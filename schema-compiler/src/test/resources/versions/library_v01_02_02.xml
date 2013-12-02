@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_04"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_04 OTA2_LibraryModel_v1.4.6.xsd">
+    
+    <VersionScheme>OTA2</VersionScheme>
+    <Status>Draft</Status>
+    <Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01_02_02</Namespace>
+    <Prefix>lib-010202</Prefix>
+    <Name>test_library</Name>
+    <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
+    <Import namespace="http://opentravel.org/common/v02" prefix="ota"/>
+    <Import namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01_02" prefix="lib-0102"/>
+    <Comments>Test Library</Comments>
+    
+    <Enumeration_Open name="TestPatchOpenEnum">
+        <Value literal="a" />
+        <Value literal="b" />
+        <Value literal="c" />
+    </Enumeration_Open>
+    
+    <ExtensionPointFacet>
+        <Attribute name="extCoreAttribute122" type="xsd:string"/>
+        <Extension extends="lib-0102:LookupCore_Summary"/>
+    </ExtensionPointFacet>
+    
+    <ExtensionPointFacet>
+        <Attribute name="extCoreDetailAttribute122" type="xsd:string"/>
+        <Extension extends="lib-0102:LookupCore_Detail"/>
+    </ExtensionPointFacet>
+    
+    <ExtensionPointFacet>
+        <Attribute name="extBOAttribute122" type="xsd:string"/>
+        <Extension extends="lib-0102:LookupBO_Summary"/>
+    </ExtensionPointFacet>
+    
+    <ExtensionPointFacet>
+        <Attribute name="extBODetailAttribute122" type="xsd:string"/>
+        <Extension extends="lib-0102:LookupBO_Detail"/>
+    </ExtensionPointFacet>
+    
+    <ExtensionPointFacet>
+        <Attribute name="extOperationAttribute122" type="xsd:string"/>
+        <Extension extends="lib-0102:VersionedService_LookupOperation_RQ"/>
+    </ExtensionPointFacet>
+    
+    <ExtensionPointFacet>
+        <Attribute name="extOperationResponseAttribute122" type="xsd:string"/>
+        <Extension extends="lib-0102:VersionedService_LookupOperation_RS"/>
+    </ExtensionPointFacet>
+    
+</Library>

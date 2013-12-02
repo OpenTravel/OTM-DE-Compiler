@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns="http://www.OpenTravel.org/ns/OTA2/RepositoryInfo_v01_00" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.OpenTravel.org/ns/OTA2/RepositoryInfo_v01_00"
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+	<xsd:element name="RepositoryInfo" type="RepositoryInfoType" />
+	<xsd:complexType name="RepositoryInfoType">
+		<xsd:sequence>
+			<xsd:element name="ID" type="RepositoryID" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="DisplayName" type="String_Short" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="RootNamespace" type="xsd:anyURI" minOccurs="0" maxOccurs="99" />
+			<xsd:element ref="RemoteRepositories" minOccurs="1" maxOccurs="1" />
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:element name="RemoteRepositories" type="RemoteRepositoriesType" />
+	<xsd:complexType name="RemoteRepositoriesType">
+		<xsd:sequence>
+			<xsd:element ref="RemoteRepository" minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:element name="RemoteRepository" type="RemoteRepositoryType" />
+	<xsd:complexType name="RemoteRepositoryType">
+		<xsd:sequence>
+			<xsd:element name="ID" type="RepositoryID" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="DisplayName" type="String_Short" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="EndpointUrl" type="xsd:anyURI" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="RootNamespace" type="xsd:anyURI" minOccurs="0" maxOccurs="99" />
+			<xsd:element name="RefreshPolicy" type="RefreshPolicy" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="UserID" type="UserID" minOccurs="0" maxOccurs="1" />
+			<xsd:element name="Password" type="Password" minOccurs="0" maxOccurs="1" />
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:element name="LibraryInfoList" type="LibraryInfoListType" />
+	<xsd:complexType name="LibraryInfoListType">
+		<xsd:sequence>
+			<xsd:element ref="LibraryInfo" minOccurs="0" maxOccurs="999" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:element name="LibraryInfo" type="LibraryInfoType" />
+	<xsd:complexType name="LibraryInfoType">
+		<xsd:sequence>
+			<xsd:element name="Namespace" type="xsd:anyURI" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="BaseNamespace" type="xsd:anyURI" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="Filename" type="Filename" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="LibraryName" type="Library_Name" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="Version" type="String_Short" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="VersionScheme" type="String_Short" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="Status" type="LibraryStatus" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="State" type="RepositoryState" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="LockedBy" type="UserID" minOccurs="0" maxOccurs="1" />
+			<xsd:element name="LastUpdated" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
+			<xsd:element name="OwningRepository" type="RepositoryID" minOccurs="1" maxOccurs="1" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:element name="RepositoryItemIdentity" type="RepositoryItemIdentityType" />
+	<xsd:complexType name="RepositoryItemIdentityType">
+		<xsd:sequence>
+			<xsd:element name="BaseNamespace" type="xsd:anyURI" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="Filename" type="Filename" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="Version" type="String_Short" minOccurs="1" maxOccurs="1" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:element name="NamespaceList" type="NamespaceListType" />
+	<xsd:complexType name="NamespaceListType">
+		<xsd:sequence>
+			<xsd:element name="Namespace" type="xsd:anyURI" minOccurs="0" maxOccurs="999" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:element name="ListItemsRQ" type="ListItemsRQType" />
+	<xsd:complexType name="ListItemsRQType">
+		<xsd:sequence>
+			<xsd:element name="Namespace" type="xsd:anyURI" minOccurs="1" maxOccurs="1" />
+		</xsd:sequence>
+		<xsd:attribute name="latestVersionOnly" type="xsd:boolean" use="required" />
+		<xsd:attribute name="includeDraft" type="xsd:boolean" use="required" />
+	</xsd:complexType>
+	
+	<xsd:element name="RepositoryPermission" type="RepositoryPermissionType" />
+	<xsd:complexType name="RepositoryPermissionType">
+		<xsd:sequence>
+			<xsd:element name="RepositoryPermission" type="RepositoryPermission" minOccurs="1" maxOccurs="1" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:simpleType name="RepositoryPermission">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="ReadDraft">
+				<xsd:annotation>
+					<xsd:documentation>The 'ReadDraft' permission authorizes qualifying users to
+					read content in both the Draft and Final states.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="ReadFinal">
+				<xsd:annotation>
+					<xsd:documentation>The 'ReadFinal' permission authorizes qualifying users to
+					read content in the Final state, but Draft items are inaccessible.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="Write">
+				<xsd:annotation>
+					<xsd:documentation>The 'Write' permission authorizes qualifying users to perform
+					updates to repository managed items, including such operations as Publish, Lock, and Commit.
+					Write permissions only applies to items in the Draft state; Final state items cannot be modified,
+					regardless of the user's permissions.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="None">
+				<xsd:annotation>
+					<xsd:documentation>Indicates that the user is not authorized to view or edit any of the items
+					in the managed namespace.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<xsd:simpleType name="LibraryStatus">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="Draft" />
+			<xsd:enumeration value="Final" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="RepositoryState">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="ManagedUnlocked" />
+			<xsd:enumeration value="ManagedLocked" />
+			<xsd:enumeration value="ManagedWIP" />
+			<xsd:enumeration value="Unmanaged" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="RefreshPolicy">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="Daily" />
+			<xsd:enumeration value="Always" />
+			<xsd:enumeration value="OnDemand" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<!-- # RFC-3986 URI component:  segment with ':'-->
+	<xsd:simpleType name="UserID">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="([A-Za-z0-9\-._~!$&amp;'()*+,;=:@]|%[0-9A-Fa-f]{2})*" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<!-- # RFC-3986 URI component:  reg-name  -->
+	<xsd:simpleType name="RepositoryID">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="([A-Za-z0-9\-._~!$&amp;'()*+,;=]|%[0-9A-Fa-f]{2})*" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="Filename">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="[A-Za-z0-9/\.\-\|:_]*" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+   <xsd:simpleType name="Library_Name">
+      <xsd:restriction base="xsd:string">
+         <xsd:pattern value="[A-Za-z][A-Za-z0-9/\.\-\|:_\s]*" />
+      </xsd:restriction>
+   </xsd:simpleType>
+
+	<xsd:simpleType name="Password">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="[enc:]?.*" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="String_Short">
+		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="256" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+</xsd:schema>

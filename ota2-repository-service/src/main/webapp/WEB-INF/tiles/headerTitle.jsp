@@ -1,0 +1,1 @@
+<a href="${pageContext.request.contextPath}/console/index.html"><img src="${pageContext.request.contextPath}/images/ota_logo.png" alt="OTA2.0 Repository" style="vertical-align:middle"/> &nbsp; OTA2.0 Repository</a>

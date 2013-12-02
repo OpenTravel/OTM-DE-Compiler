@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryCatalog_v01_00" 
+	targetNamespace="http://www.OpenTravel.org/ns/OTA2/LibraryCatalog_v01_00"
+	attributeFormDefault="unqualified" elementFormDefault="qualified">
+	
+	<xsd:element name="Catalog" type="Catalog"/>
+	<xsd:complexType name="Catalog">
+		<xsd:sequence>
+			<xsd:element name="CatalogEntry" type="CatalogEntry" minOccurs="0" maxOccurs="99"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:complexType name="CatalogEntry">
+		<xsd:sequence>
+			<xsd:element name="Namespace" type="xsd:anyURI" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="Location" type="xsd:anyURI" minOccurs="1" maxOccurs="99"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	
+</xsd:schema>

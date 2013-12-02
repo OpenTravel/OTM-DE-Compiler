@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_03">
+
+	<VersionScheme>OTA2</VersionScheme>
+    <Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package_v1</Namespace>
+    <Prefix>pkg1</Prefix>
+    <Name>library_2_p1</Name>
+    <Includes>library_1_p1.xml</Includes>
+	<Import prefix="xsd" namespace="http://www.w3.org/2001/XMLSchema" />
+	<Import prefix="ota" namespace="http://opentravel.org/common/v02" />
+    <Comments>Test Library</Comments>
+    
+    <Simple type="xsd:int" name="Counter_2"/>
+	<Simple type="Counter_1" name="TestCounter_2" />
+
+</Library>

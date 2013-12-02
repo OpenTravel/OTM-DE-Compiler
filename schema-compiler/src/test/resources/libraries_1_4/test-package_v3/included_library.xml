@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_04"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_04 OTA2_LibraryModel_v1.4.6.xsd">
+    
+    <VersionScheme>OTA2</VersionScheme>
+    <Status>Draft</Status>
+    <Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package_v3</Namespace>
+    <Prefix>pkg3</Prefix>
+    <Name>included_library</Name>
+    <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
+    <Import namespace="http://opentravel.org/common/v02" prefix="ota"/>
+    <Import fileHints="legacy_schema_4.xsd"
+        namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/legacy_namespace" prefix="legacy"/>
+    <Comments>Sample Included Library</Comments>
+    
+    <Simple name="IncludedString" type="xsd:string"/>
+    
+</Library>

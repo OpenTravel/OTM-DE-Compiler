@@ -1,0 +1,81 @@
+/*
+ * Copyright (c) 2011, Sabre Inc.
+ */
+package com.sabre.schemacompiler.codegen;
+
+import java.io.File;
+import java.util.Collection;
+
+import org.slf4j.Logger;
+
+import com.sabre.schemacompiler.validate.ValidationException;
+
+/**
+ * Orchestrates the code generation process by transforming the compiler's meta-model
+ * objects into an external representation (e.g. XSD, WSDL, etc.).
+ * 
+ * <p>NOTE: Code generators assume that the model content has been determined to be
+ * error-free prior to calling the 'generateOutput()' method.  The code generator itself
+ * does not perform any validation checking.
+ * 
+ * @param <S>  the source type for which output content will be generated
+ * @author S. Livezey
+ */
+public interface CodeGenerator<S> {
+	
+	/**
+	 * Performs all tasks necessary to generate the output specified by the 'source' model
+	 * element provided.  When calling this method, the code generator itself is responsible
+	 * for determining the target output location for generated content.
+	 * 
+	 * @param source  the source element that defines the content to be rendered
+	 * @param context  the code generation context
+	 * @return Collection<File>
+	 * @throws ValidationException  thrown if problems are detected during validation that prevent schema
+	 *								generation from proceeding
+	 * @throws CodeGenerationException  thrown if a system or I/O exception occurs during output generation
+	 * @throws IllegalArgumentException  thrown if the code generator instance does not support code generation
+	 *									 for the type of source element provided
+	 */
+	public Collection<File> generateOutput(S source, CodeGenerationContext context)
+					throws ValidationException, CodeGenerationException;
+	
+	/**
+	 * Returns the code generation filter to use during processing.
+	 * 
+	 * @return CodeGenerationFilter
+	 */
+	public CodeGenerationFilter getFilter();
+	
+	/**
+	 * Assigns the code generation filter to use during processing.  If one is not specified, the code
+	 * generator should use a default filter implementation.
+	 * 
+	 * @param filter  the code generation filter to assign
+	 */
+	public void setFilter(CodeGenerationFilter filter);
+	
+	/**
+	 * Returns the filename builder to use during processing.
+	 * 
+	 * @return CodeGenerationFilenameBuilder<S>
+	 */
+	public CodeGenerationFilenameBuilder<S> getFilenameBuilder();
+	
+	/**
+	 * Assigns the filename builder to use during processing.  If one is not specified, the code
+	 * generator should use a default filename builder implementation.
+	 * 
+	 * @param filenameBuilder  the filename builder to assign
+	 */
+	public void setFilenameBuilder(CodeGenerationFilenameBuilder<S> filenameBuilder);
+	
+	/**
+	 * Assigns the logger to use for all user feedback and message displays.  If no logger is assigned
+	 * prior to output generation, a no-op logger will be used that will suppress all feedback.
+	 * 
+	 * @param log  the logger instance to assign
+	 */
+	public void setLogger(Logger log);
+	
+}

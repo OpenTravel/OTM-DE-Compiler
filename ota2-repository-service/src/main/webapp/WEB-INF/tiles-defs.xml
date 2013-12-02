@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE tiles-definitions PUBLIC
+       "-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN"
+       "http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
+
+<tiles-definitions>
+	<definition name="baseLayout" template="/WEB-INF/tiles/baseLayout.jsp">
+		<put-attribute name="headerTitle" value="/WEB-INF/tiles/headerTitle.jsp" />
+		<put-attribute name="headerMenu" value="/WEB-INF/tiles/headerMenu.jsp" />
+		<put-attribute name="footer" value="/WEB-INF/tiles/footer.jsp" />
+	</definition>
+	<definition name="homePage" extends="search" />
+	<definition name="browse" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Browse" />
+		<put-attribute name="pageTitle" value="Browse Repository" />
+		<put-attribute name="body" value="/WEB-INF/console/browse.jsp" />
+	</definition>
+	<definition name="search" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Search" />
+		<put-attribute name="pageTitle" value="Search Repository" />
+		<put-attribute name="body" value="/WEB-INF/console/search.jsp" />
+	</definition>
+	<definition name="itemDetails" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Item Details" />
+		<put-attribute name="pageTitle" value="Item Details" />
+		<put-attribute name="body" value="/WEB-INF/console/itemDetails.jsp" />
+	</definition>
+	<definition name="createNamespace" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Create Namespace" />
+		<put-attribute name="pageTitle" value="Create Namespace" />
+		<put-attribute name="body" value="/WEB-INF/console/createNamespace.jsp" />
+	</definition>
+	<definition name="deleteNamespace" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Delete Namespace" />
+		<put-attribute name="pageTitle" value="Delete Namespace" />
+		<put-attribute name="body" value="/WEB-INF/console/deleteNamespace.jsp" />
+	</definition>
+	<definition name="adminHome" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Administration" />
+		<put-attribute name="pageTitle" value="Repository Administration - Home" />
+		<put-attribute name="body" value="/WEB-INF/console/adminHome.jsp" />
+	</definition>
+	<definition name="adminChangeRepositoryName" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Change Repository Name" />
+		<put-attribute name="pageTitle" value="Change Repository Name" />
+		<put-attribute name="body" value="/WEB-INF/console/adminChangeRepositoryName.jsp" />
+	</definition>
+	<definition name="adminManageRootNamespaces" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Manage Root Namespaces" />
+		<put-attribute name="pageTitle" value="Manage Root Namespaces" />
+		<put-attribute name="body" value="/WEB-INF/console/adminManageRootNamespaces.jsp" />
+	</definition>
+	<definition name="adminPermissions" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Manage Namespace Permissions" />
+		<put-attribute name="pageTitle" value="Manage Namespace Permissions" />
+		<put-attribute name="body" value="/WEB-INF/console/adminPermissions.jsp" />
+	</definition>
+	<definition name="adminPermissionsEdit" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Manage Namespace Permissions" />
+		<put-attribute name="pageTitle" value="Edit Namespace Permissions" />
+		<put-attribute name="body" value="/WEB-INF/console/adminPermissionsEdit.jsp" />
+	</definition>
+	<definition name="adminPermissionsTest" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Manage Namespace Permissions" />
+		<put-attribute name="pageTitle" value="Test Namespace Permissions" />
+		<put-attribute name="body" value="/WEB-INF/console/adminPermissionsTest.jsp" />
+	</definition>
+	<definition name="adminUsers" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Manage User Accounts" />
+		<put-attribute name="pageTitle" value="Manage User Accounts" />
+		<put-attribute name="body" value="/WEB-INF/console/adminUsers.jsp" />
+	</definition>
+	<definition name="adminUsersAdd" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Manage User Accounts" />
+		<put-attribute name="pageTitle" value="Add User Account" />
+		<put-attribute name="body" value="/WEB-INF/console/adminUsersAdd.jsp" />
+	</definition>
+	<definition name="adminUsersDelete" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Manage User Accounts" />
+		<put-attribute name="pageTitle" value="Delete User Account" />
+		<put-attribute name="body" value="/WEB-INF/console/adminUsersDelete.jsp" />
+	</definition>
+	<definition name="adminUsersChangePassword" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Manage User Accounts" />
+		<put-attribute name="pageTitle" value="Reset User Password" />
+		<put-attribute name="body" value="/WEB-INF/console/adminUsersChangePassword.jsp" />
+	</definition>
+	<definition name="adminGroups" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Manage Group Assignments" />
+		<put-attribute name="pageTitle" value="Manage Group Assignments" />
+		<put-attribute name="body" value="/WEB-INF/console/adminGroups.jsp" />
+	</definition>
+	<definition name="adminGroupsAdd" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Manage Group Assignments" />
+		<put-attribute name="pageTitle" value="Add New Group" />
+		<put-attribute name="body" value="/WEB-INF/console/adminGroupsAdd.jsp" />
+	</definition>
+	<definition name="adminGroupsEdit" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Manage Group Assignments" />
+		<put-attribute name="pageTitle" value="Edit Group Membership" />
+		<put-attribute name="body" value="/WEB-INF/console/adminGroupsEdit.jsp" />
+	</definition>
+	<definition name="adminGroupsDelete" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Manage Group Assignments" />
+		<put-attribute name="pageTitle" value="Delete Group" />
+		<put-attribute name="body" value="/WEB-INF/console/adminGroupsDelete.jsp" />
+	</definition>
+	<definition name="adminSearchIndex" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Refresh Free-Text Search" />
+		<put-attribute name="pageTitle" value="Refresh Free-Text Search Index" />
+		<put-attribute name="body" value="/WEB-INF/console/adminSearchIndex.jsp" />
+	</definition>
+	<definition name="adminDeleteRepository" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Delete Repository (DEVELOPMENT)" />
+		<put-attribute name="pageTitle" value="Delete Repository Contents (Development Only)" />
+		<put-attribute name="body" value="/WEB-INF/console/adminDeleteRepository.jsp" />
+	</definition>
+	<definition name="adminDeleteItem" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Delete Repository Item" />
+		<put-attribute name="pageTitle" value="Delete Repository Item" />
+		<put-attribute name="body" value="/WEB-INF/console/adminDeleteItem.jsp" />
+	</definition>
+	<definition name="adminPromoteItem" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Promote Repository Item" />
+		<put-attribute name="pageTitle" value="Promote Repository Item" />
+		<put-attribute name="body" value="/WEB-INF/console/adminPromoteItem.jsp" />
+	</definition>
+	<definition name="adminDemoteItem" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Demote Repository Item" />
+		<put-attribute name="pageTitle" value="Demote Repository Item" />
+		<put-attribute name="body" value="/WEB-INF/console/adminDemoteItem.jsp" />
+	</definition>
+	<definition name="adminRecalculateItemCrc" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Recalculate CRC" />
+		<put-attribute name="pageTitle" value="Recalculate CRC" />
+		<put-attribute name="body" value="/WEB-INF/console/adminRecalculateItemCrc.jsp" />
+	</definition>
+	<definition name="changePassword" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Change Password" />
+		<put-attribute name="pageTitle" value="Change Password" />
+		<put-attribute name="body" value="/WEB-INF/console/changePassword.jsp" />
+	</definition>
+</tiles-definitions>

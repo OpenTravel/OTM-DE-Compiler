@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_03">
+
+	<VersionScheme>OTA2</VersionScheme>
+	<Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package_v1</Namespace>
+    <Prefix>pkg1</Prefix>
+	<Name>library_1</Name>
+	<Import prefix="xsd" namespace="http://www.w3.org/2001/XMLSchema" />
+	<Import prefix="ota" namespace="http://opentravel.org/common/v02" />
+	<Comments>Test Library</Comments>
+
+	<Simple type="DirectCircularReferenceType" name="DirectCircularReferenceType" />
+	
+	<Simple type="IndirectCircularReferenceType_2" name="IndirectCircularReferenceType_1" />
+	<Simple type="IndirectCircularReferenceType_1" name="IndirectCircularReferenceType_2" />
+	
+</Library>

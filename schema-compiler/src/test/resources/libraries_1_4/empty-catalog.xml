@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Catalog xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryCatalog_v01_00"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryCatalog_v01_00 ../../../main/resources/ota2-context/schemas/OTA2_LibraryCatalog_v1.0.0.xsd">
+	
+</Catalog>

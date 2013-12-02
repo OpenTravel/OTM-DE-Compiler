@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_03">
+
+	<VersionScheme>OTA2</VersionScheme>
+	<PatchLevel>0</PatchLevel>
+	<!-- IMPORTANT: The leading/trailing whitespace surrounding the namespace value
+	                is intentional and required for proper testing. -->
+    <Namespace>   http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package_v2   </Namespace>
+	<Prefix>pkg2</Prefix>
+	<Name>library_1_p2</Name>
+	<Includes>file1.xsd</Includes>
+	<Includes>file2.xsd</Includes>
+	<Import prefix="xsd" namespace="http://www.w3.org/2001/XMLSchema" />
+	<Import prefix="ota" namespace="http://opentravel.org/common/v02" />
+	<Import prefix="pkg1"
+		namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package_v1"
+		fileHints="../test-package_v1/library_1_p1.xml ../test-package_v1/library_2_p1.xml" />
+	<LibraryID>library_1_p2.xml</LibraryID>
+	<Comments>Test Library</Comments>
+
+	<Simple type="pkg1:Counter_1" name="Counter_3" />
+
+	<Enumeration_Open name="SampleEnum_Open">
+    	<Documentation>
+    		<Description>SampleEnum-documentation-line_3</Description>
+    		<Description>SampleEnum-documentation-line_4</Description>
+    	</Documentation>
+    	<Value literal="four">
+	    	<Documentation>
+    			<Description>Four</Description>
+    		</Documentation>
+    	</Value>
+    	<Value literal="five">
+	    	<Documentation>
+    			<Description>Five</Description>
+    		</Documentation>
+    	</Value>
+    	<Value literal="six">
+	    	<Documentation>
+    			<Description>Six</Description>
+    		</Documentation>
+			<Equivalent context="test">six-equivalent</Equivalent>
+    	</Value>
+	</Enumeration_Open>
+	
+	<ValueWithAttrs name="SampleValueWithAttributes" ex="SampleValueWithAttributes-ex">
+    	<Documentation>
+    		<Description>SampleValueWithAttributes-documentation-line_1</Description>
+    		<Description>SampleValueWithAttributes-documentation-line_2</Description>
+    	</Documentation>
+		<Equivalent context="test">SampleValueWithAttributes-equivalent</Equivalent>
+		<Attribute name="attr1" type="Counter_3">
+	    	<Documentation>
+    			<Description>attr1-description</Description>
+	    	</Documentation>
+		</Attribute>
+		<Attribute name="attr2" type="Counter_4" mandatory="true"></Attribute>
+		<Attribute name="attr3" type="pkg1:Counter_1" ex="attr3-ex" />
+		<Attribute name="attr4" type="xsd:int" mandatory="false">
+			<Equivalent context="test">attr4-equivalent</Equivalent>
+		</Attribute>
+		<Indicator name="indicator1" />
+	</ValueWithAttrs>
+	
+	<CoreObject name="SampleCore" extendable="">
+    	<Documentation>
+    		<Description>SampleCore-documentation-line_1</Description>
+    		<Description>SampleCore-documentation-line_2</Description>
+    	</Documentation>
+		<Equivalent context="test">SampleCore-equivalent</Equivalent>
+		<Simple type="xsd:string" ex="SimpleFacet-ex">
+	    	<Documentation>
+    			<Description>SimpleFacet-description</Description>
+	    	</Documentation>
+			<Equivalent context="test-simple">SimpleFacet-equivalent</Equivalent>
+	    </Simple>
+		<Summary>
+	    	<Documentation>
+    			<Description>SampleCore_Summary-documentation-line_1</Description>
+    			<Description>SampleCore_Summary-documentation-line_2</Description>
+    		</Documentation>
+			<Aliases>SampleCore_Alias1 SampleCore_Alias2</Aliases>
+			<Attribute name="attr1" type="Counter_3">
+		    	<Documentation>
+    				<Description>attr1-description</Description>
+	    		</Documentation>
+			</Attribute>
+			<Attribute name="attr2" type="Counter_4" mandatory="true"></Attribute>
+			<Attribute name="attr3" type="pkg1:Counter_1" ex="attr3-ex" />
+			<Attribute name="attr4" type="xsd:int" mandatory="false">
+				<Equivalent context="test">attr4-equivalent</Equivalent>
+			</Attribute>
+			<Element name="element1" type="Counter_3">
+		    	<Documentation>
+    				<Description>element1-description</Description>
+	    		</Documentation>
+			</Element>
+			<Element name="element2" type="Counter_4"></Element>
+			<Element name="element3" type="pkg1:Counter_1" mandatory="true" ex="element3-ex" />
+			<Element name="element4" type="xsd:string" mandatory="false">
+				<Equivalent context="test">element4-equivalent</Equivalent>
+			</Element>
+			<Element name="element5" type="EmptyBusinessObject" repeat="5" />
+			<Element name="element6" type="SampleBusinessObject_Detail" repeat="*" />
+			<Indicator name="indicator1">
+		    	<Documentation>
+    				<Description>indicator1-description</Description>
+	    		</Documentation>
+			</Indicator>
+			<Indicator name="indicator2">
+				<Equivalent context="test">indicator2-equivalent</Equivalent>
+			</Indicator>
+		</Summary>
+		<Info>
+			<Aliases>SampleCore_Info_Alias</Aliases>
+			<Indicator name="indicator3" />
+		</Info>
+		<Roles>role_1 role_2</Roles>
+	</CoreObject>
+	
+	<CoreObject name="SimpleCore" extends="SampleCore">
+		<Simple type="pkg1:Counter_1"/>
+		<Summary>
+			<Indicator name="simpleIndicator" />
+		</Summary>
+		<Info/>
+	</CoreObject>
+	
+	<CoreObject name="EnumCore">
+		<Simple type="SampleEnum_Closed" />
+		<Summary>
+			<Indicator name="enumIndicator" />
+		</Summary>
+		<Info/>
+	</CoreObject>
+	
+	<CoreObject name="NoSimpleBaseTypeCore">
+		<Simple type="ota:Empty" />
+		<Summary>
+			<Indicator name="noSimpleIndicator" />
+		</Summary>
+		<Info/>
+	</CoreObject>
+	
+	<BusinessObject name="EmptyBusinessObject" extendable="">
+		<ID>
+			<Element name="oid" type="xsd:int" />
+		</ID>
+	</BusinessObject>
+	
+	<BusinessObject name="SampleBusinessObject" extends="EmptyBusinessObject">
+    	<Documentation>
+    		<Description>SampleBusinessObject-documentation-line_1</Description>
+    		<Description>SampleBusinessObject-documentation-line_2</Description>
+    	</Documentation>
+		<Equivalent context="test">SampleBusinessObject-equivalent</Equivalent>
+		<Aliases>SampleBusinessObject_Alias1 SampleBusinessObject_Alias2</Aliases>
+		<ID>
+			<Element name="oid" type="xsd:int" />
+		</ID>
+		<Summary>
+			<Attribute name="sampleCoreAttr" type="SampleCore" />
+			<Element name="summaryName" type="xsd:string" />
+		</Summary>
+		<Detail>
+			<Element name="detailName" type="xsd:string" />
+		</Detail>
+		<Query context="SampleQueryFacet">
+			<Attribute name="queryAttribute" type="xsd:int" />
+			<Element name="name" type="xsd:string" />
+			<Element name="age" type="xsd:int" />
+			<Indicator name="queryIndicator" />
+		</Query>
+		<Custom context="SampleCustomFacet" extendable="">
+			<Aliases>SampleCustomFacet_Alias</Aliases>
+			<Attribute name="attr1" type="xsd:int" />
+			<Element name="element1" type="xsd:string" />
+			<Indicator name="indicator1" />
+		</Custom>
+		<Custom context="SampleCustomFacet2" extendable="">
+			<Aliases>SampleCustomFacet2_Alias</Aliases>
+			<Attribute name="attr1" type="xsd:int" />
+			<Element name="element1" type="xsd:string" />
+			<Indicator name="indicator1" />
+		</Custom>
+	</BusinessObject>
+	
+	<BusinessObject name="CompoundBusinessObject" extendable="">
+    	<Documentation>
+    		<Description>SampleBusinessObject-documentation-line_1</Description>
+    		<Description>SampleBusinessObject-documentation-line_2</Description>
+    	</Documentation>
+		<Equivalent context="test">SampleCompositeObject-equivalent</Equivalent>
+		<ID>
+			<Element name="oid" type="xsd:int" />
+		</ID>
+		<Summary>
+			<Element name="name" type="xsd:string" />
+		</Summary>
+		<Detail>
+			<Element name="SampleBusinessObject" type="SampleBusinessObject" />
+			<Element name="AlternateObject" type="SampleBusinessObject" />
+		</Detail>
+	</BusinessObject>
+	
+	<Service name="SampleService">
+    	<Documentation>
+    		<Description>SampleService-documentation-line_1</Description>
+    		<Description>SampleService-documentation-line_2</Description>
+    	</Documentation>
+		<Equivalent context="test">SampleService-equivalent</Equivalent>
+		<Operation Name="RequestResponseOperation">
+	    	<Documentation>
+    			<Description>RequestResponseOperation-documentation-line_1</Description>
+    			<Description>RequestResponseOperation-documentation-line_2</Description>
+    		</Documentation>
+			<Equivalent context="test">RequestResponseOperation-equivalent</Equivalent>
+			<Request>
+				<Element name="SampleRequest" type="SampleBusinessObject"/>
+			</Request>
+			<Response>
+				<Element name="SampleResponse" type="CompoundBusinessObject"/>
+			</Response>
+		</Operation>
+		<Operation Name="NotificationOperation">
+			<Equivalent context="test">NotificationOperation-equivalent</Equivalent>
+			<Request>
+				<Element name="SampleRequest" type="SampleBusinessObject"/>
+			</Request>
+			<Notification>
+				<Element name="SampleNotification" type="SampleBusinessObject"/>
+			</Notification>
+		</Operation>
+	</Service>
+	
+</Library>

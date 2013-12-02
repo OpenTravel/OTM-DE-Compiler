@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+	
+	
+	
+	<!--
+	  Schema Declarations
+	  
+	  The following schema declarations define the name, namespace, location, etc. of various XML schema
+	  and OTA2 library documents that are required by the compiler.  While some of these libraries may be
+	  visible externally (e.g. built-in libraries), others may only be required for internal usage by
+	  the compiler.
+	  -->
+	
+	<bean id="soapEnvelopeSchema" class="com.sabre.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
+		<property name="namespace" value="http://schemas.xmlsoap.org/soap/envelope/" />
+		<property name="name" value="SOAP_envelope.xsd" />
+		<property name="defaultPrefix" value="env" />
+		<property name="location" value="classpath:/ota2-context/built-ins/SOAP_envelope.xsd" />
+	</bean>
+	
+	<!--
+	  Built-In Libraries
+	  
+	  Defines the list of built-in libraries that should be included in every model instance that is created.  Each
+	  entry should reference on of the schema declaration ID's defined above.  Both legacy schemas (.xsd) and OTA2
+	  libraries (.otm) may be used as built-in libraries.
+	  -->
+	<bean id="builtInLibraryFactory" class="com.sabre.schemacompiler.loader.BuiltInLibraryFactory" scope="singleton">
+		<property name="loaders">
+			<list>
+				<bean class="com.sabre.schemacompiler.loader.impl.XMLSchemaBuiltInLibraryLoader">
+					<property name="defaultPrefix" value="xsd" />
+				</bean>
+				<bean class="com.sabre.schemacompiler.loader.impl.OTA2BuiltInLibraryLoader">
+					<property name="libraryDeclaration" ref="ota2CommonSchema" />
+				</bean>
+				
+				<!--
+				Example: Use the following bean definition to add a legacy (xsd) built-in library loader.
+				
+				<bean class="com.sabre.schemacompiler.loader.impl.LegacySchemaBuiltInLibraryLoader">
+					<property name="libraryDeclaration" ref="myXsdLibrary" />
+				</bean>
+				-->
+				
+				<!--
+				Example: Use the following bean definition to add an OTA2 built-in library loader.
+				
+				<bean class="com.sabre.schemacompiler.loader.impl.OTA2BuiltInLibraryLoader">
+					<property name="libraryDeclaration" ref="myOTA2Library" />
+				</bean>
+				-->
+			</list>
+		</property>
+	</bean>
+	
+	<!--
+	  Schema Dependencies
+	  
+	  Defines the qualified XML name for schema constructs (types, elements, etc.) that generated
+	  code will be dependent upon.  At a minimum, compiler extensions must define targets for the
+	  following dependency ID's in order to use the XSD and WSDL code generators of the schema
+	  compiler:
+	  
+	  EMPTY_ELEMENT           : The built-in type definition used to define an XML element with no simple or complex content.
+	  ENUM_EXTENSION          : The built-in type definition used as the simple type for open enumeration extension values.
+	  MESSAGE_HEADER          : Element definition to be used as a substitution group for SOAP message headers
+	  MESSAGE_PAYLOAD         : Element definition to be used as a substitution group for SOAP message payloads
+	  MESSAGE_FAULT           : Element definition to be used SOAP message faults
+	  EXTENSION_POINT         : Element definition for generic extension points
+	  EXTENSION_POINT_SUMMARY : Element definition for summary facet extension points
+	  EXTENSION_POINT_DETAIL  : Element definition for detail facet extension points
+	  EXTENSION_POINT_CUSTOM  : Element definition for custom facet extension points
+	  EXTENSION_POINT_QUERY   : Element definition for query facet extension points
+	  
+	  -->
+	<bean id="schemaDependencies" class="java.util.ArrayList" scope="singleton">
+		<constructor-arg>
+			<list>
+				<bean class="com.sabre.schemacompiler.ioc.SchemaDependency">
+					<property name="id" value="EMPTY_ELEMENT" />
+					<property name="schemaDeclaration" ref="ota2CommonSchema" />
+					<property name="localName" value="Empty" />
+				</bean>
+				<bean class="com.sabre.schemacompiler.ioc.SchemaDependency">
+					<property name="id" value="ENUM_EXTENSION" />
+					<property name="schemaDeclaration" ref="ota2CommonSchema" />
+					<property name="localName" value="String_EnumExtension" />
+				</bean>
+				<bean class="com.sabre.schemacompiler.ioc.SchemaDependency">
+					<property name="id" value="MESSAGE_HEADER" />
+					<property name="schemaDeclaration" ref="ota2MessageSchema" />
+					<property name="localName" value="MessageHeader" />
+				</bean>
+				<bean class="com.sabre.schemacompiler.ioc.SchemaDependency">
+					<property name="id" value="MESSAGE_FAULT" />
+					<property name="schemaDeclaration" ref="soapEnvelopeSchema" />
+					<property name="localName" value="Fault" />
+				</bean>
+				<bean class="com.sabre.schemacompiler.ioc.SchemaDependency">
+					<property name="id" value="REQUEST_PAYLOAD" />
+					<property name="schemaDeclaration" ref="ota2MessageSchema" />
+					<property name="localName" value="OTA2_Request_Payload" />
+				</bean>
+				<bean class="com.sabre.schemacompiler.ioc.SchemaDependency">
+					<property name="id" value="RESPONSE_PAYLOAD" />
+					<property name="schemaDeclaration" ref="ota2MessageSchema" />
+					<property name="localName" value="OTA2_Response_Payload" />
+				</bean>
+				<bean class="com.sabre.schemacompiler.ioc.SchemaDependency">
+					<property name="id" value="NOTIF_PAYLOAD" />
+					<property name="schemaDeclaration" ref="ota2MessageSchema" />
+					<property name="localName" value="OTA2_Notif_Payload" />
+				</bean>
+				<bean class="com.sabre.schemacompiler.ioc.SchemaDependency">
+					<property name="id" value="EXTENSION_POINT" />
+					<property name="schemaDeclaration" ref="ota2MessageSchema" />
+					<property name="localName" value="ExtensionPoint" />
+				</bean>
+				<bean class="com.sabre.schemacompiler.ioc.SchemaDependency">
+					<property name="id" value="EXTENSION_POINT_SUMMARY" />
+					<property name="schemaDeclaration" ref="ota2MessageSchema" />
+					<property name="localName" value="ExtensionPoint_Summary" />
+				</bean>
+				<bean class="com.sabre.schemacompiler.ioc.SchemaDependency">
+					<property name="id" value="EXTENSION_POINT_DETAIL" />
+					<property name="schemaDeclaration" ref="ota2MessageSchema" />
+					<property name="localName" value="ExtensionPoint_Detail" />
+				</bean>
+				<bean class="com.sabre.schemacompiler.ioc.SchemaDependency">
+					<property name="id" value="EXTENSION_POINT_CUSTOM" />
+					<property name="schemaDeclaration" ref="ota2MessageSchema" />
+					<property name="localName" value="ExtensionPoint_Custom" />
+				</bean>
+				<bean class="com.sabre.schemacompiler.ioc.SchemaDependency">
+					<property name="id" value="EXTENSION_POINT_QUERY" />
+					<property name="schemaDeclaration" ref="ota2MessageSchema" />
+					<property name="localName" value="ExtensionPoint_Query" />
+				</bean>
+			</list>
+		</constructor-arg>
+	</bean>
+	
+	<!--
+	  Code Generation WSDL Bindings
+	  
+	  Defines the class that will be used to create the bindings, message faults, service definitions, etc.
+	  for WSDL documents that are produced during code generation.  The class that is assigned to this bean
+	  definition must implement the 'com.sabre.schemacompiler.codegen.wsdl.CodeGenerationWsdlBindings'
+	  interface.
+	  -->
+	<bean id="codeGenerationWsdlBindings" class="com.sabre.schemacompiler.codegen.wsdl.DefaultSoapBindings" scope="singleton" />
+	
+</beans>

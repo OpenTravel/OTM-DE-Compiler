@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_04"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_04 ../../../../main/resources/ota2-context/schemas/OTA2_LibraryModel_v1.4.1.xsd">
+
+	<VersionScheme>OTA2</VersionScheme>
+    <Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/stl2-test/v02_00</Namespace>
+    <Prefix>test</Prefix>
+    <Name>library_2_p2</Name>
+	<Import prefix="xsd" namespace="http://www.w3.org/2001/XMLSchema" />
+	<Import prefix="ota" namespace="http://opentravel.org/common/v02" />
+	<Import prefix="stl2" namespace="http://services.sabre.com/STL/v02" />
+    <Comments>STL2 Test Library</Comments>
+    
+	<CoreObject name="TestCore" notExtendable="true">
+		<Simple type="stl2:Code_Equipment"/>
+		<Summary>
+			<Attribute name="testAttribute" type="stl2:String_Short" />
+			<Attribute name="testProperty" type="stl2:String_Long" />
+		</Summary>
+		<Detail/>
+		<Roles>
+			<Role value="Role1" />
+			<Role value="Role2" />
+			<Role value="Role3" />
+		</Roles>
+	</CoreObject>
+	
+</Library>

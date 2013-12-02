@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<xsd:schema xmlns="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-chameleon-1" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-chameleon-1" attributeFormDefault="unqualified" elementFormDefault="qualified">
+
+	<xsd:include schemaLocation="chameleon_schema-1.xsd" />
+	
+	<xsd:element name="LegacyComplexTypeB" type="LegacyComplexTypeB" />
+	
+	<xsd:complexType name="LegacyComplexTypeB">
+		<xsd:complexContent>
+			<xsd:extension base="ChameleonComplexTypeB">
+				<xsd:sequence>
+					<xsd:element name="street" type="xsd:string" />
+					<xsd:element name="city" type="xsd:string" />
+					<xsd:element name="state" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+</xsd:schema>

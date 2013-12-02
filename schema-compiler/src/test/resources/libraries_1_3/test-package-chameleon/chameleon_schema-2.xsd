@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	attributeFormDefault="unqualified" elementFormDefault="qualified">
+
+	<xsd:complexType name="ChameleonDuplicateTypeA">
+		<xsd:sequence>
+			<xsd:element name="firstName" type="xsd:string" />
+			<xsd:element name="lastName" type="xsd:string" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:simpleType name="ChameleonSimpleTypeC">
+		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="40"></xsd:maxLength>
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+</xsd:schema>

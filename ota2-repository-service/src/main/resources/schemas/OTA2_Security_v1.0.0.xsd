@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns="http://www.OpenTravel.org/ns/OTA2/Security_v01_00" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.OpenTravel.org/ns/OTA2/Security_v01_00"
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
+	
+	<xsd:element name="GroupAssignments" type="GroupAssignments" />
+	<xsd:complexType name="GroupAssignments">
+		<xsd:sequence>
+			<xsd:element ref="Group" minOccurs="0" maxOccurs="999" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:element name="Group" type="Group" />
+	<xsd:complexType name="Group">
+		<xsd:sequence>
+			<xsd:element name="Member" type="Identifier" minOccurs="0" maxOccurs="4999" />
+		</xsd:sequence>
+		<xsd:attribute name="name" type="Identifier" />
+	</xsd:complexType>
+	
+	<xsd:element name="NamespaceAuthorizations" type="NamespaceAuthorizations" />
+	<xsd:complexType name="NamespaceAuthorizations">
+		<xsd:sequence>
+			<xsd:element ref="Grant" minOccurs="0" maxOccurs="999" />
+			<xsd:element ref="Deny" minOccurs="0" maxOccurs="999" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:element name="Grant" type="AuthorizationSpec" />
+	<xsd:element name="Deny" type="AuthorizationSpec" />
+	<xsd:complexType name="AuthorizationSpec">
+		<xsd:sequence>
+			<xsd:element name="Principal" type="Identifier" minOccurs="0" maxOccurs="4999" />
+		</xsd:sequence>
+		<xsd:attribute name="permission" type="RepositoryPermission" />
+	</xsd:complexType>
+	
+	<xsd:simpleType name="RepositoryPermission">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="ReadDraft">
+				<xsd:annotation>
+					<xsd:documentation>Granting the 'ReadDraft' permission authorizes qualifying users to
+					read content in both the Draft and Final states.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="ReadFinal">
+				<xsd:annotation>
+					<xsd:documentation>Granting the 'ReadFinal' permission authorizes qualifying users to
+					read content in the Final state, but Draft items are inaccessible.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="Write">
+				<xsd:annotation>
+					<xsd:documentation>Granting the 'Write' permission authorizes qualifying users to perform
+					updates to repository managed items, including such operations as Publish, Lock, and Commit.
+					Write permissions only applies to items in the Draft state; Final state items cannot be modified,
+					regardless of the user's permissions.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<xsd:simpleType name="Identifier">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="([A-Za-z_][A-Za-z0-9\.\-_]*)?" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+</xsd:schema>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_04"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_04 OTA2_LibraryModel_v1.4.6.xsd">
+    
+    <VersionScheme>OTA2</VersionScheme>
+    <Status>Draft</Status>
+    <Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01</Namespace>
+    <Prefix>lib-01</Prefix>
+    <Name>test_library</Name>
+    <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
+    <Import namespace="http://opentravel.org/common/v02" prefix="ota"/>
+    <Comments>Test Library</Comments>
+    
+    <Simple name="TestMajorVersionSimple" type="xsd:string" />
+    
+    <Enumeration_Closed name="TestMajorVersionClosedEnum">
+        <Value literal="a" />
+        <Value literal="b" />
+        <Value literal="c" />
+    </Enumeration_Closed>
+    
+    <Enumeration_Open name="TestMajorVersionOpenEnum">
+        <Value literal="a" />
+        <Value literal="b" />
+        <Value literal="c" />
+    </Enumeration_Open>
+    
+    <ValueWithAttrs name="LookupVWA" type="xsd:string">
+        <Attribute mandatory="false" name="vwaAttribute1" type="xsd:string"/>
+    </ValueWithAttrs>
+    
+    <ValueWithAttrs name="LaterMinorVersionVWA" type="xsd:string">
+        <Attribute mandatory="false" name="vwaAttribute1" type="xsd:string"/>
+    </ValueWithAttrs>
+    
+    <CoreObject name="LookupCore" notExtendable="false">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="Element1" repeat="0" type="LookupVWA"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <CoreObject name="LaterMinorVersionCore" notExtendable="false">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="Element1" repeat="0" type="xsd:string"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <BusinessObject name="LookupBO" notExtendable="false">
+        <Aliases/>
+        <ID>
+            <Element name="uid" repeat="1" type="xsd:string"/>
+        </ID>
+        <Summary>
+            <Element name="Element1" repeat="0" type="xsd:string"/>
+        </Summary>
+        <Detail/>
+    </BusinessObject>
+    
+    <BusinessObject name="LaterMinorVersionBO" notExtendable="false">
+        <Aliases/>
+        <ID>
+            <Element name="uid" repeat="1" type="xsd:string"/>
+        </ID>
+        <Summary>
+            <Element name="Element1" repeat="0" type="xsd:string"/>
+        </Summary>
+        <Detail/>
+    </BusinessObject>
+    
+    <Service name="VersionedService">
+        <Operation Name="LookupOperation" notExtendable="false">
+            <Request>
+                <Element name="RequestValue1" repeat="0" type="xsd:string"/>
+            </Request>
+            <Response>
+                <Element name="ResponseValue1" repeat="0" type="xsd:string"/>
+            </Response>
+            <Notification/>
+        </Operation>
+        <Operation Name="LaterMinorVersionOperation" notExtendable="false">
+            <Request>
+                <Element name="RequestValue1" repeat="0" type="xsd:string"/>
+            </Request>
+            <Response>
+                <Element name="ResponseValue1" repeat="0" type="xsd:string"/>
+            </Response>
+            <Notification/>
+        </Operation>
+    </Service>
+    
+</Library>

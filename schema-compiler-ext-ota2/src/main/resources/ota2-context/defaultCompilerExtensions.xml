@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+	
+	<!--
+	  Code Generator Factory
+	  
+	  Defines the set of supported code generators for the OTA2 compiler.  Each code generator class is associated
+	  with a unique target format / source type combination.  Target formats are simple string identifiers that denote
+	  the output format of the code generator.  Source types are the class names of an OTA2 library model class.  All
+	  code generator classes must implement the 'com.sabre.schemacompiler.codegen.CodeGenerator' interface.
+	  -->
+	<bean id="codeGeneratorFactory" class="com.sabre.schemacompiler.codegen.CodeGeneratorFactory">
+		<property name="nestedFactories">
+			<set>
+				<ref bean="baseCodeGeneratorFactory" />
+			</set>
+		</property>
+	</bean>
+	
+</beans>

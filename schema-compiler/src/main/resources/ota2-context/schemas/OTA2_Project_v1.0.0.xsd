@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns="http://www.OpenTravel.org/ns/OTA2/Project_v01_00" targetNamespace="http://www.OpenTravel.org/ns/OTA2/Project_v01_00" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	attributeFormDefault="unqualified" elementFormDefault="qualified">
+
+	<xsd:element name="Project" type="ProjectType" />
+	<xsd:complexType name="ProjectType">
+		<xsd:sequence>
+			<xsd:element name="projectId" type="xsd:anyURI" />
+			<xsd:element name="name" type="String_Short" />
+			<xsd:element name="description" type="String_Long" minOccurs="0" />
+			<xsd:element name="defaultContextId" type="String_Short" minOccurs="0" />
+			<xsd:element ref="ProjectItemBase" minOccurs="0" maxOccurs="999" />
+			<xsd:element ref="RepositoryReferences" minOccurs="0" />
+			<xsd:element ref="ProjectProperties" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:element name="ProjectItemBase" type="ProjectItemType" />
+	<xsd:complexType name="ProjectItemType" abstract="true">
+		<xsd:attribute name="defaultItem" type="xsd:boolean" />
+	</xsd:complexType>
+
+	<xsd:element name="ManagedProjectItem" type="ManagedProjectItemType" substitutionGroup="ProjectItemBase" />
+	<xsd:complexType name="ManagedProjectItemType">
+		<xsd:complexContent>
+			<xsd:extension base="ProjectItemType">
+				<xsd:sequence>
+					<xsd:element name="Repository" type="String_Short" minOccurs="0" />
+					<xsd:element name="BaseNamespace" type="xsd:anyURI" />
+					<xsd:element name="Filename" type="Filename" />
+					<xsd:element name="Version" type="String_Short" />
+					<xsd:element name="WIPFileLocation" type="Filename" minOccurs="0" />
+				</xsd:sequence>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+	<xsd:element name="UnmanagedProjectItem" type="UnmanagedProjectItemType" substitutionGroup="ProjectItemBase" />
+	<xsd:complexType name="UnmanagedProjectItemType">
+		<xsd:complexContent>
+			<xsd:extension base="ProjectItemType">
+				<xsd:sequence>
+					<xsd:element name="FileLocation" type="Filename" />
+				</xsd:sequence>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	
+	<xsd:element name="RepositoryReferences" type="RepositoryReferencesType"/>
+	<xsd:complexType name="RepositoryReferencesType">
+		<xsd:sequence>
+			<xsd:element ref="RepositoryRef" minOccurs="0" maxOccurs="999"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:element name="RepositoryRef" type="RepositoryRefType"/>
+	<xsd:complexType name="RepositoryRefType">
+		<xsd:simpleContent>
+			<xsd:extension base="String_Long">
+				<xsd:attribute name="repositoryId" type="String_Short" use="required" />
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	
+	<xsd:element name="ProjectProperties" type="ProjectPropertiesType"/>
+	<xsd:complexType name="ProjectPropertiesType">
+		<xsd:sequence>
+			<xsd:element ref="Property" minOccurs="0" maxOccurs="999"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:element name="Property" type="PropertyType"/>
+	<xsd:complexType name="PropertyType">
+		<xsd:simpleContent>
+			<xsd:extension base="String_Long">
+				<xsd:attribute name="key" type="String_Short" use="required" />
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	
+	<xsd:simpleType name="Identifier">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="([A-Za-z_][A-Za-z0-9\.\-_]*)?" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="Filename">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="[A-Za-z0-9~/\.\-\|:_\s]*" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="String_Short">
+		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="256" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="String_Long">
+		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="4096" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+</xsd:schema>

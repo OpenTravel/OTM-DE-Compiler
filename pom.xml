@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.sabre.es</groupId>
+	<artifactId>ota-parent-pom</artifactId>
+	<version>3.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<modules>
+		<module>schema-compiler</module>
+		<module>schema-compiler-admin</module>
+		<module>schema-compiler-ext-ota2</module>
+		<module>schema-compiler-cli</module>
+		<module>ota2-schema-compiler</module>
+		<module>ota2-repository-service</module>
+	</modules>
+    
+	
+</project>

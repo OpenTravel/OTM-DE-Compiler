@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_04"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_04 ../../../../main/resources/ota2-context/schemas/OTA2_LibraryModel_v1.4.6.xsd">
+
+	<VersionScheme>OTA2</VersionScheme>
+    <Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-chameleon/v3</Namespace>
+	<Prefix>chm3</Prefix>
+	<Name>chameleon_test_3</Name>
+	<Includes>chameleon_schema-1.xsd</Includes>
+	<Import prefix="xsd" namespace="http://www.w3.org/2001/XMLSchema" />
+	<Import prefix="legacy" namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-chameleon-2"
+			fileHints="./legacy_schema-2.xsd" />
+	<Comments>Chameleon Test Library</Comments>
+
+	<BusinessObject name="ThisBusinessObject">
+		<ID>
+			<Element name="oid" type="xsd:int" />
+		</ID>
+		<Summary>
+			<Element name="ChameleonComplexTypeB" type="ChameleonComplexTypeB" />
+		</Summary>
+		<Detail>
+		</Detail>
+	</BusinessObject>
+	
+	<BusinessObject name="ThatBusinessObject">
+		<ID>
+			<Element name="oid" type="xsd:int" />
+		</ID>
+		<Summary>
+			<Attribute name="LegacySimpleTypeC" type="legacy:LegacySimpleTypeC" />
+		</Summary>
+		<Detail>
+		</Detail>
+	</BusinessObject>
+	
+</Library>

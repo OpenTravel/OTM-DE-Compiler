@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_04"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_04 OTA2_LibraryModel_v1.4.6.xsd">
+    
+    <VersionScheme>OTA2</VersionScheme>
+    <Status>Draft</Status>
+    <Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01_00_01</Namespace>
+    <Prefix>lib-010001</Prefix>
+    <Name>test_library</Name>
+    <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
+    <Import namespace="http://opentravel.org/common/v02" prefix="ota"/>
+    <Import namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01" prefix="lib-01"/>
+    <Comments>Test Library</Comments>
+    
+    <ExtensionPointFacet>
+        <Attribute name="extCoreAttribute101" type="xsd:string"/>
+        <Extension extends="lib-01:LookupCore_Summary"/>
+    </ExtensionPointFacet>
+    
+    <ExtensionPointFacet>
+        <Attribute name="extCoreAttribute101" type="xsd:string"/>
+        <Extension extends="lib-01:LaterMinorVersionCore_Summary"/>
+    </ExtensionPointFacet>
+    
+    <ExtensionPointFacet>
+        <Attribute name="extBOAttribute101" type="xsd:string"/>
+        <Extension extends="lib-01:LookupBO_Summary"/>
+    </ExtensionPointFacet>
+    
+    <ExtensionPointFacet>
+        <Attribute name="extBOAttribute101" type="xsd:string"/>
+        <Extension extends="lib-01:LaterMinorVersionBO_Summary"/>
+    </ExtensionPointFacet>
+    
+    <ExtensionPointFacet>
+        <Attribute name="extOperationAttribute101" type="xsd:string"/>
+        <Extension extends="lib-01:VersionedService_LookupOperation_RQ"/>
+    </ExtensionPointFacet>
+    
+    <ExtensionPointFacet>
+        <Attribute name="extOperationAttribute101" type="xsd:string"/>
+        <Extension extends="lib-01:VersionedService_LaterMinorVersionOperation_RQ"/>
+    </ExtensionPointFacet>
+    
+</Library>
