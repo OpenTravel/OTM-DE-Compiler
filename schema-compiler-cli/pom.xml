@@ -17,7 +17,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.sabre.es</groupId>
-			<artifactId>schema-compiler-stl2</artifactId>
+			<artifactId>schema-compiler</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

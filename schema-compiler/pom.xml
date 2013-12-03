@@ -12,7 +12,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.sabre.es</groupId>
-			<artifactId>schema-compiler-ota2</artifactId>
+			<artifactId>schema-compiler-ext-ota2</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
