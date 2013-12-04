@@ -3,7 +3,7 @@
 OTA2 Type Library Compiler
 
 ##Dependencies
-* [Java > 1.6](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
+* [Java >= 1.6](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 * [Maven](http://maven.apache.org/)
 
 
