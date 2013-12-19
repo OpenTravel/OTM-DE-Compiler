@@ -648,12 +648,18 @@ public abstract class AbstractVersionHelper {
 			if (newEntityVersion == null) {
 				if (originalEntity instanceof TLBusinessObject) {
 					TLBusinessObject newBO = newVersionInstance( (TLBusinessObject) originalEntity, cloner );
+					TLExtension ext = new TLExtension();
+					ext.setExtendsEntity(originalEntity);
+					newBO.setExtension(ext);
 					
 					targetLibrary.addNamedMember( newBO );
 					newEntityVersion = newBO;
 					
 				} else if (originalEntity instanceof TLCoreObject) {
 					TLCoreObject newCore = newVersionInstance( (TLCoreObject) originalEntity, cloner );
+					TLExtension ext = new TLExtension();
+					ext.setExtendsEntity(originalEntity);
+					newCore.setExtension(ext);
 					
 					targetLibrary.addNamedMember( newCore );
 					newEntityVersion = newCore;

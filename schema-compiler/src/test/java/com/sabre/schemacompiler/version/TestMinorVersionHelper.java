@@ -6,24 +6,44 @@
 package com.sabre.schemacompiler.version;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
+import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
+import com.sabre.schemacompiler.model.NamedEntity;
 import com.sabre.schemacompiler.model.TLBusinessObject;
 import com.sabre.schemacompiler.model.TLClosedEnumeration;
 import com.sabre.schemacompiler.model.TLCoreObject;
+import com.sabre.schemacompiler.model.TLExtension;
+import com.sabre.schemacompiler.model.TLExtensionPointFacet;
+import com.sabre.schemacompiler.model.TLIndicator;
 import com.sabre.schemacompiler.model.TLLibrary;
 import com.sabre.schemacompiler.model.TLModel;
 import com.sabre.schemacompiler.model.TLOpenEnumeration;
 import com.sabre.schemacompiler.model.TLOperation;
+import com.sabre.schemacompiler.model.TLProperty;
+import com.sabre.schemacompiler.model.TLPropertyType;
 import com.sabre.schemacompiler.model.TLSimple;
 import com.sabre.schemacompiler.model.TLValueWithAttributes;
+import com.sabre.schemacompiler.saver.LibrarySaveException;
+import com.sabre.schemacompiler.tests.util.ModelBuilder;
+import com.sabre.schemacompiler.transform.SymbolResolver;
+import com.sabre.schemacompiler.transform.util.LibraryPrefixResolver;
+import com.sabre.schemacompiler.util.URLUtils;
+import com.sabre.schemacompiler.validate.ValidationException;
+import com.sabre.schemacompiler.validate.ValidationFindings;
+import com.sabre.schemacompiler.validate.compile.TLModelCompileValidator;
+import com.sabre.schemacompiler.validate.impl.TLModelSymbolResolver;
 
 /**
  * Verifies the operation of the <code>MinorVersionHelper</code> class.
@@ -31,6 +51,9 @@ import com.sabre.schemacompiler.model.TLValueWithAttributes;
  * @author S. Livezey
  */
 public class TestMinorVersionHelper extends AbstractVersionHelperTests {
+
+	@Rule
+	public TemporaryFolder tmp = new TemporaryFolder();
 	
 	@Test
 	public void testGetLaterMinorVersionLibraries() throws Exception {
@@ -441,6 +464,102 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
 		assertTrue( laterMinorVersionCore.getExtension().getExtendsEntity() == newMinorVersionCore );
 		assertTrue( laterMinorVersionVWA.getParentType() == newMinorVersionVWA );
 		assertTrue( laterMinorVersionOp.getExtension().getExtendsEntity() == newMinorVersionOp );
+	}
+	
+	@Test
+	public void patchRollupWithCOAndEPFShouldCreateNewCoAndSetBaseType()
+			throws LibrarySaveException, VersionSchemeException, ValidationException, IOException {
+		// given
+		ModelBuilder mb= ModelBuilder.create();
+		TLModel m = mb.getModel();
+
+		TLLibrary patchV000 = mb.newLibrary("PatchRollup", "http://test.org/rollup/patch").build();
+		patchV000.setPrefix("a");
+		patchV000.setLibraryUrl(URLUtils.toURL(tmp.newFile(patchV000.getName())));
+
+		TLCoreObject co = new TLCoreObject();
+		co.setName("CO");
+		co.setNotExtendable(false);
+		co.getSimpleFacet().setSimpleType((NamedEntity) resolveEntity(m, "ota2:Empty"));
+
+		TLProperty coElement = new TLProperty();
+		coElement.setName("PatchElement");
+		coElement.setType((TLPropertyType) resolveEntity(m ,"xsd:string"));
+		co.getSummaryFacet().addElement(coElement);
+		patchV000.addNamedMember(co);
+
+		PatchVersionHelper helper = new PatchVersionHelper();
+		TLLibrary patchV001 = helper.createNewPatchVersion(patchV000);
+		TLExtensionPointFacet epf = new TLExtensionPointFacet();
+		patchV001.addNamedMember(epf);
+		TLExtension tlex = new TLExtension();
+		epf.setExtension(tlex);
+		tlex.setExtendsEntity(co.getSummaryFacet());
+		TLIndicator ind = new TLIndicator();
+		ind.setName("ExtendingInd");
+		epf.addIndicator(ind);
+
+		// when
+		MinorVersionHelper minor = new MinorVersionHelper();
+		TLLibrary minorv020 = minor.createNewMinorVersion(patchV000);
+
+		// then
+		ValidationFindings findings = TLModelCompileValidator
+				.validateModelElement(minorv020, false);
+		TLCoreObject minorCO = (TLCoreObject) minorv020.getNamedMember(co.getName());
+		assertNotNull(minorCO.getExtension());
+		Assert.assertSame(co, minorCO.getExtension().getExtendsEntity());
+		assertFalse(findings.hasFinding());
+	}
+
+	@Test
+	public void patchRollupWithBOAndEPFShouldCreateNewCoAndSetBaseType()
+			throws LibrarySaveException, VersionSchemeException, ValidationException, IOException {
+		// given
+		ModelBuilder mb= ModelBuilder.create();
+		TLModel m = mb.getModel();
+		
+		TLLibrary patchV000 = mb.newLibrary("PatchRollup", "http://test.org/rollup/patch").build();
+		patchV000.setPrefix("a");
+		patchV000.setLibraryUrl(URLUtils.toURL(tmp.newFile(patchV000.getName())));
+		
+		TLBusinessObject bo = new TLBusinessObject();
+		bo.setName("BO");
+		TLProperty coElement = new TLProperty();
+		coElement.setName("id");
+		coElement.setType((TLPropertyType) resolveEntity(m ,"xsd:long"));
+		bo.getIdFacet().addElement(coElement);
+		patchV000.addNamedMember(bo);
+		
+		PatchVersionHelper helper = new PatchVersionHelper();
+		TLLibrary patchV001 = helper.createNewPatchVersion(patchV000);
+		
+		TLExtensionPointFacet epf = new TLExtensionPointFacet();
+		patchV001.addNamedMember(epf);
+		TLExtension tlex = new TLExtension();
+		epf.setExtension(tlex);
+		tlex.setExtendsEntity(bo.getSummaryFacet());
+		TLIndicator ind = new TLIndicator();
+		ind.setName("ExtendingInd");
+		epf.addIndicator(ind);
+		
+		// when
+		MinorVersionHelper minor = new MinorVersionHelper();
+		TLLibrary minorv020 = minor.createNewMinorVersion(patchV000);
+		
+		// then
+		ValidationFindings findings = TLModelCompileValidator
+				.validateModelElement(minorv020, false);
+		assertFalse(findings.hasFinding());
+		TLBusinessObject minorCO = (TLBusinessObject) minorv020.getNamedMember(bo.getName());
+		assertNotNull(minorCO.getExtension());
+		Assert.assertSame(bo, minorCO.getExtension().getExtendsEntity());
+	}
+	
+	private Object resolveEntity(TLModel m, String name) {
+		SymbolResolver resolver = new TLModelSymbolResolver(m);
+		resolver.setPrefixResolver(new LibraryPrefixResolver(m.getBuiltInLibraries().get(0)));
+		return resolver.resolveEntity(name);
 	}
 	
 }
