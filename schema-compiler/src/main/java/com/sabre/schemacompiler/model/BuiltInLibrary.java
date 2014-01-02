@@ -30,7 +30,8 @@ public class BuiltInLibrary extends AbstractLibrary {
 	
 	/**
 	 * Constructor that provides all required information for the library.  Once constructed, the attributes
-	 * and members of a built-in library cannot be modified.
+	 * and members of a built-in library cannot be modified. This library will be imported by default by 
+	 * all user-defined libraries.
 	 * 
 	 * @param namespace  the library namespace
 	 * @param name  the library name
@@ -39,10 +40,25 @@ public class BuiltInLibrary extends AbstractLibrary {
 	 * @param members  the member types of the library
 	 */
 	public BuiltInLibrary(String namespace, String name, String prefix, URL libraryUrl, List<LibraryMember> members) {
-		this(namespace, name, prefix, libraryUrl, members, null, null, null);
-	}
+
+        this(namespace, name, prefix, libraryUrl, members, null, null,
+                createDefaultSchemaDeclaration(namespace, name, prefix, libraryUrl.toString(),
+                        true));
+    }
 	
-	/**
+	
+    private static SchemaDeclaration createDefaultSchemaDeclaration(String namespace, String name,
+            String prefix, String libraryUrl, boolean deprecated) {
+        SchemaDeclaration schemaDeclaration = new SchemaDeclaration();
+        schemaDeclaration.setNamespace(namespace);
+        schemaDeclaration.setName(name);
+        schemaDeclaration.setDefaultPrefix(prefix);
+        schemaDeclaration.setLocation(libraryUrl);
+        schemaDeclaration.setImportByDefault(true);
+        return schemaDeclaration;
+    }
+
+    /**
 	 * Constructor that provides all required information for the library.  Once constructed, the attributes
 	 * and members of a built-in library cannot be modified.
 	 * 

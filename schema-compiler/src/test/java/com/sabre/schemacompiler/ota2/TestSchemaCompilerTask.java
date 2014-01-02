@@ -77,9 +77,10 @@ public class TestSchemaCompilerTask {
 			builtInNames.add(lib.getName());
 		}
 
-		assertEquals(2, builtInNames.size());
+		assertEquals(3, builtInNames.size());
 		assertTrue(builtInNames.contains("XMLSchema"));
 		assertTrue(builtInNames.contains("OTA2_BuiltIns_v2.0.0"));
+		assertTrue(builtInNames.contains("OTA_SimpleTypes"));
 	}
 
 	@Test

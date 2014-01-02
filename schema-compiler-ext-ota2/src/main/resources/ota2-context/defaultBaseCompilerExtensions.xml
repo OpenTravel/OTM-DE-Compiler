@@ -35,6 +35,9 @@
 					<property name="defaultPrefix" value="xsd" />
 				</bean>
 				<bean class="com.sabre.schemacompiler.loader.impl.OTA2BuiltInLibraryLoader">
+					<property name="libraryDeclaration" ref="ota2SimpleTypes" />
+				</bean>
+				<bean class="com.sabre.schemacompiler.loader.impl.OTA2BuiltInLibraryLoader">
 					<property name="libraryDeclaration" ref="ota2CommonSchema" />
 				</bean>
 				

@@ -55,7 +55,7 @@ public class TestLibraryTransformers extends Abstract_1_3_TestTransformers {
 		for (TLNamespaceImport nsImport : library.getNamespaceImports()) {
 			libraryImports.put(nsImport.getPrefix(), nsImport);
 		}
-		assertEquals(3, libraryImports.size());
+		assertEquals(4, libraryImports.size());
 		
 		assertNotNull(testImport = libraryImports.get("xsd"));
 		assertEquals(XMLConstants.W3C_XML_SCHEMA_NS_URI, testImport.getNamespace());
@@ -107,7 +107,7 @@ public class TestLibraryTransformers extends Abstract_1_3_TestTransformers {
 		for (NamespaceImport nsImport : jaxbLibrary.getImport()) {
 			libraryImports.put(nsImport.getPrefix(), nsImport);
 		}
-		assertEquals(3, libraryImports.size());
+		assertEquals(4, libraryImports.size());
 		
 		assertNotNull(testImport = libraryImports.get("xsd"));
 		assertEquals(XMLConstants.W3C_XML_SCHEMA_NS_URI, testImport.getNamespace());

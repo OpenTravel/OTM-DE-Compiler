@@ -62,8 +62,8 @@ public class TestLibraryModelLoader {
 			libraryNames.add(library.getName());
 		}
 		assertNotNull(libraryList);
-		assertEquals(4, libraryList.size());
-		assertEquals(3, model.getNamespaces().size());
+		assertEquals(5, libraryList.size());
+		assertEquals(4, model.getNamespaces().size());
 		assertTrue(model.getNamespaces().contains(XMLConstants.W3C_XML_SCHEMA_NS_URI));
 		assertTrue(model.getNamespaces().contains(OTA2_COMMON_SCHEMA_URI));
 		assertTrue(model.getNamespaces().contains(PACKAGE_1_NAMESPACE));
@@ -96,9 +96,9 @@ public class TestLibraryModelLoader {
 			libraryNames.add(library.getName());
 		}
 		assertNotNull(libraryList);
-		assertEquals(7, libraryList.size());
-		assertEquals(7, libraryNames.size());
-		assertEquals(5, model.getNamespaces().size());
+		assertEquals(8, libraryList.size());
+		assertEquals(8, libraryNames.size());
+		assertEquals(6, model.getNamespaces().size());
 		assertTrue(model.getNamespaces().contains(XMLConstants.W3C_XML_SCHEMA_NS_URI));
 		assertTrue(model.getNamespaces().contains(OTA2_COMMON_SCHEMA_URI));
 		assertTrue(model.getNamespaces().contains(PACKAGE_1_NAMESPACE));
@@ -148,9 +148,9 @@ public class TestLibraryModelLoader {
 			libraryNames.add(library.getName());
 		}
 		assertNotNull(libraryList);
-		assertEquals(7, libraryList.size());
-		assertEquals(7, libraryNames.size());
-		assertEquals(5, model.getNamespaces().size());
+		assertEquals(8, libraryList.size());
+		assertEquals(8, libraryNames.size());
+		assertEquals(6, model.getNamespaces().size());
 		assertTrue(model.getNamespaces().contains(XMLConstants.W3C_XML_SCHEMA_NS_URI));
 		assertTrue(model.getNamespaces().contains(OTA2_COMMON_SCHEMA_URI));
 		assertTrue(model.getNamespaces().contains(PACKAGE_1_NAMESPACE));
@@ -192,8 +192,8 @@ public class TestLibraryModelLoader {
 			libraryNames.add(library.getName());
 		}
 		
-		assertEquals(9, libraryNames.size());
-		assertEquals(4, model.getNamespaces().size());
+		assertEquals(10, libraryNames.size());
+		assertEquals(5, model.getNamespaces().size());
 		assertTrue(model.getNamespaces().contains(XMLConstants.W3C_XML_SCHEMA_NS_URI));
 		assertTrue(model.getNamespaces().contains(OTA2_COMMON_SCHEMA_URI));
 		assertTrue(model.getNamespaces().contains(PACKAGE_3_NAMESPACE));
@@ -235,8 +235,8 @@ public class TestLibraryModelLoader {
 			libraryNames.add(library.getName());
 		}
 		
-		assertEquals(6, libraryNames.size());
-		assertEquals(4, model.getNamespaces().size());
+		assertEquals(7, libraryNames.size());
+		assertEquals(5, model.getNamespaces().size());
 		assertTrue(model.getNamespaces().contains(XMLConstants.W3C_XML_SCHEMA_NS_URI));
 		assertTrue(model.getNamespaces().contains(OTA2_COMMON_SCHEMA_URI));
 		assertTrue(model.getNamespaces().contains(PACKAGE_3_NAMESPACE));

@@ -9,7 +9,7 @@
     <VersionScheme>OTA2</VersionScheme>
    
     <Namespace>http://opentravel.org/common/v02</Namespace>
-	<Prefix>ota2</Prefix>
+	<Prefix>ota2-dep</Prefix>
 	<Name>OTA2_BuiltIns_v2.0.0</Name>
 	<Import prefix="xsd" namespace="http://www.w3.org/2001/XMLSchema" />
     <Context applicationContext="http://www.opentravel.org/OTM2" context="OTM2"/>
@@ -25,11 +25,13 @@
 	<Simple name="Empty" type="xsd:string" maxLength="0">
 		<Documentation>
 			<Description>An empty string used when the simple content of a complex type or attribute is to be omitted.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 	</Simple>
 	<Simple name="String_Alias" type="xsd:string" pattern="[A-Za-z0-9\.\-_]*">
 		<Documentation>
 			<Description>A core 2.0 simpleType used to constrain the contents of an Alias string.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">Alias_Name</Example>
 	</Simple>		
@@ -37,83 +39,97 @@
 		<Documentation>
 			<Description>A string used for an open enumeration literal value.</Description>
 			<Developer>Place a literal in this attribute if you have selected the "other_" value in the enumerated list. Note that this value should be known to your trading partners.</Developer>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 	</Simple>		
 	<Simple name="String_Long" type="xsd:string" minLength="1" maxLength="4096">
 		<Documentation>
 			<Description>A string with a minimum length of 1 and a maximum length of 4096.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">I am a long string.</Example>
 	</Simple>	
 	<Simple name="String_Medium" type="xsd:string" minLength="1" maxLength="512">
 		<Documentation>
 			<Description>A string with a minimum length of 1 and a maximum length of 512.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">I am a medium string.</Example>
 	</Simple>
 	<Simple name="String_PaymentCard" type="xsd:string" pattern="[0-9]{4,19}">
 		<Documentation>
 			<Description>A string that represents a payment card number up to 19 numeric characters in length.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">1111222233334444</Example>
 	</Simple>		
 	<Simple name="String_Phone" type="xsd:string" pattern="[0-9]{7}">
 		<Documentation>
 			<Description>A string that represents a phone number with the phone number exchange and suffix.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">5551212</Example>
 	</Simple>		
 	<Simple name="String_Short" type="xsd:string" minLength="1" maxLength="128">
 		<Documentation>
 			<Description>A string with a minimum length of 1 and a maximum length of 128.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">I am a short string.</Example>
 	</Simple>
 	<Simple name="String_Tiny" type="xsd:string" minLength="1" maxLength="32">
 		<Documentation>
 			<Description>A string with a minimum length of 1 and a maximum length of 32.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">I am a tiny string.</Example>
 	</Simple>
 	<Simple name="String_Alpha2" type="xsd:string" pattern="[a-zA-Z]{2}">
 		<Documentation>
 			<Description>A 2 character alphanueric string.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">AB</Example>
 	</Simple>
 	<Simple name="String_Alpha3" type="xsd:string" pattern="[a-zA-Z]{3}">
 		<Documentation>
 			<Description>A 3 character alphanueric string.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">ABC</Example>
 	</Simple>
 	<Simple name="Code_AgentDuty" type="xsd:string" pattern="[a-zA-Z0-9]{2,5}">
 		<Documentation>
 			<Description>Typically a two to five character code (alpha, numeric, or combination) that specifies a travel agent duty code that is used for agency authentication.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">AG</Example>
 	</Simple>
 	<Simple name="Code_ATPCO_PassengerType" type="String_Tiny">
 		<Documentation>
 			<Description>An ATPCO passenger type code.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">MIL</Example>
 	</Simple>
 	<Simple name="Code_DataUsePolicy" type="xsd:string" minLength="1" maxLength="128">
 		<Documentation>
 			<Description>A code that identifies a data use policy and/or restriction.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">Internal Use</Example>
 	</Simple>
 	<Simple name="Code_DayOfWeek" type="xsd:string" pattern="[a-zA-Z0-9]{3,4}">
 		<Documentation>
 			<Description>A three or four character abbreviation for a day of the week.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">WED</Example>
 	</Simple>
 	<Simple name="Code_IATA_AircraftType" type="xsd:string" minLength="3" maxLength="3">
 		<Documentation>
 			<Description>A three character IATA aircraft type designator.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			<Reference>http://www.iata.org/ps/publications/pages/code-search.aspx</Reference>
 		</Documentation>
 		<Example context="OTM2">310</Example>
@@ -121,6 +137,7 @@
 	<Simple name="Code_IATA_AirlineID" type="xsd:string" pattern="[a-zA-Z]{2}">
 		<Documentation>
 			<Description>A two character IATA assigned airline code.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			<Reference>https://en.wikipedia.org/wiki/IATA_aircraft_type_designator</Reference>
 		</Documentation>
 		<Example context="OTM2">UA</Example>
@@ -128,6 +145,7 @@
 	<Simple name="Code_IATA_Airport" type="xsd:string" pattern="[a-zA-Z]{3}">
 		<Documentation>
 			<Description>A three character code for an airport.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			<Reference>http://www.iata.org/ps/publications/pages/code-search.aspx</Reference>
 		</Documentation>
 		<Example context="OTM2">JFK</Example>
@@ -135,6 +153,7 @@
 	<Simple name="Code_IATA_City" type="xsd:string" pattern="[a-zA-Z]{3}">
 		<Documentation>
 			<Description>A three character code for a city.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			<Reference>http://www.iata.org/ps/publications/pages/code-search.aspx</Reference>
 		</Documentation>
 		<Example context="OTM2">NYC</Example>
@@ -142,6 +161,7 @@
 	<Simple name="Code_IATA_ERSP" type="xsd:string" pattern="[0-9]{1,16}">
 		<Documentation>
 			<Description>A unique IATA (in cooperation with ATA and ARC) code used as a means of identification when performing online bookings with airlines.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			<Reference>http://www.iata.org/ps/accreditation-travel/ersp/pages/index.aspx</Reference>
 		</Documentation>
 		<Example context="OTM2">123456789</Example>
@@ -149,6 +169,7 @@
 	<Simple name="Code_ISO_Country" type="xsd:string" pattern="[a-zA-Z]{3}">
 		<Documentation>
 			<Description>A three character country code defined in ISO 3166 format.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			<Reference>http://www.iso.org/iso/country_codes/iso_3166_code_lists.htm</Reference>
 		</Documentation>
 		<Example context="OTM2">USA</Example>
@@ -156,6 +177,7 @@
 	<Simple name="Code_ISO_Currency" type="xsd:string" pattern="[a-zA-Z]{3}">
 		<Documentation>
 			<Description>A three character currency code as defined in ISO 4217.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			<Reference>http://bit.ly/OTA2_ISO4217</Reference>
 		</Documentation>
 		<Example context="OTM2">USD</Example>
@@ -164,6 +186,7 @@
 		<Documentation>
 			<Description>A code for a language in ISO 639-1 (2 alpha character) format.</Description>
 			<Developer>Language codes are typically used to describe spoken languages and languages that descriptive information is requested and/or provided in. An example is "en" which is English.</Developer>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			<Reference>http://sharepoint.opentraveldevelopersnetwork.com/Lists/The OpenTravel Glossary/AllItems.aspx</Reference>
 		</Documentation>
 		<Example context="OTM2">en</Example>
@@ -171,6 +194,7 @@
 	<Simple name="Code_ProcessingCondition" type="xsd:string" pattern="[0-9a-zA-Z]{1,9}">
 		<Documentation>
 			<Description>Specifies a one to nine character length code that represents an abbreviated message processing condition.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">NOAVAIL</Example>
 	</Simple>
@@ -178,42 +202,49 @@
 		<Documentation>
 			<Description>The ratio used to calculate the number of loyalty program points (or miles) required to pay for a monetary amount.</Description>
 			<Developer>For example, a base air fare of $100 where MoneyToPointsRatio is 1000 requires 100,000 frequent flyer miles to pay for the full base fare (100 * 1000 = 100,000 miles.)</Developer>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">1000</Example>
 	</Simple>
 	<Simple name="Code_OpenTravel" type="xsd:string" pattern="[0-9]{1,3}">
 		<Documentation>
 			<Description>Specifies a one to three character length code that represents a value from an OpenTravel Code List.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">123</Example>
 	</Simple>
 	<Simple name="Code_OSI" type="xsd:string" pattern="[A-Z]{2,4}">
 		<Documentation>
 			<Description>Specifies an other service request (OSI) code that may be associated with a passenger name record (PNR).</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">YY</Example>
 	</Simple>
 	<Simple name="Code_PaymentCardSeries" type="xsd:string" pattern="[0-9]{2,9}">
 		<Documentation>
 			<Description>Verification digits printed on a payment card that follow the embossed number. </Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">123456789</Example>
 	</Simple>
 	<Simple name="Code_PaymentCardType" type="xsd:string" pattern="[a-zA-Z]{2,9}">
 		<Documentation>
 			<Description>Specifies a 2 to 9 character alphanumeric code for a payment card.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">MC</Example>
 	</Simple>
 	<Simple name="Code_Phone_Area" type="xsd:string" pattern="[0-9]{3}">
 		<Documentation>
 			<Description>A code that represents the area code in a telephone number.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">203</Example>
 	</Simple>
 	<Simple name="Code_Phone_Country" type="xsd:string" pattern="[0-9]{1,3}">
 		<Documentation>
 			<Description>A code that represents a country in a telephone number.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">44</Example>
 	</Simple>
@@ -221,6 +252,7 @@
 		<Documentation>
 			<Description>Specifies a postal code, known in various countries as a post code, postcode or ZIP code.</Description>
 			<Developer>A postal code contains a series of letters and/or digits appended to a postal address for the purpose of sorting mail.</Developer>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			<Reference>http://en.wikipedia.org/wiki/List_of_postal_codes</Reference>
 		</Documentation>
 		<Example context="OTM2">33626</Example>
@@ -229,6 +261,7 @@
 		<Documentation>
 			<Description>Specifies a promotion code.</Description>
 			<Developer>A promotion code is the identifier used by the host system to link directly with a specific named advertising campaign. By including the required code, the client system is able to gain access to special offers which may have been created for a specifically targeted group via a CRM system or for a wider advertising campaign using television or press advertisements.</Developer>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">TWOFORONE</Example>
 	</Simple>
@@ -236,6 +269,7 @@
 		<Documentation>
 			<Description>A three to five character code (alpha, numeric or combination) that specifies a GDS code used to identify a travel agency location.</Description>
 			<Developer>This code is typically required when using negotiated rates that are tied to an agency through this code.</Developer>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			<Reference>http://sharepoint.opentraveldevelopersnetwork.com/Lists/The OpenTravel Glossary/AllItems.aspx</Reference>
 		</Documentation>
 		<Example context="OTM2">DFW</Example>
@@ -243,6 +277,7 @@
 	<Simple name="Code_RatePlan" type="xsd:string" minLength="1" maxLength="64">
 		<Documentation>
 			<Description>A code that identifies a rate plan.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			<Reference>http://sharepoint.opentraveldevelopersnetwork.com/Lists/The OpenTravel Glossary/AllItems.aspx</Reference>
 		</Documentation>
 		<Example context="OTM2">RoomAndMeal</Example>
@@ -250,24 +285,28 @@
 	<Simple name="Code_Region" type="xsd:string" pattern="[A-Za-z0-9]{1,16}">
 		<Documentation>
 			<Description>Up to a 16 character code for a geographic region.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">Europe</Example>
 	</Simple>
 	<Simple name="Code_SSR" type="xsd:string" pattern="[A-Z]{4}">
 		<Documentation>
 			<Description>Specifies a special request (SSR) code associated with a passenger name record (PNR).</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">BLND</Example>
 	</Simple>
 	<Simple name="Code_State" type="xsd:string" pattern="[A-Za-z]{2}">
 		<Documentation>
 			<Description>A 2 character abbreviation for a state.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">CA</Example>
 	</Simple>
 	<Simple name="Code_Tour" type="xsd:string" pattern="[A-Z0-9]{1,32}">
 		<Documentation>
 			<Description>Up to a 32 character numeric or alphanumeric tour code.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">GOGOEUROPE</Example>
 	</Simple>
@@ -275,42 +314,49 @@
 		<Documentation>
 			<Description>Up to a 16 character numeric or alphanumeric tax code.</Description>
 			<Developer>This is used to represent a type or category of tax applied to a price or fee.</Developer>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">XF</Example>
 	</Simple>
 	<Simple name="Name_Location" type="xsd:string" minLength="1" maxLength="75">
 		<Documentation>
 			<Description>A string for a named location.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">Paris</Example>
 	</Simple>
 	<Simple name="Name_Proper" type="xsd:string" minLength="1" maxLength="128">
 		<Documentation>
 			<Description>A name used to describe a person, place or thing, such as a hotel, airport or company.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">Joe Smith</Example>
 	</Simple>
 	<Simple name="Money" type="xsd:decimal" fractionDigits="3" >
 		<Documentation>
 			<Description>Specifies an amount with a maximum of 3 decimals.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">1.25</Example>
 	</Simple>
 	<Simple name="Price" type="xsd:decimal" fractionDigits="3">
 	<Documentation>
 		<Description>Contains a basic price.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 	</Documentation>
 	<Example context="OTM2">1.25</Example>
 </Simple>
 	<Simple name="Percentage" type="xsd:decimal">
 		<Documentation>
 			<Description>A percentage.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">6.25</Example>
 	</Simple>
 	<Simple name="URL" type="xsd:anyURI">
 		<Documentation>
 			<Description>A URL in W3C recommended format.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			<Reference>http://www.w3.org/Addressing/URL/url-spec.txt</Reference>
 		</Documentation>
 		<Example context="OTM2">http://www.opentravel.org</Example>
@@ -318,12 +364,14 @@
 	<Simple name="Date_Birth" type="xsd:date">
 		<Documentation>
 			<Description>A persons full birthdate, including year, month and day.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">1964-12-26</Example>
 	</Simple>
 	<Simple name="Date_Date" type="xsd:date">
 		<Documentation>
 			<Description>A W3C compliant date field.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			<Reference>http://www.w3.org/TR/xmlschema-2/#date</Reference>
 		</Documentation>
 		<Example context="OTM2">2012-01-30</Example>
@@ -331,6 +379,7 @@
 	<Simple name="Date_DateTime" type="xsd:dateTime">
 		<Documentation>
 			<Description>A W3C compliant date with an optional time.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			<Reference>http://www.w3.org/TR/xmlschema-2/#dateTime</Reference>
 		</Documentation>
 		<Example context="OTM2">2012-12-17T09:30:47</Example>
@@ -338,24 +387,28 @@
 	<Simple name="Date_MMYY" type="xsd:string" pattern="(0[1-9]|1[0-2])[0-9][0-9]">
 		<Documentation>
 			<Description>A date represented as a two digit month and two digit year.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">1261</Example>
 	</Simple>
 	<Simple name="Date_Timestamp" type="xsd:dateTime">
 	<Documentation>
 		<Description>A timestamp with a date and time.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 	</Documentation>
 	<Example context="OTM2">2012-12-17T09:30:47</Example>
 </Simple>
 	<Simple name="Date_YYYY" type="xsd:string" pattern="[0-9]{4}">
 		<Documentation>
 			<Description>A four digit year.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Example context="OTM2">2012</Example>
 	</Simple>
 	<Simple name="Time_Duration" type="xsd:duration">
 		<Documentation>
 			<Description>A W3C compliant time duration unit.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			<Reference>http://www.w3.org/TR/xmlschema-2/#duration</Reference>
 		</Documentation>
 		<Example context="OTM2">P7D</Example>
@@ -365,6 +418,7 @@
 	<Enumeration_Open name="Enum_BookingChannel">
 		<Documentation>
 			<Description>An extensible list of identifiers for a type or category of a booking channel.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			<OtherDoc context="OpenTravel Codelist">Booking Channel Type (BCT)</OtherDoc>
 		</Documentation>
           <Value literal="Agent"/>
@@ -380,6 +434,7 @@
 	<Enumeration_Open name="Enum_CodelistSource">
 		<Documentation>
 			<Description>An extensible list of codelist sources.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Value literal="IATA"/>
 		<Value literal="OpenTravel"/>
@@ -388,31 +443,37 @@
 		<Documentation>
 			<Description>An extensible list of identifiers for a type of data usage policy and/or restriction.</Description>
 			<Developer>Note that any data use, sharing or retention policies MUST be agreed upon by trading partners. Exchanging a warning and/or data restriction policy content in an electronic message does indicate policy compliance awareness by the receiving party. This functionality is typically used for privacy compliance and log auditing purposes only.</Developer>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Value literal="Retention">
 			<Documentation>
 				<Description>Indicates the encrypted information is subject to a data retention (data storage) policy established by the sending party and known to recipient parties.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 		</Value>
 		<Value literal="Sharing">
 			<Documentation>
 				<Description>Indicates the encrypted information is subject to a data sharing policy (internal and third party) established by the sending party and known to recipient parties.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 		</Value>
 		<Value literal="Use">
 			<Documentation>
 				<Description>Indicates the encrypted information is subject to a data use policy (internal and third party) established by the sending party and known to recipient parties.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 		</Value>
 		<Value literal="Retention, Sharing and Use">
 			<Documentation>
 				<Description>Indicates the encrypted information is subject to a data retention, sharing and use policy established by the sending party and known to recipient parties.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 		</Value>
 	</Enumeration_Open>
 	<Enumeration_Open name="Enum_RecordActionType">
 		<Documentation>
 			<Description>An extensible list of actions performed on a record.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Value literal="Create"/>
 		<Value literal="Delete"/>
@@ -423,6 +484,7 @@
 	<Enumeration_Open name="Enum_TargetProcessingSystem">
 		<Documentation>
 			<Description>An extensible list of target processing system types.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Value literal="Production"/>
 		<Value literal="Staging"/>
@@ -431,6 +493,7 @@
 	<Enumeration_Open name="Enum_TravelSector">
 		<Documentation>
 			<Description>An extensible list of travel industry sector types.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			<OtherDoc context="OpenTravel Codelist">Travel Sector (TVS)</OtherDoc>
 		</Documentation>
 		<Value literal="Activity/Attraction/Theme Park"/>
@@ -460,6 +523,7 @@
 	<Enumeration_Open name="Enum_UniqueID_Type">
 		<Documentation>
 			<Description>An extensible list of unique identifier types.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			<OtherDoc context="OpenTravel Codelist">Unique ID Type (UIT)</OtherDoc>
 		</Documentation>
 		<Value literal="Acquirer"/>
@@ -509,6 +573,7 @@
 	<Enumeration_Open name="Enum_URL_Context">
 		<Documentation>
 			<Description>An extensible list of URL contexts.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Value literal="Company Website"/>
 		<Value literal="Descriptive Information"/>
@@ -518,6 +583,7 @@
 	<Enumeration_Closed name="Enum_DayOfWeek">
 		<Documentation>
 			<Description>Day of the Week types.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Value literal="Monday"/>
 		<Value literal="Tuesday"/>
@@ -530,6 +596,7 @@
 	<Enumeration_Closed name="Enum_OpenTravelCodelist">
 		<Documentation>
 			<Description>OpenTravel codelist table names.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		  <Value literal="ADT:Additional Detail Type"/>
 		  <Value literal="OPR:Additional Operation Info"/>
@@ -683,6 +750,7 @@
 	<Enumeration_Closed name="Enum_TransactionStatus">
 		<Documentation>
 			<Description>An identifier for where this message falls within a sequence of messages.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Value literal="Start"/>
 		<Value literal="End"/>
@@ -695,6 +763,7 @@
 	<ValueWithAttrs name="CodeList" type="Enum_CodelistSource">
 		<Documentation>
 			<Description>Metadata that describes a codelist.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<ValueDocumentation>
 			<Description>The source of the codelist.</Description>
@@ -703,30 +772,35 @@
 		<Attribute mandatory="false" name="itemCode" type="String_Tiny">
 			<Documentation>
 				<Description>The numeric ID or code for the value from the code list.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">14</Example>
 		</Attribute>
 		<Attribute mandatory="false" name="itemName" type="String_Short">
 			<Documentation>
 				<Description>The literal (textual) value from the code list.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">Corporate Booking Information</Example>
 		</Attribute>
 		<Attribute mandatory="false" name="listNameCode" type="String_Tiny">
 			<Documentation>
 				<Description>The acronym or code for the code list name.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">ADT</Example>
 		</Attribute>
 		<Attribute mandatory="false" name="openTravelListName" type="Enum_OpenTravelCodelist">
 			<Documentation>
 				<Description>The OpenTravel code list name.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">ADT:Additional Detail Type</Example>
 		</Attribute>
 		<Attribute mandatory="false" name="otherListName" type="String_Short">
 			<Documentation>
 				<Description>The name of a third party (non-OpenTravel) code list.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">IATA Country Codes</Example>
 		</Attribute>
@@ -734,6 +808,7 @@
 	<ValueWithAttrs name="ContextualCode" type="String_Tiny">
 		<Documentation>
 			<Description>Metadata that describes a contextual code.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<ValueDocumentation>
 			<Description>A code up to 32 characters in length.</Description>
@@ -742,12 +817,14 @@
 		<Attribute mandatory="false" name="context" type="String_Tiny">
 			<Documentation>
 				<Description>The named context of the code.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">Owner</Example>
 		</Attribute>
 		<Attribute mandatory="false" name="URL" type="URL">
 			<Documentation>
 				<Description>A URL to the source owner of the code.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">http://www.ABCCompany.com/somesource</Example>
 		</Attribute>
@@ -755,6 +832,7 @@
 	<ValueWithAttrs name="ContextualID" type="String_Short">
 		<Documentation>
 			<Description>Metadata that describes a contextual identifier.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<ValueDocumentation>
 			<Description>A unique ID up to 128 characters in length.</Description>
@@ -762,12 +840,14 @@
 		<Attribute mandatory="false" name="context" type="String_Tiny">
 			<Documentation>
 				<Description>The named context of the ID.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">Owner</Example>
 		</Attribute>
 		<Attribute mandatory="false" name="URL" type="URL">
 			<Documentation>
 				<Description>A URL to the source owner of the ID.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">http://www.opentravel.org</Example>
 		</Attribute>
@@ -792,6 +872,7 @@
 	<ValueWithAttrs name="ExchangeRate" type="Code_ISO_Currency">
 		<Documentation>
 			<Description>Metadata that describes an exchange rate.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<ValueDocumentation>
 			<Description>An ISO 4217 currency code for the base currency that's being converted.</Description>
@@ -800,36 +881,42 @@
 		<Attribute mandatory="false" name="baseNUC" type="Money">
 			<Documentation>
 				<Description>The base neutral unit of construction amount.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">100</Example>
 		</Attribute>
 		<Attribute mandatory="true" name="exchangeDateTime" type="Date_DateTime">
 			<Documentation>
 				<Description>The date and time of the conversion rate.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">2012-12-17T09:30:47</Example>
 		</Attribute>
 		<Attribute mandatory="true" name="exchangeRate" type="xsd:decimal">
 			<Documentation>
 				<Description>The rate used for conversion from the source currency to the target currency.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">1.32932</Example>
 		</Attribute>
 		<Attribute mandatory="false" name="exchangeSourceName" type="String_Short">
 			<Documentation>
 				<Description>The name of the exchange rate source.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">Exchange Rates.com</Example>
 		</Attribute>
 		<Attribute mandatory="false" name="exchangeSourceURL" type="URL">
 			<Documentation>
 				<Description>A URL for the source of the conversion rate.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">http://www.exchangerates.org.uk/US-Dollar-USD-currency-table.html</Example>
 		</Attribute>
 		<Attribute mandatory="true" name="toCurrency" type="Code_ISO_Currency">
 			<Documentation>
 				<Description>An ISO 4217 currency code for the final converted currency.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">EUR</Example>
 		</Attribute>
@@ -837,6 +924,7 @@
 	<ValueWithAttrs name="InitiatorAirline" type="Code_IATA_AirlineID">
 		<Documentation>
 			<Description>Metadata that describes airline information for a message requestor or sender.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			<Reference>http://bit.ly/OTA2_IATA_AirlineCode</Reference>
 		</Documentation>
 		<ValueDocumentation>
@@ -847,6 +935,7 @@
 		<Attribute mandatory="false" name="airportCode" type="Code_IATA_Airport">
 			<Documentation>
 				<Description>A three character IATA assigned airport code.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 				<Reference>http://bit.ly/OTA2_IATA_AirportCodes</Reference>
 			</Documentation>
 			<Example context="OTM2">JFK</Example>
@@ -855,6 +944,7 @@
 			<Documentation>
 				<Description>The IATA airline Electronic Reservation Services Provider (ERSP) code.</Description>
 				<Developer>An ERSP is a unique IATA (in cooperation with ATA and ARC) code used as a means of identification when performing online bookings with airlines.</Developer>
+				<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 				<Reference>http://bit.ly/OTA2_ERSP</Reference>
 			</Documentation>
 			<Example context="OTM2">123456789</Example>
@@ -862,6 +952,7 @@
 		<Attribute mandatory="false" name="firstDeparturePoint" type="Code_IATA_City">
 			<Documentation>
 				<Description>An IATA city code for the first departure point for a trip.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 				<Reference>http://bit.ly/OTA2_IATA_AirportCodes</Reference>
 			</Documentation>
 			<Example context="OTM2">JFK</Example>
@@ -870,6 +961,7 @@
 	<ValueWithAttrs name="InitiatorBookingChannel" type="Enum_BookingChannel">
 		<Documentation>
 			<Description>Metadata that describes a booking channel.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<ValueDocumentation>
 			<Description>An extensible list of booking channel types.</Description>
@@ -878,24 +970,28 @@
 		<Attribute mandatory="false" name="code" type="String_Tiny">
 			<Documentation>
 				<Description>A code for the booking channel.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">12345</Example>
 		</Attribute>
 		<Attribute mandatory="false" name="id" type="String_Short">
 			<Documentation>
 				<Description>A unique ID for the booking channel that is typically used for message authentication.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">ABC1234567</Example>
 		</Attribute>
 		<Attribute mandatory="false" name="name" type="String_Short">
 			<Documentation>
 				<Description>The name of the booking channel.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">The Best Travel Company Public Website</Example>
 		</Attribute>
 		<Indicator name="primary">
 			<Documentation>
 				<Description>If true, the booking channel type is the primary means of connectivity used by the source.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 		</Indicator>
 	</ValueWithAttrs>	
@@ -903,6 +999,7 @@
 		<Documentation>
 			<Description>Metadata that describes a unique ID and contextual information for the ID for a message requestor or sender.</Description>
 			<Developer>The ID and associated information should be known between trading partners.</Developer>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<ValueDocumentation>
 			<Description>A unique identifier for the requestor or sender of the message.</Description>
@@ -912,12 +1009,14 @@
 		<Attribute mandatory="false" name="context" type="String_Short">
 			<Documentation>
 				<Description>The contextual source of the requestor ID, such as IATA, ARC, and ERSP.</Description>
+				<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">IATA</Example>
 		</Attribute>
 		<Attribute mandatory="false" name="url" type="URL">
 			<Documentation>
 				<Description>A URL that identifies the location associated with the @context.</Description>
+				<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">http://www.vendor12345.com</Example>
 		</Attribute>
@@ -925,6 +1024,7 @@
 	<ValueWithAttrs name="InitiatorTravelAgent" type="String_Tiny">
 		<Documentation>
 			<Description>Sine ID and other metadata about a travel agency.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<ValueDocumentation>
 			<Description>The travel agent sine identifier.</Description>
@@ -934,12 +1034,14 @@
 		<Attribute mandatory="false" name="companyName" type="Name_Proper">
 			<Documentation>
 				<Description>The name of the travel agency.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">ABC Travel Company</Example>
 		</Attribute>
 		<Attribute mandatory="false" name="dutyCode" type="Code_AgentDuty">
 			<Documentation>
 				<Description>A two to five character code (alpha, numeric or combination) code that specifies a travel agents duty code used for agency authentication.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">GS</Example>
 		</Attribute>
@@ -947,12 +1049,14 @@
 			<Documentation>
 				<Description>A three to five character code (alpha, numeric or combination) that specifies a GDS code used to identify a travel agency location.</Description>
 				<Developer>Note that this may be a required field when using negotiated rates to associate the rates to an agency.</Developer>
+				<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">ORD</Example>
 		</Attribute>
 		<Attribute mandatory="false" name="terminalID" type="String_Short">
 			<Documentation>
 				<Description>The electronic address of the device from which information is entered.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">01989</Example>
 		</Attribute>
@@ -960,6 +1064,7 @@
 	<ValueWithAttrs name="Identifier_Country" type="Code_ISO_Country">
 		<Documentation>
 			<Description>Metadata that describes a country.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<ValueDocumentation>
 			<Description>A three character alpha country code defined in ISO 3166 format.</Description>
@@ -969,12 +1074,14 @@
 		<Attribute mandatory="false" name="alpha2" type="String_Alpha2">
 			<Documentation>
 				<Description>The two character alpha country code defined in ISO 3166 format.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">FR</Example>
 		</Attribute>
 		<Attribute mandatory="false" name="fullName" type="Name_Proper">
 			<Documentation>
 				<Description>The name of the country.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">France</Example>
 		</Attribute>
@@ -982,6 +1089,7 @@
 	<ValueWithAttrs name="Identifier_Currency" type="Code_ISO_Currency">
 		<Documentation>
 			<Description>Metadata that describes a currency.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<ValueDocumentation>
 			<Description>A three character ISO 4217 currency code with other related metadata.</Description>
@@ -991,18 +1099,21 @@
 		<Attribute mandatory="false" name="decimalPlaces" type="xsd:positiveInteger">
 			<Documentation>
 				<Description>An ISO 4217 standard "minor unit" for the number of decimal places for the associated currency.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">2</Example>
 		</Attribute>
 		<Indicator name="pricingFiling">
 			<Documentation>
 				<Description>If true, this is the pricing/filing currency.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 		</Indicator>
 	</ValueWithAttrs>
 	<ValueWithAttrs name="Identifier_Language" type="Code_ISO_Language">
 		<Documentation>
 			<Description>Metadata that describes a language.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<ValueDocumentation>
 			<Description>A code for a language in ISO 639-1 (2 alpha character) format.</Description>
@@ -1011,24 +1122,28 @@
 		<Attribute mandatory="false" name="alpha3" type="String_Alpha3">
 			<Documentation>
 				<Description>The three character alpha language code.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">ENG</Example>
 		</Attribute>		
 		<Attribute mandatory="false" name="name" type="String_Tiny">
 			<Documentation>
 				<Description>The name of the language for display purposes.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">ENGLISH</Example>
 		</Attribute>		
 		<Indicator name="primary">
 			<Documentation>
 				<Description>If true, this is the primary (or preferred) language within a set of specified languages.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 		</Indicator>
 	</ValueWithAttrs>
 	<ValueWithAttrs name="MessagePassword" type="String_Short">
 		<Documentation>
 			<Description>Metadata that describes a message password.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<ValueDocumentation>
 			<Description>A password associated with a message request.</Description>
@@ -1038,6 +1153,7 @@
 		<Attribute mandatory="false" name="domain" type="String_Short">
 			<Documentation>
 				<Description>The domain associated with the message password.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">CRS</Example>
 		</Attribute>
@@ -1045,6 +1161,7 @@
 	<ValueWithAttrs name="Processing_Currency" type="Identifier_Currency">
 		<Documentation>
 			<Description>Metadata that describes the currency used in a request message and the preferred response currency.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<ValueDocumentation>
 			<Description>Request and response currency information.</Description>
@@ -1052,17 +1169,20 @@
 		<Indicator name="initiator">
 			<Documentation>
 				<Description>If true, this is the currency that the initiating message is in.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 		</Indicator>
 		<Indicator name="response">
 			<Documentation>
 				<Description>If true, this is the requested currency for message responses.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 		</Indicator>
 	</ValueWithAttrs>
 	<ValueWithAttrs name="Processing_Language" type="Identifier_Language">
 		<Documentation>
 			<Description>Metadata that describes the language used in a request message and the preferred response language.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<ValueDocumentation>
 			<Description>Request and response language information.</Description>
@@ -1070,17 +1190,20 @@
 		<Indicator name="initiator">
 			<Documentation>
 				<Description>If true, this is the language that the initiating message is in.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 		</Indicator>
 		<Indicator name="response">
 			<Documentation>
 				<Description>If true, this is the requested language for message responses.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 		</Indicator>
 	</ValueWithAttrs>
 	<ValueWithAttrs name="TargetSystem" type="Enum_TargetProcessingSystem">
 		<Documentation>
 			<Description>Metadata that describes a target (or receiving) processing system.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<ValueDocumentation>
 			<Description>An extensible list of target message processing system types..</Description>
@@ -1089,6 +1212,7 @@
 		<Attribute mandatory="false" name="systemName" type="String_Short">
 			<Documentation>
 				<Description>The name of the target system that may be specified if there are more than one system for the specified system type. </Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">Server3</Example>
 		</Attribute>
@@ -1096,6 +1220,7 @@
 	<ValueWithAttrs name="TimeWindow" type="Date_DateTime">
 		<Documentation>
 			<Description>Metadata that describes a date and optional time with a time period that can be applied before and/or after the date.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<ValueDocumentation>
 			<Description>The date and optional time.</Description>
@@ -1104,12 +1229,14 @@
 		<Attribute mandatory="false" name="windowAfter" type="Time_Duration">
 			<Documentation>
 				<Description>A period of time that can be applied to the base date/time resulting in a later range of time.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">P3D</Example>
 		</Attribute>
 		<Attribute mandatory="false" name="windowBefore" type="Time_Duration">
 			<Documentation>
 				<Description>A period of time that can be applied to the base date/time resulting in an earlier range of time.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">PT12H</Example>
 		</Attribute>
@@ -1117,12 +1244,14 @@
 			<Documentation>
 				<Description>If true, the requested period may extend over the previous or following day. If false, the search period is restricted to the date/time specified.</Description>
 				<Developer>Note that this indicator is typically used when the window duration is in hours.</Developer>
+				<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 		</Indicator>
 	</ValueWithAttrs>
 	<ValueWithAttrs name="TimeZone" type="String_Tiny">
 		<Documentation>
 			<Description>Metadata that describes a time zone.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<ValueDocumentation>
 			<Description>The time zone name or abbreviation.</Description>
@@ -1132,18 +1261,21 @@
 			<Documentation>
 				<Description>The Coordinated Universal Time (UTC) time zone offset.</Description>
 				<Developer>A UTC offset is typically represented with a plus or minus sign, an hour increment and an hour designator, such as - 5h.</Developer>
+				<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">- 5h</Example>
 		</Attribute>
 		<Indicator name="daylightSavings">
 			<Documentation>
 				<Description>If true, daylight (or summer) savings time is used in the time zone.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 		</Indicator>
 	</ValueWithAttrs>
 	<ValueWithAttrs name="Transaction" type="String_Short">
 		<Documentation>
 			<Description>Metadata that describes a message transaction.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<ValueDocumentation>
 			<Description>The transaction ID.</Description>
@@ -1154,6 +1286,7 @@
 		<Attribute mandatory="false" name="correlationID" type="String_Short">
 			<Documentation>
 				<Description>An ID for end-to-end correlation of log messages with the corresponding Web service message throughout the processing of the Web service message.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">6712</Example>
 		</Attribute>
@@ -1161,12 +1294,14 @@
 			<Documentation>
 				<Description>The sequence number of the transaction assigned by the sending system for ordered message processing or message resynchronization.</Description>
 				<Developer>Message resynchronization typically is required if a system has been off-line and needs to retrieve messages that were missed.</Developer>
+				<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">6</Example>
 		</Attribute>
 		<Attribute mandatory="false" name="status" type="Enum_TransactionStatus">
 			<Documentation>
 				<Description>Where this message falls within a sequence of messages.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Example context="OTM2">Start</Example>
 		</Attribute>
@@ -1174,6 +1309,7 @@
 			<Documentation>
 				<Description>If true, the message is being re-sent after a failure.</Description>
 				<Developer>It is recommended that this attribute is used (i.e., set to TRUE) only when a message is retransmitted.</Developer>
+				<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 		</Indicator>
 	</ValueWithAttrs>
@@ -1182,74 +1318,87 @@
 	<CoreObject notExtendable="true" name="DataPolicy">
 		<Documentation>
 			<Description>Information about data policy(s) that may apply to all or a portion of the message contents.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Aliases></Aliases>
 		<Simple type="Empty"></Simple>
 		<Summary>
 			<Documentation>
 				<Description>Summary data policy information.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Attribute mandatory="true" name="schemaFieldXPath" type="String_Medium">
 				<Documentation>
 					<Description>An xPath to the tag of the schema element or attribute (field) that the data policy(s) applies to.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 				</Documentation>
 				<Example context="OTM2">AirInventoryQueryRQ/Traveler/@birthDate</Example>
 			</Attribute>
 			<Element mandatory="true" name="type" type="Enum_DataPolicyType" repeat="0">
 				<Documentation>
 					<Description>An extensible list of data policy types.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 				</Documentation>
 			</Element>
 		</Summary>
 		<Detail>
 			<Documentation>
 				<Description>Detail data policy information.</Description>
+				<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Attribute mandatory="false" name="description" type="String_Medium">
 				<Documentation>
 					<Description>A brief description of the data policy intended to be used for logging and compliance purposes.</Description>
+				<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 				</Documentation>
 				<Example context="OTM2">Restricted to internal sharing as needed-no third party sharing.</Example>
 			</Attribute>
 			<Attribute mandatory="false" name="url" type="URL">
 				<Documentation>
 					<Description>A URL to a source that describes the data policy.</Description>
+				<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 				</Documentation>
 				<Example context="OTM2">http://www.BTCCO.com/datapolicy.aspx</Example>
 			</Attribute>
-     </Detail>
+		</Detail>
 		<Roles></Roles>
 	</CoreObject>
 	<CoreObject notExtendable="true" name="Encryption">
 		<Documentation>
 			<Description>Information about encrypted elements and attributes within the message.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Aliases></Aliases>
 		<Simple type="Empty"></Simple>
 		<Summary>
 			<Documentation>
 				<Description>Summary payload information.</Description>
+				<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Attribute mandatory="true" name="schemaFieldXPath" type="String_Medium">
 				<Documentation>
 					<Description>An xPath to the tag of the schema element or attribute (field) that is encrypted.</Description>
+				<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 				</Documentation>
 				<Example context="OTM2">AirInventoryQueryRQ/Traveler/@birthDate</Example>
 			</Attribute>
 			<Attribute mandatory="true" name="value" type="xsd:string">
 				<Documentation>
 					<Description>The encrypted value.</Description>
+					<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 				</Documentation>
 			</Attribute>
 		</Summary>
 		<Detail>
 			<Documentation>
 				<Description>Detail encryption information.</Description>
+				<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Attribute mandatory="false" name="method" type="String_Short">
 				<Documentation>
 					<Description>The encryption method being used.</Description>
 					<Developer>Note that if you do not specify the encryption method, it should be known to your trading partners.</Developer>
+					<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 				</Documentation>
 				<Example context="OTM2">Triple DES</Example>
 			</Attribute>
@@ -1259,65 +1408,77 @@
 	<CoreObject notExtendable="true" name="TransactionInitiator">
 		<Documentation>
 			<Description>Transaction initiator identification, authentication and other associated summary and detail information.</Description>
+			<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 		</Documentation>
 		<Aliases>PointOfSale</Aliases>
 		<Simple type="Empty"></Simple>
 		<Summary>
 			<Documentation>
 				<Description>Summary transaction initiator information.</Description>
+				<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Element mandatory="true" name="ID" type="InitiatorID" repeat="0">
 				<Documentation>
 					<Description>A unique identifier for the requestor or sender of the message with other metadata related to the ID.</Description>
+					<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 				</Documentation>
 			</Element>
 			<Element mandatory="true" name="Type" type="Enum_UniqueID_Type" repeat="0">
 				<Documentation>
 					<Description>An extensible list of requestor or sender types.</Description>
 					<Developer>This type should be known between trading partners.</Developer>
+					<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 				</Documentation>
 			</Element>
 		</Summary>
 		<Detail>
 			<Documentation>
 				<Description>Detail transaction initiator information.</Description>
+				<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 			</Documentation>
 			<Element mandatory="false" name="Agent" type="InitiatorTravelAgent" repeat="0">
 				<Documentation>
 					<Description>The travel agent sine number and other identification and authentication information.</Description>
+					<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 				</Documentation>
 			</Element>
 			<Element mandatory="false" name="Airline" type="InitiatorAirline" repeat="0">
 				<Documentation>
 					<Description>The two character airline IATA vendor ID and other identification and authentication information.</Description>
+					<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 				</Documentation>
 			</Element>
 			<Element mandatory="false" name="BookingChannel" type="InitiatorBookingChannel" repeat="0">
 				<Documentation>
 					<Description>The type of the booking channel and other identification and authentication information for the requestor or sender.</Description>
+					<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 				</Documentation>
 			</Element>
 			<Element mandatory="false" name="Company" type="String_Short" repeat="0">
 				<Documentation>
 					<Description>Company information for the requestor or sender.</Description>
+					<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 				</Documentation>
 			</Element>
 			<Element mandatory="false" name="RelativeLocation" type="String_Short" repeat="0">
 				<Documentation>
 					<Description>The geographical location of the requestor.</Description>
+					<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 				</Documentation>
 			</Element>
 			<Element mandatory="false" name="TimeZone" type="TimeZone" repeat="0">
 				<Documentation>
 					<Description>A time zone abbreviation with other related metadata for the requestor or sender.</Description>
+					<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 				</Documentation>
 			</Element>
 			<Element mandatory="false" name="TravelSector" type="Enum_TravelSector" repeat="0">
 				<Documentation>
 					<Description>The travel sector associated with the requestor or sender.</Description>
+					<Deprecated>OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</Deprecated>
 				</Documentation>
 			</Element>
-      </Detail>
+			</Detail>
 		<Roles></Roles>
 	</CoreObject>
 	

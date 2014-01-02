@@ -485,7 +485,8 @@ public class TLModel implements Validatable {
 		
 		// Search the built-ins to determine whether new import statements are required
 		for (BuiltInLibrary builtIn : getBuiltInLibraries()) {
-			if (existingImports.containsValue(builtIn.getNamespace())) {
+            if (!builtIn.getSchemaDeclaration().isImportByDefault()
+                    ||  existingImports.containsValue(builtIn.getNamespace())) {
 				continue;
 			}
 			String prefix = builtIn.getPrefix();

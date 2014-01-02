@@ -21,16 +21,19 @@
 	  credentials used to verify the people who have write access to the libraries assigned to those
 	  namespaces.
 	  -->
+	  
+	<!-- Example definition  
 	<bean id="otaProtectedNamespaceGroup" class="com.sabre.schemacompiler.security.impl.DefaultProtectedNamespaceGroup">
 		<property name="groupId" value="OTA" />
 		<property name="groupTitle" value="OTA Namespaces" />
-		<property name="credentialUrl" value="http://localhost/~livezeysm/otm-credentials.otc"/>
+		<property name="credentialUrl" value="http://localhost/~user/otm-credentials.otc"/>
 		<property name="protectedNamespaceUris">
 			<list>
 				<value>http://opentravel.org</value>
 			</list>
 		</property>
 	</bean>
+	 -->
 	
 	<!--
 	  Schema Declarations
@@ -44,8 +47,16 @@
 	<bean id="ota2CommonSchema" class="com.sabre.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
 		<property name="namespace" value="http://opentravel.org/common/v02" />
 		<property name="name" value="OTA2_BuiltIns_v2.0.0" />
-		<property name="defaultPrefix" value="ota2" />
+		<property name="defaultPrefix" value="ota2-dep" />
 		<property name="location" value="classpath:/ota2-context/built-ins/OTA2_BuiltIns_v2.0.0.otm" />
+	</bean>
+
+	<bean id="ota2SimpleTypes" class="com.sabre.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
+		<property name="namespace" value="http://www.opentravel.org/OTM/Common/v0" />
+		<property name="name" value="OTA_SimpleTypes" />
+		<property name="defaultPrefix" value="ota2" />
+		<property name="location" value="classpath:/ota2-context/built-ins/OTA_SimpleTypes_0_0_0.otm" />
+		<property name="importByDefault" value="true" />
 	</bean>
 	
 	<bean id="ota2MessageSchema" class="com.sabre.schemacompiler.ioc.SchemaDeclaration" scope="singleton">

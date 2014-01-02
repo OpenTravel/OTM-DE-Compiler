@@ -26,6 +26,12 @@ public class SchemaDeclaration {
 	private String defaultPrefix;
 	private String location;
 	private List<String> dependencies;
+
+    /**
+     * User-defined libraries will automatically receive import statements for all built-in
+     * libraries (if they are not already defined)
+     */
+    private boolean importByDefault;
 	
 	/**
 	 * If the 'location' field is not null (or empty), this method will locate the file containing the
@@ -181,6 +187,23 @@ public class SchemaDeclaration {
 	}
 
 	/**
+	 * Return the deprecated flag for schema.
+	 * @return
+	 */
+    public boolean isImportByDefault() {
+        return importByDefault;
+    }
+
+    /**
+     * Assigns the deprecated flag for schema.
+     *
+     * @param importByDefault
+     */
+    public void setImportByDefault(boolean importByDefault) {
+        this.importByDefault = importByDefault;
+    }
+
+    /**
 	 * Returns true if the given object is a <code>SchemaDeclaration</code> with the same location value.
 	 * 
 	 * @see java.lang.Object#equals(java.lang.Object)
@@ -201,5 +224,7 @@ public class SchemaDeclaration {
 	public int hashCode() {
 		return (location == null) ? 0 : location.hashCode();
 	}
+
+   
 	
 }

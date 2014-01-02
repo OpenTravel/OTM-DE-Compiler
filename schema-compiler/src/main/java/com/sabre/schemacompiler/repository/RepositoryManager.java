@@ -1775,7 +1775,7 @@ public final class RepositoryManager implements Repository {
 			}
 			
 		} catch (RepositoryException e) {
-			log.warn("Unable to refresh contents of local OTA2.0 repository.", e);
+			log.warn("Unable to refresh contents of local OTA2.0 repository. Reason: " + e.getMessage());
 		}
 	}
 	
