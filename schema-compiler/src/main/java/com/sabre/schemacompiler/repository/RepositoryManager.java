@@ -53,6 +53,7 @@ import com.sabre.schemacompiler.security.PasswordHelper;
 import com.sabre.schemacompiler.transform.ObjectTransformer;
 import com.sabre.schemacompiler.transform.TransformerFactory;
 import com.sabre.schemacompiler.transform.symbols.DefaultTransformerContext;
+import com.sabre.schemacompiler.util.ExceptionUtils;
 import com.sabre.schemacompiler.util.URLUtils;
 import com.sabre.schemacompiler.validate.ValidationFindings;
 import com.sabre.schemacompiler.version.VersionScheme;
@@ -1775,7 +1776,7 @@ public final class RepositoryManager implements Repository {
 			}
 			
 		} catch (RepositoryException e) {
-			log.warn("Unable to refresh contents of local OTA2.0 repository. Reason: " + e.getMessage());
+			log.warn("Unable to refresh contents of local OTA2.0 repository. Reason: " + ExceptionUtils.getExceptionMessage(e));
 		}
 	}
 	

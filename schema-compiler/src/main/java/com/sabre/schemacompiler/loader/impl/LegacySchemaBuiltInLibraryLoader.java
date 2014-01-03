@@ -59,7 +59,7 @@ public class LegacySchemaBuiltInLibraryLoader extends AbstractBuiltInLibraryLoad
 					
 					library = new BuiltInLibrary(schemaInfo.getJaxbArtifact().getTargetNamespace(), libraryDeclaration.getName(),
 							libraryDeclaration.getDefaultPrefix(), inputSource.getLibraryURL(), xsdLibrary.getNamedMembers(),
-							xsdLibrary.getNamespaceImports(), xsdLibrary.getIncludes(), getLibraryDeclaration());
+							xsdLibrary.getNamespaceImports(), xsdLibrary.getIncludes(), getLibraryDeclaration(), xsdLibrary.getVersionScheme());
 				}
 			}
 		} catch (Throwable t) {

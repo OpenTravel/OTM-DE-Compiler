@@ -16,6 +16,7 @@ import com.sabre.schemacompiler.transform.ObjectTransformer;
 import com.sabre.schemacompiler.transform.symbols.DefaultTransformerContext;
 import com.sabre.schemacompiler.transform.util.BaseTransformer;
 import com.sabre.schemacompiler.transform.util.SchemaUtils;
+import com.sabre.schemacompiler.version.XSDVersionScheme;
 
 /**
  * Handles the transformation of objects from the <code>Schema</code> type to the
@@ -33,6 +34,7 @@ public class SchemaTransformer extends BaseTransformer<Schema,XSDLibrary,Default
 	public XSDLibrary transform(Schema source) {
 		XSDLibrary target = new XSDLibrary();
 		
+		target.setVersionScheme(XSDVersionScheme.ID);
 		target.setNamespace(source.getTargetNamespace());
 		target.setPrefix(source.getId()); // prefix is stored in the ID field by the LibrarySchema1_3_ModuleLoader
 		

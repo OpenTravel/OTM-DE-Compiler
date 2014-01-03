@@ -513,11 +513,13 @@ public class XsdCodegenUtils {
 	 * @return Appinfo
 	 */
 	public static Appinfo getAppInfo(AbstractLibrary library, CodeGenerationContext context) {
+
 		Appinfo appInfo = new Appinfo();
 		Library libraryInfo = new Library();
 		
 		libraryInfo.setProjectName( context.getValue( CodeGenerationContext.CK_PROJECT_FILENAME ) );
 		libraryInfo.setLibraryName( library.getName() );
+        libraryInfo.setLibraryVersion( library.getVersion() );
 		libraryInfo.setSourceFile( URLUtils.getShortRepresentation(library.getLibraryUrl()) );
 		libraryInfo.setCompilerVersion( SchemaCompilerInfo.getInstance().getCompilerVersion() );
 		libraryInfo.setCompileDate( getCurrentXmlDate() );

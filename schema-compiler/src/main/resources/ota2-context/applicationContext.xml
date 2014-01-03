@@ -816,6 +816,7 @@
 		<property name="versionSchemeMappings">
 			<props>
 				<prop key="OTA2">com.sabre.schemacompiler.version.OTA2VersionScheme</prop>
+				<prop key="XSD">com.sabre.schemacompiler.version.XSDVersionScheme</prop>
 			</props>
 		</property>
 		<property name="defaultVersionScheme" value="OTA2" />

@@ -13,6 +13,7 @@ import java.util.Set;
 import javax.xml.XMLConstants;
 
 import com.sabre.schemacompiler.ioc.SchemaDeclaration;
+import com.sabre.schemacompiler.version.XSDVersionScheme;
 
 /**
  * Base class for all built-in libraries that are loaded automatically for each
@@ -43,7 +44,7 @@ public class BuiltInLibrary extends AbstractLibrary {
 
         this(namespace, name, prefix, libraryUrl, members, null, null,
                 createDefaultSchemaDeclaration(namespace, name, prefix, libraryUrl.toString(),
-                        true));
+                        true), XSDVersionScheme.ID);
     }
 	
 	
@@ -69,11 +70,13 @@ public class BuiltInLibrary extends AbstractLibrary {
 	 * @param members  the member types of the library
 	 */
 	public BuiltInLibrary(String namespace, String name, String prefix, URL libraryUrl, List<LibraryMember> members,
-			List<TLNamespaceImport> importList, List<TLInclude> includeList, SchemaDeclaration schemaDeclaration) {
+			List<TLNamespaceImport> importList, List<TLInclude> includeList, SchemaDeclaration schemaDeclaration,
+			String versionScheme) {
 		super.setNamespace(namespace);
 		super.setName(name);
 		super.setLibraryUrl(libraryUrl);
 		super.setPrefix(prefix);
+		super.setVersionScheme(versionScheme);
 		
 		if (members != null) {
 			boolean hasTLLibraryMembers = true;

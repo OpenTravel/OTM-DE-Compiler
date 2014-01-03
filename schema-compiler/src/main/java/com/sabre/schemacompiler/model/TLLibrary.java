@@ -20,8 +20,6 @@ import com.sabre.schemacompiler.model.TLContext.ContextListManager;
 import com.sabre.schemacompiler.security.LibrarySecurityHandler;
 import com.sabre.schemacompiler.util.ContextUtils;
 import com.sabre.schemacompiler.version.LibraryVersionComparator;
-import com.sabre.schemacompiler.version.VersionScheme;
-import com.sabre.schemacompiler.version.VersionSchemeException;
 import com.sabre.schemacompiler.version.VersionSchemeFactory;
 
 /**
@@ -34,8 +32,6 @@ public class TLLibrary extends AbstractLibrary {
 	private static final Set<Class<?>> validMemberTypes;
 	
 	private ContextListManager contextManager = new ContextListManager(this);
-	private String versionScheme;
-	private VersionScheme vScheme;
 	private String previousVersionUri;
 	private URL alternateCredentialsUrl;
 	private TLLibraryStatus status = TLLibraryStatus.DRAFT;
@@ -136,74 +132,6 @@ public class TLLibrary extends AbstractLibrary {
 					"Namespaces and versions cannot be assigned to a library until a valid version scheme has been specified.");
 		}
 		setNamespace( vScheme.setVersionIdentifier(baseNamespace, versionIdentifier) );
-	}
-
-	/**
-	 * @see com.sabre.schemacompiler.version.Versioned#getVersion()
-	 */
-	public String getVersion() {
-		String namespace = getNamespace();
-		String version;
-		
-		if (vScheme != null) {
-			version = ((namespace == null) || namespace.equals("")) ?
-					vScheme.getDefaultVersionIdentifer() : vScheme.getVersionIdentifier(namespace);
-		} else {
-			version = null;
-		}
-		return version;
-	}
-	
-	/**
-	 * Assigns the given version to this library.  NOTE: Because the version of a library is derived
-	 * from the namespace and patch level, it is likely that this method call will result in updates
-	 * to those field values.
-	 * 
-	 * @param version  the version identifier to assign
-	 * @throws IllegalArgumentException  thrown if the version identifier is not valid for the current version scheme
-	 * @throws IllegalStateException  thrown if a valid version scheme identifer has not been assigned prior to this method call
-	 */
-	public void setVersion(String version) {
-		String namespace = getNamespace();
-		
-		if ((namespace == null) || namespace.equals("")) {
-			throw new IllegalStateException("Library versions cannot be set before a valid namespace has been assigned.");
-		}
-		if (vScheme == null) {
-			throw new IllegalStateException("No valid version scheme assigned to library: " + getName());
-		}
-		if (!vScheme.isValidVersionIdentifier(version)) {
-			throw new IllegalArgumentException(
-					"Invalid version identifier for version scheme " + versionScheme + ": '" + version + "'");
-		}
-		setNamespace( vScheme.setVersionIdentifier(namespace, version) );
-	}
-	
-	/**
-	 * @see com.sabre.schemacompiler.version.Versioned#getVersionScheme()
-	 */
-	public String getVersionScheme() {
-		return versionScheme;
-	}
-
-	/**
-	 * Assigns the value of the 'versionScheme' field.
-	 *
-	 * @param versionScheme  the field value to assign
-	 */
-	public void setVersionScheme(String versionScheme) {
-		ModelEvent<?> event = new ModelEventBuilder(ModelEventType.VERSION_SCHEME_MODIFIED, this)
-				.setOldValue(this.versionScheme).setNewValue(versionScheme).buildEvent();
-		
-		try {
-			// Lookup the executable component for the assigned version scheme
-			vScheme = (versionScheme == null) ? null : VersionSchemeFactory.getInstance().getVersionScheme(versionScheme);
-			
-		} catch (VersionSchemeException e) {
-			vScheme = null;
-		}
-		this.versionScheme = versionScheme;
-		publishEvent(event);
 	}
 
 	/**
