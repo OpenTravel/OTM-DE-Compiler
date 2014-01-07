@@ -21,9 +21,12 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import com.sabre.schemacompiler.model.NamedEntity;
+import com.sabre.schemacompiler.model.TLAttribute;
+import com.sabre.schemacompiler.model.TLAttributeType;
 import com.sabre.schemacompiler.model.TLBusinessObject;
 import com.sabre.schemacompiler.model.TLClosedEnumeration;
 import com.sabre.schemacompiler.model.TLCoreObject;
+import com.sabre.schemacompiler.model.TLEnumValue;
 import com.sabre.schemacompiler.model.TLExtension;
 import com.sabre.schemacompiler.model.TLExtensionPointFacet;
 import com.sabre.schemacompiler.model.TLIndicator;
@@ -35,6 +38,7 @@ import com.sabre.schemacompiler.model.TLProperty;
 import com.sabre.schemacompiler.model.TLPropertyType;
 import com.sabre.schemacompiler.model.TLSimple;
 import com.sabre.schemacompiler.model.TLValueWithAttributes;
+import com.sabre.schemacompiler.saver.LibraryModelSaver;
 import com.sabre.schemacompiler.saver.LibrarySaveException;
 import com.sabre.schemacompiler.tests.util.ModelBuilder;
 import com.sabre.schemacompiler.transform.SymbolResolver;
@@ -548,12 +552,190 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
 		TLLibrary minorv020 = minor.createNewMinorVersion(patchV000);
 		
 		// then
-		ValidationFindings findings = TLModelCompileValidator
-				.validateModelElement(minorv020, false);
+		ValidationFindings findings = TLModelCompileValidator.validateModelElement(minorv020, false);
 		assertFalse(findings.hasFinding());
 		TLBusinessObject minorCO = (TLBusinessObject) minorv020.getNamedMember(bo.getName());
 		assertNotNull(minorCO.getExtension());
 		Assert.assertSame(bo, minorCO.getExtension().getExtendsEntity());
+	}
+	@Test
+	public void patchRollupWithBOAndEPFAndSimpleTypeShouldCreateNewCoAndSetBaseType()
+	        throws LibrarySaveException, VersionSchemeException, ValidationException, IOException {
+	    // given
+	    LibraryModelSaver saver = new LibraryModelSaver();
+	    ModelBuilder mb= ModelBuilder.create();
+	    TLModel m = mb.getModel();
+	    
+	    TLLibrary majorV000 = mb.newLibrary("PatchRollup", "http://test.org/rollup/patch").build();
+	    majorV000.setPrefix("a");
+	    majorV000.setLibraryUrl(URLUtils.toURL(tmp.newFile(majorV000.getName())));
+	    
+	    TLSimple s = new TLSimple();
+	    s.setName("simpleString");
+	    s.setParentType((TLAttributeType) resolveEntity(m, "xsd:string"));
+	    majorV000.addNamedMember(s);
+	    TLBusinessObject bo = new TLBusinessObject();
+	    bo.setName("BO");
+	    TLProperty idElement = new TLProperty();
+	    idElement.setName("id");
+	    idElement.setType((TLPropertyType) resolveEntity(m ,"xsd:long"));
+	    bo.getIdFacet().addElement(idElement);
+	    TLProperty boElement = new TLProperty();
+	    boElement.setName("simple");
+	    boElement.setType(s);
+	    bo.getSummaryFacet() .addElement(boElement);
+	    majorV000.addNamedMember(bo);
+	    
+	    saver.saveLibrary(majorV000);
+	    
+	    PatchVersionHelper helper = new PatchVersionHelper();
+	    TLLibrary patchV001 = helper.createNewPatchVersion(majorV000);
+	    
+	    TLExtensionPointFacet epf = new TLExtensionPointFacet();
+	    patchV001.addNamedMember(epf);
+	    TLExtension tlex = new TLExtension();
+	    epf.setExtension(tlex);
+	    tlex.setExtendsEntity(bo.getSummaryFacet());
+	    TLIndicator ind = new TLIndicator();
+	    ind.setName("ExtendingInd");
+	    epf.addIndicator(ind);
+	    
+	    // when
+	    MinorVersionHelper minor = new MinorVersionHelper();
+	    TLLibrary minorv020 = minor.createNewMinorVersion(majorV000);
+	    
+	    // then
+	    ValidationFindings findings = TLModelCompileValidator.validateModelElement(minorv020, false);
+	    assertFalse(findings.hasFinding());
+	    TLBusinessObject minorCO = (TLBusinessObject) minorv020.getNamedMember(bo.getName());
+	    assertNotNull(minorCO.getExtension());
+	    Assert.assertSame(bo, minorCO.getExtension().getExtendsEntity());
+	}
+	
+	@Test
+    public void patchRollupDuplicatedSimpleType()
+            throws LibrarySaveException, VersionSchemeException, ValidationException, IOException {
+        // given
+        ModelBuilder mb= ModelBuilder.create();
+        TLModel m = mb.getModel();
+        
+        TLLibrary majorV000 = mb.newLibrary("PatchRollup", "http://test.org/rollup/patch").build();
+        majorV000.setPrefix("a");
+        majorV000.setLibraryUrl(URLUtils.toURL(tmp.newFile(majorV000.getName())));
+        
+        PatchVersionHelper helper = new PatchVersionHelper();
+        TLLibrary patchV001 = helper.createNewPatchVersion(majorV000);
+        
+        TLSimple s = new TLSimple();
+        s.setName("simpleInPatch");
+        s.setParentType((TLAttributeType) resolveEntity(m, "xsd:string"));
+        patchV001.addNamedMember(s);
+        
+        // when
+        MinorVersionHelper minor = new MinorVersionHelper();
+        TLLibrary minorv010 = minor.createNewMinorVersion(majorV000);
+
+        // then
+        ValidationFindings findings = TLModelCompileValidator
+                .validateModelElement(minorv010, false);
+        assertFalse(findings.hasFinding());
+    }
+	@Test
+	public void patchRollupDuplicatedSimpleTypeMultipeMinor()
+	        throws LibrarySaveException, VersionSchemeException, ValidationException, IOException {
+	    // given
+	    ModelBuilder mb= ModelBuilder.create();
+	    TLModel m = mb.getModel();
+	    
+	    TLLibrary majorV000 = mb.newLibrary("PatchRollup", "http://test.org/rollup/patch").build();
+	    majorV000.setPrefix("a");
+	    majorV000.setLibraryUrl(URLUtils.toURL(tmp.newFile(majorV000.getName())));
+	    
+	    PatchVersionHelper helper = new PatchVersionHelper();
+	    TLLibrary patchV001 = helper.createNewPatchVersion(majorV000);
+	    
+	    TLSimple s = new TLSimple();
+	    s.setName("simpleInPatch");
+	    s.setParentType((TLAttributeType) resolveEntity(m, "xsd:string"));
+	    patchV001.addNamedMember(s);
+	    
+	    // when
+	    MinorVersionHelper minor = new MinorVersionHelper();
+	    TLLibrary minorv010 = minor.createNewMinorVersion(majorV000);
+	    
+	    new LibraryModelSaver().saveAllLibraries(m);
+	    // then
+	    ValidationFindings findings = TLModelCompileValidator
+	            .validateModelElement(minorv010, false);
+	    assertFalse(findings.hasFinding());
+	}
+
+	@Test
+	public void patchRollupDuplicatedCloseEnum()
+	        throws LibrarySaveException, VersionSchemeException, ValidationException, IOException {
+	    // given
+	    ModelBuilder mb= ModelBuilder.create();
+	    TLModel m = mb.getModel();
+	    
+	    TLLibrary majorV000 = mb.newLibrary("PatchRollup", "http://test.org/rollup/patch").build();
+	    majorV000.setPrefix("a");
+	    majorV000.setLibraryUrl(URLUtils.toURL(tmp.newFile(majorV000.getName())));
+	    
+	    PatchVersionHelper helper = new PatchVersionHelper();
+	    TLLibrary patchV001 = helper.createNewPatchVersion(majorV000);
+	    
+	    TLClosedEnumeration enumC = new TLClosedEnumeration();
+	    enumC.setName("Enum");
+	    TLEnumValue value = new TLEnumValue();
+	    value.setLiteral("FirstValue");
+	    enumC.addValue(value);
+	    patchV001.addNamedMember(enumC);
+	    
+	    // when
+	    MinorVersionHelper minor = new MinorVersionHelper();
+	    TLLibrary minorv010 = minor.createNewMinorVersion(majorV000);
+	    
+	    // then
+	    ValidationFindings findings = TLModelCompileValidator
+	            .validateModelElement(minorv010, false);
+	    assertFalse(findings.hasFinding());
+	}
+
+	@Test
+	public void patchRollupDuplicatedVWAType()
+	        throws LibrarySaveException, VersionSchemeException, ValidationException, IOException {
+	    // given
+	    ModelBuilder mb= ModelBuilder.create();
+	    TLModel m = mb.getModel();
+	    LibraryModelSaver s = new LibraryModelSaver();
+	    
+	    TLLibrary majorV000 = mb.newLibrary("PatchRollup", "http://test.org/rollup/patch").build();
+	    majorV000.setPrefix("a");
+	    majorV000.setLibraryUrl(URLUtils.toURL(tmp.newFile(majorV000.getName())));
+	    
+	    MinorVersionHelper minor = new MinorVersionHelper();
+	    TLLibrary minorV010= minor.createNewMinorVersion(majorV000);
+	    
+	    TLValueWithAttributes vwa = new TLValueWithAttributes();
+	    vwa.setName("VwaInMinor");
+	    vwa.setParentType((TLAttributeType) resolveEntity(m, "xsd:string"));
+	    TLAttribute attr = new TLAttribute();
+	    attr.setName("attr");
+	    attr.setType((TLAttributeType) resolveEntity(m, "xsd:string"));
+	    vwa.addAttribute(attr);
+	    minorV010.addNamedMember(vwa);
+	    
+	    TLLibrary minorV020 = minor.createNewMinorVersion(minorV010);
+	    
+	    // when
+	    MajorVersionHelper major = new MajorVersionHelper();
+	    TLLibrary majorV100= major.createNewMajorVersion(majorV000);
+	    
+	    s.saveAllLibraries(m);
+	    // then
+	    ValidationFindings findings = TLModelCompileValidator
+	            .validateModelElement(majorV100, false);
+	    assertFalse(findings.hasFinding());
 	}
 	
 	private Object resolveEntity(TLModel m, String name) {

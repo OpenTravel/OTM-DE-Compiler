@@ -13,13 +13,17 @@ import java.util.Map;
 import javax.xml.namespace.QName;
 
 import com.sabre.schemacompiler.ioc.SchemaDependency;
+import com.sabre.schemacompiler.model.AbstractLibrary;
+import com.sabre.schemacompiler.model.LibraryMember;
 import com.sabre.schemacompiler.model.NamedEntity;
+import com.sabre.schemacompiler.model.TLClosedEnumeration;
 import com.sabre.schemacompiler.model.TLExampleOwner;
 import com.sabre.schemacompiler.model.TLExtension;
 import com.sabre.schemacompiler.model.TLExtensionOwner;
 import com.sabre.schemacompiler.model.TLLibrary;
 import com.sabre.schemacompiler.model.TLModel;
 import com.sabre.schemacompiler.model.TLOperation;
+import com.sabre.schemacompiler.model.TLSimple;
 import com.sabre.schemacompiler.model.TLValueWithAttributes;
 import com.sabre.schemacompiler.transform.SymbolResolver;
 import com.sabre.schemacompiler.transform.util.ChameleonFilter;
@@ -32,11 +36,14 @@ import com.sabre.schemacompiler.validate.ValidationFindings;
 import com.sabre.schemacompiler.validate.Validator;
 import com.sabre.schemacompiler.validate.ValidatorFactory;
 import com.sabre.schemacompiler.version.LibraryVersionComparator;
+import com.sabre.schemacompiler.version.MajorVersionHelper;
 import com.sabre.schemacompiler.version.MinorVersionHelper;
+import com.sabre.schemacompiler.version.PatchVersionHelper;
 import com.sabre.schemacompiler.version.VersionScheme;
 import com.sabre.schemacompiler.version.VersionSchemeException;
 import com.sabre.schemacompiler.version.VersionSchemeFactory;
 import com.sabre.schemacompiler.version.Versioned;
+import com.sun.xml.txw2.IllegalSignatureException;
 
 /**
  * Base class for all validators used to inspect <code>TLModel</code> member elements.
@@ -276,6 +283,10 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
 			if (versionedVWA.getParentType() instanceof TLValueWithAttributes) {
 				candidateVersion = (V) versionedVWA.getParentType();
 			}
+		} else if ( versionedEntity instanceof TLSimple) {
+		    candidateVersion = (V) findSimpleExtension((TLSimple)versionedEntity);
+		} else if ( versionedEntity instanceof TLClosedEnumeration) {
+		    candidateVersion = (V) findClosedEnumExtension((TLClosedEnumeration)versionedEntity);
 		}
 		
 		// Determine whether the candidate is a version or non-version extension
@@ -293,6 +304,58 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
 		}
 		return extendedVersion;
 	}
+	
+    private TLClosedEnumeration findClosedEnumExtension(TLClosedEnumeration closedEnum) {
+        try {
+            TLLibrary minorPreceder = new MinorVersionHelper()
+                    .getPriorMinorVersion((TLLibrary) closedEnum.getOwningLibrary());
+            if (minorPreceder != null) {
+                List<TLLibrary> patches = new PatchVersionHelper()
+                        .getLaterPatchVersions(minorPreceder);
+                for (TLLibrary lib : patches) {
+                    if (lib == closedEnum.getOwningLibrary()) {
+                        continue;
+                    }
+                    LibraryMember candidate = lib.getNamedMember(closedEnum.getLocalName());
+                    if (candidate instanceof TLClosedEnumeration) {
+                        return (TLClosedEnumeration) candidate;
+                    }
+                }
+            }
+        } catch (VersionSchemeException e) {
+            throw new IllegalSignatureException(
+                    "Cannot find extensions. Problem with version scheme", e);
+        }
+        return null;
+    }
+
+    /**
+	 * @param simple
+	 * @return previous version of simple object created on minor roll-up.
+	 * @throws IllegalStateException for missing version schema.
+	 */
+	private TLSimple findSimpleExtension(TLSimple simple) {
+        try {
+            TLLibrary minorPreceder = new MinorVersionHelper().getPriorMinorVersion((TLLibrary) simple.getOwningLibrary());
+            if (minorPreceder != null) {
+                List<TLLibrary> patches = new PatchVersionHelper()
+                        .getLaterPatchVersions(minorPreceder);
+                for (TLLibrary lib : patches) {
+                    if (lib == simple.getOwningLibrary()) {
+                        continue;
+                    }
+                        LibraryMember candidate = lib.getNamedMember(simple
+                                .getLocalName());
+                        if (candidate instanceof TLSimple) {
+                            return (TLSimple) candidate;
+                        }
+                }
+            }
+        } catch (VersionSchemeException e) {
+            throw new IllegalSignatureException("Cannot find extensions. Problem with version scheme", e);
+        }
+        return null;
+    }
 	
 	/**
 	 * Returns a collection of all version extensions for the given entity.
