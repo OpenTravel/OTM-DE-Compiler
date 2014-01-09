@@ -647,7 +647,8 @@ public final class RepositoryManager implements Repository {
 				}
 				
 			} catch (RepositoryException e) {
-				log.warn("Error contacting remote repository: " + repository.getId(), e);
+                log.warn("Error contacting remote repository: " + repository.getId() + ", reason: "
+                        + ExceptionUtils.getExceptionMessage(e));
 			}
 		}
 		return searchResults;
