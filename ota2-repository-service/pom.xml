@@ -1,15 +1,20 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.sabre.es</groupId>
+	<groupId>com.sabre.es.otm</groupId>
 	<artifactId>ota2-repository-service</artifactId>
-	<version>3.1-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>OTA2 Repository Web Service</name>
 
+	<parent>
+	    <groupId>com.sabre.es.otm</groupId>
+	    <artifactId>ota-parent-pom</artifactId>
+	    <version>3.1-SNAPSHOT</version>
+	</parent>
+
 	<dependencies>
 		<dependency>
-			<groupId>com.sabre.es</groupId>
+			<groupId>com.sabre.es.otm</groupId>
 			<artifactId>schema-compiler</artifactId>
 			<version>${project.version}</version>
 		</dependency>
