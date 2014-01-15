@@ -40,14 +40,14 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
 	 * @parameter
 	 * @required
 	 */
-	private File libraryFile;
+	protected File libraryFile;
 	
 	/**
 	 * The location of the library catalog file.
 	 * 
 	 * @parameter
 	 */
-	private File catalog;
+	protected File catalog;
 	
 	/**
 	 * The output folder location for generated files (default location is
@@ -55,42 +55,42 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
 	 * 
 	 * @parameter default-value="${project.build.directory}/generated-sources/ota2"
 	 */
-	private File outputFolder;
+	protected File outputFolder;
 	
 	/**
 	 * The binding style for generated schemas and services (default is 'OTA2').
 	 * 
 	 * @parameter
 	 */
-	private String bindingStyle;
+	protected String bindingStyle;
 	
 	/**
 	 * Boolean flag indicating that XML schema files should be generated.
 	 * 
 	 * @parameter default-value="true"
 	 */
-	private boolean compileSchemas;
+	protected boolean compileSchemas;
 	
 	/**
 	 * Boolean flag indicating that WSDL schema files should be generated.
 	 * 
 	 * @parameter default-value="true"
 	 */
-	private boolean compileServices;
+	protected boolean compileServices;
 	
 	/**
 	 * Boolean flag indicating that example data files should be generated.
 	 * 
 	 * @parameter default-value="true"
 	 */
-	private boolean generateExamples;
+	protected boolean generateExamples;
 	
 	/**
 	 * The URL of the root service endpoint for WSDL services.
 	 * 
 	 * @parameter
 	 */
-	private String serviceEndpointUrl;
+	protected String serviceEndpointUrl;
 	
 	/**
 	 * Boolean flag indicating that the maximum amount of detail is to be included in generated
@@ -98,14 +98,14 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
 	 * 
 	 * @parameter default-value="true"
 	 */
-	private boolean generateMaxDetailsForExamples;
+	protected boolean generateMaxDetailsForExamples;
 	
 	/**
 	 * The preferred context ID to use when producing example values for simple data types.
 	 * 
 	 * @parameter
 	 */
-	private String exampleContext;
+	protected String exampleContext;
 	
 	/**
 	 * The maximum number of times that repeating elements should be displayed in generated
@@ -113,14 +113,14 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
 	 * 
 	 * @parameter
 	 */
-	private Integer exampleMaxRepeat;
+	protected Integer exampleMaxRepeat;
 	
 	/**
 	 * The maximum depth that should be included for nested elements in generated example output.
 	 * 
 	 * @parameter
 	 */
-	private Integer exampleMaxDepth;
+	protected Integer exampleMaxDepth;
 	
 	/**
 	 * Flag used for debugging that causes this Mojo's configuration settings to be
@@ -128,7 +128,7 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
 	 * 
 	 * @parameter default-value="false"
 	 */
-	private boolean debug;
+	protected boolean debug;
 	
 	/**
 	 * @see org.apache.maven.plugin.Mojo#execute()
@@ -315,5 +315,5 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
 			throw new ExceptionInInitializerError(t);
 		}
 	}
-	
+
 }

@@ -2,7 +2,6 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.sabre.es.otm</groupId>
 	<artifactId>ota2-schema-compiler</artifactId>
 	<packaging>maven-plugin</packaging>
 	<name>OTA2 Compiler Maven Mojo</name>
