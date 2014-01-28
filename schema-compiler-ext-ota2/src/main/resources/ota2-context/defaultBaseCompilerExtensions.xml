@@ -14,7 +14,7 @@
 	  the compiler.
 	  -->
 	
-	<bean id="soapEnvelopeSchema" class="com.sabre.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
+	<bean id="soapEnvelopeSchema" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
 		<property name="namespace" value="http://schemas.xmlsoap.org/soap/envelope/" />
 		<property name="name" value="SOAP_envelope.xsd" />
 		<property name="defaultPrefix" value="env" />
@@ -28,23 +28,23 @@
 	  entry should reference on of the schema declaration ID's defined above.  Both legacy schemas (.xsd) and OTA2
 	  libraries (.otm) may be used as built-in libraries.
 	  -->
-	<bean id="builtInLibraryFactory" class="com.sabre.schemacompiler.loader.BuiltInLibraryFactory" scope="singleton">
+	<bean id="builtInLibraryFactory" class="org.opentravel.schemacompiler.loader.BuiltInLibraryFactory" scope="singleton">
 		<property name="loaders">
 			<list>
-				<bean class="com.sabre.schemacompiler.loader.impl.XMLSchemaBuiltInLibraryLoader">
+				<bean class="org.opentravel.schemacompiler.loader.impl.XMLSchemaBuiltInLibraryLoader">
 					<property name="defaultPrefix" value="xsd" />
 				</bean>
-				<bean class="com.sabre.schemacompiler.loader.impl.OTA2BuiltInLibraryLoader">
+				<bean class="org.opentravel.schemacompiler.loader.impl.OTA2BuiltInLibraryLoader">
 					<property name="libraryDeclaration" ref="ota2SimpleTypes" />
 				</bean>
-				<bean class="com.sabre.schemacompiler.loader.impl.OTA2BuiltInLibraryLoader">
+				<bean class="org.opentravel.schemacompiler.loader.impl.OTA2BuiltInLibraryLoader">
 					<property name="libraryDeclaration" ref="ota2CommonSchema" />
 				</bean>
 				
 				<!--
 				Example: Use the following bean definition to add a legacy (xsd) built-in library loader.
 				
-				<bean class="com.sabre.schemacompiler.loader.impl.LegacySchemaBuiltInLibraryLoader">
+				<bean class="org.opentravel.schemacompiler.loader.impl.LegacySchemaBuiltInLibraryLoader">
 					<property name="libraryDeclaration" ref="myXsdLibrary" />
 				</bean>
 				-->
@@ -52,7 +52,7 @@
 				<!--
 				Example: Use the following bean definition to add an OTA2 built-in library loader.
 				
-				<bean class="com.sabre.schemacompiler.loader.impl.OTA2BuiltInLibraryLoader">
+				<bean class="org.opentravel.schemacompiler.loader.impl.OTA2BuiltInLibraryLoader">
 					<property name="libraryDeclaration" ref="myOTA2Library" />
 				</bean>
 				-->
@@ -83,62 +83,62 @@
 	<bean id="schemaDependencies" class="java.util.ArrayList" scope="singleton">
 		<constructor-arg>
 			<list>
-				<bean class="com.sabre.schemacompiler.ioc.SchemaDependency">
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaDependency">
 					<property name="id" value="EMPTY_ELEMENT" />
 					<property name="schemaDeclaration" ref="ota2CommonSchema" />
 					<property name="localName" value="Empty" />
 				</bean>
-				<bean class="com.sabre.schemacompiler.ioc.SchemaDependency">
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaDependency">
 					<property name="id" value="ENUM_EXTENSION" />
 					<property name="schemaDeclaration" ref="ota2CommonSchema" />
 					<property name="localName" value="String_EnumExtension" />
 				</bean>
-				<bean class="com.sabre.schemacompiler.ioc.SchemaDependency">
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaDependency">
 					<property name="id" value="MESSAGE_HEADER" />
 					<property name="schemaDeclaration" ref="ota2MessageSchema" />
 					<property name="localName" value="MessageHeader" />
 				</bean>
-				<bean class="com.sabre.schemacompiler.ioc.SchemaDependency">
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaDependency">
 					<property name="id" value="MESSAGE_FAULT" />
 					<property name="schemaDeclaration" ref="soapEnvelopeSchema" />
 					<property name="localName" value="Fault" />
 				</bean>
-				<bean class="com.sabre.schemacompiler.ioc.SchemaDependency">
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaDependency">
 					<property name="id" value="REQUEST_PAYLOAD" />
 					<property name="schemaDeclaration" ref="ota2MessageSchema" />
 					<property name="localName" value="OTA2_Request_Payload" />
 				</bean>
-				<bean class="com.sabre.schemacompiler.ioc.SchemaDependency">
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaDependency">
 					<property name="id" value="RESPONSE_PAYLOAD" />
 					<property name="schemaDeclaration" ref="ota2MessageSchema" />
 					<property name="localName" value="OTA2_Response_Payload" />
 				</bean>
-				<bean class="com.sabre.schemacompiler.ioc.SchemaDependency">
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaDependency">
 					<property name="id" value="NOTIF_PAYLOAD" />
 					<property name="schemaDeclaration" ref="ota2MessageSchema" />
 					<property name="localName" value="OTA2_Notif_Payload" />
 				</bean>
-				<bean class="com.sabre.schemacompiler.ioc.SchemaDependency">
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaDependency">
 					<property name="id" value="EXTENSION_POINT" />
 					<property name="schemaDeclaration" ref="ota2MessageSchema" />
 					<property name="localName" value="ExtensionPoint" />
 				</bean>
-				<bean class="com.sabre.schemacompiler.ioc.SchemaDependency">
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaDependency">
 					<property name="id" value="EXTENSION_POINT_SUMMARY" />
 					<property name="schemaDeclaration" ref="ota2MessageSchema" />
 					<property name="localName" value="ExtensionPoint_Summary" />
 				</bean>
-				<bean class="com.sabre.schemacompiler.ioc.SchemaDependency">
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaDependency">
 					<property name="id" value="EXTENSION_POINT_DETAIL" />
 					<property name="schemaDeclaration" ref="ota2MessageSchema" />
 					<property name="localName" value="ExtensionPoint_Detail" />
 				</bean>
-				<bean class="com.sabre.schemacompiler.ioc.SchemaDependency">
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaDependency">
 					<property name="id" value="EXTENSION_POINT_CUSTOM" />
 					<property name="schemaDeclaration" ref="ota2MessageSchema" />
 					<property name="localName" value="ExtensionPoint_Custom" />
 				</bean>
-				<bean class="com.sabre.schemacompiler.ioc.SchemaDependency">
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaDependency">
 					<property name="id" value="EXTENSION_POINT_QUERY" />
 					<property name="schemaDeclaration" ref="ota2MessageSchema" />
 					<property name="localName" value="ExtensionPoint_Query" />
@@ -152,9 +152,9 @@
 	  
 	  Defines the class that will be used to create the bindings, message faults, service definitions, etc.
 	  for WSDL documents that are produced during code generation.  The class that is assigned to this bean
-	  definition must implement the 'com.sabre.schemacompiler.codegen.wsdl.CodeGenerationWsdlBindings'
+	  definition must implement the 'org.opentravel.schemacompiler.codegen.wsdl.CodeGenerationWsdlBindings'
 	  interface.
 	  -->
-	<bean id="codeGenerationWsdlBindings" class="com.sabre.schemacompiler.codegen.wsdl.DefaultSoapBindings" scope="singleton" />
+	<bean id="codeGenerationWsdlBindings" class="org.opentravel.schemacompiler.codegen.wsdl.DefaultSoapBindings" scope="singleton" />
 	
 </beans>
