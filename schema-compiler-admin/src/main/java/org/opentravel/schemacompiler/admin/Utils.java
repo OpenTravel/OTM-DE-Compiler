@@ -17,7 +17,7 @@ import java.util.ResourceBundle;
  */
 public class Utils {
 	
-	private static final String MESSAGE_RB = "/com/sabre/schemacompiler/admin/admin-messages.properties";
+	private static final String MESSAGE_RB = "/org/opentravel/schemacompiler/admin/admin-messages.properties";
 	private static final ResourceBundle messageBundle;
 	
 	/**

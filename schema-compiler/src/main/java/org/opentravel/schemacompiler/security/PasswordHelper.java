@@ -24,8 +24,8 @@ import org.opentravel.schemacompiler.ioc.CompilerExtensionRegistry;
  */
 public class PasswordHelper {
 
-    protected static final String PUBLIC_KEYFILE = "/com/sabre/schemacompiler/ota2-repository.pub";
-    protected static final String PRIVATE_KEYFILE = "/com/sabre/schemacompiler/ota2-repository.pri";
+    protected static final String PUBLIC_KEYFILE = "/org/opentravel/schemacompiler/ota2-repository.pub";
+    protected static final String PRIVATE_KEYFILE = "/org/opentravel/schemacompiler/ota2-repository.pri";
     protected static final String ENCRYPTION_ALGORITHM = "RSA";
     protected static final String CIPHER_TRANSFORMATION = ENCRYPTION_ALGORITHM + "/ECB/NoPadding";
 

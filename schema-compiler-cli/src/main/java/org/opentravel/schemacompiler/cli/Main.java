@@ -30,7 +30,7 @@ public class Main {
             : SCRIPT_BASH;
     private static final String SCRIPT_SYNTAX = SCRIPT_NAME + " [options] <library-file>";
 
-    private static final String MESSAGE_RB = "/com/sabre/schemacompiler/cli/cli-messages.properties";
+    private static final String MESSAGE_RB = "/org/opentravel/schemacompiler/cli/cli-messages.properties";
     private static final ResourceBundle messageBundle;
 
     /**

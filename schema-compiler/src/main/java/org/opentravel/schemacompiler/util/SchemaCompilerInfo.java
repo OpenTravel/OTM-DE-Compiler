@@ -13,7 +13,7 @@ import org.opentravel.schemacompiler.ioc.CompilerExtensionRegistry;
  */
 public class SchemaCompilerInfo {
 
-    private static final String COMPILER_INFO_FILE = "/com/sabre/schemacompiler/compiler-info.properties";
+    private static final String COMPILER_INFO_FILE = "/org/opentravel/schemacompiler/compiler-info.properties";
 
     private static SchemaCompilerInfo defaultInstance = new SchemaCompilerInfo();
 

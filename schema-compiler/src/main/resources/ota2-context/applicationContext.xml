@@ -800,7 +800,7 @@
 	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
 		<property name="basenames">
 			<list>
-				<value>com/sabre/schemacompiler/compiler-messages</value>
+				<value>org/opentravel/schemacompiler/compiler-messages</value>
 			</list>
 		</property>
 	</bean>
