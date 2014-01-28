@@ -1,6 +1,4 @@
-/*
- * Copyright (c) 2011, Sabre Inc.
- */
+
 package org.opentravel.schemacompiler.util;
 
 import java.io.IOException;

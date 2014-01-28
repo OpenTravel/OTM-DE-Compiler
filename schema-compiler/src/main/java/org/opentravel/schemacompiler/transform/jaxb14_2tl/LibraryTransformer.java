@@ -1,6 +1,4 @@
-/*
- * Copyright (c) 2011, Sabre Inc.
- */
+
 package org.opentravel.schemacompiler.transform.jaxb14_2tl;
 
 import java.net.MalformedURLException;

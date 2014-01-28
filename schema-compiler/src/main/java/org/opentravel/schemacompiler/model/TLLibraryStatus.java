@@ -1,8 +1,4 @@
-/*
- * Copyright (c) 2012, Sabre Corporation and affiliates.
- * All Rights Reserved.
- * Use is subject to license agreement.
- */
+
 package org.opentravel.schemacompiler.model;
 
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryStatus;

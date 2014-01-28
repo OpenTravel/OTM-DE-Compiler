@@ -1,6 +1,4 @@
-/*
- * Copyright (c) 2011, Sabre Inc.
- */
+
 package org.opentravel.schemacompiler.ioc;
 
 import org.opentravel.schemacompiler.ota2.OTA2CompilerConstants;

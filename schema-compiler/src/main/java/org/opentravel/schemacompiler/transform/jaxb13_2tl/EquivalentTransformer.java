@@ -1,6 +1,4 @@
-/*
- * Copyright (c) 2011, Sabre Inc.
- */
+
 package org.opentravel.schemacompiler.transform.jaxb13_2tl;
 
 import org.opentravel.ns.ota2.librarymodel_v01_03.Equivalent;

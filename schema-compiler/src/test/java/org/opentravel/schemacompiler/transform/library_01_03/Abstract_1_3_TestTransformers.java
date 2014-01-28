@@ -1,6 +1,4 @@
-/*
- * Copyright (c) 2011, Sabre Inc.
- */
+
 package org.opentravel.schemacompiler.transform.library_01_03;
 
 import org.opentravel.schemacompiler.transform.AbstractTestTransformers;

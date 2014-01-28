@@ -1,3 +1,4 @@
+
 package org.opentravel.schemacompiler.tests.util;
 
 import org.opentravel.schemacompiler.ic.ModelIntegrityChecker;

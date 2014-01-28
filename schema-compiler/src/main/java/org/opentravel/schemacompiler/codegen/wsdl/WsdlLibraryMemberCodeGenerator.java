@@ -1,6 +1,4 @@
-/*
- * Copyright (c) 2011, Sabre Inc.
- */
+
 package org.opentravel.schemacompiler.codegen.wsdl;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder;

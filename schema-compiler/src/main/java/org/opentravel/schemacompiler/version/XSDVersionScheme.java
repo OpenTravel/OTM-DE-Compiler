@@ -1,3 +1,4 @@
+
 package org.opentravel.schemacompiler.version;
 
 import java.util.Collections;
