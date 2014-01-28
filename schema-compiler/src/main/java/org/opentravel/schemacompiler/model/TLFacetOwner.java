@@ -1,6 +1,4 @@
-
 package org.opentravel.schemacompiler.model;
-
 
 /**
  * Interface to be implemented by named entities that are capable of owning facets.
@@ -8,5 +6,5 @@ package org.opentravel.schemacompiler.model;
  * @author S. Livezey
  */
 public interface TLFacetOwner extends NamedEntity {
-	
+
 }

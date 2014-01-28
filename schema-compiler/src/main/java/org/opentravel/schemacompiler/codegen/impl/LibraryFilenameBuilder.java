@@ -1,4 +1,3 @@
-
 package org.opentravel.schemacompiler.codegen.impl;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder;
@@ -12,23 +11,25 @@ import org.opentravel.schemacompiler.model.TLLibrary;
  * 
  * @author S. Livezey
  */
-public class LibraryFilenameBuilder<L extends AbstractLibrary> implements CodeGenerationFilenameBuilder<L> {
-	
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder#buildFilename(org.opentravel.schemacompiler.model.TLModelElement, java.lang.String)
-	 */
-	@Override
-	public String buildFilename(L item, String fileExtension) {
-		String fileExt = (fileExtension.length() == 0) ? "" : ("." + fileExtension);
-		String filename = item.getName();
-		
-		if (item instanceof TLLibrary) {
-			filename += "_" + ((TLLibrary) item).getVersion().replaceAll("\\.", "_");
-		}
-		if (!filename.toLowerCase().endsWith(fileExt)) {
-			filename += fileExt;
-		}
-		return filename;
-	}
-	
+public class LibraryFilenameBuilder<L extends AbstractLibrary> implements
+        CodeGenerationFilenameBuilder<L> {
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder#buildFilename(org.opentravel.schemacompiler.model.TLModelElement,
+     *      java.lang.String)
+     */
+    @Override
+    public String buildFilename(L item, String fileExtension) {
+        String fileExt = (fileExtension.length() == 0) ? "" : ("." + fileExtension);
+        String filename = item.getName();
+
+        if (item instanceof TLLibrary) {
+            filename += "_" + ((TLLibrary) item).getVersion().replaceAll("\\.", "_");
+        }
+        if (!filename.toLowerCase().endsWith(fileExt)) {
+            filename += fileExt;
+        }
+        return filename;
+    }
+
 }

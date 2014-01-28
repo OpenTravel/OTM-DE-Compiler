@@ -1,4 +1,3 @@
-
 package org.opentravel.schemacompiler.security;
 
 import org.opentravel.schemacompiler.repository.RepositoryException;
@@ -10,38 +9,43 @@ import org.opentravel.schemacompiler.repository.RepositoryException;
  * @author S. Livezey
  */
 public class RepositorySecurityException extends RepositoryException {
-	
-	/**
-	 * Default constructor.
-	 */
-	public RepositorySecurityException() {}
 
-	/**
-	 * Constructs an exception with the specified message.
-	 * 
-	 * @param message  the exception message
-	 */
-	public RepositorySecurityException(String message) {
-		super(message);
-	}
+    /**
+     * Default constructor.
+     */
+    public RepositorySecurityException() {
+    }
 
-	/**
-	 * Constructs an exception with the specified underlying cause.
-	 * 
-	 * @param cause  the underlying exception that caused this one
-	 */
-	public RepositorySecurityException(Throwable cause) {
-		super(cause);
-	}
+    /**
+     * Constructs an exception with the specified message.
+     * 
+     * @param message
+     *            the exception message
+     */
+    public RepositorySecurityException(String message) {
+        super(message);
+    }
 
-	/**
-	 * Constructs an exception with the specified message and underlying cause.
-	 * 
-	 * @param message  the exception message
-	 * @param cause  the underlying exception that caused this one
-	 */
-	public RepositorySecurityException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    /**
+     * Constructs an exception with the specified underlying cause.
+     * 
+     * @param cause
+     *            the underlying exception that caused this one
+     */
+    public RepositorySecurityException(Throwable cause) {
+        super(cause);
+    }
+
+    /**
+     * Constructs an exception with the specified message and underlying cause.
+     * 
+     * @param message
+     *            the exception message
+     * @param cause
+     *            the underlying exception that caused this one
+     */
+    public RepositorySecurityException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
 }

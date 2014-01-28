@@ -1,4 +1,3 @@
-
 package org.opentravel.schemacompiler.tests.util;
 
 import org.opentravel.schemacompiler.ic.ModelIntegrityChecker;
@@ -34,10 +33,10 @@ public class ModelBuilder {
         }
         return this;
     }
+
     public ModelBuilder newLibrary(String name, String namespace) {
         return newLibrary(name, namespace, "0.0.0");
     }
-
 
     public TLLibrary build() {
         TLLibrary library = new TLLibrary();
@@ -47,7 +46,7 @@ public class ModelBuilder {
         return library;
     }
 
-    //TODO: remove
+    // TODO: remove
     public TLModel getModel() {
         return model;
     }

@@ -1,4 +1,3 @@
-
 package org.opentravel.schemacompiler.util;
 
 /**
@@ -8,37 +7,42 @@ package org.opentravel.schemacompiler.util;
  */
 public class SchemaCompilerException extends Exception {
 
-	/**
-	 * Default constructor.
-	 */
-	public SchemaCompilerException() {}
+    /**
+     * Default constructor.
+     */
+    public SchemaCompilerException() {
+    }
 
-	/**
-	 * Constructs an exception with the specified message.
-	 * 
-	 * @param message  the exception message
-	 */
-	public SchemaCompilerException(String message) {
-		super(message);
-	}
+    /**
+     * Constructs an exception with the specified message.
+     * 
+     * @param message
+     *            the exception message
+     */
+    public SchemaCompilerException(String message) {
+        super(message);
+    }
 
-	/**
-	 * Constructs an exception with the specified underlying cause.
-	 * 
-	 * @param cause  the underlying exception that caused this one
-	 */
-	public SchemaCompilerException(Throwable cause) {
-		super(cause);
-	}
+    /**
+     * Constructs an exception with the specified underlying cause.
+     * 
+     * @param cause
+     *            the underlying exception that caused this one
+     */
+    public SchemaCompilerException(Throwable cause) {
+        super(cause);
+    }
 
-	/**
-	 * Constructs an exception with the specified message and underlying cause.
-	 * 
-	 * @param message  the exception message
-	 * @param cause  the underlying exception that caused this one
-	 */
-	public SchemaCompilerException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    /**
+     * Constructs an exception with the specified message and underlying cause.
+     * 
+     * @param message
+     *            the exception message
+     * @param cause
+     *            the underlying exception that caused this one
+     */
+    public SchemaCompilerException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
 }

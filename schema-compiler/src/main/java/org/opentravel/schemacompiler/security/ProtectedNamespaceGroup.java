@@ -1,4 +1,3 @@
-
 package org.opentravel.schemacompiler.security;
 
 import java.util.List;
@@ -10,37 +9,41 @@ import java.util.List;
  * @author S. Livezey
  */
 public interface ProtectedNamespaceGroup {
-	
-	/**
-	 * Returns the ID of this protected namespace group.
-	 * 
-	 * @return String
-	 */
-	public String getGroupId();
-	
-	/**
-	 * Returns the user-readable title of this protected namespace group.
-	 * 
-	 * @return String
-	 */
-	public String getGroupTitle();
-	
-	/**
-	 * Returns the list of protected namespace URI's for this group.
-	 * 
-	 * @return List<String>
-	 */
-	public List<String> getProtectedNamespaceUris();
-	
-	/**
-	 * Returns true if the user credentials provided match those of a user who should have
-	 * write access to the namespaces in this group.
-	 * 
-	 * @param userId  the ID of the user to check
-	 * @param password  the clear-text password of the user to check
-	 * @return boolean
-	 * @throws SchemaCompilerSecurityException  thrown if an error occurs during the access check
-	 */
-	public boolean hasWriteAccess(String userId, String password) throws SchemaCompilerSecurityException;
-	
+
+    /**
+     * Returns the ID of this protected namespace group.
+     * 
+     * @return String
+     */
+    public String getGroupId();
+
+    /**
+     * Returns the user-readable title of this protected namespace group.
+     * 
+     * @return String
+     */
+    public String getGroupTitle();
+
+    /**
+     * Returns the list of protected namespace URI's for this group.
+     * 
+     * @return List<String>
+     */
+    public List<String> getProtectedNamespaceUris();
+
+    /**
+     * Returns true if the user credentials provided match those of a user who should have write
+     * access to the namespaces in this group.
+     * 
+     * @param userId
+     *            the ID of the user to check
+     * @param password
+     *            the clear-text password of the user to check
+     * @return boolean
+     * @throws SchemaCompilerSecurityException
+     *             thrown if an error occurs during the access check
+     */
+    public boolean hasWriteAccess(String userId, String password)
+            throws SchemaCompilerSecurityException;
+
 }

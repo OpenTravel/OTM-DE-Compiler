@@ -1,4 +1,3 @@
-
 package org.opentravel.schemacompiler.transform;
 
 /**
@@ -8,19 +7,20 @@ package org.opentravel.schemacompiler.transform;
  * @author S. Livezey
  */
 public interface ObjectTransformerContext {
-	
-	/**
-	 * Returns the transformer factory associated with the context.
-	 * 
-	 * @return TransformerFactory<?>
-	 */
-	public TransformerFactory<?> getTransformerFactory();
-	
-	/**
-	 * Assigns the factory instance to be associated with this context.
-	 * 
-	 * @param factory  the factory instance to associated with the context
-	 */
-	public void setTransformerFactory(TransformerFactory<?> factory);
-	
+
+    /**
+     * Returns the transformer factory associated with the context.
+     * 
+     * @return TransformerFactory<?>
+     */
+    public TransformerFactory<?> getTransformerFactory();
+
+    /**
+     * Assigns the factory instance to be associated with this context.
+     * 
+     * @param factory
+     *            the factory instance to associated with the context
+     */
+    public void setTransformerFactory(TransformerFactory<?> factory);
+
 }

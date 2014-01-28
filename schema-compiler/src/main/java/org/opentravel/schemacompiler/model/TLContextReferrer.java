@@ -1,4 +1,3 @@
-
 package org.opentravel.schemacompiler.model;
 
 /**
@@ -7,19 +6,20 @@ package org.opentravel.schemacompiler.model;
  * @author S. Livezey
  */
 public interface TLContextReferrer extends LibraryElement {
-	
-	/**
-	 * Returns the ID of the context declaration to which this entity refers.
-	 * 
-	 * @return String
-	 */
-	public String getContext();
-	
-	/**
-	 * Assigns the ID of the context declaration to which this entity refers.
-	 * 
-	 * @param context  the context ID to assign
-	 */
-	public void setContext(String context);
-	
+
+    /**
+     * Returns the ID of the context declaration to which this entity refers.
+     * 
+     * @return String
+     */
+    public String getContext();
+
+    /**
+     * Assigns the ID of the context declaration to which this entity refers.
+     * 
+     * @param context
+     *            the context ID to assign
+     */
+    public void setContext(String context);
+
 }

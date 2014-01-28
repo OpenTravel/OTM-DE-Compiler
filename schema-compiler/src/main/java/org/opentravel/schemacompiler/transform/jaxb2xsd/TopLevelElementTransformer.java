@@ -1,4 +1,3 @@
-
 package org.opentravel.schemacompiler.transform.jaxb2xsd;
 
 import org.opentravel.schemacompiler.model.XSDElement;
@@ -9,17 +8,18 @@ import org.w3._2001.xmlschema.TopLevelElement;
 /**
  * Handles the transformation of objects from the <code>TopLevelElement</code> type to the
  * <code>XSDElement</code> type.
- *
+ * 
  * @author S. Livezey
  */
-public class TopLevelElementTransformer extends BaseTransformer<TopLevelElement,XSDElement,DefaultTransformerContext> {
+public class TopLevelElementTransformer extends
+        BaseTransformer<TopLevelElement, XSDElement, DefaultTransformerContext> {
 
-	/**
-	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
-	 */
-	@Override
-	public XSDElement transform(TopLevelElement source) {
-		return new XSDElement(source.getName(), source);
-	}
-	
+    /**
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
+     */
+    @Override
+    public XSDElement transform(TopLevelElement source) {
+        return new XSDElement(source.getName(), source);
+    }
+
 }

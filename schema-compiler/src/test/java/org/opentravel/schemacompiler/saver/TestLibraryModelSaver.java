@@ -1,4 +1,3 @@
-
 package org.opentravel.schemacompiler.saver;
 
 import static org.junit.Assert.assertFalse;
@@ -29,206 +28,210 @@ import org.opentravel.schemacompiler.validate.ValidationFindings;
  * @author S. Livezey
  */
 public class TestLibraryModelSaver {
-	
-	private static final String SAVE_FOLDER = "/target/test-save-location/";
-	
-	@Test
-	public void testSaveLibraryModel() throws Exception {
-		TLModel model = loadTestModel();
-		
-		try {
-			for (TLLibrary library : model.getUserDefinedLibraries()) {
-				moveLibraryUrlToTempLocation(library);
-			}
-			ValidationFindings findings = new LibraryModelSaver().saveAllLibraries(model);
-			
-			SchemaCompilerTestUtils.printFindings(findings);
-			assertFalse(findings.hasFinding());
-			
-			for (TLLibrary library : model.getUserDefinedLibraries()) {
-				assertLibraryFileExists(library);
-			}
-		} finally {
-			for (TLLibrary library : model.getUserDefinedLibraries()) {
-				deleteLibraryFile(library);
-			}
-		}
-	}
-	
-	@Test
-	public void testSaveSingleLibrary() throws Exception {
-		TLModel model = loadTestModel();
-		TLLibrary library = null;
-		
-		try {
-			for (TLLibrary lib : model.getUserDefinedLibraries()) {
-				library = lib;
-				break;
-			}
-			assertNotNull(library);
-			moveLibraryUrlToTempLocation(library);
-			
-			ValidationFindings findings = new LibraryModelSaver().saveLibrary(library);
-			
-			SchemaCompilerTestUtils.printFindings(findings);
-			assertFalse(findings.hasFinding());
-			assertLibraryFileExists(library);
-			
-		} finally {
-			if (library != null) {
-				deleteLibraryFile(library);
-			}
-		}
-	}
-	
-	@Test
-	public void testBackupFile() throws Exception {
-		TLModel model = loadTestModel();
-		TLLibrary library = null;
-		File backupFile = null;
-		
-		try {
-			for (TLLibrary lib : model.getUserDefinedLibraries()) {
-				library = lib;
-				break;
-			}
-			assertNotNull(library);
-			moveLibraryUrlToTempLocation(library);
-			
-			// Save the file to the temp-location
-			ValidationFindings findings = new LibraryModelSaver().saveLibrary(library);
-			
-			SchemaCompilerTestUtils.printFindings(findings);
-			assertFalse(findings.hasFinding());
-			assertLibraryFileExists(library);
-			
-			// Save the file again to force the creation of a backup
-			backupFile = getBackupFile(library);
-			
-			if (backupFile.exists()) {
-				backupFile.delete();
-			}
-			findings = new LibraryModelSaver().saveLibrary(library);
-			assertTrue(backupFile.exists());
-			
-		} finally {
-			if (library != null) {
-				deleteLibraryFile(library);
-			}
-			if (backupFile != null) {
-				backupFile.delete();
-			}
-		}
-	}
-	
-//	@Test
-	public void testLoadAndSave_ManualTest() throws Exception {
-		String filepath = "src/test/resources/libraries_1_4/test-package_v2/";
-//		String filepath = "../stl2Developer/resources/";
-		String filename = "library_3_ext.xml";
-		LibraryInputSource<InputStream> libraryInput = new LibraryStreamInputSource(
-				new File(System.getProperty("user.dir"), filepath + filename));
-		File saveFile = new File(System.getProperty("user.dir"), SAVE_FOLDER + filename);
-		LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>();
-		ValidationFindings findings = modelLoader.loadLibraryModel(libraryInput);
-		
-		if (findings.hasFinding()) {
-			System.out.println("Loader Errors/Warnings:");
-			
-			for (String message : findings.getAllValidationMessages(FindingMessageFormat.IDENTIFIED_FORMAT)) {
-				System.out.println("  " + message);
-			}
-		}
-		
-		TLModel model = modelLoader.getLibraryModel();
-		assertNotNull(model);
-		TLLibrary library = null;
-		
-		for (TLLibrary lib : model.getUserDefinedLibraries()) {
-			if (lib.getLibraryUrl().toExternalForm().endsWith(filename)) {
-				library = lib;
-				break;
-			}
-		}
-		assertNotNull(library);
-		
-		if (saveFile.exists()) {
-			saveFile.delete();
-		}
-		library.setLibraryUrl(URLUtils.toURL(saveFile));
-		findings = new LibraryModelSaver().saveLibrary(library);
-		
-		if (findings.hasFinding()) {
-			System.out.println("Saver Errors/Warnings:");
-			
-			for (String message : findings.getAllValidationMessages(FindingMessageFormat.IDENTIFIED_FORMAT)) {
-				System.out.println("  " + message);
-			}
-		}
-		assertFalse(findings.hasFinding(FindingType.ERROR));
-	}
-	
-	@BeforeClass
-	public static void createTestFolder() {
-		File testFolder = new File(System.getProperty("user.dir"), SAVE_FOLDER);
-		
-		if (!testFolder.exists()) {
-			testFolder.mkdirs();
-		}
-	}
-	
-	private TLModel loadTestModel() throws Exception {
-		LibraryInputSource<InputStream> libraryInput = new LibraryStreamInputSource(
-				new File(SchemaCompilerTestUtils.getBaseLibraryLocation() + "/test-package_v2/library_1_p2.xml"));
-		LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>();
-		modelLoader.loadLibraryModel(libraryInput);
-		
-		return modelLoader.getLibraryModel();
-	}
-	
-	private void moveLibraryUrlToTempLocation(TLLibrary library) throws Exception {
-		String urlPath = library.getLibraryUrl().toExternalForm();
-		String filename = urlPath.substring(urlPath.lastIndexOf('/') + 1);
-		File tempFile = new File(System.getProperty("user.dir"), SAVE_FOLDER + filename);
-		
-		if (tempFile.exists()) {
-			tempFile.delete();
-		}
-		library.setLibraryUrl(URLUtils.toURL(tempFile));
-	}
-	
-	private void assertLibraryFileExists(TLLibrary library) throws Exception {
-		String urlPath = library.getLibraryUrl().toExternalForm();
-		String filename = urlPath.substring(urlPath.lastIndexOf('/') + 1);
-		File libraryFile = new File(System.getProperty("user.dir"), SAVE_FOLDER + filename);
-		
-		if (!libraryFile.exists()) {
-			fail("Saved library file does not exist at the expected location: " + libraryFile.getAbsolutePath());
-		}
-	}
-	
-	private void deleteLibraryFile(TLLibrary library) {
-		String urlPath = library.getLibraryUrl().toExternalForm();
-		
-		if (urlPath.indexOf(SAVE_FOLDER) >= 0) {
-			String filename = urlPath.substring(urlPath.lastIndexOf('/') + 1);
-			File libraryFile = new File(System.getProperty("user.dir"), SAVE_FOLDER + filename);
-			
-			if (libraryFile.exists()) {
-				libraryFile.delete();
-			}
-		}
-	}
-	
-	private File getBackupFile(TLLibrary library) {
-		File libraryFile = URLUtils.toFile(library.getLibraryUrl());
-		String filename = libraryFile.getName();
-		int dotIdx = filename.lastIndexOf('.');
-		
-		if (dotIdx >= 0) {
-			filename = filename.substring(0, dotIdx);
-		}
-		return new File(libraryFile.getParentFile(), filename + ".bak");
-	}
-	
+
+    private static final String SAVE_FOLDER = "/target/test-save-location/";
+
+    @Test
+    public void testSaveLibraryModel() throws Exception {
+        TLModel model = loadTestModel();
+
+        try {
+            for (TLLibrary library : model.getUserDefinedLibraries()) {
+                moveLibraryUrlToTempLocation(library);
+            }
+            ValidationFindings findings = new LibraryModelSaver().saveAllLibraries(model);
+
+            SchemaCompilerTestUtils.printFindings(findings);
+            assertFalse(findings.hasFinding());
+
+            for (TLLibrary library : model.getUserDefinedLibraries()) {
+                assertLibraryFileExists(library);
+            }
+        } finally {
+            for (TLLibrary library : model.getUserDefinedLibraries()) {
+                deleteLibraryFile(library);
+            }
+        }
+    }
+
+    @Test
+    public void testSaveSingleLibrary() throws Exception {
+        TLModel model = loadTestModel();
+        TLLibrary library = null;
+
+        try {
+            for (TLLibrary lib : model.getUserDefinedLibraries()) {
+                library = lib;
+                break;
+            }
+            assertNotNull(library);
+            moveLibraryUrlToTempLocation(library);
+
+            ValidationFindings findings = new LibraryModelSaver().saveLibrary(library);
+
+            SchemaCompilerTestUtils.printFindings(findings);
+            assertFalse(findings.hasFinding());
+            assertLibraryFileExists(library);
+
+        } finally {
+            if (library != null) {
+                deleteLibraryFile(library);
+            }
+        }
+    }
+
+    @Test
+    public void testBackupFile() throws Exception {
+        TLModel model = loadTestModel();
+        TLLibrary library = null;
+        File backupFile = null;
+
+        try {
+            for (TLLibrary lib : model.getUserDefinedLibraries()) {
+                library = lib;
+                break;
+            }
+            assertNotNull(library);
+            moveLibraryUrlToTempLocation(library);
+
+            // Save the file to the temp-location
+            ValidationFindings findings = new LibraryModelSaver().saveLibrary(library);
+
+            SchemaCompilerTestUtils.printFindings(findings);
+            assertFalse(findings.hasFinding());
+            assertLibraryFileExists(library);
+
+            // Save the file again to force the creation of a backup
+            backupFile = getBackupFile(library);
+
+            if (backupFile.exists()) {
+                backupFile.delete();
+            }
+            findings = new LibraryModelSaver().saveLibrary(library);
+            assertTrue(backupFile.exists());
+
+        } finally {
+            if (library != null) {
+                deleteLibraryFile(library);
+            }
+            if (backupFile != null) {
+                backupFile.delete();
+            }
+        }
+    }
+
+    // @Test
+    public void testLoadAndSave_ManualTest() throws Exception {
+        String filepath = "src/test/resources/libraries_1_4/test-package_v2/";
+        // String filepath = "../stl2Developer/resources/";
+        String filename = "library_3_ext.xml";
+        LibraryInputSource<InputStream> libraryInput = new LibraryStreamInputSource(new File(
+                System.getProperty("user.dir"), filepath + filename));
+        File saveFile = new File(System.getProperty("user.dir"), SAVE_FOLDER + filename);
+        LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>();
+        ValidationFindings findings = modelLoader.loadLibraryModel(libraryInput);
+
+        if (findings.hasFinding()) {
+            System.out.println("Loader Errors/Warnings:");
+
+            for (String message : findings
+                    .getAllValidationMessages(FindingMessageFormat.IDENTIFIED_FORMAT)) {
+                System.out.println("  " + message);
+            }
+        }
+
+        TLModel model = modelLoader.getLibraryModel();
+        assertNotNull(model);
+        TLLibrary library = null;
+
+        for (TLLibrary lib : model.getUserDefinedLibraries()) {
+            if (lib.getLibraryUrl().toExternalForm().endsWith(filename)) {
+                library = lib;
+                break;
+            }
+        }
+        assertNotNull(library);
+
+        if (saveFile.exists()) {
+            saveFile.delete();
+        }
+        library.setLibraryUrl(URLUtils.toURL(saveFile));
+        findings = new LibraryModelSaver().saveLibrary(library);
+
+        if (findings.hasFinding()) {
+            System.out.println("Saver Errors/Warnings:");
+
+            for (String message : findings
+                    .getAllValidationMessages(FindingMessageFormat.IDENTIFIED_FORMAT)) {
+                System.out.println("  " + message);
+            }
+        }
+        assertFalse(findings.hasFinding(FindingType.ERROR));
+    }
+
+    @BeforeClass
+    public static void createTestFolder() {
+        File testFolder = new File(System.getProperty("user.dir"), SAVE_FOLDER);
+
+        if (!testFolder.exists()) {
+            testFolder.mkdirs();
+        }
+    }
+
+    private TLModel loadTestModel() throws Exception {
+        LibraryInputSource<InputStream> libraryInput = new LibraryStreamInputSource(new File(
+                SchemaCompilerTestUtils.getBaseLibraryLocation()
+                        + "/test-package_v2/library_1_p2.xml"));
+        LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>();
+        modelLoader.loadLibraryModel(libraryInput);
+
+        return modelLoader.getLibraryModel();
+    }
+
+    private void moveLibraryUrlToTempLocation(TLLibrary library) throws Exception {
+        String urlPath = library.getLibraryUrl().toExternalForm();
+        String filename = urlPath.substring(urlPath.lastIndexOf('/') + 1);
+        File tempFile = new File(System.getProperty("user.dir"), SAVE_FOLDER + filename);
+
+        if (tempFile.exists()) {
+            tempFile.delete();
+        }
+        library.setLibraryUrl(URLUtils.toURL(tempFile));
+    }
+
+    private void assertLibraryFileExists(TLLibrary library) throws Exception {
+        String urlPath = library.getLibraryUrl().toExternalForm();
+        String filename = urlPath.substring(urlPath.lastIndexOf('/') + 1);
+        File libraryFile = new File(System.getProperty("user.dir"), SAVE_FOLDER + filename);
+
+        if (!libraryFile.exists()) {
+            fail("Saved library file does not exist at the expected location: "
+                    + libraryFile.getAbsolutePath());
+        }
+    }
+
+    private void deleteLibraryFile(TLLibrary library) {
+        String urlPath = library.getLibraryUrl().toExternalForm();
+
+        if (urlPath.indexOf(SAVE_FOLDER) >= 0) {
+            String filename = urlPath.substring(urlPath.lastIndexOf('/') + 1);
+            File libraryFile = new File(System.getProperty("user.dir"), SAVE_FOLDER + filename);
+
+            if (libraryFile.exists()) {
+                libraryFile.delete();
+            }
+        }
+    }
+
+    private File getBackupFile(TLLibrary library) {
+        File libraryFile = URLUtils.toFile(library.getLibraryUrl());
+        String filename = libraryFile.getName();
+        int dotIdx = filename.lastIndexOf('.');
+
+        if (dotIdx >= 0) {
+            filename = filename.substring(0, dotIdx);
+        }
+        return new File(libraryFile.getParentFile(), filename + ".bak");
+    }
+
 }

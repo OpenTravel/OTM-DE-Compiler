@@ -1,9 +1,8 @@
-
 package org.opentravel.schemacompiler.model;
 
 /**
- * Marker interface to be implemented by model elements that can be referenced
- * as facet property types.
+ * Marker interface to be implemented by model elements that can be referenced as facet property
+ * types.
  * 
  * @author S. Livezey
  */

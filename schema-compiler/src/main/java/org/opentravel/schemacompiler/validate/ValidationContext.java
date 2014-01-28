@@ -1,4 +1,3 @@
-
 package org.opentravel.schemacompiler.validate;
 
 /**
@@ -8,5 +7,5 @@ package org.opentravel.schemacompiler.validate;
  * @author S. Livezey
  */
 public interface ValidationContext {
-	
+
 }

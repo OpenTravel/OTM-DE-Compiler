@@ -1,4 +1,3 @@
-
 package org.opentravel.schemacompiler.ota2;
 
 /**
@@ -7,9 +6,8 @@ package org.opentravel.schemacompiler.ota2;
  * @author S. Livezey
  */
 public interface OTA2CompilerConstants {
-	
-	/** The unique ID of the OTA2 compiler extension. */
-	public static final String OTA2_COMPILER_EXTENSION_ID = "OTA2";
-	
-	
+
+    /** The unique ID of the OTA2 compiler extension. */
+    public static final String OTA2_COMPILER_EXTENSION_ID = "OTA2";
+
 }

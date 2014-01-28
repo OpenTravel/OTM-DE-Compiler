@@ -1,4 +1,3 @@
-
 package org.opentravel.schemacompiler.repository;
 
 import java.io.File;
@@ -16,31 +15,31 @@ import org.opentravel.schemacompiler.repository.impl.DefaultRepositoryFileManage
  * @author S. Livezey
  */
 public class RepositoryMetadataResource extends FileResource<RepositoryInfoType> {
-	
-	public RepositoryFileManager fileManager;
-	
-	public RepositoryMetadataResource(File repositoryLocation) {
-		super(repositoryLocation);
-		this.fileManager = new DefaultRepositoryFileManager(repositoryLocation);
-		invalidateResource();
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.config.FileResource#loadResource(java.io.File)
-	 */
-	@Override
-	protected RepositoryInfoType loadResource(File dataFile) throws IOException {
-		try {
-			RepositoryInfoType metadata = null;
-			
-			if (fileManager != null) {
-				metadata = fileManager.loadRepositoryMetadata();
-			}
-			return metadata;
-			
-		} catch (RepositoryException e) {
-			throw new IOException(e.getMessage());
-		}
-	}
-	
+
+    public RepositoryFileManager fileManager;
+
+    public RepositoryMetadataResource(File repositoryLocation) {
+        super(repositoryLocation);
+        this.fileManager = new DefaultRepositoryFileManager(repositoryLocation);
+        invalidateResource();
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.config.FileResource#loadResource(java.io.File)
+     */
+    @Override
+    protected RepositoryInfoType loadResource(File dataFile) throws IOException {
+        try {
+            RepositoryInfoType metadata = null;
+
+            if (fileManager != null) {
+                metadata = fileManager.loadRepositoryMetadata();
+            }
+            return metadata;
+
+        } catch (RepositoryException e) {
+            throw new IOException(e.getMessage());
+        }
+    }
+
 }

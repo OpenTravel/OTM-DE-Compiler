@@ -1,4 +1,3 @@
-
 package org.opentravel.schemacompiler.repository.impl;
 
 import java.util.Locale;
@@ -16,29 +15,29 @@ import org.apache.http.impl.client.SystemDefaultCredentialsProvider;
  */
 public class NTLMSystemCredentialsProvider extends SystemDefaultCredentialsProvider {
 
-	public Credentials getCredentials(final AuthScope authscope) {
-		Credentials credentials = super.getCredentials(authscope);
-		if (AuthSchemes.NTLM.toUpperCase(Locale.ENGLISH).equals(authscope.getScheme())) {
-			credentials = super.getCredentials(authscope);
-			return traslateToNTLMCredentials(credentials);
-		}
-		return credentials;
-	}
+    public Credentials getCredentials(final AuthScope authscope) {
+        Credentials credentials = super.getCredentials(authscope);
+        if (AuthSchemes.NTLM.toUpperCase(Locale.ENGLISH).equals(authscope.getScheme())) {
+            credentials = super.getCredentials(authscope);
+            return traslateToNTLMCredentials(credentials);
+        }
+        return credentials;
+    }
 
-	private NTCredentials traslateToNTLMCredentials(Credentials credentials) {
-		String fullUserName = credentials.getUserPrincipal().getName();
-		String[] tokens = fullUserName.split("\\\\", 2);
-		String userName = "";
-		String domain = null;
-		if (tokens.length == 2) {
-			if (tokens[0] != null && !tokens[0].isEmpty()) {
-				domain = tokens[0];
-			}
-			userName = tokens[1];
-		} else {
-			userName = tokens[0];
-		}
-		String workstation = null; // how to support workstation ???
-		return new NTCredentials(userName, credentials.getPassword(), workstation, domain);
-	}
+    private NTCredentials traslateToNTLMCredentials(Credentials credentials) {
+        String fullUserName = credentials.getUserPrincipal().getName();
+        String[] tokens = fullUserName.split("\\\\", 2);
+        String userName = "";
+        String domain = null;
+        if (tokens.length == 2) {
+            if (tokens[0] != null && !tokens[0].isEmpty()) {
+                domain = tokens[0];
+            }
+            userName = tokens[1];
+        } else {
+            userName = tokens[0];
+        }
+        String workstation = null; // how to support workstation ???
+        return new NTCredentials(userName, credentials.getPassword(), workstation, domain);
+    }
 }

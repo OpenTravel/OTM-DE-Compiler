@@ -1,4 +1,3 @@
-
 package org.opentravel.schemacompiler.task;
 
 /**
@@ -6,6 +5,7 @@ package org.opentravel.schemacompiler.task;
  * 
  * @author S. Livezey
  */
-public interface SchemaCompilerTaskOptions extends CommonCompilerTaskOptions, ExampleCompilerTaskOptions {
-	
+public interface SchemaCompilerTaskOptions extends CommonCompilerTaskOptions,
+        ExampleCompilerTaskOptions {
+
 }

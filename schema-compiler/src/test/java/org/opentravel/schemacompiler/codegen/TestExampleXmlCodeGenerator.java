@@ -1,4 +1,3 @@
-
 package org.opentravel.schemacompiler.codegen;
 
 import static org.junit.Assert.assertFalse;
@@ -22,42 +21,47 @@ import org.opentravel.schemacompiler.validate.ValidationException;
  * @author S. Livezey
  */
 public class TestExampleXmlCodeGenerator extends AbstractTestTransformers {
-	
-	@Test
-	public void testExampleXmlGenerator() throws Exception {
-		TLBusinessObject sampleBusinessObject = getBusinessObject(PACKAGE_2_NAMESPACE, "library_1_p2", "SampleBusinessObject");
-		TLBusinessObject compoundBusinessObject = getBusinessObject(PACKAGE_2_NAMESPACE, "library_1_p2", "CompoundBusinessObject");
-		TLFacet customFacet = sampleBusinessObject.getCustomFacet("Sample", "Test1");
-		ExampleGeneratorOptions options = new ExampleGeneratorOptions();
-		
-		options.setDetailLevel(DetailLevel.MAXIMUM);
-		
-		assertNotNull(sampleBusinessObject);
-		assertNotNull(compoundBusinessObject);
-		assertNotNull(customFacet);
-		
-		try {
-			String exampleContent = new ExampleDocumentBuilder(options).setModelElement(compoundBusinessObject).buildString();
-			assertNotNull(exampleContent); // for now, just make sure we generate some content without error
-			
-		} catch (ValidationException e) {
-			SchemaCompilerTestUtils.printFindings(e.getFindings());
-			assertFalse( e.getFindings().hasFinding(FindingType.ERROR) );
-		}
-	}
-	
-	private TLBusinessObject getBusinessObject(String namespace, String libraryName, String typeName) throws Exception {
-		TLLibrary library = getLibrary(namespace, libraryName);
-		
-		return (library == null) ? null : library.getBusinessObjectType(typeName);
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.transform.AbstractTestTransformers#getBaseLocation()
-	 */
-	@Override
-	protected String getBaseLocation() {
-		return SchemaCompilerTestUtils.getBaseLibraryLocation();
-	}
-	
+
+    @Test
+    public void testExampleXmlGenerator() throws Exception {
+        TLBusinessObject sampleBusinessObject = getBusinessObject(PACKAGE_2_NAMESPACE,
+                "library_1_p2", "SampleBusinessObject");
+        TLBusinessObject compoundBusinessObject = getBusinessObject(PACKAGE_2_NAMESPACE,
+                "library_1_p2", "CompoundBusinessObject");
+        TLFacet customFacet = sampleBusinessObject.getCustomFacet("Sample", "Test1");
+        ExampleGeneratorOptions options = new ExampleGeneratorOptions();
+
+        options.setDetailLevel(DetailLevel.MAXIMUM);
+
+        assertNotNull(sampleBusinessObject);
+        assertNotNull(compoundBusinessObject);
+        assertNotNull(customFacet);
+
+        try {
+            String exampleContent = new ExampleDocumentBuilder(options).setModelElement(
+                    compoundBusinessObject).buildString();
+            assertNotNull(exampleContent); // for now, just make sure we generate some content
+                                           // without error
+
+        } catch (ValidationException e) {
+            SchemaCompilerTestUtils.printFindings(e.getFindings());
+            assertFalse(e.getFindings().hasFinding(FindingType.ERROR));
+        }
+    }
+
+    private TLBusinessObject getBusinessObject(String namespace, String libraryName, String typeName)
+            throws Exception {
+        TLLibrary library = getLibrary(namespace, libraryName);
+
+        return (library == null) ? null : library.getBusinessObjectType(typeName);
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.transform.AbstractTestTransformers#getBaseLocation()
+     */
+    @Override
+    protected String getBaseLocation() {
+        return SchemaCompilerTestUtils.getBaseLibraryLocation();
+    }
+
 }

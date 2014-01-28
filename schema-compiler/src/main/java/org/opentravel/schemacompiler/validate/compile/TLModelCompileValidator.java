@@ -1,4 +1,3 @@
-
 package org.opentravel.schemacompiler.validate.compile;
 
 import org.opentravel.schemacompiler.model.LibraryElement;
@@ -28,224 +27,235 @@ import org.opentravel.schemacompiler.visitor.DependencyNavigator;
 import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
 
 /**
- * Static utility methods used for the validation of <code>TLModel</code> elements prior
- * to compilation / code generation.
+ * Static utility methods used for the validation of <code>TLModel</code> elements prior to
+ * compilation / code generation.
  * 
  * @author S. Livezey
  */
 public class TLModelCompileValidator {
-	
-	/**
-	 * Utility method that validates all elements of the given model using the default rule set for
-	 * library compilation.
-	 * 
-	 * @param model  the model whose members should be validated
-	 * @return ValidationFindings
-	 */
-	public static ValidationFindings validateModel(TLModel model) {
-		return TLModelValidator.validateModel(model, ValidatorFactory.COMPILE_RULE_SET_ID);
-	}
-	
-	/**
-	 * Utility method that validates the given model element using the specified rule set from the
-	 * application context file.  If the object has not yet been assigned to a model, some validation
-	 * tasks may not function properly.
-	 * 
-	 * <p>NOTE: This method performs validation checks for the given model element, as well as all of
-	 * its dependencies.  For example, in a model where <code>Payment</code> contains an element reference
-	 * to <code>PaymentCard</code>, a call to validate <code>Payment</code> may result in findings for
-	 * <code>PaymentCard</code> since it is a dependency of the original model element.
-	 * 
-	 * @param modelElement  the model element to validate
-	 * @return TLModelElement
-	 */
-	public static ValidationFindings validateModelElement(TLModelElement modelElement) {
-		return validateModelElement(modelElement, true);
-	}
-	
-	/**
-	 * Utility method that validates the given model element using the specified rule set from the
-	 * application context file.  If the object has not yet been assigned to a model, some validation
-	 * tasks may not function properly.
-	 * 
-	 * @param modelElement  the model element to validate
-	 * @param validateDependencies  flag indicating whether dependencies of the given model element should
-	 *								also be validated (only applies to named entity model elements)
-	 * @return TLModelElement
-	 */
-	public static ValidationFindings validateModelElement(TLModelElement modelElement, boolean validateDependencies) {
-		ValidationFindings findings;
-		
-		if (validateDependencies && (modelElement instanceof NamedEntity)) {
-			ValidationDependencyVisitor visitor = new ValidationDependencyVisitor(modelElement.getOwningModel());
-			
-			DependencyNavigator.navigate((NamedEntity) modelElement, visitor);
-			findings = visitor.getFindings();
-			
-		} else {
-			findings = TLModelValidator.validateModelElement(modelElement, ValidatorFactory.COMPILE_RULE_SET_ID);
-		}
-		return findings;
-	}
-	
-	/**
-	 * Visitor that performs validation checks for the assigned model element and all of its dependencies
-	 * to determine whether any errors exist prior to producing example output.
-	 *
-	 * @author S. Livezey
-	 */
-	private static class ValidationDependencyVisitor extends ModelElementVisitorAdapter {
-		
-		private ValidatorFactory factory;
-		private ValidationFindings findings = new ValidationFindings();
-		
-		/**
-		 * Constructor that provides a reference to the model that owns all elements to be validated.
-		 * 
-		 * @param model  the model instance to be validated
-		 */
-		public ValidationDependencyVisitor(TLModel model) {
-			factory = ValidatorFactory.getInstance( ValidatorFactory.COMPILE_RULE_SET_ID,
-					new TLModelValidationContext(model) );
-		}
-		
-		/**
-		 * Returns the validation findings that were discovered during dependency navigation.
-		 * 
-		 * @return ValidationFindings
-		 */
-		public ValidationFindings getFindings() {
-			return findings;
-		}
-		
-		/**
-		 * Validates the entity and reports any validation findings that are discovered.
-		 * 
-		 * @param entity  the model element to be validated
-		 */
-		private void validateEntity(Validatable entity) {
-			if (entity instanceof LibraryElement) {
-				LibraryElement libElement = (LibraryElement) entity;
-				
-				// Only validate members of user-defined libraries
-				if (libElement.getOwningLibrary() instanceof TLLibrary) {
-					Validator<Validatable> validator = factory.getValidatorForTarget(entity);
-					
-					if (validator != null) {
-						findings.addAll( validator.validate(entity) );
-					}
-				}
-			}
-		}
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitSimple(org.opentravel.schemacompiler.model.TLSimple)
-		 */
-		@Override
-		public boolean visitSimple(TLSimple simple) {
-			validateEntity(simple);
-			return true;
-		}
+    /**
+     * Utility method that validates all elements of the given model using the default rule set for
+     * library compilation.
+     * 
+     * @param model
+     *            the model whose members should be validated
+     * @return ValidationFindings
+     */
+    public static ValidationFindings validateModel(TLModel model) {
+        return TLModelValidator.validateModel(model, ValidatorFactory.COMPILE_RULE_SET_ID);
+    }
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitValueWithAttributes(org.opentravel.schemacompiler.model.TLValueWithAttributes)
-		 */
-		@Override
-		public boolean visitValueWithAttributes(TLValueWithAttributes valueWithAttributes) {
-			validateEntity(valueWithAttributes);
-			return true;
-		}
+    /**
+     * Utility method that validates the given model element using the specified rule set from the
+     * application context file. If the object has not yet been assigned to a model, some validation
+     * tasks may not function properly.
+     * 
+     * <p>
+     * NOTE: This method performs validation checks for the given model element, as well as all of
+     * its dependencies. For example, in a model where <code>Payment</code> contains an element
+     * reference to <code>PaymentCard</code>, a call to validate <code>Payment</code> may result in
+     * findings for <code>PaymentCard</code> since it is a dependency of the original model element.
+     * 
+     * @param modelElement
+     *            the model element to validate
+     * @return TLModelElement
+     */
+    public static ValidationFindings validateModelElement(TLModelElement modelElement) {
+        return validateModelElement(modelElement, true);
+    }
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitClosedEnumeration(org.opentravel.schemacompiler.model.TLClosedEnumeration)
-		 */
-		@Override
-		public boolean visitClosedEnumeration(TLClosedEnumeration enumeration) {
-			validateEntity(enumeration);
-			return true;
-		}
+    /**
+     * Utility method that validates the given model element using the specified rule set from the
+     * application context file. If the object has not yet been assigned to a model, some validation
+     * tasks may not function properly.
+     * 
+     * @param modelElement
+     *            the model element to validate
+     * @param validateDependencies
+     *            flag indicating whether dependencies of the given model element should also be
+     *            validated (only applies to named entity model elements)
+     * @return TLModelElement
+     */
+    public static ValidationFindings validateModelElement(TLModelElement modelElement,
+            boolean validateDependencies) {
+        ValidationFindings findings;
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitCoreObject(org.opentravel.schemacompiler.model.TLCoreObject)
-		 */
-		@Override
-		public boolean visitCoreObject(TLCoreObject coreObject) {
-			validateEntity(coreObject);
-			return true;
-		}
+        if (validateDependencies && (modelElement instanceof NamedEntity)) {
+            ValidationDependencyVisitor visitor = new ValidationDependencyVisitor(
+                    modelElement.getOwningModel());
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitBusinessObject(org.opentravel.schemacompiler.model.TLBusinessObject)
-		 */
-		@Override
-		public boolean visitBusinessObject(TLBusinessObject businessObject) {
-			validateEntity(businessObject);
-			return true;
-		}
+            DependencyNavigator.navigate((NamedEntity) modelElement, visitor);
+            findings = visitor.getFindings();
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitService(org.opentravel.schemacompiler.model.TLService)
-		 */
-		@Override
-		public boolean visitService(TLService service) {
-			validateEntity(service);
-			return true;
-		}
+        } else {
+            findings = TLModelValidator.validateModelElement(modelElement,
+                    ValidatorFactory.COMPILE_RULE_SET_ID);
+        }
+        return findings;
+    }
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitOperation(org.opentravel.schemacompiler.model.TLOperation)
-		 */
-		@Override
-		public boolean visitOperation(TLOperation operation) {
-			validateEntity(operation);
-			return true;
-		}
+    /**
+     * Visitor that performs validation checks for the assigned model element and all of its
+     * dependencies to determine whether any errors exist prior to producing example output.
+     * 
+     * @author S. Livezey
+     */
+    private static class ValidationDependencyVisitor extends ModelElementVisitorAdapter {
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitExtensionPointFacet(org.opentravel.schemacompiler.model.TLExtensionPointFacet)
-		 */
-		@Override
-		public boolean visitExtensionPointFacet(TLExtensionPointFacet extensionPointFacet) {
-			validateEntity(extensionPointFacet);
-			return true;
-		}
+        private ValidatorFactory factory;
+        private ValidationFindings findings = new ValidationFindings();
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitFacet(org.opentravel.schemacompiler.model.TLFacet)
-		 */
-		@Override
-		public boolean visitFacet(TLFacet facet) {
-			validateEntity(facet);
-			return true;
-		}
+        /**
+         * Constructor that provides a reference to the model that owns all elements to be
+         * validated.
+         * 
+         * @param model
+         *            the model instance to be validated
+         */
+        public ValidationDependencyVisitor(TLModel model) {
+            factory = ValidatorFactory.getInstance(ValidatorFactory.COMPILE_RULE_SET_ID,
+                    new TLModelValidationContext(model));
+        }
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitSimpleFacet(org.opentravel.schemacompiler.model.TLSimpleFacet)
-		 */
-		@Override
-		public boolean visitSimpleFacet(TLSimpleFacet simpleFacet) {
-			validateEntity(simpleFacet);
-			return true;
-		}
+        /**
+         * Returns the validation findings that were discovered during dependency navigation.
+         * 
+         * @return ValidationFindings
+         */
+        public ValidationFindings getFindings() {
+            return findings;
+        }
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitListFacet(org.opentravel.schemacompiler.model.TLListFacet)
-		 */
-		@Override
-		public boolean visitListFacet(TLListFacet listFacet) {
-			validateEntity(listFacet);
-			return true;
-		}
+        /**
+         * Validates the entity and reports any validation findings that are discovered.
+         * 
+         * @param entity
+         *            the model element to be validated
+         */
+        private void validateEntity(Validatable entity) {
+            if (entity instanceof LibraryElement) {
+                LibraryElement libElement = (LibraryElement) entity;
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitAlias(org.opentravel.schemacompiler.model.TLAlias)
-		 */
-		@Override
-		public boolean visitAlias(TLAlias alias) {
-			validateEntity(alias);
-			return true;
-		}
-		
-	}
-	
+                // Only validate members of user-defined libraries
+                if (libElement.getOwningLibrary() instanceof TLLibrary) {
+                    Validator<Validatable> validator = factory.getValidatorForTarget(entity);
+
+                    if (validator != null) {
+                        findings.addAll(validator.validate(entity));
+                    }
+                }
+            }
+        }
+
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitSimple(org.opentravel.schemacompiler.model.TLSimple)
+         */
+        @Override
+        public boolean visitSimple(TLSimple simple) {
+            validateEntity(simple);
+            return true;
+        }
+
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitValueWithAttributes(org.opentravel.schemacompiler.model.TLValueWithAttributes)
+         */
+        @Override
+        public boolean visitValueWithAttributes(TLValueWithAttributes valueWithAttributes) {
+            validateEntity(valueWithAttributes);
+            return true;
+        }
+
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitClosedEnumeration(org.opentravel.schemacompiler.model.TLClosedEnumeration)
+         */
+        @Override
+        public boolean visitClosedEnumeration(TLClosedEnumeration enumeration) {
+            validateEntity(enumeration);
+            return true;
+        }
+
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitCoreObject(org.opentravel.schemacompiler.model.TLCoreObject)
+         */
+        @Override
+        public boolean visitCoreObject(TLCoreObject coreObject) {
+            validateEntity(coreObject);
+            return true;
+        }
+
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitBusinessObject(org.opentravel.schemacompiler.model.TLBusinessObject)
+         */
+        @Override
+        public boolean visitBusinessObject(TLBusinessObject businessObject) {
+            validateEntity(businessObject);
+            return true;
+        }
+
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitService(org.opentravel.schemacompiler.model.TLService)
+         */
+        @Override
+        public boolean visitService(TLService service) {
+            validateEntity(service);
+            return true;
+        }
+
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitOperation(org.opentravel.schemacompiler.model.TLOperation)
+         */
+        @Override
+        public boolean visitOperation(TLOperation operation) {
+            validateEntity(operation);
+            return true;
+        }
+
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitExtensionPointFacet(org.opentravel.schemacompiler.model.TLExtensionPointFacet)
+         */
+        @Override
+        public boolean visitExtensionPointFacet(TLExtensionPointFacet extensionPointFacet) {
+            validateEntity(extensionPointFacet);
+            return true;
+        }
+
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitFacet(org.opentravel.schemacompiler.model.TLFacet)
+         */
+        @Override
+        public boolean visitFacet(TLFacet facet) {
+            validateEntity(facet);
+            return true;
+        }
+
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitSimpleFacet(org.opentravel.schemacompiler.model.TLSimpleFacet)
+         */
+        @Override
+        public boolean visitSimpleFacet(TLSimpleFacet simpleFacet) {
+            validateEntity(simpleFacet);
+            return true;
+        }
+
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitListFacet(org.opentravel.schemacompiler.model.TLListFacet)
+         */
+        @Override
+        public boolean visitListFacet(TLListFacet listFacet) {
+            validateEntity(listFacet);
+            return true;
+        }
+
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitAlias(org.opentravel.schemacompiler.model.TLAlias)
+         */
+        @Override
+        public boolean visitAlias(TLAlias alias) {
+            validateEntity(alias);
+            return true;
+        }
+
+    }
+
 }

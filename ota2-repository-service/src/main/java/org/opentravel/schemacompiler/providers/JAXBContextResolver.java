@@ -1,4 +1,3 @@
-
 package org.opentravel.schemacompiler.providers;
 
 import javax.ws.rs.ext.ContextResolver;
@@ -12,28 +11,28 @@ import javax.xml.bind.JAXBContext;
  */
 @Provider
 public final class JAXBContextResolver implements ContextResolver<JAXBContext> {
-	
-	private static final String SCHEMA_CONTEXT = ":org.w3._2001.xmlschema:org.opentravel.ns.ota2.repositoryinfo_v01_00";
-	
-	private static JAXBContext jaxbContext;
-	
-	/**
-	 * @see javax.ws.rs.ext.ContextResolver#getContext(java.lang.Class)
-	 */
-	public JAXBContext getContext(Class<?> type) {
-		return jaxbContext;
-	}
-	
-	/**
-	 * Initializes the shared JAXB context.
-	 */
-	static {
-		try {
-			jaxbContext = JAXBContext.newInstance(SCHEMA_CONTEXT);
-			
-		} catch (Throwable t) {
-			throw new ExceptionInInitializerError(t);
-		}
-	}
-	
+
+    private static final String SCHEMA_CONTEXT = ":org.w3._2001.xmlschema:org.opentravel.ns.ota2.repositoryinfo_v01_00";
+
+    private static JAXBContext jaxbContext;
+
+    /**
+     * @see javax.ws.rs.ext.ContextResolver#getContext(java.lang.Class)
+     */
+    public JAXBContext getContext(Class<?> type) {
+        return jaxbContext;
+    }
+
+    /**
+     * Initializes the shared JAXB context.
+     */
+    static {
+        try {
+            jaxbContext = JAXBContext.newInstance(SCHEMA_CONTEXT);
+
+        } catch (Throwable t) {
+            throw new ExceptionInInitializerError(t);
+        }
+    }
+
 }

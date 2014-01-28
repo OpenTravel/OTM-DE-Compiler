@@ -1,4 +1,3 @@
-
 package org.opentravel.schemacompiler.transform.library_01_04;
 
 import org.opentravel.schemacompiler.transform.AbstractTestTransformers;
@@ -11,12 +10,12 @@ import org.opentravel.schemacompiler.util.SchemaCompilerTestUtils;
  */
 public abstract class Abstract_1_4_TestTransformers extends AbstractTestTransformers {
 
-	/**
-	 * @see org.opentravel.schemacompiler.transform.AbstractTestTransformers#getBaseLocation()
-	 */
-	@Override
-	protected String getBaseLocation() {
-		return SchemaCompilerTestUtils.getBaseLibraryLocation();
-	}
-	
+    /**
+     * @see org.opentravel.schemacompiler.transform.AbstractTestTransformers#getBaseLocation()
+     */
+    @Override
+    protected String getBaseLocation() {
+        return SchemaCompilerTestUtils.getBaseLibraryLocation();
+    }
+
 }
