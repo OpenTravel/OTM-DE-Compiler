@@ -2,13 +2,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.sabre.es.otm</groupId>
 	<artifactId>schema-compiler-cli</artifactId>
 	<packaging>jar</packaging>
 	<name>OTA2 Compiler Command-Line Interface</name>
 
 	<parent>
-	    <groupId>com.sabre.es.otm</groupId>
+	    <groupId>org.opentravel.otm</groupId>
 	    <artifactId>ota-parent-pom</artifactId>
 	    <version>3.1-SNAPSHOT</version>
 	</parent>
@@ -20,7 +19,7 @@
 			<version>1.2</version>
 		</dependency>
 		<dependency>
-			<groupId>com.sabre.es.otm</groupId>
+			<groupId>org.opentravel.otm</groupId>
 			<artifactId>schema-compiler</artifactId>
 			<version>${project.version}</version>
 		</dependency>
