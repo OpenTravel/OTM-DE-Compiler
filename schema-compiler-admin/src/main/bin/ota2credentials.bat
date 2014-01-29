@@ -1,6 +1,6 @@
 @echo off
 FOR /R ./lib %%a in (*.jar) DO CALL :AddToPath %%a
-java -cp %CLASSPATH% com.sabre.schemacompiler.admin.CredentialsManager %*
+java -cp %CLASSPATH% org.opentravel.schemacompiler.admin.CredentialsManager %*
 GOTO :EOF
 
 :AddToPath
