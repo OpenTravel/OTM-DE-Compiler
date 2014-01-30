@@ -1,6 +1,3 @@
-/*
- * Copyright (c) 2011, Sabre Inc.
- */
 package org.opentravel.schemacompiler.event;
 
 import java.util.HashSet;

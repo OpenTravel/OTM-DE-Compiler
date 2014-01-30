@@ -147,8 +147,6 @@ public class TestSchemaCompilerTask {
     public void testSTL2_SchemaCompilerTask_manualTest() throws Exception {
         File sourceFile = new File(System.getProperty("user.dir"),
                 "../../../temp/schemas/test/testA.otm");
-        // File sourceFile = new
-        // File("/Users/livezeysm/Sabre/Software/temp/schemas/test/AncillaryPricing_PDC_1.3.4.xml");
         File targetFolder = new File(System.getProperty("user.dir")
                 + "/target/codegen-output/testSchemaCompilerTask_manualTest");
         CompileAllCompilerTask compilerTask = TaskFactory.getTask(CompileAllCompilerTask.class);
