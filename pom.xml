@@ -7,6 +7,7 @@
 	<artifactId>ota-parent-pom</artifactId>
 	<version>3.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
+  <inceptionYear>2014</inceptionYear>
 
 	<modules>
 		<module>schema-compiler</module>
@@ -16,6 +17,39 @@
 		<module>ota2-schema-compiler</module>
 		<module>ota2-repository-service</module>
 	</modules>
+  
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.mycila</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <version>2.6</version>
+        <configuration>
+          <header>com/mycila/maven/plugin/license/templates/APACHE-2.txt</header>
+          <properties>
+            <owner>OpenTravel Alliance</owner>
+            <year>${project.inceptionYear}</year>
+            <email>info@opentravel.org</email>
+          </properties>
+          <excludes>
+            <exclude>**/pom.xml</exclude>
+            <!-- exclude eclipse launchers-->
+            <exclude>**/*.launch</exclude>
+            <exclude>**/*.txt</exclude>
+            <exclude>src/test/resources/**</exclude>
+            <exclude>src/main/resources/**</exclude>
+          </excludes>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
     
 	
 </project>
