@@ -31,6 +31,9 @@
             <year>${project.inceptionYear}</year>
             <email>info@opentravel.org</email>
           </properties>
+          <includes>
+            <include>src/**</include>
+          </includes>
           <excludes>
             <exclude>**/pom.xml</exclude>
             <!-- exclude eclipse launchers-->
