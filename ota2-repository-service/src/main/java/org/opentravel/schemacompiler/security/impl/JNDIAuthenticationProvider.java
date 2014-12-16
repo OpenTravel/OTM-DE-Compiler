@@ -66,8 +66,7 @@ import org.opentravel.schemacompiler.security.RepositorySecurityException;
  * <li><b>User Search Mode</b> - Like user-lookup, this mode of operation establishes remote
  * connections using a single authenticated user account. User accounts are located by searches
  * within the directory using one or more configurable query strings. Once user accounts are located
- * by a search, the user's encrypted password credentials are retrieved from the directory and
- * compared with the credentials provided by the remote user of the repository.
+ * by a search, the user's credentials are verified by attempting a login to the directory.
  * </ul>
  * 
  * <p>
@@ -171,7 +170,7 @@ import org.opentravel.schemacompiler.security.RepositorySecurityException;
  * <td>The base element for user searches performed using the 'userSearchPatterns' expressions.</td>
  * <td>N/A</td>
  * <td>N/A</td>
- * <td>Required</td>
+ * <td>Optional</td>
  * </tr>
  * <tr>
  * <td>searchUserSubtree</td>
@@ -205,7 +204,7 @@ import org.opentravel.schemacompiler.security.RepositorySecurityException;
  * specified, a default value of "userPassword" is assumed.</td>
  * <td>N/A</td>
  * <td>Optional</td>
- * <td>Optional</td>
+ * <td>N/A</td>
  * </tr>
  * <tr>
  * <td>referralStrategy</td>
@@ -226,14 +225,14 @@ import org.opentravel.schemacompiler.security.RepositorySecurityException;
  * to be retrieved.</td>
  * <td>N/A</td>
  * <td>Required</td>
- * <td>Required</td>
+ * <td>N/A</td>
  * </tr>
  * <tr>
  * <td>digestEncoding</td>
  * <td>The encoding character set to use when applying the digest algorithm.</td>
  * <td>N/A</td>
  * <td>Optional</td>
- * <td>Optional</td>
+ * <td>N/A</td>
  * </tr>
  * </table>
  * 
@@ -261,7 +260,7 @@ public class JNDIAuthenticationProvider implements AuthenticationProvider {
     private String digestEncoding;
 
     private MessageFormat userPattern;
-    private String userSearchBase;
+    private String userSearchBase = "";
     private boolean searchUserSubtree = false;
     private MessageFormat[] userSearchPatterns;
     private int userSearchTimeout = 5000;
@@ -272,7 +271,7 @@ public class JNDIAuthenticationProvider implements AuthenticationProvider {
 
     private Map<String, AuthenticationCacheEntry> authenticationCache = new HashMap<String, AuthenticationCacheEntry>();
     private PasswordValidator passwordValidator;
-
+    
     /**
      * @see org.opentravel.schemacompiler.security.AuthenticationProvider#isValidUser(java.lang.String,java.lang.String)
      */
@@ -350,11 +349,23 @@ public class JNDIAuthenticationProvider implements AuthenticationProvider {
                     if (mode == AuthenticationMode.USER_LOOKUP) {
                         userPassword = lookupUserPassword(userId, context);
 
+                        if (userPassword != null) {
+                            isValid = passwordValidator.isValidPassword(authCredentials, userPassword);
+                        }
+                        
                     } else { // AuthenticationMode.USER_SEARCH
-                        userPassword = findUserPassword(userId, context);
-                    }
-                    if (userPassword != null) {
-                        isValid = passwordValidator.isValidPassword(authCredentials, userPassword);
+                        String userDn = findUserDn(userId, context);
+                        
+                        if (userDn != null) {
+                            try {
+                            	context.close(); // close the generic lookup context
+                            	context = openConnection(userDn, authCredentials);
+                                isValid = true;
+
+                            } catch (NamingException e) {
+                                // Ignore and return false
+                            }
+                        }
                     }
                 }
 
@@ -366,10 +377,8 @@ public class JNDIAuthenticationProvider implements AuthenticationProvider {
 
         } finally {
             try {
-                if (context != null)
-                    context.close();
-            } catch (Throwable t) {
-            }
+                if (context != null) context.close();
+            } catch (Throwable t) {}
         }
     }
 
@@ -428,25 +437,24 @@ public class JNDIAuthenticationProvider implements AuthenticationProvider {
             userPassword = getAttributeValue(userAttributes, userPasswordAttribute);
 
         } catch (NameNotFoundException e) {
-            e.printStackTrace(System.out);
             // Ignore and return null
         }
         return userPassword;
     }
 
     /**
-     * Searches the remote directory for the user's entry and returns the value of its password
-     * attribute.
+     * Searches the remote directory for the user's entry and returns its distinguished name
+     * string.
      * 
      * @param userId
-     *            the ID of the user whose password is to be retrieved
+     *            the ID of the user whose DN is to be retrieved
      * @param context
-     *            the directory context from which to retrieve the user's password
+     *            the directory context from which to retrieve the user's DN
      * @return String
      * @throws NamingException
      */
-    protected String findUserPassword(String userId, DirContext context) throws NamingException {
-        String userPassword = null;
+    protected String findUserDn(String userId, DirContext context) throws NamingException {
+        String userDn = null;
 
         for (MessageFormat userSearchPattern : userSearchPatterns) {
             try {
@@ -457,8 +465,7 @@ public class JNDIAuthenticationProvider implements AuthenticationProvider {
                         : SearchControls.ONELEVEL_SCOPE);
                 constraints.setTimeLimit(userSearchTimeout);
 
-                NamingEnumeration<SearchResult> results = context.search(userSearchBase,
-                        searchFilter, constraints);
+                NamingEnumeration<SearchResult> results = context.search(userSearchBase, searchFilter, constraints);
                 SearchResult result = null;
 
                 try {
@@ -476,7 +483,7 @@ public class JNDIAuthenticationProvider implements AuthenticationProvider {
                 }
 
                 if (result != null) {
-                    userPassword = getAttributeValue(result.getAttributes(), userPasswordAttribute);
+                	userDn = result.getNameInNamespace();
                     break;
                 }
 
@@ -484,7 +491,7 @@ public class JNDIAuthenticationProvider implements AuthenticationProvider {
                 // Ignore and keep searching
             }
         }
-        return userPassword;
+        return userDn;
     }
 
     /**
@@ -629,17 +636,13 @@ public class JNDIAuthenticationProvider implements AuthenticationProvider {
                     throw new RepositorySecurityException(
                             "The 'authentication.jndi.connectionPassword' property is a required value for the JNDI user-lookup mode.");
                 }
-                if ((userSearchBase == null) || (userSearchBase.length() == 0)) {
+                if (userSearchBase == null) {
                     throw new RepositorySecurityException(
                             "The 'authentication.jndi.userSearchBase' property is a required value for the JNDI user-lookup mode.");
                 }
                 if ((userSearchPatterns == null) || (userSearchPatterns.length == 0)) {
                     throw new RepositorySecurityException(
                             "The 'authentication.jndi.userSearchPatterns' property is a required value for the JNDI user-lookup mode.");
-                }
-                if (passwordValidator == null) {
-                    throw new RepositorySecurityException(
-                            "The 'authentication.jndi.digestAlgorithm' property is a required value for the JNDI user-lookup mode.");
                 }
                 break;
         }

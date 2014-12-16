@@ -127,17 +127,17 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
             dupBuilder.setProperty("name-upa", inheritedMembers).setFindingType(FindingType.ERROR)
                     .assertNoDuplicates(new FacetMemberIdentityResolver());
 
-            if (dupBuilder.isEmpty()) {
+            if (dupBuilder.isEmpty() && !PropertyCodegenUtils.isReferenceProperty( target )) {
                 TLPropertyType resolvedPropertyType = PropertyCodegenUtils.resolvePropertyType(
                         target.getPropertyOwner(), propertyType);
-                NamedEntity targtInheritanceRoot = PropertyCodegenUtils
-                        .getInheritanceRoot(resolvedPropertyType);
+                NamedEntity targtSubstitutionRoot = PropertyCodegenUtils
+                        .getSubstitutionRoot(resolvedPropertyType);
 
-                if (targtInheritanceRoot != null) {
+                if (targtSubstitutionRoot != null) {
                     List<String> baseSubstitutionGroups = getBaseSubstitutionGroups(
                             inheritedMembers, target);
 
-                    if (baseSubstitutionGroups.contains(targtInheritanceRoot.getLocalName())) {
+                    if (baseSubstitutionGroups.contains(targtSubstitutionRoot.getLocalName())) {
                         builder.addFinding(FindingType.ERROR, "name-upa",
                                 ERROR_SUBSTITUTION_GROUP_CONFLICT);
                     }
@@ -304,12 +304,15 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
         for (TLModelElement ownerElement : ownerElements) {
             if ((ownerElement != target) && (ownerElement instanceof TLProperty)) {
                 TLProperty property = (TLProperty) ownerElement;
-                TLPropertyType propertyType = PropertyCodegenUtils.resolvePropertyType(
-                        property.getPropertyOwner(), property.getType());
-                NamedEntity inheritanceRoot = PropertyCodegenUtils.getInheritanceRoot(propertyType);
+                
+                if (!PropertyCodegenUtils.isReferenceProperty( property )) {
+                    TLPropertyType propertyType = PropertyCodegenUtils.resolvePropertyType(
+                            property.getPropertyOwner(), property.getType());
+                    NamedEntity sgRoot = PropertyCodegenUtils.getSubstitutionRoot(propertyType);
 
-                if (inheritanceRoot != null) {
-                    baseSubstitutionGroups.add(inheritanceRoot.getLocalName());
+                    if (sgRoot != null) {
+                        baseSubstitutionGroups.add(sgRoot.getLocalName());
+                    }
                 }
             }
         }

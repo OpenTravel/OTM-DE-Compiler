@@ -17,13 +17,11 @@ package org.opentravel.schemacompiler.codegen;
 
 import java.io.File;
 import java.io.InputStream;
-import java.net.URI;
 
 import org.junit.BeforeClass;
-import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
+import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.loader.LibraryModelLoader;
-import org.opentravel.schemacompiler.loader.LibraryNamespaceResolver;
-import org.opentravel.schemacompiler.loader.impl.CatalogLibraryNamespaceResolver;
+import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
@@ -47,12 +45,14 @@ public abstract class AbstractTestCodeGenerators {
 
     @BeforeClass
     public static void loadTestModel() throws Exception {
-        LibraryNamespaceResolver namespaceResolver = new CatalogLibraryNamespaceResolver(new File(
-                SchemaCompilerTestUtils.getBaseLibraryLocation() + "/library-catalog.xml"));
+        LibraryInputSource<InputStream> library1Input = new LibraryStreamInputSource(
+        		new File( SchemaCompilerTestUtils.getBaseLibraryLocation() + "/test-package_v2/library_1_p2.xml" ) );
+        LibraryInputSource<InputStream> library2Input = new LibraryStreamInputSource(
+        		new File( SchemaCompilerTestUtils.getBaseLibraryLocation() + "/test-package_v2/library_2_p2.xml" ) );
         LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>();
-
-        modelLoader.setNamespaceResolver(namespaceResolver);
-        ValidationFindings findings = modelLoader.loadLibraryModel(new URI(PACKAGE_2_NAMESPACE));
+        ValidationFindings findings = modelLoader.loadLibraryModel( library1Input );
+        
+        findings.addAll( modelLoader.loadLibraryModel( library2Input ) );
 
         // Display any error messages to standard output before returning
         if (findings.hasFinding(FindingType.ERROR)) {

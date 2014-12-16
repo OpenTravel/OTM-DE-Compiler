@@ -118,7 +118,7 @@ public abstract class AbstractLibraryModuleLoader implements LibraryModuleLoader
                 }
 
                 JAXBElement<?> documentElement = (JAXBElement<?>) unmarshaller
-                        .unmarshal(inputSource.getLibraryContent());
+                        .unmarshal( is );
                 jaxbLibrary = documentElement.getValue();
 
             } else {

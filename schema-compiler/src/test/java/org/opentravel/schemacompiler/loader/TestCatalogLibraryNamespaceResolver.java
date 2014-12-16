@@ -39,7 +39,7 @@ import org.opentravel.schemacompiler.util.URLUtils;
  */
 public class TestCatalogLibraryNamespaceResolver {
 
-    public static final String CATALOG_FILE = "library-catalog.xml";
+    public static final String CATALOG_FILE = "library-catalog-err.xml";
 
     @Test
     public void testNamespaceUrlLookup() throws Exception {

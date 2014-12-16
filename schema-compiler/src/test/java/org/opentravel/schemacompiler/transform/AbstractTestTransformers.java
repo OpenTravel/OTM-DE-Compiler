@@ -17,17 +17,15 @@ package org.opentravel.schemacompiler.transform;
 
 import java.io.File;
 import java.io.InputStream;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.loader.LibraryModelLoader;
-import org.opentravel.schemacompiler.loader.LibraryNamespaceResolver;
-import org.opentravel.schemacompiler.loader.impl.CatalogLibraryNamespaceResolver;
+import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
-import org.opentravel.schemacompiler.transform.SymbolResolver;
 import org.opentravel.schemacompiler.transform.symbols.SymbolResolverTransformerContext;
 import org.opentravel.schemacompiler.transform.symbols.SymbolTableFactory;
 import org.opentravel.schemacompiler.transform.tl2jaxb.TL2JaxbLibrarySymbolResolver;
@@ -48,32 +46,35 @@ public abstract class AbstractTestTransformers {
     public static final String PACKAGE_EXT_NAMESPACE = "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-ext_v2";
 
     private static Map<String, TLModel> testModelsByBaseLocation = new HashMap<String, TLModel>();
-
+    
     /**
      * Returns the base location (root folder) for the test files that are to be used to load and
      * construct the model.
      */
     protected abstract String getBaseLocation();
 
-    protected synchronized TLModel getTestModel() throws Exception {
-        String baseLocation = getBaseLocation();
-        TLModel testModel = testModelsByBaseLocation.get(baseLocation);
+    protected TLModel getTestModel() throws Exception {
+        String baseLocation = getBaseLocation().intern();
+        
+        synchronized (baseLocation) {
+            TLModel testModel = testModelsByBaseLocation.get(baseLocation);
 
-        if (testModel == null) {
-            LibraryNamespaceResolver namespaceResolver = new CatalogLibraryNamespaceResolver(
-                    new File(getBaseLocation(), "/library-catalog.xml"));
-            LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>();
+            if (testModel == null) {
+                LibraryInputSource<InputStream> library1Input = new LibraryStreamInputSource(
+                		new File( getBaseLocation() + "/test-package_v2/library_1_p2.xml" ) );
+                LibraryInputSource<InputStream> library2Input = new LibraryStreamInputSource(
+                		new File( getBaseLocation() + "/test-package_v2/library_2_p2.xml" ) );
+                LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>();
+                ValidationFindings findings = modelLoader.loadLibraryModel( library1Input );
+                findings.addAll( modelLoader.loadLibraryModel( library2Input ) );
+                
+                SchemaCompilerTestUtils.printFindings(findings);
 
-            modelLoader.setNamespaceResolver(namespaceResolver);
-            ValidationFindings findings = modelLoader
-                    .loadLibraryModel(new URI(PACKAGE_2_NAMESPACE));
-
-            SchemaCompilerTestUtils.printFindings(findings);
-
-            testModel = modelLoader.getLibraryModel();
-            testModelsByBaseLocation.put(baseLocation, testModel);
+                testModel = modelLoader.getLibraryModel();
+                testModelsByBaseLocation.put(baseLocation, testModel);
+            }
+            return testModel;
         }
-        return testModel;
     }
 
     protected TLLibrary getLibrary(String namespace, String libraryName) throws Exception {

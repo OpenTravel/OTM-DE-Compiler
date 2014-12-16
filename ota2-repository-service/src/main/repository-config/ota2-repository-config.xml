@@ -128,9 +128,8 @@
 		
 		Authentication provider that implements JNDI authentication using user searches.  This mode of operation
 		establishes remote connections using a single authenticated user account.  User accounts are located by
-		searches within the directory using one or more configurable query strings.  Once user accounts are
-		located by a search, the user's encrypted password credentials are retrieved from the directory and
-		compared with the credentials provided by the remote user of the repository.
+		searches within the directory using one or more configurable query strings.  Once user accounts are located
+		by a search, the user's credentials are verified by attempting a login to the directory.
 	-->
 	<!--
 	<bean id="authenticationProvider" class="org.opentravel.schemacompiler.security.impl.JNDIAuthenticationProvider">
@@ -140,7 +139,6 @@
 		<property name="connectionPassword" value="password" />
 		<property name="userSearchBase" value="ou=users" />
 		<property name="userSearchPatterns" value="(uid={0})" />
-		<property name="digestAlgorithm" value="SHA-1" />
 	</bean>
 	-->
 	

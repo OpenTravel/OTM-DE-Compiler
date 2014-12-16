@@ -649,6 +649,67 @@ public class PropertyCodegenUtils {
     }
 
     /**
+     * Analyzes the given property instance to determine the root of its substitution group hierarchy.
+     * This is typically the core or business object that is the owner of the facet or alias that is
+     * given the property type.  If the given property type is not capable of being a member of a
+     * substitution group hierarchy (e.g. a simple type or VWA), this method will return null.
+     * 
+     * @param propertyType  the property type to analyze
+     * @return NamedEntity
+     */
+    public static NamedEntity getSubstitutionRoot(TLPropertyType propertyType) {
+        NamedEntity sgRoot = null;
+        
+        if (propertyType instanceof TLFacetOwner) {
+        	sgRoot = propertyType;
+        	
+        } else if (propertyType instanceof TLFacet) {
+        	TLFacet facet = (TLFacet) propertyType;
+        	
+        	if (isSubstitutableFacet( facet )) {
+            	sgRoot = facet.getOwningEntity();
+        	}
+        	
+        } else if (propertyType instanceof TLAlias) {
+        	TLAlias alias = (TLAlias) propertyType;
+        	
+        	if (alias.getOwningEntity() instanceof TLFacetOwner) {
+        		sgRoot = alias;
+        		
+        	} else if (alias.getOwningEntity() instanceof TLFacet) {
+            	TLFacet facet = (TLFacet) alias.getOwningEntity();
+            	
+            	if (isSubstitutableFacet( facet )) {
+            		sgRoot = AliasCodegenUtils.getOwnerAlias( alias );
+            	}
+        	}
+        }
+        return sgRoot;
+    }
+    
+    /**
+     * Returns true if the given facet is a member of a substitution group, based on its type.
+     * 
+     * @param facet  the facet to analyze
+     * @return boolean
+     */
+    private static boolean isSubstitutableFacet(TLFacet facet) {
+    	boolean result;
+    	
+    	switch (facet.getFacetType()) {
+    		case ID:
+    		case SUMMARY:
+    		case DETAIL:
+    		case CUSTOM:
+    			result = true;
+    			break;
+    		default:
+    			result = false;
+    	}
+    	return result;
+    }
+    
+    /**
      * Returns true if the given property is a reference to a complex type, or is assigned as a
      * simple type of "IDREF" or "IDREFS".
      * 
