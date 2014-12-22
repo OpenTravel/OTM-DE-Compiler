@@ -69,9 +69,16 @@ public class GroupAssignmentsResource extends FileResource<Map<String, List<Stri
         List<String> assignedGroups = new ArrayList<String>();
 
         for (String groupName : groupAssignments.keySet()) {
-            List<String> memberIds = groupAssignments.get(groupName);
-
-            if (memberIds.contains(userId)) {
+            List<String> memberIds = new ArrayList<String>( groupAssignments.get(groupName) );
+            boolean memberOfGroup = false;
+            
+            for (String memberId : memberIds) {
+            	if (memberId.equalsIgnoreCase( userId )) {
+            		memberOfGroup = true;
+            		break;
+            	}
+            }
+            if (memberOfGroup) {
                 assignedGroups.add(groupName);
             }
         }

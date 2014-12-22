@@ -386,7 +386,12 @@ public class AdminController extends BaseController {
         boolean success = false;
         try {
             if (userId != null) {
-                if ((password == null) || (password.length() == 0)) {
+                RepositoryFileManager fileManager = getRepositoryManager().getFileManager();
+                
+            	if (FileAuthenticationProvider.isExistingUserId( userId, fileManager.getRepositoryLocation() )) {
+                    setErrorMessage("A user with the ID '" + userId + "' already exists.", model);
+            		
+            	} else if ((password == null) || (password.length() == 0)) {
                     setErrorMessage("The password is a required value.", model);
 
                 } else if (password.indexOf(' ') >= 0) {
@@ -395,9 +400,7 @@ public class AdminController extends BaseController {
                 } else if (!password.equals(passwordConfirm)) {
                     setErrorMessage("The passwords do not match.", model);
 
-                } else { // everything is ok - change the password
-                    RepositoryFileManager fileManager = getRepositoryManager().getFileManager();
-
+                } else { // everything is ok - add the user
                     FileAuthenticationProvider.saveUserCredentials(userId, password, false,
                             fileManager);
                     setStatusMessage("User '" + userId + "' created successfully.", model);

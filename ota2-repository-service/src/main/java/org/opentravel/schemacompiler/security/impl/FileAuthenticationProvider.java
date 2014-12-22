@@ -95,6 +95,26 @@ public class FileAuthenticationProvider implements AuthenticationProvider {
         }
         return userIds.toArray(new String[userIds.size()]);
     }
+    
+    /**
+     * Returns true if the given user ID already exists.
+     * 
+     * @param userId  the user ID to check for existence
+     * @param repositoryLocation
+     *            the root folder location of the repository
+     * @return boolean
+     */
+    public static boolean isExistingUserId(String userId, File repositoryLocation) {
+    	boolean exists = false;
+    	
+    	for (String existingId : getAllUserIds( repositoryLocation )) {
+    		if (existingId.equalsIgnoreCase( userId )) {
+    			exists = true;
+    			break;
+    		}
+    	}
+    	return exists;
+    }
 
     /**
      * Saves the user ID and password provided. If the user does not yet exist, the account will be
