@@ -31,6 +31,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
+import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLModelElement;
@@ -103,15 +104,43 @@ public class ExampleDocumentBuilder {
      * from the specified namespace. Schema locations will only be included in the example XML
      * output if they are bound to one or more elements in the resulting XML document.
      * 
-     * @param schemaLocation
-     *            the schema location to assign
+     * @param library  the library for which to assign a schema location
      * @return ExampleDocumentBuilder
      */
-    public ExampleDocumentBuilder addSchemaLocation(String namespace, String schemaLocation) {
-        if (!schemaLocations.containsKey(namespace)) {
-            schemaLocations.put(namespace, schemaLocation);
+    public ExampleDocumentBuilder addSchemaLocation(AbstractLibrary library, String schemaLocation) {
+    	String slocKey = library.getNamespace() + "#" + library.getName();
+    	
+        if (!schemaLocations.containsKey(slocKey)) {
+            schemaLocations.put(slocKey, schemaLocation);
+        }
+        if (!schemaLocations.containsKey(library.getNamespace())) {
+            schemaLocations.put(library.getNamespace(), schemaLocation);
         }
         return this;
+    }
+    
+    /**
+     * Returns the schema location of the given library.  If a schema location has not been
+     * added for the requested library, this method will return null.
+     * 
+     * @param library  the library for which to return a schema location
+     * @return String
+     */
+    private String getSchemaLocation(AbstractLibrary library) {
+    	String slocKey = library.getNamespace() + "#" + library.getName();
+    	
+    	return schemaLocations.get( slocKey );
+    }
+
+    /**
+     * Returns the schema location of the specified namespace.  If a schema location has
+     * not been added for the namespace, this method will return null.
+     * 
+     * @param namespace  the namespace for which to return a schema location
+     * @return String
+     */
+    private String getSchemaLocation(String namespace) {
+    	return schemaLocations.get( namespace );
     }
 
     /**
@@ -191,10 +220,18 @@ public class ExampleDocumentBuilder {
 
             // Construct the xsi:schemaLocation string for the XML document
             for (String boundNS : visitor.getBoundNamespaces()) {
-                if (schemaLocations.containsKey(boundNS)) {
+            	String sLoc;
+            	
+            	if (boundNS.equals( modelElement.getNamespace() )) {
+            		sLoc = getSchemaLocation( modelElement.getOwningLibrary() );
+            		
+            	} else {
+            		sLoc = getSchemaLocation( boundNS );
+            	}
+                if (sLoc != null) {
                     if (schemaLocation.length() > 0)
                         schemaLocation.append(" ");
-                    schemaLocation.append(boundNS).append(' ').append(schemaLocations.get(boundNS));
+                    schemaLocation.append(boundNS).append(' ').append( sLoc );
                 }
             }
 
