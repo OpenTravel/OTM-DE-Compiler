@@ -17,6 +17,7 @@ package org.opentravel.schemacompiler.codegen.wsdl;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.opentravel.schemacompiler.ioc.SchemaDeclaration;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
@@ -132,9 +133,11 @@ public interface CodeGenerationWsdlBindings {
      * 
      * @param exampleXml
      *            the DOM element to which the attributes and/or elements should be added
+     * @param namespaceMappings
+     *            map that should be used to define any new namespace mappings (key = NS URI / value = NS prefix) 
      * @param operationFacet
      *            the operation facet from which the example XML element was generated
      */
-    public void addPayloadExampleContent(Element exampleXml, TLFacet operationFacet);
+    public void addPayloadExampleContent(Element exampleXml, Map<String,String> namespaceMappings, TLFacet operationFacet);
 
 }
