@@ -25,7 +25,6 @@ import java.util.Map;
 import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
-import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
@@ -48,15 +47,12 @@ import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.Validator;
 import org.opentravel.schemacompiler.validate.ValidatorFactory;
 import org.opentravel.schemacompiler.version.LibraryVersionComparator;
-import org.opentravel.schemacompiler.version.MajorVersionHelper;
 import org.opentravel.schemacompiler.version.MinorVersionHelper;
 import org.opentravel.schemacompiler.version.PatchVersionHelper;
 import org.opentravel.schemacompiler.version.VersionScheme;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 import org.opentravel.schemacompiler.version.VersionSchemeFactory;
 import org.opentravel.schemacompiler.version.Versioned;
-
-import com.sun.xml.txw2.IllegalSignatureException;
 
 /**
  * Base class for all validators used to inspect <code>TLModel</code> member elements.
@@ -359,7 +355,7 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
                 }
             }
         } catch (VersionSchemeException e) {
-            throw new IllegalSignatureException(
+            throw new IllegalArgumentException(
                     "Cannot find extensions. Problem with version scheme", e);
         }
         return null;
@@ -389,7 +385,7 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
                 }
             }
         } catch (VersionSchemeException e) {
-            throw new IllegalSignatureException(
+            throw new IllegalArgumentException(
                     "Cannot find extensions. Problem with version scheme", e);
         }
         return null;
