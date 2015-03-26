@@ -7,9 +7,9 @@
 	<name>OTA2 Compiler Maven Mojo</name>
 
 	<parent>
-	    <groupId>org.opentravel.otm</groupId>
-	    <artifactId>ota-parent-pom</artifactId>
-	    <version>3.2-SNAPSHOT</version>
+		<groupId>org.opentravel.otm</groupId>
+		<artifactId>ota-parent-pom</artifactId>
+		<version>3.2-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
@@ -23,10 +23,46 @@
 			<artifactId>maven-plugin-api</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.maven.plugin-tools</groupId>
+			<artifactId>maven-plugin-annotations</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.apache.maven.plugins</groupId>
+										<artifactId>maven-plugin-plugin</artifactId>
+										<versionRange>[3.2,)</versionRange>
+										<goals>
+											<goal>descriptor</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore />
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
 </project>

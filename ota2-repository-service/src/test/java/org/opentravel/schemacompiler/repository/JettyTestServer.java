@@ -76,6 +76,7 @@ public class JettyTestServer {
         System.setProperty("ota2.repository.config", System.getProperty("user.dir")
                 + "/target/test-classes/ota2-repository-config.xml");
         RepositoryComponentFactory.resetDefault();
+        new ResourceConfig().register( MultiPartFeature.class ); // only needs to be registered once
     }
 
     /**
@@ -95,7 +96,6 @@ public class JettyTestServer {
 		resourceProps.put( ServerProperties.PROVIDER_PACKAGES,
 				"org.opentravel.schemacompiler.repository org.opentravel.schemacompiler.providers" );
 		resourceConfig.addProperties( resourceProps );
-		resourceConfig.register(MultiPartFeature.class);
 		context.setContextPath("/ota2-repository-service");
         context.addServlet(new ServletHolder(new RepositoryServlet(resourceConfig)), "/service/*");
         jettyServer = new Server(port);
