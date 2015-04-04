@@ -33,7 +33,6 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.SearcherManager;
 import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.util.Version;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoType;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.RepositoryException;
@@ -68,7 +67,7 @@ public class QueryTask extends AbstractFreeTextSearchTask {
     public QueryTask(SearcherManager searchManager, RepositoryManager repositoryManager) {
         super(repositoryManager);
         this.searchManager = searchManager;
-        this.indexAnalyzer = new StandardAnalyzer(Version.LUCENE_41);
+        this.indexAnalyzer = new StandardAnalyzer();
     }
 
     /**
@@ -91,11 +90,12 @@ public class QueryTask extends AbstractFreeTextSearchTask {
     public List<RepositoryItem> queryRepositoryItems(String queryString,
             boolean latestVersionsOnly, boolean includeDraftVersions) throws RepositoryException {
         List<Document> indexDocuments = new ArrayList<Document>();
+        IndexSearcher searcher = null;
 
         // Search the index for matching documents
         refreshSearcher();
-        IndexSearcher searcher = searchManager.acquire();
         try {
+            searcher = searchManager.acquire();
             Query query = buildQuery(queryString, latestVersionsOnly, includeDraftVersions);
             TopDocs scoredResults = searcher.search(query, MAX_SEARCH_RESULTS);
 
@@ -108,7 +108,7 @@ public class QueryTask extends AbstractFreeTextSearchTask {
 
         } finally {
             try {
-                searchManager.release(searcher);
+                if (searcher != null) searchManager.release(searcher);
 
             } catch (IOException e) {
                 throw new RepositoryException("Error releasing free-text searcher.", e);
@@ -145,7 +145,7 @@ public class QueryTask extends AbstractFreeTextSearchTask {
      */
     private Query buildQuery(String contentTerms, boolean latestVersionsOnly,
             boolean includeDraftVersions) throws ParseException {
-        QueryParser parser = new QueryParser(Version.LUCENE_41, CONTENT_FIELD, indexAnalyzer);
+        QueryParser parser = new QueryParser(CONTENT_FIELD, indexAnalyzer);
         StringBuilder queryText = new StringBuilder(VERSION_TYPE_FIELD).append(':');
 
         // Create the search term for the 'versionType' field
@@ -216,8 +216,9 @@ public class QueryTask extends AbstractFreeTextSearchTask {
     }
 
     protected void displayIndex() {
-        IndexSearcher searcher = searchManager.acquire();
+        IndexSearcher searcher = null;
         try {
+        	searcher = searchManager.acquire();
             IndexReader reader = searcher.getIndexReader();
 
             for (int i = 0; i < reader.maxDoc(); i++) {
@@ -236,7 +237,7 @@ public class QueryTask extends AbstractFreeTextSearchTask {
 
         } finally {
             try {
-                searchManager.release(searcher);
+                if (searcher != null) searchManager.release(searcher);
 
             } catch (IOException e) {
                 // Ignore error and continue

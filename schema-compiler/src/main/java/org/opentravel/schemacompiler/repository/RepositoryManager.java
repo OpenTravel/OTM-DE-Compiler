@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -80,6 +81,8 @@ public final class RepositoryManager implements Repository {
 
     private static final String CURRENT_USER_BASE_NAMESPACE = "http://opentravel.org/local/";
     private static final String ENCRYPTED_PASSWORD_PREFIX = "enc:";
+    private static final int MAX_DISPLAY_NAME_LENGTH = 256;
+    private static final Pattern REPOSITORY_ID_PATTERN = Pattern.compile("([A-Za-z0-9\\-._~!$&'()*+,;=]|%[0-9A-Fa-f]{2})*");
 
     private static RepositoryManager defaultInstance;
     private static Log log = LogFactory.getLog(RepositoryManager.class);
@@ -226,6 +229,15 @@ public final class RepositoryManager implements Repository {
         boolean success = false;
 
         try {
+        	if (repositoryId == null) repositoryId = "";
+        	if (displayName == null) displayName = "";
+        	
+        	if (displayName.length() > MAX_DISPLAY_NAME_LENGTH) {
+        		throw new RepositoryException("Invalid display name for repository (max length is " + MAX_DISPLAY_NAME_LENGTH + ")");
+        	}
+        	if (!REPOSITORY_ID_PATTERN.matcher( repositoryId ).matches()) {
+        		throw new RepositoryException("Invalid repository ID: " + repositoryId);
+        	}
             this.localRepositoryId = repositoryId;
             this.localRepositoryDisplayName = displayName;
 

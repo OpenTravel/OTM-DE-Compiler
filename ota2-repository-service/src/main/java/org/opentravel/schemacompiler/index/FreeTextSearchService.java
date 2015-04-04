@@ -35,7 +35,6 @@ import org.apache.lucene.search.SearcherFactory;
 import org.apache.lucene.search.SearcherManager;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.util.Version;
 import org.opentravel.schemacompiler.index.IndexingTask.TaskInfo;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
@@ -90,9 +89,6 @@ public class FreeTextSearchService {
         if (!indexLocation.exists()) {
             indexLocation.mkdirs();
         }
-        this.writerConfig = new IndexWriterConfig(Version.LUCENE_41, new StandardAnalyzer(
-                Version.LUCENE_41));
-        this.writerConfig.setOpenMode(OpenMode.CREATE_OR_APPEND);
         this.repositoryManager = repositoryManager;
         this.indexLocation = indexLocation;
         this.realTimeIndexing = System.getProperty("ota2.repository.realTimeIndexing", "false")
@@ -189,14 +185,19 @@ public class FreeTextSearchService {
         }
 
         // Check to make sure the index was properly closed, and release any lock that might exist
-        this.indexDirectory = FSDirectory.open(indexLocation);
+        this.indexDirectory = FSDirectory.open(indexLocation.toPath());
 
+        // TODO: Does Lucene 5.0 still require that we force a previous lock to be released?  If so, how?
+        /*
         if (IndexWriter.isLocked(indexDirectory)) {
             log.warn("The search index was not properly shut down - releasing lock.");
             IndexWriter.unlock(indexDirectory);
         }
+        */
 
         // Configure the indexing and search components
+        this.writerConfig = new IndexWriterConfig(new StandardAnalyzer());
+        this.writerConfig.setOpenMode(OpenMode.CREATE_OR_APPEND);
         this.indexWriter = new IndexWriter(indexDirectory, writerConfig);
         this.searchManager = new SearcherManager(indexWriter, true, new SearcherFactory());
         this.indexingTask = new IndexingTask(indexWriter, repositoryManager);
@@ -249,7 +250,6 @@ public class FreeTextSearchService {
         try {
             searchManager.close();
             indexWriter.close();
-            indexDirectory.clearLock(indexDirectory.getLockID());
             indexDirectory.close();
 
         } finally {
