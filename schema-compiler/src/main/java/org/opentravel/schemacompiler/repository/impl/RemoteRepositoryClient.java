@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.ProxySelector;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
@@ -53,9 +52,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoListType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryStatus;
@@ -124,7 +121,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
 
     private static Log log = LogFactory.getLog(RemoteRepositoryClient.class);
     protected static ObjectFactory objectFactory = new ObjectFactory();
-
+    
     private RepositoryManager manager;
     private String id;
     private String displayName;
@@ -146,22 +143,13 @@ public class RemoteRepositoryClient implements RemoteRepository {
     }
 
     private static HttpClient createHttpClient() {
-        CloseableHttpClient client = HttpClientBuilder.create().useSystemProperties()
+		return HttpClientBuilder.create().useSystemProperties()
                 .setDefaultCredentialsProvider(new NTLMSystemCredentialsProvider()).build();
-        return client;
-    }
-
-    private boolean useProxy() {
-        SystemDefaultRoutePlanner planner = new SystemDefaultRoutePlanner(null,
-                ProxySelector.getDefault());
-        // TODO Auto-generated method stub
-        return false;
     }
 
     private HttpResponse executeWithAuthentication(HttpUriRequest request)
             throws ClientProtocolException, IOException {
-        HttpClientContext context = createHttpContext();
-        return createHttpClient().execute(request, context);
+        return createHttpClient().execute(request, createHttpContext());
     }
 
     private static HttpResponse execute(HttpUriRequest request) throws ClientProtocolException,
@@ -1503,7 +1491,8 @@ public class RemoteRepositoryClient implements RemoteRepository {
      * encrypted password that is configured for this repository.
      */
     private HttpClientContext createHttpContext() {
-        HttpClientContext context = HttpClientContext.create();
+		HttpClientContext context = HttpClientContext.create();
+		
         if ((userId != null) && (encryptedPassword != null)) {
             AuthState target = new AuthState();
             target.update(

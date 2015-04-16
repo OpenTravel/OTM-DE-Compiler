@@ -1787,12 +1787,13 @@ public final class RepositoryManager implements Repository {
 
         } else {
             Repository repository = item.getRepository();
-
-            if (repository instanceof RemoteRepository) {
+        	File itemFile = fileManager.getLibraryContentLocation(baseNS,
+        			item.getFilename(), item.getVersion());
+            
+            if ((repository instanceof RemoteRepository) && !itemFile.exists()) {
                 ((RemoteRepository) repository).downloadContent(item, false);
             }
-            contentLocation = URLUtils.toURL(fileManager.getLibraryContentLocation(baseNS,
-                    item.getFilename(), item.getVersion()));
+            contentLocation = URLUtils.toURL( itemFile );
         }
         return contentLocation;
     }

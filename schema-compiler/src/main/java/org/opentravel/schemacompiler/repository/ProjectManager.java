@@ -49,7 +49,9 @@ import org.opentravel.schemacompiler.event.OwnershipEvent;
 import org.opentravel.schemacompiler.ic.ImportManagementIntegrityChecker;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.loader.LibraryModelLoader;
+import org.opentravel.schemacompiler.loader.LibraryNamespaceResolver;
 import org.opentravel.schemacompiler.loader.LoaderValidationMessageKeys;
+import org.opentravel.schemacompiler.loader.impl.DefaultLibraryNamespaceResolver;
 import org.opentravel.schemacompiler.loader.impl.FileValidationSource;
 import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
 import org.opentravel.schemacompiler.loader.impl.LibraryValidationSource;
@@ -318,6 +320,7 @@ public final class ProjectManager {
             // defined in the file.
             List<RepositoryItem> managedItems = new ArrayList<RepositoryItem>();
             List<File> unmanagedItemFiles = new ArrayList<File>();
+            Map<String,String> repositoryLocations = new HashMap<>();
             RepositoryItem defaultItem = null;
             URL defaultItemUrl = null;
 
@@ -952,7 +955,22 @@ public final class ProjectManager {
 
         // Initialize the loader and validation findings
         modelLoader.setResolveModelReferences(false);
-
+        
+    	// Optimization that will pre-process the repository URL's for each library.  This will
+    	// allow the loader to bypass multiple downloads of the libraries from the remote repository.
+        if ((managedItems != null) && !managedItems.isEmpty()) {
+        	LibraryNamespaceResolver nsResolver = new DefaultLibraryNamespaceResolver();
+        	
+            modelLoader.setNamespaceResolver( nsResolver );
+            
+            for (RepositoryItem managedItem : managedItems) {
+            	String repositoryUri = "otm://" + managedItem.getRepository().getId() + "/" + managedItem.getFilename();
+            	String libraryUrl = repositoryManager.getContentLocation( managedItem ).toExternalForm();
+            	
+            	nsResolver.setRepositoryLocation( repositoryUri, libraryUrl );
+            }
+        }
+        
         // Load all of the managed repository items
         for (RepositoryItem managedItem : managedItems) {
             URL libraryUrl = repositoryManager.getContentLocation(managedItem);

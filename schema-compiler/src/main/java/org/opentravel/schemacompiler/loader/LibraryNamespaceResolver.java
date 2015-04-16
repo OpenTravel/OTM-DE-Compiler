@@ -90,5 +90,15 @@ public interface LibraryNamespaceResolver {
      *            the URL of the context schema passed to this method
      */
     public void setContextSchema(LibraryModuleInfo<Schema> contextSchema, URL schemaUrl);
+    
+    /**
+     * Assigns the URL location of the library with the given repository file URI.  This
+     * is included as an optimization to prevent repeated downloads of file content during
+     * the namespace resolution phase of a load.
+     * 
+     * @param repositoryUri  the URI of the repository item
+     * @param libraryUrl  the resolved URL of the library
+     */
+    public void setRepositoryLocation(String repositoryUri, String libraryUrl);
 
 }
