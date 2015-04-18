@@ -39,6 +39,10 @@
 			<artifactId>lucene-queryparser</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-backward-codecs</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.tmatesoft.svnkit</groupId>
 			<artifactId>svnkit</artifactId>
 		</dependency>
