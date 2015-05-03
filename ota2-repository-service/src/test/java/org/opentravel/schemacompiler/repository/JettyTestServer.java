@@ -25,7 +25,6 @@ import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.log.Logger;
-import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
 import org.opentravel.schemacompiler.index.FreeTextSearchService;
@@ -76,7 +75,6 @@ public class JettyTestServer {
         System.setProperty("ota2.repository.config", System.getProperty("user.dir")
                 + "/target/test-classes/ota2-repository-config.xml");
         RepositoryComponentFactory.resetDefault();
-        new ResourceConfig().register( MultiPartFeature.class ); // only needs to be registered once
     }
 
     /**
