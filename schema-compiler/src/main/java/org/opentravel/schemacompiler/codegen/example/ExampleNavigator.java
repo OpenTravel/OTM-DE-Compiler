@@ -746,22 +746,23 @@ public class ExampleNavigator {
      * <code>ExampleGeneratorOptions</code>, the facet that is returned may or may not be the one
      * that is passed to this method.
      * 
-     * @param preferredFacet
-     *            the facet with the preferred amount of detail (per the current model
-     *            configuration)
+     * @param preferredFacet  the facet with the default amount of detail
      * @return TLAbstractFacet
      */
-    protected TLAbstractFacet selectExampleFacet(TLFacet preferredFacet) {
-        TLAbstractFacet exampleFacet;
+    protected TLAbstractFacet selectExampleFacet(TLFacet defaultFacet) {
+    	TLFacetOwner facetOwner = (defaultFacet == null) ? null : defaultFacet.getOwningEntity();
+        TLAbstractFacet exampleFacet = options.getPreferredFacet( facetOwner );
+        
+        if (exampleFacet == null) { // no preferred facet assigned
+            if (defaultFacet.getFacetType().isContextual()) {
+                exampleFacet = defaultFacet;
 
-        if (preferredFacet.getFacetType().isContextual()) {
-            exampleFacet = preferredFacet;
-
-        } else {
-            if (options.getDetailLevel() == DetailLevel.MAXIMUM) {
-                exampleFacet = getMaximumDetail(preferredFacet.getOwningEntity());
             } else {
-                exampleFacet = getMinimumDetail(preferredFacet);
+                if (options.getDetailLevel() == DetailLevel.MAXIMUM) {
+                    exampleFacet = getMaximumDetail(facetOwner);
+                } else {
+                    exampleFacet = getMinimumDetail(defaultFacet);
+                }
             }
         }
         return exampleFacet;
@@ -888,6 +889,8 @@ public class ExampleNavigator {
                         candidateFacets.add(0, businessObject.getSummaryFacet());
                     case ID:
                         candidateFacets.add(0, businessObject.getIdFacet());
+                    default:
+                    	break;
                 }
             } else if (facetOwner instanceof TLCoreObject) {
                 TLCoreObject coreObject = (TLCoreObject) facetOwner;
@@ -899,6 +902,8 @@ public class ExampleNavigator {
                         candidateFacets.add(0, coreObject.getSummaryFacet());
                     case SIMPLE:
                         candidateFacets.add(0, coreObject.getSimpleFacet());
+                    default:
+                    	break;
                 }
             }
 
@@ -932,6 +937,8 @@ public class ExampleNavigator {
                     candidateFacets.add(0, facetOwner.getDetailListFacet());
                 case SUMMARY:
                     candidateFacets.add(0, facetOwner.getSummaryListFacet());
+                default:
+                	break;
             }
 
             for (TLListFacet candidate : candidateFacets) {
