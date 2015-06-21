@@ -977,6 +977,79 @@ public class AdminController extends BaseController {
 
     /**
      * Called by the Spring MVC controller to display the application administration page used to
+     * unlock a repository item.
+     * 
+     * @param baseNamespace
+     *            the base namespace of the repository item to be unlocked
+     * @param filename
+     *            the filename of the repository item to be unlocked
+     * @param version
+     *            the version of the repository item to be unlocked
+     * @param confirmUnlock
+     *            flag indicating that the user has confirmed the unlock task
+     * @param session
+     *            the HTTP session that contains information about an authenticated user
+     * @param model
+     *            the model context to be used when rendering the page view
+     * @return String
+     */
+    @RequestMapping({ "/adminUnlockItem.html", "/adminUnlockItem.htm" })
+    public String adminUnlockItemPage(
+            @RequestParam(value = "baseNamespace", required = true) String baseNamespace,
+            @RequestParam(value = "filename", required = true) String filename,
+            @RequestParam(value = "version", required = true) String version,
+            @RequestParam(value = "confirmUnlock", required = false) boolean confirmUnlock,
+            HttpSession session, Model model) {
+        String targetPage = null;
+
+        if (confirmUnlock) {
+            try {
+                UserPrincipal user = getCurrentUser(session);
+
+                if (getSecurityManager().isAdministrator(user)) {
+                    RepositoryManager repositoryManager = getRepositoryManager();
+                    RepositoryItem item = repositoryManager.getRepositoryItem(baseNamespace,
+                            filename, version);
+
+                    repositoryManager.unlock(item, false);
+                    searchService.indexRepositoryItem(item);
+
+                    setStatusMessage("Repository item unlocked successfully: " + filename, model);
+
+                } else {
+                    setErrorMessage("You do not have permission to unlock the repository item.",
+                            model);
+                }
+            } catch (Exception e) {
+                log.error("Unable to unlock the repository item.", e);
+                setErrorMessage(
+                        "Unable to unlock the repository item (see server log for details).",
+                        model);
+
+            } finally {
+                targetPage = new ViewItemController().itemDetails(baseNamespace, filename, version,
+                        session, model);
+            }
+        }
+        if (targetPage == null) {
+            try {
+                RepositoryItem item = getRepositoryManager().getRepositoryItem(baseNamespace,
+                        filename, version);
+
+                model.addAttribute("item", item);
+                targetPage = applyCommonValues(session, model, "adminUnlockItem");
+
+            } catch (RepositoryException e) {
+                log.error("The requested repository item does not exist.", e);
+                setErrorMessage("The requested repository item does not exist.", model);
+                targetPage = new BrowseController().browsePage(baseNamespace, null, session, model);
+            }
+        }
+        return targetPage;
+    }
+
+    /**
+     * Called by the Spring MVC controller to display the application administration page used to
      * recalculate the CRC of a repository item that is in the final state.
      * 
      * @param baseNamespace

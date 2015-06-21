@@ -1234,7 +1234,7 @@ public final class RepositoryManager implements Repository {
 
         if (((libraryMetadata.getState() != RepositoryState.MANAGED_LOCKED) && (item.getState() != RepositoryItemState.MANAGED_WIP))
                 || (item.getLockedByUser() == null)
-                || !item.getLockedByUser().equals(libraryMetadata.getLockedBy())) {
+                || !item.getLockedByUser().equalsIgnoreCase(libraryMetadata.getLockedBy())) {
             throw new RepositoryException(
                     "Unable to commit - only work-in-process items can be committed to the repository.");
         }
@@ -1300,7 +1300,7 @@ public final class RepositoryManager implements Repository {
 
             if (((libraryMetadata.getState() != RepositoryState.MANAGED_LOCKED) && (item.getState() != RepositoryItemState.MANAGED_WIP))
                     || (item.getLockedByUser() == null)
-                    || !item.getLockedByUser().equals(libraryMetadata.getLockedBy())) {
+                    || !item.getLockedByUser().equalsIgnoreCase(libraryMetadata.getLockedBy())) {
                 throw new RepositoryException(
                         "Unable to revert - only work-in-process items can be reverted.");
             }
@@ -1461,8 +1461,8 @@ public final class RepositoryManager implements Repository {
 
         if (((libraryMetadata.getState() != RepositoryState.MANAGED_LOCKED) && (item.getState() != RepositoryItemState.MANAGED_WIP))
                 || (item.getLockedByUser() == null)
-                || !item.getLockedByUser().equals(libraryMetadata.getLockedBy())) {
-            throw new RepositoryException("Unable to release lock - item is not currently unlocked");
+                || !item.getLockedByUser().equalsIgnoreCase(libraryMetadata.getLockedBy())) {
+            throw new RepositoryException("Unable to release lock - item is not currently locked");
         }
 
         boolean success = false;

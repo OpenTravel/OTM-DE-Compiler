@@ -21,14 +21,17 @@ import org.opentravel.schemacompiler.model.TLAbstractFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLAttributeOwner;
+import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
+import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLModelElement;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
+import org.opentravel.schemacompiler.model.TLRoleEnumeration;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
@@ -56,6 +59,8 @@ public class TLAttributeCompileValidator extends TLAttributeBaseValidator {
     public static final String ERROR_ILLEGAL_REQUIRED_ATTRIBUTE = "ILLEGAL_REQUIRED_ATTRIBUTE";
     public static final String WARNING_BOOLEAN_TYPE_REFERENCE = "BOOLEAN_TYPE_REFERENCE";
     public static final String WARNING_LEGACY_IDREF = "LEGACY_IDREF";
+    public static final String WARNING_ILLEGAL_BUSINESS_OBJECT_ID = "ILLEGAL_BUSINESS_OBJECT_ID";
+    public static final String WARNING_ILLEGAL_CORE_OBJECT_ID = "ILLEGAL_CORE_OBJECT_ID";
 
     /**
      * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateFields(org.opentravel.schemacompiler.validate.Validatable)
@@ -72,8 +77,8 @@ public class TLAttributeCompileValidator extends TLAttributeBaseValidator {
                 .setFindingType(FindingType.ERROR)
                 .assertNotNull()
                 .assertValidEntityReference(TLClosedEnumeration.class, TLOpenEnumeration.class,
-                        TLValueWithAttributes.class, TLSimple.class, TLCoreObject.class,
-                        TLSimpleFacet.class, TLListFacet.class, XSDSimpleType.class)
+                        TLRoleEnumeration.class, TLValueWithAttributes.class, TLSimple.class,
+                        TLCoreObject.class, TLSimpleFacet.class, TLListFacet.class, XSDSimpleType.class)
                 .setFindingType(FindingType.WARNING).assertNotDeprecated();
 
         // VWA and open enumeration attributes are only allowed when the attribute's owner is a VWA
@@ -130,6 +135,23 @@ public class TLAttributeCompileValidator extends TLAttributeBaseValidator {
 
         if (ValidatorUtils.isLegacyIDREF(target.getType())) {
             builder.addFinding(FindingType.WARNING, "type", WARNING_LEGACY_IDREF);
+        }
+        
+        // For xsd:ID attributes, make sure they are contained in the top-level facet
+        // if the owner is a core or business object
+        if (ValidatorUtils.isXsdID(target.getType()) && (target.getAttributeOwner() instanceof TLFacet)) {
+        	TLFacet facet = (TLFacet) target.getAttributeOwner();
+        	TLFacetOwner facetOwner = facet.getOwningEntity();
+        	
+        	if (facetOwner instanceof TLBusinessObject) {
+        		if (facet.getFacetType() != TLFacetType.ID) {
+                    builder.addFinding(FindingType.WARNING, "type", WARNING_ILLEGAL_BUSINESS_OBJECT_ID);
+        		}
+        	} else if (facetOwner instanceof TLCoreObject) {
+        		if (facet.getFacetType() != TLFacetType.SUMMARY) {
+                    builder.addFinding(FindingType.WARNING, "type", WARNING_ILLEGAL_CORE_OBJECT_ID);
+        		}
+        	}
         }
 
         // Issue a warning if an empty facet is referenced

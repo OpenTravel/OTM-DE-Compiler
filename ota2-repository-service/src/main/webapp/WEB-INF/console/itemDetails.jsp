@@ -71,7 +71,18 @@
 	</tr>
 	<tr class="d1">
 		<td>Repository State:</td>
-		<td>${item.state}</td>
+		<td>${item.state}
+			<c:if test="${sessionScope.isAdminAuthorized}">
+				<c:if test="${item.state.toString()=='MANAGED_LOCKED'}">
+					<c:url var="unlockItemUrl" value="/console/adminUnlockItem.html">
+						<c:param name="baseNamespace" value="${item.baseNamespace}" />
+						<c:param name="filename" value="${item.filename}" />
+						<c:param name="version" value="${item.version}" />
+					</c:url>
+					&nbsp; &nbsp; [ <a href="${unlockItemUrl}">Unlock this item</a> ]
+				</c:if>
+			</c:if>
+		</td>
 	</tr>
 	<c:if test="${item.lockedByUser != null}">
 		<tr class="d0">

@@ -97,12 +97,22 @@ public abstract class AbstractExampleVisitor implements ExampleVisitor {
                     .getSimpleFacet());
 
         } else if (entity instanceof TLAttribute) {
-            exampleValue = exampleValueGenerator.getExampleValue((TLAttribute) entity);
+            exampleValue = exampleValueGenerator.getExampleValue((TLAttribute) entity, getContextFacet());
 
         } else if (entity instanceof TLProperty) {
-            exampleValue = exampleValueGenerator.getExampleValue((TLProperty) entity);
+            exampleValue = exampleValueGenerator.getExampleValue((TLProperty) entity, getContextFacet());
         }
         return exampleValue;
+    }
+    
+    /**
+     * Returns the context facet that is the current owner for all attributes and elements
+     * that are encountered.  By default, this method returns null; sub-classes may override.
+     * 
+     * @return TLFacet
+     */
+    protected TLFacet getContextFacet() {
+    	return null;
     }
 
     /**

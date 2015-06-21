@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -320,7 +321,6 @@ public final class ProjectManager {
             // defined in the file.
             List<RepositoryItem> managedItems = new ArrayList<RepositoryItem>();
             List<File> unmanagedItemFiles = new ArrayList<File>();
-            Map<String,String> repositoryLocations = new HashMap<>();
             RepositoryItem defaultItem = null;
             URL defaultItemUrl = null;
 
@@ -441,6 +441,16 @@ public final class ProjectManager {
                 findings.addAll(TLModelValidator.validateModel(model,
                         ValidatorFactory.COMPILE_RULE_SET_ID));
                 findings.addAll(loaderFindings);
+            }
+            
+            // Ensure that all of the project items were loaded, and place any that did
+            // not in the 'failedProjectItems' list.
+            for (JAXBElement<? extends ProjectItemType> jaxbItem : jaxbProject.getProjectItemBase()) {
+            	ProjectItemType item = jaxbItem.getValue();
+            	
+            	if (!isProjectItemLoaded( item, project )) {
+            		project.getFailedProjectItems().add( item );
+            	}
             }
 
         } else {
@@ -565,6 +575,12 @@ public final class ProjectManager {
         if (findings == null)
             findings = new ValidationFindings();
 
+        // Before saving, scan the list of failed project items to make sure that none
+        // of them were loaded after the initial attempt.
+        checkFailedProjectItems( project );
+        
+        // In addition to the project itself, save any of the unmanaged libraries if requested
+        // by the caller.
         if (saveUnmanagedLibraries) {
             List<TLLibrary> libraryList = new ArrayList<TLLibrary>();
 
@@ -710,6 +726,24 @@ public final class ProjectManager {
             }
         }
         return projectList;
+    }
+    
+    /**
+     * Scans the list of failed project items for the given project and removes any
+     * items that have been loaded successfully since the last check.
+     * 
+     * @param project  the project to be checked
+     */
+    public void checkFailedProjectItems(Project project) {
+        Iterator<ProjectItemType> itemIterator = project.getFailedProjectItems().iterator();
+        
+        while (itemIterator.hasNext()) {
+        	ProjectItemType failedItem = itemIterator.next();
+        	
+        	if (isProjectItemLoaded( failedItem, project )) {
+        		itemIterator.remove();
+        	}
+        }
     }
 
     /**
@@ -937,7 +971,7 @@ public final class ProjectManager {
      * @param managedItems
      *            the managed repository items to be included in the project
      * @param project
-     *            the project to which the unmanaged project item will be added
+     *            the project to which the project item will be added
      * @param loaderFindings
      *            validation findings where errors/warnings from the loading operation will be
      *            reported
@@ -1526,6 +1560,9 @@ public final class ProjectManager {
                 case UNMANAGED:
                     throw new RepositoryException(
                             "Unable to lock - the item is not a managed artifact.");
+                    
+				default:
+					break;
             }
 
             // Copy the repository file to the WIP location
@@ -2002,6 +2039,41 @@ public final class ProjectManager {
             projectItems.add(projectItem);
         }
         return projectItem;
+    }
+    
+    /**
+     * Returns true if the given JAXB representation of the project item exists
+     * in the model (false otherwise).
+     * 
+     * @param jaxbItem  the JAXB representation of the project item to check
+     * @param project  the project from which the item was loaded
+     * @return boolean
+     */
+    private boolean isProjectItemLoaded(ProjectItemType jaxbItem, Project project) {
+    	boolean result;
+    	
+    	try {
+        	URL libraryUrl;
+        	
+        	if (jaxbItem instanceof UnmanagedProjectItemType) {
+        		UnmanagedProjectItemType _jaxbItem = (UnmanagedProjectItemType) jaxbItem;
+        		File projectFolder = project.getProjectFile().getParentFile();
+    			
+        		libraryUrl = URLUtils.getResolvedURL( _jaxbItem.getFileLocation(), URLUtils.toURL( projectFolder ) );
+        		
+        	} else { // must be a ManagedProjectItemType
+        		ManagedProjectItemType _jaxbItem = (ManagedProjectItemType) jaxbItem;
+    			RepositoryItem repositoryItem = repositoryManager.getRepositoryItem( _jaxbItem.getBaseNamespace(),
+    			        _jaxbItem.getFilename(), _jaxbItem.getVersion() );
+    			
+    			libraryUrl = repositoryManager.getContentLocation( repositoryItem );
+        	}
+    		result = (model.getLibrary( libraryUrl ) != null);
+    		
+    	} catch (MalformedURLException | RepositoryException e) {
+    		result = false; // Ignore error and return false
+    	}
+    	return result;
     }
 
     /**

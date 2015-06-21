@@ -35,6 +35,7 @@ import org.opentravel.schemacompiler.model.TLAbstractEnumeration;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAliasOwner;
 import org.opentravel.schemacompiler.model.TLAttribute;
+import org.opentravel.schemacompiler.model.TLAttributeOwner;
 import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLCoreObject;
@@ -46,6 +47,7 @@ import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLProperty;
+import org.opentravel.schemacompiler.model.TLPropertyOwner;
 import org.opentravel.schemacompiler.model.TLRole;
 import org.opentravel.schemacompiler.model.TLRoleEnumeration;
 import org.opentravel.schemacompiler.model.TLSimple;
@@ -212,15 +214,16 @@ public class ExampleValueGenerator {
      * 
      * @param attribute
      *            the attribute for which to return an example value
+     * @param owner  the owner that declared or inherited the attribute
      * @return String
      */
-    public String getExampleValue(TLAttribute attribute) {
+    public String getExampleValue(TLAttribute attribute, TLAttributeOwner owner) {
         String exampleValue = null;
 
         if ((attribute != null) && !isEmptyValueType(attribute.getType())) {
             if (XsdCodegenUtils.isIdType(attribute.getType())) {
-                NamedEntity owner = getBaseEntity(attribute.getAttributeOwner());
-                exampleValue = idFactory.getMessageId(owner.getNamespace(), owner.getLocalName());
+                NamedEntity ownerBase = getBaseEntity( (owner != null) ? owner : attribute.getAttributeOwner() );
+                exampleValue = idFactory.getMessageId(ownerBase.getNamespace(), ownerBase.getLocalName());
             } else {
                 exampleValue = getExampleValue(attribute, attribute.getType());
             }
@@ -236,15 +239,16 @@ public class ExampleValueGenerator {
      * 
      * @param element
      *            the element for which to return an example value
+     * @param owner  the owner that declared or inherited the element
      * @return String
      */
-    public String getExampleValue(TLProperty element) {
+    public String getExampleValue(TLProperty element, TLPropertyOwner owner) {
         String exampleValue = null;
 
         if ((element != null) && !isEmptyValueType(element.getType())) {
             if (XsdCodegenUtils.isIdType(element.getType())) {
-                NamedEntity owner = getBaseEntity(element.getPropertyOwner());
-                exampleValue = idFactory.getMessageId(owner.getNamespace(), owner.getLocalName());
+                NamedEntity ownerBase = getBaseEntity( (owner != null) ? owner : element.getPropertyOwner() );
+                exampleValue = idFactory.getMessageId(ownerBase.getNamespace(), ownerBase.getLocalName());
             } else {
                 exampleValue = getExampleValue(element, element.getType());
             }
@@ -467,6 +471,8 @@ public class ExampleValueGenerator {
                 case ANY_EXAMPLE:
                     exampleValue = getAnyExample(simple);
                     break;
+				default:
+					break;
             }
             if (exampleValue == null) {
                 TLAttributeType parentType = simple.getParentType();
@@ -504,6 +510,8 @@ public class ExampleValueGenerator {
                 case ANY_EXAMPLE:
                     exampleValue = getAnyExample(simpleFacet);
                     break;
+				default:
+					break;
             }
             if (exampleValue == null) {
                 NamedEntity parentType = simpleFacet.getSimpleType();
@@ -552,6 +560,8 @@ public class ExampleValueGenerator {
                 case ANY_EXAMPLE:
                     exampleValue = getAnyExample(valueWithAttributes);
                     break;
+				default:
+					break;
             }
             if (exampleValue == null) {
                 TLAttributeType parentType = valueWithAttributes.getParentType();

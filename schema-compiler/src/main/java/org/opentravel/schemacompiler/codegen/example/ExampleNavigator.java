@@ -559,7 +559,9 @@ public class ExampleNavigator {
             navigateAttribute(attribute);
         }
         for (TLIndicator indicator : PropertyCodegenUtils.getInheritedIndicators(facet)) {
-            navigateIndicator(indicator);
+        	if (!indicator.isPublishAsElement()) {
+                navigateIndicator(indicator);
+        	}
         }
 
         // Navigate the elements (properties) and extension points for this facet
@@ -592,7 +594,14 @@ public class ExampleNavigator {
             // Navigate the example content for the current element
             navigateElement(element);
         }
-
+        
+        // Navigate indicators that are published as elements
+        for (TLIndicator indicator : PropertyCodegenUtils.getInheritedIndicators(facet)) {
+        	if (indicator.isPublishAsElement()) {
+                navigateIndicator(indicator);
+        	}
+        }
+        
         // Wrap up by checking for any extension points for the current facet (take into account
         // that
         // the facet may not contain any properties and therefore may not have checked for extension

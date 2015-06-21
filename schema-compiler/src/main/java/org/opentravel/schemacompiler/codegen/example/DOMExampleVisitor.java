@@ -243,6 +243,15 @@ public class DOMExampleVisitor extends AbstractExampleVisitor {
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#getContextFacet()
+	 */
+	@Override
+	protected TLFacet getContextFacet() {
+		TLPropertyOwner contextFacet = facetStack.isEmpty() ? null : facetStack.peek();
+		return (contextFacet instanceof TLFacet) ? (TLFacet) contextFacet : null;
+	}
+
+	/**
      * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#startAlias(org.opentravel.schemacompiler.model.TLAlias)
      */
     @Override

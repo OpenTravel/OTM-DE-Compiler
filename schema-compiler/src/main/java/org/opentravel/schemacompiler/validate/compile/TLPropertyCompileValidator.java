@@ -34,6 +34,7 @@ import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
+import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLModelElement;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
@@ -75,6 +76,8 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
     public static final String WARNING_UNNECESSARY_EXAMPLE = "UNNECESSARY_EXAMPLE";
     public static final String WARNING_LEGACY_IDREF = "LEGACY_IDREF";
     public static final String WARNING_INVALID_REFERENCE_NAME = "INVALID_REFERENCE_NAME";
+    public static final String WARNING_ILLEGAL_BUSINESS_OBJECT_ID = "ILLEGAL_BUSINESS_OBJECT_ID";
+    public static final String WARNING_ILLEGAL_CORE_OBJECT_ID = "ILLEGAL_CORE_OBJECT_ID";
 
     /**
      * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateFields(org.opentravel.schemacompiler.validate.Validatable)
@@ -91,15 +94,32 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
         builder.setEntityReferenceProperty("type", propertyType, target.getTypeName())
                 .setFindingType(FindingType.ERROR)
                 .assertNotNull()
-                .assertValidEntityReference(TLClosedEnumeration.class, TLSimple.class,
-                        TLSimpleFacet.class, TLOpenEnumeration.class, TLValueWithAttributes.class,
-                        TLFacet.class, TLListFacet.class, TLCoreObject.class,
-                        TLBusinessObject.class, TLAlias.class, TLRoleEnumeration.class,
-                        XSDSimpleType.class, XSDComplexType.class, XSDElement.class)
+                .assertValidEntityReference(TLSimple.class, TLSimpleFacet.class, TLClosedEnumeration.class, 
+                        TLOpenEnumeration.class, TLRoleEnumeration.class, TLValueWithAttributes.class,
+                        TLFacet.class, TLListFacet.class, TLCoreObject.class, TLBusinessObject.class,
+                        TLAlias.class, TLRoleEnumeration.class, XSDSimpleType.class, XSDComplexType.class,
+                        XSDElement.class)
                 .setFindingType(FindingType.WARNING).assertNotDeprecated();
 
         if (ValidatorUtils.isLegacyIDREF(propertyType)) {
             builder.addFinding(FindingType.WARNING, "type", WARNING_LEGACY_IDREF);
+        }
+
+        // For xsd:ID elements, make sure they are contained in the top-level facet
+        // if the owner is a core or business object
+        if (ValidatorUtils.isXsdID(target.getType()) && (target.getPropertyOwner() instanceof TLFacet)) {
+        	TLFacet facet = (TLFacet) target.getPropertyOwner();
+        	TLFacetOwner facetOwner = facet.getOwningEntity();
+        	
+        	if (facetOwner instanceof TLBusinessObject) {
+        		if (facet.getFacetType() != TLFacetType.ID) {
+                    builder.addFinding(FindingType.WARNING, "type", WARNING_ILLEGAL_BUSINESS_OBJECT_ID);
+        		}
+        	} else if (facetOwner instanceof TLCoreObject) {
+        		if (facet.getFacetType() != TLFacetType.SUMMARY) {
+                    builder.addFinding(FindingType.WARNING, "type", WARNING_ILLEGAL_CORE_OBJECT_ID);
+        		}
+        	}
         }
 
         if ((propertyType != null) && target.isReference() && !hasID(propertyType)) {

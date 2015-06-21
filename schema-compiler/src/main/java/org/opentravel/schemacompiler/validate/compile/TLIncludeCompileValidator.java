@@ -36,7 +36,7 @@ public class TLIncludeCompileValidator extends TLValidatorBase<TLInclude> {
         TLValidationBuilder builder = newValidationBuilder(target);
 
         builder.setProperty("path", target.getPath()).setFindingType(FindingType.ERROR)
-                .assertNotNullOrBlank().assertContainsNoWhitespace();
+                .assertNotNullOrBlank();
 
         return builder.getFindings();
     }

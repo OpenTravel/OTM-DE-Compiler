@@ -147,6 +147,11 @@
 		<put-attribute name="pageTitle" value="Demote Repository Item" />
 		<put-attribute name="body" value="/WEB-INF/console/adminDemoteItem.jsp" />
 	</definition>
+	<definition name="adminUnlockItem" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Unlock Item" />
+		<put-attribute name="pageTitle" value="Unlock Repository Item" />
+		<put-attribute name="body" value="/WEB-INF/console/adminUnlockItem.jsp" />
+	</definition>
 	<definition name="adminRecalculateItemCrc" extends="baseLayout">
 		<put-attribute name="title" value="OTA2.0 Repository - Recalculate CRC" />
 		<put-attribute name="pageTitle" value="Recalculate CRC" />

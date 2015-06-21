@@ -30,6 +30,7 @@ import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLRole;
+import org.opentravel.schemacompiler.model.TLRoleEnumeration;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.transform.AnonymousEntityFilter;
@@ -90,6 +91,10 @@ public class TLAttributeCodegenTransformer extends
                     ((TLOpenEnumeration) attributeType).getLocalName() + "_Base"));
             artifacts.addArtifact(extensionAttr);
 
+        } else if (attributeType instanceof TLRoleEnumeration) {
+            attr.setType(new QName(attributeType.getNamespace(),
+                    ((TLRoleEnumeration) attributeType).getLocalName() + "_Base"));
+        	
         } else { // normal case
             String attrTypeNS = attributeType.getNamespace();
 

@@ -30,6 +30,7 @@ import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLCoreObject;
@@ -379,6 +380,15 @@ public class DependencyFilterBuilder {
         }
 
         /**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitAlias(org.opentravel.schemacompiler.model.TLAlias)
+		 */
+		@Override
+		public boolean visitAlias(TLAlias alias) {
+            visitLibraryElement(alias);
+            return true;
+		}
+
+		/**
          * When the compiled XSD includes an implied dependency on a built-in type, this method
          * ensures it will be imported, even though it is not directly referenced by the source
          * library.

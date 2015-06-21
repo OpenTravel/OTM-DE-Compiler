@@ -60,6 +60,19 @@ public class ValidatorUtils {
      *            the entity type to analyze
      * @return boolean
      */
+    public static boolean isXsdID(NamedEntity type) {
+        return (type != null) && XMLConstants.W3C_XML_SCHEMA_NS_URI.equals(type.getNamespace())
+                && "ID".equals(type.getLocalName());
+    }
+
+    /**
+     * Returns true if the given named entity represents either the 'xsd:IDREF' or 'xsd:IDREFS'
+     * attribute/property type.
+     * 
+     * @param type
+     *            the entity type to analyze
+     * @return boolean
+     */
     public static boolean isLegacyIDREF(NamedEntity type) {
         return (type != null) && XMLConstants.W3C_XML_SCHEMA_NS_URI.equals(type.getNamespace())
                 && ("IDREF".equals(type.getLocalName()) || "IDREFS".equals(type.getLocalName()));
