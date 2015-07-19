@@ -87,19 +87,15 @@ import org.opentravel.schemacompiler.xml.XMLGregorianCalendarConverter;
 public class RemoteRepositoryClient implements RemoteRepository {
 
     private static final String SERVICE_CONTEXT = "/service";
-    private static final String REPOSITORY_METADATA_ENDPOINT = SERVICE_CONTEXT
-            + "/repository-metadata";
+    private static final String REPOSITORY_METADATA_ENDPOINT = SERVICE_CONTEXT + "/repository-metadata";
     private static final String ALL_NAMSPACES_ENDPOINT = SERVICE_CONTEXT + "/all-namespaces";
     private static final String BASE_NAMSPACES_ENDPOINT = SERVICE_CONTEXT + "/base-namespaces";
-    private static final String NAMESPACE_CHILDREN_ENDPOINT = SERVICE_CONTEXT
-            + "/namespace-children";
+    private static final String NAMESPACE_CHILDREN_ENDPOINT = SERVICE_CONTEXT + "/namespace-children";
     private static final String LIST_ITEMS_ENDPOINT = SERVICE_CONTEXT + "/list-items";
     private static final String VERSION_HISTORY_ENDPOINT = SERVICE_CONTEXT + "/version-history";
     private static final String SEARCH_ENDPOINT = SERVICE_CONTEXT + "/search";
-    private static final String CREATE_ROOT_NAMESPACE_ENDPOINT = SERVICE_CONTEXT
-            + "/create-root-namespace";
-    private static final String DELETE_ROOT_NAMESPACE_ENDPOINT = SERVICE_CONTEXT
-            + "/delete-root-namespace";
+    private static final String CREATE_ROOT_NAMESPACE_ENDPOINT = SERVICE_CONTEXT + "/create-root-namespace";
+    private static final String DELETE_ROOT_NAMESPACE_ENDPOINT = SERVICE_CONTEXT + "/delete-root-namespace";
     private static final String CREATE_NAMESPACE_ENDPOINT = SERVICE_CONTEXT + "/create-namespace";
     private static final String DELETE_NAMESPACE_ENDPOINT = SERVICE_CONTEXT + "/delete-namespace";
     private static final String PUBLISH_ENDPOINT = SERVICE_CONTEXT + "/publish";
@@ -112,8 +108,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
     private static final String DELETE_ENDPOINT = SERVICE_CONTEXT + "/delete";
     private static final String REPOSITORY_ITEM_METADATA_ENDPOINT = SERVICE_CONTEXT + "/metadata";
     private static final String REPOSITORY_ITEM_CONTENT_ENDPOINT = SERVICE_CONTEXT + "/content";
-    private static final String USER_AUTHORIZATION_ENDPOINT = SERVICE_CONTEXT
-            + "/user-authorization";
+    private static final String USER_AUTHORIZATION_ENDPOINT = SERVICE_CONTEXT + "/user-authorization";
 
     private static final int HTTP_RESPONSE_STATUS_OK = 200;
 
@@ -1195,11 +1190,11 @@ public class RemoteRepositoryClient implements RemoteRepository {
      *      boolean)
      */
     @Override
-    public void downloadContent(RepositoryItem item, boolean forceUpdate)
+    public boolean downloadContent(RepositoryItem item, boolean forceUpdate)
             throws RepositoryException {
         String baseNS = RepositoryNamespaceUtils.normalizeUri(item.getBaseNamespace());
 
-        downloadContent(baseNS, item.getFilename(), item.getVersion(), forceUpdate);
+        return downloadContent(baseNS, item.getFilename(), item.getVersion(), forceUpdate);
     }
 
     /**
@@ -1207,6 +1202,10 @@ public class RemoteRepositoryClient implements RemoteRepository {
      * into the local instance. If the refresh policy for this repository does not require an update
      * (or the remote repository is not accessible), the locally cached copy of the content will be
      * used.
+     * 
+     * <p>This method will return true if the local copy was replaced by newer content from the remote
+     * repository.  False will be returned if the local copy was up-to-date, even if a refresh was
+     * forced by the caller or the update policy.
      * 
      * @param baseNamespace
      *            the namespace of the repository item to download
@@ -1217,32 +1216,30 @@ public class RemoteRepositoryClient implements RemoteRepository {
      * @param forceUpdate
      *            disregards the repository's update policy and forces the remote content to be
      *            downloaded
+     * @return boolean
      * @throws RepositoryException
      *             thrown if the remote repository cannot be accessed
      */
     @SuppressWarnings("unchecked")
-    public void downloadContent(String baseNamespace, String filename, String versionIdentifier,
+    public boolean downloadContent(String baseNamespace, String filename, String versionIdentifier,
             boolean forceUpdate) throws RepositoryException {
         String baseNS = RepositoryNamespaceUtils.normalizeUri(baseNamespace);
         LibraryInfoType contentMetadata = null;
-        boolean refreshRequired;
+        boolean refreshRequired, isStaleContent = false;
+        Date localLastUpdated;
 
         try {
-            contentMetadata = manager.getFileManager().loadLibraryMetadata(baseNS, filename,
-                    versionIdentifier);
-            refreshRequired = forceUpdate || (contentMetadata.getStatus() == LibraryStatus.DRAFT) || // always
-                                                                                                     // update
-                                                                                                     // draft
-                                                                                                     // items
+            contentMetadata = manager.getFileManager().loadLibraryMetadata(baseNS, filename, versionIdentifier);
+            localLastUpdated = XMLGregorianCalendarConverter.toJavaDate(contentMetadata.getLastUpdated());
+            refreshRequired = forceUpdate || (contentMetadata.getStatus() == LibraryStatus.DRAFT) || // always update draft items
                     (refreshPolicy == RefreshPolicy.ALWAYS);
 
             if (!refreshRequired && (refreshPolicy == RefreshPolicy.DAILY)) {
-                Date lastUpdated = XMLGregorianCalendarConverter.toJavaDate(contentMetadata
-                        .getLastUpdated());
-                refreshRequired = !dateOnlyFormat.format(lastUpdated).equals(
-                        dateOnlyFormat.format(new Date()));
+                refreshRequired = !dateOnlyFormat.format(localLastUpdated).equals(dateOnlyFormat.format(new Date()));
             }
+            
         } catch (RepositoryException e) {
+        	localLastUpdated = new Date( 0L ); // make sure the local date is earlier than anything we will get from the repository
             refreshRequired = true;
         }
 
@@ -1297,17 +1294,22 @@ public class RemoteRepositoryClient implements RemoteRepository {
 
                 // Update the local cache with the content we just received from the remote web
                 // service
-                Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext()
-                        .createUnmarshaller();
+                Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
                 JAXBElement<LibraryInfoType> jaxbElement = (JAXBElement<LibraryInfoType>) unmarshaller
                         .unmarshal(metadataResponse.getEntity().getContent());
+                LibraryInfoType libraryMetadata = jaxbElement.getValue();
 
                 manager.getFileManager().createNamespaceIdFiles(
                         jaxbElement.getValue().getBaseNamespace());
-                manager.getFileManager().saveLibraryMetadata(jaxbElement.getValue());
+                manager.getFileManager().saveLibraryMetadata(libraryMetadata);
                 manager.getFileManager().saveFile(repositoryContentFile,
                         contentResponse.getEntity().getContent());
                 success = true;
+                
+                // Compare the last-updated with our previous local value and return true if the
+                // local content was modified.
+                Date remoteLastUpdated = XMLGregorianCalendarConverter.toJavaDate(libraryMetadata.getLastUpdated());
+                isStaleContent = remoteLastUpdated.after( localLastUpdated );
 
             } catch (UnknownHostException e) {
                 // If the remote repository is inaccessible, it is only an error if we are
@@ -1345,6 +1347,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
                 }
             }
         }
+        return isStaleContent;
     }
 
     /**

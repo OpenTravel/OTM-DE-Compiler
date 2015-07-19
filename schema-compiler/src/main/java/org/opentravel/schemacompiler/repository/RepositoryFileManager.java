@@ -430,8 +430,13 @@ public abstract class RepositoryFileManager {
         if (!metadataFolder.exists()) {
             metadataFolder.mkdirs();
         }
-        libraryMetadata.setLastUpdated(XMLGregorianCalendarConverter
-                .toXMLGregorianCalendar(new Date()));
+        
+        if (libraryMetadata.getLastUpdated() != null) {
+            libraryMetadata.setLastUpdated(libraryMetadata.getLastUpdated());
+        } else {
+            libraryMetadata.setLastUpdated(XMLGregorianCalendarConverter.toXMLGregorianCalendar(new Date()));
+        }
+        
         saveFile(metadataFile, objectFactory.createLibraryInfo(libraryMetadata), true);
         return metadataFile;
     }

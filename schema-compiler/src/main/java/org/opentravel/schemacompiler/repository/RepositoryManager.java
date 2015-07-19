@@ -1804,17 +1804,22 @@ public final class RepositoryManager implements Repository {
      * local repository, this method has no effect. This update is performed regardless of the
      * update policy for the repository that owns and manages the item.
      * 
+     * <p>This method will return true if the item's local copy was replaced by new content from
+     * the remote repository.
+     * 
      * @param item
      *            the repository item to refresh
      * @throws RepositoryException
      *             thrown if the file content cannot be locked by the current user
      */
-    public void refreshLocalCopy(RepositoryItem item) throws RepositoryException {
+    public boolean refreshLocalCopy(RepositoryItem item) throws RepositoryException {
         Repository repository = item.getRepository();
-
+        boolean isRefreshed = false;
+        
         if (repository instanceof RemoteRepository) {
-            ((RemoteRepository) repository).downloadContent(item, true);
+            isRefreshed = ((RemoteRepository) repository).downloadContent(item, true);
         }
+        return isRefreshed;
     }
 
     /**
