@@ -109,7 +109,7 @@ public class TLClosedEnumeration extends TLAbstractEnumeration implements Versio
      */
     @Override
     public XSDFacetProfile getXSDFacetProfile() {
-        return XSDFacetProfile.FP_String;
+        return XSDFacetProfile.FP_string;
     }
 
 }

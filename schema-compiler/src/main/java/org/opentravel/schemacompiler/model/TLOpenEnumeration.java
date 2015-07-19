@@ -46,7 +46,7 @@ public class TLOpenEnumeration extends TLAbstractEnumeration implements TLAttrib
      */
     @Override
     public XSDFacetProfile getXSDFacetProfile() {
-        return null;
+        return XSDFacetProfile.FP_unknown;
     }
 
 }

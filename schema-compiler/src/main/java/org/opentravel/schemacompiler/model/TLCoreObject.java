@@ -122,7 +122,7 @@ public class TLCoreObject extends TLComplexTypeBase implements Versioned, TLFace
      */
     @Override
     public XSDFacetProfile getXSDFacetProfile() {
-        return (simpleFacet == null) ? null : simpleFacet.getXSDFacetProfile();
+        return (simpleFacet == null) ? XSDFacetProfile.FP_unknown : simpleFacet.getXSDFacetProfile();
     }
 
     /**

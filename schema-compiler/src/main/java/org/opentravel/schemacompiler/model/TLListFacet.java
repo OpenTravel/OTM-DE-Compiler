@@ -72,7 +72,7 @@ public class TLListFacet extends TLAbstractFacet implements TLAttributeType, TLA
     @Override
     public XSDFacetProfile getXSDFacetProfile() {
         return (itemFacet instanceof TLSimpleFacet) ? ((TLSimpleFacet) itemFacet)
-                .getXSDFacetProfile() : null;
+                .getXSDFacetProfile() : XSDFacetProfile.FP_unknown;
     }
 
     /**
