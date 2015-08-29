@@ -50,6 +50,7 @@ import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLModel;
+import org.opentravel.schemacompiler.model.TLModelElement;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLPropertyType;
@@ -565,40 +566,40 @@ public class ExampleNavigator {
         }
 
         // Navigate the elements (properties) and extension points for this facet
-        for (TLProperty element : PropertyCodegenUtils.getInheritedProperties(facet)) {
-            TLFacet currentFacet = (TLFacet) element.getPropertyOwner();
+        for (TLModelElement elementItem : PropertyCodegenUtils.getElementSequence(facet)) {
+        	if (elementItem instanceof TLProperty) {
+        		TLProperty element = (TLProperty) elementItem;
+        		
+                TLFacet currentFacet = (TLFacet) element.getPropertyOwner();
 
-            // Before navigating the element itself, check to see if we need to insert any extension
-            // point facets
-            if (currentFacet.getFacetType() != previousFacetType) {
-                List<TLFacet> facetHierarchy = FacetCodegenUtils
-                        .getLocalFacetHierarchy(currentFacet);
+                // Before navigating the element itself, check to see if we need to insert any extension
+                // point facets
+                if (currentFacet.getFacetType() != previousFacetType) {
+                    List<TLFacet> facetHierarchy = FacetCodegenUtils
+                            .getLocalFacetHierarchy(currentFacet);
 
-                // Ignore the last element in the facet hierarchy list since it is always the
-                // current
-                // facet we are processing
-                for (int i = 0; i < (facetHierarchy.size() - 1); i++) {
-                    TLFacet hFacet = facetHierarchy.get(i);
+                    // Ignore the last element in the facet hierarchy list since it is always the
+                    // current
+                    // facet we are processing
+                    for (int i = 0; i < (facetHierarchy.size() - 1); i++) {
+                        TLFacet hFacet = facetHierarchy.get(i);
 
-                    if (!processedExtensionPointTypes.contains(hFacet.getFacetType())) {
-                        List<TLExtensionPointFacet> facetExtensions = facetExtensionsByType
-                                .get(hFacet.getFacetType());
+                        if (!processedExtensionPointTypes.contains(hFacet.getFacetType())) {
+                            List<TLExtensionPointFacet> facetExtensions = facetExtensionsByType
+                                    .get(hFacet.getFacetType());
 
-                        navigateExtensionPoint(hFacet, facetExtensions);
-                        processedExtensionPointTypes.add(hFacet.getFacetType());
+                            navigateExtensionPoint(hFacet, facetExtensions);
+                            processedExtensionPointTypes.add(hFacet.getFacetType());
+                        }
                     }
+                    previousFacetType = currentFacet.getFacetType();
                 }
-                previousFacetType = currentFacet.getFacetType();
-            }
 
-            // Navigate the example content for the current element
-            navigateElement(element);
-        }
-        
-        // Navigate indicators that are published as elements
-        for (TLIndicator indicator : PropertyCodegenUtils.getInheritedIndicators(facet)) {
-        	if (indicator.isPublishAsElement()) {
-                navigateIndicator(indicator);
+                // Navigate the example content for the current element
+                navigateElement(element);
+                
+        	} else if (elementItem instanceof TLIndicator) {
+                navigateIndicator( (TLIndicator) elementItem );
         	}
         }
         

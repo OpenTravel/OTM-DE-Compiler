@@ -40,6 +40,7 @@ import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLListFacet;
+import org.opentravel.schemacompiler.model.TLModelElement;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLPropertyOwner;
@@ -646,6 +647,30 @@ public class PropertyCodegenUtils {
             }
         }
         return inheritanceRoot;
+    }
+    
+    /**
+     * Returns an ordered list of <code>TLProperty</code> and <code>TLIndicator</code> elements
+     * in the order they will occur in a schema-valid XML document.  Only those indicators that
+     * are published as elements will be included in the resulting list.
+     * 
+     * @param facet  the facet for which to return the sequence of XML elements
+     * @return List<TLModelElement>
+     */
+    public static List<TLModelElement> getElementSequence(TLFacet facet) {
+        List<TLFacet> localFacetHierarchy = FacetCodegenUtils.getLocalFacetHierarchy( facet );
+        List<TLModelElement> elementList = new ArrayList<TLModelElement>();
+
+        for (TLFacet aFacet : localFacetHierarchy) {
+        	elementList.addAll( getInheritedFacetProperties( aFacet ) );
+        	
+        	for (TLIndicator indicator : getInheritedFacetIndicators( aFacet )) {
+        		if (indicator.isPublishAsElement()) {
+        			elementList.add( indicator );
+        		}
+        	}
+        }
+        return elementList;
     }
 
     /**

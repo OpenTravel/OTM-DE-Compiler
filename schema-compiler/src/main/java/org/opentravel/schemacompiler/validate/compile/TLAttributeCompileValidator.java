@@ -15,8 +15,6 @@
  */
 package org.opentravel.schemacompiler.validate.compile;
 
-import java.util.List;
-
 import org.opentravel.schemacompiler.model.TLAbstractFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttribute;
@@ -24,12 +22,10 @@ import org.opentravel.schemacompiler.model.TLAttributeOwner;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLCoreObject;
-import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLListFacet;
-import org.opentravel.schemacompiler.model.TLModelElement;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLRoleEnumeration;
 import org.opentravel.schemacompiler.model.TLSimple;
@@ -37,9 +33,10 @@ import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.model.XSDSimpleType;
 import org.opentravel.schemacompiler.validate.FindingType;
+import org.opentravel.schemacompiler.validate.ValidationBuilder;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.base.TLAttributeBaseValidator;
-import org.opentravel.schemacompiler.validate.impl.FacetMemberIdentityResolver;
+import org.opentravel.schemacompiler.validate.impl.DuplicateFieldChecker;
 import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
 import org.opentravel.schemacompiler.validate.impl.ValidatorUtils;
 import org.opentravel.schemacompiler.version.Versioned;
@@ -67,7 +64,6 @@ public class TLAttributeCompileValidator extends TLAttributeBaseValidator {
      */
     @Override
     protected ValidationFindings validateFields(TLAttribute target) {
-        TLValidationBuilder dupBuilder = newValidationBuilder(target);
         TLValidationBuilder builder = newValidationBuilder(target);
 
         builder.setProperty("name", target.getName()).setFindingType(FindingType.ERROR)
@@ -96,20 +92,12 @@ public class TLAttributeCompileValidator extends TLAttributeBaseValidator {
                 .setFindingType(FindingType.ERROR).assertNotNull().assertContainsNoNullElements();
 
         // Check for duplicate names of this attribute
-        dupBuilder.setProperty("name", getMembersOfOwner(target)).setFindingType(FindingType.ERROR)
-                .assertNoDuplicates(new FacetMemberIdentityResolver());
-
-        if (dupBuilder.isEmpty() && !(target.getAttributeOwner() instanceof TLValueWithAttributes)) { // Does
-                                                                                                      // not
-                                                                                                      // apply
-                                                                                                      // to
-                                                                                                      // VWA's
-            List<TLModelElement> inheritedMembersOfOwner = getInheritedMembersOfOwner(target);
-
-            if (inheritedMembersOfOwner != null) {
-                dupBuilder.setProperty("name-upa", inheritedMembersOfOwner)
-                        .setFindingType(FindingType.ERROR)
-                        .assertNoDuplicates(new FacetMemberIdentityResolver());
+        if (target.getName() != null) {
+            DuplicateFieldChecker dupChecker = getDuplicateFieldChecker( target );
+            
+            if (dupChecker.isDuplicateName( target )) {
+            	builder.addFinding( FindingType.ERROR, "name", ValidationBuilder.ERROR_DUPLICATE_ELEMENT,
+            			target.getName() );
             }
         }
 
@@ -144,7 +132,7 @@ public class TLAttributeCompileValidator extends TLAttributeBaseValidator {
         	TLFacetOwner facetOwner = facet.getOwningEntity();
         	
         	if (facetOwner instanceof TLBusinessObject) {
-        		if (facet.getFacetType() != TLFacetType.ID) {
+        		if ((facet.getFacetType() != TLFacetType.ID) && (facet.getFacetType() != TLFacetType.QUERY)) {
                     builder.addFinding(FindingType.WARNING, "type", WARNING_ILLEGAL_BUSINESS_OBJECT_ID);
         		}
         	} else if (facetOwner instanceof TLCoreObject) {
@@ -179,68 +167,26 @@ public class TLAttributeCompileValidator extends TLAttributeBaseValidator {
             }
         }
 
-        builder.addFindings(dupBuilder.getFindings());
         return builder.getFindings();
     }
-
+    
     /**
-     * Returns the list of attributes, properties, and indicators defined by the given attribute's
-     * owner.
+     * Returns a <code>DuplicateFieldChecker</code> that can be used to identify duplicate
+     * field names within the attributes of the declaring facet or VWA.
      * 
-     * @param target
-     *            the target attribute being validated
-     * @return List<TLModelElement>
+     * @param target  the target attribute being validated
+     * @return DuplicateFieldChecker
      */
-    @SuppressWarnings("unchecked")
-    private List<TLModelElement> getMembersOfOwner(TLAttribute target) {
+    private DuplicateFieldChecker getDuplicateFieldChecker(TLAttribute target) {
         TLAttributeOwner attrOwner = target.getAttributeOwner();
-        String cacheKey = attrOwner.getNamespace() + ":" + attrOwner.getLocalName() + ":members";
-        List<TLModelElement> members = (List<TLModelElement>) getContextCacheEntry(cacheKey);
+        String cacheKey = attrOwner.getNamespace() + ":" + attrOwner.getLocalName() + ":dupChecker";
+        DuplicateFieldChecker checker = (DuplicateFieldChecker) getContextCacheEntry( cacheKey );
 
-        if (members == null) {
-            if (attrOwner instanceof TLValueWithAttributes) {
-                members = ValidatorUtils.getMembers((TLValueWithAttributes) attrOwner);
-
-            } else if (attrOwner instanceof TLExtensionPointFacet) {
-                members = ValidatorUtils.getMembers((TLExtensionPointFacet) attrOwner);
-
-            } else { // TLFacet
-                members = ValidatorUtils.getMembers((TLFacet) attrOwner);
-            }
-            setContextCacheEntry(cacheKey, members);
+        if (checker == null) {
+        	checker = new DuplicateFieldChecker( attrOwner );
+            setContextCacheEntry( cacheKey, checker );
         }
-        return members;
-    }
-
-    /**
-     * Returns the list of inherited attributes, properties, and indicators defined by the given
-     * attribute's owner. If the given attribute is not owned by a facet or VWA, this method will
-     * return null (indicating that the concept of inheritance does not apply to the owner).
-     * 
-     * @param target
-     *            the target attribute being validated
-     * @return List<TLModelElement>
-     */
-    @SuppressWarnings("unchecked")
-    private List<TLModelElement> getInheritedMembersOfOwner(TLAttribute target) {
-        TLAttributeOwner attrOwner = target.getAttributeOwner();
-        String cacheKey = attrOwner.getNamespace() + ":" + attrOwner.getLocalName()
-                + ":inheritedMembers";
-        List<TLModelElement> members = (List<TLModelElement>) getContextCacheEntry(cacheKey);
-
-        if (members == null) {
-            if (attrOwner instanceof TLFacet) {
-                members = ValidatorUtils.getInheritedMembers((TLFacet) attrOwner);
-
-            } else if (attrOwner instanceof TLValueWithAttributes) {
-                members = ValidatorUtils.getInheritedMembers((TLValueWithAttributes) attrOwner);
-            }
-
-            if (members != null) {
-                setContextCacheEntry(cacheKey, members);
-            }
-        }
-        return members;
+        return checker;
     }
 
     /**
