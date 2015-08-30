@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import org.opentravel.schemacompiler.model.TLAttributeType;
+import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.XSDFacetProfile;
 import org.opentravel.schemacompiler.model.XSDSimpleType;
@@ -58,9 +59,18 @@ public class TLSimpleCompileValidator extends TLSimpleBaseValidator {
 
         builder.setEntityReferenceProperty("parentType", target.getParentType(),
                 target.getParentTypeName()).setFindingType(FindingType.ERROR).assertNotNull()
-                .assertValidEntityReference(TLSimple.class, XSDSimpleType.class)
                 .setFindingType(FindingType.WARNING).assertNotDeprecated();
-
+        
+        // Validate allowable parent types (closed enumerations are allowed for list types
+        if (!target.isListTypeInd()) {
+        	builder.setFindingType(FindingType.ERROR).assertValidEntityReference(
+        			TLSimple.class, XSDSimpleType.class);
+        	
+        } else {
+        	builder.setFindingType(FindingType.ERROR).assertValidEntityReference(
+        			TLSimple.class, XSDSimpleType.class, TLClosedEnumeration.class);
+        }
+        
         if (target.isListTypeInd() && isSimpleListType(target.getParentType())) {
             builder.addFinding(FindingType.ERROR, "listTypeInd", ERROR_INVALID_LIST_OF_LISTS);
         }

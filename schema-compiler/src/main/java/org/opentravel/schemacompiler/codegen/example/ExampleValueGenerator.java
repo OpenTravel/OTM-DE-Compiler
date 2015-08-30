@@ -474,13 +474,33 @@ public class ExampleValueGenerator {
             }
             if (exampleValue == null) {
                 TLAttributeType parentType = simple.getParentType();
+                int repeatCount = simple.isListTypeInd() ? 3 : 1;
+                StringBuilder exampleStr = new StringBuilder();
 
-                if (parentType instanceof TLSimple) {
-                    exampleValue = getExampleValue((TLSimple) parentType, searchMode);
+                for (int i = 0; i < repeatCount; i++) {
+                	String _exampleValue = null;
+                	
+                    if (parentType instanceof TLSimple) {
+                        _exampleValue = getExampleValue((TLSimple) parentType, searchMode);
 
-                } else if ((parentType instanceof XSDSimpleType)
-                        && (searchMode == ExampleSearchMode.LEGACY_VALUE)) {
-                    exampleValue = getExampleValue((XSDSimpleType) parentType);
+                    } else if (parentType instanceof TLClosedEnumeration) {
+                        _exampleValue = getExampleValue((TLClosedEnumeration) parentType, searchMode);
+                    	
+                    } else if ((parentType instanceof XSDSimpleType)
+                            && (searchMode == ExampleSearchMode.LEGACY_VALUE)) {
+                        _exampleValue = getExampleValue((XSDSimpleType) parentType);
+                    }
+                    
+                    if (_exampleValue != null) {
+                    	if (exampleStr.length() > 0) {
+                    		exampleStr.append(" ");
+                    	}
+                    	exampleStr.append(_exampleValue);
+                    }
+                }
+                
+                if (exampleStr.length() > 0) {
+                	exampleValue = exampleStr.toString();
                 }
             }
         }
