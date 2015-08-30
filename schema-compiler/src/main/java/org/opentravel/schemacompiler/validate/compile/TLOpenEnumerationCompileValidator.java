@@ -39,11 +39,17 @@ public class TLOpenEnumerationCompileValidator extends TLOpenEnumerationBaseVali
                 .assertNotNullOrBlank().assertPatternMatch(NAME_XML_PATTERN);
 
         builder.setProperty("values", target.getValues()).setFindingType(FindingType.ERROR)
-                .assertNotNull().assertContainsNoNullElements().assertMinimumSize(1);
+                .assertNotNull().assertContainsNoNullElements();
+        
+        if (target.getExtension() == null) {
+            builder.setProperty("values", target.getValues()).setFindingType(FindingType.ERROR)
+            		.assertMinimumSize(1);
+        }
 
         checkSchemaNamingConflicts(target, builder);
 
-        checkMajorVersionNamingConflicts(target, builder);
+        // TODO: Re-enable version naming validation once we figure out the rules
+//        checkMajorVersionNamingConflicts(target, builder);
 
         return builder.getFindings();
     }

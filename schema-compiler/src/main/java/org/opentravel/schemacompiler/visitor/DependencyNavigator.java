@@ -195,8 +195,8 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
      *            the enumeration entity to visit and navigate
      */
     protected void navigateClosedEnumeration(TLClosedEnumeration enumeration) {
-        if (canVisit(enumeration)) {
-            visitor.visitClosedEnumeration(enumeration);
+        if (canVisit(enumeration) && visitor.visitClosedEnumeration(enumeration)) {
+            navigateExtension(enumeration.getExtension());
         }
     }
 
@@ -207,8 +207,8 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
      *            the enumeration entity to visit and navigate
      */
     protected void navigateOpenEnumeration(TLOpenEnumeration enumeration) {
-        if (canVisit(enumeration)) {
-            visitor.visitOpenEnumeration(enumeration);
+        if (canVisit(enumeration) && visitor.visitOpenEnumeration(enumeration)) {
+            navigateExtension(enumeration.getExtension());
         }
     }
 

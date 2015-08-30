@@ -53,6 +53,7 @@ import org.opentravel.schemacompiler.tests.util.ModelBuilder;
 import org.opentravel.schemacompiler.transform.SymbolResolver;
 import org.opentravel.schemacompiler.transform.util.LibraryPrefixResolver;
 import org.opentravel.schemacompiler.util.URLUtils;
+import org.opentravel.schemacompiler.validate.FindingMessageFormat;
 import org.opentravel.schemacompiler.validate.ValidationException;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.compile.TLModelCompileValidator;
@@ -741,7 +742,7 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
     }
 
     @Test
-    public void patchRollupDuplicatedSimpleTypeMultipeMinor() throws LibrarySaveException,
+    public void patchRollupDuplicatedSimpleTypeMultipleMinor() throws LibrarySaveException,
             VersionSchemeException, ValidationException, IOException {
         // given
         ModelBuilder mb = ModelBuilder.create();
@@ -798,6 +799,47 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
         // then
         ValidationFindings findings = TLModelCompileValidator
                 .validateModelElement(minorv010, false);
+        
+        // TODO: Delete debugging code
+        for (String message : findings.getAllValidationMessages(FindingMessageFormat.IDENTIFIED_FORMAT)) {
+        	System.out.println(message);
+        }
+        assertFalse(findings.hasFinding());
+    }
+
+    @Test
+    public void patchRollupDuplicatedOpenEnum() throws LibrarySaveException,
+            VersionSchemeException, ValidationException, IOException {
+        // given
+        ModelBuilder mb = ModelBuilder.create();
+        TLModel m = mb.getModel();
+
+        TLLibrary majorV000 = mb.newLibrary("PatchRollup", "http://test.org/rollup/patch").build();
+        majorV000.setPrefix("a");
+        majorV000.setLibraryUrl(URLUtils.toURL(tmp.newFile(majorV000.getName())));
+
+        PatchVersionHelper helper = new PatchVersionHelper();
+        TLLibrary patchV001 = helper.createNewPatchVersion(majorV000);
+
+        TLOpenEnumeration enumO = new TLOpenEnumeration();
+        enumO.setName("Enum");
+        TLEnumValue value = new TLEnumValue();
+        value.setLiteral("FirstValue");
+        enumO.addValue(value);
+        patchV001.addNamedMember(enumO);
+
+        // when
+        MinorVersionHelper minor = new MinorVersionHelper();
+        TLLibrary minorv010 = minor.createNewMinorVersion(majorV000);
+
+        // then
+        ValidationFindings findings = TLModelCompileValidator
+                .validateModelElement(minorv010, false);
+        
+        // TODO: Delete debugging code
+        for (String message : findings.getAllValidationMessages(FindingMessageFormat.IDENTIFIED_FORMAT)) {
+        	System.out.println(message);
+        }
         assertFalse(findings.hasFinding());
     }
 

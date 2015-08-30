@@ -407,6 +407,7 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
             for (TLEnumValue enumValue : enumeration.getValues()) {
                 navigateEnumValue(enumValue);
             }
+            navigateExtension(enumeration.getExtension());
             navigateDocumentation(enumeration.getDocumentation());
         }
         addVisitedNode(enumeration);
@@ -423,6 +424,7 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
             for (TLEnumValue enumValue : enumeration.getValues()) {
                 navigateEnumValue(enumValue);
             }
+            navigateExtension(enumeration.getExtension());
             navigateDocumentation(enumeration.getDocumentation());
         }
         addVisitedNode(enumeration);

@@ -18,8 +18,10 @@ package org.opentravel.schemacompiler.transform.jaxb14_2tl;
 import org.opentravel.ns.ota2.librarymodel_v01_04.Documentation;
 import org.opentravel.ns.ota2.librarymodel_v01_04.EnumValue;
 import org.opentravel.ns.ota2.librarymodel_v01_04.EnumerationOpen;
+import org.opentravel.ns.ota2.librarymodel_v01_04.Extension;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLEnumValue;
+import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.symbols.DefaultTransformerContext;
@@ -39,12 +41,18 @@ public class EnumerationOpenTransformer extends
      */
     @Override
     public TLOpenEnumeration transform(EnumerationOpen source) {
+        ObjectTransformer<Extension, TLExtension, DefaultTransformerContext> extTransformer = getTransformerFactory()
+                .getTransformer(Extension.class, TLExtension.class);
         ObjectTransformer<Documentation, TLDocumentation, DefaultTransformerContext> docTransformer = getTransformerFactory()
                 .getTransformer(Documentation.class, TLDocumentation.class);
         TLOpenEnumeration enumType = new TLOpenEnumeration();
 
         enumType.setName(source.getName());
 
+        if (source.getExtension() != null) {
+        	enumType.setExtension(extTransformer.transform(source.getExtension()));
+        }
+        
         if (source.getDocumentation() != null) {
             enumType.setDocumentation(docTransformer.transform(source.getDocumentation()));
         }

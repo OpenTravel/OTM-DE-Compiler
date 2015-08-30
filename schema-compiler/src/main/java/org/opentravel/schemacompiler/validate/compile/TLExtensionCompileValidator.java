@@ -17,6 +17,7 @@ package org.opentravel.schemacompiler.validate.compile;
 
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLComplexTypeBase;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtension;
@@ -24,6 +25,7 @@ import org.opentravel.schemacompiler.model.TLExtensionOwner;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
+import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
@@ -69,6 +71,14 @@ public class TLExtensionCompileValidator extends TLValidatorBase<TLExtension> {
             } else if (extensionOwner instanceof TLOperation) {
                 builder.setFindingType(FindingType.ERROR).assertValidEntityReference(
                         TLOperation.class);
+
+            } else if (extensionOwner instanceof TLClosedEnumeration) {
+                builder.setFindingType(FindingType.ERROR).assertValidEntityReference(
+                		TLClosedEnumeration.class);
+
+            } else if (extensionOwner instanceof TLOpenEnumeration) {
+                builder.setFindingType(FindingType.ERROR).assertValidEntityReference(
+                		TLOpenEnumeration.class);
 
             } else if (extensionOwner instanceof TLExtensionPointFacet) {
                 String extendsEntityNamespace = extendsEntity.getNamespace();

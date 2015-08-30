@@ -24,6 +24,7 @@ import java.util.Map;
 import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
+import org.opentravel.schemacompiler.codegen.util.EnumCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
@@ -777,8 +778,7 @@ public class ExampleValueGenerator {
 
         if (enumeration != null) {
             synchronized (enumerationExamples) {
-                Map<String, List<String>> localEnumExamples = enumerationExamples.get(enumeration
-                        .getNamespace());
+                Map<String, List<String>> localEnumExamples = enumerationExamples.get(enumeration.getNamespace());
                 List<String> enumExamples;
 
                 // Create the list of example data values if this is our first time generating
@@ -794,7 +794,7 @@ public class ExampleValueGenerator {
                     enumExamples = new ArrayList<String>();
                     localEnumExamples.put(enumeration.getLocalName(), enumExamples);
 
-                    for (TLEnumValue enumValue : enumeration.getValues()) {
+                    for (TLEnumValue enumValue : EnumCodegenUtils.getInheritedValues( enumeration )) {
                         enumExamples.add(enumValue.getLiteral());
                     }
                 }

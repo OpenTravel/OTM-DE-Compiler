@@ -20,6 +20,7 @@ import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
+import org.opentravel.schemacompiler.codegen.util.EnumCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLDocumentation;
@@ -59,7 +60,7 @@ public class TLClosedEnumerationCodegenTransformer extends
         }
         XsdCodegenUtils.addAppInfo(source, xsdEnum);
 
-        for (TLEnumValue modelEnum : source.getValues()) {
+        for (TLEnumValue modelEnum : EnumCodegenUtils.getInheritedValues( source )) {
             restriction.getFacets().add(createEnumValue(modelEnum));
         }
         xsdEnum.setRestriction(restriction);

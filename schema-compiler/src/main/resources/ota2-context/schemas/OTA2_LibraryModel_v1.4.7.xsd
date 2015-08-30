@@ -550,6 +550,7 @@
       </xsd:annotation>
       <xsd:sequence>
          <xsd:element ref="Documentation" minOccurs="0" />
+         <xsd:element ref="Extension" minOccurs="0" />
          <xsd:element name="Value" type="Enum_Value" maxOccurs="256">
             <xsd:annotation>
                <xsd:documentation>A collection of enumerated list items.
