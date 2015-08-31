@@ -85,7 +85,7 @@ public class TLExampleCompileValidator extends TLValidatorBase<TLExample> {
                     if (simpleType.getMinLength() > 0) {
                         builder.assertMinimumLength(simpleType.getMinLength());
                     }
-                    if (simpleType.getPattern() != null) {
+                    if ((simpleType.getPattern() != null) && (simpleType.getPattern().length() > 0)) {
                         try {
                             Pattern.compile(simpleType.getPattern());
                             builder.assertPatternMatch(simpleType.getPattern());
