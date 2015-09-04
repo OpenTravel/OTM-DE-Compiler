@@ -78,7 +78,7 @@ public class TLExtensionCompileValidator extends TLValidatorBase<TLExtension> {
 
             } else if (extensionOwner instanceof TLOpenEnumeration) {
                 builder.setFindingType(FindingType.ERROR).assertValidEntityReference(
-                		TLOpenEnumeration.class);
+                		TLOpenEnumeration.class, TLClosedEnumeration.class);
 
             } else if (extensionOwner instanceof TLExtensionPointFacet) {
                 String extendsEntityNamespace = extendsEntity.getNamespace();
