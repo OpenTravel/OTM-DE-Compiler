@@ -13,18 +13,50 @@
     <Import namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01_01" prefix="lib-0101"/>
     <Comments>Test Library</Comments>
     
-    <Simple name="TestMinorVersionSimple" type="xsd:string" />
+    <Simple name="LookupSimple" type="lib-0101:LookupSimple" maxLength="5"/>
+    
+    <Simple name="TestMinorVersionSimple" type="xsd:string" pattern="[A-Za-z]*" minLength="2" maxLength="5" />
+    
+    <Simple name="LaterMinorVersionSimple" type="lib-01:LaterMinorVersionSimple" />
     
     <Enumeration_Closed name="TestMinorVersionClosedEnum">
-        <Value literal="a" />
-        <Value literal="b" />
-        <Value literal="c" />
+        <Value literal="a12" />
+        <Value literal="b12" />
+        <Value literal="c12" />
+    </Enumeration_Closed>
+    
+    <Enumeration_Closed name="LookupClosedEnum">
+        <Extension extends="lib-0101:LookupClosedEnum"/>
+        <Value literal="a12" />
+        <Value literal="b12" />
+        <Value literal="c12" />
+    </Enumeration_Closed>
+    
+    <Enumeration_Closed name="LaterMinorVersionClosedEnum">
+        <Extension extends="lib-01:LaterMinorVersionClosedEnum"/>
+        <Value literal="a12" />
+        <Value literal="b12" />
+        <Value literal="c12" />
     </Enumeration_Closed>
     
     <Enumeration_Open name="TestMinorVersionOpenEnum">
-        <Value literal="a" />
-        <Value literal="b" />
-        <Value literal="c" />
+        <Value literal="a12" />
+        <Value literal="b12" />
+        <Value literal="c12" />
+    </Enumeration_Open>
+    
+    <Enumeration_Open name="LookupOpenEnum">
+        <Extension extends="lib-0101:LookupOpenEnum"/>
+        <Value literal="a12" />
+        <Value literal="b12" />
+        <Value literal="c12" />
+    </Enumeration_Open>
+    
+    <Enumeration_Open name="LaterMinorVersionOpenEnum">
+        <Extension extends="lib-01:LaterMinorVersionOpenEnum"/>
+        <Value literal="a12" />
+        <Value literal="b12" />
+        <Value literal="c12" />
     </Enumeration_Open>
     
     <ValueWithAttrs name="LookupVWA" type="lib-0101:LookupVWA">

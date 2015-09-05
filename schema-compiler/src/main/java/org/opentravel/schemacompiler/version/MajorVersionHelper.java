@@ -25,6 +25,7 @@ import java.util.Map;
 import org.opentravel.schemacompiler.ic.ImportManagementIntegrityChecker;
 import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLAbstractEnumeration;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLContext;
@@ -161,7 +162,6 @@ public final class MajorVersionHelper extends AbstractVersionHelper {
      * @throws LibrarySaveException
      *             thrown if the new version of the library cannot be saved to the local disk
      */
-    @SuppressWarnings("unchecked")
     public TLLibrary createNewMajorVersion(TLLibrary library, File libraryFile)
             throws VersionSchemeException, ValidationException, LibrarySaveException {
         List<ProjectItem> importedVersions = new ArrayList<ProjectItem>();
@@ -268,7 +268,6 @@ public final class MajorVersionHelper extends AbstractVersionHelper {
      *             thrown if the rollup cannot be performed because one or more validation errors
      *             exist in either the source or target entity
      */
-    @SuppressWarnings("unchecked")
     public <V extends Versioned> void rollupMinorVersion(V majorVersionTarget, V minorVersion)
             throws VersionSchemeException, ValidationException {
         if (!(majorVersionTarget.getOwningLibrary() instanceof TLLibrary)
@@ -301,7 +300,6 @@ public final class MajorVersionHelper extends AbstractVersionHelper {
      *             thrown if the rollup cannot be performed because one or more validation errors
      *             exist in either the source or target entity
      */
-    @SuppressWarnings("unchecked")
     public void rollupPatchVersion(Versioned majorVersionTarget, TLExtensionPointFacet patchVersion)
             throws VersionSchemeException, ValidationException {
         if (!(majorVersionTarget.getOwningLibrary() instanceof TLLibrary)
@@ -394,7 +392,20 @@ public final class MajorVersionHelper extends AbstractVersionHelper {
 
         // Perform the roll-up of all attributes, properties, and indicators of the given minor
         // version
-        if (majorVersionTarget instanceof TLValueWithAttributes) {
+    	if (majorVersionTarget instanceof TLSimple) {
+    		TLSimple target = (TLSimple) majorVersionTarget;
+    		TLSimple source = (TLSimple) minorVersion;
+    		
+            mergeSimpleConstraints(target, source);
+            
+    	} else if (majorVersionTarget instanceof TLAbstractEnumeration) {
+            ModelElementCloner cloner = new ModelElementCloner(minorVersion.getOwningModel());
+            TLAbstractEnumeration target = (TLAbstractEnumeration) majorVersionTarget;
+            TLAbstractEnumeration source = (TLAbstractEnumeration) minorVersion;
+
+            mergeEnumeratedValues(target, source.getValues(), cloner);
+    		
+    	} else if (majorVersionTarget instanceof TLValueWithAttributes) {
             ModelElementCloner cloner = new ModelElementCloner(minorVersion.getOwningModel());
             TLValueWithAttributes target = (TLValueWithAttributes) majorVersionTarget;
             TLValueWithAttributes source = (TLValueWithAttributes) minorVersion;
@@ -508,35 +519,77 @@ public final class MajorVersionHelper extends AbstractVersionHelper {
             }
         }
         for (TLSimple simple : minorVersionLibrary.getSimpleTypes()) {
-            if (majorVersionLibrary.getNamedMember(simple.getName()) == null) {
+            LibraryMember majorVersionEntity;
+
+            if ((majorVersionEntity = majorVersionLibrary.getNamedMember(simple.getName())) == null) {
+            	List<TLSimple> priorMinorVersions = getAllPriorVersionExtensions(simple);
+            	TLSimple earliestMinorVersion = priorMinorVersions.isEmpty() ?
+            			null : priorMinorVersions.get(priorMinorVersions.size() - 1);
                 TLSimple clone = cloner.clone(simple);
 
+                if (earliestMinorVersion != null) {// Roll up to the original base type
+                	clone.setParentType( earliestMinorVersion.getParentType() );
+                }
                 majorVersionLibrary.addNamedMember(clone);
                 captureRollupLibraryReference(clone, rollupReferences);
+            	
+            } else if (majorVersionEntity instanceof TLSimple) {
+                try {
+                    rollupMinorVersion((Versioned) majorVersionEntity, simple, rollupReferences, true);
+
+                } catch (ValidationException e) {
+                    // Should never happen since we indicate that validation should be skipped
+                }
             }
         }
         for (TLClosedEnumeration closedEnum : minorVersionLibrary.getClosedEnumerationTypes()) {
-            if (majorVersionLibrary.getNamedMember(closedEnum.getName()) == null) {
+            LibraryMember majorVersionEntity;
+
+            if ((majorVersionEntity = majorVersionLibrary.getNamedMember(closedEnum.getName())) == null) {
                 TLClosedEnumeration clone = cloner.clone(closedEnum);
 
                 majorVersionLibrary.addNamedMember(clone);
                 captureRollupLibraryReference(clone, rollupReferences);
+            	
+            } else if (majorVersionEntity instanceof TLClosedEnumeration) {
+                try {
+                    rollupMinorVersion((Versioned) majorVersionEntity, closedEnum, rollupReferences, true);
+
+                } catch (ValidationException e) {
+                    // Should never happen since we indicate that validation should be skipped
+                }
             }
         }
         for (TLOpenEnumeration openEnum : minorVersionLibrary.getOpenEnumerationTypes()) {
-            if (majorVersionLibrary.getNamedMember(openEnum.getName()) == null) {
+            LibraryMember majorVersionEntity;
+
+            if ((majorVersionEntity = majorVersionLibrary.getNamedMember(openEnum.getName())) == null) {
                 TLOpenEnumeration clone = cloner.clone(openEnum);
 
                 majorVersionLibrary.addNamedMember(clone);
                 captureRollupLibraryReference(clone, rollupReferences);
+            	
+            } else if (majorVersionEntity instanceof TLOpenEnumeration) {
+                try {
+                    rollupMinorVersion((Versioned) majorVersionEntity, openEnum, rollupReferences, true);
+
+                } catch (ValidationException e) {
+                    // Should never happen since we indicate that validation should be skipped
+                }
             }
         }
         for (TLValueWithAttributes vwa : minorVersionLibrary.getValueWithAttributesTypes()) {
             LibraryMember majorVersionEntity;
 
             if ((majorVersionEntity = majorVersionLibrary.getNamedMember(vwa.getName())) == null) {
+            	List<TLValueWithAttributes> priorMinorVersions = getAllPriorVersionExtensions(vwa);
+            	TLValueWithAttributes earliestMinorVersion = priorMinorVersions.isEmpty() ?
+            			null : priorMinorVersions.get(priorMinorVersions.size() - 1);
                 TLValueWithAttributes clone = cloner.clone(vwa);
-
+                
+                if (earliestMinorVersion != null) { // Roll up to the original VWA base type
+                	clone.setParentType( earliestMinorVersion.getParentType() );
+                }
                 majorVersionLibrary.addNamedMember(clone);
                 captureRollupLibraryReference(clone, rollupReferences);
 

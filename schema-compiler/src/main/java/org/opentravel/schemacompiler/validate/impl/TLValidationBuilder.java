@@ -233,7 +233,10 @@ public final class TLValidationBuilder extends ValidationBuilder<TLValidationBui
             if (value != null) {
                 boolean isDeprecated = false;
 
-                if (value instanceof TLDocumentationOwner) {
+                if (ValidatorUtils.isEmptyValueType(value)) {
+                	// Special case - do not warn deprecations on ota2:Empty
+                	
+                } else if (value instanceof TLDocumentationOwner) {
                     TLDocumentation valueDoc = ((TLDocumentationOwner) value).getDocumentation();
 
                     if ((valueDoc != null) && (valueDoc.getDeprecations() != null)) {
@@ -247,6 +250,7 @@ public final class TLValidationBuilder extends ValidationBuilder<TLValidationBui
                             }
                         }
                     }
+                    
                 } else {
                     AbstractLibrary valueLibrary = value.getOwningLibrary();
 

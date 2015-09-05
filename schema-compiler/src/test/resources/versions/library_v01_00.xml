@@ -12,18 +12,46 @@
     <Import namespace="http://opentravel.org/common/v02" prefix="ota"/>
     <Comments>Test Library</Comments>
     
-    <Simple name="TestMajorVersionSimple" type="xsd:string" />
+    <Simple name="TestMajorVersionSimple" type="xsd:string" pattern="[A-Za-z]*" minLength="2" maxLength="5" />
+    
+    <Simple name="LookupSimple" type="xsd:string" pattern="[A-Za-z]*" />
+    
+    <Simple name="LaterMinorVersionSimple" type="xsd:string" pattern="[A-Za-z]*" minLength="2" maxLength="5" />
     
     <Enumeration_Closed name="TestMajorVersionClosedEnum">
-        <Value literal="a" />
-        <Value literal="b" />
-        <Value literal="c" />
+        <Value literal="a1" />
+        <Value literal="b1" />
+        <Value literal="c1" />
+    </Enumeration_Closed>
+    
+    <Enumeration_Closed name="LookupClosedEnum">
+        <Value literal="a1" />
+        <Value literal="b1" />
+        <Value literal="c1" />
+    </Enumeration_Closed>
+    
+    <Enumeration_Closed name="LaterMinorVersionClosedEnum">
+        <Value literal="a1" />
+        <Value literal="b1" />
+        <Value literal="c1" />
     </Enumeration_Closed>
     
     <Enumeration_Open name="TestMajorVersionOpenEnum">
-        <Value literal="a" />
-        <Value literal="b" />
-        <Value literal="c" />
+        <Value literal="a1" />
+        <Value literal="b1" />
+        <Value literal="c1" />
+    </Enumeration_Open>
+    
+    <Enumeration_Open name="LookupOpenEnum">
+        <Value literal="a1" />
+        <Value literal="b1" />
+        <Value literal="c1" />
+    </Enumeration_Open>
+    
+    <Enumeration_Open name="LaterMinorVersionOpenEnum">
+        <Value literal="a1" />
+        <Value literal="b1" />
+        <Value literal="c1" />
     </Enumeration_Open>
     
     <ValueWithAttrs name="LookupVWA" type="xsd:string">

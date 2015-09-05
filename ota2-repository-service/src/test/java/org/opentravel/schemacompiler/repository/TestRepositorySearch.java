@@ -204,26 +204,23 @@ public class TestRepositorySearch extends RepositoryTestBase {
     public void testFreeTextSearch_allVersions_includeDraft() throws Exception {
         List<String> itemFilenames;
 
-        // Search for a keyword in all three libraries
+        // Search for a keyword in only two libraries
         itemFilenames = getFilenames(repositoryManager.get().search("red", false, true));
 
-        assertEquals(3, itemFilenames.size());
+        assertEquals(2, itemFilenames.size());
         assertTrue(itemFilenames.contains("Version_Test_1_0_0.otm"));
         assertTrue(itemFilenames.contains("Version_Test_1_1_0.otm"));
-        assertTrue(itemFilenames.contains("Version_Test_1_1_1.otm"));
-
-        // Search for a keyword in only two libraries
-        itemFilenames = getFilenames(repositoryManager.get().search("green", false, true));
-
-        assertEquals(2, itemFilenames.size());
-        assertTrue(itemFilenames.contains("Version_Test_1_1_0.otm"));
-        assertTrue(itemFilenames.contains("Version_Test_1_1_1.otm"));
 
         // Search for a keyword in only one library
-        itemFilenames = getFilenames(repositoryManager.get().search("blue", false, true));
+        itemFilenames = getFilenames(repositoryManager.get().search("green", false, true));
 
         assertEquals(1, itemFilenames.size());
-        assertTrue(itemFilenames.contains("Version_Test_1_1_1.otm"));
+        assertTrue(itemFilenames.contains("Version_Test_1_1_0.otm"));
+
+        // Search for a non-existent keyword
+        itemFilenames = getFilenames(repositoryManager.get().search("blue", false, true));
+
+        assertEquals(0, itemFilenames.size());
     }
 
     @Test
@@ -267,23 +264,22 @@ public class TestRepositorySearch extends RepositoryTestBase {
     public void testFreeTextSearch_finalVersion_includeDraft() throws Exception {
         List<String> itemFilenames;
 
-        // Search for a keyword in all three libraries
+        // Search for a keyword in only two libraries
         itemFilenames = getFilenames(repositoryManager.get().search("red", true, true));
 
         assertEquals(1, itemFilenames.size());
         assertTrue(itemFilenames.contains("Version_Test_1_1_1.otm"));
 
-        // Search for a keyword in only two libraries
+        // Search for a keyword in only one library
         itemFilenames = getFilenames(repositoryManager.get().search("green", true, true));
 
         assertEquals(1, itemFilenames.size());
         assertTrue(itemFilenames.contains("Version_Test_1_1_1.otm"));
 
-        // Search for a keyword in only one library
+        // Search for a non-existent keyword
         itemFilenames = getFilenames(repositoryManager.get().search("blue", true, true));
 
-        assertEquals(1, itemFilenames.size());
-        assertTrue(itemFilenames.contains("Version_Test_1_1_1.otm"));
+        assertEquals(0, itemFilenames.size());
     }
 
     @Test

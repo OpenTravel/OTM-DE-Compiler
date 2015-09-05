@@ -859,7 +859,7 @@ public class PropertyCodegenUtils {
         }
         return result;
     }
-
+    
     /**
      * When a referenced facet is considered "empty", this method will provide a prioritized list of
      * the alternate sibling facets that should be considered for code generation.

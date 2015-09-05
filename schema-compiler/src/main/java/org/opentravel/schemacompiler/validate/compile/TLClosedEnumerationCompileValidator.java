@@ -47,9 +47,7 @@ public class TLClosedEnumerationCompileValidator extends TLClosedEnumerationBase
         }
 
         checkSchemaNamingConflicts(target, builder);
-
-        // TODO: Re-enable version naming validation once we figure out the rules
-//        checkMajorVersionNamingConflicts(target, builder);
+        validateVersioningRules(target, builder);
 
         return builder.getFindings();
     }

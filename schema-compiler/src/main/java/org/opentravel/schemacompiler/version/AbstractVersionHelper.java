@@ -27,11 +27,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.opentravel.schemacompiler.codegen.util.EnumCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLAbstractEnumeration;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLAttributeOwner;
 import org.opentravel.schemacompiler.model.TLAttributeType;
@@ -39,6 +41,7 @@ import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLContext;
 import org.opentravel.schemacompiler.model.TLCoreObject;
+import org.opentravel.schemacompiler.model.TLEnumValue;
 import org.opentravel.schemacompiler.model.TLEquivalent;
 import org.opentravel.schemacompiler.model.TLExample;
 import org.opentravel.schemacompiler.model.TLExtension;
@@ -213,6 +216,9 @@ public abstract class AbstractVersionHelper {
 
         } else if (versionedEntity instanceof TLValueWithAttributes) {
             extendedEntity = ((TLValueWithAttributes) versionedEntity).getParentType();
+            
+        } else if (versionedEntity instanceof TLSimple) {
+            extendedEntity = ((TLSimple) versionedEntity).getParentType();
         }
 
         // Determine whether the extended entity is a minor version of the one that
@@ -239,7 +245,7 @@ public abstract class AbstractVersionHelper {
     /**
      * If the given versioned entity is a minor version of an entity defined in a prior version,
      * this method will return an ordered list of all the previous versions. The list is sorted in
-     * descending ordr (i.e. the latest prior version will be the first element in the list).
+     * descending order (i.e. the latest prior version will be the first element in the list).
      * 
      * @param versionedEntity
      *            the versioned entity for which to return the previous version
@@ -379,8 +385,7 @@ public abstract class AbstractVersionHelper {
             if (extendedFacetOwner instanceof Versioned) {
                 VersionScheme versionScheme = VersionSchemeFactory.getInstance().getVersionScheme(
                         xpFacet.getVersionScheme());
-                List<String> versionChain = versionScheme.getMajorVersionChain(xpFacet
-                        .getNamespace());
+                List<String> versionChain = versionScheme.getMajorVersionChain(xpFacet.getNamespace());
 
                 if (versionChain.indexOf(extendedFacetOwner.getNamespace()) > 0) {
                     patchedVersion = (Versioned) extendedFacetOwner;
@@ -641,30 +646,6 @@ public abstract class AbstractVersionHelper {
                 minorVersionLibrary.addContext(cloner.clone(context));
             }
         }
-        for (TLSimple simple : patchLibrary.getSimpleTypes()) {
-            if (minorVersionLibrary.getNamedMember(simple.getName()) == null) {
-                TLSimple clone = cloner.clone(simple);
-
-                minorVersionLibrary.addNamedMember(clone);
-                captureRollupLibraryReference(clone, rollupReferences);
-            }
-        }
-        for (TLClosedEnumeration closedEnum : patchLibrary.getClosedEnumerationTypes()) {
-            if (minorVersionLibrary.getNamedMember(closedEnum.getName()) == null) {
-                TLClosedEnumeration clone = cloner.clone(closedEnum);
-
-                minorVersionLibrary.addNamedMember(clone);
-                captureRollupLibraryReference(clone, rollupReferences);
-            }
-        }
-        for (TLOpenEnumeration openEnum : patchLibrary.getOpenEnumerationTypes()) {
-            if (minorVersionLibrary.getNamedMember(openEnum.getName()) == null) {
-                TLOpenEnumeration clone = cloner.clone(openEnum);
-
-                minorVersionLibrary.addNamedMember(clone);
-                captureRollupLibraryReference(clone, rollupReferences);
-            }
-        }
         for (TLExtensionPointFacet patch : patchLibrary.getExtensionPointFacetTypes()) {
             Versioned patchedEntity = getPatchedVersion(patch);
 
@@ -736,20 +717,13 @@ public abstract class AbstractVersionHelper {
             // with the same name.
             if (newEntityVersion == null) {
                 if (originalEntity instanceof TLBusinessObject) {
-                    TLBusinessObject newBO = newVersionInstance((TLBusinessObject) originalEntity,
-                            cloner);
-                    TLExtension ext = new TLExtension();
-                    ext.setExtendsEntity(originalEntity);
-                    newBO.setExtension(ext);
+                    TLBusinessObject newBO = newVersionInstance((TLBusinessObject) originalEntity, cloner);
 
                     targetLibrary.addNamedMember(newBO);
                     newEntityVersion = newBO;
 
                 } else if (originalEntity instanceof TLCoreObject) {
                     TLCoreObject newCore = newVersionInstance((TLCoreObject) originalEntity, cloner);
-                    TLExtension ext = new TLExtension();
-                    ext.setExtendsEntity(originalEntity);
-                    newCore.setExtension(ext);
 
                     targetLibrary.addNamedMember(newCore);
                     newEntityVersion = newCore;
@@ -772,6 +746,27 @@ public abstract class AbstractVersionHelper {
 
                     targetLibrary.addNamedMember(newVWA);
                     newEntityVersion = newVWA;
+                    
+                } else if (originalEntity instanceof TLOpenEnumeration) {
+                	TLOpenEnumeration newEnum = newVersionInstance(
+                            (TLOpenEnumeration) originalEntity, cloner);
+
+                    targetLibrary.addNamedMember(newEnum);
+                    newEntityVersion = newEnum;
+                    
+                } else if (originalEntity instanceof TLClosedEnumeration) {
+                	TLClosedEnumeration newEnum = newVersionInstance(
+                            (TLClosedEnumeration) originalEntity, cloner);
+
+                    targetLibrary.addNamedMember(newEnum);
+                    newEntityVersion = newEnum;
+                    
+                } else if (originalEntity instanceof TLSimple) {
+                	TLSimple newSimple = newVersionInstance(
+                            (TLSimple) originalEntity, cloner);
+
+                    targetLibrary.addNamedMember(newSimple);
+                    newEntityVersion = newSimple;
                 }
             }
         } catch (ClassCastException e) {
@@ -1107,7 +1102,8 @@ public abstract class AbstractVersionHelper {
 
     /**
      * Constructs a new version of the given entity that is an exact copy except that the facets do
-     * not contain any attributes, elements, or indicators.
+     * not contain any attributes, elements, or indicators.  The new version returned by this method
+     * is configured to extend the old version provided.
      * 
      * @param oldVersion
      *            the old version from which to construct the new version instance
@@ -1120,6 +1116,7 @@ public abstract class AbstractVersionHelper {
 
         newVersion.setName(oldVersion.getName());
         newVersion.setDocumentation(cloner.clone(oldVersion.getDocumentation()));
+        setMinorVersionExtension(newVersion, oldVersion);
 
         for (TLEquivalent equivalent : oldVersion.getEquivalents()) {
             newVersion.addEquivalent(cloner.clone(equivalent));
@@ -1129,7 +1126,8 @@ public abstract class AbstractVersionHelper {
 
     /**
      * Constructs a new version of the given entity that is an exact copy except that the facets do
-     * not contain any attributes, elements, or indicators.
+     * not contain any attributes, elements, or indicators.  The new version returned by this method
+     * is configured to extend the old version provided.
      * 
      * @param oldVersion
      *            the old version from which to construct the new version instance
@@ -1143,6 +1141,7 @@ public abstract class AbstractVersionHelper {
         newVersion.setName(oldVersion.getName());
         newVersion.setDocumentation(cloner.clone(oldVersion.getDocumentation()));
         newVersion.setSimpleFacet(cloner.clone(oldVersion.getSimpleFacet()));
+        setMinorVersionExtension(newVersion, oldVersion);
 
         for (TLEquivalent equivalent : oldVersion.getEquivalents()) {
             newVersion.addEquivalent(cloner.clone(equivalent));
@@ -1170,7 +1169,8 @@ public abstract class AbstractVersionHelper {
 
     /**
      * Constructs a new version of the given entity that is an exact copy except that the facets do
-     * not contain any attributes, elements, or indicators.
+     * not contain any attributes, elements, or indicators.  The new version returned by this method
+     * is configured to extend the old version provided.
      * 
      * @param oldVersion
      *            the old version from which to construct the new version instance
@@ -1183,6 +1183,7 @@ public abstract class AbstractVersionHelper {
 
         newVersion.setName(oldVersion.getName());
         newVersion.setDocumentation(cloner.clone(oldVersion.getDocumentation()));
+        setMinorVersionExtension(newVersion, oldVersion);
 
         for (TLEquivalent equivalent : oldVersion.getEquivalents()) {
             newVersion.addEquivalent(cloner.clone(equivalent));
@@ -1192,7 +1193,8 @@ public abstract class AbstractVersionHelper {
 
     /**
      * Constructs a new version of the given entity that is an exact copy except that the facets do
-     * not contain any attributes or indicators.
+     * not contain any attributes or indicators.  The new version returned by this method is configured
+     * to extend the old version provided.
      * 
      * @param oldVersion
      *            the old version from which to construct the new version instance
@@ -1206,6 +1208,7 @@ public abstract class AbstractVersionHelper {
 
         newVersion.setName(oldVersion.getName());
         newVersion.setDocumentation(cloner.clone(oldVersion.getDocumentation()));
+        newVersion.setParentType(oldVersion);
 
         for (TLEquivalent equivalent : oldVersion.getEquivalents()) {
             newVersion.addEquivalent(cloner.clone(equivalent));
@@ -1214,6 +1217,105 @@ public abstract class AbstractVersionHelper {
             newVersion.addExample(cloner.clone(example));
         }
         return newVersion;
+    }
+
+    /**
+     * Constructs a new version of the given entity that is an exact copy except that
+     * it does not contain any enumerated values.  The new version returned by this method
+     * is configured to extend the old version provided.
+     * 
+     * @param oldVersion
+     *            the old version from which to construct the new version instance
+     * @param cloner
+     *            the cloner to use when creating copies of model elements
+     * @return TLOpenEnumeration
+     */
+    TLOpenEnumeration newVersionInstance(TLOpenEnumeration oldVersion,
+            ModelElementCloner cloner) {
+    	TLOpenEnumeration newVersion = new TLOpenEnumeration();
+
+        newVersion.setName(oldVersion.getName());
+        newVersion.setDocumentation(cloner.clone(oldVersion.getDocumentation()));
+        setMinorVersionExtension(newVersion, oldVersion);
+        return newVersion;
+    }
+
+    /**
+     * Constructs a new version of the given entity that is an exact copy except that
+     * it does not contain any enumerated values.  The new version returned by this method
+     * is configured to extend the old version provided.
+     * 
+     * @param oldVersion
+     *            the old version from which to construct the new version instance
+     * @param cloner
+     *            the cloner to use when creating copies of model elements
+     * @return TLClosedEnumeration
+     */
+    TLClosedEnumeration newVersionInstance(TLClosedEnumeration oldVersion,
+            ModelElementCloner cloner) {
+    	TLClosedEnumeration newVersion = new TLClosedEnumeration();
+
+        newVersion.setName(oldVersion.getName());
+        newVersion.setDocumentation(cloner.clone(oldVersion.getDocumentation()));
+        setMinorVersionExtension(newVersion, oldVersion);
+        return newVersion;
+    }
+
+    /**
+     * Constructs a new version of the given entity that is an exact copy of the
+     * original.  The new version returned by this method is configured to extend
+     * the old version provided.
+     * 
+     * @param oldVersion
+     *            the old version from which to construct the new version instance
+     * @param cloner
+     *            the cloner to use when creating copies of model elements
+     * @return TLSimple
+     */
+    TLSimple newVersionInstance(TLSimple oldVersion, ModelElementCloner cloner) {
+    	TLSimple newVersion = new TLSimple();
+
+        newVersion.setName(oldVersion.getName());
+        newVersion.setDocumentation(cloner.clone(oldVersion.getDocumentation()));
+        newVersion.setParentType(oldVersion);
+        newVersion.setListTypeInd(oldVersion.isListTypeInd());
+
+        for (TLEquivalent equivalent : oldVersion.getEquivalents()) {
+            newVersion.addEquivalent(cloner.clone(equivalent));
+        }
+        for (TLExample example : oldVersion.getExamples()) {
+            newVersion.addExample(cloner.clone(example));
+        }
+        return newVersion;
+    }
+
+    /**
+     * Assigns the 'extendedVersion' entity as the minor version extension of the 'laterVersion'
+     * entity.
+     * 
+     * @param laterVersion
+     *            the later version of the entity to which the extension will be assigned
+     * @param extendedVersion
+     *            the extended version that will be assigned to the 'extendedVersion'
+     */
+    void setMinorVersionExtension(Versioned laterVersion, Versioned extendedVersion) {
+        if (laterVersion instanceof TLExtensionOwner) { // BO, core, operations & open/closed enums
+            TLExtensionOwner _laterVersion = (TLExtensionOwner) laterVersion;
+            TLExtension extension = _laterVersion.getExtension();
+
+            if (extension == null) {
+                extension = new TLExtension();
+                _laterVersion.setExtension(extension);
+            }
+            extension.setExtendsEntity((NamedEntity) extendedVersion);
+
+        } else if (laterVersion instanceof TLValueWithAttributes) {
+            ((TLValueWithAttributes) laterVersion)
+                    .setParentType((TLValueWithAttributes) extendedVersion);
+            
+        } else if (laterVersion instanceof TLSimple) {
+            ((TLSimple) laterVersion).setParentType((TLSimple) extendedVersion);
+        }
     }
 
     /**
@@ -1346,6 +1448,72 @@ public abstract class AbstractVersionHelper {
         }
     }
 
+    /**
+     * Merges the contents of the given list into the specified target entity. If any enumerated
+     * values with the same literal already exist in the target, the merge item(s) will be ignored.
+     * 
+     * @param target
+     *            the entity that will receive new enumerated values from the merge
+     * @param valuesToMerge
+     *            the list of enumerated values to merge into the target
+     * @param cloner
+     *            the cloner to use when creating copies of model elements
+     */
+    void mergeEnumeratedValues(TLAbstractEnumeration target, List<TLEnumValue> valuesToMerge,
+            ModelElementCloner cloner) {
+        List<TLEnumValue> existingValues = EnumCodegenUtils.getInheritedValues( target );
+    	Set<String> existingValueLiterals = new HashSet<String>();
+        
+        for (TLEnumValue existingValue : existingValues) {
+        	existingValueLiterals.add( existingValue.getLiteral() );
+        }
+        
+        for (TLEnumValue sourceValue : valuesToMerge) {
+        	if (!existingValueLiterals.contains(sourceValue.getLiteral())) {
+        		target.addValue(cloner.clone(sourceValue));
+        	}
+        }
+    }
+    
+    /**
+     * Merges the constraints of the given source entity into the target.  If any constraint
+     * is already defined in the target entity, that source item constraint will be ignored.
+     * 
+     * @param target
+     *            the entity that will receive new simple constraints from the merge
+     * @param source
+     *            the entity whose constraints will be merged into the target
+     */
+    void mergeSimpleConstraints(TLSimple target, TLSimple source) {
+    	if ((target.getPattern() == null) || (target.getPattern().length() == 0)) {
+    		target.setPattern(source.getPattern());
+    	}
+    	if (target.getMinLength() < 0) {
+    		target.setMinLength(source.getMinLength());
+    	}
+    	if (target.getMaxLength() < 0) {
+    		target.setMaxLength(source.getMaxLength());
+    	}
+    	if (target.getFractionDigits() < 0) {
+    		target.setFractionDigits(source.getFractionDigits());
+    	}
+    	if (target.getTotalDigits() < 0) {
+    		target.setTotalDigits(source.getTotalDigits());
+    	}
+    	if ((target.getMinInclusive() == null) || (target.getMinInclusive().length() == 0)) {
+    		target.setMinInclusive(source.getMinInclusive());
+    	}
+    	if ((target.getMaxInclusive() == null) || (target.getMaxInclusive().length() == 0)) {
+    		target.setMaxInclusive(source.getMaxInclusive());
+    	}
+    	if ((target.getMinExclusive() == null) || (target.getMinExclusive().length() == 0)) {
+    		target.setMinExclusive(source.getMinExclusive());
+    	}
+    	if ((target.getMaxExclusive() == null) || (target.getMaxExclusive().length() == 0)) {
+    		target.setMaxExclusive(source.getMaxExclusive());
+    	}
+    }
+    
     /**
      * If the new entity contains a reference to another entity within its owning library, that
      * reference is captured in the map provided so that it may be adjusted in the owning library of
@@ -1491,7 +1659,8 @@ public abstract class AbstractVersionHelper {
          * @param rollupLibrary
          *            the library being rolled up
          */
-        public RollupReferenceInfo(TLLibrary rollupLibrary,
+        @SafeVarargs
+		public RollupReferenceInfo(TLLibrary rollupLibrary,
                 Collection<TLLibrary>... rollupLibraries) {
             this(rollupLibraries);
 
@@ -1507,7 +1676,8 @@ public abstract class AbstractVersionHelper {
          * @param rollupLibraries
          *            the collection(s) of libraries being rolled up
          */
-        public RollupReferenceInfo(Collection<TLLibrary>... rollupLibraries) {
+        @SafeVarargs
+		public RollupReferenceInfo(Collection<TLLibrary>... rollupLibraries) {
             for (Collection<TLLibrary> libraries : rollupLibraries) {
                 if (libraries != null) {
                     this.rollupLibraries.addAll(libraries);

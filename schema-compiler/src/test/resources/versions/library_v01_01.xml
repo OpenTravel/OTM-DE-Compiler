@@ -13,6 +13,36 @@
     <Import namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01" prefix="lib-01"/>
     <Comments>Test Library</Comments>
     
+    <Simple name="LookupSimple" type="lib-01:LookupSimple" minLength="2" />
+    
+    <Simple name="MinorVersionTestSimple" type="xsd:string" pattern="[A-Za-z]*" minLength="2" maxLength="5" />
+    
+    <Enumeration_Closed name="LookupClosedEnum">
+        <Extension extends="lib-01:LookupClosedEnum"/>
+        <Value literal="a11" />
+        <Value literal="b11" />
+        <Value literal="c11" />
+    </Enumeration_Closed>
+    
+    <Enumeration_Closed name="MinorVersionTestClosedEnum">
+        <Value literal="a11" />
+        <Value literal="b11" />
+        <Value literal="c11" />
+    </Enumeration_Closed>
+    
+    <Enumeration_Open name="LookupOpenEnum">
+        <Extension extends="lib-01:LookupOpenEnum"/>
+        <Value literal="a11" />
+        <Value literal="b11" />
+        <Value literal="c11" />
+    </Enumeration_Open>
+    
+    <Enumeration_Open name="MinorVersionTestOpenEnum">
+        <Value literal="a11" />
+        <Value literal="b11" />
+        <Value literal="c11" />
+    </Enumeration_Open>
+    
     <ValueWithAttrs name="LookupVWA" type="lib-01:LookupVWA">
         <Attribute mandatory="false" name="vwaAttribute11" type="xsd:string"/>
     </ValueWithAttrs>

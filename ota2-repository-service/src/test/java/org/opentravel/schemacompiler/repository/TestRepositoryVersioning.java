@@ -89,7 +89,6 @@ public class TestRepositoryVersioning extends RepositoryTestBase {
         assertEquals("2.0.0", newVersion.getVersion());
         assertNotNull(newVersion.getSimpleType("SimpleType_01_00"));
         assertNotNull(newVersion.getSimpleType("SimpleType_01_01"));
-        assertNotNull(newVersion.getSimpleType("SimpleType_01_01_01"));
     }
 
     @Test
@@ -122,7 +121,6 @@ public class TestRepositoryVersioning extends RepositoryTestBase {
         // that were not originally in the project
         assertNotNull(newVersion);
         assertEquals("1.2.0", newVersion.getVersion());
-        assertNotNull(newVersion.getSimpleType("SimpleType_01_01_01"));
     }
 
     @Test

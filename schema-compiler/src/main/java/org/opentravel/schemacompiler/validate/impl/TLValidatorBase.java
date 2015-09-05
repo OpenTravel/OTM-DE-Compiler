@@ -24,10 +24,8 @@ import java.util.Map;
 
 import javax.xml.namespace.QName;
 
-import org.opentravel.schemacompiler.ioc.SchemaDependency;
-import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.NamedEntity;
-import org.opentravel.schemacompiler.model.TLClosedEnumeration;
+import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLExampleOwner;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLExtensionOwner;
@@ -72,6 +70,8 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
     public static final String ERROR_DUPLICATE_SCHEMA_TYPE_NAME = "DUPLICATE_SCHEMA_TYPE_NAME";
     public static final String ERROR_DUPLICATE_SCHEMA_ELEMENT_NAME = "DUPLICATE_SCHEMA_ELEMENT_NAME";
     public static final String ERROR_DUPLICATE_MAJOR_VERSION_SYMBOL = "DUPLICATE_MAJOR_VERSION_SYMBOL";
+    public static final String ERROR_INVALID_VERSION_EXTENSION = "INVALID_VERSION_EXTENSION";
+    public static final String ERROR_ILLEGAL_PATCH = "ILLEGAL_PATCH";
     public static final String WARNING_EXAMPLE_FOR_EMPTY_TYPE = "EXAMPLE_FOR_EMPTY_TYPE";
 
     private TLModelValidationContext context;
@@ -239,7 +239,7 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
         }
         return result;
     }
-
+    
     /**
      * If the given owner provides example values, this method will issue a warning if the assigned
      * type is 'ota:Empty'.
@@ -256,13 +256,7 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
     protected void checkEmptyValueType(TLExampleOwner exampleOwner, NamedEntity assignedType,
             String propertyName, ValidationBuilder<?> builder) {
         if ((exampleOwner != null) && (exampleOwner.getExamples().size() > 0)) {
-            SchemaDependency emptyElement = SchemaDependency.getEmptyElement();
-            boolean isEmptyType = (assignedType == null)
-                    || (emptyElement.getSchemaDeclaration().getNamespace()
-                            .equals(assignedType.getNamespace()) && emptyElement.getLocalName()
-                            .equals(assignedType.getLocalName()));
-
-            if (isEmptyType) {
+            if (ValidatorUtils.isEmptyValueType(assignedType)) {
                 builder.addFinding(FindingType.WARNING, propertyName,
                         WARNING_EXAMPLE_FOR_EMPTY_TYPE);
             }
@@ -277,6 +271,7 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
      *            the versioned entity to analyze
      * @return boolean
      */
+    // TODO: Move to version helpers
     protected boolean isVersionExtension(Versioned versionedEntity) {
         return (getExtendedVersion(versionedEntity) != null);
     }
@@ -296,6 +291,7 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
      * @return V
      */
     @SuppressWarnings("unchecked")
+    // TODO: Move to version helpers
     protected <V extends Versioned> V getExtendedVersion(V versionedEntity) {
         V candidateVersion = null;
         V extendedVersion = null;
@@ -316,18 +312,20 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
                 candidateVersion = (V) versionedVWA.getParentType();
             }
         } else if (versionedEntity instanceof TLSimple) {
-            candidateVersion = (V) findSimpleExtension((TLSimple) versionedEntity);
-        } else if (versionedEntity instanceof TLClosedEnumeration) {
-            candidateVersion = (V) findClosedEnumExtension((TLClosedEnumeration) versionedEntity);
+        	TLAttributeType parentType = ((TLSimple) versionedEntity).getParentType();
+        	
+        	if (parentType instanceof Versioned) {
+                candidateVersion = (V) parentType;
+        	}
         }
 
         // Determine whether the candidate is a version or non-version extension
         if (candidateVersion != null) {
             if (versionedEntity.getBaseNamespace().equals(candidateVersion.getBaseNamespace())) {
-                String versionedEntityName = (versionedEntity instanceof TLOperation) ? ((TLOperation) versionedEntity)
-                        .getName() : versionedEntity.getLocalName();
-                String candidateName = (candidateVersion instanceof TLOperation) ? ((TLOperation) candidateVersion)
-                        .getName() : candidateVersion.getLocalName();
+                String versionedEntityName = (versionedEntity instanceof TLOperation) ?
+                		((TLOperation) versionedEntity).getName() : versionedEntity.getLocalName();
+                String candidateName = (candidateVersion instanceof TLOperation) ?
+                		((TLOperation) candidateVersion).getName() : candidateVersion.getLocalName();
 
                 if (versionedEntityName.equals(candidateName)) {
                     extendedVersion = candidateVersion;
@@ -337,60 +335,6 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
         return extendedVersion;
     }
 
-    private TLClosedEnumeration findClosedEnumExtension(TLClosedEnumeration closedEnum) {
-        try {
-            TLLibrary minorPreceder = new MinorVersionHelper()
-                    .getPriorMinorVersion((TLLibrary) closedEnum.getOwningLibrary());
-            if (minorPreceder != null) {
-                List<TLLibrary> patches = new PatchVersionHelper()
-                        .getLaterPatchVersions(minorPreceder);
-                for (TLLibrary lib : patches) {
-                    if (lib == closedEnum.getOwningLibrary()) {
-                        continue;
-                    }
-                    LibraryMember candidate = lib.getNamedMember(closedEnum.getLocalName());
-                    if (candidate instanceof TLClosedEnumeration) {
-                        return (TLClosedEnumeration) candidate;
-                    }
-                }
-            }
-        } catch (VersionSchemeException e) {
-            throw new IllegalArgumentException(
-                    "Cannot find extensions. Problem with version scheme", e);
-        }
-        return null;
-    }
-
-    /**
-     * @param simple
-     * @return previous version of simple object created on minor roll-up.
-     * @throws IllegalStateException
-     *             for missing version schema.
-     */
-    private TLSimple findSimpleExtension(TLSimple simple) {
-        try {
-            TLLibrary minorPreceder = new MinorVersionHelper()
-                    .getPriorMinorVersion((TLLibrary) simple.getOwningLibrary());
-            if (minorPreceder != null) {
-                List<TLLibrary> patches = new PatchVersionHelper()
-                        .getLaterPatchVersions(minorPreceder);
-                for (TLLibrary lib : patches) {
-                    if (lib == simple.getOwningLibrary()) {
-                        continue;
-                    }
-                    LibraryMember candidate = lib.getNamedMember(simple.getLocalName());
-                    if (candidate instanceof TLSimple) {
-                        return (TLSimple) candidate;
-                    }
-                }
-            }
-        } catch (VersionSchemeException e) {
-            throw new IllegalArgumentException(
-                    "Cannot find extensions. Problem with version scheme", e);
-        }
-        return null;
-    }
-
     /**
      * Returns a collection of all version extensions for the given entity.
      * 
@@ -398,6 +342,7 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
      *            the versioned entity for which to return version extensions
      * @return Collection<V>
      */
+    // TODO: Move to version helpers
     private <V extends Versioned> Collection<V> getAllExtendedVersions(V versionedEntity) {
         V extendedVersion = getExtendedVersion(versionedEntity);
         List<V> extendedVersions = new ArrayList<V>();
@@ -491,6 +436,36 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
         }
         return schemaNameRegistry;
     }
+    
+    /**
+     * Performs validation checks required for all versioned objects.
+     * 
+     * @param target  the versioned entity to check
+     * @param builder  the validation builder that will receive any validation errors that are detected
+     */
+    protected void validateVersioningRules(Versioned target, ValidationBuilder<?> builder) {
+    	// Illegal patch violations for operations will be caught when the service is validated
+    	if (!(target instanceof TLOperation)) {
+            try {
+                PatchVersionHelper helper = new PatchVersionHelper();
+                VersionScheme vScheme = helper.getVersionScheme(target);
+
+                if ((vScheme != null) && vScheme.isPatchVersion(target.getNamespace())) {
+                    builder.addFinding(FindingType.ERROR, "name", ERROR_ILLEGAL_PATCH);
+                }
+
+            } catch (VersionSchemeException e) {
+                // Ignore - Invalid version scheme error will be reported when the owning library is
+                // validated
+            }
+    	}
+
+        if (isInvalidVersionExtension(target)) {
+            builder.addFinding(FindingType.ERROR, "versionExtension",
+                    ERROR_INVALID_VERSION_EXTENSION);
+        }
+        checkMajorVersionNamingConflicts(target, builder);
+    }
 
     /**
      * Checks to determine if another entity is assigned to the given entity's major-version
@@ -503,7 +478,7 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
      * @param builder
      *            the validation builder that will receive any validation errors that are detected
      */
-    protected void checkMajorVersionNamingConflicts(NamedEntity entity, ValidationBuilder<?> builder) {
+    private void checkMajorVersionNamingConflicts(NamedEntity entity, ValidationBuilder<?> builder) {
         // Check for trivial negative cases...
         if ((entity == null) || (entity.getOwningModel() == null)
                 || !(entity.getOwningLibrary() instanceof TLLibrary)
@@ -541,8 +516,8 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
 
         // Only check for validation errors if we find duplicates of the entity's name
         if (matchingEntities.size() > 1) {
-            Collection<Versioned> versionFamily = (entity instanceof Versioned) ? getMinorVersionFamily((Versioned) entity)
-                    : new ArrayList<Versioned>();
+            Collection<Versioned> versionFamily = (entity instanceof Versioned) ?
+            		getMinorVersionFamily((Versioned) entity) : new ArrayList<Versioned>();
 
             for (NamedEntity matchingEntity : matchingEntities) {
                 if (matchingEntity == entity) {
@@ -564,10 +539,8 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
 
                 if (conflictingEntity != null) {
                     // NOTE: This validation check only reports errors for duplicate names in
-                    // DIFFERENT namespaces
-                    // of a major-version chain. Duplicate symbols that occur in the same namespace
-                    // are reported
-                    // by different validation checks.
+                    // DIFFERENT namespaces of a major-version chain. Duplicate symbols that occur
+                	// in the same namespace are reported by different validation checks.
                     if (!conflictingEntity.getNamespace().equals(entity.getNamespace())) {
                         builder.addFinding(FindingType.ERROR, "name",
                                 ERROR_DUPLICATE_MAJOR_VERSION_SYMBOL, localName);
@@ -596,9 +569,11 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
             setContextCacheEntry("minorVersionFamilyMappings", minorVersionFamilyMappings);
         }
         Collection<V> minorVersionFamily = minorVersionFamilyMappings.get(versionedEntity);
-        Collection<V> priorEntityVersions = getAllExtendedVersions(versionedEntity);
 
         if (minorVersionFamily == null) {
+            // TODO: Move this method to the version helpers; rename to getMajorVersionFamily()
+            Collection<V> priorEntityVersions = getAllExtendedVersions(versionedEntity);
+            
             minorVersionFamily = new ArrayList<V>();
 
             if ((versionedEntity.getBaseNamespace() != null)
@@ -674,6 +649,7 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
 
         if (majorVersionNamespace == null) {
             try {
+                // TODO: Move to the version helpers
                 VersionSchemeFactory factory = VersionSchemeFactory.getInstance();
                 VersionScheme versionScheme = factory.getVersionScheme(factory
                         .getDefaultVersionScheme());

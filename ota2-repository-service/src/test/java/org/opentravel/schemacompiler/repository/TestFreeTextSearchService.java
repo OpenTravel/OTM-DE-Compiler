@@ -80,29 +80,26 @@ public class TestFreeTextSearchService {
         Collection<String> filenames;
 
         try {
-            // Search for a keyword in all three libraries
+            // Search for a keyword in only two libraries
             searchResults = service.query("red", false, true);
             filenames = getFilenames(searchResults);
 
-            assertEquals(3, searchResults.size());
+            assertEquals(2, searchResults.size());
             assertTrue(filenames.contains("Version_Test_1_0_0.otm"));
             assertTrue(filenames.contains("Version_Test_1_1_0.otm"));
-            assertTrue(filenames.contains("Version_Test_1_1_1.otm"));
 
-            // Search for a keyword in only two libraries
+            // Search for a keyword in only one library
             searchResults = service.query("green", false, true);
             filenames = getFilenames(searchResults);
 
-            assertEquals(2, searchResults.size());
+            assertEquals(1, searchResults.size());
             assertTrue(filenames.contains("Version_Test_1_1_0.otm"));
-            assertTrue(filenames.contains("Version_Test_1_1_1.otm"));
 
-            // Search for a keyword in only one library
+            // Search for a non-existent keyword
             searchResults = service.query("blue", false, true);
             filenames = getFilenames(searchResults);
 
-            assertEquals(1, searchResults.size());
-            assertTrue(filenames.contains("Version_Test_1_1_1.otm"));
+            assertEquals(0, searchResults.size());
 
         } finally {
             service.stopService();

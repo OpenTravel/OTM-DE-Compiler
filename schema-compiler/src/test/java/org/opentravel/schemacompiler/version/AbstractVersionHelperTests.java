@@ -30,8 +30,10 @@ import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.loader.LibraryModelLoader;
 import org.opentravel.schemacompiler.loader.impl.CatalogLibraryNamespaceResolver;
 import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
+import org.opentravel.schemacompiler.model.TLAbstractEnumeration;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLAttributeOwner;
+import org.opentravel.schemacompiler.model.TLEnumValue;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLProperty;
@@ -160,6 +162,19 @@ public abstract class AbstractVersionHelperTests {
         for (String elementName : elementNames) {
             if (!ownerElements.contains(elementName)) {
                 fail("Expected element name not found: " + elementName);
+            }
+        }
+    }
+
+    protected void assertContainsValues(TLAbstractEnumeration valueOwner, String... valueLiterals) {
+        Set<String> ownerLiterals = new HashSet<String>();
+
+        for (TLEnumValue value : valueOwner.getValues()) {
+        	ownerLiterals.add(value.getLiteral());
+        }
+        for (String literal : valueLiterals) {
+            if (!ownerLiterals.contains(literal)) {
+                fail("Expected enumeration value not found: " + literal);
             }
         }
     }

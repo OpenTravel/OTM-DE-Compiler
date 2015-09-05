@@ -22,6 +22,7 @@ import javax.xml.XMLConstants;
 
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
+import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
@@ -36,6 +37,20 @@ import org.opentravel.schemacompiler.model.TLValueWithAttributes;
  * @author S. Livezey
  */
 public class ValidatorUtils {
+
+    /**
+     * Returns true if the given entity matches the built-in empty string type.
+     * 
+     * @param entity  the entity to check
+     * @return boolean
+     */
+    public static boolean isEmptyValueType(NamedEntity entity) {
+        SchemaDependency emptyElement = SchemaDependency.getEmptyElement();
+        
+        return (entity != null)
+        		&& emptyElement.getSchemaDeclaration().getNamespace().equals(entity.getNamespace())
+        		&& emptyElement.getLocalName().equals(entity.getLocalName());
+    }
 
     /**
      * Returns true if the given type reference is to the built-in boolean XML schema type.

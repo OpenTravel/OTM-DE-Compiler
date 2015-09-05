@@ -13,12 +13,6 @@
     <Import namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01_02" prefix="lib-0102"/>
     <Comments>Test Library</Comments>
     
-    <Enumeration_Open name="TestPatchOpenEnum">
-        <Value literal="a" />
-        <Value literal="b" />
-        <Value literal="c" />
-    </Enumeration_Open>
-    
     <ExtensionPointFacet>
         <Attribute name="extCoreAttribute122" type="xsd:string"/>
         <Extension extends="lib-0102:LookupCore_Summary"/>

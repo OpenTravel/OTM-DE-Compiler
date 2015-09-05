@@ -23,13 +23,14 @@ import org.opentravel.schemacompiler.ic.ImportManagementIntegrityChecker;
 import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLCoreObject;
-import org.opentravel.schemacompiler.model.TLExtension;
-import org.opentravel.schemacompiler.model.TLExtensionOwner;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLService;
+import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.repository.Project;
 import org.opentravel.schemacompiler.repository.ProjectItem;
@@ -37,6 +38,7 @@ import org.opentravel.schemacompiler.saver.LibraryModelSaver;
 import org.opentravel.schemacompiler.saver.LibrarySaveException;
 import org.opentravel.schemacompiler.util.ModelElementCloner;
 import org.opentravel.schemacompiler.util.URLUtils;
+import org.opentravel.schemacompiler.validate.FindingMessageFormat;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationException;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
@@ -285,7 +287,6 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
      * @throws LibrarySaveException
      *             thrown if the new version of the library cannot be saved to the local disk
      */
-    @SuppressWarnings("unchecked")
     public TLLibrary createNewMinorVersion(TLLibrary library, File libraryFile)
             throws VersionSchemeException, ValidationException, LibrarySaveException {
         List<ProjectItem> importedVersions = new ArrayList<ProjectItem>();
@@ -347,6 +348,9 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
             findings.addAll(validate(priorMinorVersion));
 
             if (findings.hasFinding(FindingType.ERROR)) {
+            	for (String message : findings.getAllValidationMessages(FindingMessageFormat.IDENTIFIED_FORMAT)) {
+            		System.out.println(message);
+            	}
                 library.getOwningModel().removeLibrary(newLibrary);
                 throw new ValidationException(
                         "Unable to create the new version because the prior version and/or patch libraries contain errors.",
@@ -427,6 +431,10 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
                         + versionedEntity.getLocalName()
                         + "' already exists in the specified library's service.");
             }
+        } else if (versionedEntity instanceof TLSimple) {
+        	if (((TLSimple) versionedEntity).isListTypeInd()) {
+        		throw new VersionSchemeException("Minor versions of simple list types are not allowed.");
+        	}
         } else {
             if (targetLibraryVersion.getNamedMember(versionedEntity.getLocalName()) != null) {
                 throw new VersionSchemeException("A minor version of entity '"
@@ -453,12 +461,10 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
             if (laterMinorVersion != null) {
                 if (isReadOnly(laterMinorVersionLibrary)) {
                     // This read-only check is included for completeness, but it is an edge case
-                    // since the later
-                    // minor version is probably marked as FINAL, even though our previous version
-                    // is DRAFT. This
-                    // would not be an expected configuration since earlier versions are typically
-                    // locked for editing
-                    // before the later versions of a library.
+                    // since the later minor version is probably marked as FINAL, even though our
+                	// previous version is DRAFT. This would not be an expected configuration since
+                	// earlier versions are typically locked for editing before the later versions
+                	// of a library.
                     throw new VersionSchemeException(
                             "Unable to create the requested minor version because a later minor version exists that is read-only.");
                 }
@@ -479,7 +485,6 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
             if (laterMinorVersion != null) {
                 setMinorVersionExtension(laterMinorVersion, newBO);
             }
-            setMinorVersionExtension(newBO, oldBO);
             targetLibraryVersion.addNamedMember(newBO);
             newVersion = (V) newBO;
 
@@ -490,7 +495,6 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
             if (laterMinorVersion != null) {
                 setMinorVersionExtension(laterMinorVersion, newCore);
             }
-            setMinorVersionExtension(newCore, oldCore);
             targetLibraryVersion.addNamedMember(newCore);
             newVersion = (V) newCore;
 
@@ -506,20 +510,48 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
             if (laterMinorVersion != null) {
                 setMinorVersionExtension(laterMinorVersion, newOp);
             }
-            setMinorVersionExtension(newOp, oldOp);
             newVersionService.addOperation(newOp);
             newVersion = (V) newOp;
 
-        } else { // assume TLValueWithAttributes
+        } else if (versionedEntity instanceof TLValueWithAttributes) {
             TLValueWithAttributes oldVWA = (TLValueWithAttributes) versionedEntity;
             TLValueWithAttributes newVWA = newVersionInstance(oldVWA, cloner);
 
             if (laterMinorVersion != null) {
                 setMinorVersionExtension(laterMinorVersion, newVWA);
             }
-            setMinorVersionExtension(newVWA, oldVWA);
             targetLibraryVersion.addNamedMember(newVWA);
             newVersion = (V) newVWA;
+
+        } else if (versionedEntity instanceof TLOpenEnumeration) {
+        	TLOpenEnumeration oldEnum = (TLOpenEnumeration) versionedEntity;
+        	TLOpenEnumeration newEnum = newVersionInstance(oldEnum, cloner);
+
+            if (laterMinorVersion != null) {
+                setMinorVersionExtension(laterMinorVersion, newEnum);
+            }
+            targetLibraryVersion.addNamedMember(newEnum);
+            newVersion = (V) newEnum;
+
+        } else if (versionedEntity instanceof TLClosedEnumeration) {
+        	TLClosedEnumeration oldEnum = (TLClosedEnumeration) versionedEntity;
+        	TLClosedEnumeration newEnum = newVersionInstance(oldEnum, cloner);
+
+            if (laterMinorVersion != null) {
+                setMinorVersionExtension(laterMinorVersion, newEnum);
+            }
+            targetLibraryVersion.addNamedMember(newEnum);
+            newVersion = (V) newEnum;
+
+        } else { // Assume TLSimple
+        	TLSimple oldSimple = (TLSimple) versionedEntity;
+        	TLSimple newSimple = newVersionInstance(oldSimple, cloner);
+
+            if (laterMinorVersion != null) {
+                setMinorVersionExtension(laterMinorVersion, newSimple);
+            }
+            targetLibraryVersion.addNamedMember(newSimple);
+            newVersion = (V) newSimple;
         }
 
         // Search for patches of the versioned entity to roll up
@@ -552,7 +584,6 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
      *             thrown if the rollup cannot be performed because one or more validation errors
      *             exist in either the source or target entity
      */
-    @SuppressWarnings("unchecked")
     public void rollupPatchVersion(Versioned minorVersionTarget, TLExtensionPointFacet patchVersion)
             throws VersionSchemeException, ValidationException {
         if (!(minorVersionTarget.getOwningLibrary() instanceof TLLibrary)
@@ -568,32 +599,6 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
                 minorVersionTarget.getOwningModel()), rollupReferences, false);
         adjustSameLibraryReferences(targetLibrary, rollupReferences);
         ImportManagementIntegrityChecker.verifyReferencedLibraries(targetLibrary);
-    }
-
-    /**
-     * Assigns the 'extendedVersion' entity as the minor version extension of the 'laterVersion'
-     * entity.
-     * 
-     * @param laterVersion
-     *            the later version of the entity to which the extension will be assigned
-     * @param extendedVersion
-     *            the extended version that will be assigned to the 'extendedVersion'
-     */
-    private void setMinorVersionExtension(Versioned laterVersion, Versioned extendedVersion) {
-        if (laterVersion instanceof TLExtensionOwner) {
-            TLExtensionOwner _laterVersion = (TLExtensionOwner) laterVersion;
-            TLExtension extension = _laterVersion.getExtension();
-
-            if (extension == null) {
-                extension = new TLExtension();
-                _laterVersion.setExtension(extension);
-            }
-            extension.setExtendsEntity(extendedVersion);
-
-        } else if (laterVersion instanceof TLValueWithAttributes) {
-            ((TLValueWithAttributes) laterVersion)
-                    .setParentType((TLValueWithAttributes) extendedVersion);
-        }
     }
 
 }

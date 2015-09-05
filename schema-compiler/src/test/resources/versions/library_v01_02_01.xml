@@ -14,21 +14,13 @@
     <Import namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01_02" prefix="lib-0102"/>
     <Comments>Test Library</Comments>
     
-    <Simple name="TestPatchSimple" type="xsd:string" />
-    
-    <Enumeration_Closed name="TestPatchClosedEnum">
-        <Value literal="a" />
-        <Value literal="b" />
-        <Value literal="c" />
-    </Enumeration_Closed>
-    
     <ExtensionPointFacet>
-        <Attribute name="extCoreAttribute121" type="TestPatchSimple"/>
+        <Attribute name="extCoreAttribute121" type="lib-0101:LookupSimple"/>
         <Extension extends="lib-0102:LookupCore_Summary"/>
     </ExtensionPointFacet>
     
     <ExtensionPointFacet>
-        <Attribute name="extBOAttribute121" type="lib-01:TestMajorVersionSimple"/>
+        <Attribute name="extBOAttribute121" type="lib-01:LookupSimple"/>
         <Extension extends="lib-0102:LookupBO_Summary"/>
     </ExtensionPointFacet>
     

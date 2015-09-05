@@ -169,8 +169,7 @@ public class TLSimpleCompileValidator extends TLSimpleBaseValidator {
         }
 
         checkSchemaNamingConflicts(target, builder);
-
-        checkMajorVersionNamingConflicts(target, builder);
+        validateVersioningRules(target, builder);
 
         return builder.getFindings();
     }
