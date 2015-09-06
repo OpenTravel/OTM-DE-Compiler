@@ -17,31 +17,28 @@ package org.opentravel.schemacompiler.version;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.opentravel.schemacompiler.ic.ImportManagementIntegrityChecker;
 import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.NamedEntity;
-import org.opentravel.schemacompiler.model.TLBusinessObject;
-import org.opentravel.schemacompiler.model.TLClosedEnumeration;
-import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
-import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLOperation;
-import org.opentravel.schemacompiler.model.TLService;
 import org.opentravel.schemacompiler.model.TLSimple;
-import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.repository.Project;
 import org.opentravel.schemacompiler.repository.ProjectItem;
 import org.opentravel.schemacompiler.saver.LibraryModelSaver;
 import org.opentravel.schemacompiler.saver.LibrarySaveException;
-import org.opentravel.schemacompiler.util.ModelElementCloner;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingMessageFormat;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationException;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
+import org.opentravel.schemacompiler.version.handlers.RollupReferenceHandler;
+import org.opentravel.schemacompiler.version.handlers.VersionHandler;
 
 /**
  * Helper methods used to construct new minor versions of <code>TLLibrary</code> instances and their
@@ -127,22 +124,31 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
         return priorVersion;
     }
 
-    /**
-     * @see org.opentravel.schemacompiler.version.AbstractVersionHelper#getPriorVersionExtension(org.opentravel.schemacompiler.version.Versioned)
-     */
-    @Override
-    public <V extends Versioned> V getPriorVersionExtension(V versionedEntity)
+	/**
+     * If the given versioned entity is a minor version of an entity defined in a prior version,
+     * this method will return that prior version.
+     * 
+     * @param entity  the versioned entity for which to return the previous version
+     * @return V
+     * @throws VersionSchemeException  thrown if the entity's version scheme is not recognized
+	 */
+    public <V extends Versioned> V getVersionExtension(V versionedEntity)
             throws VersionSchemeException {
-        return super.getPriorVersionExtension(versionedEntity);
+    	return getVersionHandler( versionedEntity ).getVersionExtension( versionedEntity );
     }
 
     /**
-     * @see org.opentravel.schemacompiler.version.AbstractVersionHelper#getAllPriorVersionExtensions(org.opentravel.schemacompiler.version.Versioned)
+     * If the given versioned entity is a minor version of an entity defined in a prior version,
+     * this method will return an ordered list of all the previous versions. The list is sorted in
+     * descending order (i.e. the latest prior version will be the first element in the list).
+     * 
+     * @param versionedEntity  the versioned entity for which to return the previous version
+     * @return List<V>
+     * @throws VersionSchemeException  thrown if the entity's version scheme is not recognized
      */
-    @Override
-    public <V extends Versioned> List<V> getAllPriorVersionExtensions(V versionedEntity)
+    public <V extends Versioned> List<V> getAllVersionExtensions(V versionedEntity)
             throws VersionSchemeException {
-        return super.getAllPriorVersionExtensions(versionedEntity);
+    	return getVersionHandler( versionedEntity ).getAllVersionExtensions( versionedEntity );
     }
 
     /**
@@ -157,6 +163,7 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
     @SuppressWarnings("unchecked")
     public <V extends Versioned> List<V> getLaterMinorVersions(V versionedEntity)
             throws VersionSchemeException {
+    	VersionHandler<V> handler = getVersionHandler( versionedEntity );
         List<V> versionExtensions = new ArrayList<V>();
 
         if (versionedEntity instanceof LibraryElement) {
@@ -167,19 +174,7 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
                         .getOwningLibrary());
 
                 for (TLLibrary minorVersionLib : minorVersionLibraries) {
-                    NamedEntity minorVersionEntity = null;
-
-                    if (versionedEntity instanceof TLOperation) {
-                        TLService minorVersionService = minorVersionLib.getService();
-
-                        if (minorVersionService != null) {
-                            minorVersionEntity = minorVersionService
-                                    .getOperation(((TLOperation) versionedEntity).getName());
-                        }
-                    } else {
-                        minorVersionEntity = minorVersionLib.getNamedMember(versionedEntity
-                                .getLocalName());
-                    }
+                    NamedEntity minorVersionEntity = handler.retrieveExistingVersion(versionedEntity, minorVersionLib);
 
                     // If the names and classes of the two entities match, we have a minor version
                     if ((minorVersionEntity != null)
@@ -191,7 +186,72 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
         }
         return versionExtensions;
     }
+    
+    /**
+     * Returns the collection of all later and earlier minor versions of the given entity. At a
+     * minimum, the resulting collection will contain the original entity. To improve performance,
+     * the minor version families are cached in the validation context.
+     * 
+     * @param versionedEntity
+     *            the versioned entity for which to return the major version family
+     * @return List<V>
+     */
+    @SuppressWarnings("unchecked")
+	public <V extends Versioned> List<V> getMajorVersionFamily(V versionedEntity)
+            throws VersionSchemeException {
+        Collection<V> priorEntityVersions = getAllVersionExtensions(versionedEntity);
+        List<V> majorVersionFamily = new ArrayList<V>();
 
+        if ((versionedEntity.getBaseNamespace() != null)
+                && (versionedEntity.getOwningModel() != null)) {
+            VersionScheme versionScheme = getVersionScheme( versionedEntity );
+            
+            for (TLLibrary library : versionedEntity.getOwningModel().getUserDefinedLibraries()) {
+                if (!library.getBaseNamespace().equals(versionedEntity.getBaseNamespace())) {
+                    continue;
+                }
+                List<V> versionedMembers = new ArrayList<V>();
+
+                // Find all of the entities from this library of the same type as our original
+                // versioned entity
+                if (versionedEntity instanceof TLOperation) {
+                    if (library.getService() != null) {
+                        for (TLOperation operation : library.getService().getOperations()) {
+                            versionedMembers.add((V) operation);
+                        }
+                    }
+                } else {
+                    for (NamedEntity libraryMember : library.getNamedMembers()) {
+                        if (libraryMember.getClass().equals(versionedEntity.getClass())) {
+                            versionedMembers.add((V) libraryMember);
+                        }
+                    }
+                }
+
+                // Determine whether each same-name entity is part of the original entity's major
+                // version family
+                for (V versionedMember : versionedMembers) {
+                    if ((versionedMember == versionedEntity)
+                            || priorEntityVersions.contains(versionedMember)) {
+                        // The member is a previous version of our original versioned entity (or
+                        // the original entity itself)
+                    	majorVersionFamily.add(versionedMember);
+
+                    } else {
+                        Collection<V> priorMemberVersions = getAllVersionExtensions(versionedMember);
+
+                        if (priorMemberVersions.contains(versionedEntity)) {
+                            // The original entity is a previous version of this versioned member
+                        	majorVersionFamily.add(versionedMember);
+                        }
+                    }
+                }
+            }
+            Collections.sort( majorVersionFamily, versionScheme.getComparator( true ) );
+        }
+        return majorVersionFamily;
+    }
+    
     /**
      * Returns the libraries in the current model that are eligible to accept new minor versions for
      * the given versioned entity. In order to be returned by this method, an eligible library must
@@ -207,20 +267,13 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
         TLLibrary owningLibrary = getOwningLibrary(versionedEntity);
         List<TLLibrary> minorVersionLibraries = getLaterMinorVersions(owningLibrary);
         List<TLLibrary> eligibleLibraries = new ArrayList<TLLibrary>();
-
+    	VersionHandler<Versioned> handler = getVersionHandler( versionedEntity );
+    	
         // Search the patch libraries, and return only those who do not yet contain a patch for the
         // given facet
         for (TLLibrary minorVersionLibrary : minorVersionLibraries) {
-            boolean isEligible = true;
+            boolean isEligible = (handler.retrieveExistingVersion(versionedEntity, minorVersionLibrary) == null);
 
-            if (versionedEntity instanceof TLOperation) {
-                if (minorVersionLibrary.getService() != null) {
-                    isEligible = (minorVersionLibrary.getService().getOperation(
-                            ((TLOperation) versionedEntity).getName()) == null);
-                }
-            } else {
-                isEligible = (minorVersionLibrary.getNamedMember(versionedEntity.getLocalName()) == null);
-            }
             if (isEligible && !isReadOnly(minorVersionLibrary)) {
                 eligibleLibraries.add(minorVersionLibrary);
             }
@@ -359,13 +412,12 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
 
             // For any patches that exist in the prior minor version, create roll-up
             // entities in the new library version.
-            RollupReferenceInfo rollupReferences = new RollupReferenceInfo(library, patchLibraries);
-            ModelElementCloner cloner = new ModelElementCloner(library.getOwningModel());
+            RollupReferenceHandler referenceHandler = new RollupReferenceHandler(library, patchLibraries);
 
             for (TLLibrary patchLibrary : patchLibraries) {
-                rollupPatchLibrary(newLibrary, patchLibrary, cloner, rollupReferences);
+                rollupPatchLibrary(newLibrary, patchLibrary, referenceHandler);
             }
-            adjustSameLibraryReferences(newLibrary, rollupReferences);
+            referenceHandler.adjustSameLibraryReferences(newLibrary);
             ImportManagementIntegrityChecker.verifyReferencedLibraries(newLibrary);
 
             new LibraryModelSaver().saveLibrary(newLibrary);
@@ -394,13 +446,13 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
      *             thrown if the versioned entity or one of its roll-up patches contains validation
      *             errors
      */
-    @SuppressWarnings("unchecked")
     public <V extends Versioned> V createNewMinorVersion(V versionedEntity,
             TLLibrary targetLibraryVersion) throws VersionSchemeException, ValidationException {
         TLLibrary owningLibrary = getOwningLibrary(versionedEntity);
         List<TLLibrary> minorVersionLibraries = getLaterMinorVersions(owningLibrary);
         List<TLLibrary> patchLibraries = getLaterPatchVersions(owningLibrary);
         int targetVersionIndex = minorVersionLibraries.indexOf(targetLibraryVersion);
+        VersionHandler<V> handler = getVersionHandler(versionedEntity);
         ValidationFindings findings = new ValidationFindings();
         V laterMinorVersion = null;
 
@@ -411,6 +463,10 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
         findings.addAll(validate(targetLibraryVersion));
 
         if (findings.hasFinding(FindingType.ERROR)) {
+        	// TODO: Delete debugging code
+        	for (String message : findings.getAllValidationMessages(FindingMessageFormat.IDENTIFIED_FORMAT)) {
+        		System.out.println(message);
+        	}
             throw new ValidationException(
                     "Unable to create the new version because the prior version and/or patch libraries contain errors.",
                     findings);
@@ -446,18 +502,9 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
         // Attempt to identify a later minor version than the one we are going to create
         for (int i = targetVersionIndex + 1; i < minorVersionLibraries.size(); i++) {
             TLLibrary laterMinorVersionLibrary = minorVersionLibraries.get(i);
-
-            if (versionedEntity instanceof TLOperation) {
-                TLService service = laterMinorVersionLibrary.getService();
-
-                if (service != null) {
-                    laterMinorVersion = (V) service.getOperation(((TLOperation) versionedEntity)
-                            .getName());
-                }
-            } else {
-                laterMinorVersion = (V) laterMinorVersionLibrary.getNamedMember(versionedEntity
-                        .getLocalName());
-            }
+            
+            laterMinorVersion = handler.retrieveExistingVersion( versionedEntity, laterMinorVersionLibrary );
+            
             if (laterMinorVersion != null) {
                 if (isReadOnly(laterMinorVersionLibrary)) {
                     // This read-only check is included for completeness, but it is an edge case
@@ -473,96 +520,22 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
         }
 
         // Create the new minor version
-        RollupReferenceInfo rollupReferences = new RollupReferenceInfo(owningLibrary,
-                patchLibraries);
-        ModelElementCloner cloner = new ModelElementCloner(owningLibrary.getOwningModel());
-        V newVersion;
+        RollupReferenceHandler referenceHandler = new RollupReferenceHandler(owningLibrary, patchLibraries);
+        V newVersion = handler.createNewVersion(versionedEntity, targetLibraryVersion);
 
-        if (versionedEntity instanceof TLBusinessObject) {
-            TLBusinessObject oldBO = (TLBusinessObject) versionedEntity;
-            TLBusinessObject newBO = newVersionInstance(oldBO, cloner);
-
-            if (laterMinorVersion != null) {
-                setMinorVersionExtension(laterMinorVersion, newBO);
-            }
-            targetLibraryVersion.addNamedMember(newBO);
-            newVersion = (V) newBO;
-
-        } else if (versionedEntity instanceof TLCoreObject) {
-            TLCoreObject oldCore = (TLCoreObject) versionedEntity;
-            TLCoreObject newCore = newVersionInstance(oldCore, cloner);
-
-            if (laterMinorVersion != null) {
-                setMinorVersionExtension(laterMinorVersion, newCore);
-            }
-            targetLibraryVersion.addNamedMember(newCore);
-            newVersion = (V) newCore;
-
-        } else if (versionedEntity instanceof TLOperation) {
-            TLService newVersionService = targetLibraryVersion.getService();
-            TLOperation oldOp = (TLOperation) versionedEntity;
-            TLOperation newOp = newVersionInstance(oldOp, cloner);
-
-            if (newVersionService == null) {
-                newVersionService = newVersionInstance(oldOp.getOwningService(), cloner);
-                targetLibraryVersion.setService(newVersionService);
-            }
-            if (laterMinorVersion != null) {
-                setMinorVersionExtension(laterMinorVersion, newOp);
-            }
-            newVersionService.addOperation(newOp);
-            newVersion = (V) newOp;
-
-        } else if (versionedEntity instanceof TLValueWithAttributes) {
-            TLValueWithAttributes oldVWA = (TLValueWithAttributes) versionedEntity;
-            TLValueWithAttributes newVWA = newVersionInstance(oldVWA, cloner);
-
-            if (laterMinorVersion != null) {
-                setMinorVersionExtension(laterMinorVersion, newVWA);
-            }
-            targetLibraryVersion.addNamedMember(newVWA);
-            newVersion = (V) newVWA;
-
-        } else if (versionedEntity instanceof TLOpenEnumeration) {
-        	TLOpenEnumeration oldEnum = (TLOpenEnumeration) versionedEntity;
-        	TLOpenEnumeration newEnum = newVersionInstance(oldEnum, cloner);
-
-            if (laterMinorVersion != null) {
-                setMinorVersionExtension(laterMinorVersion, newEnum);
-            }
-            targetLibraryVersion.addNamedMember(newEnum);
-            newVersion = (V) newEnum;
-
-        } else if (versionedEntity instanceof TLClosedEnumeration) {
-        	TLClosedEnumeration oldEnum = (TLClosedEnumeration) versionedEntity;
-        	TLClosedEnumeration newEnum = newVersionInstance(oldEnum, cloner);
-
-            if (laterMinorVersion != null) {
-                setMinorVersionExtension(laterMinorVersion, newEnum);
-            }
-            targetLibraryVersion.addNamedMember(newEnum);
-            newVersion = (V) newEnum;
-
-        } else { // Assume TLSimple
-        	TLSimple oldSimple = (TLSimple) versionedEntity;
-        	TLSimple newSimple = newVersionInstance(oldSimple, cloner);
-
-            if (laterMinorVersion != null) {
-                setMinorVersionExtension(laterMinorVersion, newSimple);
-            }
-            targetLibraryVersion.addNamedMember(newSimple);
-            newVersion = (V) newSimple;
+        if (laterMinorVersion != null) {
+        	handler.setExtension(laterMinorVersion, newVersion);
         }
-
+        
         // Search for patches of the versioned entity to roll up
         for (TLLibrary patchLibrary : patchLibraries) {
             for (TLExtensionPointFacet patch : patchLibrary.getExtensionPointFacetTypes()) {
                 if (getPatchedVersion(patch) == versionedEntity) {
-                    rollupPatchVersion(newVersion, patch, cloner, rollupReferences, true);
+                    rollupPatchVersion(newVersion, patch, referenceHandler, true);
                 }
             }
         }
-        adjustSameLibraryReferences(targetLibraryVersion, rollupReferences);
+        referenceHandler.adjustSameLibraryReferences(targetLibraryVersion);
         ImportManagementIntegrityChecker.verifyReferencedLibraries(targetLibraryVersion);
 
         return newVersion;
@@ -591,13 +564,12 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
             throw new VersionSchemeException(
                     "Only entities contained within user-defined libraries can be rolled up.");
         }
-        RollupReferenceInfo rollupReferences = new RollupReferenceInfo(
+        RollupReferenceHandler referenceHandler = new RollupReferenceHandler(
                 (TLLibrary) patchVersion.getOwningLibrary());
         TLLibrary targetLibrary = (TLLibrary) minorVersionTarget.getOwningLibrary();
 
-        rollupPatchVersion(minorVersionTarget, patchVersion, new ModelElementCloner(
-                minorVersionTarget.getOwningModel()), rollupReferences, false);
-        adjustSameLibraryReferences(targetLibrary, rollupReferences);
+        rollupPatchVersion(minorVersionTarget, patchVersion, referenceHandler, false);
+        referenceHandler.adjustSameLibraryReferences(targetLibrary);
         ImportManagementIntegrityChecker.verifyReferencedLibraries(targetLibrary);
     }
 

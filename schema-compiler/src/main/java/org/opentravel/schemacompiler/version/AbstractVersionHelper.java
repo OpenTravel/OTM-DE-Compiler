@@ -18,53 +18,23 @@ package org.opentravel.schemacompiler.version;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-import org.opentravel.schemacompiler.codegen.util.EnumCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
-import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.NamedEntity;
-import org.opentravel.schemacompiler.model.TLAbstractEnumeration;
-import org.opentravel.schemacompiler.model.TLAttribute;
-import org.opentravel.schemacompiler.model.TLAttributeOwner;
-import org.opentravel.schemacompiler.model.TLAttributeType;
-import org.opentravel.schemacompiler.model.TLBusinessObject;
-import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLContext;
-import org.opentravel.schemacompiler.model.TLCoreObject;
-import org.opentravel.schemacompiler.model.TLEnumValue;
-import org.opentravel.schemacompiler.model.TLEquivalent;
-import org.opentravel.schemacompiler.model.TLExample;
-import org.opentravel.schemacompiler.model.TLExtension;
-import org.opentravel.schemacompiler.model.TLExtensionOwner;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLFacetType;
-import org.opentravel.schemacompiler.model.TLIndicator;
-import org.opentravel.schemacompiler.model.TLIndicatorOwner;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLModelElement;
-import org.opentravel.schemacompiler.model.TLOpenEnumeration;
-import org.opentravel.schemacompiler.model.TLOperation;
-import org.opentravel.schemacompiler.model.TLProperty;
-import org.opentravel.schemacompiler.model.TLPropertyOwner;
-import org.opentravel.schemacompiler.model.TLPropertyType;
-import org.opentravel.schemacompiler.model.TLService;
-import org.opentravel.schemacompiler.model.TLSimple;
-import org.opentravel.schemacompiler.model.TLSimpleFacet;
-import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.repository.Project;
 import org.opentravel.schemacompiler.repository.ProjectItem;
 import org.opentravel.schemacompiler.repository.ProjectManager;
@@ -73,16 +43,16 @@ import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryItemState;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
-import org.opentravel.schemacompiler.transform.SymbolTable;
-import org.opentravel.schemacompiler.transform.symbols.SymbolTableFactory;
 import org.opentravel.schemacompiler.util.ModelElementCloner;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationException;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.compile.TLModelCompileValidator;
-import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
-import org.opentravel.schemacompiler.visitor.ModelNavigator;
+import org.opentravel.schemacompiler.version.handlers.RollupReferenceHandler;
+import org.opentravel.schemacompiler.version.handlers.VersionHandler;
+import org.opentravel.schemacompiler.version.handlers.VersionHandlerFactory;
+import org.opentravel.schemacompiler.version.handlers.VersionHandlerMergeUtils;
 
 /**
  * Base class for version helpers used to retrieve related versions of a library or entity from a
@@ -92,7 +62,8 @@ import org.opentravel.schemacompiler.visitor.ModelNavigator;
  */
 public abstract class AbstractVersionHelper {
 
-    private Project activeProject;
+    private VersionHandlerFactory handlerFactory = new VersionHandlerFactory();
+	private Project activeProject;
 
     /**
      * Default constructor. NOTE: When working in an environment where a <code>ProjectManager</code>
@@ -174,6 +145,31 @@ public abstract class AbstractVersionHelper {
 
         return versionChain;
     }
+    
+    /**
+     * Returns the major version namespace of the given library.
+     * 
+     * @param library  the library for which to return the major version namespace
+     * @return String
+     * @throws VersionSchemeException
+     *             thrown if the library's version scheme is not recognized
+     */
+    public String getMajorVersionNamespace(AbstractLibrary library) throws VersionSchemeException {
+        VersionScheme versionScheme = getVersionScheme( library );
+        return versionScheme.getMajorVersionNamespace( library.getNamespace() );
+    }
+    
+    /**
+     * Returns the major version namespace of the given versioned entity.
+     * 
+     * @param versionedEntity  the entity for which to return the major version namespace
+     * @return String
+     * @throws VersionSchemeException
+     *             thrown if the library's version scheme is not recognized
+     */
+    public String getMajorVersionNamespace(Versioned versionedEntity) throws VersionSchemeException {
+    	return (versionedEntity == null) ? null : getMajorVersionNamespace( versionedEntity.getOwningLibrary() );
+    }
 
     /**
      * Returns the library from the model with the specified name and namespace, or null if no such
@@ -191,78 +187,15 @@ public abstract class AbstractVersionHelper {
         AbstractLibrary library = model.getLibrary(namespace, libraryName);
         return (library instanceof TLLibrary) ? (TLLibrary) library : null;
     }
-
+    
     /**
-     * If the given versioned entity is a minor version of an entity defined in a prior version,
-     * this method will return that prior version.
+     * Returns a version handler for the given versioned entity.
      * 
-     * @param versionedEntity
-     *            the versioned entity for which to return the previous version
-     * @return V
-     * @throws VersionSchemeException
-     *             thrown if the entity's version scheme is not recognized
+     * @param versionedEntity  the versioned entity for which to return a handler
+     * @return VersionHandler<V>
      */
-    @SuppressWarnings("unchecked")
-    <V extends Versioned> V getPriorVersionExtension(V versionedEntity)
-            throws VersionSchemeException {
-        NamedEntity origEntity = (NamedEntity) versionedEntity;
-        NamedEntity extendedEntity = null;
-        V extendedVersion = null;
-
-        // Identify the extension (if any) based on the type of versioned entity we have
-        if (versionedEntity instanceof TLExtensionOwner) {
-            TLExtension extension = ((TLExtensionOwner) versionedEntity).getExtension();
-            extendedEntity = (extension == null) ? null : extension.getExtendsEntity();
-
-        } else if (versionedEntity instanceof TLValueWithAttributes) {
-            extendedEntity = ((TLValueWithAttributes) versionedEntity).getParentType();
-            
-        } else if (versionedEntity instanceof TLSimple) {
-            extendedEntity = ((TLSimple) versionedEntity).getParentType();
-        }
-
-        // Determine whether the extended entity is a minor version of the one that
-        // was passed to this method
-        if ((extendedEntity != null)
-                && extendedEntity.getClass().equals(versionedEntity.getClass())
-                && extendedEntity.getLocalName().equals(origEntity.getLocalName())) {
-            String origBaseNamespace = versionedEntity.getBaseNamespace();
-            String extendedBaseNamespace = ((Versioned) extendedEntity).getBaseNamespace();
-
-            if ((origBaseNamespace != null) && origBaseNamespace.equals(extendedBaseNamespace)) {
-                VersionScheme versionScheme = getVersionScheme(versionedEntity);
-                List<String> versionChain = versionScheme.getMajorVersionChain(versionedEntity
-                        .getNamespace());
-
-                if (versionChain.contains(extendedEntity.getNamespace())) {
-                    extendedVersion = (V) extendedEntity;
-                }
-            }
-        }
-        return extendedVersion;
-    }
-
-    /**
-     * If the given versioned entity is a minor version of an entity defined in a prior version,
-     * this method will return an ordered list of all the previous versions. The list is sorted in
-     * descending order (i.e. the latest prior version will be the first element in the list).
-     * 
-     * @param versionedEntity
-     *            the versioned entity for which to return the previous version
-     * @return List<V>
-     * @throws VersionSchemeException
-     *             thrown if the entity's version scheme is not recognized
-     */
-    <V extends Versioned> List<V> getAllPriorVersionExtensions(V versionedEntity)
-            throws VersionSchemeException {
-        List<V> extendedVersions = new ArrayList<V>();
-        V extendedVersion = versionedEntity;
-
-        while ((extendedVersion = getPriorVersionExtension(extendedVersion)) != null) {
-            extendedVersions.add(extendedVersion);
-        }
-        Collections.sort(extendedVersions, getVersionScheme(versionedEntity).getComparator(false));
-        return extendedVersions;
+    <V extends Versioned> VersionHandler<V> getVersionHandler(V versionedEntity) {
+    	return handlerFactory.getHandler( versionedEntity );
     }
 
     /**
@@ -631,18 +564,16 @@ public abstract class AbstractVersionHelper {
      *            the minor version libarary that will receive any new/modified rolled-up entities
      * @param patchLibrary
      *            the patch library whose contents are to be rolled up
-     * @param cloner
-     *            the cloner to use when creating copies of model elements
-     * @param rollupReferences
-     *            reference information for the libraries being rolled up
+     * @param referenceHandler
+     *            handler that stores reference information for the libraries being rolled up
      * @throws VersionSchemeException
      *             thrown if the library's version scheme is not recognized
      */
     void rollupPatchLibrary(TLLibrary minorVersionLibrary, TLLibrary patchLibrary,
-            ModelElementCloner cloner, RollupReferenceInfo rollupReferences)
-            throws VersionSchemeException {
+            RollupReferenceHandler referenceHandler) throws VersionSchemeException {
         for (TLContext context : patchLibrary.getContexts()) {
             if (minorVersionLibrary.getContext(context.getContextId()) == null) {
+            	ModelElementCloner cloner = getCloner( patchLibrary.getOwningModel() );
                 minorVersionLibrary.addContext(cloner.clone(context));
             }
         }
@@ -651,9 +582,10 @@ public abstract class AbstractVersionHelper {
 
             if (patchedEntity != null) {
                 try {
-                    Versioned newEntityVersion = createOrRetrieveNewEntityVersion(patchedEntity,
-                            minorVersionLibrary, cloner);
-                    rollupPatchVersion(newEntityVersion, patch, cloner, rollupReferences, true);
+                	VersionHandler<Versioned> handler = getVersionHandler( patchedEntity );
+                	Versioned newEntityVersion = handler.createOrRetrieveNewVersion( patchedEntity, minorVersionLibrary );
+                	
+                    rollupPatchVersion(newEntityVersion, patch, referenceHandler, true);
 
                 } catch (ValidationException e) {
                     // Not possible since we indicated validation should be skipped
@@ -686,96 +618,6 @@ public abstract class AbstractVersionHelper {
     }
 
     /**
-     * Constructs a new copy of the given entity with the same local name, but does not populate any
-     * of the contents (elements or attributes). The new entity is added to the target library as a
-     * new named member.
-     * 
-     * @param originalEntity
-     *            the original entity from which the copy should be constructed
-     * @param targetLibrary
-     *            the target library to which the new entity version will be assigned
-     * @param cloner
-     *            the cloner to use when creating copies of model elements
-     * @return Versioned
-     */
-    Versioned createOrRetrieveNewEntityVersion(Versioned originalEntity, TLLibrary targetLibrary,
-            ModelElementCloner cloner) {
-        Versioned newEntityVersion;
-        try {
-            // Attempt to find an existing entity that matches the original
-            if (originalEntity instanceof TLOperation) {
-                TLService service = targetLibrary.getService();
-                newEntityVersion = (service == null) ? null : service
-                        .getOperation(((TLOperation) originalEntity).getName());
-
-            } else {
-                newEntityVersion = (Versioned) targetLibrary.getNamedMember(originalEntity
-                        .getLocalName());
-            }
-
-            // If a matching entity does not already exist, create an empty instance
-            // with the same name.
-            if (newEntityVersion == null) {
-                if (originalEntity instanceof TLBusinessObject) {
-                    TLBusinessObject newBO = newVersionInstance((TLBusinessObject) originalEntity, cloner);
-
-                    targetLibrary.addNamedMember(newBO);
-                    newEntityVersion = newBO;
-
-                } else if (originalEntity instanceof TLCoreObject) {
-                    TLCoreObject newCore = newVersionInstance((TLCoreObject) originalEntity, cloner);
-
-                    targetLibrary.addNamedMember(newCore);
-                    newEntityVersion = newCore;
-
-                } else if (originalEntity instanceof TLOperation) {
-                    TLService newVersionService = targetLibrary.getService();
-                    TLOperation oldOp = (TLOperation) originalEntity;
-                    TLOperation newOp = newVersionInstance(oldOp, cloner);
-
-                    if (newVersionService == null) {
-                        newVersionService = newVersionInstance(oldOp.getOwningService(), cloner);
-                        targetLibrary.setService(newVersionService);
-                    }
-                    newVersionService.addOperation(newOp);
-                    newEntityVersion = newOp;
-
-                } else if (originalEntity instanceof TLValueWithAttributes) {
-                    TLValueWithAttributes newVWA = newVersionInstance(
-                            (TLValueWithAttributes) originalEntity, cloner);
-
-                    targetLibrary.addNamedMember(newVWA);
-                    newEntityVersion = newVWA;
-                    
-                } else if (originalEntity instanceof TLOpenEnumeration) {
-                	TLOpenEnumeration newEnum = newVersionInstance(
-                            (TLOpenEnumeration) originalEntity, cloner);
-
-                    targetLibrary.addNamedMember(newEnum);
-                    newEntityVersion = newEnum;
-                    
-                } else if (originalEntity instanceof TLClosedEnumeration) {
-                	TLClosedEnumeration newEnum = newVersionInstance(
-                            (TLClosedEnumeration) originalEntity, cloner);
-
-                    targetLibrary.addNamedMember(newEnum);
-                    newEntityVersion = newEnum;
-                    
-                } else if (originalEntity instanceof TLSimple) {
-                	TLSimple newSimple = newVersionInstance(
-                            (TLSimple) originalEntity, cloner);
-
-                    targetLibrary.addNamedMember(newSimple);
-                    newEntityVersion = newSimple;
-                }
-            }
-        } catch (ClassCastException e) {
-            newEntityVersion = null;
-        }
-        return newEntityVersion;
-    }
-
-    /**
      * Rolls up the contents of the given patch version into the new major/minor version. A roll-up
      * is essentially a merge of the attributes, properties, and indicators from the facets of the
      * patch version.
@@ -784,10 +626,8 @@ public abstract class AbstractVersionHelper {
      *            the major/minor version of the entity that will receive any rolled up items
      * @param patchVersion
      *            the patch version of the entity whose items will be the source of the roll-up
-     * @param cloner
-     *            the cloner to use when creating copies of model elements
-     * @param rollupReferences
-     *            reference information for the libraries being rolled up
+     * @param referenceHandler
+     *            handler that stores reference information for the libraries being rolled up
      * @param skipValidation
      *            internal flag indicating whether entity validation should be skipped
      * @throws VersionSchemeException
@@ -797,9 +637,8 @@ public abstract class AbstractVersionHelper {
      *             thrown if the rollup cannot be performed because one or more validation errors
      *             exist in either the source or target entity
      */
-    void rollupPatchVersion(Versioned majorOrMinorVersionTarget,
-            TLExtensionPointFacet patchVersion, ModelElementCloner cloner,
-            RollupReferenceInfo rollupReferences, boolean skipValidation)
+    void rollupPatchVersion(Versioned majorOrMinorVersionTarget, TLExtensionPointFacet patchVersion,
+    		RollupReferenceHandler referenceHandler, boolean skipValidation)
             throws VersionSchemeException, ValidationException {
         // Perform validation checks before rolling up
         if (!skipValidation) {
@@ -830,7 +669,8 @@ public abstract class AbstractVersionHelper {
             }
 
             // Verify that the patch is, in fact, a patch of one of its prior minor versions
-            List<Versioned> priorMajorOrMinorVersions = getAllPriorVersionExtensions(majorOrMinorVersionTarget);
+            VersionHandler<Versioned> handler = getVersionHandler( majorOrMinorVersionTarget );
+            List<Versioned> priorMajorOrMinorVersions = handler.getAllVersionExtensions( majorOrMinorVersionTarget );
             Versioned patchedVersion = getPatchedVersion(patchVersion);
 
             if ((patchedVersion == null) || !priorMajorOrMinorVersions.contains(patchedVersion)) {
@@ -840,15 +680,16 @@ public abstract class AbstractVersionHelper {
         }
 
         // Perform the roll-up of attributes, properties, and indicators
-        TLFacetType patchedFacetType = ((TLFacet) patchVersion.getExtension().getExtendsEntity())
-                .getFacetType();
+        TLFacetType patchedFacetType = ((TLFacet) patchVersion.getExtension().getExtendsEntity()).getFacetType();
         TLFacet targetFacet = FacetCodegenUtils.getFacetOfType(
                 (TLFacetOwner) majorOrMinorVersionTarget, patchedFacetType);
 
         if (targetFacet != null) {
-            mergeAttributes(targetFacet, patchVersion.getAttributes(), cloner, rollupReferences);
-            mergeProperties(targetFacet, patchVersion.getElements(), cloner, rollupReferences);
-            mergeIndicators(targetFacet, patchVersion.getIndicators(), cloner);
+        	VersionHandlerMergeUtils mergeUtils = new VersionHandlerMergeUtils( handlerFactory );
+        	
+        	mergeUtils.mergeAttributes(targetFacet, patchVersion.getAttributes(), referenceHandler);
+        	mergeUtils.mergeProperties(targetFacet, patchVersion.getElements(), referenceHandler);
+        	mergeUtils.mergeIndicators(targetFacet, patchVersion.getIndicators());
         }
     }
 
@@ -988,7 +829,7 @@ public abstract class AbstractVersionHelper {
      * @throws VersionSchemeException
      *             thrown if the library's version scheme is not recognized
      */
-    public VersionScheme getVersionScheme(TLLibrary library) throws VersionSchemeException {
+    public VersionScheme getVersionScheme(AbstractLibrary library) throws VersionSchemeException {
         return (library == null) ? null : VersionSchemeFactory.getInstance().getVersionScheme(
                 library.getVersionScheme());
     }
@@ -1099,761 +940,15 @@ public abstract class AbstractVersionHelper {
         findings.addAll(TLModelCompileValidator.validateModelElement(xpFacet, false));
         return findings;
     }
-
-    /**
-     * Constructs a new version of the given entity that is an exact copy except that the facets do
-     * not contain any attributes, elements, or indicators.  The new version returned by this method
-     * is configured to extend the old version provided.
-     * 
-     * @param oldVersion
-     *            the old version from which to construct the new version instance
-     * @param cloner
-     *            the cloner to use when creating copies of model elements
-     * @return TLBusinessObject
-     */
-    TLBusinessObject newVersionInstance(TLBusinessObject oldVersion, ModelElementCloner cloner) {
-        TLBusinessObject newVersion = new TLBusinessObject();
-
-        newVersion.setName(oldVersion.getName());
-        newVersion.setDocumentation(cloner.clone(oldVersion.getDocumentation()));
-        setMinorVersionExtension(newVersion, oldVersion);
-
-        for (TLEquivalent equivalent : oldVersion.getEquivalents()) {
-            newVersion.addEquivalent(cloner.clone(equivalent));
-        }
-        return newVersion;
-    }
-
-    /**
-     * Constructs a new version of the given entity that is an exact copy except that the facets do
-     * not contain any attributes, elements, or indicators.  The new version returned by this method
-     * is configured to extend the old version provided.
-     * 
-     * @param oldVersion
-     *            the old version from which to construct the new version instance
-     * @param cloner
-     *            the cloner to use when creating copies of model elements
-     * @return TLCoreObject
-     */
-    TLCoreObject newVersionInstance(TLCoreObject oldVersion, ModelElementCloner cloner) {
-        TLCoreObject newVersion = new TLCoreObject();
-
-        newVersion.setName(oldVersion.getName());
-        newVersion.setDocumentation(cloner.clone(oldVersion.getDocumentation()));
-        newVersion.setSimpleFacet(cloner.clone(oldVersion.getSimpleFacet()));
-        setMinorVersionExtension(newVersion, oldVersion);
-
-        for (TLEquivalent equivalent : oldVersion.getEquivalents()) {
-            newVersion.addEquivalent(cloner.clone(equivalent));
-        }
-        return newVersion;
-    }
-
-    /**
-     * Constructs a new version of the given service that is an exact copy except that it does not
-     * contain any operations.
-     * 
-     * @param oldVersion
-     *            the old service from which to construct the new instance
-     * @param cloner
-     *            the cloner to use when creating copies of model elements
-     * @return TLService
-     */
-    TLService newVersionInstance(TLService oldVersion, ModelElementCloner cloner) {
-        TLService newVersion = new TLService();
-
-        newVersion.setName(oldVersion.getName());
-        newVersion.setDocumentation(cloner.clone(oldVersion.getDocumentation()));
-        return newVersion;
-    }
-
-    /**
-     * Constructs a new version of the given entity that is an exact copy except that the facets do
-     * not contain any attributes, elements, or indicators.  The new version returned by this method
-     * is configured to extend the old version provided.
-     * 
-     * @param oldVersion
-     *            the old version from which to construct the new version instance
-     * @param cloner
-     *            the cloner to use when creating copies of model elements
-     * @return TLOperation
-     */
-    TLOperation newVersionInstance(TLOperation oldVersion, ModelElementCloner cloner) {
-        TLOperation newVersion = new TLOperation();
-
-        newVersion.setName(oldVersion.getName());
-        newVersion.setDocumentation(cloner.clone(oldVersion.getDocumentation()));
-        setMinorVersionExtension(newVersion, oldVersion);
-
-        for (TLEquivalent equivalent : oldVersion.getEquivalents()) {
-            newVersion.addEquivalent(cloner.clone(equivalent));
-        }
-        return newVersion;
-    }
-
-    /**
-     * Constructs a new version of the given entity that is an exact copy except that the facets do
-     * not contain any attributes or indicators.  The new version returned by this method is configured
-     * to extend the old version provided.
-     * 
-     * @param oldVersion
-     *            the old version from which to construct the new version instance
-     * @param cloner
-     *            the cloner to use when creating copies of model elements
-     * @return TLValueWithAttributes
-     */
-    TLValueWithAttributes newVersionInstance(TLValueWithAttributes oldVersion,
-            ModelElementCloner cloner) {
-        TLValueWithAttributes newVersion = new TLValueWithAttributes();
-
-        newVersion.setName(oldVersion.getName());
-        newVersion.setDocumentation(cloner.clone(oldVersion.getDocumentation()));
-        newVersion.setParentType(oldVersion);
-
-        for (TLEquivalent equivalent : oldVersion.getEquivalents()) {
-            newVersion.addEquivalent(cloner.clone(equivalent));
-        }
-        for (TLExample example : oldVersion.getExamples()) {
-            newVersion.addExample(cloner.clone(example));
-        }
-        return newVersion;
-    }
-
-    /**
-     * Constructs a new version of the given entity that is an exact copy except that
-     * it does not contain any enumerated values.  The new version returned by this method
-     * is configured to extend the old version provided.
-     * 
-     * @param oldVersion
-     *            the old version from which to construct the new version instance
-     * @param cloner
-     *            the cloner to use when creating copies of model elements
-     * @return TLOpenEnumeration
-     */
-    TLOpenEnumeration newVersionInstance(TLOpenEnumeration oldVersion,
-            ModelElementCloner cloner) {
-    	TLOpenEnumeration newVersion = new TLOpenEnumeration();
-
-        newVersion.setName(oldVersion.getName());
-        newVersion.setDocumentation(cloner.clone(oldVersion.getDocumentation()));
-        setMinorVersionExtension(newVersion, oldVersion);
-        return newVersion;
-    }
-
-    /**
-     * Constructs a new version of the given entity that is an exact copy except that
-     * it does not contain any enumerated values.  The new version returned by this method
-     * is configured to extend the old version provided.
-     * 
-     * @param oldVersion
-     *            the old version from which to construct the new version instance
-     * @param cloner
-     *            the cloner to use when creating copies of model elements
-     * @return TLClosedEnumeration
-     */
-    TLClosedEnumeration newVersionInstance(TLClosedEnumeration oldVersion,
-            ModelElementCloner cloner) {
-    	TLClosedEnumeration newVersion = new TLClosedEnumeration();
-
-        newVersion.setName(oldVersion.getName());
-        newVersion.setDocumentation(cloner.clone(oldVersion.getDocumentation()));
-        setMinorVersionExtension(newVersion, oldVersion);
-        return newVersion;
-    }
-
-    /**
-     * Constructs a new version of the given entity that is an exact copy of the
-     * original.  The new version returned by this method is configured to extend
-     * the old version provided.
-     * 
-     * @param oldVersion
-     *            the old version from which to construct the new version instance
-     * @param cloner
-     *            the cloner to use when creating copies of model elements
-     * @return TLSimple
-     */
-    TLSimple newVersionInstance(TLSimple oldVersion, ModelElementCloner cloner) {
-    	TLSimple newVersion = new TLSimple();
-
-        newVersion.setName(oldVersion.getName());
-        newVersion.setDocumentation(cloner.clone(oldVersion.getDocumentation()));
-        newVersion.setParentType(oldVersion);
-        newVersion.setListTypeInd(oldVersion.isListTypeInd());
-
-        for (TLEquivalent equivalent : oldVersion.getEquivalents()) {
-            newVersion.addEquivalent(cloner.clone(equivalent));
-        }
-        for (TLExample example : oldVersion.getExamples()) {
-            newVersion.addExample(cloner.clone(example));
-        }
-        return newVersion;
-    }
-
-    /**
-     * Assigns the 'extendedVersion' entity as the minor version extension of the 'laterVersion'
-     * entity.
-     * 
-     * @param laterVersion
-     *            the later version of the entity to which the extension will be assigned
-     * @param extendedVersion
-     *            the extended version that will be assigned to the 'extendedVersion'
-     */
-    void setMinorVersionExtension(Versioned laterVersion, Versioned extendedVersion) {
-        if (laterVersion instanceof TLExtensionOwner) { // BO, core, operations & open/closed enums
-            TLExtensionOwner _laterVersion = (TLExtensionOwner) laterVersion;
-            TLExtension extension = _laterVersion.getExtension();
-
-            if (extension == null) {
-                extension = new TLExtension();
-                _laterVersion.setExtension(extension);
-            }
-            extension.setExtendsEntity((NamedEntity) extendedVersion);
-
-        } else if (laterVersion instanceof TLValueWithAttributes) {
-            ((TLValueWithAttributes) laterVersion)
-                    .setParentType((TLValueWithAttributes) extendedVersion);
-            
-        } else if (laterVersion instanceof TLSimple) {
-            ((TLSimple) laterVersion).setParentType((TLSimple) extendedVersion);
-        }
-    }
-
-    /**
-     * Merges the contents of the given list into the specified target entity. If any attributes
-     * with the same name already exist in the target, the merge item(s) will be ignored.
-     * 
-     * @param target
-     *            the entity that will receive new attributes from the merge
-     * @param attributesToMerge
-     *            the list of attributes to merge into the target
-     * @param cloner
-     *            the cloner to use when creating copies of model elements
-     * @param rollupReferences
-     *            reference information for the libraries being rolled up
-     */
-    void mergeAttributes(TLAttributeOwner target, List<TLAttribute> attributesToMerge,
-            ModelElementCloner cloner, RollupReferenceInfo rollupReferences) {
-        Set<String> existingAttributeNames = new HashSet<String>();
-        List<TLAttribute> existingAttributes = null;
-
-        if (target instanceof TLValueWithAttributes) {
-            existingAttributes = PropertyCodegenUtils
-                    .getInheritedAttributes((TLValueWithAttributes) target);
-        } else if (target instanceof TLFacet) {
-            existingAttributes = PropertyCodegenUtils.getInheritedAttributes((TLFacet) target);
-        }
-        if (existingAttributes != null) {
-            for (TLAttribute attr : existingAttributes) {
-                existingAttributeNames.add(attr.getName());
-            }
-        }
-
-        for (TLAttribute sourceAttribute : attributesToMerge) {
-            if (!existingAttributeNames.contains(sourceAttribute.getName())) {
-                TLAttribute clone = cloner.clone(sourceAttribute);
-
-                target.addAttribute(clone);
-                captureRollupLibraryReference(clone, rollupReferences);
-            }
-        }
-    }
-
-    /**
-     * Merges the contents of the given list into the specified target entity. If any properties
-     * with the same name already exist in the target (or, in the case of complex types, properties
-     * from the same substitution group), the merge item(s) will be ignored.
-     * 
-     * @param target
-     *            the entity that will receive new properties from the merge
-     * @param propertiesToMerge
-     *            the list of properties to merge into the target
-     * @param cloner
-     *            the cloner to use when creating copies of model elements
-     * @param rollupReferences
-     *            reference information for the libraries being rolled up
-     */
-    void mergeProperties(TLPropertyOwner target, List<TLProperty> propertiesToMerge,
-            ModelElementCloner cloner, RollupReferenceInfo rollupReferences) {
-        Set<NamedEntity> existingSubstitutionGroups = new HashSet<NamedEntity>();
-        Set<String> existingPropertyNames = new HashSet<String>();
-
-        if (target instanceof TLFacet) {
-            List<TLProperty> existingProperties = PropertyCodegenUtils
-                    .getInheritedProperties((TLFacet) target);
-
-            for (TLProperty property : existingProperties) {
-                TLPropertyType propertyType = PropertyCodegenUtils.resolvePropertyType(target,
-                        property.getType());
-                NamedEntity substitutionGroup = PropertyCodegenUtils
-                        .getInheritanceRoot(propertyType);
-
-                if (substitutionGroup != null) {
-                    existingSubstitutionGroups.add(substitutionGroup);
-                }
-                if (property.getName() != null) {
-                    existingPropertyNames.add(property.getName());
-                }
-            }
-        }
-
-        for (TLProperty sourceProperty : propertiesToMerge) {
-            if (!existingPropertyNames.contains(sourceProperty.getName())) {
-                TLPropertyType propertyType = PropertyCodegenUtils.resolvePropertyType(target,
-                        sourceProperty.getType());
-                NamedEntity substitutionGroup = PropertyCodegenUtils
-                        .getInheritanceRoot(propertyType);
-
-                if (!existingSubstitutionGroups.contains(substitutionGroup)) {
-                    TLProperty clone = cloner.clone(sourceProperty);
-
-                    target.addElement(clone);
-                    captureRollupLibraryReference(clone, rollupReferences);
-                }
-            }
-        }
-    }
-
-    /**
-     * Merges the contents of the given list into the specified target entity. If any indicators
-     * with the same name already exist in the target, the merge item(s) will be ignored.
-     * 
-     * @param target
-     *            the entity that will receive new indicators from the merge
-     * @param indicatorsToMerge
-     *            the list of indicators to merge into the target
-     * @param cloner
-     *            the cloner to use when creating copies of model elements
-     */
-    void mergeIndicators(TLIndicatorOwner target, List<TLIndicator> indicatorsToMerge,
-            ModelElementCloner cloner) {
-        Set<String> existingIndicatorNames = new HashSet<String>();
-        List<TLIndicator> existingIndicators = null;
-
-        if (target instanceof TLValueWithAttributes) {
-            existingIndicators = PropertyCodegenUtils
-                    .getInheritedIndicators((TLValueWithAttributes) target);
-        } else if (target instanceof TLFacet) {
-            existingIndicators = PropertyCodegenUtils.getInheritedIndicators((TLFacet) target);
-        }
-        if (existingIndicators != null) {
-            for (TLIndicator indicator : existingIndicators) {
-                existingIndicatorNames.add(indicator.getName());
-            }
-        }
-
-        for (TLIndicator sourceIndicator : indicatorsToMerge) {
-            if (!existingIndicatorNames.contains(sourceIndicator.getName())) {
-                target.addIndicator(cloner.clone(sourceIndicator));
-            }
-        }
-    }
-
-    /**
-     * Merges the contents of the given list into the specified target entity. If any enumerated
-     * values with the same literal already exist in the target, the merge item(s) will be ignored.
-     * 
-     * @param target
-     *            the entity that will receive new enumerated values from the merge
-     * @param valuesToMerge
-     *            the list of enumerated values to merge into the target
-     * @param cloner
-     *            the cloner to use when creating copies of model elements
-     */
-    void mergeEnumeratedValues(TLAbstractEnumeration target, List<TLEnumValue> valuesToMerge,
-            ModelElementCloner cloner) {
-        List<TLEnumValue> existingValues = EnumCodegenUtils.getInheritedValues( target );
-    	Set<String> existingValueLiterals = new HashSet<String>();
-        
-        for (TLEnumValue existingValue : existingValues) {
-        	existingValueLiterals.add( existingValue.getLiteral() );
-        }
-        
-        for (TLEnumValue sourceValue : valuesToMerge) {
-        	if (!existingValueLiterals.contains(sourceValue.getLiteral())) {
-        		target.addValue(cloner.clone(sourceValue));
-        	}
-        }
-    }
     
     /**
-     * Merges the constraints of the given source entity into the target.  If any constraint
-     * is already defined in the target entity, that source item constraint will be ignored.
+     * Returns a cloner that can produced deep copies of entities from the given model.
      * 
-     * @param target
-     *            the entity that will receive new simple constraints from the merge
-     * @param source
-     *            the entity whose constraints will be merged into the target
+     * @param model  the model instance for which to return a cloner
+     * @return ModelElementCloner
      */
-    void mergeSimpleConstraints(TLSimple target, TLSimple source) {
-    	if ((target.getPattern() == null) || (target.getPattern().length() == 0)) {
-    		target.setPattern(source.getPattern());
-    	}
-    	if (target.getMinLength() < 0) {
-    		target.setMinLength(source.getMinLength());
-    	}
-    	if (target.getMaxLength() < 0) {
-    		target.setMaxLength(source.getMaxLength());
-    	}
-    	if (target.getFractionDigits() < 0) {
-    		target.setFractionDigits(source.getFractionDigits());
-    	}
-    	if (target.getTotalDigits() < 0) {
-    		target.setTotalDigits(source.getTotalDigits());
-    	}
-    	if ((target.getMinInclusive() == null) || (target.getMinInclusive().length() == 0)) {
-    		target.setMinInclusive(source.getMinInclusive());
-    	}
-    	if ((target.getMaxInclusive() == null) || (target.getMaxInclusive().length() == 0)) {
-    		target.setMaxInclusive(source.getMaxInclusive());
-    	}
-    	if ((target.getMinExclusive() == null) || (target.getMinExclusive().length() == 0)) {
-    		target.setMinExclusive(source.getMinExclusive());
-    	}
-    	if ((target.getMaxExclusive() == null) || (target.getMaxExclusive().length() == 0)) {
-    		target.setMaxExclusive(source.getMaxExclusive());
-    	}
-    }
-    
-    /**
-     * If the new entity contains a reference to another entity within its owning library, that
-     * reference is captured in the map provided so that it may be adjusted in the owning library of
-     * the new entity.
-     * 
-     * @param oldEntity
-     *            the original entity from which the new copy was created
-     * @param newEntity
-     *            the new copy of the library element
-     * @param rollupReferences
-     *            reference information for the libraries being rolled up
-     */
-    void captureRollupLibraryReference(LibraryElement newEntity,
-            RollupReferenceInfo rollupReferences) {
-        if (newEntity == null) {
-            return; // simple case - nothing to capture
-        }
-        if (newEntity instanceof TLAttribute) {
-            TLAttribute attribute = (TLAttribute) newEntity;
-
-            if ((attribute.getType() != null)
-                    && rollupReferences.isRollupLibrary(attribute.getType().getOwningLibrary())) {
-                rollupReferences.getReferences().put(attribute, attribute.getType());
-            }
-
-        } else if (newEntity instanceof TLProperty) {
-            TLProperty element = (TLProperty) newEntity;
-
-            if ((element.getType() != null)
-                    && rollupReferences.isRollupLibrary(element.getType().getOwningLibrary())) {
-                rollupReferences.getReferences().put(element, element.getType());
-            }
-
-        } else if (newEntity instanceof TLExtension) {
-            TLExtension extension = (TLExtension) newEntity;
-
-            if ((extension.getExtendsEntity() != null)
-                    && rollupReferences.isRollupLibrary(extension.getExtendsEntity()
-                            .getOwningLibrary())) {
-                rollupReferences.getReferences().put(extension, extension.getExtendsEntity());
-            }
-
-        } else if (newEntity instanceof TLValueWithAttributes) {
-            TLValueWithAttributes newVWA = (TLValueWithAttributes) newEntity;
-
-            if ((newVWA.getParentType() != null)
-                    && rollupReferences.isRollupLibrary(newVWA.getParentType().getOwningLibrary())) {
-                rollupReferences.getReferences().put(newVWA, newVWA.getParentType());
-            }
-            for (TLAttribute newAttribute : newVWA.getAttributes()) {
-                captureRollupLibraryReference(newVWA.getAttribute(newAttribute.getName()),
-                        rollupReferences);
-            }
-
-        } else if (newEntity instanceof TLSimple) {
-            TLSimple simple = (TLSimple) newEntity;
-
-            if ((simple.getParentType() != null)
-                    && rollupReferences.isRollupLibrary(simple.getParentType().getOwningLibrary())) {
-                rollupReferences.getReferences().put(simple, simple.getParentType());
-            }
-
-        } else if (newEntity instanceof TLSimpleFacet) {
-            TLSimpleFacet simpleFacet = (TLSimpleFacet) newEntity;
-
-            if ((simpleFacet.getSimpleType() != null)
-                    && rollupReferences.isRollupLibrary(simpleFacet.getSimpleType()
-                            .getOwningLibrary())) {
-                rollupReferences.getReferences().put(simpleFacet, simpleFacet.getSimpleType());
-            }
-
-        } else if (newEntity instanceof TLBusinessObject) {
-            TLBusinessObject newBO = (TLBusinessObject) newEntity;
-
-            captureRollupLibraryReference(newBO.getExtension(), rollupReferences);
-            captureRollupLibraryReference(newBO.getIdFacet(), rollupReferences);
-            captureRollupLibraryReference(newBO.getSummaryFacet(), rollupReferences);
-            captureRollupLibraryReference(newBO.getDetailFacet(), rollupReferences);
-
-            for (TLFacet newFacet : newBO.getCustomFacets()) {
-                captureRollupLibraryReference(newFacet, rollupReferences);
-            }
-            for (TLFacet newFacet : newBO.getQueryFacets()) {
-                captureRollupLibraryReference(newFacet, rollupReferences);
-            }
-
-        } else if (newEntity instanceof TLCoreObject) {
-            TLCoreObject newCore = (TLCoreObject) newEntity;
-
-            captureRollupLibraryReference(newCore.getExtension(), rollupReferences);
-            captureRollupLibraryReference(newCore.getSimpleFacet(), rollupReferences);
-            captureRollupLibraryReference(newCore.getSummaryFacet(), rollupReferences);
-            captureRollupLibraryReference(newCore.getDetailFacet(), rollupReferences);
-
-        } else if (newEntity instanceof TLOperation) {
-            TLOperation newOp = (TLOperation) newEntity;
-
-            captureRollupLibraryReference(newOp.getExtension(), rollupReferences);
-            captureRollupLibraryReference(newOp.getRequest(), rollupReferences);
-            captureRollupLibraryReference(newOp.getResponse(), rollupReferences);
-            captureRollupLibraryReference(newOp.getNotification(), rollupReferences);
-
-        } else if (newEntity instanceof TLFacet) {
-            TLFacet newFacet = (TLFacet) newEntity;
-
-            for (TLAttribute newAttribute : newFacet.getAttributes()) {
-                captureRollupLibraryReference(newAttribute, rollupReferences);
-            }
-            for (TLProperty newElement : newFacet.getElements()) {
-                captureRollupLibraryReference(newElement, rollupReferences);
-            }
-        }
-    }
-
-    /**
-     * If the given map contains any recorded entities that contained same-library references, the
-     * copied references are adjusted to same-named entities in the new owning library (assuming a
-     * same-name match can be found).
-     * 
-     * @param newLibrary
-     *            the new library whose internal references are to be adjusted
-     * @param rollupReferences
-     *            reference information for the libraries being rolled up
-     */
-    void adjustSameLibraryReferences(TLLibrary newLibrary, RollupReferenceInfo rollupReferences) {
-        ModelNavigator.navigate(newLibrary, new RollupReferenceAdjustmentVisitor(newLibrary,
-                rollupReferences));
-    }
-
-    /**
-     * Encapsulates all of the information needed to identify and process entity references within
-     * the same set of libraries that are being rolled up.
-     */
-    protected class RollupReferenceInfo {
-
-        private Map<LibraryElement, NamedEntity> rollupReferences = new HashMap<LibraryElement, NamedEntity>();
-        private Set<TLLibrary> rollupLibraries = new HashSet<TLLibrary>();
-
-        /**
-         * Constructor that specifies a single library that is being rolled up as part of the
-         * current operation.
-         * 
-         * @param rollupLibrary
-         *            the library being rolled up
-         */
-        @SafeVarargs
-		public RollupReferenceInfo(TLLibrary rollupLibrary,
-                Collection<TLLibrary>... rollupLibraries) {
-            this(rollupLibraries);
-
-            if (rollupLibrary != null) {
-                this.rollupLibraries.add(rollupLibrary);
-            }
-        }
-
-        /**
-         * Constructor that specifies the collection(s) of libraries that are being rolled up as
-         * part of the current operation.
-         * 
-         * @param rollupLibraries
-         *            the collection(s) of libraries being rolled up
-         */
-        @SafeVarargs
-		public RollupReferenceInfo(Collection<TLLibrary>... rollupLibraries) {
-            for (Collection<TLLibrary> libraries : rollupLibraries) {
-                if (libraries != null) {
-                    this.rollupLibraries.addAll(libraries);
-                }
-            }
-        }
-
-        /**
-         * Returns the map of references that have been detected to entities contained within one of
-         * the 'rollupLibraries' members.
-         * 
-         * @return Map<LibraryElement,NamedEntity>
-         */
-        public Map<LibraryElement, NamedEntity> getReferences() {
-            return rollupReferences;
-        }
-
-        /**
-         * Returns true if the given library is a member of the rollup collection currently being
-         * processed.
-         * 
-         * @param library
-         *            the library to analyze
-         * @return boolean
-         */
-        public boolean isRollupLibrary(AbstractLibrary library) {
-            return rollupLibraries.contains(library);
-        }
-
-    }
-
-    /**
-     * Visitor that adjusts references to same-named entities in the new owning library if a
-     * same-name match can be found.
-     */
-    private class RollupReferenceAdjustmentVisitor extends ModelElementVisitorAdapter {
-
-        private RollupReferenceInfo rollupReferences;
-        private SymbolTable symbols;
-
-        /**
-         * Constructor that assigns the map of roll-up references that were captured during the
-         * entity cloning process.
-         * 
-         * @param newLibrary
-         *            the new library that owns all references to be adjusted
-         * @param rollupReferences
-         *            reference information for the libraries being rolled up
-         */
-        public RollupReferenceAdjustmentVisitor(TLLibrary newLibrary,
-                RollupReferenceInfo rollupReferences) {
-            this.rollupReferences = rollupReferences;
-            this.symbols = SymbolTableFactory.newSymbolTableFromEntity(newLibrary);
-        }
-
-        /**
-         * Searches the given library for an named entity member with the same name as the original
-         * entity provided.
-         * 
-         * @param originalEntity
-         *            the original entity whose local name should be used in the search
-         * @param library
-         *            the library to search
-         * @return NamedEntity
-         */
-        private NamedEntity findSameNameEntity(NamedEntity originalEntity, TLLibrary library) {
-            Object entity = symbols
-                    .getEntity(library.getNamespace(), originalEntity.getLocalName());
-            NamedEntity sameNameEntity = null;
-
-            if (entity instanceof NamedEntity) {
-                NamedEntity namedEntity = (NamedEntity) entity;
-
-                if (namedEntity.getOwningLibrary() == library) {
-                    sameNameEntity = namedEntity;
-                }
-            }
-            return sameNameEntity;
-        }
-
-        /**
-         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitSimple(org.opentravel.schemacompiler.model.TLSimple)
-         */
-        @Override
-        public boolean visitSimple(TLSimple simple) {
-            if (rollupReferences.getReferences().containsKey(simple)) {
-                NamedEntity sameNameEntity = findSameNameEntity(rollupReferences.getReferences()
-                        .get(simple), (TLLibrary) simple.getOwningLibrary());
-
-                if (sameNameEntity instanceof TLAttributeType) {
-                    simple.setParentType((TLAttributeType) sameNameEntity);
-                }
-            }
-            return true;
-        }
-
-        /**
-         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitValueWithAttributes(org.opentravel.schemacompiler.model.TLValueWithAttributes)
-         */
-        @Override
-        public boolean visitValueWithAttributes(TLValueWithAttributes vwa) {
-            if (rollupReferences.getReferences().containsKey(vwa)) {
-                NamedEntity sameNameEntity = findSameNameEntity(rollupReferences.getReferences()
-                        .get(vwa), (TLLibrary) vwa.getOwningLibrary());
-
-                if (sameNameEntity instanceof TLAttributeType) {
-                    vwa.setParentType((TLAttributeType) sameNameEntity);
-                }
-            }
-            return true;
-        }
-
-        /**
-         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitSimpleFacet(org.opentravel.schemacompiler.model.TLSimpleFacet)
-         */
-        @Override
-        public boolean visitSimpleFacet(TLSimpleFacet simpleFacet) {
-            if (rollupReferences.getReferences().containsKey(simpleFacet)) {
-                NamedEntity sameNameEntity = findSameNameEntity(rollupReferences.getReferences()
-                        .get(simpleFacet), (TLLibrary) simpleFacet.getOwningLibrary());
-
-                if (sameNameEntity instanceof TLAttributeType) {
-                    simpleFacet.setSimpleType((TLAttributeType) sameNameEntity);
-                }
-            }
-            return true;
-        }
-
-        /**
-         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitAttribute(org.opentravel.schemacompiler.model.TLAttribute)
-         */
-        @Override
-        public boolean visitAttribute(TLAttribute attribute) {
-            if (rollupReferences.getReferences().containsKey(attribute)) {
-                NamedEntity sameNameEntity = findSameNameEntity(rollupReferences.getReferences()
-                        .get(attribute), (TLLibrary) attribute.getOwningLibrary());
-
-                if (sameNameEntity instanceof TLAttributeType) {
-                    attribute.setType((TLAttributeType) sameNameEntity);
-                }
-            }
-            return true;
-        }
-
-        /**
-         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitElement(org.opentravel.schemacompiler.model.TLProperty)
-         */
-        @Override
-        public boolean visitElement(TLProperty element) {
-            if (rollupReferences.getReferences().containsKey(element)) {
-                NamedEntity sameNameEntity = findSameNameEntity(rollupReferences.getReferences()
-                        .get(element), (TLLibrary) element.getOwningLibrary());
-
-                if (sameNameEntity instanceof TLPropertyType) {
-                    element.setType((TLPropertyType) sameNameEntity);
-                }
-            }
-            return true;
-        }
-
-        /**
-         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitExtension(org.opentravel.schemacompiler.model.TLExtension)
-         */
-        @Override
-        public boolean visitExtension(TLExtension extension) {
-            if (rollupReferences.getReferences().containsKey(extension)) {
-                NamedEntity sameNameEntity = findSameNameEntity(rollupReferences.getReferences()
-                        .get(extension), (TLLibrary) extension.getOwningLibrary());
-
-                if (sameNameEntity != null) {
-                    extension.setExtendsEntity(sameNameEntity);
-                }
-            }
-            return true;
-        }
-
+    ModelElementCloner getCloner(TLModel model) {
+    	return handlerFactory.getCloner( model );
     }
 
     /**

@@ -49,7 +49,6 @@ import org.opentravel.schemacompiler.version.MinorVersionHelper;
 import org.opentravel.schemacompiler.version.PatchVersionHelper;
 import org.opentravel.schemacompiler.version.VersionScheme;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
-import org.opentravel.schemacompiler.version.VersionSchemeFactory;
 import org.opentravel.schemacompiler.version.Versioned;
 
 /**
@@ -271,7 +270,6 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
      *            the versioned entity to analyze
      * @return boolean
      */
-    // TODO: Move to version helpers
     protected boolean isVersionExtension(Versioned versionedEntity) {
         return (getExtendedVersion(versionedEntity) != null);
     }
@@ -279,7 +277,6 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
     /**
      * Returns the prior version that is extended by the given entity, or null if the given entity
      * is not a version extension.
-     * 
      * <p>
      * NOTE: This method is designed to be used for validation purposes. It is less strict than the
      * method provided by the <code>MinorVersionHelper</code> because it does not require the
@@ -291,7 +288,6 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
      * @return V
      */
     @SuppressWarnings("unchecked")
-    // TODO: Move to version helpers
     protected <V extends Versioned> V getExtendedVersion(V versionedEntity) {
         V candidateVersion = null;
         V extendedVersion = null;
@@ -333,25 +329,6 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
             }
         }
         return extendedVersion;
-    }
-
-    /**
-     * Returns a collection of all version extensions for the given entity.
-     * 
-     * @param versionedEntity
-     *            the versioned entity for which to return version extensions
-     * @return Collection<V>
-     */
-    // TODO: Move to version helpers
-    private <V extends Versioned> Collection<V> getAllExtendedVersions(V versionedEntity) {
-        V extendedVersion = getExtendedVersion(versionedEntity);
-        List<V> extendedVersions = new ArrayList<V>();
-
-        while (extendedVersion != null) {
-            extendedVersions.add(extendedVersion);
-            extendedVersion = getExtendedVersion(extendedVersion);
-        }
-        return extendedVersions;
     }
 
     /**
@@ -517,7 +494,7 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
         // Only check for validation errors if we find duplicates of the entity's name
         if (matchingEntities.size() > 1) {
             Collection<Versioned> versionFamily = (entity instanceof Versioned) ?
-            		getMinorVersionFamily((Versioned) entity) : new ArrayList<Versioned>();
+            		getMajorVersionFamily((Versioned) entity) : new ArrayList<Versioned>();
 
             for (NamedEntity matchingEntity : matchingEntities) {
                 if (matchingEntity == entity) {
@@ -561,65 +538,22 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
      * @return Collection<V>
      */
     @SuppressWarnings("unchecked")
-    private <V extends Versioned> Collection<V> getMinorVersionFamily(V versionedEntity) {
-        Map<Versioned, Collection<V>> minorVersionFamilyMappings = (Map<Versioned, Collection<V>>) getContextCacheEntry("minorVersionFamilyMappings");
-
+    private <V extends Versioned> Collection<V> getMajorVersionFamily(V versionedEntity) {
+        Map<Versioned, Collection<V>> minorVersionFamilyMappings = (Map<Versioned, Collection<V>>) getContextCacheEntry("majorVersionFamilyMappings");
+        
         if (minorVersionFamilyMappings == null) {
             minorVersionFamilyMappings = new HashMap<Versioned, Collection<V>>();
-            setContextCacheEntry("minorVersionFamilyMappings", minorVersionFamilyMappings);
+            setContextCacheEntry("majorVersionFamilyMappings", minorVersionFamilyMappings);
         }
         Collection<V> minorVersionFamily = minorVersionFamilyMappings.get(versionedEntity);
 
         if (minorVersionFamily == null) {
-            // TODO: Move this method to the version helpers; rename to getMajorVersionFamily()
-            Collection<V> priorEntityVersions = getAllExtendedVersions(versionedEntity);
-            
-            minorVersionFamily = new ArrayList<V>();
-
-            if ((versionedEntity.getBaseNamespace() != null)
-                    && (versionedEntity.getOwningModel() != null)) {
-                for (TLLibrary library : versionedEntity.getOwningModel().getUserDefinedLibraries()) {
-                    if (!library.getBaseNamespace().equals(versionedEntity.getBaseNamespace())) {
-                        continue;
-                    }
-                    List<V> versionedMembers = new ArrayList<V>();
-
-                    // Find all of the entities from this library of the same type as our original
-                    // versioned entity
-                    if (versionedEntity instanceof TLOperation) {
-                        if (library.getService() != null) {
-                            for (TLOperation operation : library.getService().getOperations()) {
-                                versionedMembers.add((V) operation);
-                            }
-                        }
-                    } else {
-                        for (NamedEntity libraryMember : library.getNamedMembers()) {
-                            if (libraryMember.getClass().equals(versionedEntity.getClass())) {
-                                versionedMembers.add((V) libraryMember);
-                            }
-                        }
-                    }
-
-                    // Determine whether the given entity is part of the original entity's minor
-                    // version family
-                    for (V versionedMember : versionedMembers) {
-                        if ((versionedMember == versionedEntity)
-                                || priorEntityVersions.contains(versionedMember)) {
-                            // The member is a previous version of our original versioned entity (or
-                            // the original entity itself)
-                            minorVersionFamily.add(versionedMember);
-
-                        } else {
-                            Collection<V> priorMemberVersions = getAllExtendedVersions(versionedMember);
-
-                            if (priorMemberVersions.contains(versionedEntity)) {
-                                // The original entity is a previous version of this versioned
-                                // member
-                                minorVersionFamily.add(versionedMember);
-                            }
-                        }
-                    }
-                }
+            try {
+            	minorVersionFamily = new MinorVersionHelper().getMajorVersionFamily( versionedEntity );
+            	
+            } catch (VersionSchemeException e) {
+            	// Ignore; the invalid version scheme will be reported elsewhere
+            	minorVersionFamily = new ArrayList<>();
             }
 
             for (Versioned familyMember : minorVersionFamily) {
@@ -649,12 +583,7 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
 
         if (majorVersionNamespace == null) {
             try {
-                // TODO: Move to the version helpers
-                VersionSchemeFactory factory = VersionSchemeFactory.getInstance();
-                VersionScheme versionScheme = factory.getVersionScheme(factory
-                        .getDefaultVersionScheme());
-
-                majorVersionNamespace = versionScheme.getMajorVersionNamespace(libraryNamespace);
+                majorVersionNamespace = new MinorVersionHelper().getMajorVersionNamespace( library );
 
             } catch (VersionSchemeException e) {
                 // Use default naming in case of a URI that does not match the default version

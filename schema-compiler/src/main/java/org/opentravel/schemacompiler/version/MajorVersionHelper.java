@@ -18,27 +18,15 @@ package org.opentravel.schemacompiler.version;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.opentravel.schemacompiler.ic.ImportManagementIntegrityChecker;
 import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.NamedEntity;
-import org.opentravel.schemacompiler.model.TLAbstractEnumeration;
-import org.opentravel.schemacompiler.model.TLBusinessObject;
-import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLContext;
-import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
-import org.opentravel.schemacompiler.model.TLFacet;
-import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLLibrary;
-import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLOperation;
-import org.opentravel.schemacompiler.model.TLService;
-import org.opentravel.schemacompiler.model.TLSimple;
-import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.repository.Project;
 import org.opentravel.schemacompiler.repository.ProjectItem;
 import org.opentravel.schemacompiler.saver.LibraryModelSaver;
@@ -48,6 +36,8 @@ import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationException;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
+import org.opentravel.schemacompiler.version.handlers.RollupReferenceHandler;
+import org.opentravel.schemacompiler.version.handlers.VersionHandler;
 
 /**
  * Helper methods used to construct new major versions of <code>TLLibrary</code> instances.
@@ -207,8 +197,8 @@ public final class MajorVersionHelper extends AbstractVersionHelper {
             }
 
             // Create the new (empty) library version
-            String newLibraryVersion = versionScheme.incrementMajorVersion(versionScheme
-                    .getVersionIdentifier(previousMajorVersion.getNamespace()));
+            String newLibraryVersion = versionScheme.incrementMajorVersion(
+            		versionScheme.getVersionIdentifier(previousMajorVersion.getNamespace()));
             TLLibrary newLibrary = createNewLibrary(previousMajorVersion);
 
             newLibrary.setNamespace(versionScheme.setVersionIdentifier(library.getNamespace(),
@@ -224,23 +214,22 @@ public final class MajorVersionHelper extends AbstractVersionHelper {
                                 + libraryFile.getAbsolutePath());
             }
             newLibrary.setLibraryUrl(URLUtils.toURL(libraryFile));
+            library.getOwningModel().addLibrary( newLibrary );
 
             // For any minor versions or patches that exist in the prior minor version, create
-            // roll-up
-            // entities in the new library version.
-            RollupReferenceInfo rollupReferences = new RollupReferenceInfo(minorVersionLibraries,
-                    patchLibraries);
-            ModelElementCloner cloner = new ModelElementCloner(library.getOwningModel());
+            // roll-up entities in the new library version.
+            RollupReferenceHandler referenceHandler = new RollupReferenceHandler(
+            		minorVersionLibraries, patchLibraries);
 
             for (TLLibrary minorVersionLibrary : minorVersionLibraries) {
-                rollupMinorVersionLibrary(newLibrary, minorVersionLibrary, cloner, rollupReferences);
+                rollupMinorVersionLibrary(newLibrary, minorVersionLibrary, referenceHandler);
             }
 
             // Roll up any patches that exist for the last minor version
             for (TLLibrary patchLibrary : patchLibraries) {
-                rollupPatchLibrary(newLibrary, patchLibrary, cloner, rollupReferences);
+                rollupPatchLibrary(newLibrary, patchLibrary, referenceHandler);
             }
-            adjustSameLibraryReferences(newLibrary, rollupReferences);
+            referenceHandler.adjustSameLibraryReferences(newLibrary);
             ImportManagementIntegrityChecker.verifyReferencedLibraries(newLibrary);
 
             new LibraryModelSaver().saveLibrary(newLibrary);
@@ -275,12 +264,14 @@ public final class MajorVersionHelper extends AbstractVersionHelper {
             throw new VersionSchemeException(
                     "Only entities contained within user-defined libraries can be rolled up.");
         }
-        RollupReferenceInfo rollupReferences = new RollupReferenceInfo(
-                (TLLibrary) minorVersion.getOwningLibrary());
+        validateMinorVersionRollup(majorVersionTarget, minorVersion);
+        
+        RollupReferenceHandler referenceHandler = new RollupReferenceHandler(
+        		(TLLibrary) minorVersion.getOwningLibrary());
         TLLibrary targetLibrary = (TLLibrary) majorVersionTarget.getOwningLibrary();
-
-        rollupMinorVersion(majorVersionTarget, minorVersion, rollupReferences, false);
-        adjustSameLibraryReferences(targetLibrary, rollupReferences);
+        VersionHandler<V> handler = getVersionHandler( minorVersion );
+        
+        handler.rollupMinorVersion(minorVersion, majorVersionTarget, referenceHandler);
         ImportManagementIntegrityChecker.verifyReferencedLibraries(targetLibrary);
     }
 
@@ -307,192 +298,79 @@ public final class MajorVersionHelper extends AbstractVersionHelper {
             throw new VersionSchemeException(
                     "Only entities contained within user-defined libraries can be rolled up.");
         }
-        RollupReferenceInfo rollupReferences = new RollupReferenceInfo(
+        RollupReferenceHandler referenceHandler = new RollupReferenceHandler(
                 (TLLibrary) patchVersion.getOwningLibrary());
         TLLibrary targetLibrary = (TLLibrary) majorVersionTarget.getOwningLibrary();
-
-        rollupPatchVersion(majorVersionTarget, patchVersion, new ModelElementCloner(
-                majorVersionTarget.getOwningModel()), rollupReferences, false);
-        adjustSameLibraryReferences(targetLibrary, rollupReferences);
+        
+        rollupPatchVersion(majorVersionTarget, patchVersion, referenceHandler, false);
+        referenceHandler.adjustSameLibraryReferences(targetLibrary);
         ImportManagementIntegrityChecker.verifyReferencedLibraries(targetLibrary);
     }
 
     /**
-     * Rolls up the contents of the given minor version into the new major version. A roll-up is
-     * essentially a merge of the attributes, properties, and indicators from the facets of the
-     * minor version.
+     * Performs a compiler validation check on both entity versions to ensure that a minor version
+     * rollup can be executed successfully.  In addition to the normal validation checks, a number
+     * of other checks are performed to ensure that the version schemes of the two entities are
+     * properly aligned.
      * 
      * @param majorVersionTarget
      *            the major version of the entity that will receive any rolled up items
      * @param minorVersion
      *            the minor version of the entity whose items will be the source of the roll-up
-     * @param rollupReferences
-     *            reference information for the libraries being rolled up
-     * @param skipValidation
-     *            internal flag indicating whether entity validation should be skipped
      * @throws VersionSchemeException
-     *             thrown if the given major version is not a later major version and/or the minor
-     *             version is not a prior minor version
+     *             thrown if the given major version is not a later major version and/or the patch
+     *             version is not a prior patch version
      * @throws ValidationException
      *             thrown if the rollup cannot be performed because one or more validation errors
-     *             exist in either the source or target entity
+     *             exist in either the major or minor version entity
      */
-    private <V extends Versioned> void rollupMinorVersion(V majorVersionTarget, V minorVersion,
-            RollupReferenceInfo rollupReferences, boolean skipValidation)
+    private <V extends Versioned> void validateMinorVersionRollup(V majorVersionTarget, V minorVersion)
             throws VersionSchemeException, ValidationException {
-        // Perform validation checks before rolling up
-        if (!skipValidation) {
-            ValidationFindings findings = new ValidationFindings();
-            findings.addAll(validate(majorVersionTarget));
-            findings.addAll(validate(minorVersion));
+        ValidationFindings findings = new ValidationFindings();
+        findings.addAll(validate(majorVersionTarget));
+        findings.addAll(validate(minorVersion));
 
-            if (findings.hasFinding(FindingType.ERROR)) {
-                throw new ValidationException(
-                        "Unable to roll-up because the target and/or minor versions contains errors.",
-                        findings);
-            }
-            if ((majorVersionTarget.getVersionScheme() == null)
-                    || !majorVersionTarget.getVersionScheme().equals(
-                            minorVersion.getVersionScheme())) {
-                throw new VersionSchemeException(
-                        "The target and minor versions to be rolled-up are not assigned to the same version scheme.");
-            }
-            if ((majorVersionTarget.getBaseNamespace() == null)
-                    || !majorVersionTarget.getBaseNamespace().equals(
-                            minorVersion.getBaseNamespace())) {
-                throw new VersionSchemeException(
-                        "The target and minor versions to be rolled-up are not assigned to the same base namespace.");
-            }
-            if (!((NamedEntity) majorVersionTarget).getLocalName().equals(
-                    ((NamedEntity) minorVersion).getLocalName())) {
-                throw new VersionSchemeException(
-                        "The minor version provided is not a later version of the target entity because it does not have the same name.");
-            }
-            if (!majorVersionTarget.getClass().equals(minorVersion.getClass())) {
-                throw new VersionSchemeException(
-                        "The minor version provided is not a later version of the target entity because they are different entity types.");
-            }
-            if (isReadOnly(majorVersionTarget.getOwningLibrary())) {
-                throw new VersionSchemeException(
-                        "Unable to roll-up the requested minor version because the target version is in a read-only library.");
-            }
-
-            // Verify that the minor is, in fact, an extension of one of the previous major versions
-            VersionScheme versionScheme = VersionSchemeFactory.getInstance().getVersionScheme(
-                    majorVersionTarget.getVersionScheme());
-            Comparator<Versioned> versionComparator = versionScheme.getComparator(true);
-
-            if (!versionScheme.isMajorVersion(majorVersionTarget.getNamespace())
-                    || !versionScheme.isMinorVersion(minorVersion.getNamespace())
-                    || (versionComparator.compare(majorVersionTarget, minorVersion) < 0)) {
-                throw new VersionSchemeException(
-                        "The minor version provided is not a later version of the target entity.");
-            }
+        if (findings.hasFinding(FindingType.ERROR)) {
+            throw new ValidationException(
+                    "Unable to roll-up because the target and/or minor versions contains errors.",
+                    findings);
+        }
+        if ((majorVersionTarget.getVersionScheme() == null)
+                || !majorVersionTarget.getVersionScheme().equals(
+                        minorVersion.getVersionScheme())) {
+            throw new VersionSchemeException(
+                    "The target and minor versions to be rolled-up are not assigned to the same version scheme.");
+        }
+        if ((majorVersionTarget.getBaseNamespace() == null)
+                || !majorVersionTarget.getBaseNamespace().equals(
+                        minorVersion.getBaseNamespace())) {
+            throw new VersionSchemeException(
+                    "The target and minor versions to be rolled-up are not assigned to the same base namespace.");
+        }
+        if (!((NamedEntity) majorVersionTarget).getLocalName().equals(
+                ((NamedEntity) minorVersion).getLocalName())) {
+            throw new VersionSchemeException(
+                    "The minor version provided is not a later version of the target entity because it does not have the same name.");
+        }
+        if (!majorVersionTarget.getClass().equals(minorVersion.getClass())) {
+            throw new VersionSchemeException(
+                    "The minor version provided is not a later version of the target entity because they are different entity types.");
+        }
+        if (isReadOnly(majorVersionTarget.getOwningLibrary())) {
+            throw new VersionSchemeException(
+                    "Unable to roll-up the requested minor version because the target version is in a read-only library.");
         }
 
-        // Perform the roll-up of all attributes, properties, and indicators of the given minor
-        // version
-    	if (majorVersionTarget instanceof TLSimple) {
-    		TLSimple target = (TLSimple) majorVersionTarget;
-    		TLSimple source = (TLSimple) minorVersion;
-    		
-            mergeSimpleConstraints(target, source);
-            
-    	} else if (majorVersionTarget instanceof TLAbstractEnumeration) {
-            ModelElementCloner cloner = new ModelElementCloner(minorVersion.getOwningModel());
-            TLAbstractEnumeration target = (TLAbstractEnumeration) majorVersionTarget;
-            TLAbstractEnumeration source = (TLAbstractEnumeration) minorVersion;
+        // Verify that the minor is, in fact, an extension of one of the previous major versions
+        VersionScheme versionScheme = VersionSchemeFactory.getInstance().getVersionScheme(
+                majorVersionTarget.getVersionScheme());
+        Comparator<Versioned> versionComparator = versionScheme.getComparator(true);
 
-            mergeEnumeratedValues(target, source.getValues(), cloner);
-    		
-    	} else if (majorVersionTarget instanceof TLValueWithAttributes) {
-            ModelElementCloner cloner = new ModelElementCloner(minorVersion.getOwningModel());
-            TLValueWithAttributes target = (TLValueWithAttributes) majorVersionTarget;
-            TLValueWithAttributes source = (TLValueWithAttributes) minorVersion;
-
-            mergeAttributes(target, source.getAttributes(), cloner, rollupReferences);
-            mergeIndicators(target, source.getIndicators(), cloner);
-
-        } else if (majorVersionTarget instanceof TLFacetOwner) {
-            Map<String, TLFacet> targetFacets = new HashMap<String, TLFacet>();
-            Map<String, TLFacet> sourceFacets = new HashMap<String, TLFacet>();
-
-            // Identify the facets to be merged based on the type of the versioned objects
-            if (majorVersionTarget instanceof TLBusinessObject) {
-                TLBusinessObject target = (TLBusinessObject) majorVersionTarget;
-                TLBusinessObject source = (TLBusinessObject) minorVersion;
-
-                addToIdentityFacetMap(target.getSummaryFacet(), targetFacets);
-                addToIdentityFacetMap(target.getDetailFacet(), targetFacets);
-                addToIdentityFacetMap(source.getSummaryFacet(), sourceFacets);
-                addToIdentityFacetMap(source.getDetailFacet(), sourceFacets);
-
-                for (TLFacet sourceFacet : source.getCustomFacets()) {
-                    TLFacet targetFacet = target.getCustomFacet(sourceFacet.getContext(),
-                            sourceFacet.getLabel());
-
-                    if (targetFacet == null) {
-                        targetFacet = new TLFacet();
-                        target.addCustomFacet(targetFacet);
-                    }
-                    addToIdentityFacetMap(targetFacet, targetFacets);
-                    addToIdentityFacetMap(sourceFacet, targetFacets);
-                }
-
-                for (TLFacet sourceFacet : source.getQueryFacets()) {
-                    TLFacet targetFacet = target.getQueryFacet(sourceFacet.getContext(),
-                            sourceFacet.getLabel());
-
-                    if (targetFacet == null) {
-                        targetFacet = new TLFacet();
-                        target.addQueryFacet(targetFacet);
-                    }
-                    addToIdentityFacetMap(targetFacet, targetFacets);
-                    addToIdentityFacetMap(sourceFacet, targetFacets);
-                }
-
-            } else if (majorVersionTarget instanceof TLCoreObject) {
-                TLCoreObject target = (TLCoreObject) majorVersionTarget;
-                TLCoreObject source = (TLCoreObject) minorVersion;
-
-                addToIdentityFacetMap(target.getSummaryFacet(), targetFacets);
-                addToIdentityFacetMap(target.getDetailFacet(), targetFacets);
-                addToIdentityFacetMap(source.getSummaryFacet(), sourceFacets);
-                addToIdentityFacetMap(source.getDetailFacet(), sourceFacets);
-
-            } else if (majorVersionTarget instanceof TLOperation) {
-                TLOperation target = (TLOperation) majorVersionTarget;
-                TLOperation source = (TLOperation) minorVersion;
-
-                addToIdentityFacetMap(target.getRequest(), targetFacets);
-                addToIdentityFacetMap(target.getResponse(), targetFacets);
-                addToIdentityFacetMap(target.getNotification(), targetFacets);
-                addToIdentityFacetMap(source.getRequest(), sourceFacets);
-                addToIdentityFacetMap(source.getResponse(), sourceFacets);
-                addToIdentityFacetMap(source.getNotification(), sourceFacets);
-
-            } else {
-                throw new IllegalArgumentException("Unknown versioned entity type: "
-                        + majorVersionTarget.getClass().getSimpleName());
-            }
-
-            // Perform the merge of each facet identified in the source and target versions
-            ModelElementCloner cloner = new ModelElementCloner(minorVersion.getOwningModel());
-
-            for (String facetIdentity : sourceFacets.keySet()) {
-                TLFacet sourceFacet = sourceFacets.get(facetIdentity);
-                TLFacet targetFacet = targetFacets.get(facetIdentity);
-
-                if (targetFacet.getDocumentation() == null) {
-                    targetFacet.setDocumentation(cloner.clone(sourceFacet.getDocumentation()));
-                }
-                mergeAttributes(targetFacet, sourceFacet.getAttributes(), cloner, rollupReferences);
-                mergeProperties(targetFacet, sourceFacet.getElements(), cloner, rollupReferences);
-                mergeIndicators(targetFacet, sourceFacet.getIndicators(), cloner);
-            }
-        } else {
-            throw new IllegalArgumentException("Unknown versioned entity type: "
-                    + majorVersionTarget.getClass().getSimpleName());
+        if (!versionScheme.isMajorVersion(majorVersionTarget.getNamespace())
+                || !versionScheme.isMinorVersion(minorVersion.getNamespace())
+                || (versionComparator.compare(majorVersionTarget, minorVersion) < 0)) {
+            throw new VersionSchemeException(
+                    "The minor version provided is not a later version of the target entity.");
         }
     }
 
@@ -505,187 +383,37 @@ public final class MajorVersionHelper extends AbstractVersionHelper {
      *            the minor version library whose contents are to be rolled up
      * @param cloner
      *            the cloner to use when creating copies of model elements
-     * @param rollupReferences
-     *            reference information for the libraries being rolled up
+     * @param referenceHandler
+     *            handler that stores reference information for the libraries being rolled up
      * @throws VersionSchemeException
      *             thrown if the library's version scheme is not recognized
      */
-    private void rollupMinorVersionLibrary(TLLibrary majorVersionLibrary,
-            TLLibrary minorVersionLibrary, ModelElementCloner cloner,
-            RollupReferenceInfo rollupReferences) throws VersionSchemeException {
+    private void rollupMinorVersionLibrary(TLLibrary majorVersionLibrary, TLLibrary minorVersionLibrary,
+            RollupReferenceHandler referenceHandler) throws VersionSchemeException {
         for (TLContext context : minorVersionLibrary.getContexts()) {
             if (majorVersionLibrary.getContext(context.getContextId()) == null) {
+            	ModelElementCloner cloner = getCloner( minorVersionLibrary.getOwningModel() );
                 majorVersionLibrary.addContext(cloner.clone(context));
             }
         }
-        for (TLSimple simple : minorVersionLibrary.getSimpleTypes()) {
-            LibraryMember majorVersionEntity;
-
-            if ((majorVersionEntity = majorVersionLibrary.getNamedMember(simple.getName())) == null) {
-            	List<TLSimple> priorMinorVersions = getAllPriorVersionExtensions(simple);
-            	TLSimple earliestMinorVersion = priorMinorVersions.isEmpty() ?
-            			null : priorMinorVersions.get(priorMinorVersions.size() - 1);
-                TLSimple clone = cloner.clone(simple);
-
-                if (earliestMinorVersion != null) {// Roll up to the original base type
-                	clone.setParentType( earliestMinorVersion.getParentType() );
-                }
-                majorVersionLibrary.addNamedMember(clone);
-                captureRollupLibraryReference(clone, rollupReferences);
-            	
-            } else if (majorVersionEntity instanceof TLSimple) {
-                try {
-                    rollupMinorVersion((Versioned) majorVersionEntity, simple, rollupReferences, true);
-
-                } catch (ValidationException e) {
-                    // Should never happen since we indicate that validation should be skipped
-                }
-            }
-        }
-        for (TLClosedEnumeration closedEnum : minorVersionLibrary.getClosedEnumerationTypes()) {
-            LibraryMember majorVersionEntity;
-
-            if ((majorVersionEntity = majorVersionLibrary.getNamedMember(closedEnum.getName())) == null) {
-                TLClosedEnumeration clone = cloner.clone(closedEnum);
-
-                majorVersionLibrary.addNamedMember(clone);
-                captureRollupLibraryReference(clone, rollupReferences);
-            	
-            } else if (majorVersionEntity instanceof TLClosedEnumeration) {
-                try {
-                    rollupMinorVersion((Versioned) majorVersionEntity, closedEnum, rollupReferences, true);
-
-                } catch (ValidationException e) {
-                    // Should never happen since we indicate that validation should be skipped
-                }
-            }
-        }
-        for (TLOpenEnumeration openEnum : minorVersionLibrary.getOpenEnumerationTypes()) {
-            LibraryMember majorVersionEntity;
-
-            if ((majorVersionEntity = majorVersionLibrary.getNamedMember(openEnum.getName())) == null) {
-                TLOpenEnumeration clone = cloner.clone(openEnum);
-
-                majorVersionLibrary.addNamedMember(clone);
-                captureRollupLibraryReference(clone, rollupReferences);
-            	
-            } else if (majorVersionEntity instanceof TLOpenEnumeration) {
-                try {
-                    rollupMinorVersion((Versioned) majorVersionEntity, openEnum, rollupReferences, true);
-
-                } catch (ValidationException e) {
-                    // Should never happen since we indicate that validation should be skipped
-                }
-            }
-        }
-        for (TLValueWithAttributes vwa : minorVersionLibrary.getValueWithAttributesTypes()) {
-            LibraryMember majorVersionEntity;
-
-            if ((majorVersionEntity = majorVersionLibrary.getNamedMember(vwa.getName())) == null) {
-            	List<TLValueWithAttributes> priorMinorVersions = getAllPriorVersionExtensions(vwa);
-            	TLValueWithAttributes earliestMinorVersion = priorMinorVersions.isEmpty() ?
-            			null : priorMinorVersions.get(priorMinorVersions.size() - 1);
-                TLValueWithAttributes clone = cloner.clone(vwa);
-                
-                if (earliestMinorVersion != null) { // Roll up to the original VWA base type
-                	clone.setParentType( earliestMinorVersion.getParentType() );
-                }
-                majorVersionLibrary.addNamedMember(clone);
-                captureRollupLibraryReference(clone, rollupReferences);
-
-            } else if (majorVersionEntity instanceof TLValueWithAttributes) {
-                try {
-                    rollupMinorVersion((Versioned) majorVersionEntity, vwa, rollupReferences, true);
-
-                } catch (ValidationException e) {
-                    // Should never happen since we indicate that validation should be skipped
-                }
-            }
-        }
-        for (TLCoreObject coreObject : minorVersionLibrary.getCoreObjectTypes()) {
-            LibraryMember majorVersionEntity;
-
-            if ((majorVersionEntity = majorVersionLibrary.getNamedMember(coreObject.getName())) == null) {
-                TLCoreObject clone = cloner.clone(coreObject);
-
-                majorVersionLibrary.addNamedMember(clone);
-                captureRollupLibraryReference(clone, rollupReferences);
-
-            } else if (majorVersionEntity instanceof TLCoreObject) {
-                try {
-                    rollupMinorVersion((Versioned) majorVersionEntity, coreObject,
-                            rollupReferences, true);
-
-                } catch (ValidationException e) {
-                    // Should never happen since we indicate that validation should be skipped
-                }
-            }
-        }
-        for (TLBusinessObject businessObject : minorVersionLibrary.getBusinessObjectTypes()) {
-            LibraryMember majorVersionEntity;
-
-            if ((majorVersionEntity = majorVersionLibrary.getNamedMember(businessObject.getName())) == null) {
-                TLBusinessObject clone = cloner.clone(businessObject);
-
-                majorVersionLibrary.addNamedMember(clone);
-                captureRollupLibraryReference(clone, rollupReferences);
-
-            } else if (majorVersionEntity instanceof TLBusinessObject) {
-                try {
-                    rollupMinorVersion((Versioned) majorVersionEntity, businessObject,
-                            rollupReferences, true);
-
-                } catch (ValidationException e) {
-                    // Should never happen since we indicate that validation should be skipped
-                }
-            }
+        List<Versioned> minorVersionList = new ArrayList<>();
+        
+        // Collect the list of all versioned entities from the minor version library
+        for (LibraryMember member : minorVersionLibrary.getNamedMembers()) {
+        	if (member instanceof Versioned) {
+            	minorVersionList.add( (Versioned) member );
+        	}
         }
         if (minorVersionLibrary.getService() != null) {
-            TLService majorVersionService = majorVersionLibrary.getService();
-
-            if (majorVersionService == null) {
-                majorVersionService = new TLService();
-                majorVersionService.setName(minorVersionLibrary.getService().getName());
-                majorVersionService.setDocumentation(cloner.clone(minorVersionLibrary.getService()
-                        .getDocumentation()));
-                majorVersionLibrary.setService(majorVersionService);
-            }
             for (TLOperation operation : minorVersionLibrary.getService().getOperations()) {
-                TLOperation majorVersionOp;
-
-                if ((majorVersionOp = majorVersionService.getOperation(operation.getName())) == null) {
-                    TLOperation clone = cloner.clone(operation);
-
-                    majorVersionService.addOperation(clone);
-                    captureRollupLibraryReference(clone, rollupReferences);
-
-                } else {
-                    try {
-                        rollupMinorVersion((Versioned) majorVersionOp, operation, rollupReferences,
-                                true);
-
-                    } catch (ValidationException e) {
-                        // Should never happen since we indicate that validation should be skipped
-                    }
-                }
+            	minorVersionList.add( operation );
             }
         }
-    }
-
-    /**
-     * Adds the given facet to the identity map, using the full identity string of the facet as the
-     * key.
-     * 
-     * @param facet
-     *            the facet instance to add
-     * @param identityFacetMap
-     *            the map that will receive the facet
-     */
-    private void addToIdentityFacetMap(TLFacet facet, Map<String, TLFacet> identityFacetMap) {
-        if (facet != null) {
-            identityFacetMap.put(
-                    facet.getFacetType().getIdentityName(facet.getContext(), facet.getLabel()),
-                    facet);
+        
+        // Roll up all of the entities we just collected to the major version library
+        for (Versioned minorVersion : minorVersionList) {
+        	getVersionHandler( minorVersion ).rollupMinorVersion(
+        			minorVersion, majorVersionLibrary, referenceHandler );
         }
     }
 

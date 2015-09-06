@@ -148,13 +148,13 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
         assertNotNull(currentVersionClosedEnum);
         assertNotNull(currentVersionSimple);
 
-        TLBusinessObject priorVersionBO = helper.getPriorVersionExtension(currentVersionBO);
-        TLCoreObject priorVersionCore = helper.getPriorVersionExtension(currentVersionCore);
-        TLValueWithAttributes priorVersionVWA = helper.getPriorVersionExtension(currentVersionVWA);
-        TLOperation priorVersionOp = helper.getPriorVersionExtension(currentVersionOp);
-        TLOpenEnumeration priorVersionOpenEnum = helper.getPriorVersionExtension(currentVersionOpenEnum);
-        TLClosedEnumeration priorVersionClosedEnum = helper.getPriorVersionExtension(currentVersionClosedEnum);
-        TLSimple priorVersionSimple = helper.getPriorVersionExtension(currentVersionSimple);
+        TLBusinessObject priorVersionBO = helper.getVersionExtension(currentVersionBO);
+        TLCoreObject priorVersionCore = helper.getVersionExtension(currentVersionCore);
+        TLValueWithAttributes priorVersionVWA = helper.getVersionExtension(currentVersionVWA);
+        TLOperation priorVersionOp = helper.getVersionExtension(currentVersionOp);
+        TLOpenEnumeration priorVersionOpenEnum = helper.getVersionExtension(currentVersionOpenEnum);
+        TLClosedEnumeration priorVersionClosedEnum = helper.getVersionExtension(currentVersionClosedEnum);
+        TLSimple priorVersionSimple = helper.getVersionExtension(currentVersionSimple);
 
         assertNotNull(priorVersionBO);
         assertEquals("1.1.0", priorVersionBO.getVersion());
@@ -208,13 +208,13 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
         assertNotNull(currentVersionClosedEnum);
         assertNotNull(currentVersionSimple);
 
-        List<TLBusinessObject> priorBOVersions = helper.getAllPriorVersionExtensions(currentVersionBO);
-        List<TLCoreObject> priorCoreVersions = helper.getAllPriorVersionExtensions(currentVersionCore);
-        List<TLValueWithAttributes> priorVwaVersions = helper.getAllPriorVersionExtensions(currentVersionVWA);
-        List<TLOperation> priorOpVersions = helper.getAllPriorVersionExtensions(currentVersionOp);
-        List<TLOpenEnumeration> priorOpenEnumVersions = helper.getAllPriorVersionExtensions(currentVersionOpenEnum);
-        List<TLClosedEnumeration> priorClosedEnumVersions = helper.getAllPriorVersionExtensions(currentVersionClosedEnum);
-        List<TLSimple> priorSimpleVersions = helper.getAllPriorVersionExtensions(currentVersionSimple);
+        List<TLBusinessObject> priorBOVersions = helper.getAllVersionExtensions(currentVersionBO);
+        List<TLCoreObject> priorCoreVersions = helper.getAllVersionExtensions(currentVersionCore);
+        List<TLValueWithAttributes> priorVwaVersions = helper.getAllVersionExtensions(currentVersionVWA);
+        List<TLOperation> priorOpVersions = helper.getAllVersionExtensions(currentVersionOp);
+        List<TLOpenEnumeration> priorOpenEnumVersions = helper.getAllVersionExtensions(currentVersionOpenEnum);
+        List<TLClosedEnumeration> priorClosedEnumVersions = helper.getAllVersionExtensions(currentVersionClosedEnum);
+        List<TLSimple> priorSimpleVersions = helper.getAllVersionExtensions(currentVersionSimple);
 
         assertEquals(2, priorBOVersions.size());
         assertEquals("1.1.0", priorBOVersions.get(0).getVersion());

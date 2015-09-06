@@ -29,8 +29,8 @@ import org.opentravel.schemacompiler.version.Versioned;
  * 
  * @author S. Livezey
  */
-public class TLOperation extends TLModelElement implements NamedEntity, Versioned, TLFacetOwner,
-        TLExtensionOwner, TLDocumentationOwner, TLEquivalentOwner {
+public class TLOperation extends TLModelElement implements NamedEntity, TLFacetOwner, TLVersionedExtensionOwner,
+		TLDocumentationOwner, TLEquivalentOwner {
 
     private TLService owningService;
     private String name;

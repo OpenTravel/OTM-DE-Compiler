@@ -28,8 +28,7 @@ import org.opentravel.schemacompiler.version.Versioned;
  * 
  * @author S. Livezey
  */
-public class TLBusinessObject extends TLComplexTypeBase implements Versioned, TLFacetOwner,
-        TLAliasOwner {
+public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner, TLAliasOwner {
 
     protected AliasListManager aliasManager = new AliasListManager(this);
     private FacetListManager customFacetManager = new FacetListManager(this, TLFacetType.CUSTOM,

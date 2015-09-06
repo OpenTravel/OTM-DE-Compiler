@@ -26,8 +26,7 @@ import org.opentravel.schemacompiler.version.Versioned;
  * 
  * @author S. Livezey
  */
-public class TLCoreObject extends TLComplexTypeBase implements Versioned, TLFacetOwner,
-        TLAliasOwner, TLAttributeType {
+public class TLCoreObject extends TLComplexTypeBase implements TLFacetOwner, TLAliasOwner, TLAttributeType {
 
     protected AliasListManager aliasManager = new AliasListManager(this);
     private TLRoleEnumeration roleEnumeration = new TLRoleEnumeration(this);

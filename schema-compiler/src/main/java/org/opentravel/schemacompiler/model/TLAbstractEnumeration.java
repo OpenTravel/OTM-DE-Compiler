@@ -29,7 +29,7 @@ import org.opentravel.schemacompiler.version.Versioned;
  * 
  * @author S. Livezey
  */
-public abstract class TLAbstractEnumeration extends LibraryMember implements Versioned, TLDocumentationOwner, TLExtensionOwner {
+public abstract class TLAbstractEnumeration extends LibraryMember implements TLVersionedExtensionOwner, TLDocumentationOwner {
 
     private String name;
     private TLExtension extension;
