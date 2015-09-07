@@ -17,6 +17,7 @@ package org.opentravel.schemacompiler.version;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.io.File;
 import java.util.List;
@@ -165,36 +166,45 @@ public class TestMajorVersionHelper extends AbstractVersionHelperTests {
         TLSimple lookupSimple = newMajorVersionLibrary.getSimpleType("LookupSimple");
 
         assertNotNull(lookupBO);
+        assertNull(lookupBO.getExtension());
         assertEquals(2, lookupBO.getSummaryFacet().getAttributes().size());
         assertEquals(3, lookupBO.getSummaryFacet().getElements().size());
         assertContainsAttributes(lookupBO.getSummaryFacet(), "extBOAttribute121", "extBOAttribute122");
         assertContainsElements(lookupBO.getSummaryFacet(), "Element1", "Element11", "Element12");
 
         assertNotNull(lookupCore);
+        assertNull(lookupCore.getExtension());
         assertEquals(2, lookupCore.getSummaryFacet().getAttributes().size());
         assertEquals(3, lookupCore.getSummaryFacet().getElements().size());
         assertContainsAttributes(lookupCore.getSummaryFacet(), "extCoreAttribute121", "extCoreAttribute122");
         assertContainsElements(lookupCore.getSummaryFacet(), "Element1", "Element11", "Element12");
 
         assertNotNull(lookupVWA);
+        assertNotNull(lookupVWA.getParentType());
+        assertEquals("string", lookupVWA.getParentType().getLocalName());
         assertEquals(3, lookupVWA.getAttributes().size());
         assertContainsAttributes(lookupVWA, "vwaAttribute1", "vwaAttribute11", "vwaAttribute12");
 
         assertNotNull(lookupOp);
+        assertNull(lookupOp.getExtension());
         assertEquals(2, lookupOp.getRequest().getAttributes().size());
         assertEquals(3, lookupOp.getRequest().getElements().size());
         assertContainsAttributes(lookupOp.getRequest(), "extOperationAttribute121", "extOperationAttribute122");
         assertContainsElements(lookupOp.getRequest(), "RequestValue1", "RequestValue11", "RequestValue12");
 
         assertNotNull(lookupOpenEnum);
+        assertNull(lookupOpenEnum.getExtension());
         assertEquals(9, lookupOpenEnum.getValues().size());
         assertContainsValues(lookupOpenEnum, "a1", "b1", "c1", "a11", "b11", "c11", "a12", "b12", "c12");
 
         assertNotNull(lookupClosedEnum);
+        assertNull(lookupClosedEnum.getExtension());
         assertEquals(9, lookupClosedEnum.getValues().size());
         assertContainsValues(lookupClosedEnum, "a1", "b1", "c1", "a11", "b11", "c11", "a12", "b12", "c12");
 
         assertNotNull(lookupSimple);
+        assertNotNull(lookupSimple.getParentType());
+        assertEquals("string", lookupSimple.getParentType().getLocalName());
         assertEquals("[A-Za-z]*", lookupSimple.getPattern());
         assertEquals(2, lookupSimple.getMinLength());
         assertEquals(5, lookupSimple.getMaxLength());
@@ -209,33 +219,42 @@ public class TestMajorVersionHelper extends AbstractVersionHelperTests {
         TLSimple laterMinorVersionSimple = newMajorVersionLibrary.getSimpleType("LaterMinorVersionSimple");
 
         assertNotNull(laterMinorVersionBO);
+        assertNull(laterMinorVersionBO.getExtension());
         assertEquals(0, laterMinorVersionBO.getSummaryFacet().getAttributes().size());
         assertEquals(2, laterMinorVersionBO.getSummaryFacet().getElements().size());
         assertContainsElements(laterMinorVersionBO.getSummaryFacet(), "Element1", "Element12");
 
         assertNotNull(laterMinorVersionCore);
+        assertNull(laterMinorVersionCore.getExtension());
         assertEquals(0, laterMinorVersionCore.getSummaryFacet().getAttributes().size());
         assertEquals(2, laterMinorVersionCore.getSummaryFacet().getElements().size());
         assertContainsElements(laterMinorVersionCore.getSummaryFacet(), "Element1", "Element12");
 
         assertNotNull(laterMinorVersionVWA);
+        assertNotNull(laterMinorVersionVWA.getParentType());
+        assertEquals("string", laterMinorVersionVWA.getParentType().getLocalName());
         assertEquals(2, laterMinorVersionVWA.getAttributes().size());
         assertContainsAttributes(laterMinorVersionVWA, "vwaAttribute1", "vwaAttribute12");
 
         assertNotNull(laterMinorVersionOp);
+        assertNull(laterMinorVersionOp.getExtension());
         assertEquals(0, laterMinorVersionOp.getRequest().getAttributes().size());
         assertEquals(2, laterMinorVersionOp.getRequest().getElements().size());
         assertContainsElements(laterMinorVersionOp.getRequest(), "RequestValue1", "RequestValue12");
 
         assertNotNull(laterMinorVersionOpenEnum);
+        assertNull(laterMinorVersionOpenEnum.getExtension());
         assertEquals(6, laterMinorVersionOpenEnum.getValues().size());
         assertContainsValues(laterMinorVersionOpenEnum, "a1", "b1", "c1", "a12", "b12", "c12");
 
         assertNotNull(laterMinorVersionClosedEnum);
+        assertNull(laterMinorVersionClosedEnum.getExtension());
         assertEquals(6, laterMinorVersionClosedEnum.getValues().size());
         assertContainsValues(laterMinorVersionClosedEnum, "a1", "b1", "c1", "a12", "b12", "c12");
 
         assertNotNull(laterMinorVersionSimple);
+        assertNotNull(laterMinorVersionSimple.getParentType());
+        assertEquals("string", laterMinorVersionSimple.getParentType().getLocalName());
         assertEquals("[A-Za-z]*", laterMinorVersionSimple.getPattern());
         assertEquals(2, laterMinorVersionSimple.getMinLength());
         assertEquals(5, laterMinorVersionSimple.getMaxLength());
@@ -250,33 +269,42 @@ public class TestMajorVersionHelper extends AbstractVersionHelperTests {
         TLSimple minorVersionTestSimple = newMajorVersionLibrary.getSimpleType("MinorVersionTestSimple");
 
         assertNotNull(minorVersionTestBO);
+        assertNull(minorVersionTestBO.getExtension());
         assertEquals(0, minorVersionTestBO.getSummaryFacet().getAttributes().size());
         assertEquals(1, minorVersionTestBO.getSummaryFacet().getElements().size());
         assertContainsElements(minorVersionTestBO.getSummaryFacet(), "Element11");
 
         assertNotNull(minorVersionTestCore);
+        assertNull(minorVersionTestCore.getExtension());
         assertEquals(0, minorVersionTestCore.getSummaryFacet().getAttributes().size());
         assertEquals(1, minorVersionTestCore.getSummaryFacet().getElements().size());
         assertContainsElements(minorVersionTestCore.getSummaryFacet(), "Element11");
 
         assertNotNull(minorVersionTestVWA);
+        assertNotNull(minorVersionTestVWA.getParentType());
+        assertEquals("string", minorVersionTestVWA.getParentType().getLocalName());
         assertEquals(1, minorVersionTestVWA.getAttributes().size());
         assertContainsAttributes(minorVersionTestVWA, "vwaAttribute11");
 
         assertNotNull(minorVersionTestOp);
+        assertNull(minorVersionTestOp.getExtension());
         assertEquals(0, minorVersionTestOp.getRequest().getAttributes().size());
         assertEquals(1, minorVersionTestOp.getRequest().getElements().size());
         assertContainsElements(minorVersionTestOp.getRequest(), "RequestValue11");
 
         assertNotNull(minorVersionTestOpenEnum);
+        assertNull(minorVersionTestOpenEnum.getExtension());
         assertEquals(3, minorVersionTestOpenEnum.getValues().size());
         assertContainsValues(minorVersionTestOpenEnum, "a11", "b11", "c11");
 
         assertNotNull(minorVersionTestClosedEnum);
+        assertNull(minorVersionTestClosedEnum.getExtension());
         assertEquals(3, minorVersionTestClosedEnum.getValues().size());
         assertContainsValues(minorVersionTestClosedEnum, "a11", "b11", "c11");
 
         assertNotNull(minorVersionTestSimple);
+        assertNotNull(minorVersionTestSimple.getParentType());
+        assertEquals("string", minorVersionTestSimple.getParentType().getLocalName());
         assertEquals("[A-Za-z]*", minorVersionTestSimple.getPattern());
         assertEquals(2, minorVersionTestSimple.getMinLength());
         assertEquals(5, minorVersionTestSimple.getMaxLength());
