@@ -22,6 +22,7 @@ import javax.xml.namespace.QName;
 
 import org.opentravel.ns.ota2.appinfo_v01_00.OTA2Entity;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
+import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.model.TLAlias;
@@ -65,11 +66,13 @@ public class TLPropertyCodegenTransformer extends
                 : transformValueProperty(source);
 
         // Add documentation, equivalents, and examples to the element's annotation as required
-        if (source.getDocumentation() != null) {
-            ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(source.getDocumentation(), Annotation.class);
+        TLDocumentation sourceDoc = DocumentationFinder.getDocumentation( source );
+        
+        if (sourceDoc != null) {
+            ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer =
+            		getTransformerFactory().getTransformer(sourceDoc, Annotation.class);
 
-            element.setAnnotation(docTransformer.transform(source.getDocumentation()));
+            element.setAnnotation(docTransformer.transform(sourceDoc));
         }
         XsdCodegenUtils.addEquivalentInfo(source, element);
         return element;

@@ -20,6 +20,7 @@ import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
+import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegate;
@@ -149,16 +150,17 @@ public class TLCoreObjectCodegenTransformer extends
         }
 
         for (TLRole role : PropertyCodegenUtils.getInheritedRoles(source)) {
+        	TLDocumentation doc = DocumentationFinder.getDocumentation(role);
             NoFixedFacet roleEnumValue = new NoFixedFacet();
 
             roleEnumValue.setValue(role.getName());
             restriction.getFacets().add(jaxbObjectFactory.createEnumeration(roleEnumValue));
 
-            if ((role.getDocumentation() != null) && !role.getDocumentation().isEmpty()) {
-                ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer = getTransformerFactory()
-                        .getTransformer(role.getDocumentation(), Annotation.class);
+            if (doc != null) {
+                ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer =
+                		getTransformerFactory().getTransformer(doc, Annotation.class);
 
-                roleEnumValue.setAnnotation(docTransformer.transform(role.getDocumentation()));
+                roleEnumValue.setAnnotation(docTransformer.transform(doc));
             }
         }
         if (openEnumeration) {

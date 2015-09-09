@@ -21,6 +21,7 @@ import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
+import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLDocumentation;
@@ -125,11 +126,13 @@ public class TLExtensionPointFacetCodegenTransformer extends
         }
 
         // Generate the documentation block (if required)
-        if (source.getDocumentation() != null) {
-            ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(source.getDocumentation(), Annotation.class);
+        TLDocumentation sourceDoc = DocumentationFinder.getDocumentation( source );
+        
+        if (sourceDoc != null) {
+            ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer =
+            		getTransformerFactory().getTransformer(sourceDoc, Annotation.class);
 
-            type.setAnnotation(docTransformer.transform(source.getDocumentation()));
+            type.setAnnotation(docTransformer.transform(sourceDoc));
         }
         XsdCodegenUtils.addAppInfo(source, type);
         return type;

@@ -19,6 +19,7 @@ import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
+import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
@@ -53,12 +54,11 @@ public class TLValueWithAttributesCodegenTransformer extends
      */
     @Override
     public CodegenArtifacts transform(TLValueWithAttributes source) {
-        ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer = getTransformerFactory()
-                .getTransformer(source.getDocumentation(), Annotation.class);
         ObjectTransformer<TLAttribute, CodegenArtifacts, CodeGenerationTransformerContext> attributeTransformer = getTransformerFactory()
                 .getTransformer(TLAttribute.class, CodegenArtifacts.class);
         ObjectTransformer<TLIndicator, Annotated, CodeGenerationTransformerContext> indicatorTransformer = getTransformerFactory()
                 .getTransformer(TLIndicator.class, Annotated.class);
+        TLDocumentation sourceDoc = DocumentationFinder.getDocumentation( source );
         NamedEntity vwaParentType = getBaseParentType(source);
         CodegenArtifacts artifacts = new CodegenArtifacts();
         ComplexType targetType = new TopLevelComplexType();
@@ -67,8 +67,11 @@ public class TLValueWithAttributesCodegenTransformer extends
 
         targetType.setName(source.getName());
 
-        if (source.getDocumentation() != null) {
-            targetType.setAnnotation(docTransformer.transform(source.getDocumentation()));
+        if (sourceDoc != null) {
+            ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer =
+            		getTransformerFactory().getTransformer(sourceDoc, Annotation.class);
+            
+            targetType.setAnnotation(docTransformer.transform(sourceDoc));
         }
         XsdCodegenUtils.addAppInfo(source, targetType);
 
@@ -88,6 +91,9 @@ public class TLValueWithAttributesCodegenTransformer extends
             addCompileTimeDependency(emptyElement);
         }
         if (source.getValueDocumentation() != null) {
+            ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer =
+            		getTransformerFactory().getTransformer(source.getValueDocumentation(), Annotation.class);
+            
             simpleContent.setAnnotation(docTransformer.transform(source.getValueDocumentation()));
         }
         simpleContent.setExtension(extType);

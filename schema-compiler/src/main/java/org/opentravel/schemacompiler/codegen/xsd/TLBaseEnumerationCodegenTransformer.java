@@ -18,6 +18,7 @@ package org.opentravel.schemacompiler.codegen.xsd;
 import javax.xml.bind.JAXBElement;
 
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
+import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLEnumValue;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
@@ -46,15 +47,16 @@ public abstract class TLBaseEnumerationCodegenTransformer<S, T> extends
      * @return JAXBElement<NoFixedFacet>
      */
     protected JAXBElement<NoFixedFacet> createEnumValue(TLEnumValue modelEnum) {
+        TLDocumentation doc = DocumentationFinder.getDocumentation(modelEnum);
         NoFixedFacet facet = new NoFixedFacet();
 
         facet.setValue(modelEnum.getLiteral());
 
-        if (modelEnum.getDocumentation() != null) {
-            ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(modelEnum.getDocumentation(), Annotation.class);
+        if (doc != null) {
+            ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer =
+            		getTransformerFactory().getTransformer(doc, Annotation.class);
 
-            facet.setAnnotation(docTransformer.transform(modelEnum.getDocumentation()));
+            facet.setAnnotation(docTransformer.transform(doc));
         }
         return jaxbObjectFactory.createEnumeration(facet);
     }

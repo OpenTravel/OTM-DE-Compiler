@@ -18,6 +18,7 @@ package org.opentravel.schemacompiler.codegen.xsd.facet;
 import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
+import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLDocumentation;
@@ -61,6 +62,7 @@ public class TLSimpleFacetCodegenDelegate extends FacetCodegenDelegate<TLSimpleF
     @Override
     protected Annotated createType() {
         TLSimpleFacet sourceFacet = getSourceFacet();
+        TLDocumentation doc = DocumentationFinder.getDocumentation(sourceFacet);
         Restriction restriction = new Restriction();
         SimpleType type = null;
         QName baseType;
@@ -83,11 +85,11 @@ public class TLSimpleFacetCodegenDelegate extends FacetCodegenDelegate<TLSimpleF
         }
         restriction.setBase(baseType);
 
-        if (sourceFacet.getDocumentation() != null) {
-            ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(sourceFacet.getDocumentation(), Annotation.class);
+        if (doc != null) {
+            ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer =
+            		getTransformerFactory().getTransformer(doc, Annotation.class);
 
-            type.setAnnotation(docTransformer.transform(sourceFacet.getDocumentation()));
+            type.setAnnotation(docTransformer.transform(doc));
         }
         XsdCodegenUtils.addAppInfo(sourceFacet, type);
         return type;

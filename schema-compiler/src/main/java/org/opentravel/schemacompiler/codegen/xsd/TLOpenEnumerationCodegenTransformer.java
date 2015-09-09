@@ -20,6 +20,7 @@ import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
+import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
 import org.opentravel.schemacompiler.codegen.util.EnumCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
@@ -69,11 +70,18 @@ public class TLOpenEnumerationCodegenTransformer extends
      */
     protected ComplexType createEnumComplexType(TLOpenEnumeration source) {
         SchemaDependency enumExtension = SchemaDependency.getEnumExtension();
+        TLDocumentation sourceDoc = DocumentationFinder.getDocumentation( source );
         ComplexType complexEnum = new TopLevelComplexType();
         SimpleContent simpleContent = new SimpleContent();
         SimpleExtensionType extension = new SimpleExtensionType();
         Attribute attribute = new Attribute();
 
+        if (sourceDoc != null) {
+            ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer =
+            		getTransformerFactory().getTransformer(sourceDoc, Annotation.class);
+
+            complexEnum.setAnnotation(docTransformer.transform(sourceDoc));
+        }
         complexEnum.setName(source.getName());
         complexEnum.setSimpleContent(simpleContent);
         XsdCodegenUtils.addAppInfo(source, complexEnum);
@@ -100,11 +108,14 @@ public class TLOpenEnumerationCodegenTransformer extends
         simpleEnum.setName(source.getName() + "_Base");
         restriction.setBase(new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "string"));
 
-        if (source.getDocumentation() != null) {
-            ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(source.getDocumentation(), Annotation.class);
+        // Generate the documentation block (if required)
+        TLDocumentation sourceDoc = DocumentationFinder.getDocumentation( source );
+        
+        if (sourceDoc != null) {
+            ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer =
+            		getTransformerFactory().getTransformer(sourceDoc, Annotation.class);
 
-            simpleEnum.setAnnotation(docTransformer.transform(source.getDocumentation()));
+            simpleEnum.setAnnotation(docTransformer.transform(sourceDoc));
         }
         XsdCodegenUtils.addAppInfo(source, simpleEnum);
 
