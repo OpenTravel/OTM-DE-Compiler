@@ -68,9 +68,17 @@ public class BusinessObjectCustomFacetCodegenDelegate extends BusinessObjectFace
      */
     @Override
     public QName getExtensionPointElement() {
-        SchemaDependency extensionPoint = SchemaDependency.getExtensionPointCustomElement();
-        QName extensionPointQName = extensionPoint.toQName();
-
+    	TLBusinessObject bo = (TLBusinessObject) getSourceFacet().getOwningEntity();
+        SchemaDependency extensionPoint;
+        QName extensionPointQName;
+        
+        if (declaresOrInheritsFacetContent( bo.getSummaryFacet() )) {
+        	extensionPoint = SchemaDependency.getExtensionPointCustomElement();
+        	
+        } else {
+        	extensionPoint = SchemaDependency.getExtensionPointElement();
+        }
+        extensionPointQName = extensionPoint.toQName();
         addCompileTimeDependency(extensionPoint);
         return extensionPointQName;
     }

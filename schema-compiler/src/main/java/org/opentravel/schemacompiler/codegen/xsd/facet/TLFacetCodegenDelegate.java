@@ -175,6 +175,22 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
         }
         return baseFacet;
     }
+    
+    /**
+     * Returns true if the given facet (not necessarily the source facet) declares or
+     * inherits fields (attributes, elements, or indicators) from another extended facet.
+     * 
+     * @param facet  the facet to analyze
+     * @return boolean
+     */
+    protected boolean declaresOrInheritsFacetContent(TLFacet facet) {
+    	FacetCodegenDelegate<TLFacet> delegate = (facet == getSourceFacet()) ? this : null;
+    	
+    	if (delegate == null) {
+    		delegate = new FacetCodegenDelegateFactory(transformerContext).getDelegate( facet );
+    	}
+    	return delegate.hasContent();
+    }
 
     /**
      * Returns the global type name of the local base facet for the source facet. By default, this

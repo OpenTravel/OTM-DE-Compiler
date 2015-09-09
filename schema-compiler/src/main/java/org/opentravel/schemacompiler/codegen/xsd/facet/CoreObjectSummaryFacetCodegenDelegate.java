@@ -21,6 +21,7 @@ import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.codegen.xsd.TLDocumentationCodegenTransformer;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.TLAlias;
+import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.w3._2001.xmlschema.Annotation;
@@ -81,9 +82,17 @@ public class CoreObjectSummaryFacetCodegenDelegate extends CoreObjectFacetCodege
      */
     @Override
     public QName getExtensionPointElement() {
-        SchemaDependency extensionPoint = SchemaDependency.getExtensionPointSummaryElement();
-        QName extensionPointQName = extensionPoint.toQName();
-
+    	TLCoreObject core = (TLCoreObject) getSourceFacet().getOwningEntity();
+        SchemaDependency extensionPoint;
+        QName extensionPointQName;
+        
+        if (declaresOrInheritsFacetContent( core.getDetailFacet() )) {
+        	extensionPoint = SchemaDependency.getExtensionPointSummaryElement();
+        	
+        } else {
+        	extensionPoint = SchemaDependency.getExtensionPointElement();
+        }
+        extensionPointQName = extensionPoint.toQName();
         addCompileTimeDependency(extensionPoint);
         return extensionPointQName;
     }

@@ -68,11 +68,9 @@ public class BusinessObjectQueryFacetCodegenDelegate extends BusinessObjectFacet
      */
     @Override
     public QName getExtensionPointElement() {
-        QName extensionPointQName = null;
-
-        SchemaDependency extensionPoint = SchemaDependency.getExtensionPointQueryElement();
-
-        extensionPointQName = extensionPoint.toQName();
+        SchemaDependency extensionPoint = SchemaDependency.getExtensionPointElement();
+        QName extensionPointQName = extensionPoint.toQName();
+        
         addCompileTimeDependency(extensionPoint);
         return extensionPointQName;
     }
