@@ -15,7 +15,13 @@
  */
 package org.opentravel.schemacompiler.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.opentravel.schemacompiler.event.ModelElementListener;
 import org.opentravel.schemacompiler.event.ModelEvent;
+import org.opentravel.schemacompiler.event.OwnershipEvent;
+import org.opentravel.schemacompiler.event.ValueChangeEvent;
 import org.opentravel.schemacompiler.util.ModelElementCloner;
 
 /**
@@ -24,11 +30,35 @@ import org.opentravel.schemacompiler.util.ModelElementCloner;
  * @author S. Livezey
  */
 public abstract class TLModelElement implements ModelElement {
-
+	
+	private List<ModelElementListener> listeners = new ArrayList<>();
+	
     /**
      * Default constructor.
      */
     public TLModelElement() {
+    }
+    
+    /**
+     * Registers a listener for this model element.
+     * 
+     * @param listener  the listener instance to register
+     */
+    public void addListener(ModelElementListener listener) {
+    	if ((listener != null) && !listeners.contains( listener )) {
+    		listeners.add( listener );
+    	}
+    }
+    
+    /**
+     * Unregisteres a listener from this model element.
+     * 
+     * @param listener  the lister instance to unregister
+     */
+    public void removeListener(ModelElementListener listener) {
+    	if (listener != null) {
+    		listeners.remove( listener );
+    	}
     }
 
     /**
@@ -43,6 +73,17 @@ public abstract class TLModelElement implements ModelElement {
 
         if (owningModel != null) {
             owningModel.publishEvent(event);
+            
+            if (event instanceof ValueChangeEvent) {
+            	for (ModelElementListener listener : listeners) {
+            		listener.processValueChangeEvent( (ValueChangeEvent<?,?>) event );
+            	}
+            	
+            } else if (event instanceof OwnershipEvent) {
+            	for (ModelElementListener listener : listeners) {
+            		listener.processOwnershipEvent( (OwnershipEvent<?,?>) event );
+            	}
+            }
         }
     }
 
