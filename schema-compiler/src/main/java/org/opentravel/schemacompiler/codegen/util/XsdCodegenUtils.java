@@ -569,7 +569,11 @@ public class XsdCodegenUtils {
         appInfo.getContent().add(appInfoObjectFactory.createLibrary(libraryInfo));
 
         if (library instanceof TLLibrary) {
-            libraryInfo.setLibraryVersion(((TLLibrary) library).getVersion());
+        	TLLibrary tlLibrary = (TLLibrary) library;
+        	
+        	if (tlLibrary.getStatus() != null) {
+        		libraryInfo.setLibraryStatus(tlLibrary.getStatus().toString());
+        	}
         }
         return appInfo;
     }
