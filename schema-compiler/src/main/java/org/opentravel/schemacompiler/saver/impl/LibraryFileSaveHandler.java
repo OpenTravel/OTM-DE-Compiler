@@ -34,8 +34,8 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
-import org.opentravel.ns.ota2.librarymodel_v01_04.Library;
-import org.opentravel.ns.ota2.librarymodel_v01_04.ObjectFactory;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Library;
+import org.opentravel.ns.ota2.librarymodel_v01_05.ObjectFactory;
 import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
 import org.opentravel.schemacompiler.loader.impl.LibraryValidationSource;
 import org.opentravel.schemacompiler.saver.LibrarySaveException;
@@ -57,16 +57,16 @@ import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
  */
 public class LibraryFileSaveHandler implements LibrarySaveHandler {
 
-    private static final String SCHEMA_CONTEXT = ":org.w3._2001.xmlschema:org.opentravel.ns.ota2.librarymodel_v01_04";
+    private static final String SCHEMA_CONTEXT = ":org.w3._2001.xmlschema:org.opentravel.ns.ota2.librarymodel_v01_05";
 
     private static final String VALIDATION_MESSAGE_KEY = "org.opentravel.schemacompiler.TLLibrary.jaxbValidationWarning";
-    private static final String LIBRARY_SCHEMA_LOCATION_DECL = SchemaDeclarations.OTA2_LIBRARY_SCHEMA_1_4
-            .getNamespace() + " " + SchemaDeclarations.OTA2_LIBRARY_SCHEMA_1_4.getFilename();
+    private static final String LIBRARY_SCHEMA_LOCATION_DECL = SchemaDeclarations.OTA2_LIBRARY_SCHEMA_1_5.getNamespace() +
+    		" " + SchemaDeclarations.OTA2_LIBRARY_SCHEMA_1_5.getFilename();
 
     private static final Map<String, String> preferredPrefixMappings;
     private static final String[] schemaDeclarations = new String[] {
             XMLConstants.W3C_XML_SCHEMA_NS_URI, XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI,
-            SchemaDeclarations.OTA2_LIBRARY_SCHEMA_1_4.getNamespace() };
+            SchemaDeclarations.OTA2_LIBRARY_SCHEMA_1_5.getNamespace() };
 
     private static JAXBContext jaxbContext;
     private static Schema validationSchema;
@@ -294,7 +294,7 @@ public class LibraryFileSaveHandler implements LibrarySaveHandler {
         try {
             SchemaFactory schemaFactory = SchemaFactory
                     .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            InputStream schemaStream = SchemaDeclarations.OTA2_LIBRARY_SCHEMA_1_4.getContent();
+            InputStream schemaStream = SchemaDeclarations.OTA2_LIBRARY_SCHEMA_1_5.getContent();
 
             validationSchema = schemaFactory.newSchema(new StreamSource(schemaStream));
             jaxbContext = JAXBContext.newInstance(SCHEMA_CONTEXT);
@@ -311,7 +311,7 @@ public class LibraryFileSaveHandler implements LibrarySaveHandler {
         try {
             Map<String, String> prefixMappings = new HashMap<String, String>();
 
-            prefixMappings.put(SchemaDeclarations.OTA2_LIBRARY_SCHEMA_1_4.getNamespace(), "");
+            prefixMappings.put(SchemaDeclarations.OTA2_LIBRARY_SCHEMA_1_5.getNamespace(), "");
             prefixMappings.put(XMLConstants.W3C_XML_SCHEMA_NS_URI, "xsd");
             prefixMappings.put(XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI, "xsi");
             preferredPrefixMappings = Collections.unmodifiableMap(prefixMappings);

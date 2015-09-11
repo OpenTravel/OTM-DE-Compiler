@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<xsd:schema xmlns="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-chameleon-1" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-chameleon-1" attributeFormDefault="unqualified" elementFormDefault="qualified">
+
+	<xsd:include schemaLocation="chameleon_schema-2.xsd" />
+
+	<xsd:complexType name="LegacyComplexTypeD">
+		<xsd:simpleContent>
+			<xsd:extension base="ChameleonSimpleTypeC">
+				<xsd:attribute name="stuff" type="xsd:string" />
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+
+</xsd:schema>

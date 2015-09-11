@@ -111,7 +111,10 @@ public class LibraryCrcCalculator {
     public static Long getLibraryCrcValue(Object jaxbLibrary) {
         Long crcValue = null;
 
-        if (jaxbLibrary instanceof org.opentravel.ns.ota2.librarymodel_v01_04.Library) {
+        if (jaxbLibrary instanceof org.opentravel.ns.ota2.librarymodel_v01_05.Library) {
+            crcValue = ((org.opentravel.ns.ota2.librarymodel_v01_05.Library) jaxbLibrary)
+                    .getCrcValue();
+        } else if (jaxbLibrary instanceof org.opentravel.ns.ota2.librarymodel_v01_04.Library) {
             crcValue = ((org.opentravel.ns.ota2.librarymodel_v01_04.Library) jaxbLibrary)
                     .getCrcValue();
         }

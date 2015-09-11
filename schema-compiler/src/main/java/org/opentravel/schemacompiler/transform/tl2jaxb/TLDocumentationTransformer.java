@@ -18,9 +18,9 @@ package org.opentravel.schemacompiler.transform.tl2jaxb;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opentravel.ns.ota2.librarymodel_v01_04.AdditionalDoc;
-import org.opentravel.ns.ota2.librarymodel_v01_04.Description;
-import org.opentravel.ns.ota2.librarymodel_v01_04.Documentation;
+import org.opentravel.ns.ota2.librarymodel_v01_05.AdditionalDoc;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Description;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Documentation;
 import org.opentravel.schemacompiler.model.TLAdditionalDocumentationItem;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLDocumentationItem;

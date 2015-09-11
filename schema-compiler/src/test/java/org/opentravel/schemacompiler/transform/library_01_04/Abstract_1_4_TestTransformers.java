@@ -16,7 +16,6 @@
 package org.opentravel.schemacompiler.transform.library_01_04;
 
 import org.opentravel.schemacompiler.transform.AbstractTestTransformers;
-import org.opentravel.schemacompiler.util.SchemaCompilerTestUtils;
 
 /**
  * Base class for all transformer tests that utilize library schema v1.4 data.
@@ -30,7 +29,7 @@ public abstract class Abstract_1_4_TestTransformers extends AbstractTestTransfor
      */
     @Override
     protected String getBaseLocation() {
-        return SchemaCompilerTestUtils.getBaseLibraryLocation();
+        return System.getProperty("user.dir") + "/src/test/resources/libraries_1_4";
     }
 
 }

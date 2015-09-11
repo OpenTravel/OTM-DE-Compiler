@@ -17,10 +17,10 @@ package org.opentravel.schemacompiler.transform.tl2jaxb;
 
 import java.math.BigInteger;
 
-import org.opentravel.ns.ota2.librarymodel_v01_04.Documentation;
-import org.opentravel.ns.ota2.librarymodel_v01_04.Equivalent;
-import org.opentravel.ns.ota2.librarymodel_v01_04.Example;
-import org.opentravel.ns.ota2.librarymodel_v01_04.Simple;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Documentation;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Equivalent;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Example;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Simple;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLEquivalent;
