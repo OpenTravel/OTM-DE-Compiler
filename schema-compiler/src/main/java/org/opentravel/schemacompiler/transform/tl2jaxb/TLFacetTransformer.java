@@ -15,8 +15,8 @@
  */
 package org.opentravel.schemacompiler.transform.tl2jaxb;
 
-import org.opentravel.ns.ota2.librarymodel_v01_04.Documentation;
-import org.opentravel.ns.ota2.librarymodel_v01_04.Facet;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Documentation;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Facet;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;

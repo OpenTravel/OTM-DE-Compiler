@@ -18,9 +18,9 @@ package org.opentravel.schemacompiler.transform.tl2jaxb;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opentravel.ns.ota2.librarymodel_v01_04.Attribute;
-import org.opentravel.ns.ota2.librarymodel_v01_04.Indicator;
-import org.opentravel.ns.ota2.librarymodel_v01_04.Property;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Attribute;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Indicator;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Property;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLIndicator;

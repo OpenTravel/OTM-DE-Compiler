@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	attributeFormDefault="unqualified" elementFormDefault="qualified">
+
+	<xsd:simpleType name="ChameleonDuplicateTypeA">
+		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="50"></xsd:maxLength>
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<xsd:complexType name="ChameleonComplexTypeB">
+		<xsd:sequence>
+			<xsd:element name="street" type="xsd:string" />
+			<xsd:element name="city" type="xsd:string" />
+			<xsd:element name="state" type="xsd:string" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+</xsd:schema>

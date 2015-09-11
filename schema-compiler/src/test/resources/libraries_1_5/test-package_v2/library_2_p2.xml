@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_05"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_05 OTA2_LibraryModel_v1.5.0.xsd">
+    
+    <VersionScheme>OTA2</VersionScheme>
+    <Status>Draft</Status>
+    <Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package_v2</Namespace>
+    <Prefix>pkg2</Prefix>
+    <Name>library_2_p2</Name>
+    <Includes>library_1_p2.xml</Includes>
+    <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
+    <Import namespace="http://opentravel.org/common/v02" prefix="ota"/>
+    <Import fileHints="../test-package_v1/library_2_p1.xml"
+        namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package_v1" prefix="pkg1"/>
+    <Context applicationContext="context_1-applicationContext" context="context_1"/>
+    <Context applicationContext="context_2-applicationContext" context="context_2"/>
+    <Comments>Test Library</Comments>
+    
+    <Simple name="Counter_4" type="pkg1:Counter_2"/>
+    
+    <Simple listTypeInd="true" name="Counter_4_List" type="Counter_4"/>
+    
+    <ValueWithAttrs name="MyVWA" type="xsd:string">
+        <Example context="context_1">MyVWA-example-value-1</Example>
+        <Example context="context_2">MyVWA-example-value-2</Example>
+        <Attribute name="testAttr" type="Counter_3"/>
+    </ValueWithAttrs>
+    
+    <Enumeration_Closed name="SampleEnum_Closed">
+        <Documentation>
+            <Description>SampleEnum-documentation-line_1</Description>
+        </Documentation>
+        <Value literal="one">
+            <Documentation>
+                <Description>One</Description>
+            </Documentation>
+        </Value>
+        <Value literal="two">
+            <Documentation>
+                <Description>Two</Description>
+            </Documentation>
+        </Value>
+        <Value literal="three">
+            <Documentation>
+                <Description>Three</Description>
+            </Documentation>
+            <Equivalent context="test">three-equivalent</Equivalent>
+        </Value>
+    </Enumeration_Closed>
+    
+    <Simple name="SampleDocumentation" type="xsd:string">
+        <Documentation>
+            <Description>SampleDocumentation-description-line_1</Description>
+            <Implementer>SampleDocumentation-implementer-line_1</Implementer>
+            <Implementer>SampleDocumentation-implementer-line_2</Implementer>
+            <Deprecated>SampleDocumentation-deprecation-line_1</Deprecated>
+            <Deprecated>SampleDocumentation-deprecation-line_2</Deprecated>
+            <Reference>http://www.OpenTravel.org/ns/OTA2/SampleDocumentation/reference/1</Reference>
+            <Reference>http://www.OpenTravel.org/ns/OTA2/SampleDocumentation/reference/2</Reference>
+            <MoreInfo>http://www.OpenTravel.org/ns/OTA2/SampleDocumentation/moreInfo/1</MoreInfo>
+            <MoreInfo>http://www.OpenTravel.org/ns/OTA2/SampleDocumentation/moreInfo/2</MoreInfo>
+            <OtherDoc context="context_1">SampleDocumentation-otherDoc-line_1</OtherDoc>
+            <OtherDoc context="context_2">SampleDocumentation-otherDoc-line_2</OtherDoc>
+        </Documentation>
+    </Simple>
+    
+</Library>

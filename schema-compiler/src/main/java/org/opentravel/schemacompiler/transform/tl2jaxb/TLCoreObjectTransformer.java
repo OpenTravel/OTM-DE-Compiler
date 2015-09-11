@@ -15,14 +15,14 @@
  */
 package org.opentravel.schemacompiler.transform.tl2jaxb;
 
-import org.opentravel.ns.ota2.librarymodel_v01_04.CoreObject;
-import org.opentravel.ns.ota2.librarymodel_v01_04.Documentation;
-import org.opentravel.ns.ota2.librarymodel_v01_04.Equivalent;
-import org.opentravel.ns.ota2.librarymodel_v01_04.Extension;
-import org.opentravel.ns.ota2.librarymodel_v01_04.Facet;
-import org.opentravel.ns.ota2.librarymodel_v01_04.Role;
-import org.opentravel.ns.ota2.librarymodel_v01_04.RoleList;
-import org.opentravel.ns.ota2.librarymodel_v01_04.SimpleFacet;
+import org.opentravel.ns.ota2.librarymodel_v01_05.CoreObject;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Documentation;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Equivalent;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Extension;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Facet;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Role;
+import org.opentravel.ns.ota2.librarymodel_v01_05.RoleList;
+import org.opentravel.ns.ota2.librarymodel_v01_05.SimpleFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLEquivalent;

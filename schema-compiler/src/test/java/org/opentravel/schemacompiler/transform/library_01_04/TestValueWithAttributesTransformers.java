@@ -24,7 +24,7 @@ import static org.junit.Assert.assertTrue;
 import javax.xml.XMLConstants;
 
 import org.junit.Test;
-import org.opentravel.ns.ota2.librarymodel_v01_04.ValueWithAttributes;
+import org.opentravel.ns.ota2.librarymodel_v01_05.ValueWithAttributes;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLSimple;

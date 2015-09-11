@@ -26,10 +26,10 @@ import java.util.List;
 import javax.xml.XMLConstants;
 
 import org.junit.Test;
-import org.opentravel.ns.ota2.librarymodel_v01_04.BusinessObject;
-import org.opentravel.ns.ota2.librarymodel_v01_04.CoreObject;
-import org.opentravel.ns.ota2.librarymodel_v01_04.Facet;
-import org.opentravel.ns.ota2.librarymodel_v01_04.FacetContextual;
+import org.opentravel.ns.ota2.librarymodel_v01_05.BusinessObject;
+import org.opentravel.ns.ota2.librarymodel_v01_05.CoreObject;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Facet;
+import org.opentravel.ns.ota2.librarymodel_v01_05.FacetContextual;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLBusinessObject;

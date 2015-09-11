@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_05"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_05 OTA2_LibraryModel_v1.5.0.xsd">
+    
+    <VersionScheme>OTA2</VersionScheme>
+    <Status>Draft</Status>
+    <Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package_v1</Namespace>
+    <Prefix>pkg1</Prefix>
+    <Name>library_1_p1</Name>
+    <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
+    <Import namespace="http://opentravel.org/common/v02" prefix="ota"/>
+    <Context applicationContext="default-applicationContext" context="default"/>
+    <Comments>Test Library</Comments>
+    
+    <Simple name="Counter_1" type="xsd:int"/>
+    
+    <Simple name="TestCounter" type="Counter_1"/>
+    
+    <Simple maxLength="10" minLength="5" name="TestString"
+        pattern="[A-Za-z]*" type="xsd:string">
+        <Equivalent context="default">TestString-equivalent</Equivalent>
+        <Example context="default">TestString-ex</Example>
+    </Simple>
+    
+    <Enumeration_Open name="AbcEnum">
+        <Value literal="a"/>
+        <Value literal="b"/>
+        <Value literal="c"/>
+    </Enumeration_Open>
+    
+    <Enumeration_Open name="DefEnum">
+        <Extension extends="AbcEnum" />
+        <Value literal="d"/>
+        <Value literal="e"/>
+        <Value literal="f"/>
+    </Enumeration_Open>
+    
+    <ValueWithAttrs name="AttributeVwa" type="AbcEnum">
+        <Attribute mandatory="true" name="defValue" type="DefEnum"/>
+    </ValueWithAttrs>
+    
+    <ValueWithAttrs name="BaseVwa" type="AbcEnum">
+        <Attribute mandatory="true" name="abcValue" type="AbcEnum"/>
+        <Attribute mandatory="true" name="vwaValue" type="AttributeVwa"/>
+        <Attribute mandatory="true" name="defValue" type="DefEnum"/>
+    </ValueWithAttrs>
+    
+    <CoreObject name="VwaCore" notExtendable="false">
+        <Documentation>
+            <Description>Used to produce validatable examples for the VWA's above.</Description>
+        </Documentation>
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="AttributeVwa" repeat="0" type="AttributeVwa"/>
+            <Element name="BaseVwa" repeat="0" type="BaseVwa"/>
+        </Summary>
+        <Detail/>
+    </CoreObject>
+    
+</Library>

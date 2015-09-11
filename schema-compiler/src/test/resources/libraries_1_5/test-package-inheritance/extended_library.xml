@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_05"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_05 ../../../../main/resources/ota2-context/schemas/OTA2_LibraryModel_v1.5.0.xsd">
+
+	<VersionScheme>OTA2</VersionScheme>
+    <Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-inheritance/extended/v1_0</Namespace>
+    <Prefix>ext</Prefix>
+    <Name>extended_library</Name>
+	<Import prefix="xsd" namespace="http://www.w3.org/2001/XMLSchema" />
+	<Import prefix="ota" namespace="http://opentravel.org/common/v02" />
+	<Import prefix="base" namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-inheritance/base/v1_0"
+			fileHints="base_library.xml" />
+	<Context context="Context1" applicationContext="Context1" />
+	<Context context="Context2" applicationContext="Context2" />
+	<Context context="Context3" applicationContext="Context3" />
+    <Comments>Extended Entities for Inheritance Tests</Comments>
+    
+	<BusinessObject name="NSExtendedBusinessObject" notExtendable="true">
+		<Extension extends="base:ExtendedBusinessObject" />
+		<Aliases>NSExtendedAlias</Aliases>
+		<ID>
+			<Attribute name="idNSExtendedAttr" type="xsd:int" />
+			<Element name="idNSExtended" type="xsd:int" />
+		</ID>
+		<Summary>
+			<Attribute name="summaryNSExtendedAttr" type="xsd:string" />
+			<Element name="summaryNSExtended" type="xsd:string" />
+		</Summary>
+		<Detail>
+			<Attribute name="detailNSExtendedAttr" type="xsd:string" />
+			<Element name="detailNSExtended" type="xsd:string" />
+		</Detail>
+		<Query context="Context1" label="Label1">
+			<Attribute name="context1Label1NSExtendedAttr" type="xsd:string" />
+			<Element name="context1Label1NSExtended" type="xsd:string" />
+		</Query>
+		<Query context="Context2">
+			<Attribute name="context2NSExtendedAttr" type="xsd:string" />
+			<Element name="context2NSExtended" type="xsd:string" />
+		</Query>
+		<Query context="Context3">
+			<Attribute name="context3NSExtendedAttr" type="xsd:string" />
+			<Element name="context3NSExtended" type="xsd:string" />
+		</Query>
+		<Custom context="Context1" label="Label1">
+			<Attribute name="context1Label1NSExtendedAttr" type="xsd:string" />
+			<Element name="context1Label1NSExtended" type="xsd:string" />
+		</Custom>
+		<Custom context="Context2">
+			<Attribute name="context2NSExtendedAttr" type="xsd:string" />
+			<Element name="context2NSExtended" type="xsd:string" />
+		</Custom>
+		<Custom context="Context3">
+			<Attribute name="context3NSExtendedAttr" type="xsd:string" />
+			<Element name="context3NSExtended" type="xsd:string" />
+		</Custom>
+	</BusinessObject>
+	
+	<Service name="ExtendedService">
+		<Operation Name="Operation1">
+			<Extension extends="base:BaseService_Operation1" />
+			<Request>
+				<Attribute name="requestExtendedServiceOperation1Attr" type="xsd:string"/>
+				<Element name="requestExtendedServiceOperation1" type="xsd:string"/>
+			</Request>
+			<Response>
+				<Attribute name="responseExtendedServiceOperation1Attr" type="xsd:string"/>
+				<Element name="responseExtendedServiceOperation1" type="xsd:string"/>
+			</Response>
+		</Operation>
+		<Operation Name="Operation2">
+			<Extension extends="base:BaseService_Operation2" />
+			<Request>
+				<Attribute name="requestExtendedServiceOperation2Attr" type="xsd:string"/>
+				<Element name="requestExtendedServiceOperation2" type="xsd:string"/>
+			</Request>
+		</Operation>
+	</Service>
+	
+</Library>
