@@ -100,7 +100,7 @@ public abstract class AbstractExampleVisitor implements ExampleVisitor {
                     .getSimpleFacet());
 
         } else if (entity instanceof TLAttribute) {
-        	TLAttributeOwner owner = ((TLAttribute) entity).getAttributeOwner();
+        	TLAttributeOwner owner = ((TLAttribute) entity).getOwner();
         	NamedEntity contextFacet = getContextFacet();
         	
         	if (contextFacet != null) {
@@ -110,7 +110,7 @@ public abstract class AbstractExampleVisitor implements ExampleVisitor {
         	}
 
         } else if (entity instanceof TLProperty) {
-        	TLPropertyOwner owner = ((TLProperty) entity).getPropertyOwner();
+        	TLPropertyOwner owner = ((TLProperty) entity).getOwner();
         	NamedEntity contextFacet = getContextFacet();
         	
         	if (contextFacet != null) {

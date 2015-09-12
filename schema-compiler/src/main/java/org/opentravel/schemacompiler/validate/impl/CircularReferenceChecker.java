@@ -182,7 +182,7 @@ public class CircularReferenceChecker {
      */
     public static boolean hasCircularReference(TLProperty element) {
         return !element.isMandatory() ? false : checkCircularReference(element.getType(),
-                element.getPropertyOwner(), new HashSet<TLPropertyType>());
+                element.getOwner(), new HashSet<TLPropertyType>());
     }
 
     /**

@@ -103,8 +103,8 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
 
         // For xsd:ID elements, make sure they are contained in the top-level facet
         // if the owner is a core or business object
-        if (ValidatorUtils.isXsdID(target.getType()) && (target.getPropertyOwner() instanceof TLFacet)) {
-        	TLFacet facet = (TLFacet) target.getPropertyOwner();
+        if (ValidatorUtils.isXsdID(target.getType()) && (target.getOwner() instanceof TLFacet)) {
+        	TLFacet facet = (TLFacet) target.getOwner();
         	TLFacetOwner facetOwner = facet.getOwningEntity();
         	
         	if (facetOwner instanceof TLBusinessObject) {
@@ -168,8 +168,8 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
         // property
         // belongs to a built-in library since it cannot be edited to add aliases).
         if (propertyType != null) {
-            TLPropertyType resolvedPropertyType = (target.getPropertyOwner() == null) ? propertyType
-                    : PropertyCodegenUtils.resolvePropertyType(target.getPropertyOwner(),
+            TLPropertyType resolvedPropertyType = (target.getOwner() == null) ? propertyType
+                    : PropertyCodegenUtils.resolvePropertyType(target.getOwner(),
                             propertyType);
 
             if (PropertyCodegenUtils.hasGlobalElement(resolvedPropertyType)) {
@@ -252,7 +252,7 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
      * @return DuplicateFieldChecker
      */
     private DuplicateFieldChecker getDuplicateFieldChecker(TLProperty target) {
-        TLPropertyOwner propertyOwner = target.getPropertyOwner();
+        TLPropertyOwner propertyOwner = target.getOwner();
         String cacheKey = propertyOwner.getNamespace() + ":" + propertyOwner.getLocalName() + ":dupChecker";
         DuplicateFieldChecker checker = (DuplicateFieldChecker) getContextCacheEntry( cacheKey );
 
@@ -271,7 +271,7 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
      * @return UPAViolationChecker
      */
     private UPAViolationChecker getUPAViolationChecker(TLProperty target) {
-        TLPropertyOwner propertyOwner = target.getPropertyOwner();
+        TLPropertyOwner propertyOwner = target.getOwner();
         String cacheKey = propertyOwner.getNamespace() + ":" + propertyOwner.getLocalName() + ":upaChecker";
         UPAViolationChecker checker = (UPAViolationChecker) getContextCacheEntry( cacheKey );
 
@@ -364,8 +364,8 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
     private Versioned getVersionedOwner(TLProperty target) {
         Versioned owner = null;
 
-        if (target.getPropertyOwner() instanceof TLFacet) {
-            TLFacetOwner facetOwner = ((TLFacet) target.getPropertyOwner()).getOwningEntity();
+        if (target.getOwner() instanceof TLFacet) {
+            TLFacetOwner facetOwner = ((TLFacet) target.getOwner()).getOwningEntity();
 
             if (facetOwner instanceof Versioned) {
                 owner = (Versioned) facetOwner;

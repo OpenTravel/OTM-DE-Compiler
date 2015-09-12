@@ -86,9 +86,9 @@ public class TLPropertyCodegenTransformer extends
      * @return TopLevelElement
      */
     private TopLevelElement transformValueProperty(TLProperty source) {
-        TLPropertyOwner propertyOwner = source.getPropertyOwner();
+        TLPropertyOwner propertyOwner = source.getOwner();
         TLPropertyType propertyType = PropertyCodegenUtils.resolvePropertyType(
-                source.getPropertyOwner(), source.getType());
+                source.getOwner(), source.getType());
         TopLevelElement element = new TopLevelElement();
 
         if (!PropertyCodegenUtils.hasGlobalElement(propertyType)) {
@@ -161,7 +161,7 @@ public class TLPropertyCodegenTransformer extends
      */
     private TopLevelElement transformReferenceProperty(TLProperty source) {
         TLPropertyType propertyType = PropertyCodegenUtils.resolvePropertyType(
-                source.getPropertyOwner(), source.getType());
+                source.getOwner(), source.getType());
         TopLevelElement element = new TopLevelElement();
         Annotation annotation = new Annotation();
         Appinfo appInfo = new Appinfo();

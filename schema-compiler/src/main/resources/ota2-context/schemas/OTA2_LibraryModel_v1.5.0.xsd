@@ -765,15 +765,6 @@
       </xsd:annotation>
       <xsd:complexContent>
          <xsd:extension base="Facet">
-         	<xsd:sequence>
-         		<xsd:element name="ElementRef" type="Name_XML" minOccurs="0" maxOccurs="100">
-	               <xsd:annotation>
-    	              <xsd:documentation>A reference to a property defined in another facet,
-    	              possibly by a different facet owner.
-            	      </xsd:documentation>
-               </xsd:annotation>
-         		</xsd:element>
-         	</xsd:sequence>
             <xsd:attribute name="context" type="Name_XML" use="required">
                <xsd:annotation>
                   <xsd:documentation>A usage indicator that describes a
@@ -1526,4 +1517,574 @@
          </xsd:documentation>
       </xsd:annotation>
    </xsd:element>
+   
+   <!-- TODO: New types for OTM Resources (organize when complete) -->
+   <xsd:simpleType name="ParamLocation">
+      <xsd:annotation>
+         <xsd:documentation>Specifies the location of an parameter for a REST
+         	action request.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:restriction base="xsd:NMTOKEN">
+         <xsd:enumeration value="Path">
+           <xsd:annotation>
+              <xsd:documentation>
+              	The parameter is part of the URL request path.
+              </xsd:documentation>
+           </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="Query">
+           <xsd:annotation>
+              <xsd:documentation>
+              	The value is a query parameter on the request URL.
+              </xsd:documentation>
+           </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="Header">
+           <xsd:annotation>
+              <xsd:documentation>
+              	The parameter is specified as a header on the HTTP request
+              	message.
+              </xsd:documentation>
+           </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+
+   <xsd:simpleType name="HttpMethod">
+      <xsd:annotation>
+         <xsd:documentation>Used to specify the HTTP method for an REST
+         	action request.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:restriction base="xsd:NMTOKEN">
+         <xsd:enumeration value="GET"/>
+         <xsd:enumeration value="PUT"/>
+         <xsd:enumeration value="POST"/>
+         <xsd:enumeration value="DELETE"/>
+         <xsd:enumeration value="OPTIONS"/>
+         <xsd:enumeration value="HEAD"/>
+         <xsd:enumeration value="PATCH"/>
+      </xsd:restriction>
+   </xsd:simpleType>
+
+   <xsd:simpleType name="MimeType">
+      <xsd:annotation>
+         <xsd:documentation>Specifies the message MIME type for a REST
+         	action request or response.  At this time, only XML and JSON
+         	types are supported by the OTM model.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:restriction base="xsd:NMTOKEN">
+         <xsd:enumeration value="APPLICATION_XML">
+           <xsd:annotation>
+              <xsd:documentation>
+              	application/xml
+              </xsd:documentation>
+           </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="TEXT_XML">
+           <xsd:annotation>
+              <xsd:documentation>
+              	text/xml
+              </xsd:documentation>
+           </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="APPLICATION_JSON">
+           <xsd:annotation>
+              <xsd:documentation>
+              	application/json
+              </xsd:documentation>
+           </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="TEXT_JSON">
+           <xsd:annotation>
+              <xsd:documentation>
+              	text/json
+              </xsd:documentation>
+           </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+
+   <xsd:simpleType name="BusinessObjectReferenceType">
+      <xsd:annotation>
+         <xsd:documentation>Used by the Facet_Action type to describe how a
+         	business object should be referenced.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:restriction base="xsd:NMTOKEN">
+         <xsd:enumeration value="None">
+           <xsd:annotation>
+              <xsd:documentation>Indicates that no reference to a resource's
+              	business object should exist in the message.
+              </xsd:documentation>
+           </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="Optional">
+           <xsd:annotation>
+              <xsd:documentation>Indicates that an optional reference to the
+              	resource's business object should exist in the message.
+              </xsd:documentation>
+           </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="Required">
+           <xsd:annotation>
+              <xsd:documentation>Indicates that a required reference to the
+              	resource's business object should exist in the message.
+              </xsd:documentation>
+           </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+
+   <xsd:complexType name="Facet_Action">
+      <xsd:annotation>
+         <xsd:documentation>Action facets describe the message payload for RESTful
+         	action requests and responses.  In addition to their own payload, they
+         	provide basic information about how the resource's business object
+         	should be referenced in the message
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:complexContent>
+         <xsd:extension base="Facet_Contextual">
+            <xsd:attribute name="businessObjectReferenceType" type="BusinessObjectReferenceType" use="required">
+               <xsd:annotation>
+                  <xsd:documentation>Indicates how the business object should be
+                  	referenced in the message.
+                  </xsd:documentation>
+               </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="businessObjectFacet" type="Name_XML" use="optional">
+               <xsd:annotation>
+                  <xsd:documentation>Specifies the name of the business object facet
+                  	to be referenced in the message.  If the 'businessObjectReferenceType'
+                  	value is 'None' this value will be ignored.
+                  </xsd:documentation>
+               </xsd:annotation>
+            </xsd:attribute>
+	        <xsd:attribute name="businessObjectRepeat">
+    	       <xsd:annotation>
+        	      <xsd:documentation>Specifies the maximum number of times that the business
+        	      	object reference should repeat in the message.
+	  
+    	            Best practices state that this string value should contain a positive
+        	        number that is greater than or equal to 1.
+            	  </xsd:documentation>
+	           </xsd:annotation>
+    	       <xsd:simpleType>
+        	      <xsd:restriction base="xsd:string">
+            	     <xsd:pattern value="[0-9]+|\*" />
+	              </xsd:restriction>
+    	       </xsd:simpleType>
+      	   </xsd:attribute>
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   
+   <xsd:element name="Parameter" type="Parameter">
+      <xsd:annotation>
+         <xsd:documentation>Provides a reference to a property, attribute or element
+         	that should be used as a parameter in a REST request message.
+         </xsd:documentation>
+      </xsd:annotation>
+   </xsd:element>
+   <xsd:complexType name="Parameter">
+      <xsd:annotation>
+         <xsd:documentation>Provides a reference to a property, attribute or element
+         	that should be used as a parameter in a REST request message.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:sequence>
+         <xsd:element ref="Documentation" minOccurs="0" />
+         <xsd:element ref="Equivalent" minOccurs="0" maxOccurs="100" />
+         <xsd:element ref="Example" minOccurs="0" maxOccurs="100" />
+      </xsd:sequence>
+      <xsd:attribute name="facetName" type="Name_XML" use="required">
+         <xsd:annotation>
+            <xsd:documentation>Name of the business object facet from which all parameters
+            	in this group will be referenced.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="fieldName" type="Name_XML" use="required">
+         <xsd:annotation>
+            <xsd:documentation>Name of the field to be used as a REST request parameter.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="location" type="ParamLocation" use="required">
+         <xsd:annotation>
+            <xsd:documentation>
+            	Specifies the location of the parameter in the REST request.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+   </xsd:complexType>
+
+   <xsd:element name="ParamGroup" type="ParamGroup">
+      <xsd:annotation>
+         <xsd:documentation>Provides a collection of field references to the resource's
+         	business object that will be used as parameters on a REST request.
+         </xsd:documentation>
+      </xsd:annotation>
+   </xsd:element>
+   <xsd:complexType name="ParamGroup">
+      <xsd:annotation>
+         <xsd:documentation>Provides a collection of field references to the resource's
+         	business object that will be used as parameters on a REST request.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:sequence>
+         <xsd:element ref="Documentation" minOccurs="0" />
+         <xsd:element name="Parameter" type="Parameter" minOccurs="0" maxOccurs="100">
+            <xsd:annotation>
+               <xsd:documentation>
+               	  The list of parameters that are contained within this grouping.
+               </xsd:documentation>
+            </xsd:annotation>
+         </xsd:element>
+      </xsd:sequence>
+      <xsd:attribute name="name" type="Name_XML" use="required">
+         <xsd:annotation>
+            <xsd:documentation>The name of the parameter group.  This value must be
+            	unique within its owning resource.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="idGroup" type="xsd:boolean" use="required">
+         <xsd:annotation>
+            <xsd:documentation>Indicates whether this group is intended to be used as an
+            	identity group for the owning resource.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+   </xsd:complexType>
+
+   <xsd:element name="ActionRequest" type="ActionRequest">
+      <xsd:annotation>
+         <xsd:documentation>Specifies the characteristics and payload for a REST
+         	Action request.
+         </xsd:documentation>
+      </xsd:annotation>
+   </xsd:element>
+   <xsd:complexType name="ActionRequest">
+      <xsd:annotation>
+         <xsd:documentation>Specifies the characteristics and payload for a REST
+         	Action request.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:sequence>
+         <xsd:element ref="Documentation" minOccurs="0" />
+      </xsd:sequence>
+      <xsd:attribute name="httpMethod" type="HttpMethod" use="optional">
+         <xsd:annotation>
+            <xsd:documentation>The HTTP method of the REST request.</xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="actionFacet" type="Name_XML" use="optional">
+         <xsd:annotation>
+            <xsd:documentation>Name of the action facet that specifies the
+            	payload (if any) for the request.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="paramGroup" type="Name_XML" use="optional">
+         <xsd:annotation>
+            <xsd:documentation>Name of the parameter group that provides the URL and
+            	header parameters (if any) for the request.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="mimeTypes" use="optional">
+         <xsd:annotation>
+            <xsd:documentation>List of supported MIME types.</xsd:documentation>
+         </xsd:annotation>
+         <xsd:simpleType>
+         	<xsd:list itemType="MimeType" />
+         </xsd:simpleType>
+      </xsd:attribute>
+   </xsd:complexType>
+
+   <xsd:element name="ActionResponse" type="ActionResponse">
+      <xsd:annotation>
+         <xsd:documentation>Specifies the characteristics and payload for a REST
+         	Action response.
+         </xsd:documentation>
+      </xsd:annotation>
+   </xsd:element>
+   <xsd:complexType name="ActionResponse">
+      <xsd:annotation>
+         <xsd:documentation>Specifies the characteristics and payload for a REST
+         	Action response.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:sequence>
+         <xsd:element ref="Documentation" minOccurs="0" />
+      </xsd:sequence>
+      <xsd:attribute name="statusCodes" use="required">
+         <xsd:annotation>
+            <xsd:documentation>Specifies the acceptable HTTP response codes.</xsd:documentation>
+         </xsd:annotation>
+         <xsd:simpleType>
+            <xsd:list itemType="xsd:int" />
+         </xsd:simpleType>
+      </xsd:attribute>
+      <xsd:attribute name="actionFacet" type="Name_XML" use="optional">
+         <xsd:annotation>
+            <xsd:documentation>Name of the action facet that specifies the
+            	payload (if any) for the response.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="mimeTypes" use="required">
+         <xsd:annotation>
+            <xsd:documentation>List of supported MIME types.</xsd:documentation>
+         </xsd:annotation>
+         <xsd:simpleType>
+         	<xsd:list itemType="MimeType" />
+         </xsd:simpleType>
+      </xsd:attribute>
+   </xsd:complexType>
+
+   <xsd:element name="Action" type="Action">
+      <xsd:annotation>
+         <xsd:documentation>
+         	Specifies the request and response portions of a REST operation.
+         </xsd:documentation>
+      </xsd:annotation>
+   </xsd:element>
+   <xsd:complexType name="Action">
+      <xsd:annotation>
+         <xsd:documentation>Provides a collection of field references to the resource's
+         	business object that will be used as parameters on a REST request.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:sequence>
+         <xsd:element ref="Documentation" minOccurs="0" />
+         <xsd:element ref="ActionRequest" minOccurs="1" maxOccurs="1">
+            <xsd:annotation>
+         	  <xsd:documentation>
+         	    Specifies request characteristics of this action.
+         	  </xsd:documentation>
+            </xsd:annotation>
+         </xsd:element>
+         <xsd:element ref="ActionResponse" minOccurs="0" maxOccurs="100">
+            <xsd:annotation>
+         	  <xsd:documentation>
+         	    Specifies response characteristics of this action.
+         	  </xsd:documentation>
+            </xsd:annotation>
+         </xsd:element>
+      </xsd:sequence>
+      <xsd:attribute name="name" type="Name_XML" use="required">
+         <xsd:annotation>
+            <xsd:documentation>The name of the action.  This value must be
+            	unique within its owning resource.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="pathTemplate" type="xsd:string" use="required">
+         <xsd:annotation>
+            <xsd:documentation>Specifies the path for this action relative to the
+            	base path of the owning resource.  The path template must contain
+            	a reference to all path parameters specified in the request's
+            	parameter group.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+   </xsd:complexType>
+
+   <xsd:element name="ResourceParentRef" type="ResourceParentRef">
+      <xsd:annotation>
+         <xsd:documentation>
+         	Specifies a parent reference for a REST resource.
+         </xsd:documentation>
+      </xsd:annotation>
+   </xsd:element>
+   <xsd:complexType name="ResourceParentRef">
+      <xsd:annotation>
+         <xsd:documentation>
+         	Specifies a parent reference for a REST resource.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:sequence>
+         <xsd:element ref="Documentation" minOccurs="0" />
+      </xsd:sequence>
+      <xsd:attribute name="parent" type="Name_XML" use="required">
+         <xsd:annotation>
+            <xsd:documentation>
+            	The qualified name of the parent resource.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="parentParamGroup" type="Name_XML" use="required">
+         <xsd:annotation>
+            <xsd:documentation>
+            	The name of the parameter group on the the parent resource with
+            	which this parent reference is associated.  The referenced group
+            	must be an ID parameter group.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="pathTemplate" type="xsd:string" use="required">
+         <xsd:annotation>
+            <xsd:documentation>Specifies the path template for the parent resource.
+            	This path will be pre-pended to all action path templates when the
+            	child resource is treated as a sub-resource (non-first class).
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+   </xsd:complexType>
+
+   <xsd:element name="Resource" type="Resource">
+      <xsd:annotation>
+         <xsd:documentation>
+         	Encapsulates all aspects of a RESTful resource used to expose and manage
+         	a particular business object.
+         </xsd:documentation>
+      </xsd:annotation>
+   </xsd:element>
+   <xsd:complexType name="Resource">
+      <xsd:annotation>
+         <xsd:documentation>
+         	Encapsulates all aspects of a RESTful resource used to expose and manage
+         	a particular business object.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:sequence>
+         <xsd:element ref="Documentation" minOccurs="0" />
+         <xsd:element ref="ResourceParentRef" minOccurs="0" maxOccurs="100">
+            <xsd:annotation>
+         	  <xsd:documentation>
+         	    The list of parent references for the resource.
+         	  </xsd:documentation>
+            </xsd:annotation>
+         </xsd:element>
+         <xsd:element ref="Extension" minOccurs="0">
+            <xsd:annotation>
+         	  <xsd:documentation>
+         	    Reference to the resource from which the child resource will inherit.
+         	  </xsd:documentation>
+            </xsd:annotation>
+         </xsd:element>
+         <xsd:element ref="ParamGroup" minOccurs="0" maxOccurs="100">
+            <xsd:annotation>
+         	  <xsd:documentation>
+         	    The list of parameter groups for the resource.
+         	  </xsd:documentation>
+            </xsd:annotation>
+         </xsd:element>
+         <xsd:element name="ActionFacet" type="Facet_Action" minOccurs="0" maxOccurs="100">
+            <xsd:annotation>
+         	  <xsd:documentation>
+         	    The list of action facets declared for the resource.
+         	  </xsd:documentation>
+            </xsd:annotation>
+         </xsd:element>
+         <xsd:element ref="Action" minOccurs="0" maxOccurs="100">
+            <xsd:annotation>
+         	  <xsd:documentation>
+         	    The list of actions declared for the resource.
+         	  </xsd:documentation>
+            </xsd:annotation>
+         </xsd:element>
+      </xsd:sequence>
+      <xsd:attribute name="name" type="Name_XML" use="required">
+         <xsd:annotation>
+            <xsd:documentation>
+            	The name of the resource.  This name is used to uniquely identify
+            	the resource within the OTM model, but will not conflict with any
+            	naming conventions used in generated XSD documents.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="businessObjectRef" type="Name_XML" use="required">
+         <xsd:annotation>
+            <xsd:documentation>
+            	The name of the business object with which this resource is associated.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="basePath" type="xsd:string" use="optional">
+         <xsd:annotation>
+            <xsd:documentation>Specifies the base path for this resource.  Path
+            	parameters are not allowed within a resource's base path.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="abstract" type="xsd:boolean" use="required">
+         <xsd:annotation>
+            <xsd:documentation>
+            	Indicates whether this is an abstract resource.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="firstClass" type="xsd:boolean" use="required">
+         <xsd:annotation>
+            <xsd:documentation>
+            	Indicates whether this is a first-class resource.  First class resources
+            	may exist independently of a parent resource.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+   </xsd:complexType>
+
+   <xsd:element name="ChoiceObject" type="ChoiceObject">
+      <xsd:annotation>
+         <xsd:documentation>2.0 Choice Objects are containers for
+         	mutually-exclusive data sets that may be substituted for one
+         	another at a particular property location in the sequence
+         	of a complex type.  Choice objects are not compiled as XSD
+         	choice groups, but rather as substitution groups in an XML
+         	schema.
+         </xsd:documentation>
+      </xsd:annotation>
+   </xsd:element>
+   <xsd:complexType name="ChoiceObject">
+      <xsd:annotation>
+         <xsd:documentation>2.0 Choice Objects are containers for
+         	mutually-exclusive data sets that may be substituted for one
+         	another at a particular property location in the sequence
+         	of a complex type.  Choice objects are not compiled as XSD
+         	choice groups, but rather as substitution groups in an XML
+         	schema.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:sequence>
+         <xsd:element ref="Documentation" minOccurs="0" />
+         <xsd:element ref="Equivalent" minOccurs="0" maxOccurs="100" />
+         <xsd:element ref="Extension" minOccurs="0" />
+         <xsd:element ref="Aliases" minOccurs="0" />
+         <xsd:element name="Shared" type="Facet">
+            <xsd:annotation>
+               <xsd:documentation>The Shared facet is a collection of fields
+               	  that are common to all of the available choices.
+               </xsd:documentation>
+            </xsd:annotation>
+         </xsd:element>
+         <xsd:element name="Choice" type="Facet_Contextual" minOccurs="0" maxOccurs="100">
+            <xsd:annotation>
+               <xsd:documentation>The choice facet provides the fields that are
+                  members of a mutually-exclusive choice or option.  Choice objects
+                  may have multiple choice facets.
+               </xsd:documentation>
+            </xsd:annotation>
+         </xsd:element>
+      </xsd:sequence>
+      <xsd:attribute name="name" type="Name_XML" use="required">
+         <xsd:annotation>
+            <xsd:documentation>The name of the choice object.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="notExtendable" type="xsd:boolean" use="optional">
+         <xsd:annotation>
+            <xsd:documentation>Unless present and 'true', the Choice Object allows
+               proprietary implementers extensions.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+   </xsd:complexType>
+
 </xsd:schema>

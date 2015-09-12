@@ -323,8 +323,8 @@ public class ChameleonTypeChecker {
          */
         @Override
         public boolean visitAttribute(TLAttribute attribute) {
-            if (attribute.getAttributeOwner() != null) {
-                referringNamespace = attribute.getAttributeOwner().getNamespace();
+            if (attribute.getOwner() != null) {
+                referringNamespace = attribute.getOwner().getNamespace();
             }
             return true;
         }
@@ -334,8 +334,8 @@ public class ChameleonTypeChecker {
          */
         @Override
         public boolean visitElement(TLProperty element) {
-            if (element.getPropertyOwner() != null) {
-                referringNamespace = element.getPropertyOwner().getNamespace();
+            if (element.getOwner() != null) {
+                referringNamespace = element.getOwner().getNamespace();
             }
             return true;
         }

@@ -103,7 +103,7 @@ public class TLAttributeCodegenTransformer extends
                     || attrTypeNS.equals(AnonymousEntityFilter.ANONYMOUS_PSEUDO_NAMESPACE)) {
                 // If this type is from a chameleon schema, replace its namespace with that of the
                 // local library
-                attrTypeNS = source.getAttributeOwner().getNamespace();
+                attrTypeNS = source.getOwner().getNamespace();
             }
             attr.setType(new QName(attrTypeNS, XsdCodegenUtils.getGlobalTypeName(attributeType)));
         }

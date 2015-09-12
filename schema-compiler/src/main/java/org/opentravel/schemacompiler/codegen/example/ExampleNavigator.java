@@ -570,7 +570,7 @@ public class ExampleNavigator {
         	if (elementItem instanceof TLProperty) {
         		TLProperty element = (TLProperty) elementItem;
         		
-                TLFacet currentFacet = (TLFacet) element.getPropertyOwner();
+                TLFacet currentFacet = (TLFacet) element.getOwner();
 
                 // Before navigating the element itself, check to see if we need to insert any extension
                 // point facets

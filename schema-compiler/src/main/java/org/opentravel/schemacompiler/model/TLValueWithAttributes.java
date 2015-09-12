@@ -15,6 +15,7 @@
  */
 package org.opentravel.schemacompiler.model;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -389,6 +390,31 @@ public class TLValueWithAttributes extends LibraryMember implements Versioned, T
     public void sortIndicators(Comparator<TLIndicator> comparator) {
         indicatorManager.sortChildren(comparator);
     }
+
+    /**
+	 * @see org.opentravel.schemacompiler.model.TLMemberFieldOwner#getMemberFields()
+	 */
+	@Override
+	public List<TLMemberField<?>> getMemberFields() {
+		List<TLMemberField<?>> memberFields = new ArrayList<>();
+		
+		memberFields.addAll( getAttributes() );
+		memberFields.addAll( getIndicators() );
+		return memberFields;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.model.TLMemberFieldOwner#getMemberField(java.lang.String)
+	 */
+	@Override
+	public TLMemberField<?> getMemberField(String fieldName) {
+		TLMemberField<?> memberField = getAttribute( fieldName );
+		
+		if (memberField == null) {
+			memberField = getIndicator( fieldName );
+		}
+		return memberField;
+	}
 
     /**
      * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#getEquivalents()

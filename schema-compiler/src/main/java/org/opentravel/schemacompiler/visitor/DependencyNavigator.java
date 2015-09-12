@@ -486,7 +486,7 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
     protected void navigateAttribute(TLAttribute attribute) {
         if (canVisit(attribute) && visitor.visitAttribute(attribute)) {
             navigateDependency(attribute.getType());
-            navigateDependency(attribute.getAttributeOwner());
+            navigateDependency(attribute.getOwner());
         }
     }
 
@@ -499,7 +499,7 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
     protected void navigateElement(TLProperty element) {
         if (canVisit(element) && visitor.visitElement(element)) {
             navigateDependency(element.getType());
-            navigateDependency(element.getPropertyOwner());
+            navigateDependency(element.getOwner());
         }
     }
 

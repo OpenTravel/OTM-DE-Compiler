@@ -224,13 +224,13 @@ public class ValidatorUtils {
 
         for (TLAttribute attribute : attributeList) {
             if (XsdCodegenUtils.isIdType(attribute.getType())) {
-                declaresId |= (attribute.getAttributeOwner() == entity);
+                declaresId |= (attribute.getOwner() == entity);
                 idCount++;
             }
         }
         for (TLProperty property : propertyList) {
             if (XsdCodegenUtils.isIdType(property.getType())) {
-                declaresId |= (property.getPropertyOwner() == entity);
+                declaresId |= (property.getOwner() == entity);
                 idCount++;
             }
         }

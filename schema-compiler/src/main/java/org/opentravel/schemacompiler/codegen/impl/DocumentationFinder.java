@@ -164,12 +164,12 @@ public class DocumentationFinder {
 		} else if (entity instanceof TLAttribute) {
 			TLAttribute e = (TLAttribute) entity;
 			entityId.append(getEntityId(
-					(TLDocumentationOwner) e.getAttributeOwner())).append(":").append(e.getName());
+					(TLDocumentationOwner) e.getOwner())).append(":").append(e.getName());
 			
 		} else if (entity instanceof TLProperty) {
 			TLProperty e = (TLProperty) entity;
 			entityId.append(getEntityId(
-					(TLDocumentationOwner) e.getPropertyOwner())).append(":").append(e.getName());
+					(TLDocumentationOwner) e.getOwner())).append(":").append(e.getName());
 			
 		} else {
 			entityId.append("unknown");

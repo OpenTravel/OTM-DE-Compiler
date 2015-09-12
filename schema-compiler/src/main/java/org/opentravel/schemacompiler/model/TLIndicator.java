@@ -28,7 +28,8 @@ import org.opentravel.schemacompiler.model.TLEquivalent.EquivalentListManager;
  * 
  * @author S. Livezey
  */
-public class TLIndicator extends TLModelElement implements TLDocumentationOwner, TLEquivalentOwner {
+public class TLIndicator extends TLModelElement implements TLMemberField<TLIndicatorOwner>,
+		TLDocumentationOwner, TLEquivalentOwner {
 
     private TLIndicatorOwner owner;
     private String name;
