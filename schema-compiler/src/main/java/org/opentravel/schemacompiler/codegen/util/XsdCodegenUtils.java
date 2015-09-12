@@ -327,7 +327,7 @@ public class XsdCodegenUtils {
 
             if (referencingProperty != null) {
                 facet = PropertyCodegenUtils.findNonEmptyFacet(
-                        referencingProperty.getPropertyOwner(), facet);
+                        referencingProperty.getOwner(), facet);
             }
             typeName = getFacetTypeName(facet);
 
@@ -336,7 +336,7 @@ public class XsdCodegenUtils {
 
             if (referencingProperty != null) {
                 facet = PropertyCodegenUtils.findNonEmptyFacet(
-                        referencingProperty.getPropertyOwner(), facet);
+                        referencingProperty.getOwner(), facet);
             }
             typeName = getFacetTypeName(facet);
 

@@ -221,7 +221,7 @@ public class ExampleValueGenerator {
 
         if ((attribute != null) && !isEmptyValueType(attribute.getType())) {
             if (XsdCodegenUtils.isIdType(attribute.getType())) {
-                NamedEntity ownerBase = getBaseEntity( (owner != null) ? owner : attribute.getAttributeOwner() );
+                NamedEntity ownerBase = getBaseEntity( (owner != null) ? owner : attribute.getOwner() );
                 exampleValue = idFactory.getMessageId(ownerBase.getNamespace(), ownerBase.getLocalName());
             } else {
                 exampleValue = getExampleValue((TLExampleOwner) attribute, attribute.getType());
@@ -246,7 +246,7 @@ public class ExampleValueGenerator {
 
         if ((element != null) && !isEmptyValueType(element.getType())) {
             if (XsdCodegenUtils.isIdType(element.getType())) {
-                NamedEntity ownerBase = getBaseEntity( (owner != null) ? owner : element.getPropertyOwner() );
+                NamedEntity ownerBase = getBaseEntity( (owner != null) ? owner : element.getOwner() );
                 exampleValue = idFactory.getMessageId(ownerBase.getNamespace(), ownerBase.getLocalName());
             } else {
                 exampleValue = getExampleValue((TLExampleOwner) element, element.getType());

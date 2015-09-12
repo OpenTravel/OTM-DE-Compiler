@@ -47,7 +47,16 @@ public enum TLFacetType {
     RESPONSE("RS", false),
 
     /** The notification facet of a service operation. */
-    NOTIFICATION("Notif", false);
+    NOTIFICATION("Notif", false),
+
+    /** The action facet of a REST resource. */
+    ACTION("Action", false),
+
+    /** The shared facet of a choice object. */
+    SHARED("Shared", false),
+
+    /** The choice facet of a choice object. */
+    CHOICE("Choice", false);
 
     private String identityName;
     private boolean contextual;

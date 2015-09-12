@@ -340,7 +340,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor {
 
         // Capture ID values in the registry for use during post-processing
         if (XsdCodegenUtils.isIdType(attribute.getType())) {
-        	TLAttributeOwner owner = attribute.getAttributeOwner();
+        	TLAttributeOwner owner = attribute.getOwner();
         	NamedEntity contextFacet = getContextFacet();
         	
         	if (contextFacet != null) {
@@ -392,7 +392,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor {
 
         // Capture ID values in the registry for use during post-processing
         if (XsdCodegenUtils.isIdType(element.getType())) {
-        	TLPropertyOwner owner = element.getPropertyOwner();
+        	TLPropertyOwner owner = element.getOwner();
         	NamedEntity contextFacet = getContextFacet();
         	
         	if (contextFacet != null) {
@@ -710,8 +710,8 @@ public class DOMExampleVisitor extends AbstractExampleVisitor {
                 // most recently encountered facet (i.e. the top of the facet stack)
 
                 if (facetStack.isEmpty()) {
-                    elementNamespace = property.getPropertyOwner().getNamespace();
-                    prefixEntity = property.getPropertyOwner();
+                    elementNamespace = property.getOwner().getNamespace();
+                    prefixEntity = property.getOwner();
                 } else {
                     TLPropertyOwner propertyOwner;
 
@@ -722,7 +722,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor {
                         if (facetStack.size() > 1) {
                             propertyOwner = facetStack.get(facetStack.size() - 2);
                         } else {
-                            propertyOwner = property.getPropertyOwner();
+                            propertyOwner = property.getOwner();
                         }
                     } else {
                         propertyOwner = facetStack.peek();

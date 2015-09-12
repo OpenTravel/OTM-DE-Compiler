@@ -78,7 +78,7 @@ public class TLAttributeCompileValidator extends TLAttributeBaseValidator {
                 .setFindingType(FindingType.WARNING).assertNotDeprecated();
 
         // VWA and open enumeration attributes are only allowed when the attribute's owner is a VWA
-        if (!(target.getAttributeOwner() instanceof TLValueWithAttributes)) {
+        if (!(target.getOwner() instanceof TLValueWithAttributes)) {
             if (target.getType() instanceof TLValueWithAttributes) {
                 builder.addFinding(FindingType.ERROR, "type", ERROR_ILLEGAL_VWA_ATTRIBUTE);
             } else if (target.getType() instanceof TLOpenEnumeration) {
@@ -127,8 +127,8 @@ public class TLAttributeCompileValidator extends TLAttributeBaseValidator {
         
         // For xsd:ID attributes, make sure they are contained in the top-level facet
         // if the owner is a core or business object
-        if (ValidatorUtils.isXsdID(target.getType()) && (target.getAttributeOwner() instanceof TLFacet)) {
-        	TLFacet facet = (TLFacet) target.getAttributeOwner();
+        if (ValidatorUtils.isXsdID(target.getType()) && (target.getOwner() instanceof TLFacet)) {
+        	TLFacet facet = (TLFacet) target.getOwner();
         	TLFacetOwner facetOwner = facet.getOwningEntity();
         	
         	if (facetOwner instanceof TLBusinessObject) {
@@ -178,7 +178,7 @@ public class TLAttributeCompileValidator extends TLAttributeBaseValidator {
      * @return DuplicateFieldChecker
      */
     private DuplicateFieldChecker getDuplicateFieldChecker(TLAttribute target) {
-        TLAttributeOwner attrOwner = target.getAttributeOwner();
+        TLAttributeOwner attrOwner = target.getOwner();
         String cacheKey = attrOwner.getNamespace() + ":" + attrOwner.getLocalName() + ":dupChecker";
         DuplicateFieldChecker checker = (DuplicateFieldChecker) getContextCacheEntry( cacheKey );
 
@@ -199,14 +199,14 @@ public class TLAttributeCompileValidator extends TLAttributeBaseValidator {
     private Versioned getVersionedOwner(TLAttribute target) {
         Versioned owner = null;
 
-        if (target.getAttributeOwner() instanceof TLFacet) {
-            TLFacetOwner facetOwner = ((TLFacet) target.getAttributeOwner()).getOwningEntity();
+        if (target.getOwner() instanceof TLFacet) {
+            TLFacetOwner facetOwner = ((TLFacet) target.getOwner()).getOwningEntity();
 
             if (facetOwner instanceof Versioned) {
                 owner = (Versioned) facetOwner;
             }
-        } else if (target.getAttributeOwner() instanceof TLValueWithAttributes) {
-            owner = (Versioned) target.getAttributeOwner();
+        } else if (target.getOwner() instanceof TLValueWithAttributes) {
+            owner = (Versioned) target.getOwner();
         }
         return owner;
     }

@@ -234,6 +234,78 @@ public enum ModelEventType {
     ROLE_REMOVED(OwnershipEvent.class),
 
     /**
+     * Event type sent when an parameter was added to a parameter group.
+     * 
+     * <p>
+     * <u>Event</u>: <code>OwnershipEvent</code> <br>
+     * <u>Source Object</u>: <code>TLParamGroup</code>
+     */
+    PARAMETER_ADDED(OwnershipEvent.class),
+
+    /**
+     * Event type sent when an parameter was removed from a parameter group.
+     * 
+     * <p>
+     * <u>Event</u>: <code>OwnershipEvent</code> <br>
+     * <u>Source Object</u>: <code>TLParamGroup</code>
+     */
+    PARAMETER_REMOVED(OwnershipEvent.class),
+
+    /**
+     * Event type sent when a parameter group was added to a resource.
+     * 
+     * <p>
+     * <u>Event</u>: <code>OwnershipEvent</code> <br>
+     * <u>Source Object</u>: <code>TLResource</code>
+     */
+    PARAM_GROUP_ADDED(OwnershipEvent.class),
+
+    /**
+     * Event type sent when a parameter group was removed from a resource.
+     * 
+     * <p>
+     * <u>Event</u>: <code>OwnershipEvent</code> <br>
+     * <u>Source Object</u>: <code>TLResource</code>
+     */
+    PARAM_GROUP_REMOVED(OwnershipEvent.class),
+
+    /**
+     * Event type sent when an action was added to a resource.
+     * 
+     * <p>
+     * <u>Event</u>: <code>OwnershipEvent</code> <br>
+     * <u>Source Object</u>: <code>TLResource</code>
+     */
+    ACTION_ADDED(OwnershipEvent.class),
+
+    /**
+     * Event type sent when an actoin was removed from a resource.
+     * 
+     * <p>
+     * <u>Event</u>: <code>OwnershipEvent</code> <br>
+     * <u>Source Object</u>: <code>TLResource</code>
+     */
+    ACTION_REMOVED(OwnershipEvent.class),
+
+    /**
+     * Event type sent when a response was added to a resource action.
+     * 
+     * <p>
+     * <u>Event</u>: <code>OwnershipEvent</code> <br>
+     * <u>Source Object</u>: <code>TLAction</code>
+     */
+    ACTION_RESPONSE_ADDED(OwnershipEvent.class),
+
+    /**
+     * Event type sent when a response was removed from a resource action.
+     * 
+     * <p>
+     * <u>Event</u>: <code>OwnershipEvent</code> <br>
+     * <u>Source Object</u>: <code>TLAction</code>
+     */
+    ACTION_RESPONSE_REMOVED(OwnershipEvent.class),
+
+    /**
      * Event type sent when a service operation was added.
      * 
      * <p>
@@ -616,6 +688,42 @@ public enum ModelEventType {
     QUERY_FACET_REMOVED(OwnershipEvent.class),
 
     /**
+     * Event type sent when an action facet is added to a resource.
+     * 
+     * <p>
+     * <u>Event</u>: <code>OwnershipEvent</code> <br>
+     * <u>Source Object</u>: <code>TLResource</code>
+     */
+    ACTION_FACET_ADDED(OwnershipEvent.class),
+
+    /**
+     * Event type sent when an action facet is removed from a resource.
+     * 
+     * <p>
+     * <u>Event</u>: <code>OwnershipEvent</code> <br>
+     * <u>Source Object</u>: <code>TLResource</code>
+     */
+    ACTION_FACET_REMOVED(OwnershipEvent.class),
+
+    /**
+     * Event type sent when a choice facet is added to a choice object.
+     * 
+     * <p>
+     * <u>Event</u>: <code>OwnershipEvent</code> <br>
+     * <u>Source Object</u>: <code>TLChoiceObject</code>
+     */
+    CHOICE_FACET_ADDED(OwnershipEvent.class),
+
+    /**
+     * Event type sent when a choice facet is removed from a choice object.
+     * 
+     * <p>
+     * <u>Event</u>: <code>OwnershipEvent</code> <br>
+     * <u>Source Object</u>: <code>TLChoiceObject</code>
+     */
+    CHOICE_FACET_REMOVED(OwnershipEvent.class),
+
+    /**
      * Event type sent when the 'notExtendable' flag of an entity was modified.
      * 
      * <p>
@@ -660,6 +768,180 @@ public enum ModelEventType {
      * <u>Source Object</u>: <code>TLEnumValue</code>
      */
     ENUM_LITERAL_MODIFIED(ValueChangeEvent.class),
+
+    /**
+     * Event type sent when the 'abstract' flag for a resource is modified.
+     * 
+     * <p>
+     * <u>Event</u>: <code>ValueChangeEvent</code> <br>
+     * <u>Source Object</u>: <code>TLResource</code>
+     */
+    ABSTRACT_FLAG_MODIFIED(ValueChangeEvent.class),
+
+    /**
+     * Event type sent when the 'firstClass' flag for a resource is modified.
+     * 
+     * <p>
+     * <u>Event</u>: <code>ValueChangeEvent</code> <br>
+     * <u>Source Object</u>: <code>TLResource</code>
+     */
+    FIRST_CLASS_FLAG_MODIFIED(ValueChangeEvent.class),
+
+    /**
+     * Event type sent when the field reference for a parameter is modified.
+     * 
+     * <p>
+     * <u>Event</u>: <code>ValueChangeEvent</code> <br>
+     * <u>Source Object</u>: <code>TLParameter</code>
+     */
+    FIELD_REF_MODIFIED(ValueChangeEvent.class),
+
+    /**
+     * Event type sent when the URL location of a parameter is modified.
+     * 
+     * <p>
+     * <u>Event</u>: <code>ValueChangeEvent</code> <br>
+     * <u>Source Object</u>: <code>TLParameter</code>
+     */
+    LOCATION_MODIFIED(ValueChangeEvent.class),
+
+    /**
+     * Event type sent when the 'idGroup' flag of a parameter group is modified.
+     * 
+     * <p>
+     * <u>Event</u>: <code>ValueChangeEvent</code> <br>
+     * <u>Source Object</u>: <code>TLParamGroup</code>
+     */
+    ID_GROUP_FLAG_MODIFIED(ValueChangeEvent.class),
+
+    /**
+     * Event type sent when the business object reference of a resource is modified.
+     * 
+     * <p>
+     * <u>Event</u>: <code>ValueChangeEvent</code> <br>
+     * <u>Source Object</u>: <code>TLResource</code>
+     */
+    BO_REFERENCE_MODIFIED(ValueChangeEvent.class),
+
+    /**
+     * Event type sent when the business object reference type of an action facet is modified.
+     * 
+     * <p>
+     * <u>Event</u>: <code>ValueChangeEvent</code> <br>
+     * <u>Source Object</u>: <code>TLActionFacet</code>
+     */
+    BO_REFERENCE_TYPE_MODIFIED(ValueChangeEvent.class),
+
+    /**
+     * Event type sent when the business object facet name of an action facet is modified.
+     * 
+     * <p>
+     * <u>Event</u>: <code>ValueChangeEvent</code> <br>
+     * <u>Source Object</u>: <code>TLActionFacet</code>
+     */
+    BO_FACET_NAME_MODIFIED(ValueChangeEvent.class),
+
+    /**
+     * Event type sent when the business object repeat count of an action facet is modified.
+     * 
+     * <p>
+     * <u>Event</u>: <code>ValueChangeEvent</code> <br>
+     * <u>Source Object</u>: <code>TLActionFacet</code>
+     */
+    BO_REPEAT_MODIFIED(ValueChangeEvent.class),
+
+    /**
+     * Event type sent when the HTTP method of an action request is modified.
+     * 
+     * <p>
+     * <u>Event</u>: <code>ValueChangeEvent</code> <br>
+     * <u>Source Object</u>: <code>TLActionRequest</code>
+     */
+    HTTP_METHOD_MODIFIED(ValueChangeEvent.class),
+
+    /**
+     * Event type sent when the parameter group of an action request is modified.
+     * 
+     * <p>
+     * <u>Event</u>: <code>ValueChangeEvent</code> <br>
+     * <u>Source Object</u>: <code>TLActionRequest</code>
+     */
+    PARAM_GROUP_MODIFIED(ValueChangeEvent.class),
+
+    /**
+     * Event type sent when the unique ID of an action is modified.
+     * 
+     * <p>
+     * <u>Event</u>: <code>ValueChangeEvent</code> <br>
+     * <u>Source Object</u>: <code>TLAction</code>
+     */
+    ACTION_ID_MODIFIED(ValueChangeEvent.class),
+
+    /**
+     * Event type sent when the action facet reference of an action request or
+     * response is modified.
+     * 
+     * <p>
+     * <u>Event</u>: <code>ValueChangeEvent</code> <br>
+     * <u>Source Object</u>: <code>TLActionRequest</code> or <code>TLActionResponse</code>
+     */
+    ACTION_FACET_MODIFIED(ValueChangeEvent.class),
+
+    /**
+     * Event type sent when the MIME types list of an action request or
+     * response is modified.
+     * 
+     * <p>
+     * <u>Event</u>: <code>ValueChangeEvent</code> <br>
+     * <u>Source Object</u>: <code>TLActionRequest</code> or <code>TLActionResponse</code>
+     */
+    MIME_TYPES_MODIFIED(ValueChangeEvent.class),
+
+    /**
+     * Event type sent when the HTTP response codes for an action response is modified.
+     * 
+     * <p>
+     * <u>Event</u>: <code>ValueChangeEvent</code> <br>
+     * <u>Source Object</u>: <code>TLActionResponse</code>
+     */
+    STATUS_CODES_MODIFIED(ValueChangeEvent.class),
+
+    /**
+     * Event type sent when the base path for a resource is modified.
+     * 
+     * <p>
+     * <u>Event</u>: <code>ValueChangeEvent</code> <br>
+     * <u>Source Object</u>: <code>TLResource</code>
+     */
+    BASE_PATH_MODIFIED(ValueChangeEvent.class),
+
+    /**
+     * Event type sent when the path template for a resource action is modified.
+     * 
+     * <p>
+     * <u>Event</u>: <code>ValueChangeEvent</code> <br>
+     * <u>Source Object</u>: <code>TLAction</code>
+     */
+    PATH_TEMPLATE_MODIFIED(ValueChangeEvent.class),
+
+    /**
+     * Event type sent when the parent reference for a parent resource relationship is modified.
+     * 
+     * <p>
+     * <u>Event</u>: <code>ValueChangeEvent</code> <br>
+     * <u>Source Object</u>: <code>TLResourceParentRef</code>
+     */
+    PARENT_RESOURCE_MODIFIED(ValueChangeEvent.class),
+
+    /**
+     * Event type sent when the parameter group reference for a parent resource
+     * relationship is modified.
+     * 
+     * <p>
+     * <u>Event</u>: <code>ValueChangeEvent</code> <br>
+     * <u>Source Object</u>: <code>TLResourceParentRef</code>
+     */
+    PARENT_PARAM_GROUP_MODIFIED(ValueChangeEvent.class),
 
     /**
      * Event type sent when the documentation instance value was assigned to a model element.

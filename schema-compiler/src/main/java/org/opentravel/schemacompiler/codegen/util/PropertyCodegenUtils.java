@@ -516,7 +516,7 @@ public class PropertyCodegenUtils {
                 Collections.reverse(localProperties);
 
                 for (TLProperty property : localProperties) {
-                    TLPropertyType propertyType = resolvePropertyType(property.getPropertyOwner(),
+                    TLPropertyType propertyType = resolvePropertyType(property.getOwner(),
                             property.getType());
                     NamedEntity inheritanceRoot = getInheritanceRoot(propertyType);
 
