@@ -19,10 +19,14 @@ import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.event.ValueChangeEvent;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLActionRequest;
+import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLModelElement;
+import org.opentravel.schemacompiler.model.TLParamGroup;
 import org.opentravel.schemacompiler.model.TLProperty;
+import org.opentravel.schemacompiler.model.TLResourceParentRef;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
@@ -46,7 +50,10 @@ public class TypeNameIntegrityChecker extends
     @Override
     public void processModelEvent(ValueChangeEvent<TLModelElement, NamedEntity> event) {
         if ((event.getType() == ModelEventType.TYPE_ASSIGNMENT_MODIFIED)
-                || (event.getType() == ModelEventType.EXTENDS_ENTITY_MODIFIED)) {
+                || (event.getType() == ModelEventType.EXTENDS_ENTITY_MODIFIED)
+                || (event.getType() == ModelEventType.PARENT_RESOURCE_MODIFIED)
+                || (event.getType() == ModelEventType.FACET_REF_MODIFIED)
+                || (event.getType() == ModelEventType.ACTION_FACET_MODIFIED)) {
             TLModelElement sourceObject = event.getSource();
             String entityName = buildEntityName(event.getNewValue(), sourceObject);
 
@@ -67,6 +74,18 @@ public class TypeNameIntegrityChecker extends
 
             } else if (sourceObject instanceof TLExtension) {
                 ((TLExtension) sourceObject).setExtendsEntityName(entityName);
+                
+            } else if (sourceObject instanceof TLResourceParentRef) {
+                ((TLResourceParentRef) sourceObject).setParentResourceName(entityName);
+
+            } else if (sourceObject instanceof TLParamGroup) {
+                ((TLParamGroup) sourceObject).setFacetRefName(entityName);
+
+            } else if (sourceObject instanceof TLActionRequest) {
+                ((TLActionRequest) sourceObject).setActionFacetName(entityName);
+
+            } else if (sourceObject instanceof TLActionResponse) {
+                ((TLActionResponse) sourceObject).setActionFacetName(entityName);
             }
         }
     }

@@ -18,15 +18,28 @@ package org.opentravel.schemacompiler.ic;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLAction;
+import org.opentravel.schemacompiler.model.TLActionFacet;
+import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAlias;
+import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLFacet;
+import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLListFacet;
+import org.opentravel.schemacompiler.model.TLModelElement;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.model.TLParamGroup;
+import org.opentravel.schemacompiler.model.TLParameter;
+import org.opentravel.schemacompiler.model.TLProperty;
+import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.model.TLResourceParentRef;
+import org.opentravel.schemacompiler.model.TLRole;
+import org.opentravel.schemacompiler.model.TLService;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
@@ -43,14 +56,14 @@ import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
  */
 public class ModelElementCollector extends ModelElementVisitorAdapter {
 
-    private Collection<NamedEntity> libraryEntities = new HashSet<NamedEntity>();
+    private Collection<TLModelElement> libraryEntities = new HashSet<TLModelElement>();
 
     /**
      * Returns the list of named entities that were collected during library navigation.
      * 
-     * @return Collection<NamedEntity>
+     * @return Collection<TLModelElement>
      */
-    public Collection<NamedEntity> getLibraryEntities() {
+    public Collection<TLModelElement> getLibraryEntities() {
         return libraryEntities;
     }
 
@@ -109,6 +122,24 @@ public class ModelElementCollector extends ModelElementVisitorAdapter {
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitChoiceObject(org.opentravel.schemacompiler.model.TLChoiceObject)
+	 */
+	@Override
+	public boolean visitChoiceObject(TLChoiceObject choiceObject) {
+        libraryEntities.add(choiceObject);
+        return true;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResource(org.opentravel.schemacompiler.model.TLResource)
+	 */
+	@Override
+	public boolean visitResource(TLResource resource) {
+        libraryEntities.add(resource);
+        return true;
+	}
+
+	/**
      * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitOperation(org.opentravel.schemacompiler.model.TLOperation)
      */
     @Override
@@ -153,6 +184,15 @@ public class ModelElementCollector extends ModelElementVisitorAdapter {
         return true;
     }
 
+	/**
+	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionFacet(org.opentravel.schemacompiler.model.TLActionFacet)
+	 */
+	@Override
+	public boolean visitActionFacet(TLActionFacet facet) {
+        libraryEntities.add(facet);
+        return true;
+	}
+
     /**
      * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitSimpleFacet(org.opentravel.schemacompiler.model.TLSimpleFacet)
      */
@@ -179,5 +219,95 @@ public class ModelElementCollector extends ModelElementVisitorAdapter {
         libraryEntities.add(alias);
         return true;
     }
+
+	/**
+	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitRole(org.opentravel.schemacompiler.model.TLRole)
+	 */
+	@Override
+	public boolean visitRole(TLRole role) {
+        libraryEntities.add(role);
+        return true;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitService(org.opentravel.schemacompiler.model.TLService)
+	 */
+	@Override
+	public boolean visitService(TLService service) {
+        libraryEntities.add(service);
+        return true;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResourceParentRef(org.opentravel.schemacompiler.model.TLResourceParentRef)
+	 */
+	@Override
+	public boolean visitResourceParentRef(TLResourceParentRef parentRef) {
+        libraryEntities.add(parentRef);
+        return true;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParamGroup(org.opentravel.schemacompiler.model.TLParamGroup)
+	 */
+	@Override
+	public boolean visitParamGroup(TLParamGroup paramGroup) {
+        libraryEntities.add(paramGroup);
+        return true;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParameter(org.opentravel.schemacompiler.model.TLParameter)
+	 */
+	@Override
+	public boolean visitParameter(TLParameter parameter) {
+        libraryEntities.add(parameter);
+        return true;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitAction(org.opentravel.schemacompiler.model.TLAction)
+	 */
+	@Override
+	public boolean visitAction(TLAction action) {
+        libraryEntities.add(action);
+        return true;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionResponse(org.opentravel.schemacompiler.model.TLActionResponse)
+	 */
+	@Override
+	public boolean visitActionResponse(TLActionResponse actionResponse) {
+        libraryEntities.add(actionResponse);
+        return true;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitAttribute(org.opentravel.schemacompiler.model.TLAttribute)
+	 */
+	@Override
+	public boolean visitAttribute(TLAttribute attribute) {
+        libraryEntities.add(attribute);
+        return true;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitElement(org.opentravel.schemacompiler.model.TLProperty)
+	 */
+	@Override
+	public boolean visitElement(TLProperty element) {
+        libraryEntities.add(element);
+        return true;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitIndicator(org.opentravel.schemacompiler.model.TLIndicator)
+	 */
+	@Override
+	public boolean visitIndicator(TLIndicator indicator) {
+        libraryEntities.add(indicator);
+        return true;
+	}
 
 }

@@ -33,10 +33,18 @@ public class TLAction extends TLModelElement implements LibraryElement, TLDocume
 	private TLResource owner;
 	private String actionId;
 	private String pathTemplate;
-	private TLActionRequest request = new TLActionRequest();
+	private TLActionRequest request;
 	private ActionResponseListManager responseManager = new ActionResponseListManager( this );
     private TLDocumentation documentation;
 	
+    /**
+     * Default constructor.
+     */
+    public TLAction() {
+    	this.request = new TLActionRequest();
+    	this.request.setOwner(this);
+    }
+    
 	/**
 	 * @see org.opentravel.schemacompiler.validate.Validatable#getValidationIdentity()
 	 */
@@ -147,7 +155,7 @@ public class TLAction extends TLModelElement implements LibraryElement, TLDocume
      * 
      * @return List<TLActionResponse>
      */
-    public List<TLActionResponse> getResponse() {
+    public List<TLActionResponse> getResponses() {
         return responseManager.getChildren();
     }
 

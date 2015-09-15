@@ -18,10 +18,15 @@ package org.opentravel.schemacompiler.ic;
 import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.event.ValueChangeEvent;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
+import org.opentravel.schemacompiler.model.TLActionRequest;
+import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLNamespaceImport;
+import org.opentravel.schemacompiler.model.TLParamGroup;
 import org.opentravel.schemacompiler.model.TLProperty;
+import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.model.TLResourceParentRef;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
@@ -178,6 +183,71 @@ public class PrefixChangeIntegrityChecker extends
             }
             return true;
         }
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResource(org.opentravel.schemacompiler.model.TLResource)
+		 */
+		@Override
+		public boolean visitResource(TLResource resource) {
+            if ((resource.getBusinessObjectRef() != null)
+                    && affectedNamespace.equals(resource.getBusinessObjectRef().getNamespace())) {
+            	resource.setBusinessObjectRefName(symbolResolver.buildEntityName(affectedNamespace, resource
+                        .getBusinessObjectRef().getLocalName()));
+            }
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResourceParentRef(org.opentravel.schemacompiler.model.TLResourceParentRef)
+		 */
+		@Override
+		public boolean visitResourceParentRef(TLResourceParentRef parentRef) {
+            if ((parentRef.getParentResource() != null)
+                    && affectedNamespace.equals(parentRef.getParentResource().getNamespace())) {
+            	parentRef.setParentResourceName(symbolResolver.buildEntityName(affectedNamespace, parentRef
+                        .getParentResource().getLocalName()));
+            }
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParamGroup(org.opentravel.schemacompiler.model.TLParamGroup)
+		 */
+		@Override
+		public boolean visitParamGroup(TLParamGroup paramGroup) {
+            if ((paramGroup.getFacetRef() != null)
+                    && affectedNamespace.equals(paramGroup.getFacetRef().getNamespace())) {
+            	paramGroup.setFacetRefName(symbolResolver.buildEntityName(affectedNamespace, paramGroup
+                        .getFacetRef().getLocalName()));
+            }
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionRequest(org.opentravel.schemacompiler.model.TLActionRequest)
+		 */
+		@Override
+		public boolean visitActionRequest(TLActionRequest actionRequest) {
+            if ((actionRequest.getActionFacet() != null)
+                    && affectedNamespace.equals(actionRequest.getActionFacet().getNamespace())) {
+            	actionRequest.setActionFacetName(symbolResolver.buildEntityName(affectedNamespace, actionRequest
+                        .getActionFacet().getLocalName()));
+            }
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionResponse(org.opentravel.schemacompiler.model.TLActionResponse)
+		 */
+		@Override
+		public boolean visitActionResponse(TLActionResponse actionResponse) {
+            if ((actionResponse.getActionFacet() != null)
+                    && affectedNamespace.equals(actionResponse.getActionFacet().getNamespace())) {
+            	actionResponse.setActionFacetName(symbolResolver.buildEntityName(affectedNamespace, actionResponse
+                        .getActionFacet().getLocalName()));
+            }
+            return true;
+		}
 
     }
 

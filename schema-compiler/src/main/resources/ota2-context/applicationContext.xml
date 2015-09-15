@@ -529,6 +529,11 @@
 					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.ContextDeclarationTransformer" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.ChoiceObject" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLChoiceObject" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.ChoiceObjectTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
 					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.CoreObject" />
 					<property name="target" value="org.opentravel.schemacompiler.model.TLCoreObject" />
 					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.CoreObjectTransformer" />
@@ -623,6 +628,41 @@
 					<property name="target" value="org.opentravel.schemacompiler.model.TLValueWithAttributes" />
 					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.ValueWithAttributesTransformer" />
 				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.Resource" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLResource" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.ResourceTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.ResourceParentRef" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLResourceParentRef" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.ResourceParentRefTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.ParamGroup" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLParamGroup" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.ParamGroupTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.Parameter" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLParameter" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.ParameterTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.FacetAction" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLActionFacet" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.FacetActionTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.Action" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLAction" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.ActionTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.ActionResponse" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLActionResponse" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.ActionResponseTransformer" />
+				</bean>
 				
 				<!-- Legacy Schema Transformers -->
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
@@ -680,6 +720,11 @@
 					<property name="source" value="org.opentravel.schemacompiler.model.TLContext" />
 					<property name="target" value="org.opentravel.ns.ota2.librarymodel_v01_05.ContextDeclaration" />
 					<property name="transformer" value="org.opentravel.schemacompiler.transform.tl2jaxb.TLContextTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLChoiceObject" />
+					<property name="target" value="org.opentravel.ns.ota2.librarymodel_v01_05.ChoiceObject" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.tl2jaxb.TLChoiceObjectTransformer" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
 					<property name="source" value="org.opentravel.schemacompiler.model.TLCoreObject" />
@@ -775,6 +820,41 @@
 					<property name="source" value="org.opentravel.schemacompiler.model.TLValueWithAttributes" />
 					<property name="target" value="org.opentravel.ns.ota2.librarymodel_v01_05.ValueWithAttributes" />
 					<property name="transformer" value="org.opentravel.schemacompiler.transform.tl2jaxb.TLValueWithAttributesTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLResource" />
+					<property name="target" value="org.opentravel.ns.ota2.librarymodel_v01_05.Resource" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.tl2jaxb.TLResourceTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLResourceParentRef" />
+					<property name="target" value="org.opentravel.ns.ota2.librarymodel_v01_05.ResourceParentRef" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.tl2jaxb.TLResourceParentRefTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLParamGroup" />
+					<property name="target" value="org.opentravel.ns.ota2.librarymodel_v01_05.ParamGroup" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.tl2jaxb.TLParamGroupTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLParameter" />
+					<property name="target" value="org.opentravel.ns.ota2.librarymodel_v01_05.Parameter" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.tl2jaxb.TLParameterTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLActionFacet" />
+					<property name="target" value="org.opentravel.ns.ota2.librarymodel_v01_05.FacetAction" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.tl2jaxb.TLActionFacetTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLAction" />
+					<property name="target" value="org.opentravel.ns.ota2.librarymodel_v01_05.Action" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.tl2jaxb.TLActionTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLActionResponse" />
+					<property name="target" value="org.opentravel.ns.ota2.librarymodel_v01_05.ActionResponse" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.tl2jaxb.TLActionResponseTransformer" />
 				</bean>
 			</set>
 		</property>

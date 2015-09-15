@@ -34,6 +34,8 @@ public class TLParamGroup extends TLModelElement implements LibraryElement, TLDo
 	private TLResource owner;
 	private String name;
 	private boolean idGroup;
+	private TLFacet facetRef;
+	private String facetRefName;
     private TLDocumentation documentation;
     private ParameterListManager parameterManager = new ParameterListManager(this);
     
@@ -134,6 +136,46 @@ public class TLParamGroup extends TLModelElement implements LibraryElement, TLDo
 	}
 	
     /**
+	 * Returns the value of the 'facetRef' field.
+	 *
+	 * @return TLFacet
+	 */
+	public TLFacet getFacetRef() {
+		return facetRef;
+	}
+
+	/**
+	 * Assigns the value of the 'facetRef' field.
+	 *
+	 * @param facetRef  the field value to assign
+	 */
+	public void setFacetRef(TLFacet facetRef) {
+        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.FACET_REF_MODIFIED, this)
+        		.setOldValue(this.facetRef).setNewValue(facetRef).buildEvent();
+
+		this.facetRef = facetRef;
+        publishEvent(event);
+	}
+
+	/**
+	 * Returns the value of the 'facetRefName' field.
+	 *
+	 * @return String
+	 */
+	public String getFacetRefName() {
+		return facetRefName;
+	}
+
+	/**
+	 * Assigns the value of the 'facetRefName' field.
+	 *
+	 * @param facetRefName  the field value to assign
+	 */
+	public void setFacetRefName(String facetRefName) {
+		this.facetRefName = facetRefName;
+	}
+
+	/**
      * @see org.opentravel.schemacompiler.model.TLDocumentationOwner#getDocumentation()
      */
     public TLDocumentation getDocumentation() {

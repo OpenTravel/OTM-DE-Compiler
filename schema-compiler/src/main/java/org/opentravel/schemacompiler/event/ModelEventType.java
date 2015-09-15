@@ -788,6 +788,15 @@ public enum ModelEventType {
     FIRST_CLASS_FLAG_MODIFIED(ValueChangeEvent.class),
 
     /**
+     * Event type sent when the facet reference for a parameter group is modified.
+     * 
+     * <p>
+     * <u>Event</u>: <code>ValueChangeEvent</code> <br>
+     * <u>Source Object</u>: <code>TLParamGroup</code>
+     */
+    FACET_REF_MODIFIED(ValueChangeEvent.class),
+
+    /**
      * Event type sent when the field reference for a parameter is modified.
      * 
      * <p>
@@ -830,7 +839,7 @@ public enum ModelEventType {
      * <u>Event</u>: <code>ValueChangeEvent</code> <br>
      * <u>Source Object</u>: <code>TLActionFacet</code>
      */
-    BO_REFERENCE_TYPE_MODIFIED(ValueChangeEvent.class),
+    REFERENCE_TYPE_MODIFIED(ValueChangeEvent.class),
 
     /**
      * Event type sent when the business object facet name of an action facet is modified.
@@ -839,7 +848,7 @@ public enum ModelEventType {
      * <u>Event</u>: <code>ValueChangeEvent</code> <br>
      * <u>Source Object</u>: <code>TLActionFacet</code>
      */
-    BO_FACET_NAME_MODIFIED(ValueChangeEvent.class),
+    FACET_REF_NAME_MODIFIED(ValueChangeEvent.class),
 
     /**
      * Event type sent when the business object repeat count of an action facet is modified.
@@ -848,7 +857,7 @@ public enum ModelEventType {
      * <u>Event</u>: <code>ValueChangeEvent</code> <br>
      * <u>Source Object</u>: <code>TLActionFacet</code>
      */
-    BO_REPEAT_MODIFIED(ValueChangeEvent.class),
+    FACET_REF_REPEAT_MODIFIED(ValueChangeEvent.class),
 
     /**
      * Event type sent when the HTTP method of an action request is modified.

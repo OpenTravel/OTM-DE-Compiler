@@ -15,17 +15,34 @@
  */
 package org.opentravel.schemacompiler.transform.util;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
+import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLActionFacet;
+import org.opentravel.schemacompiler.model.TLActionRequest;
+import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLAttributeType;
+import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLExtension;
+import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLMemberField;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.model.TLParamGroup;
+import org.opentravel.schemacompiler.model.TLParameter;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLPropertyType;
+import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.model.TLResourceParentRef;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
@@ -43,7 +60,8 @@ import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
 public class EntityReferenceResolutionVisitor extends ModelElementVisitorAdapter {
 
     private SymbolResolver symbolResolver;
-
+    private Map<String,List<TLMemberField<?>>> inheritedFieldCache = new HashMap<>();
+    
     /**
      * Constructor that assigns the model being navigated.
      * 
@@ -199,5 +217,136 @@ public class EntityReferenceResolutionVisitor extends ModelElementVisitorAdapter
         }
         return true;
     }
+
+	/**
+	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResource(org.opentravel.schemacompiler.model.TLResource)
+	 */
+	@Override
+	public boolean visitResource(TLResource resource) {
+        if ((resource.getBusinessObjectRef() == null) && (resource.getBusinessObjectRefName() != null)) {
+            Object ref = symbolResolver.resolveEntity(resource.getBusinessObjectRefName());
+
+            if (ref instanceof TLBusinessObject) {
+            	resource.setBusinessObjectRef((TLBusinessObject) ref);
+            }
+        }
+        return true;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResourceParentRef(org.opentravel.schemacompiler.model.TLResourceParentRef)
+	 */
+	@Override
+	public boolean visitResourceParentRef(TLResourceParentRef parentRef) {
+        if ((parentRef.getParentResource() == null) && (parentRef.getParentResourceName() != null)) {
+            Object ref = symbolResolver.resolveEntity(parentRef.getParentResourceName());
+
+            if (ref instanceof TLResource) {
+            	parentRef.setParentResource((TLResource) ref);
+            }
+        }
+        
+        if ((parentRef.getParentResource() != null) &&
+        		(parentRef.getParentParamGroup() == null) && (parentRef.getParentParamGroupName() != null)) {
+        	List<TLParamGroup> paramGroups = ResourceCodegenUtils.getInheritedParamGroups(parentRef.getParentResource());
+        	String pgName = parentRef.getParentParamGroupName();
+        	
+        	for (TLParamGroup paramGroup : paramGroups) {
+        		if (pgName.equals(paramGroup.getName())) {
+        			parentRef.setParentParamGroup(paramGroup);
+        			break;
+        		}
+        	}
+        }
+        return true;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParamGroup(org.opentravel.schemacompiler.model.TLParamGroup)
+	 */
+	@Override
+	public boolean visitParamGroup(TLParamGroup paramGroup) {
+        if ((paramGroup.getFacetRef() == null) && (paramGroup.getFacetRefName() != null)) {
+            Object ref = symbolResolver.resolveEntity(paramGroup.getFacetRefName());
+
+            if (ref instanceof TLFacet) {
+            	paramGroup.setFacetRef((TLFacet) ref);
+            }
+        }
+        return true;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParameter(org.opentravel.schemacompiler.model.TLParameter)
+	 */
+	@Override
+	public boolean visitParameter(TLParameter parameter) {
+        if ((parameter.getOwner() != null) && (parameter.getOwner().getFacetRef() != null) &&
+        		(parameter.getFieldRef() == null) && (parameter.getFieldRefName() != null)) {
+        	TLFacet facetRef = parameter.getOwner().getFacetRef();
+        	String facetRefKey = facetRef.getNamespace() + ":" + facetRef.getLocalName();
+        	List<TLMemberField<?>> memberFields = inheritedFieldCache.get(facetRefKey);
+        	String fieldName = parameter.getFieldRefName();
+        	
+            if (memberFields == null) {
+            	memberFields = new ArrayList<>();
+            	memberFields.addAll(PropertyCodegenUtils.getInheritedAttributes(facetRef));
+            	memberFields.addAll(PropertyCodegenUtils.getInheritedProperties(facetRef));
+            	memberFields.addAll(PropertyCodegenUtils.getInheritedIndicators(facetRef));
+            	inheritedFieldCache.put(facetRefKey, memberFields);
+            }
+            
+            for (TLMemberField<?> memberField : memberFields) {
+            	if (fieldName.equals(memberField.getName())) {
+            		parameter.setFieldRef(memberField);
+            		break;
+            	}
+            }
+        }
+        return true;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionRequest(org.opentravel.schemacompiler.model.TLActionRequest)
+	 */
+	@Override
+	public boolean visitActionRequest(TLActionRequest actionRequest) {
+        if ((actionRequest.getOwner() != null) && (actionRequest.getOwner().getOwner() != null) &&
+        		(actionRequest.getParamGroup() == null) && (actionRequest.getParamGroupName() != null)) {
+        	TLResource owningResource = actionRequest.getOwner().getOwner();
+        	List<TLParamGroup> paramGroups = ResourceCodegenUtils.getInheritedParamGroups(owningResource);
+        	String pgName = actionRequest.getParamGroupName();
+        	
+        	for (TLParamGroup paramGroup : paramGroups) {
+        		if (pgName.equals(paramGroup.getName())) {
+        			actionRequest.setParamGroup(paramGroup);
+        			break;
+        		}
+        	}
+        }
+        if ((actionRequest.getActionFacet() == null) && (actionRequest.getActionFacetName() != null)) {
+            Object ref = symbolResolver.resolveEntity(actionRequest.getActionFacetName());
+
+            if (ref instanceof TLActionFacet) {
+            	actionRequest.setActionFacet((TLActionFacet) ref);
+            }
+        }
+        return true;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionResponse(org.opentravel.schemacompiler.model.TLActionResponse)
+	 */
+	@Override
+	public boolean visitActionResponse(TLActionResponse actionResponse) {
+        if ((actionResponse.getActionFacet() == null) && (actionResponse.getActionFacetName() != null)) {
+            Object ref = symbolResolver.resolveEntity(actionResponse.getActionFacetName());
+
+            if (ref instanceof TLActionFacet) {
+            	actionResponse.setActionFacet((TLActionFacet) ref);
+            }
+        }
+        return true;
+	}
 
 }

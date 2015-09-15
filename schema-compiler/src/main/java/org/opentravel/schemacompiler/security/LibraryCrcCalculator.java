@@ -29,10 +29,15 @@ import org.opentravel.schemacompiler.loader.LibraryModuleInfo;
 import org.opentravel.schemacompiler.loader.LibraryModuleLoader;
 import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
 import org.opentravel.schemacompiler.loader.impl.MultiVersionLibraryModuleLoader;
+import org.opentravel.schemacompiler.model.TLAction;
+import org.opentravel.schemacompiler.model.TLActionFacet;
+import org.opentravel.schemacompiler.model.TLActionRequest;
+import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAdditionalDocumentationItem;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLContext;
 import org.opentravel.schemacompiler.model.TLCoreObject;
@@ -50,10 +55,15 @@ import org.opentravel.schemacompiler.model.TLInclude;
 import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
+import org.opentravel.schemacompiler.model.TLMimeType;
 import org.opentravel.schemacompiler.model.TLNamespaceImport;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.model.TLParamGroup;
+import org.opentravel.schemacompiler.model.TLParameter;
 import org.opentravel.schemacompiler.model.TLProperty;
+import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.model.TLResourceParentRef;
 import org.opentravel.schemacompiler.model.TLRole;
 import org.opentravel.schemacompiler.model.TLService;
 import org.opentravel.schemacompiler.model.TLSimple;
@@ -345,6 +355,115 @@ public class LibraryCrcCalculator {
         }
 
         /**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitChoiceObject(org.opentravel.schemacompiler.model.TLChoiceObject)
+		 */
+		@Override
+		public boolean visitChoiceObject(TLChoiceObject choiceObject) {
+            crcData.append(choiceObject.getName()).append('|');
+            crcData.append(choiceObject.isNotExtendable()).append('|');
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResource(org.opentravel.schemacompiler.model.TLResource)
+		 */
+		@Override
+		public boolean visitResource(TLResource resource) {
+            crcData.append(resource.getName()).append('|');
+            crcData.append(resource.getBasePath()).append('|');
+            crcData.append(resource.isAbstract()).append('|');
+            crcData.append(resource.isFirstClass()).append('|');
+            crcData.append(resource.getBusinessObjectRefName()).append('|');
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResourceParentRef(org.opentravel.schemacompiler.model.TLResourceParentRef)
+		 */
+		@Override
+		public boolean visitResourceParentRef(TLResourceParentRef parentRef) {
+            crcData.append(parentRef.getParentResourceName()).append('|');
+            crcData.append(parentRef.getParentParamGroupName()).append('|');
+            crcData.append(parentRef.getPathTemplate()).append('|');
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParamGroup(org.opentravel.schemacompiler.model.TLParamGroup)
+		 */
+		@Override
+		public boolean visitParamGroup(TLParamGroup paramGroup) {
+            crcData.append(paramGroup.getName()).append('|');
+            crcData.append(paramGroup.isIdGroup()).append('|');
+            crcData.append(paramGroup.getFacetRefName()).append('|');
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParameter(org.opentravel.schemacompiler.model.TLParameter)
+		 */
+		@Override
+		public boolean visitParameter(TLParameter parameter) {
+            crcData.append(parameter.getFieldRefName()).append('|');
+            crcData.append(parameter.getLocation()).append('|');
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitAction(org.opentravel.schemacompiler.model.TLAction)
+		 */
+		@Override
+		public boolean visitAction(TLAction action) {
+            crcData.append(action.getActionId()).append('|');
+            crcData.append(action.getPathTemplate()).append('|');
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionRequest(org.opentravel.schemacompiler.model.TLActionRequest)
+		 */
+		@Override
+		public boolean visitActionRequest(TLActionRequest actionRequest) {
+            crcData.append(actionRequest.getHttpMethod()).append('|');
+            crcData.append(actionRequest.getParamGroupName()).append('|');
+            crcData.append(actionRequest.getActionFacetName()).append('|');
+            
+            for (TLMimeType mimeType : actionRequest.getMimeTypes()) {
+                crcData.append(mimeType).append('|');
+            }
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionResponse(org.opentravel.schemacompiler.model.TLActionResponse)
+		 */
+		@Override
+		public boolean visitActionResponse(TLActionResponse actionResponse) {
+			for (Integer statusCode : actionResponse.getStatusCodes()) {
+                crcData.append(statusCode).append('|');
+			}
+            crcData.append(actionResponse.getActionFacetName()).append('|');
+            
+            for (TLMimeType mimeType : actionResponse.getMimeTypes()) {
+                crcData.append(mimeType).append('|');
+            }
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionFacet(org.opentravel.schemacompiler.model.TLActionFacet)
+		 */
+		@Override
+		public boolean visitActionFacet(TLActionFacet facet) {
+            crcData.append(facet.getName()).append('|');
+            crcData.append(facet.getReferenceType()).append('|');
+            crcData.append(facet.getReferenceFacetName()).append('|');
+            crcData.append(facet.getReferenceRepeat()).append('|');
+            crcData.append(facet.isNotExtendable()).append('|');
+            return true;
+		}
+
+		/**
          * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitExtensionPointFacet(org.opentravel.schemacompiler.model.TLExtensionPointFacet)
          */
         @Override

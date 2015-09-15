@@ -18,7 +18,6 @@ package org.opentravel.schemacompiler.model;
 import java.util.Comparator;
 import java.util.List;
 
-import org.opentravel.ns.ota2.librarymodel_v01_05.ParamLocation;
 import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.event.ModelEventBuilder;
 import org.opentravel.schemacompiler.event.ModelEventType;
@@ -37,7 +36,7 @@ public class TLParameter extends TLModelElement implements TLDocumentationOwner,
 	private TLParamGroup owner;
 	private TLMemberField<?> fieldRef;
 	private String fieldRefName;
-	private ParamLocation location;
+	private TLParamLocation location;
     private TLDocumentation documentation;
     private EquivalentListManager equivalentManager = new EquivalentListManager(this);
     private ExampleListManager exampleManager = new ExampleListManager(this);
@@ -119,6 +118,7 @@ public class TLParameter extends TLModelElement implements TLDocumentationOwner,
         ModelEvent<?> event = new ModelEventBuilder(ModelEventType.FIELD_REF_MODIFIED, this)
         		.setOldValue(this.fieldRef).setNewValue(fieldRef).buildEvent();
         
+    	this.fieldRefName = (fieldRef == null) ? null : fieldRef.getName();
 		this.fieldRef = fieldRef;
         publishEvent(event);
 	}
@@ -144,9 +144,9 @@ public class TLParameter extends TLModelElement implements TLDocumentationOwner,
 	/**
 	 * Returns the value of the 'location' field.
 	 *
-	 * @return ParamLocation
+	 * @return TLParamLocation
 	 */
-	public ParamLocation getLocation() {
+	public TLParamLocation getLocation() {
 		return location;
 	}
 
@@ -155,7 +155,7 @@ public class TLParameter extends TLModelElement implements TLDocumentationOwner,
 	 *
 	 * @param location  the field value to assign
 	 */
-	public void setLocation(ParamLocation location) {
+	public void setLocation(TLParamLocation location) {
         ModelEvent<?> event = new ModelEventBuilder(ModelEventType.LOCATION_MODIFIED, this)
 				.setOldValue(this.location).setNewValue(location).buildEvent();
         

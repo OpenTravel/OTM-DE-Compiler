@@ -20,7 +20,6 @@ import java.util.List;
 
 import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.event.OwnershipEvent;
-import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLModelElement;
 
 /**
@@ -31,12 +30,16 @@ import org.opentravel.schemacompiler.model.TLModelElement;
  *            the source object type for the event
  * @author S. Livezey
  */
-public class NamedEntityRemovedIntegrityChecker<S extends TLModelElement> extends
-        EntityRemovedIntegrityChecker<S, NamedEntity> {
+public class ModelElementRemovedIntegrityChecker<S extends TLModelElement> extends
+        EntityRemovedIntegrityChecker<S, TLModelElement> {
 
     private static ModelEventType[] ELIGIBLE_EVENT_TYPES = { ModelEventType.MEMBER_REMOVED,
             ModelEventType.ROLE_REMOVED, ModelEventType.ALIAS_REMOVED,
-            ModelEventType.OPERATION_REMOVED, ModelEventType.CUSTOM_FACET_REMOVED };
+            ModelEventType.OPERATION_REMOVED, ModelEventType.CUSTOM_FACET_REMOVED,
+            ModelEventType.QUERY_FACET_REMOVED, ModelEventType.ACTION_FACET_REMOVED,
+            ModelEventType.CHOICE_FACET_REMOVED, ModelEventType.PARAMETER_REMOVED,
+            ModelEventType.PARAM_GROUP_REMOVED, ModelEventType.ACTION_REMOVED,
+            ModelEventType.ACTION_RESPONSE_REMOVED };
 
     private List<ModelEventType> eligibleEvents = Arrays.asList(ELIGIBLE_EVENT_TYPES);
     private Class<S> eventSourceType;
@@ -47,7 +50,7 @@ public class NamedEntityRemovedIntegrityChecker<S extends TLModelElement> extend
      * @param eventSourceType
      *            the source type of the event to which this listener will respond
      */
-    public NamedEntityRemovedIntegrityChecker(Class<S> eventSourceType) {
+    public ModelElementRemovedIntegrityChecker(Class<S> eventSourceType) {
         this.eventSourceType = eventSourceType;
     }
 
@@ -55,9 +58,9 @@ public class NamedEntityRemovedIntegrityChecker<S extends TLModelElement> extend
      * @see org.opentravel.schemacompiler.event.ModelEventListener#processModelEvent(org.opentravel.schemacompiler.event.ModelEvent)
      */
     @Override
-    public void processModelEvent(OwnershipEvent<S, NamedEntity> event) {
+    public void processModelEvent(OwnershipEvent<S, TLModelElement> event) {
         if (eligibleEvents.contains(event.getType())) {
-            NamedEntity removedEntity = event.getAffectedItem();
+        	TLModelElement removedEntity = event.getAffectedItem();
 
             if (removedEntity instanceof TLModelElement) {
                 purgeEntitiesFromModel((TLModelElement) event.getAffectedItem(), event.getSource()

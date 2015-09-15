@@ -39,7 +39,13 @@ public class TypeAssignmentChangeIntegrityChecker
     @Override
     public void processModelEvent(ValueChangeEvent<TLModelElement, NamedEntity> event) {
         if ((event.getType() == ModelEventType.TYPE_ASSIGNMENT_MODIFIED)
-                || (event.getType() == ModelEventType.EXTENDS_ENTITY_MODIFIED)) {
+                || (event.getType() == ModelEventType.EXTENDS_ENTITY_MODIFIED)
+                || (event.getType() == ModelEventType.PARENT_RESOURCE_MODIFIED)
+                || (event.getType() == ModelEventType.PARAM_GROUP_MODIFIED)
+                || (event.getType() == ModelEventType.BO_REFERENCE_MODIFIED)
+                || (event.getType() == ModelEventType.FACET_REF_MODIFIED)
+                || (event.getType() == ModelEventType.FIELD_REF_MODIFIED)
+                || (event.getType() == ModelEventType.ACTION_FACET_MODIFIED)) {
             AbstractLibrary owningLibrary = getOwningLibrary(event.getSource());
 
             if (owningLibrary instanceof TLLibrary) {

@@ -19,14 +19,17 @@ import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAbstractFacet;
+import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAliasOwner;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLService;
 import org.opentravel.schemacompiler.model.XSDComplexType;
 import org.opentravel.schemacompiler.transform.DerivedEntityFactory;
@@ -156,6 +159,26 @@ public abstract class AbstractTLSymbolTablePopulator<S> implements SymbolTablePo
                 symbols.addEntity(namespace, owner.getRoleEnumeration().getLocalName(),
                         owner.getRoleEnumeration());
 
+            } else if (libraryMember instanceof TLResource) {
+            	TLResource owner = (TLResource) libraryMember;
+            	
+                for (TLActionFacet actionFacet : owner.getActionFacets()) {
+                    addFacetEntries(actionFacet, symbols);
+                }
+                
+            } else if (libraryMember instanceof TLChoiceObject) {
+            	TLChoiceObject owner = (TLChoiceObject) libraryMember;
+
+                if (owner.getSharedFacet() != null) {
+                    addFacetEntries(owner.getSharedFacet(), symbols);
+                }
+                for (TLFacet choiceFacet : owner.getChoiceFacets()) {
+                    addFacetEntries(choiceFacet, symbols);
+                }
+                for (TLAlias alias : owner.getAliases()) {
+                    symbols.addEntity(namespace, alias.getLocalName(), alias);
+                }
+                
             } else if (libraryMember instanceof TLService) {
                 TLService service = (TLService) libraryMember;
 
