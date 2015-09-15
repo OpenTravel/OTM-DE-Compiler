@@ -35,7 +35,7 @@ public class TLActionResponse extends TLModelElement implements LibraryElement, 
 	private List<Integer> statusCodes = new ArrayList<>();
 	private TLActionFacet actionFacet;
 	private String actionFacetName;
-	private List<MimeType> mimeTypes = new ArrayList<>();
+	private List<TLMimeType> mimeTypes = new ArrayList<>();
     private TLDocumentation documentation;
     
 	/**
@@ -192,9 +192,9 @@ public class TLActionResponse extends TLModelElement implements LibraryElement, 
 	/**
 	 * Returns the value of the 'mimeTypes' field.
 	 *
-	 * @return List<MimeType>
+	 * @return List<TLMimeType>
 	 */
-	public List<MimeType> getMimeTypes() {
+	public List<TLMimeType> getMimeTypes() {
 		return mimeTypes;
 	}
 
@@ -203,11 +203,11 @@ public class TLActionResponse extends TLModelElement implements LibraryElement, 
 	 *
 	 * @param mimeTypes  the field value to assign
 	 */
-	public void setMimeTypes(List<MimeType> mimeTypes) {
+	public void setMimeTypes(List<TLMimeType> mimeTypes) {
         ModelEvent<?> event = new ModelEventBuilder(ModelEventType.MIME_TYPES_MODIFIED, this)
         		.setOldValue(this.mimeTypes).setNewValue(mimeTypes).buildEvent();
 
-		this.mimeTypes = (mimeTypes == null) ? new ArrayList<MimeType>() : mimeTypes;
+		this.mimeTypes = (mimeTypes == null) ? new ArrayList<TLMimeType>() : mimeTypes;
         publishEvent(event);
 	}
 
@@ -216,7 +216,7 @@ public class TLActionResponse extends TLModelElement implements LibraryElement, 
 	 * 
 	 * @param mimeType  the MIME type to add
 	 */
-	public void addMimeType(MimeType mimeType) {
+	public void addMimeType(TLMimeType mimeType) {
 		ModelEventBuilder eventBuilder = null;
 		
 		if (!this.mimeTypes.contains(mimeType)) {

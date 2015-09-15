@@ -37,9 +37,11 @@ import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAbstractFacet;
+import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLEquivalent;
@@ -244,7 +246,7 @@ public class XsdCodegenUtils {
      */
     public static QName getSubstitutionGroupElementName(NamedEntity modelEntity) {
         boolean isTopLevelFacetOwner = (modelEntity instanceof TLBusinessObject)
-                || (modelEntity instanceof TLCoreObject);
+                || (modelEntity instanceof TLCoreObject) || (modelEntity instanceof TLChoiceObject);
         QName referenceElementName = null;
 
         if (!isTopLevelFacetOwner && (modelEntity instanceof TLAlias)) {
@@ -252,7 +254,8 @@ public class XsdCodegenUtils {
             NamedEntity aliasedEntity = alias.getOwningEntity();
 
             isTopLevelFacetOwner = (aliasedEntity instanceof TLBusinessObject)
-                    || (aliasedEntity instanceof TLCoreObject);
+                    || (aliasedEntity instanceof TLCoreObject)
+                    || (aliasedEntity instanceof TLChoiceObject);
         }
         if (isTopLevelFacetOwner) {
             QName globalElementName = getGlobalElementName(modelEntity);
@@ -340,6 +343,9 @@ public class XsdCodegenUtils {
             }
             typeName = getFacetTypeName(facet);
 
+        } else if (modelEntity instanceof TLChoiceObject) {
+        	typeName = getFacetTypeName(((TLChoiceObject) modelEntity).getSharedFacet());
+        	
         } else {
             typeName = modelEntity.getLocalName();
         }
@@ -828,10 +834,12 @@ public class XsdCodegenUtils {
             typeNames.put(TLSimple.class, "Simple");
             typeNames.put(TLValueWithAttributes.class, "ValueWithAttributes");
             typeNames.put(TLCoreObject.class, "CoreObject");
+            typeNames.put(TLChoiceObject.class, "ChoiceObject");
             typeNames.put(TLBusinessObject.class, "BusinessObject");
             typeNames.put(TLOpenEnumeration.class, "EnumerationOpen");
             typeNames.put(TLClosedEnumeration.class, "EnumerationClosed");
             typeNames.put(TLOperation.class, "Operation");
+            typeNames.put(TLActionFacet.class, "ActionFacet");
 
             libraryTypeNames = Collections.unmodifiableMap(typeNames);
             jaxbDatatypeFactory = DatatypeFactory.newInstance();

@@ -25,12 +25,19 @@ import java.util.Map;
 import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
+import org.opentravel.schemacompiler.model.LibraryMember;
+import org.opentravel.schemacompiler.model.TLActionRequest;
+import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLInclude;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLNamespaceImport;
+import org.opentravel.schemacompiler.model.TLParamGroup;
+import org.opentravel.schemacompiler.model.TLParameter;
 import org.opentravel.schemacompiler.model.TLProperty;
+import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.model.TLResourceParentRef;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
@@ -520,6 +527,78 @@ public abstract class ImportManagementIntegrityChecker<E extends ModelEvent<S>, 
             }
             return true;
         }
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResource(org.opentravel.schemacompiler.model.TLResource)
+		 */
+		@Override
+		public boolean visitResource(TLResource resource) {
+            if (resource.getBusinessObjectRef() != null) {
+                addReferencedLibrary(resource.getBusinessObjectRef().getOwningLibrary());
+            }
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResourceParentRef(org.opentravel.schemacompiler.model.TLResourceParentRef)
+		 */
+		@Override
+		public boolean visitResourceParentRef(TLResourceParentRef parentRef) {
+            if (parentRef.getParentResource() != null) {
+                addReferencedLibrary(parentRef.getParentResource().getOwningLibrary());
+            }
+            if (parentRef.getParentParamGroup() != null) {
+                addReferencedLibrary(parentRef.getParentParamGroup().getOwningLibrary());
+            }
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParamGroup(org.opentravel.schemacompiler.model.TLParamGroup)
+		 */
+		@Override
+		public boolean visitParamGroup(TLParamGroup paramGroup) {
+            if (paramGroup.getFacetRef() != null) {
+                addReferencedLibrary(paramGroup.getFacetRef().getOwningLibrary());
+            }
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParameter(org.opentravel.schemacompiler.model.TLParameter)
+		 */
+		@Override
+		public boolean visitParameter(TLParameter parameter) {
+            if (parameter.getFieldRef() != null) {
+                addReferencedLibrary(((LibraryMember) parameter.getFieldRef()).getOwningLibrary());
+            }
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionRequest(org.opentravel.schemacompiler.model.TLActionRequest)
+		 */
+		@Override
+		public boolean visitActionRequest(TLActionRequest actionRequest) {
+            if (actionRequest.getParamGroup() != null) {
+                addReferencedLibrary(actionRequest.getParamGroup().getOwningLibrary());
+            }
+            if (actionRequest.getActionFacet() != null) {
+                addReferencedLibrary(actionRequest.getActionFacet().getOwningLibrary());
+            }
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionResponse(org.opentravel.schemacompiler.model.TLActionResponse)
+		 */
+		@Override
+		public boolean visitActionResponse(TLActionResponse actionResponse) {
+            if (actionResponse.getActionFacet() != null) {
+                addReferencedLibrary(actionResponse.getActionFacet().getOwningLibrary());
+            }
+            return true;
+		}
 
     }
 

@@ -26,9 +26,14 @@ import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.LibraryMember;
+import org.opentravel.schemacompiler.model.TLAction;
+import org.opentravel.schemacompiler.model.TLActionFacet;
+import org.opentravel.schemacompiler.model.TLActionRequest;
+import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
@@ -38,7 +43,11 @@ import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.model.TLParamGroup;
+import org.opentravel.schemacompiler.model.TLParameter;
 import org.opentravel.schemacompiler.model.TLProperty;
+import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.model.TLResourceParentRef;
 import org.opentravel.schemacompiler.model.TLRole;
 import org.opentravel.schemacompiler.model.TLService;
 import org.opentravel.schemacompiler.model.TLSimple;
@@ -152,8 +161,7 @@ public class LibraryFilterBuilder {
         @Override
         public void navigateFacet(TLFacet facet) {
             if (canVisit(facet) && visitor.visitFacet(facet)) {
-                List<TLAttribute> attributeList = PropertyCodegenUtils
-                        .getInheritedAttributes(facet);
+                List<TLAttribute> attributeList = PropertyCodegenUtils.getInheritedAttributes(facet);
                 List<TLProperty> propertyList = PropertyCodegenUtils.getInheritedProperties(facet);
 
                 for (TLAlias alias : facet.getAliases()) {
@@ -170,14 +178,32 @@ public class LibraryFilterBuilder {
         }
 
         /**
+		 * @see org.opentravel.schemacompiler.visitor.ModelNavigator#navigateActionFacet(org.opentravel.schemacompiler.model.TLActionFacet)
+		 */
+		@Override
+		public void navigateActionFacet(TLActionFacet actionFacet) {
+            if (canVisit(actionFacet) && visitor.visitActionFacet(actionFacet)) {
+                List<TLAttribute> attributeList = PropertyCodegenUtils.getInheritedAttributes(actionFacet);
+                List<TLProperty> propertyList = PropertyCodegenUtils.getInheritedProperties(actionFacet);
+
+                for (TLAttribute attribute : attributeList) {
+                    navigateAttribute(attribute);
+                }
+                for (TLProperty element : propertyList) {
+                    navigateElement(element);
+                }
+            }
+            addVisitedNode(actionFacet);
+		}
+
+		/**
          * @see org.opentravel.schemacompiler.visitor.ModelNavigator#navigateValueWithAttributes(org.opentravel.schemacompiler.model.TLValueWithAttributes)
          */
         @Override
         public void navigateValueWithAttributes(TLValueWithAttributes valueWithAttributes) {
             if (canVisit(valueWithAttributes)
                     && visitor.visitValueWithAttributes(valueWithAttributes)) {
-                List<TLAttribute> attributeList = PropertyCodegenUtils
-                        .getInheritedAttributes(valueWithAttributes);
+                List<TLAttribute> attributeList = PropertyCodegenUtils.getInheritedAttributes(valueWithAttributes);
 
                 for (TLAttribute attribute : attributeList) {
                     navigateAttribute(attribute);
@@ -355,6 +381,14 @@ public class LibraryFilterBuilder {
         }
 
         /**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitChoiceObject(org.opentravel.schemacompiler.model.TLChoiceObject)
+		 */
+		@Override
+		public boolean visitChoiceObject(TLChoiceObject choiceObject) {
+            return isAllowedByGlobalFilter(choiceObject);
+		}
+
+		/**
          * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitCoreObject(org.opentravel.schemacompiler.model.TLCoreObject)
          */
         @Override
@@ -377,6 +411,14 @@ public class LibraryFilterBuilder {
         public boolean visitFacet(TLFacet facet) {
             return isAllowedByGlobalFilter(facet);
         }
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionFacet(org.opentravel.schemacompiler.model.TLActionFacet)
+		 */
+		@Override
+		public boolean visitActionFacet(TLActionFacet facet) {
+            return isAllowedByGlobalFilter(facet);
+		}
 
         /**
          * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitListFacet(org.opentravel.schemacompiler.model.TLListFacet)
@@ -411,6 +453,62 @@ public class LibraryFilterBuilder {
         }
 
         /**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResource(org.opentravel.schemacompiler.model.TLResource)
+		 */
+		@Override
+		public boolean visitResource(TLResource resource) {
+            return isAllowedByGlobalFilter(resource);
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResourceParentRef(org.opentravel.schemacompiler.model.TLResourceParentRef)
+		 */
+		@Override
+		public boolean visitResourceParentRef(TLResourceParentRef parentRef) {
+            return isAllowedByGlobalFilter(parentRef);
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParamGroup(org.opentravel.schemacompiler.model.TLParamGroup)
+		 */
+		@Override
+		public boolean visitParamGroup(TLParamGroup paramGroup) {
+            return isAllowedByGlobalFilter(paramGroup);
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParameter(org.opentravel.schemacompiler.model.TLParameter)
+		 */
+		@Override
+		public boolean visitParameter(TLParameter parameter) {
+            return isAllowedByGlobalFilter(parameter);
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitAction(org.opentravel.schemacompiler.model.TLAction)
+		 */
+		@Override
+		public boolean visitAction(TLAction action) {
+            return isAllowedByGlobalFilter(action);
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionRequest(org.opentravel.schemacompiler.model.TLActionRequest)
+		 */
+		@Override
+		public boolean visitActionRequest(TLActionRequest actionRequest) {
+            return isAllowedByGlobalFilter(actionRequest);
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionResponse(org.opentravel.schemacompiler.model.TLActionResponse)
+		 */
+		@Override
+		public boolean visitActionResponse(TLActionResponse actionResponse) {
+            return isAllowedByGlobalFilter(actionResponse);
+		}
+
+		/**
          * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitExtensionPointFacet(org.opentravel.schemacompiler.model.TLExtensionPointFacet)
          */
         @Override

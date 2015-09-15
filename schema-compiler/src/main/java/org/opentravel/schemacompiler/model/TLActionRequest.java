@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.opentravel.ns.ota2.librarymodel_v01_05.HttpMethod;
 import org.opentravel.ns.ota2.librarymodel_v01_05.MimeType;
 import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.event.ModelEventBuilder;
@@ -33,12 +32,12 @@ import org.opentravel.schemacompiler.event.ModelEventType;
 public class TLActionRequest extends TLModelElement implements LibraryElement, TLDocumentationOwner {
 	
 	private TLAction owner;
-	private HttpMethod httpMethod;
+	private TLHttpMethod httpMethod;
 	private TLParamGroup paramGroup;
 	private String paramGroupName;
 	private TLActionFacet actionFacet;
 	private String actionFacetName;
-	private List<MimeType> mimeTypes = new ArrayList<>();
+	private List<TLMimeType> mimeTypes = new ArrayList<>();
     private TLDocumentation documentation;
 	
 	/**
@@ -95,9 +94,9 @@ public class TLActionRequest extends TLModelElement implements LibraryElement, T
 	/**
 	 * Returns the value of the 'httpMethod' field.
 	 *
-	 * @return HttpMethod
+	 * @return TLHttpMethod
 	 */
-	public HttpMethod getHttpMethod() {
+	public TLHttpMethod getHttpMethod() {
 		return httpMethod;
 	}
 
@@ -106,7 +105,7 @@ public class TLActionRequest extends TLModelElement implements LibraryElement, T
 	 *
 	 * @param httpMethod  the field value to assign
 	 */
-	public void setHttpMethod(HttpMethod httpMethod) {
+	public void setHttpMethod(TLHttpMethod httpMethod) {
         ModelEvent<?> event = new ModelEventBuilder(ModelEventType.HTTP_METHOD_MODIFIED, this)
         		.setOldValue(this.httpMethod).setNewValue(httpMethod).buildEvent();
 
@@ -131,7 +130,8 @@ public class TLActionRequest extends TLModelElement implements LibraryElement, T
 	public void setParamGroup(TLParamGroup paramGroup) {
         ModelEvent<?> event = new ModelEventBuilder(ModelEventType.PARAM_GROUP_MODIFIED, this)
         		.setOldValue(this.paramGroup).setNewValue(paramGroup).buildEvent();
-
+        
+		this.paramGroupName = (paramGroup == null) ? null : paramGroup.getName();
 		this.paramGroup = paramGroup;
         publishEvent(event);
 	}
@@ -199,7 +199,7 @@ public class TLActionRequest extends TLModelElement implements LibraryElement, T
 	 *
 	 * @return List<MimeType>
 	 */
-	public List<MimeType> getMimeTypes() {
+	public List<TLMimeType> getMimeTypes() {
 		return Collections.unmodifiableList( mimeTypes );
 	}
 
@@ -208,11 +208,11 @@ public class TLActionRequest extends TLModelElement implements LibraryElement, T
 	 *
 	 * @param mimeTypes  the field value to assign
 	 */
-	public void setMimeTypes(List<MimeType> mimeTypes) {
+	public void setMimeTypes(List<TLMimeType> mimeTypes) {
         ModelEvent<?> event = new ModelEventBuilder(ModelEventType.MIME_TYPES_MODIFIED, this)
         		.setOldValue(this.mimeTypes).setNewValue(mimeTypes).buildEvent();
 
-		this.mimeTypes = (mimeTypes == null) ? new ArrayList<MimeType>() : mimeTypes;
+		this.mimeTypes = (mimeTypes == null) ? new ArrayList<TLMimeType>() : mimeTypes;
         publishEvent(event);
 	}
 	
@@ -221,7 +221,7 @@ public class TLActionRequest extends TLModelElement implements LibraryElement, T
 	 * 
 	 * @param mimeType  the MIME type to add
 	 */
-	public void addMimeType(MimeType mimeType) {
+	public void addMimeType(TLMimeType mimeType) {
 		ModelEventBuilder eventBuilder = null;
 		
 		if (!this.mimeTypes.contains(mimeType)) {

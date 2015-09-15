@@ -148,7 +148,8 @@ public class TLResourceParentRef extends TLModelElement implements LibraryElemen
         ModelEvent<?> event = new ModelEventBuilder(ModelEventType.PARENT_PARAM_GROUP_MODIFIED, this)
         		.setOldValue(this.parentParamGroup).setNewValue(parentParamGroup).buildEvent();
 
-		this.parentParamGroup = parentParamGroup;
+		this.parentParamGroupName = (parentParamGroup == null) ? null : parentParamGroup.getName();
+        this.parentParamGroup = parentParamGroup;
         publishEvent(event);
 	}
 

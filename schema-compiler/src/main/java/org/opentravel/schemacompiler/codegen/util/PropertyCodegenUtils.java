@@ -28,6 +28,7 @@ import javax.xml.namespace.QName;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAbstractFacet;
+import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAliasOwner;
 import org.opentravel.schemacompiler.model.TLAttribute;
@@ -567,6 +568,141 @@ public class PropertyCodegenUtils {
             }
         }
         return roles;
+    }
+
+    /**
+     * Returns the list of attributes that were declared by the given facet or inherited from facets
+     * with the same name. Attributes are guranteed to be in the correct order of their declaration in
+     * the sequencing of the inheritance hierarchy.
+     * 
+     * @param facet
+     *            the facet for which to retrieve inherited attributes
+     * @return List<TLAttribute>
+     */
+    public static List<TLAttribute> getInheritedAttributes(TLActionFacet facet) {
+        Collection<TLFacetOwner> visitedOwners = new HashSet<TLFacetOwner>();
+        List<TLAttribute> attributeList = new ArrayList<TLAttribute>();
+        TLFacetOwner facetOwner = facet.getOwningEntity();
+
+        while (facetOwner != null) {
+            if (visitedOwners.contains(facetOwner)) {
+                break;
+            }
+            TLActionFacet aFacet = FacetCodegenUtils.getActionFacetWithName(facetOwner, facet.getName());
+
+            if (aFacet != null) {
+                List<TLAttribute> localAttributes = new ArrayList<TLAttribute>(
+                        aFacet.getAttributes());
+
+                // We are traversing upward in the inheritance hierarchy, so we must pre-pend
+                // attributes onto
+                // the list in the reverse order of their declarations in order to preserve the
+                // intende order
+                // of occurrance.
+                Collections.reverse(localAttributes);
+
+                for (TLAttribute attribute : localAttributes) {
+                    attributeList.add(0, attribute);
+                }
+            }
+            visitedOwners.add(facetOwner);
+            facetOwner = FacetCodegenUtils.getFacetOwnerExtension(facetOwner);
+        }
+        return attributeList;
+    }
+
+    /**
+     * Returns the list of indicators that were declared by the given facet or inherited from facets
+     * with the same name. Indicators are guranteed to be in the correct order of their declaration in
+     * the sequencing of the inheritance hierarchy.
+     * 
+     * @param facet
+     *            the facet for which to retrieve inherited indicators
+     * @return List<TLIndicator>
+     */
+    public static List<TLIndicator> getInheritedIndicators(TLActionFacet facet) {
+        Collection<TLFacetOwner> visitedOwners = new HashSet<TLFacetOwner>();
+        List<TLIndicator> indicatorList = new ArrayList<TLIndicator>();
+        TLFacetOwner facetOwner = facet.getOwningEntity();
+
+        while (facetOwner != null) {
+            if (visitedOwners.contains(facetOwner)) {
+                break;
+            }
+            TLActionFacet aFacet = FacetCodegenUtils.getActionFacetWithName(facetOwner, facet.getName());
+
+            if (aFacet != null) {
+                List<TLIndicator> localIndicators = new ArrayList<TLIndicator>(
+                        aFacet.getIndicators());
+
+                // We are traversing upward in the inheritance hierarchy, so we must pre-pend
+                // indicators onto
+                // the list in the reverse order of their declarations in order to preserve the
+                // intende order
+                // of occurrance.
+                Collections.reverse(localIndicators);
+
+                for (TLIndicator indicator : localIndicators) {
+                    indicatorList.add(0, indicator);
+                }
+            }
+            visitedOwners.add(facetOwner);
+            facetOwner = FacetCodegenUtils.getFacetOwnerExtension(facetOwner);
+        }
+        return indicatorList;
+    }
+
+    /**
+     * Returns the list of properties that were declared by the given facet or inherited from facets
+     * with the same name. Properties are guranteed to be in the correct order of their declaration in
+     * the sequencing of the inheritance hierarchy.
+     * 
+     * @param facet
+     *            the facet for which to retrieve inherited properties
+     * @return List<TLProperty>
+     */
+    public static List<TLProperty> getInheritedProperties(TLActionFacet facet) {
+        Collection<TLFacetOwner> visitedOwners = new HashSet<TLFacetOwner>();
+        Set<NamedEntity> inheritanceRoots = new HashSet<NamedEntity>();
+        List<TLProperty> propertyList = new ArrayList<TLProperty>();
+        TLFacetOwner facetOwner = facet.getOwningEntity();
+
+        while (facetOwner != null) {
+            if (visitedOwners.contains(facetOwner)) {
+                break;
+            }
+            TLActionFacet aFacet = FacetCodegenUtils.getActionFacetWithName(facetOwner, facet.getName());
+
+            if (aFacet != null) {
+                List<TLProperty> localProperties = new ArrayList<TLProperty>(aFacet.getElements());
+
+                // We are traversing upward in the inheritance hierarchy, so we must pre-pend
+                // properties onto
+                // the list in the reverse order of their declarations in order to preserve the
+                // intende order
+                // of occurrance.
+                Collections.reverse(localProperties);
+
+                for (TLProperty property : localProperties) {
+                    TLPropertyType propertyType = resolvePropertyType(property.getOwner(),
+                            property.getType());
+                    NamedEntity inheritanceRoot = getInheritanceRoot(propertyType);
+
+                    // Properties whose types are members of an inheritance hierarchy should be
+                    // skipped
+                    // if they were eclipsed by lower-level properties of the owner's hierarchy
+                    if ((inheritanceRoot == null) || !inheritanceRoots.contains(inheritanceRoot)) {
+                        if (inheritanceRoot != null) {
+                            inheritanceRoots.add(inheritanceRoot);
+                        }
+                        propertyList.add(0, property);
+                    }
+                }
+            }
+            visitedOwners.add(facetOwner);
+            facetOwner = FacetCodegenUtils.getFacetOwnerExtension(facetOwner);
+        }
+        return propertyList;
     }
 
     /**

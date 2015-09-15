@@ -80,7 +80,7 @@ public class PropertyTransformer extends
      *            the repeat string value to convert
      * @return int
      */
-    private int convertRepeatValue(String repeatStr) {
+    protected static int convertRepeatValue(String repeatStr) {
         int result = 0;
 
         if (repeatStr != null) {

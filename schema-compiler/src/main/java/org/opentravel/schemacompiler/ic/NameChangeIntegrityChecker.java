@@ -21,11 +21,22 @@ import java.util.List;
 import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.event.ValueChangeEvent;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
+import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLActionFacet;
+import org.opentravel.schemacompiler.model.TLActionRequest;
+import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAttribute;
+import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLExtension;
+import org.opentravel.schemacompiler.model.TLFacet;
+import org.opentravel.schemacompiler.model.TLMemberField;
 import org.opentravel.schemacompiler.model.TLModelElement;
+import org.opentravel.schemacompiler.model.TLParamGroup;
+import org.opentravel.schemacompiler.model.TLParameter;
 import org.opentravel.schemacompiler.model.TLProperty;
+import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.model.TLResourceParentRef;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
@@ -51,10 +62,18 @@ public class NameChangeIntegrityChecker extends
     @Override
     public void processModelEvent(ValueChangeEvent<TLModelElement, NamedEntity> event) {
         TLModelElement sourceObject = event.getSource();
-
-        if ((sourceObject instanceof NamedEntity)
-                && (event.getType() == ModelEventType.NAME_MODIFIED)) {
-            resolveAssignedTypeNames((NamedEntity) sourceObject);
+        
+        if (event.getType() == ModelEventType.NAME_MODIFIED) {
+            if (sourceObject instanceof NamedEntity) {
+                resolveAssignedTypeNames((NamedEntity) sourceObject);
+                
+            } else if (sourceObject instanceof TLMemberField) {
+            	resolveAssignedFieldNames((TLMemberField<?>) sourceObject);
+            	
+            } else if (sourceObject instanceof TLParamGroup) {
+            	resolveAssignedParamGroupNames((TLParamGroup) sourceObject);
+            }
+        	
         }
     }
 
@@ -66,7 +85,7 @@ public class NameChangeIntegrityChecker extends
      *            the modified entity whose references should be updated
      */
     public static void resolveAssignedTypeNames(NamedEntity modifiedEntity) {
-        List<NamedEntity> affectedEntities = getAffectedEntities(modifiedEntity);
+        List<TLModelElement> affectedEntities = getAffectedEntities(modifiedEntity);
         AbstractLibrary localLibrary = modifiedEntity.getOwningLibrary();
         SymbolResolver symbolResolver = new TLModelSymbolResolver(localLibrary.getOwningModel());
 
@@ -77,17 +96,55 @@ public class NameChangeIntegrityChecker extends
     }
 
     /**
+     * Scans the entire model for references to the given member field and refreshes the name
+     * assignment for each occurrance.
+     * 
+     * @param modifiedField
+     *            the modified field whose references should be updated
+     */
+    public static void resolveAssignedFieldNames(TLMemberField<?> modifiedField) {
+        AbstractLibrary localLibrary = ((LibraryElement) modifiedField.getOwner()).getOwningLibrary();
+        SymbolResolver symbolResolver = new TLModelSymbolResolver(localLibrary.getOwningModel());
+        List<TLModelElement> affectedEntities = new ArrayList<>();
+        
+        affectedEntities.add((TLModelElement) modifiedField);
+        symbolResolver.setPrefixResolver(new LibraryPrefixResolver(localLibrary));
+        symbolResolver.setAnonymousEntityFilter(new ChameleonFilter(localLibrary));
+        ModelNavigator.navigate(localLibrary.getOwningModel(), new EntityNameChangeVisitor(
+                affectedEntities, symbolResolver));
+    }
+    
+    /**
+     * Scans the entire model for references to the given parameter group and refreshes the name
+     * assignment for each occurrance.
+     * 
+     * @param modifiedParamGroup
+     *            the modified parameter group whose references should be updated
+     */
+    public static void resolveAssignedParamGroupNames(TLParamGroup modifiedParamGroup) {
+        AbstractLibrary localLibrary = modifiedParamGroup.getOwningLibrary();
+        SymbolResolver symbolResolver = new TLModelSymbolResolver(localLibrary.getOwningModel());
+        List<TLModelElement> affectedEntities = new ArrayList<>();
+        
+        affectedEntities.add(modifiedParamGroup);
+        symbolResolver.setPrefixResolver(new LibraryPrefixResolver(localLibrary));
+        symbolResolver.setAnonymousEntityFilter(new ChameleonFilter(localLibrary));
+        ModelNavigator.navigate(localLibrary.getOwningModel(), new EntityNameChangeVisitor(
+                affectedEntities, symbolResolver));
+    }
+    
+    /**
      * Returns the list of model entities that were affected by the name-change event.
      * 
      * @param modifiedEntity
      *            the source object whose name was modified
-     * @return List<NamedEntity>
+     * @return List<TLModelElement>
      */
-    private static List<NamedEntity> getAffectedEntities(NamedEntity modifiedEntity) {
+    private static List<TLModelElement> getAffectedEntities(NamedEntity modifiedEntity) {
         ModelElementCollector collectVisitor = new ModelElementCollector();
 
         ModelNavigator.navigate(modifiedEntity, collectVisitor);
-        return new ArrayList<NamedEntity>(collectVisitor.getLibraryEntities());
+        return new ArrayList<TLModelElement>(collectVisitor.getLibraryEntities());
     }
 
     /**
@@ -114,7 +171,7 @@ public class NameChangeIntegrityChecker extends
      */
     private static class EntityNameChangeVisitor extends ModelElementVisitorAdapter {
 
-        private List<NamedEntity> modifiedEntities;
+        private List<TLModelElement> modifiedEntities = new ArrayList<>();
         private SymbolResolver symbolResolver;
 
         /**
@@ -126,9 +183,11 @@ public class NameChangeIntegrityChecker extends
          * @param symbolResolver
          *            the symbol resolver used to construct new entity names
          */
-        public EntityNameChangeVisitor(List<NamedEntity> modifiedEntities,
+        public EntityNameChangeVisitor(List<TLModelElement> modifiedEntities,
                 SymbolResolver symbolResolver) {
-            this.modifiedEntities = modifiedEntities;
+        	if (modifiedEntities != null) {
+                this.modifiedEntities.addAll(modifiedEntities);
+        	}
             this.symbolResolver = symbolResolver;
         }
 
@@ -215,6 +274,97 @@ public class NameChangeIntegrityChecker extends
             }
             return true;
         }
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResource(org.opentravel.schemacompiler.model.TLResource)
+		 */
+		@Override
+		public boolean visitResource(TLResource resource) {
+			TLBusinessObject referencedEntity = resource.getBusinessObjectRef();
+			
+            if (modifiedEntities.contains(referencedEntity)) {
+            	resource.setBusinessObjectRefName(symbolResolver.buildEntityName(referencedEntity.getNamespace(),
+                        referencedEntity.getLocalName()));
+            }
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResourceParentRef(org.opentravel.schemacompiler.model.TLResourceParentRef)
+		 */
+		@Override
+		public boolean visitResourceParentRef(TLResourceParentRef parentRef) {
+			TLResource referencedResource = parentRef.getParentResource();
+			TLParamGroup referencedParamGroup = parentRef.getParentParamGroup();
+			
+            if (modifiedEntities.contains(referencedResource)) {
+            	parentRef.setParentResourceName(symbolResolver.buildEntityName(referencedResource.getNamespace(),
+            			referencedResource.getLocalName()));
+            }
+            if (modifiedEntities.contains(referencedParamGroup)) {
+            	parentRef.setParentParamGroupName(referencedParamGroup.getName());
+            }
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParamGroup(org.opentravel.schemacompiler.model.TLParamGroup)
+		 */
+		@Override
+		public boolean visitParamGroup(TLParamGroup paramGroup) {
+			TLFacet referencedEntity = paramGroup.getFacetRef();
+			
+            if (modifiedEntities.contains(referencedEntity)) {
+            	paramGroup.setFacetRefName(symbolResolver.buildEntityName(referencedEntity.getNamespace(),
+                        referencedEntity.getLocalName()));
+            }
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParameter(org.opentravel.schemacompiler.model.TLParameter)
+		 */
+		@Override
+		public boolean visitParameter(TLParameter parameter) {
+			TLMemberField<?> referencedEntity = parameter.getFieldRef();
+			
+            if (modifiedEntities.contains(referencedEntity)) {
+            	parameter.setFieldRefName(referencedEntity.getName());
+            }
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionRequest(org.opentravel.schemacompiler.model.TLActionRequest)
+		 */
+		@Override
+		public boolean visitActionRequest(TLActionRequest actionRequest) {
+			TLParamGroup referencedParamGroup = actionRequest.getParamGroup();
+			TLActionFacet referencedActionFacet = actionRequest.getActionFacet();
+			
+            if (modifiedEntities.contains(referencedParamGroup)) {
+            	actionRequest.setParamGroupName(referencedParamGroup.getName());
+            }
+            if (modifiedEntities.contains(referencedActionFacet)) {
+            	actionRequest.setActionFacetName(symbolResolver.buildEntityName(referencedActionFacet.getNamespace(),
+            			referencedActionFacet.getLocalName()));
+            }
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionResponse(org.opentravel.schemacompiler.model.TLActionResponse)
+		 */
+		@Override
+		public boolean visitActionResponse(TLActionResponse actionResponse) {
+			TLActionFacet referencedActionFacet = actionResponse.getActionFacet();
+			
+            if (modifiedEntities.contains(referencedActionFacet)) {
+            	actionResponse.setActionFacetName(symbolResolver.buildEntityName(referencedActionFacet.getNamespace(),
+            			referencedActionFacet.getLocalName()));
+            }
+            return true;
+		}
 
     }
 

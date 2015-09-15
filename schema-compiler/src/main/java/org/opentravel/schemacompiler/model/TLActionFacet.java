@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import org.opentravel.ns.ota2.librarymodel_v01_05.BusinessObjectReferenceType;
 import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.event.ModelEventBuilder;
 import org.opentravel.schemacompiler.event.ModelEventType;
@@ -39,9 +38,9 @@ public class TLActionFacet extends TLAbstractFacet implements TLAttributeOwner,
     private AttributeListManager attributeManager = new AttributeListManager(this);
     private PropertyListManager elementManager = new PropertyListManager(this);
     private IndicatorListManager indicatorManager = new IndicatorListManager(this);
-    protected BusinessObjectReferenceType businessObjectReferenceType;
-    protected String businessObjectFacetName;
-    protected int businessObjectRepeat;
+    protected TLReferenceType referenceType;
+    protected String referenceFacetName;
+    protected int referenceRepeat;
     private boolean notExtendable;
 	
     /**
@@ -360,68 +359,68 @@ public class TLActionFacet extends TLAbstractFacet implements TLAttributeOwner,
     }
 
     /**
-	 * Returns the value of the 'businessObjectReferenceType' field.
+	 * Returns the value of the 'referenceType' field.
 	 *
-	 * @return BusinessObjectReferenceType
+	 * @return TLReferenceType
 	 */
-	public BusinessObjectReferenceType getBusinessObjectReferenceType() {
-		return businessObjectReferenceType;
+	public TLReferenceType getReferenceType() {
+		return referenceType;
 	}
 
 	/**
-	 * Assigns the value of the 'businessObjectReferenceType' field.
+	 * Assigns the value of the 'referenceType' field.
 	 *
-	 * @param businessObjectReferenceType  the field value to assign
+	 * @param referenceType  the field value to assign
 	 */
-	public void setBusinessObjectReferenceType(BusinessObjectReferenceType businessObjectReferenceType) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.BO_REFERENCE_TYPE_MODIFIED,
-                this).setOldValue(this.businessObjectReferenceType).setNewValue(businessObjectReferenceType).buildEvent();
+	public void setReferenceType(TLReferenceType businessObjectReferenceType) {
+        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.REFERENCE_TYPE_MODIFIED,
+                this).setOldValue(this.referenceType).setNewValue(businessObjectReferenceType).buildEvent();
 
-		this.businessObjectReferenceType = businessObjectReferenceType;
+		this.referenceType = businessObjectReferenceType;
         publishEvent(event);
 	}
 
 	/**
-	 * Returns the value of the 'businessObjectFacetName' field.
+	 * Returns the value of the 'referenceFacetName' field.
 	 *
 	 * @return String
 	 */
-	public String getBusinessObjectFacetName() {
-		return businessObjectFacetName;
+	public String getReferenceFacetName() {
+		return referenceFacetName;
 	}
 
 	/**
-	 * Assigns the value of the 'businessObjectFacetName' field.
+	 * Assigns the value of the 'referenceFacetName' field.
 	 *
-	 * @param businessObjectFacetName  the field value to assign
+	 * @param referenceFacetName  the field value to assign
 	 */
-	public void setBusinessObjectFacetName(String businessObjectFacetName) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.BO_FACET_NAME_MODIFIED,
-                this).setOldValue(this.businessObjectFacetName).setNewValue(businessObjectFacetName).buildEvent();
+	public void setReferenceFacetName(String businessObjectFacetName) {
+        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.FACET_REF_NAME_MODIFIED,
+                this).setOldValue(this.referenceFacetName).setNewValue(businessObjectFacetName).buildEvent();
 
-		this.businessObjectFacetName = businessObjectFacetName;
+		this.referenceFacetName = businessObjectFacetName;
         publishEvent(event);
 	}
 
 	/**
-	 * Returns the value of the 'businessObjectRepeat' field.
+	 * Returns the value of the 'referenceRepeat' field.
 	 *
 	 * @return int
 	 */
-	public int getBusinessObjectRepeat() {
-		return businessObjectRepeat;
+	public int getReferenceRepeat() {
+		return referenceRepeat;
 	}
 
 	/**
-	 * Assigns the value of the 'businessObjectRepeat' field.
+	 * Assigns the value of the 'referenceRepeat' field.
 	 *
-	 * @param businessObjectRepeat  the field value to assign
+	 * @param referenceRepeat  the field value to assign
 	 */
-	public void setBusinessObjectRepeat(int businessObjectRepeat) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.BO_REPEAT_MODIFIED,
-                this).setOldValue(this.businessObjectRepeat).setNewValue(businessObjectRepeat).buildEvent();
+	public void setReferenceRepeat(int businessObjectRepeat) {
+        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.FACET_REF_REPEAT_MODIFIED,
+                this).setOldValue(this.referenceRepeat).setNewValue(businessObjectRepeat).buildEvent();
 
-		this.businessObjectRepeat = businessObjectRepeat;
+		this.referenceRepeat = businessObjectRepeat;
         publishEvent(event);
 	}
 

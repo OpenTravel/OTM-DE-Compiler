@@ -23,6 +23,7 @@ import java.util.Set;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.OperationType;
+import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtension;
@@ -31,6 +32,7 @@ import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.model.TLResource;
 
 /**
  * Static utility methods used during the generation of code output for facets.
@@ -188,6 +190,25 @@ public class FacetCodegenUtils {
         return memberFacet;
     }
 
+    /**
+     * Returns a facet of the specified type from the given owner. If no such facet is available
+     * from the owner, this method will return null.
+     * 
+     * @param owner
+     *            the facet owner from which to return an action facet
+     * @param facetName
+     *            the name of the facet to return
+     * @return TLActionFacet
+     */
+    public static TLActionFacet getActionFacetWithName(TLFacetOwner owner, String facetName) {
+    	TLActionFacet actionFacet = null;
+    	
+    	if (owner instanceof TLResource) {
+    		actionFacet = ((TLResource) owner).getActionFacet(facetName);
+    	}
+    	return actionFacet;
+    }
+    
     /**
      * Returns true if the given facet owner is an extensible business object, core, or operation
      * entity.

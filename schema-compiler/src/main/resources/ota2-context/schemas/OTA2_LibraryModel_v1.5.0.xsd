@@ -1607,7 +1607,7 @@
       </xsd:restriction>
    </xsd:simpleType>
 
-   <xsd:simpleType name="BusinessObjectReferenceType">
+   <xsd:simpleType name="ReferenceType">
       <xsd:annotation>
          <xsd:documentation>Used by the Facet_Action type to describe how a
          	business object should be referenced.
@@ -1648,14 +1648,14 @@
       </xsd:annotation>
       <xsd:complexContent>
          <xsd:extension base="Facet_Contextual">
-            <xsd:attribute name="businessObjectReferenceType" type="BusinessObjectReferenceType" use="required">
+            <xsd:attribute name="referenceType" type="ReferenceType" use="required">
                <xsd:annotation>
                   <xsd:documentation>Indicates how the business object should be
                   	referenced in the message.
                   </xsd:documentation>
                </xsd:annotation>
             </xsd:attribute>
-            <xsd:attribute name="businessObjectFacet" type="Name_XML" use="optional">
+            <xsd:attribute name="referenceFacet" type="Name_XML" use="optional">
                <xsd:annotation>
                   <xsd:documentation>Specifies the name of the business object facet
                   	to be referenced in the message.  If the 'businessObjectReferenceType'
@@ -1663,7 +1663,7 @@
                   </xsd:documentation>
                </xsd:annotation>
             </xsd:attribute>
-	        <xsd:attribute name="businessObjectRepeat">
+	        <xsd:attribute name="referenceRepeat">
     	       <xsd:annotation>
         	      <xsd:documentation>Specifies the maximum number of times that the business
         	      	object reference should repeat in the message.
@@ -1700,13 +1700,6 @@
          <xsd:element ref="Equivalent" minOccurs="0" maxOccurs="100" />
          <xsd:element ref="Example" minOccurs="0" maxOccurs="100" />
       </xsd:sequence>
-      <xsd:attribute name="facetName" type="Name_XML" use="required">
-         <xsd:annotation>
-            <xsd:documentation>Name of the business object facet from which all parameters
-            	in this group will be referenced.
-            </xsd:documentation>
-         </xsd:annotation>
-      </xsd:attribute>
       <xsd:attribute name="fieldName" type="Name_XML" use="required">
          <xsd:annotation>
             <xsd:documentation>Name of the field to be used as a REST request parameter.
@@ -1756,6 +1749,13 @@
          <xsd:annotation>
             <xsd:documentation>Indicates whether this group is intended to be used as an
             	identity group for the owning resource.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="facetName" type="Name_XML" use="required">
+         <xsd:annotation>
+            <xsd:documentation>Name of the business object facet from which all parameters
+            	in this group will be referenced.
             </xsd:documentation>
          </xsd:annotation>
       </xsd:attribute>
@@ -1877,9 +1877,9 @@
             </xsd:annotation>
          </xsd:element>
       </xsd:sequence>
-      <xsd:attribute name="name" type="Name_XML" use="required">
+      <xsd:attribute name="actionId" type="Name_XML" use="required">
          <xsd:annotation>
-            <xsd:documentation>The name of the action.  This value must be
+            <xsd:documentation>The ID of the action.  This value must be
             	unique within its owning resource.
             </xsd:documentation>
          </xsd:annotation>
