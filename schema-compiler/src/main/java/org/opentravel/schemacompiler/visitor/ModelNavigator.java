@@ -259,11 +259,17 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
                 } else if (builtInType instanceof TLOpenEnumeration) {
                     navigateOpenEnumeration((TLOpenEnumeration) builtInType);
 
+                } else if (builtInType instanceof TLChoiceObject) {
+                    navigateChoiceObject((TLChoiceObject) builtInType);
+
                 } else if (builtInType instanceof TLCoreObject) {
                     navigateCoreObject((TLCoreObject) builtInType);
 
                 } else if (builtInType instanceof TLBusinessObject) {
                     navigateBusinessObject((TLBusinessObject) builtInType);
+
+                } else if (builtInType instanceof TLResource) {
+                    navigateResource((TLResource) builtInType);
 
                 } else if (builtInType instanceof TLExtensionPointFacet) {
                     navigateExtensionPointFacet((TLExtensionPointFacet) builtInType);
@@ -343,11 +349,17 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
             for (TLOpenEnumeration entity : library.getOpenEnumerationTypes()) {
                 navigateOpenEnumeration(entity);
             }
+            for (TLChoiceObject entity : library.getChoiceObjectTypes()) {
+                navigateChoiceObject(entity);
+            }
             for (TLCoreObject entity : library.getCoreObjectTypes()) {
                 navigateCoreObject(entity);
             }
             for (TLBusinessObject entity : library.getBusinessObjectTypes()) {
                 navigateBusinessObject(entity);
+            }
+            for (TLResource entity : library.getResourceTypes()) {
+                navigateResource(entity);
             }
             if (library.getService() != null) {
                 navigateService(library.getService());
