@@ -93,7 +93,7 @@ public class ModelElementVisitorAdapter implements ModelElementVisitor {
      */
     @Override
     public boolean visitContext(TLContext context) {
-        return false;
+        return true;
     }
 
     /**
@@ -141,7 +141,7 @@ public class ModelElementVisitorAdapter implements ModelElementVisitor {
 	 */
 	@Override
 	public boolean visitChoiceObject(TLChoiceObject choiceObject) {
-		return false;
+		return true;
 	}
 
 	/**
@@ -149,7 +149,7 @@ public class ModelElementVisitorAdapter implements ModelElementVisitor {
      */
     @Override
     public boolean visitCoreObject(TLCoreObject coreObject) {
-        return false;
+        return true;
     }
 
     /**
@@ -373,7 +373,7 @@ public class ModelElementVisitorAdapter implements ModelElementVisitor {
      */
     @Override
     public boolean visitExample(TLExample example) {
-        return false;
+        return true;
     }
 
     /**
