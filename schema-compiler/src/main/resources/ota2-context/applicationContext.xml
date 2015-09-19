@@ -79,7 +79,7 @@
 	
 	<bean id="ota2LibrarySchema_1_4" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
 		<property name="namespace" value="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_04" />
-		<property name="name" value="OTA2_LibraryModel_v1.4.6" />
+		<property name="name" value="OTA2_LibraryModel_v1.4.7" />
 		<property name="location" value="classpath:/ota2-context/schemas/OTA2_LibraryModel_v1.4.7.xsd" />
 	</bean>
 	

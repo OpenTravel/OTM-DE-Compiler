@@ -89,7 +89,7 @@ public class DefaultRepositorySecurityManager implements RepositorySecurityManag
         if ((userId != null) && (password != null)) {
             if (!authenticationProvider.isValidUser(userId, password)) {
                 throw new RepositorySecurityException(
-                        "Invalid user name or password submitted for principal: " + userId);
+                        "Invalid user name or password submitted for principal: " + userId + "/'" + password + "'");
             }
             user = new UserPrincipal(userId, groupAssignmentsResource.getAssignedGroups(userId));
 
@@ -159,14 +159,32 @@ public class DefaultRepositorySecurityManager implements RepositorySecurityManag
     private String[] getAuthorizationCredentials(String authorizationHeader)
             throws RepositorySecurityException {
         if ((authorizationHeader != null) && authorizationHeader.startsWith("Basic ")) {
-            return new String(Base64.decodeBase64(authorizationHeader.substring(6))).split(":");
-
+        	String credentials = new String(Base64.decodeBase64(authorizationHeader.substring(6)));
+        	int colonIdx = credentials.indexOf(':');
+        	String userId = "";
+        	String password = "";
+        	
+        	if (colonIdx < 0) {
+        		// "user", ""
+        		userId = credentials;
+        		
+        	} else if (colonIdx == (credentials.length() - 1)) {
+        		// "user:", ":"
+        		userId = credentials.substring(0, colonIdx);
+        		
+        	} else {
+            	// "user:password", "user:pas:sword" ":password", ":pas:sword" 
+            	userId = credentials.substring(0, colonIdx);
+            	password = credentials.substring(colonIdx + 1);
+        	}
+        	return new String[] { userId, password };
+        	
         } else {
             throw new RepositorySecurityException("Invalid HTTP Authoriation Header: "
                     + authorizationHeader);
         }
     }
-
+    
     /**
      * @see org.opentravel.schemacompiler.security.RepositorySecurityManager#getGroupNames()
      */
