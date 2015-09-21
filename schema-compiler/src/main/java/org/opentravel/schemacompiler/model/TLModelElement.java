@@ -16,6 +16,8 @@
 package org.opentravel.schemacompiler.model;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.opentravel.schemacompiler.event.ModelElementListener;
@@ -59,6 +61,16 @@ public abstract class TLModelElement implements ModelElement {
     	if (listener != null) {
     		listeners.remove( listener );
     	}
+    }
+    
+    /**
+     * Returns an unmodifiable collections of all listeners that have been registered
+     * with this model element.
+     * 
+     * @return Collection<ModelElementListener>
+     */
+    public Collection<ModelElementListener> getListeners() {
+    	return Collections.unmodifiableCollection( listeners );
     }
 
     /**
