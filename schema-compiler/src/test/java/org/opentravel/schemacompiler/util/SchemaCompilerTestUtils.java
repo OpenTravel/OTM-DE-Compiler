@@ -37,7 +37,7 @@ public class SchemaCompilerTestUtils {
      * @return String
      */
     public static String getBaseLibraryLocation() {
-        return System.getProperty("user.dir") + "/src/test/resources/libraries_1_4";
+        return System.getProperty("user.dir") + "/src/test/resources/libraries_1_5";
     }
 
     /**

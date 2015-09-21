@@ -41,6 +41,7 @@ import org.opentravel.ns.ota2.project_v01_00.ProjectItemType;
 import org.opentravel.ns.ota2.project_v01_00.ProjectType;
 import org.opentravel.ns.ota2.project_v01_00.RepositoryRefType;
 import org.opentravel.ns.ota2.project_v01_00.UnmanagedProjectItemType;
+import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryPermission;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
 import org.opentravel.schemacompiler.codegen.impl.DependencyFilterBuilder;
@@ -1923,6 +1924,38 @@ public final class ProjectManager {
             }
         }
         return result;
+    }
+    
+    /**
+     * If the given URL resolves to a repository item, this method will return the
+     * ID of the repository from which the library is managed.  If the library is not
+     * a repository-managed item, this method will return null.  NOTE: This method will
+     * only return a result if a local copy of the repository has been loaded from
+     * the remote server.
+     * 
+     * @param libraryUrl  the URL of the library for which to return a repository ID
+     * @return String
+     */
+    public String getRepositoryId(URL libraryUrl) {
+    	String repositoryId = null;
+    	
+    	if (isRepositoryUrl(libraryUrl)) {
+			try {
+	    		File libraryFile = URLUtils.toFile(libraryUrl);
+	    		String metadataFilename = repositoryManager.getFileManager()
+	    				.getLibraryMetadataFilename(libraryFile.getName());
+	    		File metadataFile = new File(libraryFile.getParentFile(), metadataFilename);
+	    		
+	    		if (metadataFile.exists()) {
+					LibraryInfoType libraryMetadata = repositoryManager.getFileManager().loadLibraryMetadata(metadataFile);
+					repositoryId = libraryMetadata.getOwningRepository();
+	    		}
+	    		
+			} catch (RepositoryException e) {
+				// Ignore error and return null
+			}
+    	}
+    	return repositoryId;
     }
 
     /**

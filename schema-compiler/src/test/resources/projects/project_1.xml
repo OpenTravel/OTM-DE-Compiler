@@ -4,6 +4,6 @@
     <otp:name>Test Project #1</otp:name>
     <otp:description>Test description for the project.</otp:description>
     <otp:UnmanagedProjectItem defaultItem="true">
-        <otp:FileLocation>../libraries_1_4/test-package_v2/library_1_p2.xml</otp:FileLocation>
+        <otp:FileLocation>../libraries_1_5/test-package_v2/library_1_p2.xml</otp:FileLocation>
     </otp:UnmanagedProjectItem>
 </otp:Project>

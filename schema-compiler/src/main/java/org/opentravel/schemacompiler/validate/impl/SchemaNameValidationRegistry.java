@@ -386,7 +386,6 @@ public class SchemaNameValidationRegistry {
 		 */
 		@Override
 		public boolean visitChoiceObject(TLChoiceObject choiceObject) {
-            addElementNamesToRegistry(choiceObject);
             return true;
 		}
 

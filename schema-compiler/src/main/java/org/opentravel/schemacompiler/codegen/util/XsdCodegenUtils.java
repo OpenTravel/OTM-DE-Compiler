@@ -381,6 +381,13 @@ public class XsdCodegenUtils {
         } else if (facet.getOwningEntity() instanceof TLOperation) {
             typeName = ((TLOperation) facet.getOwningEntity()).getName()
                     + getTypeFacetSuffix(facet);
+        } else if (facet.getOwningEntity() instanceof TLChoiceObject) {
+            if (facet.getFacetType() == TLFacetType.SHARED) {
+                typeName = facet.getOwningEntity().getLocalName();
+
+            } else if (facet.getFacetType().isContextual()) {
+                typeName = facet.getOwningEntity().getLocalName() + getTypeFacetSuffix(facet);
+            }
         }
         return typeName;
     }
@@ -411,7 +418,7 @@ public class XsdCodegenUtils {
             TLFacet tlFacet = (TLFacet) facet;
 
             if (!isLegacyFacetNamingEnabled()) {
-                if (facetType != TLFacetType.CUSTOM) {
+                if ((facetType != TLFacetType.CUSTOM) && (facetType != TLFacetType.CHOICE)) {
                     suffix.append("_").append(facetType.getIdentityName());
                 }
                 if ((tlFacet.getLabel() != null) && !tlFacet.getLabel().equals("")) {

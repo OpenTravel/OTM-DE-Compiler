@@ -77,27 +77,28 @@ public class DefaultLibraryNamespaceResolver implements LibraryNamespaceResolver
             // into the model
             referencedUrl = resolveFromExistingProjectItems(namespace, fileHint);
 
-            // If the hint could not be resolved to a known repository item, attempt to resolve the
-            // hint
-            // as a repository URI
-            if (referencedUrl == null) {
-                referencedUrl = resolveFromRepositoryURI(namespace, fileHint);
-            }
-
-            // If the hint could not be resolved to a repository item, attempt to resolve it using
+            // If the hint could not be resolved to an existing item, attempt to resolve it using
             // default processing
             if (referencedUrl == null) {
-                referencedUrl = resolveAsFilePath(fileHint);
+            	URL fileUrl = resolveAsFilePath(fileHint);
+            	
+                // Only use this URL if it is a file URL and that file actually exists
+                if ((fileUrl != null) && URLUtils.isFileURL(fileUrl) && URLUtils.toFile(fileUrl).exists()) {
+                	referencedUrl = fileUrl;
+                }
+            }
+
+            // If the hint could not be resolved to a local file, attempt to resolve the
+            // hint as a repository URI
+            if (referencedUrl == null) {
+            	referencedUrl = resolveFromRepositoryURI(namespace, fileHint);
             }
 
             // If none of the previous lookup heuristics have succeeded, attempt a best-effort
-            // search of the
-            // repository. Only attempt this search if the previous step returned a URL to a file on
-            // the local
-            // file system that does not exist.
-            if ((referencedUrl == null)
-                    || (!URLUtils.isFileURL(referencedUrl) || !URLUtils.toFile(referencedUrl)
-                            .exists())) {
+            // search of the repository.
+            /*
+			*/
+            if (referencedUrl == null) {
                 URL bestEffortUrl = resolveWithBestEffortRepsositorySearch(namespace,
                         versionScheme, fileHint);
 
@@ -107,7 +108,7 @@ public class DefaultLibraryNamespaceResolver implements LibraryNamespaceResolver
                     referencedUrl = bestEffortUrl;
                 }
             }
-
+            
             // Add the resolved library URL if one of the above strategies was successful
             if (referencedUrl != null) {
                 libraryUrls.add(referencedUrl);
