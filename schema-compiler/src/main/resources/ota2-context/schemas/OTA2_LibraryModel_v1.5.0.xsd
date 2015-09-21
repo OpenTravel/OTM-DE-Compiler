@@ -1458,7 +1458,9 @@
          <xsd:element ref="Enumeration_Open" minOccurs="0" maxOccurs="unbounded" />
          <xsd:element ref="ValueWithAttrs" minOccurs="0" maxOccurs="unbounded" />
          <xsd:element ref="CoreObject" minOccurs="0" maxOccurs="unbounded" />
+         <xsd:element ref="ChoiceObject" minOccurs="0" maxOccurs="unbounded" />
          <xsd:element ref="BusinessObject" minOccurs="0" maxOccurs="unbounded" />
+         <xsd:element ref="Resource" minOccurs="0" maxOccurs="unbounded" />
          <xsd:element ref="ExtensionPointFacet" minOccurs="0" maxOccurs="unbounded" />
       </xsd:choice>
    </xsd:group>

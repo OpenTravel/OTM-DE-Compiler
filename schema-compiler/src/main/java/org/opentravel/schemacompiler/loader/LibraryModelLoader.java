@@ -42,6 +42,10 @@ import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.XSDComplexType;
 import org.opentravel.schemacompiler.model.XSDElement;
 import org.opentravel.schemacompiler.model.XSDLibrary;
+import org.opentravel.schemacompiler.repository.ProjectManager;
+import org.opentravel.schemacompiler.repository.Repository;
+import org.opentravel.schemacompiler.repository.impl.RepositoryItemImpl;
+import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
 import org.opentravel.schemacompiler.security.LibraryCrcCalculator;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.TransformerFactory;
@@ -415,8 +419,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
             String expectedNamespace, OperationType operationType, JAXBModelArtifacts jaxbArtifacts)
             throws LibraryLoaderException {
         ValidationFindings moduleFindings = new ValidationFindings();
-        LibraryModuleInfo<Object> libraryInfo = moduleLoader.loadLibrary(inputSource,
-                moduleFindings);
+        LibraryModuleInfo<Object> libraryInfo = moduleLoader.loadLibrary(inputSource, moduleFindings);
 
         addLoaderFindings(moduleFindings);
 
@@ -451,14 +454,17 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
                     namespaceResolver.setContextLibrary(libraryInfo, libraryUrl);
 
                     URI libraryNamespace = new URI(libraryInfo.getNamespace());
-                    LibraryInputSource<C> includeInputSource = moduleLoader
-                            .newInputSource(namespaceResolver.resovleLibraryInclude(
-                                    libraryNamespace, include));
+                    URL includeUrl = namespaceResolver.resovleLibraryInclude(libraryNamespace, include);
+                    
+                    if (includeUrl != null) {
+                        LibraryInputSource<C> includeInputSource = moduleLoader.newInputSource(includeUrl);
 
-                    if (includeInputSource != null) {
-                        loadModuleAndDependencies(includeInputSource, libraryInfo.getNamespace(),
-                                OperationType.INCLUDE, jaxbArtifacts);
+                        if (includeInputSource != null) {
+                            loadModuleAndDependencies(includeInputSource, libraryInfo.getNamespace(),
+                                    OperationType.INCLUDE, jaxbArtifacts);
+                        }
                     }
+                    
                 } catch (URISyntaxException e) {
                     addLoaderFinding(FindingType.ERROR, new LibraryValidationSource(library),
                             ERROR_INVALID_URL_ON_INCLUDE, include);
@@ -511,16 +517,24 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
             // Identify previous versions of the library that are required but were not directly
             // loaded by import declarations
             try {
+            	// Start by identifying the repository (if any) from which the current library
+            	// was loaded.  We will assume that any other required versions will be managed
+            	// by the same repository.
+            	ProjectManager projectManager = ProjectManager.getProjectManager(libraryModel);
+            	
+            	if (projectManager == null) {
+            		projectManager = new ProjectManager(libraryModel);
+            	}
+            	String repositoryId = projectManager.getRepositoryId(libraryUrl);
+            	Repository owningRepository = (repositoryId == null) ? null : projectManager.getRepositoryManager().getRepository(repositoryId);
+            	
+                // Make a best-effort to identify the library version immediately prior to the current
+                // one. There is no need to identify all previous versions, because they will be discovered
+            	// during the recursive loading process of the previous version.
                 VersionScheme vScheme = VersionSchemeFactory.getInstance().getVersionScheme(
                         libraryInfo.getVersionScheme());
-                List<String> versionChain = vScheme
-                        .getMajorVersionChain(libraryInfo.getNamespace());
+                List<String> versionChain = vScheme.getMajorVersionChain(libraryInfo.getNamespace());
 
-                // This loop makes a best-effort to identify the library version immediately prior
-                // to the
-                // current one. There is no need to identify all previous versions, because they
-                // will be
-                // discovered during the recursive loading process of the previous version.
                 for (int i = 1; i < versionChain.size(); i++) { // skip the first element since it
                                                                 // represents the current library's
                                                                 // version
@@ -531,9 +545,22 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
                                // declarations
                     }
                     try {
+                    	RepositoryItemImpl repositoryItem = new RepositoryItemImpl();
+                    	String fileHint;
+                    	
+                    	if (owningRepository != null) {
+                        	repositoryItem.setRepository(owningRepository);
+                        	repositoryItem.setNamespace(versionNS);
+                        	repositoryItem.setFilename(vScheme.getDefaultFileHint(versionNS, libraryInfo.getLibraryName()));
+                        	repositoryItem.setVersionScheme(libraryInfo.getVersionScheme());
+                        	fileHint = RepositoryUtils.newURI(repositoryItem, true).toString();
+                        	
+                    	} else {
+                    		fileHint = vScheme.getDefaultFileHint(versionNS, libraryInfo.getLibraryName());
+                    	}
+                    	
                         Collection<LibraryInputSource<C>> versionInputSources = getInputSources(
-                                new URI(versionNS), libraryInfo.getVersionScheme(),
-                                vScheme.getDefaultFileHint(versionNS, libraryInfo.getLibraryName()));
+                                new URI(versionNS), libraryInfo.getVersionScheme(), fileHint.toString());
 
                         if (!versionInputSources.isEmpty()) {
                             for (LibraryInputSource<C> dlInputSource : versionInputSources) {
@@ -548,15 +575,14 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
                     } catch (URISyntaxException e) {
                         addLoaderFinding(FindingType.ERROR, new LibraryValidationSource(library),
                                 ERROR_INVALID_NAMESPACE_URI_ON_IMPORT, versionNS);
-                        log.debug("Invalid namespace URI on import: " + libraryInfo.getNamespace(),
-                                e);
+                        log.debug("Invalid namespace URI on import: " + libraryInfo.getNamespace(), e);
                     } catch (Throwable t) {
+                    	t.printStackTrace(System.out);
                         addLoaderFinding(FindingType.ERROR, new LibraryValidationSource(library),
                                 ERROR_UNKNOWN_EXCEPTION_DURING_MODULE_LOAD,
                                 libraryInfo.getLibraryName(), ExceptionUtils.getExceptionClass(t)
                                         .getSimpleName(), ExceptionUtils.getExceptionMessage(t));
-                        log.debug(
-                                "Unexpected exception loading liberary module: "
+                        log.debug("Unexpected exception loading liberary module: "
                                         + libraryInfo.getLibraryName(), t);
                     }
                 }

@@ -737,7 +737,9 @@ public class TLLibrary extends AbstractLibrary {
             validTypes.add(TLOpenEnumeration.class);
             validTypes.add(TLClosedEnumeration.class);
             validTypes.add(TLCoreObject.class);
+            validTypes.add(TLChoiceObject.class);
             validTypes.add(TLBusinessObject.class);
+            validTypes.add(TLResource.class);
             validTypes.add(TLExtensionPointFacet.class);
             validMemberTypes = Collections.unmodifiableSet(validTypes);
 

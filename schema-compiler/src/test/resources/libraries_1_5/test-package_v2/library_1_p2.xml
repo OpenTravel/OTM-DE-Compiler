@@ -192,6 +192,25 @@
         <Detail/>
     </CoreObject>
     
+    <ChoiceObject name="SampleChoice" notExtendable="false">
+        <Aliases>SampleChoice_Alias1 SampleChoice_Alias2</Aliases>
+        <Shared>
+            <Attribute name="sharedAttribute" type="xsd:string"/>
+            <Element name="sharedElement" repeat="0" type="xsd:int"/>
+            <Indicator name="sharedIndicator" publishAsElement="false"/>
+        </Shared>
+        <Choice label="ChoiceA" context="">
+            <Attribute name="attributeA" type="xsd:string"/>
+            <Element name="elementA" repeat="0" type="xsd:int"/>
+            <Indicator name="indicatorA" publishAsElement="false"/>
+        </Choice>
+        <Choice label="ChoiceB" context="">
+            <Attribute name="attributeB" type="xsd:string"/>
+            <Element name="elementB" repeat="3" type="xsd:int"/>
+            <Indicator name="indicatorB" publishAsElement="false"/>
+        </Choice>
+    </ChoiceObject>
+    
     <BusinessObject name="EmptyBusinessObject" notExtendable="false">
         <Aliases/>
         <ID>
