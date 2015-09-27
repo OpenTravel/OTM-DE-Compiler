@@ -32,6 +32,7 @@ import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLInclude;
 import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLMemberField;
 import org.opentravel.schemacompiler.model.TLNamespaceImport;
 import org.opentravel.schemacompiler.model.TLParamGroup;
 import org.opentravel.schemacompiler.model.TLParameter;
@@ -570,7 +571,11 @@ public abstract class ImportManagementIntegrityChecker<E extends ModelEvent<S>, 
 		@Override
 		public boolean visitParameter(TLParameter parameter) {
             if (parameter.getFieldRef() != null) {
-                addReferencedLibrary(((LibraryMember) parameter.getFieldRef()).getOwningLibrary());
+            	TLMemberField<?> referencedField = parameter.getFieldRef();
+            	
+            	if ((referencedField != null) && (referencedField.getOwner() instanceof LibraryMember)) {
+                    addReferencedLibrary(((LibraryMember) referencedField.getOwner()).getOwningLibrary());
+            	}
             }
             return true;
 		}

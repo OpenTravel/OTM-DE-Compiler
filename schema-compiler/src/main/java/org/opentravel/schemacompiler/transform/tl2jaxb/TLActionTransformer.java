@@ -82,7 +82,7 @@ public class TLActionTransformer extends TLComplexTypeTransformer<TLAction,Actio
             action.setDocumentation(docTransformer.transform(source.getDocumentation()));
         }
         if ((sourceRequest.getDocumentation() != null) && !sourceRequest.getDocumentation().isEmpty()) {
-        	request.setDocumentation(docTransformer.transform(source.getDocumentation()));
+        	request.setDocumentation(docTransformer.transform(sourceRequest.getDocumentation()));
         }
         
         for (TLActionResponse sourceResponse : source.getResponses()) {

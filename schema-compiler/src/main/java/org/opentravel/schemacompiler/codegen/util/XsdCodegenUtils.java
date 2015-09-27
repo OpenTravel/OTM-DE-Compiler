@@ -57,6 +57,7 @@ import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLPropertyType;
+import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
@@ -302,6 +303,10 @@ public class XsdCodegenUtils {
 
     /**
      * Returns the globally-accessible type name for the given entity in the XML schema output.
+     * <p>
+     * NOTE: In some cases (e.g. action facets of abstract resources), the resulting value may
+     * be null.  This indicates that there is no global schema type name associated with the
+     * given model entity.
      * 
      * @param modelEntity
      *            the model entity for which to return the element name
@@ -313,6 +318,10 @@ public class XsdCodegenUtils {
 
     /**
      * Returns the globally-accessible type name for the given entity in the XML schema output.
+     * <p>
+     * NOTE: In some cases (e.g. action facets of abstract resources), the resulting value may
+     * be null.  This indicates that there is no global schema type name associated with the
+     * given model entity.
      * 
      * @param modelEntity
      *            the model entity for which to return the element name
@@ -354,6 +363,10 @@ public class XsdCodegenUtils {
 
     /**
      * Returns the type name for the facet in the XML schema output.
+     * <p>
+     * NOTE: In some cases (e.g. action facets of abstract resources), the resulting value may
+     * be null.  This indicates that there is no global schema type name associated with the
+     * given model entity.
      * 
      * @param facet
      *            the facet being transformed
@@ -369,6 +382,15 @@ public class XsdCodegenUtils {
             if (facet instanceof TLListFacet) {
                 typeName += "_List";
             }
+            
+        } else if (facet.getOwningEntity() instanceof TLChoiceObject) {
+            if (facet.getFacetType() == TLFacetType.SHARED) {
+                typeName = facet.getOwningEntity().getLocalName();
+
+            } else if (facet.getFacetType().isContextual()) {
+                typeName = facet.getOwningEntity().getLocalName() + getTypeFacetSuffix(facet);
+            }
+            
         } else if (facet.getOwningEntity() instanceof TLBusinessObject) {
             if (facet instanceof TLFacet) {
                 if (facet.getFacetType() == TLFacetType.SUMMARY) {
@@ -378,16 +400,19 @@ public class XsdCodegenUtils {
                     typeName = facet.getOwningEntity().getLocalName() + getTypeFacetSuffix(facet);
                 }
             }
+            
         } else if (facet.getOwningEntity() instanceof TLOperation) {
-            typeName = ((TLOperation) facet.getOwningEntity()).getName()
-                    + getTypeFacetSuffix(facet);
-        } else if (facet.getOwningEntity() instanceof TLChoiceObject) {
-            if (facet.getFacetType() == TLFacetType.SHARED) {
-                typeName = facet.getOwningEntity().getLocalName();
-
-            } else if (facet.getFacetType().isContextual()) {
-                typeName = facet.getOwningEntity().getLocalName() + getTypeFacetSuffix(facet);
-            }
+            typeName = ((TLOperation) facet.getOwningEntity()).getName() + getTypeFacetSuffix(facet);
+            
+        } else if (facet instanceof TLActionFacet) {
+        	TLResource resource = (TLResource) facet.getOwningEntity();
+        	
+        	if (resource.isAbstract() || (resource.getBusinessObjectRef() == null)) {
+        		typeName = null; // No XSD types associated with actions of abstract resources
+        		
+        	} else {
+        		typeName = resource.getBusinessObjectRef().getLocalName() + getTypeFacetSuffix(facet);
+        	}
         }
         return typeName;
     }
@@ -436,6 +461,9 @@ public class XsdCodegenUtils {
                 }
                 suffix.append("_").append(facetType.getIdentityName());
             }
+        } else if (facet instanceof TLActionFacet) {
+        	suffix.append("_").append( ((TLActionFacet) facet).getName() );
+        	
         } else {
             suffix.append("_").append(facetType.getIdentityName());
         }
