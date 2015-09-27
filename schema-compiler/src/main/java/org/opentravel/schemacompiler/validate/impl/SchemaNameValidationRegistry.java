@@ -39,7 +39,6 @@ import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLReferenceType;
-import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
@@ -148,10 +147,8 @@ public class SchemaNameValidationRegistry {
      * @return boolean
      */
     public boolean hasTypeNameConflicts(NamedEntity entity) {
-        Collection<NamedEntity> entityTypeMatches = typeNameEntities.get(entityTypeNames
-                .get(entity));
-        return ((entityTypeMatches != null) && (entityTypeMatches.size() > 1) && entityTypeMatches
-                .contains(entity));
+        Collection<NamedEntity> entityTypeMatches = typeNameEntities.get(entityTypeNames.get(entity));
+        return ((entityTypeMatches != null) && (entityTypeMatches.size() > 1) && entityTypeMatches.contains(entity));
     }
 
     /**
@@ -195,17 +192,20 @@ public class SchemaNameValidationRegistry {
             typeName = new QName(entity.getNamespace(), entity.getLocalName());
 
         } else {
-            typeName = new QName(entity.getNamespace(), XsdCodegenUtils.getGlobalTypeName(entity));
+        	String localTypeName = XsdCodegenUtils.getGlobalTypeName(entity);
+            typeName = (localTypeName == null) ? null : new QName(entity.getNamespace(), localTypeName);
         }
+        
+        if (typeName != null) {
+            Set<NamedEntity> registeredEntities = typeNameEntities.get(typeName);
 
-        Set<NamedEntity> registeredEntities = typeNameEntities.get(typeName);
-
-        if (registeredEntities == null) {
-            registeredEntities = new HashSet<NamedEntity>();
-            typeNameEntities.put(typeName, registeredEntities);
+            if (registeredEntities == null) {
+                registeredEntities = new HashSet<NamedEntity>();
+                typeNameEntities.put(typeName, registeredEntities);
+            }
+            registeredEntities.add(entity);
+            entityTypeNames.put(entity, typeName);
         }
-        registeredEntities.add(entity);
-        entityTypeNames.put(entity, typeName);
     }
 
     /**
@@ -412,9 +412,6 @@ public class SchemaNameValidationRegistry {
 
             if (hasContent || ((facet.getReferenceType() != TLReferenceType.NONE) && (facet.getReferenceRepeat() != 0))) {
                 addTypeNameToRegistry(facet);
-                
-            } else if (facet.getReferenceType() != TLReferenceType.NONE) {
-                addTypeNameToRegistry(((TLResource) facet.getOwningEntity()).getBusinessObjectRef());
             }
             addElementNamesToRegistry(facet);
             return true;

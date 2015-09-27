@@ -15,13 +15,17 @@
  */
 package org.opentravel.schemacompiler.transform.jaxb15_2tl;
 
+import org.opentravel.ns.ota2.librarymodel_v01_05.Documentation;
 import org.opentravel.ns.ota2.librarymodel_v01_05.FacetAction;
 import org.opentravel.ns.ota2.librarymodel_v01_05.ReferenceType;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAttribute;
+import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLReferenceType;
+import org.opentravel.schemacompiler.transform.ObjectTransformer;
+import org.opentravel.schemacompiler.transform.symbols.DefaultTransformerContext;
 
 /**
  * Handles the transformation of objects from the <code>FacetAction</code> type to the
@@ -44,6 +48,13 @@ public class FacetActionTransformer extends ComplexTypeTransformer<FacetAction,T
 		facet.setReferenceRepeat(PropertyTransformer.convertRepeatValue(source.getReferenceRepeat()));
 		facet.setNotExtendable(source.isNotExtendable());
 		
+        if (source.getDocumentation() != null) {
+            ObjectTransformer<Documentation, TLDocumentation, DefaultTransformerContext> docTransformer = getTransformerFactory()
+                    .getTransformer(Documentation.class, TLDocumentation.class);
+
+            facet.setDocumentation(docTransformer.transform(source.getDocumentation()));
+        }
+
         for (TLAttribute attribute : transformAttributes(source.getAttribute())) {
             facet.addAttribute(attribute);
         }

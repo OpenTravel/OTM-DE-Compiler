@@ -18,41 +18,51 @@ package org.opentravel.schemacompiler.codegen.xsd.facet;
 import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
+import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
-import org.opentravel.schemacompiler.model.TLFacet;
+import org.w3._2001.xmlschema.Annotated;
 
 /**
- * Code generation delegate for <code>TLFacet</code> instances with a facet type of <code>QUERY</code>
- * and a facet owner of type <code>TLBusinessObject</code>.
- * 
+ * Code generation delegate for <code>TLFacet</code> instances with a facet type of <code>ACTION</code>
+ * and a facet owner of type <code>TLResource</code>.
+ *
  * @author S. Livezey
  */
-public class BusinessObjectQueryFacetCodegenDelegate extends BusinessObjectFacetCodegenDelegate {
-
+public class ResourceActionFacetCodegenDelegate extends FacetCodegenDelegate<TLActionFacet> {
+	
     /**
      * Constructor that specifies the source facet for which code artifacts are being generated.
      * 
      * @param sourceFacet
      *            the source facet
      */
-    public BusinessObjectQueryFacetCodegenDelegate(TLFacet sourceFacet) {
+    public ResourceActionFacetCodegenDelegate(TLActionFacet sourceFacet) {
         super(sourceFacet);
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegate#createType()
+	 */
+	@Override
+	protected Annotated createType() {
+		// TODO: Implement the ResourceActionFacetCodegenDelegate.createType() method
+		return null;
+	}
+
+	/**
      * @see org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegate#hasContent()
      */
     @Override
     public boolean hasContent() {
-        return getSourceFacet().declaresContent() || (getBaseFacet() != null);
+        return getSourceFacet().declaresContent();
     }
 
     /**
      * @see org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate#getLocalBaseFacet()
      */
     @Override
-    public TLFacet getLocalBaseFacet() {
-        return null; // No base type for query facets
+    public TLActionFacet getLocalBaseFacet() {
+        return null; // No base type for action facets
     }
 
     /**
@@ -64,9 +74,12 @@ public class BusinessObjectQueryFacetCodegenDelegate extends BusinessObjectFacet
     }
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate#getExtensionPointElement()
+     * If the source facet should support an extension point element, this method will return the
+     * qualified name of the global extension point element to use in the type's definition. If
+     * extensions are not supported for the facet, this method sould return null.
+     * 
+     * @return QName
      */
-    @Override
     public QName getExtensionPointElement() {
         SchemaDependency extensionPoint = SchemaDependency.getExtensionPointElement();
         QName extensionPointQName = extensionPoint.toQName();

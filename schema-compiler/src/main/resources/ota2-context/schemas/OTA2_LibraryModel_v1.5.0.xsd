@@ -1839,7 +1839,7 @@
             </xsd:documentation>
          </xsd:annotation>
       </xsd:attribute>
-      <xsd:attribute name="mimeTypes" use="required">
+      <xsd:attribute name="mimeTypes" use="optional">
          <xsd:annotation>
             <xsd:documentation>List of supported MIME types.</xsd:documentation>
          </xsd:annotation>
@@ -2001,7 +2001,7 @@
             </xsd:documentation>
          </xsd:annotation>
       </xsd:attribute>
-      <xsd:attribute name="businessObjectRef" type="Name_XML" use="required">
+      <xsd:attribute name="businessObjectRef" type="Name_XML" use="optional">
          <xsd:annotation>
             <xsd:documentation>
             	The name of the business object with which this resource is associated.

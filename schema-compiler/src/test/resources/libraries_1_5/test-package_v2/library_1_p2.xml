@@ -193,6 +193,10 @@
     </CoreObject>
     
     <ChoiceObject name="SampleChoice" notExtendable="false">
+        <Documentation>
+            <Description>SampleChoice-documentation-line_1</Description>
+        </Documentation>
+        <Equivalent context="test">SampleChoice-equivalent</Equivalent>
         <Aliases>SampleChoice_Alias1 SampleChoice_Alias2</Aliases>
         <Shared>
             <Attribute name="sharedAttribute" type="xsd:string"/>
@@ -208,6 +212,26 @@
             <Attribute name="attributeB" type="xsd:string"/>
             <Element name="elementB" repeat="3" type="xsd:int"/>
             <Indicator name="indicatorB" publishAsElement="false"/>
+        </Choice>
+    </ChoiceObject>
+    
+    <ChoiceObject name="ExtendedChoice" notExtendable="false">
+        <Extension extends="SampleChoice"/>
+        <Aliases>ExtChoice_Alias1 ExtChoice_Alias2</Aliases>
+        <Shared>
+            <Attribute name="sharedAttribute2" type="xsd:string"/>
+            <Element name="sharedElement2" repeat="0" type="xsd:int"/>
+            <Indicator name="sharedIndicator2" publishAsElement="false"/>
+        </Shared>
+        <Choice label="ChoiceA" context="">
+            <Attribute name="extAttributeA" type="xsd:string"/>
+            <Element name="extElementA" repeat="0" type="xsd:int"/>
+            <Indicator name="extIndicatorA" publishAsElement="false"/>
+        </Choice>
+        <Choice label="ChoiceC" context="">
+            <Attribute name="attributeC" type="xsd:string"/>
+            <Element name="elementC" repeat="3" type="xsd:int"/>
+            <Indicator name="indicatorC" publishAsElement="false"/>
         </Choice>
     </ChoiceObject>
     
@@ -292,6 +316,118 @@
             <Element name="CustomObject" repeat="0" type="SampleBusinessObject_Alias2_Test1"/>
         </Detail>
     </BusinessObject>
+    
+    <Resource name="BaseResource" abstract="true" firstClass="true">
+   	</Resource>
+   	
+    <Resource name="ParentResource" businessObjectRef="EmptyBusinessObject"  basePath="/services/EmptyResource"
+    			abstract="true" firstClass="true">
+        <ParamGroup name="IDParameters" idGroup="true" facetName="ID">
+        	<Parameter fieldName="empty_oid" location="Path"/>
+        </ParamGroup>
+   	</Resource>
+   	
+    <Resource name="SampleResource" businessObjectRef="SampleBusinessObject" basePath="/services/SampleResource"
+    			abstract="false" firstClass="true">
+        <Documentation>
+            <Description>SampleResource-documentation-line_1</Description>
+        </Documentation>
+    	<ResourceParentRef parent="ParentResource" parentParamGroup="IDParameters" pathTemplate="/parent/{empty_oid}">
+	        <Documentation>
+    	        <Description>SampleResource-ParentRef-documentation-line_1</Description>
+        	</Documentation>
+    	</ResourceParentRef>
+        <Extension extends="BaseResource"/>
+        <ParamGroup name="IDParameters" idGroup="true" facetName="SampleBusinessObject_ID">
+	        <Documentation>
+    	        <Description>IDParameters-documentation-line_1</Description>
+        	</Documentation>
+        	<Parameter fieldName="sample_oid" location="Path">
+		        <Documentation>
+    		        <Description>Param-sample_oid-documentation-line_1</Description>
+        		</Documentation>
+		        <Equivalent context="test">Param-sample_oid-equivalent</Equivalent>
+	            <Example context="test">sample_oid-ex</Example>
+        	</Parameter>
+        </ParamGroup>
+        <ParamGroup name="QueryParameters" idGroup="false" facetName="FindByName">
+        	<Parameter fieldName="queryAttribute" location="Header"/>
+        	<Parameter fieldName="lastName" location="Query"/>
+        	<Parameter fieldName="firstName" location="Query"/>
+        </ParamGroup>
+        <ActionFacet context="" label="ObjectOnly" notExtendable="false" referenceType="Required">
+	        <Documentation>
+    		    <Description>ActionFacet-ObjectOnly-documentation-line_1</Description>
+        	</Documentation>
+        </ActionFacet>
+        <ActionFacet context="" label="ObjectList" notExtendable="false" referenceType="Required"
+        			referenceFacet="SUMMARY" referenceRepeat="1000"/>
+        <ActionFacet context="" label="ObjectWrapper" notExtendable="false" referenceType="Optional">
+            <Attribute name="wrapperAttribute" type="xsd:int"/>
+            <Element name="wrapperElement" repeat="0" type="xsd:int"/>
+            <Indicator name="wrapperIndicator" publishAsElement="false"/>
+        </ActionFacet>
+        <Action actionId="Create" pathTemplate="/samples">
+	        <Documentation>
+    		    <Description>Action-Create-documentation-line_1</Description>
+        	</Documentation>
+        	<ActionRequest httpMethod="POST" actionFacet="SampleResource_ObjectOnly" mimeTypes="APPLICATION_XML APPLICATION_JSON">
+		        <Documentation>
+    			    <Description>Action-Create-Request-documentation-line_1</Description>
+        		</Documentation>
+        	</ActionRequest>
+        	<ActionResponse statusCodes="200 204" actionFacet="SampleResource_ObjectOnly" mimeTypes="APPLICATION_XML APPLICATION_JSON">
+		        <Documentation>
+    			    <Description>Action-Create-Response1-documentation-line_1</Description>
+        		</Documentation>
+        	</ActionResponse>
+        	<ActionResponse statusCodes="500">
+		        <Documentation>
+    			    <Description>Action-Create-Response2-documentation-line_1</Description>
+        		</Documentation>
+        	</ActionResponse>
+        </Action>
+        <Action actionId="Update" pathTemplate="/sample/{sample_oid}">
+	        <Documentation>
+    		    <Description>Action-Update-documentation-line_1</Description>
+        	</Documentation>
+        	<ActionRequest httpMethod="PUT" paramGroup="IDParameters" actionFacet="SampleResource_ObjectOnly" mimeTypes="APPLICATION_XML APPLICATION_JSON">
+		        <Documentation>
+    			    <Description>Action-Update-Request-documentation-line_1</Description>
+        		</Documentation>
+        	</ActionRequest>
+        	<ActionResponse statusCodes="200" actionFacet="SampleResource_ObjectOnly" mimeTypes="APPLICATION_XML APPLICATION_JSON">
+		        <Documentation>
+    			    <Description>Action-Update-Response1-documentation-line_1</Description>
+        		</Documentation>
+        	</ActionResponse>
+        	<ActionResponse statusCodes="500">
+		        <Documentation>
+    			    <Description>Action-Update-Response2-documentation-line_1</Description>
+        		</Documentation>
+        	</ActionResponse>
+        </Action>
+        <Action actionId="Search" pathTemplate="/samples">
+	        <Documentation>
+    		    <Description>Action-Create-documentation-line_1</Description>
+        	</Documentation>
+        	<ActionRequest httpMethod="GET" paramGroup="QueryParameters">
+		        <Documentation>
+    			    <Description>Action-Search-Request-documentation-line_1</Description>
+        		</Documentation>
+        	</ActionRequest>
+        	<ActionResponse statusCodes="200" actionFacet="SampleResource_ObjectList" mimeTypes="APPLICATION_XML APPLICATION_JSON">
+		        <Documentation>
+    			    <Description>Action-Search-Response1-documentation-line_1</Description>
+        		</Documentation>
+        	</ActionResponse>
+        	<ActionResponse statusCodes="403 500">
+		        <Documentation>
+    			    <Description>Action-Search-Response2-documentation-line_1</Description>
+        		</Documentation>
+        	</ActionResponse>
+        </Action>
+    </Resource>
     
     <Service name="SampleService">
         <Documentation>

@@ -52,6 +52,26 @@ public class TLActionFacet extends TLAbstractFacet implements TLAttributeOwner,
     }
     
     /**
+	 * @see org.opentravel.schemacompiler.model.TLAbstractFacet#getLocalName()
+	 */
+	@Override
+	public String getLocalName() {
+		TLFacetOwner owningEntity = getOwningEntity();
+        StringBuilder localName = new StringBuilder();
+
+        if (owningEntity != null) {
+            localName.append(owningEntity.getLocalName()).append('_');
+        }
+        if (name != null) {
+            localName.append(name);
+            
+        } else {
+            localName.append("Unnamed_Facet");
+        }
+        return localName.toString();
+	}
+
+	/**
 	 * @see org.opentravel.schemacompiler.validate.Validatable#getValidationIdentity()
 	 */
 	@Override

@@ -577,7 +577,6 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
                                 ERROR_INVALID_NAMESPACE_URI_ON_IMPORT, versionNS);
                         log.debug("Invalid namespace URI on import: " + libraryInfo.getNamespace(), e);
                     } catch (Throwable t) {
-                    	t.printStackTrace(System.out);
                         addLoaderFinding(FindingType.ERROR, new LibraryValidationSource(library),
                                 ERROR_UNKNOWN_EXCEPTION_DURING_MODULE_LOAD,
                                 libraryInfo.getLibraryName(), ExceptionUtils.getExceptionClass(t)
