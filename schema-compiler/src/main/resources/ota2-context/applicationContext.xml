@@ -675,6 +675,11 @@
 					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.ActionTransformer" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.ActionRequest" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLActionRequest" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.ActionRequestTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
 					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.ActionResponse" />
 					<property name="target" value="org.opentravel.schemacompiler.model.TLActionResponse" />
 					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.ActionResponseTransformer" />
@@ -866,6 +871,11 @@
 					<property name="source" value="org.opentravel.schemacompiler.model.TLAction" />
 					<property name="target" value="org.opentravel.ns.ota2.librarymodel_v01_05.Action" />
 					<property name="transformer" value="org.opentravel.schemacompiler.transform.tl2jaxb.TLActionTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLActionRequest" />
+					<property name="target" value="org.opentravel.ns.ota2.librarymodel_v01_05.ActionRequest" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.tl2jaxb.TLActionRequestTransformer" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
 					<property name="source" value="org.opentravel.schemacompiler.model.TLActionResponse" />

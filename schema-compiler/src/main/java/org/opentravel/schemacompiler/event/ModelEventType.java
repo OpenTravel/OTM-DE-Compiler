@@ -288,6 +288,24 @@ public enum ModelEventType {
     ACTION_REMOVED(OwnershipEvent.class),
 
     /**
+     * Event type sent when a request was added to a resource action.
+     * 
+     * <p>
+     * <u>Event</u>: <code>OwnershipEvent</code> <br>
+     * <u>Source Object</u>: <code>TLAction</code>
+     */
+    ACTION_REQUEST_ADDED(OwnershipEvent.class),
+
+    /**
+     * Event type sent when a request was removed from a resource action.
+     * 
+     * <p>
+     * <u>Event</u>: <code>OwnershipEvent</code> <br>
+     * <u>Source Object</u>: <code>TLAction</code>
+     */
+    ACTION_REQUEST_REMOVED(OwnershipEvent.class),
+
+    /**
      * Event type sent when a response was added to a resource action.
      * 
      * <p>
@@ -885,6 +903,15 @@ public enum ModelEventType {
      * <u>Source Object</u>: <code>TLAction</code>
      */
     ACTION_ID_MODIFIED(ValueChangeEvent.class),
+
+    /**
+     * Event type sent when the common flag of an action is modified.
+     * 
+     * <p>
+     * <u>Event</u>: <code>ValueChangeEvent</code> <br>
+     * <u>Source Object</u>: <code>TLAction</code>
+     */
+    COMMON_FLAG_MODIFIED(ValueChangeEvent.class),
 
     /**
      * Event type sent when the action facet reference of an action request or

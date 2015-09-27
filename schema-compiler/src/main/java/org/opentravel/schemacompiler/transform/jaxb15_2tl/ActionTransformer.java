@@ -22,13 +22,11 @@ import org.opentravel.ns.ota2.librarymodel_v01_05.Action;
 import org.opentravel.ns.ota2.librarymodel_v01_05.ActionRequest;
 import org.opentravel.ns.ota2.librarymodel_v01_05.ActionResponse;
 import org.opentravel.ns.ota2.librarymodel_v01_05.Documentation;
-import org.opentravel.ns.ota2.librarymodel_v01_05.HttpMethod;
 import org.opentravel.ns.ota2.librarymodel_v01_05.MimeType;
 import org.opentravel.schemacompiler.model.TLAction;
 import org.opentravel.schemacompiler.model.TLActionRequest;
 import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLDocumentation;
-import org.opentravel.schemacompiler.model.TLHttpMethod;
 import org.opentravel.schemacompiler.model.TLMimeType;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.symbols.DefaultTransformerContext;
@@ -46,29 +44,25 @@ public class ActionTransformer extends ComplexTypeTransformer<Action,TLAction> {
 	 */
 	@Override
 	public TLAction transform(Action source) {
-        ObjectTransformer<Documentation, TLDocumentation, DefaultTransformerContext> docTransformer =
-        		getTransformerFactory().getTransformer(Documentation.class, TLDocumentation.class);
         ObjectTransformer<ActionResponse, TLActionResponse, DefaultTransformerContext> responseTransformer =
         		getTransformerFactory().getTransformer(ActionResponse.class, TLActionResponse.class);
 		TLAction action = new TLAction();
-		TLActionRequest request = action.getRequest();
-		ActionRequest sourceRequest = source.getActionRequest();
 		
 		action.setActionId(trimString(source.getActionId()));
 		action.setPathTemplate(trimString(source.getPathTemplate()));
+		action.setCommonAction(source.isCommon());
 		
-		if (sourceRequest != null) {
-			request.setHttpMethod(transformHttpMethod(sourceRequest.getHttpMethod()));
-			request.setParamGroupName(trimString(sourceRequest.getParamGroup()));
-			request.setActionFacetName(trimString(sourceRequest.getActionFacet()));
-			request.setMimeTypes(transformMimeTypes(sourceRequest.getMimeTypes()));
-			
-	        if (sourceRequest.getDocumentation() != null) {
-	            request.setDocumentation(docTransformer.transform(sourceRequest.getDocumentation()));
-	        }
+		if (source.getActionRequest() != null) {
+	        ObjectTransformer<ActionRequest, TLActionRequest, DefaultTransformerContext> requestTransformer =
+	        		getTransformerFactory().getTransformer(ActionRequest.class, TLActionRequest.class);
+	        
+	        action.setRequest(requestTransformer.transform(source.getActionRequest()));
 		}
 		
         if (source.getDocumentation() != null) {
+            ObjectTransformer<Documentation, TLDocumentation, DefaultTransformerContext> docTransformer =
+            		getTransformerFactory().getTransformer(Documentation.class, TLDocumentation.class);
+            
             action.setDocumentation(docTransformer.transform(source.getDocumentation()));
         }
         
@@ -77,48 +71,6 @@ public class ActionTransformer extends ComplexTypeTransformer<Action,TLAction> {
         }
         
 		return action;
-	}
-	
-	/**
-	 * Transforms the given <code>HttpMethod</code> value.
-	 * 
-	 * @param sourceHttpMethod  the JAXB HTTP method value
-	 * @return TLHttpMethod
-	 */
-	protected static TLHttpMethod transformHttpMethod(HttpMethod sourceHttpMethod) {
-		TLHttpMethod httpMethod;
-		
-		if (sourceHttpMethod != null) {
-			switch (sourceHttpMethod) {
-				case GET:
-					httpMethod = TLHttpMethod.GET;
-					break;
-				case POST:
-					httpMethod = TLHttpMethod.POST;
-					break;
-				case PUT:
-					httpMethod = TLHttpMethod.PUT;
-					break;
-				case DELETE:
-					httpMethod = TLHttpMethod.DELETE;
-					break;
-				case HEAD:
-					httpMethod = TLHttpMethod.HEAD;
-					break;
-				case OPTIONS:
-					httpMethod = TLHttpMethod.OPTIONS;
-					break;
-				case PATCH:
-					httpMethod = TLHttpMethod.PATCH;
-					break;
-				default:
-					httpMethod = null;
-					break;
-			}
-		} else {
-			httpMethod = null;
-		}
-		return httpMethod;
 	}
 	
 	/**
