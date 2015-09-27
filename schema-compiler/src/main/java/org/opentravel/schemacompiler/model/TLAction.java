@@ -32,19 +32,12 @@ public class TLAction extends TLModelElement implements LibraryElement, TLDocume
 	
 	private TLResource owner;
 	private String actionId;
+	private boolean commonAction;
 	private String pathTemplate;
 	private TLActionRequest request;
 	private ActionResponseListManager responseManager = new ActionResponseListManager( this );
     private TLDocumentation documentation;
 	
-    /**
-     * Default constructor.
-     */
-    public TLAction() {
-    	this.request = new TLActionRequest();
-    	this.request.setOwner(this);
-    }
-    
 	/**
 	 * @see org.opentravel.schemacompiler.validate.Validatable#getValidationIdentity()
 	 */
@@ -120,6 +113,28 @@ public class TLAction extends TLModelElement implements LibraryElement, TLDocume
 	}
 
 	/**
+	 * Returns the value of the 'commonAction' field.
+	 *
+	 * @return boolean
+	 */
+	public boolean isCommonAction() {
+		return commonAction;
+	}
+
+	/**
+	 * Assigns the value of the 'commonAction' field.
+	 *
+	 * @param commonAction  the field value to assign
+	 */
+	public void setCommonAction(boolean commonAction) {
+        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.COMMON_FLAG_MODIFIED, this)
+				.setOldValue(this.actionId).setNewValue(actionId).buildEvent();
+
+		this.commonAction = commonAction;
+        publishEvent(event);
+	}
+
+	/**
 	 * Returns the value of the 'pathTemplate' field.
 	 *
 	 * @return String
@@ -151,6 +166,30 @@ public class TLAction extends TLModelElement implements LibraryElement, TLDocume
 	}
 
     /**
+	 * Assigns the value of the 'request' field.
+	 *
+	 * @param request  the field value to assign
+	 */
+	public void setRequest(TLActionRequest request) {
+		TLActionRequest origRequest = this.request;
+        
+		if (request != origRequest) {
+			this.request = request;
+			
+			if (origRequest != null) {
+				origRequest.setOwner(null);
+				publishEvent( new ModelEventBuilder(ModelEventType.ACTION_REQUEST_REMOVED, this)
+						.setAffectedItem(origRequest).buildEvent() );
+			}
+			if (request != null) {
+				request.setOwner(this);
+				publishEvent( new ModelEventBuilder(ModelEventType.ACTION_REQUEST_ADDED, this)
+						.setAffectedItem(request).buildEvent() );
+			}
+		}
+	}
+
+	/**
      * Returns the value of the 'actionResponse' field.
      * 
      * @return List<TLActionResponse>

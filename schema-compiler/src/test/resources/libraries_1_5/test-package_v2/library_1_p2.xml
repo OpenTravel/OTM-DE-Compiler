@@ -318,6 +318,13 @@
     </BusinessObject>
     
     <Resource name="BaseResource" abstract="true" firstClass="true">
+    	<Action actionId="CommonErrors" common="true">
+        	<ActionResponse statusCodes="403 500">
+		        <Documentation>
+    			    <Description>Action-Search-Response2-documentation-line_1</Description>
+        		</Documentation>
+        	</ActionResponse>
+    	</Action>
    	</Resource>
    	
     <Resource name="ParentResource" businessObjectRef="EmptyBusinessObject"  basePath="/services/EmptyResource"
@@ -367,7 +374,7 @@
             <Element name="wrapperElement" repeat="0" type="xsd:int"/>
             <Indicator name="wrapperIndicator" publishAsElement="false"/>
         </ActionFacet>
-        <Action actionId="Create" pathTemplate="/samples">
+        <Action actionId="Create" pathTemplate="/samples" common="false">
 	        <Documentation>
     		    <Description>Action-Create-documentation-line_1</Description>
         	</Documentation>
@@ -381,13 +388,8 @@
     			    <Description>Action-Create-Response1-documentation-line_1</Description>
         		</Documentation>
         	</ActionResponse>
-        	<ActionResponse statusCodes="500">
-		        <Documentation>
-    			    <Description>Action-Create-Response2-documentation-line_1</Description>
-        		</Documentation>
-        	</ActionResponse>
         </Action>
-        <Action actionId="Update" pathTemplate="/sample/{sample_oid}">
+        <Action actionId="Update" pathTemplate="/sample/{sample_oid}" common="false">
 	        <Documentation>
     		    <Description>Action-Update-documentation-line_1</Description>
         	</Documentation>
@@ -401,13 +403,8 @@
     			    <Description>Action-Update-Response1-documentation-line_1</Description>
         		</Documentation>
         	</ActionResponse>
-        	<ActionResponse statusCodes="500">
-		        <Documentation>
-    			    <Description>Action-Update-Response2-documentation-line_1</Description>
-        		</Documentation>
-        	</ActionResponse>
         </Action>
-        <Action actionId="Search" pathTemplate="/samples">
+        <Action actionId="Search" pathTemplate="/samples" common="false">
 	        <Documentation>
     		    <Description>Action-Create-documentation-line_1</Description>
         	</Documentation>
@@ -419,11 +416,6 @@
         	<ActionResponse statusCodes="200" actionFacet="SampleResource_ObjectList" mimeTypes="APPLICATION_XML APPLICATION_JSON">
 		        <Documentation>
     			    <Description>Action-Search-Response1-documentation-line_1</Description>
-        		</Documentation>
-        	</ActionResponse>
-        	<ActionResponse statusCodes="403 500">
-		        <Documentation>
-    			    <Description>Action-Search-Response2-documentation-line_1</Description>
         		</Documentation>
         	</ActionResponse>
         </Action>

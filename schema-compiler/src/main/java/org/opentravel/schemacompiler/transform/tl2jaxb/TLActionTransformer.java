@@ -22,16 +22,12 @@ import org.opentravel.ns.ota2.librarymodel_v01_05.Action;
 import org.opentravel.ns.ota2.librarymodel_v01_05.ActionRequest;
 import org.opentravel.ns.ota2.librarymodel_v01_05.ActionResponse;
 import org.opentravel.ns.ota2.librarymodel_v01_05.Documentation;
-import org.opentravel.ns.ota2.librarymodel_v01_05.HttpMethod;
 import org.opentravel.ns.ota2.librarymodel_v01_05.MimeType;
 import org.opentravel.schemacompiler.model.TLAction;
-import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLActionRequest;
 import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLDocumentation;
-import org.opentravel.schemacompiler.model.TLHttpMethod;
 import org.opentravel.schemacompiler.model.TLMimeType;
-import org.opentravel.schemacompiler.model.TLParamGroup;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.symbols.SymbolResolverTransformerContext;
 
@@ -48,41 +44,26 @@ public class TLActionTransformer extends TLComplexTypeTransformer<TLAction,Actio
 	 */
 	@Override
 	public Action transform(TLAction source) {
-        ObjectTransformer<TLDocumentation, Documentation, SymbolResolverTransformerContext> docTransformer =
-        		getTransformerFactory().getTransformer(TLDocumentation.class, Documentation.class);
         ObjectTransformer<TLActionResponse, ActionResponse, SymbolResolverTransformerContext> responseTransformer =
         		getTransformerFactory().getTransformer(TLActionResponse.class, ActionResponse.class);
-		TLActionRequest sourceRequest = source.getRequest();
-		TLParamGroup sourceParamGroup = sourceRequest.getParamGroup();
-		TLActionFacet sourceActionFacet = sourceRequest.getActionFacet();
-		ActionRequest request = new ActionRequest();
 		Action action = new Action();
 		
 		action.setActionId(trimString(source.getActionId(), false));
 		action.setPathTemplate(trimString(source.getPathTemplate(), false));
-		action.setActionRequest(request);
-		
-		request.setHttpMethod(transformHttpMethod(sourceRequest.getHttpMethod()));
-		request.getMimeTypes().addAll(transformMimeTypes(sourceRequest.getMimeTypes()));
-		
-		if (sourceParamGroup != null) {
-			request.setParamGroup(sourceParamGroup.getName());
-		} else {
-			request.setParamGroup(sourceRequest.getParamGroupName());
-		}
-		
-		if (sourceActionFacet != null) {
-			request.setActionFacet(context.getSymbolResolver().buildEntityName(
-					sourceActionFacet.getNamespace(), sourceActionFacet.getLocalName()));
-		} else {
-			request.setActionFacet(sourceRequest.getActionFacetName());
-		}
+		action.setCommon(source.isCommonAction());
 		
         if ((source.getDocumentation() != null) && !source.getDocumentation().isEmpty()) {
+            ObjectTransformer<TLDocumentation, Documentation, SymbolResolverTransformerContext> docTransformer =
+            		getTransformerFactory().getTransformer(TLDocumentation.class, Documentation.class);
+            
             action.setDocumentation(docTransformer.transform(source.getDocumentation()));
         }
-        if ((sourceRequest.getDocumentation() != null) && !sourceRequest.getDocumentation().isEmpty()) {
-        	request.setDocumentation(docTransformer.transform(sourceRequest.getDocumentation()));
+        
+        if (source.getRequest() != null) {
+            ObjectTransformer<TLActionRequest, ActionRequest, SymbolResolverTransformerContext> requestTransformer =
+            		getTransformerFactory().getTransformer(TLActionRequest.class, ActionRequest.class);
+        	
+            action.setActionRequest(requestTransformer.transform(source.getRequest()));
         }
         
         for (TLActionResponse sourceResponse : source.getResponses()) {
@@ -90,48 +71,6 @@ public class TLActionTransformer extends TLComplexTypeTransformer<TLAction,Actio
         }
         
 		return action;
-	}
-	
-	/**
-	 * Transforms the given <code>TLHttpMethod</code> value.
-	 * 
-	 * @param sourceMethod  the enumeration value to transform
-	 * @return HttpMethod
-	 */
-	private HttpMethod transformHttpMethod(TLHttpMethod sourceMethod) {
-		HttpMethod method;
-		
-		if (sourceMethod != null) {
-			switch (sourceMethod) {
-				case GET:
-					method = HttpMethod.GET;
-					break;
-				case POST:
-					method = HttpMethod.POST;
-					break;
-				case PUT:
-					method = HttpMethod.PUT;
-					break;
-				case DELETE:
-					method = HttpMethod.DELETE;
-					break;
-				case HEAD:
-					method = HttpMethod.HEAD;
-					break;
-				case OPTIONS:
-					method = HttpMethod.OPTIONS;
-					break;
-				case PATCH:
-					method = HttpMethod.PATCH;
-					break;
-				default:
-					method = null;
-					break;
-			}
-		} else {
-			method = null;
-		}
-		return method;
 	}
 	
 	/**

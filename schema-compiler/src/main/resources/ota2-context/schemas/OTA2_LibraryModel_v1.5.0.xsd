@@ -1864,7 +1864,7 @@
       </xsd:annotation>
       <xsd:sequence>
          <xsd:element ref="Documentation" minOccurs="0" />
-         <xsd:element ref="ActionRequest" minOccurs="1" maxOccurs="1">
+         <xsd:element ref="ActionRequest" minOccurs="0" maxOccurs="1">
             <xsd:annotation>
          	  <xsd:documentation>
          	    Specifies request characteristics of this action.
@@ -1886,12 +1886,20 @@
             </xsd:documentation>
          </xsd:annotation>
       </xsd:attribute>
-      <xsd:attribute name="pathTemplate" type="xsd:string" use="required">
+      <xsd:attribute name="pathTemplate" type="xsd:string" use="optional">
          <xsd:annotation>
             <xsd:documentation>Specifies the path for this action relative to the
             	base path of the owning resource.  The path template must contain
             	a reference to all path parameters specified in the request's
             	parameter group.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="common" type="xsd:boolean" use="required">
+         <xsd:annotation>
+            <xsd:documentation>Indicates that the action is a "common" or "shared"
+            	action, meaning that all other actions defined for the resource will
+            	inherit the characteristics (typically responses) defined for it.
             </xsd:documentation>
          </xsd:annotation>
       </xsd:attribute>
