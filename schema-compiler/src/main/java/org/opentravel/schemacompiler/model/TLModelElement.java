@@ -85,17 +85,17 @@ public abstract class TLModelElement implements ModelElement {
 
         if (owningModel != null) {
             owningModel.publishEvent(event);
-            
-            if (event instanceof ValueChangeEvent) {
-            	for (ModelElementListener listener : listeners) {
-            		listener.processValueChangeEvent( (ValueChangeEvent<?,?>) event );
-            	}
-            	
-            } else if (event instanceof OwnershipEvent) {
-            	for (ModelElementListener listener : listeners) {
-            		listener.processOwnershipEvent( (OwnershipEvent<?,?>) event );
-            	}
-            }
+        }
+        
+        if (event instanceof ValueChangeEvent) {
+        	for (ModelElementListener listener : listeners) {
+        		listener.processValueChangeEvent( (ValueChangeEvent<?,?>) event );
+        	}
+        	
+        } else if (event instanceof OwnershipEvent) {
+        	for (ModelElementListener listener : listeners) {
+        		listener.processOwnershipEvent( (OwnershipEvent<?,?>) event );
+        	}
         }
     }
 
