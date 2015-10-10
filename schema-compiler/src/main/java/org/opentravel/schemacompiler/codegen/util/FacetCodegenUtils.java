@@ -25,6 +25,7 @@ import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.OperationType;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLExtensionOwner;
@@ -65,7 +66,13 @@ public class FacetCodegenUtils {
                     case QUERY:
                         facetList.addAll(((TLBusinessObject) owner).getQueryFacets());
                         break;
+					default:
+						break;
                 }
+            } else if (owner instanceof TLChoiceObject) {
+            	if (facetType == TLFacetType.CHOICE) {
+            		facetList.addAll(((TLChoiceObject) owner).getChoiceFacets());
+            	}
             }
         } else {
             facetList.add(getFacetOfType(owner, facetType));
@@ -102,12 +109,12 @@ public class FacetCodegenUtils {
      * @param facetContext
      *            the context ID of the facet to return (only used for contextual facets)
      * @param facetLabel
-     *            the label of the facet to return (only used for contextual facets)
+     *            the label of the facet to return (only used for contextual or action facets)
      * @return TLFacet
      */
     public static TLFacet getFacetOfType(TLFacetOwner owner, TLFacetType facetType,
             String facetContext, String facetLabel) {
-        TLFacet memberFacet = null;
+        TLFacet memberFacet;
 
         if (owner instanceof TLBusinessObject) {
             TLBusinessObject boOwner = (TLBusinessObject) owner;
@@ -130,6 +137,9 @@ public class FacetCodegenUtils {
                     memberFacet = findContextualFacet(boOwner.getQueryFacets(), facetContext,
                             facetLabel);
                     break;
+				default:
+					memberFacet = null;
+					break;
             }
         } else if (owner instanceof TLCoreObject) {
             TLCoreObject coreOwner = (TLCoreObject) owner;
@@ -142,7 +152,24 @@ public class FacetCodegenUtils {
                 case DETAIL:
                     memberFacet = coreOwner.getDetailFacet();
                     break;
+				default:
+					memberFacet = null;
+					break;
             }
+        } else if (owner instanceof TLChoiceObject) {
+        	TLChoiceObject choiceOwner = (TLChoiceObject) owner;
+        	
+        	switch (facetType) {
+        		case SHARED:
+        			memberFacet = choiceOwner.getSharedFacet();
+        			break;
+        		case CHOICE:
+        			memberFacet = findContextualFacet(choiceOwner.getChoiceFacets(), facetContext, facetLabel);
+        			break;
+				default:
+					memberFacet = null;
+					break;
+        	}
         } else if (owner instanceof TLOperation) {
             TLOperation opOwner = (TLOperation) owner;
 
@@ -156,7 +183,12 @@ public class FacetCodegenUtils {
                 case NOTIFICATION:
                     memberFacet = opOwner.getNotification();
                     break;
+				default:
+					memberFacet = null;
+					break;
             }
+        } else {
+        	memberFacet = null;
         }
         return memberFacet;
     }
@@ -191,25 +223,6 @@ public class FacetCodegenUtils {
     }
 
     /**
-     * Returns a facet of the specified type from the given owner. If no such facet is available
-     * from the owner, this method will return null.
-     * 
-     * @param owner
-     *            the facet owner from which to return an action facet
-     * @param facetName
-     *            the name of the facet to return
-     * @return TLActionFacet
-     */
-    public static TLActionFacet getActionFacetWithName(TLFacetOwner owner, String facetName) {
-    	TLActionFacet actionFacet = null;
-    	
-    	if (owner instanceof TLResource) {
-    		actionFacet = ((TLResource) owner).getActionFacet(facetName);
-    	}
-    	return actionFacet;
-    }
-    
-    /**
      * Returns true if the given facet owner is an extensible business object, core, or operation
      * entity.
      * 
@@ -226,6 +239,9 @@ public class FacetCodegenUtils {
         } else if (owner instanceof TLCoreObject) {
             result = !((TLCoreObject) owner).isNotExtendable();
 
+        } else if (owner instanceof TLChoiceObject) {
+            result = !((TLChoiceObject) owner).isNotExtendable();
+            
         } else if (owner instanceof TLOperation) {
             result = !((TLOperation) owner).isNotExtendable();
         }
@@ -281,10 +297,16 @@ public class FacetCodegenUtils {
                     localHierarchy.add(0, getFacetOfType(facetOwner, TLFacetType.SUMMARY));
                 case SUMMARY:
                     localHierarchy.add(0, getFacetOfType(facetOwner, TLFacetType.ID));
+				default:
+					break;
             }
         } else if (facetOwner instanceof TLCoreObject) {
             if (facet.getFacetType() == TLFacetType.DETAIL) {
                 localHierarchy.add(0, getFacetOfType(facetOwner, TLFacetType.SUMMARY));
+            }
+        } else if (facetOwner instanceof TLChoiceObject) {
+            if (facet.getFacetType() == TLFacetType.CHOICE) {
+                localHierarchy.add(0, getFacetOfType(facetOwner, TLFacetType.SHARED));
             }
         } else if (facetOwner instanceof TLOperation) {
             // No detail hierarchy within an operation's facets
@@ -333,10 +355,8 @@ public class FacetCodegenUtils {
 
         // At this point, the values in the 'inheritedFacets' map contains the set of uniquely-named
         // facets that are declared by the facetOwner's ancestors. Any ancestor facets that do not
-        // have
-        // a matching item that is explicitly declared by the facetOwner should be considered a
-        // ghost
-        // facet.
+        // have a matching item that is explicitly declared by the facetOwner should be considered a
+        // ghost facet.
         List<TLFacet> ghostFacets = new ArrayList<TLFacet>();
 
         for (TLFacet inheritedFacet : inheritedFacets) {
@@ -356,6 +376,63 @@ public class FacetCodegenUtils {
         return ghostFacets;
     }
 
+    /**
+     * Returns a list of "ghost facets" for the given resource. A ghost facet occurs when an action
+     * facet with a certain name is declared on an ancestor resource that is extended by the given
+     * 'resource' but no corresponding entity is declared on the 'resource' itself. In these cases,
+     * we must compile XSD artifacts for an inherited "ghost facet", even though it was not explicitly
+     * declared in the model.
+     * 
+     * @param resource  the resource for which to return "ghost facets"
+     * @return List<TLActionFacet>
+     */
+    public static List<TLActionFacet> findGhostFacets(TLResource resource) {
+        Set<String> inheritedFacetNames = new HashSet<String>();
+        List<TLActionFacet> inheritedFacets = new ArrayList<TLActionFacet>();
+        TLResource extendedResource = ResourceCodegenUtils.getExtendedResource(resource);
+        Set<TLResource> visitedOwners = new HashSet<TLResource>();
+
+        // Find all of the inherited facets of the specified facet type
+        while (extendedResource != null) {
+            List<TLActionFacet> facetList = extendedResource.getActionFacets();
+
+            for (TLActionFacet facet : facetList) {
+                String facetKey = facet.getName();
+
+                if (!inheritedFacetNames.contains(facetKey)) {
+                    inheritedFacetNames.add(facetKey);
+                    inheritedFacets.add(facet);
+                }
+            }
+            visitedOwners.add(extendedResource);
+            extendedResource = ResourceCodegenUtils.getExtendedResource(extendedResource);
+
+            if (visitedOwners.contains(extendedResource)) {
+                break; // exit if we encounter a circular reference
+            }
+        }
+
+        // At this point, the values in the 'inheritedFacets' map contains the set of uniquely-named
+        // facets that are declared by the facetOwner's ancestors. Any ancestor facets that do not
+        // have a matching item that is explicitly declared by the facetOwner should be considered a
+        // ghost facet.
+        List<TLActionFacet> ghostFacets = new ArrayList<TLActionFacet>();
+    	
+        for (TLActionFacet inheritedFacet : inheritedFacets) {
+        	TLActionFacet declaredFacet = resource.getActionFacet(inheritedFacet.getName());
+
+            if (declaredFacet == null) {
+            	TLActionFacet ghostFacet = new TLActionFacet();
+
+                ghostFacet.setFacetType(TLFacetType.ACTION);
+                ghostFacet.setName(inheritedFacet.getName());
+                ghostFacet.setOwningEntity(resource);
+                ghostFacets.add(ghostFacet);
+            }
+        }
+        return ghostFacets;
+    }
+    
     /**
      * Returns the type of operation based on the configuration of the request, response,
      * and/or notification facets.

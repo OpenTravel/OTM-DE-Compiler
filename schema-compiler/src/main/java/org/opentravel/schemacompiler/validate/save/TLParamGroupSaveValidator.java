@@ -13,28 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.validate.compile;
+package org.opentravel.schemacompiler.validate.save;
 
-import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.model.TLParamGroup;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
-import org.opentravel.schemacompiler.validate.base.TLResourceBaseValidator;
+import org.opentravel.schemacompiler.validate.base.TLParamGroupBaseValidator;
 import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
 
 /**
- * Validator for the <code>TLResource</code> class.
+ * Validator for the <code>TLParamGroup</code> class.
  * 
  * @author S. Livezey
  */
-public class TLResourceCompileValidator extends TLResourceBaseValidator {
+public class TLParamGroupSaveValidator extends TLParamGroupBaseValidator{
 
-    /**
-     * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateFields(org.opentravel.schemacompiler.validate.Validatable)
-     */
-    @Override
-    protected ValidationFindings validateFields(TLResource target) {
+	/**
+	 * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateFields(org.opentravel.schemacompiler.validate.Validatable)
+	 */
+	@Override
+	protected ValidationFindings validateFields(TLParamGroup target) {
         TLValidationBuilder builder = newValidationBuilder(target);
         
         return builder.getFindings();
-    }
+	}
 
 }

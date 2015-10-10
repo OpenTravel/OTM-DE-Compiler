@@ -15,26 +15,26 @@
  */
 package org.opentravel.schemacompiler.validate.compile;
 
-import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.model.TLActionRequest;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
-import org.opentravel.schemacompiler.validate.base.TLResourceBaseValidator;
+import org.opentravel.schemacompiler.validate.base.TLActionRequestBaseValidator;
 import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
 
 /**
- * Validator for the <code>TLResource</code> class.
+ * Validator for the <code>TLActionRequest</code> class.
  * 
  * @author S. Livezey
  */
-public class TLResourceCompileValidator extends TLResourceBaseValidator {
+public class TLActionRequestCompileValidator extends TLActionRequestBaseValidator {
 
-    /**
-     * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateFields(org.opentravel.schemacompiler.validate.Validatable)
-     */
-    @Override
-    protected ValidationFindings validateFields(TLResource target) {
+	/**
+	 * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateFields(org.opentravel.schemacompiler.validate.Validatable)
+	 */
+	@Override
+	protected ValidationFindings validateFields(TLActionRequest target) {
         TLValidationBuilder builder = newValidationBuilder(target);
         
         return builder.getFindings();
-    }
+	}
 
 }

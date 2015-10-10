@@ -46,6 +46,7 @@ import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLPropertyOwner;
 import org.opentravel.schemacompiler.model.TLPropertyType;
+import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLRole;
 import org.opentravel.schemacompiler.model.TLRoleEnumeration;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
@@ -388,10 +389,8 @@ public class PropertyCodegenUtils {
                         aFacet.getAttributes());
 
                 // We are traversing upward in the inheritance hierarchy, so we must pre-pend
-                // attributes onto
-                // the list in the reverse order of their declarations in order to preserve the
-                // intende order
-                // of occurrance.
+                // attributes onto the list in the reverse order of their declarations in order
+                // to preserve the intended order of occurrance.
                 Collections.reverse(localAttributes);
 
                 for (TLAttribute attribute : localAttributes) {
@@ -449,10 +448,8 @@ public class PropertyCodegenUtils {
                         aFacet.getIndicators());
 
                 // We are traversing upward in the inheritance hierarchy, so we must pre-pend
-                // indicators onto
-                // the list in the reverse order of their declarations in order to preserve the
-                // intende order
-                // of occurrance.
+                // indicators onto the list in the reverse order of their declarations in order
+                // to preserve the intended order of occurrance.
                 Collections.reverse(localIndicators);
 
                 for (TLIndicator indicator : localIndicators) {
@@ -510,10 +507,8 @@ public class PropertyCodegenUtils {
                 List<TLProperty> localProperties = new ArrayList<TLProperty>(aFacet.getElements());
 
                 // We are traversing upward in the inheritance hierarchy, so we must pre-pend
-                // properties onto
-                // the list in the reverse order of their declarations in order to preserve the
-                // intende order
-                // of occurrance.
+                // properties onto the list in the reverse order of their declarations in order
+                // to preserve the intended order of occurrance.
                 Collections.reverse(localProperties);
 
                 for (TLProperty property : localProperties) {
@@ -522,8 +517,8 @@ public class PropertyCodegenUtils {
                     NamedEntity inheritanceRoot = getInheritanceRoot(propertyType);
 
                     // Properties whose types are members of an inheritance hierarchy should be
-                    // skipped
-                    // if they were eclipsed by lower-level properties of the owner's hierarchy
+                    // skipped if they were eclipsed by lower-level properties of the owner's
+                    // hierarchy
                     if ((inheritanceRoot == null) || !inheritanceRoots.contains(inheritanceRoot)) {
                         if (inheritanceRoot != null) {
                             inheritanceRoots.add(inheritanceRoot);
@@ -582,23 +577,20 @@ public class PropertyCodegenUtils {
     public static List<TLAttribute> getInheritedAttributes(TLActionFacet facet) {
         Collection<TLFacetOwner> visitedOwners = new HashSet<TLFacetOwner>();
         List<TLAttribute> attributeList = new ArrayList<TLAttribute>();
-        TLFacetOwner facetOwner = facet.getOwningEntity();
+        TLResource facetOwner = (TLResource) facet.getOwningEntity();
 
         while (facetOwner != null) {
             if (visitedOwners.contains(facetOwner)) {
                 break;
             }
-            TLActionFacet aFacet = FacetCodegenUtils.getActionFacetWithName(facetOwner, facet.getName());
+            TLActionFacet aFacet = facetOwner.getActionFacet(facet.getName());
 
             if (aFacet != null) {
-                List<TLAttribute> localAttributes = new ArrayList<TLAttribute>(
-                        aFacet.getAttributes());
+                List<TLAttribute> localAttributes = new ArrayList<TLAttribute>(aFacet.getAttributes());
 
                 // We are traversing upward in the inheritance hierarchy, so we must pre-pend
-                // attributes onto
-                // the list in the reverse order of their declarations in order to preserve the
-                // intende order
-                // of occurrance.
+                // attributes onto the list in the reverse order of their declarations in order
+                // to preserve the intended order of occurrance.
                 Collections.reverse(localAttributes);
 
                 for (TLAttribute attribute : localAttributes) {
@@ -606,7 +598,7 @@ public class PropertyCodegenUtils {
                 }
             }
             visitedOwners.add(facetOwner);
-            facetOwner = FacetCodegenUtils.getFacetOwnerExtension(facetOwner);
+            facetOwner = ResourceCodegenUtils.getExtendedResource(facetOwner);
         }
         return attributeList;
     }
@@ -623,13 +615,13 @@ public class PropertyCodegenUtils {
     public static List<TLIndicator> getInheritedIndicators(TLActionFacet facet) {
         Collection<TLFacetOwner> visitedOwners = new HashSet<TLFacetOwner>();
         List<TLIndicator> indicatorList = new ArrayList<TLIndicator>();
-        TLFacetOwner facetOwner = facet.getOwningEntity();
+        TLResource facetOwner = (TLResource) facet.getOwningEntity();
 
         while (facetOwner != null) {
             if (visitedOwners.contains(facetOwner)) {
                 break;
             }
-            TLActionFacet aFacet = FacetCodegenUtils.getActionFacetWithName(facetOwner, facet.getName());
+            TLActionFacet aFacet = facetOwner.getActionFacet(facet.getName());
 
             if (aFacet != null) {
                 List<TLIndicator> localIndicators = new ArrayList<TLIndicator>(
@@ -647,7 +639,7 @@ public class PropertyCodegenUtils {
                 }
             }
             visitedOwners.add(facetOwner);
-            facetOwner = FacetCodegenUtils.getFacetOwnerExtension(facetOwner);
+            facetOwner = ResourceCodegenUtils.getExtendedResource(facetOwner);
         }
         return indicatorList;
     }
@@ -665,13 +657,13 @@ public class PropertyCodegenUtils {
         Collection<TLFacetOwner> visitedOwners = new HashSet<TLFacetOwner>();
         Set<NamedEntity> inheritanceRoots = new HashSet<NamedEntity>();
         List<TLProperty> propertyList = new ArrayList<TLProperty>();
-        TLFacetOwner facetOwner = facet.getOwningEntity();
+        TLResource facetOwner = (TLResource) facet.getOwningEntity();
 
         while (facetOwner != null) {
             if (visitedOwners.contains(facetOwner)) {
                 break;
             }
-            TLActionFacet aFacet = FacetCodegenUtils.getActionFacetWithName(facetOwner, facet.getName());
+            TLActionFacet aFacet = facetOwner.getActionFacet(facet.getName());
 
             if (aFacet != null) {
                 List<TLProperty> localProperties = new ArrayList<TLProperty>(aFacet.getElements());
@@ -700,7 +692,7 @@ public class PropertyCodegenUtils {
                 }
             }
             visitedOwners.add(facetOwner);
-            facetOwner = FacetCodegenUtils.getFacetOwnerExtension(facetOwner);
+            facetOwner = ResourceCodegenUtils.getExtendedResource(facetOwner);
         }
         return propertyList;
     }
@@ -948,6 +940,8 @@ public class PropertyCodegenUtils {
                     case DETAIL:
                         assignedType = itemFacet;
                         break;
+					default:
+						break;
                 }
             }
         }
@@ -1058,7 +1052,6 @@ public class PropertyCodegenUtils {
      * Simple dispatch method used to decompose the problem from the primary 'getAlternateFacets()'
      * method.
      */
-    @SuppressWarnings("unused")
     private static TLAbstractFacet[] getAlternateFacets(TLPropertyOwner originatingFacet,
             TLCoreObject referencedOwner, TLListFacet referencedFacet) {
         TLAbstractFacet[] results = new TLAbstractFacet[0];
@@ -1076,7 +1069,6 @@ public class PropertyCodegenUtils {
      * Simple dispatch method used to decompose the problem from the primary 'getAlternateFacets()'
      * method.
      */
-    @SuppressWarnings("unused")
     private static TLAbstractFacet[] getAlternateFacets(TLBusinessObject originatingOwner,
             TLFacet originatingFacet, TLBusinessObject referencedOwner,
             TLAbstractFacet referencedFacet) {
@@ -1098,6 +1090,8 @@ public class PropertyCodegenUtils {
                         results = new TLAbstractFacet[] { referencedOwner.getSummaryFacet(),
                                 referencedOwner.getIdFacet() };
                         break;
+					default:
+						break;
                 }
                 break;
             case SUMMARY:
@@ -1120,6 +1114,8 @@ public class PropertyCodegenUtils {
                         results = new TLAbstractFacet[] { referencedOwner.getSummaryFacet(),
                                 referencedOwner.getIdFacet() };
                         break;
+					default:
+						break;
                 }
                 break;
             case DETAIL:
@@ -1140,8 +1136,12 @@ public class PropertyCodegenUtils {
                         results = new TLAbstractFacet[] { referencedOwner.getSummaryFacet(),
                                 referencedOwner.getIdFacet() };
                         break;
+					default:
+						break;
                 }
                 break;
+			default:
+				break;
         }
         return results;
     }
@@ -1150,7 +1150,6 @@ public class PropertyCodegenUtils {
      * Simple dispatch method used to decompose the problem from the primary 'getAlternateFacets()'
      * method.
      */
-    @SuppressWarnings("unused")
     private static TLAbstractFacet[] getAlternateFacets(TLBusinessObject originatingOwner,
             TLFacet originatingFacet, TLCoreObject referencedOwner, TLAbstractFacet referencedFacet) {
         TLAbstractFacet[] results = new TLAbstractFacet[0];
@@ -1170,6 +1169,8 @@ public class PropertyCodegenUtils {
                         results = new TLAbstractFacet[] { referencedOwner.getSummaryFacet(),
                                 referencedOwner.getSimpleFacet() };
                         break;
+					default:
+						break;
                 }
                 break;
             case SUMMARY:
@@ -1186,6 +1187,8 @@ public class PropertyCodegenUtils {
                         results = new TLAbstractFacet[] { referencedOwner.getSummaryFacet(),
                                 referencedOwner.getSimpleFacet() };
                         break;
+					default:
+						break;
                 }
                 break;
             case DETAIL:
@@ -1204,8 +1207,12 @@ public class PropertyCodegenUtils {
                         results = new TLAbstractFacet[] { referencedOwner.getSummaryFacet(),
                                 referencedOwner.getSimpleFacet() };
                         break;
+					default:
+						break;
                 }
                 break;
+			default:
+				break;
         }
         return results;
     }
@@ -1214,7 +1221,6 @@ public class PropertyCodegenUtils {
      * Simple dispatch method used to decompose the problem from the primary 'getAlternateFacets()'
      * method.
      */
-    @SuppressWarnings("unused")
     private static TLAbstractFacet[] getAlternateFacets(TLCoreObject originatingOwner,
             TLFacet originatingFacet, TLBusinessObject referencedOwner,
             TLAbstractFacet referencedFacet) {
@@ -1226,7 +1232,6 @@ public class PropertyCodegenUtils {
      * Simple dispatch method used to decompose the problem from the primary 'getAlternateFacets()'
      * method.
      */
-    @SuppressWarnings("unused")
     private static TLAbstractFacet[] getAlternateFacets(TLCoreObject originatingOwner,
             TLFacet originatingFacet, TLCoreObject referencedOwner, TLAbstractFacet referencedFacet) {
         TLAbstractFacet[] results = new TLAbstractFacet[0];
@@ -1244,6 +1249,8 @@ public class PropertyCodegenUtils {
                 results = new TLAbstractFacet[] { referencedOwner.getSummaryFacet(),
                         referencedOwner.getSimpleFacet() };
                 break;
+			default:
+				break;
         }
         return results;
     }
@@ -1252,7 +1259,6 @@ public class PropertyCodegenUtils {
      * Simple dispatch method used to decompose the problem from the primary 'getAlternateFacets()'
      * method.
      */
-    @SuppressWarnings("unused")
     private static TLAbstractFacet[] getAlternateFacets(TLExtensionPointFacet originatingOwner,
             TLFacet originatingFacet, TLBusinessObject referencedOwner,
             TLAbstractFacet referencedFacet) {
@@ -1275,6 +1281,8 @@ public class PropertyCodegenUtils {
                 results = new TLAbstractFacet[] { referencedOwner.getSummaryFacet(),
                         referencedOwner.getIdFacet() };
                 break;
+			default:
+				break;
         }
         return results;
     }
@@ -1283,7 +1291,6 @@ public class PropertyCodegenUtils {
      * Simple dispatch method used to decompose the problem from the primary 'getAlternateFacets()'
      * method.
      */
-    @SuppressWarnings("unused")
     private static TLAbstractFacet[] getAlternateFacets(TLExtensionPointFacet originatingOwner,
             TLFacet originatingFacet, TLCoreObject referencedOwner, TLAbstractFacet referencedFacet) {
         TLAbstractFacet[] results = new TLAbstractFacet[0];
@@ -1301,6 +1308,8 @@ public class PropertyCodegenUtils {
                 results = new TLAbstractFacet[] { referencedOwner.getSummaryFacet(),
                         referencedOwner.getSimpleFacet() };
                 break;
+			default:
+				break;
         }
         return results;
     }

@@ -24,6 +24,7 @@ import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
@@ -188,6 +189,23 @@ public class ValidatorUtils {
      * @return List<TLModelElement>
      */
     public static List<TLModelElement> getInheritedMembers(TLFacet target) {
+        List<TLModelElement> inheritedMembers = new ArrayList<TLModelElement>();
+
+        inheritedMembers.addAll(PropertyCodegenUtils.getInheritedAttributes(target));
+        inheritedMembers.addAll(PropertyCodegenUtils.getInheritedProperties(target));
+        inheritedMembers.addAll(PropertyCodegenUtils.getInheritedIndicators(target));
+        return inheritedMembers;
+    }
+
+    /**
+     * Returns a collection of all attributes, properties, and indicators that are owned or
+     * inherited by the given action facet.
+     * 
+     * @param target
+     *            the action facet being validated
+     * @return List<TLModelElement>
+     */
+    public static List<TLModelElement> getInheritedMembers(TLActionFacet target) {
         List<TLModelElement> inheritedMembers = new ArrayList<TLModelElement>();
 
         inheritedMembers.addAll(PropertyCodegenUtils.getInheritedAttributes(target));
