@@ -15,8 +15,15 @@
  */
 package org.opentravel.schemacompiler.validate.base;
 
+import org.opentravel.schemacompiler.model.TLAction;
+import org.opentravel.schemacompiler.model.TLActionFacet;
+import org.opentravel.schemacompiler.model.TLDocumentation;
+import org.opentravel.schemacompiler.model.TLExtension;
+import org.opentravel.schemacompiler.model.TLParamGroup;
 import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.model.TLResourceParentRef;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
+import org.opentravel.schemacompiler.validate.Validator;
 import org.opentravel.schemacompiler.validate.impl.TLValidatorBase;
 
 /**
@@ -31,8 +38,35 @@ public class TLResourceBaseValidator extends TLValidatorBase<TLResource> {
      */
     @Override
     protected ValidationFindings validateChildren(TLResource target) {
+        Validator<TLResourceParentRef> parentRefValidator = getValidatorFactory().getValidatorForClass(TLResourceParentRef.class);
+        Validator<TLParamGroup> paramGroupValidator = getValidatorFactory().getValidatorForClass(TLParamGroup.class);
+        Validator<TLActionFacet> actionFacetValidator = getValidatorFactory().getValidatorForClass(TLActionFacet.class);
+        Validator<TLAction> actionValidator = getValidatorFactory().getValidatorForClass(TLAction.class);
         ValidationFindings findings = new ValidationFindings();
+        
+        if (target.getExtension() != null) {
+            Validator<TLExtension> extensionValidator = getValidatorFactory().getValidatorForClass(TLExtension.class);
 
+            findings.addAll(extensionValidator.validate(target.getExtension()));
+        }
+        if (target.getDocumentation() != null) {
+            Validator<TLDocumentation> docValidator = getValidatorFactory().getValidatorForClass(TLDocumentation.class);
+
+            findings.addAll(docValidator.validate(target.getDocumentation()));
+        }
+        
+        for (TLResourceParentRef parentRef : target.getParentRefs()) {
+            findings.addAll(parentRefValidator.validate(parentRef));
+        }
+        for (TLParamGroup paramGroup : target.getParamGroups()) {
+            findings.addAll(paramGroupValidator.validate(paramGroup));
+        }
+        for (TLActionFacet actionFacet : target.getActionFacets()) {
+            findings.addAll(actionFacetValidator.validate(actionFacet));
+        }
+        for (TLAction action : target.getActions()) {
+            findings.addAll(actionValidator.validate(action));
+        }
         return findings;
     }
 

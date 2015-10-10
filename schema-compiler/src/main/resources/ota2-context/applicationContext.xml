@@ -230,10 +230,6 @@
 					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.compile.TLPropertyCompileValidator" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
-					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLResource" />
-					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.compile.TLResourceCompileValidator" />
-				</bean>
-				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
 					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLRole" />
 					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.compile.TLRoleCompileValidator" />
 				</bean>
@@ -252,6 +248,38 @@
 				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
 					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLValueWithAttributes" />
 					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.compile.TLValueWithAttributesCompileValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLResource" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.compile.TLResourceCompileValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLResourceParentRef" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.compile.TLResourceParentRefCompileValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLParamGroup" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.compile.TLParamGroupCompileValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLParameter" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.compile.TLParameterCompileValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLActionFacet" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.compile.TLActionFacetCompileValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLAction" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.compile.TLActionCompileValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLActionRequest" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.compile.TLActionRequestCompileValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLActionResponse" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.compile.TLActionResponseCompileValidator" />
 				</bean>
 			</list>
 		</property>
@@ -350,10 +378,6 @@
 					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.save.TLPropertySaveValidator" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
-					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLResource" />
-					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.save.TLResourceSaveValidator" />
-				</bean>
-				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
 					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLRole" />
 					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.save.TLRoleSaveValidator" />
 				</bean>
@@ -372,6 +396,38 @@
 				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
 					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLValueWithAttributes" />
 					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.save.TLValueWithAttributesSaveValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLResource" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.save.TLResourceSaveValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLResourceParentRef" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.save.TLResourceParentRefSaveValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLParamGroup" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.save.TLParamGroupSaveValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLParameter" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.save.TLParameterSaveValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLActionFacet" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.save.TLActionFacetSaveValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLAction" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.save.TLActionSaveValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLActionRequest" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.save.TLActionRequestSaveValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLActionResponse" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.save.TLActionResponseSaveValidator" />
 				</bean>
 			</list>
 		</property>
