@@ -22,8 +22,8 @@ import org.opentravel.schemacompiler.model.TLLibrary;
 
 /**
  * Integrity checker component that automatically manages the list of imports and includes
- * maintained by a <code>TLLibrary</code> instance. It is invoked whenever attributes or properties
- * are added or removed from a facet, taking action to add or remove imports/includes as required.
+ * maintained by a <code>TLLibrary</code> instance. It is invoked whenever entities are added
+ * or removed from a library, taking action to add or remove imports/includes as required.
  * 
  * @author S. Livezey
  */

@@ -42,20 +42,21 @@ import org.opentravel.schemacompiler.validate.impl.TLModelSymbolResolver;
  * @author S. Livezey
  */
 public class TypeNameIntegrityChecker extends
-        AbstractIntegrityChecker<ValueChangeEvent<TLModelElement, NamedEntity>, TLModelElement> {
+        AbstractIntegrityChecker<ValueChangeEvent<TLModelElement, TLModelElement>, TLModelElement> {
 
     /**
      * @see org.opentravel.schemacompiler.event.ModelEventListener#processModelEvent(org.opentravel.schemacompiler.event.ModelEvent)
      */
     @Override
-    public void processModelEvent(ValueChangeEvent<TLModelElement, NamedEntity> event) {
+    public void processModelEvent(ValueChangeEvent<TLModelElement, TLModelElement> event) {
+        TLModelElement sourceObject = event.getSource();
+        
         if ((event.getType() == ModelEventType.TYPE_ASSIGNMENT_MODIFIED)
                 || (event.getType() == ModelEventType.EXTENDS_ENTITY_MODIFIED)
                 || (event.getType() == ModelEventType.PARENT_RESOURCE_MODIFIED)
                 || (event.getType() == ModelEventType.FACET_REF_MODIFIED)
                 || (event.getType() == ModelEventType.ACTION_FACET_MODIFIED)) {
-            TLModelElement sourceObject = event.getSource();
-            String entityName = buildEntityName(event.getNewValue(), sourceObject);
+            String entityName = buildEntityName((NamedEntity) event.getNewValue(), sourceObject);
 
             if (sourceObject instanceof TLSimple) {
                 ((TLSimple) sourceObject).setParentTypeName(entityName);
@@ -87,6 +88,14 @@ public class TypeNameIntegrityChecker extends
             } else if (sourceObject instanceof TLActionResponse) {
                 ((TLActionResponse) sourceObject).setActionFacetName(entityName);
             }
+            
+        } else if ((event.getType() == ModelEventType.PARAM_GROUP_MODIFIED)
+        		&& (event.getNewValue() instanceof TLParamGroup)
+        		&& (sourceObject instanceof TLActionRequest)) {
+    		// TLParamGroup is the only entity reference we need to handle that is not
+    		// a named entity.
+            ((TLActionRequest) sourceObject).setParamGroupName(
+            		((TLParamGroup) event.getNewValue()).getName() );
         }
     }
 

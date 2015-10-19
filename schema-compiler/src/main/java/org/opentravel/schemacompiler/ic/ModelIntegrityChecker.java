@@ -38,8 +38,9 @@ public class ModelIntegrityChecker extends AbstractModelIntegrityChecker {
         List<ModelEventListener<?, ?>> listeners = new ArrayList<ModelEventListener<?, ?>>();
 
         listeners.add(new TypeAssignmentChangeIntegrityChecker());
-        listeners.add(new FacetMemberChangeIntegrityChecker());
         listeners.add(new LibraryMemberChangeIntegrityChecker());
+        listeners.add(new FacetMemberChangeIntegrityChecker());
+        listeners.add(new ResourceMemberChangeIntegrityChecker());
         listeners.add(new TypeNameIntegrityChecker());
 
         listeners.add(new NameChangeIntegrityChecker());
