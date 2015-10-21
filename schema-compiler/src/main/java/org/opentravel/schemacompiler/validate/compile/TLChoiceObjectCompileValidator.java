@@ -16,6 +16,7 @@
 package org.opentravel.schemacompiler.validate.compile;
 
 import org.opentravel.schemacompiler.model.TLChoiceObject;
+import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.base.TLChoiceObjectBaseValidator;
 import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
@@ -34,7 +35,6 @@ public class TLChoiceObjectCompileValidator extends TLChoiceObjectBaseValidator 
     protected ValidationFindings validateFields(TLChoiceObject target) {
         TLValidationBuilder builder = newValidationBuilder(target);
         
-        /*
         builder.setProperty("name", target.getName()).setFindingType(FindingType.ERROR)
                 .assertNotNullOrBlank().assertPatternMatch(NAME_XML_PATTERN);
 
@@ -49,7 +49,6 @@ public class TLChoiceObjectCompileValidator extends TLChoiceObjectBaseValidator 
 
         checkSchemaNamingConflicts(target, builder);
         validateVersioningRules(target, builder);
-		*/
         
         return builder.getFindings();
     }
