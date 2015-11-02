@@ -20,8 +20,18 @@
     </ExtensionPointFacet>
     
     <ExtensionPointFacet>
+        <Attribute name="extChoiceAttribute121" type="lib-01:LookupSimple"/>
+        <Extension extends="lib-0102:LookupChoice_Shared"/>
+    </ExtensionPointFacet>
+    
+    <ExtensionPointFacet>
         <Attribute name="extBOAttribute121" type="lib-01:LookupSimple"/>
         <Extension extends="lib-0102:LookupBO_Summary"/>
+    </ExtensionPointFacet>
+    
+    <ExtensionPointFacet>
+        <Attribute name="extResourceAttribute121" type="lib-01:LookupSimple"/>
+        <Extension extends="lib-0102:LookupResource_LookupFacetShared"/>
     </ExtensionPointFacet>
     
     <ExtensionPointFacet>

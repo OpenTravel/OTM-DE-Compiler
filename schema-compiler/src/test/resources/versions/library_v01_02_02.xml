@@ -24,6 +24,16 @@
     </ExtensionPointFacet>
     
     <ExtensionPointFacet>
+        <Attribute name="extChoiceAttribute122" type="lib-01:LookupSimple"/>
+        <Extension extends="lib-0102:LookupChoice_Shared"/>
+    </ExtensionPointFacet>
+    
+    <ExtensionPointFacet>
+        <Attribute name="extChoiceAAttribute122" type="lib-01:LookupSimple"/>
+        <Extension extends="lib-0102:LookupChoice_ChoiceA"/>
+    </ExtensionPointFacet>
+    
+    <ExtensionPointFacet>
         <Attribute name="extBOAttribute122" type="xsd:string"/>
         <Extension extends="lib-0102:LookupBO_Summary"/>
     </ExtensionPointFacet>
@@ -31,6 +41,11 @@
     <ExtensionPointFacet>
         <Attribute name="extBODetailAttribute122" type="xsd:string"/>
         <Extension extends="lib-0102:LookupBO_Detail"/>
+    </ExtensionPointFacet>
+    
+    <ExtensionPointFacet>
+        <Attribute name="extResourceAttribute122" type="lib-01:LookupSimple"/>
+        <Extension extends="lib-0102:LookupResource_LookupFacetShared"/>
     </ExtensionPointFacet>
     
     <ExtensionPointFacet>

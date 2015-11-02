@@ -72,6 +72,33 @@
         <Roles/>
     </CoreObject>
     
+    <ChoiceObject name="LookupChoice" notExtendable="false">
+        <Extension extends="lib-01:LookupChoice"/>
+        <Aliases/>
+        <Shared>
+            <Element name="sharedElement11" repeat="0" type="xsd:string"/>
+        </Shared>
+        <Choice label="ChoiceA" context="">
+            <Element name="choiceAElement11" repeat="0" type="xsd:string"/>
+        </Choice>
+        <Choice label="ChoiceB" context="">
+            <Element name="choiceBElement11" repeat="0" type="xsd:string"/>
+        </Choice>
+    </ChoiceObject>
+    
+    <ChoiceObject name="MinorVersionTestChoice" notExtendable="false">
+        <Aliases/>
+        <Shared>
+            <Element name="sharedElement11" repeat="0" type="xsd:string"/>
+        </Shared>
+        <Choice label="ChoiceA" context="">
+            <Element name="choiceAElement11" repeat="0" type="xsd:string"/>
+        </Choice>
+        <Choice label="ChoiceB" context="">
+            <Element name="choiceBElement11" repeat="0" type="xsd:string"/>
+        </Choice>
+    </ChoiceObject>
+    
     <BusinessObject name="LookupBO" notExtendable="false">
         <Extension extends="lib-01:LookupBO"/>
         <Aliases/>
@@ -92,6 +119,41 @@
         </Summary>
         <Detail/>
     </BusinessObject>
+    
+    <Resource name="LookupResource" businessObjectRef="LookupBO" basePath="/resources/LookupResource"
+    			abstract="false" firstClass="true">
+        <Extension extends="lib-01:LookupResource"/>
+        <ParamGroup name="LookupParametersShared" idGroup="false" facetName="LookupBO_Summary">
+        	<Parameter fieldName="Element11" location="Path" />
+        </ParamGroup>
+        <ParamGroup name="LookupParameters11" idGroup="true" facetName="LookupBO_ID">
+        	<Parameter fieldName="uid" location="Path" />
+        </ParamGroup>
+        <ActionFacet context="" label="LookupFacetShared" notExtendable="false" referenceType="Required">
+            <Element name="Element11" repeat="0" type="xsd:string"/>
+        </ActionFacet>
+        <ActionFacet context="" label="LookupFacet11" notExtendable="false" referenceType="Required">
+            <Element name="Element11" repeat="0" type="xsd:string"/>
+        </ActionFacet>
+        <Action actionId="LookupAction11" pathTemplate="/{uid}" common="false">
+        	<ActionRequest httpMethod="GET" paramGroup="LookupParameters11" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+        	<ActionResponse statusCodes="200" actionFacet="LookupResource_LookupFacet11" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+        </Action>
+    </Resource>
+    
+    <Resource name="MinorVersionTestResource" businessObjectRef="MinorVersionTestBO" basePath="/resources/MinorVersionTestResource"
+    			abstract="false" firstClass="true">
+        <ParamGroup name="MinorVersionTestParameters" idGroup="true" facetName="MinorVersionTestBO_Summary">
+        	<Parameter fieldName="uid" location="Path" />
+        </ParamGroup>
+        <ActionFacet context="" label="MinorVersionTestFacet" notExtendable="false" referenceType="Required">
+            <Element name="Element11" repeat="0" type="xsd:string"/>
+        </ActionFacet>
+        <Action actionId="MinorVersionTestAction" pathTemplate="/{uid}" common="false">
+        	<ActionRequest httpMethod="GET" paramGroup="MinorVersionTestParameters" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+        	<ActionResponse statusCodes="200" actionFacet="MinorVersionTestResource_MinorVersionTestFacet" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+        </Action>
+    </Resource>
     
     <Service name="VersionedService">
         <Operation Name="LookupOperation" notExtendable="false">

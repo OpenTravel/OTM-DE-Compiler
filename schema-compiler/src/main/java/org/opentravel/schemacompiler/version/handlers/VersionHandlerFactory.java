@@ -20,11 +20,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.util.ModelElementCloner;
@@ -112,7 +114,9 @@ public class VersionHandlerFactory {
 		
 		_handlerMappings.put( TLBusinessObject.class, TLBusinessObjectVersionHandler.class );
 		_handlerMappings.put( TLCoreObject.class, TLCoreObjectVersionHandler.class );
+		_handlerMappings.put( TLChoiceObject.class, TLChoiceObjectVersionHandler.class );
 		_handlerMappings.put( TLOperation.class, TLOperationVersionHandler.class );
+		_handlerMappings.put( TLResource.class, TLResourceVersionHandler.class );
 		_handlerMappings.put( TLValueWithAttributes.class, TLValueWithAttributesVersionHandler.class );
 		_handlerMappings.put( TLOpenEnumeration.class, TLOpenEnumerationVersionHandler.class );
 		_handlerMappings.put( TLClosedEnumeration.class, TLClosedEnumerationVersionHandler.class );

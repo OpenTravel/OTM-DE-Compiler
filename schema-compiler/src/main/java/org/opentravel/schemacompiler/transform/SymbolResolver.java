@@ -109,4 +109,9 @@ public interface SymbolResolver {
      */
     public void setAnonymousEntityFilter(AnonymousEntityFilter filter);
 
+    /**
+     * Displays the contents of the underlying symbol table for debugging purposes.
+     */
+    public void displaySymbolTable();
+
 }

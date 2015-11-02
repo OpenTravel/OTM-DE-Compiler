@@ -647,8 +647,6 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateResourceParentRef(TLResourceParentRef parentRef) {
         if (canVisit(parentRef) && visitor.visitResourceParentRef(parentRef)) {
-        	navigateResource(parentRef.getParentResource());
-        	navigateParamGroup(parentRef.getParentParamGroup());
             navigateDocumentation(parentRef.getDocumentation());
         }
         addVisitedNode(parentRef);

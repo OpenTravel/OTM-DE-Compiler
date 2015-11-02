@@ -24,13 +24,13 @@ import java.util.List;
 
 import org.junit.Test;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLOperation;
-import org.opentravel.schemacompiler.version.PatchVersionHelper;
-import org.opentravel.schemacompiler.version.Versioned;
+import org.opentravel.schemacompiler.model.TLResource;
 
 /**
  * Verifies the operation of the <code>PatchVersionHelper</code> class.
@@ -42,14 +42,10 @@ public class TestPatchVersionHelper extends AbstractVersionHelperTests {
     @Test
     public void testGetLaterPatchVersionLibraries() throws Exception {
         TLModel model = loadTestModel(FILE_VERSION_1_2_2, FILE_VERSION_1_0_1);
-        TLLibrary majorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1,
-                TEST_LIBRARY_NAME);
-        TLLibrary minorVersionLibrary1 = (TLLibrary) model.getLibrary(NS_VERSION_1_1,
-                TEST_LIBRARY_NAME);
-        TLLibrary minorVersionLibrary2 = (TLLibrary) model.getLibrary(NS_VERSION_1_2,
-                TEST_LIBRARY_NAME);
-        TLLibrary patchVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_2_1,
-                TEST_LIBRARY_NAME);
+        TLLibrary majorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1, TEST_LIBRARY_NAME);
+        TLLibrary minorVersionLibrary1 = (TLLibrary) model.getLibrary(NS_VERSION_1_1, TEST_LIBRARY_NAME);
+        TLLibrary minorVersionLibrary2 = (TLLibrary) model.getLibrary(NS_VERSION_1_2, TEST_LIBRARY_NAME);
+        TLLibrary patchVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_2_1, TEST_LIBRARY_NAME);
         PatchVersionHelper helper = new PatchVersionHelper();
         List<String> laterPatchVersions;
 
@@ -78,30 +74,41 @@ public class TestPatchVersionHelper extends AbstractVersionHelperTests {
     @Test
     public void testGetPatchedVersion() throws Exception {
         TLModel model = loadTestModel(FILE_VERSION_1_2_2, FILE_VERSION_1_0_1);
-        TLLibrary patchVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_2_1,
-                TEST_LIBRARY_NAME);
-        TLLibrary minorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_2,
-                TEST_LIBRARY_NAME);
+        TLLibrary patchVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_2_1, TEST_LIBRARY_NAME);
+        TLLibrary minorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_2, TEST_LIBRARY_NAME);
         TLExtensionPointFacet boPatch = patchVersionLibrary
                 .getExtensionPointFacetType("ExtensionPoint_LookupBO_Summary");
         TLExtensionPointFacet corePatch = patchVersionLibrary
                 .getExtensionPointFacetType("ExtensionPoint_LookupCore_Summary");
+        TLExtensionPointFacet choicePatch = patchVersionLibrary
+                .getExtensionPointFacetType("ExtensionPoint_LookupChoice_Shared");
         TLExtensionPointFacet opPatch = patchVersionLibrary
                 .getExtensionPointFacetType("ExtensionPoint_VersionedService_LookupOperation_RQ");
+        TLExtensionPointFacet resourcePatch = patchVersionLibrary
+                .getExtensionPointFacetType("ExtensionPoint_LookupResource_LookupFacetShared");
         PatchVersionHelper helper = new PatchVersionHelper();
 
         assertNotNull(boPatch);
         assertNotNull(corePatch);
+        assertNotNull(choicePatch);
         assertNotNull(opPatch);
+        assertNotNull(resourcePatch);
 
         Versioned patchedBO = helper.getPatchedVersion(boPatch);
         Versioned patchedCore = helper.getPatchedVersion(corePatch);
+        Versioned patchedChoice = helper.getPatchedVersion(choicePatch);
         Versioned patchedOp = helper.getPatchedVersion(opPatch);
+        Versioned patchedResource = helper.getPatchedVersion(resourcePatch);
 
         assertNotNull(patchedBO);
         assertTrue(patchedBO instanceof TLBusinessObject);
         assertEquals("1.2.0", patchedBO.getVersion());
         assertTrue(patchedBO.getOwningLibrary() == minorVersionLibrary);
+
+        assertNotNull(patchedChoice);
+        assertTrue(patchedChoice instanceof TLChoiceObject);
+        assertEquals("1.2.0", patchedChoice.getVersion());
+        assertTrue(patchedChoice.getOwningLibrary() == minorVersionLibrary);
 
         assertNotNull(patchedCore);
         assertTrue(patchedCore instanceof TLCoreObject);
@@ -112,30 +119,37 @@ public class TestPatchVersionHelper extends AbstractVersionHelperTests {
         assertTrue(patchedOp instanceof TLOperation);
         assertEquals("1.2.0", patchedOp.getVersion());
         assertTrue(patchedOp.getOwningLibrary() == minorVersionLibrary);
+        
+        assertNotNull(patchedResource);
+        assertTrue(patchedResource instanceof TLResource);
+        assertEquals("1.2.0", patchedResource.getVersion());
+        assertTrue(patchedResource.getOwningLibrary() == minorVersionLibrary);
     }
 
     @Test
     public void testGetLaterPatchVersions() throws Exception {
         TLModel model = loadTestModel(FILE_VERSION_1_2_2);
-        TLLibrary minorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_2,
-                TEST_LIBRARY_NAME);
-        TLLibrary patchVersionLibrary1 = (TLLibrary) model.getLibrary(NS_VERSION_1_2_1,
-                TEST_LIBRARY_NAME);
-        TLLibrary patchVersionLibrary2 = (TLLibrary) model.getLibrary(NS_VERSION_1_2_2,
-                TEST_LIBRARY_NAME);
+        TLLibrary minorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_2, TEST_LIBRARY_NAME);
+        TLLibrary patchVersionLibrary1 = (TLLibrary) model.getLibrary(NS_VERSION_1_2_1, TEST_LIBRARY_NAME);
+        TLLibrary patchVersionLibrary2 = (TLLibrary) model.getLibrary(NS_VERSION_1_2_2, TEST_LIBRARY_NAME);
         TLBusinessObject minorVersionBO = minorVersionLibrary.getBusinessObjectType("LookupBO");
         TLCoreObject minorVersionCore = minorVersionLibrary.getCoreObjectType("LookupCore");
-        TLOperation minorVersionOp = minorVersionLibrary.getService().getOperation(
-                "LookupOperation");
+        TLChoiceObject minorVersionChoice = minorVersionLibrary.getChoiceObjectType("LookupChoice");
+        TLOperation minorVersionOp = minorVersionLibrary.getService().getOperation("LookupOperation");
+        TLResource minorVersionResource = minorVersionLibrary.getResourceType("LookupResource");
         PatchVersionHelper helper = new PatchVersionHelper();
 
         assertNotNull(minorVersionBO);
         assertNotNull(minorVersionCore);
+        assertNotNull(minorVersionChoice);
         assertNotNull(minorVersionOp);
+        assertNotNull(minorVersionResource);
 
         List<TLExtensionPointFacet> boPatches = helper.getLaterPatchVersions(minorVersionBO);
         List<TLExtensionPointFacet> corePatches = helper.getLaterPatchVersions(minorVersionCore);
+        List<TLExtensionPointFacet> choicePatches = helper.getLaterPatchVersions(minorVersionChoice);
         List<TLExtensionPointFacet> opPatches = helper.getLaterPatchVersions(minorVersionOp);
+        List<TLExtensionPointFacet> resourcePatches = helper.getLaterPatchVersions(minorVersionResource);
 
         assertEquals(3, boPatches.size());
         assertEquals("1.2.1", boPatches.get(0).getVersion());
@@ -153,6 +167,14 @@ public class TestPatchVersionHelper extends AbstractVersionHelperTests {
         assertEquals("1.2.2", corePatches.get(2).getVersion());
         assertTrue(corePatches.get(2).getOwningLibrary() == patchVersionLibrary2);
 
+        assertEquals(3, choicePatches.size());
+        assertEquals("1.2.1", choicePatches.get(0).getVersion());
+        assertTrue(choicePatches.get(0).getOwningLibrary() == patchVersionLibrary1);
+        assertEquals("1.2.2", choicePatches.get(1).getVersion());
+        assertTrue(choicePatches.get(1).getOwningLibrary() == patchVersionLibrary2);
+        assertEquals("1.2.2", choicePatches.get(2).getVersion());
+        assertTrue(choicePatches.get(2).getOwningLibrary() == patchVersionLibrary2);
+
         assertEquals(3, opPatches.size());
         assertEquals("1.2.1", opPatches.get(0).getVersion());
         assertTrue(opPatches.get(0).getOwningLibrary() == patchVersionLibrary1);
@@ -160,6 +182,12 @@ public class TestPatchVersionHelper extends AbstractVersionHelperTests {
         assertTrue(opPatches.get(1).getOwningLibrary() == patchVersionLibrary2);
         assertEquals("1.2.2", opPatches.get(2).getVersion());
         assertTrue(opPatches.get(2).getOwningLibrary() == patchVersionLibrary2);
+
+        assertEquals(2, resourcePatches.size());
+        assertEquals("1.2.1", resourcePatches.get(0).getVersion());
+        assertTrue(resourcePatches.get(0).getOwningLibrary() == patchVersionLibrary1);
+        assertEquals("1.2.2", resourcePatches.get(1).getVersion());
+        assertTrue(resourcePatches.get(1).getOwningLibrary() == patchVersionLibrary2);
     }
 
     @Test
@@ -170,17 +198,16 @@ public class TestPatchVersionHelper extends AbstractVersionHelperTests {
         PatchVersionHelper helper = new PatchVersionHelper();
         List<TLLibrary> eligibleLibraries;
 
-        TLLibrary minorVersionLibrary12 = (TLLibrary) model.getLibrary(NS_VERSION_1_2,
-                TEST_LIBRARY_NAME);
-        TLLibrary patchVersionLibrary121 = (TLLibrary) model.getLibrary(NS_VERSION_1_2_1,
-                TEST_LIBRARY_NAME);
-        TLLibrary patchVersionLibrary123 = helper.createNewPatchVersion(minorVersionLibrary12,
-                patchLibraryFile);
+        TLLibrary minorVersionLibrary12 = (TLLibrary) model.getLibrary(NS_VERSION_1_2, TEST_LIBRARY_NAME);
+        TLLibrary patchVersionLibrary121 = (TLLibrary) model.getLibrary(NS_VERSION_1_2_1, TEST_LIBRARY_NAME);
+        TLLibrary patchVersionLibrary122 = (TLLibrary) model.getLibrary(NS_VERSION_1_2_2, TEST_LIBRARY_NAME);
+        TLLibrary patchVersionLibrary123 = helper.createNewPatchVersion(minorVersionLibrary12, patchLibraryFile);
 
         TLBusinessObject minorVersionBO = minorVersionLibrary12.getBusinessObjectType("LookupBO");
         TLCoreObject minorVersionCore = minorVersionLibrary12.getCoreObjectType("LookupCore");
-        TLOperation minorVersionOp = minorVersionLibrary12.getService().getOperation(
-                "LookupOperation");
+        TLChoiceObject minorVersionChoice = minorVersionLibrary12.getChoiceObjectType("LookupChoice");
+        TLOperation minorVersionOp = minorVersionLibrary12.getService().getOperation("LookupOperation");
+        TLResource minorVersionResource = minorVersionLibrary12.getResourceType("LookupResource");
 
         eligibleLibraries = helper.getEligiblePatchVersionTargets(minorVersionBO.getSummaryFacet());
         assertEquals(1, eligibleLibraries.size());
@@ -191,13 +218,20 @@ public class TestPatchVersionHelper extends AbstractVersionHelperTests {
         assertTrue(eligibleLibraries.contains(patchVersionLibrary121));
         assertTrue(eligibleLibraries.contains(patchVersionLibrary123));
 
-        eligibleLibraries = helper.getEligiblePatchVersionTargets(minorVersionCore
-                .getSummaryFacet());
+        eligibleLibraries = helper.getEligiblePatchVersionTargets(minorVersionCore.getSummaryFacet());
         assertEquals(1, eligibleLibraries.size());
         assertTrue(eligibleLibraries.contains(patchVersionLibrary123));
 
-        eligibleLibraries = helper
-                .getEligiblePatchVersionTargets(minorVersionCore.getDetailFacet());
+        eligibleLibraries = helper.getEligiblePatchVersionTargets(minorVersionCore.getDetailFacet());
+        assertEquals(2, eligibleLibraries.size());
+        assertTrue(eligibleLibraries.contains(patchVersionLibrary121));
+        assertTrue(eligibleLibraries.contains(patchVersionLibrary123));
+
+        eligibleLibraries = helper.getEligiblePatchVersionTargets(minorVersionChoice.getSharedFacet());
+        assertEquals(1, eligibleLibraries.size());
+        assertTrue(eligibleLibraries.contains(patchVersionLibrary123));
+
+        eligibleLibraries = helper.getEligiblePatchVersionTargets(minorVersionChoice.getChoiceFacet(null, "ChoiceA"));
         assertEquals(2, eligibleLibraries.size());
         assertTrue(eligibleLibraries.contains(patchVersionLibrary121));
         assertTrue(eligibleLibraries.contains(patchVersionLibrary123));
@@ -210,6 +244,16 @@ public class TestPatchVersionHelper extends AbstractVersionHelperTests {
         assertEquals(2, eligibleLibraries.size());
         assertTrue(eligibleLibraries.contains(patchVersionLibrary121));
         assertTrue(eligibleLibraries.contains(patchVersionLibrary123));
+        
+        eligibleLibraries = helper.getEligiblePatchVersionTargets(minorVersionResource.getActionFacet("LookupFacetShared"));
+        assertEquals(1, eligibleLibraries.size());
+        assertTrue(eligibleLibraries.contains(patchVersionLibrary123));
+
+        eligibleLibraries = helper.getEligiblePatchVersionTargets(minorVersionResource.getActionFacet("LookupFacet12"));
+        assertEquals(3, eligibleLibraries.size());
+        assertTrue(eligibleLibraries.contains(patchVersionLibrary121));
+        assertTrue(eligibleLibraries.contains(patchVersionLibrary122));
+        assertTrue(eligibleLibraries.contains(patchVersionLibrary123));
     }
 
     @Test
@@ -219,32 +263,31 @@ public class TestPatchVersionHelper extends AbstractVersionHelperTests {
                 "/target/test-save-location/library_v01_02_03.otm"));
         PatchVersionHelper helper = new PatchVersionHelper();
 
-        TLLibrary minorVersionLibrary12 = (TLLibrary) model.getLibrary(NS_VERSION_1_2,
-                TEST_LIBRARY_NAME);
-        TLLibrary patchVersionLibrary123 = helper.createNewPatchVersion(minorVersionLibrary12,
-                patchLibraryFile);
+        TLLibrary minorVersionLibrary12 = (TLLibrary) model.getLibrary(NS_VERSION_1_2, TEST_LIBRARY_NAME);
+        TLLibrary patchVersionLibrary123 = helper.createNewPatchVersion(minorVersionLibrary12, patchLibraryFile);
 
         TLBusinessObject minorVersionBO = minorVersionLibrary12.getBusinessObjectType("LookupBO");
         TLCoreObject minorVersionCore = minorVersionLibrary12.getCoreObjectType("LookupCore");
-        TLOperation minorVersionOp = minorVersionLibrary12.getService().getOperation(
-                "LookupOperation");
+        TLChoiceObject minorVersionChoice = minorVersionLibrary12.getChoiceObjectType("LookupChoice");
+        TLOperation minorVersionOp = minorVersionLibrary12.getService().getOperation("LookupOperation");
+        TLResource minorVersionResource = minorVersionLibrary12.getResourceType("LookupResource");
 
         assertTrue(helper.getPreferredPatchVersionTarget(minorVersionBO.getSummaryFacet()) == patchVersionLibrary123);
         assertTrue(helper.getPreferredPatchVersionTarget(minorVersionCore.getSummaryFacet()) == patchVersionLibrary123);
+        assertTrue(helper.getPreferredPatchVersionTarget(minorVersionChoice.getSharedFacet()) == patchVersionLibrary123);
         assertTrue(helper.getPreferredPatchVersionTarget(minorVersionOp.getRequest()) == patchVersionLibrary123);
+        assertTrue(helper.getPreferredPatchVersionTarget(minorVersionResource.getActionFacet("LookupFacetShared")) == patchVersionLibrary123);
     }
 
     @Test
     public void testNewPatchLibraryVersion_FromMinorVersion() throws Exception {
         TLModel model = loadTestModel(FILE_VERSION_1_2_2);
-        TLLibrary minorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_2,
-                TEST_LIBRARY_NAME);
+        TLLibrary minorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_2, TEST_LIBRARY_NAME);
         File patchLibraryFile = purgeExistingFile(new File(System.getProperty("user.dir"),
                 "/target/test-save-location/library_v01_02_03.otm"));
         PatchVersionHelper helper = new PatchVersionHelper();
 
-        TLLibrary patchVersionLibrary = helper.createNewPatchVersion(minorVersionLibrary,
-                patchLibraryFile);
+        TLLibrary patchVersionLibrary = helper.createNewPatchVersion(minorVersionLibrary, patchLibraryFile);
 
         assertNotNull(patchVersionLibrary);
         assertEquals("1.2.3", patchVersionLibrary.getVersion());
@@ -256,14 +299,12 @@ public class TestPatchVersionHelper extends AbstractVersionHelperTests {
     @Test
     public void testNewPatchLibraryVersion_FromPatchVersion() throws Exception {
         TLModel model = loadTestModel(FILE_VERSION_1_2_2);
-        TLLibrary existingPatchLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_2_1,
-                TEST_LIBRARY_NAME);
+        TLLibrary existingPatchLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_2_1, TEST_LIBRARY_NAME);
         File patchLibraryFile = purgeExistingFile(new File(System.getProperty("user.dir"),
                 "/target/test-save-location/library_v01_02_03.otm"));
         PatchVersionHelper helper = new PatchVersionHelper();
 
-        TLLibrary patchVersionLibrary = helper.createNewPatchVersion(existingPatchLibrary,
-                patchLibraryFile);
+        TLLibrary patchVersionLibrary = helper.createNewPatchVersion(existingPatchLibrary, patchLibraryFile);
 
         assertNotNull(patchVersionLibrary);
         assertEquals("1.2.3", patchVersionLibrary.getVersion());
@@ -276,21 +317,20 @@ public class TestPatchVersionHelper extends AbstractVersionHelperTests {
     @Test
     public void testCreateNewPatch() throws Exception {
         TLModel model = loadTestModel(FILE_VERSION_1_2_2);
-        TLLibrary minorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_2,
-                TEST_LIBRARY_NAME);
+        TLLibrary minorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_2, TEST_LIBRARY_NAME);
         TLLibrary patchLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_2_2, TEST_LIBRARY_NAME);
         TLBusinessObject minorVersionBO = minorVersionLibrary.getBusinessObjectType("PatchTestBO");
         TLCoreObject minorVersionCore = minorVersionLibrary.getCoreObjectType("PatchTestCore");
-        TLOperation minorVersionOp = minorVersionLibrary.getService().getOperation(
-                "PatchTestOperation");
+        TLChoiceObject minorVersionChoice = minorVersionLibrary.getChoiceObjectType("PatchTestChoice");
+        TLOperation minorVersionOp = minorVersionLibrary.getService().getOperation("PatchTestOperation");
+        TLResource minorVersionResource = minorVersionLibrary.getResourceType("PatchTestResource");
         PatchVersionHelper helper = new PatchVersionHelper();
 
-        TLExtensionPointFacet boPatch = helper.createNewPatch(minorVersionBO.getSummaryFacet(),
-                patchLibrary);
-        TLExtensionPointFacet corePatch = helper.createNewPatch(minorVersionCore.getSummaryFacet(),
-                patchLibrary);
-        TLExtensionPointFacet opPatch = helper.createNewPatch(minorVersionOp.getRequest(),
-                patchLibrary);
+        TLExtensionPointFacet boPatch = helper.createNewPatch(minorVersionBO.getSummaryFacet(), patchLibrary);
+        TLExtensionPointFacet corePatch = helper.createNewPatch(minorVersionCore.getSummaryFacet(), patchLibrary);
+        TLExtensionPointFacet choicePatch = helper.createNewPatch(minorVersionChoice.getSharedFacet(), patchLibrary);
+        TLExtensionPointFacet opPatch = helper.createNewPatch(minorVersionOp.getRequest(), patchLibrary);
+        TLExtensionPointFacet resourcePatch = helper.createNewPatch(minorVersionResource.getActionFacet("PatchTestFacet"), patchLibrary);
 
         assertNotNull(boPatch);
         assertTrue(boPatch.getOwningLibrary() == patchLibrary);
@@ -301,11 +341,17 @@ public class TestPatchVersionHelper extends AbstractVersionHelperTests {
 
         assertNotNull(corePatch);
         assertTrue(corePatch.getOwningLibrary() == patchLibrary);
-        assertTrue(corePatch.getExtension().getExtendsEntity() == minorVersionCore
-                .getSummaryFacet());
+        assertTrue(corePatch.getExtension().getExtendsEntity() == minorVersionCore.getSummaryFacet());
         assertTrue(corePatch.getAttributes().isEmpty());
         assertTrue(corePatch.getElements().isEmpty());
         assertTrue(corePatch.getIndicators().isEmpty());
+
+        assertNotNull(choicePatch);
+        assertTrue(choicePatch.getOwningLibrary() == patchLibrary);
+        assertTrue(choicePatch.getExtension().getExtendsEntity() == minorVersionChoice.getSharedFacet());
+        assertTrue(choicePatch.getAttributes().isEmpty());
+        assertTrue(choicePatch.getElements().isEmpty());
+        assertTrue(choicePatch.getIndicators().isEmpty());
 
         assertNotNull(opPatch);
         assertTrue(opPatch.getOwningLibrary() == patchLibrary);
@@ -313,6 +359,13 @@ public class TestPatchVersionHelper extends AbstractVersionHelperTests {
         assertTrue(opPatch.getAttributes().isEmpty());
         assertTrue(opPatch.getElements().isEmpty());
         assertTrue(opPatch.getIndicators().isEmpty());
+        
+        assertNotNull(resourcePatch);
+        assertTrue(resourcePatch.getOwningLibrary() == patchLibrary);
+        assertTrue(resourcePatch.getExtension().getExtendsEntity() == minorVersionResource.getActionFacet("PatchTestFacet"));
+        assertTrue(resourcePatch.getAttributes().isEmpty());
+        assertTrue(resourcePatch.getElements().isEmpty());
+        assertTrue(resourcePatch.getIndicators().isEmpty());
     }
 
 }
