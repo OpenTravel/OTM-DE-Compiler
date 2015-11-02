@@ -31,8 +31,7 @@ import org.opentravel.schemacompiler.model.TLProperty.PropertyListManager;
  * 
  * @author S. Livezey
  */
-public class TLActionFacet extends TLAbstractFacet implements TLAttributeOwner,
-		TLPropertyOwner, TLIndicatorOwner {
+public class TLActionFacet extends TLPatchableFacet {
 	
 	private String name;
     private AttributeListManager attributeManager = new AttributeListManager(this);

@@ -463,10 +463,6 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
         findings.addAll(validate(targetLibraryVersion));
 
         if (findings.hasFinding(FindingType.ERROR)) {
-        	// TODO: Delete debugging code
-        	for (String message : findings.getAllValidationMessages(FindingMessageFormat.IDENTIFIED_FORMAT)) {
-        		System.out.println(message);
-        	}
             throw new ValidationException(
                     "Unable to create the new version because the prior version and/or patch libraries contain errors.",
                     findings);

@@ -182,5 +182,5 @@ public abstract class AbstractSymbolResolver implements SymbolResolver {
         }
         return nameComponents;
     }
-
+    
 }

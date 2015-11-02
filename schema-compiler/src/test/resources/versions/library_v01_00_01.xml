@@ -24,6 +24,16 @@
     </ExtensionPointFacet>
     
     <ExtensionPointFacet>
+        <Attribute name="extChoiceAttribute101" type="xsd:string"/>
+        <Extension extends="lib-01:LookupChoice_Shared"/>
+    </ExtensionPointFacet>
+    
+    <ExtensionPointFacet>
+        <Attribute name="extChoiceAttribute101" type="xsd:string"/>
+        <Extension extends="lib-01:LaterMinorVersionChoice_Shared"/>
+    </ExtensionPointFacet>
+    
+    <ExtensionPointFacet>
         <Attribute name="extBOAttribute101" type="xsd:string"/>
         <Extension extends="lib-01:LookupBO_Summary"/>
     </ExtensionPointFacet>
@@ -31,6 +41,16 @@
     <ExtensionPointFacet>
         <Attribute name="extBOAttribute101" type="xsd:string"/>
         <Extension extends="lib-01:LaterMinorVersionBO_Summary"/>
+    </ExtensionPointFacet>
+    
+    <ExtensionPointFacet>
+        <Attribute name="extResourceAttribute101" type="xsd:string"/>
+        <Extension extends="lib-01:LookupResource_LookupFacetShared"/>
+    </ExtensionPointFacet>
+    
+    <ExtensionPointFacet>
+        <Attribute name="extResourceAttribute101" type="xsd:string"/>
+        <Extension extends="lib-01:LaterMinorVersionResource_LaterMinorVersionFacetShared"/>
     </ExtensionPointFacet>
     
     <ExtensionPointFacet>

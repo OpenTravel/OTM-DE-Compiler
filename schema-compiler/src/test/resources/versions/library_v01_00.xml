@@ -82,6 +82,32 @@
         <Roles/>
     </CoreObject>
     
+    <ChoiceObject name="LookupChoice" notExtendable="false">
+        <Aliases/>
+        <Shared>
+            <Element name="sharedElement1" repeat="0" type="xsd:string"/>
+        </Shared>
+        <Choice label="ChoiceA" context="">
+            <Element name="choiceAElement1" repeat="0" type="xsd:string"/>
+        </Choice>
+        <Choice label="ChoiceB" context="">
+            <Element name="choiceBElement1" repeat="0" type="xsd:string"/>
+        </Choice>
+    </ChoiceObject>
+    
+    <ChoiceObject name="LaterMinorVersionChoice" notExtendable="false">
+        <Aliases/>
+        <Shared>
+            <Element name="sharedElement1" repeat="0" type="xsd:string"/>
+        </Shared>
+        <Choice label="ChoiceA" context="">
+            <Element name="choiceAElement1" repeat="0" type="xsd:string"/>
+        </Choice>
+        <Choice label="ChoiceB" context="">
+            <Element name="choiceBElement1" repeat="0" type="xsd:string"/>
+        </Choice>
+    </ChoiceObject>
+    
     <BusinessObject name="LookupBO" notExtendable="false">
         <Aliases/>
         <ID>
@@ -103,6 +129,47 @@
         </Summary>
         <Detail/>
     </BusinessObject>
+    
+    <Resource name="LookupResource" businessObjectRef="LookupBO" basePath="/resources/LookupResource"
+    			abstract="false" firstClass="true">
+        <ParamGroup name="LookupParametersShared" idGroup="false" facetName="LookupBO_Summary">
+        	<Parameter fieldName="Element1" location="Path" />
+        </ParamGroup>
+        <ParamGroup name="LookupParameters10" idGroup="true" facetName="LookupBO_ID">
+        	<Parameter fieldName="uid" location="Path" />
+        </ParamGroup>
+        <ActionFacet context="" label="LookupFacetShared" notExtendable="false" referenceType="Required">
+            <Element name="Element1" repeat="0" type="xsd:string"/>
+        </ActionFacet>
+        <ActionFacet context="" label="LookupFacet10" notExtendable="false" referenceType="Required">
+            <Element name="Element1" repeat="0" type="xsd:string"/>
+        </ActionFacet>
+        <Action actionId="LookupAction10" pathTemplate="/{uid}" common="false">
+        	<ActionRequest httpMethod="GET" paramGroup="LookupParameters10" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+        	<ActionResponse statusCodes="200" actionFacet="LookupResource_LookupFacet10" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+        </Action>
+    </Resource>
+    
+    <Resource name="LaterMinorVersionResource" businessObjectRef="LaterMinorVersionBO" basePath="/resources/LaterMinorVersionResource"
+    			abstract="false" firstClass="true">
+    	<ResourceParentRef parent="LookupResource" parentParamGroup="LookupParameters10" pathTemplate="/parent/{uid}" />
+        <ParamGroup name="LaterMinorVersionParametersShared" idGroup="false" facetName="LaterMinorVersionBO_Summary">
+        	<Parameter fieldName="Element1" location="Path" />
+        </ParamGroup>
+        <ParamGroup name="LaterMinorVersionParameters10" idGroup="true" facetName="LaterMinorVersionBO_ID">
+        	<Parameter fieldName="uid" location="Path" />
+        </ParamGroup>
+        <ActionFacet context="" label="LaterMinorVersionFacetShared" notExtendable="false" referenceType="Required">
+            <Element name="Element1" repeat="0" type="xsd:string"/>
+        </ActionFacet>
+        <ActionFacet context="" label="LaterMinorVersionFacet10" notExtendable="false" referenceType="Required">
+            <Element name="Element1" repeat="0" type="xsd:string"/>
+        </ActionFacet>
+        <Action actionId="LaterMinorVersionAction10" pathTemplate="/{uid}" common="false">
+        	<ActionRequest httpMethod="GET" paramGroup="LaterMinorVersionParameters10" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+        	<ActionResponse statusCodes="200" actionFacet="LaterMinorVersionResource_LookupFacet10" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+        </Action>
+    </Resource>
     
     <Service name="VersionedService">
         <Operation Name="LookupOperation" notExtendable="false">

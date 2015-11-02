@@ -20,32 +20,30 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLEquivalent;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
-import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLPatchableFacet;
-import org.opentravel.schemacompiler.model.TLService;
 import org.opentravel.schemacompiler.util.ModelElementCloner;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 
 /**
- * <code>VersionHandler</code> implementation for <code>TLOperation</code>
+ * <code>VersionHandler</code> implementation for <code>TLChoiceObject</code>
  * model entities.
- *
+ * 
  * @author S. Livezey
  */
-public class TLOperationVersionHandler extends TLExtensionOwnerVersionHandler<TLOperation> {
+public class TLChoiceObjectVersionHandler extends TLExtensionOwnerVersionHandler<TLChoiceObject> {
 	
 	/**
 	 * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#createNewVersion(org.opentravel.schemacompiler.version.Versioned, org.opentravel.schemacompiler.model.TLLibrary)
 	 */
 	@Override
-	public TLOperation createNewVersion(TLOperation origVersion, TLLibrary targetLibrary) {
-        TLService newVersionService = getTargetServiceVersion( origVersion.getOwningService(), targetLibrary );
+	public TLChoiceObject createNewVersion(TLChoiceObject origVersion, TLLibrary targetLibrary) {
 		ModelElementCloner cloner = getCloner( origVersion );
-        TLOperation newVersion = new TLOperation();
-        
+		TLChoiceObject newVersion = new TLChoiceObject();
+
         newVersion.setName( origVersion.getName() );
         newVersion.setDocumentation( cloner.clone( origVersion.getDocumentation() ) );
         setExtension( newVersion, origVersion );
@@ -53,41 +51,25 @@ public class TLOperationVersionHandler extends TLExtensionOwnerVersionHandler<TL
         for (TLEquivalent equivalent : origVersion.getEquivalents()) {
             newVersion.addEquivalent( cloner.clone( equivalent ) );
         }
-        newVersionService.addOperation( newVersion );
+        targetLibrary.addNamedMember( newVersion );
         return newVersion;
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#retrieveExistingVersion(org.opentravel.schemacompiler.version.Versioned, org.opentravel.schemacompiler.model.TLLibrary)
-	 */
-	@Override
-	public TLOperation retrieveExistingVersion(TLOperation origVersion, TLLibrary targetLibrary) {
-		TLOperation existingVersion = null;
-        
-        if (origVersion != null) {
-            TLService service = targetLibrary.getService();
-            existingVersion = (service == null) ? null : service.getOperation( origVersion.getName() );
-        }
-        return existingVersion;
 	}
 	
 	/**
 	 * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#rollupMinorVersion(org.opentravel.schemacompiler.version.Versioned, org.opentravel.schemacompiler.model.TLLibrary, org.opentravel.schemacompiler.version.handlers.RollupReferenceHandler)
 	 */
 	@Override
-	public void rollupMinorVersion(TLOperation minorVersion, TLLibrary majorVersionLibrary,
+	public void rollupMinorVersion(TLChoiceObject minorVersion, TLLibrary majorVersionLibrary,
 			RollupReferenceHandler referenceHandler) throws VersionSchemeException {
-		TLOperation majorVersion = retrieveExistingVersion( minorVersion, majorVersionLibrary );
+		TLChoiceObject majorVersion = retrieveExistingVersion( minorVersion, majorVersionLibrary );
 		
         if (majorVersion == null) {
-            TLService newVersionService = getTargetServiceVersion( minorVersion.getOwningService(), majorVersionLibrary );
-            
         	majorVersion = getCloner( minorVersion ).clone( minorVersion );
             assignBaseExtension( majorVersion, minorVersion );
-        	newVersionService.addOperation( majorVersion );
+            majorVersionLibrary.addNamedMember( majorVersion );
             referenceHandler.captureRollupReferences( majorVersion );
         	
-        } else if (majorVersion instanceof TLOperation) {
+        } else if (majorVersion instanceof TLChoiceObject) {
             rollupMinorVersion( minorVersion, majorVersion, referenceHandler );
         }
 	}
@@ -96,56 +78,45 @@ public class TLOperationVersionHandler extends TLExtensionOwnerVersionHandler<TL
 	 * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#rollupMinorVersion(org.opentravel.schemacompiler.version.Versioned, org.opentravel.schemacompiler.version.Versioned, org.opentravel.schemacompiler.version.handlers.RollupReferenceHandler)
 	 */
 	@Override
-	public void rollupMinorVersion(TLOperation minorVersion, TLOperation majorVersionTarget,
+	public void rollupMinorVersion(TLChoiceObject minorVersion, TLChoiceObject majorVersionTarget,
 			RollupReferenceHandler referenceHandler) {
 		VersionHandlerMergeUtils mergeUtils = new VersionHandlerMergeUtils( getFactory() );
         Map<String, TLFacet> targetFacets = new HashMap<String, TLFacet>();
         Map<String, TLFacet> sourceFacets = new HashMap<String, TLFacet>();
 		
-        mergeUtils.addToIdentityFacetMap( majorVersionTarget.getRequest(), targetFacets );
-        mergeUtils.addToIdentityFacetMap( majorVersionTarget.getResponse(), targetFacets );
-        mergeUtils.addToIdentityFacetMap( majorVersionTarget.getNotification(), targetFacets );
-        mergeUtils.addToIdentityFacetMap( minorVersion.getRequest(), sourceFacets );
-        mergeUtils.addToIdentityFacetMap( minorVersion.getResponse(), sourceFacets );
-        mergeUtils.addToIdentityFacetMap( minorVersion.getNotification(), sourceFacets );
+        mergeUtils.addToIdentityFacetMap( majorVersionTarget.getSharedFacet(), targetFacets );
+        mergeUtils.addToIdentityFacetMap( minorVersion.getSharedFacet(), sourceFacets );
+
+        for (TLFacet sourceFacet : minorVersion.getChoiceFacets()) {
+            TLFacet targetFacet = majorVersionTarget.getChoiceFacet(
+            		sourceFacet.getContext(), sourceFacet.getLabel() );
+
+            if (targetFacet == null) {
+                targetFacet = new TLFacet();
+                targetFacet.setContext( sourceFacet.getContext() );
+                targetFacet.setLabel( sourceFacet.getLabel() );
+                majorVersionTarget.addChoiceFacet( targetFacet );
+            }
+            mergeUtils.addToIdentityFacetMap( targetFacet, targetFacets );
+            mergeUtils.addToIdentityFacetMap( sourceFacet, sourceFacets );
+        }
         mergeUtils.mergeFacets( targetFacets, sourceFacets, referenceHandler );
-	}
-	
-	/**
-	 * Returns the service version from the target library.  If a service does not yet exist
-	 * in the target library, one will be created automatically using the original version
-	 * as a template.
-	 * 
-	 * @param origVersion  the original version of the service
-	 * @param targetLibrary  the target library from which the new service version will be returned
-	 * @return TLService
-	 */
-	private TLService getTargetServiceVersion(TLService origVersion, TLLibrary targetLibrary) {
-		TLService newVersion = null;
-		
-		if (origVersion.getOwningLibrary() == targetLibrary) {
-			newVersion = origVersion;
-			
-		} else if ((newVersion = targetLibrary.getService()) == null) {
-			newVersion = new TLService();
-			newVersion.setName( origVersion.getName() );
-			newVersion.setDocumentation( getCloner( origVersion ).clone( origVersion.getDocumentation() ) );
-            targetLibrary.setService( newVersion );
-		}
-		return newVersion;
 	}
 	
 	/**
 	 * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#getPatchableFacets(org.opentravel.schemacompiler.version.Versioned)
 	 */
 	@Override
-	public List<TLPatchableFacet> getPatchableFacets(TLOperation entity) {
+	public List<TLPatchableFacet> getPatchableFacets(TLChoiceObject entity) {
 		List<TLPatchableFacet> facetList = new ArrayList<>();
 		
-		facetList.add(entity.getRequest());
-		facetList.add(entity.getResponse());
-		facetList.add(entity.getNotification());
+		for (TLFacet facet : entity.getChoiceFacets()) {
+			facetList.add( facet );
+		}
+		facetList.add( entity.getSharedFacet() );
 		return facetList;
 	}
 	
 }
+
+	

@@ -73,4 +73,12 @@ public class TL2JaxbLibrarySymbolResolver extends AbstractSymbolResolver {
         // Not required for TL -> JAXB transformation
     }
 
+	/**
+	 * @see org.opentravel.schemacompiler.transform.symbols.AbstractSymbolResolver#displaySymbolTable()
+	 */
+	@Override
+	public void displaySymbolTable() {
+		symbolTable.displayTable();
+	}
+
 }

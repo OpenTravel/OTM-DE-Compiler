@@ -15,9 +15,9 @@
  */
 package org.opentravel.schemacompiler.version;
 
-import static junit.framework.Assert.fail;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.InputStream;
@@ -31,13 +31,19 @@ import org.opentravel.schemacompiler.loader.LibraryModelLoader;
 import org.opentravel.schemacompiler.loader.impl.CatalogLibraryNamespaceResolver;
 import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
 import org.opentravel.schemacompiler.model.TLAbstractEnumeration;
+import org.opentravel.schemacompiler.model.TLAction;
+import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLAttributeOwner;
 import org.opentravel.schemacompiler.model.TLEnumValue;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
+import org.opentravel.schemacompiler.model.TLParamGroup;
+import org.opentravel.schemacompiler.model.TLParameter;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLPropertyOwner;
+import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.model.TLResourceParentRef;
 import org.opentravel.schemacompiler.util.SchemaCompilerTestUtils;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
@@ -161,7 +167,7 @@ public abstract class AbstractVersionHelperTests {
         }
         for (String elementName : elementNames) {
             if (!ownerElements.contains(elementName)) {
-                fail("Expected element name not found: " + elementName);
+            	fail("Expected element name not found: " + elementName);
             }
         }
     }
@@ -174,7 +180,74 @@ public abstract class AbstractVersionHelperTests {
         }
         for (String literal : valueLiterals) {
             if (!ownerLiterals.contains(literal)) {
-                fail("Expected enumeration value not found: " + literal);
+            	fail("Expected enumeration value not found: " + literal);
+            }
+        }
+    }
+
+    protected void assertContainsParentRefs(TLResource resource, String... pathTemplates) {
+        Set<String> resourceParentPaths = new HashSet<String>();
+
+        for (TLResourceParentRef parentRef : resource.getParentRefs()) {
+        	resourceParentPaths.add(parentRef.getPathTemplate());
+        }
+        for (String pathTemplate : pathTemplates) {
+            if (!resourceParentPaths.contains(pathTemplate)) {
+            	fail("Expected parent reference not found: " + pathTemplate);
+            }
+        }
+    }
+
+    protected void assertContainsParamGroups(TLResource resource, String... paramGroupNames) {
+        Set<String> resourceParamGroups = new HashSet<String>();
+
+        for (TLParamGroup paramGroup : resource.getParamGroups()) {
+        	resourceParamGroups.add(paramGroup.getName());
+        }
+        for (String groupName : paramGroupNames) {
+            if (!resourceParamGroups.contains(groupName)) {
+            	fail("Expected parameter group not found: " + groupName);
+            }
+        }
+    }
+
+    protected void assertContainsParameters(TLParamGroup paramGroup, String... paramNames) {
+        Set<String> pgParameterNames = new HashSet<String>();
+
+        for (TLParameter param : paramGroup.getParameters()) {
+        	if (param.getFieldRef() != null) {
+            	pgParameterNames.add(param.getFieldRef().getName());
+        	}
+        }
+        for (String paramName : paramNames) {
+            if (!pgParameterNames.contains(paramName)) {
+            	fail("Expected parameter not found: " + paramName);
+            }
+        }
+    }
+
+    protected void assertContainsActionFacets(TLResource resource, String... facetNames) {
+        Set<String> resourceActionFacets = new HashSet<String>();
+
+        for (TLActionFacet facet : resource.getActionFacets()) {
+        	resourceActionFacets.add(facet.getName());
+        }
+        for (String facetName : facetNames) {
+            if (!resourceActionFacets.contains(facetName)) {
+            	fail("Expected action facet not found: " + facetName);
+            }
+        }
+    }
+
+    protected void assertContainsActions(TLResource resource, String... actionIds) {
+        Set<String> resourceActionIds = new HashSet<String>();
+
+        for (TLAction action : resource.getActions()) {
+        	resourceActionIds.add(action.getActionId());
+        }
+        for (String actionId : actionIds) {
+            if (!resourceActionIds.contains(actionId)) {
+            	fail("Expected resource action not found: " + actionId);
             }
         }
     }

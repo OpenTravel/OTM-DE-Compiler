@@ -26,15 +26,22 @@ import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLActionFacet;
+import org.opentravel.schemacompiler.model.TLAttributeOwner;
+import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLContext;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLFacetType;
+import org.opentravel.schemacompiler.model.TLIndicatorOwner;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
+import org.opentravel.schemacompiler.model.TLMemberFieldOwner;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLModelElement;
+import org.opentravel.schemacompiler.model.TLPropertyOwner;
+import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.repository.Project;
 import org.opentravel.schemacompiler.repository.ProjectItem;
 import org.opentravel.schemacompiler.repository.ProjectManager;
@@ -310,19 +317,23 @@ public abstract class AbstractVersionHelper {
     Versioned getPatchedVersion(TLExtensionPointFacet xpFacet) throws VersionSchemeException {
         NamedEntity extendedEntity = (xpFacet.getExtension() == null) ? null : xpFacet
                 .getExtension().getExtendsEntity();
+        TLFacetOwner extendedFacetOwner = null;
         Versioned patchedVersion = null;
-
+        
         if (extendedEntity instanceof TLFacet) {
-            TLFacetOwner extendedFacetOwner = ((TLFacet) extendedEntity).getOwningEntity();
+            extendedFacetOwner = ((TLFacet) extendedEntity).getOwningEntity();
+            
+        } else if (extendedEntity instanceof TLActionFacet) {
+            extendedFacetOwner = ((TLActionFacet) extendedEntity).getOwningEntity();
+        }
+        
+        if (extendedFacetOwner instanceof Versioned) {
+            VersionScheme versionScheme = VersionSchemeFactory.getInstance().getVersionScheme(
+                    xpFacet.getVersionScheme());
+            List<String> versionChain = versionScheme.getMajorVersionChain(xpFacet.getNamespace());
 
-            if (extendedFacetOwner instanceof Versioned) {
-                VersionScheme versionScheme = VersionSchemeFactory.getInstance().getVersionScheme(
-                        xpFacet.getVersionScheme());
-                List<String> versionChain = versionScheme.getMajorVersionChain(xpFacet.getNamespace());
-
-                if (versionChain.indexOf(extendedFacetOwner.getNamespace()) > 0) {
-                    patchedVersion = (Versioned) extendedFacetOwner;
-                }
+            if (versionChain.indexOf(extendedFacetOwner.getNamespace()) > 0) {
+                patchedVersion = (Versioned) extendedFacetOwner;
             }
         }
         return patchedVersion;
@@ -680,16 +691,66 @@ public abstract class AbstractVersionHelper {
         }
 
         // Perform the roll-up of attributes, properties, and indicators
-        TLFacetType patchedFacetType = ((TLFacet) patchVersion.getExtension().getExtendsEntity()).getFacetType();
-        TLFacet targetFacet = FacetCodegenUtils.getFacetOfType(
-                (TLFacetOwner) majorOrMinorVersionTarget, patchedFacetType);
+        NamedEntity extendedEntity = patchVersion.getExtension().getExtendsEntity();
+        TLMemberFieldOwner targetFacet = null;
+        
+        if (extendedEntity instanceof TLFacet) {
+            TLFacetType patchedFacetType = ((TLFacet) extendedEntity).getFacetType();
+            
+            if (patchedFacetType.isContextual()) {
+            	TLFacet patchedFacet = (TLFacet) extendedEntity;
+            	
+                targetFacet = FacetCodegenUtils.getFacetOfType((TLFacetOwner) majorOrMinorVersionTarget,
+                		patchedFacetType, patchedFacet.getContext(), patchedFacet.getLabel());
+            	
+            	// If a matching contextual facet does not yet exist, create one automatically
+                if (targetFacet == null) {
+                	if (majorOrMinorVersionTarget instanceof TLBusinessObject) {
+                		TLFacet contextualFacet = new TLFacet();
+                		
+                		contextualFacet.setContext( patchedFacet.getContext() );
+                		contextualFacet.setLabel( patchedFacet.getLabel() );
+                		
+                		if (patchedFacet.getFacetType() == TLFacetType.CUSTOM) {
+                			((TLBusinessObject) majorOrMinorVersionTarget).addCustomFacet( contextualFacet );
+                    		targetFacet = contextualFacet;
+                    		
+                		} else {
+                			((TLBusinessObject) majorOrMinorVersionTarget).addQueryFacet( contextualFacet );
+                    		targetFacet = contextualFacet;
+                		}
+                		
+                	} else {
+                		// At this time, only business objects have contextual facets
+                	}
+                }
+            } else {
+                targetFacet = FacetCodegenUtils.getFacetOfType((TLFacetOwner) majorOrMinorVersionTarget, patchedFacetType);
+            }
+        	
+        } else if ((extendedEntity instanceof TLActionFacet) && (majorOrMinorVersionTarget instanceof TLResource)) {
+        	targetFacet = ((TLResource) majorOrMinorVersionTarget).getActionFacet( ((TLActionFacet) extendedEntity).getName() );
+        	
+        	// If a matching action facet does not yet exist, create one automatically
+        	if (targetFacet == null) {
+        		TLActionFacet patchedFacet = (TLActionFacet) extendedEntity;
+        		TLActionFacet actionFacet = new TLActionFacet();
+        		
+        		actionFacet.setName( patchedFacet.getName() );
+        		actionFacet.setReferenceFacetName( patchedFacet.getReferenceFacetName() );
+        		actionFacet.setReferenceType( patchedFacet.getReferenceType() );
+        		actionFacet.setReferenceRepeat( patchedFacet.getReferenceRepeat() );
+        		((TLResource) majorOrMinorVersionTarget).addActionFacet( actionFacet );
+        		targetFacet = actionFacet;
+        	}
+        }
 
         if (targetFacet != null) {
         	VersionHandlerMergeUtils mergeUtils = new VersionHandlerMergeUtils( handlerFactory );
         	
-        	mergeUtils.mergeAttributes(targetFacet, patchVersion.getAttributes(), referenceHandler);
-        	mergeUtils.mergeProperties(targetFacet, patchVersion.getElements(), referenceHandler);
-        	mergeUtils.mergeIndicators(targetFacet, patchVersion.getIndicators());
+        	mergeUtils.mergeAttributes((TLAttributeOwner) targetFacet, patchVersion.getAttributes(), referenceHandler);
+        	mergeUtils.mergeProperties((TLPropertyOwner) targetFacet, patchVersion.getElements(), referenceHandler);
+        	mergeUtils.mergeIndicators((TLIndicatorOwner) targetFacet, patchVersion.getIndicators());
         }
     }
 

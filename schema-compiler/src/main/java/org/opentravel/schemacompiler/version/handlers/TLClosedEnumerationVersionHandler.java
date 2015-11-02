@@ -15,8 +15,12 @@
  */
 package org.opentravel.schemacompiler.version.handlers;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLPatchableFacet;
 
 /**
  * <code>VersionHandler</code> implementation for <code>TLClosedEnumeration</code>
@@ -39,6 +43,14 @@ public class TLClosedEnumerationVersionHandler extends TLAbstractEnumerationVers
         targetLibrary.addNamedMember( newVersion );
         
         return newVersion;
+	}
+	
+	/**
+	 * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#getPatchableFacets(org.opentravel.schemacompiler.version.Versioned)
+	 */
+	@Override
+	public List<TLPatchableFacet> getPatchableFacets(TLClosedEnumeration entity) {
+		return Collections.emptyList();
 	}
 	
 }
