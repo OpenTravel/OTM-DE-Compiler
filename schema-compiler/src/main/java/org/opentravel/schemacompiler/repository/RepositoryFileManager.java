@@ -766,28 +766,62 @@ public abstract class RepositoryFileManager {
                 }
             }
 
-            // Save the root namespace file if one does not already exist
-            if ((nsid != null) && !nsidFile.exists()) {
-                Writer writer = null;
-                try {
-                    if (!nsFolder.exists()) {
-                        nsFolder.mkdirs();
-                    }
-                    addToChangeSet(nsidFile);
-                    writer = new BufferedWriter(new FileWriter(nsidFile));
-                    writer.write(nsid);
-
-                } catch (IOException e) {
-                    throw new RepositoryException(
-                            "Unable to create namespace identification file for URI: " + ns, e);
-
-                } finally {
-                    try {
-                        if (writer != null)
-                            writer.close();
-                    } catch (Throwable t) {
-                    }
+            if (nsid != null) {
+                // Create any namespace folders that do not already exist
+            	if (!nsFolder.exists()) {
+                    nsFolder.mkdirs();
                 }
+                
+            	if (nsidFile.exists()) {
+            		// If the namespace file already exists, check it to make sure
+            		// we are matching on a case-sensitive basis
+            		BufferedReader reader = null;
+            		try {
+            			reader = new BufferedReader(new FileReader(nsidFile));
+            			String existingNsid = reader.readLine();
+            			
+            			if (!nsid.equals(existingNsid)) {
+            				if (nsid.equalsIgnoreCase(existingNsid)) {
+                                throw new RepositoryException(
+                                        "The given URI conflicts with the case-sensitivity of an existing namespace: " +
+                                        		baseNamespace);
+                                
+            				} else { // failed for some other reason than case-sensitivity
+                                throw new RepositoryException(
+                                        "The given URI conflicts with an existing namespace: " + baseNamespace);
+            				}
+            			}
+            			
+            		} catch (IOException e) {
+                        throw new RepositoryException(
+                                "Unable to verify namespace identification file for URI: " + ns, e);
+            			
+            		} finally {
+                        try {
+                            if (reader != null)
+                            	reader.close();
+                        } catch (Throwable t) {}
+            		}
+            		
+            	} else {
+                    // Save the root namespace file if one does not already exist
+                    Writer writer = null;
+                    try {
+                        addToChangeSet(nsidFile);
+                        writer = new BufferedWriter(new FileWriter(nsidFile));
+                        writer.write(nsid);
+
+                    } catch (IOException e) {
+                        throw new RepositoryException(
+                                "Unable to create namespace identification file for URI: " + ns, e);
+
+                    } finally {
+                        try {
+                            if (writer != null)
+                                writer.close();
+                        } catch (Throwable t) {}
+                    }
+            	}
             }
         }
     }

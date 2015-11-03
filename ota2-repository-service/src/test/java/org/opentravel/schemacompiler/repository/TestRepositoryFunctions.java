@@ -68,6 +68,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         test_08_DemoteLibrary();
         test_09_DeleteLibrary();
         test_10_CreateNamespace();
+        test_10a_CreateNamespaceError();
         test_11_ListNamespaceChildren();
         test_12_DeleteNamespace();
         test_13_CreateRootNamespace();
@@ -407,6 +408,31 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         testRepository.get().createNamespace(managedNS);
         repositoryNamespaces = testRepository.get().listBaseNamespaces();
         assertTrue(repositoryNamespaces.contains(managedNS));
+
+        if (DEBUG)
+            System.out.println("DONE - Success.");
+    }
+    
+    public void test_10a_CreateNamespaceError() throws Exception {
+        if (DEBUG)
+            System.out.println("CREATE NAMESPACE (Error Test) - Attempt to create conflicting namespace. ["
+                    + getClass().getSimpleName() + "]");
+        String managedNS = "http://www.OpenTravel.org/NS/Test-NS/ns2"; // case-sensitive conflict with test_10
+        List<String> repositoryNamespaces = testRepository.get().listBaseNamespaces();
+
+        // Make sure the namespace does not exist yet
+        assertFalse(repositoryNamespaces.contains(managedNS));
+
+        // Attempt to create the namespace (should fail with RepositoryException)
+        try {
+        	testRepository.get().createNamespace(managedNS);
+        	fail("Expected exception not thrown.");
+        	
+        } catch (RepositoryException e) {
+        	// No action - failure is the expected result
+        }
+        repositoryNamespaces = testRepository.get().listBaseNamespaces();
+        assertFalse(repositoryNamespaces.contains(managedNS));
 
         if (DEBUG)
             System.out.println("DONE - Success.");
