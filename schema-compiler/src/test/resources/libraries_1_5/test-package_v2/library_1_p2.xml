@@ -328,7 +328,7 @@
    	</Resource>
    	
     <Resource name="ParentResource" businessObjectRef="EmptyBusinessObject"  basePath="/services/EmptyResource"
-    			abstract="true" firstClass="true">
+    			abstract="false" firstClass="true">
         <ParamGroup name="IDParameters" idGroup="true" facetName="ID">
         	<Parameter fieldName="empty_oid" location="Path"/>
         </ParamGroup>

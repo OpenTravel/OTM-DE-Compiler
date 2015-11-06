@@ -309,14 +309,16 @@ public class ResourceCodegenUtils {
 	 * @return List<TLActionResponse>
 	 */
 	public static List<TLActionResponse> getInheritedResponses(TLAction action) {
+		List<TLResource> resourceHierarchy = getInheritanceHierarchy(action.getOwner());
 		List<TLActionResponse> responses = new ArrayList<>();
 		Set<Integer> statusCodes = new HashSet<>();
 		String actionId = action.getActionId();
 		
-		for (TLResource extendedResource : getInheritanceHierarchy(action.getOwner())) {
+		// Start by adding responses from all of the inherited, non-common actions
+		for (TLResource extendedResource : resourceHierarchy) {
 			TLAction extendedAction = extendedResource.getAction(actionId);
 			
-			if (extendedAction != null) {
+			if ((extendedAction != null) && !extendedAction.isCommonAction()) {
 				List<TLActionResponse> localResponses = new ArrayList<>();
 				
 				for (TLActionResponse response : extendedAction.getResponses()) {
@@ -326,6 +328,17 @@ public class ResourceCodegenUtils {
 					}
 				}
 				responses.addAll(0, localResponses);
+			}
+		}
+		
+		// Finish by incorporating responses from all of the inherited common
+		// actions.  Note that common actions are included, regardless of whether
+		// their action ID's match that of the original.
+		for (TLResource extendedResource : resourceHierarchy) {
+			for (TLAction inheritedAction : extendedResource.getActions()) {
+				if (inheritedAction.isCommonAction()) {
+					responses.addAll( inheritedAction.getResponses() );
+				}
 			}
 		}
 		return responses;

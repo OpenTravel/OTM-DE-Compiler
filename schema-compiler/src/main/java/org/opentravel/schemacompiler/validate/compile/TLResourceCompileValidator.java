@@ -16,8 +16,10 @@
 package org.opentravel.schemacompiler.validate.compile;
 
 import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.base.TLResourceBaseValidator;
+import org.opentravel.schemacompiler.validate.impl.ResourceUrlValidator;
 import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
 
 /**
@@ -27,12 +29,38 @@ import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
  */
 public class TLResourceCompileValidator extends TLResourceBaseValidator {
 
+    public static final String ERROR_INVALID_BASE_PATH = "INVALID_BASE_PATH";
+    
+	private static ResourceUrlValidator urlValidator = new ResourceUrlValidator();
+	
     /**
      * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateFields(org.opentravel.schemacompiler.validate.Validatable)
      */
     @Override
     protected ValidationFindings validateFields(TLResource target) {
         TLValidationBuilder builder = newValidationBuilder(target);
+        
+        builder.setProperty("name", target.getName()).setFindingType(FindingType.ERROR)
+        		.assertNotNullOrBlank().assertPatternMatch(NAME_XML_PATTERN);
+        
+        if (target.isAbstract()) {
+        	builder.setProperty("basePath", target.getBasePath()).setFindingType(FindingType.ERROR)
+            		.assertNullOrBlank();
+        	
+        } else {
+        	String basePath = target.getBasePath();
+        	
+        	builder.setProperty("basePath", basePath).setFindingType(FindingType.ERROR)
+        			.assertNotNullOrBlank();
+        	
+        	if ((basePath != null) &&
+        			!(urlValidator.isValid( basePath ) || urlValidator.isValidPath( basePath ))) {
+            	builder.addFinding( FindingType.ERROR, "basePath", ERROR_INVALID_BASE_PATH, basePath );
+        	}
+        }
+        		
+        checkSchemaNamingConflicts(target, builder);
+        validateVersioningRules(target, builder);
         
         return builder.getFindings();
     }
