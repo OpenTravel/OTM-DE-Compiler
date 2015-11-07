@@ -52,7 +52,6 @@ import org.opentravel.schemacompiler.loader.impl.MultiVersionLibraryModuleLoader
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.impl.DefaultRepositoryFileManager;
-import org.opentravel.schemacompiler.repository.impl.NamespaceIdFileGenerator;
 import org.opentravel.schemacompiler.repository.impl.ProjectFileUtils;
 import org.opentravel.schemacompiler.repository.impl.RemoteRepositoryClient;
 import org.opentravel.schemacompiler.repository.impl.RepositoryItemImpl;
@@ -121,7 +120,6 @@ public final class RepositoryManager implements Repository {
     public RepositoryManager(RepositoryFileManager fileManager) throws RepositoryException {
         this.fileManager = fileManager;
         initializeLocalRepositoryInfo();
-        new NamespaceIdFileGenerator(this).execute();
     }
 
     /**
