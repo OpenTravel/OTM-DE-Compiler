@@ -117,7 +117,7 @@ public class ResourceCodegenUtils {
 				List<TLParameter> localParameters = new ArrayList<>();
 				
 				for (TLParameter param : extendedGroup.getParameters()) {
-					String paramName = (param.getFieldRef() == null) ? null : param.getFieldRef().getName();
+					String paramName = (param.getFieldRef() == null) ? param.getFieldRefName() : param.getFieldRef().getName();
 					
 					if ((paramName != null) && !parameterNames.contains(paramName)) {
 						localParameters.add(param);
@@ -289,14 +289,20 @@ public class ResourceCodegenUtils {
 		String actionId = action.getActionId();
 		TLActionRequest request = null;
 		
-		for (TLResource extendedResource : getInheritanceHierarchy(action.getOwner())) {
-			TLAction extendedAction = extendedResource.getAction(actionId);
-			
-			if (extendedAction != null) {
-				if ((request = extendedAction.getRequest()) != null) {
-					break;
+		if (actionId != null) {
+			for (TLResource extendedResource : getInheritanceHierarchy(action.getOwner())) {
+				TLAction extendedAction = extendedResource.getAction(actionId);
+				
+				if (extendedAction != null) {
+					if ((request = extendedAction.getRequest()) != null) {
+						break;
+					}
 				}
 			}
+		} else {
+			// If the action ID is null, only return the request from the given action.  Do
+			// not look for inherited requests.
+			request = action.getRequest();
 		}
 		return request;
 	}
@@ -351,7 +357,7 @@ public class ResourceCodegenUtils {
 	 * @param resource  the resource for which to return the hierarchy
 	 * @return List<TLResource>
 	 */
-	private static List<TLResource> getInheritanceHierarchy(TLResource resource) {
+	public static List<TLResource> getInheritanceHierarchy(TLResource resource) {
 		List<TLResource> hierarchyList = new ArrayList<>();
 		TLResource extendedResource = resource;
 		
@@ -362,6 +368,46 @@ public class ResourceCodegenUtils {
 			}
 		}
 		return hierarchyList;
+	}
+	
+	/**
+	 * Returns a valid name that may be used by an action facet to reference the given facet.
+	 * 
+	 * @param facet  the facet to be referenced by an action facet
+	 * @return String
+	 */
+	public static String getActionFacetReferenceName(TLFacet facet) {
+		return facet.getFacetType().getIdentityName( facet.getContext(), facet.getLabel() );
+	}
+	
+	/**
+	 * Returns the facet from the given business object that matches the reference facet name
+	 * provided.  If no matching facet exists for the business object, this method will return
+	 * null.
+	 * 
+	 * @param businessObject  the business object from which to return a matching facet
+	 * @param referenceFacetName  the action facet reference name that must be matched by the returned facet
+	 * @return TLFacet
+	 */
+	public static TLFacet getReferencedFacet(TLBusinessObject businessObject, String referenceFacetName) {
+		List<TLFacet> boFacets = new ArrayList<>();
+		TLFacet referencedFacet = null;
+		
+		boFacets.add( businessObject.getIdFacet() );
+		boFacets.add( businessObject.getSummaryFacet() );
+		boFacets.add( businessObject.getDetailFacet() );
+		boFacets.addAll( businessObject.getCustomFacets() );
+		boFacets.addAll( businessObject.getQueryFacets() );
+		
+		for (TLFacet boFacet : boFacets) {
+			String boFacetReferenceName = getActionFacetReferenceName( boFacet );
+			
+			if (boFacetReferenceName.equals( referenceFacetName )) {
+				referencedFacet = boFacet;
+				break;
+			}
+		}
+		return referencedFacet;
 	}
 	
 	/**

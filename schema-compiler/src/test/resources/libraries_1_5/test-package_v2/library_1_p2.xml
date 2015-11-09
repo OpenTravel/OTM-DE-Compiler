@@ -327,9 +327,9 @@
     	</Action>
    	</Resource>
    	
-    <Resource name="ParentResource" businessObjectRef="EmptyBusinessObject"  basePath="/services/EmptyResource"
+    <Resource name="ParentResource" businessObjectRef="EmptyBusinessObject" basePath="/services/EmptyResource"
     			abstract="false" firstClass="true">
-        <ParamGroup name="IDParameters" idGroup="true" facetName="ID">
+        <ParamGroup name="IDParameters" idGroup="true" facetName="EmptyBusinessObject_ID">
         	<Parameter fieldName="empty_oid" location="Path"/>
         </ParamGroup>
    	</Resource>
@@ -357,19 +357,19 @@
 	            <Example context="test">sample_oid-ex</Example>
         	</Parameter>
         </ParamGroup>
-        <ParamGroup name="QueryParameters" idGroup="false" facetName="FindByName">
+        <ParamGroup name="QueryParameters" idGroup="false" facetName="SampleBusinessObject_Query_FindByName">
         	<Parameter fieldName="queryAttribute" location="Header"/>
         	<Parameter fieldName="lastName" location="Query"/>
         	<Parameter fieldName="firstName" location="Query"/>
         </ParamGroup>
-        <ActionFacet context="" label="ObjectOnly" notExtendable="false" referenceType="Required">
+        <ActionFacet context="" label="ObjectOnly" notExtendable="false" referenceType="Required" referenceFacet="Summary">
 	        <Documentation>
     		    <Description>ActionFacet-ObjectOnly-documentation-line_1</Description>
         	</Documentation>
         </ActionFacet>
-        <ActionFacet context="" label="ObjectList" notExtendable="false" referenceType="Required"
-        			referenceFacet="SUMMARY" referenceRepeat="1000"/>
-        <ActionFacet context="" label="ObjectWrapper" notExtendable="false" referenceType="Optional">
+        <ActionFacet context="" label="ObjectList" notExtendable="false" referenceType="Required" referenceFacet="Summary"
+        		referenceRepeat="1000"/>
+        <ActionFacet context="" label="ObjectWrapper" notExtendable="false" referenceType="Optional" referenceFacet="Summary">
             <Attribute name="wrapperAttribute" type="xsd:int"/>
             <Element name="wrapperElement" repeat="0" type="xsd:int"/>
             <Indicator name="wrapperIndicator" publishAsElement="false"/>

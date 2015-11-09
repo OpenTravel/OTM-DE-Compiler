@@ -15,6 +15,8 @@
  */
 package org.opentravel.schemacompiler.validate.compile;
 
+import org.opentravel.schemacompiler.model.TLAction;
+import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
@@ -29,7 +31,10 @@ import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
  */
 public class TLResourceCompileValidator extends TLResourceBaseValidator {
 
-    public static final String ERROR_INVALID_BASE_PATH = "INVALID_BASE_PATH";
+    public static final String ERROR_INVALID_BASE_PATH        = "INVALID_BASE_PATH";
+    public static final String ERROR_INVALID_BUSINESS_OBJ_NS  = "INVALID_BUSINESS_OBJ_NS";
+    public static final String ERROR_PARAM_GROUPS_NOT_ALLOWED = "PARAM_GROUPS_NOT_ALLOWED";
+    public static final String ERROR_MULTIPLE_COMMON_ACTIONS  = "MULTIPLE_COMMON_ACTIONS";
     
 	private static ResourceUrlValidator urlValidator = new ResourceUrlValidator();
 	
@@ -43,11 +48,19 @@ public class TLResourceCompileValidator extends TLResourceBaseValidator {
         builder.setProperty("name", target.getName()).setFindingType(FindingType.ERROR)
         		.assertNotNullOrBlank().assertPatternMatch(NAME_XML_PATTERN);
         
+        // Different rules for abstract and non-abstract resources
         if (target.isAbstract()) {
         	builder.setProperty("basePath", target.getBasePath()).setFindingType(FindingType.ERROR)
             		.assertNullOrBlank();
+        	builder.setProperty("businessObjectRef", target.getBusinessObjectRef()).setFindingType(FindingType.ERROR)
+        			.assertNull();
+        	
+        	if (target.getParamGroups().size() > 0) {
+            	builder.addFinding( FindingType.ERROR, "paramGroups", ERROR_PARAM_GROUPS_NOT_ALLOWED );
+        	}
         	
         } else {
+        	TLBusinessObject businessObjectRef = target.getBusinessObjectRef();
         	String basePath = target.getBasePath();
         	
         	builder.setProperty("basePath", basePath).setFindingType(FindingType.ERROR)
@@ -57,12 +70,41 @@ public class TLResourceCompileValidator extends TLResourceBaseValidator {
         			!(urlValidator.isValid( basePath ) || urlValidator.isValidPath( basePath ))) {
             	builder.addFinding( FindingType.ERROR, "basePath", ERROR_INVALID_BASE_PATH, basePath );
         	}
+        	builder.setEntityReferenceProperty("businessObjectRef", businessObjectRef, target.getBusinessObjectRefName())
+        			.setFindingType(FindingType.ERROR)
+        			.assertNotNull();
+        	
+        	if ((businessObjectRef != null) && (target.getNamespace() != null)
+        			&& !target.getNamespace().equals(businessObjectRef.getNamespace())) {
+            	builder.addFinding( FindingType.ERROR, "businessObjectRef", ERROR_INVALID_BUSINESS_OBJ_NS );
+        	}
         }
-        		
+        
+        if (countCommonActions( target ) > 1) {
+        	builder.addFinding( FindingType.ERROR, "actions", ERROR_MULTIPLE_COMMON_ACTIONS );
+        }
+        
         checkSchemaNamingConflicts(target, builder);
         validateVersioningRules(target, builder);
         
         return builder.getFindings();
     }
-
+    
+    /**
+     * Returns the number of common actions declared for the resource.
+     * 
+     * @param target  the target resource being validated
+     * @return int
+     */
+    private int countCommonActions(TLResource target) {
+    	int commonCount = 0;
+    	
+    	for (TLAction action : target.getActions()) {
+    		if (action.isCommonAction()) {
+    			commonCount++;
+    		}
+    	}
+    	return commonCount;
+    }
+    
 }

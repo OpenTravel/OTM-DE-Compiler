@@ -138,14 +138,14 @@
         <ParamGroup name="LookupParameters10" idGroup="true" facetName="LookupBO_ID">
         	<Parameter fieldName="uid" location="Path" />
         </ParamGroup>
-        <ActionFacet context="" label="LookupFacetShared" notExtendable="false" referenceType="Required">
+        <ActionFacet context="" label="LookupFacetShared" notExtendable="false" referenceType="None">
             <Element name="Element1" repeat="0" type="xsd:string"/>
         </ActionFacet>
-        <ActionFacet context="" label="LookupFacet10" notExtendable="false" referenceType="Required">
+        <ActionFacet context="" label="LookupFacet10" notExtendable="false" referenceType="None">
             <Element name="Element1" repeat="0" type="xsd:string"/>
         </ActionFacet>
         <Action actionId="LookupAction10" pathTemplate="/{uid}" common="false">
-        	<ActionRequest httpMethod="GET" paramGroup="LookupParameters10" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+        	<ActionRequest httpMethod="GET" paramGroup="LookupParameters10" />
         	<ActionResponse statusCodes="200" actionFacet="LookupResource_LookupFacet10" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
         </Action>
     </Resource>
@@ -159,15 +159,15 @@
         <ParamGroup name="LaterMinorVersionParameters10" idGroup="true" facetName="LaterMinorVersionBO_ID">
         	<Parameter fieldName="uid" location="Path" />
         </ParamGroup>
-        <ActionFacet context="" label="LaterMinorVersionFacetShared" notExtendable="false" referenceType="Required">
+        <ActionFacet context="" label="LaterMinorVersionFacetShared" notExtendable="false" referenceType="None">
             <Element name="Element1" repeat="0" type="xsd:string"/>
         </ActionFacet>
-        <ActionFacet context="" label="LaterMinorVersionFacet10" notExtendable="false" referenceType="Required">
+        <ActionFacet context="" label="LaterMinorVersionFacet10" notExtendable="false" referenceType="None">
             <Element name="Element1" repeat="0" type="xsd:string"/>
         </ActionFacet>
         <Action actionId="LaterMinorVersionAction10" pathTemplate="/{uid}" common="false">
-        	<ActionRequest httpMethod="GET" paramGroup="LaterMinorVersionParameters10" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
-        	<ActionResponse statusCodes="200" actionFacet="LaterMinorVersionResource_LookupFacet10" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+        	<ActionRequest httpMethod="GET" paramGroup="LaterMinorVersionParameters10" />
+        	<ActionResponse statusCodes="200" actionFacet="LaterMinorVersionResource_LaterMinorVersionFacet10" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
         </Action>
     </Resource>
     

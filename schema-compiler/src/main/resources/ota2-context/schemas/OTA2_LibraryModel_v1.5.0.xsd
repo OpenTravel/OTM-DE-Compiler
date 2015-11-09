@@ -1520,7 +1520,6 @@
       </xsd:annotation>
    </xsd:element>
    
-   <!-- TODO: New types for OTM Resources (organize when complete) -->
    <xsd:simpleType name="ParamLocation">
       <xsd:annotation>
          <xsd:documentation>Specifies the location of an parameter for a REST
@@ -1657,7 +1656,7 @@
                   </xsd:documentation>
                </xsd:annotation>
             </xsd:attribute>
-            <xsd:attribute name="referenceFacet" type="Name_XML" use="optional">
+            <xsd:attribute name="referenceFacet" type="Name_Type" use="optional">
                <xsd:annotation>
                   <xsd:documentation>Specifies the name of the business object facet
                   	to be referenced in the message.  If the 'businessObjectReferenceType'
@@ -1784,7 +1783,7 @@
             <xsd:documentation>The HTTP method of the REST request.</xsd:documentation>
          </xsd:annotation>
       </xsd:attribute>
-      <xsd:attribute name="actionFacet" type="Name_XML" use="optional">
+      <xsd:attribute name="actionFacet" type="Name_Type" use="optional">
          <xsd:annotation>
             <xsd:documentation>Name of the action facet that specifies the
             	payload (if any) for the request.
@@ -1832,7 +1831,7 @@
             <xsd:list itemType="xsd:int" />
          </xsd:simpleType>
       </xsd:attribute>
-      <xsd:attribute name="actionFacet" type="Name_XML" use="optional">
+      <xsd:attribute name="actionFacet" type="Name_Type" use="optional">
          <xsd:annotation>
             <xsd:documentation>Name of the action facet that specifies the
             	payload (if any) for the response.
@@ -1921,7 +1920,7 @@
       <xsd:sequence>
          <xsd:element ref="Documentation" minOccurs="0" />
       </xsd:sequence>
-      <xsd:attribute name="parent" type="Name_XML" use="required">
+      <xsd:attribute name="parent" type="Name_Type" use="required">
          <xsd:annotation>
             <xsd:documentation>
             	The qualified name of the parent resource.
@@ -2009,7 +2008,7 @@
             </xsd:documentation>
          </xsd:annotation>
       </xsd:attribute>
-      <xsd:attribute name="businessObjectRef" type="Name_XML" use="optional">
+      <xsd:attribute name="businessObjectRef" type="Name_Type" use="optional">
          <xsd:annotation>
             <xsd:documentation>
             	The name of the business object with which this resource is associated.

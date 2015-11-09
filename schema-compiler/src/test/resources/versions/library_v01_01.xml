@@ -105,6 +105,7 @@
         <ID/>
         <Summary>
             <Element name="Element11" repeat="0" type="MinorVersionTestVWA"/>
+            <Element name="Element11Param" repeat="0" type="xsd:string"/>
         </Summary>
         <Detail/>
     </BusinessObject>
@@ -124,19 +125,19 @@
     			abstract="false" firstClass="true">
         <Extension extends="lib-01:LookupResource"/>
         <ParamGroup name="LookupParametersShared" idGroup="false" facetName="LookupBO_Summary">
-        	<Parameter fieldName="Element11" location="Path" />
+        	<Parameter fieldName="Element11Param" location="Path" />
         </ParamGroup>
         <ParamGroup name="LookupParameters11" idGroup="true" facetName="LookupBO_ID">
         	<Parameter fieldName="uid" location="Path" />
         </ParamGroup>
-        <ActionFacet context="" label="LookupFacetShared" notExtendable="false" referenceType="Required">
+        <ActionFacet context="" label="LookupFacetShared" notExtendable="false" referenceType="None">
             <Element name="Element11" repeat="0" type="xsd:string"/>
         </ActionFacet>
-        <ActionFacet context="" label="LookupFacet11" notExtendable="false" referenceType="Required">
+        <ActionFacet context="" label="LookupFacet11" notExtendable="false" referenceType="None">
             <Element name="Element11" repeat="0" type="xsd:string"/>
         </ActionFacet>
         <Action actionId="LookupAction11" pathTemplate="/{uid}" common="false">
-        	<ActionRequest httpMethod="GET" paramGroup="LookupParameters11" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+        	<ActionRequest httpMethod="GET" paramGroup="LookupParameters11" />
         	<ActionResponse statusCodes="200" actionFacet="LookupResource_LookupFacet11" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
         </Action>
     </Resource>
@@ -146,11 +147,11 @@
         <ParamGroup name="MinorVersionTestParameters" idGroup="true" facetName="MinorVersionTestBO_Summary">
         	<Parameter fieldName="uid" location="Path" />
         </ParamGroup>
-        <ActionFacet context="" label="MinorVersionTestFacet" notExtendable="false" referenceType="Required">
+        <ActionFacet context="" label="MinorVersionTestFacet" notExtendable="false" referenceType="None">
             <Element name="Element11" repeat="0" type="xsd:string"/>
         </ActionFacet>
         <Action actionId="MinorVersionTestAction" pathTemplate="/{uid}" common="false">
-        	<ActionRequest httpMethod="GET" paramGroup="MinorVersionTestParameters" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+        	<ActionRequest httpMethod="GET" paramGroup="MinorVersionTestParameters" />
         	<ActionResponse statusCodes="200" actionFacet="MinorVersionTestResource_MinorVersionTestFacet" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
         </Action>
     </Resource>

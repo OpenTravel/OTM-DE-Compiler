@@ -180,14 +180,14 @@
         <ParamGroup name="LookupParameters12" idGroup="true" facetName="LookupBO_ID">
         	<Parameter fieldName="uid" location="Path" />
         </ParamGroup>
-        <ActionFacet context="" label="LookupFacetShared" notExtendable="false" referenceType="Required">
+        <ActionFacet context="" label="LookupFacetShared" notExtendable="false" referenceType="None">
             <Element name="Element12" repeat="0" type="xsd:string"/>
         </ActionFacet>
-        <ActionFacet context="" label="LookupFacet12" notExtendable="false" referenceType="Required">
+        <ActionFacet context="" label="LookupFacet12" notExtendable="false" referenceType="None">
             <Element name="Element12" repeat="0" type="xsd:string"/>
         </ActionFacet>
         <Action actionId="LookupAction12" pathTemplate="/{uid}" common="false">
-        	<ActionRequest httpMethod="GET" paramGroup="LookupParameters12" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+        	<ActionRequest httpMethod="GET" paramGroup="LookupParameters12" />
         	<ActionResponse statusCodes="200" actionFacet="LookupResource_LookupFacet12" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
         </Action>
     </Resource>
@@ -197,34 +197,34 @@
         <ParamGroup name="PatchTestParameters" idGroup="false" facetName="PatchTestBO_Summary">
         	<Parameter fieldName="Element12" location="Path" />
         </ParamGroup>
-        <ActionFacet context="" label="PatchTestFacet" notExtendable="false" referenceType="Required">
+        <ActionFacet context="" label="PatchTestFacet" notExtendable="false" referenceType="None">
             <Element name="Element12" repeat="0" type="xsd:string"/>
         </ActionFacet>
         <Action actionId="PatchTestAction" pathTemplate="/{Element12}" common="false">
-        	<ActionRequest httpMethod="GET" paramGroup="PatchTestParameters" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
-        	<ActionResponse statusCodes="200" actionFacet="LookupResource_PatchTestFacet" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+        	<ActionRequest httpMethod="GET" paramGroup="PatchTestParameters" />
+        	<ActionResponse statusCodes="200" actionFacet="PatchTestResource_PatchTestFacet" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
         </Action>
     </Resource>
     
     <Resource name="LaterMinorVersionResource" businessObjectRef="LaterMinorVersionBO" basePath="/resources/LaterMinorVersionResource"
     			abstract="false" firstClass="true">
-        <Extension extends="lib-01:LaterMinorVersionResource"/>
     	<ResourceParentRef parent="lib-0101:MinorVersionTestResource" parentParamGroup="MinorVersionTestParameters" pathTemplate="/parent2/{uid}" />
+        <Extension extends="lib-01:LaterMinorVersionResource"/>
         <ParamGroup name="LaterMinorVersionParametersShared" idGroup="false" facetName="LaterMinorVersionBO_Summary">
         	<Parameter fieldName="Element12" location="Path" />
         </ParamGroup>
         <ParamGroup name="LaterMinorVersionParameters12" idGroup="true" facetName="LaterMinorVersionBO_ID">
         	<Parameter fieldName="uid" location="Path" />
         </ParamGroup>
-        <ActionFacet context="" label="LaterMinorVersionFacetShared" notExtendable="false" referenceType="Required">
+        <ActionFacet context="" label="LaterMinorVersionFacetShared" notExtendable="false" referenceType="None">
             <Element name="Element12" repeat="0" type="xsd:string"/>
         </ActionFacet>
-        <ActionFacet context="" label="LaterMinorVersionFacet12" notExtendable="false" referenceType="Required">
+        <ActionFacet context="" label="LaterMinorVersionFacet12" notExtendable="false" referenceType="None">
             <Element name="Element12" repeat="0" type="xsd:string"/>
         </ActionFacet>
         <Action actionId="LaterMinorVersionAction12" pathTemplate="/{uid}" common="false">
-        	<ActionRequest httpMethod="GET" paramGroup="LaterMinorVersionParameters12" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
-        	<ActionResponse statusCodes="200" actionFacet="LaterMinorVersionResource_LookupFacet12" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+        	<ActionRequest httpMethod="GET" paramGroup="LaterMinorVersionParameters12" />
+        	<ActionResponse statusCodes="200" actionFacet="LaterMinorVersionResource_LaterMinorVersionFacet12" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
         </Action>
     </Resource>
     

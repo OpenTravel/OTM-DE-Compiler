@@ -802,6 +802,39 @@ public class PropertyCodegenUtils {
     }
 
     /**
+     * Returns an ordered list of <code>TLProperty</code> and <code>TLIndicator</code> elements
+     * in the order they will occur in a schema-valid XML document.  Only those indicators that
+     * are published as elements will be included in the resulting list.
+     * 
+     * @param facet  the facet for which to return the sequence of XML elements
+     * @return List<TLModelElement>
+     */
+    public static List<TLModelElement> getElementSequence(TLActionFacet facet) {
+    	List<TLResource> resourceHierarchy = ResourceCodegenUtils.getInheritanceHierarchy(
+    			(TLResource) facet.getOwningEntity() );
+        List<TLModelElement> elementList = new ArrayList<TLModelElement>();
+    	String facetName = facet.getName();
+    	
+    	// Start from the top of the inheritance hierarchy and work down
+    	Collections.reverse( resourceHierarchy );
+    	
+    	for (TLResource resource : resourceHierarchy) {
+    		TLActionFacet aFacet = resource.getActionFacet( facetName );
+    		
+    		if (aFacet != null) {
+            	elementList.addAll( aFacet.getElements() );
+            	
+            	for (TLIndicator indicator : aFacet.getIndicators()) {
+            		if (indicator.isPublishAsElement()) {
+            			elementList.add( indicator );
+            		}
+            	}
+    		}
+    	}
+    	return elementList;
+    }
+    
+    /**
      * Analyzes the given property instance to determine the root of its substitution group hierarchy.
      * This is typically the core or business object that is the owner of the facet or alias that is
      * given the property type.  If the given property type is not capable of being a member of a

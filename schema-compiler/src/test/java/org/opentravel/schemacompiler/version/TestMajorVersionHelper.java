@@ -172,9 +172,9 @@ public class TestMajorVersionHelper extends AbstractVersionHelperTests {
         assertNotNull(lookupBO);
         assertNull(lookupBO.getExtension());
         assertEquals(2, lookupBO.getSummaryFacet().getAttributes().size());
-        assertEquals(3, lookupBO.getSummaryFacet().getElements().size());
+        assertEquals(4, lookupBO.getSummaryFacet().getElements().size());
         assertContainsAttributes(lookupBO.getSummaryFacet(), "extBOAttribute121", "extBOAttribute122");
-        assertContainsElements(lookupBO.getSummaryFacet(), "Element1", "Element11", "Element12");
+        assertContainsElements(lookupBO.getSummaryFacet(), "Element1", "Element11", "Element11Param", "Element12");
 
         assertNotNull(lookupCore);
         assertNull(lookupCore.getExtension());
@@ -227,7 +227,7 @@ public class TestMajorVersionHelper extends AbstractVersionHelperTests {
         assertEquals(4, lookupResource.getParamGroups().size());
         assertContainsParamGroups( lookupResource, "LookupParametersShared", "LookupParameters10", "LookupParameters11", "LookupParameters12");
         assertEquals(3, lookupResource.getParamGroup("LookupParametersShared").getParameters().size());
-        assertContainsParameters(lookupResource.getParamGroup("LookupParametersShared"), "Element1", "Element11", "Element12");
+        assertContainsParameters(lookupResource.getParamGroup("LookupParametersShared"), "Element1", "Element11Param", "Element12");
         assertEquals(4, lookupResource.getActionFacets().size());
         assertContainsActionFacets( lookupResource, "LookupFacetShared", "LookupFacet10", "LookupFacet11", "LookupFacet12");
         assertEquals(2, lookupResource.getActionFacet("LookupFacetShared").getAttributes().size());

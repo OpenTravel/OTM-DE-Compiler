@@ -40,18 +40,20 @@ public class TLResourceParentRef extends TLModelElement implements LibraryElemen
 	@Override
 	public String getValidationIdentity() {
         StringBuilder identity = new StringBuilder();
-
+        
         if (owner != null) {
             identity.append(owner.getValidationIdentity()).append("/");
         }
-        if (parentParamGroup == null) {
-        	if (parentParamGroupName == null) {
-                identity.append("[Unspecified Parameter Group]");
+        identity.append("Parent-Ref/");
+        
+        if (parentResource == null) {
+        	if (parentResourceName == null) {
+                identity.append("[Unspecified Parent Resource]");
         	} else {
-        		identity.append(parentParamGroupName);
+        		identity.append(parentResourceName);
         	}
         } else {
-            identity.append(parentParamGroup.getName());
+            identity.append(parentResource.getName());
         }
         return identity.toString();
 	}

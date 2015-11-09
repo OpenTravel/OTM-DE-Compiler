@@ -15,7 +15,16 @@
  */
 package org.opentravel.schemacompiler.validate.compile;
 
+import java.util.List;
+
+import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
+import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
+import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLActionRequest;
+import org.opentravel.schemacompiler.model.TLHttpMethod;
+import org.opentravel.schemacompiler.model.TLParamGroup;
+import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.base.TLActionRequestBaseValidator;
 import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
@@ -27,14 +36,75 @@ import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
  */
 public class TLActionRequestCompileValidator extends TLActionRequestBaseValidator {
 
+    public static final String ERROR_INVALID_PARAM_GROUP      = "INVALID_PARAM_GROUP";
+    public static final String ERROR_GET_REQUEST_PAYLOAD      = "GET_REQUEST_PAYLOAD";
+    public static final String ERROR_INVALID_ACTION_FACET_REF = "INVALID_ACTION_FACET_REF";
+    public static final String WARNING_PATCH_PARTIAL_SUPPORT  = "PATCH_PARTIAL_SUPPORT";
+    
 	/**
 	 * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateFields(org.opentravel.schemacompiler.validate.Validatable)
 	 */
 	@Override
 	protected ValidationFindings validateFields(TLActionRequest target) {
+        TLResource owningResource = (target.getOwner() == null) ? null : target.getOwner().getOwner();
+        TLParamGroup paramGroup = target.getParamGroup();
         TLValidationBuilder builder = newValidationBuilder(target);
         
-        return builder.getFindings();
+        builder.setProperty("httpMethod", target.getHttpMethod())
+        		.setFindingType(FindingType.ERROR).assertNotNull();
+        
+        if (target.getHttpMethod() == TLHttpMethod.PATCH) {
+        	builder.addFinding( FindingType.WARNING, "httpMethod", WARNING_PATCH_PARTIAL_SUPPORT );
+        }
+        
+    	if (paramGroup == null) {
+    		String paramGroupName = target.getParamGroupName();
+    		
+            if ((paramGroupName != null) && !paramGroupName.equals("")) {
+            	builder.addFinding(FindingType.ERROR, "paramGroup",
+            			TLValidationBuilder.UNRESOLVED_NAMED_ENTITY_REFERENCE, paramGroupName );
+            }
+    	} else if (owningResource != null) {
+    		List<TLParamGroup> inheritedParamGroup =
+    				ResourceCodegenUtils.getInheritedParamGroups( owningResource );
+    		
+    		if (!inheritedParamGroup.contains( paramGroup )) {
+            	builder.addFinding( FindingType.ERROR, "paramGroup", ERROR_INVALID_PARAM_GROUP,
+            			paramGroup.getName() );
+    		}
+    	}
+    	
+    	if (target.getActionFacet() != null) {
+    		TLActionFacet actionFacet = target.getActionFacet();
+    		
+        	if (target.getHttpMethod() == TLHttpMethod.GET) {
+            	builder.addFinding( FindingType.ERROR, "actionFacet", ERROR_GET_REQUEST_PAYLOAD );
+        	}
+        	if (owningResource != null) {
+        		if (!owningResource.getActionFacets().contains( actionFacet ) &&
+        				!FacetCodegenUtils.findGhostFacets( owningResource ).contains( actionFacet )) {
+                	builder.addFinding( FindingType.ERROR, "actionFacet", ERROR_INVALID_ACTION_FACET_REF,
+                			actionFacet.getName() );
+        		}
+        	}
+            builder.setProperty("mimeTypes", target.getMimeTypes()).setFindingType(FindingType.ERROR)
+            		.assertMinimumSize( 1 );
+        	
+    	} else {
+    		String actionFacetName = target.getActionFacetName();
+    		
+    		if ((actionFacetName != null) && (actionFacetName.length() > 0)) {
+            	builder.addFinding(FindingType.ERROR, "actionFacet",
+            			TLValidationBuilder.UNRESOLVED_NAMED_ENTITY_REFERENCE, actionFacetName );
+                builder.setProperty("mimeTypes", target.getMimeTypes()).setFindingType(FindingType.ERROR)
+                		.assertMinimumSize( 1 );
+    		} else {
+                builder.setProperty("mimeTypes", target.getMimeTypes()).setFindingType(FindingType.WARNING)
+                		.assertMaximumSize( 0 );
+    		}
+    	}
+    	
+		return builder.getFindings();
 	}
 
 }

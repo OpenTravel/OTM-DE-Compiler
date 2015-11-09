@@ -100,7 +100,7 @@ public class TestResourceTransformers extends Abstract_1_5_TestTransformers {
         assertEquals("ActionFacet-ObjectOnly-documentation-line_1",
         		type.getActionFacets().get(0).getDocumentation().getDescription());
         assertEquals(TLReferenceType.REQUIRED, type.getActionFacets().get(0).getReferenceType());
-        assertEquals("SUMMARY", type.getActionFacets().get(1).getReferenceFacetName());
+        assertEquals("Summary", type.getActionFacets().get(1).getReferenceFacetName());
         assertEquals(1000, type.getActionFacets().get(1).getReferenceRepeat());
         assertEquals(1, type.getActionFacets().get(2).getAttributes().size());
         assertEquals(1, type.getActionFacets().get(2).getElements().size());
@@ -188,7 +188,7 @@ public class TestResourceTransformers extends Abstract_1_5_TestTransformers {
         assertEquals("ActionFacet-ObjectOnly-documentation-line_1",
         		type.getActionFacet().get(0).getDocumentation().getDescription().getValue());
         assertEquals(ReferenceType.REQUIRED, type.getActionFacet().get(0).getReferenceType());
-        assertEquals("SUMMARY", type.getActionFacet().get(1).getReferenceFacet());
+        assertEquals("Summary", type.getActionFacet().get(1).getReferenceFacet());
         assertEquals("1000", type.getActionFacet().get(1).getReferenceRepeat());
         assertEquals(1, type.getActionFacet().get(2).getAttribute().size());
         assertEquals(1, type.getActionFacet().get(2).getElement().size());

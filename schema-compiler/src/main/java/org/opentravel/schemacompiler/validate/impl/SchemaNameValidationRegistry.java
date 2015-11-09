@@ -39,6 +39,7 @@ import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLReferenceType;
+import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
@@ -275,7 +276,7 @@ public class SchemaNameValidationRegistry {
         } else if (XsdCodegenUtils.isSimpleCoreObject(entity)) {
             addElementNameToRegistry(XsdCodegenUtils.getGlobalElementName(entity), entity);
 
-        } else { // Must be a business object or core that has a substitution group
+        } else { // Must be a business, core, or choice object that has a substitution group
             TLFacet substitutableFacet = null;
 
             if (entity instanceof TLCoreObject) {
@@ -386,6 +387,16 @@ public class SchemaNameValidationRegistry {
 		 */
 		@Override
 		public boolean visitChoiceObject(TLChoiceObject choiceObject) {
+			// No Action - the shared facet will register the global elements
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResource(org.opentravel.schemacompiler.model.TLResource)
+		 */
+		@Override
+		public boolean visitResource(TLResource resource) {
+            addTypeNameToRegistry(resource);
             return true;
 		}
 

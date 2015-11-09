@@ -153,7 +153,7 @@ public class TLParamGroup extends TLModelElement implements LibraryElement, TLDo
         ModelEvent<?> event = new ModelEventBuilder(ModelEventType.FACET_REF_MODIFIED, this)
         		.setOldValue(this.facetRef).setNewValue(facetRef).buildEvent();
 
-		this.facetRef = facetRef;
+        this.facetRef = facetRef;
         publishEvent(event);
 	}
 
