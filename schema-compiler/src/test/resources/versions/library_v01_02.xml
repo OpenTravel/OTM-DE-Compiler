@@ -186,8 +186,8 @@
         <ActionFacet context="" label="LookupFacet12" notExtendable="false" referenceType="None">
             <Element name="Element12" repeat="0" type="xsd:string"/>
         </ActionFacet>
-        <Action actionId="LookupAction12" pathTemplate="/{uid}" common="false">
-        	<ActionRequest httpMethod="GET" paramGroup="LookupParameters12" />
+        <Action actionId="LookupAction12" common="false">
+        	<ActionRequest httpMethod="GET" pathTemplate="/{uid}" paramGroup="LookupParameters12" />
         	<ActionResponse statusCodes="200" actionFacet="LookupResource_LookupFacet12" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
         </Action>
     </Resource>
@@ -200,8 +200,8 @@
         <ActionFacet context="" label="PatchTestFacet" notExtendable="false" referenceType="None">
             <Element name="Element12" repeat="0" type="xsd:string"/>
         </ActionFacet>
-        <Action actionId="PatchTestAction" pathTemplate="/{Element12}" common="false">
-        	<ActionRequest httpMethod="GET" paramGroup="PatchTestParameters" />
+        <Action actionId="PatchTestAction" common="false">
+        	<ActionRequest httpMethod="GET" pathTemplate="/{Element12}" paramGroup="PatchTestParameters" />
         	<ActionResponse statusCodes="200" actionFacet="PatchTestResource_PatchTestFacet" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
         </Action>
     </Resource>
@@ -222,8 +222,8 @@
         <ActionFacet context="" label="LaterMinorVersionFacet12" notExtendable="false" referenceType="None">
             <Element name="Element12" repeat="0" type="xsd:string"/>
         </ActionFacet>
-        <Action actionId="LaterMinorVersionAction12" pathTemplate="/{uid}" common="false">
-        	<ActionRequest httpMethod="GET" paramGroup="LaterMinorVersionParameters12" />
+        <Action actionId="LaterMinorVersionAction12" common="false">
+        	<ActionRequest httpMethod="GET" pathTemplate="/{uid}" paramGroup="LaterMinorVersionParameters12" />
         	<ActionResponse statusCodes="200" actionFacet="LaterMinorVersionResource_LaterMinorVersionFacet12" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
         </Action>
     </Resource>

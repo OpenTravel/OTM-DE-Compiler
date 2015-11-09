@@ -374,11 +374,11 @@
             <Element name="wrapperElement" repeat="0" type="xsd:int"/>
             <Indicator name="wrapperIndicator" publishAsElement="false"/>
         </ActionFacet>
-        <Action actionId="Create" pathTemplate="/samples" common="false">
+        <Action actionId="Create" common="false">
 	        <Documentation>
     		    <Description>Action-Create-documentation-line_1</Description>
         	</Documentation>
-        	<ActionRequest httpMethod="POST" actionFacet="SampleResource_ObjectOnly" mimeTypes="APPLICATION_XML APPLICATION_JSON">
+        	<ActionRequest httpMethod="POST" pathTemplate="/samples" actionFacet="SampleResource_ObjectOnly" mimeTypes="APPLICATION_XML APPLICATION_JSON">
 		        <Documentation>
     			    <Description>Action-Create-Request-documentation-line_1</Description>
         		</Documentation>
@@ -389,11 +389,11 @@
         		</Documentation>
         	</ActionResponse>
         </Action>
-        <Action actionId="Update" pathTemplate="/sample/{sample_oid}" common="false">
+        <Action actionId="Update" common="false">
 	        <Documentation>
     		    <Description>Action-Update-documentation-line_1</Description>
         	</Documentation>
-        	<ActionRequest httpMethod="PUT" paramGroup="IDParameters" actionFacet="SampleResource_ObjectOnly" mimeTypes="APPLICATION_XML APPLICATION_JSON">
+        	<ActionRequest httpMethod="PUT" pathTemplate="/sample/{sample_oid}" paramGroup="IDParameters" actionFacet="SampleResource_ObjectOnly" mimeTypes="APPLICATION_XML APPLICATION_JSON">
 		        <Documentation>
     			    <Description>Action-Update-Request-documentation-line_1</Description>
         		</Documentation>
@@ -404,11 +404,11 @@
         		</Documentation>
         	</ActionResponse>
         </Action>
-        <Action actionId="Search" pathTemplate="/samples" common="false">
+        <Action actionId="Search" common="false">
 	        <Documentation>
     		    <Description>Action-Create-documentation-line_1</Description>
         	</Documentation>
-        	<ActionRequest httpMethod="GET" paramGroup="QueryParameters">
+        	<ActionRequest httpMethod="GET" pathTemplate="/samples" paramGroup="QueryParameters">
 		        <Documentation>
     			    <Description>Action-Search-Request-documentation-line_1</Description>
         		</Documentation>

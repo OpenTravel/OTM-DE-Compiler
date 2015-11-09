@@ -623,7 +623,7 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
     			List<String> missingParams = getMissingPathParams( pathTemplate, paramGroup, urlValidator );
     			List<String> unusedParams = getUnusedPathParams( paramGroup, pathTemplate, urlValidator );
     			
-				if (!missingParams.isEmpty()) {
+				if ((paramGroup != null) && !missingParams.isEmpty()) {
 	            	builder.addFinding( FindingType.ERROR, "pathTemplate", ERROR_UNDECLARED_PATH_PARAM,
 	            			toCsvString( missingParams ) );
 				}

@@ -33,7 +33,6 @@ public class TLAction extends TLModelElement implements LibraryElement, TLDocume
 	private TLResource owner;
 	private String actionId;
 	private boolean commonAction;
-	private String pathTemplate;
 	private TLActionRequest request;
 	private ActionResponseListManager responseManager = new ActionResponseListManager( this );
     private TLDocumentation documentation;
@@ -131,28 +130,6 @@ public class TLAction extends TLModelElement implements LibraryElement, TLDocume
 				.setOldValue(this.actionId).setNewValue(actionId).buildEvent();
 
 		this.commonAction = commonAction;
-        publishEvent(event);
-	}
-
-	/**
-	 * Returns the value of the 'pathTemplate' field.
-	 *
-	 * @return String
-	 */
-	public String getPathTemplate() {
-		return pathTemplate;
-	}
-
-	/**
-	 * Assigns the value of the 'pathTemplate' field.
-	 *
-	 * @param pathTemplate  the field value to assign
-	 */
-	public void setPathTemplate(String pathTemplate) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.PATH_TEMPLATE_MODIFIED, this)
-				.setOldValue(this.pathTemplate).setNewValue(pathTemplate).buildEvent();
-
-		this.pathTemplate = pathTemplate;
         publishEvent(event);
 	}
 

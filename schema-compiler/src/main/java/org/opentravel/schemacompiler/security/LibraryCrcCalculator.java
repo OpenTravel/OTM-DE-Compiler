@@ -415,7 +415,6 @@ public class LibraryCrcCalculator {
 		@Override
 		public boolean visitAction(TLAction action) {
             crcData.append(action.getActionId()).append('|');
-            crcData.append(action.getPathTemplate()).append('|');
             return true;
 		}
 
@@ -425,6 +424,7 @@ public class LibraryCrcCalculator {
 		@Override
 		public boolean visitActionRequest(TLActionRequest actionRequest) {
             crcData.append(actionRequest.getHttpMethod()).append('|');
+            crcData.append(actionRequest.getPathTemplate()).append('|');
             crcData.append(actionRequest.getParamGroupName()).append('|');
             crcData.append(actionRequest.getActionFacetName()).append('|');
             

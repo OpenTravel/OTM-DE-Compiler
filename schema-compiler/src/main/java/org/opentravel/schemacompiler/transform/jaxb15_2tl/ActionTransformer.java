@@ -49,7 +49,6 @@ public class ActionTransformer extends ComplexTypeTransformer<Action,TLAction> {
 		TLAction action = new TLAction();
 		
 		action.setActionId(trimString(source.getActionId()));
-		action.setPathTemplate(trimString(source.getPathTemplate()));
 		action.setCommonAction(source.isCommon());
 		
 		if (source.getActionRequest() != null) {

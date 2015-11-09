@@ -35,6 +35,7 @@ public class TLActionRequest extends TLModelElement implements LibraryElement, T
 	private TLHttpMethod httpMethod;
 	private TLParamGroup paramGroup;
 	private String paramGroupName;
+	private String pathTemplate;
 	private TLActionFacet actionFacet;
 	private String actionFacetName;
 	private List<TLMimeType> mimeTypes = new ArrayList<>();
@@ -152,6 +153,28 @@ public class TLActionRequest extends TLModelElement implements LibraryElement, T
 	 */
 	public void setParamGroupName(String paramGroupName) {
 		this.paramGroupName = paramGroupName;
+	}
+
+	/**
+	 * Returns the value of the 'pathTemplate' field.
+	 *
+	 * @return String
+	 */
+	public String getPathTemplate() {
+		return pathTemplate;
+	}
+
+	/**
+	 * Assigns the value of the 'pathTemplate' field.
+	 *
+	 * @param pathTemplate  the field value to assign
+	 */
+	public void setPathTemplate(String pathTemplate) {
+        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.PATH_TEMPLATE_MODIFIED, this)
+				.setOldValue(this.pathTemplate).setNewValue(pathTemplate).buildEvent();
+
+		this.pathTemplate = pathTemplate;
+        publishEvent(event);
 	}
 
 	/**

@@ -179,7 +179,6 @@ public class TLResourceVersionHandler extends TLExtensionOwnerVersionHandler<TLR
         		targetAction = new TLAction();
         		targetAction.setActionId( sourceAction.getActionId() );
         		targetAction.setCommonAction( sourceAction.isCommonAction() );
-        		targetAction.setPathTemplate( sourceAction.getPathTemplate() );
         		majorVersionTarget.addAction( targetAction );
         	}
             if (targetAction.getDocumentation() == null) {

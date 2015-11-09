@@ -62,14 +62,6 @@ public class TLActionCompileValidator extends TLActionBaseValidator {
         			}
         		});
         
-    	builder.setProperty("pathTemplate", target.getPathTemplate()).setFindingType(FindingType.ERROR);
-    	if (!target.isCommonAction()) {
-			builder.assertNotNullOrBlank();
-    	}
-    	if (target.getRequest() != null) {
-        	validatePathTemplate( target.getPathTemplate(), target.getRequest().getParamGroup(), builder );
-    	}
-    	
     	if (target.isCommonAction()) {
     		if (request != null) {
             	builder.addFinding( FindingType.WARNING, "request", WARNING_IGNORING_REQUEST );

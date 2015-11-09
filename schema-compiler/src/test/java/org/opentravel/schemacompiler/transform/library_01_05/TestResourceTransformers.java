@@ -108,10 +108,10 @@ public class TestResourceTransformers extends Abstract_1_5_TestTransformers {
         
         assertEquals(3, type.getActions().size());
         assertEquals("Update", type.getActions().get(1).getActionId());
-        assertEquals("/sample/{sample_oid}", type.getActions().get(1).getPathTemplate());
         
         assertNotNull(type.getActions().get(1).getRequest());
         assertEquals(TLHttpMethod.PUT, type.getActions().get(1).getRequest().getHttpMethod());
+        assertEquals("/sample/{sample_oid}", type.getActions().get(1).getRequest().getPathTemplate());
         assertNotNull(type.getActions().get(1).getRequest().getParamGroup());
         assertEquals("IDParameters", type.getActions().get(1).getRequest().getParamGroup().getName());
         assertEquals("IDParameters", type.getActions().get(1).getRequest().getParamGroupName());
@@ -196,9 +196,9 @@ public class TestResourceTransformers extends Abstract_1_5_TestTransformers {
         
         assertEquals(3, type.getAction().size());
         assertEquals("Update", type.getAction().get(1).getActionId());
-        assertEquals("/sample/{sample_oid}", type.getAction().get(1).getPathTemplate());
         
         assertEquals(HttpMethod.PUT, type.getAction().get(1).getActionRequest().getHttpMethod());
+        assertEquals("/sample/{sample_oid}", type.getAction().get(1).getActionRequest().getPathTemplate());
         assertEquals("IDParameters", type.getAction().get(1).getActionRequest().getParamGroup());
         assertEquals("SampleResource_ObjectOnly", type.getAction().get(1).getActionRequest().getActionFacet());
         assertEquals(2, type.getAction().get(1).getActionRequest().getMimeTypes().size());

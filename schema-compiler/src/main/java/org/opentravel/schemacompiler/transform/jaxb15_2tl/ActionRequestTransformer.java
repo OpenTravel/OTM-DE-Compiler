@@ -41,6 +41,7 @@ public class ActionRequestTransformer extends ComplexTypeTransformer<ActionReque
 		
 		request.setHttpMethod(transformHttpMethod(source.getHttpMethod()));
 		request.setParamGroupName(trimString(source.getParamGroup()));
+		request.setPathTemplate(trimString(source.getPathTemplate()));
 		request.setActionFacetName(trimString(source.getActionFacet()));
 		request.setMimeTypes(ActionTransformer.transformMimeTypes(source.getMimeTypes()));
 		

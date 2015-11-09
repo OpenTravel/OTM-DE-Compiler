@@ -49,7 +49,6 @@ public class TLActionTransformer extends TLComplexTypeTransformer<TLAction,Actio
 		Action action = new Action();
 		
 		action.setActionId(trimString(source.getActionId(), false));
-		action.setPathTemplate(trimString(source.getPathTemplate(), false));
 		action.setCommon(source.isCommonAction());
 		
         if ((source.getDocumentation() != null) && !source.getDocumentation().isEmpty()) {

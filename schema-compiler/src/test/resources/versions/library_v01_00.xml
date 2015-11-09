@@ -144,8 +144,8 @@
         <ActionFacet context="" label="LookupFacet10" notExtendable="false" referenceType="None">
             <Element name="Element1" repeat="0" type="xsd:string"/>
         </ActionFacet>
-        <Action actionId="LookupAction10" pathTemplate="/{uid}" common="false">
-        	<ActionRequest httpMethod="GET" paramGroup="LookupParameters10" />
+        <Action actionId="LookupAction10" common="false">
+        	<ActionRequest httpMethod="GET" pathTemplate="/{uid}" paramGroup="LookupParameters10" />
         	<ActionResponse statusCodes="200" actionFacet="LookupResource_LookupFacet10" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
         </Action>
     </Resource>
@@ -165,8 +165,8 @@
         <ActionFacet context="" label="LaterMinorVersionFacet10" notExtendable="false" referenceType="None">
             <Element name="Element1" repeat="0" type="xsd:string"/>
         </ActionFacet>
-        <Action actionId="LaterMinorVersionAction10" pathTemplate="/{uid}" common="false">
-        	<ActionRequest httpMethod="GET" paramGroup="LaterMinorVersionParameters10" />
+        <Action actionId="LaterMinorVersionAction10" common="false">
+        	<ActionRequest httpMethod="GET" pathTemplate="/{uid}" paramGroup="LaterMinorVersionParameters10" />
         	<ActionResponse statusCodes="200" actionFacet="LaterMinorVersionResource_LaterMinorVersionFacet10" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
         </Action>
     </Resource>

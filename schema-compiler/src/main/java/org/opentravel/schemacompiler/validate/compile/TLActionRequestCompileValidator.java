@@ -27,6 +27,7 @@ import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.base.TLActionRequestBaseValidator;
+import org.opentravel.schemacompiler.validate.impl.ResourceUrlValidator;
 import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
 
 /**
@@ -36,11 +37,14 @@ import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
  */
 public class TLActionRequestCompileValidator extends TLActionRequestBaseValidator {
 
+    public static final String ERROR_PARAM_GROUP_REQUIRED     = "PARAM_GROUP_REQUIRED";
     public static final String ERROR_INVALID_PARAM_GROUP      = "INVALID_PARAM_GROUP";
     public static final String ERROR_GET_REQUEST_PAYLOAD      = "GET_REQUEST_PAYLOAD";
     public static final String ERROR_INVALID_ACTION_FACET_REF = "INVALID_ACTION_FACET_REF";
     public static final String WARNING_PATCH_PARTIAL_SUPPORT  = "PATCH_PARTIAL_SUPPORT";
     
+	private static ResourceUrlValidator urlValidator = new ResourceUrlValidator( true );
+	
 	/**
 	 * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateFields(org.opentravel.schemacompiler.validate.Validatable)
 	 */
@@ -63,7 +67,12 @@ public class TLActionRequestCompileValidator extends TLActionRequestBaseValidato
             if ((paramGroupName != null) && !paramGroupName.equals("")) {
             	builder.addFinding(FindingType.ERROR, "paramGroup",
             			TLValidationBuilder.UNRESOLVED_NAMED_ENTITY_REFERENCE, paramGroupName );
+            	
+            } else if ((target.getPathTemplate() != null) &&
+                	!urlValidator.getPathParameters( target.getPathTemplate() ).isEmpty()) {
+               	builder.addFinding( FindingType.ERROR, "paramGroup", ERROR_PARAM_GROUP_REQUIRED );
             }
+            
     	} else if (owningResource != null) {
     		List<TLParamGroup> inheritedParamGroup =
     				ResourceCodegenUtils.getInheritedParamGroups( owningResource );
@@ -73,6 +82,10 @@ public class TLActionRequestCompileValidator extends TLActionRequestBaseValidato
             			paramGroup.getName() );
     		}
     	}
+    	
+    	builder.setProperty("pathTemplate", target.getPathTemplate()).setFindingType(FindingType.ERROR)
+    			.assertNotNullOrBlank();
+    	validatePathTemplate( target.getPathTemplate(), target.getParamGroup(), builder );
     	
     	if (target.getActionFacet() != null) {
     		TLActionFacet actionFacet = target.getActionFacet();

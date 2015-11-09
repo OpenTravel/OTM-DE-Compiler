@@ -42,6 +42,7 @@ public class TLActionRequestTransformer extends TLComplexTypeTransformer<TLActio
 		ActionRequest request = new ActionRequest();
 		
 		request.setHttpMethod(transformHttpMethod(source.getHttpMethod()));
+		request.setPathTemplate(trimString(source.getPathTemplate(), false));
 		request.getMimeTypes().addAll(TLActionTransformer.transformMimeTypes(source.getMimeTypes()));
 		
 		if (source.getParamGroup() != null) {

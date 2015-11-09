@@ -1797,6 +1797,15 @@
             </xsd:documentation>
          </xsd:annotation>
       </xsd:attribute>
+      <xsd:attribute name="pathTemplate" type="xsd:string" use="optional">
+         <xsd:annotation>
+            <xsd:documentation>Specifies the path for this action relative to the
+            	base path of the owning resource.  The path template must contain
+            	a reference to all path parameters specified in the request's
+            	parameter group.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
       <xsd:attribute name="mimeTypes" use="optional">
          <xsd:annotation>
             <xsd:documentation>List of supported MIME types.</xsd:documentation>
@@ -1882,15 +1891,6 @@
          <xsd:annotation>
             <xsd:documentation>The ID of the action.  This value must be
             	unique within its owning resource.
-            </xsd:documentation>
-         </xsd:annotation>
-      </xsd:attribute>
-      <xsd:attribute name="pathTemplate" type="xsd:string" use="optional">
-         <xsd:annotation>
-            <xsd:documentation>Specifies the path for this action relative to the
-            	base path of the owning resource.  The path template must contain
-            	a reference to all path parameters specified in the request's
-            	parameter group.
             </xsd:documentation>
          </xsd:annotation>
       </xsd:attribute>
