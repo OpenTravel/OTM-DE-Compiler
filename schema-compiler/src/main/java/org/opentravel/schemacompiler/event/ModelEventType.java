@@ -914,14 +914,14 @@ public enum ModelEventType {
     COMMON_FLAG_MODIFIED(ValueChangeEvent.class),
 
     /**
-     * Event type sent when the action facet reference of an action request or
+     * Event type sent when the payload type reference of an action request or
      * response is modified.
      * 
      * <p>
      * <u>Event</u>: <code>ValueChangeEvent</code> <br>
      * <u>Source Object</u>: <code>TLActionRequest</code> or <code>TLActionResponse</code>
      */
-    ACTION_FACET_MODIFIED(ValueChangeEvent.class),
+    PAYLOAD_TYPE_MODIFIED(ValueChangeEvent.class),
 
     /**
      * Event type sent when the MIME types list of an action request or

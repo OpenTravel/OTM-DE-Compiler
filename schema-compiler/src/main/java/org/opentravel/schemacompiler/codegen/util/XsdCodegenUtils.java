@@ -37,7 +37,10 @@ import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAbstractFacet;
+import org.opentravel.schemacompiler.model.TLAction;
 import org.opentravel.schemacompiler.model.TLActionFacet;
+import org.opentravel.schemacompiler.model.TLActionRequest;
+import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
@@ -57,6 +60,7 @@ import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLPropertyType;
+import org.opentravel.schemacompiler.model.TLReferenceType;
 import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
@@ -160,7 +164,23 @@ public class XsdCodegenUtils {
                 elementLocalName = alias.getLocalName();
             }
             elementName = new QName(alias.getNamespace(), elementLocalName);
-
+            
+        } else if (modelEntity instanceof TLActionRequest) {
+        	TLActionRequest request = (TLActionRequest) modelEntity;
+        	String localPart = getActionElement( request.getOwner(), request.getPayloadType(), "RQ" );
+        	
+        	if (localPart != null) {
+            	elementName = new QName(modelEntity.getNamespace(), localPart );
+        	}
+        	
+        } else if (modelEntity instanceof TLActionResponse) {
+        	TLActionResponse response = (TLActionResponse) modelEntity;
+        	String localPart = getActionElement( response.getOwner(), response.getPayloadType(), "RS" );
+        	
+        	if (localPart != null) {
+            	elementName = new QName(modelEntity.getNamespace(), localPart );
+        	}
+        	
         } else if ((modelEntity instanceof TLCoreObject)
                 || !(modelEntity instanceof TLAttributeType)) {
             elementName = new QName(modelEntity.getNamespace(), modelEntity.getLocalName());
@@ -189,6 +209,10 @@ public class XsdCodegenUtils {
             }
         } else if (facetOwner instanceof TLCoreObject) {
             if (facet.getFacetType() == TLFacetType.SUMMARY) {
+                elementName = facetOwner.getLocalName();
+            }
+        } else if (facetOwner instanceof TLChoiceObject) {
+            if (facet.getFacetType() == TLFacetType.SHARED) {
                 elementName = facetOwner.getLocalName();
             }
         }
@@ -226,6 +250,12 @@ public class XsdCodegenUtils {
             TLAlias ownerAlias = AliasCodegenUtils.getOwnerAlias(facetAlias);
 
             if (facet.getFacetType() == TLFacetType.SUMMARY) {
+                elementName = ownerAlias.getName();
+            }
+        } else if (facetOwner instanceof TLChoiceObject) {
+            TLAlias ownerAlias = AliasCodegenUtils.getOwnerAlias(facetAlias);
+
+            if (facet.getFacetType() == TLFacetType.SHARED) {
                 elementName = ownerAlias.getName();
             }
         }
@@ -355,6 +385,16 @@ public class XsdCodegenUtils {
         } else if (modelEntity instanceof TLChoiceObject) {
         	typeName = getFacetTypeName(((TLChoiceObject) modelEntity).getSharedFacet());
         	
+        } else if (modelEntity instanceof TLActionRequest) {
+        	TLActionRequest request = (TLActionRequest) modelEntity;
+        	
+        	typeName = getActionType( request.getOwner(), request.getPayloadType(), "RQ" );
+        	
+        } else if (modelEntity instanceof TLActionResponse) {
+        	TLActionResponse response = (TLActionResponse) modelEntity;
+        	
+        	typeName = getActionType( response.getOwner(), response.getPayloadType(), "RS" );
+        	
         } else {
             typeName = modelEntity.getLocalName();
         }
@@ -468,6 +508,119 @@ public class XsdCodegenUtils {
             suffix.append("_").append(facetType.getIdentityName());
         }
         return suffix.toString();
+    }
+    
+    /**
+     * Returns the local element name for an action request or response payload based
+     * on the information provided.
+     * 
+     * @param action  the action for which to return an element name
+     * @param payloadType  the payload type for the action request or response
+     * @param elementSuffix  the suffix to append onto the resulting element name
+     * @return String
+     */
+    private static String getActionElement(TLAction action, NamedEntity payloadType, String elementSuffix) {
+    	String elementName = null;
+    	
+    	if (payloadType instanceof TLActionFacet) {
+    		TLActionFacet actionFacet = (TLActionFacet) payloadType;
+    		TLReferenceType referenceType = actionFacet.getReferenceType();
+        	TLResource resource = (action == null) ? null : action.getOwner();
+        	String actionId = (action == null) ? "UnknownAction" : getCamelCaseActionId( action.getActionId() );
+        	StringBuilder elementPrefix = new StringBuilder();
+        	String businessObjectName = null;
+        	
+        	if ((resource != null) && (referenceType != null) && (referenceType != TLReferenceType.NONE)) {
+        		TLBusinessObject businessObj = resource.getBusinessObjectRef();
+        		
+        		if (businessObj != null) {
+        			QName boQName = getGlobalElementName( businessObj );
+        			businessObjectName = (boQName == null) ? null : boQName.getLocalPart();
+        			
+        		} else if (resource != null) {
+        			businessObjectName = resource.getBusinessObjectRefName();
+        		}
+        	}
+        	if (businessObjectName != null) {
+        		elementPrefix.append( businessObjectName );
+        	} else {
+    			QName facetQName = getGlobalElementName( actionFacet );
+    			
+    			if (facetQName != null) {
+            		elementPrefix.append( facetQName.getLocalPart() );
+    			}
+        	}
+        	elementPrefix.append( actionId );
+        	elementName = elementPrefix.append( elementSuffix ).toString();
+    	}
+    	return elementName;
+    }
+
+    /**
+     * Returns the type name for an action request or response payload based on
+     * the information provided.
+     * 
+     * @param action  the action for which to return a type name
+     * @param payloadType  the payload type for the action request or response
+     * @param typeSuffix  the suffix to append onto the resulting type name
+     * @return String
+     */
+    private static String getActionType(TLAction action, NamedEntity payloadType, String typeSuffix) {
+    	String typeName = null;
+    	
+    	if (payloadType instanceof TLActionFacet) {
+    		TLActionFacet actionFacet = (TLActionFacet) payloadType;
+    		TLReferenceType referenceType = actionFacet.getReferenceType();
+        	TLResource resource = (action == null) ? null : action.getOwner();
+        	String actionId = (action == null) ? "UnknownAction" : getCamelCaseActionId( action.getActionId() );
+        	StringBuilder typePrefix = new StringBuilder();
+        	String businessObjectName = null;
+        	
+        	if ((resource != null) && (referenceType != null) && (referenceType != TLReferenceType.NONE)) {
+        		TLBusinessObject businessObj = resource.getBusinessObjectRef();
+        		
+        		if (businessObj != null) {
+        			businessObjectName = getGlobalTypeName( businessObj );
+        			
+        		} else if (resource != null) {
+        			businessObjectName = resource.getBusinessObjectRefName();
+        		}
+        	}
+        	if (businessObjectName != null) {
+        		typePrefix.append( businessObjectName );
+        	} else {
+    			typePrefix.append( getGlobalTypeName( actionFacet ) );
+        	}
+        	typePrefix.append('_').append( actionId ).append('_');
+        	typeName = typePrefix.append( typeSuffix ).toString();
+    	}
+    	return typeName;
+    }
+    
+    /**
+     * Returns a camel-case version of the given action ID.  If the ID is already
+     * in camel case text, this method should preserve the existing text.  Upper-case
+     * and "_" separated ID's will be converted to a camel-case equivalent.
+     * 
+     * @param actionId  the action ID to process
+     * @return String
+     */
+    private static String getCamelCaseActionId(String actionId) {
+    	StringBuilder ccActionId = new StringBuilder();
+    	
+		if (actionId.toUpperCase().equals( actionId )) {
+			actionId = actionId.toLowerCase();
+		}
+		for (String idPart : actionId.split("_")) {
+			if (idPart.length() == 1) {
+				ccActionId.append( idPart.toUpperCase() );
+				
+			} else if (idPart.length() > 1) {
+				ccActionId.append( idPart.substring( 0, 1 ).toUpperCase() )
+						.append( idPart.substring( 1 ) );
+			}
+		}
+    	return ccActionId.toString();
     }
 
     /**

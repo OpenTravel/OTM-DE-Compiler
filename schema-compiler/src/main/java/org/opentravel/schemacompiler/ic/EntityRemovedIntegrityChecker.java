@@ -20,6 +20,7 @@ import java.util.Collection;
 import org.opentravel.schemacompiler.event.OwnershipEvent;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryElement;
+import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLActionRequest;
 import org.opentravel.schemacompiler.model.TLActionResponse;
@@ -299,7 +300,7 @@ public abstract class EntityRemovedIntegrityChecker<S, I> extends
 		@Override
 		public boolean visitActionRequest(TLActionRequest actionRequest) {
             TLParamGroup referencedParamGroup = actionRequest.getParamGroup();
-            TLActionFacet referencedActionFacet = actionRequest.getActionFacet();
+            TLActionFacet referencedPayloadType = actionRequest.getPayloadType();
             TLModel model = actionRequest.getOwningModel();
             
             if (isRemovedEntity(referencedParamGroup)) {
@@ -308,10 +309,10 @@ public abstract class EntityRemovedIntegrityChecker<S, I> extends
                 actionRequest.setParamGroup(null);
                 restoreListeners(model, listenersEnabled);
             }
-            if (isRemovedEntity(referencedActionFacet)) {
+            if (isRemovedEntity(referencedPayloadType)) {
                 boolean listenersEnabled = disableListeners(model);
 
-                actionRequest.setActionFacet(null);
+                actionRequest.setPayloadType(null);
                 restoreListeners(model, listenersEnabled);
             }
             return true;
@@ -322,13 +323,14 @@ public abstract class EntityRemovedIntegrityChecker<S, I> extends
 		 */
 		@Override
 		public boolean visitActionResponse(TLActionResponse actionResponse) {
-            TLActionFacet referencedActionFacet = actionResponse.getActionFacet();
+            NamedEntity referencedPayloadType = actionResponse.getPayloadType();
             
-            if (isRemovedEntity(referencedActionFacet)) {
+            if ((referencedPayloadType instanceof TLModelElement)
+            		&& isRemovedEntity((TLModelElement) referencedPayloadType)) {
                 TLModel model = actionResponse.getOwningModel();
                 boolean listenersEnabled = disableListeners(model);
 
-                actionResponse.setActionFacet(null);
+                actionResponse.setPayloadType(null);
                 restoreListeners(model, listenersEnabled);
             }
             return true;

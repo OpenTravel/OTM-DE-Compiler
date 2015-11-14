@@ -55,7 +55,7 @@ public class TypeNameIntegrityChecker extends
                 || (event.getType() == ModelEventType.EXTENDS_ENTITY_MODIFIED)
                 || (event.getType() == ModelEventType.PARENT_RESOURCE_MODIFIED)
                 || (event.getType() == ModelEventType.FACET_REF_MODIFIED)
-                || (event.getType() == ModelEventType.ACTION_FACET_MODIFIED)) {
+                || (event.getType() == ModelEventType.PAYLOAD_TYPE_MODIFIED)) {
             String entityName = buildEntityName((NamedEntity) event.getNewValue(), sourceObject);
 
             if (sourceObject instanceof TLSimple) {
@@ -83,10 +83,10 @@ public class TypeNameIntegrityChecker extends
                 ((TLParamGroup) sourceObject).setFacetRefName(entityName);
 
             } else if (sourceObject instanceof TLActionRequest) {
-                ((TLActionRequest) sourceObject).setActionFacetName(entityName);
+                ((TLActionRequest) sourceObject).setPayloadTypeName(entityName);
 
             } else if (sourceObject instanceof TLActionResponse) {
-                ((TLActionResponse) sourceObject).setActionFacetName(entityName);
+                ((TLActionResponse) sourceObject).setPayloadTypeName(entityName);
             }
             
         } else if ((event.getType() == ModelEventType.PARAM_GROUP_MODIFIED)

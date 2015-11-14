@@ -188,7 +188,7 @@
         </ActionFacet>
         <Action actionId="LookupAction12" common="false">
         	<ActionRequest httpMethod="GET" pathTemplate="/{uid}" paramGroup="LookupParameters12" />
-        	<ActionResponse statusCodes="200" actionFacet="LookupResource_LookupFacet12" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+        	<ActionResponse statusCodes="200" payloadType="LookupResource_LookupFacet12" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
         </Action>
     </Resource>
     
@@ -202,7 +202,7 @@
         </ActionFacet>
         <Action actionId="PatchTestAction" common="false">
         	<ActionRequest httpMethod="GET" pathTemplate="/{Element12}" paramGroup="PatchTestParameters" />
-        	<ActionResponse statusCodes="200" actionFacet="PatchTestResource_PatchTestFacet" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+        	<ActionResponse statusCodes="200" payloadType="PatchTestResource_PatchTestFacet" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
         </Action>
     </Resource>
     
@@ -224,7 +224,7 @@
         </ActionFacet>
         <Action actionId="LaterMinorVersionAction12" common="false">
         	<ActionRequest httpMethod="GET" pathTemplate="/{uid}" paramGroup="LaterMinorVersionParameters12" />
-        	<ActionResponse statusCodes="200" actionFacet="LaterMinorVersionResource_LaterMinorVersionFacet12" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+        	<ActionResponse statusCodes="200" payloadType="LaterMinorVersionResource_LaterMinorVersionFacet12" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
         </Action>
     </Resource>
     

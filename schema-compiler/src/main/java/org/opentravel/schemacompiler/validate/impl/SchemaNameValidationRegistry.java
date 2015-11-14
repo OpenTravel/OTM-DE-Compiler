@@ -387,7 +387,7 @@ public class SchemaNameValidationRegistry {
 		 */
 		@Override
 		public boolean visitChoiceObject(TLChoiceObject choiceObject) {
-			// No Action - the shared facet will register the global elements
+            addElementNamesToRegistry(choiceObject);
             return true;
 		}
 

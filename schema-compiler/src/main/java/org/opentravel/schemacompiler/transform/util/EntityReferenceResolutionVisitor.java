@@ -354,11 +354,11 @@ public class EntityReferenceResolutionVisitor extends ModelElementVisitorAdapter
         		}
         	}
         }
-        if ((actionRequest.getActionFacet() == null) && (actionRequest.getActionFacetName() != null)) {
-            Object ref = symbolResolver.resolveEntity(actionRequest.getActionFacetName());
+        if ((actionRequest.getPayloadType() == null) && (actionRequest.getPayloadTypeName() != null)) {
+            Object ref = symbolResolver.resolveEntity(actionRequest.getPayloadTypeName());
 
             if (ref instanceof TLActionFacet) {
-            	actionRequest.setActionFacet((TLActionFacet) ref);
+            	actionRequest.setPayloadType((TLActionFacet) ref);
             }
         }
         return true;
@@ -369,11 +369,11 @@ public class EntityReferenceResolutionVisitor extends ModelElementVisitorAdapter
 	 */
 	@Override
 	public boolean visitActionResponse(TLActionResponse actionResponse) {
-        if ((actionResponse.getActionFacet() == null) && (actionResponse.getActionFacetName() != null)) {
-            Object ref = symbolResolver.resolveEntity(actionResponse.getActionFacetName());
+        if ((actionResponse.getPayloadType() == null) && (actionResponse.getPayloadTypeName() != null)) {
+            Object ref = symbolResolver.resolveEntity(actionResponse.getPayloadTypeName());
 
-            if (ref instanceof TLActionFacet) {
-            	actionResponse.setActionFacet((TLActionFacet) ref);
+            if (ref instanceof NamedEntity) {
+            	actionResponse.setPayloadType((NamedEntity) ref);
             }
         }
         return true;

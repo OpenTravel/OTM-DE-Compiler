@@ -727,8 +727,6 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateActionRequest(TLActionRequest actionRequest) {
         if (canVisit(actionRequest) && visitor.visitActionRequest(actionRequest)) {
-        	navigateParamGroup(actionRequest.getParamGroup());
-        	navigateActionFacet(actionRequest.getActionFacet());
             navigateDocumentation(actionRequest.getDocumentation());
         }
         addVisitedNode(actionRequest);
@@ -742,7 +740,6 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateActionResponse(TLActionResponse actionResponse) {
         if (canVisit(actionResponse) && visitor.visitActionResponse(actionResponse)) {
-        	navigateActionFacet(actionResponse.getActionFacet());
             navigateDocumentation(actionResponse.getDocumentation());
         }
         addVisitedNode(actionResponse);

@@ -146,7 +146,7 @@
         </ActionFacet>
         <Action actionId="LookupAction10" common="false">
         	<ActionRequest httpMethod="GET" pathTemplate="/{uid}" paramGroup="LookupParameters10" />
-        	<ActionResponse statusCodes="200" actionFacet="LookupResource_LookupFacet10" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+        	<ActionResponse statusCodes="200" payloadType="LookupResource_LookupFacet10" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
         </Action>
     </Resource>
     
@@ -167,7 +167,7 @@
         </ActionFacet>
         <Action actionId="LaterMinorVersionAction10" common="false">
         	<ActionRequest httpMethod="GET" pathTemplate="/{uid}" paramGroup="LaterMinorVersionParameters10" />
-        	<ActionResponse statusCodes="200" actionFacet="LaterMinorVersionResource_LaterMinorVersionFacet10" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+        	<ActionResponse statusCodes="200" payloadType="LaterMinorVersionResource_LaterMinorVersionFacet10" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
         </Action>
     </Resource>
     

@@ -87,28 +87,28 @@ public class TLActionRequestCompileValidator extends TLActionRequestBaseValidato
     			.assertNotNullOrBlank();
     	validatePathTemplate( target.getPathTemplate(), target.getParamGroup(), builder );
     	
-    	if (target.getActionFacet() != null) {
-    		TLActionFacet actionFacet = target.getActionFacet();
+    	if (target.getPayloadType() != null) {
+    		TLActionFacet payloadType = target.getPayloadType();
     		
         	if (target.getHttpMethod() == TLHttpMethod.GET) {
-            	builder.addFinding( FindingType.ERROR, "actionFacet", ERROR_GET_REQUEST_PAYLOAD );
+            	builder.addFinding( FindingType.ERROR, "payloadType", ERROR_GET_REQUEST_PAYLOAD );
         	}
         	if (owningResource != null) {
-        		if (!owningResource.getActionFacets().contains( actionFacet ) &&
-        				!FacetCodegenUtils.findGhostFacets( owningResource ).contains( actionFacet )) {
-                	builder.addFinding( FindingType.ERROR, "actionFacet", ERROR_INVALID_ACTION_FACET_REF,
-                			actionFacet.getName() );
+        		if (!owningResource.getActionFacets().contains( payloadType ) &&
+        				!FacetCodegenUtils.findGhostFacets( owningResource ).contains( payloadType )) {
+                	builder.addFinding( FindingType.ERROR, "payloadType", ERROR_INVALID_ACTION_FACET_REF,
+                			payloadType.getName() );
         		}
         	}
             builder.setProperty("mimeTypes", target.getMimeTypes()).setFindingType(FindingType.ERROR)
             		.assertMinimumSize( 1 );
         	
     	} else {
-    		String actionFacetName = target.getActionFacetName();
+    		String payloadTypeName = target.getPayloadTypeName();
     		
-    		if ((actionFacetName != null) && (actionFacetName.length() > 0)) {
-            	builder.addFinding(FindingType.ERROR, "actionFacet",
-            			TLValidationBuilder.UNRESOLVED_NAMED_ENTITY_REFERENCE, actionFacetName );
+    		if ((payloadTypeName != null) && (payloadTypeName.length() > 0)) {
+            	builder.addFinding(FindingType.ERROR, "payloadType",
+            			TLValidationBuilder.UNRESOLVED_NAMED_ENTITY_REFERENCE, payloadTypeName );
                 builder.setProperty("mimeTypes", target.getMimeTypes()).setFindingType(FindingType.ERROR)
                 		.assertMinimumSize( 1 );
     		} else {

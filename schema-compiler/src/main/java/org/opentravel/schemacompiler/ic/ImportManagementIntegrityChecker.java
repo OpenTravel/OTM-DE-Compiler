@@ -588,8 +588,8 @@ public abstract class ImportManagementIntegrityChecker<E extends ModelEvent<S>, 
             if (actionRequest.getParamGroup() != null) {
                 addReferencedLibrary(actionRequest.getParamGroup().getOwningLibrary());
             }
-            if (actionRequest.getActionFacet() != null) {
-                addReferencedLibrary(actionRequest.getActionFacet().getOwningLibrary());
+            if (actionRequest.getPayloadType() != null) {
+                addReferencedLibrary(actionRequest.getPayloadType().getOwningLibrary());
             }
             return true;
 		}
@@ -599,8 +599,8 @@ public abstract class ImportManagementIntegrityChecker<E extends ModelEvent<S>, 
 		 */
 		@Override
 		public boolean visitActionResponse(TLActionResponse actionResponse) {
-            if (actionResponse.getActionFacet() != null) {
-                addReferencedLibrary(actionResponse.getActionFacet().getOwningLibrary());
+            if (actionResponse.getPayloadType() != null) {
+                addReferencedLibrary(actionResponse.getPayloadType().getOwningLibrary());
             }
             return true;
 		}

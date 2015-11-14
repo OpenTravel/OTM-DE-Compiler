@@ -38,7 +38,7 @@ public class TLActionRequestTransformer extends TLComplexTypeTransformer<TLActio
 	 */
 	@Override
 	public ActionRequest transform(TLActionRequest source) {
-		TLActionFacet sourceActionFacet = source.getActionFacet();
+		TLActionFacet sourcePayloadType = source.getPayloadType();
 		ActionRequest request = new ActionRequest();
 		
 		request.setHttpMethod(transformHttpMethod(source.getHttpMethod()));
@@ -51,11 +51,11 @@ public class TLActionRequestTransformer extends TLComplexTypeTransformer<TLActio
 			request.setParamGroup(source.getParamGroupName());
 		}
 		
-		if (sourceActionFacet != null) {
-			request.setActionFacet(context.getSymbolResolver().buildEntityName(
-					sourceActionFacet.getNamespace(), sourceActionFacet.getLocalName()));
+		if (sourcePayloadType != null) {
+			request.setPayloadType(context.getSymbolResolver().buildEntityName(
+					sourcePayloadType.getNamespace(), sourcePayloadType.getLocalName()));
 		} else {
-			request.setActionFacet(source.getActionFacetName());
+			request.setPayloadType(source.getPayloadTypeName());
 		}
 		
         if ((source.getDocumentation() != null) && !source.getDocumentation().isEmpty()) {

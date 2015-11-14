@@ -277,17 +277,17 @@ public class RollupReferenceHandler {
                     && rollupReferences.isRollupLibrary( request.getParamGroup().getOwningLibrary() )) {
                 rollupReferences.addReference( request, request.getParamGroup() );
             }
-            if ((request.getActionFacet() != null)
-                    && rollupReferences.isRollupLibrary( request.getActionFacet().getOwningLibrary() )) {
-                rollupReferences.addReference( request, request.getActionFacet() );
+            if ((request.getPayloadType() != null)
+                    && rollupReferences.isRollupLibrary( request.getPayloadType().getOwningLibrary() )) {
+                rollupReferences.addReference( request, request.getPayloadType() );
             }
             
         } else if (entity instanceof TLActionResponse) {
         	TLActionResponse response = (TLActionResponse) entity;
         	
-            if ((response.getActionFacet() != null)
-                    && rollupReferences.isRollupLibrary( response.getActionFacet().getOwningLibrary() )) {
-                rollupReferences.addReference( response, response.getActionFacet() );
+            if ((response.getPayloadType() != null)
+                    && rollupReferences.isRollupLibrary( response.getPayloadType().getOwningLibrary() )) {
+                rollupReferences.addReference( response, response.getPayloadType() );
             }
         }
     }
@@ -719,15 +719,15 @@ public class RollupReferenceHandler {
                 TLParamGroup sameNameParamGroup = findSameNameParamGroup(
                 		rollupReferences.getReference( actionRequest, TLParamGroup.class ),
                 		(TLLibrary) actionRequest.getOwningLibrary() );
-                TLActionFacet sameNameActionFacet = findSameNameEntity(
+                TLActionFacet sameNamePayloadType = findSameNameEntity(
                 		rollupReferences.getReference( actionRequest, TLActionFacet.class ),
                 		(TLLibrary) actionRequest.getOwningLibrary() );
 
                 if (sameNameParamGroup != null) {
                 	actionRequest.setParamGroup( sameNameParamGroup );
                 }
-                if (sameNameActionFacet != null) {
-                	actionRequest.setActionFacet( sameNameActionFacet );
+                if (sameNamePayloadType != null) {
+                	actionRequest.setPayloadType( sameNamePayloadType );
                 }
             }
 			return true;
@@ -739,12 +739,12 @@ public class RollupReferenceHandler {
 		@Override
 		public boolean visitActionResponse(TLActionResponse actionResponse) {
             if (rollupReferences.hasReference( actionResponse )) {
-                TLActionFacet sameNameActionFacet = findSameNameEntity(
-                		rollupReferences.getReference( actionResponse, TLActionFacet.class ),
+                NamedEntity sameNamePayloadType = findSameNameEntity(
+                		rollupReferences.getReference( actionResponse, NamedEntity.class ),
                 		(TLLibrary) actionResponse.getOwningLibrary() );
 
-                if (sameNameActionFacet != null) {
-                	actionResponse.setActionFacet( sameNameActionFacet );
+                if (sameNamePayloadType != null) {
+                	actionResponse.setPayloadType( sameNamePayloadType );
                 }
             }
 			return true;

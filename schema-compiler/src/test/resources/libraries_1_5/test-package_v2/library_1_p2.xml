@@ -319,7 +319,7 @@
     
     <Resource name="BaseResource" abstract="true" firstClass="true">
     	<Action actionId="CommonErrors" common="true">
-        	<ActionResponse statusCodes="403 500">
+        	<ActionResponse statusCodes="403 500" payloadType="SampleCore" mimeTypes="APPLICATION_XML APPLICATION_JSON">
 		        <Documentation>
     			    <Description>Action-Search-Response2-documentation-line_1</Description>
         		</Documentation>
@@ -378,12 +378,12 @@
 	        <Documentation>
     		    <Description>Action-Create-documentation-line_1</Description>
         	</Documentation>
-        	<ActionRequest httpMethod="POST" pathTemplate="/samples" actionFacet="SampleResource_ObjectOnly" mimeTypes="APPLICATION_XML APPLICATION_JSON">
+        	<ActionRequest httpMethod="POST" pathTemplate="/samples" payloadType="SampleResource_ObjectOnly" mimeTypes="APPLICATION_XML APPLICATION_JSON">
 		        <Documentation>
     			    <Description>Action-Create-Request-documentation-line_1</Description>
         		</Documentation>
         	</ActionRequest>
-        	<ActionResponse statusCodes="200 204" actionFacet="SampleResource_ObjectOnly" mimeTypes="APPLICATION_XML APPLICATION_JSON">
+        	<ActionResponse statusCodes="200 204" payloadType="SampleResource_ObjectOnly" mimeTypes="APPLICATION_XML APPLICATION_JSON">
 		        <Documentation>
     			    <Description>Action-Create-Response1-documentation-line_1</Description>
         		</Documentation>
@@ -393,12 +393,12 @@
 	        <Documentation>
     		    <Description>Action-Update-documentation-line_1</Description>
         	</Documentation>
-        	<ActionRequest httpMethod="PUT" pathTemplate="/sample/{sample_oid}" paramGroup="IDParameters" actionFacet="SampleResource_ObjectOnly" mimeTypes="APPLICATION_XML APPLICATION_JSON">
+        	<ActionRequest httpMethod="PUT" pathTemplate="/sample/{sample_oid}" paramGroup="IDParameters" payloadType="SampleResource_ObjectOnly" mimeTypes="APPLICATION_XML APPLICATION_JSON">
 		        <Documentation>
     			    <Description>Action-Update-Request-documentation-line_1</Description>
         		</Documentation>
         	</ActionRequest>
-        	<ActionResponse statusCodes="200" actionFacet="SampleResource_ObjectOnly" mimeTypes="APPLICATION_XML APPLICATION_JSON">
+        	<ActionResponse statusCodes="200" payloadType="SampleResource_ObjectOnly" mimeTypes="APPLICATION_XML APPLICATION_JSON">
 		        <Documentation>
     			    <Description>Action-Update-Response1-documentation-line_1</Description>
         		</Documentation>
@@ -413,7 +413,7 @@
     			    <Description>Action-Search-Request-documentation-line_1</Description>
         		</Documentation>
         	</ActionRequest>
-        	<ActionResponse statusCodes="200" actionFacet="SampleResource_ObjectList" mimeTypes="APPLICATION_XML APPLICATION_JSON">
+        	<ActionResponse statusCodes="200" payloadType="SampleResource_ObjectList" mimeTypes="APPLICATION_XML APPLICATION_JSON">
 		        <Documentation>
     			    <Description>Action-Search-Response1-documentation-line_1</Description>
         		</Documentation>

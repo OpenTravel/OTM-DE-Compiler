@@ -58,6 +58,9 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
 
         } else if (owningEntity instanceof TLCoreObject) {
             ownerAliasManager = ((TLCoreObject) owningEntity).aliasManager;
+            
+        } else if (owningEntity instanceof TLChoiceObject) {
+            ownerAliasManager = ((TLChoiceObject) owningEntity).aliasManager;
         }
         if (ownerAliasManager != null) {
             ownerAliasManager.addDerivedListManager(new FacetAliasManager());

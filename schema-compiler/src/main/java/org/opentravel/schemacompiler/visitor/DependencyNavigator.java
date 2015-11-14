@@ -365,7 +365,7 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
     public void navigateActionRequest(TLActionRequest actionRequest) {
         if (canVisit(actionRequest) && visitor.visitActionRequest(actionRequest)) {
         	navigateParamGroup(actionRequest.getParamGroup());
-        	navigateActionFacet(actionRequest.getActionFacet());
+        	navigateActionFacet(actionRequest.getPayloadType());
         }
         addVisitedNode(actionRequest);
     }
@@ -378,7 +378,7 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
      */
     public void navigateActionResponse(TLActionResponse actionResponse) {
         if (canVisit(actionResponse) && visitor.visitActionResponse(actionResponse)) {
-        	navigateActionFacet(actionResponse.getActionFacet());
+        	navigateDependency(actionResponse.getPayloadType());
         }
         addVisitedNode(actionResponse);
     }

@@ -426,7 +426,7 @@ public class LibraryCrcCalculator {
             crcData.append(actionRequest.getHttpMethod()).append('|');
             crcData.append(actionRequest.getPathTemplate()).append('|');
             crcData.append(actionRequest.getParamGroupName()).append('|');
-            crcData.append(actionRequest.getActionFacetName()).append('|');
+            crcData.append(actionRequest.getPayloadTypeName()).append('|');
             
             for (TLMimeType mimeType : actionRequest.getMimeTypes()) {
                 crcData.append(mimeType).append('|');
@@ -442,7 +442,7 @@ public class LibraryCrcCalculator {
 			for (Integer statusCode : actionResponse.getStatusCodes()) {
                 crcData.append(statusCode).append('|');
 			}
-            crcData.append(actionResponse.getActionFacetName()).append('|');
+            crcData.append(actionResponse.getPayloadTypeName()).append('|');
             
             for (TLMimeType mimeType : actionResponse.getMimeTypes()) {
                 crcData.append(mimeType).append('|');

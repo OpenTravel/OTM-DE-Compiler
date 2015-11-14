@@ -20,8 +20,13 @@ import java.util.Collections;
 import java.util.List;
 
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
+import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLActionResponse;
+import org.opentravel.schemacompiler.model.TLAlias;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
+import org.opentravel.schemacompiler.model.TLCoreObject;
+import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
@@ -37,6 +42,7 @@ public class TLActionResponseCompileValidator extends TLActionResponseBaseValida
 
     public static final String ERROR_INVALID_STATUS_CODES     = "INVALID_STATUS_CODES";
     public static final String ERROR_INVALID_ACTION_FACET_REF = "INVALID_ACTION_FACET_REF";
+    public static final String ERROR_INVALID_RESPONSE_PAYLOAD = "INVALID_RESPONSE_PAYLOAD";
     
 	/**
 	 * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateFields(org.opentravel.schemacompiler.validate.Validatable)
@@ -52,25 +58,28 @@ public class TLActionResponseCompileValidator extends TLActionResponseBaseValida
         			toCsvString( invalidStatusCodes ) );
         }
         
-    	if (target.getActionFacet() != null) {
-    		TLActionFacet actionFacet = target.getActionFacet();
+    	if (target.getPayloadType() != null) {
+    		NamedEntity payloadType = target.getPayloadType();
     		
-        	if (owningResource != null) {
-        		if (!owningResource.getActionFacets().contains( actionFacet ) &&
-        				!FacetCodegenUtils.findGhostFacets( owningResource ).contains( actionFacet )) {
-                	builder.addFinding( FindingType.ERROR, "actionFacet", ERROR_INVALID_ACTION_FACET_REF,
-                			actionFacet.getName() );
+    		if (payloadType instanceof TLActionFacet) {
+        		if ((owningResource != null) && !owningResource.getActionFacets().contains( payloadType )
+        				&& !FacetCodegenUtils.findGhostFacets( owningResource ).contains( payloadType )) {
+                	builder.addFinding( FindingType.ERROR, "payloadType", ERROR_INVALID_ACTION_FACET_REF,
+                			payloadType.getLocalName() );
         		}
-        	}
+    		} else if (!isValidResponsePayload( payloadType )){
+            	builder.addFinding(FindingType.ERROR, "payloadType", ERROR_INVALID_RESPONSE_PAYLOAD,
+            			payloadType.getLocalName() );
+    		}
             builder.setProperty("mimeTypes", target.getMimeTypes()).setFindingType(FindingType.ERROR)
             		.assertMinimumSize( 1 );
         	
     	} else {
-    		String actionFacetName = target.getActionFacetName();
+    		String payloadTypeName = target.getPayloadTypeName();
     		
-    		if ((actionFacetName != null) && (actionFacetName.length() > 0)) {
-            	builder.addFinding(FindingType.ERROR, "actionFacet",
-            			TLValidationBuilder.UNRESOLVED_NAMED_ENTITY_REFERENCE, actionFacetName );
+    		if ((payloadTypeName != null) && (payloadTypeName.length() > 0)) {
+            	builder.addFinding(FindingType.ERROR, "payloadType",
+            			TLValidationBuilder.UNRESOLVED_NAMED_ENTITY_REFERENCE, payloadTypeName );
                 builder.setProperty("mimeTypes", target.getMimeTypes()).setFindingType(FindingType.ERROR)
                 		.assertMinimumSize( 1 );
     		} else {
@@ -98,6 +107,23 @@ public class TLActionResponseCompileValidator extends TLActionResponseBaseValida
 		}
 		Collections.sort( invalidCodes );
 		return invalidCodes;
+	}
+	
+	/**
+	 * Returns true if the given entity is a valid reference to a core object, one of its
+	 * aliases, or one of its non-simple facets.
+	 * 
+	 * @param payloadType  the payload type to validate
+	 * @return boolean
+	 */
+	private boolean isValidResponsePayload(NamedEntity payloadType) {
+		if (payloadType instanceof TLAlias) {
+			payloadType = ((TLAlias) payloadType).getOwningEntity();
+		}
+		if (payloadType instanceof TLFacet) {
+			payloadType = ((TLFacet) payloadType).getOwningEntity();
+		}
+		return (payloadType instanceof TLCoreObject) || (payloadType instanceof TLChoiceObject);
 	}
 	
 }

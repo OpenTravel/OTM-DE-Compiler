@@ -228,10 +228,10 @@ public class PrefixChangeIntegrityChecker extends
 		 */
 		@Override
 		public boolean visitActionRequest(TLActionRequest actionRequest) {
-            if ((actionRequest.getActionFacet() != null)
-                    && affectedNamespace.equals(actionRequest.getActionFacet().getNamespace())) {
-            	actionRequest.setActionFacetName(symbolResolver.buildEntityName(affectedNamespace, actionRequest
-                        .getActionFacet().getLocalName()));
+            if ((actionRequest.getPayloadType() != null)
+                    && affectedNamespace.equals(actionRequest.getPayloadType().getNamespace())) {
+            	actionRequest.setPayloadTypeName(symbolResolver.buildEntityName(affectedNamespace, actionRequest
+                        .getPayloadType().getLocalName()));
             }
             return true;
 		}
@@ -241,10 +241,10 @@ public class PrefixChangeIntegrityChecker extends
 		 */
 		@Override
 		public boolean visitActionResponse(TLActionResponse actionResponse) {
-            if ((actionResponse.getActionFacet() != null)
-                    && affectedNamespace.equals(actionResponse.getActionFacet().getNamespace())) {
-            	actionResponse.setActionFacetName(symbolResolver.buildEntityName(affectedNamespace, actionResponse
-                        .getActionFacet().getLocalName()));
+            if ((actionResponse.getPayloadType() != null)
+                    && affectedNamespace.equals(actionResponse.getPayloadType().getNamespace())) {
+            	actionResponse.setPayloadTypeName(symbolResolver.buildEntityName(affectedNamespace, actionResponse
+                        .getPayloadType().getLocalName()));
             }
             return true;
 		}

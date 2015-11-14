@@ -340,14 +340,14 @@ public class NameChangeIntegrityChecker extends
 		@Override
 		public boolean visitActionRequest(TLActionRequest actionRequest) {
 			TLParamGroup referencedParamGroup = actionRequest.getParamGroup();
-			TLActionFacet referencedActionFacet = actionRequest.getActionFacet();
+			TLActionFacet referencedPayloadType = actionRequest.getPayloadType();
 			
             if (modifiedEntities.contains(referencedParamGroup)) {
             	actionRequest.setParamGroupName(referencedParamGroup.getName());
             }
-            if (modifiedEntities.contains(referencedActionFacet)) {
-            	actionRequest.setActionFacetName(symbolResolver.buildEntityName(referencedActionFacet.getNamespace(),
-            			referencedActionFacet.getLocalName()));
+            if (modifiedEntities.contains(referencedPayloadType)) {
+            	actionRequest.setPayloadTypeName(symbolResolver.buildEntityName(referencedPayloadType.getNamespace(),
+            			referencedPayloadType.getLocalName()));
             }
             return true;
 		}
@@ -357,11 +357,11 @@ public class NameChangeIntegrityChecker extends
 		 */
 		@Override
 		public boolean visitActionResponse(TLActionResponse actionResponse) {
-			TLActionFacet referencedActionFacet = actionResponse.getActionFacet();
+			NamedEntity referencedPayloadType = actionResponse.getPayloadType();
 			
-            if (modifiedEntities.contains(referencedActionFacet)) {
-            	actionResponse.setActionFacetName(symbolResolver.buildEntityName(referencedActionFacet.getNamespace(),
-            			referencedActionFacet.getLocalName()));
+            if (modifiedEntities.contains(referencedPayloadType)) {
+            	actionResponse.setPayloadTypeName(symbolResolver.buildEntityName(referencedPayloadType.getNamespace(),
+            			referencedPayloadType.getLocalName()));
             }
             return true;
 		}

@@ -200,7 +200,7 @@ public class ReferenceCountVisitor extends ModelElementVisitorAdapter {
 	@Override
 	public boolean visitActionRequest(TLActionRequest actionRequest) {
         countReference(actionRequest.getParamGroup());
-        countReference(actionRequest.getActionFacet());
+        countReference(actionRequest.getPayloadType());
         return true;
 	}
 
@@ -209,7 +209,7 @@ public class ReferenceCountVisitor extends ModelElementVisitorAdapter {
 	 */
 	@Override
 	public boolean visitActionResponse(TLActionResponse actionResponse) {
-        countReference(actionResponse.getActionFacet());
+        countReference(actionResponse.getPayloadType());
         return true;
 	}
 

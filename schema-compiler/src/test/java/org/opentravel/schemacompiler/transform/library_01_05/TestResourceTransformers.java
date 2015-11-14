@@ -115,9 +115,10 @@ public class TestResourceTransformers extends Abstract_1_5_TestTransformers {
         assertNotNull(type.getActions().get(1).getRequest().getParamGroup());
         assertEquals("IDParameters", type.getActions().get(1).getRequest().getParamGroup().getName());
         assertEquals("IDParameters", type.getActions().get(1).getRequest().getParamGroupName());
-        assertNotNull(type.getActions().get(1).getRequest().getActionFacet());
-        assertEquals("ObjectOnly", type.getActions().get(1).getRequest().getActionFacet().getName());
-        assertEquals("SampleResource_ObjectOnly", type.getActions().get(1).getRequest().getActionFacetName());
+        assertNotNull(type.getActions().get(1).getRequest().getPayloadType());
+        assertEquals("ObjectOnly", type.getActions().get(1).getRequest().getPayloadType().getName());
+        assertEquals("SampleResource_ObjectOnly", type.getActions().get(1).getRequest().getPayloadType().getLocalName());
+        assertEquals("SampleResource_ObjectOnly", type.getActions().get(1).getRequest().getPayloadTypeName());
         assertEquals(2, type.getActions().get(1).getRequest().getMimeTypes().size());
         assertEquals(TLMimeType.APPLICATION_XML, type.getActions().get(1).getRequest().getMimeTypes().get(0));
         assertEquals(TLMimeType.APPLICATION_JSON, type.getActions().get(1).getRequest().getMimeTypes().get(1));
@@ -129,9 +130,9 @@ public class TestResourceTransformers extends Abstract_1_5_TestTransformers {
         assertEquals(1, type.getActions().get(2).getResponses().size());
         assertEquals(1, type.getActions().get(2).getResponses().get(0).getStatusCodes().size());
         assertEquals(200, type.getActions().get(2).getResponses().get(0).getStatusCodes().get(0).intValue());
-        assertNotNull(type.getActions().get(2).getResponses().get(0).getActionFacet());
-        assertEquals("ObjectList", type.getActions().get(2).getResponses().get(0).getActionFacet().getName());
-        assertEquals("SampleResource_ObjectList", type.getActions().get(2).getResponses().get(0).getActionFacetName());
+        assertNotNull(type.getActions().get(2).getResponses().get(0).getPayloadType());
+        assertEquals("SampleResource_ObjectList", type.getActions().get(2).getResponses().get(0).getPayloadType().getLocalName());
+        assertEquals("SampleResource_ObjectList", type.getActions().get(2).getResponses().get(0).getPayloadTypeName());
         assertEquals(2, type.getActions().get(2).getResponses().get(0).getMimeTypes().size());
         assertEquals(TLMimeType.APPLICATION_XML, type.getActions().get(2).getResponses().get(0).getMimeTypes().get(0));
         assertEquals(TLMimeType.APPLICATION_JSON, type.getActions().get(2).getResponses().get(0).getMimeTypes().get(1));
@@ -200,7 +201,7 @@ public class TestResourceTransformers extends Abstract_1_5_TestTransformers {
         assertEquals(HttpMethod.PUT, type.getAction().get(1).getActionRequest().getHttpMethod());
         assertEquals("/sample/{sample_oid}", type.getAction().get(1).getActionRequest().getPathTemplate());
         assertEquals("IDParameters", type.getAction().get(1).getActionRequest().getParamGroup());
-        assertEquals("SampleResource_ObjectOnly", type.getAction().get(1).getActionRequest().getActionFacet());
+        assertEquals("SampleResource_ObjectOnly", type.getAction().get(1).getActionRequest().getPayloadType());
         assertEquals(2, type.getAction().get(1).getActionRequest().getMimeTypes().size());
         assertEquals(MimeType.APPLICATION_XML, type.getAction().get(1).getActionRequest().getMimeTypes().get(0));
         assertEquals(MimeType.APPLICATION_JSON, type.getAction().get(1).getActionRequest().getMimeTypes().get(1));
@@ -212,7 +213,7 @@ public class TestResourceTransformers extends Abstract_1_5_TestTransformers {
         assertEquals(1, type.getAction().get(2).getActionResponse().size());
         assertEquals(1, type.getAction().get(2).getActionResponse().get(0).getStatusCodes().size());
         assertEquals(200, type.getAction().get(2).getActionResponse().get(0).getStatusCodes().get(0).intValue());
-        assertEquals("SampleResource_ObjectList", type.getAction().get(2).getActionResponse().get(0).getActionFacet());
+        assertEquals("SampleResource_ObjectList", type.getAction().get(2).getActionResponse().get(0).getPayloadType());
         assertEquals(2, type.getAction().get(2).getActionResponse().get(0).getMimeTypes().size());
         assertEquals(MimeType.APPLICATION_XML, type.getAction().get(2).getActionResponse().get(0).getMimeTypes().get(0));
         assertEquals(MimeType.APPLICATION_JSON, type.getAction().get(2).getActionResponse().get(0).getMimeTypes().get(1));

@@ -45,7 +45,7 @@ public class TypeAssignmentChangeIntegrityChecker
                 || (event.getType() == ModelEventType.BO_REFERENCE_MODIFIED)
                 || (event.getType() == ModelEventType.FACET_REF_MODIFIED)
                 || (event.getType() == ModelEventType.FIELD_REF_MODIFIED)
-                || (event.getType() == ModelEventType.ACTION_FACET_MODIFIED)) {
+                || (event.getType() == ModelEventType.PAYLOAD_TYPE_MODIFIED)) {
             AbstractLibrary owningLibrary = getOwningLibrary(event.getSource());
 
             if (owningLibrary instanceof TLLibrary) {

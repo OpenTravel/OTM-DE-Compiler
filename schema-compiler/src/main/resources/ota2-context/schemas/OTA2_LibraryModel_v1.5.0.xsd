@@ -1783,7 +1783,7 @@
             <xsd:documentation>The HTTP method of the REST request.</xsd:documentation>
          </xsd:annotation>
       </xsd:attribute>
-      <xsd:attribute name="actionFacet" type="Name_Type" use="optional">
+      <xsd:attribute name="payloadType" type="Name_Type" use="optional">
          <xsd:annotation>
             <xsd:documentation>Name of the action facet that specifies the
             	payload (if any) for the request.
@@ -1840,9 +1840,9 @@
             <xsd:list itemType="xsd:int" />
          </xsd:simpleType>
       </xsd:attribute>
-      <xsd:attribute name="actionFacet" type="Name_Type" use="optional">
+      <xsd:attribute name="payloadType" type="Name_Type" use="optional">
          <xsd:annotation>
-            <xsd:documentation>Name of the action facet that specifies the
+            <xsd:documentation>Name of the action facet or core object that specifies the
             	payload (if any) for the response.
             </xsd:documentation>
          </xsd:annotation>

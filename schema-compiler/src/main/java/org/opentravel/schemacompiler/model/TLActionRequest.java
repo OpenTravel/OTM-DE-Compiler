@@ -29,15 +29,15 @@ import org.opentravel.schemacompiler.event.ModelEventType;
  * 
  * @author S. Livezey
  */
-public class TLActionRequest extends TLModelElement implements LibraryElement, TLDocumentationOwner {
+public class TLActionRequest extends TLModelElement implements NamedEntity, TLDocumentationOwner {
 	
 	private TLAction owner;
 	private TLHttpMethod httpMethod;
 	private TLParamGroup paramGroup;
 	private String paramGroupName;
 	private String pathTemplate;
-	private TLActionFacet actionFacet;
-	private String actionFacetName;
+	private TLActionFacet payloadType;
+	private String payloadTypeName;
 	private List<TLMimeType> mimeTypes = new ArrayList<>();
     private TLDocumentation documentation;
 	
@@ -56,6 +56,33 @@ public class TLActionRequest extends TLModelElement implements LibraryElement, T
         }
         identity.append("Request");
         return identity.toString();
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.model.NamedEntity#getNamespace()
+	 */
+	@Override
+	public String getNamespace() {
+		AbstractLibrary owningLibrary = getOwningLibrary();
+		
+		return (owningLibrary == null) ? null : owningLibrary.getNamespace();
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.model.NamedEntity#getLocalName()
+	 */
+	@Override
+	public String getLocalName() {
+		StringBuilder localName = new StringBuilder();
+		String actionId = (owner == null) ? null : owner.getActionId();
+		
+		if (actionId != null) {
+			localName.append( actionId );
+		} else {
+			localName.append( "Unknown_Action" );
+		}
+		localName.append('_').append( "Request" );
+		return localName.toString();
 	}
 
 	/**
@@ -178,43 +205,43 @@ public class TLActionRequest extends TLModelElement implements LibraryElement, T
 	}
 
 	/**
-	 * Returns the value of the 'actionFacet' field.
+	 * Returns the value of the 'payloadType' field.
 	 *
 	 * @return TLActionFacet
 	 */
-	public TLActionFacet getActionFacet() {
-		return actionFacet;
+	public TLActionFacet getPayloadType() {
+		return payloadType;
 	}
 
 	/**
-	 * Assigns the value of the 'actionFacet' field.
+	 * Assigns the value of the 'payloadType' field.
 	 *
 	 * @param actionFacet  the field value to assign
 	 */
-	public void setActionFacet(TLActionFacet actionFacet) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.ACTION_FACET_MODIFIED, this)
-        		.setOldValue(this.actionFacet).setNewValue(actionFacet).buildEvent();
+	public void setPayloadType(TLActionFacet payloadType) {
+        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.PAYLOAD_TYPE_MODIFIED, this)
+        		.setOldValue(this.payloadType).setNewValue(payloadType).buildEvent();
 
-		this.actionFacet = actionFacet;
+		this.payloadType = payloadType;
         publishEvent(event);
 	}
 
 	/**
-	 * Returns the value of the 'actionFacetName' field.
+	 * Returns the value of the 'payloadTypeName' field.
 	 *
 	 * @return String
 	 */
-	public String getActionFacetName() {
-		return actionFacetName;
+	public String getPayloadTypeName() {
+		return payloadTypeName;
 	}
 
 	/**
-	 * Assigns the value of the 'actionFacetName' field.
+	 * Assigns the value of the 'payloadTypeName' field.
 	 *
-	 * @param actionFacetName  the field value to assign
+	 * @param payloadTypeName  the field value to assign
 	 */
-	public void setActionFacetName(String actionFacetName) {
-		this.actionFacetName = actionFacetName;
+	public void setPayloadTypeName(String payloadTypeName) {
+		this.payloadTypeName = payloadTypeName;
 	}
 
 	/**

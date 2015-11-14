@@ -23,6 +23,7 @@ import org.opentravel.schemacompiler.event.ModelEventBuilder;
 import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.model.TLEquivalent.EquivalentListManager;
 import org.opentravel.schemacompiler.model.TLExample.ExampleListManager;
+import org.opentravel.schemacompiler.util.XSDFacetProfileLocator;
 import org.opentravel.schemacompiler.version.Versioned;
 
 /**
@@ -256,7 +257,8 @@ public class TLSimple extends LibraryMember implements Versioned, TLAttributeTyp
      */
     @Override
     public XSDFacetProfile getXSDFacetProfile() {
-        return (parentType == null) ? XSDFacetProfile.FP_unknown : parentType.getXSDFacetProfile();
+        return ((parentType == null) || (parentType == this)) ?
+        		XSDFacetProfile.FP_unknown : XSDFacetProfileLocator.getXSDFacetProfile( parentType );
     }
 
     /**

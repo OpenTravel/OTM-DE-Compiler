@@ -38,7 +38,7 @@ public class ActionResponseTransformer extends ComplexTypeTransformer<ActionResp
 		TLActionResponse response = new TLActionResponse();
 		
 		response.setStatusCodes(source.getStatusCodes());
-		response.setActionFacetName(trimString(source.getActionFacet()));
+		response.setPayloadTypeName(trimString(source.getPayloadType()));
 		response.setMimeTypes(ActionTransformer.transformMimeTypes(source.getMimeTypes()));
 		
         if (source.getDocumentation() != null) {
