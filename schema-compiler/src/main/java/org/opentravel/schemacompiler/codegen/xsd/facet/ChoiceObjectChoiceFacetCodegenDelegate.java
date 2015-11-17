@@ -18,7 +18,6 @@ package org.opentravel.schemacompiler.codegen.xsd.facet;
 import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
-import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLFacet;
 
@@ -61,18 +60,9 @@ public class ChoiceObjectChoiceFacetCodegenDelegate extends ChoiceObjectFacetCod
      */
     @Override
     public QName getExtensionPointElement() {
-    	TLBusinessObject bo = (TLBusinessObject) getSourceFacet().getOwningEntity();
-        SchemaDependency extensionPoint;
-        QName extensionPointQName;
+        SchemaDependency extensionPoint = SchemaDependency.getExtensionPointChoiceElement();
+        QName extensionPointQName = extensionPoint.toQName();
         
-        if (declaresOrInheritsFacetContent( bo.getSummaryFacet() )) {
-        	// TODO: Need an ExtensionPoint_Shared element
-        	extensionPoint = SchemaDependency.getExtensionPointCustomElement();
-        	
-        } else {
-        	extensionPoint = SchemaDependency.getExtensionPointElement();
-        }
-        extensionPointQName = extensionPoint.toQName();
         addCompileTimeDependency(extensionPoint);
         return extensionPointQName;
     }

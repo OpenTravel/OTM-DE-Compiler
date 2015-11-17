@@ -77,8 +77,15 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
      */
     @Override
     public FacetCodegenElements generateElements() {
-        FacetCodegenElements codegenElements = super.generateElements();
-
+    	boolean doDefaultElement = hasDefaultFacetElement();
+        FacetCodegenElements codegenElements;
+        
+        if (doDefaultElement) {
+            codegenElements = super.generateElements();
+        } else {
+            codegenElements = new FacetCodegenElements();
+        }
+        
         if (hasContent()) {
             TLFacet sourceFacet = getSourceFacet();
             TLFacetOwner facetOwner = sourceFacet.getOwningEntity();
@@ -101,8 +108,9 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
                         codegenElements.addSubstitutionGroupElement(ownerAlias,
                                 createSubstitutionGroupElement(ownerAlias));
                     }
-                    codegenElements.addFacetElement(ownerAlias, createElement(facetAlias));
-
+                    if (doDefaultElement) {
+                        codegenElements.addFacetElement(ownerAlias, createElement(facetAlias));
+                    }
                     if (doNonSubstitutableElement) {
                         codegenElements.addFacetElement(ownerAlias,
                                 createNonSubstitutableElement(facetAlias));
@@ -112,7 +120,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
         }
         return codegenElements;
     }
-
+    
     /**
      * @see org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegate#hasContent()
      */
@@ -206,6 +214,16 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
 
         return (baseFacet == null) ? null : new QName(baseFacet.getNamespace(),
                 XsdCodegenUtils.getGlobalTypeName(baseFacet));
+    }
+
+    /**
+     * Returns true if this delegate should call the base class to generate a default
+     * global element (returns true by default).
+     * 
+     * @return boolean
+     */
+    protected boolean hasDefaultFacetElement() {
+    	return true;
     }
 
     /**
@@ -428,7 +446,9 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
         QName globalExtensionPointElement = hasExtensionPoint() ? getExtensionPointElement() : null;
 
         List<TLProperty> elementList = getElements();
-        boolean hasSequence = (globalExtensionPointElement != null) || !elementList.isEmpty();
+        List<TLIndicator> indicatorList = getIndicators();
+        boolean hasSequence = (globalExtensionPointElement != null) ||
+        		!elementList.isEmpty() || hasElementIndicators( indicatorList );
         ExplicitGroup sequence = hasSequence ? new ExplicitGroup() : null;
         ComplexType type = new TopLevelComplexType();
         List<Annotated> jaxbAttributeList;
@@ -462,7 +482,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
                 sequence.getParticle().add(
                         jaxbObjectFactory.createElement(elementTransformer.transform(element)));
             }
-            for (TLIndicator indicator : getIndicators()) {
+            for (TLIndicator indicator : indicatorList) {
                 if (indicator.isPublishAsElement()) {
                     sequence.getParticle().add(
                             jaxbObjectFactory.createElement((TopLevelElement) indicatorTransformer
@@ -596,6 +616,25 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
             facetHierarchy.pop();
         }
         return (TLPropertyType) (facetHierarchy.isEmpty() ? null : facetHierarchy.peek());
+    }
+    
+    /**
+     * Returns true if the given list of indicators has at least one that should be declared
+     * as an XSD element.
+     * 
+     * @param indicatorList  the list of indicators to analyze
+     * @return boolean
+     */
+    private boolean hasElementIndicators(List<TLIndicator> indicatorList) {
+    	boolean hasElement = false;
+    	
+    	for (TLIndicator indicator : indicatorList) {
+    		if (indicator.isPublishAsElement()) {
+    			hasElement = true;
+    			break;
+    		}
+    	}
+    	return hasElement;
     }
 
     /**

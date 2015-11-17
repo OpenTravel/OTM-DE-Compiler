@@ -116,9 +116,9 @@ public class TestResourceTransformers extends Abstract_1_5_TestTransformers {
         assertEquals("IDParameters", type.getActions().get(1).getRequest().getParamGroup().getName());
         assertEquals("IDParameters", type.getActions().get(1).getRequest().getParamGroupName());
         assertNotNull(type.getActions().get(1).getRequest().getPayloadType());
-        assertEquals("ObjectOnly", type.getActions().get(1).getRequest().getPayloadType().getName());
-        assertEquals("SampleResource_ObjectOnly", type.getActions().get(1).getRequest().getPayloadType().getLocalName());
-        assertEquals("SampleResource_ObjectOnly", type.getActions().get(1).getRequest().getPayloadTypeName());
+        assertEquals("ObjectWrapper", type.getActions().get(1).getRequest().getPayloadType().getName());
+        assertEquals("SampleResource_ObjectWrapper", type.getActions().get(1).getRequest().getPayloadType().getLocalName());
+        assertEquals("SampleResource_ObjectWrapper", type.getActions().get(1).getRequest().getPayloadTypeName());
         assertEquals(2, type.getActions().get(1).getRequest().getMimeTypes().size());
         assertEquals(TLMimeType.APPLICATION_XML, type.getActions().get(1).getRequest().getMimeTypes().get(0));
         assertEquals(TLMimeType.APPLICATION_JSON, type.getActions().get(1).getRequest().getMimeTypes().get(1));
@@ -201,7 +201,7 @@ public class TestResourceTransformers extends Abstract_1_5_TestTransformers {
         assertEquals(HttpMethod.PUT, type.getAction().get(1).getActionRequest().getHttpMethod());
         assertEquals("/sample/{sample_oid}", type.getAction().get(1).getActionRequest().getPathTemplate());
         assertEquals("IDParameters", type.getAction().get(1).getActionRequest().getParamGroup());
-        assertEquals("SampleResource_ObjectOnly", type.getAction().get(1).getActionRequest().getPayloadType());
+        assertEquals("SampleResource_ObjectWrapper", type.getAction().get(1).getActionRequest().getPayloadType());
         assertEquals(2, type.getAction().get(1).getActionRequest().getMimeTypes().size());
         assertEquals(MimeType.APPLICATION_XML, type.getAction().get(1).getActionRequest().getMimeTypes().get(0));
         assertEquals(MimeType.APPLICATION_JSON, type.getAction().get(1).getActionRequest().getMimeTypes().get(1));

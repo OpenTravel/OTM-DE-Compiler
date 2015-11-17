@@ -143,6 +143,16 @@
 					<property name="schemaDeclaration" ref="ota2MessageSchema" />
 					<property name="localName" value="ExtensionPoint_Query" />
 				</bean>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaDependency">
+					<property name="id" value="EXTENSION_POINT_SHARED" />
+					<property name="schemaDeclaration" ref="ota2MessageSchema" />
+					<property name="localName" value="ExtensionPoint_Shared" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaDependency">
+					<property name="id" value="EXTENSION_POINT_CHOICE" />
+					<property name="schemaDeclaration" ref="ota2MessageSchema" />
+					<property name="localName" value="ExtensionPoint_Choice" />
+				</bean>
 			</list>
 		</constructor-arg>
 	</bean>

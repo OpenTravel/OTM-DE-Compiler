@@ -15,8 +15,6 @@
  */
 package org.opentravel.schemacompiler.codegen.xsd.facet;
 
-import javax.xml.namespace.QName;
-
 import org.opentravel.schemacompiler.model.TLFacet;
 
 /**
@@ -35,22 +33,6 @@ public abstract class ChoiceObjectFacetCodegenDelegate extends TLFacetCodegenDel
      */
     public ChoiceObjectFacetCodegenDelegate(TLFacet sourceFacet) {
         super(sourceFacet);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate#getLocalBaseFacet()
-     */
-    @Override
-    public TLFacet getLocalBaseFacet() {
-        return null;
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate#getExtensionPointElement()
-     */
-    @Override
-    public QName getExtensionPointElement() {
-        return null;
     }
 
 }

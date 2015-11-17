@@ -393,7 +393,7 @@
 	        <Documentation>
     		    <Description>Action-Update-documentation-line_1</Description>
         	</Documentation>
-        	<ActionRequest httpMethod="PUT" pathTemplate="/sample/{sample_oid}" paramGroup="IDParameters" payloadType="SampleResource_ObjectOnly" mimeTypes="APPLICATION_XML APPLICATION_JSON">
+        	<ActionRequest httpMethod="PUT" pathTemplate="/sample/{sample_oid}" paramGroup="IDParameters" payloadType="SampleResource_ObjectWrapper" mimeTypes="APPLICATION_XML APPLICATION_JSON">
 		        <Documentation>
     			    <Description>Action-Update-Request-documentation-line_1</Description>
         		</Documentation>

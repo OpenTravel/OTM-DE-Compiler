@@ -276,23 +276,28 @@ public class XsdCodegenUtils {
      * @return QName
      */
     public static QName getSubstitutionGroupElementName(NamedEntity modelEntity) {
-        boolean isTopLevelFacetOwner = (modelEntity instanceof TLBusinessObject)
-                || (modelEntity instanceof TLCoreObject) || (modelEntity instanceof TLChoiceObject);
+        NamedEntity nonAliasEntity = modelEntity;
         QName referenceElementName = null;
-
-        if (!isTopLevelFacetOwner && (modelEntity instanceof TLAlias)) {
-            TLAlias alias = (TLAlias) modelEntity;
-            NamedEntity aliasedEntity = alias.getOwningEntity();
-
-            isTopLevelFacetOwner = (aliasedEntity instanceof TLBusinessObject)
-                    || (aliasedEntity instanceof TLCoreObject)
-                    || (aliasedEntity instanceof TLChoiceObject);
+        
+        if (modelEntity instanceof TLAlias) {
+        	nonAliasEntity = ((TLAlias) modelEntity).getOwningEntity();
         }
+        boolean isTopLevelFacetOwner =
+        		(nonAliasEntity instanceof TLBusinessObject)
+                || (nonAliasEntity instanceof TLCoreObject)
+                || (nonAliasEntity instanceof TLChoiceObject);
+        
         if (isTopLevelFacetOwner) {
             QName globalElementName = getGlobalElementName(modelEntity);
 
-            referenceElementName = new QName(globalElementName.getNamespaceURI(),
-                    globalElementName.getLocalPart() + "SubGrp");
+            if (nonAliasEntity instanceof TLChoiceObject) {
+            	// Slightly different naming for choice objects than cores and business objects
+            	referenceElementName = globalElementName;
+            	
+            } else {
+                referenceElementName = new QName(globalElementName.getNamespaceURI(),
+                        globalElementName.getLocalPart() + "SubGrp");
+            }
         }
         return referenceElementName;
     }
@@ -534,8 +539,7 @@ public class XsdCodegenUtils {
         		TLBusinessObject businessObj = resource.getBusinessObjectRef();
         		
         		if (businessObj != null) {
-        			QName boQName = getGlobalElementName( businessObj );
-        			businessObjectName = (boQName == null) ? null : boQName.getLocalPart();
+        			businessObjectName = businessObj.getLocalName();
         			
         		} else if (resource != null) {
         			businessObjectName = resource.getBusinessObjectRefName();
@@ -580,7 +584,7 @@ public class XsdCodegenUtils {
         		TLBusinessObject businessObj = resource.getBusinessObjectRef();
         		
         		if (businessObj != null) {
-        			businessObjectName = getGlobalTypeName( businessObj );
+        			businessObjectName = businessObj.getLocalName();
         			
         		} else if (resource != null) {
         			businessObjectName = resource.getBusinessObjectRefName();
@@ -1028,6 +1032,8 @@ public class XsdCodegenUtils {
             typeNames.put(TLClosedEnumeration.class, "EnumerationClosed");
             typeNames.put(TLOperation.class, "Operation");
             typeNames.put(TLActionFacet.class, "ActionFacet");
+            typeNames.put(TLActionRequest.class, "ActionRequest");
+            typeNames.put(TLActionResponse.class, "ActionResponse");
 
             libraryTypeNames = Collections.unmodifiableMap(typeNames);
             jaxbDatatypeFactory = DatatypeFactory.newInstance();

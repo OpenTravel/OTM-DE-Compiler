@@ -41,6 +41,8 @@ public final class SchemaDependency {
     private static final String EXTENSION_POINT_DETAIL = "EXTENSION_POINT_DETAIL";
     private static final String EXTENSION_POINT_CUSTOM = "EXTENSION_POINT_CUSTOM";
     private static final String EXTENSION_POINT_QUERY = "EXTENSION_POINT_QUERY";
+    private static final String EXTENSION_POINT_SHARED = "EXTENSION_POINT_SHARED";
+    private static final String EXTENSION_POINT_CHOICE = "EXTENSION_POINT_CHOICE";
 
     private String id;
     private SchemaDeclaration schemaDeclaration;
@@ -152,6 +154,24 @@ public final class SchemaDependency {
      */
     public static SchemaDependency getExtensionPointQueryElement() {
         return getDependency(EXTENSION_POINT_QUERY);
+    }
+
+    /**
+     * Returns the schema dependency for the "ExtensionPoint_Shared" element.
+     * 
+     * @return SchemaDependency
+     */
+    public static SchemaDependency getExtensionPointSharedElement() {
+        return getDependency(EXTENSION_POINT_SHARED);
+    }
+
+    /**
+     * Returns the schema dependency for the "ExtensionPoint_Choice" element.
+     * 
+     * @return SchemaDependency
+     */
+    public static SchemaDependency getExtensionPointChoiceElement() {
+        return getDependency(EXTENSION_POINT_CHOICE);
     }
 
     /**

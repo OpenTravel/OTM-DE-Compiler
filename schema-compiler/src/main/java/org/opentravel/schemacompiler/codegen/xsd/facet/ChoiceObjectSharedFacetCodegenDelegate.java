@@ -17,14 +17,13 @@ package org.opentravel.schemacompiler.codegen.xsd.facet;
 
 import javax.xml.namespace.QName;
 
-import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
-import org.opentravel.schemacompiler.codegen.xsd.TLDocumentationCodegenTransformer;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.TLAlias;
-import org.opentravel.schemacompiler.model.TLCoreObject;
-import org.opentravel.schemacompiler.model.TLDocumentationOwner;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLFacet;
-import org.w3._2001.xmlschema.Annotation;
+import org.w3._2001.xmlschema.Annotated;
+import org.w3._2001.xmlschema.ComplexType;
+import org.w3._2001.xmlschema.Element;
 
 /**
  * Code generation delegate for <code>TLFacet</code> instances with a facet type of
@@ -45,28 +44,19 @@ public class ChoiceObjectSharedFacetCodegenDelegate extends ChoiceObjectFacetCod
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate#hasDefaultFacetElement()
+	 */
+	@Override
+	protected boolean hasDefaultFacetElement() {
+		return false;
+	}
+
+	/**
      * @see org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate#hasSubstitutionGroupElement()
      */
     @Override
     protected boolean hasSubstitutionGroupElement() {
-        return !XsdCodegenUtils.isSimpleCoreObject(getSourceFacet().getOwningEntity());
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate#hasNonSubstitutableElement()
-     */
-    @Override
-    protected boolean hasNonSubstitutableElement() {
-        return !XsdCodegenUtils.isSimpleCoreObject(getSourceFacet().getOwningEntity());
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate#getSubstitutionGroup(org.opentravel.schemacompiler.model.TLAlias)
-     */
-    @Override
-    protected QName getSubstitutionGroup(TLAlias facetAlias) {
-        return XsdCodegenUtils.isSimpleCoreObject(getSourceFacet().getOwningEntity()) ? null
-                : super.getSubstitutionGroup(facetAlias);
+        return true;
     }
 
     /**
@@ -74,53 +64,54 @@ public class ChoiceObjectSharedFacetCodegenDelegate extends ChoiceObjectFacetCod
      */
     @Override
     public TLFacet getLocalBaseFacet() {
-        return null; // No base type for core object summary facets
+        return null; // No base type for choice object shared facets
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate#createSubstitutionGroupElement(org.opentravel.schemacompiler.model.TLAlias)
+	 */
+	@Override
+	protected Element createSubstitutionGroupElement(TLAlias ownerAlias) {
+		Element sgElement = super.createSubstitutionGroupElement(ownerAlias);
+		
+		sgElement.setAbstract( true );
+		return sgElement;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate#createType()
+	 */
+	@Override
+	protected Annotated createType() {
+		Annotated type = super.createType();
+		
+		if (type instanceof ComplexType) {
+			((ComplexType) type).setAbstract( true );
+		}
+		return type;
+	}
+
+	/**
      * @see org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate#getExtensionPointElement()
      */
     @Override
     public QName getExtensionPointElement() {
-    	TLCoreObject core = (TLCoreObject) getSourceFacet().getOwningEntity();
-        SchemaDependency extensionPoint;
+        TLChoiceObject choiceObject = (TLChoiceObject) getSourceFacet().getOwningEntity();
+        SchemaDependency extensionPoint = SchemaDependency.getExtensionPointElement();
         QName extensionPointQName;
         
-        if (declaresOrInheritsFacetContent( core.getDetailFacet() )) {
-        	extensionPoint = SchemaDependency.getExtensionPointSummaryElement();
-        	
-        } else {
-        	extensionPoint = SchemaDependency.getExtensionPointElement();
+        // If we have choice facets, we must use the extension point element that differentiates
+        // the shared facet from the choice facet extension points.
+        for (TLFacet descendantFacet : choiceObject.getChoiceFacets()) {
+        	if (declaresOrInheritsFacetContent( descendantFacet )) {
+        		extensionPoint = SchemaDependency.getExtensionPointSharedElement();
+        		break;
+        	}
         }
+        
         extensionPointQName = extensionPoint.toQName();
         addCompileTimeDependency(extensionPoint);
         return extensionPointQName;
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate#createJaxbDocumentation(org.opentravel.schemacompiler.model.TLDocumentationOwner)
-     */
-    @Override
-    protected Annotation createJaxbDocumentation(TLDocumentationOwner entity) {
-        Annotation annotation = null;
-
-        if (entity instanceof TLFacet) {
-            TLFacet sourceFacet = (TLFacet) entity;
-
-            if (XsdCodegenUtils.isSimpleCoreObject(sourceFacet.getOwningEntity())) {
-                Annotation ownerAnnotation = super
-                        .createJaxbDocumentation((TLDocumentationOwner) sourceFacet
-                                .getOwningEntity());
-                Annotation facetAnnotation = super.createJaxbDocumentation(sourceFacet);
-
-                annotation = TLDocumentationCodegenTransformer.mergeDocumentation(ownerAnnotation,
-                        facetAnnotation);
-            }
-        }
-        if (annotation == null) {
-            annotation = super.createJaxbDocumentation(entity);
-        }
-        return annotation;
     }
 
 }
