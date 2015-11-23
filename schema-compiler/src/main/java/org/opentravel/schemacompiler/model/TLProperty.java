@@ -97,6 +97,27 @@ public class TLProperty extends TLModelElement implements TLMemberField<TLProper
     }
 
     /**
+     * Returns the value of the 'propertyOwner' field.
+     * 
+     * @return TLPropertyOwner
+     */
+    @Deprecated
+    public TLPropertyOwner getPropertyOwner() {
+        return propertyOwner;
+    }
+
+    /**
+     * Assigns the value of the 'propertyOwner' field.
+     * 
+     * @param propertyOwner
+     *            the field value to assign
+     */
+    @Deprecated
+    public void setPropertyOwner(TLPropertyOwner propertyOwner) {
+        this.propertyOwner = propertyOwner;
+    }
+
+    /**
      * Moves this element up by one position in the list of elements maintained by its owner. If the
      * owner is null, or this element is already at the front of the list, this method has no
      * effect.

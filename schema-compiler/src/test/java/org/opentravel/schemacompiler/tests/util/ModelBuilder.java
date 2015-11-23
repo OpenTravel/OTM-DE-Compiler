@@ -61,7 +61,6 @@ public class ModelBuilder {
         return library;
     }
 
-    // TODO: remove
     public TLModel getModel() {
         return model;
     }

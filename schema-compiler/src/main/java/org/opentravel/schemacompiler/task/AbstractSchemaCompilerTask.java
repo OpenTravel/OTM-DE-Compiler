@@ -35,15 +35,21 @@ import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.codegen.xsd.AbstractXsdCodeGenerator;
 import org.opentravel.schemacompiler.codegen.xsd.ImportSchemaLocations;
 import org.opentravel.schemacompiler.codegen.xsd.XsdBuiltInCodeGenerator;
+import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.ioc.SchemaDeclaration;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.LibraryMember;
+import org.opentravel.schemacompiler.model.TLAction;
+import org.opentravel.schemacompiler.model.TLActionFacet;
+import org.opentravel.schemacompiler.model.TLActionRequest;
+import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLModelElement;
 import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLService;
 import org.opentravel.schemacompiler.model.XSDLibrary;
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
@@ -368,6 +374,33 @@ public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask im
                                     operation.getNotification(), exampleContext));
                         }
                     }
+                    
+                } else if (member instanceof TLResource) {
+                	FacetCodegenDelegateFactory factory = new FacetCodegenDelegateFactory(null);
+                	TLResource resource = (TLResource) member;
+                	
+                	for (TLAction action : resource.getActions()) {
+                		TLActionRequest request = action.getRequest();
+                		
+                		if ((request != null) && (request.getPayloadType() instanceof TLActionFacet)) {
+                			TLActionFacet payloadType = (TLActionFacet) request.getPayloadType();
+                			
+                			if (factory.getDelegate( payloadType ).hasContent()) {
+                                addGeneratedFiles(exampleGenerator.generateOutput(request, exampleContext));
+                			}
+                		}
+                		
+                		for (TLActionResponse response : action.getResponses()) {
+                    		if (response.getPayloadType() instanceof TLActionFacet) {
+                    			TLActionFacet payloadType = (TLActionFacet) response.getPayloadType();
+                    			
+                    			if (factory.getDelegate( payloadType ).hasContent()) {
+                                    addGeneratedFiles(exampleGenerator.generateOutput(response, exampleContext));
+                    			}
+                    		}
+                		}
+                	}
+                	
                 } else {
                     addGeneratedFiles(exampleGenerator.generateOutput(member, exampleContext));
                 }
@@ -472,10 +505,10 @@ public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask im
             context.setValue(CodeGenerationContext.CK_EXAMPLE_CONTEXT, exampleContext);
         }
         if (exampleMaxRepeat != null) {
-            context.setValue(CodeGenerationContext.CK_EXAMPLE_CONTEXT, exampleMaxRepeat.toString());
+            context.setValue(CodeGenerationContext.CK_EXAMPLE_MAX_REPEAT, exampleMaxRepeat.toString());
         }
         if (exampleMaxDepth != null) {
-            context.setValue(CodeGenerationContext.CK_EXAMPLE_CONTEXT, exampleMaxDepth.toString());
+            context.setValue(CodeGenerationContext.CK_EXAMPLE_MAX_DEPTH, exampleMaxDepth.toString());
         }
         return context;
     }

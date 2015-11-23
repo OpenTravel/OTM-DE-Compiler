@@ -38,6 +38,9 @@ import org.opentravel.schemacompiler.codegen.wsdl.CodeGenerationWsdlBindings;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLActionFacet;
+import org.opentravel.schemacompiler.model.TLActionRequest;
+import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLAttributeOwner;
@@ -51,6 +54,7 @@ import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.model.TLPatchableFacet;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLPropertyOwner;
 import org.opentravel.schemacompiler.model.TLPropertyType;
@@ -313,6 +317,68 @@ public class DOMExampleVisitor extends AbstractExampleVisitor {
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#startRequest(org.opentravel.schemacompiler.model.TLActionRequest)
+	 */
+	@Override
+	public void startRequest(TLActionRequest request) {
+		super.startRequest(request);
+		
+		if (request.getPayloadType() instanceof TLActionFacet) {
+			TLActionFacet payloadType = (TLActionFacet) request.getPayloadType();
+			
+	        facetStack.push(payloadType);
+	        createComplexElement(request);
+		}
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#endRequest(org.opentravel.schemacompiler.model.TLActionRequest)
+	 */
+	@Override
+	public void endRequest(TLActionRequest request) {
+		super.endRequest(request);
+		
+		if (request.getPayloadType() instanceof TLActionFacet) {
+			TLActionFacet payloadType = (TLActionFacet) request.getPayloadType();
+			
+	        if (facetStack.peek() == payloadType) {
+	            facetStack.pop();
+	        }
+		}
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#startResponse(org.opentravel.schemacompiler.model.TLActionResponse)
+	 */
+	@Override
+	public void startResponse(TLActionResponse response) {
+		super.startResponse(response);
+		
+		if (response.getPayloadType() instanceof TLActionFacet) {
+			TLActionFacet payloadType = (TLActionFacet) response.getPayloadType();
+			
+	        facetStack.push(payloadType);
+	        createComplexElement(response);
+		}
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#endResponse(org.opentravel.schemacompiler.model.TLActionResponse)
+	 */
+	@Override
+	public void endResponse(TLActionResponse response) {
+		super.endResponse(response);
+		
+		if (response.getPayloadType() instanceof TLActionFacet) {
+			TLActionFacet payloadType = (TLActionFacet) response.getPayloadType();
+			
+	        if (facetStack.peek() == payloadType) {
+	            facetStack.pop();
+	        }
+		}
+	}
+
+	/**
      * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#startAttribute(org.opentravel.schemacompiler.model.TLAttribute)
      */
     @Override
@@ -500,7 +566,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor {
      * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#startExtensionPoint(org.opentravel.schemacompiler.model.TLFacet)
      */
     @Override
-    public void startExtensionPoint(TLFacet facet) {
+    public void startExtensionPoint(TLPatchableFacet facet) {
         super.startExtensionPoint(facet);
         SchemaDependency extensionElement = extensionPointTypeMap.get(facet.getFacetType());
         Element owningDomElement = context.getDomElement();
@@ -519,7 +585,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor {
      * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#endExtensionPoint(org.opentravel.schemacompiler.model.TLFacet)
      */
     @Override
-    public void endExtensionPoint(TLFacet facet) {
+    public void endExtensionPoint(TLPatchableFacet facet) {
         super.endExtensionPoint(facet);
         SchemaDependency extensionElement = extensionPointTypeMap.get(facet.getFacetType());
         Element domElement = context.getDomElement();
@@ -811,6 +877,16 @@ public class DOMExampleVisitor extends AbstractExampleVisitor {
                         isReferenceProperty);
             }
         }
+        
+        // If a default XML element name could not be discovered, try finding a global
+        // schema element name for the entity
+        if (elementQName == null) {
+        	elementQName = XsdCodegenUtils.getGlobalElementName( elementType );
+        }
+        
+        // If all other attempts to discover a global element name have failed, use the local
+        // name of the entity.  This will not be schema valid, but that is okay for simple types
+        // and VWA example documents.
         return (elementQName != null) ? elementQName.getLocalPart() : elementType.getLocalName();
     }
 

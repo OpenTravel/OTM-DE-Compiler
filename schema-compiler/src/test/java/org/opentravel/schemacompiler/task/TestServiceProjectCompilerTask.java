@@ -15,6 +15,8 @@
  */
 package org.opentravel.schemacompiler.task;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,8 +27,6 @@ import java.util.Collections;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
-import junit.framework.Assert;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -78,7 +78,7 @@ public class TestServiceProjectCompilerTask {
         String expectedSchemaLocation = "../"
                 + new LibraryTrimmedFilenameBuilder(null).buildFilename(lib, "xsd");
 
-        Assert.assertEquals(expectedSchemaLocation, schemaLocation);
+        assertEquals(expectedSchemaLocation, schemaLocation);
     }
 
     private File findFileWithString(String pathSeg, Collection<File> files) {

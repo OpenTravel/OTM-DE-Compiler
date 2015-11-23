@@ -30,7 +30,9 @@ import java.io.Serializable;
  */
 public class CharChunk implements Cloneable, Serializable, CharSequence {
 
-    // Input interface, used when the buffer is emptied.
+	private static final long serialVersionUID = 8707550635040596397L;
+
+	// Input interface, used when the buffer is emptied.
     public static interface CharInputChannel {
         /**
          * Read new bytes ( usually the internal conversion buffer ). The implementation is allowed
@@ -59,7 +61,7 @@ public class CharChunk implements Cloneable, Serializable, CharSequence {
     private int start;
     private int end;
 
-    private boolean isSet = false; // XXX
+    private boolean isSet = false;
 
     // -1: grow indefinitely
     // maximum amount to be cached
@@ -93,7 +95,7 @@ public class CharChunk implements Cloneable, Serializable, CharSequence {
     public boolean isNull() {
         if (end > 0)
             return false;
-        return !isSet; // XXX
+        return !isSet;
     }
 
     /**
@@ -101,7 +103,7 @@ public class CharChunk implements Cloneable, Serializable, CharSequence {
      */
     public void recycle() {
         // buff=null;
-        isSet = false; // XXX
+        isSet = false;
         start = 0;
         end = 0;
     }
@@ -443,7 +445,7 @@ public class CharChunk implements Cloneable, Serializable, CharSequence {
         }
 
         // limit < buf.length ( the buffer is already big )
-        // or we already have space XXX
+        // or we already have space
         if (desiredSize <= buff.length) {
             return;
         }

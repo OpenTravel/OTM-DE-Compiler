@@ -104,6 +104,8 @@ public class OperationFacetCodegenDelegate extends TLFacetCodegenDelegate {
             case NOTIFICATION:
                 messagePayload = SchemaDependency.getNotifPayload();
                 break;
+			default:
+				break;
         }
         return messagePayload;
     }

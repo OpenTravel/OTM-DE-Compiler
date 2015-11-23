@@ -30,14 +30,10 @@ import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAttribute;
-import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLProperty;
-import org.opentravel.schemacompiler.model.TLPropertyType;
-import org.opentravel.schemacompiler.model.TLReferenceType;
-import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.w3._2001.xmlschema.Annotated;
 import org.w3._2001.xmlschema.Annotation;
@@ -102,30 +98,15 @@ public abstract class TLBaseActionCodegenTransformer<S> extends AbstractXsdTrans
             List<Annotated> jaxbAttributeList = type.getAttributeOrAttributeGroup();
             
             // Create the type sequence
-        	TLReferenceType refType = payloadType.getReferenceType();
-        	String referenceFacetName = payloadType.getReferenceFacetName();
             QName extensionPointElementName = SchemaDependency.getExtensionPointElement().toQName();
+    		TLProperty boElement = ResourceCodegenUtils.getBusinessObjectElement( payloadType );
             TopLevelElement extensionPointElement = new TopLevelElement();
             ExplicitGroup sequence = new ExplicitGroup();
-        	
-        	if ((refType == TLReferenceType.OPTIONAL) || (refType == TLReferenceType.REQUIRED)) {
-        		TLBusinessObject bo = ((TLResource) payloadType.getOwningEntity()).getBusinessObjectRef();
-        		TLProperty boElement = new TLProperty();
-        		TLPropertyType elementType = bo;
-        		
-        		if (referenceFacetName != null) {
-        			elementType = ResourceCodegenUtils.getReferencedFacet( bo, referenceFacetName );
-        		}
-        		boElement.setName( elementType.getLocalName() );
-        		boElement.setType( elementType );
-        		boElement.setMandatory( (refType == TLReferenceType.REQUIRED ) );
-        		
-        		if (payloadType.getReferenceRepeat() > 1) {
-        			boElement.setRepeat( payloadType.getReferenceRepeat() );
-        		}
+    		
+    		if (boElement != null) {
                 sequence.getParticle().add(
                         jaxbObjectFactory.createElement(elementTransformer.transform(boElement)));
-        	}
+    		}
             for (TLProperty element : elementList) {
                 sequence.getParticle().add(
                         jaxbObjectFactory.createElement(elementTransformer.transform(element)));

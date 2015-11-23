@@ -25,7 +25,9 @@ import org.opentravel.schemacompiler.repository.RepositoryException;
  */
 public class RepositorySecurityException extends RepositoryException {
 
-    /**
+	private static final long serialVersionUID = 6551223793369573693L;
+
+	/**
      * Default constructor.
      */
     public RepositorySecurityException() {

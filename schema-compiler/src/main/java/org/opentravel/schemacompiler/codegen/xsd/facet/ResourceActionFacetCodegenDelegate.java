@@ -17,6 +17,8 @@ package org.opentravel.schemacompiler.codegen.xsd.facet;
 
 import javax.xml.namespace.QName;
 
+import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
+import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
@@ -45,8 +47,7 @@ public class ResourceActionFacetCodegenDelegate extends FacetCodegenDelegate<TLA
 	 */
 	@Override
 	protected Annotated createType() {
-		// TODO: Implement the ResourceActionFacetCodegenDelegate.createType() method
-		return null;
+		return null; // No type generated for action facet
 	}
 
 	/**
@@ -54,7 +55,23 @@ public class ResourceActionFacetCodegenDelegate extends FacetCodegenDelegate<TLA
      */
     @Override
     public boolean hasContent() {
-        return getSourceFacet().declaresContent();
+    	TLActionFacet sourceFacet = getSourceFacet();
+    	String xsdTypeName = XsdCodegenUtils.getGlobalTypeName( sourceFacet );
+    	boolean contentExists;
+    	
+    	if (xsdTypeName != null) {
+    		if (sourceFacet.getReferenceRepeat() > 1) {
+    			contentExists = true;
+    			
+    		} else {
+    	        contentExists = !PropertyCodegenUtils.getInheritedAttributes( sourceFacet ).isEmpty()
+    	        		|| !PropertyCodegenUtils.getInheritedProperties( sourceFacet ).isEmpty()
+    	        		|| !PropertyCodegenUtils.getInheritedIndicators( sourceFacet ).isEmpty();
+    		}
+    	} else {
+    		contentExists = false;
+    	}
+        return contentExists;
     }
 
     /**

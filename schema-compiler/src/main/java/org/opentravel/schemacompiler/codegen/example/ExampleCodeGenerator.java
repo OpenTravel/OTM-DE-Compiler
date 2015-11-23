@@ -20,11 +20,14 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.net.URL;
 
+import javax.xml.namespace.QName;
+
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder;
 import org.opentravel.schemacompiler.codegen.example.ExampleGeneratorOptions.DetailLevel;
 import org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator;
+import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.NamedEntity;
@@ -189,7 +192,13 @@ public class ExampleCodeGenerator extends AbstractCodeGenerator<TLModelElement> 
                             + facetItem.getFacetType().getIdentityName();
 
                 } else if (item instanceof NamedEntity) {
-                    itemName = ((NamedEntity) item).getLocalName();
+                	QName globalElementName = XsdCodegenUtils.getGlobalElementName( (NamedEntity) item );
+                	
+                	if (globalElementName != null) {
+                		itemName = globalElementName.getLocalPart();
+                	} else {
+                        itemName = ((NamedEntity) item).getLocalName();
+                    }
                 } else {
                     itemName = "";
                 }

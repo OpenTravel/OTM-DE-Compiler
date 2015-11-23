@@ -84,6 +84,8 @@ public class FacetCodegenDelegateFactory {
                     case QUERY:
                         delegate = (FacetCodegenDelegate<F>) new BusinessObjectQueryFacetCodegenDelegate(facet);
                         break;
+					default:
+						break;
                 }
             }
         } else if (facetOwner instanceof TLCoreObject) {
@@ -97,6 +99,8 @@ public class FacetCodegenDelegateFactory {
                     case DETAIL:
                         delegate = (FacetCodegenDelegate<F>) new CoreObjectDetailFacetCodegenDelegate(facet);
                         break;
+					default:
+						break;
                 }
             } else if (facetInstance instanceof TLListFacet) {
                 TLListFacet facet = (TLListFacet) facetInstance;
@@ -109,6 +113,8 @@ public class FacetCodegenDelegateFactory {
                     case DETAIL:
                         delegate = (FacetCodegenDelegate<F>) new CoreObjectListFacetCodegenDelegate(facet);
                         break;
+					default:
+						break;
                 }
             } else if (facetInstance instanceof TLSimpleFacet) {
                 TLSimpleFacet facet = (TLSimpleFacet) facetInstance;
@@ -117,6 +123,8 @@ public class FacetCodegenDelegateFactory {
                     case SIMPLE:
                         delegate = (FacetCodegenDelegate<F>) new TLSimpleFacetCodegenDelegate(facet);
                         break;
+					default:
+						break;
                 }
             }
         } else if (facetOwner instanceof TLChoiceObject) {
@@ -130,6 +138,8 @@ public class FacetCodegenDelegateFactory {
                     case CHOICE:
                         delegate = (FacetCodegenDelegate<F>) new ChoiceObjectChoiceFacetCodegenDelegate(facet);
                         break;
+					default:
+						break;
                 }
             }
         } else if (facetOwner instanceof TLResource) {

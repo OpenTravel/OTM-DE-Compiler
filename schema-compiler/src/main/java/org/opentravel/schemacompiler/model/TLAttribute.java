@@ -100,6 +100,27 @@ public class TLAttribute extends TLModelElement implements TLMemberField<TLAttri
     }
 
     /**
+     * Returns the value of the 'attributeOwner' field.
+     * 
+     * @return TLAttributeOwner
+     */
+    @Deprecated
+    public TLAttributeOwner getAttributeOwner() {
+        return attributeOwner;
+    }
+
+    /**
+     * Assigns the value of the 'attributeOwner' field.
+     * 
+     * @param attributeOwner
+     *            the field value to assign
+     */
+    @Deprecated
+    public void setAttributeOwner(TLAttributeOwner attributeOwner) {
+        this.attributeOwner = attributeOwner;
+    }
+
+    /**
      * Moves this attribute up by one position in the list of attributes maintained by its owner. If
      * the owner is null, or this attribute is already at the front of the list, this method has no
      * effect.

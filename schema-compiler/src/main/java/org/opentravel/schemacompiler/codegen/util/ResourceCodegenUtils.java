@@ -25,6 +25,7 @@ import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAction;
+import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLActionRequest;
 import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAttribute;
@@ -39,6 +40,7 @@ import org.opentravel.schemacompiler.model.TLParamGroup;
 import org.opentravel.schemacompiler.model.TLParameter;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLPropertyType;
+import org.opentravel.schemacompiler.model.TLReferenceType;
 import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLRoleEnumeration;
 import org.opentravel.schemacompiler.model.TLSimple;
@@ -408,6 +410,41 @@ public class ResourceCodegenUtils {
 			}
 		}
 		return referencedFacet;
+	}
+	
+	/**
+	 * If the given action facet specifies a reference to the resource's business object,
+	 * this method will return a ghost-element that can be used to generate schema content
+	 * and examples.  If a business object is not referenced, this method will return null.
+	 * 
+	 * @param actionFacet  the action facet for which to return the business object element
+	 * @return TLProperty
+	 */
+	public static TLProperty getBusinessObjectElement(TLActionFacet actionFacet) {
+		TLResource owningResource = (TLResource) actionFacet.getOwningEntity();
+		TLBusinessObject referencedBO = (owningResource == null) ? null : owningResource.getBusinessObjectRef();
+    	TLReferenceType refType = actionFacet.getReferenceType();
+		TLProperty boElement = null;
+		
+		if ((referencedBO != null)
+				&& ((refType == TLReferenceType.OPTIONAL) || (refType == TLReferenceType.REQUIRED))) {
+    		TLPropertyType elementType = referencedBO;
+    		
+    		boElement = new TLProperty();
+    		
+    		if (actionFacet.getReferenceFacetName() != null) {
+    			elementType = ResourceCodegenUtils.getReferencedFacet(
+    					referencedBO, actionFacet.getReferenceFacetName() );
+    		}
+    		boElement.setName( elementType.getLocalName() );
+    		boElement.setType( elementType );
+    		boElement.setMandatory( (refType == TLReferenceType.REQUIRED ) );
+    		
+    		if (actionFacet.getReferenceRepeat() > 1) {
+    			boElement.setRepeat( actionFacet.getReferenceRepeat() );
+    		}
+		}
+		return boElement;
 	}
 	
 	/**

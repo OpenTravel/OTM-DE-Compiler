@@ -16,6 +16,8 @@
 package org.opentravel.schemacompiler.codegen.example;
 
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLActionRequest;
+import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLAttributeOwner;
@@ -27,6 +29,7 @@ import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
+import org.opentravel.schemacompiler.model.TLPatchableFacet;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLPropertyOwner;
 import org.opentravel.schemacompiler.model.TLRole;
@@ -215,6 +218,46 @@ public abstract class AbstractExampleVisitor implements ExampleVisitor {
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#startRequest(org.opentravel.schemacompiler.model.TLActionRequest)
+	 */
+	@Override
+	public void startRequest(TLActionRequest request) {
+        if (DEBUG) {
+            log.info(debugIndent + "startRequest() : " + request.getLocalName());
+        }
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#endRequest(org.opentravel.schemacompiler.model.TLActionRequest)
+	 */
+	@Override
+	public void endRequest(TLActionRequest request) {
+        if (DEBUG) {
+            log.info(debugIndent + "endRequest() : " + request.getLocalName());
+        }
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#startResponse(org.opentravel.schemacompiler.model.TLActionResponse)
+	 */
+	@Override
+	public void startResponse(TLActionResponse response) {
+        if (DEBUG) {
+            log.info(debugIndent + "startResponse() : " + response.getLocalName());
+        }
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#endResponse(org.opentravel.schemacompiler.model.TLActionResponse)
+	 */
+	@Override
+	public void endResponse(TLActionResponse response) {
+        if (DEBUG) {
+            log.info(debugIndent + "endResponse() : " + response.getLocalName());
+        }
+	}
+
+	/**
      * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#startAttribute(org.opentravel.schemacompiler.model.TLAttribute)
      */
     @Override
@@ -366,10 +409,10 @@ public abstract class AbstractExampleVisitor implements ExampleVisitor {
     }
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#startExtensionPoint(org.opentravel.schemacompiler.model.TLFacet)
+     * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#startExtensionPoint(org.opentravel.schemacompiler.model.TLPatchableFacet)
      */
     @Override
-    public void startExtensionPoint(TLFacet facet) {
+    public void startExtensionPoint(TLPatchableFacet facet) {
         if (DEBUG) {
             log.info(debugIndent + "startExtensionPoint() : " + facet.getLocalName());
             debugIndent.append("  ");
@@ -377,10 +420,10 @@ public abstract class AbstractExampleVisitor implements ExampleVisitor {
     }
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#endExtensionPoint(org.opentravel.schemacompiler.model.TLFacet)
+     * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#endExtensionPoint(org.opentravel.schemacompiler.model.TLPatchableFacet)
      */
     @Override
-    public void endExtensionPoint(TLFacet facet) {
+    public void endExtensionPoint(TLPatchableFacet facet) {
         if (DEBUG) {
             if (debugIndent.length() > 0)
                 debugIndent.setLength(debugIndent.length() - 2);

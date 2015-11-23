@@ -90,8 +90,8 @@ public class PropertyCodegenUtils {
 
     /**
      * Returns the default name that will be assigned in a generated schema for elements of the
-     * assigned type. Default element names are only assigned for elements that are typed as cores
-     * and business objects; for all other element types, this method will return null.
+     * assigned type. If the given property type does not have a default element name, this method
+     * will return null.
      * 
      * @param propertyType
      *            the assigned type of the model property

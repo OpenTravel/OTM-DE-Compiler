@@ -15,11 +15,12 @@
  */
 package org.opentravel.schemacompiler.repository.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 import java.util.Locale;
-
-import junit.framework.Assert;
 
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
@@ -45,7 +46,7 @@ public class NTLMSystemCredentialsProviderTest extends SystemDefaultCredentialsP
         testAuthenticator.userName = "";
         Credentials credentials = ntlmCredentialsProvider
                 .getCredentials(createAuthScope(AuthSchemes.NTLM));
-        Assert.assertTrue(credentials instanceof NTCredentials);
+        assertTrue(credentials instanceof NTCredentials);
     }
 
     @Test
@@ -55,8 +56,8 @@ public class NTLMSystemCredentialsProviderTest extends SystemDefaultCredentialsP
         testAuthenticator.userName = domain + "\\" + username;
         NTCredentials credentials = (NTCredentials) ntlmCredentialsProvider
                 .getCredentials(createAuthScope(AuthSchemes.NTLM));
-        Assert.assertEquals(domain, credentials.getDomain());
-        Assert.assertEquals(username, credentials.getUserName());
+        assertEquals(domain, credentials.getDomain());
+        assertEquals(username, credentials.getUserName());
     }
 
     @Test
@@ -66,8 +67,8 @@ public class NTLMSystemCredentialsProviderTest extends SystemDefaultCredentialsP
         testAuthenticator.userName = domain + "\\" + username;
         NTCredentials credentials = (NTCredentials) ntlmCredentialsProvider
                 .getCredentials(createAuthScope(AuthSchemes.NTLM));
-        Assert.assertEquals(domain.toUpperCase(Locale.ENGLISH), credentials.getDomain());
-        Assert.assertEquals(username, credentials.getUserName());
+        assertEquals(domain.toUpperCase(Locale.ENGLISH), credentials.getDomain());
+        assertEquals(username, credentials.getUserName());
     }
 
     @Test
@@ -77,8 +78,8 @@ public class NTLMSystemCredentialsProviderTest extends SystemDefaultCredentialsP
         testAuthenticator.userName = domain + "\\" + username;
         NTCredentials credentials = (NTCredentials) ntlmCredentialsProvider
                 .getCredentials(createAuthScope(AuthSchemes.NTLM));
-        Assert.assertEquals(null, credentials.getDomain());
-        Assert.assertEquals(username, credentials.getUserName());
+        assertEquals(null, credentials.getDomain());
+        assertEquals(username, credentials.getUserName());
     }
 
     @Test
@@ -88,8 +89,8 @@ public class NTLMSystemCredentialsProviderTest extends SystemDefaultCredentialsP
         testAuthenticator.userName = domain + "\\" + username;
         NTCredentials credentials = (NTCredentials) ntlmCredentialsProvider
                 .getCredentials(createAuthScope(AuthSchemes.NTLM));
-        Assert.assertEquals(domain, credentials.getDomain());
-        Assert.assertEquals(username, credentials.getUserName());
+        assertEquals(domain, credentials.getDomain());
+        assertEquals(username, credentials.getUserName());
     }
 
     private AuthScope createAuthScope(String schema) {

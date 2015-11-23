@@ -82,7 +82,7 @@ public class ByteChunk {
 
     private String enc;
 
-    private boolean isSet = false; // XXX
+    private boolean isSet = false;
 
     // How much can it grow, when data is added
     private int limit = -1;
@@ -206,7 +206,7 @@ public class ByteChunk {
     }
 
     /**
-     * Returns the length of the bytes. XXX need to clean this up
+     * Returns the length of the bytes
      */
     public int getLength() {
         return end - start;
@@ -425,7 +425,7 @@ public class ByteChunk {
         }
 
         // limit < buf.length ( the buffer is already big )
-        // or we already have space XXX
+        // or we already have space
         if (desiredSize <= buff.length) {
             return;
         }
@@ -503,7 +503,7 @@ public class ByteChunk {
      * @return true if the comparison succeeded, false otherwise
      */
     public boolean equals(String s) {
-        // XXX ENCODING - this only works if encoding is UTF8-compat
+        // ENCODING - this only works if encoding is UTF8-compat
         // ( ok for tomcat, where we compare ascii - header names, etc )!!!
 
         byte[] b = buff;
@@ -570,7 +570,7 @@ public class ByteChunk {
     }
 
     public boolean equals(char c2[], int off2, int len2) {
-        // XXX works only for enc compatible with ASCII/UTF !!!
+        // Works only for enc compatible with ASCII/UTF !!!
         byte b1[] = buff;
         if (c2 == null && b1 == null)
             return true;

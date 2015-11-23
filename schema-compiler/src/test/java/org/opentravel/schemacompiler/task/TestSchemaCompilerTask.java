@@ -50,6 +50,7 @@ public class TestSchemaCompilerTask {
         compilerTask.setCompileSchemas(true);
         compilerTask.setCompileServices(true);
         compilerTask.setGenerateExamples(true);
+        compilerTask.setExampleMaxRepeat( 3 );
         compilerTask.setServiceEndpointUrl("http://www.OpenTravel.org/services");
 
         ValidationFindings findings = compilerTask.compileOutput(sourceFile);
