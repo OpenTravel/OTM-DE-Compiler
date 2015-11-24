@@ -300,6 +300,8 @@ public class TLOperationCodegenTransformer extends
             case NOTIFICATION:
                 msgName.append("Notif");
                 break;
+			default:
+				break;
         }
         return msgName.toString();
     }

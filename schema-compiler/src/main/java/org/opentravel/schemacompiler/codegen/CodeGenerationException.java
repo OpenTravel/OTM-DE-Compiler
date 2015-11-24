@@ -24,7 +24,9 @@ import org.opentravel.schemacompiler.util.SchemaCompilerException;
  */
 public class CodeGenerationException extends SchemaCompilerException {
 
-    /**
+	private static final long serialVersionUID = -8992007234245167340L;
+
+	/**
      * Default constructor.
      */
     public CodeGenerationException() {

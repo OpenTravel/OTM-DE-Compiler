@@ -376,6 +376,8 @@ public class XsdRASCodeGenerator extends AbstractXsdCodeGenerator<TLBusinessObje
                 case CUSTOM:
                     targetFacet = facetOwner.getSummaryFacet();
                     break;
+				default:
+					break;
             }
         }
         return targetFacet;

@@ -22,7 +22,9 @@ package org.opentravel.schemacompiler.repository;
  */
 public class RepositoryUnavailableException extends RepositoryException {
 
-    /**
+	private static final long serialVersionUID = -155864920147747357L;
+
+	/**
      * Default constructor.
      */
     public RepositoryUnavailableException() {

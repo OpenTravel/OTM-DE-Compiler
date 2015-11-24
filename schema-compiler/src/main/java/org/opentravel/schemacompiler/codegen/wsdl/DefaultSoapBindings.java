@@ -168,6 +168,8 @@ public class DefaultSoapBindings implements CodeGenerationWsdlBindings {
             case NOTIFICATION:
                 faultName += "NotifFault";
                 break;
+			default:
+				break;
         }
         faultBody.setName("body");
         faultBody.setElement(getFaultType(operation, operationType, messageType));

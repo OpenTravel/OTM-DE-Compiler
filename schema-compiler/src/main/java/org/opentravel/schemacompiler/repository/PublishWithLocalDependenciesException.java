@@ -28,7 +28,9 @@ import java.util.Collection;
  */
 public class PublishWithLocalDependenciesException extends Exception {
 
-    private Collection<ProjectItem> requestedPublications;
+	private static final long serialVersionUID = 3165044513260100326L;
+	
+	private Collection<ProjectItem> requestedPublications;
     private Collection<ProjectItem> requiredPublications;
 
     /**
