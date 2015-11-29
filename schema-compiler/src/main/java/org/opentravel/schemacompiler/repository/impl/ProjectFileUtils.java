@@ -46,6 +46,7 @@ import org.opentravel.ns.ota2.project_v01_00.ProjectType;
 import org.opentravel.ns.ota2.project_v01_00.RepositoryRefType;
 import org.opentravel.ns.ota2.project_v01_00.RepositoryReferencesType;
 import org.opentravel.ns.ota2.project_v01_00.UnmanagedProjectItemType;
+import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.loader.LoaderValidationMessageKeys;
@@ -554,7 +555,8 @@ public class ProjectFileUtils {
         try {
             SchemaFactory schemaFactory = SchemaFactory
                     .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            InputStream schemaStream = SchemaDeclarations.OTA2_PROJECT_SCHEMA.getContent();
+            InputStream schemaStream = SchemaDeclarations.OTA2_PROJECT_SCHEMA.getContent(
+            		CodeGeneratorFactory.XSD_TARGET_FORMAT);
 
             schemaFactory.setResourceResolver(new ClasspathResourceResolver());
             projectValidationSchema = schemaFactory.newSchema(new StreamSource(schemaStream));

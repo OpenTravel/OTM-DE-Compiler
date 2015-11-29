@@ -31,6 +31,7 @@ import javax.xml.XMLConstants;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
 import org.opentravel.schemacompiler.codegen.CodeGenerator;
+import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.codegen.impl.AbstractCodegenTransformer;
 import org.opentravel.schemacompiler.codegen.impl.AbstractJaxbCodeGenerator;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
@@ -162,7 +163,8 @@ public abstract class AbstractXsdTransformer<S, T> extends AbstractCodegenTransf
         for (SchemaDeclaration schemaDependency : getCompileTimeDependencies()) {
             AbstractLibrary builtInImport = model.getLibrary(schemaDependency.getNamespace(),
                     schemaDependency.getName());
-            String schemaLocation = builtInFolder + schemaDependency.getFilename();
+            String schemaLocation = builtInFolder + schemaDependency.getFilename(
+            		CodeGeneratorFactory.XSD_TARGET_FORMAT);
 
             if (schemaLocation.toLowerCase().endsWith(".xsd")) {
                 if (builtInImport != null) {
@@ -172,7 +174,8 @@ public abstract class AbstractXsdTransformer<S, T> extends AbstractCodegenTransf
                     // identified as
                     // built-in libraries.
                     addImport(schema, schemaDependency.getNamespace(), builtInFolder
-                            + schemaDependency.getFilename(), false);
+                            + schemaDependency.getFilename(CodeGeneratorFactory.XSD_TARGET_FORMAT),
+                            false);
                 }
             }
         }
@@ -242,7 +245,8 @@ public abstract class AbstractXsdTransformer<S, T> extends AbstractCodegenTransf
             }
         }
         addImport(schema, SchemaDeclarations.OTA2_APPINFO_SCHEMA.getNamespace(), builtInFolder
-                + SchemaDeclarations.OTA2_APPINFO_SCHEMA.getFilename(), false);
+                + SchemaDeclarations.OTA2_APPINFO_SCHEMA.getFilename(CodeGeneratorFactory.XSD_TARGET_FORMAT),
+                false);
         addCompileTimeDependency(SchemaDeclarations.OTA2_APPINFO_SCHEMA);
     }
 

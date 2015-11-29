@@ -127,13 +127,15 @@ public class CodeGeneratorTestAssertions {
         try {
             SchemaFactory schemaFactory = SchemaFactory
                     .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            InputStream schemaStream = SchemaDeclarations.SCHEMA_FOR_SCHEMAS.getContent();
+            InputStream schemaStream = SchemaDeclarations.SCHEMA_FOR_SCHEMAS.getContent(
+            		CodeGeneratorFactory.XSD_TARGET_FORMAT);
 
             schemaFactory.setResourceResolver(new ClasspathResourceResolver());
             xsdValidationSchema = schemaFactory.newSchema(new StreamSource(schemaStream));
             jaxbXsdContext = JAXBContext.newInstance(XSD_SCHEMA_CONTEXT);
 
-            schemaStream = SchemaDeclarations.WSDL_SCHEMA.getContent();
+            schemaStream = SchemaDeclarations.WSDL_SCHEMA.getContent(
+            		CodeGeneratorFactory.XSD_TARGET_FORMAT);
             wsdlValidationSchema = schemaFactory.newSchema(new StreamSource(schemaStream));
             jaxbWsdlContext = JAXBContext.newInstance(WSDL_SCHEMA_CONTEXT);
 

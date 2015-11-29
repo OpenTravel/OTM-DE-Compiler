@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
+import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.ioc.SchemaDeclaration;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.util.URLUtils;
@@ -86,7 +87,7 @@ public class LibraryStreamInputSource implements LibraryInputSource<InputStream>
 
         try {
             if (schemaDeclaration != null) {
-                contentStream = schemaDeclaration.getContent();
+                contentStream = schemaDeclaration.getContent(CodeGeneratorFactory.XSD_TARGET_FORMAT);
             }
             if ((contentStream == null) && (libraryUrl != null)) {
                 if (URLUtils.isFileURL(libraryUrl)) {

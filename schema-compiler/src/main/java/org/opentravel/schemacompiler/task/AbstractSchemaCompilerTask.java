@@ -118,7 +118,8 @@ public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask im
                 AbstractJaxbCodeGenerator<?> generator = (AbstractJaxbCodeGenerator<?>) xsdGenerator;
 
                 for (SchemaDeclaration schemaDeclaration : generator.getCompileTimeDependencies()) {
-                    if (schemaDeclaration.getFilename().endsWith(".xsd")) {
+                    if (schemaDeclaration.getFilename(CodeGeneratorFactory.XSD_TARGET_FORMAT)
+                    		.endsWith(".xsd")) {
                         continue;
                     }
                     AbstractLibrary dependentLib = model.getLibrary(
@@ -259,7 +260,7 @@ public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask im
             }
         }
         for (SchemaDeclaration builtIn : builtInDependencies) {
-            String filename = builtIn.getFilename();
+            String filename = builtIn.getFilename(CodeGeneratorFactory.XSD_TARGET_FORMAT);
 
             if (!filename.toLowerCase().endsWith(".xsd")) {
                 BuiltInLibrary builtInLib = getBuiltInLibrary(builtIn, model);

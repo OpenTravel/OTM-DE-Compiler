@@ -16,6 +16,7 @@
 package org.opentravel.schemacompiler.model;
 
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -24,7 +25,9 @@ import java.util.Set;
 
 import javax.xml.XMLConstants;
 
+import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.ioc.SchemaDeclaration;
+import org.opentravel.schemacompiler.ioc.SchemaLocation;
 import org.opentravel.schemacompiler.version.XSDVersionScheme;
 
 /**
@@ -63,14 +66,7 @@ public class BuiltInLibrary extends AbstractLibrary {
     public BuiltInLibrary(String namespace, String name, String prefix, URL libraryUrl,
             List<LibraryMember> members) {
 
-        this(
-                namespace,
-                name,
-                prefix,
-                libraryUrl,
-                members,
-                null,
-                null,
+        this(namespace, name, prefix, libraryUrl, members, null, null,
                 createDefaultSchemaDeclaration(namespace, name, prefix, libraryUrl.toString(), true),
                 XSDVersionScheme.ID);
     }
@@ -81,7 +77,8 @@ public class BuiltInLibrary extends AbstractLibrary {
         schemaDeclaration.setNamespace(namespace);
         schemaDeclaration.setName(name);
         schemaDeclaration.setDefaultPrefix(prefix);
-        schemaDeclaration.setLocation(libraryUrl);
+        schemaDeclaration.setLocations( Arrays.asList(
+        		new SchemaLocation( CodeGeneratorFactory.XSD_TARGET_FORMAT, libraryUrl ) ) );
         schemaDeclaration.setImportByDefault(true);
         return schemaDeclaration;
     }

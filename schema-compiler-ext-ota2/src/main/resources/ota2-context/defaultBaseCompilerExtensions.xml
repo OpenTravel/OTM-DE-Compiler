@@ -18,7 +18,14 @@
 		<property name="namespace" value="http://schemas.xmlsoap.org/soap/envelope/" />
 		<property name="name" value="SOAP_envelope.xsd" />
 		<property name="defaultPrefix" value="env" />
-		<property name="location" value="classpath:/ota2-context/built-ins/SOAP_envelope.xsd" />
+		<property name="locations">
+			<list>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="XSD" />
+					<property name="location" value="classpath:/ota2-context/built-ins/SOAP_envelope.xsd" />
+				</bean>
+			</list>
+		</property>
 	</bean>
 	
 	<!--

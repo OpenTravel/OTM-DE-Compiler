@@ -28,6 +28,7 @@ import javax.xml.validation.SchemaFactory;
 
 import org.opentravel.ns.ota2.librarymodel_v01_05.Library;
 import org.opentravel.ns.ota2.librarymodel_v01_05.NamespaceImport;
+import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
@@ -147,7 +148,8 @@ public class LibrarySchema1_5_ModuleLoader extends AbstractLibraryModuleLoader {
         try {
             SchemaFactory schemaFactory = SchemaFactory
                     .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            InputStream schemaStream = SchemaDeclarations.OTA2_LIBRARY_SCHEMA_1_5.getContent();
+            InputStream schemaStream = SchemaDeclarations.OTA2_LIBRARY_SCHEMA_1_5.getContent(
+            		CodeGeneratorFactory.XSD_TARGET_FORMAT);
 
             schemaFactory.setResourceResolver(new ClasspathResourceResolver());
             libraryValidationSchema = schemaFactory.newSchema(new StreamSource(schemaStream));

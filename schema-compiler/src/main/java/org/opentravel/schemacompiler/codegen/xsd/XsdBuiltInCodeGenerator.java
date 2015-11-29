@@ -31,6 +31,7 @@ import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
+import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator;
 import org.opentravel.schemacompiler.codegen.impl.CodegenNamespacePrefixMapper;
 import org.opentravel.schemacompiler.codegen.impl.LibraryFilenameBuilder;
@@ -124,7 +125,7 @@ public class XsdBuiltInCodeGenerator extends AbstractCodeGenerator<BuiltInLibrar
                 String line = null;
 
                 reader = new BufferedReader(new InputStreamReader(source.getSchemaDeclaration()
-                        .getContent()));
+                        .getContent(CodeGeneratorFactory.XSD_TARGET_FORMAT)));
                 writer = new BufferedWriter(new FileWriter(outputFile));
 
                 while ((line = reader.readLine()) != null) {

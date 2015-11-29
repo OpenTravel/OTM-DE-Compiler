@@ -27,6 +27,7 @@
 		
 		<!-- Dependency Versions -->
 		<jaxb.version>2.2.11</jaxb.version>
+		<gson.version>2.5</gson.version>
 		<spring.version>4.1.5.RELEASE</spring.version>
 		<httpcomponents.version>4.4</httpcomponents.version>
 		<maven.plugin.api.version>3.2.5</maven.plugin.api.version>
@@ -127,6 +128,11 @@
 				<groupId>com.sun.xml.bind</groupId>
 				<artifactId>jaxb-impl</artifactId>
 				<version>${jaxb.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.code.gson</groupId>
+				<artifactId>gson</artifactId>
+				<version>2.5</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>

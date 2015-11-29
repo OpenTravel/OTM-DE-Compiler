@@ -36,6 +36,7 @@ public final class CodeGeneratorFactory {
     public static final String RAS_XSD_TARGET_FORMAT = "RASXSD";
     public static final String WSDL_TARGET_FORMAT = "WSDL";
     public static final String XML_TARGET_FORMAT = "XML";
+    public static final String JSON_SCHEMA_TARGET_FORMAT = "JSON_SCHEMA";
 
     private static final String FACTORY_NAME = "codeGeneratorFactory";
     private static final Pattern whitespacePattern = Pattern.compile("\\s+");

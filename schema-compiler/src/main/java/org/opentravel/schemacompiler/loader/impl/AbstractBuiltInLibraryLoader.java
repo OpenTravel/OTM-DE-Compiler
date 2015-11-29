@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.ioc.SchemaDeclaration;
 import org.opentravel.schemacompiler.loader.BuiltInLibraryLoader;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
@@ -80,7 +81,8 @@ public abstract class AbstractBuiltInLibraryLoader implements BuiltInLibraryLoad
             if (!libraryUrl.toString().endsWith("/")) {
                 libraryUrl.append("/");
             }
-            String location = libraryDeclaration.getLocation().replaceAll("\\\\", "/");
+            String location = libraryDeclaration.getLocation(
+            		CodeGeneratorFactory.XSD_TARGET_FORMAT).replaceAll("\\\\", "/");
             int pathPos = location.lastIndexOf('/');
             String filename;
 

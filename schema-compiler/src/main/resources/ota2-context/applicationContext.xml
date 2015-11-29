@@ -48,14 +48,36 @@
 		<property name="namespace" value="http://opentravel.org/common/v02" />
 		<property name="name" value="OTA2_BuiltIns_v2.0.0" />
 		<property name="defaultPrefix" value="ota2-dep" />
-		<property name="location" value="classpath:/ota2-context/built-ins/OTA2_BuiltIns_v2.0.0.otm" />
+		<property name="locations">
+			<list>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="XSD" />
+					<property name="location" value="classpath:/ota2-context/built-ins/OTA2_BuiltIns_v2.0.0.otm" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="JSON_SCHEMA" />
+					<property name="location" value="classpath:/ota2-context/built-ins/OTA2_BuiltIns_v2.0.0.otm" />
+				</bean>
+			</list>
+		</property>
 	</bean>
 
 	<bean id="ota2SimpleTypes" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
 		<property name="namespace" value="http://www.opentravel.org/OTM/Common/v0" />
 		<property name="name" value="OTA_SimpleTypes" />
 		<property name="defaultPrefix" value="ota2" />
-		<property name="location" value="classpath:/ota2-context/built-ins/OTA_SimpleTypes_0_0_0.otm" />
+		<property name="locations">
+			<list>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="XSD" />
+					<property name="location" value="classpath:/ota2-context/built-ins/OTA_SimpleTypes_0_0_0.otm" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="JSON_SCHEMA" />
+					<property name="location" value="classpath:/ota2-context/built-ins/OTA_SimpleTypes_0_0_0.otm" />
+				</bean>
+			</list>
+		</property>
 		<property name="importByDefault" value="true" />
 	</bean>
 	
@@ -63,7 +85,18 @@
 		<property name="namespace" value="http://opentravel.org/common/message/v02" />
 		<property name="name" value="OTA2_Message_v2.0.0" />
 		<property name="defaultPrefix" value="ota2msg" />
-		<property name="location" value="classpath:/ota2-context/built-ins/OTA2_Message_v2.0.0.xsd" />
+		<property name="locations">
+			<list>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="XSD" />
+					<property name="location" value="classpath:/ota2-context/built-ins/OTA2_Message_v2.0.0.xsd" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="JSON_SCHEMA" />
+					<property name="location" value="classpath:/ota2-context/built-ins/OTA2_Message_v2.0.0.json" />
+				</bean>
+			</list>
+		</property>
 		<property name="dependencies">
 			<list>
 				<value>ota2CommonSchema</value>
@@ -74,68 +107,138 @@
 	<bean id="ota2LibrarySchema_1_4" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
 		<property name="namespace" value="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_04" />
 		<property name="name" value="OTA2_LibraryModel_v1.4.7" />
-		<property name="location" value="classpath:/ota2-context/schemas/OTA2_LibraryModel_v1.4.7.xsd" />
+		<property name="locations">
+			<list>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="XSD" />
+					<property name="location" value="classpath:/ota2-context/schemas/OTA2_LibraryModel_v1.4.7.xsd" />
+				</bean>
+			</list>
+		</property>
 	</bean>
 	
 	<bean id="ota2LibrarySchema_1_5" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
 		<property name="namespace" value="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_05" />
 		<property name="name" value="OTA2_LibraryModel_v1.5.0" />
-		<property name="location" value="classpath:/ota2-context/schemas/OTA2_LibraryModel_v1.5.0.xsd" />
+		<property name="locations">
+			<list>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="XSD" />
+					<property name="location" value="classpath:/ota2-context/schemas/OTA2_LibraryModel_v1.5.0.xsd" />
+				</bean>
+			</list>
+		</property>
 	</bean>
 	
 	<bean id="ota2ProjectSchema" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
 		<property name="namespace" value="http://www.OpenTravel.org/ns/OTA2/Project_v01_00" />
 		<property name="name" value="OTA2_Project_v1.0.0" />
 		<property name="defaultPrefix" value="otp" />
-		<property name="location" value="classpath:/ota2-context/schemas/OTA2_Project_v1.0.0.xsd" />
+		<property name="locations">
+			<list>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="XSD" />
+					<property name="location" value="classpath:/ota2-context/schemas/OTA2_Project_v1.0.0.xsd" />
+				</bean>
+			</list>
+		</property>
 	</bean>
 	
 	<bean id="ota2RepositorySchema" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
 		<property name="namespace" value="http://www.OpenTravel.org/ns/OTA2/RepositoryInfo_v01_00" />
 		<property name="name" value="OTA2_Repository_v1.0.0" />
 		<property name="defaultPrefix" value="otr" />
-		<property name="location" value="classpath:/ota2-context/schemas/OTA2_Repository_v1.0.1.xsd" />
+		<property name="locations">
+			<list>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="XSD" />
+					<property name="location" value="classpath:/ota2-context/schemas/OTA2_Repository_v1.0.1.xsd" />
+				</bean>
+			</list>
+		</property>
 	</bean>
 	
 	<bean id="ota2CatalogSchema" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
 		<property name="namespace" value="http://www.OpenTravel.org/ns/OTA2/LibraryCatalog_v01_00" />
 		<property name="name" value="OTA2_LibraryCatalog_v1.0.0" />
-		<property name="location" value="classpath:/ota2-context/schemas/OTA2_LibraryCatalog_v1.0.0.xsd" />
+		<property name="locations">
+			<list>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="XSD" />
+					<property name="location" value="classpath:/ota2-context/schemas/OTA2_LibraryCatalog_v1.0.0.xsd" />
+				</bean>
+			</list>
+		</property>
 	</bean>
 	
 	<bean id="wsdlSchema" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
 		<property name="namespace" value="http://schemas.xmlsoap.org/wsdl/" />
 		<property name="name" value="wsdl" />
 		<property name="defaultPrefix" value="wsdl" />
-		<property name="location" value="classpath:/ota2-context/schemas/wsdl.xsd" />
+		<property name="locations">
+			<list>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="XSD" />
+					<property name="location" value="classpath:/ota2-context/schemas/wsdl.xsd" />
+				</bean>
+			</list>
+		</property>
 	</bean>
 	
 	<bean id="soapSchema" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
 		<property name="namespace" value="http://schemas.xmlsoap.org/wsdl/soap/" />
 		<property name="name" value="soap" />
 		<property name="defaultPrefix" value="soap" />
-		<property name="location" value="classpath:/ota2-context/schemas/soap.xsd" />
+		<property name="locations">
+			<list>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="XSD" />
+					<property name="location" value="classpath:/ota2-context/schemas/soap.xsd" />
+				</bean>
+			</list>
+		</property>
 	</bean>
 	
 	<bean id="schemaForSchemas" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
 		<property name="namespace" value="http://www.w3.org/2001/XMLSchema" />
 		<property name="name" value="XMLSchema" />
 		<property name="defaultPrefix" value="xsd" />
-		<property name="location" value="classpath:/ota2-context/schemas/XMLSchemaForSchemas.xsd" />
+		<property name="locations">
+			<list>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="XSD" />
+					<property name="location" value="classpath:/ota2-context/schemas/XMLSchemaForSchemas.xsd" />
+				</bean>
+			</list>
+		</property>
 	</bean>
 	
 	<bean id="xmlSchema" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
 		<property name="namespace" value="http://www.w3.org/2001/XMLSchema" />
 		<property name="name" value="XMLSchema" />
 		<property name="defaultPrefix" value="xsd" />
-		<property name="location" value="classpath:/ota2-context/schemas/xml.xsd" />
+		<property name="locations">
+			<list>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="XSD" />
+					<property name="location" value="classpath:/ota2-context/schemas/xml.xsd" />
+				</bean>
+			</list>
+		</property>
 	</bean>
 	
 	<bean id="ota2AppInfoSchema" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
 		<property name="namespace" value="http://www.OpenTravel.org/ns/OTA2/AppInfo_v01_00" />
 		<property name="name" value="OTA2_AppInfo_v1.0.0" />
 		<property name="defaultPrefix" value="otm" />
-		<property name="location" value="classpath:/ota2-context/schemas/OTA2_AppInfo_v1.0.0.xsd" />
+		<property name="locations">
+			<list>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="XSD" />
+					<property name="location" value="classpath:/ota2-context/schemas/OTA2_AppInfo_v1.0.0.xsd" />
+				</bean>
+			</list>
+		</property>
 	</bean>
 	
 	<!--
