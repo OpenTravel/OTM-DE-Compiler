@@ -25,11 +25,8 @@ import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerConte
 import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
-import org.opentravel.schemacompiler.model.TLAlias;
-import org.opentravel.schemacompiler.model.TLAliasOwner;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLDocumentation;
-import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLPropertyOwner;
@@ -48,12 +45,6 @@ import org.w3._2001.xmlschema.TopLevelElement;
  */
 public class TLPropertyCodegenTransformer extends
         AbstractXsdTransformer<TLProperty, TopLevelElement> {
-
-    /**
-     * If the 'repeat' value of a property is greater than this threshold value, the XSD element
-     * definition will be created with a 'maxOccurs' value of "unbounded".
-     */
-    private static final int MAX_OCCURS_UNBOUNDED_THRESHOLD = 5000;
 
     private static org.opentravel.ns.ota2.appinfo_v01_00.ObjectFactory appInfoObjectFactory = new org.opentravel.ns.ota2.appinfo_v01_00.ObjectFactory();
 
@@ -142,10 +133,10 @@ public class TLPropertyCodegenTransformer extends
             if (facetOwner.getRoleEnumeration().getRoles().size() > 0) {
                 element.setMaxOccurs(facetOwner.getRoleEnumeration().getRoles().size() + "");
             } else {
-                element.setMaxOccurs(getMaxOccurs(source));
+                element.setMaxOccurs(PropertyCodegenUtils.getMaxOccurs(source));
             }
         } else {
-            element.setMaxOccurs(getMaxOccurs(source));
+            element.setMaxOccurs(PropertyCodegenUtils.getMaxOccurs(source));
         }
         XsdCodegenUtils.addExampleInfo(source, element);
 
@@ -167,7 +158,7 @@ public class TLPropertyCodegenTransformer extends
         Appinfo appInfo = new Appinfo();
         OTA2Entity ota2Entity = new OTA2Entity();
         String elementName = source.getName();
-        String maxOccurs = getMaxOccurs(source);
+        String maxOccurs = PropertyCodegenUtils.getMaxOccurs(source);
         boolean isMultipleReference;
 
         if (PropertyCodegenUtils.hasGlobalElement(propertyType)) {
@@ -212,59 +203,6 @@ public class TLPropertyCodegenTransformer extends
             element.setMinOccurs(BigInteger.ZERO);
         }
         return element;
-    }
-
-    /**
-     * Identifies the 'maxOccurs' value for the generated element, typically this is defined by the
-     * 'repeat' attribute of the <code>TLPropertyElement</code>.
-     * 
-     * Special Case: Properties that reference core object list facets as their type should assign
-     * the maxOccurs attribute to the number of roles in the core object.
-     * 
-     * @param source
-     *            the model property being rendered
-     * @return String
-     */
-    private String getMaxOccurs(TLProperty source) {
-        TLPropertyType facetType = source.getType();
-        TLListFacet listFacet = null;
-        String maxOccurs = null;
-
-        // Check for special case with core object list facets
-        if (facetType instanceof TLListFacet) {
-            listFacet = (TLListFacet) facetType;
-
-        } else if (facetType instanceof TLAlias) {
-            TLAlias alias = (TLAlias) facetType;
-            TLAliasOwner aliasOwner = alias.getOwningEntity();
-
-            if (aliasOwner instanceof TLListFacet) {
-                listFacet = (TLListFacet) aliasOwner;
-            }
-        }
-        if (listFacet != null) {
-            TLFacetOwner facetOwner = listFacet.getOwningEntity();
-
-            if (facetOwner instanceof TLCoreObject) {
-                TLCoreObject core = (TLCoreObject) facetOwner;
-
-                if (core.getRoleEnumeration().getRoles().size() > 0) {
-                    maxOccurs = core.getRoleEnumeration().getRoles().size() + "";
-                }
-            }
-            listFacet.getOwningEntity();
-        }
-
-        // Normal processing for maxOccurs if the special case was not present
-        if (maxOccurs == null) {
-            if ((source.getRepeat() < 0) || (source.getRepeat() > MAX_OCCURS_UNBOUNDED_THRESHOLD)) {
-                maxOccurs = "unbounded";
-
-            } else if (source.getRepeat() > 0) {
-                maxOccurs = source.getRepeat() + "";
-            }
-        }
-        return maxOccurs;
     }
 
 }

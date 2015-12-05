@@ -15,6 +15,15 @@
  */
 package org.opentravel.schemacompiler.codegen.json.model;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.xml.XMLConstants;
+
+import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.XSDSimpleType;
+
 /**
  * Enumeration that represents the available types and data formats for a
  * JSON schema.
@@ -36,6 +45,7 @@ public enum JsonType {
 	jsonObject   ( "object",   null       ),
 	jsonNull     ( "null",     null       );
 	
+	private static Map<String,JsonType> xsdSimpleMap;
 	private String schemaType;
 	private String format;
 	
@@ -66,6 +76,59 @@ public enum JsonType {
 	 */
 	public String getFormat() {
 		return format;
+	}
+	
+	/**
+	 * If the given named entity is an XSD simple type from the OTM model, this
+	 * method will return the equivalent <code>JsonType</code>.  For non-XSD simples,
+	 * this method will return null.
+	 * 
+	 * @param entity  the named entity for which to return a JSON simple type
+	 * @return JsonType
+	 */
+	public static JsonType valueOf(NamedEntity entity) {
+		JsonType type = null;
+		
+		if ((entity instanceof XSDSimpleType) &&
+				entity.getNamespace().equals(XMLConstants.W3C_XML_SCHEMA_NS_URI)) {
+			type = xsdSimpleMap.get( entity.getLocalName() );
+		}
+		return type;
+	}
+	
+	/**
+	 * Initializes the map of XSD simple types to JSON simples.
+	 */
+	static {
+		try {
+			Map<String,JsonType> typeMappings = new HashMap<>();
+			
+			typeMappings.put( "anyURI", jsonString );
+			typeMappings.put( "boolean", jsonBoolean );
+			typeMappings.put( "date", jsonDate );
+			typeMappings.put( "dateTime", jsonDateTime );
+			typeMappings.put( "decimal", jsonFloat );
+			typeMappings.put( "double", jsonDouble );
+			typeMappings.put( "float", jsonFloat );
+			typeMappings.put( "duration", jsonString );
+			typeMappings.put( "ID", jsonString );
+			typeMappings.put( "IDREF", jsonString );
+			typeMappings.put( "IDREFS", jsonString );
+			typeMappings.put( "long", jsonLong );
+			typeMappings.put( "int", jsonInteger );
+			typeMappings.put( "integer", jsonInteger );
+			typeMappings.put( "positiveInteger", jsonInteger );
+			typeMappings.put( "QName", jsonString );
+			typeMappings.put( "string", jsonString );
+			typeMappings.put( "time", jsonString );
+			typeMappings.put( "language", jsonString );
+			typeMappings.put( "base64Binary", jsonString );
+			
+			xsdSimpleMap = Collections.unmodifiableMap( typeMappings );
+			
+		} catch (Throwable t) {
+			throw new ExceptionInInitializerError( t );
+		}
 	}
 	
 }

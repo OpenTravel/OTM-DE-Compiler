@@ -15,6 +15,10 @@
  */
 package org.opentravel.schemacompiler.codegen.json.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 /**
@@ -25,6 +29,9 @@ public class JsonSchemaReference {
 	
 	private JsonSchema schema;
 	private String schemaPath;
+	private JsonSchemaDocumentation schemaPathDocumentation;
+	private List<JsonContextualValue> schemaPathEquivalentItems = new ArrayList<>();
+	private List<JsonContextualValue> schemaPathExampleItems = new ArrayList<>();
 	
 	/**
 	 * Default constructor.
@@ -89,6 +96,50 @@ public class JsonSchemaReference {
 	}
 	
 	/**
+	 * Returns the documentation for the schema path.  If this schema reference
+	 * contains a by-value schema (not a path reference), this documentation item
+	 * will be ignored during marshalling.
+	 *
+	 * @return JsonSchemaDocumentation
+	 */
+	public JsonSchemaDocumentation getSchemaPathDocumentation() {
+		return schemaPathDocumentation;
+	}
+
+	/**
+	 * Assigns the documentation for the schema path.  If this schema reference
+	 * contains a by-value schema (not a path reference), this documentation item
+	 * will be ignored during marshalling.
+	 *
+	 * @param schemaPathDocumentation  the schema path documentation to assign
+	 */
+	public void setSchemaPathDocumentation(JsonSchemaDocumentation schemaPathDocumentation) {
+		this.schemaPathDocumentation = schemaPathDocumentation;
+	}
+
+	/**
+	 * Returns the list of equivalent item definitions for the schema path.  If this
+	 * schema reference contains a by-value schema (not a path reference), these equivalent
+	 * items will be ignored during marshalling.
+	 *
+	 * @return List<JsonContextualValue>
+	 */
+	public List<JsonContextualValue> getSchemaPathEquivalentItems() {
+		return schemaPathEquivalentItems;
+	}
+
+	/**
+	 * Returns the list of example value definitions for the schema path.  If this
+	 * schema reference contains a by-value schema (not a path reference), these example
+	 * items will be ignored during marshalling.
+	 *
+	 * @return List<JsonContextualValue>
+	 */
+	public List<JsonContextualValue> getSchemaPathExampleItems() {
+		return schemaPathExampleItems;
+	}
+
+	/**
 	 * Returns the <code>JsonObject</code> representation of this type.
 	 * 
 	 * @return JsonObject
@@ -101,9 +152,33 @@ public class JsonSchemaReference {
 			
 		} else {
 			schemaRef = new JsonObject();
+			
+			if (schemaPathDocumentation != null) {
+				JsonObject refDoc = schemaPathDocumentation.toJson();
+				
+				if (refDoc != null) {
+					schemaRef.add( "x-otm-documentation", refDoc );
+				}
+			}
+			if (!schemaPathEquivalentItems.isEmpty()) {
+				JsonArray itemList = new JsonArray();
+				
+				for (JsonContextualValue item : schemaPathEquivalentItems) {
+					itemList.add( item.toJson() );
+				}
+				schemaRef.add( "x-otm-equivalents", itemList );
+			}
+			if (!schemaPathExampleItems.isEmpty()) {
+				JsonArray itemList = new JsonArray();
+				
+				for (JsonContextualValue item : schemaPathExampleItems) {
+					itemList.add( item.toJson() );
+				}
+				schemaRef.add( "x-otm-examples", itemList );
+			}
 			schemaRef.addProperty( "$ref", schemaPath );
 		}
-		return null;
+		return schemaRef;
 	}
 	
 }

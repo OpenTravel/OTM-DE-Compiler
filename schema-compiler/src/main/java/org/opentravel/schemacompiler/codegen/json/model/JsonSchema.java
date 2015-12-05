@@ -35,7 +35,11 @@ public class JsonSchema {
 	private String id;
 	private String schemaSpec;
 	private String title;
-	private String description;
+	private JsonLibraryInfo libraryInfo;
+	private JsonEntityInfo entityInfo;
+	private JsonSchemaDocumentation documentation;
+	private List<JsonContextualValue> equivalentItems = new ArrayList<>();
+	private List<JsonContextualValue> exampleItems = new ArrayList<>();
 	private List<JsonSchemaNamedReference> definitions = new ArrayList<>();
 	private List<JsonSchemaNamedReference> properties = new ArrayList<>();
 	private List<JsonSchemaNamedReference> patternProperties = new ArrayList<>();
@@ -63,31 +67,17 @@ public class JsonSchema {
 	private List<JsonSchemaNamedReference> dependencies = new ArrayList<>();
 	
 	/**
-	 * Private constructor - use <code>newInstance()</code> factory methods for instantiation.
+	 * Default constructor.
 	 */
-	private JsonSchema() {}
+	public JsonSchema() {}
 	
 	/**
-	 * Constructs a new JSON schema instance based on the latest (draft-4) specification
-	 * version.
-	 * 
-	 * @return JsonSchema
-	 */
-	public static JsonSchema newInstance() {
-		return newInstance( JSON_SCHEMA_DRAFT4 );
-	}
-	
-	/**
-	 * Constructs a new JSON schema instance based on the specification version provided.
+	 * Constructor that supplies the schema specification identifier.
 	 * 
 	 * @param schemaSpec  the schema specification identifier
-	 * @return JsonSchema
 	 */
-	public static JsonSchema newInstance(String schemaSpec) {
-		JsonSchema schema = new JsonSchema();
-		
-		schema.setSchemaSpec( schemaSpec );
-		return schema;
+	public JsonSchema(String schemaSpec) {
+		this.schemaSpec = schemaSpec;
 	}
 	
 	/**
@@ -119,16 +109,6 @@ public class JsonSchema {
 	}
 
 	/**
-	 * Assigns the URI constant that indicates the version of the JSON schema
-	 * specification.
-	 *
-	 * @param schema  the schema version URI to assign
-	 */
-	public void setSchemaSpec(String schema) {
-		this.schemaSpec = schema;
-	}
-
-	/**
 	 * Returns the title of the schema.
 	 *
 	 * @return String
@@ -147,21 +127,75 @@ public class JsonSchema {
 	}
 
 	/**
-	 * Returns the description of the schema.
+	 * Returns the library-info element for this schema.
 	 *
-	 * @return String
+	 * @return JsonLibraryInfo
 	 */
-	public String getDescription() {
-		return description;
+	public JsonLibraryInfo getLibraryInfo() {
+		return libraryInfo;
 	}
 
 	/**
-	 * Assigns the description of the schema.
+	 * Assigns the library-info element for this schema.
 	 *
-	 * @param description  the description to assign
+	 * @param libraryInfo  the library-info instance to assign
 	 */
-	public void setDescription(String description) {
-		this.description = description;
+	public void setLibraryInfo(JsonLibraryInfo libraryInfo) {
+		this.libraryInfo = libraryInfo;
+	}
+
+	/**
+	 * Returns the entity-info element for this schema.
+	 *
+	 * @return JsonEntityInfo
+	 */
+	public JsonEntityInfo getEntityInfo() {
+		return entityInfo;
+	}
+
+	/**
+	 * Assigns the entity-info element for this schema.
+	 *
+	 * @param entityInfo  the entity-info instance to assign
+	 */
+	public void setEntityInfo(JsonEntityInfo entityInfo) {
+		this.entityInfo = entityInfo;
+	}
+
+	/**
+	 * Returns the documentation for this schema.
+	 *
+	 * @return JsonSchemaDocumentation
+	 */
+	public JsonSchemaDocumentation getDocumentation() {
+		return documentation;
+	}
+
+	/**
+	 * Assigns the documentation for this schema.
+	 *
+	 * @param documentation  the documentation item to assign
+	 */
+	public void setDocumentation(JsonSchemaDocumentation documentation) {
+		this.documentation = documentation;
+	}
+
+	/**
+	 * Returns the list of equivalent item definitions for this schema.
+	 *
+	 * @return List<JsonContextualValue>
+	 */
+	public List<JsonContextualValue> getEquivalentItems() {
+		return equivalentItems;
+	}
+
+	/**
+	 * Returns the list of example value definitions for this schema.
+	 *
+	 * @return List<JsonContextualValue>
+	 */
+	public List<JsonContextualValue> getExampleItems() {
+		return exampleItems;
 	}
 
 	/**
@@ -584,8 +618,43 @@ public class JsonSchema {
 		if (title != null) {
 			jsonSchema.addProperty( "title", title );
 		}
-		if (description != null) {
-			jsonSchema.addProperty( "description", description );
+		if (libraryInfo != null) {
+			jsonSchema.add( "x-otm-library", libraryInfo.toJson() );
+		}
+		if (entityInfo != null) {
+			jsonSchema.add( "x-otm-entity", entityInfo.toJson() );
+		}
+		if (documentation != null) {
+			JsonObject jsonDoc = documentation.toJson();
+			
+			if (jsonDoc != null) {
+				// Since the 'description' field is supported by the JSON schema spec,
+				// we will move that property from the 'x-otm-documentation' element
+				// to the main schema properties
+				if ((documentation.getDescription() != null) && (documentation.getDescription().length() > 0)) {
+					jsonSchema.addProperty( "description", documentation.getDescription() );
+					jsonDoc.remove( "description" );
+				}
+				if (!jsonDoc.entrySet().isEmpty()) {
+					jsonSchema.add( "x-otm-documentation", jsonDoc );
+				}
+			}
+		}
+		if (!equivalentItems.isEmpty()) {
+			JsonArray itemList = new JsonArray();
+			
+			for (JsonContextualValue item : equivalentItems) {
+				itemList.add( item.toJson() );
+			}
+			jsonSchema.add( "x-otm-equivalents", itemList );
+		}
+		if (!exampleItems.isEmpty()) {
+			JsonArray itemList = new JsonArray();
+			
+			for (JsonContextualValue item : exampleItems) {
+				itemList.add( item.toJson() );
+			}
+			jsonSchema.add( "x-otm-examples", itemList );
 		}
 		if (!definitions.isEmpty()) {
 			JsonObject schemaDefs = new JsonObject();
@@ -672,7 +741,7 @@ public class JsonSchema {
 			JsonArray schemaAllOf = new JsonArray();
 			
 			for (JsonSchemaReference schemaRef : allOf) {
-				schemaAllOf.add( schemaRef.getSchema().toJson() );
+				schemaAllOf.add( schemaRef.toJson() );
 			}
 			jsonSchema.add( "allOf", schemaAllOf );
 		}
@@ -680,7 +749,7 @@ public class JsonSchema {
 			JsonArray schemaAnyOf = new JsonArray();
 			
 			for (JsonSchemaReference schemaRef : anyOf) {
-				schemaAnyOf.add( schemaRef.getSchema().toJson() );
+				schemaAnyOf.add( schemaRef.toJson() );
 			}
 			jsonSchema.add( "anyOf", schemaAnyOf );
 		}
@@ -688,7 +757,7 @@ public class JsonSchema {
 			JsonArray schemaOneOf = new JsonArray();
 			
 			for (JsonSchemaReference schemaRef : oneOf) {
-				schemaOneOf.add( schemaRef.getSchema().toJson() );
+				schemaOneOf.add( schemaRef.toJson() );
 			}
 			jsonSchema.add( "oneOf", schemaOneOf );
 		}

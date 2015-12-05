@@ -48,6 +48,7 @@ public class TestSchemaCompilerTask {
         compilerTask.setCatalogLocation(catalogFile.getAbsolutePath());
         compilerTask.setOutputFolder(targetFolder.getAbsolutePath());
         compilerTask.setCompileSchemas(true);
+        compilerTask.setCompileJsonSchemas(true);
         compilerTask.setCompileServices(true);
         compilerTask.setGenerateExamples(true);
         compilerTask.setExampleMaxRepeat( 3 );
@@ -91,6 +92,7 @@ public class TestSchemaCompilerTask {
 
         compilerTask.setOutputFolder(targetFolder.getAbsolutePath());
         compilerTask.setCompileSchemas(true);
+        compilerTask.setCompileJsonSchemas(true);
         compilerTask.setCompileServices(true);
         compilerTask.setGenerateExamples(true);
         compilerTask.setServiceEndpointUrl("http://www.OpenTravel.org/services");
@@ -113,6 +115,7 @@ public class TestSchemaCompilerTask {
 
         compilerTask.setOutputFolder(targetFolder.getAbsolutePath());
         compilerTask.setCompileSchemas(true);
+        compilerTask.setCompileJsonSchemas(true);
         compilerTask.setCompileServices(true);
         compilerTask.setGenerateExamples(true);
         compilerTask.setServiceEndpointUrl("http://www.OpenTravel.org/services");
@@ -138,6 +141,7 @@ public class TestSchemaCompilerTask {
         compilerTask.setCatalogLocation(catalogFile.getAbsolutePath());
         compilerTask.setOutputFolder(targetFolder.getAbsolutePath());
         compilerTask.setCompileSchemas(true);
+        compilerTask.setCompileJsonSchemas(true);
         compilerTask.setCompileServices(true);
         compilerTask.setGenerateExamples(true);
         compilerTask.setServiceEndpointUrl("http://www.OpenTravel.org/services");
@@ -181,6 +185,7 @@ public class TestSchemaCompilerTask {
 
         compilerTask.setOutputFolder(targetFolder.getAbsolutePath());
         compilerTask.setCompileSchemas(true);
+        compilerTask.setCompileJsonSchemas(true);
         compilerTask.setCompileServices(true);
         compilerTask.setServiceEndpointUrl("http://www.OpenTravel.org/services");
 

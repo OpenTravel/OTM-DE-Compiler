@@ -20,20 +20,17 @@ import javax.xml.namespace.QName;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
+import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
-import org.opentravel.schemacompiler.model.AbstractLibrary;
-import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLDocumentation;
-import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLRole;
 import org.opentravel.schemacompiler.model.TLRoleEnumeration;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
-import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.transform.AnonymousEntityFilter;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.w3._2001.xmlschema.Annotation;
@@ -53,7 +50,7 @@ public class TLAttributeCodegenTransformer extends
      */
     @Override
     public CodegenArtifacts transform(TLAttribute source) {
-        TLAttributeType attributeType = getAttributeType(source);
+        TLAttributeType attributeType = PropertyCodegenUtils.getAttributeType(source);
         CodegenArtifacts artifacts = new CodegenArtifacts();
         Attribute attr = new Attribute();
 
@@ -127,54 +124,6 @@ public class TLAttributeCodegenTransformer extends
         XsdCodegenUtils.addExampleInfo(source, attr);
 
         return artifacts;
-    }
-
-    /**
-     * Returns the type of the attribute. In most cases, this is a simple call to 'attr.getType()'.
-     * In the case of VWA attribute types, however, we must search the VWA hierarchy to retrieve the
-     * simple base type.
-     * 
-     * @param attribute
-     *            the attribute for which to return the type
-     * @return TLAttributeType
-     */
-    private TLAttributeType getAttributeType(TLAttribute attribute) {
-        TLAttributeType attributeType = attribute.getType();
-
-        while (attributeType instanceof TLValueWithAttributes) {
-            attributeType = (TLAttributeType) ((TLValueWithAttributes) attributeType)
-                    .getParentType();
-
-            if (attributeType == null) {
-                attributeType = findEmptyStringType(attribute.getOwningModel());
-            }
-        }
-        return attributeType;
-    }
-
-    /**
-     * Scans the given model and returns the model entity used to represent the empty element type.
-     * If no such entity is defined, this method will return null.
-     * 
-     * @param model
-     *            the model to search
-     * @return TLAttributeType
-     */
-    private TLAttributeType findEmptyStringType(TLModel model) {
-        SchemaDependency emptySD = SchemaDependency.getEmptyElement();
-        TLAttributeType emptyAttribute = null;
-
-        for (AbstractLibrary library : model.getAllLibraries()) {
-            if ((library.getNamespace() != null)
-                    && library.getNamespace().equals(emptySD.getSchemaDeclaration().getNamespace())) {
-                LibraryMember member = library.getNamedMember(emptySD.getLocalName());
-
-                if (member instanceof TLAttributeType) {
-                    emptyAttribute = (TLAttributeType) member;
-                }
-            }
-        }
-        return emptyAttribute;
     }
 
 }

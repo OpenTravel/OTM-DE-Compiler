@@ -26,6 +26,9 @@ import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
+import org.opentravel.schemacompiler.ioc.SchemaDependency;
+import org.opentravel.schemacompiler.model.AbstractLibrary;
+import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAbstractFacet;
 import org.opentravel.schemacompiler.model.TLActionFacet;
@@ -41,6 +44,7 @@ import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLListFacet;
+import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLModelElement;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLProperty;
@@ -59,6 +63,12 @@ import org.opentravel.schemacompiler.model.TLValueWithAttributes;
  */
 public class PropertyCodegenUtils {
 
+    /**
+     * If the 'repeat' value of a property is greater than this threshold value, the XSD element
+     * definition will be created with a 'maxOccurs' value of "unbounded".
+     */
+    private static final int MAX_OCCURS_UNBOUNDED_THRESHOLD = 5000;
+    
     /**
      * Returns true if a global element declaration is to be generated for the given property type.
      * 
@@ -1345,6 +1355,118 @@ public class PropertyCodegenUtils {
 				break;
         }
         return results;
+    }
+
+    /**
+     * Returns the type of the attribute. In most cases, this is a simple call to 'attr.getType()'.
+     * In the case of VWA attribute types, however, we must search the VWA hierarchy to retrieve the
+     * simple base type.
+     * 
+     * @param attribute  the attribute for which to return the type
+     * @return TLAttributeType
+     */
+    public static TLAttributeType getAttributeType(TLAttribute attribute) {
+        TLAttributeType attributeType = attribute.getType();
+
+        while (attributeType instanceof TLValueWithAttributes) {
+            attributeType = (TLAttributeType) ((TLValueWithAttributes) attributeType)
+                    .getParentType();
+
+            if (attributeType == null) {
+                attributeType = findEmptyStringType(attribute.getOwningModel());
+            }
+        }
+        return attributeType;
+    }
+
+    /**
+     * Scans the given model and returns the model entity used to represent the empty element type.
+     * If no such entity is defined, this method will return null.
+     * 
+     * @param model  the model to search
+     * @return TLAttributeType
+     */
+    public static TLAttributeType findEmptyStringType(TLModel model) {
+        SchemaDependency emptySD = SchemaDependency.getEmptyElement();
+        TLAttributeType emptyAttribute = null;
+
+        for (AbstractLibrary library : model.getAllLibraries()) {
+            if ((library.getNamespace() != null)
+                    && library.getNamespace().equals(emptySD.getSchemaDeclaration().getNamespace())) {
+                LibraryMember member = library.getNamedMember(emptySD.getLocalName());
+
+                if (member instanceof TLAttributeType) {
+                    emptyAttribute = (TLAttributeType) member;
+                }
+            }
+        }
+        return emptyAttribute;
+    }
+    
+    /**
+     * Returns true if the given named entity is a reference to the empty-string
+     * schema dependency.
+     * 
+     * @param entity  the entity to analyze
+     * @return boolean
+     */
+    public static boolean isEmptyStringType(NamedEntity entity) {
+        QName emptyElementType = SchemaDependency.getEmptyElement().toQName();
+
+        return emptyElementType.getNamespaceURI().equals(entity.getNamespace())
+                && emptyElementType.getLocalPart().equals(entity.getLocalName());
+    }
+
+    /**
+     * Identifies the 'maxOccurs' value for the generated element, typically this is defined by the
+     * 'repeat' attribute of the <code>TLPropertyElement</code>.
+     * 
+     * <p>Special Case: Properties that reference core object list facets as their type should assign
+     * the maxOccurs attribute to the number of roles in the core object.
+     * 
+     * @param source  the model property being rendered
+     * @return String
+     */
+    public static String getMaxOccurs(TLProperty source) {
+        TLPropertyType facetType = source.getType();
+        TLListFacet listFacet = null;
+        String maxOccurs = null;
+
+        // Check for special case with core object list facets
+        if (facetType instanceof TLListFacet) {
+            listFacet = (TLListFacet) facetType;
+
+        } else if (facetType instanceof TLAlias) {
+            TLAlias alias = (TLAlias) facetType;
+            TLAliasOwner aliasOwner = alias.getOwningEntity();
+
+            if (aliasOwner instanceof TLListFacet) {
+                listFacet = (TLListFacet) aliasOwner;
+            }
+        }
+        if (listFacet != null) {
+            TLFacetOwner facetOwner = listFacet.getOwningEntity();
+
+            if (facetOwner instanceof TLCoreObject) {
+                TLCoreObject core = (TLCoreObject) facetOwner;
+
+                if (core.getRoleEnumeration().getRoles().size() > 0) {
+                    maxOccurs = core.getRoleEnumeration().getRoles().size() + "";
+                }
+            }
+            listFacet.getOwningEntity();
+        }
+
+        // Normal processing for maxOccurs if the special case was not present
+        if (maxOccurs == null) {
+            if ((source.getRepeat() < 0) || (source.getRepeat() > MAX_OCCURS_UNBOUNDED_THRESHOLD)) {
+                maxOccurs = "unbounded";
+
+            } else if (source.getRepeat() > 0) {
+                maxOccurs = source.getRepeat() + "";
+            }
+        }
+        return maxOccurs;
     }
 
 }

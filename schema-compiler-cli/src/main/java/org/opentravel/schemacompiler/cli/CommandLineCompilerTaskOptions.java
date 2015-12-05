@@ -107,6 +107,14 @@ public class CommandLineCompilerTaskOptions implements CompileAllTaskOptions {
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.task.CompileAllTaskOptions#isCompileJsonSchemas()
+	 */
+	@Override
+	public boolean isCompileJsonSchemas() {
+		return false; // JSON schemas not yet fully supported
+	}
+
+    /**
      * @see org.opentravel.schemacompiler.task.CompileAllTaskOptions#isCompileServices()
      */
     @Override

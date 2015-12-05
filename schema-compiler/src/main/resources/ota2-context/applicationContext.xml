@@ -1175,6 +1175,16 @@
 					<property name="targetFormat" value="XML" />
 					<property name="codeGenerator" value="org.opentravel.schemacompiler.codegen.example.ExampleCodeGenerator" />
 				</bean>
+				<bean class="org.opentravel.schemacompiler.codegen.CodeGeneratorMapping">
+					<property name="sourceType" value="org.opentravel.schemacompiler.model.TLLibrary" />
+					<property name="targetFormat" value="JSON_SCHEMA" />
+					<property name="codeGenerator" value="org.opentravel.schemacompiler.codegen.json.JsonSchemaUserLibraryCodeGenerator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.codegen.CodeGeneratorMapping">
+					<property name="sourceType" value="org.opentravel.schemacompiler.model.BuiltInLibrary" />
+					<property name="targetFormat" value="JSON_SCHEMA" />
+					<property name="codeGenerator" value="org.opentravel.schemacompiler.codegen.json.JsonSchemaBuiltInCodeGenerator" />
+				</bean>
 			</set>
 		</property>
 	</bean>
@@ -1324,6 +1334,117 @@
 		</property>
 	</bean>
 	
+	<!--
+	  Transform Factory: XML Schema (XSD) Code Generator
+	  
+	  Defines the object transformation mappings utilized by the XML schema code generator.  Each mapping associates
+	  the source and target object types with the transformer class that will be used to implement the conversion
+	  function.  All transformer classes must implement the 'org.opentravel.schemacompiler.transform.ObjectTransformer'
+	  interface.
+	  -->
+	<bean id="jsonSchemaCodeGeneratorTransformFactory" class="org.opentravel.schemacompiler.transform.TransformerFactory" scope="prototype">
+		<property name="transformerMappings">
+			<set>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLLibrary" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.json.model.JsonSchema" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLLibraryJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.BuiltInLibrary" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.json.model.JsonSchema" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.BuiltInLibraryJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLDocumentation" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.json.model.JsonSchemaDocumentation" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLDocumentationJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLAttribute" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLAttributeJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLIndicator" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLIndicatorJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLProperty" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLPropertyJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLSimple" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLSimpleJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLClosedEnumeration" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLClosedEnumerationJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLOpenEnumeration" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLOpenEnumerationJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLValueWithAttributes" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLValueWithAttributesJsonCodegenTransformer" />
+				</bean>
+				<!--
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLCoreObject" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLCoreObjectJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLBusinessObject" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLBusinessObjectJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLChoiceObject" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLChoiceObjectJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLExtensionPointFacet" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLExtensionPointFacetJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLService" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLServiceJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLOperation" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLOperationCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLResource" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLResourceJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLActionRequest" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLActionRequestJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLActionResponse" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLActionResponseJsonCodegenTransformer" />
+				</bean>
+				-->
+			</set>
+		</property>
+	</bean>
 	
 	<bean id="exampleGenerator" class="org.opentravel.schemacompiler.codegen.example.ExampleValueGenerator" scope="prototype">
  		<property name="legacyExampleProviders">

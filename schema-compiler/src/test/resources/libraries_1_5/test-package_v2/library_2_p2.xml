@@ -18,7 +18,10 @@
     <Context applicationContext="context_2-applicationContext" context="context_2"/>
     <Comments>Test Library</Comments>
     
-    <Simple name="Counter_4" type="pkg1:Counter_2"/>
+    <Simple name="Counter_4" type="pkg1:Counter_2" maxExclusive="5">
+        <Equivalent context="context_1">Counter_4-equivalent</Equivalent>
+        <Example context="context_2">Counter_4-example-value</Example>
+    </Simple>
     
     <Simple listTypeInd="true" name="Counter_4_List" type="Counter_4"/>
     
