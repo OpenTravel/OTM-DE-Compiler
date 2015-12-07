@@ -1395,12 +1395,12 @@
 					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
 					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLValueWithAttributesJsonCodegenTransformer" />
 				</bean>
-				<!--
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
 					<property name="source" value="org.opentravel.schemacompiler.model.TLCoreObject" />
 					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
 					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLCoreObjectJsonCodegenTransformer" />
 				</bean>
+				<!--
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
 					<property name="source" value="org.opentravel.schemacompiler.model.TLBusinessObject" />
 					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
@@ -1457,7 +1457,5 @@
  			</list>
  		</property>
  	</bean>
-	
-	
 	
 </beans>

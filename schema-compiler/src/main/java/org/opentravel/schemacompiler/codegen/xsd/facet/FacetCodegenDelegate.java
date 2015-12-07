@@ -196,7 +196,7 @@ public abstract class FacetCodegenDelegate<F extends TLAbstractFacet> {
      *            the alias of the source facet element being created (may be null)
      * @return String
      */
-    protected String getElementName(TLAlias facetAlias) {
+    public String getElementName(TLAlias facetAlias) {
         String elementName;
 
         if (facetAlias == null) {

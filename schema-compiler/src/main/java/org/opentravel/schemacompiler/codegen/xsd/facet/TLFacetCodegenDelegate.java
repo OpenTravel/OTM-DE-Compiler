@@ -162,14 +162,12 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
      * 
      * @return TLFacet
      */
-    protected TLFacet getBaseFacet() {
+    public TLFacet getBaseFacet() {
         TLFacet baseFacet = getLocalBaseFacet();
 
         // If the source facet does not have a base facet from its local owner, we need to look at
-        // the
-        // business object/core/operation extension and select the corresponding facet from the
-        // extended
-        // owner as the base
+        // the business object/core/operation extension and select the corresponding facet from the
+        // extended owner as the base
         if (baseFacet == null) {
             InheritedFacetSearch facetSearch = new InheritedFacetSearch(getSourceFacet()) {
                 public boolean isMatchingCandidate(TLFacet candidateFacet) {
@@ -222,12 +220,12 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
      * 
      * @return boolean
      */
-    protected boolean hasDefaultFacetElement() {
+    public boolean hasDefaultFacetElement() {
     	return true;
     }
 
     /**
-     * Returns true if root substitution group element for the source facet owne should be generated
+     * Returns true if root substitution group element for the source facet owner should be generated
      * using the source facet.
      * 
      * <p>
@@ -288,7 +286,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
      * 
      * @return boolean
      */
-    protected boolean hasNonSubstitutableElement() {
+    public boolean hasNonSubstitutableElement() {
         return false;
     }
 
@@ -322,7 +320,8 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
     }
 
     /**
-     * Returns the name of the element used to represent the source facet or the specified alias.
+     * Returns the name of the non-substitutable element used to represent the source facet or the
+     * specified alias.
      * 
      * <p>
      * NOTE: By default, this method returns the results of the 'getElementName()' that is used to
@@ -334,7 +333,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
      *            the alias of the source facet element being created (may be null)
      * @return String
      */
-    protected String getNonSubstitableElementName(TLAlias facetAlias) {
+    public String getNonSubstitableElementName(TLAlias facetAlias) {
         String elementName;
 
         if (facetAlias == null) {
@@ -349,7 +348,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
      * @see org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegate#getElementName(org.opentravel.schemacompiler.model.TLAlias)
      */
     @Override
-    protected String getElementName(TLAlias facetAlias) {
+    public String getElementName(TLAlias facetAlias) {
         String elementName;
 
         if (facetAlias == null) {
@@ -364,7 +363,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
     /**
      * If the source facet should support an extension point element, this method will return the
      * qualified name of the global extension point element to use in the type's definition. If
-     * extensions are not supported for the facet, this method sould return null.
+     * extensions are not supported for the facet, this method should return null.
      * 
      * @return QName
      */
@@ -407,7 +406,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
      * 
      * @return List<TLAttribute>
      */
-    protected List<TLAttribute> getAttributes() {
+    public List<TLAttribute> getAttributes() {
         return PropertyCodegenUtils.getInheritedFacetAttributes(getSourceFacet());
     }
 
@@ -419,7 +418,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
      * 
      * @return List<TLProperty>
      */
-    protected List<TLProperty> getElements() {
+    public List<TLProperty> getElements() {
         return PropertyCodegenUtils.getInheritedFacetProperties(getSourceFacet());
     }
 
@@ -431,7 +430,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
      * 
      * @return List<TLIndicator>
      */
-    protected List<TLIndicator> getIndicators() {
+    public List<TLIndicator> getIndicators() {
         return PropertyCodegenUtils.getInheritedFacetIndicators(getSourceFacet());
     }
 

@@ -47,7 +47,7 @@ public class ChoiceObjectSharedFacetCodegenDelegate extends ChoiceObjectFacetCod
 	 * @see org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate#hasDefaultFacetElement()
 	 */
 	@Override
-	protected boolean hasDefaultFacetElement() {
+	public boolean hasDefaultFacetElement() {
 		return false;
 	}
 

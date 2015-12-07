@@ -15,6 +15,7 @@
  */
 package org.opentravel.schemacompiler.codegen.json.facet;
 
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 
 /**
@@ -31,5 +32,14 @@ public class TLSimpleFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLS
     public TLSimpleFacetJsonSchemaDelegate(TLSimpleFacet sourceFacet) {
         super(sourceFacet);
     }
+    
+    /**
+	 * @see org.opentravel.schemacompiler.codegen.json.facet.FacetJsonSchemaDelegate#createDefinition()
+	 */
+	@Override
+	protected JsonSchemaNamedReference createDefinition() {
+		// TODO Implement the 'createDefinition()' method
+		return null;
+	}
 
 }

@@ -15,6 +15,7 @@
  */
 package org.opentravel.schemacompiler.codegen.json.facet;
 
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 
 /**
@@ -32,5 +33,14 @@ public class ResourceActionFacetJsonSchemaDelegate extends FacetJsonSchemaDelega
     public ResourceActionFacetJsonSchemaDelegate(TLActionFacet sourceFacet) {
         super(sourceFacet);
     }
+    
+    /**
+	 * @see org.opentravel.schemacompiler.codegen.json.facet.FacetJsonSchemaDelegate#createDefinition()
+	 */
+	@Override
+	protected JsonSchemaNamedReference createDefinition() {
+		// No JSON schema definitions required for action facets
+		return null;
+	}
 
 }
