@@ -17,7 +17,7 @@ package org.opentravel.schemacompiler.saver;
 
 import java.util.List;
 
-import org.opentravel.ns.ota2.librarymodel_v01_04.Library;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Library;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;

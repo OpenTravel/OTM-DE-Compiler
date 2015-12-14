@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<otp:LibraryInfo xmlns="http://www.w3.org/2001/XMLSchema" xmlns:otp="http://www.OpenTravel.org/ns/OTA2/RepositoryInfo_v01_00">
+<otp:LibraryInfo xmlns="http://www.w3.org/2001/XMLSchema" xmlns:otp="http://www.OpenTravel.org/ns/OTA2/RepositoryInfo_v01_00"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/RepositoryInfo_v01_00 ../../../../../../../../../../../../../../../schema-compiler/src/main/resources/ota2-context/schemas/OTA2_Repository_v1.0.1.xsd">
     <otp:Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01_01_01</otp:Namespace>
     <otp:BaseNamespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test</otp:BaseNamespace>
     <otp:Filename>Version_Test_1_1_1.otm</otp:Filename>

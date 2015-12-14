@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_05"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_05 ../../../../main/resources/ota2-context/schemas/OTA2_LibraryModel_v1.5.0.xsd">
+
+	<VersionScheme>OTA2</VersionScheme>
+    <Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-inheritance/extended-service/v1_0</Namespace>
+    <Prefix>extsvc</Prefix>
+    <Name>extended_service</Name>
+	<Import prefix="xsd" namespace="http://www.w3.org/2001/XMLSchema" />
+	<Import prefix="ota" namespace="http://opentravel.org/common/v02" />
+	<Import prefix="ext" namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-inheritance/extended/v1_0"
+			fileHints="extended_library.xml" />
+    <Comments>Extended Service Entities for Inheritance Tests</Comments>
+    
+	<Service name="NSExtendedService">
+		<Operation Name="Operation1">
+			<Extension extends="ext:ExtendedService_Operation1" />
+			<Request>
+				<Attribute name="requestNSExtendedServiceOperation1Attr" type="xsd:string"/>
+				<Element name="requestNSExtendedServiceOperation1" type="xsd:string"/>
+			</Request>
+			<Response>
+				<Attribute name="responseNSExtendedServiceOperation1Attr" type="xsd:string"/>
+				<Element name="responseNSExtendedServiceOperation1" type="xsd:string"/>
+			</Response>
+		</Operation>
+		<Operation Name="Operation2">
+			<Extension extends="ext:ExtendedService_Operation2" />
+			<Request>
+				<Attribute name="requestNSExtendedServiceOperation2Attr" type="xsd:string"/>
+				<Element name="requestNSExtendedServiceOperation2" type="xsd:string"/>
+			</Request>
+			<Response>
+				<Attribute name="responseNSExtendedServiceOperation2Attr" type="xsd:string"/>
+				<Element name="responseNSExtendedServiceOperation2" type="xsd:string"/>
+			</Response>
+		</Operation>
+	</Service>
+	
+</Library>

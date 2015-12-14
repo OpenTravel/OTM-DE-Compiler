@@ -26,8 +26,8 @@ import java.util.Map;
 import javax.xml.XMLConstants;
 
 import org.junit.Test;
-import org.opentravel.ns.ota2.librarymodel_v01_04.Library;
-import org.opentravel.ns.ota2.librarymodel_v01_04.NamespaceImport;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Library;
+import org.opentravel.ns.ota2.librarymodel_v01_05.NamespaceImport;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
 import org.opentravel.schemacompiler.model.TLLibrary;

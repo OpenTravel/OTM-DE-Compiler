@@ -47,7 +47,16 @@ public enum TLFacetType {
     RESPONSE("RS", false),
 
     /** The notification facet of a service operation. */
-    NOTIFICATION("Notif", false);
+    NOTIFICATION("Notif", false),
+
+    /** The action facet of a REST resource. */
+    ACTION("Action", false),
+
+    /** The shared facet of a choice object. */
+    SHARED("Shared", false),
+
+    /** The choice facet of a choice object. */
+    CHOICE("Choice", true);
 
     private String identityName;
     private boolean contextual;
@@ -100,7 +109,7 @@ public enum TLFacetType {
                 } else if ((facetContext != null) && (facetContext.length() > 0)) {
                     identity.append("_").append(facetContext);
                 }
-            } else { // custom facet type
+            } else { // custom or choice facet type
                 if ((facetLabel != null) && (facetLabel.length() > 0)) {
                     identity.append(facetLabel);
 

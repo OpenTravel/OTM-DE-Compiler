@@ -16,9 +16,14 @@
 package org.opentravel.schemacompiler.visitor;
 
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
+import org.opentravel.schemacompiler.model.TLAction;
+import org.opentravel.schemacompiler.model.TLActionFacet;
+import org.opentravel.schemacompiler.model.TLActionRequest;
+import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLContext;
 import org.opentravel.schemacompiler.model.TLCoreObject;
@@ -36,7 +41,11 @@ import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLNamespaceImport;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.model.TLParamGroup;
+import org.opentravel.schemacompiler.model.TLParameter;
 import org.opentravel.schemacompiler.model.TLProperty;
+import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.model.TLResourceParentRef;
 import org.opentravel.schemacompiler.model.TLRole;
 import org.opentravel.schemacompiler.model.TLService;
 import org.opentravel.schemacompiler.model.TLSimple;
@@ -139,6 +148,15 @@ public interface ModelElementVisitor {
     public boolean visitEnumValue(TLEnumValue enumValue);
 
     /**
+     * Called when a <code>TLChoiceObject</code> instance is encountered during model navigation.
+     * 
+     * @param choiceObject
+     *            the choice object entity to visit
+     * @return boolean flag indicating whether to traverse child elements (if any exist)
+     */
+    public boolean visitChoiceObject(TLChoiceObject choiceObject);
+
+    /**
      * Called when a <code>TLCoreObject</code> instance is encountered during model navigation.
      * 
      * @param coreObject
@@ -182,6 +200,69 @@ public interface ModelElementVisitor {
      * @return boolean flag indicating whether to traverse child elements (if any exist)
      */
     public boolean visitOperation(TLOperation operation);
+
+    /**
+     * Called when a <code>TLResource</code> instance is encountered during model navigation.
+     * 
+     * @param resource
+     *            the resource entity to visit
+     * @return boolean flag indicating whether to traverse child elements (if any exist)
+     */
+    public boolean visitResource(TLResource resource);
+
+    /**
+     * Called when a <code>TLResourceParentRef</code> instance is encountered during model navigation.
+     * 
+     * @param parentRef
+     *            the resource parent reference entity to visit
+     * @return boolean flag indicating whether to traverse child elements (if any exist)
+     */
+    public boolean visitResourceParentRef(TLResourceParentRef parentRef);
+
+    /**
+     * Called when a <code>TLParamGroup</code> instance is encountered during model navigation.
+     * 
+     * @param paramGroup
+     *            the parameter group entity to visit
+     * @return boolean flag indicating whether to traverse child elements (if any exist)
+     */
+    public boolean visitParamGroup(TLParamGroup paramGroup);
+
+    /**
+     * Called when a <code>TLParameter</code> instance is encountered during model navigation.
+     * 
+     * @param parameter
+     *            the parameter entity to visit
+     * @return boolean flag indicating whether to traverse child elements (if any exist)
+     */
+    public boolean visitParameter(TLParameter parameter);
+
+    /**
+     * Called when a <code>TLAction</code> instance is encountered during model navigation.
+     * 
+     * @param action
+     *            the action entity to visit
+     * @return boolean flag indicating whether to traverse child elements (if any exist)
+     */
+    public boolean visitAction(TLAction action);
+
+    /**
+     * Called when a <code>TLActionRequest</code> instance is encountered during model navigation.
+     * 
+     * @param actionRequest
+     *            the action request entity to visit
+     * @return boolean flag indicating whether to traverse child elements (if any exist)
+     */
+    public boolean visitActionRequest(TLActionRequest actionRequest);
+
+    /**
+     * Called when a <code>TLActionResponse</code> instance is encountered during model navigation.
+     * 
+     * @param actionResponse
+     *            the action response entity to visit
+     * @return boolean flag indicating whether to traverse child elements (if any exist)
+     */
+    public boolean visitActionResponse(TLActionResponse actionResponse);
 
     /**
      * Called when a <code>TLExtensionPointFacet</code> instance is encountered during model
@@ -228,6 +309,15 @@ public interface ModelElementVisitor {
      * @return boolean flag indicating whether to traverse child elements (if any exist)
      */
     public boolean visitFacet(TLFacet facet);
+
+    /**
+     * Called when a <code>TLActionFacet</code> instance is encountered during model navigation.
+     * 
+     * @param facet
+     *            the action facet entity to visit
+     * @return boolean flag indicating whether to traverse child elements (if any exist)
+     */
+    public boolean visitActionFacet(TLActionFacet facet);
 
     /**
      * Called when a <code>TLSimpleFacet</code> instance is encountered during model navigation.

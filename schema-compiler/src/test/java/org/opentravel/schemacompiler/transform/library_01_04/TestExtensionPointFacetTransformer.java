@@ -23,7 +23,7 @@ import static org.junit.Assert.assertNull;
 import javax.xml.XMLConstants;
 
 import org.junit.Test;
-import org.opentravel.ns.ota2.librarymodel_v01_04.ExtensionPointFacet;
+import org.opentravel.ns.ota2.librarymodel_v01_05.ExtensionPointFacet;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLFacet;

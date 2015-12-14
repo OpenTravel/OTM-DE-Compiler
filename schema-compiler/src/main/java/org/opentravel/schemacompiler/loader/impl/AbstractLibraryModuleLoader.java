@@ -60,7 +60,7 @@ public abstract class AbstractLibraryModuleLoader implements LibraryModuleLoader
         LoaderValidationMessageKeys {
 
     protected static final Logger log = LoggerFactory
-            .getLogger(LibrarySchema1_3_ModuleLoader.class);
+            .getLogger(AbstractLibraryModuleLoader.class);
 
     private static final String SCHEMA_CONTEXT = ":org.w3._2001.xmlschema";
 

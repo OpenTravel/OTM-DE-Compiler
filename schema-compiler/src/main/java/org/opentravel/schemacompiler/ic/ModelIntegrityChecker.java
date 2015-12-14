@@ -19,12 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.opentravel.schemacompiler.event.ModelEventListener;
-import org.opentravel.schemacompiler.model.TLBusinessObject;
-import org.opentravel.schemacompiler.model.TLCoreObject;
-import org.opentravel.schemacompiler.model.TLFacet;
-import org.opentravel.schemacompiler.model.TLLibrary;
-import org.opentravel.schemacompiler.model.TLListFacet;
-import org.opentravel.schemacompiler.model.TLService;
+import org.opentravel.schemacompiler.model.TLModelElement;
 
 /**
  * Default model integrity checker instance that provides a standard set of listeners. If required,
@@ -43,8 +38,9 @@ public class ModelIntegrityChecker extends AbstractModelIntegrityChecker {
         List<ModelEventListener<?, ?>> listeners = new ArrayList<ModelEventListener<?, ?>>();
 
         listeners.add(new TypeAssignmentChangeIntegrityChecker());
-        listeners.add(new FacetMemberChangeIntegrityChecker());
         listeners.add(new LibraryMemberChangeIntegrityChecker());
+        listeners.add(new FacetMemberChangeIntegrityChecker());
+        listeners.add(new ResourceMemberChangeIntegrityChecker());
         listeners.add(new TypeNameIntegrityChecker());
 
         listeners.add(new NameChangeIntegrityChecker());
@@ -52,14 +48,28 @@ public class ModelIntegrityChecker extends AbstractModelIntegrityChecker {
         listeners.add(new NamespaceChangeIntegrityChecker());
 
         listeners.add(new LibraryRemovedIntegrityChecker());
-        listeners.add(new NamedEntityRemovedIntegrityChecker<TLLibrary>(TLLibrary.class));
-        listeners.add(new NamedEntityRemovedIntegrityChecker<TLBusinessObject>(
-                TLBusinessObject.class));
-        listeners.add(new NamedEntityRemovedIntegrityChecker<TLCoreObject>(TLCoreObject.class));
-        listeners.add(new NamedEntityRemovedIntegrityChecker<TLService>(TLService.class));
-        listeners.add(new NamedEntityRemovedIntegrityChecker<TLFacet>(TLFacet.class));
-        listeners.add(new NamedEntityRemovedIntegrityChecker<TLListFacet>(TLListFacet.class));
-
+        listeners.add(new ModelElementRemovedIntegrityChecker<TLModelElement>(TLModelElement.class));
+        /*
+        listeners.add(new ModelElementRemovedIntegrityChecker<TLLibrary>(TLLibrary.class));
+        listeners.add(new ModelElementRemovedIntegrityChecker<TLBusinessObject>(TLBusinessObject.class));
+        listeners.add(new ModelElementRemovedIntegrityChecker<TLCoreObject>(TLCoreObject.class));
+        listeners.add(new ModelElementRemovedIntegrityChecker<TLChoiceObject>(TLChoiceObject.class));
+        listeners.add(new ModelElementRemovedIntegrityChecker<TLService>(TLService.class));
+        listeners.add(new ModelElementRemovedIntegrityChecker<TLOperation>(TLOperation.class));
+        listeners.add(new ModelElementRemovedIntegrityChecker<TLFacet>(TLFacet.class));
+        listeners.add(new ModelElementRemovedIntegrityChecker<TLActionFacet>(TLActionFacet.class));
+        listeners.add(new ModelElementRemovedIntegrityChecker<TLListFacet>(TLListFacet.class));
+        listeners.add(new ModelElementRemovedIntegrityChecker<TLRole>(TLRole.class));
+        listeners.add(new ModelElementRemovedIntegrityChecker<TLAlias>(TLAlias.class));
+        listeners.add(new ModelElementRemovedIntegrityChecker<TLResource>(TLResource.class));
+        listeners.add(new ModelElementRemovedIntegrityChecker<TLResourceParentRef>(TLResourceParentRef.class));
+        listeners.add(new ModelElementRemovedIntegrityChecker<TLActionFacet>(TLActionFacet.class));
+        listeners.add(new ModelElementRemovedIntegrityChecker<TLParameter>(TLParameter.class));
+        listeners.add(new ModelElementRemovedIntegrityChecker<TLParamGroup>(TLParamGroup.class));
+        listeners.add(new ModelElementRemovedIntegrityChecker<TLAction>(TLAction.class));
+        listeners.add(new ModelElementRemovedIntegrityChecker<TLActionResponse>(TLActionResponse.class));
+		*/
+        
         listeners.add(new ContextDeletionIntegrityChecker());
         listeners.add(new ContextDeclarationChangeIntegrityChecker());
         listeners.add(new ContextReferrerAddedIntegrityChecker());

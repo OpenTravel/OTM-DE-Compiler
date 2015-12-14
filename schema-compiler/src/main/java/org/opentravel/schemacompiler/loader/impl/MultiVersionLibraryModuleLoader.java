@@ -41,8 +41,8 @@ public class MultiVersionLibraryModuleLoader extends AbstractLibraryModuleLoader
      */
     public MultiVersionLibraryModuleLoader() {
         // Assign the prioritized list of delegate module loaders
+        moduleLoaders.add(new LibrarySchema1_5_ModuleLoader());
         moduleLoaders.add(new LibrarySchema1_4_ModuleLoader());
-        moduleLoaders.add(new LibrarySchema1_3_ModuleLoader());
     }
 
     /**

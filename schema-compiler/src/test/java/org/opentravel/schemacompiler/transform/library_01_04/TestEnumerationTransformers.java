@@ -19,8 +19,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
-import org.opentravel.ns.ota2.librarymodel_v01_04.EnumerationClosed;
-import org.opentravel.ns.ota2.librarymodel_v01_04.EnumerationOpen;
+import org.opentravel.ns.ota2.librarymodel_v01_05.EnumerationClosed;
+import org.opentravel.ns.ota2.librarymodel_v01_05.EnumerationOpen;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLLibrary;

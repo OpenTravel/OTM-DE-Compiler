@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_05"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_05 ../../../../main/resources/ota2-context/schemas/OTA2_LibraryModel_v1.5.0.xsd">
+    
+    <VersionScheme>OTA2</VersionScheme>
+    <Status>Draft</Status>
+    <Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-ext_v2</Namespace>
+    <Prefix>pkg1</Prefix>
+    <Name>library_3_ext</Name>
+    <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
+    <Import namespace="http://opentravel.org/common/v02" prefix="ota"/>
+    <Import fileHints="./library_1_p2.xml"
+        namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package_v2" prefix="pkg2"/>
+    <Context applicationContext="default-applicationContext" context="default"/>
+    <Comments>Test Library</Comments>
+    
+    <ExtensionPointFacet>
+        <Documentation>
+            <Description>SampleExtensionPointFacet-documentation-line_1</Description>
+        </Documentation>
+        <Attribute name="extAttr1" type="xsd:string"/>
+        <Attribute name="extAttr2" type="xsd:int"/>
+        <Element name="SampleCore_Detail" repeat="0" type="pkg2:SampleCore_Detail"/>
+        <Indicator name="extIndicator1"/>
+        <Extension extends="pkg2:CompoundBusinessObject_Summary"/>
+    </ExtensionPointFacet>
+    
+</Library>
