@@ -25,8 +25,8 @@ import org.springframework.context.ApplicationContext;
  */
 public class SchemaDeclarations {
 
-    public static final SchemaDeclaration OTA2_LIBRARY_SCHEMA_1_3;
     public static final SchemaDeclaration OTA2_LIBRARY_SCHEMA_1_4;
+    public static final SchemaDeclaration OTA2_LIBRARY_SCHEMA_1_5;
     public static final SchemaDeclaration OTA2_CATALOG_SCHEMA;
     public static final SchemaDeclaration OTA2_PROJECT_SCHEMA;
     public static final SchemaDeclaration OTA2_REPOSITORY_SCHEMA;
@@ -36,8 +36,8 @@ public class SchemaDeclarations {
     public static final SchemaDeclaration OTA2_COMMON_SCHEMA;
     public static final SchemaDeclaration OTA2_APPINFO_SCHEMA;
 
-    private static final String OTA2_LIBRARY_SCHEMA_1_3_ID = "ota2LibrarySchema_1_3";
     private static final String OTA2_LIBRARY_SCHEMA_1_4_ID = "ota2LibrarySchema_1_4";
+    private static final String OTA2_LIBRARY_SCHEMA_1_5_ID = "ota2LibrarySchema_1_5";
     private static final String OTA2_CATALOG_SCHEMA_ID = "ota2CatalogSchema";
     private static final String OTA2_PROJECT_SCHEMA_ID = "ota2ProjectSchema";
     private static final String OTA2_REPOSITORY_SCHEMA_ID = "ota2RepositorySchema";
@@ -54,14 +54,11 @@ public class SchemaDeclarations {
         try {
             ApplicationContext appContext = SchemaCompilerApplicationContext.getContext();
 
-            OTA2_LIBRARY_SCHEMA_1_3 = (SchemaDeclaration) appContext
-                    .getBean(OTA2_LIBRARY_SCHEMA_1_3_ID);
-            OTA2_LIBRARY_SCHEMA_1_4 = (SchemaDeclaration) appContext
-                    .getBean(OTA2_LIBRARY_SCHEMA_1_4_ID);
+            OTA2_LIBRARY_SCHEMA_1_4 = (SchemaDeclaration) appContext.getBean(OTA2_LIBRARY_SCHEMA_1_4_ID);
+            OTA2_LIBRARY_SCHEMA_1_5 = (SchemaDeclaration) appContext.getBean(OTA2_LIBRARY_SCHEMA_1_5_ID);
             OTA2_CATALOG_SCHEMA = (SchemaDeclaration) appContext.getBean(OTA2_CATALOG_SCHEMA_ID);
             OTA2_PROJECT_SCHEMA = (SchemaDeclaration) appContext.getBean(OTA2_PROJECT_SCHEMA_ID);
-            OTA2_REPOSITORY_SCHEMA = (SchemaDeclaration) appContext
-                    .getBean(OTA2_REPOSITORY_SCHEMA_ID);
+            OTA2_REPOSITORY_SCHEMA = (SchemaDeclaration) appContext.getBean(OTA2_REPOSITORY_SCHEMA_ID);
             WSDL_SCHEMA = (SchemaDeclaration) appContext.getBean(WSDL_SCHEMA_ID);
             SOAP_SCHEMA = (SchemaDeclaration) appContext.getBean(SOAP_SCHEMA_ID);
             SCHEMA_FOR_SCHEMAS = (SchemaDeclaration) appContext.getBean(SCHEMA_FOR_SCHEMAS_ID);

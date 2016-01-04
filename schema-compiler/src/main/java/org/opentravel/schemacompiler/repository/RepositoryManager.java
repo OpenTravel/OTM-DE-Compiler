@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,7 +52,6 @@ import org.opentravel.schemacompiler.loader.impl.MultiVersionLibraryModuleLoader
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.impl.DefaultRepositoryFileManager;
-import org.opentravel.schemacompiler.repository.impl.NamespaceIdFileGenerator;
 import org.opentravel.schemacompiler.repository.impl.ProjectFileUtils;
 import org.opentravel.schemacompiler.repository.impl.RemoteRepositoryClient;
 import org.opentravel.schemacompiler.repository.impl.RepositoryItemImpl;
@@ -80,6 +80,8 @@ public final class RepositoryManager implements Repository {
 
     private static final String CURRENT_USER_BASE_NAMESPACE = "http://opentravel.org/local/";
     private static final String ENCRYPTED_PASSWORD_PREFIX = "enc:";
+    private static final int MAX_DISPLAY_NAME_LENGTH = 256;
+    private static final Pattern REPOSITORY_ID_PATTERN = Pattern.compile("([A-Za-z0-9\\-._~!$&'()*+,;=]|%[0-9A-Fa-f]{2})*");
 
     private static RepositoryManager defaultInstance;
     private static Log log = LogFactory.getLog(RepositoryManager.class);
@@ -118,7 +120,6 @@ public final class RepositoryManager implements Repository {
     public RepositoryManager(RepositoryFileManager fileManager) throws RepositoryException {
         this.fileManager = fileManager;
         initializeLocalRepositoryInfo();
-        new NamespaceIdFileGenerator(this).execute();
     }
 
     /**
@@ -226,6 +227,15 @@ public final class RepositoryManager implements Repository {
         boolean success = false;
 
         try {
+        	if (repositoryId == null) repositoryId = "";
+        	if (displayName == null) displayName = "";
+        	
+        	if (displayName.length() > MAX_DISPLAY_NAME_LENGTH) {
+        		throw new RepositoryException("Invalid display name for repository (max length is " + MAX_DISPLAY_NAME_LENGTH + ")");
+        	}
+        	if (!REPOSITORY_ID_PATTERN.matcher( repositoryId ).matches()) {
+        		throw new RepositoryException("Invalid repository ID: " + repositoryId);
+        	}
             this.localRepositoryId = repositoryId;
             this.localRepositoryDisplayName = displayName;
 
@@ -1222,7 +1232,7 @@ public final class RepositoryManager implements Repository {
 
         if (((libraryMetadata.getState() != RepositoryState.MANAGED_LOCKED) && (item.getState() != RepositoryItemState.MANAGED_WIP))
                 || (item.getLockedByUser() == null)
-                || !item.getLockedByUser().equals(libraryMetadata.getLockedBy())) {
+                || !item.getLockedByUser().equalsIgnoreCase(libraryMetadata.getLockedBy())) {
             throw new RepositoryException(
                     "Unable to commit - only work-in-process items can be committed to the repository.");
         }
@@ -1288,7 +1298,7 @@ public final class RepositoryManager implements Repository {
 
             if (((libraryMetadata.getState() != RepositoryState.MANAGED_LOCKED) && (item.getState() != RepositoryItemState.MANAGED_WIP))
                     || (item.getLockedByUser() == null)
-                    || !item.getLockedByUser().equals(libraryMetadata.getLockedBy())) {
+                    || !item.getLockedByUser().equalsIgnoreCase(libraryMetadata.getLockedBy())) {
                 throw new RepositoryException(
                         "Unable to revert - only work-in-process items can be reverted.");
             }
@@ -1449,8 +1459,8 @@ public final class RepositoryManager implements Repository {
 
         if (((libraryMetadata.getState() != RepositoryState.MANAGED_LOCKED) && (item.getState() != RepositoryItemState.MANAGED_WIP))
                 || (item.getLockedByUser() == null)
-                || !item.getLockedByUser().equals(libraryMetadata.getLockedBy())) {
-            throw new RepositoryException("Unable to release lock - item is not currently unlocked");
+                || !item.getLockedByUser().equalsIgnoreCase(libraryMetadata.getLockedBy())) {
+            throw new RepositoryException("Unable to release lock - item is not currently locked");
         }
 
         boolean success = false;
@@ -1775,12 +1785,13 @@ public final class RepositoryManager implements Repository {
 
         } else {
             Repository repository = item.getRepository();
-
-            if (repository instanceof RemoteRepository) {
+        	File itemFile = fileManager.getLibraryContentLocation(baseNS,
+        			item.getFilename(), item.getVersion());
+            
+            if ((repository instanceof RemoteRepository) && !itemFile.exists()) {
                 ((RemoteRepository) repository).downloadContent(item, false);
             }
-            contentLocation = URLUtils.toURL(fileManager.getLibraryContentLocation(baseNS,
-                    item.getFilename(), item.getVersion()));
+            contentLocation = URLUtils.toURL( itemFile );
         }
         return contentLocation;
     }
@@ -1791,17 +1802,22 @@ public final class RepositoryManager implements Repository {
      * local repository, this method has no effect. This update is performed regardless of the
      * update policy for the repository that owns and manages the item.
      * 
+     * <p>This method will return true if the item's local copy was replaced by new content from
+     * the remote repository.
+     * 
      * @param item
      *            the repository item to refresh
      * @throws RepositoryException
      *             thrown if the file content cannot be locked by the current user
      */
-    public void refreshLocalCopy(RepositoryItem item) throws RepositoryException {
+    public boolean refreshLocalCopy(RepositoryItem item) throws RepositoryException {
         Repository repository = item.getRepository();
-
+        boolean isRefreshed = false;
+        
         if (repository instanceof RemoteRepository) {
-            ((RemoteRepository) repository).downloadContent(item, true);
+            isRefreshed = ((RemoteRepository) repository).downloadContent(item, true);
         }
+        return isRefreshed;
     }
 
     /**

@@ -15,7 +15,7 @@
  */
 package org.opentravel.schemacompiler.transform.tl2jaxb;
 
-import org.opentravel.ns.ota2.librarymodel_v01_04.Example;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Example;
 import org.opentravel.schemacompiler.model.TLExample;
 import org.opentravel.schemacompiler.transform.symbols.SymbolResolverTransformerContext;
 import org.opentravel.schemacompiler.transform.util.BaseTransformer;

@@ -26,8 +26,8 @@ import java.util.Map;
 import javax.xml.XMLConstants;
 
 import org.junit.Test;
-import org.opentravel.ns.ota2.librarymodel_v01_04.Library;
-import org.opentravel.ns.ota2.librarymodel_v01_04.NamespaceImport;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Library;
+import org.opentravel.ns.ota2.librarymodel_v01_05.NamespaceImport;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
 import org.opentravel.schemacompiler.model.TLLibrary;
@@ -92,10 +92,10 @@ public class TestLibraryTransformers extends Abstract_1_4_TestTransformers {
         assertEquals(1, testImport.getFileHints().size());
         assertTrue(testImport.getFileHints().contains("library_3_ext.xml"));
 
-        assertEquals(13, library.getNamedMembers().size());
+        assertEquals(14, library.getNamedMembers().size());
         assertEquals(2, library.getSimpleTypes().size());
         assertEquals(0, library.getClosedEnumerationTypes().size());
-        assertEquals(1, library.getOpenEnumerationTypes().size());
+        assertEquals(2, library.getOpenEnumerationTypes().size());
         assertEquals(2, library.getValueWithAttributesTypes().size());
         assertEquals(4, library.getCoreObjectTypes().size());
         assertEquals(3, library.getBusinessObjectTypes().size());

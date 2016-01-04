@@ -17,6 +17,7 @@ package org.opentravel.schemacompiler.validate.base;
 
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLEnumValue;
+import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.Validator;
@@ -42,6 +43,13 @@ public class TLOpenEnumerationBaseValidator extends TLValidatorBase<TLOpenEnumer
             findings.addAll(enumValueValidator.validate(enumValue));
         }
 
+        if (target.getExtension() != null) {
+            Validator<TLExtension> extensionValidator = getValidatorFactory().getValidatorForClass(
+                    TLExtension.class);
+
+            findings.addAll(extensionValidator.validate(target.getExtension()));
+        }
+        
         if (target.getDocumentation() != null) {
             Validator<TLDocumentation> docValidator = getValidatorFactory().getValidatorForClass(
                     TLDocumentation.class);

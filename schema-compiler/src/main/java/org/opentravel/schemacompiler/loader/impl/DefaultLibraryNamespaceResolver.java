@@ -21,8 +21,10 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.opentravel.schemacompiler.loader.LibraryModuleInfo;
 import org.opentravel.schemacompiler.loader.LibraryNamespaceResolver;
@@ -49,7 +51,8 @@ import org.w3._2001.xmlschema.Schema;
  * @author S. Livezey
  */
 public class DefaultLibraryNamespaceResolver implements LibraryNamespaceResolver {
-
+	
+	private Map<String,String> repositoryUrlCache = new HashMap<>();
     private ProjectManager projectManager;
     private Object contextLibraryOrSchema;
     private String contextVersionScheme;
@@ -134,6 +137,7 @@ public class DefaultLibraryNamespaceResolver implements LibraryNamespaceResolver
     public void setModel(TLModel model) {
         if (model != null) {
             projectManager = ProjectManager.getProjectManager(model);
+            repositoryUrlCache.clear();
         }
     }
 
@@ -164,6 +168,16 @@ public class DefaultLibraryNamespaceResolver implements LibraryNamespaceResolver
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.loader.LibraryNamespaceResolver#setRepositoryLocation(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public void setRepositoryLocation(String repositoryUri, String libraryUrl) {
+        if (repositoryUri.startsWith("otm://")) {
+        	repositoryUrlCache.put( repositoryUri, libraryUrl );
+        }
+	}
+
+	/**
      * Attempts to resolve a URL for the given namespace and file path using the libraries that have
      * already been loaded by the project manager. If the current model does not have an associated
      * project manager, this method will always return null.
@@ -218,17 +232,30 @@ public class DefaultLibraryNamespaceResolver implements LibraryNamespaceResolver
 
         if (filePath.startsWith("otm://")) {
             try {
-                RepositoryManager repositoryManager = (projectManager != null) ? projectManager
-                        .getRepositoryManager() : RepositoryManager.getDefault();
-                RepositoryItem repositoryItem = repositoryManager.getRepositoryItem(filePath,
-                        namespace);
+            	String cachedUrl = repositoryUrlCache.get(filePath);
+            	
+            	if (cachedUrl != null) {
+            		referencedUrl = new URL( cachedUrl );
+            		
+            	} else {
+                    RepositoryManager repositoryManager = (projectManager != null) ? projectManager
+                            .getRepositoryManager() : RepositoryManager.getDefault();
+                    RepositoryItem repositoryItem = repositoryManager.getRepositoryItem(filePath,
+                            namespace);
 
-                if (repositoryItem != null) {
-                    referencedUrl = repositoryManager.getContentLocation(repositoryItem);
-                }
+                    if (repositoryItem != null) {
+                        referencedUrl = repositoryManager.getContentLocation(repositoryItem);
+                        repositoryUrlCache.put( filePath, referencedUrl.toExternalForm() );
+                    }
+            	}
+            } catch (MalformedURLException e) {
+            	e.printStackTrace(System.out);
+                // Should never happen - return null
             } catch (RepositoryException e) {
+            	e.printStackTrace(System.out);
                 // No error - return null
             } catch (URISyntaxException e) {
+            	e.printStackTrace(System.out);
                 // No error - return null
             }
 

@@ -24,6 +24,7 @@ import java.util.Map;
 import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
+import org.opentravel.schemacompiler.codegen.util.EnumCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
@@ -212,17 +213,18 @@ public class ExampleValueGenerator {
      * 
      * @param attribute
      *            the attribute for which to return an example value
+     * @param owner  the owner that declared or inherited the attribute
      * @return String
      */
-    public String getExampleValue(TLAttribute attribute) {
+    public String getExampleValue(TLAttribute attribute, NamedEntity owner) {
         String exampleValue = null;
 
         if ((attribute != null) && !isEmptyValueType(attribute.getType())) {
             if (XsdCodegenUtils.isIdType(attribute.getType())) {
-                NamedEntity owner = getBaseEntity(attribute.getAttributeOwner());
-                exampleValue = idFactory.getMessageId(owner.getNamespace(), owner.getLocalName());
+                NamedEntity ownerBase = getBaseEntity( (owner != null) ? owner : attribute.getAttributeOwner() );
+                exampleValue = idFactory.getMessageId(ownerBase.getNamespace(), ownerBase.getLocalName());
             } else {
-                exampleValue = getExampleValue(attribute, attribute.getType());
+                exampleValue = getExampleValue((TLExampleOwner) attribute, attribute.getType());
             }
         }
         return exampleValue;
@@ -236,17 +238,18 @@ public class ExampleValueGenerator {
      * 
      * @param element
      *            the element for which to return an example value
+     * @param owner  the owner that declared or inherited the element
      * @return String
      */
-    public String getExampleValue(TLProperty element) {
+    public String getExampleValue(TLProperty element, NamedEntity owner) {
         String exampleValue = null;
 
         if ((element != null) && !isEmptyValueType(element.getType())) {
             if (XsdCodegenUtils.isIdType(element.getType())) {
-                NamedEntity owner = getBaseEntity(element.getPropertyOwner());
-                exampleValue = idFactory.getMessageId(owner.getNamespace(), owner.getLocalName());
+                NamedEntity ownerBase = getBaseEntity( (owner != null) ? owner : element.getPropertyOwner() );
+                exampleValue = idFactory.getMessageId(ownerBase.getNamespace(), ownerBase.getLocalName());
             } else {
-                exampleValue = getExampleValue(element, element.getType());
+                exampleValue = getExampleValue((TLExampleOwner) element, element.getType());
             }
         }
         return exampleValue;
@@ -467,16 +470,38 @@ public class ExampleValueGenerator {
                 case ANY_EXAMPLE:
                     exampleValue = getAnyExample(simple);
                     break;
+				default:
+					break;
             }
             if (exampleValue == null) {
                 TLAttributeType parentType = simple.getParentType();
+                int repeatCount = simple.isListTypeInd() ? 3 : 1;
+                StringBuilder exampleStr = new StringBuilder();
 
-                if (parentType instanceof TLSimple) {
-                    exampleValue = getExampleValue((TLSimple) parentType, searchMode);
+                for (int i = 0; i < repeatCount; i++) {
+                	String _exampleValue = null;
+                	
+                    if (parentType instanceof TLSimple) {
+                        _exampleValue = getExampleValue((TLSimple) parentType, searchMode);
 
-                } else if ((parentType instanceof XSDSimpleType)
-                        && (searchMode == ExampleSearchMode.LEGACY_VALUE)) {
-                    exampleValue = getExampleValue((XSDSimpleType) parentType);
+                    } else if (parentType instanceof TLClosedEnumeration) {
+                        _exampleValue = getExampleValue((TLClosedEnumeration) parentType, searchMode);
+                    	
+                    } else if ((parentType instanceof XSDSimpleType)
+                            && (searchMode == ExampleSearchMode.LEGACY_VALUE)) {
+                        _exampleValue = getExampleValue((XSDSimpleType) parentType);
+                    }
+                    
+                    if (_exampleValue != null) {
+                    	if (exampleStr.length() > 0) {
+                    		exampleStr.append(" ");
+                    	}
+                    	exampleStr.append(_exampleValue);
+                    }
+                }
+                
+                if (exampleStr.length() > 0) {
+                	exampleValue = exampleStr.toString();
                 }
             }
         }
@@ -504,6 +529,8 @@ public class ExampleValueGenerator {
                 case ANY_EXAMPLE:
                     exampleValue = getAnyExample(simpleFacet);
                     break;
+				default:
+					break;
             }
             if (exampleValue == null) {
                 NamedEntity parentType = simpleFacet.getSimpleType();
@@ -552,6 +579,8 @@ public class ExampleValueGenerator {
                 case ANY_EXAMPLE:
                     exampleValue = getAnyExample(valueWithAttributes);
                     break;
+				default:
+					break;
             }
             if (exampleValue == null) {
                 TLAttributeType parentType = valueWithAttributes.getParentType();
@@ -749,8 +778,7 @@ public class ExampleValueGenerator {
 
         if (enumeration != null) {
             synchronized (enumerationExamples) {
-                Map<String, List<String>> localEnumExamples = enumerationExamples.get(enumeration
-                        .getNamespace());
+                Map<String, List<String>> localEnumExamples = enumerationExamples.get(enumeration.getNamespace());
                 List<String> enumExamples;
 
                 // Create the list of example data values if this is our first time generating
@@ -766,7 +794,7 @@ public class ExampleValueGenerator {
                     enumExamples = new ArrayList<String>();
                     localEnumExamples.put(enumeration.getLocalName(), enumExamples);
 
-                    for (TLEnumValue enumValue : enumeration.getValues()) {
+                    for (TLEnumValue enumValue : EnumCodegenUtils.getInheritedValues( enumeration )) {
                         enumExamples.add(enumValue.getLiteral());
                     }
                 }

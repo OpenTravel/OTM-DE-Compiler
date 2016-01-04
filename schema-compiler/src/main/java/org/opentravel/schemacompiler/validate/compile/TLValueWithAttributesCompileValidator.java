@@ -39,9 +39,6 @@ import org.opentravel.schemacompiler.validate.base.TLValueWithAttributesBaseVali
 import org.opentravel.schemacompiler.validate.impl.CircularReferenceChecker;
 import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
 import org.opentravel.schemacompiler.validate.impl.ValidatorUtils;
-import org.opentravel.schemacompiler.version.PatchVersionHelper;
-import org.opentravel.schemacompiler.version.VersionScheme;
-import org.opentravel.schemacompiler.version.VersionSchemeException;
 
 /**
  * Validator for the <code>TLValueWithAttributes</code> class.
@@ -55,8 +52,6 @@ public class TLValueWithAttributesCompileValidator extends TLValueWithAttributes
     public static final String ERROR_INHERITANCE_TYPE_CONFLICT = "INHERITANCE_TYPE_CONFLICT";
     public static final String ERROR_INVALID_CIRCULAR_REFERENCE = "INVALID_CIRCULAR_REFERENCE";
     public static final String ERROR_MULTIPLE_ID_MEMBERS = "MULTIPLE_ID_MEMBERS";
-    public static final String ERROR_ILLEGAL_PATCH = "ILLEGAL_PATCH";
-    public static final String ERROR_INVALID_VERSION_EXTENSION = "INVALID_VERSION_EXTENSION";
 
     /**
      * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateFields(org.opentravel.schemacompiler.validate.Validatable)
@@ -152,32 +147,13 @@ public class TLValueWithAttributesCompileValidator extends TLValueWithAttributes
             }
         }
 
-        // Validate versioning rules
-        try {
-            PatchVersionHelper helper = new PatchVersionHelper();
-            VersionScheme vScheme = helper.getVersionScheme(target);
-
-            if ((vScheme != null) && vScheme.isPatchVersion(target.getNamespace())) {
-                builder.addFinding(FindingType.ERROR, "name", ERROR_ILLEGAL_PATCH);
-            }
-
-            if (isInvalidVersionExtension(target)) {
-                builder.addFinding(FindingType.ERROR, "versionExtension",
-                        ERROR_INVALID_VERSION_EXTENSION);
-            }
-            checkMajorVersionNamingConflicts(target, builder);
-
-        } catch (VersionSchemeException e) {
-            // Ignore - Invalid version scheme error will be reported when the owning library is
-            // validated
-        }
-
         // Check for circular references
         if (CircularReferenceChecker.hasCircularReference(target)) {
             builder.addFinding(FindingType.ERROR, "parentType", ERROR_INVALID_CIRCULAR_REFERENCE);
         }
 
         checkSchemaNamingConflicts(target, builder);
+        validateVersioningRules(target, builder);
 
         return builder.getFindings();
     }

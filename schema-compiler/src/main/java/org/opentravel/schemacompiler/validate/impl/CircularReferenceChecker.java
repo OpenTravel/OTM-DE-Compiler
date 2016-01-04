@@ -141,8 +141,10 @@ public class CircularReferenceChecker {
         boolean result = false;
 
         if (referencedEntity != null) {
-            if (visitedEntities.contains(referencedEntity) && (referencedEntity == originalEntity)) {
-                result = true;
+            if (visitedEntities.contains(referencedEntity)) {
+            	if (referencedEntity == originalEntity) {
+                    result = true;
+            	}
 
             } else {
                 visitedEntities.add(referencedEntity);
@@ -159,6 +161,7 @@ public class CircularReferenceChecker {
                                     (TLValueWithAttributes) attribute.getType(), originalEntity,
                                     visitedEntities);
                         }
+                        if (result) break;
                     }
                 }
             }

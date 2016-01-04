@@ -25,7 +25,9 @@ import org.opentravel.schemacompiler.util.SchemaCompilerException;
  */
 public class ValidationException extends SchemaCompilerException {
 
-    private ValidationFindings findings;
+	private static final long serialVersionUID = 3933016239871704438L;
+	
+	private ValidationFindings findings;
 
     /**
      * Constructor that assigns the validation findings to be thrown.

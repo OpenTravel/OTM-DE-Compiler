@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,13 +44,17 @@ import org.opentravel.ns.ota2.project_v01_00.UnmanagedProjectItemType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryPermission;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
 import org.opentravel.schemacompiler.codegen.impl.DependencyFilterBuilder;
+import org.opentravel.schemacompiler.event.ModelEventBuilder;
 import org.opentravel.schemacompiler.event.ModelEventListener;
 import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.event.OwnershipEvent;
 import org.opentravel.schemacompiler.ic.ImportManagementIntegrityChecker;
+import org.opentravel.schemacompiler.ic.LibraryRemovedIntegrityChecker;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.loader.LibraryModelLoader;
+import org.opentravel.schemacompiler.loader.LibraryNamespaceResolver;
 import org.opentravel.schemacompiler.loader.LoaderValidationMessageKeys;
+import org.opentravel.schemacompiler.loader.impl.DefaultLibraryNamespaceResolver;
 import org.opentravel.schemacompiler.loader.impl.FileValidationSource;
 import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
 import org.opentravel.schemacompiler.loader.impl.LibraryValidationSource;
@@ -435,9 +440,18 @@ public final class ProjectManager {
 
             // Validate for errors/warnings if requested by the caller
             if (findings != null) {
-                findings.addAll(TLModelValidator.validateModel(model,
-                        ValidatorFactory.COMPILE_RULE_SET_ID));
+                findings.addAll(TLModelValidator.validateModel(model, ValidatorFactory.COMPILE_RULE_SET_ID));
                 findings.addAll(loaderFindings);
+            }
+            
+            // Ensure that all of the project items were loaded, and place any that did
+            // not in the 'failedProjectItems' list.
+            for (JAXBElement<? extends ProjectItemType> jaxbItem : jaxbProject.getProjectItemBase()) {
+            	ProjectItemType item = jaxbItem.getValue();
+            	
+            	if (!isProjectItemLoaded( item, project )) {
+            		project.getFailedProjectItems().add( item );
+            	}
             }
 
         } else {
@@ -562,6 +576,12 @@ public final class ProjectManager {
         if (findings == null)
             findings = new ValidationFindings();
 
+        // Before saving, scan the list of failed project items to make sure that none
+        // of them were loaded after the initial attempt.
+        checkFailedProjectItems( project );
+        
+        // In addition to the project itself, save any of the unmanaged libraries if requested
+        // by the caller.
         if (saveUnmanagedLibraries) {
             List<TLLibrary> libraryList = new ArrayList<TLLibrary>();
 
@@ -613,6 +633,124 @@ public final class ProjectManager {
         projectItems.clear();
         model.clearModel();
         projects.add(builtInProject = new BuiltInProject(this));
+    }
+    
+    /**
+     * Refreshes the contents of all managed project items that are not locked for editing
+     * by the current user.  The list returned by this method contains all project items that
+     * were updated during the refresh.
+     * 
+     * @return List<ProjectItem>
+     * @throws LibraryLoaderException  thrown if the contents of a library cannot be loaded
+     * @throws RepositoryException  thrown if one or more managed repository items cannot be accessed
+     */
+    public List<ProjectItem> refreshManagedProjectItems() throws LibraryLoaderException, RepositoryException {
+    	return refreshManagedProjectItems( null );
+    }
+
+    /**
+     * Refreshes the contents of all managed project items that are not locked for editing
+     * by the current user.  The list returned by this method contains all project items that
+     * were updated during the refresh.
+     * 
+     * @param findings  validation findings where errors/warnings from the refresh operation will be reported
+     * @return List<ProjectItem>
+     * @throws LibraryLoaderException  thrown if the contents of a library cannot be loaded
+     * @throws RepositoryException  thrown if one or more managed repository items cannot be accessed
+     */
+    @SuppressWarnings("unchecked")
+	public List<ProjectItem> refreshManagedProjectItems(ValidationFindings findings) throws LibraryLoaderException, RepositoryException {
+        LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>(model);
+    	LibraryRemovedIntegrityChecker removeProcessor = new LibraryRemovedIntegrityChecker();
+    	ValidationFindings loaderFindings = new ValidationFindings();
+    	Map<String,ProjectItem> refreshedItemMap = new HashMap<>();
+    	List<URL> refreshedLibraryUrls = new ArrayList<>();
+    	List<ProjectItem> refreshedItems = new ArrayList<>();
+    	
+    	modelLoader.setResolveModelReferences( false );
+    	
+    	// Scan for libraries (project items) that need to be refreshed
+    	for (ProjectItem item : projectItems) {
+    		try {
+        		RepositoryItemState itemState = item.getState();
+        		
+        		// Skip items that are locked for local edits; this includes unmanaged items
+        		// and managed items that are WIP
+        		if ((itemState == RepositoryItemState.UNMANAGED) || (itemState == RepositoryItemState.MANAGED_WIP)) {
+        			continue;
+        		}
+        		
+        		// Check the last-updated date on the remote repository item against the local copy
+        		if (repositoryManager.refreshLocalCopy( item )) {
+        			// NOTE: This has only refreshed the library content on the local file system; we
+        			//       still need to update the in-memory model
+        			URL libraryUrl = item.getContent().getLibraryUrl();
+        			
+        			refreshedLibraryUrls.add( libraryUrl );
+        			refreshedItemMap.put( libraryUrl.toExternalForm(), item );
+        		}
+    			
+            } catch (Throwable t) {
+				loaderFindings.addFinding(FindingType.ERROR, new LibraryValidationSource(item.getContent()),
+						LoaderValidationMessageKeys.ERROR_UNKNOWN_EXCEPTION_DURING_MODULE_LOAD, URLUtils
+							.getShortRepresentation(item.getContent().getLibraryUrl()), ExceptionUtils
+							.getExceptionClass(t).getSimpleName(), ExceptionUtils.getExceptionMessage(t));
+            }
+    	}
+    	
+    	// Remove each refreshed library from the model
+    	for (ProjectItem item : refreshedItemMap.values()) {
+    		model.removeLibrary( item.getContent() );
+    		removeProcessor.processModelEvent( (OwnershipEvent<TLModel, AbstractLibrary>)
+    				new ModelEventBuilder( ModelEventType.LIBRARY_REMOVED, model )
+    						.setAffectedItem( item.getContent() ).buildEvent() );
+    	}
+    	
+		// Reload each affected library from the local file system and add it back into the model
+    	for (URL libraryUrl : refreshedLibraryUrls) {
+    		ProjectItemImpl refreshedItem = (ProjectItemImpl) refreshedItemMap.get( libraryUrl.toExternalForm() );
+    		List<Project> assignedProjects = refreshedItem.memberOfProjects();
+    		try {
+    			// Re-load the library into memory and replace the original content of the project item
+        		modelLoader.loadLibraryModel( new LibraryStreamInputSource(libraryUrl) );
+    			TLLibrary refreshedLibrary = (TLLibrary) model.getLibrary( libraryUrl );
+    			
+    			if (refreshedLibrary != null) {
+    				refreshedItem.setContent( refreshedLibrary );
+    			}
+    			refreshedItems.add( refreshedItem );
+    			
+    			// Look for new libraries added to the model as dependencies after the refresh
+    			for (AbstractLibrary library : model.getAllLibraries()) {
+    				if (library instanceof BuiltInLibrary) continue;
+    				
+    				if (getProjectItem( library ) == null) {
+    					ProjectItem newItem = findOrCreateProjectItem( library );
+    					
+    					for (Project project : assignedProjects) {
+    						project.add( newItem );
+    					}
+    					addProjectItem( newItem );
+    					refreshedItems.add( newItem );
+    				}
+    			}
+    			
+            } catch (Throwable t) {
+				loaderFindings.addFinding(FindingType.ERROR, new LibraryValidationSource(refreshedItem.getContent()),
+						LoaderValidationMessageKeys.ERROR_UNKNOWN_EXCEPTION_DURING_MODULE_LOAD,
+							URLUtils .getShortRepresentation(libraryUrl),
+							ExceptionUtils.getExceptionClass(t).getSimpleName(),
+							ExceptionUtils.getExceptionMessage(t));
+            }
+    	}
+    	modelLoader.resolveModelEntityReferences();
+    	
+    	// Run a final validation check (if necessary)
+    	if (findings != null) {
+    		findings.addAll( TLModelValidator.validateModel(model, ValidatorFactory.COMPILE_RULE_SET_ID) );
+    		findings.addAll( loaderFindings );
+    	}
+    	return refreshedItems;
     }
 
     /**
@@ -707,6 +845,24 @@ public final class ProjectManager {
             }
         }
         return projectList;
+    }
+    
+    /**
+     * Scans the list of failed project items for the given project and removes any
+     * items that have been loaded successfully since the last check.
+     * 
+     * @param project  the project to be checked
+     */
+    public void checkFailedProjectItems(Project project) {
+        Iterator<ProjectItemType> itemIterator = project.getFailedProjectItems().iterator();
+        
+        while (itemIterator.hasNext()) {
+        	ProjectItemType failedItem = itemIterator.next();
+        	
+        	if (isProjectItemLoaded( failedItem, project )) {
+        		itemIterator.remove();
+        	}
+        }
     }
 
     /**
@@ -836,7 +992,7 @@ public final class ProjectManager {
 
         // If the new (or existing) project item is not yet assigned to the project, assign it now
         if (!project.isMemberOf(projectItem)) {
-            projectItems.add(projectItem);
+            addProjectItem(projectItem);
             project.add(projectItem);
         }
 
@@ -934,7 +1090,7 @@ public final class ProjectManager {
      * @param managedItems
      *            the managed repository items to be included in the project
      * @param project
-     *            the project to which the unmanaged project item will be added
+     *            the project to which the project item will be added
      * @param loaderFindings
      *            validation findings where errors/warnings from the loading operation will be
      *            reported
@@ -952,7 +1108,22 @@ public final class ProjectManager {
 
         // Initialize the loader and validation findings
         modelLoader.setResolveModelReferences(false);
-
+        
+    	// Optimization that will pre-process the repository URL's for each library.  This will
+    	// allow the loader to bypass multiple downloads of the libraries from the remote repository.
+        if ((managedItems != null) && !managedItems.isEmpty()) {
+        	LibraryNamespaceResolver nsResolver = new DefaultLibraryNamespaceResolver();
+        	
+            modelLoader.setNamespaceResolver( nsResolver );
+            
+            for (RepositoryItem managedItem : managedItems) {
+            	String repositoryUri = "otm://" + managedItem.getRepository().getId() + "/" + managedItem.getFilename();
+            	String libraryUrl = repositoryManager.getContentLocation( managedItem ).toExternalForm();
+            	
+            	nsResolver.setRepositoryLocation( repositoryUri, libraryUrl );
+            }
+        }
+        
         // Load all of the managed repository items
         for (RepositoryItem managedItem : managedItems) {
             URL libraryUrl = repositoryManager.getContentLocation(managedItem);
@@ -966,10 +1137,8 @@ public final class ProjectManager {
                     AbstractLibrary managedLibrary = model.getLibrary(libraryUrl);
 
                     if (managedLibrary != null) {
-                        // Check the namespace of the library we just loaded and make sure it
-                        // matches the
-                        // repository item; if not, reassign the libary's namespace and issue a
-                        // loader warning.
+                        // Check the namespace of the library we just loaded and make sure it matches the
+                        // repository item; if not, reassign the libary's namespace and issue a loader warning.
                         if (!managedItem.getNamespace().equals(managedLibrary.getNamespace())) {
                             try {
                                 managedLibrary.setNamespace(managedItem.getNamespace());
@@ -982,8 +1151,7 @@ public final class ProjectManager {
 
                             } catch (IllegalArgumentException e) {
                                 // If we cannot reassign the namespace because a duplicate exists,
-                                // remove
-                                // the library and issue a loader error.
+                                // remove the library and issue a loader error.
                                 loaderFindings
                                         .addFinding(
                                                 FindingType.ERROR,
@@ -1013,7 +1181,7 @@ public final class ProjectManager {
             }
 
             if (newItem != null) {
-                projectItems.add(newItem);
+                addProjectItem(newItem);
                 project.add(newItem);
                 newItems.add(newItem);
             }
@@ -1059,7 +1227,7 @@ public final class ProjectManager {
             }
 
             if (newItem != null) {
-                projectItems.add(newItem);
+                addProjectItem(newItem);
                 project.add(newItem);
                 newItems.add(newItem);
             }
@@ -1076,15 +1244,12 @@ public final class ProjectManager {
         // the last time this/these libraries were loaded.
         for (ProjectItem item : projectItems) {
             if (item.getContent() instanceof TLLibrary) {
-                ImportManagementIntegrityChecker.verifyReferencedLibraries((TLLibrary) item
-                        .getContent());
+                ImportManagementIntegrityChecker.verifyReferencedLibraries((TLLibrary) item.getContent());
             }
         }
 
-        // In some cases, libraries may have been referenced by includes/imports, but no real
-        // dependencies
-        // to their content exist. In these cases, libraries (project-items) that are not explicitly
-        // assigned
+        // In some cases, libraries may have been referenced by includes/imports, but no real dependencies
+        // to their content exist. In these cases, libraries (project-items) that are not explicitly assigned
         // to a project need to be purged.
         purgeOrphanedProjectItems();
 
@@ -1508,6 +1673,9 @@ public final class ProjectManager {
                 case UNMANAGED:
                     throw new RepositoryException(
                             "Unable to lock - the item is not a managed artifact.");
+                    
+				default:
+					break;
             }
 
             // Copy the repository file to the WIP location
@@ -1894,7 +2062,7 @@ public final class ProjectManager {
                     newItem = ProjectItemImpl.newUnmanagedItem(
                             URLUtils.toFile(library.getLibraryUrl()), library, this);
                 }
-                projectItems.add(newItem);
+                addProjectItem(newItem);
             }
         }
     }
@@ -1981,9 +2149,63 @@ public final class ProjectManager {
                 projectItem = ProjectItemImpl.newUnmanagedItem(
                         URLUtils.toFile(library.getLibraryUrl()), library, this);
             }
-            projectItems.add(projectItem);
+            addProjectItem(projectItem);
         }
         return projectItem;
+    }
+    
+    /**
+     * Adds a project item to the current list of all items if it is not already a member.
+     * 
+     * @param item  the project item to add
+     */
+    private void addProjectItem(ProjectItem item) {
+    	boolean newItem = true;
+    	
+    	for (ProjectItem currentItem : projectItems) {
+    		if (currentItem == item) {
+    			newItem = false;
+    			break;
+    		}
+    	}
+    	if (newItem) {
+    		projectItems.add( item );
+    	}
+    }
+    
+    /**
+     * Returns true if the given JAXB representation of the project item exists
+     * in the model (false otherwise).
+     * 
+     * @param jaxbItem  the JAXB representation of the project item to check
+     * @param project  the project from which the item was loaded
+     * @return boolean
+     */
+    private boolean isProjectItemLoaded(ProjectItemType jaxbItem, Project project) {
+    	boolean result;
+    	
+    	try {
+        	URL libraryUrl;
+        	
+        	if (jaxbItem instanceof UnmanagedProjectItemType) {
+        		UnmanagedProjectItemType _jaxbItem = (UnmanagedProjectItemType) jaxbItem;
+        		File projectFolder = project.getProjectFile().getParentFile();
+    			
+        		libraryUrl = URLUtils.getResolvedURL( _jaxbItem.getFileLocation(), URLUtils.toURL( projectFolder ) );
+        		
+        	} else { // must be a ManagedProjectItemType
+        		ManagedProjectItemType _jaxbItem = (ManagedProjectItemType) jaxbItem;
+    			RepositoryItem repositoryItem = repositoryManager.getRepositoryItem( _jaxbItem.getBaseNamespace(),
+    			        _jaxbItem.getFilename(), _jaxbItem.getVersion() );
+    			
+    			libraryUrl = repositoryManager.getContentLocation( repositoryItem );
+        	}
+    		result = (model.getLibrary( libraryUrl ) != null);
+    		
+    	} catch (MalformedURLException | RepositoryException e) {
+    		result = false; // Ignore error and return false
+    	}
+    	return result;
     }
 
     /**

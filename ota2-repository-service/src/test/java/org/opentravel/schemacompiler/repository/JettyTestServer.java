@@ -17,22 +17,19 @@ package org.opentravel.schemacompiler.repository;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.log.Logger;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.server.ServerProperties;
 import org.opentravel.schemacompiler.index.FreeTextSearchService;
-import org.opentravel.schemacompiler.repository.RemoteRepository;
-import org.opentravel.schemacompiler.repository.RepositoryComponentFactory;
-import org.opentravel.schemacompiler.repository.RepositoryException;
-import org.opentravel.schemacompiler.repository.RepositoryManager;
-import org.opentravel.schemacompiler.repository.RepositoryServlet;
 import org.opentravel.schemacompiler.repository.impl.RemoteRepositoryClient;
 import org.opentravel.schemacompiler.util.RepositoryTestUtils;
-
-import com.sun.jersey.api.core.PackagesResourceConfig;
 
 /**
  * Encapsulates the configuration and run-time environment of an OTA2.0 repository that is launched
@@ -91,11 +88,14 @@ public class JettyTestServer {
             throw new IllegalStateException("The Jetty server is already running.");
         }
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
-
-        context.setContextPath("/ota2-repository-service");
-        context.addServlet(new ServletHolder(new RepositoryServlet(new PackagesResourceConfig(
-                new String[] { "org.opentravel.schemacompiler.repository",
-                        "org.opentravel.schemacompiler.providers" }))), "/service/*");
+		ResourceConfig resourceConfig = new ResourceConfig();
+		Map<String,Object> resourceProps = new HashMap<>();
+		
+		resourceProps.put( ServerProperties.PROVIDER_PACKAGES,
+				"org.opentravel.schemacompiler.repository org.opentravel.schemacompiler.providers" );
+		resourceConfig.addProperties( resourceProps );
+		context.setContextPath("/ota2-repository-service");
+        context.addServlet(new ServletHolder(new RepositoryServlet(resourceConfig)), "/service/*");
         jettyServer = new Server(port);
 
         ErrorHandler errH = new ErrorHandler();
@@ -229,6 +229,10 @@ public class JettyTestServer {
         public void debug(String msg, Object... args) {
         }
 
+		@Override
+		public void debug(String msg, long level) {
+		}
+		
         @Override
         public void debug(Throwable thrown) {
         }
@@ -245,6 +249,7 @@ public class JettyTestServer {
         @Override
         public void ignore(Throwable ignored) {
         }
+
     }
 
 }

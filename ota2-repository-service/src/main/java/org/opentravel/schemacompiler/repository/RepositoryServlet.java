@@ -18,13 +18,13 @@ package org.opentravel.schemacompiler.repository;
 import java.io.IOException;
 
 import javax.servlet.ServletException;
-import javax.ws.rs.core.Application;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.servlet.ServletContainer;
 import org.opentravel.schemacompiler.index.FreeTextSearchService;
-
-import com.sun.jersey.spi.container.servlet.ServletContainer;
 
 /**
  * Servlet class that extends the Jersey JAX-RS servlet, adding a function to gracefully release the
@@ -34,7 +34,8 @@ import com.sun.jersey.spi.container.servlet.ServletContainer;
  */
 public class RepositoryServlet extends ServletContainer {
 
-    private static Log log = LogFactory.getLog(RepositoryServlet.class);
+	private static final long serialVersionUID = -5879953110490573634L;
+	private static Log log = LogFactory.getLog(RepositoryServlet.class);
 
     /**
      * Default constructor.
@@ -43,25 +44,16 @@ public class RepositoryServlet extends ServletContainer {
         super();
     }
 
-    /**
-     * Constructor that initializes the servlet using the application instance provided.
+	/**
+     * Constructor that initializes the servlet using the resource configuration provided.
      * 
      * @param app
      *            the JAX-RS application instance
      */
-    public RepositoryServlet(Application app) {
-        super(app);
-    }
-
-    /**
-     * Constructor that initializes the servlet using the specified type of application.
-     * 
-     * @param appClass
-     *            the type of application with which this servlet should be initialized
-     */
-    public RepositoryServlet(Class<? extends Application> appClass) {
-        super(appClass);
-    }
+    public RepositoryServlet(ResourceConfig resourceConfig) {
+		super(resourceConfig);
+		resourceConfig.register( MultiPartFeature.class );
+	}
 
     /**
      * @see com.sun.jersey.spi.container.servlet.ServletContainer#init()

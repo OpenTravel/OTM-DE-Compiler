@@ -21,12 +21,19 @@ import org.opentravel.schemacompiler.event.OwnershipEvent;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLActionFacet;
+import org.opentravel.schemacompiler.model.TLActionRequest;
+import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLModelElement;
+import org.opentravel.schemacompiler.model.TLParamGroup;
+import org.opentravel.schemacompiler.model.TLParameter;
 import org.opentravel.schemacompiler.model.TLProperty;
+import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.model.TLResourceParentRef;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
@@ -66,7 +73,7 @@ public abstract class EntityRemovedIntegrityChecker<S, I> extends
         }
 
         // Next, purge any references to those entities we just collected
-        Collection<NamedEntity> removedEntities = collectVisitor.getLibraryEntities();
+        Collection<TLModelElement> removedEntities = collectVisitor.getLibraryEntities();
 
         if (!removedEntities.isEmpty()) {
             PurgeEntityVisitor purgeVisitor = new PurgeEntityVisitor(removedEntities);
@@ -85,7 +92,7 @@ public abstract class EntityRemovedIntegrityChecker<S, I> extends
      */
     private static class PurgeEntityVisitor extends ModelElementVisitorAdapter {
 
-        private NamedEntity[] removedEntities;
+        private TLModelElement[] removedEntities;
 
         /**
          * Constructor that assigns the list of modified entities and the symbol resolver used to
@@ -94,17 +101,17 @@ public abstract class EntityRemovedIntegrityChecker<S, I> extends
          * @param removedEntities
          *            the named entities that were removed from the model
          */
-        public PurgeEntityVisitor(Collection<NamedEntity> removedEntities) {
+        public PurgeEntityVisitor(Collection<TLModelElement> removedEntities) {
             if (removedEntities != null) {
-                this.removedEntities = new NamedEntity[removedEntities.size()];
+                this.removedEntities = new TLModelElement[removedEntities.size()];
                 int i = 0;
 
-                for (NamedEntity removedEntity : removedEntities) {
+                for (TLModelElement removedEntity : removedEntities) {
                     this.removedEntities[i] = removedEntity;
                     i++;
                 }
             } else {
-                this.removedEntities = new NamedEntity[0];
+                this.removedEntities = new TLModelElement[0];
             }
         }
 
@@ -113,7 +120,7 @@ public abstract class EntityRemovedIntegrityChecker<S, I> extends
          */
         @Override
         public boolean visitSimple(TLSimple simple) {
-            NamedEntity referencedEntity = simple.getParentType();
+        	TLModelElement referencedEntity = (TLModelElement) simple.getParentType();
 
             if (isRemovedEntity(referencedEntity)) {
                 TLModel model = simple.getOwningModel();
@@ -130,7 +137,7 @@ public abstract class EntityRemovedIntegrityChecker<S, I> extends
          */
         @Override
         public boolean visitValueWithAttributes(TLValueWithAttributes valueWithAttributes) {
-            NamedEntity referencedEntity = valueWithAttributes.getParentType();
+        	TLModelElement referencedEntity = (TLModelElement) valueWithAttributes.getParentType();
 
             if (isRemovedEntity(referencedEntity)) {
                 TLModel model = valueWithAttributes.getOwningModel();
@@ -147,7 +154,7 @@ public abstract class EntityRemovedIntegrityChecker<S, I> extends
          */
         @Override
         public boolean visitExtension(TLExtension extension) {
-            NamedEntity referencedEntity = extension.getExtendsEntity();
+        	TLModelElement referencedEntity = (TLModelElement) extension.getExtendsEntity();
 
             if (isRemovedEntity(referencedEntity)) {
                 TLModel model = extension.getOwningModel();
@@ -164,7 +171,7 @@ public abstract class EntityRemovedIntegrityChecker<S, I> extends
          */
         @Override
         public boolean visitSimpleFacet(TLSimpleFacet simpleFacet) {
-            NamedEntity referencedEntity = simpleFacet.getSimpleType();
+        	TLModelElement referencedEntity = (TLModelElement) simpleFacet.getSimpleType();
 
             if (isRemovedEntity(referencedEntity)) {
                 TLModel model = simpleFacet.getOwningModel();
@@ -181,7 +188,7 @@ public abstract class EntityRemovedIntegrityChecker<S, I> extends
          */
         @Override
         public boolean visitAttribute(TLAttribute attribute) {
-            NamedEntity referencedEntity = attribute.getType();
+        	TLModelElement referencedEntity = (TLModelElement) attribute.getType();
 
             if (isRemovedEntity(referencedEntity)) {
                 TLModel model = attribute.getOwningModel();
@@ -198,7 +205,7 @@ public abstract class EntityRemovedIntegrityChecker<S, I> extends
          */
         @Override
         public boolean visitElement(TLProperty element) {
-            NamedEntity referencedEntity = element.getType();
+        	TLModelElement referencedEntity = (TLModelElement) element.getType();
 
             if (isRemovedEntity(referencedEntity)) {
                 TLModel model = element.getOwningModel();
@@ -211,6 +218,114 @@ public abstract class EntityRemovedIntegrityChecker<S, I> extends
         }
 
         /**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResource(org.opentravel.schemacompiler.model.TLResource)
+		 */
+		@Override
+		public boolean visitResource(TLResource resource) {
+			TLModelElement referencedEntity = resource.getBusinessObjectRef();
+
+            if (isRemovedEntity(referencedEntity)) {
+                TLModel model = resource.getOwningModel();
+                boolean listenersEnabled = disableListeners(model);
+
+                resource.setBusinessObjectRef(null);
+                restoreListeners(model, listenersEnabled);
+            }
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResourceParentRef(org.opentravel.schemacompiler.model.TLResourceParentRef)
+		 */
+		@Override
+		public boolean visitResourceParentRef(TLResourceParentRef parentRef) {
+			TLModelElement referencedResource = parentRef.getParentResource();
+            TLParamGroup referencedParamGroup = parentRef.getParentParamGroup();
+            TLModel model = parentRef.getOwningModel();
+
+            if (isRemovedEntity(referencedResource)) {
+                boolean listenersEnabled = disableListeners(model);
+
+                parentRef.setParentResource(null);
+                restoreListeners(model, listenersEnabled);
+            }
+            if (isRemovedEntity(referencedParamGroup)) {
+                boolean listenersEnabled = disableListeners(model);
+
+                parentRef.setParentParamGroup(null);
+                restoreListeners(model, listenersEnabled);
+            }
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParamGroup(org.opentravel.schemacompiler.model.TLParamGroup)
+		 */
+		@Override
+		public boolean visitParamGroup(TLParamGroup paramGroup) {
+			TLModelElement referencedEntity = paramGroup.getFacetRef();
+
+            if (isRemovedEntity(referencedEntity)) {
+                TLModel model = paramGroup.getOwningModel();
+                boolean listenersEnabled = disableListeners(model);
+
+                paramGroup.setFacetRef(null);
+                restoreListeners(model, listenersEnabled);
+            }
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParameter(org.opentravel.schemacompiler.model.TLParameter)
+		 */
+		@Override
+		public boolean visitParameter(TLParameter parameter) {
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionRequest(org.opentravel.schemacompiler.model.TLActionRequest)
+		 */
+		@Override
+		public boolean visitActionRequest(TLActionRequest actionRequest) {
+            TLParamGroup referencedParamGroup = actionRequest.getParamGroup();
+            TLActionFacet referencedPayloadType = actionRequest.getPayloadType();
+            TLModel model = actionRequest.getOwningModel();
+            
+            if (isRemovedEntity(referencedParamGroup)) {
+                boolean listenersEnabled = disableListeners(model);
+
+                actionRequest.setParamGroup(null);
+                restoreListeners(model, listenersEnabled);
+            }
+            if (isRemovedEntity(referencedPayloadType)) {
+                boolean listenersEnabled = disableListeners(model);
+
+                actionRequest.setPayloadType(null);
+                restoreListeners(model, listenersEnabled);
+            }
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionResponse(org.opentravel.schemacompiler.model.TLActionResponse)
+		 */
+		@Override
+		public boolean visitActionResponse(TLActionResponse actionResponse) {
+            NamedEntity referencedPayloadType = actionResponse.getPayloadType();
+            
+            if ((referencedPayloadType instanceof TLModelElement)
+            		&& isRemovedEntity((TLModelElement) referencedPayloadType)) {
+                TLModel model = actionResponse.getOwningModel();
+                boolean listenersEnabled = disableListeners(model);
+
+                actionResponse.setPayloadType(null);
+                restoreListeners(model, listenersEnabled);
+            }
+            return true;
+		}
+
+		/**
          * Returns true if the given named entity is one of the instances flagged for removal from
          * the model. This performs a reference check on the removed entity list instead of the
          * 'equals()' method that is employed by the Java collection API, eliminating unexpected
@@ -220,10 +335,10 @@ public abstract class EntityRemovedIntegrityChecker<S, I> extends
          *            the named entity to check
          * @return boolean
          */
-        private boolean isRemovedEntity(NamedEntity entity) {
+        private boolean isRemovedEntity(TLModelElement entity) {
             boolean result = false;
 
-            for (NamedEntity removedEntity : removedEntities) {
+            for (TLModelElement removedEntity : removedEntities) {
                 if (entity == removedEntity) {
                     result = true;
                     break;

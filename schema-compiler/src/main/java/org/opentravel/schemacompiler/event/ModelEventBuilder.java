@@ -61,18 +61,13 @@ public class ModelEventBuilder {
             modelEvent = event;
 
         } else if (eventType.getEventClass().equals(ValueChangeEvent.class)) {
-            boolean valueChanged = (oldValue == null) ? (newValue != null) : !oldValue
-                    .equals(newValue);
+            ValueChangeEvent<Object, Object> event = new ValueChangeEvent<Object, Object>(
+                    eventType, sourceObject);
 
-            // Only create a value-change event if the value actually changed
-            if (valueChanged) {
-                ValueChangeEvent<Object, Object> event = new ValueChangeEvent<Object, Object>(
-                        eventType, sourceObject);
-
-                event.setOldValue(oldValue);
-                event.setNewValue(newValue);
-                modelEvent = event;
-            }
+            event.setOldValue(oldValue);
+            event.setNewValue(newValue);
+            modelEvent = event;
+        	
         } else {
             throw new IllegalArgumentException("Unknown model event class: "
                     + eventType.getEventClass().getSimpleName());

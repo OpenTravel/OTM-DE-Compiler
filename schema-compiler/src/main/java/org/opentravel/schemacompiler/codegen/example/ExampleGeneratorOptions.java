@@ -15,6 +15,16 @@
  */
 package org.opentravel.schemacompiler.codegen.example;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.xml.namespace.QName;
+
+import org.opentravel.schemacompiler.model.TLFacet;
+import org.opentravel.schemacompiler.model.TLFacetOwner;
+import org.opentravel.schemacompiler.model.TLFacetType;
+import org.opentravel.schemacompiler.model.TLOperation;
+
 /**
  * Specifies the options to use when generating examples using the <code>ExampleNavigator</code>
  * component.
@@ -28,6 +38,7 @@ public class ExampleGeneratorOptions {
     };
 
     private DetailLevel detailLevel = DetailLevel.MAXIMUM;
+    private Map<QName,TLFacet> preferredFacetMap = new HashMap<>();
     private String exampleContext;
     private int maxRepeat = 3;
     private int maxRecursionDepth = 2;
@@ -49,6 +60,38 @@ public class ExampleGeneratorOptions {
      */
     public void setDetailLevel(DetailLevel detailLevel) {
         this.detailLevel = detailLevel;
+    }
+    
+    /**
+     * Returns the preferred facet to generate for substitution groups with the
+     * given entity.  If no preferred facet has been assigned, this method will
+     * return null.
+     * 
+     * @param entity  the entity for which to return a preferred facet
+     * @return TLFacet
+     */
+    public TLFacet getPreferredFacet(TLFacetOwner entity) {
+    	return preferredFacetMap.get( new QName( entity.getNamespace(), entity.getLocalName() ) );
+    }
+    
+    /**
+     * Returns the preferred facet to generate for substitution groups with the
+     * given entity.
+     * 
+     * @param entity  the entity for which to assign the preferred facet
+     * @param preferredFacet  the preferred facet to use when generating substitution
+     *						  groups for the entity
+     */
+    public void setPreferredFacet(TLFacetOwner entity, TLFacet preferredFacet) {
+    	QName entityName = new QName( entity.getNamespace(), entity.getLocalName() );
+    	
+    	if (entity instanceof TLOperation) {
+    		throw new IllegalArgumentException("Operation facets are not part of substitution groups.");
+    	}
+    	if (preferredFacet.getFacetType() == TLFacetType.QUERY) {
+    		throw new IllegalArgumentException("Query facets are not part of the substitution group for a business object.");
+    	}
+    	preferredFacetMap.put( entityName, preferredFacet );
     }
 
     /**

@@ -179,15 +179,17 @@ public class AliasCodegenUtils {
 
         if (ownerAlias.getOwningEntity() instanceof TLFacetOwner) {
             TLFacet facet = FacetCodegenUtils.getFacetOfType(
-                    (TLFacetOwner) ownerAlias.getOwningEntity(), facetType, facetContext,
-                    facetLabel);
-            String derivedAlias = ownerAlias.getName() + "_"
-                    + facetType.getIdentityName(facetContext, facetLabel);
+                    (TLFacetOwner) ownerAlias.getOwningEntity(), facetType, facetContext, facetLabel);
+            
+            if (facet != null) {
+                String derivedAlias = ownerAlias.getName() + "_"
+                        + facetType.getIdentityName(facetContext, facetLabel);
 
-            for (TLAlias alias : facet.getAliases()) {
-                if (alias.getName().equals(derivedAlias)) {
-                    facetAlias = alias;
-                    break;
+                for (TLAlias alias : facet.getAliases()) {
+                    if (alias.getName().equals(derivedAlias)) {
+                        facetAlias = alias;
+                        break;
+                    }
                 }
             }
         }

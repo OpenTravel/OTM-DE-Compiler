@@ -196,7 +196,7 @@ public class TestProjectManager {
         File projectTestFolder = new File(SchemaCompilerTestUtils.getBaseProjectLocation());
         File projectFile = new File(projectTestFolder, "/project_1.xml");
         File libraryFile = new File(projectTestFolder,
-                "../libraries_1_4/test-package_v2/library_3_ext.xml");
+                "../libraries_1_5/test-package_v2/library_3_ext.xml");
         ValidationFindings findings = new ValidationFindings();
         ProjectManager projectManager = new ProjectManager(false);
         Project project = projectManager.loadProject(projectFile);

@@ -17,8 +17,8 @@
 
 -->
 <!DOCTYPE tiles-definitions PUBLIC
-       "-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN"
-       "http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
+       "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
+       "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
 
 <tiles-definitions>
 	<definition name="baseLayout" template="/WEB-INF/tiles/baseLayout.jsp">
@@ -146,6 +146,11 @@
 		<put-attribute name="title" value="OTA2.0 Repository - Demote Repository Item" />
 		<put-attribute name="pageTitle" value="Demote Repository Item" />
 		<put-attribute name="body" value="/WEB-INF/console/adminDemoteItem.jsp" />
+	</definition>
+	<definition name="adminUnlockItem" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Unlock Item" />
+		<put-attribute name="pageTitle" value="Unlock Repository Item" />
+		<put-attribute name="body" value="/WEB-INF/console/adminUnlockItem.jsp" />
 	</definition>
 	<definition name="adminRecalculateItemCrc" extends="baseLayout">
 		<put-attribute name="title" value="OTA2.0 Repository - Recalculate CRC" />

@@ -19,6 +19,7 @@
 			<xsd:element name="ServiceName" type="xsd:string" minOccurs="0" maxOccurs="1" />
 			<xsd:element name="LibraryName" type="xsd:string" minOccurs="1" maxOccurs="1" />
 			<xsd:element name="LibraryVersion" type="xsd:string" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="LibraryStatus" type="xsd:string" minOccurs="1" maxOccurs="1" />
 			<xsd:element name="SourceFile" type="xsd:string" minOccurs="1" maxOccurs="1" />
 			<xsd:element name="CompilerVersion" type="xsd:string" minOccurs="1" maxOccurs="1" />
 			<xsd:element name="CompileDate" type="xsd:dateTime" minOccurs="1" maxOccurs="1" />

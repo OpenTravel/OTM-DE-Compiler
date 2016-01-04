@@ -22,15 +22,17 @@ import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.event.ModelEventBuilder;
 import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.model.TLEnumValue.EnumValueListManager;
+import org.opentravel.schemacompiler.version.Versioned;
 
 /**
  * Abstract base class for the open and closed enumeration types.
  * 
  * @author S. Livezey
  */
-public abstract class TLAbstractEnumeration extends LibraryMember implements TLDocumentationOwner {
+public abstract class TLAbstractEnumeration extends LibraryMember implements TLVersionedExtensionOwner, TLDocumentationOwner {
 
     private String name;
+    private TLExtension extension;
     private TLDocumentation documentation;
     private EnumValueListManager enumValueManager = new EnumValueListManager(this);
 
@@ -63,6 +65,101 @@ public abstract class TLAbstractEnumeration extends LibraryMember implements TLD
     @Override
     public String getLocalName() {
         return name;
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.version.Versioned#getVersion()
+     */
+    @Override
+    public String getVersion() {
+        AbstractLibrary owningLibrary = getOwningLibrary();
+        String version = null;
+
+        if (owningLibrary instanceof TLLibrary) {
+            version = ((TLLibrary) owningLibrary).getVersion();
+        }
+        return version;
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.version.Versioned#getVersionScheme()
+     */
+    @Override
+    public String getVersionScheme() {
+        AbstractLibrary owningLibrary = getOwningLibrary();
+        String versionScheme = null;
+
+        if (owningLibrary instanceof TLLibrary) {
+            versionScheme = ((TLLibrary) owningLibrary).getVersionScheme();
+        }
+        return versionScheme;
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.version.Versioned#getBaseNamespace()
+     */
+    @Override
+    public String getBaseNamespace() {
+        AbstractLibrary owningLibrary = getOwningLibrary();
+        String baseNamespace;
+
+        if (owningLibrary instanceof TLLibrary) {
+            baseNamespace = ((TLLibrary) owningLibrary).getBaseNamespace();
+        } else {
+            baseNamespace = getNamespace();
+        }
+        return baseNamespace;
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.version.Versioned#isLaterVersion(org.opentravel.schemacompiler.version.Versioned)
+     */
+    @Override
+    public boolean isLaterVersion(Versioned otherVersionedItem) {
+        boolean result = false;
+
+        if ((otherVersionedItem != null) && otherVersionedItem.getClass().equals(this.getClass())
+                && (this.getOwningLibrary() != null)
+                && (otherVersionedItem.getOwningLibrary() != null) && (this.getLocalName() != null)
+                && this.getLocalName().equals(otherVersionedItem.getLocalName())) {
+            result = this.getOwningLibrary().isLaterVersion(otherVersionedItem.getOwningLibrary());
+        }
+        return result;
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLExtensionOwner#getExtension()
+     */
+    @Override
+    public TLExtension getExtension() {
+        return extension;
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLExtensionOwner#setExtension(org.opentravel.schemacompiler.model.TLExtension)
+     */
+    @Override
+    public void setExtension(TLExtension extension) {
+        if (extension != this.extension) {
+            // Even though there is only one extension, send to events so that all extension owners
+            // behave the same (as if there is a list of multiple extensions).
+            if (this.extension != null) {
+                ModelEvent<?> event = new ModelEventBuilder(ModelEventType.EXTENDS_REMOVED, this)
+                        .setAffectedItem(this.extension).buildEvent();
+
+                this.extension.setOwner(null);
+                this.extension = null;
+                publishEvent(event);
+            }
+            if (extension != null) {
+                ModelEvent<?> event = new ModelEventBuilder(ModelEventType.EXTENDS_ADDED, this)
+                        .setAffectedItem(extension).buildEvent();
+
+                extension.setOwner(this);
+                this.extension = extension;
+                publishEvent(event);
+            }
+        }
     }
 
     /**

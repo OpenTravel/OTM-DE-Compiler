@@ -39,6 +39,9 @@ import javax.xml.bind.JAXBElement;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.glassfish.jersey.server.ResourceConfig;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoListType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.ListItemsRQType;
@@ -52,10 +55,6 @@ import org.opentravel.schemacompiler.index.FreeTextSearchService;
 import org.opentravel.schemacompiler.lock.LockableResource;
 import org.opentravel.schemacompiler.lock.RepositoryLockManager;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
-import org.opentravel.schemacompiler.repository.RepositoryException;
-import org.opentravel.schemacompiler.repository.RepositoryItem;
-import org.opentravel.schemacompiler.repository.RepositoryManager;
-import org.opentravel.schemacompiler.repository.RepositoryNamespaceUtils;
 import org.opentravel.schemacompiler.repository.impl.RepositoryItemImpl;
 import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
 import org.opentravel.schemacompiler.security.RepositorySecurityException;
@@ -64,10 +63,6 @@ import org.opentravel.schemacompiler.security.UserPrincipal;
 import org.opentravel.schemacompiler.version.VersionScheme;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 import org.opentravel.schemacompiler.version.VersionSchemeFactory;
-
-import com.sun.jersey.api.core.ResourceConfig;
-import com.sun.jersey.core.header.FormDataContentDisposition;
-import com.sun.jersey.multipart.FormDataParam;
 
 /**
  * JAX-RS endpoint used for publishing and downloading content from the OTA2.0 repository.
@@ -475,12 +470,12 @@ public class RepositoryContentResource {
     @Path("publish")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response publishContent(@FormDataParam("fileContent") InputStream contentStream,
-            @FormDataParam("fileContent") FormDataContentDisposition contentDetail,
-            @FormDataParam("namespace") String namespace,
-            @FormDataParam("libraryName") String libraryName,
-            @FormDataParam("version") String versionIdentifier,
-            @FormDataParam("versionScheme") String versionScheme,
-            @FormDataParam("status") String initialStatus,
+    		@FormDataParam("fileContent") FormDataContentDisposition contentDetail,
+    		@FormDataParam("namespace") String namespace,
+    		@FormDataParam("libraryName") String libraryName,
+    		@FormDataParam("version") String versionIdentifier,
+    		@FormDataParam("versionScheme") String versionScheme,
+    		@FormDataParam("status") String initialStatus,
             @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
 
         // Attempt to obtain a lock on the resource we are about to create. If we cannot calculate
@@ -542,8 +537,8 @@ public class RepositoryContentResource {
     @Path("commit")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response commitContent(
-            @FormDataParam("item") JAXBElement<RepositoryItemIdentityType> identityElement,
-            @FormDataParam("fileContent") InputStream contentStream,
+    		@FormDataParam("item") JAXBElement<RepositoryItemIdentityType> identityElement,
+    		@FormDataParam("fileContent") InputStream contentStream,
             @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
 
         RepositoryItemIdentityType itemIdentity = identityElement.getValue();
@@ -650,8 +645,8 @@ public class RepositoryContentResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.TEXT_XML)
     public JAXBElement<LibraryInfoType> unlockRepositoryItem(
-            @FormDataParam("item") JAXBElement<RepositoryItemIdentityType> identityElement,
-            @FormDataParam("fileContent") InputStream contentStream,
+    		@FormDataParam("item") JAXBElement<RepositoryItemIdentityType> identityElement,
+    		@FormDataParam("fileContent") InputStream contentStream,
             @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
 
         RepositoryItemIdentityType itemIdentity = identityElement.getValue();

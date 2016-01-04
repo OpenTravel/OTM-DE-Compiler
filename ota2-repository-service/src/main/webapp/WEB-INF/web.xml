@@ -25,8 +25,13 @@
 		<servlet-name>jersey-serlvet</servlet-name>
 		<servlet-class>org.opentravel.schemacompiler.repository.RepositoryServlet</servlet-class>
 		<init-param>
-			<param-name>com.sun.jersey.config.property.packages</param-name>
-			<param-value>org.opentravel.schemacompiler.repository,org.opentravel.schemacompiler.providers</param-value>
+			<param-name>jersey.config.server.provider.classnames</param-name>
+			<param-value>
+				org.opentravel.schemacompiler.repository.RepositoryContentResource,
+				org.opentravel.schemacompiler.providers.JAXBContextResolver,
+				org.opentravel.schemacompiler.providers.RepositoryServiceExceptionMapper,
+				org.glassfish.jersey.media.multipart.MultiPartFeature
+			</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>

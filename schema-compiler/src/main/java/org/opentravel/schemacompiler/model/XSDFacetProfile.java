@@ -15,9 +15,8 @@
  */
 package org.opentravel.schemacompiler.model;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Enumeration that provides detailed information about which XML schema facets are applicable to
@@ -26,32 +25,21 @@ import java.util.Set;
  * @author S. Livezey
  */
 public enum XSDFacetProfile {
-
-    FP_String(true, true, true, true, true, true, false, false, false, false, false, false), FP_Boolean(
-            false, false, false, true, false, true, false, false, false, false, false, false), FP_Decimal(
-            false, false, false, true, true, true, true, true, true, true, true, true), FP_FloatingPoint(
-            false, false, false, true, true, true, false, false, true, true, true, true), FP_Integer(
-            false, false, false, true, true, true, true, true, true, true, true, true), FP_DateTime(
-            false, false, false, true, true, true, false, false, true, true, true, true);
-
-    private static final Set<String> stringTypes = new HashSet<String>(Arrays.asList(new String[] {
-            "string", "hexBinary", "base64Binary", "anyURI", "QName", "NOTATION",
-            "normalizedString", "token", "language", "NMTOKEN", "NMTOKENS", "Name", "NCName", "ID",
-            "IDREF", "IDREFS", "ENTITY", "ENTITIES" }));;
-    private static final Set<String> booleanTypes = new HashSet<String>(
-            Arrays.asList(new String[] { "boolean" }));;
-    private static final Set<String> decimalTypes = new HashSet<String>(
-            Arrays.asList(new String[] { "decimal" }));;
-    private static final Set<String> floatingPointTypes = new HashSet<String>(
-            Arrays.asList(new String[] { "float", "double" }));;
-    private static final Set<String> integerTypes = new HashSet<String>(Arrays.asList(new String[] {
-            "integer", "nonPositiveInteger", "negativeInteger", "long", "int", "short", "byte",
-            "nonNegativeInteger", "positiveInteger", "unsignedLong", "unsignedInt",
-            "unsignedShort", "unsignedByte" }));;
-    private static final Set<String> dateTimeTypes = new HashSet<String>(
-            Arrays.asList(new String[] { "dateTime", "date", "time", "duration", "gYear",
-                    "gYearMonth", "gMonthDay", "gMonth", "gDay" }));;
-
+	
+	FP_boolean(false, false, false, true, false, true, false, false, false, false, false, false),
+	FP_int(false, false, false, true, true, true, true, true, true, true, true, true),
+	FP_decimal(false, false, false, true, true, true, true, true, true, true, true, true),
+	FP_float(false, false, false, true, true, true, false, false, true, true, true, true),
+	FP_string(true, true, true, true, true, true, false, false, false, false, false, false),
+	FP_date(false, false, false, true, true, true, false, false, true, true, true, true),
+	FP_dateTime(false, false, false, true, true, true, false, false, true, true, true, true),
+	FP_time(false, false, false, true, true, true, false, false, true, true, true, true),
+	FP_duration(false, false, false, true, true, true, false, false, true, true, true, true),
+	FP_language(false, false, false, false, false, false, false, false, false, false, false, false),
+	FP_unknown(false, false, false, false, false, false, false, false, false, false, false, false);
+	
+	private static final Map<String,XSDFacetProfile> w3cProfileMap = new HashMap<>();
+	
     private boolean lengthSupported;
     private boolean minLengthSupported;
     private boolean maxLengthSupported;
@@ -73,28 +61,8 @@ public enum XSDFacetProfile {
      * @return XSDFacetProfile
      */
     public static XSDFacetProfile toFacetProfile(String xmlSchemaType) {
-        XSDFacetProfile result = null;
-
-        if (stringTypes.contains(xmlSchemaType)) {
-            result = FP_String;
-
-        } else if (booleanTypes.contains(xmlSchemaType)) {
-            result = FP_Boolean;
-
-        } else if (decimalTypes.contains(xmlSchemaType)) {
-            result = FP_Decimal;
-
-        } else if (floatingPointTypes.contains(xmlSchemaType)) {
-            result = FP_FloatingPoint;
-
-        } else if (integerTypes.contains(xmlSchemaType)) {
-            result = FP_Integer;
-
-        } else if (dateTimeTypes.contains(xmlSchemaType)) {
-            result = FP_DateTime;
-
-        }
-        return result;
+        XSDFacetProfile result = w3cProfileMap.get( xmlSchemaType );
+        return (result != null) ? result : FP_unknown;
     }
 
     /**
@@ -250,4 +218,59 @@ public enum XSDFacetProfile {
         return maxExclusiveSupported;
     }
 
+	/**
+	 * Initializes the map of W3C type names to facet profiles.
+	 */
+	static {
+		try {
+			w3cProfileMap.put("boolean", FP_boolean);
+			w3cProfileMap.put("byte", FP_int);
+			w3cProfileMap.put("short", FP_int);
+			w3cProfileMap.put("int", FP_int);
+			w3cProfileMap.put("integer", FP_int);
+			w3cProfileMap.put("long", FP_int);
+			w3cProfileMap.put("positiveInteger", FP_int);
+			w3cProfileMap.put("nonPositiveInteger", FP_int);
+			w3cProfileMap.put("negativeInteger", FP_int);
+			w3cProfileMap.put("nonNegativeInteger", FP_int);
+			w3cProfileMap.put("unsignedByte", FP_int);
+			w3cProfileMap.put("unsignedShort", FP_int);
+			w3cProfileMap.put("unsignedInt", FP_int);
+			w3cProfileMap.put("unsignedLong", FP_int);
+			w3cProfileMap.put("decimal", FP_decimal);
+			w3cProfileMap.put("float", FP_float);
+			w3cProfileMap.put("double", FP_float);
+			w3cProfileMap.put("string", FP_string);
+			w3cProfileMap.put("normalizedString", FP_string);
+			w3cProfileMap.put("token", FP_string);
+			w3cProfileMap.put("Name", FP_string);
+			w3cProfileMap.put("NCName", FP_string);
+			w3cProfileMap.put("NOTATION", FP_string);
+			w3cProfileMap.put("NMTOKEN", FP_string);
+			w3cProfileMap.put("NMTOKENS", FP_string);
+			w3cProfileMap.put("ENTITY", FP_string);
+			w3cProfileMap.put("ENTITIES", FP_string);
+			w3cProfileMap.put("date", FP_date);
+			w3cProfileMap.put("dateTime", FP_dateTime);
+			w3cProfileMap.put("time", FP_time);
+			w3cProfileMap.put("duration", FP_duration);
+			w3cProfileMap.put("gYear", FP_date);
+			w3cProfileMap.put("gYearMonth", FP_date);
+			w3cProfileMap.put("gMonthDay", FP_date);
+			w3cProfileMap.put("gMonth", FP_date);
+			w3cProfileMap.put("gDay", FP_date);
+			w3cProfileMap.put("ID", FP_string);
+			w3cProfileMap.put("IDREF", FP_string);
+			w3cProfileMap.put("IDREFS", FP_string);
+			w3cProfileMap.put("language", FP_language);
+			w3cProfileMap.put("QName", FP_string);
+			w3cProfileMap.put("anyURI", FP_string);
+			w3cProfileMap.put("hexBinary", FP_string);
+			w3cProfileMap.put("base64Binary", FP_string);
+			
+		} catch (Throwable t) {
+			throw new ExceptionInInitializerError( t );
+		}
+	}
+	
 }

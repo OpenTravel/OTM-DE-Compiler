@@ -24,6 +24,7 @@ import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
+import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
 import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
@@ -175,6 +176,22 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
         }
         return baseFacet;
     }
+    
+    /**
+     * Returns true if the given facet (not necessarily the source facet) declares or
+     * inherits fields (attributes, elements, or indicators) from another extended facet.
+     * 
+     * @param facet  the facet to analyze
+     * @return boolean
+     */
+    protected boolean declaresOrInheritsFacetContent(TLFacet facet) {
+    	FacetCodegenDelegate<TLFacet> delegate = (facet == getSourceFacet()) ? this : null;
+    	
+    	if (delegate == null) {
+    		delegate = new FacetCodegenDelegateFactory(transformerContext).getDelegate( facet );
+    	}
+    	return delegate.hasContent();
+    }
 
     /**
      * Returns the global type name of the local base facet for the source facet. By default, this
@@ -230,13 +247,13 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
                 .getGlobalTypeName(sourceFacet)));
 
         if (owner instanceof TLDocumentationOwner) {
-            TLDocumentation documentation = ((TLDocumentationOwner) owner).getDocumentation();
+            TLDocumentation doc = DocumentationFinder.getDocumentation((TLDocumentationOwner) owner);
 
-            if (documentation != null) {
-                ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer = getTransformerFactory()
-                        .getTransformer(documentation, Annotation.class);
+            if (doc != null) {
+                ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer =
+                		getTransformerFactory().getTransformer(doc, Annotation.class);
 
-                element.setAnnotation(docTransformer.transform(documentation));
+                element.setAnnotation(docTransformer.transform(doc));
             }
             XsdCodegenUtils.addAppInfo(owner, element);
         }
@@ -507,13 +524,14 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
      * @return Annotation
      */
     protected Annotation createJaxbDocumentation(TLDocumentationOwner entity) {
+        TLDocumentation doc = DocumentationFinder.getDocumentation( entity );
         Annotation annotation = null;
 
-        if (entity.getDocumentation() != null) {
-            ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(entity.getDocumentation(), Annotation.class);
+        if (doc != null) {
+            ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer =
+            		getTransformerFactory().getTransformer(doc, Annotation.class);
 
-            annotation = docTransformer.transform(entity.getDocumentation());
+            annotation = docTransformer.transform(doc);
         }
         return annotation;
     }

@@ -19,9 +19,14 @@ import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.LibraryMember;
+import org.opentravel.schemacompiler.model.TLAction;
+import org.opentravel.schemacompiler.model.TLActionFacet;
+import org.opentravel.schemacompiler.model.TLActionRequest;
+import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLContext;
 import org.opentravel.schemacompiler.model.TLCoreObject;
@@ -40,7 +45,11 @@ import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLNamespaceImport;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.model.TLParamGroup;
+import org.opentravel.schemacompiler.model.TLParameter;
 import org.opentravel.schemacompiler.model.TLProperty;
+import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.model.TLResourceParentRef;
 import org.opentravel.schemacompiler.model.TLRole;
 import org.opentravel.schemacompiler.model.TLService;
 import org.opentravel.schemacompiler.model.TLSimple;
@@ -154,14 +163,23 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
         } else if (libraryElement instanceof TLOpenEnumeration) {
             navigateOpenEnumeration((TLOpenEnumeration) libraryElement);
 
+        } else if (libraryElement instanceof TLChoiceObject) {
+            navigateChoiceObject((TLChoiceObject) libraryElement);
+
         } else if (libraryElement instanceof TLCoreObject) {
             navigateCoreObject((TLCoreObject) libraryElement);
 
         } else if (libraryElement instanceof TLBusinessObject) {
             navigateBusinessObject((TLBusinessObject) libraryElement);
 
+        } else if (libraryElement instanceof TLResource) {
+            navigateResource((TLResource) libraryElement);
+
         } else if (libraryElement instanceof TLFacet) {
             navigateFacet((TLFacet) libraryElement);
+
+        } else if (libraryElement instanceof TLActionFacet) {
+            navigateActionFacet((TLActionFacet) libraryElement);
 
         } else if (libraryElement instanceof TLSimpleFacet) {
             navigateSimpleFacet((TLSimpleFacet) libraryElement);
@@ -240,11 +258,17 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
                 } else if (builtInType instanceof TLOpenEnumeration) {
                     navigateOpenEnumeration((TLOpenEnumeration) builtInType);
 
+                } else if (builtInType instanceof TLChoiceObject) {
+                    navigateChoiceObject((TLChoiceObject) builtInType);
+
                 } else if (builtInType instanceof TLCoreObject) {
                     navigateCoreObject((TLCoreObject) builtInType);
 
                 } else if (builtInType instanceof TLBusinessObject) {
                     navigateBusinessObject((TLBusinessObject) builtInType);
+
+                } else if (builtInType instanceof TLResource) {
+                    navigateResource((TLResource) builtInType);
 
                 } else if (builtInType instanceof TLExtensionPointFacet) {
                     navigateExtensionPointFacet((TLExtensionPointFacet) builtInType);
@@ -324,11 +348,17 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
             for (TLOpenEnumeration entity : library.getOpenEnumerationTypes()) {
                 navigateOpenEnumeration(entity);
             }
+            for (TLChoiceObject entity : library.getChoiceObjectTypes()) {
+                navigateChoiceObject(entity);
+            }
             for (TLCoreObject entity : library.getCoreObjectTypes()) {
                 navigateCoreObject(entity);
             }
             for (TLBusinessObject entity : library.getBusinessObjectTypes()) {
                 navigateBusinessObject(entity);
+            }
+            for (TLResource entity : library.getResourceTypes()) {
+                navigateResource(entity);
             }
             if (library.getService() != null) {
                 navigateService(library.getService());
@@ -407,6 +437,7 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
             for (TLEnumValue enumValue : enumeration.getValues()) {
                 navigateEnumValue(enumValue);
             }
+            navigateExtension(enumeration.getExtension());
             navigateDocumentation(enumeration.getDocumentation());
         }
         addVisitedNode(enumeration);
@@ -423,6 +454,7 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
             for (TLEnumValue enumValue : enumeration.getValues()) {
                 navigateEnumValue(enumValue);
             }
+            navigateExtension(enumeration.getExtension());
             navigateDocumentation(enumeration.getDocumentation());
         }
         addVisitedNode(enumeration);
@@ -442,6 +474,31 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
             navigateDocumentation(enumValue.getDocumentation());
         }
         addVisitedNode(enumValue);
+    }
+
+    /**
+     * Called when a <code>TLChoiceObject</code> instance is encountered during model navigation.
+     * 
+     * @param choiceObject
+     *            the choice object entity to visit and navigate
+     */
+    public void navigateChoiceObject(TLChoiceObject choiceObject) {
+        if (canVisit(choiceObject) && visitor.visitChoiceObject(choiceObject)) {
+            navigateFacet(choiceObject.getSharedFacet());
+            navigateExtension(choiceObject.getExtension());
+
+            for (TLAlias alias : choiceObject.getAliases()) {
+                navigateAlias(alias);
+            }
+            for (TLFacet choiceFacet : choiceObject.getChoiceFacets()) {
+                navigateFacet(choiceFacet);
+            }
+            for (TLEquivalent equivalent : choiceObject.getEquivalents()) {
+                navigateEquivalent(equivalent);
+            }
+            navigateDocumentation(choiceObject.getDocumentation());
+        }
+        addVisitedNode(choiceObject);
     }
 
     /**
@@ -554,6 +611,128 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
     }
 
     /**
+     * Called when a <code>TLResource</code> instance is encountered during model navigation.
+     * 
+     * @param resource
+     *            the resource entity to visit and navigate
+     */
+    public void navigateResource(TLResource resource) {
+        if (canVisit(resource) && visitor.visitResource(resource)) {
+            navigateDocumentation(resource.getDocumentation());
+            navigateBusinessObject(resource.getBusinessObjectRef());
+            navigateExtension(resource.getExtension());
+            
+            for (TLResourceParentRef parentRef : resource.getParentRefs()) {
+            	navigateResourceParentRef(parentRef);
+            }
+            for (TLParamGroup paramGroup : resource.getParamGroups()) {
+            	navigateParamGroup(paramGroup);
+            }
+            for (TLActionFacet actionFacet : resource.getActionFacets()) {
+            	navigateActionFacet(actionFacet);
+            }
+            for (TLAction action : resource.getActions()) {
+            	navigateAction(action);	
+            }
+        }
+        addVisitedNode(resource);
+    }
+
+    /**
+     * Called when a <code>TLResourceParentRef</code> instance is encountered during model navigation.
+     * 
+     * @param parentRef
+     *            the resource parent reference entity to visit and navigate
+     */
+    public void navigateResourceParentRef(TLResourceParentRef parentRef) {
+        if (canVisit(parentRef) && visitor.visitResourceParentRef(parentRef)) {
+            navigateDocumentation(parentRef.getDocumentation());
+        }
+        addVisitedNode(parentRef);
+    }
+    
+    /**
+     * Called when a <code>TLParamGroup</code> instance is encountered during model navigation.
+     * 
+     * @param paramGroup
+     *            the parameter group entity to visit and navigate
+     */
+    public void navigateParamGroup(TLParamGroup paramGroup) {
+        if (canVisit(paramGroup) && visitor.visitParamGroup(paramGroup)) {
+        	navigateFacet(paramGroup.getFacetRef());
+            navigateDocumentation(paramGroup.getDocumentation());
+            
+            for (TLParameter parameter : paramGroup.getParameters()) {
+            	navigateParameter(parameter);
+            }
+        }
+        addVisitedNode(paramGroup);
+    }
+    
+    /**
+     * Called when a <code>TLParameter</code> instance is encountered during model navigation.
+     * 
+     * @param parameter
+     *            the parameter entity to visit and navigate
+     */
+    public void navigateParameter(TLParameter parameter) {
+        if (canVisit(parameter) && visitor.visitParameter(parameter)) {
+            for (TLEquivalent equivalent : parameter.getEquivalents()) {
+                navigateEquivalent(equivalent);
+            }
+            for (TLExample example : parameter.getExamples()) {
+                navigateExample(example);
+            }
+            navigateDocumentation(parameter.getDocumentation());
+        }
+        addVisitedNode(parameter);
+    }
+    
+    /**
+     * Called when a <code>TLAction</code> instance is encountered during model navigation.
+     * 
+     * @param action
+     *            the action entity to visit and navigate
+     */
+    public void navigateAction(TLAction action) {
+        if (canVisit(action) && visitor.visitAction(action)) {
+            navigateDocumentation(action.getDocumentation());
+            navigateActionRequest(action.getRequest());
+            
+            for (TLActionResponse response : action.getResponses()) {
+            	navigateActionResponse(response);
+            }
+        }
+        addVisitedNode(action);
+    }
+    
+    /**
+     * Called when a <code>TLActionRequest</code> instance is encountered during model navigation.
+     * 
+     * @param actionRequest
+     *            the action request entity to visit and navigate
+     */
+    public void navigateActionRequest(TLActionRequest actionRequest) {
+        if (canVisit(actionRequest) && visitor.visitActionRequest(actionRequest)) {
+            navigateDocumentation(actionRequest.getDocumentation());
+        }
+        addVisitedNode(actionRequest);
+    }
+    
+    /**
+     * Called when a <code>TLActionResponse</code> instance is encountered during model navigation.
+     * 
+     * @param actionResponse
+     *            the action response entity to visit and navigate
+     */
+    public void navigateActionResponse(TLActionResponse actionResponse) {
+        if (canVisit(actionResponse) && visitor.visitActionResponse(actionResponse)) {
+            navigateDocumentation(actionResponse.getDocumentation());
+        }
+        addVisitedNode(actionResponse);
+    }
+    
+    /**
      * Called when a <code>TLExtensionPointFacet</code> instance is encountered during model
      * navigation.
      * 
@@ -653,6 +832,28 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
         addVisitedNode(facet);
     }
 
+    /**
+     * Called when a <code>TLActionFacet</code> instance is encountered during model navigation.
+     * 
+     * @param actionFacet
+     *            the action facet entity to visit and navigate
+     */
+    public void navigateActionFacet(TLActionFacet actionFacet) {
+        if (canVisit(actionFacet) && visitor.visitActionFacet(actionFacet)) {
+            for (TLAttribute attribute : actionFacet.getAttributes()) {
+                navigateAttribute(attribute);
+            }
+            for (TLProperty element : actionFacet.getElements()) {
+                navigateElement(element);
+            }
+            for (TLIndicator indicator : actionFacet.getIndicators()) {
+                navigateIndicator(indicator);
+            }
+            navigateDocumentation(actionFacet.getDocumentation());
+        }
+        addVisitedNode(actionFacet);
+    }
+    
     /**
      * Called when a <code>TLSimpleFacet</code> instance is encountered during model navigation.
      * 

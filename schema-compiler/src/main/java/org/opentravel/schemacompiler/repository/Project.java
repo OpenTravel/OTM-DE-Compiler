@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.opentravel.ns.ota2.project_v01_00.ProjectItemType;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 
@@ -44,6 +45,7 @@ public class Project {
     private ProjectItem defaultItem;
     private String defaultContextId;
     private List<ProjectItem> projectItems = new ArrayList<ProjectItem>();
+    private List<ProjectItemType> failedItems = new ArrayList<ProjectItemType>();
     private Collection<ProjectChangeListener> listeners = new ArrayList<ProjectChangeListener>();
 
     /**
@@ -258,6 +260,15 @@ public class Project {
             projectItems.add(item);
             fireProjectItemAdded(item);
         }
+    }
+    
+    /**
+     * Returns the list of project items that failed to load properly.
+     * 
+     * @return List<ProjectItemType>
+     */
+    public List<ProjectItemType> getFailedProjectItems() {
+    	return failedItems;
     }
 
     /**

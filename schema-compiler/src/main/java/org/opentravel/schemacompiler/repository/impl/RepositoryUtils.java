@@ -114,7 +114,7 @@ public class RepositoryUtils {
             } else {
                 lockOwner = ((RemoteRepositoryClient) item.getRepository()).getUserId();
             }
-            if ((lockOwner != null) && lockOwner.equals(item.getLockedByUser())) {
+            if ((lockOwner != null) && lockOwner.equalsIgnoreCase(item.getLockedByUser())) {
                 File wipFile = repositoryManager.getFileManager().getLibraryWIPContentLocation(
                         item.getBaseNamespace(), item.getFilename());
 

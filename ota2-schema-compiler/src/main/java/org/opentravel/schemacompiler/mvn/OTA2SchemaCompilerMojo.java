@@ -24,6 +24,10 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.plugins.annotations.Execute;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.opentravel.schemacompiler.ioc.CompilerExtensionRegistry;
 import org.opentravel.schemacompiler.task.CommonCompilerTaskOptions;
 import org.opentravel.schemacompiler.task.CompileAllCompilerTask;
@@ -38,107 +42,92 @@ import org.opentravel.schemacompiler.validate.ValidationFindings;
  * Maven Mojo that handles the compilation of files from the OTA2 library format into XML schemas
  * and WSDL documents.
  * 
- * @goal ota2-compile
- * @phase generate-sources
- * @threadSafe
  * @author S. Livezey
  */
+@Mojo( name = "ota2-compile", defaultPhase = LifecyclePhase.GENERATE_SOURCES, threadSafe=true )
+@Execute( goal = "ota2-compile", phase = LifecyclePhase.GENERATE_SOURCES )
 public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTaskOptions {
 
     /**
      * The location of the library file to be compiled.
-     * 
-     * @parameter
-     * @required
      */
+	@Parameter( required = true )
     protected File libraryFile;
 
     /**
      * The location of the library catalog file.
-     * 
-     * @parameter
      */
+	@Parameter
     protected File catalog;
 
     /**
      * The output folder location for generated files (default location is
      * &lt;project&gt;/target/generated-sources/ota2).
-     * 
-     * @parameter default-value="${project.build.directory}/generated-sources/ota2"
      */
+	@Parameter( defaultValue = "${project.build.directory}/generated-sources/ota2" )
     protected File outputFolder;
 
     /**
      * The binding style for generated schemas and services (default is 'OTA2').
-     * 
-     * @parameter
      */
+	@Parameter
     protected String bindingStyle;
 
     /**
      * Boolean flag indicating that XML schema files should be generated.
-     * 
-     * @parameter default-value="true"
      */
+	@Parameter( defaultValue = "true" )
     protected boolean compileSchemas;
 
     /**
      * Boolean flag indicating that WSDL schema files should be generated.
-     * 
-     * @parameter default-value="true"
      */
+	@Parameter( defaultValue = "true" )
     protected boolean compileServices;
 
     /**
      * Boolean flag indicating that example data files should be generated.
-     * 
-     * @parameter default-value="true"
      */
+	@Parameter( defaultValue = "true" )
     protected boolean generateExamples;
 
     /**
      * The URL of the root service endpoint for WSDL services.
-     * 
-     * @parameter
      */
+	@Parameter
     protected String serviceEndpointUrl;
 
     /**
      * Boolean flag indicating that the maximum amount of detail is to be included in generated
      * example data. If false, minimum detail will be generated.
-     * 
-     * @parameter default-value="true"
      */
+	@Parameter( defaultValue = "true" )
     protected boolean generateMaxDetailsForExamples;
 
     /**
      * The preferred context ID to use when producing example values for simple data types.
-     * 
-     * @parameter
      */
+	@Parameter
     protected String exampleContext;
 
     /**
      * The maximum number of times that repeating elements should be displayed in generated example
      * output.
-     * 
-     * @parameter
      */
+	@Parameter
     protected Integer exampleMaxRepeat;
 
     /**
      * The maximum depth that should be included for nested elements in generated example output.
-     * 
-     * @parameter
      */
+	@Parameter
     protected Integer exampleMaxDepth;
 
     /**
      * Flag used for debugging that causes this Mojo's configuration settings to be displayed prior
      * to execution.
-     * 
-     * @parameter default-value="false"
      */
+	@Parameter( defaultValue = "false" )
     protected boolean debug;
 
     /**

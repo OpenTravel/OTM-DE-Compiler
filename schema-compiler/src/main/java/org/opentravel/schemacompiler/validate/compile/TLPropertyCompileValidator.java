@@ -15,9 +15,6 @@
  */
 package org.opentravel.schemacompiler.validate.compile;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.xml.XMLConstants;
 
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
@@ -31,11 +28,10 @@ import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLCoreObject;
-import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
+import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLListFacet;
-import org.opentravel.schemacompiler.model.TLModelElement;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLPropertyOwner;
@@ -48,11 +44,13 @@ import org.opentravel.schemacompiler.model.XSDComplexType;
 import org.opentravel.schemacompiler.model.XSDElement;
 import org.opentravel.schemacompiler.model.XSDSimpleType;
 import org.opentravel.schemacompiler.validate.FindingType;
+import org.opentravel.schemacompiler.validate.ValidationBuilder;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.base.TLPropertyBaseValidator;
 import org.opentravel.schemacompiler.validate.impl.CircularReferenceChecker;
-import org.opentravel.schemacompiler.validate.impl.FacetMemberIdentityResolver;
+import org.opentravel.schemacompiler.validate.impl.DuplicateFieldChecker;
 import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
+import org.opentravel.schemacompiler.validate.impl.UPAViolationChecker;
 import org.opentravel.schemacompiler.validate.impl.ValidatorUtils;
 import org.opentravel.schemacompiler.version.Versioned;
 
@@ -67,7 +65,7 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
     public static final String WARNING_LIST_FACET_REPEAT_IGNORED = "LIST_FACET_REPEAT_IGNORED";
     public static final String ERROR_EMPTY_FACET_REFERENCED = "EMPTY_FACET_REFERENCED";
     public static final String ERROR_ELEMENT_REF_NAME_MISMATCH = "ELEMENT_REF_NAME_MISMATCH";
-    public static final String ERROR_SUBSTITUTION_GROUP_CONFLICT = "SUBSTITUTION_GROUP_CONFLICT";
+    public static final String ERROR_UPA_VIOLATION = "UPA_VIOLATION";
     public static final String ERROR_ILLEGAL_REFERENCE = "ILLEGAL_REFERENCE";
     public static final String ERROR_ILLEGAL_CIRCULAR_REFERENCE = "ILLEGAL_CIRCULAR_REFERENCE";
     public static final String ERROR_ILLEGAL_REQUIRED_ELEMENT = "ILLEGAL_REQUIRED_ELEMENT";
@@ -75,13 +73,14 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
     public static final String WARNING_UNNECESSARY_EXAMPLE = "UNNECESSARY_EXAMPLE";
     public static final String WARNING_LEGACY_IDREF = "LEGACY_IDREF";
     public static final String WARNING_INVALID_REFERENCE_NAME = "INVALID_REFERENCE_NAME";
+    public static final String WARNING_ILLEGAL_BUSINESS_OBJECT_ID = "ILLEGAL_BUSINESS_OBJECT_ID";
+    public static final String WARNING_ILLEGAL_CORE_OBJECT_ID = "ILLEGAL_CORE_OBJECT_ID";
 
     /**
      * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateFields(org.opentravel.schemacompiler.validate.Validatable)
      */
     @Override
     protected ValidationFindings validateFields(TLProperty target) {
-        TLValidationBuilder dupBuilder = newValidationBuilder(target);
         TLValidationBuilder builder = newValidationBuilder(target);
         TLPropertyType propertyType = target.getType();
 
@@ -91,15 +90,32 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
         builder.setEntityReferenceProperty("type", propertyType, target.getTypeName())
                 .setFindingType(FindingType.ERROR)
                 .assertNotNull()
-                .assertValidEntityReference(TLClosedEnumeration.class, TLSimple.class,
-                        TLSimpleFacet.class, TLOpenEnumeration.class, TLValueWithAttributes.class,
-                        TLFacet.class, TLListFacet.class, TLCoreObject.class,
-                        TLBusinessObject.class, TLAlias.class, TLRoleEnumeration.class,
-                        XSDSimpleType.class, XSDComplexType.class, XSDElement.class)
+                .assertValidEntityReference(TLSimple.class, TLSimpleFacet.class, TLClosedEnumeration.class, 
+                        TLOpenEnumeration.class, TLRoleEnumeration.class, TLValueWithAttributes.class,
+                        TLFacet.class, TLListFacet.class, TLCoreObject.class, TLBusinessObject.class,
+                        TLAlias.class, TLRoleEnumeration.class, XSDSimpleType.class, XSDComplexType.class,
+                        XSDElement.class)
                 .setFindingType(FindingType.WARNING).assertNotDeprecated();
 
         if (ValidatorUtils.isLegacyIDREF(propertyType)) {
             builder.addFinding(FindingType.WARNING, "type", WARNING_LEGACY_IDREF);
+        }
+
+        // For xsd:ID elements, make sure they are contained in the top-level facet
+        // if the owner is a core or business object
+        if (ValidatorUtils.isXsdID(target.getType()) && (target.getPropertyOwner() instanceof TLFacet)) {
+        	TLFacet facet = (TLFacet) target.getPropertyOwner();
+        	TLFacetOwner facetOwner = facet.getOwningEntity();
+        	
+        	if (facetOwner instanceof TLBusinessObject) {
+        		if ((facet.getFacetType() != TLFacetType.ID) && (facet.getFacetType() != TLFacetType.QUERY)) {
+                    builder.addFinding(FindingType.WARNING, "type", WARNING_ILLEGAL_BUSINESS_OBJECT_ID);
+        		}
+        	} else if (facetOwner instanceof TLCoreObject) {
+        		if (facet.getFacetType() != TLFacetType.SUMMARY) {
+                    builder.addFinding(FindingType.WARNING, "type", WARNING_ILLEGAL_CORE_OBJECT_ID);
+        		}
+        	}
         }
 
         if ((propertyType != null) && target.isReference() && !hasID(propertyType)) {
@@ -116,32 +132,23 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
 
         builder.setProperty("equivalents", target.getEquivalents())
                 .setFindingType(FindingType.ERROR).assertNotNull().assertContainsNoNullElements();
+        
+        // Check for duplicate names of this element
+        if (target.getName() != null) {
+            DuplicateFieldChecker dupChecker = getDuplicateFieldChecker( target );
+            
+            if (dupChecker.isDuplicateName( target )) {
+            	builder.addFinding( FindingType.ERROR, "name", ValidationBuilder.ERROR_DUPLICATE_ELEMENT,
+            			target.getName() );
+            }
+        }
 
-        dupBuilder.setProperty("name", getMembersOfOwner(target)).setFindingType(FindingType.ERROR)
-                .assertNoDuplicates(new FacetMemberIdentityResolver());
-
-        // Check for duplicate names of this property
-        if (dupBuilder.isEmpty() && (target.getPropertyOwner() instanceof TLFacet)) {
-            List<TLModelElement> inheritedMembers = getInheritedMembersOfOwner(target);
-
-            dupBuilder.setProperty("name-upa", inheritedMembers).setFindingType(FindingType.ERROR)
-                    .assertNoDuplicates(new FacetMemberIdentityResolver());
-
-            if (dupBuilder.isEmpty() && !PropertyCodegenUtils.isReferenceProperty( target )) {
-                TLPropertyType resolvedPropertyType = PropertyCodegenUtils.resolvePropertyType(
-                        target.getPropertyOwner(), propertyType);
-                NamedEntity targtSubstitutionRoot = PropertyCodegenUtils
-                        .getSubstitutionRoot(resolvedPropertyType);
-
-                if (targtSubstitutionRoot != null) {
-                    List<String> baseSubstitutionGroups = getBaseSubstitutionGroups(
-                            inheritedMembers, target);
-
-                    if (baseSubstitutionGroups.contains(targtSubstitutionRoot.getLocalName())) {
-                        builder.addFinding(FindingType.ERROR, "name-upa",
-                                ERROR_SUBSTITUTION_GROUP_CONFLICT);
-                    }
-                }
+        // Check for UPA violations
+        if (target.getName() != null) {
+            UPAViolationChecker upaChecker = getUPAViolationChecker( target );
+            
+            if (upaChecker.isUPAViolation( target )) {
+            	builder.addFinding( FindingType.ERROR, "name", ERROR_UPA_VIOLATION, target.getName() );
             }
         }
 
@@ -234,89 +241,45 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
                     target.getTypeName());
         }
 
-        builder.addFindings(dupBuilder.getFindings());
         return builder.getFindings();
     }
 
     /**
-     * Returns the list of attributes, properties, and indicators defined by the given property's
-     * owner.
+     * Returns a <code>DuplicateFieldChecker</code> that can be used to identify duplicate
+     * field names within the elements of the declaring facet.
      * 
-     * @param target
-     *            the target property being validated
-     * @return List<TLModelElement>
+     * @param target  the target property being validated
+     * @return DuplicateFieldChecker
      */
-    @SuppressWarnings("unchecked")
-    private List<TLModelElement> getMembersOfOwner(TLProperty target) {
+    private DuplicateFieldChecker getDuplicateFieldChecker(TLProperty target) {
         TLPropertyOwner propertyOwner = target.getPropertyOwner();
-        String cacheKey = propertyOwner.getNamespace() + ":" + propertyOwner.getLocalName()
-                + ":members";
-        List<TLModelElement> members = (List<TLModelElement>) getContextCacheEntry(cacheKey);
+        String cacheKey = propertyOwner.getNamespace() + ":" + propertyOwner.getLocalName() + ":dupChecker";
+        DuplicateFieldChecker checker = (DuplicateFieldChecker) getContextCacheEntry( cacheKey );
 
-        if (members == null) {
-            if (propertyOwner instanceof TLExtensionPointFacet) {
-                members = ValidatorUtils.getMembers((TLExtensionPointFacet) propertyOwner);
-
-            } else { // TLFacet
-                members = ValidatorUtils.getMembers((TLFacet) propertyOwner);
-            }
-            setContextCacheEntry(cacheKey, members);
+        if (checker == null) {
+        	checker = new DuplicateFieldChecker( propertyOwner );
+            setContextCacheEntry( cacheKey, checker );
         }
-        return members;
+        return checker;
     }
 
     /**
-     * Returns the list of inherited attributes, properties, and indicators defined by the given
-     * property's owner.
+     * Returns a <code>UPAViolationChecker</code> that can be used to identify UPA violations that occur
+     * with preceding elements of the declaring facet.
      * 
-     * @param target
-     *            the target property being validated
-     * @return List<TLModelElement>
+     * @param target  the target property being validated
+     * @return UPAViolationChecker
      */
-    @SuppressWarnings("unchecked")
-    private List<TLModelElement> getInheritedMembersOfOwner(TLProperty target) {
+    private UPAViolationChecker getUPAViolationChecker(TLProperty target) {
         TLPropertyOwner propertyOwner = target.getPropertyOwner();
-        String cacheKey = propertyOwner.getNamespace() + ":" + propertyOwner.getLocalName()
-                + ":inheritedMembers";
-        List<TLModelElement> members = (List<TLModelElement>) getContextCacheEntry(cacheKey);
+        String cacheKey = propertyOwner.getNamespace() + ":" + propertyOwner.getLocalName() + ":upaChecker";
+        UPAViolationChecker checker = (UPAViolationChecker) getContextCacheEntry( cacheKey );
 
-        if (members == null) {
-            members = ValidatorUtils.getInheritedMembers((TLFacet) propertyOwner);
-            setContextCacheEntry(cacheKey, members);
+        if (checker == null) {
+        	checker = new UPAViolationChecker( propertyOwner );
+            setContextCacheEntry( cacheKey, checker );
         }
-        return members;
-    }
-
-    /**
-     * Returns all of the base substitution groups for the complex types defined in the given list
-     * of model elements.
-     * 
-     * @param ownerElements
-     *            the list of model elements identified for a property owner
-     * @param target
-     *            the target property being validated
-     * @return List<String>
-     */
-    private List<String> getBaseSubstitutionGroups(List<TLModelElement> ownerElements,
-            TLProperty target) {
-        List<String> baseSubstitutionGroups = new ArrayList<String>();
-
-        for (TLModelElement ownerElement : ownerElements) {
-            if ((ownerElement != target) && (ownerElement instanceof TLProperty)) {
-                TLProperty property = (TLProperty) ownerElement;
-                
-                if (!PropertyCodegenUtils.isReferenceProperty( property )) {
-                    TLPropertyType propertyType = PropertyCodegenUtils.resolvePropertyType(
-                            property.getPropertyOwner(), property.getType());
-                    NamedEntity sgRoot = PropertyCodegenUtils.getSubstitutionRoot(propertyType);
-
-                    if (sgRoot != null) {
-                        baseSubstitutionGroups.add(sgRoot.getLocalName());
-                    }
-                }
-            }
-        }
-        return baseSubstitutionGroups;
+        return checker;
     }
 
     /**

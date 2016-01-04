@@ -20,7 +20,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.OperationType;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtension;
@@ -331,6 +333,41 @@ public class FacetCodegenUtils {
             }
         }
         return ghostFacets;
+    }
+
+    /**
+     * Returns the type of operation based on the configuration of the request, response,
+     * and/or notification facets.
+     * 
+     * @param operation  the operation to be analyzed
+     * @return OperationType
+     */
+    public static OperationType getOperationType(TLOperation operation) {
+    	FacetCodegenDelegateFactory factory = new FacetCodegenDelegateFactory(null);
+        boolean hasRequest = factory.getDelegate(operation.getRequest()).hasContent();
+        boolean hasResponse = factory.getDelegate(operation.getResponse()).hasContent();
+        boolean hasNotification = factory.getDelegate(operation.getNotification()).hasContent();
+        OperationType opType = OperationType.INVALID;
+
+        if (hasRequest && !hasResponse && !hasNotification) {
+            opType = OperationType.ONE_WAY;
+
+        } else if (!hasRequest && !hasResponse && hasNotification) {
+            opType = OperationType.NOTIFICATION;
+
+        } else if (hasRequest && hasResponse && !hasNotification) {
+            opType = OperationType.REQUEST_RESPONSE;
+
+        } else if (hasRequest && !hasResponse && hasNotification) {
+            opType = OperationType.SOLICIT_NOTIFICATION;
+
+        } else if (hasRequest && hasResponse && hasNotification) {
+            opType = OperationType.REQUEST_RESPONSE_WITH_NOTIFICATION;
+
+        } else {
+            opType = OperationType.INVALID;
+        }
+        return opType;
     }
 
 }

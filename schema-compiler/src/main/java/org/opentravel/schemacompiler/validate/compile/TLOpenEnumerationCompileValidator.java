@@ -39,12 +39,17 @@ public class TLOpenEnumerationCompileValidator extends TLOpenEnumerationBaseVali
                 .assertNotNullOrBlank().assertPatternMatch(NAME_XML_PATTERN);
 
         builder.setProperty("values", target.getValues()).setFindingType(FindingType.ERROR)
-                .assertNotNull().assertContainsNoNullElements().assertMinimumSize(1);
+                .assertNotNull().assertContainsNoNullElements();
+        
+        if (target.getExtension() == null) {
+            builder.setProperty("values", target.getValues()).setFindingType(FindingType.ERROR)
+            		.assertMinimumSize(1);
+        }
 
         checkSchemaNamingConflicts(target, builder);
+        validateVersioningRules(target, builder);
 
-        checkMajorVersionNamingConflicts(target, builder);
-
+        // TODO: Extension cannot be a closed enum if the extended enum is a prior minor version
         return builder.getFindings();
     }
 

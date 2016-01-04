@@ -54,15 +54,20 @@ public interface RemoteRepository extends Repository {
      * (or the remote repository is not accessible), the locally cached copy of the content will be
      * used.
      * 
+     * <p>This method will return true if the local copy was replaced by newer content from the remote
+     * repository.  False will be returned if the local copy was up-to-date, even if a refresh was
+     * forced by the caller or the update policy.
+     * 
      * @param item
      *            the reposited item whose content is to be downloaded into the local cache
      * @param forceUpdate
      *            disregards the repository's update policy and forces the remote content to be
      *            downloaded
+     * @return boolean
      * @throws RepositoryException
      *             thrown if the remote repository cannot be accessed
      */
-    public void downloadContent(RepositoryItem item, boolean forceUpdate)
+    public boolean downloadContent(RepositoryItem item, boolean forceUpdate)
             throws RepositoryException;
 
 }

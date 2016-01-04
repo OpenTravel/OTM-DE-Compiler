@@ -50,6 +50,7 @@ import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLModel;
+import org.opentravel.schemacompiler.model.TLModelElement;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLPropertyType;
@@ -559,40 +560,49 @@ public class ExampleNavigator {
             navigateAttribute(attribute);
         }
         for (TLIndicator indicator : PropertyCodegenUtils.getInheritedIndicators(facet)) {
-            navigateIndicator(indicator);
+        	if (!indicator.isPublishAsElement()) {
+                navigateIndicator(indicator);
+        	}
         }
 
         // Navigate the elements (properties) and extension points for this facet
-        for (TLProperty element : PropertyCodegenUtils.getInheritedProperties(facet)) {
-            TLFacet currentFacet = (TLFacet) element.getPropertyOwner();
+        for (TLModelElement elementItem : PropertyCodegenUtils.getElementSequence(facet)) {
+        	if (elementItem instanceof TLProperty) {
+        		TLProperty element = (TLProperty) elementItem;
+        		
+                TLFacet currentFacet = (TLFacet) element.getPropertyOwner();
 
-            // Before navigating the element itself, check to see if we need to insert any extension
-            // point facets
-            if (currentFacet.getFacetType() != previousFacetType) {
-                List<TLFacet> facetHierarchy = FacetCodegenUtils
-                        .getLocalFacetHierarchy(currentFacet);
+                // Before navigating the element itself, check to see if we need to insert any extension
+                // point facets
+                if (currentFacet.getFacetType() != previousFacetType) {
+                    List<TLFacet> facetHierarchy = FacetCodegenUtils
+                            .getLocalFacetHierarchy(currentFacet);
 
-                // Ignore the last element in the facet hierarchy list since it is always the
-                // current
-                // facet we are processing
-                for (int i = 0; i < (facetHierarchy.size() - 1); i++) {
-                    TLFacet hFacet = facetHierarchy.get(i);
+                    // Ignore the last element in the facet hierarchy list since it is always the
+                    // current
+                    // facet we are processing
+                    for (int i = 0; i < (facetHierarchy.size() - 1); i++) {
+                        TLFacet hFacet = facetHierarchy.get(i);
 
-                    if (!processedExtensionPointTypes.contains(hFacet.getFacetType())) {
-                        List<TLExtensionPointFacet> facetExtensions = facetExtensionsByType
-                                .get(hFacet.getFacetType());
+                        if (!processedExtensionPointTypes.contains(hFacet.getFacetType())) {
+                            List<TLExtensionPointFacet> facetExtensions = facetExtensionsByType
+                                    .get(hFacet.getFacetType());
 
-                        navigateExtensionPoint(hFacet, facetExtensions);
-                        processedExtensionPointTypes.add(hFacet.getFacetType());
+                            navigateExtensionPoint(hFacet, facetExtensions);
+                            processedExtensionPointTypes.add(hFacet.getFacetType());
+                        }
                     }
+                    previousFacetType = currentFacet.getFacetType();
                 }
-                previousFacetType = currentFacet.getFacetType();
-            }
 
-            // Navigate the example content for the current element
-            navigateElement(element);
+                // Navigate the example content for the current element
+                navigateElement(element);
+                
+        	} else if (elementItem instanceof TLIndicator) {
+                navigateIndicator( (TLIndicator) elementItem );
+        	}
         }
-
+        
         // Wrap up by checking for any extension points for the current facet (take into account
         // that
         // the facet may not contain any properties and therefore may not have checked for extension
@@ -746,22 +756,23 @@ public class ExampleNavigator {
      * <code>ExampleGeneratorOptions</code>, the facet that is returned may or may not be the one
      * that is passed to this method.
      * 
-     * @param preferredFacet
-     *            the facet with the preferred amount of detail (per the current model
-     *            configuration)
+     * @param preferredFacet  the facet with the default amount of detail
      * @return TLAbstractFacet
      */
-    protected TLAbstractFacet selectExampleFacet(TLFacet preferredFacet) {
-        TLAbstractFacet exampleFacet;
+    protected TLAbstractFacet selectExampleFacet(TLFacet defaultFacet) {
+    	TLFacetOwner facetOwner = (defaultFacet == null) ? null : defaultFacet.getOwningEntity();
+        TLAbstractFacet exampleFacet = options.getPreferredFacet( facetOwner );
+        
+        if (exampleFacet == null) { // no preferred facet assigned
+            if (defaultFacet.getFacetType().isContextual()) {
+                exampleFacet = defaultFacet;
 
-        if (preferredFacet.getFacetType().isContextual()) {
-            exampleFacet = preferredFacet;
-
-        } else {
-            if (options.getDetailLevel() == DetailLevel.MAXIMUM) {
-                exampleFacet = getMaximumDetail(preferredFacet.getOwningEntity());
             } else {
-                exampleFacet = getMinimumDetail(preferredFacet);
+                if (options.getDetailLevel() == DetailLevel.MAXIMUM) {
+                    exampleFacet = getMaximumDetail(facetOwner);
+                } else {
+                    exampleFacet = getMinimumDetail(defaultFacet);
+                }
             }
         }
         return exampleFacet;
@@ -888,6 +899,8 @@ public class ExampleNavigator {
                         candidateFacets.add(0, businessObject.getSummaryFacet());
                     case ID:
                         candidateFacets.add(0, businessObject.getIdFacet());
+                    default:
+                    	break;
                 }
             } else if (facetOwner instanceof TLCoreObject) {
                 TLCoreObject coreObject = (TLCoreObject) facetOwner;
@@ -899,6 +912,8 @@ public class ExampleNavigator {
                         candidateFacets.add(0, coreObject.getSummaryFacet());
                     case SIMPLE:
                         candidateFacets.add(0, coreObject.getSimpleFacet());
+                    default:
+                    	break;
                 }
             }
 
@@ -932,6 +947,8 @@ public class ExampleNavigator {
                     candidateFacets.add(0, facetOwner.getDetailListFacet());
                 case SUMMARY:
                     candidateFacets.add(0, facetOwner.getSummaryListFacet());
+                default:
+                	break;
             }
 
             for (TLListFacet candidate : candidateFacets) {

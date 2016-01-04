@@ -77,6 +77,7 @@ public abstract class CoreObjectFacetCodegenDelegate extends TLFacetCodegenDeleg
                     Attribute roleAttr = new Attribute();
 
                     if (ownerExtension != null) {
+                    	// TODO: Convert this to a camel-case attribute (lowercase first letter)
                         roleAttr.setName(owner.getLocalName() + "Role");
                     } else {
                         roleAttr.setName("role");

@@ -148,7 +148,7 @@ public class ExampleCodeGenerator extends AbstractCodeGenerator<TLModelElement> 
                     schemaLocation = schemaPath + getBuiltInSchemaOutputLocation(context) + "/"
                             + schemaFilename;
                 }
-                builder.addSchemaLocation(library.getNamespace(), schemaLocation);
+                builder.addSchemaLocation(library, schemaLocation);
             }
         }
     }

@@ -29,8 +29,8 @@ import org.opentravel.schemacompiler.version.Versioned;
  * 
  * @author S. Livezey
  */
-public class TLOperation extends TLModelElement implements NamedEntity, Versioned, TLFacetOwner,
-        TLExtensionOwner, TLDocumentationOwner, TLEquivalentOwner {
+public class TLOperation extends TLModelElement implements NamedEntity, TLFacetOwner, TLVersionedExtensionOwner,
+		TLDocumentationOwner, TLEquivalentOwner {
 
     private TLService owningService;
     private String name;
@@ -530,39 +530,6 @@ public class TLOperation extends TLModelElement implements NamedEntity, Versione
             }
         }
 
-    }
-
-    /**
-     * Returns the type of operation based on the current configuration of the request, response,
-     * and/or notification facets.
-     * 
-     * @return OperationType
-     */
-    public OperationType getOperationType() {
-        boolean hasRequest = (request != null) && request.declaresContent();
-        boolean hasResponse = (response != null) && response.declaresContent();
-        boolean hasNotification = (notification != null) && notification.declaresContent();
-        OperationType opType = OperationType.INVALID;
-
-        if (hasRequest && !hasResponse && !hasNotification) {
-            opType = OperationType.ONE_WAY;
-
-        } else if (!hasRequest && !hasResponse && hasNotification) {
-            opType = OperationType.NOTIFICATION;
-
-        } else if (hasRequest && hasResponse && !hasNotification) {
-            opType = OperationType.REQUEST_RESPONSE;
-
-        } else if (hasRequest && !hasResponse && hasNotification) {
-            opType = OperationType.SOLICIT_NOTIFICATION;
-
-        } else if (hasRequest && hasResponse && hasNotification) {
-            opType = OperationType.REQUEST_RESPONSE_WITH_NOTIFICATION;
-
-        } else {
-            opType = OperationType.INVALID;
-        }
-        return opType;
     }
 
 }

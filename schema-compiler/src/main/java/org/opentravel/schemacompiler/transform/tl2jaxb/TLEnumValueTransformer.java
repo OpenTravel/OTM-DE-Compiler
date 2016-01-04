@@ -15,9 +15,9 @@
  */
 package org.opentravel.schemacompiler.transform.tl2jaxb;
 
-import org.opentravel.ns.ota2.librarymodel_v01_04.Documentation;
-import org.opentravel.ns.ota2.librarymodel_v01_04.EnumValue;
-import org.opentravel.ns.ota2.librarymodel_v01_04.Equivalent;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Documentation;
+import org.opentravel.ns.ota2.librarymodel_v01_05.EnumValue;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Equivalent;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLEnumValue;
 import org.opentravel.schemacompiler.model.TLEquivalent;
@@ -54,6 +54,7 @@ public class TLEnumValueTransformer extends
             enumValue.getEquivalent().add(equivTransformer.transform(sourceEquiv));
         }
         enumValue.setLiteral(trimString(source.getLiteral(), false));
+        enumValue.setLabel(trimString(source.getLabel(), false));
         return enumValue;
     }
 

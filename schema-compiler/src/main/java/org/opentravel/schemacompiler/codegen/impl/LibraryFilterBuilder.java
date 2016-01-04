@@ -291,6 +291,10 @@ public class LibraryFilterBuilder {
          */
         @Override
         public boolean visitAttribute(TLAttribute attribute) {
+        	if (attribute.getType() instanceof TLOpenEnumeration) {
+        		// We have to visit the open enumeration, to catch the dependency for the string extension
+        		visitOpenEnumeration((TLOpenEnumeration) attribute.getType());
+        	}
             visitLibraryElement(attribute.getType());
             return isAllowedByGlobalFilter(attribute.getType());
         }

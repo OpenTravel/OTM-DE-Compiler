@@ -30,9 +30,6 @@ import java.util.Set;
 import javax.xml.XMLConstants;
 
 import org.junit.Test;
-import org.opentravel.schemacompiler.loader.LibraryInputSource;
-import org.opentravel.schemacompiler.loader.LibraryModelLoader;
-import org.opentravel.schemacompiler.loader.LibraryNamespaceResolver;
 import org.opentravel.schemacompiler.loader.impl.CatalogLibraryNamespaceResolver;
 import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
 import org.opentravel.schemacompiler.model.AbstractLibrary;

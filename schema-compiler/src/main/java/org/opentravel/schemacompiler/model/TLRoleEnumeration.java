@@ -60,7 +60,7 @@ public class TLRoleEnumeration extends TLModelElement implements TLAttributeType
      */
     @Override
     public XSDFacetProfile getXSDFacetProfile() {
-        return null;
+        return XSDFacetProfile.FP_unknown;
     }
 
     /**

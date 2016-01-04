@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_05"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_05 ../../../../main/resources/ota2-context/schemas/OTA2_LibraryModel_v1.5.0.xsd">
+    
+    <VersionScheme>OTA2</VersionScheme>
+    <Status>Draft</Status>
+    <Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-service_v1</Namespace>
+    <Prefix>a</Prefix>
+    <Name>SimpleService</Name>
+    <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
+    <Context
+        applicationContext="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-service_v1" context="a"/>
+    
+    <Service name="SimpleService">
+        <Operation Name="Operation" notExtendable="false">
+            <Request>
+                <Element name="ID" repeat="0" type="xsd:string"/>
+            </Request>
+            <Response>
+                <Element name="Value" repeat="0" type="xsd:int"/>
+            </Response>
+            <Notification/>
+        </Operation>
+    </Service>
+    
+</Library>

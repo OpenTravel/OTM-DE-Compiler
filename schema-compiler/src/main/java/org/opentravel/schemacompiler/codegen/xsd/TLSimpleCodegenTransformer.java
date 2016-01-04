@@ -19,6 +19,7 @@ import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
+import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLPropertyType;
@@ -51,11 +52,14 @@ public class TLSimpleCodegenTransformer extends AbstractXsdTransformer<TLSimple,
         SimpleType simple = source.isListTypeInd() ? createListSimple(source)
                 : createStandardSimple(source);
 
-        if (source.getDocumentation() != null) {
-            ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(source.getDocumentation(), Annotation.class);
+        // Generate the documentation block (if required)
+        TLDocumentation sourceDoc = DocumentationFinder.getDocumentation( source );
+        
+        if (sourceDoc != null) {
+            ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer =
+            		getTransformerFactory().getTransformer(sourceDoc, Annotation.class);
 
-            simple.setAnnotation(docTransformer.transform(source.getDocumentation()));
+            simple.setAnnotation(docTransformer.transform(sourceDoc));
         }
         XsdCodegenUtils.addAppInfo(source, simple);
         artifacts.addArtifact(simple);

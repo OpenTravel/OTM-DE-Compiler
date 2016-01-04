@@ -15,8 +15,10 @@
  */
 package org.opentravel.schemacompiler.codegen.example;
 
+import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttribute;
+import org.opentravel.schemacompiler.model.TLAttributeOwner;
 import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLCoreObject;
@@ -26,6 +28,7 @@ import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLProperty;
+import org.opentravel.schemacompiler.model.TLPropertyOwner;
 import org.opentravel.schemacompiler.model.TLRole;
 import org.opentravel.schemacompiler.model.TLRoleEnumeration;
 import org.opentravel.schemacompiler.model.TLSimple;
@@ -97,12 +100,37 @@ public abstract class AbstractExampleVisitor implements ExampleVisitor {
                     .getSimpleFacet());
 
         } else if (entity instanceof TLAttribute) {
-            exampleValue = exampleValueGenerator.getExampleValue((TLAttribute) entity);
+        	TLAttributeOwner owner = ((TLAttribute) entity).getAttributeOwner();
+        	NamedEntity contextFacet = getContextFacet();
+        	
+        	if (contextFacet != null) {
+                exampleValue = exampleValueGenerator.getExampleValue((TLAttribute) entity, contextFacet);
+        	} else {
+                exampleValue = exampleValueGenerator.getExampleValue((TLAttribute) entity, owner);
+        	}
 
         } else if (entity instanceof TLProperty) {
-            exampleValue = exampleValueGenerator.getExampleValue((TLProperty) entity);
+        	TLPropertyOwner owner = ((TLProperty) entity).getPropertyOwner();
+        	NamedEntity contextFacet = getContextFacet();
+        	
+        	if (contextFacet != null) {
+                exampleValue = exampleValueGenerator.getExampleValue((TLProperty) entity, contextFacet);
+        	} else {
+                exampleValue = exampleValueGenerator.getExampleValue((TLProperty) entity, owner);
+        	}
         }
         return exampleValue;
+    }
+    
+    /**
+     * Returns the context facet that is the current owner (or possibly an alias of the owner) for all
+     * attributes and elements that are encountered.  By default, this method returns null; sub-classes
+     * may override.
+     * 
+     * @return TLFacet
+     */
+    protected NamedEntity getContextFacet() {
+    	return null;
     }
 
     /**
@@ -192,8 +220,7 @@ public abstract class AbstractExampleVisitor implements ExampleVisitor {
     @Override
     public void startAttribute(TLAttribute attribute) {
         if (DEBUG) {
-            log.info(debugIndent + "startAttribute() : " + attribute.getName() + " --> "
-                    + generateExampleValue(attribute));
+            log.info(debugIndent + "startAttribute() : " + attribute.getName());
             debugIndent.append("  ");
         }
     }

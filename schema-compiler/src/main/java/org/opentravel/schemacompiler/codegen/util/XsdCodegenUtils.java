@@ -72,12 +72,9 @@ import org.w3._2001.xmlschema.Attribute;
  */
 public class XsdCodegenUtils {
 
-    public static final QName XSD_BOOLEAN_TYPE = new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI,
-            "boolean");
-    public static final QName XSD_STRING_TYPE = new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI,
-            "string");
-    public static final QName XML_SCHEMA_ID_TYPE = new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI,
-            "ID");
+    public static final QName XSD_BOOLEAN_TYPE = new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "boolean");
+    public static final QName XSD_STRING_TYPE = new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "string");
+    public static final QName XML_SCHEMA_ID_TYPE = new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "ID");
     private static final Map<Class<?>, String> libraryTypeNames;
 
     public static final String BUILT_INS_FOLDER = "built-ins";
@@ -572,7 +569,11 @@ public class XsdCodegenUtils {
         appInfo.getContent().add(appInfoObjectFactory.createLibrary(libraryInfo));
 
         if (library instanceof TLLibrary) {
-            libraryInfo.setLibraryVersion(((TLLibrary) library).getVersion());
+        	TLLibrary tlLibrary = (TLLibrary) library;
+        	
+        	if (tlLibrary.getStatus() != null) {
+        		libraryInfo.setLibraryStatus(tlLibrary.getStatus().toString());
+        	}
         }
         return appInfo;
     }

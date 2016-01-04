@@ -17,6 +17,7 @@ package org.opentravel.schemacompiler.codegen.example;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -38,8 +39,8 @@ import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAlias;
-import org.opentravel.schemacompiler.model.TLAliasOwner;
 import org.opentravel.schemacompiler.model.TLAttribute;
+import org.opentravel.schemacompiler.model.TLAttributeOwner;
 import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLCoreObject;
@@ -62,6 +63,8 @@ import org.opentravel.schemacompiler.model.XSDElement;
 import org.springframework.context.ApplicationContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * <code>ExampleVisitor</code> component used to construct a DOM tree containing the example data.
@@ -74,6 +77,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor {
 
     private Map<String, String> namespaceMappings = new HashMap<String, String>();
     private Set<String> extensionPointNamespaces = new HashSet<String>();
+    private Set<String> externalDependencyNamespaces = new HashSet<String>();
     private Stack<ExampleContext> contextStack = new Stack<ExampleContext>();
     private Stack<TLPropertyOwner> facetStack = new Stack<TLPropertyOwner>();
     protected CodeGenerationWsdlBindings wsdlBindings = null;
@@ -142,12 +146,14 @@ public class DOMExampleVisitor extends AbstractExampleVisitor {
         List<String> nsList = new ArrayList<String>();
 
         /*
-         * Commented out these lines due to false validation errors on substitution group elements
+         * Commented out this line due to false validation errors on substitution group elements
          * that result when multiple namespace mappings are included in the 'xsi:schemaLocation'
          * attribute of an example XML document.
          * 
-         * nsList.addAll( extensionPointNamespaces ); Collections.sort( nsList );
+         * nsList.addAll( extensionPointNamespaces );
          */
+        nsList.addAll( externalDependencyNamespaces );
+        Collections.sort( nsList );
 
         if ((domDocument != null) && (domDocument.getDocumentElement() != null)) {
             nsList.add(0, domDocument.getDocumentElement().getNamespaceURI());
@@ -204,7 +210,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor {
         // If this is a repeat visit of the list facet for a different role, we must complete the
         // old element and start a new one.
         if (context.getDomElement() != null) {
-            NamedEntity contextAlias = context.getModelAlias();
+        	TLAlias contextAlias = context.getModelAlias();
 
             context = new ExampleContext(context.getModelElement());
             context.setModelAlias(contextAlias);
@@ -237,6 +243,48 @@ public class DOMExampleVisitor extends AbstractExampleVisitor {
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#getContextFacet()
+	 */
+	@Override
+	protected NamedEntity getContextFacet() {
+		NamedEntity elementType = (context.modelElement == null) ? null : context.modelElement.getType();
+		NamedEntity contextFacet;
+		
+		if (elementType instanceof TLExtensionPointFacet) {
+			contextFacet = null; // No inheritance or aliases for extension point facets
+			
+		} else if (elementType instanceof TLValueWithAttributes) {
+			contextFacet = elementType;
+			
+		} else {
+			ExampleContext facetContext = context;
+			
+			// If we are currently processing an attribute value, the facet context will be the
+			// current one.  If we are processing an element value, the facet context will be
+			// on top of the context stack.
+			if ((facetContext.modelAttribute == null) && !contextStack.isEmpty()) {
+				facetContext = contextStack.peek();
+			}
+			
+			if (facetContext.modelAlias != null) {
+				TLAlias facetAlias = facetContext.modelAlias;
+				
+				if (facetAlias.getOwningEntity() instanceof TLListFacet) {
+					TLAlias coreAlias = AliasCodegenUtils.getOwnerAlias( facetAlias );
+					
+					facetAlias = AliasCodegenUtils.getFacetAlias( coreAlias,
+							((TLListFacet) facetAlias.getOwningEntity()).getItemFacet().getFacetType());
+				}
+				contextFacet = facetAlias;
+				
+			} else {
+				contextFacet = facetStack.isEmpty() ? null : facetStack.peek();
+			}
+		}
+		return contextFacet;
+	}
+
+	/**
      * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#startAlias(org.opentravel.schemacompiler.model.TLAlias)
      */
     @Override
@@ -292,12 +340,14 @@ public class DOMExampleVisitor extends AbstractExampleVisitor {
 
         // Capture ID values in the registry for use during post-processing
         if (XsdCodegenUtils.isIdType(attribute.getType())) {
-            if (context.getModelAlias() != null) {
-                registerIdValue(context.getModelAlias(), lastExampleValue);
-
-            } else {
-                registerIdValue(attribute.getAttributeOwner(), lastExampleValue);
-            }
+        	TLAttributeOwner owner = attribute.getAttributeOwner();
+        	NamedEntity contextFacet = getContextFacet();
+        	
+        	if (contextFacet != null) {
+                registerIdValue(contextFacet, lastExampleValue);
+        	} else {
+                registerIdValue(owner, lastExampleValue);
+        	}
         }
 
         // Queue up IDREF(S) attributes for assignment during post-processing
@@ -342,12 +392,14 @@ public class DOMExampleVisitor extends AbstractExampleVisitor {
 
         // Capture ID values in the registry for use during post-processing
         if (XsdCodegenUtils.isIdType(element.getType())) {
-            if (context.getModelAlias() != null) {
-                registerIdValue(context.getModelAlias(), lastExampleValue);
-
-            } else {
-                registerIdValue(element.getPropertyOwner(), lastExampleValue);
-            }
+        	TLPropertyOwner owner = element.getPropertyOwner();
+        	NamedEntity contextFacet = getContextFacet();
+        	
+        	if (contextFacet != null) {
+                registerIdValue(contextFacet, lastExampleValue);
+        	} else {
+                registerIdValue(owner, lastExampleValue);
+        	}
         }
 
         // Queue up IDREF(S) attributes for assignment during post-processing
@@ -860,8 +912,46 @@ public class DOMExampleVisitor extends AbstractExampleVisitor {
         Element domElement = context.getDomElement();
 
         if ((domElement != null) && (wsdlBindings != null)) {
-            wsdlBindings.addPayloadExampleContent(domElement, operationFacet);
+        	Map<String,String> nsMappings = new HashMap<String,String>();
+        	Element rootElement = domElement.getOwnerDocument().getDocumentElement();
+        	
+            wsdlBindings.addPayloadExampleContent(domElement, nsMappings, operationFacet);
+            
+            for (String ns : nsMappings.keySet()) {
+            	String _prefix = nsMappings.get( ns );
+            	String prefix = _prefix;
+            	int counter = 1;
+            	
+            	while (namespaceMappings.containsValue( prefix )) {
+            		prefix = _prefix + counter;
+            		counter++;
+            	}
+            	namespaceMappings.put( ns, prefix );
+                rootElement.setAttributeNS( XMLConstants.XMLNS_ATTRIBUTE_NS_URI, "xmlns:" + prefix, ns );
+            }
+            applyElementPrefixes( domElement );
         }
+    }
+    
+    /**
+     * Recursively applies a namespace prefix to the given element and all of its descendants
+     * using the current set of namespace prefix mappings.
+     * 
+     * @param element  the DOM element to process
+     */
+    private void applyElementPrefixes(Element element) {
+    	if (element.getPrefix() == null) {
+        	element.setPrefix( namespaceMappings.get( element.getNamespaceURI() ) );
+    	}
+    	NodeList children = element.getChildNodes();
+    	
+    	for (int i = 0; i < children.getLength(); i++) {
+    		Node child = children.item( 0 );
+    		
+    		if (child instanceof Element) {
+    			applyElementPrefixes( (Element) child ); 
+    		}
+    	}
     }
 
     /**
@@ -916,7 +1006,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor {
 
         private Element domElement;
         private TLProperty modelElement;
-        private NamedEntity modelAlias;
+        private TLAlias modelAlias;
         private TLAttribute modelAttribute;
 
         /**
@@ -962,9 +1052,9 @@ public class DOMExampleVisitor extends AbstractExampleVisitor {
         /**
          * Returns the alias or role (if any) that is associated with this context.
          * 
-         * @return NamedEntity
+         * @return TLAlias
          */
-        public NamedEntity getModelAlias() {
+        public TLAlias getModelAlias() {
             return modelAlias;
         }
 
@@ -974,7 +1064,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor {
          * @param modelAlias
          *            the alias or role to be associated with this context
          */
-        public void setModelAlias(NamedEntity modelAlias) {
+        public void setModelAlias(TLAlias modelAlias) {
             this.modelAlias = modelAlias;
         }
 
@@ -1097,17 +1187,17 @@ public class DOMExampleVisitor extends AbstractExampleVisitor {
                 NamedEntity entity = referencedEntity;
 
                 // Add all applicable names for the entity and its alias equivalents
-                if (entity instanceof TLAlias) {
-                    addEntityNames(entity, entityNames);
-                    entity = ((TLAlias) entity).getOwningEntity();
-                }
+//                if (entity instanceof TLAlias) {
+//                    addEntityNames(entity, entityNames);
+//                    entity = ((TLAlias) entity).getOwningEntity();
+//                }
                 addEntityNames(entity, entityNames);
 
-                if (entity instanceof TLAliasOwner) {
-                    for (TLAlias alias : ((TLAliasOwner) entity).getAliases()) {
-                        addEntityNames(alias, entityNames);
-                    }
-                }
+//                if (entity instanceof TLAliasOwner) {
+//                    for (TLAlias alias : ((TLAliasOwner) entity).getAliases()) {
+//                        addEntityNames(alias, entityNames);
+//                    }
+//                }
 
                 // Iterate through the list and select the first name that appears in the ID
                 // registry

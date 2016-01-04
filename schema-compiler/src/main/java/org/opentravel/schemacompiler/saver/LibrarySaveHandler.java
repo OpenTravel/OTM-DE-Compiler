@@ -17,7 +17,7 @@ package org.opentravel.schemacompiler.saver;
 
 import java.net.URL;
 
-import org.opentravel.ns.ota2.librarymodel_v01_04.Library;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Library;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 
 /**

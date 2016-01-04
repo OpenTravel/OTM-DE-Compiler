@@ -4,6 +4,6 @@
     <otp:name>Test Project #3</otp:name>
     <otp:description>Test project used to demonstrate multi-service WSDL generation.</otp:description>
     <otp:UnmanagedProjectItem defaultItem="true">
-        <otp:FileLocation>../libraries_1_4/test-package-inheritance/extended_service.xml</otp:FileLocation>
+        <otp:FileLocation>../libraries_1_5/test-package-inheritance/extended_service.xml</otp:FileLocation>
     </otp:UnmanagedProjectItem>
 </otp:Project>

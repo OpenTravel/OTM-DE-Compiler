@@ -19,6 +19,7 @@ import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
+import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
@@ -30,6 +31,7 @@ import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLRole;
+import org.opentravel.schemacompiler.model.TLRoleEnumeration;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.transform.AnonymousEntityFilter;
@@ -90,6 +92,10 @@ public class TLAttributeCodegenTransformer extends
                     ((TLOpenEnumeration) attributeType).getLocalName() + "_Base"));
             artifacts.addArtifact(extensionAttr);
 
+        } else if (attributeType instanceof TLRoleEnumeration) {
+            attr.setType(new QName(attributeType.getNamespace(),
+                    ((TLRoleEnumeration) attributeType).getLocalName() + "_Base"));
+        	
         } else { // normal case
             String attrTypeNS = attributeType.getNamespace();
 
@@ -109,11 +115,13 @@ public class TLAttributeCodegenTransformer extends
         }
 
         // Add documentation, equivalents, and examples to the attribute's annotation as required
-        if (source.getDocumentation() != null) {
-            ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(source.getDocumentation(), Annotation.class);
+        TLDocumentation sourceDoc = DocumentationFinder.getDocumentation( source );
+        
+        if (sourceDoc != null) {
+            ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer =
+            		getTransformerFactory().getTransformer(sourceDoc, Annotation.class);
 
-            attr.setAnnotation(docTransformer.transform(source.getDocumentation()));
+            attr.setAnnotation(docTransformer.transform(sourceDoc));
         }
         XsdCodegenUtils.addEquivalentInfo(source, attr);
         XsdCodegenUtils.addExampleInfo(source, attr);

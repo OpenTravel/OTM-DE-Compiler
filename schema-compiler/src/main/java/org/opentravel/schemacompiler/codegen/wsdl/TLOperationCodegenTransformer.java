@@ -22,7 +22,10 @@ import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
+import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
+import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegate;
+import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
 import org.opentravel.schemacompiler.model.OperationType;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLFacet;
@@ -47,6 +50,8 @@ import org.xmlsoap.schemas.wsdl.TPart;
 public class TLOperationCodegenTransformer extends
         AbstractWsdlTransformer<TLOperation, CodegenArtifacts> {
 
+	private static FacetCodegenDelegateFactory facetDelegateFactory = new FacetCodegenDelegateFactory(null);
+	
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
      */
@@ -75,9 +80,10 @@ public class TLOperationCodegenTransformer extends
      * @return List<TMessage>
      */
     private TMessage createMessage(TLFacet opFacet) {
+    	FacetCodegenDelegate<TLFacet> facetDelegate = facetDelegateFactory.getDelegate(opFacet);
         TMessage message = null;
 
-        if ((opFacet != null) && opFacet.declaresContent()) {
+        if ((opFacet != null) && facetDelegate.hasContent()) {
             TPart part = new TPart();
 
             part.setName("body");
@@ -125,7 +131,7 @@ public class TLOperationCodegenTransformer extends
 
         operation.setName(getOperationName(sourceOperation));
 
-        switch (sourceOperation.getOperationType()) {
+        switch (FacetCodegenUtils.getOperationType(sourceOperation)) {
             case ONE_WAY:
                 addInput(operation, sourceOperation.getRequest(), targetNamespace);
                 break;
@@ -153,6 +159,8 @@ public class TLOperationCodegenTransformer extends
                 // Notification facet is ignored - multiple output elements not supported in WSDL
                 // 1.0
                 break;
+            case INVALID:
+            	break;
         }
 
         if (sourceOperation.getDocumentation() != null) {

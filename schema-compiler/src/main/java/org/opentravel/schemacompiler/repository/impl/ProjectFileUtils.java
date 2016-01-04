@@ -41,6 +41,7 @@ import javax.xml.validation.SchemaFactory;
 
 import org.opentravel.ns.ota2.project_v01_00.ManagedProjectItemType;
 import org.opentravel.ns.ota2.project_v01_00.ObjectFactory;
+import org.opentravel.ns.ota2.project_v01_00.ProjectItemType;
 import org.opentravel.ns.ota2.project_v01_00.ProjectType;
 import org.opentravel.ns.ota2.project_v01_00.RepositoryRefType;
 import org.opentravel.ns.ota2.project_v01_00.RepositoryReferencesType;
@@ -258,6 +259,7 @@ public class ProjectFileUtils {
         jaxbProject.setDescription(project.getDescription());
         jaxbProject.setDefaultContextId(project.getDefaultContextId());
 
+        // Compile the list of project items to include in the file
         for (ProjectItem item : purgeImpliedManagedVersions(project.getProjectItems())) {
             if (item.getState() == RepositoryItemState.UNMANAGED) {
                 UnmanagedProjectItemType jaxbItem = new UnmanagedProjectItemType();
@@ -284,6 +286,20 @@ public class ProjectFileUtils {
                 jaxbProject.getProjectItemBase().add(
                         objectFactory.createManagedProjectItem(jaxbItem));
             }
+        }
+        
+        // Add any failed project items to the list so they will not be lost when the
+        // file is re-opened.
+        for (ProjectItemType failedItem : project.getFailedProjectItems()) {
+        	if (failedItem instanceof UnmanagedProjectItemType) {
+                jaxbProject.getProjectItemBase().add( objectFactory.createUnmanagedProjectItem(
+                		(UnmanagedProjectItemType) failedItem ) );
+        		
+        	} else { // Must be a ManagedProjectItemType
+                jaxbProject.getProjectItemBase().add( objectFactory.createManagedProjectItem(
+                		(ManagedProjectItemType) failedItem ) );
+        	}
+        	failedItem.setDefaultItem( null );
         }
 
         // If necessary, compile a list of repositories that are referenced and their endpoint URL's

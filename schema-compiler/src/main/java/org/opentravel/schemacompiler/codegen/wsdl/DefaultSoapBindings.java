@@ -448,11 +448,10 @@ public class DefaultSoapBindings implements CodeGenerationWsdlBindings {
     }
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.wsdl.CodeGenerationWsdlBindings#addPayloadExampleContent(org.w3c.dom.Element,
-     *      org.opentravel.schemacompiler.model.TLFacet)
+     * @see org.opentravel.schemacompiler.codegen.wsdl.CodeGenerationWsdlBindings#addPayloadExampleContent(org.w3c.dom.Element, java.util.Map, org.opentravel.schemacompiler.model.TLFacet)
      */
     @Override
-    public void addPayloadExampleContent(Element exampleXml, TLFacet operationFacet) {
+    public void addPayloadExampleContent(Element exampleXml, Map<String,String> namespaceMappings, TLFacet operationFacet) {
         AbstractLibrary owningLibrary = operationFacet.getOwningLibrary();
         String versionValue = "1";
 

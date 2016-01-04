@@ -38,7 +38,9 @@ import java.util.TreeSet;
  */
 public class ValidationFindings implements Serializable {
 
-    private Collection<ValidationFinding> allFindings = new TreeSet<ValidationFinding>();
+	private static final long serialVersionUID = -7081558490066747720L;
+	
+	private Collection<ValidationFinding> allFindings = new TreeSet<ValidationFinding>();
     private Map<Validatable, List<String>> messageKeysBySourceObject = new HashMap<Validatable, List<String>>();
 
     /**

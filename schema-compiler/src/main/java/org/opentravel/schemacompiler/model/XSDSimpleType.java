@@ -128,7 +128,7 @@ public class XSDSimpleType extends LibraryMember implements TLAttributeType {
 
         if (namespace != null) {
             if (namespace.equals(XMLConstants.W3C_XML_SCHEMA_NS_URI)) {
-                rootTypename = jaxbType.getName();
+                rootTypename = (jaxbType == null) ? name : jaxbType.getName();
 
             } else if (jaxbType.getRestriction() != null) {
                 Restriction restriction = jaxbType.getRestriction();

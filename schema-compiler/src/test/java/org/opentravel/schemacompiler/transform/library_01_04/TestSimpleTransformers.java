@@ -21,14 +21,14 @@ import static org.junit.Assert.assertNotNull;
 import javax.xml.XMLConstants;
 
 import org.junit.Test;
-import org.opentravel.ns.ota2.librarymodel_v01_04.Simple;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Simple;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.XSDSimpleType;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.TransformerFactory;
-import org.opentravel.schemacompiler.transform.jaxb13_2tl.LibraryTransformer;
+import org.opentravel.schemacompiler.transform.jaxb14_2tl.LibraryTransformer;
 import org.opentravel.schemacompiler.transform.symbols.SymbolResolverTransformerContext;
 
 /**

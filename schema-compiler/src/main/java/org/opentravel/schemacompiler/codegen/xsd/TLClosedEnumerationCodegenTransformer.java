@@ -20,6 +20,8 @@ import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
+import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
+import org.opentravel.schemacompiler.codegen.util.EnumCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLDocumentation;
@@ -51,15 +53,18 @@ public class TLClosedEnumerationCodegenTransformer extends
         xsdEnum.setName(source.getName());
         restriction.setBase(new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "string"));
 
-        if (source.getDocumentation() != null) {
-            ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(source.getDocumentation(), Annotation.class);
+        // Generate the documentation block (if required)
+        TLDocumentation sourceDoc = DocumentationFinder.getDocumentation( source );
+        
+        if (sourceDoc != null) {
+            ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer =
+            		getTransformerFactory().getTransformer(sourceDoc, Annotation.class);
 
-            xsdEnum.setAnnotation(docTransformer.transform(source.getDocumentation()));
+            xsdEnum.setAnnotation(docTransformer.transform(sourceDoc));
         }
         XsdCodegenUtils.addAppInfo(source, xsdEnum);
 
-        for (TLEnumValue modelEnum : source.getValues()) {
+        for (TLEnumValue modelEnum : EnumCodegenUtils.getInheritedValues( source )) {
             restriction.getFacets().add(createEnumValue(modelEnum));
         }
         xsdEnum.setRestriction(restriction);

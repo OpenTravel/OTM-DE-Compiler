@@ -569,6 +569,27 @@ public class TLLibrary extends AbstractLibrary {
     }
 
     /**
+     * Returns the choice object type with the specified name.
+     * 
+     * @param localName
+     *            the local name of the choice object type to return
+     * @return TLChoiceObject
+     */
+    public TLChoiceObject getChoiceObjectType(String localName) {
+        LibraryMember member = getNamedMember(localName);
+        return (member instanceof TLChoiceObject) ? (TLChoiceObject) member : null;
+    }
+
+    /**
+     * Returns the list of choice object member types.
+     * 
+     * @return List<TLChoiceObject>
+     */
+    public List<TLChoiceObject> getChoiceObjectTypes() {
+        return buildMemberList(TLChoiceObject.class);
+    }
+
+    /**
      * Returns the core object type with the specified name.
      * 
      * @param localName
@@ -608,6 +629,27 @@ public class TLLibrary extends AbstractLibrary {
      */
     public List<TLBusinessObject> getBusinessObjectTypes() {
         return buildMemberList(TLBusinessObject.class);
+    }
+
+    /**
+     * Returns the resource type with the specified name.
+     * 
+     * @param localName
+     *            the local name of the resource type to return
+     * @return TLResource
+     */
+    public TLResource getResourceType(String localName) {
+        LibraryMember member = getNamedMember(localName);
+        return (member instanceof TLResource) ? (TLResource) member : null;
+    }
+
+    /**
+     * Returns the list of resource member types.
+     * 
+     * @return List<TLResource>
+     */
+    public List<TLResource> getResourceTypes() {
+        return buildMemberList(TLResource.class);
     }
 
     /**
@@ -695,7 +737,9 @@ public class TLLibrary extends AbstractLibrary {
             validTypes.add(TLOpenEnumeration.class);
             validTypes.add(TLClosedEnumeration.class);
             validTypes.add(TLCoreObject.class);
+            validTypes.add(TLChoiceObject.class);
             validTypes.add(TLBusinessObject.class);
+            validTypes.add(TLResource.class);
             validTypes.add(TLExtensionPointFacet.class);
             validMemberTypes = Collections.unmodifiableSet(validTypes);
 

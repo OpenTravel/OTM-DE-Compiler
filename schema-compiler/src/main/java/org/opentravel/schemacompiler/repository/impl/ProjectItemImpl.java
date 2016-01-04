@@ -113,6 +113,8 @@ public class ProjectItemImpl extends RepositoryItemImpl implements ProjectItem {
             case BUILT_IN:
                 throw new IllegalStateException("Cannnot change a project item's state from '"
                         + item.getState() + "' to MANAGED_UNLOCKED.");
+			default:
+				break;
         }
         ProjectItemImpl _item = (ProjectItemImpl) item;
 

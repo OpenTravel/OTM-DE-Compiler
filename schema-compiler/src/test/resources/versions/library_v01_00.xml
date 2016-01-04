@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_04"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_04 OTA2_LibraryModel_v1.4.6.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_04 OTA2_LibraryModel_v1.4.7.xsd">
     
     <VersionScheme>OTA2</VersionScheme>
     <Status>Draft</Status>
@@ -12,18 +12,46 @@
     <Import namespace="http://opentravel.org/common/v02" prefix="ota"/>
     <Comments>Test Library</Comments>
     
-    <Simple name="TestMajorVersionSimple" type="xsd:string" />
+    <Simple name="TestMajorVersionSimple" type="xsd:string" pattern="[A-Za-z]*" minLength="2" maxLength="5" />
+    
+    <Simple name="LookupSimple" type="xsd:string" pattern="[A-Za-z]*" />
+    
+    <Simple name="LaterMinorVersionSimple" type="xsd:string" pattern="[A-Za-z]*" minLength="2" maxLength="5" />
     
     <Enumeration_Closed name="TestMajorVersionClosedEnum">
-        <Value literal="a" />
-        <Value literal="b" />
-        <Value literal="c" />
+        <Value literal="a1" />
+        <Value literal="b1" />
+        <Value literal="c1" />
+    </Enumeration_Closed>
+    
+    <Enumeration_Closed name="LookupClosedEnum">
+        <Value literal="a1" />
+        <Value literal="b1" />
+        <Value literal="c1" />
+    </Enumeration_Closed>
+    
+    <Enumeration_Closed name="LaterMinorVersionClosedEnum">
+        <Value literal="a1" />
+        <Value literal="b1" />
+        <Value literal="c1" />
     </Enumeration_Closed>
     
     <Enumeration_Open name="TestMajorVersionOpenEnum">
-        <Value literal="a" />
-        <Value literal="b" />
-        <Value literal="c" />
+        <Value literal="a1" />
+        <Value literal="b1" />
+        <Value literal="c1" />
+    </Enumeration_Open>
+    
+    <Enumeration_Open name="LookupOpenEnum">
+        <Value literal="a1" />
+        <Value literal="b1" />
+        <Value literal="c1" />
+    </Enumeration_Open>
+    
+    <Enumeration_Open name="LaterMinorVersionOpenEnum">
+        <Value literal="a1" />
+        <Value literal="b1" />
+        <Value literal="c1" />
     </Enumeration_Open>
     
     <ValueWithAttrs name="LookupVWA" type="xsd:string">

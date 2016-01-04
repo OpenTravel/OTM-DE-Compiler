@@ -15,20 +15,16 @@
  */
 package org.opentravel.schemacompiler.validate.compile;
 
-import java.util.List;
-
-import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
-import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLIndicatorOwner;
-import org.opentravel.schemacompiler.model.TLModelElement;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.validate.FindingType;
+import org.opentravel.schemacompiler.validate.ValidationBuilder;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.base.TLIndicatorBaseValidator;
-import org.opentravel.schemacompiler.validate.impl.FacetMemberIdentityResolver;
+import org.opentravel.schemacompiler.validate.impl.DuplicateFieldChecker;
 import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
-import org.opentravel.schemacompiler.validate.impl.ValidatorUtils;
+import org.opentravel.schemacompiler.validate.impl.UPAViolationChecker;
 
 /**
  * Validator for the <code>TLIndicator</code> class.
@@ -38,13 +34,13 @@ import org.opentravel.schemacompiler.validate.impl.ValidatorUtils;
 public class TLIndicatorCompileValidator extends TLIndicatorBaseValidator {
 
     public static final String WARNING_ELEMENTS_NOT_ALLOWED = "ELEMENTS_NOT_ALLOWED";
+    public static final String ERROR_UPA_VIOLATION = "UPA_VIOLATION";
 
     /**
      * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateFields(org.opentravel.schemacompiler.validate.Validatable)
      */
     @Override
     protected ValidationFindings validateFields(TLIndicator target) {
-        TLValidationBuilder dupBuilder = newValidationBuilder(target);
         TLValidationBuilder builder = newValidationBuilder(target);
 
         builder.setProperty("name", target.getName()).setFindingType(FindingType.ERROR)
@@ -53,75 +49,71 @@ public class TLIndicatorCompileValidator extends TLIndicatorBaseValidator {
         builder.setProperty("equivalents", target.getEquivalents())
                 .setFindingType(FindingType.ERROR).assertNotNull().assertContainsNoNullElements();
 
-        if (target.isPublishAsElement() && (target.getOwner() instanceof TLValueWithAttributes)) {
-            builder.addFinding(FindingType.WARNING, "publishAsElement",
-                    WARNING_ELEMENTS_NOT_ALLOWED);
+        // Check for duplicate names of this indicator
+        if (target.getName() != null) {
+            DuplicateFieldChecker dupChecker = getDuplicateFieldChecker( target );
+            
+            if (dupChecker.isDuplicateName( target )) {
+            	builder.addFinding( FindingType.ERROR, "name", ValidationBuilder.ERROR_DUPLICATE_ELEMENT,
+            			target.getName() );
+            }
+        }
+        
+        if (target.isPublishAsElement()) {
+        	if (target.getOwner() instanceof TLValueWithAttributes) {
+                builder.addFinding(FindingType.WARNING, "publishAsElement", WARNING_ELEMENTS_NOT_ALLOWED);
+                
+        	} else {
+                // Check for UPA violations
+                if (target.getName() != null) {
+                    UPAViolationChecker upaChecker = getUPAViolationChecker( target );
+                    
+                    if (upaChecker.isUPAViolation( target )) {
+                    	builder.addFinding( FindingType.ERROR, "name", ERROR_UPA_VIOLATION, target.getName() );
+                    }
+                }
+        	}
         }
 
-        // Check for duplicate names of this attribute
-        dupBuilder.setProperty("name", getMembersOfOwner(target)).setFindingType(FindingType.ERROR)
-                .assertNoDuplicates(new FacetMemberIdentityResolver());
-
-        if (dupBuilder.isEmpty() && (target.getOwner() instanceof TLFacet)) {
-            dupBuilder.setProperty("name-upa", getInheritedMembersOfOwner(target))
-                    .setFindingType(FindingType.ERROR)
-                    .assertNoDuplicates(new FacetMemberIdentityResolver());
-        }
-
-        builder.addFindings(dupBuilder.getFindings());
         return builder.getFindings();
     }
-
+    
     /**
-     * Returns the list of attributes, properties, and indicators defined by the given indicator's
-     * owner.
+     * Returns a <code>DuplicateFieldChecker</code> that can be used to identify duplicate
+     * field names within the elements of the declaring facet.
      * 
-     * @param target
-     *            the target indicator being validated
-     * @return List<TLModelElement>
+     * @param target  the target indicator being validated
+     * @return DuplicateFieldChecker
      */
-    @SuppressWarnings("unchecked")
-    private List<TLModelElement> getMembersOfOwner(TLIndicator target) {
+    private DuplicateFieldChecker getDuplicateFieldChecker(TLIndicator target) {
         TLIndicatorOwner indicatorOwner = target.getOwner();
-        String cacheKey = indicatorOwner.getNamespace() + ":" + indicatorOwner.getLocalName()
-                + ":members";
-        List<TLModelElement> members = (List<TLModelElement>) getContextCacheEntry(cacheKey);
+        String cacheKey = indicatorOwner.getNamespace() + ":" + indicatorOwner.getLocalName() + ":dupChecker";
+        DuplicateFieldChecker checker = (DuplicateFieldChecker) getContextCacheEntry( cacheKey );
 
-        if (members == null) {
-            if (indicatorOwner instanceof TLValueWithAttributes) {
-                members = ValidatorUtils.getMembers((TLValueWithAttributes) indicatorOwner);
-
-            } else if (indicatorOwner instanceof TLExtensionPointFacet) {
-                members = ValidatorUtils.getMembers((TLExtensionPointFacet) indicatorOwner);
-
-            } else { // TLFacet
-                members = ValidatorUtils.getMembers((TLFacet) indicatorOwner);
-            }
-            setContextCacheEntry(cacheKey, members);
+        if (checker == null) {
+        	checker = new DuplicateFieldChecker( indicatorOwner );
+            setContextCacheEntry( cacheKey, checker );
         }
-        return members;
+        return checker;
     }
 
     /**
-     * Returns the list of inherited attributes, properties, and indicators defined by the given
-     * attribute' owner.
+     * Returns a <code>UPAViolationChecker</code> that can be used to identify UPA violations that occur
+     * with preceding elements of the declaring facet.
      * 
-     * @param target
-     *            the target attribute being validated
-     * @return List<TLModelElement>
+     * @param target  the target indicator being validated
+     * @return UPAViolationChecker
      */
-    @SuppressWarnings("unchecked")
-    private List<TLModelElement> getInheritedMembersOfOwner(TLIndicator target) {
+    private UPAViolationChecker getUPAViolationChecker(TLIndicator target) {
         TLIndicatorOwner indicatorOwner = target.getOwner();
-        String cacheKey = indicatorOwner.getNamespace() + ":" + indicatorOwner.getLocalName()
-                + ":inheritedMembers";
-        List<TLModelElement> members = (List<TLModelElement>) getContextCacheEntry(cacheKey);
+        String cacheKey = indicatorOwner.getNamespace() + ":" + indicatorOwner.getLocalName() + ":upaChecker";
+        UPAViolationChecker checker = (UPAViolationChecker) getContextCacheEntry( cacheKey );
 
-        if (members == null) {
-            members = ValidatorUtils.getInheritedMembers((TLFacet) indicatorOwner);
-            setContextCacheEntry(cacheKey, members);
+        if (checker == null) {
+        	checker = new UPAViolationChecker( indicatorOwner );
+            setContextCacheEntry( cacheKey, checker );
         }
-        return members;
+        return checker;
     }
 
 }

@@ -22,7 +22,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.opentravel.ns.ota2.librarymodel_v01_04.BusinessObject;
+import org.opentravel.ns.ota2.librarymodel_v01_05.BusinessObject;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLLibrary;

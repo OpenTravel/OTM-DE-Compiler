@@ -30,7 +30,7 @@ import org.opentravel.schemacompiler.model.TLEquivalent.EquivalentListManager;
  * @author S. Livezey
  */
 public abstract class TLComplexTypeBase extends LibraryMember implements TLPropertyType,
-        TLExtensionOwner, TLDocumentationOwner, TLEquivalentOwner {
+        TLVersionedExtensionOwner, TLDocumentationOwner, TLEquivalentOwner {
 
     private String name;
     private boolean notExtendable;

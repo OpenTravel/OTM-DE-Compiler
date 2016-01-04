@@ -35,7 +35,6 @@ import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLCoreObject;
-import org.opentravel.schemacompiler.model.TLEnumValue;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLIndicator;
@@ -57,10 +56,6 @@ import org.opentravel.schemacompiler.validate.ValidationException;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.compile.TLModelCompileValidator;
 import org.opentravel.schemacompiler.validate.impl.TLModelSymbolResolver;
-import org.opentravel.schemacompiler.version.MajorVersionHelper;
-import org.opentravel.schemacompiler.version.MinorVersionHelper;
-import org.opentravel.schemacompiler.version.PatchVersionHelper;
-import org.opentravel.schemacompiler.version.VersionSchemeException;
 
 /**
  * Verifies the operation of the <code>MinorVersionHelper</code> class.
@@ -75,14 +70,10 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
     @Test
     public void testGetLaterMinorVersionLibraries() throws Exception {
         TLModel model = loadTestModel(FILE_VERSION_1_2_2);
-        TLLibrary majorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1,
-                TEST_LIBRARY_NAME);
-        TLLibrary minorVersionLibrary1 = (TLLibrary) model.getLibrary(NS_VERSION_1_1,
-                TEST_LIBRARY_NAME);
-        TLLibrary minorVersionLibrary2 = (TLLibrary) model.getLibrary(NS_VERSION_1_2,
-                TEST_LIBRARY_NAME);
-        TLLibrary patchVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_2_2,
-                TEST_LIBRARY_NAME);
+        TLLibrary majorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1, TEST_LIBRARY_NAME);
+        TLLibrary minorVersionLibrary1 = (TLLibrary) model.getLibrary(NS_VERSION_1_1, TEST_LIBRARY_NAME);
+        TLLibrary minorVersionLibrary2 = (TLLibrary) model.getLibrary(NS_VERSION_1_2, TEST_LIBRARY_NAME);
+        TLLibrary patchVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_2_2, TEST_LIBRARY_NAME);
         MinorVersionHelper helper = new MinorVersionHelper();
         List<String> laterMinorVersions;
 
@@ -110,14 +101,10 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
     @Test
     public void testGetPriorMinorVersionLibraries() throws Exception {
         TLModel model = loadTestModel(FILE_VERSION_1_2_2);
-        TLLibrary majorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1,
-                TEST_LIBRARY_NAME);
-        TLLibrary minorVersionLibrary1 = (TLLibrary) model.getLibrary(NS_VERSION_1_1,
-                TEST_LIBRARY_NAME);
-        TLLibrary minorVersionLibrary2 = (TLLibrary) model.getLibrary(NS_VERSION_1_2,
-                TEST_LIBRARY_NAME);
-        TLLibrary patchVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_2_2,
-                TEST_LIBRARY_NAME);
+        TLLibrary majorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1, TEST_LIBRARY_NAME);
+        TLLibrary minorVersionLibrary1 = (TLLibrary) model.getLibrary(NS_VERSION_1_1, TEST_LIBRARY_NAME);
+        TLLibrary minorVersionLibrary2 = (TLLibrary) model.getLibrary(NS_VERSION_1_2, TEST_LIBRARY_NAME);
+        TLLibrary patchVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_2_2, TEST_LIBRARY_NAME);
         MinorVersionHelper helper = new MinorVersionHelper();
         TLLibrary priorMinorVersion;
 
@@ -142,27 +129,32 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
     @Test
     public void testGetPriorVersionExtension() throws Exception {
         TLModel model = loadTestModel(FILE_VERSION_1_2_2);
-        TLLibrary minorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_2,
-                TEST_LIBRARY_NAME);
-        TLLibrary priorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_1,
-                TEST_LIBRARY_NAME);
+        TLLibrary minorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_2, TEST_LIBRARY_NAME);
+        TLLibrary priorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_1, TEST_LIBRARY_NAME);
         MinorVersionHelper helper = new MinorVersionHelper();
         TLBusinessObject currentVersionBO = minorVersionLibrary.getBusinessObjectType("LookupBO");
         TLCoreObject currentVersionCore = minorVersionLibrary.getCoreObjectType("LookupCore");
-        TLValueWithAttributes currentVersionVWA = minorVersionLibrary
-                .getValueWithAttributesType("LookupVWA");
-        TLOperation currentVersionOp = minorVersionLibrary.getService().getOperation(
-                "LookupOperation");
+        TLValueWithAttributes currentVersionVWA = minorVersionLibrary.getValueWithAttributesType("LookupVWA");
+        TLOperation currentVersionOp = minorVersionLibrary.getService().getOperation("LookupOperation");
+        TLOpenEnumeration currentVersionOpenEnum = minorVersionLibrary.getOpenEnumerationType("LookupOpenEnum");
+        TLClosedEnumeration currentVersionClosedEnum = minorVersionLibrary.getClosedEnumerationType("LookupClosedEnum");
+        TLSimple currentVersionSimple = minorVersionLibrary.getSimpleType("LookupSimple");
 
         assertNotNull(currentVersionBO);
         assertNotNull(currentVersionCore);
         assertNotNull(currentVersionVWA);
         assertNotNull(currentVersionOp);
+        assertNotNull(currentVersionOpenEnum);
+        assertNotNull(currentVersionClosedEnum);
+        assertNotNull(currentVersionSimple);
 
-        TLBusinessObject priorVersionBO = helper.getPriorVersionExtension(currentVersionBO);
-        TLCoreObject priorVersionCore = helper.getPriorVersionExtension(currentVersionCore);
-        TLValueWithAttributes priorVersionVWA = helper.getPriorVersionExtension(currentVersionVWA);
-        TLOperation priorVersionOp = helper.getPriorVersionExtension(currentVersionOp);
+        TLBusinessObject priorVersionBO = helper.getVersionExtension(currentVersionBO);
+        TLCoreObject priorVersionCore = helper.getVersionExtension(currentVersionCore);
+        TLValueWithAttributes priorVersionVWA = helper.getVersionExtension(currentVersionVWA);
+        TLOperation priorVersionOp = helper.getVersionExtension(currentVersionOp);
+        TLOpenEnumeration priorVersionOpenEnum = helper.getVersionExtension(currentVersionOpenEnum);
+        TLClosedEnumeration priorVersionClosedEnum = helper.getVersionExtension(currentVersionClosedEnum);
+        TLSimple priorVersionSimple = helper.getVersionExtension(currentVersionSimple);
 
         assertNotNull(priorVersionBO);
         assertEquals("1.1.0", priorVersionBO.getVersion());
@@ -179,37 +171,50 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
         assertNotNull(priorVersionOp);
         assertEquals("1.1.0", priorVersionOp.getVersion());
         assertTrue(priorVersionOp.getOwningLibrary() == priorVersionLibrary);
+
+        assertNotNull(priorVersionOpenEnum);
+        assertEquals("1.1.0", priorVersionOp.getVersion());
+        assertTrue(priorVersionOp.getOwningLibrary() == priorVersionLibrary);
+
+        assertNotNull(priorVersionClosedEnum);
+        assertEquals("1.1.0", priorVersionOp.getVersion());
+        assertTrue(priorVersionOp.getOwningLibrary() == priorVersionLibrary);
+
+        assertNotNull(priorVersionSimple);
+        assertEquals("1.1.0", priorVersionOp.getVersion());
+        assertTrue(priorVersionOp.getOwningLibrary() == priorVersionLibrary);
     }
 
     @Test
     public void testGetAllPriorVersionExtensions() throws Exception {
         TLModel model = loadTestModel(FILE_VERSION_1_2_2);
-        TLLibrary minorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_2,
-                TEST_LIBRARY_NAME);
-        TLLibrary priorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_1,
-                TEST_LIBRARY_NAME);
-        TLLibrary majorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1,
-                TEST_LIBRARY_NAME);
+        TLLibrary minorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_2, TEST_LIBRARY_NAME);
+        TLLibrary priorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_1, TEST_LIBRARY_NAME);
+        TLLibrary majorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1, TEST_LIBRARY_NAME);
         MinorVersionHelper helper = new MinorVersionHelper();
         TLBusinessObject currentVersionBO = minorVersionLibrary.getBusinessObjectType("LookupBO");
         TLCoreObject currentVersionCore = minorVersionLibrary.getCoreObjectType("LookupCore");
-        TLValueWithAttributes currentVersionVWA = minorVersionLibrary
-                .getValueWithAttributesType("LookupVWA");
-        TLOperation currentVersionOp = minorVersionLibrary.getService().getOperation(
-                "LookupOperation");
+        TLValueWithAttributes currentVersionVWA = minorVersionLibrary.getValueWithAttributesType("LookupVWA");
+        TLOperation currentVersionOp = minorVersionLibrary.getService().getOperation("LookupOperation");
+        TLOpenEnumeration currentVersionOpenEnum = minorVersionLibrary.getOpenEnumerationType("LookupOpenEnum");
+        TLClosedEnumeration currentVersionClosedEnum = minorVersionLibrary.getClosedEnumerationType("LookupClosedEnum");
+        TLSimple currentVersionSimple = minorVersionLibrary.getSimpleType("LookupSimple");
 
         assertNotNull(currentVersionBO);
         assertNotNull(currentVersionCore);
         assertNotNull(currentVersionVWA);
         assertNotNull(currentVersionOp);
+        assertNotNull(currentVersionOpenEnum);
+        assertNotNull(currentVersionClosedEnum);
+        assertNotNull(currentVersionSimple);
 
-        List<TLBusinessObject> priorBOVersions = helper
-                .getAllPriorVersionExtensions(currentVersionBO);
-        List<TLCoreObject> priorCoreVersions = helper
-                .getAllPriorVersionExtensions(currentVersionCore);
-        List<TLValueWithAttributes> priorVwaVersions = helper
-                .getAllPriorVersionExtensions(currentVersionVWA);
-        List<TLOperation> priorOpVersions = helper.getAllPriorVersionExtensions(currentVersionOp);
+        List<TLBusinessObject> priorBOVersions = helper.getAllVersionExtensions(currentVersionBO);
+        List<TLCoreObject> priorCoreVersions = helper.getAllVersionExtensions(currentVersionCore);
+        List<TLValueWithAttributes> priorVwaVersions = helper.getAllVersionExtensions(currentVersionVWA);
+        List<TLOperation> priorOpVersions = helper.getAllVersionExtensions(currentVersionOp);
+        List<TLOpenEnumeration> priorOpenEnumVersions = helper.getAllVersionExtensions(currentVersionOpenEnum);
+        List<TLClosedEnumeration> priorClosedEnumVersions = helper.getAllVersionExtensions(currentVersionClosedEnum);
+        List<TLSimple> priorSimpleVersions = helper.getAllVersionExtensions(currentVersionSimple);
 
         assertEquals(2, priorBOVersions.size());
         assertEquals("1.1.0", priorBOVersions.get(0).getVersion());
@@ -234,35 +239,56 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
         assertTrue(priorOpVersions.get(0).getOwningLibrary() == priorVersionLibrary);
         assertEquals("1.0.0", priorOpVersions.get(1).getVersion());
         assertTrue(priorOpVersions.get(1).getOwningLibrary() == majorVersionLibrary);
+
+        assertEquals(2, priorOpenEnumVersions.size());
+        assertEquals("1.1.0", priorOpenEnumVersions.get(0).getVersion());
+        assertTrue(priorOpenEnumVersions.get(0).getOwningLibrary() == priorVersionLibrary);
+        assertEquals("1.0.0", priorOpenEnumVersions.get(1).getVersion());
+        assertTrue(priorOpenEnumVersions.get(1).getOwningLibrary() == majorVersionLibrary);
+
+        assertEquals(2, priorClosedEnumVersions.size());
+        assertEquals("1.1.0", priorClosedEnumVersions.get(0).getVersion());
+        assertTrue(priorClosedEnumVersions.get(0).getOwningLibrary() == priorVersionLibrary);
+        assertEquals("1.0.0", priorClosedEnumVersions.get(1).getVersion());
+        assertTrue(priorClosedEnumVersions.get(1).getOwningLibrary() == majorVersionLibrary);
+
+        assertEquals(2, priorSimpleVersions.size());
+        assertEquals("1.1.0", priorSimpleVersions.get(0).getVersion());
+        assertTrue(priorSimpleVersions.get(0).getOwningLibrary() == priorVersionLibrary);
+        assertEquals("1.0.0", priorSimpleVersions.get(1).getVersion());
+        assertTrue(priorSimpleVersions.get(1).getOwningLibrary() == majorVersionLibrary);
     }
 
     @Test
     public void testGetLaterMinorVersions() throws Exception {
         TLModel model = loadTestModel(FILE_VERSION_1_2_2);
-        TLLibrary majorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1,
-                TEST_LIBRARY_NAME);
-        TLLibrary minorVersionLibrary1 = (TLLibrary) model.getLibrary(NS_VERSION_1_1,
-                TEST_LIBRARY_NAME);
-        TLLibrary minorVersionLibrary2 = (TLLibrary) model.getLibrary(NS_VERSION_1_2,
-                TEST_LIBRARY_NAME);
+        TLLibrary majorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1, TEST_LIBRARY_NAME);
+        TLLibrary minorVersionLibrary1 = (TLLibrary) model.getLibrary(NS_VERSION_1_1, TEST_LIBRARY_NAME);
+        TLLibrary minorVersionLibrary2 = (TLLibrary) model.getLibrary(NS_VERSION_1_2, TEST_LIBRARY_NAME);
         TLBusinessObject majorVersionBO = majorVersionLibrary.getBusinessObjectType("LookupBO");
         TLCoreObject majorVersionCore = majorVersionLibrary.getCoreObjectType("LookupCore");
-        TLValueWithAttributes majorVersionVWA = majorVersionLibrary
-                .getValueWithAttributesType("LookupVWA");
-        TLOperation majorVersionOp = majorVersionLibrary.getService().getOperation(
-                "LookupOperation");
+        TLValueWithAttributes majorVersionVWA = majorVersionLibrary .getValueWithAttributesType("LookupVWA");
+        TLOperation majorVersionOp = majorVersionLibrary.getService().getOperation( "LookupOperation");
+        TLOpenEnumeration majorVersionOpenEnum = majorVersionLibrary.getOpenEnumerationType( "LookupOpenEnum");
+        TLClosedEnumeration majorVersionClosedEnum = majorVersionLibrary.getClosedEnumerationType( "LookupClosedEnum");
+        TLSimple majorVersionSimple = majorVersionLibrary.getSimpleType( "LookupSimple");
         MinorVersionHelper helper = new MinorVersionHelper();
 
         assertNotNull(majorVersionBO);
         assertNotNull(majorVersionCore);
         assertNotNull(majorVersionVWA);
         assertNotNull(majorVersionOp);
+        assertNotNull(majorVersionOpenEnum);
+        assertNotNull(majorVersionClosedEnum);
+        assertNotNull(majorVersionSimple);
 
         List<TLBusinessObject> laterBOVersions = helper.getLaterMinorVersions(majorVersionBO);
         List<TLCoreObject> laterCoreVersions = helper.getLaterMinorVersions(majorVersionCore);
-        List<TLValueWithAttributes> laterVwaVersions = helper
-                .getLaterMinorVersions(majorVersionVWA);
+        List<TLValueWithAttributes> laterVwaVersions = helper.getLaterMinorVersions(majorVersionVWA);
         List<TLOperation> laterOpVersions = helper.getLaterMinorVersions(majorVersionOp);
+        List<TLOpenEnumeration> laterOpenEnumVersions = helper.getLaterMinorVersions(majorVersionOpenEnum);
+        List<TLClosedEnumeration> laterClosedVersions = helper.getLaterMinorVersions(majorVersionClosedEnum);
+        List<TLSimple> laterSimpleVersions = helper.getLaterMinorVersions(majorVersionSimple);
 
         assertEquals(2, laterBOVersions.size());
         assertEquals("1.1.0", laterBOVersions.get(0).getVersion());
@@ -287,33 +313,46 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
         assertTrue(laterOpVersions.get(0).getOwningLibrary() == minorVersionLibrary1);
         assertEquals("1.2.0", laterOpVersions.get(1).getVersion());
         assertTrue(laterOpVersions.get(1).getOwningLibrary() == minorVersionLibrary2);
+
+        assertEquals(2, laterOpenEnumVersions.size());
+        assertEquals("1.1.0", laterOpenEnumVersions.get(0).getVersion());
+        assertTrue(laterOpenEnumVersions.get(0).getOwningLibrary() == minorVersionLibrary1);
+        assertEquals("1.2.0", laterOpenEnumVersions.get(1).getVersion());
+        assertTrue(laterOpenEnumVersions.get(1).getOwningLibrary() == minorVersionLibrary2);
+
+        assertEquals(2, laterClosedVersions.size());
+        assertEquals("1.1.0", laterClosedVersions.get(0).getVersion());
+        assertTrue(laterClosedVersions.get(0).getOwningLibrary() == minorVersionLibrary1);
+        assertEquals("1.2.0", laterClosedVersions.get(1).getVersion());
+        assertTrue(laterClosedVersions.get(1).getOwningLibrary() == minorVersionLibrary2);
+
+        assertEquals(2, laterSimpleVersions.size());
+        assertEquals("1.1.0", laterSimpleVersions.get(0).getVersion());
+        assertTrue(laterSimpleVersions.get(0).getOwningLibrary() == minorVersionLibrary1);
+        assertEquals("1.2.0", laterSimpleVersions.get(1).getVersion());
+        assertTrue(laterSimpleVersions.get(1).getOwningLibrary() == minorVersionLibrary2);
     }
 
     @Test
     public void testGetEligibleMinorVersionTargets() throws Exception {
         TLModel model = loadTestModel(FILE_VERSION_1_2_2);
-        File patchLibraryFile = purgeExistingFile(new File(System.getProperty("user.dir"),
+        File libraryFile13 = purgeExistingFile(new File(System.getProperty("user.dir"),
                 "/target/test-save-location/library_v01_03.otm"));
         MinorVersionHelper helper = new MinorVersionHelper();
         List<TLLibrary> eligibleLibraries;
 
-        TLLibrary minorVersionLibrary10 = (TLLibrary) model.getLibrary(NS_VERSION_1,
-                TEST_LIBRARY_NAME);
-        TLLibrary minorVersionLibrary11 = (TLLibrary) model.getLibrary(NS_VERSION_1_1,
-                TEST_LIBRARY_NAME);
-        TLLibrary minorVersionLibrary12 = (TLLibrary) model.getLibrary(NS_VERSION_1_2,
-                TEST_LIBRARY_NAME);
-        TLLibrary minorVersionLibrary13 = helper.createNewMinorVersion(minorVersionLibrary12,
-                patchLibraryFile);
+        TLLibrary minorVersionLibrary10 = (TLLibrary) model.getLibrary(NS_VERSION_1, TEST_LIBRARY_NAME);
+        TLLibrary minorVersionLibrary11 = (TLLibrary) model.getLibrary(NS_VERSION_1_1, TEST_LIBRARY_NAME);
+        TLLibrary minorVersionLibrary12 = (TLLibrary) model.getLibrary(NS_VERSION_1_2, TEST_LIBRARY_NAME);
+        TLLibrary minorVersionLibrary13 = helper.createNewMinorVersion(minorVersionLibrary12, libraryFile13);
 
-        TLBusinessObject minorVersionBO = minorVersionLibrary10
-                .getBusinessObjectType("LaterMinorVersionBO");
-        TLCoreObject minorVersionCore = minorVersionLibrary10
-                .getCoreObjectType("LaterMinorVersionCore");
-        TLValueWithAttributes minorVersionVWA = minorVersionLibrary10
-                .getValueWithAttributesType("LaterMinorVersionVWA");
-        TLOperation minorVersionOp = minorVersionLibrary10.getService().getOperation(
-                "LaterMinorVersionOperation");
+        TLBusinessObject minorVersionBO = minorVersionLibrary10.getBusinessObjectType("LaterMinorVersionBO");
+        TLCoreObject minorVersionCore = minorVersionLibrary10.getCoreObjectType("LaterMinorVersionCore");
+        TLValueWithAttributes minorVersionVWA = minorVersionLibrary10.getValueWithAttributesType("LaterMinorVersionVWA");
+        TLOperation minorVersionOp = minorVersionLibrary10.getService().getOperation("LaterMinorVersionOperation");
+        TLOpenEnumeration minorVersionOpenEnum = minorVersionLibrary10.getOpenEnumerationType("LaterMinorVersionOpenEnum");
+        TLClosedEnumeration minorVersionClosedEnum = minorVersionLibrary10.getClosedEnumerationType("LaterMinorVersionClosedEnum");
+        TLSimple minorVersionSimple = minorVersionLibrary10.getSimpleType("LaterMinorVersionSimple");
 
         eligibleLibraries = helper.getEligibleMinorVersionTargets(minorVersionBO);
         assertEquals(2, eligibleLibraries.size());
@@ -334,6 +373,21 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
         assertEquals(2, eligibleLibraries.size());
         assertTrue(eligibleLibraries.contains(minorVersionLibrary11));
         assertTrue(eligibleLibraries.contains(minorVersionLibrary13));
+
+        eligibleLibraries = helper.getEligibleMinorVersionTargets(minorVersionOpenEnum);
+        assertEquals(2, eligibleLibraries.size());
+        assertTrue(eligibleLibraries.contains(minorVersionLibrary11));
+        assertTrue(eligibleLibraries.contains(minorVersionLibrary13));
+
+        eligibleLibraries = helper.getEligibleMinorVersionTargets(minorVersionClosedEnum);
+        assertEquals(2, eligibleLibraries.size());
+        assertTrue(eligibleLibraries.contains(minorVersionLibrary11));
+        assertTrue(eligibleLibraries.contains(minorVersionLibrary13));
+
+        eligibleLibraries = helper.getEligibleMinorVersionTargets(minorVersionSimple);
+        assertEquals(2, eligibleLibraries.size());
+        assertTrue(eligibleLibraries.contains(minorVersionLibrary11));
+        assertTrue(eligibleLibraries.contains(minorVersionLibrary13));
     }
 
     @Test
@@ -343,119 +397,88 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
                 "/target/test-save-location/library_v01_03.otm"));
         MinorVersionHelper helper = new MinorVersionHelper();
 
-        TLLibrary minorVersionLibrary10 = (TLLibrary) model.getLibrary(NS_VERSION_1,
-                TEST_LIBRARY_NAME);
-        TLLibrary minorVersionLibrary12 = (TLLibrary) model.getLibrary(NS_VERSION_1_2,
-                TEST_LIBRARY_NAME);
-        TLLibrary minorVersionLibrary13 = helper.createNewMinorVersion(minorVersionLibrary12,
-                patchLibraryFile);
+        TLLibrary minorVersionLibrary10 = (TLLibrary) model.getLibrary(NS_VERSION_1, TEST_LIBRARY_NAME);
+        TLLibrary minorVersionLibrary12 = (TLLibrary) model.getLibrary(NS_VERSION_1_2, TEST_LIBRARY_NAME);
+        TLLibrary minorVersionLibrary13 = helper.createNewMinorVersion(minorVersionLibrary12, patchLibraryFile);
 
-        TLBusinessObject minorVersionBO = minorVersionLibrary10
-                .getBusinessObjectType("LaterMinorVersionBO");
-        TLCoreObject minorVersionCore = minorVersionLibrary10
-                .getCoreObjectType("LaterMinorVersionCore");
-        TLValueWithAttributes minorVersionVWA = minorVersionLibrary10
-                .getValueWithAttributesType("LaterMinorVersionVWA");
-        TLOperation minorVersionOp = minorVersionLibrary10.getService().getOperation(
-                "LaterMinorVersionOperation");
+        TLBusinessObject minorVersionBO = minorVersionLibrary10.getBusinessObjectType("LaterMinorVersionBO");
+        TLCoreObject minorVersionCore = minorVersionLibrary10.getCoreObjectType("LaterMinorVersionCore");
+        TLValueWithAttributes minorVersionVWA = minorVersionLibrary10.getValueWithAttributesType("LaterMinorVersionVWA");
+        TLOperation minorVersionOp = minorVersionLibrary10.getService().getOperation("LaterMinorVersionOperation");
+        TLOpenEnumeration minorVersionOpenEnum = minorVersionLibrary10.getOpenEnumerationType( "LaterMinorVersionOpenEnum");
+        TLClosedEnumeration minorVersionClosedEnum = minorVersionLibrary10.getClosedEnumerationType( "LaterMinorVersionClosedEnum");
+        TLSimple minorVersionSimple = minorVersionLibrary10.getSimpleType( "LaterMinorVersionSimple");
 
         assertTrue(helper.getPreferredMinorVersionTarget(minorVersionBO) == minorVersionLibrary13);
         assertTrue(helper.getPreferredMinorVersionTarget(minorVersionCore) == minorVersionLibrary13);
         assertTrue(helper.getPreferredMinorVersionTarget(minorVersionVWA) == minorVersionLibrary13);
         assertTrue(helper.getPreferredMinorVersionTarget(minorVersionOp) == minorVersionLibrary13);
+        assertTrue(helper.getPreferredMinorVersionTarget(minorVersionOpenEnum) == minorVersionLibrary13);
+        assertTrue(helper.getPreferredMinorVersionTarget(minorVersionClosedEnum) == minorVersionLibrary13);
+        assertTrue(helper.getPreferredMinorVersionTarget(minorVersionSimple) == minorVersionLibrary13);
     }
 
     @Test
     public void testNewMinorLibraryVersion() throws Exception {
         TLModel model = loadTestModel(FILE_VERSION_1_2_2);
-        TLLibrary minorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_2,
-                TEST_LIBRARY_NAME);
+        TLLibrary minorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_2, TEST_LIBRARY_NAME);
         File newVersionLibraryFile = purgeExistingFile(new File(System.getProperty("user.dir"),
                 "/target/test-save-location/library_v01_03.otm"));
         MinorVersionHelper helper = new MinorVersionHelper();
 
-        TLLibrary newMinorVersionLibrary = helper.createNewMinorVersion(minorVersionLibrary,
-                newVersionLibraryFile);
-        TLBusinessObject newMinorVersionBO = newMinorVersionLibrary
-                .getBusinessObjectType("LookupBO");
+        TLLibrary newMinorVersionLibrary = helper.createNewMinorVersion(minorVersionLibrary, newVersionLibraryFile);
+        TLBusinessObject newMinorVersionBO = newMinorVersionLibrary.getBusinessObjectType("LookupBO");
         TLCoreObject newMinorVersionCore = newMinorVersionLibrary.getCoreObjectType("LookupCore");
-        TLOperation newMinorVersionOp = newMinorVersionLibrary.getService().getOperation(
-                "LookupOperation");
-        TLSimple minorVersionSimple = newMinorVersionLibrary
-                .getSimpleType("TestMinorVersionSimple");
-        TLSimple minorVersionOpenEnum = newMinorVersionLibrary
-                .getSimpleType("TestMinorVersionClosedEnum");
-        TLSimple minorVersionClosedEnum = newMinorVersionLibrary
-                .getSimpleType("TestMinorVersionOpenEnum");
-        TLSimple patchSimple = newMinorVersionLibrary.getSimpleType("TestPatchSimple");
-        TLClosedEnumeration patchClosedEnum = newMinorVersionLibrary
-                .getClosedEnumerationType("TestPatchClosedEnum");
-        TLOpenEnumeration patchOpenEnum = newMinorVersionLibrary
-                .getOpenEnumerationType("TestPatchOpenEnum");
+        TLOperation newMinorVersionOp = newMinorVersionLibrary.getService().getOperation("LookupOperation");
 
         assertNotNull(newMinorVersionLibrary);
         assertEquals("1.3.0", newMinorVersionLibrary.getVersion());
         assertEquals(minorVersionLibrary.getName(), newMinorVersionLibrary.getName());
-        assertEquals(minorVersionLibrary.getBaseNamespace(),
-                newMinorVersionLibrary.getBaseNamespace());
+        assertEquals(minorVersionLibrary.getBaseNamespace(), newMinorVersionLibrary.getBaseNamespace());
         assertEquals(minorVersionLibrary.getComments(), newMinorVersionLibrary.getComments());
 
         assertNotNull(newMinorVersionBO);
-        assertContainsAttributes(newMinorVersionBO.getSummaryFacet(), "extBOAttribute121",
-                "extBOAttribute122");
+        assertContainsAttributes(newMinorVersionBO.getSummaryFacet(), "extBOAttribute121", "extBOAttribute122");
 
         assertNotNull(newMinorVersionCore);
-        assertContainsAttributes(newMinorVersionCore.getSummaryFacet(), "extCoreAttribute121",
-                "extCoreAttribute122");
+        assertContainsAttributes(newMinorVersionCore.getSummaryFacet(), "extCoreAttribute121", "extCoreAttribute122");
 
         assertNotNull(newMinorVersionOp);
-        assertContainsAttributes(newMinorVersionOp.getRequest(), "extOperationAttribute121",
-                "extOperationAttribute122");
+        assertContainsAttributes(newMinorVersionOp.getRequest(), "extOperationAttribute121", "extOperationAttribute122");
 
-        // Simple types defined in the previous minor version are not
-        // copied forward to the new minor version
-        assertNull(minorVersionSimple);
-        assertNull(minorVersionClosedEnum);
-        assertNull(minorVersionOpenEnum);
-
-        // Simple type defined in a patch library ARE copied forward to
-        // the new minor version
-        assertNotNull(patchSimple);
-        assertNotNull(patchClosedEnum);
-        assertNotNull(patchOpenEnum);
-
+        // Types defined in the previous minor version are not copied forward to
+        // the new minor version unless patches are defined for them
         assertNull(newMinorVersionLibrary.getNamedMember("LookupVWA"));
         assertNull(newMinorVersionLibrary.getNamedMember("PatchTestCore"));
         assertNull(newMinorVersionLibrary.getNamedMember("PatchTestBO"));
         assertNull(newMinorVersionLibrary.getService().getOperation("PatchTestOperation"));
+        assertNull(newMinorVersionLibrary.getNamedMember("LookupOpenEnum"));
+        assertNull(newMinorVersionLibrary.getNamedMember("LookupClosedEnum"));
+        assertNull(newMinorVersionLibrary.getNamedMember("LookupSimple"));
     }
 
     @Test
     public void testNewMinorVersion_noRollup() throws Exception {
         TLModel model = loadTestModel(FILE_VERSION_1_2_2);
-        TLLibrary minorVersionLibrary11 = (TLLibrary) model.getLibrary(NS_VERSION_1_1,
-                TEST_LIBRARY_NAME);
-        TLLibrary minorVersionLibrary12 = (TLLibrary) model.getLibrary(NS_VERSION_1_2,
-                TEST_LIBRARY_NAME);
+        TLLibrary minorVersionLibrary11 = (TLLibrary) model.getLibrary(NS_VERSION_1_1, TEST_LIBRARY_NAME);
+        TLLibrary minorVersionLibrary12 = (TLLibrary) model.getLibrary(NS_VERSION_1_2, TEST_LIBRARY_NAME);
         MinorVersionHelper helper = new MinorVersionHelper();
 
-        TLBusinessObject existingMinorVersionBO = minorVersionLibrary11
-                .getBusinessObjectType("MinorVersionTestBO");
-        TLCoreObject existingMinorVersionCore = minorVersionLibrary11
-                .getCoreObjectType("MinorVersionTestCore");
-        TLValueWithAttributes existingMinorVersionVWA = minorVersionLibrary11
-                .getValueWithAttributesType("MinorVersionTestVWA");
-        TLOperation existingMinorVersionOp = minorVersionLibrary11.getService().getOperation(
-                "MinorVersionTestOperation");
-
-        TLBusinessObject newMinorVersionBO = helper.createNewMinorVersion(existingMinorVersionBO,
-                minorVersionLibrary12);
-        TLCoreObject newMinorVersionCore = helper.createNewMinorVersion(existingMinorVersionCore,
-                minorVersionLibrary12);
-        TLValueWithAttributes newMinorVersionVWA = helper.createNewMinorVersion(
-                existingMinorVersionVWA, minorVersionLibrary12);
-        TLOperation newMinorVersionOp = helper.createNewMinorVersion(existingMinorVersionOp,
-                minorVersionLibrary12);
+        TLBusinessObject existingMinorVersionBO = minorVersionLibrary11.getBusinessObjectType("MinorVersionTestBO");
+        TLCoreObject existingMinorVersionCore = minorVersionLibrary11.getCoreObjectType("MinorVersionTestCore");
+        TLValueWithAttributes existingMinorVersionVWA = minorVersionLibrary11.getValueWithAttributesType("MinorVersionTestVWA");
+        TLOperation existingMinorVersionOp = minorVersionLibrary11.getService().getOperation("MinorVersionTestOperation");
+        TLOpenEnumeration existingMinorVersionOpenEnum = minorVersionLibrary11.getOpenEnumerationType("MinorVersionTestOpenEnum");
+        TLClosedEnumeration existingMinorVersionClosedEnum = minorVersionLibrary11.getClosedEnumerationType("MinorVersionTestClosedEnum");
+        TLSimple existingMinorVersionSimple = minorVersionLibrary11.getSimpleType("MinorVersionTestSimple");
+        
+        TLBusinessObject newMinorVersionBO = helper.createNewMinorVersion(existingMinorVersionBO, minorVersionLibrary12);
+        TLCoreObject newMinorVersionCore = helper.createNewMinorVersion(existingMinorVersionCore, minorVersionLibrary12);
+        TLValueWithAttributes newMinorVersionVWA = helper.createNewMinorVersion(existingMinorVersionVWA, minorVersionLibrary12);
+        TLOperation newMinorVersionOp = helper.createNewMinorVersion(existingMinorVersionOp, minorVersionLibrary12);
+        TLOpenEnumeration newMinorVersionOpenEnum = helper.createNewMinorVersion(existingMinorVersionOpenEnum, minorVersionLibrary12);
+        TLClosedEnumeration newMinorVersionClosedEnum = helper.createNewMinorVersion(existingMinorVersionClosedEnum, minorVersionLibrary12);
+        TLSimple newMinorVersionSimple = helper.createNewMinorVersion(existingMinorVersionSimple, minorVersionLibrary12);
 
         assertNotNull(newMinorVersionBO);
         assertTrue(newMinorVersionBO.getOwningLibrary() == minorVersionLibrary12);
@@ -476,57 +499,74 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
         assertTrue(newMinorVersionVWA.getParentType() == existingMinorVersionVWA);
         assertEquals(0, newMinorVersionVWA.getAttributes().size());
         assertEquals(0, newMinorVersionVWA.getIndicators().size());
-
+        
         assertNotNull(newMinorVersionOp);
         assertTrue(newMinorVersionOp.getOwningLibrary() == minorVersionLibrary12);
         assertTrue(newMinorVersionOp.getExtension().getExtendsEntity() == existingMinorVersionOp);
         assertEquals(0, newMinorVersionOp.getRequest().getAttributes().size());
         assertEquals(0, newMinorVersionOp.getRequest().getElements().size());
         assertEquals(0, newMinorVersionOp.getRequest().getIndicators().size());
+
+        assertNotNull(newMinorVersionOpenEnum);
+        assertTrue(newMinorVersionOpenEnum.getOwningLibrary() == minorVersionLibrary12);
+        assertTrue(newMinorVersionOpenEnum.getExtension().getExtendsEntity() == existingMinorVersionOpenEnum);
+        assertEquals(0, newMinorVersionOpenEnum.getValues().size());
+
+        assertNotNull(newMinorVersionClosedEnum);
+        assertTrue(newMinorVersionClosedEnum.getOwningLibrary() == minorVersionLibrary12);
+        assertTrue(newMinorVersionClosedEnum.getExtension().getExtendsEntity() == existingMinorVersionClosedEnum);
+        assertEquals(0, newMinorVersionClosedEnum.getValues().size());
+
+        assertNotNull(newMinorVersionSimple);
+        assertTrue(newMinorVersionSimple.getOwningLibrary() == minorVersionLibrary12);
+        assertTrue(newMinorVersionSimple.getParentType() == existingMinorVersionSimple);
+        assertNull(newMinorVersionSimple.getPattern());
+        assertEquals(-1, newMinorVersionSimple.getMinLength());
+        assertEquals(-1, newMinorVersionSimple.getMaxLength());
+        assertEquals(-1, newMinorVersionSimple.getFractionDigits());
+        assertEquals(-1, newMinorVersionSimple.getTotalDigits());
+        assertNull(newMinorVersionSimple.getMinInclusive());
+        assertNull(newMinorVersionSimple.getMaxInclusive());
+        assertNull(newMinorVersionSimple.getMinExclusive());
+        assertNull(newMinorVersionSimple.getMaxExclusive());
     }
 
     @Test
     public void testNewMinorVersion_laterMinorVersion_withRollup() throws Exception {
         TLModel model = loadTestModel(FILE_VERSION_1_2_2, FILE_VERSION_1_0_1);
-        TLLibrary minorVersionLibrary10 = (TLLibrary) model.getLibrary(NS_VERSION_1,
-                TEST_LIBRARY_NAME);
-        TLLibrary minorVersionLibrary11 = (TLLibrary) model.getLibrary(NS_VERSION_1_1,
-                TEST_LIBRARY_NAME);
-        TLLibrary minorVersionLibrary12 = (TLLibrary) model.getLibrary(NS_VERSION_1_2,
-                TEST_LIBRARY_NAME);
+        TLLibrary minorVersionLibrary10 = (TLLibrary) model.getLibrary(NS_VERSION_1, TEST_LIBRARY_NAME);
+        TLLibrary minorVersionLibrary11 = (TLLibrary) model.getLibrary(NS_VERSION_1_1, TEST_LIBRARY_NAME);
+        TLLibrary minorVersionLibrary12 = (TLLibrary) model.getLibrary(NS_VERSION_1_2, TEST_LIBRARY_NAME);
         MinorVersionHelper helper = new MinorVersionHelper();
 
-        TLBusinessObject firstMinorVersionBO = minorVersionLibrary10
-                .getBusinessObjectType("LaterMinorVersionBO");
-        TLCoreObject firstMinorVersionCore = minorVersionLibrary10
-                .getCoreObjectType("LaterMinorVersionCore");
-        TLValueWithAttributes firstMinorVersionVWA = minorVersionLibrary10
-                .getValueWithAttributesType("LaterMinorVersionVWA");
-        TLOperation firstMinorVersionOp = minorVersionLibrary10.getService().getOperation(
-                "LaterMinorVersionOperation");
+        TLBusinessObject firstMinorVersionBO = minorVersionLibrary10.getBusinessObjectType("LaterMinorVersionBO");
+        TLCoreObject firstMinorVersionCore = minorVersionLibrary10.getCoreObjectType("LaterMinorVersionCore");
+        TLValueWithAttributes firstMinorVersionVWA = minorVersionLibrary10.getValueWithAttributesType("LaterMinorVersionVWA");
+        TLOperation firstMinorVersionOp = minorVersionLibrary10.getService().getOperation("LaterMinorVersionOperation");
+        TLOpenEnumeration firstMinorVersionOpenEnum = minorVersionLibrary10.getOpenEnumerationType("LaterMinorVersionOpenEnum");
+        TLClosedEnumeration firstMinorVersionClosedEnum = minorVersionLibrary10.getClosedEnumerationType("LaterMinorVersionClosedEnum");
+        TLSimple firstMinorVersionSimple = minorVersionLibrary10.getSimpleType("LaterMinorVersionSimple");
 
-        TLBusinessObject laterMinorVersionBO = minorVersionLibrary12
-                .getBusinessObjectType("LaterMinorVersionBO");
-        TLCoreObject laterMinorVersionCore = minorVersionLibrary12
-                .getCoreObjectType("LaterMinorVersionCore");
-        TLValueWithAttributes laterMinorVersionVWA = minorVersionLibrary12
-                .getValueWithAttributesType("LaterMinorVersionVWA");
-        TLOperation laterMinorVersionOp = minorVersionLibrary12.getService().getOperation(
-                "LaterMinorVersionOperation");
+        TLBusinessObject laterMinorVersionBO = minorVersionLibrary12.getBusinessObjectType("LaterMinorVersionBO");
+        TLCoreObject laterMinorVersionCore = minorVersionLibrary12.getCoreObjectType("LaterMinorVersionCore");
+        TLValueWithAttributes laterMinorVersionVWA = minorVersionLibrary12.getValueWithAttributesType("LaterMinorVersionVWA");
+        TLOperation laterMinorVersionOp = minorVersionLibrary12.getService().getOperation("LaterMinorVersionOperation");
+        TLOpenEnumeration laterMinorVersionOpenEnum = minorVersionLibrary12.getOpenEnumerationType("LaterMinorVersionOpenEnum");
+        TLClosedEnumeration laterMinorVersionClosedEnum = minorVersionLibrary12.getClosedEnumerationType("LaterMinorVersionClosedEnum");
+        TLSimple laterMinorVersionSimple = minorVersionLibrary12.getSimpleType("LaterMinorVersionSimple");
 
         assertTrue(laterMinorVersionBO.getExtension().getExtendsEntity() == firstMinorVersionBO);
         assertTrue(laterMinorVersionCore.getExtension().getExtendsEntity() == firstMinorVersionCore);
         assertTrue(laterMinorVersionVWA.getParentType() == firstMinorVersionVWA);
         assertTrue(laterMinorVersionOp.getExtension().getExtendsEntity() == firstMinorVersionOp);
 
-        TLBusinessObject newMinorVersionBO = helper.createNewMinorVersion(firstMinorVersionBO,
-                minorVersionLibrary11);
-        TLCoreObject newMinorVersionCore = helper.createNewMinorVersion(firstMinorVersionCore,
-                minorVersionLibrary11);
-        TLValueWithAttributes newMinorVersionVWA = helper.createNewMinorVersion(
-                firstMinorVersionVWA, minorVersionLibrary11);
-        TLOperation newMinorVersionOp = helper.createNewMinorVersion(firstMinorVersionOp,
-                minorVersionLibrary11);
+        TLBusinessObject newMinorVersionBO = helper.createNewMinorVersion(firstMinorVersionBO, minorVersionLibrary11);
+        TLCoreObject newMinorVersionCore = helper.createNewMinorVersion(firstMinorVersionCore, minorVersionLibrary11);
+        TLValueWithAttributes newMinorVersionVWA = helper.createNewMinorVersion(firstMinorVersionVWA, minorVersionLibrary11);
+        TLOperation newMinorVersionOp = helper.createNewMinorVersion(firstMinorVersionOp, minorVersionLibrary11);
+        TLOpenEnumeration newMinorVersionOpenEnum = helper.createNewMinorVersion(firstMinorVersionOpenEnum, minorVersionLibrary11);
+        TLClosedEnumeration newMinorVersionClosedEnum = helper.createNewMinorVersion(firstMinorVersionClosedEnum, minorVersionLibrary11);
+        TLSimple newMinorVersionSimple = helper.createNewMinorVersion(firstMinorVersionSimple, minorVersionLibrary11);
 
         assertNotNull(newMinorVersionBO);
         assertTrue(newMinorVersionBO.getOwningLibrary() == minorVersionLibrary11);
@@ -564,6 +604,9 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
         assertTrue(laterMinorVersionCore.getExtension().getExtendsEntity() == newMinorVersionCore);
         assertTrue(laterMinorVersionVWA.getParentType() == newMinorVersionVWA);
         assertTrue(laterMinorVersionOp.getExtension().getExtendsEntity() == newMinorVersionOp);
+        assertTrue(laterMinorVersionOpenEnum.getExtension().getExtendsEntity() == newMinorVersionOpenEnum);
+        assertTrue(laterMinorVersionClosedEnum.getExtension().getExtendsEntity() == newMinorVersionClosedEnum);
+        assertTrue(laterMinorVersionSimple.getParentType() == newMinorVersionSimple);
     }
 
     @Test
@@ -712,96 +755,6 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
     }
 
     @Test
-    public void patchRollupDuplicatedSimpleType() throws LibrarySaveException,
-            VersionSchemeException, ValidationException, IOException {
-        // given
-        ModelBuilder mb = ModelBuilder.create();
-        TLModel m = mb.getModel();
-
-        TLLibrary majorV000 = mb.newLibrary("PatchRollup", "http://test.org/rollup/patch").build();
-        majorV000.setPrefix("a");
-        majorV000.setLibraryUrl(URLUtils.toURL(tmp.newFile(majorV000.getName())));
-
-        PatchVersionHelper helper = new PatchVersionHelper();
-        TLLibrary patchV001 = helper.createNewPatchVersion(majorV000);
-
-        TLSimple s = new TLSimple();
-        s.setName("simpleInPatch");
-        s.setParentType((TLAttributeType) resolveEntity(m, "xsd:string"));
-        patchV001.addNamedMember(s);
-
-        // when
-        MinorVersionHelper minor = new MinorVersionHelper();
-        TLLibrary minorv010 = minor.createNewMinorVersion(majorV000);
-
-        // then
-        ValidationFindings findings = TLModelCompileValidator
-                .validateModelElement(minorv010, false);
-        assertFalse(findings.hasFinding());
-    }
-
-    @Test
-    public void patchRollupDuplicatedSimpleTypeMultipeMinor() throws LibrarySaveException,
-            VersionSchemeException, ValidationException, IOException {
-        // given
-        ModelBuilder mb = ModelBuilder.create();
-        TLModel m = mb.getModel();
-
-        TLLibrary majorV000 = mb.newLibrary("PatchRollup", "http://test.org/rollup/patch").build();
-        majorV000.setPrefix("a");
-        majorV000.setLibraryUrl(URLUtils.toURL(tmp.newFile(majorV000.getName())));
-
-        PatchVersionHelper helper = new PatchVersionHelper();
-        TLLibrary patchV001 = helper.createNewPatchVersion(majorV000);
-
-        TLSimple s = new TLSimple();
-        s.setName("simpleInPatch");
-        s.setParentType((TLAttributeType) resolveEntity(m, "xsd:string"));
-        patchV001.addNamedMember(s);
-
-        // when
-        MinorVersionHelper minor = new MinorVersionHelper();
-        TLLibrary minorv010 = minor.createNewMinorVersion(majorV000);
-
-        new LibraryModelSaver().saveAllLibraries(m);
-        // then
-        ValidationFindings findings = TLModelCompileValidator
-                .validateModelElement(minorv010, false);
-        assertFalse(findings.hasFinding());
-    }
-
-    @Test
-    public void patchRollupDuplicatedCloseEnum() throws LibrarySaveException,
-            VersionSchemeException, ValidationException, IOException {
-        // given
-        ModelBuilder mb = ModelBuilder.create();
-        TLModel m = mb.getModel();
-
-        TLLibrary majorV000 = mb.newLibrary("PatchRollup", "http://test.org/rollup/patch").build();
-        majorV000.setPrefix("a");
-        majorV000.setLibraryUrl(URLUtils.toURL(tmp.newFile(majorV000.getName())));
-
-        PatchVersionHelper helper = new PatchVersionHelper();
-        TLLibrary patchV001 = helper.createNewPatchVersion(majorV000);
-
-        TLClosedEnumeration enumC = new TLClosedEnumeration();
-        enumC.setName("Enum");
-        TLEnumValue value = new TLEnumValue();
-        value.setLiteral("FirstValue");
-        enumC.addValue(value);
-        patchV001.addNamedMember(enumC);
-
-        // when
-        MinorVersionHelper minor = new MinorVersionHelper();
-        TLLibrary minorv010 = minor.createNewMinorVersion(majorV000);
-
-        // then
-        ValidationFindings findings = TLModelCompileValidator
-                .validateModelElement(minorv010, false);
-        assertFalse(findings.hasFinding());
-    }
-
-    @Test
     public void patchRollupDuplicatedVWAType() throws LibrarySaveException, VersionSchemeException,
             ValidationException, IOException {
         // given
@@ -825,7 +778,7 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
         vwa.addAttribute(attr);
         minorV010.addNamedMember(vwa);
 
-        TLLibrary minorV020 = minor.createNewMinorVersion(minorV010);
+        minor.createNewMinorVersion(minorV010);
 
         // when
         MajorVersionHelper major = new MajorVersionHelper();

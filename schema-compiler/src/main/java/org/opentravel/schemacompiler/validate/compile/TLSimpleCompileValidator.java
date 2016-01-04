@@ -19,7 +19,9 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import org.opentravel.schemacompiler.model.TLAttributeType;
+import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLSimple;
+import org.opentravel.schemacompiler.model.XSDFacetProfile;
 import org.opentravel.schemacompiler.model.XSDSimpleType;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
@@ -38,6 +40,7 @@ public class TLSimpleCompileValidator extends TLSimpleBaseValidator {
     public static final String ERROR_INVALID_LIST_OF_LISTS = "INVALID_LIST_OF_LISTS";
     public static final String ERROR_INVALID_PATTERN = "INVALID_PATTERN";
     public static final String ERROR_INVALID_RESTRICTION = "INVALID_RESTRICTION";
+    public static final String ERROR_RESTRICTION_NOT_APPLICABLE = "RESTRICTION_NOT_APPLICABLE";
     public static final String ERROR_INVALID_CIRCULAR_REFERENCE = "INVALID_CIRCULAR_REFERENCE";
 
     /**
@@ -56,9 +59,18 @@ public class TLSimpleCompileValidator extends TLSimpleBaseValidator {
 
         builder.setEntityReferenceProperty("parentType", target.getParentType(),
                 target.getParentTypeName()).setFindingType(FindingType.ERROR).assertNotNull()
-                .assertValidEntityReference(TLSimple.class, XSDSimpleType.class)
                 .setFindingType(FindingType.WARNING).assertNotDeprecated();
-
+        
+        // Validate allowable parent types (closed enumerations are allowed for list types
+        if (!target.isListTypeInd()) {
+        	builder.setFindingType(FindingType.ERROR).assertValidEntityReference(
+        			TLSimple.class, XSDSimpleType.class);
+        	
+        } else {
+        	builder.setFindingType(FindingType.ERROR).assertValidEntityReference(
+        			TLSimple.class, XSDSimpleType.class, TLClosedEnumeration.class);
+        }
+        
         if (target.isListTypeInd() && isSimpleListType(target.getParentType())) {
             builder.addFinding(FindingType.ERROR, "listTypeInd", ERROR_INVALID_LIST_OF_LISTS);
         }
@@ -93,6 +105,37 @@ public class TLSimpleCompileValidator extends TLSimpleBaseValidator {
             if ((maxInclusive != null) && (maxExclusive != null)) {
                 builder.addFinding(FindingType.ERROR, "maxInclusive", ERROR_INVALID_RESTRICTION);
             }
+            
+            // Validate that any constraints are valid according to the facet profile
+            XSDFacetProfile facetProfile = target.getXSDFacetProfile();
+            
+            if ((target.getMinLength() > 0) && !facetProfile.isMinLengthSupported()) {
+                builder.addFinding(FindingType.ERROR, "constraintFacet", ERROR_RESTRICTION_NOT_APPLICABLE, "minLength");
+            }
+            if ((target.getMaxLength() > 0) && !facetProfile.isMaxLengthSupported()) {
+                builder.addFinding(FindingType.ERROR, "constraintFacet", ERROR_RESTRICTION_NOT_APPLICABLE, "maxLength");
+            }
+            if ((target.getPattern() != null) && !facetProfile.isPatternSupported()) {
+                builder.addFinding(FindingType.ERROR, "constraintFacet", ERROR_RESTRICTION_NOT_APPLICABLE, "pattern");
+            }
+            if ((target.getFractionDigits() > 0) && !facetProfile.isFractionDigitsSupported()) {
+                builder.addFinding(FindingType.ERROR, "constraintFacet", ERROR_RESTRICTION_NOT_APPLICABLE, "fractionDigits");
+            }
+            if ((target.getTotalDigits() > 0) && !facetProfile.isTotalDigitsSupported()) {
+                builder.addFinding(FindingType.ERROR, "constraintFacet", ERROR_RESTRICTION_NOT_APPLICABLE, "totalDigits");
+            }
+            if ((target.getMinInclusive() != null) && !facetProfile.isMinInclusiveSupported()) {
+                builder.addFinding(FindingType.ERROR, "constraintFacet", ERROR_RESTRICTION_NOT_APPLICABLE, "minInclusive");
+            }
+            if ((target.getMaxInclusive() != null) && !facetProfile.isMaxInclusiveSupported()) {
+                builder.addFinding(FindingType.ERROR, "constraintFacet", ERROR_RESTRICTION_NOT_APPLICABLE, "maxInclusive");
+            }
+            if ((target.getMinExclusive() != null) && !facetProfile.isMinExclusiveSupported()) {
+                builder.addFinding(FindingType.ERROR, "constraintFacet", ERROR_RESTRICTION_NOT_APPLICABLE, "minExclusive");
+            }
+            if ((target.getMaxExclusive() != null) && !facetProfile.isMaxExclusiveSupported()) {
+                builder.addFinding(FindingType.ERROR, "constraintFacet", ERROR_RESTRICTION_NOT_APPLICABLE, "maxExclusive");
+            }
 
         } else {
             // Warn if restriction value(s) are provided for a simple-list type
@@ -114,7 +157,6 @@ public class TLSimpleCompileValidator extends TLSimpleBaseValidator {
                     .setFindingType(FindingType.WARNING).assertLessThanOrEqual(0);
             builder.setProperty("totalDigits", target.getTotalDigits())
                     .setFindingType(FindingType.WARNING).assertLessThanOrEqual(0);
-
         }
 
         checkEmptyValueType(target, target.getParentType(), "parentType", builder);
@@ -127,8 +169,7 @@ public class TLSimpleCompileValidator extends TLSimpleBaseValidator {
         }
 
         checkSchemaNamingConflicts(target, builder);
-
-        checkMajorVersionNamingConflicts(target, builder);
+        validateVersioningRules(target, builder);
 
         return builder.getFindings();
     }
