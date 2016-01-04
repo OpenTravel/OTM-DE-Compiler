@@ -36,17 +36,17 @@
         <Documentation>
             <Description>SampleEnum-documentation-line_3</Description>
         </Documentation>
-        <Value literal="four">
+        <Value literal="four" label="fourLabel">
             <Documentation>
                 <Description>Four</Description>
             </Documentation>
         </Value>
-        <Value literal="five">
+        <Value literal="five" label="fiveLabel">
             <Documentation>
                 <Description>Five</Description>
             </Documentation>
         </Value>
-        <Value literal="six">
+        <Value literal="six" label="sixLabel">
             <Documentation>
                 <Description>Six</Description>
             </Documentation>

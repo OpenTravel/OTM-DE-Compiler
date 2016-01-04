@@ -483,6 +483,12 @@
             </xsd:documentation>
          </xsd:annotation>
       </xsd:attribute>
+      <xsd:attribute name="label" type="Name_XML" use="optional">
+         <xsd:annotation>
+            <xsd:documentation>Optional label for an item in the enumerated list.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
    </xsd:complexType>
 
    <xsd:simpleType name="Enum_xsdSimpleType">

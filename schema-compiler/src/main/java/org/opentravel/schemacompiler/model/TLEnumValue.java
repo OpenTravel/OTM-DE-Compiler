@@ -32,6 +32,7 @@ public class TLEnumValue extends TLModelElement implements TLDocumentationOwner,
 
     private TLAbstractEnumeration owningEnum;
     private String literal;
+    private String label;
     private TLDocumentation documentation;
     private EquivalentListManager equivalentManager = new EquivalentListManager(this);
 
@@ -128,6 +129,29 @@ public class TLEnumValue extends TLModelElement implements TLDocumentationOwner,
                 .setOldValue(this.literal).setNewValue(literal).buildEvent();
 
         this.literal = literal;
+        publishEvent(event);
+    }
+
+    /**
+     * Returns the value of the 'label' field.
+     * 
+     * @return String
+     */
+    public String getLabel() {
+        return label;
+    }
+
+    /**
+     * Assigns the value of the 'label' field.
+     * 
+     * @param label
+     *            the field value to assign
+     */
+    public void setLabel(String label) {
+        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.ENUM_LABEL_MODIFIED, this)
+                .setOldValue(this.label).setNewValue(label).buildEvent();
+
+        this.label = label;
         publishEvent(event);
     }
 

@@ -53,6 +53,7 @@ public class EnumValueTransformer extends
             enumValue.addEquivalent(equivTransformer.transform(sourceEquiv));
         }
         enumValue.setLiteral(trimString(source.getLiteral()));
+        enumValue.setLabel(trimString(source.getLabel()));
         return enumValue;
     }
 

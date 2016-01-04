@@ -54,6 +54,7 @@ public class TLEnumValueTransformer extends
             enumValue.getEquivalent().add(equivTransformer.transform(sourceEquiv));
         }
         enumValue.setLiteral(trimString(source.getLiteral(), false));
+        enumValue.setLabel(trimString(source.getLabel(), false));
         return enumValue;
     }
 

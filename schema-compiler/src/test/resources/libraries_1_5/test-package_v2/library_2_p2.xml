@@ -35,17 +35,17 @@
         <Documentation>
             <Description>SampleEnum-documentation-line_1</Description>
         </Documentation>
-        <Value literal="one">
+        <Value literal="one" label="oneLabel">
             <Documentation>
                 <Description>One</Description>
             </Documentation>
         </Value>
-        <Value literal="two">
+        <Value literal="two" label="twoLabel">
             <Documentation>
                 <Description>Two</Description>
             </Documentation>
         </Value>
-        <Value literal="three">
+        <Value literal="three" label="threeLabel">
             <Documentation>
                 <Description>Three</Description>
             </Documentation>

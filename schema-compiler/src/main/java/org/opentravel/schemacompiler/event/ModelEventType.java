@@ -788,6 +788,15 @@ public enum ModelEventType {
     ENUM_LITERAL_MODIFIED(ValueChangeEvent.class),
 
     /**
+     * Event type sent when the label of an enumeration value was modified.
+     * 
+     * <p>
+     * <u>Event</u>: <code>ValueChangeEvent</code> <br>
+     * <u>Source Object</u>: <code>TLEnumValue</code>
+     */
+    ENUM_LABEL_MODIFIED(ValueChangeEvent.class),
+
+    /**
      * Event type sent when the 'abstract' flag for a resource is modified.
      * 
      * <p>

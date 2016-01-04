@@ -52,6 +52,10 @@ public class TestEnumerationTransformers extends Abstract_1_5_TestTransformers {
         assertEquals("two", enumType.getValues().get(1).getLiteral());
         assertEquals("three", enumType.getValues().get(2).getLiteral());
 
+        assertEquals("oneLabel", enumType.getValues().get(0).getLabel());
+        assertEquals("twoLabel", enumType.getValues().get(1).getLabel());
+        assertEquals("threeLabel", enumType.getValues().get(2).getLabel());
+
         assertNotNull(enumType.getValues().get(0).getDocumentation());
         assertNotNull(enumType.getValues().get(1).getDocumentation());
         assertNotNull(enumType.getValues().get(2).getDocumentation());
@@ -82,6 +86,10 @@ public class TestEnumerationTransformers extends Abstract_1_5_TestTransformers {
         assertEquals("two", enumType.getValue().get(1).getLiteral());
         assertEquals("three", enumType.getValue().get(2).getLiteral());
 
+        assertEquals("oneLabel", enumType.getValue().get(0).getLabel());
+        assertEquals("twoLabel", enumType.getValue().get(1).getLabel());
+        assertEquals("threeLabel", enumType.getValue().get(2).getLabel());
+
         assertNotNull(enumType.getValue().get(0).getDocumentation());
         assertNotNull(enumType.getValue().get(1).getDocumentation());
         assertNotNull(enumType.getValue().get(2).getDocumentation());
@@ -108,6 +116,10 @@ public class TestEnumerationTransformers extends Abstract_1_5_TestTransformers {
         assertEquals("four", enumType.getValues().get(0).getLiteral());
         assertEquals("five", enumType.getValues().get(1).getLiteral());
         assertEquals("six", enumType.getValues().get(2).getLiteral());
+
+        assertEquals("fourLabel", enumType.getValues().get(0).getLabel());
+        assertEquals("fiveLabel", enumType.getValues().get(1).getLabel());
+        assertEquals("sixLabel", enumType.getValues().get(2).getLabel());
 
         assertNotNull(enumType.getValues().get(0).getDocumentation());
         assertNotNull(enumType.getValues().get(1).getDocumentation());
@@ -138,6 +150,10 @@ public class TestEnumerationTransformers extends Abstract_1_5_TestTransformers {
         assertEquals("four", enumType.getValue().get(0).getLiteral());
         assertEquals("five", enumType.getValue().get(1).getLiteral());
         assertEquals("six", enumType.getValue().get(2).getLiteral());
+
+        assertEquals("fourLabel", enumType.getValue().get(0).getLabel());
+        assertEquals("fiveLabel", enumType.getValue().get(1).getLabel());
+        assertEquals("sixLabel", enumType.getValue().get(2).getLabel());
 
         assertNotNull(enumType.getValue().get(0).getDocumentation());
         assertNotNull(enumType.getValue().get(1).getDocumentation());
