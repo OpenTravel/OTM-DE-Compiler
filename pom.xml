@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.opentravel.otm</groupId>
 	<artifactId>ota-parent-pom</artifactId>
-	<version>3.2-SNAPSHOT</version>
+	<version>3.2</version>
 	<packaging>pom</packaging>
 	<inceptionYear>2014</inceptionYear>
 
