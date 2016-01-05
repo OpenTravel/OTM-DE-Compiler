@@ -1110,7 +1110,12 @@
 				<bean class="org.opentravel.schemacompiler.codegen.CodeGeneratorMapping">
 					<property name="sourceType" value="org.opentravel.schemacompiler.model.TLModelElement" />
 					<property name="targetFormat" value="XML" />
-					<property name="codeGenerator" value="org.opentravel.schemacompiler.codegen.example.ExampleCodeGenerator" />
+					<property name="codeGenerator" value="org.opentravel.schemacompiler.codegen.example.XMLExampleCodeGenerator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.codegen.CodeGeneratorMapping">
+					<property name="sourceType" value="org.opentravel.schemacompiler.model.TLModelElement" />
+					<property name="targetFormat" value="JSON" />
+					<property name="codeGenerator" value="org.opentravel.schemacompiler.codegen.example.JSONExampleCodeGenerator" />
 				</bean>
 			</set>
 		</property>

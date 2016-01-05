@@ -15,15 +15,29 @@
  */
 package org.opentravel.schemacompiler.codegen.example;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
+
+import javax.xml.namespace.QName;
+
+import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
+import org.opentravel.schemacompiler.codegen.wsdl.CodeGenerationWsdlBindings;
+import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
+import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLAttributeOwner;
 import org.opentravel.schemacompiler.model.TLAttributeType;
+import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
+import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
@@ -39,6 +53,7 @@ import org.opentravel.schemacompiler.model.XSDElement;
 import org.opentravel.schemacompiler.model.XSDSimpleType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 
 /**
  * Adapter base class for the <code>ExampleVisitor</code> interface that can optionally print
@@ -46,13 +61,22 @@ import org.slf4j.LoggerFactory;
  * 
  * @author S. Livezey
  */
-public abstract class AbstractExampleVisitor implements ExampleVisitor {
+public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractExampleVisitor.class);
     private static final boolean DEBUG = false;
+    
+    protected static Map<TLFacetType, SchemaDependency> extensionPointTypeMap;
 
     private StringBuilder debugIndent = new StringBuilder();
     protected ExampleValueGenerator exampleValueGenerator;
+    protected CodeGenerationWsdlBindings wsdlBindings = null;   
+    protected String lastExampleValue;
+	protected Map<QName, List<String>> idRegistry = new HashMap<QName, List<String>>();	
+	protected Stack<TLPropertyOwner> facetStack = new Stack<TLPropertyOwner>();
+	protected ExampleContext context = new ExampleContext(null);
+	protected Stack<ExampleContext> contextStack = new Stack<ExampleContext>();
+
 
     /**
      * Contstructor that provides the navigation options to use during example generation.
@@ -62,6 +86,13 @@ public abstract class AbstractExampleVisitor implements ExampleVisitor {
      */
     public AbstractExampleVisitor(String preferredContext) {
         this.exampleValueGenerator = ExampleValueGenerator.getInstance(preferredContext);
+        ApplicationContext appContext = SchemaCompilerApplicationContext.getContext();
+
+        if (appContext
+                .containsBean(SchemaCompilerApplicationContext.CODE_GENERATION_WSDL_BINDINGS)) {
+            this.wsdlBindings = (CodeGenerationWsdlBindings) appContext
+                    .getBean(SchemaCompilerApplicationContext.CODE_GENERATION_WSDL_BINDINGS);
+        }
     }
 
     /**
@@ -72,6 +103,7 @@ public abstract class AbstractExampleVisitor implements ExampleVisitor {
      * @return String
      */
     protected String generateExampleValue(Object entity) {
+    	
         String exampleValue = null;
 
         if (entity instanceof TLSimple) {
@@ -119,7 +151,8 @@ public abstract class AbstractExampleVisitor implements ExampleVisitor {
                 exampleValue = exampleValueGenerator.getExampleValue((TLProperty) entity, owner);
         	}
         }
-        return exampleValue;
+        lastExampleValue = exampleValue;
+		return lastExampleValue;
     }
     
     /**
@@ -129,9 +162,54 @@ public abstract class AbstractExampleVisitor implements ExampleVisitor {
      * 
      * @return TLFacet
      */
-    protected NamedEntity getContextFacet() {
-    	return null;
-    }
+    /**
+	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#getContextFacet()
+	 */
+	//@Override
+	protected NamedEntity getContextFacet() {
+		NamedEntity elementType = (context.modelElement == null) ? null
+				: context.modelElement.getType();
+		NamedEntity contextFacet;
+
+		if (elementType instanceof TLExtensionPointFacet) {
+			contextFacet = null; // No inheritance or aliases for extension
+									// point facets
+
+		} else if (elementType instanceof TLValueWithAttributes) {
+			contextFacet = elementType;
+
+		} else {
+			ExampleContext facetContext = context;
+
+			// If we are currently processing an attribute value, the facet
+			// context will be the
+			// current one. If we are processing an element value, the facet
+			// context will be
+			// on top of the context stack.
+			if ((facetContext.modelAttribute == null)
+					&& !contextStack.isEmpty()) {
+				facetContext = contextStack.peek();
+			}
+
+			if (facetContext.modelAlias != null) {
+				TLAlias facetAlias = facetContext.modelAlias;
+
+				if (facetAlias.getOwningEntity() instanceof TLListFacet) {
+					TLAlias coreAlias = AliasCodegenUtils
+							.getOwnerAlias(facetAlias);
+
+					facetAlias = AliasCodegenUtils.getFacetAlias(coreAlias,
+							((TLListFacet) facetAlias.getOwningEntity())
+									.getItemFacet().getFacetType());
+				}
+				contextFacet = facetAlias;
+
+			} else {
+				contextFacet = facetStack.isEmpty() ? null : facetStack.peek();
+			}
+		}
+		return contextFacet;
+	}
 
     /**
      * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#visitSimpleType(org.opentravel.schemacompiler.model.TLAttributeType)
@@ -450,5 +528,381 @@ public abstract class AbstractExampleVisitor implements ExampleVisitor {
             log.info(debugIndent + "endXsdElement() : " + xsdElement.getLocalName());
         }
     }
+    
+    /**
+	 * Adds the given ID to the registry under the qualified name of the given
+	 * entity.
+	 * 
+	 * @param identifiedEntity
+	 *            the named entity type that is referenced by the ID
+	 * @param id
+	 *            the ID value to add to the registry
+	 */
+	protected void registerIdValue(NamedEntity identifiedEntity, String id) {
+		QName entityName = new QName(identifiedEntity.getNamespace(),
+				identifiedEntity.getLocalName());
+		List<String> idList = idRegistry.get(entityName);
+
+		if (idList == null) {
+			idList = new ArrayList<String>();
+			idRegistry.put(entityName, idList);
+		}
+		idList.add(id);
+	}
+	
+	/**
+	 * Adds an example role value for the given core object and each of the
+	 * extended objects that it inherits role attributes from.
+	 * 
+	 * @param coreObject
+	 *            the core object for which to generate role attributes
+	 */
+	protected abstract void addRoleAttributes(TLCoreObject coreObject);
+	
+    /**
+   	 * Adds any attributes and/or child elements that are required by the
+   	 * base payload type of the operation facet to the current object tree.
+   	 *
+   	 * @param operationFacet
+   	 * the operation facet for which to add example web service
+   	 * payload content
+   	 */
+   	 protected abstract void addOperationPayloadContent(TLFacet operationFacet);
+   	 
+   	 /**
+      * Initializes the mapping of facet types to the extension point elements used to encapsulate
+      * extension point facet elements in the generated XML content.
+      */
+     static {
+         try {
+             extensionPointTypeMap = new HashMap<TLFacetType, SchemaDependency>();
+             extensionPointTypeMap.put(TLFacetType.SUMMARY,
+                     SchemaDependency.getExtensionPointSummaryElement());
+             extensionPointTypeMap.put(TLFacetType.DETAIL,
+                     SchemaDependency.getExtensionPointDetailElement());
+             extensionPointTypeMap.put(TLFacetType.CUSTOM,
+                     SchemaDependency.getExtensionPointCustomElement());
+             extensionPointTypeMap.put(TLFacetType.QUERY,
+                     SchemaDependency.getExtensionPointQueryElement());
+
+         } catch (Throwable t) {
+             throw new ExceptionInInitializerError(t);
+         }
+     }
+     
+
+ 	/**
+ 	 * Handles the deferred assignment of 'IDREF' and 'IDREFS' values as a
+ 	 * post-processing step of the example generation process.
+ 	 */
+ 	protected abstract class IdReferenceAssignment {
+
+ 		protected String nodeName;
+ 		protected NamedEntity referencedEntity;
+ 		protected int referenceCount;
+
+ 		/**
+ 		 * Constructor used for assigning an IDREF(S) value to an XML element.
+ 		 * 
+ 		 * @param referencedEntity
+ 		 *            the named entity that was referenced (may be null for
+ 		 *            legacy IDREF(S) values)
+ 		 * @param referenceCount
+ 		 *            indicates the number of reference values that should be
+ 		 *            applied
+ 		 */
+ 		protected IdReferenceAssignment(NamedEntity referencedEntity,
+ 				int referenceCount) {
+ 			this(referencedEntity, referenceCount, null);
+ 		}
+
+ 		/**
+ 		 * Constructor used for assigning an IDREF(S) value to an XML attribute.
+ 		 * 
+ 		 * @param referencedEntity
+ 		 *            the named entity that was referenced (may be null for
+ 		 *            legacy IDREF(S) values)
+ 		 * @param referenceCount
+ 		 *            indicates the number of reference values that should be
+ 		 *            applied
+ 		 * @param attributeName
+ 		 *            the name of the IDREF(S) attribute to which the value
+ 		 *            should be assigned
+ 		 */
+ 		protected IdReferenceAssignment(NamedEntity referencedEntity,
+ 				int referenceCount, String nodeName) {
+ 			this.referencedEntity = referencedEntity;
+ 			this.referenceCount = referenceCount;
+ 			this.nodeName = nodeName;
+ 		}
+
+ 		/**
+ 		 * Assigns the IDREF value(s) to the appropriate attribute or element
+ 		 * based on information collected in the message ID registry during
+ 		 * document generation.
+ 		 */
+ 		public abstract void assignReferenceValue(); 
+ 		/**
+ 		 * Retrieves a space-separated list of appropriate ID values from the
+ 		 * registry.
+ 		 * 
+ 		 * @return String
+ 		 */
+ 		protected String getIdValues() {
+ 			QName elementName = getReferenceElementName();
+ 			List<String> idValues = idRegistry.get(elementName);
+ 			int count = (idValues == null) ? 0 : Math.min(referenceCount,
+ 					idValues.size());
+ 			StringBuilder valueStr = new StringBuilder();
+
+ 			for (int i = 0; i < count; i++) {
+ 				String id = idValues.remove(0);
+
+ 				if (valueStr.length() > 0)
+ 					valueStr.append(" ");
+ 				valueStr.append(id);
+ 				idValues.add(id); // rotate to the end of the list
+ 			}
+ 			return (valueStr.length() == 0) ? null : valueStr.toString();
+ 		}
+
+ 		/**
+ 		 * Searches the ID registry for an ID that is compatible with the entity
+ 		 * type that was referenced by the model attribute or element.
+ 		 * 
+ 		 * @return QName
+ 		 */
+ 		private QName getReferenceElementName() {
+ 			QName elementName = null;
+
+ 			if (referencedEntity == null) {
+ 				if (!idRegistry.keySet().isEmpty()) {
+ 					elementName = idRegistry.keySet().iterator().next();
+ 				}
+ 			} else {
+ 				// Build a list of eligible entity names that qualify for the
+ 				// reference
+ 				List<QName> entityNames = new ArrayList<QName>();
+ 				NamedEntity entity = referencedEntity;
+
+ 				// Add all applicable names for the entity and its alias
+ 				// equivalents
+ 				// if (entity instanceof TLAlias) {
+ 				// addEntityNames(entity, entityNames);
+ 				// entity = ((TLAlias) entity).getOwningEntity();
+ 				// }
+ 				addEntityNames(entity, entityNames);
+
+ 				// if (entity instanceof TLAliasOwner) {
+ 				// for (TLAlias alias : ((TLAliasOwner) entity).getAliases()) {
+ 				// addEntityNames(alias, entityNames);
+ 				// }
+ 				// }
+
+ 				// Iterate through the list and select the first name that
+ 				// appears in the ID
+ 				// registry
+ 				for (QName entityName : entityNames) {
+ 					if (idRegistry.containsKey(entityName)) {
+ 						elementName = entityName;
+ 						break;
+ 					}
+ 				}
+ 			}
+ 			return elementName;
+ 		}
+
+ 		/**
+ 		 * Adds the names of of the given entity and all of its applicable
+ 		 * facets to the list of names provided.
+ 		 * 
+ 		 * @param entityRef
+ 		 *            the referenced entity from which to collect names
+ 		 * @param entityNames
+ 		 *            the list of entity names to be appended
+ 		 */
+ 		private void addEntityNames(NamedEntity entityRef,
+ 				List<QName> entityNames) {
+ 			// Always include the entity whose name was referenced directly
+ 			entityNames.add(new QName(entityRef.getNamespace(), entityRef
+ 					.getLocalName()));
+
+ 			// If the entity is a Core or Business Object (or a Core/BO alias),
+ 			// we can include the
+ 			// names of
+ 			// its non-query facets in the list of eligible entities
+ 			if (entityRef instanceof TLAlias) {
+ 				TLAlias entityAlias = (TLAlias) entityRef;
+ 				NamedEntity owner = entityAlias.getOwningEntity();
+
+ 				if (owner instanceof TLBusinessObject) {
+ 					TLBusinessObject entity = (TLBusinessObject) owner;
+ 					TLAlias idAlias = AliasCodegenUtils.getFacetAlias(
+ 							entityAlias, TLFacetType.ID);
+ 					TLAlias summaryAlias = AliasCodegenUtils.getFacetAlias(
+ 							entityAlias, TLFacetType.SUMMARY);
+ 					TLAlias detailAlias = AliasCodegenUtils.getFacetAlias(
+ 							entityAlias, TLFacetType.DETAIL);
+
+ 					entityNames.add(new QName(idAlias.getNamespace(), idAlias
+ 							.getLocalName()));
+ 					entityNames.add(new QName(summaryAlias.getNamespace(),
+ 							summaryAlias.getLocalName()));
+
+ 					for (TLFacet customFacet : entity.getCustomFacets()) {
+ 						TLAlias customAlias = AliasCodegenUtils.getFacetAlias(
+ 								entityAlias, TLFacetType.CUSTOM,
+ 								customFacet.getContext(),
+ 								customFacet.getLabel());
+
+ 						entityNames.add(new QName(customAlias.getNamespace(),
+ 								customAlias.getLocalName()));
+ 					}
+ 					entityNames.add(new QName(detailAlias.getNamespace(),
+ 							detailAlias.getLocalName()));
+
+ 				} else if (owner instanceof TLCoreObject) {
+ 					TLAlias summaryAlias = AliasCodegenUtils.getFacetAlias(
+ 							entityAlias, TLFacetType.SUMMARY);
+ 					TLAlias detailAlias = AliasCodegenUtils.getFacetAlias(
+ 							entityAlias, TLFacetType.DETAIL);
+
+ 					entityNames.add(new QName(summaryAlias.getNamespace(),
+ 							summaryAlias.getLocalName()));
+ 					entityNames.add(new QName(detailAlias.getNamespace(),
+ 							detailAlias.getLocalName()));
+ 				}
+ 			} else {
+ 				if (entityRef instanceof TLBusinessObject) {
+ 					TLBusinessObject entity = (TLBusinessObject) entityRef;
+
+ 					entityNames
+ 							.add(new QName(entity.getIdFacet().getNamespace(),
+ 									entity.getIdFacet().getLocalName()));
+ 					entityNames.add(new QName(entity.getSummaryFacet()
+ 							.getNamespace(), entity.getSummaryFacet()
+ 							.getLocalName()));
+
+ 					for (TLFacet customFacet : entity.getCustomFacets()) {
+ 						entityNames.add(new QName(customFacet.getNamespace(),
+ 								customFacet.getLocalName()));
+ 					}
+ 					entityNames.add(new QName(entity.getDetailFacet()
+ 							.getNamespace(), entity.getDetailFacet()
+ 							.getLocalName()));
+
+ 				} else if (entityRef instanceof TLCoreObject) {
+ 					TLCoreObject entity = (TLCoreObject) entityRef;
+
+ 					entityNames.add(new QName(entity.getSummaryFacet()
+ 							.getNamespace(), entity.getSummaryFacet()
+ 							.getLocalName()));
+ 					entityNames.add(new QName(entity.getDetailFacet()
+ 							.getNamespace(), entity.getDetailFacet()
+ 							.getLocalName()));
+ 				}
+ 			}
+ 		}
+
+ 	}
+ 	
+ 	/**
+	 * Encapsulates the data-generation context within the current
+	 * element/property being visited.
+	 * 
+	 * @author S. Livezey, E. Bronson
+	 */
+	protected class ExampleContext {
+
+		private T node;
+		private TLProperty modelElement;
+		private TLAlias modelAlias;
+		private TLAttribute modelAttribute;
+
+		/**
+		 * Constructor that specifies the <code>TLProperty</code> instance with
+		 * which this context is associated. If the model element passed to this
+		 * method is null, the context will be assumed to represent the root
+		 * element of the DOM document that is created.
+		 * 
+		 * @param modelElement
+		 *            the model property to be associated with the new context
+		 */
+		public ExampleContext(TLProperty modelElement) {
+			this.modelElement = modelElement;
+		}
+
+		/**
+		 * Returns the element that is being generated for this context.
+		 * 
+		 * @return T
+		 */
+		public T getNode() {
+			return node;
+		}
+
+		/**
+		 * Assigns the element that is being generated for this context.
+		 * 
+		 * @param node
+		 *            the element to assign
+		 */
+		public void setNode(T node) {
+			this.node = node;
+		}
+
+		/**
+		 * Returns the <code>TLProperty</code> instance with which this context
+		 * is associated.
+		 * 
+		 * @return TLProperty
+		 */
+		public TLProperty getModelElement() {
+			return modelElement;
+		}
+
+		/**
+		 * Returns the alias or role (if any) that is associated with this
+		 * context.
+		 * 
+		 * @return TLAlias
+		 */
+		public TLAlias getModelAlias() {
+			return modelAlias;
+		}
+
+		/**
+		 * Assigns the alias or role (if any) that is associated with this
+		 * context.
+		 * 
+		 * @param modelAlias
+		 *            the alias or role to be associated with this context
+		 */
+		public void setModelAlias(TLAlias modelAlias) {
+			this.modelAlias = modelAlias;
+		}
+
+		/**
+		 * Returns the attribute (if any) that is currently associated with this
+		 * context.
+		 * 
+		 * @return TLAttribute
+		 */
+		public TLAttribute getModelAttribute() {
+			return modelAttribute;
+		}
+
+		/**
+		 * Assigns the attribute (if any) that is currently associated with this
+		 * context.
+		 * 
+		 * @param modelAttribute
+		 *            the model attribute to assign
+		 */
+		public void setModelAttribute(TLAttribute modelAttribute) {
+			this.modelAttribute = modelAttribute;
+		}
+
+	}
 
 }
