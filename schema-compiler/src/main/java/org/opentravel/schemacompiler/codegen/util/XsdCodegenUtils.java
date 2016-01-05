@@ -1017,6 +1017,22 @@ public class XsdCodegenUtils {
     }
 
     /**
+     * Returns a camel-case name for a role attribute using the given owner name as a template.
+     * 
+     * @param roleOwnerName  the name of the role attribute owner
+     * @return String
+     */
+    public static String getRoleAttributeName(String roleOwnerName) {
+    	StringBuilder roleName = new StringBuilder().append( roleOwnerName.charAt( 0 ) );
+    	
+    	if (roleOwnerName.length() > 1 ) {
+    		roleName.append( roleOwnerName.substring( 1 ) );
+    	}
+    	roleName.append( "Role" );
+    	return roleName.toString();
+    }
+    
+    /**
      * Initializes the mappings from meta-model classes to library type names.
      */
     static {

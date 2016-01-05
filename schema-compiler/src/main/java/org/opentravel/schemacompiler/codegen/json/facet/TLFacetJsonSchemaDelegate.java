@@ -15,15 +15,21 @@
  */
 package org.opentravel.schemacompiler.codegen.json.facet;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
+import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
+import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.CorrelatedCodegenArtifacts;
+import org.opentravel.schemacompiler.codegen.json.JsonCodegenUtils;
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
+import org.opentravel.schemacompiler.codegen.json.model.JsonType;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
@@ -32,12 +38,15 @@ import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLProperty;
+import org.opentravel.schemacompiler.transform.ObjectTransformer;
 
 /**
  * Base class for facet code generation delegates used to generate code artifacts for
  * <code>TLFacet</code> model elements.
  */
 public abstract class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> {
+	
+	public static final String DISCRIMINATOR_PROPERTY = "discriminator";
 	
     /**
      * Constructor that specifies the source facet for which code artifacts are being generated.
@@ -85,8 +94,106 @@ public abstract class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<
 	 */
 	@Override
 	protected JsonSchemaNamedReference createDefinition() {
-		// TODO Implement the 'createDefinition()' method
+        TLFacet sourceFacet = getSourceFacet();
+        TLFacet baseFacet = getLocalBaseFacet();
+        JsonSchemaNamedReference definition = new JsonSchemaNamedReference();
+        JsonSchemaNamedReference extensionPoint = getExtensionPointProperty();
+        JsonSchema localFacetSchema = new JsonSchema();
+        JsonSchema facetSchema;
+        
+        definition.setName( XsdCodegenUtils.getGlobalTypeName( sourceFacet ) );
+        
+        if (baseFacet != null) {
+        	JsonSchemaReference baseSchemaRef = new JsonSchemaReference( getSchemaReferencePath( baseFacet, sourceFacet ) );
+        	
+        	facetSchema = new JsonSchema();
+        	facetSchema.getAllOf().add( baseSchemaRef );
+        	facetSchema.getAllOf().add( new JsonSchemaReference( localFacetSchema ) );
+        	
+        } else {
+        	JsonSchemaNamedReference discriminator = createDiscriminatorProperty();
+        	
+        	localFacetSchema.getProperties().add( discriminator );
+        	localFacetSchema.setDiscriminator( discriminator.getName() );
+        	definition.setSchema( new JsonSchemaReference( localFacetSchema ) );
+        	facetSchema = localFacetSchema;
+        }
+		transformDocumentation( sourceFacet, facetSchema );
+		facetSchema.setEntityInfo( JsonCodegenUtils.getEntityInfo( sourceFacet.getOwningEntity() ) );
+        
+		localFacetSchema.getProperties().addAll( createAttributeDefinitions() );
+		localFacetSchema.getProperties().addAll( createElementDefinitions() );
+		
+		if (extensionPoint != null) {
+			localFacetSchema.getProperties().add( extensionPoint );
+		}
 		return null;
+	}
+	
+	/**
+	 * Creates the discriminator property for a JSON definition that may be used to support
+	 * inheritance and polymorphism in JSON messages.
+	 * 
+	 * @return JsonSchemaNamedReference
+	 */
+	protected JsonSchemaNamedReference createDiscriminatorProperty() {
+		JsonSchemaNamedReference discriminator = new JsonSchemaNamedReference();
+		JsonSchema schema = new JsonSchema();
+		
+		discriminator.setRequired( true );
+		discriminator.setName( DISCRIMINATOR_PROPERTY );
+		discriminator.setSchema( new JsonSchemaReference( schema ) );
+		schema.setType( JsonType.jsonString );
+		return discriminator;
+	}
+	
+	/**
+	 * Constructs the list of <code>JsonSchemaNamedReference</code> definitions that are based on
+	 * OTM attributes and non-element indicators.
+	 * 
+	 * @return List<JsonSchemaNamedReference>
+	 */
+	protected List<JsonSchemaNamedReference> createAttributeDefinitions() {
+        ObjectTransformer<TLAttribute, CodegenArtifacts, CodeGenerationTransformerContext> attributeTransformer = getTransformerFactory()
+                .getTransformer(TLAttribute.class, CodegenArtifacts.class);
+        ObjectTransformer<TLIndicator, JsonSchemaNamedReference, CodeGenerationTransformerContext> indicatorTransformer = getTransformerFactory()
+                .getTransformer(TLIndicator.class, JsonSchemaNamedReference.class);
+        List<JsonSchemaNamedReference> attributeDefs = new ArrayList<JsonSchemaNamedReference>();
+
+        for (TLAttribute attribute : getAttributes()) {
+        	attributeDefs.addAll( attributeTransformer.transform( attribute ).getArtifactsOfType(
+        			JsonSchemaNamedReference.class ) );
+        }
+        for (TLIndicator indicator : getIndicators()) {
+            if (!indicator.isPublishAsElement()) {
+            	attributeDefs.add( indicatorTransformer.transform( indicator ) );
+            }
+        }
+        return attributeDefs;
+	}
+
+	/**
+	 * Constructs the list of <code>JsonSchemaNamedReference</code> definitions that are based on
+	 * OTM elements and element indicators.
+	 * 
+	 * @return List<JsonSchemaNamedReference>
+	 */
+	protected List<JsonSchemaNamedReference> createElementDefinitions() {
+        ObjectTransformer<TLProperty, JsonSchemaNamedReference, CodeGenerationTransformerContext> elementTransformer = getTransformerFactory()
+                .getTransformer(TLProperty.class, JsonSchemaNamedReference.class);
+        ObjectTransformer<TLIndicator, JsonSchemaNamedReference, CodeGenerationTransformerContext> indicatorTransformer = getTransformerFactory()
+                .getTransformer(TLIndicator.class, JsonSchemaNamedReference.class);
+        List<JsonSchemaNamedReference> elementDefs = new ArrayList<JsonSchemaNamedReference>();
+
+        for (TLProperty element : getElements()) {
+        	elementDefs.add( elementTransformer.transform( element ) );
+        }
+        for (TLIndicator indicator : getIndicators()) {
+            if (indicator.isPublishAsElement()) {
+            	elementDefs.add( indicatorTransformer.transform( indicator ) );
+            }
+        }
+        return elementDefs;
 	}
 
 	/**

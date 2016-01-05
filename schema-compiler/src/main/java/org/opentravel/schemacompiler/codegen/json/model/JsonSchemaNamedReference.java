@@ -22,6 +22,7 @@ public class JsonSchemaNamedReference {
 	
 	private String name;
 	private JsonSchemaReference schema;
+	private boolean required = false;
 	
 	/**
 	 * Default constructor.
@@ -73,6 +74,26 @@ public class JsonSchemaNamedReference {
 	 */
 	public void setSchema(JsonSchemaReference schema) {
 		this.schema = schema;
+	}
+
+	/**
+	 * Returns the flag indicating whether the named reference is required when used
+	 * as a schema property.
+	 *
+	 * @return boolean
+	 */
+	public boolean isRequired() {
+		return required;
+	}
+
+	/**
+	 * Assigns the flag indicating whether the named reference is required when used
+	 * as a schema property.
+	 *
+	 * @param required  the flag value to assign
+	 */
+	public void setRequired(boolean required) {
+		this.required = required;
 	}
 	
 }

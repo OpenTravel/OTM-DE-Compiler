@@ -15,6 +15,11 @@
  */
 package org.opentravel.schemacompiler.codegen.json.facet;
 
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
+import org.opentravel.schemacompiler.codegen.json.model.JsonType;
+import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.model.TLListFacet;
 
 /**
@@ -31,5 +36,23 @@ public class CoreObjectListSimpleFacetJsonSchemaDelegate extends TLListFacetJson
     public CoreObjectListSimpleFacetJsonSchemaDelegate(TLListFacet sourceFacet) {
         super(sourceFacet);
     }
-
+    
+	/**
+	 * @see org.opentravel.schemacompiler.codegen.json.facet.FacetJsonSchemaDelegate#createDefinition()
+	 */
+	@Override
+	protected JsonSchemaNamedReference createDefinition() {
+		JsonSchemaNamedReference definition = new JsonSchemaNamedReference();
+		JsonSchemaReference itemSchemaRef = new JsonSchemaReference();
+		JsonSchema arraySchema = new JsonSchema();
+        TLListFacet sourceFacet = getSourceFacet();
+		
+        arraySchema.setType( JsonType.jsonArray );
+		arraySchema.setItems( itemSchemaRef );
+        itemSchemaRef.setSchemaPath( getSchemaReferencePath( sourceFacet.getItemFacet(), sourceFacet ) );
+		definition.setName( XsdCodegenUtils.getGlobalTypeName(sourceFacet) );
+		definition.setSchema( new JsonSchemaReference( arraySchema ) );
+		return definition;
+	}
+    
 }

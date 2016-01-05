@@ -967,8 +967,8 @@ public class DOMExampleVisitor extends AbstractExampleVisitor {
             if (coreObject.getRoleEnumeration().getRoles().size() > 0) {
                 TLCoreObject extendedCore = (TLCoreObject) FacetCodegenUtils
                         .getFacetOwnerExtension(coreObject);
-                String attrName = (extendedCore == null) ? "role" : coreObject.getLocalName()
-                        + "Role";
+                String attrName = (extendedCore == null) ? "role" :
+                		XsdCodegenUtils.getRoleAttributeName( coreObject.getLocalName() );
 
                 context.getDomElement().setAttribute(attrName,
                         exampleValueGenerator.getExampleRoleValue(coreObject));

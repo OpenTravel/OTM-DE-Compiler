@@ -67,7 +67,7 @@ public class PropertyCodegenUtils {
      * If the 'repeat' value of a property is greater than this threshold value, the XSD element
      * definition will be created with a 'maxOccurs' value of "unbounded".
      */
-    private static final int MAX_OCCURS_UNBOUNDED_THRESHOLD = 5000;
+    public static final int MAX_OCCURS_UNBOUNDED_THRESHOLD = 5000;
     
     /**
      * Returns true if a global element declaration is to be generated for the given property type.

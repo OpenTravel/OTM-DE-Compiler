@@ -15,7 +15,14 @@
  */
 package org.opentravel.schemacompiler.codegen.json.facet;
 
+import org.opentravel.schemacompiler.codegen.json.JsonCodegenUtils;
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
+import org.opentravel.schemacompiler.codegen.json.model.JsonType;
+import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
+import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 
 /**
@@ -38,8 +45,39 @@ public class TLSimpleFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLS
 	 */
 	@Override
 	protected JsonSchemaNamedReference createDefinition() {
-		// TODO Implement the 'createDefinition()' method
-		return null;
+		JsonSchemaNamedReference definition = new JsonSchemaNamedReference();
+		JsonSchemaReference schemaRef = new JsonSchemaReference();
+		TLSimpleFacet sourceFacet = getSourceFacet();
+		NamedEntity baseType = sourceFacet.getSimpleType();
+		JsonType jsonType;
+		
+		definition.setName( XsdCodegenUtils.getGlobalTypeName( sourceFacet ));
+		definition.setSchema( schemaRef );
+		
+        // Special Case: For core objects, use the simple facet as the base type
+		if (baseType instanceof TLCoreObject) {
+			baseType = ((TLCoreObject) baseType).getSimpleFacet();
+		}
+		
+		jsonType = JsonType.valueOf( baseType );
+		
+		if (jsonType != null) {
+			JsonSchema schema = new JsonSchema();
+			
+			schema.setType( jsonType );
+			transformDocumentation( sourceFacet, schema );
+			schema.setEntityInfo( JsonCodegenUtils.getEntityInfo( sourceFacet ) );
+			schema.getExampleItems().addAll( JsonCodegenUtils.getExampleInfo( sourceFacet ) );
+			schema.getEquivalentItems().addAll( JsonCodegenUtils.getEquivalentInfo( sourceFacet ) );
+			schemaRef.setSchema( schema );
+			
+		} else {
+    		transformDocumentation( sourceFacet, schemaRef );
+    		schemaRef.getSchemaPathExampleItems().addAll( JsonCodegenUtils.getExampleInfo( sourceFacet ) );
+    		schemaRef.getSchemaPathEquivalentItems().addAll( JsonCodegenUtils.getEquivalentInfo( sourceFacet ) );
+    		schemaRef.setSchemaPath( getSchemaReferencePath( baseType, sourceFacet ) );
+		}
+		return definition;
 	}
 
 }

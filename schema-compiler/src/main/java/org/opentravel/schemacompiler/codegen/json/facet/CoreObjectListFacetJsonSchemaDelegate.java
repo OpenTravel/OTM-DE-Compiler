@@ -15,6 +15,7 @@
  */
 package org.opentravel.schemacompiler.codegen.json.facet;
 
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.model.TLListFacet;
 
 /**
@@ -32,4 +33,12 @@ public class CoreObjectListFacetJsonSchemaDelegate extends TLListFacetJsonSchema
         super(sourceFacet);
     }
 
+	/**
+	 * @see org.opentravel.schemacompiler.codegen.json.facet.FacetJsonSchemaDelegate#createDefinition()
+	 */
+	@Override
+	protected JsonSchemaNamedReference createDefinition() {
+        return null; // No type generated for complex list facet types
+	}
+    
 }

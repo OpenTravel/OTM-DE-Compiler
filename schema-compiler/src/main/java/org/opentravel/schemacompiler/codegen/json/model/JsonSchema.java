@@ -607,6 +607,7 @@ public class JsonSchema {
 	 * @return JsonObject
 	 */
 	public JsonObject toJson() {
+		List<String> requiredProperties = new ArrayList<>();
 		JsonObject jsonSchema = new JsonObject();
 		
 		if (id != null) {
@@ -668,6 +669,9 @@ public class JsonSchema {
 			JsonObject schemaProps = new JsonObject();
 			
 			for (JsonSchemaNamedReference property : properties) {
+				if (property.isRequired()) {
+					requiredProperties.add( property.getName() );
+				}
 				schemaProps.add( property.getName(), property.getSchema().toJson() );
 			}
 			jsonSchema.add( "properties", schemaProps );
@@ -676,9 +680,23 @@ public class JsonSchema {
 			JsonObject patternProps = new JsonObject();
 			
 			for (JsonSchemaNamedReference property : patternProperties) {
+				if (property.isRequired()) {
+					requiredProperties.add( property.getName() );
+				}
 				patternProps.add( property.getName(), property.getSchema().toJson() );
 			}
 			jsonSchema.add( "patternProperties", patternProps );
+		}
+		if (!requiredProperties.isEmpty()) {
+			JsonArray requiredArray = new JsonArray();
+			
+			for (String propertyName : requiredProperties) {
+				requiredArray.add( propertyName );
+			}
+			jsonSchema.add( "required", requiredArray );
+		}
+		if (discriminator != null) {
+			jsonSchema.addProperty( "discriminator", discriminator );
 		}
 		if (additionalProperties != null) {
 			jsonSchema.add( "additionalProperties", additionalProperties.toJson() );

@@ -53,6 +53,7 @@ public class TLAttributeJsonCodegenTransformer extends AbstractJsonSchemaTransfo
             attr.setName(source.getName());
         }
 		attr.setSchema( attrSchemaRef );
+		attr.setRequired( source.isMandatory() );
 		artifacts.addArtifact( attr );
 		
         if (attributeType instanceof TLCoreObject) {
@@ -105,14 +106,14 @@ public class TLAttributeJsonCodegenTransformer extends AbstractJsonSchemaTransfo
         	
         	attrSchema.setType( jsonType );
     		transformDocumentation( source, attrSchema );
-    		attrSchema.getExampleItems().addAll( getExampleInfo( source ) );
-    		attrSchema.getEquivalentItems().addAll( getEquivalentInfo( source ) );
+    		attrSchema.getExampleItems().addAll( JsonCodegenUtils.getExampleInfo( source ) );
+    		attrSchema.getEquivalentItems().addAll( JsonCodegenUtils.getEquivalentInfo( source ) );
     		attrSchemaRef.setSchema( attrSchema );
     		
         } else {
     		transformDocumentation( source, attrSchemaRef );
-    		attrSchemaRef.getSchemaPathExampleItems().addAll( getExampleInfo( source ) );
-    		attrSchemaRef.getSchemaPathEquivalentItems().addAll( getEquivalentInfo( source ) );
+    		attrSchemaRef.getSchemaPathExampleItems().addAll( JsonCodegenUtils.getExampleInfo( source ) );
+    		attrSchemaRef.getSchemaPathEquivalentItems().addAll( JsonCodegenUtils.getEquivalentInfo( source ) );
         	attrSchemaRef.setSchemaPath( getSchemaReferencePath( attributeType, source.getOwner() ) );
         }
 	}

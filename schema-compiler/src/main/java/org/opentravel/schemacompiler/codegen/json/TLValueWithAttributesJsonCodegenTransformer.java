@@ -55,7 +55,7 @@ public class TLValueWithAttributesJsonCodegenTransformer extends AbstractJsonSch
         targetVwa.setName( source.getName() );
         targetVwa.setSchema( new JsonSchemaReference( vwaSchema ) );
         transformDocumentation( source, vwaSchema );
-        vwaSchema.setEntityInfo( getEntityInfo( source ) );
+        vwaSchema.setEntityInfo( JsonCodegenUtils.getEntityInfo( source ) );
         
         // Create the attribute(s) for the VWA parent type
         if ((vwaParentType != null) && !PropertyCodegenUtils.isEmptyStringType( vwaParentType )) {

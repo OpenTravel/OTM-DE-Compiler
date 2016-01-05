@@ -45,7 +45,7 @@ public class TLIndicatorJsonCodegenTransformer extends AbstractJsonSchemaTransfo
         jsonIndicator.setSchema( new JsonSchemaReference( indicatorSchema ) );
         
         transformDocumentation( source, indicatorSchema );
-        indicatorSchema.getEquivalentItems().addAll( getEquivalentInfo( source ) );
+        indicatorSchema.getEquivalentItems().addAll( JsonCodegenUtils.getEquivalentInfo( source ) );
         
 		return jsonIndicator;
 	}

@@ -42,7 +42,7 @@ public class TLSimpleJsonCodegenTransformer extends AbstractJsonSchemaTransforme
 			JsonSchema schema = new JsonSchema();
 			
 			transformDocumentation( source, schema );
-	        schema.setEntityInfo( getEntityInfo( source ) );
+	        schema.setEntityInfo( JsonCodegenUtils.getEntityInfo( source ) );
 	        
 			schema.setType( JsonType.jsonArray );
 			schema.setItems( new JsonSchemaReference(
@@ -71,9 +71,9 @@ public class TLSimpleJsonCodegenTransformer extends AbstractJsonSchemaTransforme
 		JsonSchemaReference schemaRef;
 		
 		transformDocumentation( source, simpleSchema );
-		simpleSchema.setEntityInfo( getEntityInfo( source ) );
-		simpleSchema.getExampleItems().addAll( getExampleInfo( source ) );
-		simpleSchema.getEquivalentItems().addAll( getEquivalentInfo( source ) );
+		simpleSchema.setEntityInfo( JsonCodegenUtils.getEntityInfo( source ) );
+		simpleSchema.getExampleItems().addAll( JsonCodegenUtils.getExampleInfo( source ) );
+		simpleSchema.getEquivalentItems().addAll( JsonCodegenUtils.getEquivalentInfo( source ) );
 		
 		if (type != null) { // parent must be an XSD simple
 			restrictionsSchema = simpleSchema;
