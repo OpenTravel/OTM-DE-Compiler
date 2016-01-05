@@ -169,13 +169,15 @@ public class DefaultSoapBindings implements CodeGenerationWsdlBindings {
 		TPart faultBody = new TPart();
 
 		switch (messageType) {
-		case REQUEST:
-		case RESPONSE:
-			faultName += "Fault";
-			break;
-		case NOTIFICATION:
-			faultName += "NotifFault";
-			break;
+			case REQUEST:
+			case RESPONSE:
+				faultName += "Fault";
+				break;
+			case NOTIFICATION:
+				faultName += "NotifFault";
+				break;
+			default:
+				break;
 		}
 		faultBody.setName("body");
 		faultBody

@@ -26,6 +26,7 @@ import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.TLEquivalent.EquivalentListManager;
 import org.opentravel.schemacompiler.model.TLExample.ExampleListManager;
+import org.opentravel.schemacompiler.util.XSDFacetProfileLocator;
 
 /**
  * Facet type that references a declared simple type for use as a facet on a complex object.
@@ -132,8 +133,9 @@ public class TLSimpleFacet extends TLAbstractFacet implements TLAttributeType, T
      */
     @Override
     public XSDFacetProfile getXSDFacetProfile() {
-        return (simpleType instanceof TLAttributeType) ? ((TLAttributeType) simpleType)
-                .getXSDFacetProfile() : XSDFacetProfile.FP_unknown;
+        return (simpleType instanceof TLAttributeType)
+        		? XSDFacetProfileLocator.getXSDFacetProfile( (TLAttributeType) simpleType )
+        				: XSDFacetProfile.FP_unknown;
     }
 
     /**

@@ -137,8 +137,7 @@ public class TestLibraryModelSaver {
 
     // @Test
     public void testLoadAndSave_ManualTest() throws Exception {
-        String filepath = "src/test/resources/libraries_1_4/test-package_v2/";
-        // String filepath = "../stl2Developer/resources/";
+        String filepath = "src/test/resources/libraries_1_5/test-package_v2/";
         String filename = "library_3_ext.xml";
         LibraryInputSource<InputStream> libraryInput = new LibraryStreamInputSource(new File(
                 System.getProperty("user.dir"), filepath + filename));

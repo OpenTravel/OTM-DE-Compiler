@@ -17,6 +17,7 @@ package org.opentravel.schemacompiler.codegen.xsd.facet;
 
 import javax.xml.namespace.QName;
 
+import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.TLActionFacet;
@@ -63,9 +64,9 @@ public class ResourceActionFacetCodegenDelegate extends FacetCodegenDelegate<TLA
     			contentExists = true;
     			
     		} else {
-    	        contentExists = !sourceFacet.getAttributes().isEmpty()
-    	        		|| !sourceFacet.getElements().isEmpty()
-    	        		|| !sourceFacet.getIndicators().isEmpty();
+    	        contentExists = !PropertyCodegenUtils.getInheritedAttributes( sourceFacet ).isEmpty()
+    	        		|| !PropertyCodegenUtils.getInheritedProperties( sourceFacet ).isEmpty()
+    	        		|| !PropertyCodegenUtils.getInheritedIndicators( sourceFacet ).isEmpty();
     		}
     	} else {
     		contentExists = false;

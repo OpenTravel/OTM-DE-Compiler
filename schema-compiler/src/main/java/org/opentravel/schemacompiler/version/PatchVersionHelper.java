@@ -23,14 +23,11 @@ import java.util.Set;
 
 import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.NamedEntity;
-import org.opentravel.schemacompiler.model.TLBusinessObject;
-import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
-import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
-import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.model.TLPatchableFacet;
 import org.opentravel.schemacompiler.repository.Project;
 import org.opentravel.schemacompiler.repository.ProjectItem;
 import org.opentravel.schemacompiler.saver.LibraryModelSaver;
@@ -105,34 +102,9 @@ public final class PatchVersionHelper extends AbstractVersionHelper {
                 if (!patchVersionLibraries.isEmpty()) {
                     // Start by identifying the possible facets to which an extension point facet
                     // can refer
-                    Set<TLFacet> entityFacets = new HashSet<TLFacet>();
-
-                    if (versionedEntity instanceof TLCoreObject) {
-                        TLCoreObject versionedCore = (TLCoreObject) versionedEntity;
-
-                        entityFacets.add(versionedCore.getSummaryFacet());
-                        entityFacets.add(versionedCore.getDetailFacet());
-
-                    } else if (versionedEntity instanceof TLBusinessObject) {
-                        TLBusinessObject versionedBO = (TLBusinessObject) versionedEntity;
-
-                        for (TLFacet customFacet : versionedBO.getCustomFacets()) {
-                            entityFacets.add(customFacet);
-                        }
-                        for (TLFacet queryFacet : versionedBO.getQueryFacets()) {
-                            entityFacets.add(queryFacet);
-                        }
-                        entityFacets.add(versionedBO.getSummaryFacet());
-                        entityFacets.add(versionedBO.getDetailFacet());
-
-                    } else if (versionedEntity instanceof TLOperation) {
-                        TLOperation versionedOp = (TLOperation) versionedEntity;
-
-                        entityFacets.add(versionedOp.getRequest());
-                        entityFacets.add(versionedOp.getResponse());
-                        entityFacets.add(versionedOp.getNotification());
-                    }
-
+                    Set<TLPatchableFacet> entityFacets = new HashSet<TLPatchableFacet>(
+                    		getVersionHandler(versionedEntity).getPatchableFacets(versionedEntity) );
+                    
                     // Search the extension points to determine if any of them reference a facet of
                     // our original entity
                     for (TLLibrary patchVersionLib : patchVersionLibraries) {
@@ -161,10 +133,9 @@ public final class PatchVersionHelper extends AbstractVersionHelper {
      * @return List<TLLibrary>
      * @throws VersionSchemeException
      */
-    public List<TLLibrary> getEligiblePatchVersionTargets(TLFacet versionedEntityFacet)
+    public List<TLLibrary> getEligiblePatchVersionTargets(TLPatchableFacet versionedEntityFacet)
             throws VersionSchemeException {
-        TLLibrary owningLibrary = getOwningLibrary((Versioned) versionedEntityFacet
-                .getOwningEntity());
+        TLLibrary owningLibrary = getOwningLibrary((Versioned) versionedEntityFacet.getOwningEntity());
         List<TLLibrary> patchLibraries = getLaterPatchVersions(owningLibrary);
         List<TLLibrary> eligibleLibraries = new ArrayList<TLLibrary>();
 
@@ -196,7 +167,7 @@ public final class PatchVersionHelper extends AbstractVersionHelper {
      * @return List<TLLibrary>
      * @throws VersionSchemeException
      */
-    public TLLibrary getPreferredPatchVersionTarget(TLFacet versionedEntityFacet)
+    public TLLibrary getPreferredPatchVersionTarget(TLPatchableFacet versionedEntityFacet)
             throws VersionSchemeException {
         List<TLLibrary> eligibleTargets = getEligiblePatchVersionTargets(versionedEntityFacet);
         return eligibleTargets.isEmpty() ? null : eligibleTargets.get(eligibleTargets.size() - 1);
@@ -311,7 +282,7 @@ public final class PatchVersionHelper extends AbstractVersionHelper {
      *             thrown if the target library is not a patch version of the given entity, or the
      *             facet to be patched is not owned by the versioned entity
      */
-    public TLExtensionPointFacet createNewPatch(TLFacet facetToPatch, TLLibrary targetLibraryVersion)
+    public TLExtensionPointFacet createNewPatch(TLPatchableFacet facetToPatch, TLLibrary targetLibraryVersion)
             throws VersionSchemeException {
         TLLibrary owningLibrary = getOwningLibrary((Versioned) facetToPatch.getOwningEntity());
         List<TLLibrary> patchLibraries = getLaterPatchVersions(owningLibrary);

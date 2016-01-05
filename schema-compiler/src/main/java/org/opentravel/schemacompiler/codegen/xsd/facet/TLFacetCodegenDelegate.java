@@ -77,8 +77,15 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
      */
     @Override
     public FacetCodegenElements generateElements() {
-        FacetCodegenElements codegenElements = super.generateElements();
-
+    	boolean doDefaultElement = hasDefaultFacetElement();
+        FacetCodegenElements codegenElements;
+        
+        if (doDefaultElement) {
+            codegenElements = super.generateElements();
+        } else {
+            codegenElements = new FacetCodegenElements();
+        }
+        
         if (hasContent()) {
             TLFacet sourceFacet = getSourceFacet();
             TLFacetOwner facetOwner = sourceFacet.getOwningEntity();
@@ -101,8 +108,9 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
                         codegenElements.addSubstitutionGroupElement(ownerAlias,
                                 createSubstitutionGroupElement(ownerAlias));
                     }
-                    codegenElements.addFacetElement(ownerAlias, createElement(facetAlias));
-
+                    if (doDefaultElement) {
+                        codegenElements.addFacetElement(ownerAlias, createElement(facetAlias));
+                    }
                     if (doNonSubstitutableElement) {
                         codegenElements.addFacetElement(ownerAlias,
                                 createNonSubstitutableElement(facetAlias));
@@ -112,7 +120,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
         }
         return codegenElements;
     }
-
+    
     /**
      * @see org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegate#hasContent()
      */
@@ -154,14 +162,12 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
      * 
      * @return TLFacet
      */
-    protected TLFacet getBaseFacet() {
+    public TLFacet getBaseFacet() {
         TLFacet baseFacet = getLocalBaseFacet();
 
         // If the source facet does not have a base facet from its local owner, we need to look at
-        // the
-        // business object/core/operation extension and select the corresponding facet from the
-        // extended
-        // owner as the base
+        // the business object/core/operation extension and select the corresponding facet from the
+        // extended owner as the base
         if (baseFacet == null) {
             InheritedFacetSearch facetSearch = new InheritedFacetSearch(getSourceFacet()) {
                 public boolean isMatchingCandidate(TLFacet candidateFacet) {
@@ -209,7 +215,17 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
     }
 
     /**
-     * Returns true if root substitution group element for the source facet owne should be generated
+     * Returns true if this delegate should call the base class to generate a default
+     * global element (returns true by default).
+     * 
+     * @return boolean
+     */
+    public boolean hasDefaultFacetElement() {
+    	return true;
+    }
+
+    /**
+     * Returns true if root substitution group element for the source facet owner should be generated
      * using the source facet.
      * 
      * <p>
@@ -270,7 +286,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
      * 
      * @return boolean
      */
-    protected boolean hasNonSubstitutableElement() {
+    public boolean hasNonSubstitutableElement() {
         return false;
     }
 
@@ -304,7 +320,8 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
     }
 
     /**
-     * Returns the name of the element used to represent the source facet or the specified alias.
+     * Returns the name of the non-substitutable element used to represent the source facet or the
+     * specified alias.
      * 
      * <p>
      * NOTE: By default, this method returns the results of the 'getElementName()' that is used to
@@ -316,7 +333,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
      *            the alias of the source facet element being created (may be null)
      * @return String
      */
-    protected String getNonSubstitableElementName(TLAlias facetAlias) {
+    public String getNonSubstitableElementName(TLAlias facetAlias) {
         String elementName;
 
         if (facetAlias == null) {
@@ -331,7 +348,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
      * @see org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegate#getElementName(org.opentravel.schemacompiler.model.TLAlias)
      */
     @Override
-    protected String getElementName(TLAlias facetAlias) {
+    public String getElementName(TLAlias facetAlias) {
         String elementName;
 
         if (facetAlias == null) {
@@ -346,7 +363,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
     /**
      * If the source facet should support an extension point element, this method will return the
      * qualified name of the global extension point element to use in the type's definition. If
-     * extensions are not supported for the facet, this method sould return null.
+     * extensions are not supported for the facet, this method should return null.
      * 
      * @return QName
      */
@@ -389,7 +406,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
      * 
      * @return List<TLAttribute>
      */
-    protected List<TLAttribute> getAttributes() {
+    public List<TLAttribute> getAttributes() {
         return PropertyCodegenUtils.getInheritedFacetAttributes(getSourceFacet());
     }
 
@@ -401,7 +418,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
      * 
      * @return List<TLProperty>
      */
-    protected List<TLProperty> getElements() {
+    public List<TLProperty> getElements() {
         return PropertyCodegenUtils.getInheritedFacetProperties(getSourceFacet());
     }
 
@@ -413,7 +430,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
      * 
      * @return List<TLIndicator>
      */
-    protected List<TLIndicator> getIndicators() {
+    public List<TLIndicator> getIndicators() {
         return PropertyCodegenUtils.getInheritedFacetIndicators(getSourceFacet());
     }
 
@@ -428,7 +445,9 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
         QName globalExtensionPointElement = hasExtensionPoint() ? getExtensionPointElement() : null;
 
         List<TLProperty> elementList = getElements();
-        boolean hasSequence = (globalExtensionPointElement != null) || !elementList.isEmpty();
+        List<TLIndicator> indicatorList = getIndicators();
+        boolean hasSequence = (globalExtensionPointElement != null) ||
+        		!elementList.isEmpty() || hasElementIndicators( indicatorList );
         ExplicitGroup sequence = hasSequence ? new ExplicitGroup() : null;
         ComplexType type = new TopLevelComplexType();
         List<Annotated> jaxbAttributeList;
@@ -462,7 +481,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
                 sequence.getParticle().add(
                         jaxbObjectFactory.createElement(elementTransformer.transform(element)));
             }
-            for (TLIndicator indicator : getIndicators()) {
+            for (TLIndicator indicator : indicatorList) {
                 if (indicator.isPublishAsElement()) {
                     sequence.getParticle().add(
                             jaxbObjectFactory.createElement((TopLevelElement) indicatorTransformer
@@ -596,6 +615,25 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
             facetHierarchy.pop();
         }
         return (TLPropertyType) (facetHierarchy.isEmpty() ? null : facetHierarchy.peek());
+    }
+    
+    /**
+     * Returns true if the given list of indicators has at least one that should be declared
+     * as an XSD element.
+     * 
+     * @param indicatorList  the list of indicators to analyze
+     * @return boolean
+     */
+    private boolean hasElementIndicators(List<TLIndicator> indicatorList) {
+    	boolean hasElement = false;
+    	
+    	for (TLIndicator indicator : indicatorList) {
+    		if (indicator.isPublishAsElement()) {
+    			hasElement = true;
+    			break;
+    		}
+    	}
+    	return hasElement;
     }
 
     /**

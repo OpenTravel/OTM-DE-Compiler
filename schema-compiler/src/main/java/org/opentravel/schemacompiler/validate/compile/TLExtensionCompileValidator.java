@@ -16,6 +16,7 @@
 package org.opentravel.schemacompiler.validate.compile;
 
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLComplexTypeBase;
@@ -85,7 +86,7 @@ public class TLExtensionCompileValidator extends TLValidatorBase<TLExtension> {
                 String localNamespace = ((TLExtensionPointFacet) extensionOwner).getNamespace();
 
                 // Extension point facets can only extend facets from another namespace
-                builder.assertValidEntityReference(TLFacet.class);
+                builder.assertValidEntityReference(TLFacet.class, TLActionFacet.class);
 
                 if ((extendsEntity instanceof TLFacet) && (localNamespace != null)
                         && localNamespace.equals(extendsEntityNamespace)) {

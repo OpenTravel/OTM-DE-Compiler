@@ -24,12 +24,14 @@ import java.util.List;
 
 import org.junit.Test;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 
@@ -159,18 +161,20 @@ public class TestMajorVersionHelper extends AbstractVersionHelperTests {
         // Validate the 'Lookup...' grouping
         TLBusinessObject lookupBO = newMajorVersionLibrary.getBusinessObjectType("LookupBO");
         TLCoreObject lookupCore = newMajorVersionLibrary.getCoreObjectType("LookupCore");
+        TLChoiceObject lookupChoice = newMajorVersionLibrary.getChoiceObjectType("LookupChoice");
         TLValueWithAttributes lookupVWA = newMajorVersionLibrary.getValueWithAttributesType("LookupVWA");
         TLOperation lookupOp = newMajorVersionLibrary.getService().getOperation("LookupOperation");
         TLOpenEnumeration lookupOpenEnum = newMajorVersionLibrary.getOpenEnumerationType("LookupOpenEnum");
         TLClosedEnumeration lookupClosedEnum = newMajorVersionLibrary.getClosedEnumerationType("LookupClosedEnum");
         TLSimple lookupSimple = newMajorVersionLibrary.getSimpleType("LookupSimple");
+        TLResource lookupResource = newMajorVersionLibrary.getResourceType("LookupResource");
 
         assertNotNull(lookupBO);
         assertNull(lookupBO.getExtension());
         assertEquals(2, lookupBO.getSummaryFacet().getAttributes().size());
-        assertEquals(3, lookupBO.getSummaryFacet().getElements().size());
+        assertEquals(4, lookupBO.getSummaryFacet().getElements().size());
         assertContainsAttributes(lookupBO.getSummaryFacet(), "extBOAttribute121", "extBOAttribute122");
-        assertContainsElements(lookupBO.getSummaryFacet(), "Element1", "Element11", "Element12");
+        assertContainsElements(lookupBO.getSummaryFacet(), "Element1", "Element11", "Element11Param", "Element12");
 
         assertNotNull(lookupCore);
         assertNull(lookupCore.getExtension());
@@ -178,6 +182,13 @@ public class TestMajorVersionHelper extends AbstractVersionHelperTests {
         assertEquals(3, lookupCore.getSummaryFacet().getElements().size());
         assertContainsAttributes(lookupCore.getSummaryFacet(), "extCoreAttribute121", "extCoreAttribute122");
         assertContainsElements(lookupCore.getSummaryFacet(), "Element1", "Element11", "Element12");
+
+        assertNotNull(lookupChoice);
+        assertNull(lookupChoice.getExtension());
+        assertEquals(2, lookupChoice.getSharedFacet().getAttributes().size());
+        assertEquals(3, lookupChoice.getSharedFacet().getElements().size());
+        assertContainsAttributes(lookupChoice.getSharedFacet(), "extChoiceAttribute121", "extChoiceAttribute122");
+        assertContainsElements(lookupChoice.getSharedFacet(), "sharedElement1", "sharedElement11", "sharedElement12");
 
         assertNotNull(lookupVWA);
         assertNotNull(lookupVWA.getParentType());
@@ -209,14 +220,35 @@ public class TestMajorVersionHelper extends AbstractVersionHelperTests {
         assertEquals(2, lookupSimple.getMinLength());
         assertEquals(5, lookupSimple.getMaxLength());
         
+        assertNotNull(lookupResource);
+        assertNull(lookupResource.getExtension());
+        assertEquals(lookupBO, lookupResource.getBusinessObjectRef());
+        assertEquals(0, lookupResource.getParentRefs().size());
+        assertEquals(4, lookupResource.getParamGroups().size());
+        assertContainsParamGroups( lookupResource, "LookupParametersShared", "LookupParameters10", "LookupParameters11", "LookupParameters12");
+        assertEquals(3, lookupResource.getParamGroup("LookupParametersShared").getParameters().size());
+        assertContainsParameters(lookupResource.getParamGroup("LookupParametersShared"), "Element1", "Element11Param", "Element12");
+        assertEquals(4, lookupResource.getActionFacets().size());
+        assertContainsActionFacets( lookupResource, "LookupFacetShared", "LookupFacet10", "LookupFacet11", "LookupFacet12");
+        assertEquals(2, lookupResource.getActionFacet("LookupFacetShared").getAttributes().size());
+        assertContainsAttributes(lookupResource.getActionFacet("LookupFacetShared"), "extResourceAttribute121", "extResourceAttribute122");
+        assertEquals(3, lookupResource.getActionFacet("LookupFacetShared").getElements().size());
+        assertContainsElements(lookupResource.getActionFacet("LookupFacetShared"), "Element1", "Element11", "Element12");
+        assertEquals(3, lookupResource.getActions().size());
+        assertContainsActions( lookupResource, "LookupAction10", "LookupAction11", "LookupAction12");
+        assertNotNull( lookupResource.getAction("LookupAction10").getRequest() );
+        assertEquals(1, lookupResource.getAction("LookupAction10").getResponses().size());
+        
         // Validate the 'LaterMinorVersion...' grouping
         TLBusinessObject laterMinorVersionBO = newMajorVersionLibrary.getBusinessObjectType("LaterMinorVersionBO");
         TLCoreObject laterMinorVersionCore = newMajorVersionLibrary.getCoreObjectType("LaterMinorVersionCore");
+        TLChoiceObject laterMinorVersionChoice = newMajorVersionLibrary.getChoiceObjectType("LaterMinorVersionChoice");
         TLValueWithAttributes laterMinorVersionVWA = newMajorVersionLibrary.getValueWithAttributesType("LaterMinorVersionVWA");
         TLOperation laterMinorVersionOp = newMajorVersionLibrary.getService().getOperation("LaterMinorVersionOperation");
         TLOpenEnumeration laterMinorVersionOpenEnum = newMajorVersionLibrary.getOpenEnumerationType("LaterMinorVersionOpenEnum");
         TLClosedEnumeration laterMinorVersionClosedEnum = newMajorVersionLibrary.getClosedEnumerationType("LaterMinorVersionClosedEnum");
         TLSimple laterMinorVersionSimple = newMajorVersionLibrary.getSimpleType("LaterMinorVersionSimple");
+        TLResource laterMinorVersionResource = newMajorVersionLibrary.getResourceType("LaterMinorVersionResource");
 
         assertNotNull(laterMinorVersionBO);
         assertNull(laterMinorVersionBO.getExtension());
@@ -229,6 +261,12 @@ public class TestMajorVersionHelper extends AbstractVersionHelperTests {
         assertEquals(0, laterMinorVersionCore.getSummaryFacet().getAttributes().size());
         assertEquals(2, laterMinorVersionCore.getSummaryFacet().getElements().size());
         assertContainsElements(laterMinorVersionCore.getSummaryFacet(), "Element1", "Element12");
+
+        assertNotNull(laterMinorVersionChoice);
+        assertNull(laterMinorVersionChoice.getExtension());
+        assertEquals(0, laterMinorVersionChoice.getSharedFacet().getAttributes().size());
+        assertEquals(2, laterMinorVersionChoice.getSharedFacet().getElements().size());
+        assertContainsElements(laterMinorVersionChoice.getSharedFacet(), "sharedElement1", "sharedElement12");
 
         assertNotNull(laterMinorVersionVWA);
         assertNotNull(laterMinorVersionVWA.getParentType());
@@ -259,14 +297,35 @@ public class TestMajorVersionHelper extends AbstractVersionHelperTests {
         assertEquals(2, laterMinorVersionSimple.getMinLength());
         assertEquals(5, laterMinorVersionSimple.getMaxLength());
 
+        assertNotNull(laterMinorVersionResource);
+        assertNull(laterMinorVersionResource.getExtension());
+        assertEquals(laterMinorVersionBO, laterMinorVersionResource.getBusinessObjectRef());
+        assertEquals(2, laterMinorVersionResource.getParentRefs().size());
+        assertContainsParentRefs(laterMinorVersionResource, "/parent/{uid}", "/parent2/{uid}");
+        assertEquals(3, laterMinorVersionResource.getParamGroups().size());
+        assertContainsParamGroups( laterMinorVersionResource, "LaterMinorVersionParametersShared", "LaterMinorVersionParameters10", "LaterMinorVersionParameters12");
+        assertEquals(2, laterMinorVersionResource.getParamGroup("LaterMinorVersionParametersShared").getParameters().size());
+        assertContainsParameters(laterMinorVersionResource.getParamGroup("LaterMinorVersionParametersShared"), "Element1", "Element12");
+        assertEquals(3, laterMinorVersionResource.getActionFacets().size());
+        assertContainsActionFacets( laterMinorVersionResource, "LaterMinorVersionFacetShared", "LaterMinorVersionFacet10", "LaterMinorVersionFacet12");
+        assertEquals(0, laterMinorVersionResource.getActionFacet("LaterMinorVersionFacetShared").getAttributes().size());
+        assertEquals(2, laterMinorVersionResource.getActionFacet("LaterMinorVersionFacetShared").getElements().size());
+        assertContainsElements(laterMinorVersionResource.getActionFacet("LaterMinorVersionFacetShared"), "Element1", "Element12");
+        assertEquals(2, laterMinorVersionResource.getActions().size());
+        assertContainsActions( laterMinorVersionResource, "LaterMinorVersionAction10", "LaterMinorVersionAction12");
+        assertNotNull( laterMinorVersionResource.getAction("LaterMinorVersionAction10").getRequest() );
+        assertEquals(1, laterMinorVersionResource.getAction("LaterMinorVersionAction10").getResponses().size());
+        
         // Validate the 'MinorVersionTest...' grouping
         TLBusinessObject minorVersionTestBO = newMajorVersionLibrary.getBusinessObjectType("MinorVersionTestBO");
         TLCoreObject minorVersionTestCore = newMajorVersionLibrary.getCoreObjectType("MinorVersionTestCore");
+        TLChoiceObject minorVersionTestChoice = newMajorVersionLibrary.getChoiceObjectType("MinorVersionTestChoice");
         TLValueWithAttributes minorVersionTestVWA = newMajorVersionLibrary.getValueWithAttributesType("MinorVersionTestVWA");
         TLOperation minorVersionTestOp = newMajorVersionLibrary.getService().getOperation("MinorVersionTestOperation");
         TLOpenEnumeration minorVersionTestOpenEnum = newMajorVersionLibrary.getOpenEnumerationType("MinorVersionTestOpenEnum");
         TLClosedEnumeration minorVersionTestClosedEnum = newMajorVersionLibrary.getClosedEnumerationType("MinorVersionTestClosedEnum");
         TLSimple minorVersionTestSimple = newMajorVersionLibrary.getSimpleType("MinorVersionTestSimple");
+        TLResource minorVersionTestResource = newMajorVersionLibrary.getResourceType("MinorVersionTestResource");
 
         assertNotNull(minorVersionTestBO);
         assertNull(minorVersionTestBO.getExtension());
@@ -279,6 +338,12 @@ public class TestMajorVersionHelper extends AbstractVersionHelperTests {
         assertEquals(0, minorVersionTestCore.getSummaryFacet().getAttributes().size());
         assertEquals(1, minorVersionTestCore.getSummaryFacet().getElements().size());
         assertContainsElements(minorVersionTestCore.getSummaryFacet(), "Element11");
+
+        assertNotNull(minorVersionTestChoice);
+        assertNull(minorVersionTestChoice.getExtension());
+        assertEquals(0, minorVersionTestChoice.getSharedFacet().getAttributes().size());
+        assertEquals(1, minorVersionTestChoice.getSharedFacet().getElements().size());
+        assertContainsElements(minorVersionTestChoice.getSharedFacet(), "sharedElement11");
 
         assertNotNull(minorVersionTestVWA);
         assertNotNull(minorVersionTestVWA.getParentType());
@@ -309,29 +374,27 @@ public class TestMajorVersionHelper extends AbstractVersionHelperTests {
         assertEquals(2, minorVersionTestSimple.getMinLength());
         assertEquals(5, minorVersionTestSimple.getMaxLength());
 
-        // Validate the 'PatchTest...' grouping
-        TLBusinessObject patchTestBO = newMajorVersionLibrary.getBusinessObjectType("PatchTestBO");
-        TLCoreObject patchTestCore = newMajorVersionLibrary.getCoreObjectType("PatchTestCore");
-        TLOperation patchTestOp = newMajorVersionLibrary.getService().getOperation("PatchTestOperation");
-
-        assertNotNull(patchTestBO);
-        assertEquals(0, patchTestBO.getSummaryFacet().getAttributes().size());
-        assertEquals(1, patchTestBO.getSummaryFacet().getElements().size());
-        assertContainsElements(patchTestBO.getSummaryFacet(), "Element12");
-
-        assertNotNull(patchTestCore);
-        assertEquals(0, patchTestCore.getSummaryFacet().getAttributes().size());
-        assertEquals(1, patchTestCore.getSummaryFacet().getElements().size());
-        assertContainsElements(patchTestCore.getSummaryFacet(), "Element12");
-
-        assertNotNull(patchTestOp);
-        assertEquals(0, patchTestOp.getRequest().getAttributes().size());
-        assertEquals(1, patchTestOp.getRequest().getElements().size());
-        assertContainsElements(patchTestOp.getRequest(), "RequestValue12");
-
+        assertNotNull(minorVersionTestResource);
+        assertNull(minorVersionTestResource.getExtension());
+        assertEquals(minorVersionTestBO, minorVersionTestResource.getBusinessObjectRef());
+        assertEquals(0, minorVersionTestResource.getParentRefs().size());
+        assertEquals(1, minorVersionTestResource.getParamGroups().size());
+        assertContainsParamGroups( minorVersionTestResource, "MinorVersionTestParameters");
+        assertEquals(1, minorVersionTestResource.getParamGroup("MinorVersionTestParameters").getParameters().size());
+        assertContainsParameters(minorVersionTestResource.getParamGroup("MinorVersionTestParameters"), "uid");
+        assertEquals(1, minorVersionTestResource.getActionFacets().size());
+        assertContainsActionFacets( minorVersionTestResource, "MinorVersionTestFacet");
+        assertEquals(0, minorVersionTestResource.getActionFacet("MinorVersionTestFacet").getAttributes().size());
+        assertEquals(1, minorVersionTestResource.getActionFacet("MinorVersionTestFacet").getElements().size());
+        assertContainsElements(minorVersionTestResource.getActionFacet("MinorVersionTestFacet"), "Element11");
+        assertEquals(1, minorVersionTestResource.getActions().size());
+        assertContainsActions( minorVersionTestResource, "MinorVersionTestAction");
+        assertNotNull( minorVersionTestResource.getAction("MinorVersionTestAction").getRequest() );
+        assertEquals(1, minorVersionTestResource.getAction("MinorVersionTestAction").getResponses().size());
+        
         // Verify the total number of elements to make sure nothing
         // exists, except for the items we just tested.
-        assertEquals(27, newMajorVersionLibrary.getNamedMembers().size());
+        assertEquals(35, newMajorVersionLibrary.getNamedMembers().size());
         assertEquals(4, newMajorVersionLibrary.getService().getOperations().size());
     }
 

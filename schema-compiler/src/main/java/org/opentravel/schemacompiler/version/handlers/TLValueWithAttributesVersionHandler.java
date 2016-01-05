@@ -15,6 +15,7 @@
  */
 package org.opentravel.schemacompiler.version.handlers;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.opentravel.schemacompiler.model.NamedEntity;
@@ -22,6 +23,7 @@ import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLEquivalent;
 import org.opentravel.schemacompiler.model.TLExample;
 import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLPatchableFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.util.ModelElementCloner;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
@@ -125,6 +127,14 @@ public class TLValueWithAttributesVersionHandler extends VersionHandler<TLValueW
         		.mergeAttributes( majorVersionTarget, minorVersion.getAttributes(), referenceHandler );
         new VersionHandlerMergeUtils( getFactory() )
         		.mergeIndicators( majorVersionTarget, minorVersion.getIndicators() );
+	}
+	
+	/**
+	 * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#getPatchableFacets(org.opentravel.schemacompiler.version.Versioned)
+	 */
+	@Override
+	public List<TLPatchableFacet> getPatchableFacets(TLValueWithAttributes entity) {
+		return Collections.emptyList();
 	}
 	
 }

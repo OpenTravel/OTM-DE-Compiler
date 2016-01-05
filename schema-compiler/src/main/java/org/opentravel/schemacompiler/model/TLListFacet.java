@@ -19,6 +19,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.opentravel.schemacompiler.model.TLAlias.AliasListManager;
+import org.opentravel.schemacompiler.util.XSDFacetProfileLocator;
 
 /**
  * Facet that provides a named entity reference for a list whose type is determined by the existence
@@ -71,8 +72,9 @@ public class TLListFacet extends TLAbstractFacet implements TLAttributeType, TLA
      */
     @Override
     public XSDFacetProfile getXSDFacetProfile() {
-        return (itemFacet instanceof TLSimpleFacet) ? ((TLSimpleFacet) itemFacet)
-                .getXSDFacetProfile() : XSDFacetProfile.FP_unknown;
+        return (itemFacet instanceof TLSimpleFacet)
+        		? XSDFacetProfileLocator.getXSDFacetProfile((TLSimpleFacet) itemFacet)
+        				: XSDFacetProfile.FP_unknown;
     }
 
     /**

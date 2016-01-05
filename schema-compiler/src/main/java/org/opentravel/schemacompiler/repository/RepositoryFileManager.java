@@ -50,6 +50,7 @@ import org.apache.commons.logging.LogFactory;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.ObjectFactory;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryInfoType;
+import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
 import org.opentravel.schemacompiler.util.ClasspathResourceResolver;
 import org.opentravel.schemacompiler.xml.XMLGregorianCalendarConverter;
@@ -1235,7 +1236,8 @@ public abstract class RepositoryFileManager {
         try {
             SchemaFactory schemaFactory = SchemaFactory
                     .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            InputStream schemaStream = SchemaDeclarations.OTA2_REPOSITORY_SCHEMA.getContent();
+            InputStream schemaStream = SchemaDeclarations.OTA2_REPOSITORY_SCHEMA.getContent(
+            		CodeGeneratorFactory.XSD_TARGET_FORMAT);
 
             schemaFactory.setResourceResolver(new ClasspathResourceResolver());
             repositoryValidationSchema = schemaFactory.newSchema(new StreamSource(schemaStream));

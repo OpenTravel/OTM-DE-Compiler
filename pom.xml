@@ -27,11 +27,13 @@
 		
 		<!-- Dependency Versions -->
 		<jaxb.version>2.2.11</jaxb.version>
+		<gson.version>2.5</gson.version>
 		<spring.version>4.1.5.RELEASE</spring.version>
 		<httpcomponents.version>4.4</httpcomponents.version>
 		<maven.plugin.api.version>3.2.5</maven.plugin.api.version>
 		<maven.annotations.version>3.4</maven.annotations.version>
 		<commons.cli.version>1.2</commons.cli.version>
+		<commons.validator.version>1.4.1</commons.validator.version>
 		<jersey.version>2.17</jersey.version>
 		<lucene.version>5.0.0</lucene.version>
 		<svnkit.version>1.8.7</svnkit.version>
@@ -128,6 +130,11 @@
 				<version>${jaxb.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>com.google.code.gson</groupId>
+				<artifactId>gson</artifactId>
+				<version>2.5</version>
+			</dependency>
+			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-context</artifactId>
 				<version>${spring.version}</version>
@@ -156,6 +163,11 @@
 				<groupId>org.apache.maven.plugin-tools</groupId>
 				<artifactId>maven-plugin-annotations</artifactId>
 				<version>${maven.annotations.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-validator</groupId>
+				<artifactId>commons-validator</artifactId>
+				<version>${commons.validator.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-cli</groupId>

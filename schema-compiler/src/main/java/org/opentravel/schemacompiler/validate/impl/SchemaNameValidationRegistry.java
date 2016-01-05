@@ -27,15 +27,19 @@ import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAliasOwner;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
+import org.opentravel.schemacompiler.model.TLReferenceType;
+import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
@@ -144,10 +148,8 @@ public class SchemaNameValidationRegistry {
      * @return boolean
      */
     public boolean hasTypeNameConflicts(NamedEntity entity) {
-        Collection<NamedEntity> entityTypeMatches = typeNameEntities.get(entityTypeNames
-                .get(entity));
-        return ((entityTypeMatches != null) && (entityTypeMatches.size() > 1) && entityTypeMatches
-                .contains(entity));
+        Collection<NamedEntity> entityTypeMatches = typeNameEntities.get(entityTypeNames.get(entity));
+        return ((entityTypeMatches != null) && (entityTypeMatches.size() > 1) && entityTypeMatches.contains(entity));
     }
 
     /**
@@ -191,17 +193,20 @@ public class SchemaNameValidationRegistry {
             typeName = new QName(entity.getNamespace(), entity.getLocalName());
 
         } else {
-            typeName = new QName(entity.getNamespace(), XsdCodegenUtils.getGlobalTypeName(entity));
+        	String localTypeName = XsdCodegenUtils.getGlobalTypeName(entity);
+            typeName = (localTypeName == null) ? null : new QName(entity.getNamespace(), localTypeName);
         }
+        
+        if (typeName != null) {
+            Set<NamedEntity> registeredEntities = typeNameEntities.get(typeName);
 
-        Set<NamedEntity> registeredEntities = typeNameEntities.get(typeName);
-
-        if (registeredEntities == null) {
-            registeredEntities = new HashSet<NamedEntity>();
-            typeNameEntities.put(typeName, registeredEntities);
+            if (registeredEntities == null) {
+                registeredEntities = new HashSet<NamedEntity>();
+                typeNameEntities.put(typeName, registeredEntities);
+            }
+            registeredEntities.add(entity);
+            entityTypeNames.put(entity, typeName);
         }
-        registeredEntities.add(entity);
-        entityTypeNames.put(entity, typeName);
     }
 
     /**
@@ -214,8 +219,15 @@ public class SchemaNameValidationRegistry {
     private void addElementNamesToRegistry(NamedEntity entity) {
         if (entity instanceof TLFacet) {
             TLFacet entityFacet = (TLFacet) entity;
-            boolean hasContent = new FacetCodegenDelegateFactory(null).getDelegate(entityFacet)
-                    .hasContent();
+            boolean hasContent = new FacetCodegenDelegateFactory(null).getDelegate(entityFacet).hasContent();
+
+            if (hasContent && !XsdCodegenUtils.isSimpleCoreObject(entityFacet.getOwningEntity())) {
+                addElementNameToRegistry(XsdCodegenUtils.getGlobalElementName(entity), entity);
+            }
+
+        } else if (entity instanceof TLActionFacet) {
+    		TLActionFacet entityFacet = (TLActionFacet) entity;
+            boolean hasContent = new FacetCodegenDelegateFactory(null).getDelegate(entityFacet).hasContent();
 
             if (hasContent && !XsdCodegenUtils.isSimpleCoreObject(entityFacet.getOwningEntity())) {
                 addElementNameToRegistry(XsdCodegenUtils.getGlobalElementName(entity), entity);
@@ -242,6 +254,9 @@ public class SchemaNameValidationRegistry {
 
                 } else if (aliasOwner instanceof TLBusinessObject) {
                     substitutableFacet = ((TLBusinessObject) aliasOwner).getIdFacet();
+                    
+                } else if (aliasOwner instanceof TLChoiceObject) {
+                    substitutableFacet = ((TLChoiceObject) aliasOwner).getSharedFacet();
                 }
                 if (substitutableFacet != null) {
                     TLAlias substitutableAlias = AliasCodegenUtils.getFacetAlias((TLAlias) entity,
@@ -261,7 +276,7 @@ public class SchemaNameValidationRegistry {
         } else if (XsdCodegenUtils.isSimpleCoreObject(entity)) {
             addElementNameToRegistry(XsdCodegenUtils.getGlobalElementName(entity), entity);
 
-        } else { // Must be a business object or core that has a substitution group
+        } else { // Must be a business, core, or choice object that has a substitution group
             TLFacet substitutableFacet = null;
 
             if (entity instanceof TLCoreObject) {
@@ -269,6 +284,9 @@ public class SchemaNameValidationRegistry {
 
             } else if (entity instanceof TLBusinessObject) {
                 substitutableFacet = ((TLBusinessObject) entity).getIdFacet();
+                
+            } else if (entity instanceof TLChoiceObject) {
+                substitutableFacet = ((TLChoiceObject) entity).getSharedFacet();
             }
             if (substitutableFacet != null) {
                 addElementNameToRegistry(
@@ -365,12 +383,29 @@ public class SchemaNameValidationRegistry {
         }
 
         /**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitChoiceObject(org.opentravel.schemacompiler.model.TLChoiceObject)
+		 */
+		@Override
+		public boolean visitChoiceObject(TLChoiceObject choiceObject) {
+            addElementNamesToRegistry(choiceObject);
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResource(org.opentravel.schemacompiler.model.TLResource)
+		 */
+		@Override
+		public boolean visitResource(TLResource resource) {
+            addTypeNameToRegistry(resource);
+            return true;
+		}
+
+		/**
          * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitFacet(org.opentravel.schemacompiler.model.TLFacet)
          */
         @Override
         public boolean visitFacet(TLFacet facet) {
-            boolean hasContent = new FacetCodegenDelegateFactory(null).getDelegate(facet)
-                    .hasContent();
+            boolean hasContent = new FacetCodegenDelegateFactory(null).getDelegate(facet).hasContent();
 
             if (hasContent) {
                 addTypeNameToRegistry(facet);
@@ -380,6 +415,20 @@ public class SchemaNameValidationRegistry {
         }
 
         /**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionFacet(org.opentravel.schemacompiler.model.TLActionFacet)
+		 */
+		@Override
+		public boolean visitActionFacet(TLActionFacet facet) {
+            boolean hasContent = new FacetCodegenDelegateFactory(null).getDelegate(facet).hasContent();
+
+            if (hasContent || ((facet.getReferenceType() != TLReferenceType.NONE) && (facet.getReferenceRepeat() != 0))) {
+                addTypeNameToRegistry(facet);
+            }
+            addElementNamesToRegistry(facet);
+            return true;
+		}
+
+		/**
          * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitSimpleFacet(org.opentravel.schemacompiler.model.TLSimpleFacet)
          */
         @Override

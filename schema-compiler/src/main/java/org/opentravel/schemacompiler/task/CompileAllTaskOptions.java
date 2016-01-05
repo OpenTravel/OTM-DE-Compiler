@@ -33,6 +33,14 @@ public interface CompileAllTaskOptions extends SchemaCompilerTaskOptions,
     public boolean isCompileSchemas();
 
     /**
+     * Returns the option flag indicating that JSON schema files should be generated for all
+     * libraries.
+     * 
+     * @return boolean
+     */
+    public boolean isCompileJsonSchemas();
+
+    /**
      * Returns the option flag indicating that service (WSDL) files should be generated for service
      * definitions.
      * 

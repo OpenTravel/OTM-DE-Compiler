@@ -28,7 +28,9 @@ import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.model.TLParameter;
 import org.opentravel.schemacompiler.model.TLProperty;
+import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
@@ -108,6 +110,16 @@ public class DocumentationFinder {
 					nextEntity = (TLDocumentationOwner) operation.getExtension().getExtendsEntity();
 				}
 				
+			} else if (entity instanceof TLResource) {
+				TLResource resource = (TLResource) entity;
+				
+				if (resource.getBusinessObjectRef() != null) {
+					nextEntity = resource.getBusinessObjectRef();
+					
+				} else if (resource.getExtension() instanceof TLDocumentationOwner) {
+					nextEntity = (TLDocumentationOwner) resource.getExtension().getExtendsEntity();
+				}
+				
 			} else if (entity instanceof TLFacet) {
 				nextEntity = (TLDocumentationOwner) ((TLFacet) entity).getOwningEntity();
 				
@@ -133,6 +145,13 @@ public class DocumentationFinder {
 				
 				if (elementType instanceof TLDocumentationOwner) {
 					nextEntity = (TLDocumentationOwner) elementType;
+				}
+				
+			} else if (entity instanceof TLParameter) {
+				TLParameter param = (TLParameter) entity;
+				
+				if (param.getFieldRef() instanceof TLDocumentationOwner) {
+					nextEntity = (TLDocumentationOwner) param.getFieldRef();
 				}
 			}
 			
@@ -164,12 +183,12 @@ public class DocumentationFinder {
 		} else if (entity instanceof TLAttribute) {
 			TLAttribute e = (TLAttribute) entity;
 			entityId.append(getEntityId(
-					(TLDocumentationOwner) e.getAttributeOwner())).append(":").append(e.getName());
+					(TLDocumentationOwner) e.getOwner())).append(":").append(e.getName());
 			
 		} else if (entity instanceof TLProperty) {
 			TLProperty e = (TLProperty) entity;
 			entityId.append(getEntityId(
-					(TLDocumentationOwner) e.getPropertyOwner())).append(":").append(e.getName());
+					(TLDocumentationOwner) e.getOwner())).append(":").append(e.getName());
 			
 		} else {
 			entityId.append("unknown");

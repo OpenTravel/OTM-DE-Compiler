@@ -27,6 +27,7 @@ import java.util.Set;
 
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryMember;
+import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLCoreObject;
@@ -319,12 +320,21 @@ public class ChameleonTypeChecker {
         }
 
         /**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionFacet(org.opentravel.schemacompiler.model.TLActionFacet)
+		 */
+		@Override
+		public boolean visitActionFacet(TLActionFacet facet) {
+            referringNamespace = facet.getNamespace();
+            return true;
+		}
+
+		/**
          * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitAttribute(org.opentravel.schemacompiler.model.TLAttribute)
          */
         @Override
         public boolean visitAttribute(TLAttribute attribute) {
-            if (attribute.getAttributeOwner() != null) {
-                referringNamespace = attribute.getAttributeOwner().getNamespace();
+            if (attribute.getOwner() != null) {
+                referringNamespace = attribute.getOwner().getNamespace();
             }
             return true;
         }
@@ -334,8 +344,8 @@ public class ChameleonTypeChecker {
          */
         @Override
         public boolean visitElement(TLProperty element) {
-            if (element.getPropertyOwner() != null) {
-                referringNamespace = element.getPropertyOwner().getNamespace();
+            if (element.getOwner() != null) {
+                referringNamespace = element.getOwner().getNamespace();
             }
             return true;
         }

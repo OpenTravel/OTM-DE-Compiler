@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_04"
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_05"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_04 OTA2_LibraryModel_v1.4.7.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_05 ../../../main/resources/ota2-context/schemas/OTA2_LibraryModel_v1.5.0.xsd">
     
     <VersionScheme>OTA2</VersionScheme>
     <Status>Draft</Status>
@@ -20,8 +21,18 @@
     </ExtensionPointFacet>
     
     <ExtensionPointFacet>
+        <Attribute name="extChoiceAttribute121" type="lib-01:LookupSimple"/>
+        <Extension extends="lib-0102:LookupChoice_Shared"/>
+    </ExtensionPointFacet>
+    
+    <ExtensionPointFacet>
         <Attribute name="extBOAttribute121" type="lib-01:LookupSimple"/>
         <Extension extends="lib-0102:LookupBO_Summary"/>
+    </ExtensionPointFacet>
+    
+    <ExtensionPointFacet>
+        <Attribute name="extResourceAttribute121" type="lib-01:LookupSimple"/>
+        <Extension extends="lib-0102:LookupResource_LookupFacetShared"/>
     </ExtensionPointFacet>
     
     <ExtensionPointFacet>

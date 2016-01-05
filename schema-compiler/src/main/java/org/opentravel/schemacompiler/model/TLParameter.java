@@ -34,6 +34,7 @@ public class TLParameter extends TLModelElement implements TLDocumentationOwner,
 		TLExampleOwner {
 	
 	private TLParamGroup owner;
+	private TLMemberField<?> fieldRef;
 	private String fieldRefName;
 	private TLParamLocation location;
     private TLDocumentation documentation;
@@ -50,6 +51,9 @@ public class TLParameter extends TLModelElement implements TLDocumentationOwner,
         
         if (owner != null) {
             identity.append( owner.getValidationIdentity() ).append("/");
+        }
+        if (fieldRef != null) {
+        	fieldName = fieldRef.getName();
         }
         if (fieldName == null) {
         	fieldName = fieldRefName;
@@ -94,6 +98,29 @@ public class TLParameter extends TLModelElement implements TLDocumentationOwner,
 	 */
 	public void setOwner(TLParamGroup owner) {
 		this.owner = owner;
+	}
+
+	/**
+	 * Returns the value of the 'fieldRef' field.
+	 *
+	 * @return TLMemberField<?>
+	 */
+	public TLMemberField<?> getFieldRef() {
+		return fieldRef;
+	}
+
+	/**
+	 * Assigns the value of the 'fieldRef' field.
+	 *
+	 * @param fieldRef  the field value to assign
+	 */
+	public void setFieldRef(TLMemberField<?> fieldRef) {
+        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.FIELD_REF_MODIFIED, this)
+        		.setOldValue(this.fieldRef).setNewValue(fieldRef).buildEvent();
+        
+    	this.fieldRefName = (fieldRef == null) ? null : fieldRef.getName();
+		this.fieldRef = fieldRef;
+        publishEvent(event);
 	}
 
 	/**
@@ -309,6 +336,9 @@ public class TLParameter extends TLModelElement implements TLDocumentationOwner,
         protected String getChildName(TLParameter child) {
         	String childName = null;
         	
+        	if (child.getFieldRef() != null) {
+        		childName = child.getFieldRef().getName();
+        	}
         	if (childName == null) {
         		childName = child.getFieldRefName();
         	}

@@ -15,13 +15,16 @@
  */
 package org.opentravel.schemacompiler.version.handlers;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLEquivalent;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLPatchableFacet;
 import org.opentravel.schemacompiler.util.ModelElementCloner;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 
@@ -98,6 +101,20 @@ public class TLChoiceObjectVersionHandler extends TLExtensionOwnerVersionHandler
             mergeUtils.addToIdentityFacetMap( sourceFacet, sourceFacets );
         }
         mergeUtils.mergeFacets( targetFacets, sourceFacets, referenceHandler );
+	}
+	
+	/**
+	 * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#getPatchableFacets(org.opentravel.schemacompiler.version.Versioned)
+	 */
+	@Override
+	public List<TLPatchableFacet> getPatchableFacets(TLChoiceObject entity) {
+		List<TLPatchableFacet> facetList = new ArrayList<>();
+		
+		for (TLFacet facet : entity.getChoiceFacets()) {
+			facetList.add( facet );
+		}
+		facetList.add( entity.getSharedFacet() );
+		return facetList;
 	}
 	
 }

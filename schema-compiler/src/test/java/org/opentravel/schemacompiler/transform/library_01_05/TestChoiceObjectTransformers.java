@@ -55,11 +55,13 @@ public class TestChoiceObjectTransformers extends Abstract_1_5_TestTransformers 
         assertNotNull(type.getEquivalent("test"));
         assertEquals("SampleChoice-equivalent", type.getEquivalent("test").getDescription());
         assertTrue(type.getSharedFacet().declaresContent());
+        assertEquals(3, type.getSharedFacet().getMemberFields().size());
         assertNotNull(type.getSharedFacet().getAttribute("sharedAttribute"));
         assertNotNull(type.getSharedFacet().getElement("sharedElement"));
         assertNotNull(type.getSharedFacet().getIndicator("sharedIndicator"));
         assertNotNull(choiceA);
         assertTrue(choiceA.declaresContent());
+        assertEquals(3, choiceA.getMemberFields().size());
         assertNotNull(choiceA.getAttribute("attributeA"));
         assertNotNull(choiceA.getElement("elementA"));
         assertNotNull(choiceA.getIndicator("indicatorA"));

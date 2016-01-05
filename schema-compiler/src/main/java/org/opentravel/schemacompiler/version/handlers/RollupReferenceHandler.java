@@ -15,25 +15,40 @@
  */
 package org.opentravel.schemacompiler.version.handlers;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLAction;
+import org.opentravel.schemacompiler.model.TLActionFacet;
+import org.opentravel.schemacompiler.model.TLActionRequest;
+import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLFacet;
+import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLMemberField;
+import org.opentravel.schemacompiler.model.TLModelElement;
 import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.model.TLParamGroup;
+import org.opentravel.schemacompiler.model.TLParameter;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLPropertyType;
+import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.model.TLResourceParentRef;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
@@ -89,7 +104,7 @@ public class RollupReferenceHandler {
 
             if ((attribute.getType() != null)
                     && rollupReferences.isRollupLibrary(attribute.getType().getOwningLibrary())) {
-                rollupReferences.getReferences().put(attribute, attribute.getType());
+                rollupReferences.addReference(attribute, (TLModelElement) attribute.getType());
             }
 
         } else if (entity instanceof TLProperty) {
@@ -97,7 +112,7 @@ public class RollupReferenceHandler {
 
             if ((element.getType() != null)
                     && rollupReferences.isRollupLibrary( element.getType().getOwningLibrary() )) {
-                rollupReferences.getReferences().put( element, element.getType() );
+                rollupReferences.addReference( element, (TLModelElement) element.getType() );
             }
 
         } else if (entity instanceof TLExtension) {
@@ -105,7 +120,7 @@ public class RollupReferenceHandler {
 
             if ((extension.getExtendsEntity() != null)
                     && rollupReferences.isRollupLibrary( extension.getExtendsEntity().getOwningLibrary() )) {
-                rollupReferences.getReferences().put( extension, extension.getExtendsEntity() );
+                rollupReferences.addReference( extension, (TLModelElement) extension.getExtendsEntity() );
             }
 
         } else if (entity instanceof TLValueWithAttributes) {
@@ -113,7 +128,7 @@ public class RollupReferenceHandler {
 
             if ((vwa.getParentType() != null)
                     && rollupReferences.isRollupLibrary( vwa.getParentType().getOwningLibrary() )) {
-                rollupReferences.getReferences().put( vwa, vwa.getParentType() );
+                rollupReferences.addReference( vwa, (TLModelElement) vwa.getParentType() );
             }
             for (TLAttribute newAttribute : vwa.getAttributes()) {
             	captureRollupReferences( vwa.getAttribute( newAttribute.getName() ) );
@@ -124,7 +139,7 @@ public class RollupReferenceHandler {
 
             if ((simple.getParentType() != null)
                     && rollupReferences.isRollupLibrary( simple.getParentType().getOwningLibrary() )) {
-                rollupReferences.getReferences().put( simple, simple.getParentType() );
+                rollupReferences.addReference( simple, (TLModelElement) simple.getParentType() );
             }
 
         } else if (entity instanceof TLSimpleFacet) {
@@ -132,7 +147,7 @@ public class RollupReferenceHandler {
 
             if ((simpleFacet.getSimpleType() != null)
                     && rollupReferences.isRollupLibrary( simpleFacet.getSimpleType().getOwningLibrary() )) {
-                rollupReferences.getReferences().put( simpleFacet, simpleFacet.getSimpleType() );
+                rollupReferences.addReference( simpleFacet, (TLModelElement) simpleFacet.getSimpleType() );
             }
 
         } else if (entity instanceof TLBusinessObject) {
@@ -158,6 +173,16 @@ public class RollupReferenceHandler {
             captureRollupReferences( core.getSummaryFacet() );
             captureRollupReferences( core.getDetailFacet() );
 
+        } else if (entity instanceof TLChoiceObject) {
+        	TLChoiceObject choice = (TLChoiceObject) entity;
+
+            captureRollupReferences( choice.getExtension() );
+            captureRollupReferences( choice.getSharedFacet() );
+
+            for (TLFacet newFacet : choice.getChoiceFacets()) {
+            	captureRollupReferences( newFacet );
+            }
+            
         } else if (entity instanceof TLOperation) {
             TLOperation op = (TLOperation) entity;
 
@@ -174,6 +199,95 @@ public class RollupReferenceHandler {
             }
             for (TLProperty newElement : facet.getElements()) {
             	captureRollupReferences( newElement );
+            }
+            
+        } else if (entity instanceof TLActionFacet) {
+        	TLActionFacet facet = (TLActionFacet) entity;
+            
+            for (TLAttribute newAttribute : facet.getAttributes()) {
+            	captureRollupReferences( newAttribute );
+            }
+            for (TLProperty newElement : facet.getElements()) {
+            	captureRollupReferences( newElement );
+            }
+
+        } else if (entity instanceof TLResource) {
+        	TLResource resource = (TLResource) entity;
+            
+            if ((resource.getBusinessObjectRef() != null)
+                    && rollupReferences.isRollupLibrary( resource.getBusinessObjectRef().getOwningLibrary() )) {
+                rollupReferences.addReference( resource, resource.getBusinessObjectRef() );
+            }
+            
+            for (TLParamGroup paramGroup : resource.getParamGroups()) {
+            	captureRollupReferences( paramGroup );
+            }
+            for (TLActionFacet facet : resource.getActionFacets()) {
+            	captureRollupReferences( facet );
+            }
+            for (TLAction action : resource.getActions()) {
+            	captureRollupReferences( action );
+            }
+            
+        } else if (entity instanceof TLResourceParentRef) {
+        	TLResourceParentRef parentRef = (TLResourceParentRef) entity;
+            
+            if ((parentRef.getParentParamGroup() != null)
+                    && rollupReferences.isRollupLibrary( parentRef.getParentParamGroup().getOwningLibrary() )) {
+                rollupReferences.addReference( parentRef, parentRef.getParentParamGroup() );
+            }
+            if ((parentRef.getParentResource() != null)
+                    && rollupReferences.isRollupLibrary( parentRef.getParentResource().getOwningLibrary() )) {
+                rollupReferences.addReference( parentRef, parentRef.getParentResource() );
+            }
+            
+        } else if (entity instanceof TLParamGroup) {
+        	TLParamGroup paramGroup = (TLParamGroup) entity;
+            
+            if ((paramGroup.getFacetRef() != null)
+                    && rollupReferences.isRollupLibrary( paramGroup.getFacetRef().getOwningLibrary() )) {
+                rollupReferences.addReference( paramGroup, paramGroup.getFacetRef() );
+            }
+            
+            for (TLParameter parameter : paramGroup.getParameters()) {
+            	captureRollupReferences( parameter );
+            }
+        	
+        } else if (entity instanceof TLParameter) {
+        	TLParameter parameter = (TLParameter) entity;
+            
+            if ((parameter.getFieldRef() != null)
+                    && rollupReferences.isRollupLibrary( ((LibraryElement) parameter.getFieldRef()).getOwningLibrary() )) {
+                rollupReferences.addReference( parameter, (TLModelElement) parameter.getFieldRef() );
+            }
+            
+        } else if (entity instanceof TLAction) {
+        	TLAction action = (TLAction) entity;
+            
+        	captureRollupReferences( action.getRequest() );
+        	
+            for (TLActionResponse response : action.getResponses()) {
+            	captureRollupReferences( response );
+            }
+            
+        } else if (entity instanceof TLActionRequest) {
+        	TLActionRequest request = (TLActionRequest) entity;
+            
+            if ((request.getParamGroup() != null)
+                    && rollupReferences.isRollupLibrary( request.getParamGroup().getOwningLibrary() )) {
+                rollupReferences.addReference( request, request.getParamGroup() );
+            }
+            if ((request.getPayloadType() != null)
+                    && rollupReferences.isRollupLibrary( request.getPayloadType().getOwningLibrary() )) {
+                rollupReferences.addReference( request, request.getPayloadType() );
+            }
+            
+        } else if (entity instanceof TLActionResponse) {
+        	TLActionResponse response = (TLActionResponse) entity;
+        	
+            if ((response.getPayloadType() != null)
+                    && rollupReferences.isRollupLibrary( response.getPayloadType().getOwningLibrary() )) {
+                rollupReferences.addReference( response, response.getPayloadType() );
             }
         }
     }
@@ -196,7 +310,7 @@ public class RollupReferenceHandler {
      */
     private class RollupReferenceInfo {
 
-        private Map<LibraryElement, NamedEntity> rollupReferences = new HashMap<>();
+        private Map<LibraryElement,List<Object>> rollupReferences = new HashMap<>();
         private Set<TLLibrary> rollupLibraries = new HashSet<>();
 
         /**
@@ -228,17 +342,58 @@ public class RollupReferenceHandler {
                 this.rollupLibraries.add( rollupLibrary );
             }
         }
-
+        
         /**
-         * Returns the map of references that have been detected to entities contained within one of
-         * the 'rollupLibraries' members.
+         * Adds the given reference to the current collection of rollup references.
          * 
-         * @return Map<LibraryElement,NamedEntity>
+         * @param referencingEntity  the entity that holds the reference
+         * @param referencedEntity  the entity that is being referenced
          */
-        public Map<LibraryElement, NamedEntity> getReferences() {
-            return rollupReferences;
+        public void addReference(LibraryElement referencingEntity, Object referencedEntity) {
+        	if (referencedEntity != null) {
+            	List<Object> referencedEntities = rollupReferences.get(referencingEntity);
+            	
+            	if (referencedEntities == null) {
+            		referencedEntities = new ArrayList<>();
+            		rollupReferences.put(referencingEntity, referencedEntities);
+            	}
+            	referencedEntities.add(referencedEntity);
+        	}
         }
-
+        
+        /**
+         * Returns true if the given entity has rollup references registered.
+         * 
+         * @param referencingEntity  the referencing entity to check
+         * @return boolean
+         */
+        public boolean hasReference(LibraryElement referencingEntity) {
+        	return rollupReferences.containsKey(referencingEntity);
+        }
+        
+        /**
+         * Returns the entity referenced by the one provided.  If multiple references exist, this
+         * method will search for the one that matches the specified type.
+         * 
+         * @param referencingEntity  the entity that holds the original reference
+         * @param referencedType  the required type for any reference that is returned
+         * @return TLModelElement
+         */
+        @SuppressWarnings("unchecked")
+		public <T> T getReference(LibraryElement referencingEntity, Class<T> referencedType) {
+        	List<Object> referencedEntities = rollupReferences.get(referencingEntity);
+        	T referencedEntity = null;
+        	
+        	if (referencedEntities != null) {
+        		for (Object entity : referencedEntities) {
+        			if (referencedType.isAssignableFrom(entity.getClass())) {
+        				referencedEntity = (T) entity;
+        			}
+        		}
+        	}
+        	return referencedEntity;
+        }
+        
         /**
          * Returns true if the given library is a member of the rollup collection currently being
          * processed.
@@ -279,12 +434,13 @@ public class RollupReferenceHandler {
          * @param library  the library to search
          * @return NamedEntity
          */
-        private NamedEntity findSameNameEntity(NamedEntity originalEntity, TLLibrary library) {
+        @SuppressWarnings("unchecked")
+        private <T extends NamedEntity> T findSameNameEntity(T originalEntity, TLLibrary library) {
             Object entity = symbols.getEntity( library.getNamespace(), originalEntity.getLocalName() );
-            NamedEntity sameNameEntity = null;
+            T sameNameEntity = null;
 
-            if (entity instanceof NamedEntity) {
-                NamedEntity namedEntity = (NamedEntity) entity;
+            if (originalEntity.getClass().equals(entity.getClass())) {
+				T namedEntity = (T) entity;
 
                 if (namedEntity.getOwningLibrary() == library) {
                     sameNameEntity = namedEntity;
@@ -294,17 +450,102 @@ public class RollupReferenceHandler {
         }
 
         /**
+         * Searches the given library for a field with the same owner and field name as the original
+         * field provided.
+         * 
+         * @param originalField  the original field whose name and owner should be used in the search
+         * @param library  the library to search
+         * @return TLMemberField<?>
+         */
+        private TLMemberField<?> findSameNameField(TLMemberField<?> originalField, TLLibrary library) {
+        	NamedEntity originalOwner = (NamedEntity) originalField.getOwner();
+        	NamedEntity sameNameOwner = findSameNameEntity(originalOwner, library);
+    		String fieldName = originalField.getName();
+        	TLMemberField<?> sameNameField = null;
+        	
+        	if ((sameNameOwner != null) && (fieldName != null)) {
+        		List<? extends TLMemberField<?>> inheritedMembers = null;
+        		
+        		if (originalField instanceof TLAttribute) {
+        			if (sameNameOwner instanceof TLFacet) {
+        				inheritedMembers = PropertyCodegenUtils.getInheritedFacetAttributes((TLFacet) sameNameOwner);
+        				
+        			} else if (sameNameOwner instanceof TLActionFacet) {
+        				inheritedMembers = PropertyCodegenUtils.getInheritedAttributes((TLActionFacet) sameNameOwner);
+        				
+        			} else if (sameNameOwner instanceof TLValueWithAttributes) {
+        				inheritedMembers = PropertyCodegenUtils.getInheritedAttributes((TLValueWithAttributes) sameNameOwner);
+        			}
+        			
+        		} else if (originalField instanceof TLProperty) {
+        			if (sameNameOwner instanceof TLFacet) {
+        				inheritedMembers = PropertyCodegenUtils.getInheritedFacetProperties((TLFacet) sameNameOwner);
+        				
+        			} else if (sameNameOwner instanceof TLActionFacet) {
+        				inheritedMembers = PropertyCodegenUtils.getInheritedProperties((TLActionFacet) sameNameOwner);
+        			}
+        			
+        		} else if (originalField instanceof TLIndicator) {
+        			if (sameNameOwner instanceof TLFacet) {
+        				inheritedMembers = PropertyCodegenUtils.getInheritedFacetIndicators((TLFacet) sameNameOwner);
+        				
+        			} else if (sameNameOwner instanceof TLActionFacet) {
+        				inheritedMembers = PropertyCodegenUtils.getInheritedIndicators((TLActionFacet) sameNameOwner);
+        				
+        			} else if (sameNameOwner instanceof TLValueWithAttributes) {
+        				inheritedMembers = PropertyCodegenUtils.getInheritedIndicators((TLValueWithAttributes) sameNameOwner);
+        			}
+        		}
+        		
+        		if (inheritedMembers != null) {
+        			for (TLMemberField<?> memberField : inheritedMembers) {
+        				if (fieldName.equals(memberField.getName())) {
+        					sameNameField = memberField;
+        					break;
+        				}
+        			}
+        		}
+        	}
+        	return sameNameField;
+        }
+        
+        /**
+         * Searches the given library for a parameter group with the same owner and field name as the original
+         * group provided.
+         * 
+         * @param originalParamGroup  the original parameter group whose name and owner should be used in the search
+         * @param library  the library to search
+         * @return TLParamGroup
+         */
+        private TLParamGroup findSameNameParamGroup(TLParamGroup originalParamGroup, TLLibrary library) {
+        	TLResource originalOwner = originalParamGroup.getOwner();
+        	NamedEntity sameNameOwner = findSameNameEntity(originalOwner, library);
+    		String groupName = originalParamGroup.getName();
+    		TLParamGroup sameNameParamGroup = null;
+        	
+        	if ((sameNameOwner instanceof TLResource) && (groupName != null)) {
+        		for (TLParamGroup paramGroup : ((TLResource) sameNameOwner).getParamGroups()) {
+        			if (groupName.equals(paramGroup.getName())) {
+        				sameNameParamGroup = paramGroup;
+        				break;
+        			}
+        		}
+        	}
+        	return sameNameParamGroup;
+        }
+        
+        /**
          * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitSimple(org.opentravel.schemacompiler.model.TLSimple)
          */
         @Override
         public boolean visitSimple(TLSimple simple) {
-            if (rollupReferences.getReferences().containsKey( simple )) {
-                NamedEntity sameNameEntity = findSameNameEntity(
-                		rollupReferences.getReferences().get( simple ),
+            if (rollupReferences.hasReference( simple )) {
+            	TLAttributeType sameNameEntity = findSameNameEntity(
+                		rollupReferences.getReference( simple, TLAttributeType.class ),
                 		(TLLibrary) simple.getOwningLibrary() );
 
-                if (sameNameEntity instanceof TLAttributeType) {
-                    simple.setParentType( (TLAttributeType) sameNameEntity );
+                if (sameNameEntity != null) {
+                    simple.setParentType( sameNameEntity );
                 }
             }
             return true;
@@ -315,13 +556,13 @@ public class RollupReferenceHandler {
          */
         @Override
         public boolean visitValueWithAttributes(TLValueWithAttributes vwa) {
-            if (rollupReferences.getReferences().containsKey( vwa )) {
-                NamedEntity sameNameEntity = findSameNameEntity(
-                		rollupReferences.getReferences().get( vwa ),
+            if (rollupReferences.hasReference( vwa )) {
+            	TLAttributeType sameNameEntity = findSameNameEntity(
+                		rollupReferences.getReference( vwa, TLAttributeType.class ),
                 		(TLLibrary) vwa.getOwningLibrary() );
 
-                if (sameNameEntity instanceof TLAttributeType) {
-                    vwa.setParentType( (TLAttributeType) sameNameEntity );
+                if (sameNameEntity != null) {
+                    vwa.setParentType( sameNameEntity );
                 }
             }
             return true;
@@ -332,13 +573,13 @@ public class RollupReferenceHandler {
          */
         @Override
         public boolean visitSimpleFacet(TLSimpleFacet simpleFacet) {
-            if (rollupReferences.getReferences().containsKey( simpleFacet )) {
-                NamedEntity sameNameEntity = findSameNameEntity(
-                		rollupReferences.getReferences().get(simpleFacet),
+            if (rollupReferences.hasReference( simpleFacet )) {
+            	TLAttributeType sameNameEntity = findSameNameEntity(
+                		rollupReferences.getReference( simpleFacet, TLAttributeType.class ),
                 		(TLLibrary) simpleFacet.getOwningLibrary() );
 
-                if (sameNameEntity instanceof TLAttributeType) {
-                    simpleFacet.setSimpleType( (TLAttributeType) sameNameEntity );
+                if (sameNameEntity != null) {
+                    simpleFacet.setSimpleType( sameNameEntity );
                 }
             }
             return true;
@@ -349,13 +590,13 @@ public class RollupReferenceHandler {
          */
         @Override
         public boolean visitAttribute(TLAttribute attribute) {
-            if (rollupReferences.getReferences().containsKey( attribute )) {
-                NamedEntity sameNameEntity = findSameNameEntity(
-                		rollupReferences.getReferences().get(attribute),
+            if (rollupReferences.hasReference( attribute )) {
+            	TLAttributeType sameNameEntity = findSameNameEntity(
+                		rollupReferences.getReference( attribute, TLAttributeType.class ),
                 		(TLLibrary) attribute.getOwningLibrary() );
 
-                if (sameNameEntity instanceof TLAttributeType) {
-                    attribute.setType( (TLAttributeType) sameNameEntity );
+                if (sameNameEntity != null) {
+                    attribute.setType( sameNameEntity );
                 }
             }
             return true;
@@ -366,13 +607,13 @@ public class RollupReferenceHandler {
          */
         @Override
         public boolean visitElement(TLProperty element) {
-            if (rollupReferences.getReferences().containsKey( element )) {
-                NamedEntity sameNameEntity = findSameNameEntity(
-                		rollupReferences.getReferences().get(element),
+            if (rollupReferences.hasReference( element )) {
+            	TLPropertyType sameNameEntity = findSameNameEntity(
+                		rollupReferences.getReference( element, TLPropertyType.class ),
                 		(TLLibrary) element.getOwningLibrary() );
 
-                if (sameNameEntity instanceof TLPropertyType) {
-                    element.setType( (TLPropertyType) sameNameEntity );
+                if (sameNameEntity != null) {
+                    element.setType( sameNameEntity );
                 }
             }
             return true;
@@ -383,9 +624,9 @@ public class RollupReferenceHandler {
          */
         @Override
         public boolean visitExtension(TLExtension extension) {
-            if (rollupReferences.getReferences().containsKey( extension )) {
+            if (rollupReferences.hasReference( extension )) {
                 NamedEntity sameNameEntity = findSameNameEntity(
-                		rollupReferences.getReferences().get(extension),
+                		rollupReferences.getReference( extension, NamedEntity.class ),
                 		(TLLibrary) extension.getOwningLibrary() );
 
                 if (sameNameEntity != null) {
@@ -394,6 +635,120 @@ public class RollupReferenceHandler {
             }
             return true;
         }
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResource(org.opentravel.schemacompiler.model.TLResource)
+		 */
+		@Override
+		public boolean visitResource(TLResource resource) {
+            if (rollupReferences.hasReference( resource )) {
+            	TLBusinessObject sameNameEntity = findSameNameEntity(
+                		rollupReferences.getReference( resource, TLBusinessObject.class ),
+                		(TLLibrary) resource.getOwningLibrary() );
+
+                if (sameNameEntity != null) {
+                	resource.setBusinessObjectRef( sameNameEntity );
+                }
+            }
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResourceParentRef(org.opentravel.schemacompiler.model.TLResourceParentRef)
+		 */
+		@Override
+		public boolean visitResourceParentRef(TLResourceParentRef parentRef) {
+            if (rollupReferences.hasReference( parentRef )) {
+                TLParamGroup sameNameParamGroup = findSameNameParamGroup(
+                		rollupReferences.getReference( parentRef, TLParamGroup.class ),
+                		(TLLibrary) parentRef.getOwningLibrary() );
+                TLResource sameNameResource = findSameNameEntity(
+                		rollupReferences.getReference( parentRef, TLResource.class ),
+                		(TLLibrary) parentRef.getOwningLibrary() );
+
+                if (sameNameParamGroup != null) {
+                	parentRef.setParentParamGroup( sameNameParamGroup );
+                }
+                if (sameNameResource != null) {
+                	parentRef.setParentResource( sameNameResource );
+                }
+            }
+			return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParamGroup(org.opentravel.schemacompiler.model.TLParamGroup)
+		 */
+		@Override
+		public boolean visitParamGroup(TLParamGroup paramGroup) {
+            if (rollupReferences.hasReference( paramGroup )) {
+            	TLFacet sameNameEntity = findSameNameEntity(
+                		rollupReferences.getReference( paramGroup, TLFacet.class ),
+                		(TLLibrary) paramGroup.getOwningLibrary() );
+
+                if (sameNameEntity != null) {
+                	paramGroup.setFacetRef( sameNameEntity );
+                }
+            }
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParameter(org.opentravel.schemacompiler.model.TLParameter)
+		 */
+		@Override
+		public boolean visitParameter(TLParameter parameter) {
+            if (rollupReferences.hasReference( parameter )) {
+                TLMemberField<?> sameNameField = findSameNameField(
+                		rollupReferences.getReference( parameter, TLMemberField.class ),
+                		(TLLibrary) parameter.getOwningLibrary() );
+
+                if (sameNameField != null) {
+                	parameter.setFieldRef( sameNameField );
+                }
+            }
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionRequest(org.opentravel.schemacompiler.model.TLActionRequest)
+		 */
+		@Override
+		public boolean visitActionRequest(TLActionRequest actionRequest) {
+            if (rollupReferences.hasReference( actionRequest )) {
+                TLParamGroup sameNameParamGroup = findSameNameParamGroup(
+                		rollupReferences.getReference( actionRequest, TLParamGroup.class ),
+                		(TLLibrary) actionRequest.getOwningLibrary() );
+                TLActionFacet sameNamePayloadType = findSameNameEntity(
+                		rollupReferences.getReference( actionRequest, TLActionFacet.class ),
+                		(TLLibrary) actionRequest.getOwningLibrary() );
+
+                if (sameNameParamGroup != null) {
+                	actionRequest.setParamGroup( sameNameParamGroup );
+                }
+                if (sameNamePayloadType != null) {
+                	actionRequest.setPayloadType( sameNamePayloadType );
+                }
+            }
+			return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionResponse(org.opentravel.schemacompiler.model.TLActionResponse)
+		 */
+		@Override
+		public boolean visitActionResponse(TLActionResponse actionResponse) {
+            if (rollupReferences.hasReference( actionResponse )) {
+                NamedEntity sameNamePayloadType = findSameNameEntity(
+                		rollupReferences.getReference( actionResponse, NamedEntity.class ),
+                		(TLLibrary) actionResponse.getOwningLibrary() );
+
+                if (sameNamePayloadType != null) {
+                	actionResponse.setPayloadType( sameNamePayloadType );
+                }
+            }
+			return true;
+		}
 
     }
 

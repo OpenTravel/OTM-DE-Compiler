@@ -33,6 +33,7 @@ import javax.xml.validation.SchemaFactory;
 
 import org.opentravel.ns.ota2.librarycatalog_v01_00.Catalog;
 import org.opentravel.ns.ota2.librarycatalog_v01_00.CatalogEntry;
+import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.util.URLUtils;
@@ -136,7 +137,8 @@ public class CatalogLibraryNamespaceResolver extends MapLibraryNamespaceResolver
             // Load and parse the catalog content from the stream
             SchemaFactory schemaFactory = SchemaFactory
                     .newInstance(javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            InputStream schemaStream = SchemaDeclarations.OTA2_CATALOG_SCHEMA.getContent();
+            InputStream schemaStream = SchemaDeclarations.OTA2_CATALOG_SCHEMA.getContent(
+            		CodeGeneratorFactory.XSD_TARGET_FORMAT);
             Schema validationSchema = schemaFactory.newSchema(new StreamSource(schemaStream));
             Unmarshaller unmarshaller = JAXBContext.newInstance(SCHEMA_CONTEXT)
                     .createUnmarshaller();

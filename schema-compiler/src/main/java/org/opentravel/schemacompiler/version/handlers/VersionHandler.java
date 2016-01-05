@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLPatchableFacet;
 import org.opentravel.schemacompiler.util.ModelElementCloner;
 import org.opentravel.schemacompiler.version.VersionScheme;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
@@ -216,6 +217,14 @@ public abstract class VersionHandler<V extends Versioned> {
      */
     public abstract void rollupMinorVersion(V minorVersion, V majorVersionTarget,
     		RollupReferenceHandler referenceHandler);
+    
+    /**
+     * Returns the list of patchable facets for the given versioned entity.
+     * 
+     * @param entity  the entity for which to return patchable facets
+     * @return List<TLPatchableFacet>
+     */
+    public abstract List<TLPatchableFacet> getPatchableFacets(V entity);
     
     /**
      * Returns the <code>VersionScheme</code> associated with the given versioned entity.

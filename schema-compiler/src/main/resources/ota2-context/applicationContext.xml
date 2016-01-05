@@ -48,14 +48,36 @@
 		<property name="namespace" value="http://opentravel.org/common/v02" />
 		<property name="name" value="OTA2_BuiltIns_v2.0.0" />
 		<property name="defaultPrefix" value="ota2-dep" />
-		<property name="location" value="classpath:/ota2-context/built-ins/OTA2_BuiltIns_v2.0.0.otm" />
+		<property name="locations">
+			<list>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="XSD" />
+					<property name="location" value="classpath:/ota2-context/built-ins/OTA2_BuiltIns_v2.0.0.otm" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="JSON_SCHEMA" />
+					<property name="location" value="classpath:/ota2-context/built-ins/OTA2_BuiltIns_v2.0.0.otm" />
+				</bean>
+			</list>
+		</property>
 	</bean>
 
 	<bean id="ota2SimpleTypes" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
 		<property name="namespace" value="http://www.opentravel.org/OTM/Common/v0" />
 		<property name="name" value="OTA_SimpleTypes" />
 		<property name="defaultPrefix" value="ota2" />
-		<property name="location" value="classpath:/ota2-context/built-ins/OTA_SimpleTypes_0_0_0.otm" />
+		<property name="locations">
+			<list>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="XSD" />
+					<property name="location" value="classpath:/ota2-context/built-ins/OTA_SimpleTypes_0_0_0.otm" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="JSON_SCHEMA" />
+					<property name="location" value="classpath:/ota2-context/built-ins/OTA_SimpleTypes_0_0_0.otm" />
+				</bean>
+			</list>
+		</property>
 		<property name="importByDefault" value="true" />
 	</bean>
 	
@@ -63,7 +85,18 @@
 		<property name="namespace" value="http://opentravel.org/common/message/v02" />
 		<property name="name" value="OTA2_Message_v2.0.0" />
 		<property name="defaultPrefix" value="ota2msg" />
-		<property name="location" value="classpath:/ota2-context/built-ins/OTA2_Message_v2.0.0.xsd" />
+		<property name="locations">
+			<list>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="XSD" />
+					<property name="location" value="classpath:/ota2-context/built-ins/OTA2_Message_v2.0.0.xsd" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="JSON_SCHEMA" />
+					<property name="location" value="classpath:/ota2-context/built-ins/OTA2_Message_v2.0.0.json" />
+				</bean>
+			</list>
+		</property>
 		<property name="dependencies">
 			<list>
 				<value>ota2CommonSchema</value>
@@ -74,68 +107,138 @@
 	<bean id="ota2LibrarySchema_1_4" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
 		<property name="namespace" value="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_04" />
 		<property name="name" value="OTA2_LibraryModel_v1.4.7" />
-		<property name="location" value="classpath:/ota2-context/schemas/OTA2_LibraryModel_v1.4.7.xsd" />
+		<property name="locations">
+			<list>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="XSD" />
+					<property name="location" value="classpath:/ota2-context/schemas/OTA2_LibraryModel_v1.4.7.xsd" />
+				</bean>
+			</list>
+		</property>
 	</bean>
 	
 	<bean id="ota2LibrarySchema_1_5" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
 		<property name="namespace" value="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_05" />
 		<property name="name" value="OTA2_LibraryModel_v1.5.0" />
-		<property name="location" value="classpath:/ota2-context/schemas/OTA2_LibraryModel_v1.5.0.xsd" />
+		<property name="locations">
+			<list>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="XSD" />
+					<property name="location" value="classpath:/ota2-context/schemas/OTA2_LibraryModel_v1.5.0.xsd" />
+				</bean>
+			</list>
+		</property>
 	</bean>
 	
 	<bean id="ota2ProjectSchema" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
 		<property name="namespace" value="http://www.OpenTravel.org/ns/OTA2/Project_v01_00" />
 		<property name="name" value="OTA2_Project_v1.0.0" />
 		<property name="defaultPrefix" value="otp" />
-		<property name="location" value="classpath:/ota2-context/schemas/OTA2_Project_v1.0.0.xsd" />
+		<property name="locations">
+			<list>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="XSD" />
+					<property name="location" value="classpath:/ota2-context/schemas/OTA2_Project_v1.0.0.xsd" />
+				</bean>
+			</list>
+		</property>
 	</bean>
 	
 	<bean id="ota2RepositorySchema" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
 		<property name="namespace" value="http://www.OpenTravel.org/ns/OTA2/RepositoryInfo_v01_00" />
 		<property name="name" value="OTA2_Repository_v1.0.0" />
 		<property name="defaultPrefix" value="otr" />
-		<property name="location" value="classpath:/ota2-context/schemas/OTA2_Repository_v1.0.1.xsd" />
+		<property name="locations">
+			<list>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="XSD" />
+					<property name="location" value="classpath:/ota2-context/schemas/OTA2_Repository_v1.0.1.xsd" />
+				</bean>
+			</list>
+		</property>
 	</bean>
 	
 	<bean id="ota2CatalogSchema" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
 		<property name="namespace" value="http://www.OpenTravel.org/ns/OTA2/LibraryCatalog_v01_00" />
 		<property name="name" value="OTA2_LibraryCatalog_v1.0.0" />
-		<property name="location" value="classpath:/ota2-context/schemas/OTA2_LibraryCatalog_v1.0.0.xsd" />
+		<property name="locations">
+			<list>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="XSD" />
+					<property name="location" value="classpath:/ota2-context/schemas/OTA2_LibraryCatalog_v1.0.0.xsd" />
+				</bean>
+			</list>
+		</property>
 	</bean>
 	
 	<bean id="wsdlSchema" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
 		<property name="namespace" value="http://schemas.xmlsoap.org/wsdl/" />
 		<property name="name" value="wsdl" />
 		<property name="defaultPrefix" value="wsdl" />
-		<property name="location" value="classpath:/ota2-context/schemas/wsdl.xsd" />
+		<property name="locations">
+			<list>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="XSD" />
+					<property name="location" value="classpath:/ota2-context/schemas/wsdl.xsd" />
+				</bean>
+			</list>
+		</property>
 	</bean>
 	
 	<bean id="soapSchema" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
 		<property name="namespace" value="http://schemas.xmlsoap.org/wsdl/soap/" />
 		<property name="name" value="soap" />
 		<property name="defaultPrefix" value="soap" />
-		<property name="location" value="classpath:/ota2-context/schemas/soap.xsd" />
+		<property name="locations">
+			<list>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="XSD" />
+					<property name="location" value="classpath:/ota2-context/schemas/soap.xsd" />
+				</bean>
+			</list>
+		</property>
 	</bean>
 	
 	<bean id="schemaForSchemas" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
 		<property name="namespace" value="http://www.w3.org/2001/XMLSchema" />
 		<property name="name" value="XMLSchema" />
 		<property name="defaultPrefix" value="xsd" />
-		<property name="location" value="classpath:/ota2-context/schemas/XMLSchemaForSchemas.xsd" />
+		<property name="locations">
+			<list>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="XSD" />
+					<property name="location" value="classpath:/ota2-context/schemas/XMLSchemaForSchemas.xsd" />
+				</bean>
+			</list>
+		</property>
 	</bean>
 	
 	<bean id="xmlSchema" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
 		<property name="namespace" value="http://www.w3.org/2001/XMLSchema" />
 		<property name="name" value="XMLSchema" />
 		<property name="defaultPrefix" value="xsd" />
-		<property name="location" value="classpath:/ota2-context/schemas/xml.xsd" />
+		<property name="locations">
+			<list>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="XSD" />
+					<property name="location" value="classpath:/ota2-context/schemas/xml.xsd" />
+				</bean>
+			</list>
+		</property>
 	</bean>
 	
 	<bean id="ota2AppInfoSchema" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
 		<property name="namespace" value="http://www.OpenTravel.org/ns/OTA2/AppInfo_v01_00" />
 		<property name="name" value="OTA2_AppInfo_v1.0.0" />
 		<property name="defaultPrefix" value="otm" />
-		<property name="location" value="classpath:/ota2-context/schemas/OTA2_AppInfo_v1.0.0.xsd" />
+		<property name="locations">
+			<list>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="XSD" />
+					<property name="location" value="classpath:/ota2-context/schemas/OTA2_AppInfo_v1.0.0.xsd" />
+				</bean>
+			</list>
+		</property>
 	</bean>
 	
 	<!--
@@ -172,6 +275,10 @@
 				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
 					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLCoreObject" />
 					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.compile.TLCoreObjectCompileValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLChoiceObject" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.compile.TLChoiceObjectCompileValidator" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
 					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLDocumentation" />
@@ -245,6 +352,38 @@
 					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLValueWithAttributes" />
 					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.compile.TLValueWithAttributesCompileValidator" />
 				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLResource" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.compile.TLResourceCompileValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLResourceParentRef" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.compile.TLResourceParentRefCompileValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLParamGroup" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.compile.TLParamGroupCompileValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLParameter" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.compile.TLParameterCompileValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLActionFacet" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.compile.TLActionFacetCompileValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLAction" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.compile.TLActionCompileValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLActionRequest" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.compile.TLActionRequestCompileValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLActionResponse" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.compile.TLActionResponseCompileValidator" />
+				</bean>
 			</list>
 		</property>
 	</bean>
@@ -284,6 +423,10 @@
 				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
 					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLCoreObject" />
 					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.save.TLCoreObjectSaveValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLChoiceObject" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.save.TLChoiceObjectSaveValidator" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
 					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLDocumentation" />
@@ -357,6 +500,38 @@
 					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLValueWithAttributes" />
 					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.save.TLValueWithAttributesSaveValidator" />
 				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLResource" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.save.TLResourceSaveValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLResourceParentRef" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.save.TLResourceParentRefSaveValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLParamGroup" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.save.TLParamGroupSaveValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLParameter" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.save.TLParameterSaveValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLActionFacet" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.save.TLActionFacetSaveValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLAction" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.save.TLActionSaveValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLActionRequest" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.save.TLActionRequestSaveValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLActionResponse" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.save.TLActionResponseSaveValidator" />
+				</bean>
 			</list>
 		</property>
 	</bean>
@@ -390,98 +565,6 @@
 	<bean id="loaderTransformFactory" class="org.opentravel.schemacompiler.transform.TransformerFactory" scope="prototype">
 		<property name="transformerMappings">
 			<set>
-				<!-- Library v1.3 Transformers -->
-				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_03.Attribute" />
-					<property name="target" value="org.opentravel.schemacompiler.model.TLAttribute" />
-					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb13_2tl.AttributeTransformer" />
-				</bean>
-				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_03.BusinessObject" />
-					<property name="target" value="org.opentravel.schemacompiler.model.TLBusinessObject" />
-					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb13_2tl.BusinessObjectTransformer" />
-				</bean>
-				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_03.EnumerationClosed" />
-					<property name="target" value="org.opentravel.schemacompiler.model.TLClosedEnumeration" />
-					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb13_2tl.EnumerationClosedTransformer" />
-				</bean>
-				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_03.CoreObject" />
-					<property name="target" value="org.opentravel.schemacompiler.model.TLCoreObject" />
-					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb13_2tl.CoreObjectTransformer" />
-				</bean>
-				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_03.Documentation" />
-					<property name="target" value="org.opentravel.schemacompiler.model.TLDocumentation" />
-					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb13_2tl.DocumentationTransformer" />
-				</bean>
-				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_03.EnumValue" />
-					<property name="target" value="org.opentravel.schemacompiler.model.TLEnumValue" />
-					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb13_2tl.EnumValueTransformer" />
-				</bean>
-				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_03.Equivalent" />
-					<property name="target" value="org.opentravel.schemacompiler.model.TLEquivalent" />
-					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb13_2tl.EquivalentTransformer" />
-				</bean>
-				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_03.Facet" />
-					<property name="target" value="org.opentravel.schemacompiler.model.TLFacet" />
-					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb13_2tl.FacetTransformer" />
-				</bean>
-				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_03.FacetContextual" />
-					<property name="target" value="org.opentravel.schemacompiler.model.TLFacet" />
-					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb13_2tl.FacetContextualTransformer" />
-				</bean>
-				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_03.Indicator" />
-					<property name="target" value="org.opentravel.schemacompiler.model.TLIndicator" />
-					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb13_2tl.IndicatorTransformer" />
-				</bean>
-				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_03.Library" />
-					<property name="target" value="org.opentravel.schemacompiler.model.TLLibrary" />
-					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb13_2tl.LibraryTransformer" />
-				</bean>
-				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_03.EnumerationOpen" />
-					<property name="target" value="org.opentravel.schemacompiler.model.TLOpenEnumeration" />
-					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb13_2tl.EnumerationOpenTransformer" />
-				</bean>
-				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_03.Operation" />
-					<property name="target" value="org.opentravel.schemacompiler.model.TLOperation" />
-					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb13_2tl.OperationTransformer" />
-				</bean>
-				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_03.Property" />
-					<property name="target" value="org.opentravel.schemacompiler.model.TLProperty" />
-					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb13_2tl.PropertyTransformer" />
-				</bean>
-				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_03.Service" />
-					<property name="target" value="org.opentravel.schemacompiler.model.TLService" />
-					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb13_2tl.ServiceTransformer" />
-				</bean>
-				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_03.SimpleFacet" />
-					<property name="target" value="org.opentravel.schemacompiler.model.TLSimpleFacet" />
-					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb13_2tl.SimpleFacetTransformer" />
-				</bean>
-				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_03.Simple" />
-					<property name="target" value="org.opentravel.schemacompiler.model.TLSimple" />
-					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb13_2tl.SimpleTransformer" />
-				</bean>
-				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_03.ValueWithAttributes" />
-					<property name="target" value="org.opentravel.schemacompiler.model.TLValueWithAttributes" />
-					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb13_2tl.ValueWithAttributesTransformer" />
-				</bean>
-				
 				<!-- Library v1.4 Transformers -->
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
 					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_04.Attribute" />
@@ -598,25 +681,167 @@
 					<property name="target" value="org.opentravel.schemacompiler.model.TLValueWithAttributes" />
 					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb14_2tl.ValueWithAttributesTransformer" />
 				</bean>
+				
+				<!-- Library v1.5 Transformers -->
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.w3._2001.xmlschema.TopLevelComplexType" />
-					<property name="target" value="org.opentravel.schemacompiler.model.XSDComplexType" />
-					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb2xsd.TopLevelComplexTypeTransformer" />
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.Attribute" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLAttribute" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.AttributeTransformer" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.w3._2001.xmlschema.TopLevelElement" />
-					<property name="target" value="org.opentravel.schemacompiler.model.XSDElement" />
-					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb2xsd.TopLevelElementTransformer" />
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.BusinessObject" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLBusinessObject" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.BusinessObjectTransformer" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.w3._2001.xmlschema.Schema" />
-					<property name="target" value="org.opentravel.schemacompiler.model.XSDLibrary" />
-					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb2xsd.SchemaTransformer" />
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.EnumerationClosed" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLClosedEnumeration" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.EnumerationClosedTransformer" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.w3._2001.xmlschema.TopLevelSimpleType" />
-					<property name="target" value="org.opentravel.schemacompiler.model.XSDSimpleType" />
-					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb2xsd.TopLevelSimpleTypeTransformer" />
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.ContextDeclaration" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLContext" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.ContextDeclarationTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.ChoiceObject" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLChoiceObject" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.ChoiceObjectTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.CoreObject" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLCoreObject" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.CoreObjectTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.Documentation" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLDocumentation" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.DocumentationTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.EnumValue" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLEnumValue" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.EnumValueTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.Equivalent" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLEquivalent" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.EquivalentTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.Example" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLExample" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.ExampleTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.Extension" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLExtension" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.ExtensionTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.ExtensionPointFacet" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLExtensionPointFacet" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.ExtensionPointFacetTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.Facet" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLFacet" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.FacetTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.FacetContextual" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLFacet" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.FacetContextualTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.Indicator" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLIndicator" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.IndicatorTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.Library" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLLibrary" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.LibraryTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.EnumerationOpen" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLOpenEnumeration" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.EnumerationOpenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.Operation" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLOperation" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.OperationTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.Property" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLProperty" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.PropertyTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.Role" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLRole" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.RoleTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.Service" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLService" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.ServiceTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.SimpleFacet" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLSimpleFacet" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.SimpleFacetTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.Simple" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLSimple" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.SimpleTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.ValueWithAttributes" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLValueWithAttributes" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.ValueWithAttributesTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.Resource" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLResource" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.ResourceTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.ResourceParentRef" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLResourceParentRef" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.ResourceParentRefTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.ParamGroup" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLParamGroup" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.ParamGroupTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.Parameter" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLParameter" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.ParameterTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.FacetAction" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLActionFacet" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.FacetActionTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.Action" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLAction" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.ActionTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.ActionRequest" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLActionRequest" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.ActionRequestTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_05.ActionResponse" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLActionResponse" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb15_2tl.ActionResponseTransformer" />
 				</bean>
 				
 				<!-- Library v1.5 Transformers -->
@@ -1117,6 +1342,16 @@
 					<property name="targetFormat" value="JSON" />
 					<property name="codeGenerator" value="org.opentravel.schemacompiler.codegen.example.JSONExampleCodeGenerator" />
 				</bean>
+				<bean class="org.opentravel.schemacompiler.codegen.CodeGeneratorMapping">
+					<property name="sourceType" value="org.opentravel.schemacompiler.model.TLLibrary" />
+					<property name="targetFormat" value="JSON_SCHEMA" />
+					<property name="codeGenerator" value="org.opentravel.schemacompiler.codegen.json.JsonSchemaUserLibraryCodeGenerator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.codegen.CodeGeneratorMapping">
+					<property name="sourceType" value="org.opentravel.schemacompiler.model.BuiltInLibrary" />
+					<property name="targetFormat" value="JSON_SCHEMA" />
+					<property name="codeGenerator" value="org.opentravel.schemacompiler.codegen.json.JsonSchemaBuiltInCodeGenerator" />
+				</bean>
 			</set>
 		</property>
 	</bean>
@@ -1207,6 +1442,26 @@
 					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
 					<property name="transformer" value="org.opentravel.schemacompiler.codegen.xsd.TLValueWithAttributesCodegenTransformer" />
 				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLChoiceObject" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.xsd.TLChoiceObjectCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLResource" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.xsd.TLResourceCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLActionRequest" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.xsd.TLActionRequestCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLActionResponse" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.xsd.TLActionResponseCodegenTransformer" />
+				</bean>
 			</set>
 		</property>
 	</bean>
@@ -1246,6 +1501,117 @@
 		</property>
 	</bean>
 	
+	<!--
+	  Transform Factory: XML Schema (XSD) Code Generator
+	  
+	  Defines the object transformation mappings utilized by the XML schema code generator.  Each mapping associates
+	  the source and target object types with the transformer class that will be used to implement the conversion
+	  function.  All transformer classes must implement the 'org.opentravel.schemacompiler.transform.ObjectTransformer'
+	  interface.
+	  -->
+	<bean id="jsonSchemaCodeGeneratorTransformFactory" class="org.opentravel.schemacompiler.transform.TransformerFactory" scope="prototype">
+		<property name="transformerMappings">
+			<set>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLLibrary" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.json.model.JsonSchema" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLLibraryJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.BuiltInLibrary" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.json.model.JsonSchema" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.BuiltInLibraryJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLDocumentation" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.json.model.JsonSchemaDocumentation" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLDocumentationJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLAttribute" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLAttributeJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLIndicator" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLIndicatorJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLProperty" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLPropertyJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLSimple" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLSimpleJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLClosedEnumeration" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLClosedEnumerationJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLOpenEnumeration" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLOpenEnumerationJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLValueWithAttributes" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLValueWithAttributesJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLCoreObject" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLCoreObjectJsonCodegenTransformer" />
+				</bean>
+				<!--
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLBusinessObject" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLBusinessObjectJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLChoiceObject" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLChoiceObjectJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLExtensionPointFacet" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLExtensionPointFacetJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLService" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLServiceJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLOperation" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLOperationCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLResource" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLResourceJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLActionRequest" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLActionRequestJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLActionResponse" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLActionResponseJsonCodegenTransformer" />
+				</bean>
+				-->
+			</set>
+		</property>
+	</bean>
 	
 	<bean id="exampleGenerator" class="org.opentravel.schemacompiler.codegen.example.ExampleValueGenerator" scope="prototype">
  		<property name="legacyExampleProviders">
@@ -1258,7 +1624,5 @@
  			</list>
  		</property>
  	</bean>
-	
-	
 	
 </beans>

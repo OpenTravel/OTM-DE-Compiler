@@ -33,6 +33,7 @@ import javax.xml.stream.util.StreamReaderDelegate;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.SchemaFactory;
 
+import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
@@ -59,8 +60,7 @@ import org.w3._2001.xmlschema.Schema;
 public abstract class AbstractLibraryModuleLoader implements LibraryModuleLoader<InputStream>,
         LoaderValidationMessageKeys {
 
-    protected static final Logger log = LoggerFactory
-            .getLogger(AbstractLibraryModuleLoader.class);
+    protected static final Logger log = LoggerFactory.getLogger(AbstractLibraryModuleLoader.class);
 
     private static final String SCHEMA_CONTEXT = ":org.w3._2001.xmlschema";
 
@@ -256,7 +256,8 @@ public abstract class AbstractLibraryModuleLoader implements LibraryModuleLoader
         try {
             SchemaFactory schemaFactory = SchemaFactory
                     .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            InputStream schemaStream = SchemaDeclarations.SCHEMA_FOR_SCHEMAS.getContent();
+            InputStream schemaStream = SchemaDeclarations.SCHEMA_FOR_SCHEMAS.getContent(
+            		CodeGeneratorFactory.XSD_TARGET_FORMAT);
 
             schemaFactory.setResourceResolver(new ClasspathResourceResolver());
             schemaValidationSchema = schemaFactory.newSchema(new StreamSource(schemaStream));

@@ -15,13 +15,16 @@
  */
 package org.opentravel.schemacompiler.version.handlers;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLEquivalent;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLPatchableFacet;
 import org.opentravel.schemacompiler.util.ModelElementCloner;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 
@@ -114,6 +117,24 @@ public class TLBusinessObjectVersionHandler extends TLExtensionOwnerVersionHandl
             mergeUtils.addToIdentityFacetMap( sourceFacet, sourceFacets );
         }
         mergeUtils.mergeFacets( targetFacets, sourceFacets, referenceHandler );
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#getPatchableFacets(org.opentravel.schemacompiler.version.Versioned)
+	 */
+	@Override
+	public List<TLPatchableFacet> getPatchableFacets(TLBusinessObject entity) {
+		List<TLPatchableFacet> facetList = new ArrayList<>();
+		
+        for (TLFacet customFacet : entity.getCustomFacets()) {
+        	facetList.add(customFacet);
+        }
+        for (TLFacet queryFacet : entity.getQueryFacets()) {
+        	facetList.add(queryFacet);
+        }
+        facetList.add(entity.getSummaryFacet());
+        facetList.add(entity.getDetailFacet());
+		return facetList;
 	}
 	
 }

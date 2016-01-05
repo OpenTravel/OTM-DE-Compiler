@@ -29,8 +29,8 @@ import org.opentravel.schemacompiler.model.TLExample.ExampleListManager;
  * 
  * @author S. Livezey
  */
-public class TLAttribute extends TLModelElement implements TLDocumentationOwner, TLEquivalentOwner,
-        TLExampleOwner {
+public class TLAttribute extends TLModelElement implements TLMemberField<TLAttributeOwner>,
+		TLDocumentationOwner, TLEquivalentOwner, TLExampleOwner {
 
     private TLAttributeOwner attributeOwner;
     private String name;
@@ -85,6 +85,26 @@ public class TLAttribute extends TLModelElement implements TLDocumentationOwner,
      * 
      * @return TLAttributeOwner
      */
+    public TLAttributeOwner getOwner() {
+        return attributeOwner;
+    }
+
+    /**
+     * Assigns the value of the 'attributeOwner' field.
+     * 
+     * @param attributeOwner
+     *            the field value to assign
+     */
+    public void setOwner(TLAttributeOwner attributeOwner) {
+        this.attributeOwner = attributeOwner;
+    }
+
+    /**
+     * Returns the value of the 'attributeOwner' field.
+     * 
+     * @return TLAttributeOwner
+     */
+    @Deprecated
     public TLAttributeOwner getAttributeOwner() {
         return attributeOwner;
     }
@@ -95,6 +115,7 @@ public class TLAttribute extends TLModelElement implements TLDocumentationOwner,
      * @param attributeOwner
      *            the field value to assign
      */
+    @Deprecated
     public void setAttributeOwner(TLAttributeOwner attributeOwner) {
         this.attributeOwner = attributeOwner;
     }
@@ -389,7 +410,7 @@ public class TLAttribute extends TLModelElement implements TLDocumentationOwner,
          */
         @Override
         protected void assignOwner(TLAttribute child, TLAttributeOwner owner) {
-            child.setAttributeOwner(owner);
+            child.setOwner(owner);
         }
 
         /**

@@ -138,6 +138,8 @@
 	<xsd:element name="ExtensionPoint_Detail" type="ExtensionPoint"/>
 	<xsd:element name="ExtensionPoint_Custom" type="ExtensionPoint"/>
 	<xsd:element name="ExtensionPoint_Query" type="ExtensionPoint"/>
+	<xsd:element name="ExtensionPoint_Shared" type="ExtensionPoint"/>
+	<xsd:element name="ExtensionPoint_Choice" type="ExtensionPoint"/>
 	<xsd:complexType name="ExtensionPoint">
 		<xsd:sequence>
 			<xsd:any minOccurs="0" maxOccurs="unbounded" namespace="##other" processContents="lax"/>

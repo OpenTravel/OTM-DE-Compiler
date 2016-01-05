@@ -30,8 +30,10 @@ import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtension;
@@ -43,6 +45,8 @@ import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.model.TLParamGroup;
+import org.opentravel.schemacompiler.model.TLParameter;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLService;
 import org.opentravel.schemacompiler.model.TLSimple;
@@ -371,6 +375,31 @@ public class DependencyFilterBuilder {
         }
 
         /**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitChoiceObject(org.opentravel.schemacompiler.model.TLChoiceObject)
+		 */
+		@Override
+		public boolean visitChoiceObject(TLChoiceObject choiceObject) {
+            visitLibraryElement(choiceObject);
+            return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParamGroup(org.opentravel.schemacompiler.model.TLParamGroup)
+		 */
+		@Override
+		public boolean visitParamGroup(TLParamGroup paramGroup) {
+			return false; // Do not follow - REST parameters do not contribute to schema dependencies
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParameter(org.opentravel.schemacompiler.model.TLParameter)
+		 */
+		@Override
+		public boolean visitParameter(TLParameter parameter) {
+			return false; // Do not follow - REST parameters do not contribute to schema dependencies
+		}
+
+		/**
          * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitExtensionPointFacet(org.opentravel.schemacompiler.model.TLExtensionPointFacet)
          */
         @Override
@@ -486,6 +515,20 @@ public class DependencyFilterBuilder {
             visitLibraryElement(facet);
             return true;
         }
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionFacet(org.opentravel.schemacompiler.model.TLActionFacet)
+		 */
+		@Override
+		public boolean visitActionFacet(TLActionFacet facet) {
+            TLFacetOwner facetOwner = facet.getOwningEntity();
+
+            if (facetOwner instanceof LibraryMember) {
+                visitLibraryElement((LibraryMember) facetOwner);
+            }
+            visitLibraryElement(facet);
+            return true;
+		}
 
         /**
          * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitSimpleFacet(org.opentravel.schemacompiler.model.TLSimpleFacet)

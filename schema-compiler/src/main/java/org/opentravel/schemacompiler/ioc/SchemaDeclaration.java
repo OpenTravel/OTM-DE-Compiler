@@ -20,8 +20,13 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 
 /**
  * Configuration element used to declare the namespace, file location, and other key fields for XML
@@ -36,7 +41,7 @@ public class SchemaDeclaration {
     private String namespace;
     private String name;
     private String defaultPrefix;
-    private String location;
+    private Map<String,String> locations = new HashMap<>();
     private List<String> dependencies;
 
     /**
@@ -53,8 +58,24 @@ public class SchemaDeclaration {
      * @return InputStream
      * @throws IOException
      *             thrown if the schema's file location is null/empty or the file cannot be found
+     * @deprecated  use getContent(fileFormat) instead
      */
     public InputStream getContent() throws IOException {
+    	return getContent( CodeGeneratorFactory.XSD_TARGET_FORMAT );
+    }
+
+    /**
+     * If the location of a schema with the specified format is not null (or empty), this method
+     * will locate the file containing the schema's content and return an input stream that can be
+     * used to read it. It is the responsibility of the caller to close the stream that is returned.
+     * 
+     * @param fileFormat  the file format of the schema whose content stream should be returned
+     * @return InputStream
+     * @throws IOException
+     *             thrown if the schema's file location is null/empty or the file cannot be found
+     */
+    public InputStream getContent(String fileFormat) throws IOException {
+    	String location = getLocation( fileFormat );
         InputStream contentStream = null;
 
         if ((location == null) || (location.length() == 0)) {
@@ -79,13 +100,27 @@ public class SchemaDeclaration {
         }
         return contentStream;
     }
-
+    
     /**
-     * Returns the name of the file (computed as the last element in the 'location' field).
+     * Returns the name of the XSD schema file (computed as the last element of the
+     * schema's location path).
      * 
      * @return String
+     * @deprecated  use getFilename(fileFormat) instead
      */
     public String getFilename() {
+    	return getFilename( CodeGeneratorFactory.XSD_TARGET_FORMAT );
+    }
+    
+    /**
+     * Returns the name of the schema file with the specified file format (computed as
+     * the last element in the schema's location).
+     * 
+     * @param fileFormat  the file format of the schema whose filename should be returned
+     * @return String
+     */
+    public String getFilename(String fileFormat) {
+    	String location = getLocation( fileFormat );
         String filename;
 
         if ((location != null) && (location.length() > 0) && !location.endsWith("/")) {
@@ -160,25 +195,54 @@ public class SchemaDeclaration {
     }
 
     /**
+     * Returns the classpath or file location of the schema (XSD file format).
+     * 
+     * @return String
+     * @deprecated  use getLocation(fileFormat) instead
+     */
+    public String getLocation() {
+        return getLocation( CodeGeneratorFactory.XSD_TARGET_FORMAT );
+    }
+
+    /**
      * Returns the classpath or file location of the schema.
      * 
      * @return String
      */
-    public String getLocation() {
-        return location;
+    public String getLocation(String fileFormat) {
+        return locations.get( fileFormat );
     }
 
     /**
-     * Assigns the classpath or file location of the schema.
-     * 
-     * @param location
-     *            the location value to assign
-     */
-    public void setLocation(String location) {
-        this.location = location;
-    }
+	 * Returns the list of all schema locations for this declaration.
+	 *
+	 * @return List<SchemaLocation>
+	 */
+	public List<SchemaLocation> getLocations() {
+		List<SchemaLocation> sLocs = new ArrayList<>();
+		
+		for (String fileFormat : locations.keySet()) {
+			sLocs.add( new SchemaLocation( fileFormat, locations.get( fileFormat) ) );
+		}
+		return Collections.unmodifiableList( sLocs );
+	}
 
-    /**
+	/**
+	 * Assigns the list of all schema locations for this declaration.
+	 *
+	 * @param locations  the list of schema locations to assign
+	 */
+	public void setLocations(List<SchemaLocation> locations) {
+		this.locations.clear();
+		
+		if (locations != null) {
+			for (SchemaLocation sLoc : locations) {
+				this.locations.put( sLoc.getFormat(), sLoc.getLocation() );
+			}
+		}
+	}
+
+	/**
      * Returns the list of bean ID's for any <code>SchemaDeclaration</code> instances that this
      * declaration depends on.
      * 
@@ -225,15 +289,15 @@ public class SchemaDeclaration {
     }
 
     /**
-     * Returns true if the given object is a <code>SchemaDeclaration</code> with the same location
-     * value.
+     * Returns true if the given object is a <code>SchemaDeclaration</code> with the same
+     * XSD location value.
      * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
     public boolean equals(Object obj) {
         if (obj instanceof SchemaDeclaration) {
-            String thisLocation = this.location;
-            String objLocation = ((SchemaDeclaration) obj).location;
+            String thisLocation = getLocation( CodeGeneratorFactory.XSD_TARGET_FORMAT );
+            String objLocation = ((SchemaDeclaration) obj).getLocation( CodeGeneratorFactory.XSD_TARGET_FORMAT );
 
             return (thisLocation == null) ? (objLocation == null) : thisLocation
                     .equals(objLocation);
@@ -245,6 +309,7 @@ public class SchemaDeclaration {
      * @see java.lang.Object#hashCode()
      */
     public int hashCode() {
+        String location = getLocation( CodeGeneratorFactory.XSD_TARGET_FORMAT );
         return (location == null) ? 0 : location.hashCode();
     }
 

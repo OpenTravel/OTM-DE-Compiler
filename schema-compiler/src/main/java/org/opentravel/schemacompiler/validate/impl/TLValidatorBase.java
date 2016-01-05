@@ -24,6 +24,7 @@ import java.util.Map;
 
 import javax.xml.namespace.QName;
 
+import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLExampleOwner;
@@ -32,6 +33,9 @@ import org.opentravel.schemacompiler.model.TLExtensionOwner;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.model.TLParamGroup;
+import org.opentravel.schemacompiler.model.TLParamLocation;
+import org.opentravel.schemacompiler.model.TLParameter;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.transform.SymbolResolver;
@@ -71,6 +75,9 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
     public static final String ERROR_DUPLICATE_MAJOR_VERSION_SYMBOL = "DUPLICATE_MAJOR_VERSION_SYMBOL";
     public static final String ERROR_INVALID_VERSION_EXTENSION = "INVALID_VERSION_EXTENSION";
     public static final String ERROR_ILLEGAL_PATCH = "ILLEGAL_PATCH";
+    public static final String ERROR_UNDECLARED_PATH_PARAM = "UNDECLARED_PATH_PARAM";
+    public static final String ERROR_UNUSED_PATH_PARAM = "UNUSED_PATH_PARAM";
+    public static final String ERROR_INVALID_PATH_TEMPLATE = "INVALID_PATH_TEMPLATE";
     public static final String WARNING_EXAMPLE_FOR_EMPTY_TYPE = "EXAMPLE_FOR_EMPTY_TYPE";
 
     private TLModelValidationContext context;
@@ -394,7 +401,7 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
                     conflictingElement.getLocalPart(), conflictingElement.getNamespaceURI());
         }
     }
-
+    
     /**
      * Returns the cached <code>SchemaNameValidationRegistry</code> instance. If a cached object
      * does not exist, one is created automatically.
@@ -596,5 +603,141 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
         }
         return majorVersionNamespace;
     }
-
+    
+    /**
+     * Validates all aspects of the given path template, including path parameters that must be declared
+     * in the given parameter group.
+     * 
+     * @param pathTemplate  the path template to be validated
+     * @param paramGroup  the parameter group that declares the path parameters of the template
+     * @param builder  the validation builder that will receive any validation errors that are detected
+     */
+    protected void validatePathTemplate(String pathTemplate, TLParamGroup paramGroup, ValidationBuilder<?> builder) {
+    	if ((pathTemplate == null) || (pathTemplate.length() == 0)) {
+    		return; // Do not validate if required information is not provided
+    	}
+    	ResourceUrlValidator urlValidator = new ResourceUrlValidator( true );
+    	
+    	if ((pathTemplate != null) && (pathTemplate.length() > 0)) {
+    		if (urlValidator.isValidPath( pathTemplate )) {
+    			List<String> missingParams = getMissingPathParams( pathTemplate, paramGroup, urlValidator );
+    			List<String> unusedParams = getUnusedPathParams( paramGroup, pathTemplate, urlValidator );
+    			
+				if ((paramGroup != null) && !missingParams.isEmpty()) {
+	            	builder.addFinding( FindingType.ERROR, "pathTemplate", ERROR_UNDECLARED_PATH_PARAM,
+	            			toCsvString( missingParams ) );
+				}
+				if (!unusedParams.isEmpty()) {
+	            	builder.addFinding( FindingType.ERROR, "pathTemplate", ERROR_UNUSED_PATH_PARAM,
+	            			toCsvString( unusedParams ) );
+				}
+    			
+    		} else {
+            	builder.addFinding( FindingType.ERROR, "pathTemplate", ERROR_INVALID_PATH_TEMPLATE, pathTemplate );
+    		}
+    	}
+    }
+    
+	/**
+	 * Returns the list of parameters from the given path template that do not have a corresponding
+	 * declaration in the parameter group provided.
+	 * 
+	 * @param pathTemplate  the path template to analyze
+	 * @param paramGroup  the parameter group which must contain all referenced path parameters
+	 * @param urlValidator  the URL validator to use when identifying path parameters
+	 * @return List<String>
+	 */
+	private List<String> getMissingPathParams(String pathTemplate, TLParamGroup paramGroup, ResourceUrlValidator urlValidator) {
+		List<String> pgPathParams = getPathParameterNames( paramGroup );
+		List<String> missingParams = new ArrayList<>();
+		
+		// Determine which (if any) parameters from the path template do not exist
+		for (String templateParam : urlValidator.getPathParameters( pathTemplate )) {
+			if (!pgPathParams.contains( templateParam )) {
+				missingParams.add( templateParam );
+			}
+		}
+		return missingParams;
+	}
+	
+	/**
+	 * Returns the list of parameters from the given parameter group that are not used in the
+	 * path template provided.
+	 * 
+	 * @param paramGroup  the parameter group which declares all required path parameters
+	 * @param pathTemplate  the path template that must reference all delcared path parameters
+	 * @param urlValidator  the URL validator to use when identifying path parameters
+	 * @return List<String>
+	 */
+	private List<String> getUnusedPathParams(TLParamGroup paramGroup, String pathTemplate, ResourceUrlValidator urlValidator) {
+		List<String> templatePathParams = urlValidator.getPathParameters( pathTemplate );
+		List<String> unusedParams = new ArrayList<>();
+		
+		// Determine which (if any) parameters from the parameter group are not used
+		for (String pgParam : getPathParameterNames( paramGroup )) {
+			if (!templatePathParams.contains( pgParam )) {
+				unusedParams.add( pgParam );
+			}
+		}
+		return unusedParams;
+	}
+	
+	/**
+	 * Returns the list of all path parameter names that are declared or inherited by
+	 * the given parameter group.
+	 * 
+	 * @param paramGroup  the parameter group for which to return path parameter names
+	 * @return List<String>
+	 */
+	@SuppressWarnings("unchecked")
+	private List<String> getPathParameterNames(TLParamGroup paramGroup) {
+		if (paramGroup == null) {
+			return new ArrayList<>(); // return empty list for null param group
+		}
+        String cacheKey = paramGroup.getOwner().getNamespace() + ":" + paramGroup.getOwner().getLocalName()
+        		+ ":" + paramGroup.getName() + ":pathParams";
+        List<String> pathParams = (List<String>) getContextCacheEntry( cacheKey );
+		
+        if (pathParams == null) {
+        	pathParams = new ArrayList<>();
+        	
+    		for (TLParameter param : ResourceCodegenUtils.getInheritedParameters( paramGroup )) {
+    			if (param.getLocation() == TLParamLocation.PATH) {
+    				String paramName;
+    				
+    				if (param.getFieldRef() != null) {
+    					paramName = param.getFieldRef().getName();
+    				} else {
+    					paramName = param.getFieldRefName();
+    				}
+    				if (paramName != null) {
+    					pathParams.add( paramName );
+    				}
+    			}
+    		}
+        	setContextCacheEntry( cacheKey, pathParams );
+        }
+        return pathParams;
+	}
+	
+	/**
+	 * Returns a string containing comma-separated values from the given list.
+	 * 
+	 * @param values  the list of values to concatenate
+	 * @return String
+	 */
+	protected String toCsvString(List<?> values) {
+		StringBuilder csv = new StringBuilder();
+		boolean firstValue = true;
+		
+		for (Object obj : values) {
+			if (obj != null) {
+				if (!firstValue) csv.append(", ");
+				csv.append( obj.toString() );
+				firstValue = false;
+			}
+		}
+		return csv.toString();
+	}
+	
 }

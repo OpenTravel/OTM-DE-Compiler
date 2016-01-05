@@ -23,7 +23,7 @@ import java.util.List;
  * 
  * @author S. Livezey
  */
-public interface TLIndicatorOwner extends NamedEntity {
+public interface TLIndicatorOwner extends NamedEntity, TLMemberFieldOwner {
 
     /**
      * Returns the value of the 'indicators' field.

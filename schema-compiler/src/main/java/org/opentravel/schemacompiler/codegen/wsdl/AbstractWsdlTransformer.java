@@ -23,6 +23,7 @@ import java.util.Map;
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder;
 import org.opentravel.schemacompiler.codegen.CodeGenerator;
+import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.codegen.impl.AbstractCodegenTransformer;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
@@ -272,7 +273,8 @@ public abstract class AbstractWsdlTransformer<S, T> extends AbstractCodegenTrans
         Import nsImport = new Import();
 
         nsImport.setNamespace(schemaDeclaration.getNamespace());
-        nsImport.setSchemaLocation(importFolder + schemaDeclaration.getFilename());
+        nsImport.setSchemaLocation(importFolder +
+        		schemaDeclaration.getFilename(CodeGeneratorFactory.XSD_TARGET_FORMAT));
         return nsImport;
     }
 

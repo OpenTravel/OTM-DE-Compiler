@@ -26,7 +26,7 @@ import org.w3._2001.xmlschema.TopLevelSimpleType;
 
 /**
  * Code generation delegate for <code>TLListFacet</code> instances with a facet type of
- * <code>SUMMARY</code> and a facet owner of type <code>TLCoreObject</code>.
+ * <code>SIMPLE</code> and a facet owner of type <code>TLCoreObject</code>.
  * 
  * @author S. Livezey
  */

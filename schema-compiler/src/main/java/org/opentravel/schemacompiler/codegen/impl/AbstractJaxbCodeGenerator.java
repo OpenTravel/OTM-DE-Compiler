@@ -33,6 +33,7 @@ import javax.xml.bind.Marshaller;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
+import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.ioc.SchemaDeclaration;
 import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
@@ -117,7 +118,8 @@ public abstract class AbstractJaxbCodeGenerator<S extends TLModelElement> extend
                 if (schemaDeclaration == SchemaDeclarations.SCHEMA_FOR_SCHEMAS) {
                     continue;
                 }
-                if (!schemaDeclaration.getFilename().endsWith(".xsd")) {
+                if (!schemaDeclaration.getFilename(
+                		CodeGeneratorFactory.XSD_TARGET_FORMAT).endsWith(".xsd")) {
                     continue;
                 }
                 File outputFolder = getOutputFolder(context, null);
@@ -130,11 +132,12 @@ public abstract class AbstractJaxbCodeGenerator<S extends TLModelElement> extend
                 }
 
                 // Copy the contents of the file to the built-in folder location
-                File outputFile = new File(outputFolder, schemaDeclaration.getFilename());
+                File outputFile = new File(outputFolder, schemaDeclaration.getFilename(
+                		CodeGeneratorFactory.XSD_TARGET_FORMAT));
 
                 if (!outputFile.exists()) {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(
-                            schemaDeclaration.getContent()));
+                            schemaDeclaration.getContent(CodeGeneratorFactory.XSD_TARGET_FORMAT)));
                     BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
                     String line = null;
 

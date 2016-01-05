@@ -23,6 +23,7 @@ import org.opentravel.ns.ota2.librarymodel_v01_05.Parameter;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLEquivalent;
 import org.opentravel.schemacompiler.model.TLExample;
+import org.opentravel.schemacompiler.model.TLMemberField;
 import org.opentravel.schemacompiler.model.TLParamLocation;
 import org.opentravel.schemacompiler.model.TLParameter;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
@@ -45,11 +46,16 @@ public class TLParameterTransformer extends TLComplexTypeTransformer<TLParameter
         		getTransformerFactory().getTransformer(TLEquivalent.class, Equivalent.class);
         ObjectTransformer<TLExample, Example, SymbolResolverTransformerContext> exTransformer =
         		getTransformerFactory().getTransformer(TLExample.class, Example.class);
+		TLMemberField<?> sourceFieldRef = source.getFieldRef();
 		Parameter parameter = new Parameter();
 		
 		parameter.setLocation(transformLocation(source.getLocation()));
 		
+        if (sourceFieldRef != null) {
+        	parameter.setFieldName(sourceFieldRef.getName());
+        } else {
         	parameter.setFieldName(trimString(source.getFieldRefName(), false));
+        }
 		
         if ((source.getDocumentation() != null) && !source.getDocumentation().isEmpty()) {
             ObjectTransformer<TLDocumentation, Documentation, SymbolResolverTransformerContext> docTransformer = getTransformerFactory()

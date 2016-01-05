@@ -21,6 +21,7 @@ import java.util.List;
 import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.event.ValueChangeEvent;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
+import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLActionRequest;
@@ -29,6 +30,7 @@ import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLFacet;
+import org.opentravel.schemacompiler.model.TLMemberField;
 import org.opentravel.schemacompiler.model.TLModelElement;
 import org.opentravel.schemacompiler.model.TLParamGroup;
 import org.opentravel.schemacompiler.model.TLParameter;
@@ -65,6 +67,9 @@ public class NameChangeIntegrityChecker extends
             if (sourceObject instanceof NamedEntity) {
                 resolveAssignedTypeNames((NamedEntity) sourceObject);
                 
+            } else if (sourceObject instanceof TLMemberField) {
+            	resolveAssignedFieldNames((TLMemberField<?>) sourceObject);
+            	
             } else if (sourceObject instanceof TLParamGroup) {
             	resolveAssignedParamGroupNames((TLParamGroup) sourceObject);
             }
@@ -90,6 +95,25 @@ public class NameChangeIntegrityChecker extends
                 affectedEntities, symbolResolver));
     }
 
+    /**
+     * Scans the entire model for references to the given member field and refreshes the name
+     * assignment for each occurrance.
+     * 
+     * @param modifiedField
+     *            the modified field whose references should be updated
+     */
+    public static void resolveAssignedFieldNames(TLMemberField<?> modifiedField) {
+        AbstractLibrary localLibrary = ((LibraryElement) modifiedField.getOwner()).getOwningLibrary();
+        SymbolResolver symbolResolver = new TLModelSymbolResolver(localLibrary.getOwningModel());
+        List<TLModelElement> affectedEntities = new ArrayList<>();
+        
+        affectedEntities.add((TLModelElement) modifiedField);
+        symbolResolver.setPrefixResolver(new LibraryPrefixResolver(localLibrary));
+        symbolResolver.setAnonymousEntityFilter(new ChameleonFilter(localLibrary));
+        ModelNavigator.navigate(localLibrary.getOwningModel(), new EntityNameChangeVisitor(
+                affectedEntities, symbolResolver));
+    }
+    
     /**
      * Scans the entire model for references to the given parameter group and refreshes the name
      * assignment for each occurrance.
@@ -302,6 +326,11 @@ public class NameChangeIntegrityChecker extends
 		 */
 		@Override
 		public boolean visitParameter(TLParameter parameter) {
+			TLMemberField<?> referencedEntity = parameter.getFieldRef();
+			
+            if (modifiedEntities.contains(referencedEntity)) {
+            	parameter.setFieldRefName(referencedEntity.getName());
+            }
             return true;
 		}
 

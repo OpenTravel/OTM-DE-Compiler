@@ -36,6 +36,9 @@ import org.opentravel.schemacompiler.codegen.wsdl.CodeGenerationWsdlBindings;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLActionFacet;
+import org.opentravel.schemacompiler.model.TLActionRequest;
+import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLAttributeOwner;
@@ -49,6 +52,7 @@ import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.model.TLPatchableFacet;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLPropertyOwner;
 import org.opentravel.schemacompiler.model.TLPropertyType;
@@ -294,17 +298,17 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
 	}
 
 	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#startAlias(org.opentravel.schemacompiler.model.TLAlias)
-	 */
-	@Override
-	public void startAlias(TLAlias alias) {
-		super.startAlias(alias);
+     * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#startAlias(org.opentravel.schemacompiler.model.TLAlias)
+     */
+    @Override
+    public void startAlias(TLAlias alias) {
+        super.startAlias(alias);
 
-		if (context == null) {
-			throw new IllegalStateException(
-					"Alias encountered without an available element context.");
-		}
-		context.setModelAlias(alias);
+        if (context == null) {
+            throw new IllegalStateException(
+                    "Alias encountered without an available element context.");
+        }
+        context.setModelAlias(alias);
 	}
 
 	/**
@@ -322,776 +326,855 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
 	}
 
 	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#startAttribute(org.opentravel.schemacompiler.model.TLAttribute)
+	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#startRequest(org.opentravel.schemacompiler.model.TLActionRequest)
 	 */
 	@Override
-	public void startAttribute(TLAttribute attribute) {
-		super.startAttribute(attribute);
-
-		if (context == null) {
-			throw new IllegalStateException(
-					"Attribute encountered without an available element context.");
+	public void startRequest(TLActionRequest request) {
+		super.startRequest(request);
+		
+		if (request.getPayloadType() instanceof TLActionFacet) {
+			TLActionFacet payloadType = (TLActionFacet) request.getPayloadType();
+			
+	        facetStack.push(payloadType);
+	        createComplexElement(request);
 		}
-		context.setModelAttribute(attribute);
 	}
 
 	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#endAttribute(org.opentravel.schemacompiler.model.TLAttribute)
+	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#endRequest(org.opentravel.schemacompiler.model.TLActionRequest)
 	 */
 	@Override
-	public void endAttribute(TLAttribute attribute) {
-		super.endAttribute(attribute);
-
-		if (context == null) {
-			throw new IllegalStateException(
-					"Attribute encountered without an available element context.");
+	public void endRequest(TLActionRequest request) {
+		super.endRequest(request);
+		
+		if (request.getPayloadType() instanceof TLActionFacet) {
+			TLActionFacet payloadType = (TLActionFacet) request.getPayloadType();
+			
+	        if (facetStack.peek() == payloadType) {
+	            facetStack.pop();
+	        }
 		}
+	}
 
-		// Capture ID values in the registry for use during post-processing
-		if (XsdCodegenUtils.isIdType(attribute.getType())) {
-			TLAttributeOwner owner = attribute.getAttributeOwner();
-			NamedEntity contextFacet = getContextFacet();
-
-			if (contextFacet != null) {
-				registerIdValue(contextFacet, lastExampleValue);
-			} else {
-				registerIdValue(owner, lastExampleValue);
-			}
+	/**
+	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#startResponse(org.opentravel.schemacompiler.model.TLActionResponse)
+	 */
+	@Override
+	public void startResponse(TLActionResponse response) {
+		super.startResponse(response);
+		
+		if (response.getPayloadType() instanceof TLActionFacet) {
+			TLActionFacet payloadType = (TLActionFacet) response.getPayloadType();
+			
+	        facetStack.push(payloadType);
+	        createComplexElement(response);
 		}
+	}
 
-		// Queue up IDREF(S) attributes for assignment during post-processing
-		if (XsdCodegenUtils.isIdRefType(attribute.getType())) {
+	/**
+	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#endResponse(org.opentravel.schemacompiler.model.TLActionResponse)
+	 */
+	@Override
+	public void endResponse(TLActionResponse response) {
+		super.endResponse(response);
+		
+		if (response.getPayloadType() instanceof TLActionFacet) {
+			TLActionFacet payloadType = (TLActionFacet) response.getPayloadType();
+			
+	        if (facetStack.peek() == payloadType) {
+	            facetStack.pop();
+	        }
+		}
+	}
+
+	/**
+     * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#startAttribute(org.opentravel.schemacompiler.model.TLAttribute)
+     */
+    @Override
+    public void startAttribute(TLAttribute attribute) {
+        super.startAttribute(attribute);
+
+        if (context == null) {
+            throw new IllegalStateException(
+                    "Attribute encountered without an available element context.");
+        }
+        context.setModelAttribute(attribute);
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#endAttribute(org.opentravel.schemacompiler.model.TLAttribute)
+     */
+    @Override
+    public void endAttribute(TLAttribute attribute) {
+        super.endAttribute(attribute);
+
+        if (context == null) {
+            throw new IllegalStateException(
+                    "Attribute encountered without an available element context.");
+        }
+
+        // Capture ID values in the registry for use during post-processing
+        if (XsdCodegenUtils.isIdType(attribute.getType())) {
+        	TLAttributeOwner owner = attribute.getOwner();
+        	NamedEntity contextFacet = getContextFacet();
+        	
+        	if (contextFacet != null) {
+                registerIdValue(contextFacet, lastExampleValue);
+        	} else {
+                registerIdValue(owner, lastExampleValue);
+        	}
+        }
+
+        // Queue up IDREF(S) attributes for assignment during post-processing
+        if (XsdCodegenUtils.isIdRefType(attribute.getType())) {
 			referenceAssignments.add(new DOMIdReferenceAssignment(null, 1,
 					attribute.getName()));
-		}
-		if (XsdCodegenUtils.isIdRefsType(attribute.getType())) {
+        }
+        if (XsdCodegenUtils.isIdRefsType(attribute.getType())) {
 			referenceAssignments.add(new DOMIdReferenceAssignment(null, 3,
 					attribute.getName()));
-		}
+        }
 
 		// If the attribute was an open enumeration type, we have to add an
 		// additional attribute
-		// for the 'Extension' value.
-		TLAttributeType attributeType = attribute.getType();
+        // for the 'Extension' value.
+        TLAttributeType attributeType = attribute.getType();
 
-		while (attributeType instanceof TLValueWithAttributes) {
+        while (attributeType instanceof TLValueWithAttributes) {
 			attributeType = ((TLValueWithAttributes) attributeType)
 					.getParentType();
-		}
-		if (attributeType instanceof TLOpenEnumeration) {
+        }
+        if (attributeType instanceof TLOpenEnumeration) {
 			context.getNode().setAttribute(
-					context.getModelAttribute().getName() + "Extension",
-					context.getModelAttribute().getName() + "_Other_Value");
-		}
-		context.setModelAttribute(null);
-	}
+                    context.getModelAttribute().getName() + "Extension",
+                    context.getModelAttribute().getName() + "_Other_Value");
+        }
+        context.setModelAttribute(null);
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#startElement(org.opentravel.schemacompiler.model.TLProperty)
-	 */
-	@Override
-	public void startElement(TLProperty element) {
-		super.startElement(element);
-		contextStack.push(context);
-		context = new ExampleContext(element);
-	}
+    /**
+     * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#startElement(org.opentravel.schemacompiler.model.TLProperty)
+     */
+    @Override
+    public void startElement(TLProperty element) {
+        super.startElement(element);
+        contextStack.push(context);
+        context = new ExampleContext(element);
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#endElement(org.opentravel.schemacompiler.model.TLProperty)
-	 */
-	@Override
-	public void endElement(TLProperty element) {
-		super.endElement(element);
+    /**
+     * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#endElement(org.opentravel.schemacompiler.model.TLProperty)
+     */
+    @Override
+    public void endElement(TLProperty element) {
+        super.endElement(element);
 
-		// Capture ID values in the registry for use during post-processing
-		if (XsdCodegenUtils.isIdType(element.getType())) {
-			TLPropertyOwner owner = element.getPropertyOwner();
-			NamedEntity contextFacet = getContextFacet();
+        // Capture ID values in the registry for use during post-processing
+        if (XsdCodegenUtils.isIdType(element.getType())) {
+        	TLPropertyOwner owner = element.getOwner();
+        	NamedEntity contextFacet = getContextFacet();
+        	
+        	if (contextFacet != null) {
+                registerIdValue(contextFacet, lastExampleValue);
+        	} else {
+                registerIdValue(owner, lastExampleValue);
+        	}
+        }
 
-			if (contextFacet != null) {
-				registerIdValue(contextFacet, lastExampleValue);
-			} else {
-				registerIdValue(owner, lastExampleValue);
-			}
-		}
-
-		// Queue up IDREF(S) attributes for assignment during post-processing
-		if (XsdCodegenUtils.isIdRefType(element.getType())) {
+        // Queue up IDREF(S) attributes for assignment during post-processing
+        if (XsdCodegenUtils.isIdRefType(element.getType())) {
 			referenceAssignments.add(new DOMIdReferenceAssignment(null, 1));
-		}
-		if (XsdCodegenUtils.isIdRefsType(element.getType())) {
+        }
+        if (XsdCodegenUtils.isIdRefsType(element.getType())) {
 			referenceAssignments.add(new DOMIdReferenceAssignment(null, 3));
-		}
-		if (element.isReference()) {
+        }
+        if (element.isReference()) {
 			int referenceCount = (element.getRepeat() <= 1) ? 1 : element
 					.getRepeat();
 
 			referenceAssignments.add(new DOMIdReferenceAssignment(element
 					.getType(), referenceCount));
-		}
-		context = contextStack.pop();
-	}
+        }
+        context = contextStack.pop();
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#startIndicatorAttribute(org.opentravel.schemacompiler.model.TLIndicator)
-	 */
-	@Override
-	public void startIndicatorAttribute(TLIndicator indicator) {
-		super.startIndicatorAttribute(indicator);
+    /**
+     * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#startIndicatorAttribute(org.opentravel.schemacompiler.model.TLIndicator)
+     */
+    @Override
+    public void startIndicatorAttribute(TLIndicator indicator) {
+        super.startIndicatorAttribute(indicator);
 
 		if (context.getNode() == null) {
-			throw new IllegalStateException(
-					"Indicator encountered without an available element context.");
-		}
-		String attributeName = indicator.getName();
+            throw new IllegalStateException(
+                    "Indicator encountered without an available element context.");
+        }
+        String attributeName = indicator.getName();
 
-		if (!attributeName.endsWith("Ind")) {
-			attributeName += "Ind";
-		}
+        if (!attributeName.endsWith("Ind")) {
+            attributeName += "Ind";
+        }
 		context.getNode().setAttribute(attributeName, "true");
-	}
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#startIndicatorElement(org.opentravel.schemacompiler.model.TLIndicator)
-	 */
-	@Override
-	public void startIndicatorElement(TLIndicator indicator) {
-		super.startIndicatorElement(indicator);
-		String elementName = indicator.getName();
+    /**
+     * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#startIndicatorElement(org.opentravel.schemacompiler.model.TLIndicator)
+     */
+    @Override
+    public void startIndicatorElement(TLIndicator indicator) {
+        super.startIndicatorElement(indicator);
+        String elementName = indicator.getName();
 
-		if (!elementName.endsWith("Ind")) {
-			elementName += "Ind";
-		}
+        if (!elementName.endsWith("Ind")) {
+            elementName += "Ind";
+        }
 		Element element = createXmlElement(indicator.getOwner().getNamespace(),
 				elementName, indicator.getOwner());
 
-		element.setTextContent("true");
+        element.setTextContent("true");
 		context.getNode().appendChild(element);
-	}
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#startOpenEnumeration(org.opentravel.schemacompiler.model.TLOpenEnumeration)
-	 */
-	@Override
-	public void startOpenEnumeration(TLOpenEnumeration openEnum) {
-		super.startOpenEnumeration(openEnum);
-		createSimpleElement(openEnum);
+    /**
+     * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#startOpenEnumeration(org.opentravel.schemacompiler.model.TLOpenEnumeration)
+     */
+    @Override
+    public void startOpenEnumeration(TLOpenEnumeration openEnum) {
+        super.startOpenEnumeration(openEnum);
+        createSimpleElement(openEnum);
 		context.getNode().setAttribute("extension", "Other_Value");
-	}
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#startRoleEnumeration(org.opentravel.schemacompiler.model.TLRoleEnumeration)
-	 */
-	@Override
-	public void startRoleEnumeration(TLRoleEnumeration roleEnum) {
-		super.startRoleEnumeration(roleEnum);
-		createSimpleElement(roleEnum);
+    /**
+     * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#startRoleEnumeration(org.opentravel.schemacompiler.model.TLRoleEnumeration)
+     */
+    @Override
+    public void startRoleEnumeration(TLRoleEnumeration roleEnum) {
+        super.startRoleEnumeration(roleEnum);
+        createSimpleElement(roleEnum);
 		context.getNode().setAttribute("extension", "Other_Value");
-	}
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#startValueWithAttributes(org.opentravel.schemacompiler.model.TLValueWithAttributes)
-	 */
-	@Override
+    /**
+     * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#startValueWithAttributes(org.opentravel.schemacompiler.model.TLValueWithAttributes)
+     */
+    @Override
 	public void startValueWithAttributes(
 			TLValueWithAttributes valueWithAttributes) {
-		NamedEntity parentType = valueWithAttributes.getParentType();
+        NamedEntity parentType = valueWithAttributes.getParentType();
 
-		// Find the root parent type for the VWA
-		while (parentType instanceof TLValueWithAttributes) {
-			parentType = ((TLValueWithAttributes) parentType).getParentType();
-		}
+        // Find the root parent type for the VWA
+        while (parentType instanceof TLValueWithAttributes) {
+            parentType = ((TLValueWithAttributes) parentType).getParentType();
+        }
 
-		// Construct the example content for the VWA
-		super.startValueWithAttributes(valueWithAttributes);
-		createComplexElement(valueWithAttributes);
+        // Construct the example content for the VWA
+        super.startValueWithAttributes(valueWithAttributes);
+        createComplexElement(valueWithAttributes);
 
 		if ((parentType instanceof TLOpenEnumeration)
 				|| (parentType instanceof TLRoleEnumeration)) {
 			context.getNode().setAttribute("extension", "Other_Value");
-		}
+        }
 		context.getNode().setTextContent(
 				generateExampleValue(valueWithAttributes));
-	}
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#startExtensionPoint(org.opentravel.schemacompiler.model.TLFacet)
-	 */
-	@Override
-	public void startExtensionPoint(TLFacet facet) {
-		super.startExtensionPoint(facet);
-		SchemaDependency extensionElement = extensionPointTypeMap.get(facet
-				.getFacetType());
-		Element owningDomElement = context.getNode();
+    /**
+     * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#startExtensionPoint(org.opentravel.schemacompiler.model.TLFacet)
+     */
+    @Override
+    public void startExtensionPoint(TLPatchableFacet facet) {
+        super.startExtensionPoint(facet);
+        SchemaDependency extensionElement = extensionPointTypeMap.get(facet.getFacetType());
+        Element owningDomElement = context.getNode();
 
-		if ((extensionElement != null) && (owningDomElement != null)) {
-			contextStack.push(context);
-			context = new ExampleContext(null);
-			context.setNode(createXmlElement(extensionElement
-					.getSchemaDeclaration().getNamespace(), extensionElement
-					.getLocalName(), extensionElement.getSchemaDeclaration()
-					.getDefaultPrefix()));
-			owningDomElement.appendChild(context.getNode());
-		}
-	}
+        if ((extensionElement != null) && (owningDomElement != null)) {
+            contextStack.push(context);
+            context = new ExampleContext(null);
+            context.setNode(createXmlElement(extensionElement.getSchemaDeclaration()
+                    .getNamespace(), extensionElement.getLocalName(), extensionElement
+                    .getSchemaDeclaration().getDefaultPrefix()));
+            owningDomElement.appendChild(context.getNode());
+        }
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#endExtensionPoint(org.opentravel.schemacompiler.model.TLFacet)
-	 */
-	@Override
-	public void endExtensionPoint(TLFacet facet) {
-		super.endExtensionPoint(facet);
-		SchemaDependency extensionElement = extensionPointTypeMap.get(facet
-				.getFacetType());
-		Element domElement = context.getNode();
+    /**
+     * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#endExtensionPoint(org.opentravel.schemacompiler.model.TLFacet)
+     */
+    @Override
+    public void endExtensionPoint(TLPatchableFacet facet) {
+        super.endExtensionPoint(facet);
+        SchemaDependency extensionElement = extensionPointTypeMap.get(facet.getFacetType());
+        Element domElement = context.getNode();
 
-		if ((extensionElement != null)
-				&& (domElement != null)
-				&& domElement.getLocalName().equals(
-						extensionElement.getLocalName())
-				&& domElement.getNamespaceURI().equals(
-						extensionElement.getSchemaDeclaration().getNamespace())) {
-			context = contextStack.pop();
-		}
-	}
+        if ((extensionElement != null)
+                && (domElement != null)
+                && domElement.getLocalName().equals(extensionElement.getLocalName())
+                && domElement.getNamespaceURI().equals(
+                        extensionElement.getSchemaDeclaration().getNamespace())) {
+            context = contextStack.pop();
+        }
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#startExtensionPointFacet(org.opentravel.schemacompiler.model.TLExtensionPointFacet)
-	 */
-	@Override
-	public void startExtensionPointFacet(TLExtensionPointFacet facet) {
-		super.startExtensionPointFacet(facet);
+    /**
+     * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#startExtensionPointFacet(org.opentravel.schemacompiler.model.TLExtensionPointFacet)
+     */
+    @Override
+    public void startExtensionPointFacet(TLExtensionPointFacet facet) {
+        super.startExtensionPointFacet(facet);
 
-		extensionPointNamespaces.add(facet.getNamespace());
-		contextStack.push(context);
-		context = new ExampleContext(null);
-		facetStack.push(facet);
-		createComplexElement(facet);
-	}
+        extensionPointNamespaces.add(facet.getNamespace());
+        contextStack.push(context);
+        context = new ExampleContext(null);
+        facetStack.push(facet);
+        createComplexElement(facet);
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#endExtensionPointFacet(org.opentravel.schemacompiler.model.TLExtensionPointFacet)
-	 */
-	@Override
-	public void endExtensionPointFacet(TLExtensionPointFacet facet) {
-		super.endExtensionPointFacet(facet);
+    /**
+     * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#endExtensionPointFacet(org.opentravel.schemacompiler.model.TLExtensionPointFacet)
+     */
+    @Override
+    public void endExtensionPointFacet(TLExtensionPointFacet facet) {
+        super.endExtensionPointFacet(facet);
 
-		if (facetStack.peek() == facet) {
-			facetStack.pop();
-		}
-		context = contextStack.pop();
-	}
+        if (facetStack.peek() == facet) {
+            facetStack.pop();
+        }
+        context = contextStack.pop();
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#startXsdComplexType(org.opentravel.schemacompiler.model.XSDComplexType)
-	 */
-	@Override
-	public void startXsdComplexType(XSDComplexType xsdComplexType) {
-		super.startXsdComplexType(xsdComplexType);
-		createComplexElement(xsdComplexType);
+    /**
+     * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#startXsdComplexType(org.opentravel.schemacompiler.model.XSDComplexType)
+     */
+    @Override
+    public void startXsdComplexType(XSDComplexType xsdComplexType) {
+        super.startXsdComplexType(xsdComplexType);
+        createComplexElement(xsdComplexType);
 		addLegacyElementContent(xsdComplexType.getNamespace(),
 				xsdComplexType.getLocalName());
-	}
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#startXsdElement(org.opentravel.schemacompiler.model.XSDElement)
-	 */
-	@Override
-	public void startXsdElement(XSDElement xsdElement) {
-		super.startXsdElement(xsdElement);
-		createComplexElement(xsdElement);
+    /**
+     * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#startXsdElement(org.opentravel.schemacompiler.model.XSDElement)
+     */
+    @Override
+    public void startXsdElement(XSDElement xsdElement) {
+        super.startXsdElement(xsdElement);
+        createComplexElement(xsdElement);
 		addLegacyElementContent(xsdElement.getNamespace(),
 				xsdElement.getLocalName());
-	}
+    }
 
-	/**
+    /**
 	 * Constructs a complex XML element using the current context information.
 	 * The new element is assigned as a child of the 'currentElement' for this
 	 * visitor, and replaces that 'currentElement' as the DOM element that will
 	 * receive attributes and child elements within the current context.
-	 * 
-	 * @param elementType
+     * 
+     * @param elementType
 	 *            specifies the type of element to use when the current context
 	 *            is null (i.e. when the new element will be the root of the XML
 	 *            document)
-	 */
-	private void createComplexElement(NamedEntity elementType) {
-		Element newElement;
+     */
+    private void createComplexElement(NamedEntity elementType) {
+        Element newElement;
 
-		// Check the context state to make sure nothing illegal is happening
-		if (context.getModelAttribute() != null) {
-			throw new IllegalStateException(
-					"Complex elements cannot be created as DOM attribute values.");
-		}
+        // Check the context state to make sure nothing illegal is happening
+        if (context.getModelAttribute() != null) {
+            throw new IllegalStateException(
+                    "Complex elements cannot be created as DOM attribute values.");
+        }
 		if (context.getNode() != null) {
-			throw new IllegalStateException(
-					"A complex element has already been defined for the current context.");
-		}
+            throw new IllegalStateException(
+                    "A complex element has already been defined for the current context.");
+        }
 
-		// Create the new DOM element
-		if ((context.getModelElement() != null)
+        // Create the new DOM element
+        if ((context.getModelElement() != null)
 				&& ((elementType instanceof TLAttributeType) || (elementType
 						.equals(context.getModelElement().getType())))) {
-			newElement = createPropertyElement(context.getModelElement(),
-					(TLPropertyType) elementType);
-		} else {
-			newElement = createXmlElement(elementType.getNamespace(),
-					getContextElementName(elementType, false), elementType);
-		}
+            newElement = createPropertyElement(context.getModelElement(),
+                    (TLPropertyType) elementType);
+        } else {
+            newElement = createXmlElement(elementType.getNamespace(),
+                    getContextElementName(elementType, false), elementType);
+        }
 		context.setNode(newElement);
 
-		// Assign the new DOM element as a child of the previous context
+        // Assign the new DOM element as a child of the previous context
 		if (contextStack.isEmpty()
 				|| (contextStack.peek().getNode() == null)) {
-			domDocument.appendChild(newElement);
-		} else {
+            domDocument.appendChild(newElement);
+        } else {
 			contextStack.peek().getNode().appendChild(newElement);
-		}
-	}
+        }
+    }
 
-	/**
+    /**
 	 * Constructs a simple XML element or an XML attribute depending upon the
 	 * content of the current context information. New elements are assigned as
 	 * a child of the 'currentElement' for this visitor, and then replace that
 	 * 'currentElement' as the DOM element for the context.
-	 * 
-	 * @param elementType
+     * 
+     * @param elementType
 	 *            specifies the type of element to use when the current context
 	 *            is null (i.e. when the new element will be the root of the XML
 	 *            document)
-	 */
-	private void createSimpleElement(NamedEntity elementType) {
-		if (context.getModelAttribute() != null) {
+     */
+    private void createSimpleElement(NamedEntity elementType) {
+        if (context.getModelAttribute() != null) {
 			if (context.getNode() == null) {
 				throw new IllegalStateException(
 						"No element available for new attribute creation.");
-			}
+            }
 			context.getNode().setAttribute(
 					context.getModelAttribute().getName(),
-					generateExampleValue(context.getModelAttribute()));
+                    generateExampleValue(context.getModelAttribute()));
 
-		} else {
+        } else {
 			if (contextStack.isEmpty() && (context.getNode() == null)) {
 				Element rootElement = createXmlElement(
 						elementType.getNamespace(), elementType.getLocalName(),
 						elementType);
 
-				rootElement.setTextContent(generateExampleValue(elementType));
+                rootElement.setTextContent(generateExampleValue(elementType));
 				context.setNode(rootElement);
-				domDocument.appendChild(rootElement);
-			} else {
-				// If the element has not already been created, do it now
+                domDocument.appendChild(rootElement);
+            } else {
+                // If the element has not already been created, do it now
 				if (context.getNode() == null) {
 					createComplexElement(elementType); // constructs a new DOM
 														// element with no
-														// content
-				}
-				if (context.getModelElement().isReference()) {
+                                                       // content
+                }
+                if (context.getModelElement().isReference()) {
 					context.getNode().setTextContent(
 							generateExampleValue(elementType));
 
-				} else {
+                } else {
 					context.getNode().setTextContent(
-							generateExampleValue(context.getModelElement()));
-				}
-			}
-		}
-	}
+                            generateExampleValue(context.getModelElement()));
+                }
+            }
+        }
+    }
 
-	/**
-	 * Creates a DOM element using the property information provided.
-	 * 
-	 * @param property
-	 *            the model property for which to construct a DOM element
-	 * @param propertyType
+    /**
+     * Creates a DOM element using the property information provided.
+     * 
+     * @param property
+     *            the model property for which to construct a DOM element
+     * @param propertyType
 	 *            the type of the property being navigated (may be different
 	 *            than the property's assigned type)
-	 * @return Element
-	 */
+     * @return Element
+     */
 	private Element createPropertyElement(TLProperty property,
 			TLPropertyType propertyType) {
-		NamedEntity prefixEntity = null;
-		String elementNamespace = null;
-		String elementName = null;
+        NamedEntity prefixEntity = null;
+        String elementNamespace = null;
+        String elementName = null;
 
-		if (!PropertyCodegenUtils.hasGlobalElement(propertyType)) {
-			if (context.getModelAlias() != null) {
+        if (!PropertyCodegenUtils.hasGlobalElement(propertyType)) {
+            if (context.getModelAlias() != null) {
 				elementName = XsdCodegenUtils.getGlobalElementName(
 						context.getModelAlias()).getLocalPart();
-				elementNamespace = context.getModelAlias().getNamespace();
-				prefixEntity = context.getModelAlias();
+                elementNamespace = context.getModelAlias().getNamespace();
+                prefixEntity = context.getModelAlias();
 
-			} else if (propertyType instanceof TLListFacet) {
-				TLListFacet listFacetType = (TLListFacet) propertyType;
+            } else if (propertyType instanceof TLListFacet) {
+                TLListFacet listFacetType = (TLListFacet) propertyType;
 
-				if (listFacetType.getFacetType() != TLFacetType.SIMPLE) {
+                if (listFacetType.getFacetType() != TLFacetType.SIMPLE) {
 					elementName = XsdCodegenUtils.getGlobalElementName(
 							listFacetType.getItemFacet()).getLocalPart();
-					elementNamespace = listFacetType.getNamespace();
-					prefixEntity = listFacetType;
-				}
-			}
+                    elementNamespace = listFacetType.getNamespace();
+                    prefixEntity = listFacetType;
+                }
+            }
 
-			if (elementName == null) {
+            if (elementName == null) {
 				if ((property.getName() == null)
 						|| (property.getName().length() == 0)) {
-					elementName = propertyType.getLocalName();
-				} else {
-					elementName = property.getName();
-				}
+                    elementName = propertyType.getLocalName();
+                } else {
+                    elementName = property.getName();
+                }
 
 				// The element may be inherited, so to obtain the proper
 				// namespace we need to use
-				// the
+                // the
 				// most recently encountered facet (i.e. the top of the facet
 				// stack)
 
-				if (facetStack.isEmpty()) {
-					elementNamespace = property.getPropertyOwner()
+                if (facetStack.isEmpty()) {
+					elementNamespace = property.getOwner()
 							.getNamespace();
-					prefixEntity = property.getPropertyOwner();
-				} else {
-					TLPropertyOwner propertyOwner;
+					prefixEntity = property.getOwner();
+                } else {
+                    TLPropertyOwner propertyOwner;
 
-					if (facetStack.peek() == propertyType) {
+                    if (facetStack.peek() == propertyType) {
 						// If the top of the facet stack is our property type,
 						// we need to go up one
-						// more level
+                        // more level
 						// to find the facet that declared (or inherited) this
 						// property.
-						if (facetStack.size() > 1) {
+                        if (facetStack.size() > 1) {
 							propertyOwner = facetStack
 									.get(facetStack.size() - 2);
-						} else {
-							propertyOwner = property.getPropertyOwner();
-						}
-					} else {
-						propertyOwner = facetStack.peek();
-					}
-					elementNamespace = propertyOwner.getNamespace();
-					prefixEntity = propertyOwner;
-				}
-			}
+                        } else {
+							propertyOwner = property.getOwner();
+                        }
+                    } else {
+                        propertyOwner = facetStack.peek();
+                    }
+                    elementNamespace = propertyOwner.getNamespace();
+                    prefixEntity = propertyOwner;
+                }
+            }
 
-			if (property.isReference() && !elementName.endsWith("Ref")) {
+            if (property.isReference() && !elementName.endsWith("Ref")) {
 				// probably a VWA reference, so we need to make sure the "Ref"
 				// suffix is appended
-				elementName += "Ref";
-			}
+                elementName += "Ref";
+            }
 
-		} else {
-			prefixEntity = propertyType;
-			elementNamespace = propertyType.getNamespace();
+        } else {
+            prefixEntity = propertyType;
+            elementNamespace = propertyType.getNamespace();
 			elementName = getContextElementName(propertyType,
 					property.isReference());
-		}
-		return createXmlElement(elementNamespace, elementName, prefixEntity);
-	}
+        }
+        return createXmlElement(elementNamespace, elementName, prefixEntity);
+    }
 
-	/**
-	 * Returns the element name for the current context model element.
-	 * 
-	 * @param elementType
+    /**
+     * Returns the element name for the current context model element.
+     * 
+     * @param elementType
 	 *            specifies the type of element to use when the current context
 	 *            is null or the given entity does not have a pre-defined global
 	 *            element
-	 * @param isReferenceProperty
+     * @param isReferenceProperty
 	 *            indicates whether the element type is assigned by value or
 	 *            reference
-	 * @return String
-	 */
+     * @return String
+     */
 	private String getContextElementName(NamedEntity elementType,
 			boolean isReferenceProperty) {
-		boolean useSubstitutableElementName = false;
-		QName elementQName;
+        boolean useSubstitutableElementName = false;
+        QName elementQName;
 
 		// Determine whether we should be using the substitutable or
 		// non-substitutable name for the
-		// element
-		if (!XsdCodegenUtils.isSimpleCoreObject(elementType)) {
-			if (context.getModelElement() != null) {
+        // element
+        if (!XsdCodegenUtils.isSimpleCoreObject(elementType)) {
+            if (context.getModelElement() != null) {
 				TLPropertyType modelPropertyType = context.getModelElement()
 						.getType();
 
-				if (modelPropertyType instanceof TLAlias) {
-					modelPropertyType = (TLPropertyType) ((TLAlias) modelPropertyType)
-							.getOwningEntity();
-				}
-				if ((modelPropertyType instanceof TLBusinessObject)
-						|| (modelPropertyType instanceof TLCoreObject)) {
-					useSubstitutableElementName = true;
-				}
-			} else { // no property - this is the root element of the document
-				if (elementType instanceof TLAlias) {
-					elementType = ((TLAlias) elementType).getOwningEntity();
-				}
-				if (elementType instanceof TLFacet) {
-					TLFacet elementTypeFacet = (TLFacet) elementType;
+                if (modelPropertyType instanceof TLAlias) {
+                    modelPropertyType = (TLPropertyType) ((TLAlias) modelPropertyType)
+                            .getOwningEntity();
+                }
+                if ((modelPropertyType instanceof TLBusinessObject)
+                        || (modelPropertyType instanceof TLCoreObject)) {
+                    useSubstitutableElementName = true;
+                }
+            } else { // no property - this is the root element of the document
+                if (elementType instanceof TLAlias) {
+                    elementType = ((TLAlias) elementType).getOwningEntity();
+                }
+                if (elementType instanceof TLFacet) {
+                    TLFacet elementTypeFacet = (TLFacet) elementType;
 
-					if (elementTypeFacet.getFacetType() == TLFacetType.SUMMARY) {
-						elementType = elementTypeFacet.getOwningEntity();
-					}
-				}
-				if ((elementType instanceof TLBusinessObject)
-						|| (elementType instanceof TLCoreObject)) {
-					useSubstitutableElementName = true;
-				}
-			}
-		}
+                    if (elementTypeFacet.getFacetType() == TLFacetType.SUMMARY) {
+                        elementType = elementTypeFacet.getOwningEntity();
+                    }
+                }
+                if ((elementType instanceof TLBusinessObject)
+                        || (elementType instanceof TLCoreObject)) {
+                    useSubstitutableElementName = true;
+                }
+            }
+        }
 
 		// Lookup the correct name for the element depending upon its specific
 		// characteristics
-		if (context.getModelAlias() != null) {
-			if (!isReferenceProperty && useSubstitutableElementName) {
+        if (context.getModelAlias() != null) {
+            if (!isReferenceProperty && useSubstitutableElementName) {
 				elementQName = XsdCodegenUtils
 						.getSubstitutableElementName((TLAlias) context
-								.getModelAlias());
+                        .getModelAlias());
 
-			} else {
-				elementQName = PropertyCodegenUtils.getDefaultXmlElementName(
-						context.getModelAlias(), isReferenceProperty);
-			}
-		} else {
-			if (!isReferenceProperty && useSubstitutableElementName
-					&& (elementType instanceof TLFacet)) {
+            } else {
+                elementQName = PropertyCodegenUtils.getDefaultXmlElementName(
+                        context.getModelAlias(), isReferenceProperty);
+            }
+        } else {
+            if (!isReferenceProperty && useSubstitutableElementName
+                    && (elementType instanceof TLFacet)) {
 				elementQName = XsdCodegenUtils
 						.getSubstitutableElementName((TLFacet) elementType);
 
-			} else {
+            } else {
 				elementQName = PropertyCodegenUtils.getDefaultXmlElementName(
 						elementType, isReferenceProperty);
-			}
-		}
+            }
+        }
 		return (elementQName != null) ? elementQName.getLocalPart()
 				: elementType.getLocalName();
-	}
+    }
 
-	/**
+    /**
 	 * Constructs a DOM element using the information provided. In addition to
 	 * the element itself, any namespace mappings that are required for the
 	 * element's prefix are also added to the document's root.
-	 * 
-	 * @param namespace
-	 *            the namespace of the element to create
-	 * @param localName
-	 *            the local (tag) name of the element to create
-	 * @param prefixEntity
+     * 
+     * @param namespace
+     *            the namespace of the element to create
+     * @param localName
+     *            the local (tag) name of the element to create
+     * @param prefixEntity
 	 *            the entity whose library should be used to obtain the
 	 *            preferred prefix of the new element
-	 * @return Element
-	 */
+     * @return Element
+     */
 	private Element createXmlElement(String namespace, String localName,
 			NamedEntity prefixEntity) {
 		return createXmlElement(namespace, localName, prefixEntity
 				.getOwningLibrary().getPrefix());
-	}
+    }
 
-	/**
+    /**
 	 * Constructs a DOM element using the information provided. In addition to
 	 * the element itself, any namespace mappings that are required for the
 	 * element's prefix are also added to the document's root.
-	 * 
-	 * @param namespace
-	 *            the namespace of the element to create
-	 * @param localName
-	 *            the local (tag) name of the element to create
-	 * @param preferredPrefix
-	 *            the preferred prefix of the new element
-	 * @return Element
-	 */
+     * 
+     * @param namespace
+     *            the namespace of the element to create
+     * @param localName
+     *            the local (tag) name of the element to create
+     * @param preferredPrefix
+     *            the preferred prefix of the new element
+     * @return Element
+     */
 	private Element createXmlElement(String namespace, String localName,
 			String preferredPrefix) {
-		Element element = domDocument.createElementNS(namespace, localName);
-		String prefix = namespaceMappings.get(namespace);
+        Element element = domDocument.createElementNS(namespace, localName);
+        String prefix = namespaceMappings.get(namespace);
 
-		if (prefix == null) {
-			Element rootElement = domDocument.getDocumentElement();
-			if (rootElement == null)
-				rootElement = element;
+        if (prefix == null) {
+            Element rootElement = domDocument.getDocumentElement();
+            if (rootElement == null)
+                rootElement = element;
 
 			if ((namespace != null)
 					&& !namespace.equals(rootElement.getNamespaceURI())) {
 
-				// Identify a unique prefix for this namespace
-				prefix = preferredPrefix;
-				if (prefix == null)
-					prefix = "ns1";
+                // Identify a unique prefix for this namespace
+                prefix = preferredPrefix;
+                if (prefix == null)
+                    prefix = "ns1";
 
-				if (namespaceMappings.containsValue(prefix)) {
-					String prefixStr = prefix.equals("ns1") ? "ns" : prefix;
-					int nsCounter = 0;
+                if (namespaceMappings.containsValue(prefix)) {
+                    String prefixStr = prefix.equals("ns1") ? "ns" : prefix;
+                    int nsCounter = 0;
 
-					while (namespaceMappings.containsValue(prefix)) {
-						prefix = prefixStr + (nsCounter++);
-					}
-				}
-				namespaceMappings.put(namespace, prefix);
+                    while (namespaceMappings.containsValue(prefix)) {
+                        prefix = prefixStr + (nsCounter++);
+                    }
+                }
+                namespaceMappings.put(namespace, prefix);
 				rootElement.setAttributeNS(XMLConstants.XMLNS_ATTRIBUTE_NS_URI,
 						"xmlns:" + prefix, namespace);
-			}
-		}
-		element.setPrefix(prefix);
+            }
+        }
+        element.setPrefix(prefix);
 
-		return element;
-	}
+        return element;
+    }
 
-	/**
+    /**
 	 * Adds an example role value for the given core object and each of the
 	 * extended objects that it inherits role attributes from.
-	 * 
-	 * @param coreObject
-	 *            the core object for which to generate role attributes
-	 */
+     * 
+     * @param coreObject
+     *            the core object for which to generate role attributes
+     */
 	protected void addRoleAttributes(TLCoreObject coreObject) {
-		while (coreObject != null) {
-			if (coreObject.getRoleEnumeration().getRoles().size() > 0) {
-				TLCoreObject extendedCore = (TLCoreObject) FacetCodegenUtils
-						.getFacetOwnerExtension(coreObject);
+        while (coreObject != null) {
+            if (coreObject.getRoleEnumeration().getRoles().size() > 0) {
+                TLCoreObject extendedCore = (TLCoreObject) FacetCodegenUtils
+                        .getFacetOwnerExtension(coreObject);
 				String attrName = (extendedCore == null) ? "role" : coreObject
 						.getLocalName() + "Role";
 
 				context.getNode().setAttribute(attrName,
-						exampleValueGenerator.getExampleRoleValue(coreObject));
-			}
+                        exampleValueGenerator.getExampleRoleValue(coreObject));
+            }
 			coreObject = (TLCoreObject) FacetCodegenUtils
 					.getFacetOwnerExtension(coreObject);
-		}
-	}
+        }
+    }
 
-	/**
+    /**
 	 * Adds any XML attributes and/or child elements that are required by the
 	 * base payload type of the operation facet to the current DOM element.
-	 * 
-	 * @param operationFacet
+     * 
+     * @param operationFacet
 	 *            the operation facet for which to add example web service
 	 *            payload content
-	 */
+     */
 	protected void addOperationPayloadContent(TLFacet operationFacet) {
 		Element domElement = context.getNode();
 
-		if ((domElement != null) && (wsdlBindings != null)) {
-			Map<String, String> nsMappings = new HashMap<String, String>();
+        if ((domElement != null) && (wsdlBindings != null)) {
+        	Map<String,String> nsMappings = new HashMap<String,String>();
 			Element rootElement = domElement.getOwnerDocument()
 					.getDocumentElement();
-
+        	
 			wsdlBindings.addPayloadExampleContent(domElement, nsMappings,
 					operationFacet);
-
-			for (String ns : nsMappings.keySet()) {
-				String _prefix = nsMappings.get(ns);
-				String prefix = _prefix;
-				int counter = 1;
-
-				while (namespaceMappings.containsValue(prefix)) {
-					prefix = _prefix + counter;
-					counter++;
-				}
-				namespaceMappings.put(ns, prefix);
+            
+            for (String ns : nsMappings.keySet()) {
+            	String _prefix = nsMappings.get( ns );
+            	String prefix = _prefix;
+            	int counter = 1;
+            	
+            	while (namespaceMappings.containsValue( prefix )) {
+            		prefix = _prefix + counter;
+            		counter++;
+            	}
+            	namespaceMappings.put( ns, prefix );
 				rootElement.setAttributeNS(XMLConstants.XMLNS_ATTRIBUTE_NS_URI,
 						"xmlns:" + prefix, ns);
-			}
-			applyElementPrefixes(domElement);
-		}
-	}
-
-	/**
+            }
+            applyElementPrefixes( domElement );
+        }
+    }
+    
+    /**
 	 * Recursively applies a namespace prefix to the given element and all of
 	 * its descendants using the current set of namespace prefix mappings.
-	 * 
+     * 
 	 * @param element
 	 *            the DOM element to process
-	 */
-	private void applyElementPrefixes(Element element) {
-		if (element.getPrefix() == null) {
-			element.setPrefix(namespaceMappings.get(element.getNamespaceURI()));
-		}
-		NodeList children = element.getChildNodes();
+     */
+    private void applyElementPrefixes(Element element) {
+    	if (element.getPrefix() == null) {
+        	element.setPrefix( namespaceMappings.get( element.getNamespaceURI() ) );
+    	}
+    	NodeList children = element.getChildNodes();
+    	
+    	for (int i = 0; i < children.getLength(); i++) {
+    		Node child = children.item( 0 );
+    		
+    		if (child instanceof Element) {
+    			applyElementPrefixes( (Element) child ); 
+    		}
+    	}
+    }
 
-		for (int i = 0; i < children.getLength(); i++) {
-			Node child = children.item(0);
-
-			if (child instanceof Element) {
-				applyElementPrefixes((Element) child);
-			}
-		}
-	}
-
-	/**
+    /**
 	 * Adds a comment as a child of the current DOM element indicating that the
 	 * content is based on a legacy type that cannot be generated by this
 	 * visitor component.
-	 * 
-	 * @param xsdNamespace
-	 *            the namespace of the legacy schema entity
-	 * @param xsdLocalName
-	 *            the local name of the legacy schema entity
-	 */
+     * 
+     * @param xsdNamespace
+     *            the namespace of the legacy schema entity
+     * @param xsdLocalName
+     *            the local name of the legacy schema entity
+     */
 	private void addLegacyElementContent(String xsdNamespace,
 			String xsdLocalName) {
 		context.getNode().appendChild(
 				domDocument.createComment("  Legacy Content: {" + xsdNamespace
 						+ "}:" + xsdLocalName + "  "));
-	}
+    }
 
-	/**
+    /**
 	 * Handles the deferred assignment of 'IDREF' and 'IDREFS' values as a
 	 * post-processing step of the example generation process.
-	 */
+     */
 	private class DOMIdReferenceAssignment extends IdReferenceAssignment {
 
-		private Element domElement;
+        private Element domElement;
 
-		/**
-		 * Constructor used for assigning an IDREF(S) value to an XML element.
-		 * 
-		 * @param referencedEntity
+        /**
+         * Constructor used for assigning an IDREF(S) value to an XML element.
+         * 
+         * @param referencedEntity
 		 *            the named entity that was referenced (may be null for
 		 *            legacy IDREF(S) values)
-		 * @param referenceCount
+         * @param referenceCount
 		 *            indicates the number of reference values that should be
 		 *            applied
-		 */
+         */
 		public DOMIdReferenceAssignment(NamedEntity referencedEntity,
 				int referenceCount) {
-			this(referencedEntity, referenceCount, null);
-		}
+            this(referencedEntity, referenceCount, null);
+        }
 
-		/**
-		 * Constructor used for assigning an IDREF(S) value to an XML attribute.
-		 * 
-		 * @param referencedEntity
+        /**
+         * Constructor used for assigning an IDREF(S) value to an XML attribute.
+         * 
+         * @param referencedEntity
 		 *            the named entity that was referenced (may be null for
 		 *            legacy IDREF(S) values)
-		 * @param referenceCount
+         * @param referenceCount
 		 *            indicates the number of reference values that should be
 		 *            applied
-		 * @param attributeName
+         * @param attributeName
 		 *            the name of the IDREF(S) attribute to which the value
 		 *            should be assigned
-		 */
+         */
 		public DOMIdReferenceAssignment(NamedEntity referencedEntity,
 				int referenceCount, String attributeName) {
 			super(referencedEntity, referenceCount, attributeName);
 			this.domElement = context.getNode();
-		}
+        }
 
-		/**
+        /**
 		 * Assigns the IDREF value(s) to the appropriate attribute or element
 		 * based on information collected in the message ID registry during
 		 * document generation.
-		 */
-		public void assignReferenceValue() {
-			String referenceValue = getIdValues();
+         */
+        public void assignReferenceValue() {
+            String referenceValue = getIdValues();
 
-			if (referenceValue != null) {
+            if (referenceValue != null) {
 				if (nodeName == null) {
-					domElement.setTextContent(referenceValue);
-				} else {
+                    domElement.setTextContent(referenceValue);
+                } else {
 					domElement.setAttribute(nodeName, referenceValue);
-				}
-			}
-		}
+                }
+            }
+        }
 
-	}
+    }
+
+    /**
+     * Initializes the mapping of facet types to the extension point elements used to encapsulate
+     * extension point facet elements in the generated XML content.
+     */
+    static {
+        try {
+            extensionPointTypeMap = new HashMap<TLFacetType, SchemaDependency>();
+            extensionPointTypeMap.put(TLFacetType.SUMMARY,
+                    SchemaDependency.getExtensionPointSummaryElement());
+            extensionPointTypeMap.put(TLFacetType.DETAIL,
+                    SchemaDependency.getExtensionPointDetailElement());
+            extensionPointTypeMap.put(TLFacetType.CUSTOM,
+                    SchemaDependency.getExtensionPointCustomElement());
+            extensionPointTypeMap.put(TLFacetType.QUERY,
+                    SchemaDependency.getExtensionPointQueryElement());
+
+        } catch (Throwable t) {
+            throw new ExceptionInInitializerError(t);
+        }
+    }
 
 }

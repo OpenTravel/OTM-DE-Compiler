@@ -56,7 +56,7 @@ public class CoreObjectSummaryFacetCodegenDelegate extends CoreObjectFacetCodege
      * @see org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate#hasNonSubstitutableElement()
      */
     @Override
-    protected boolean hasNonSubstitutableElement() {
+    public boolean hasNonSubstitutableElement() {
         return !XsdCodegenUtils.isSimpleCoreObject(getSourceFacet().getOwningEntity());
     }
 

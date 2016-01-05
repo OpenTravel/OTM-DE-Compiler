@@ -17,11 +17,17 @@ package org.opentravel.schemacompiler.util;
 
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
-import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.LibraryElement;
+import org.opentravel.schemacompiler.model.TLActionRequest;
+import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLParamGroup;
+import org.opentravel.schemacompiler.model.TLParameter;
 import org.opentravel.schemacompiler.model.TLProperty;
+import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.model.TLResourceParentRef;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
@@ -65,7 +71,7 @@ public class ReferenceCountVisitor extends ModelElementVisitorAdapter {
      * @param referencedEntity
      *            the referenced entity to count
      */
-    protected void countReference(NamedEntity referencedEntity) {
+    protected void countReference(LibraryElement referencedEntity) {
         if ((referencedEntity != null) && (referencedEntity.getOwningLibrary() == targetLibrary)) {
             referenceCount++;
         }
@@ -150,5 +156,61 @@ public class ReferenceCountVisitor extends ModelElementVisitorAdapter {
         countReference(element.getType());
         return true;
     }
+
+	/**
+	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResource(org.opentravel.schemacompiler.model.TLResource)
+	 */
+	@Override
+	public boolean visitResource(TLResource resource) {
+        countReference(resource.getBusinessObjectRef());
+        return true;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResourceParentRef(org.opentravel.schemacompiler.model.TLResourceParentRef)
+	 */
+	@Override
+	public boolean visitResourceParentRef(TLResourceParentRef parentRef) {
+        countReference(parentRef.getParentResource());
+        countReference(parentRef.getParentParamGroup());
+        return true;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParamGroup(org.opentravel.schemacompiler.model.TLParamGroup)
+	 */
+	@Override
+	public boolean visitParamGroup(TLParamGroup paramGroup) {
+        countReference(paramGroup.getFacetRef());
+        return true;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParameter(org.opentravel.schemacompiler.model.TLParameter)
+	 */
+	@Override
+	public boolean visitParameter(TLParameter parameter) {
+        countReference((LibraryElement) parameter.getFieldRef());
+        return true;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionRequest(org.opentravel.schemacompiler.model.TLActionRequest)
+	 */
+	@Override
+	public boolean visitActionRequest(TLActionRequest actionRequest) {
+        countReference(actionRequest.getParamGroup());
+        countReference(actionRequest.getPayloadType());
+        return true;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionResponse(org.opentravel.schemacompiler.model.TLActionResponse)
+	 */
+	@Override
+	public boolean visitActionResponse(TLActionResponse actionResponse) {
+        countReference(actionResponse.getPayloadType());
+        return true;
+	}
 
 }

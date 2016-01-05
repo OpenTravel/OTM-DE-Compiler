@@ -15,13 +15,16 @@
  */
 package org.opentravel.schemacompiler.version.handlers;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.opentravel.schemacompiler.model.TLEquivalent;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.model.TLPatchableFacet;
 import org.opentravel.schemacompiler.model.TLService;
 import org.opentravel.schemacompiler.util.ModelElementCloner;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
@@ -130,6 +133,19 @@ public class TLOperationVersionHandler extends TLExtensionOwnerVersionHandler<TL
             targetLibrary.setService( newVersion );
 		}
 		return newVersion;
+	}
+	
+	/**
+	 * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#getPatchableFacets(org.opentravel.schemacompiler.version.Versioned)
+	 */
+	@Override
+	public List<TLPatchableFacet> getPatchableFacets(TLOperation entity) {
+		List<TLPatchableFacet> facetList = new ArrayList<>();
+		
+		facetList.add(entity.getRequest());
+		facetList.add(entity.getResponse());
+		facetList.add(entity.getNotification());
+		return facetList;
 	}
 	
 }

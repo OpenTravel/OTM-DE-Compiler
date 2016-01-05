@@ -37,9 +37,14 @@ import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAbstractFacet;
+import org.opentravel.schemacompiler.model.TLAction;
+import org.opentravel.schemacompiler.model.TLActionFacet;
+import org.opentravel.schemacompiler.model.TLActionRequest;
+import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLEquivalent;
@@ -55,6 +60,8 @@ import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLPropertyType;
+import org.opentravel.schemacompiler.model.TLReferenceType;
+import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
@@ -157,7 +164,23 @@ public class XsdCodegenUtils {
                 elementLocalName = alias.getLocalName();
             }
             elementName = new QName(alias.getNamespace(), elementLocalName);
-
+            
+        } else if (modelEntity instanceof TLActionRequest) {
+        	TLActionRequest request = (TLActionRequest) modelEntity;
+        	String localPart = getActionElement( request.getOwner(), request.getPayloadType(), "RQ" );
+        	
+        	if (localPart != null) {
+            	elementName = new QName(modelEntity.getNamespace(), localPart );
+        	}
+        	
+        } else if (modelEntity instanceof TLActionResponse) {
+        	TLActionResponse response = (TLActionResponse) modelEntity;
+        	String localPart = getActionElement( response.getOwner(), response.getPayloadType(), "RS" );
+        	
+        	if (localPart != null) {
+            	elementName = new QName(modelEntity.getNamespace(), localPart );
+        	}
+        	
         } else if ((modelEntity instanceof TLCoreObject)
                 || !(modelEntity instanceof TLAttributeType)) {
             elementName = new QName(modelEntity.getNamespace(), modelEntity.getLocalName());
@@ -186,6 +209,10 @@ public class XsdCodegenUtils {
             }
         } else if (facetOwner instanceof TLCoreObject) {
             if (facet.getFacetType() == TLFacetType.SUMMARY) {
+                elementName = facetOwner.getLocalName();
+            }
+        } else if (facetOwner instanceof TLChoiceObject) {
+            if (facet.getFacetType() == TLFacetType.SHARED) {
                 elementName = facetOwner.getLocalName();
             }
         }
@@ -225,6 +252,12 @@ public class XsdCodegenUtils {
             if (facet.getFacetType() == TLFacetType.SUMMARY) {
                 elementName = ownerAlias.getName();
             }
+        } else if (facetOwner instanceof TLChoiceObject) {
+            TLAlias ownerAlias = AliasCodegenUtils.getOwnerAlias(facetAlias);
+
+            if (facet.getFacetType() == TLFacetType.SHARED) {
+                elementName = ownerAlias.getName();
+            }
         }
 
         // Default value is the normal global element name
@@ -243,22 +276,28 @@ public class XsdCodegenUtils {
      * @return QName
      */
     public static QName getSubstitutionGroupElementName(NamedEntity modelEntity) {
-        boolean isTopLevelFacetOwner = (modelEntity instanceof TLBusinessObject)
-                || (modelEntity instanceof TLCoreObject);
+        NamedEntity nonAliasEntity = modelEntity;
         QName referenceElementName = null;
-
-        if (!isTopLevelFacetOwner && (modelEntity instanceof TLAlias)) {
-            TLAlias alias = (TLAlias) modelEntity;
-            NamedEntity aliasedEntity = alias.getOwningEntity();
-
-            isTopLevelFacetOwner = (aliasedEntity instanceof TLBusinessObject)
-                    || (aliasedEntity instanceof TLCoreObject);
+        
+        if (modelEntity instanceof TLAlias) {
+        	nonAliasEntity = ((TLAlias) modelEntity).getOwningEntity();
         }
+        boolean isTopLevelFacetOwner =
+        		(nonAliasEntity instanceof TLBusinessObject)
+                || (nonAliasEntity instanceof TLCoreObject)
+                || (nonAliasEntity instanceof TLChoiceObject);
+        
         if (isTopLevelFacetOwner) {
             QName globalElementName = getGlobalElementName(modelEntity);
 
-            referenceElementName = new QName(globalElementName.getNamespaceURI(),
-                    globalElementName.getLocalPart() + "SubGrp");
+            if (nonAliasEntity instanceof TLChoiceObject) {
+            	// Slightly different naming for choice objects than cores and business objects
+            	referenceElementName = globalElementName;
+            	
+            } else {
+                referenceElementName = new QName(globalElementName.getNamespaceURI(),
+                        globalElementName.getLocalPart() + "SubGrp");
+            }
         }
         return referenceElementName;
     }
@@ -299,6 +338,10 @@ public class XsdCodegenUtils {
 
     /**
      * Returns the globally-accessible type name for the given entity in the XML schema output.
+     * <p>
+     * NOTE: In some cases (e.g. action facets of abstract resources), the resulting value may
+     * be null.  This indicates that there is no global schema type name associated with the
+     * given model entity.
      * 
      * @param modelEntity
      *            the model entity for which to return the element name
@@ -310,6 +353,10 @@ public class XsdCodegenUtils {
 
     /**
      * Returns the globally-accessible type name for the given entity in the XML schema output.
+     * <p>
+     * NOTE: In some cases (e.g. action facets of abstract resources), the resulting value may
+     * be null.  This indicates that there is no global schema type name associated with the
+     * given model entity.
      * 
      * @param modelEntity
      *            the model entity for which to return the element name
@@ -327,7 +374,7 @@ public class XsdCodegenUtils {
 
             if (referencingProperty != null) {
                 facet = PropertyCodegenUtils.findNonEmptyFacet(
-                        referencingProperty.getPropertyOwner(), facet);
+                        referencingProperty.getOwner(), facet);
             }
             typeName = getFacetTypeName(facet);
 
@@ -336,10 +383,23 @@ public class XsdCodegenUtils {
 
             if (referencingProperty != null) {
                 facet = PropertyCodegenUtils.findNonEmptyFacet(
-                        referencingProperty.getPropertyOwner(), facet);
+                        referencingProperty.getOwner(), facet);
             }
             typeName = getFacetTypeName(facet);
 
+        } else if (modelEntity instanceof TLChoiceObject) {
+        	typeName = getFacetTypeName(((TLChoiceObject) modelEntity).getSharedFacet());
+        	
+        } else if (modelEntity instanceof TLActionRequest) {
+        	TLActionRequest request = (TLActionRequest) modelEntity;
+        	
+        	typeName = getActionType( request.getOwner(), request.getPayloadType(), "RQ" );
+        	
+        } else if (modelEntity instanceof TLActionResponse) {
+        	TLActionResponse response = (TLActionResponse) modelEntity;
+        	
+        	typeName = getActionType( response.getOwner(), response.getPayloadType(), "RS" );
+        	
         } else {
             typeName = modelEntity.getLocalName();
         }
@@ -348,6 +408,10 @@ public class XsdCodegenUtils {
 
     /**
      * Returns the type name for the facet in the XML schema output.
+     * <p>
+     * NOTE: In some cases (e.g. action facets of abstract resources), the resulting value may
+     * be null.  This indicates that there is no global schema type name associated with the
+     * given model entity.
      * 
      * @param facet
      *            the facet being transformed
@@ -363,6 +427,15 @@ public class XsdCodegenUtils {
             if (facet instanceof TLListFacet) {
                 typeName += "_List";
             }
+            
+        } else if (facet.getOwningEntity() instanceof TLChoiceObject) {
+            if (facet.getFacetType() == TLFacetType.SHARED) {
+                typeName = facet.getOwningEntity().getLocalName();
+
+            } else if (facet.getFacetType().isContextual()) {
+                typeName = facet.getOwningEntity().getLocalName() + getTypeFacetSuffix(facet);
+            }
+            
         } else if (facet.getOwningEntity() instanceof TLBusinessObject) {
             if (facet instanceof TLFacet) {
                 if (facet.getFacetType() == TLFacetType.SUMMARY) {
@@ -372,9 +445,19 @@ public class XsdCodegenUtils {
                     typeName = facet.getOwningEntity().getLocalName() + getTypeFacetSuffix(facet);
                 }
             }
+            
         } else if (facet.getOwningEntity() instanceof TLOperation) {
-            typeName = ((TLOperation) facet.getOwningEntity()).getName()
-                    + getTypeFacetSuffix(facet);
+            typeName = ((TLOperation) facet.getOwningEntity()).getName() + getTypeFacetSuffix(facet);
+            
+        } else if (facet instanceof TLActionFacet) {
+        	TLResource resource = (TLResource) facet.getOwningEntity();
+        	
+        	if (resource.isAbstract() || (resource.getBusinessObjectRef() == null)) {
+        		typeName = null; // No XSD types associated with actions of abstract resources
+        		
+        	} else {
+        		typeName = resource.getBusinessObjectRef().getLocalName() + getTypeFacetSuffix(facet);
+        	}
         }
         return typeName;
     }
@@ -405,7 +488,7 @@ public class XsdCodegenUtils {
             TLFacet tlFacet = (TLFacet) facet;
 
             if (!isLegacyFacetNamingEnabled()) {
-                if (facetType != TLFacetType.CUSTOM) {
+                if ((facetType != TLFacetType.CUSTOM) && (facetType != TLFacetType.CHOICE)) {
                     suffix.append("_").append(facetType.getIdentityName());
                 }
                 if ((tlFacet.getLabel() != null) && !tlFacet.getLabel().equals("")) {
@@ -423,10 +506,125 @@ public class XsdCodegenUtils {
                 }
                 suffix.append("_").append(facetType.getIdentityName());
             }
+        } else if (facet instanceof TLActionFacet) {
+        	suffix.append("_").append( ((TLActionFacet) facet).getName() );
+        	
         } else {
             suffix.append("_").append(facetType.getIdentityName());
         }
         return suffix.toString();
+    }
+    
+    /**
+     * Returns the local element name for an action request or response payload based
+     * on the information provided.
+     * 
+     * @param action  the action for which to return an element name
+     * @param payloadType  the payload type for the action request or response
+     * @param elementSuffix  the suffix to append onto the resulting element name
+     * @return String
+     */
+    private static String getActionElement(TLAction action, NamedEntity payloadType, String elementSuffix) {
+    	String elementName = null;
+    	
+    	if (payloadType instanceof TLActionFacet) {
+    		TLActionFacet actionFacet = (TLActionFacet) payloadType;
+    		TLReferenceType referenceType = actionFacet.getReferenceType();
+        	TLResource resource = (action == null) ? null : action.getOwner();
+        	String actionId = (action == null) ? "UnknownAction" : getCamelCaseActionId( action.getActionId() );
+        	StringBuilder elementPrefix = new StringBuilder();
+        	String businessObjectName = null;
+        	
+        	if ((resource != null) && (referenceType != null) && (referenceType != TLReferenceType.NONE)) {
+        		TLBusinessObject businessObj = resource.getBusinessObjectRef();
+        		
+        		if (businessObj != null) {
+        			businessObjectName = businessObj.getLocalName();
+        			
+        		} else if (resource != null) {
+        			businessObjectName = resource.getBusinessObjectRefName();
+        		}
+        	}
+        	if (businessObjectName != null) {
+        		elementPrefix.append( businessObjectName );
+        	} else {
+    			QName facetQName = getGlobalElementName( actionFacet );
+    			
+    			if (facetQName != null) {
+            		elementPrefix.append( facetQName.getLocalPart() );
+    			}
+        	}
+        	elementPrefix.append( actionId );
+        	elementName = elementPrefix.append( elementSuffix ).toString();
+    	}
+    	return elementName;
+    }
+
+    /**
+     * Returns the type name for an action request or response payload based on
+     * the information provided.
+     * 
+     * @param action  the action for which to return a type name
+     * @param payloadType  the payload type for the action request or response
+     * @param typeSuffix  the suffix to append onto the resulting type name
+     * @return String
+     */
+    private static String getActionType(TLAction action, NamedEntity payloadType, String typeSuffix) {
+    	String typeName = null;
+    	
+    	if (payloadType instanceof TLActionFacet) {
+    		TLActionFacet actionFacet = (TLActionFacet) payloadType;
+    		TLReferenceType referenceType = actionFacet.getReferenceType();
+        	TLResource resource = (action == null) ? null : action.getOwner();
+        	String actionId = (action == null) ? "UnknownAction" : getCamelCaseActionId( action.getActionId() );
+        	StringBuilder typePrefix = new StringBuilder();
+        	String businessObjectName = null;
+        	
+        	if ((resource != null) && (referenceType != null) && (referenceType != TLReferenceType.NONE)) {
+        		TLBusinessObject businessObj = resource.getBusinessObjectRef();
+        		
+        		if (businessObj != null) {
+        			businessObjectName = businessObj.getLocalName();
+        			
+        		} else if (resource != null) {
+        			businessObjectName = resource.getBusinessObjectRefName();
+        		}
+        	}
+        	if (businessObjectName != null) {
+        		typePrefix.append( businessObjectName );
+        	} else {
+    			typePrefix.append( getGlobalTypeName( actionFacet ) );
+        	}
+        	typePrefix.append('_').append( actionId ).append('_');
+        	typeName = typePrefix.append( typeSuffix ).toString();
+    	}
+    	return typeName;
+    }
+    
+    /**
+     * Returns a camel-case version of the given action ID.  If the ID is already
+     * in camel case text, this method should preserve the existing text.  Upper-case
+     * and "_" separated ID's will be converted to a camel-case equivalent.
+     * 
+     * @param actionId  the action ID to process
+     * @return String
+     */
+    private static String getCamelCaseActionId(String actionId) {
+    	StringBuilder ccActionId = new StringBuilder();
+    	
+		if (actionId.toUpperCase().equals( actionId )) {
+			actionId = actionId.toLowerCase();
+		}
+		for (String idPart : actionId.split("_")) {
+			if (idPart.length() == 1) {
+				ccActionId.append( idPart.toUpperCase() );
+				
+			} else if (idPart.length() > 1) {
+				ccActionId.append( idPart.substring( 0, 1 ).toUpperCase() )
+						.append( idPart.substring( 1 ) );
+			}
+		}
+    	return ccActionId.toString();
     }
 
     /**
@@ -819,6 +1017,22 @@ public class XsdCodegenUtils {
     }
 
     /**
+     * Returns a camel-case name for a role attribute using the given owner name as a template.
+     * 
+     * @param roleOwnerName  the name of the role attribute owner
+     * @return String
+     */
+    public static String getRoleAttributeName(String roleOwnerName) {
+    	StringBuilder roleName = new StringBuilder().append( roleOwnerName.charAt( 0 ) );
+    	
+    	if (roleOwnerName.length() > 1 ) {
+    		roleName.append( roleOwnerName.substring( 1 ) );
+    	}
+    	roleName.append( "Role" );
+    	return roleName.toString();
+    }
+    
+    /**
      * Initializes the mappings from meta-model classes to library type names.
      */
     static {
@@ -828,10 +1042,14 @@ public class XsdCodegenUtils {
             typeNames.put(TLSimple.class, "Simple");
             typeNames.put(TLValueWithAttributes.class, "ValueWithAttributes");
             typeNames.put(TLCoreObject.class, "CoreObject");
+            typeNames.put(TLChoiceObject.class, "ChoiceObject");
             typeNames.put(TLBusinessObject.class, "BusinessObject");
             typeNames.put(TLOpenEnumeration.class, "EnumerationOpen");
             typeNames.put(TLClosedEnumeration.class, "EnumerationClosed");
             typeNames.put(TLOperation.class, "Operation");
+            typeNames.put(TLActionFacet.class, "ActionFacet");
+            typeNames.put(TLActionRequest.class, "ActionRequest");
+            typeNames.put(TLActionResponse.class, "ActionResponse");
 
             libraryTypeNames = Collections.unmodifiableMap(typeNames);
             jaxbDatatypeFactory = DatatypeFactory.newInstance();

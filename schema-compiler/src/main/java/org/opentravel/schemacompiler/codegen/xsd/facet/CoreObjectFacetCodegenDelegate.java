@@ -20,6 +20,7 @@ import java.util.List;
 import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
+import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.w3._2001.xmlschema.Annotated;
@@ -77,8 +78,9 @@ public abstract class CoreObjectFacetCodegenDelegate extends TLFacetCodegenDeleg
                     Attribute roleAttr = new Attribute();
 
                     if (ownerExtension != null) {
-                    	// TODO: Convert this to a camel-case attribute (lowercase first letter)
-                        roleAttr.setName(owner.getLocalName() + "Role");
+                        roleAttr.setName(
+                        		XsdCodegenUtils.getRoleAttributeName( owner.getLocalName() ) );
+                        
                     } else {
                         roleAttr.setName("role");
                     }
@@ -91,5 +93,5 @@ public abstract class CoreObjectFacetCodegenDelegate extends TLFacetCodegenDeleg
         }
         return jaxbAttributes;
     }
-
+    
 }

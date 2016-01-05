@@ -21,15 +21,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.xml.namespace.QName;
+
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAction;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLActionRequest;
 import org.opentravel.schemacompiler.model.TLActionResponse;
+import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
+import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLFacet;
+import org.opentravel.schemacompiler.model.TLIndicator;
+import org.opentravel.schemacompiler.model.TLMemberField;
 import org.opentravel.schemacompiler.model.TLParamGroup;
 import org.opentravel.schemacompiler.model.TLParameter;
 import org.opentravel.schemacompiler.model.TLProperty;
@@ -39,6 +45,7 @@ import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLRoleEnumeration;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
+import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.model.XSDSimpleType;
 
 /**
@@ -112,7 +119,7 @@ public class ResourceCodegenUtils {
 				List<TLParameter> localParameters = new ArrayList<>();
 				
 				for (TLParameter param : extendedGroup.getParameters()) {
-					String paramName = param.getFieldRefName();
+					String paramName = (param.getFieldRef() == null) ? param.getFieldRefName() : param.getFieldRef().getName();
 					
 					if ((paramName != null) && !parameterNames.contains(paramName)) {
 						localParameters.add(param);
@@ -126,6 +133,77 @@ public class ResourceCodegenUtils {
 	}
 	
 	/**
+	 * Returns the list of member fields from the given facet that are eligible to be
+	 * declared as parameters in a resource parameter group.  The resulting list will
+	 * include any indicators and simple type attributes and elements that are not
+	 * contained within repeating elements of the given facet or its children.
+	 * 
+	 * @param facet  the facet for which to return a list of eligible member fields
+	 * @return List<TLMemberField<TLFacet>>
+	 * @throws IllegalArgumentException  thrown if the given facet does not belong
+	 *									 to a business object
+	 */
+	public static List<TLMemberField<?>> getEligibleParameterFields(TLFacet facet) {
+		List<TLMemberField<?>> eligibleFields = new ArrayList<>();
+		List<TLFacet> eligibleFacets = new ArrayList<>();
+		Set<String> fieldNames = new HashSet<>();
+		
+		findEligibleParameterFacets(facet, eligibleFacets);
+		
+		for (TLFacet eligibleFacet : eligibleFacets) {
+			List<TLAttribute> attributeList = PropertyCodegenUtils.getInheritedAttributes(eligibleFacet);
+			List<TLProperty> elementList = PropertyCodegenUtils.getInheritedProperties(eligibleFacet);
+			List<TLIndicator> indicatorList = PropertyCodegenUtils.getInheritedIndicators(eligibleFacet);
+			
+			for (TLAttribute attribute : attributeList) {
+				if (!fieldNames.contains(attribute.getName())) {
+					eligibleFields.add(attribute);
+					fieldNames.add(attribute.getName());
+				}
+			}
+			for (TLProperty element : elementList) {
+				if (element.getRepeat() <= 1) {
+					if (element.getType() instanceof TLValueWithAttributes) {
+						TLValueWithAttributes vwa = (TLValueWithAttributes) element.getType();
+						List<TLAttribute> vwaAttributes = PropertyCodegenUtils.getInheritedAttributes(vwa);
+						List<TLIndicator> vwaIndicators = PropertyCodegenUtils.getInheritedIndicators(vwa);
+						
+						for (TLAttribute attribute : vwaAttributes) {
+							if (!(attribute.getType() instanceof TLValueWithAttributes) &&
+									!fieldNames.contains(attribute.getName())) {
+								eligibleFields.add(attribute);
+								fieldNames.add(attribute.getName());
+							}
+						}
+						for (TLIndicator indicator : vwaIndicators) {
+							if (!fieldNames.contains(indicator.getName())) {
+								eligibleFields.add(indicator);
+								fieldNames.add(indicator.getName());
+							}
+						}
+						
+					} else if (isEligibleParameterType(element.getType())) {
+						QName schemaName = XsdCodegenUtils.getGlobalElementName(element.getType());
+						String elementName = (schemaName != null) ? schemaName.getLocalPart() : element.getName();
+						
+						if (!fieldNames.contains(elementName)) {
+							eligibleFields.add(element);
+							fieldNames.add(elementName);
+						}
+					}
+				}
+			}
+			for (TLIndicator indicator : indicatorList) {
+				if (!fieldNames.contains(indicator.getName())) {
+					eligibleFields.add(indicator);
+					fieldNames.add(indicator.getName());
+				}
+			}
+		}
+		return eligibleFields;
+	}
+	
+	/**
 	 * Returns true if the given entity type is a valid type to assign for a
 	 * <code>TLParameter</code> field.
 	 * 
@@ -134,6 +212,47 @@ public class ResourceCodegenUtils {
 	 */
 	public static boolean isEligibleParameterType(NamedEntity entityType) {
 		return (entityType != null) && eligibleParamTypes.contains(entityType.getClass());
+	}
+	
+	/**
+	 * Finds the list of all non-repeating facets that belong to the given one that
+	 * may contain parameter-eligible fields.
+	 * 
+	 * @param facet  the facet for which to return parameter-eligible facets
+	 * @param eligibleFacets  the list to which parameter-eligible facets will be appended
+	 */
+	private static void findEligibleParameterFacets(TLFacet facet, List<TLFacet> eligibleFacets) {
+		if (eligibleFacets.contains(facet)) {
+			return; // avoid circular references
+		}
+		eligibleFacets.add(facet);
+		
+		for (TLProperty element : facet.getElements()) {
+			if (element.getRepeat() <= 1) { // Skip repeating elements
+				TLPropertyType elementType = element.getType();
+				
+				if (elementType instanceof TLFacet) {
+					findEligibleParameterFacets((TLFacet) elementType, eligibleFacets);
+					
+				} else if (elementType instanceof TLBusinessObject) {
+					TLBusinessObject bo = (TLBusinessObject) elementType;
+					
+					findEligibleParameterFacets(bo.getIdFacet(), eligibleFacets);
+					findEligibleParameterFacets(bo.getSummaryFacet(), eligibleFacets);
+					findEligibleParameterFacets(bo.getDetailFacet(), eligibleFacets);
+					
+					for (TLFacet customFacet : bo.getCustomFacets()) {
+						findEligibleParameterFacets(customFacet, eligibleFacets);
+					}
+					
+				} else if (elementType instanceof TLCoreObject) {
+					TLCoreObject core = (TLCoreObject) elementType;
+					
+					findEligibleParameterFacets(core.getSummaryFacet(), eligibleFacets);
+					findEligibleParameterFacets(core.getDetailFacet(), eligibleFacets);
+				}
+			}
+		}
 	}
 	
 	/**

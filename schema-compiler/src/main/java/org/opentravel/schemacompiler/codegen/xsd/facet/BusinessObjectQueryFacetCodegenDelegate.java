@@ -22,7 +22,7 @@ import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLFacet;
 
 /**
- * Code generation delegate for <code>TLFacet</code> instances with a facet type of <code>ID</code>
+ * Code generation delegate for <code>TLFacet</code> instances with a facet type of <code>QUERY</code>
  * and a facet owner of type <code>TLBusinessObject</code>.
  * 
  * @author S. Livezey

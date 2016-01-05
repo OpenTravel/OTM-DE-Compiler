@@ -62,7 +62,7 @@ public class TLOpenEnumerationCodegenTransformer extends
     }
 
     /**
-     * Constructs the complex type component of the closed enumeration.
+     * Constructs the complex type component of the open enumeration.
      * 
      * @param source
      *            the source meta-model enumeration
@@ -95,7 +95,7 @@ public class TLOpenEnumerationCodegenTransformer extends
     }
 
     /**
-     * Constructs the simple type component of the closed enumeration.
+     * Constructs the simple type component of the open enumeration.
      * 
      * @param source
      *            the source meta-model enumeration

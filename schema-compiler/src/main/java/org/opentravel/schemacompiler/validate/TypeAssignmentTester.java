@@ -107,7 +107,7 @@ public class TypeAssignmentTester {
 			TLAttribute testAttribute = new TLAttribute();
 			
 			testAttribute.setName("test");
-			testAttribute.setAttributeOwner(attribute.getAttributeOwner());
+			testAttribute.setOwner(attribute.getOwner());
 			testAttribute.setType((TLAttributeType) candidateType);
 			
 			initValidators();
@@ -133,7 +133,7 @@ public class TypeAssignmentTester {
 			TLProperty testElement = new TLProperty();
 			
 			testElement.setName("test");
-			testElement.setPropertyOwner(element.getPropertyOwner());
+			testElement.setOwner(element.getOwner());
 			testElement.setType((TLPropertyType) candidateType);
 			
 			initValidators();

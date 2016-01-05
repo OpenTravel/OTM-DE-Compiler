@@ -43,6 +43,14 @@ public class ChoiceObjectSharedFacetCodegenDelegate extends ChoiceObjectFacetCod
         super(sourceFacet);
     }
 
+    /**
+	 * @see org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate#hasDefaultFacetElement()
+	 */
+	@Override
+	public boolean hasDefaultFacetElement() {
+		return false;
+	}
+
 	/**
      * @see org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate#hasSubstitutionGroupElement()
      */
@@ -96,7 +104,7 @@ public class ChoiceObjectSharedFacetCodegenDelegate extends ChoiceObjectFacetCod
         // the shared facet from the choice facet extension points.
         for (TLFacet descendantFacet : choiceObject.getChoiceFacets()) {
         	if (declaresOrInheritsFacetContent( descendantFacet )) {
-        		extensionPoint = SchemaDependency.getExtensionPointElement();
+        		extensionPoint = SchemaDependency.getExtensionPointSharedElement();
         		break;
         	}
         }

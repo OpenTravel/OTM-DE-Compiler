@@ -23,7 +23,7 @@ import java.util.List;
  * 
  * @author S. Livezey
  */
-public interface TLPropertyOwner extends NamedEntity {
+public interface TLPropertyOwner extends NamedEntity, TLMemberFieldOwner {
 
     /**
      * Returns the value of the 'elements' field.

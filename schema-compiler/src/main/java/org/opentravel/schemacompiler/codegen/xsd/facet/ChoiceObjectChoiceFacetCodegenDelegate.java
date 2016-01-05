@@ -60,7 +60,7 @@ public class ChoiceObjectChoiceFacetCodegenDelegate extends ChoiceObjectFacetCod
      */
     @Override
     public QName getExtensionPointElement() {
-        SchemaDependency extensionPoint = SchemaDependency.getExtensionPointElement();
+        SchemaDependency extensionPoint = SchemaDependency.getExtensionPointChoiceElement();
         QName extensionPointQName = extensionPoint.toQName();
         
         addCompileTimeDependency(extensionPoint);

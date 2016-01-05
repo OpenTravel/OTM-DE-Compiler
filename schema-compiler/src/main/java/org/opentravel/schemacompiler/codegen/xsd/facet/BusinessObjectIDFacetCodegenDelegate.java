@@ -49,7 +49,7 @@ public class BusinessObjectIDFacetCodegenDelegate extends BusinessObjectFacetCod
      * @see org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate#hasNonSubstitutableElement()
      */
     @Override
-    protected boolean hasNonSubstitutableElement() {
+    public boolean hasNonSubstitutableElement() {
         return true;
     }
 

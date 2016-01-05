@@ -15,8 +15,13 @@
  */
 package org.opentravel.schemacompiler.transform.util;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
+import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
@@ -28,8 +33,11 @@ import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLExtension;
+import org.opentravel.schemacompiler.model.TLExtensionOwner;
 import org.opentravel.schemacompiler.model.TLFacet;
+import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLMemberField;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLParamGroup;
@@ -55,6 +63,7 @@ import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
 public class EntityReferenceResolutionVisitor extends ModelElementVisitorAdapter {
 
     private SymbolResolver symbolResolver;
+    private Map<String,List<TLMemberField<?>>> inheritedFieldCache = new HashMap<>();
     
     /**
      * Constructor that assigns the model being navigated.
@@ -275,6 +284,55 @@ public class EntityReferenceResolutionVisitor extends ModelElementVisitorAdapter
 	 */
 	@Override
 	public boolean visitParameter(TLParameter parameter) {
+        if ((parameter.getOwner() != null) && (parameter.getOwner().getFacetRef() != null) &&
+        		(parameter.getFieldRef() == null) && (parameter.getFieldRefName() != null)) {
+        	TLFacet facetRef = parameter.getOwner().getFacetRef();
+        	String facetRefKey = facetRef.getNamespace() + ":" + facetRef.getLocalName();
+        	List<TLMemberField<?>> memberFields = inheritedFieldCache.get(facetRefKey);
+        	String fieldName = parameter.getFieldRefName();
+        	
+            if (memberFields == null) {
+        		TLFacetOwner facetOwner = facetRef.getOwningEntity();
+        		TLFacet facet = facetRef;
+        		
+            	memberFields = new ArrayList<>();
+            	
+            	while (facetOwner != null) {
+            		if (facet != null) {
+                    	memberFields.addAll(PropertyCodegenUtils.getInheritedAttributes(facet));
+                    	memberFields.addAll(PropertyCodegenUtils.getInheritedProperties(facet));
+                    	memberFields.addAll(PropertyCodegenUtils.getInheritedIndicators(facet));
+            		}
+            		
+            		// Normally we would find the extended owner with a call to FacetCodegenUtils.getFacetOwnerExtension(),
+            		// but the reference may not have been resolved yet.  Therefore, we need special processing to find
+            		// the facet owner extension.
+            		if (facetOwner instanceof TLExtensionOwner) {
+            			TLExtensionOwner extensionOwner = (TLExtensionOwner) facetOwner;
+            			TLExtension extension = extensionOwner.getExtension();
+            			
+            			if (extension != null) {
+            				visitExtension( extension ); // Resolve the extension if not already done
+        					facetOwner = (TLFacetOwner) extension.getExtendsEntity();
+            			} else {
+            				facetOwner = null;
+            			}
+            		} else {
+            			facetOwner = null;
+            		}
+                	facet = FacetCodegenUtils.getFacetOfType( facetOwner, facetRef.getFacetType(),
+                			facetRef.getContext(), facetRef.getLabel() );
+            	}
+            	inheritedFieldCache.put(facetRefKey, memberFields);
+            }
+            
+            for (TLMemberField<?> memberField : memberFields) {
+            	if (fieldName.equals(memberField.getName())) {
+            		parameter.setFieldRef(memberField);
+            		break;
+            	}
+            }
+        }
         return true;
 	}
 

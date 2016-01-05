@@ -26,8 +26,12 @@ import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
+import org.opentravel.schemacompiler.ioc.SchemaDependency;
+import org.opentravel.schemacompiler.model.AbstractLibrary;
+import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAbstractFacet;
+import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAliasOwner;
 import org.opentravel.schemacompiler.model.TLAttribute;
@@ -40,11 +44,13 @@ import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLListFacet;
+import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLModelElement;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLPropertyOwner;
 import org.opentravel.schemacompiler.model.TLPropertyType;
+import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLRole;
 import org.opentravel.schemacompiler.model.TLRoleEnumeration;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
@@ -57,6 +63,12 @@ import org.opentravel.schemacompiler.model.TLValueWithAttributes;
  */
 public class PropertyCodegenUtils {
 
+    /**
+     * If the 'repeat' value of a property is greater than this threshold value, the XSD element
+     * definition will be created with a 'maxOccurs' value of "unbounded".
+     */
+    public static final int MAX_OCCURS_UNBOUNDED_THRESHOLD = 5000;
+    
     /**
      * Returns true if a global element declaration is to be generated for the given property type.
      * 
@@ -88,8 +100,8 @@ public class PropertyCodegenUtils {
 
     /**
      * Returns the default name that will be assigned in a generated schema for elements of the
-     * assigned type. Default element names are only assigned for elements that are typed as cores
-     * and business objects; for all other element types, this method will return null.
+     * assigned type. If the given property type does not have a default element name, this method
+     * will return null.
      * 
      * @param propertyType
      *            the assigned type of the model property
@@ -387,10 +399,8 @@ public class PropertyCodegenUtils {
                         aFacet.getAttributes());
 
                 // We are traversing upward in the inheritance hierarchy, so we must pre-pend
-                // attributes onto
-                // the list in the reverse order of their declarations in order to preserve the
-                // intende order
-                // of occurrance.
+                // attributes onto the list in the reverse order of their declarations in order
+                // to preserve the intended order of occurrance.
                 Collections.reverse(localAttributes);
 
                 for (TLAttribute attribute : localAttributes) {
@@ -448,10 +458,8 @@ public class PropertyCodegenUtils {
                         aFacet.getIndicators());
 
                 // We are traversing upward in the inheritance hierarchy, so we must pre-pend
-                // indicators onto
-                // the list in the reverse order of their declarations in order to preserve the
-                // intende order
-                // of occurrance.
+                // indicators onto the list in the reverse order of their declarations in order
+                // to preserve the intended order of occurrance.
                 Collections.reverse(localIndicators);
 
                 for (TLIndicator indicator : localIndicators) {
@@ -509,20 +517,18 @@ public class PropertyCodegenUtils {
                 List<TLProperty> localProperties = new ArrayList<TLProperty>(aFacet.getElements());
 
                 // We are traversing upward in the inheritance hierarchy, so we must pre-pend
-                // properties onto
-                // the list in the reverse order of their declarations in order to preserve the
-                // intende order
-                // of occurrance.
+                // properties onto the list in the reverse order of their declarations in order
+                // to preserve the intended order of occurrance.
                 Collections.reverse(localProperties);
 
                 for (TLProperty property : localProperties) {
-                    TLPropertyType propertyType = resolvePropertyType(property.getPropertyOwner(),
+                    TLPropertyType propertyType = resolvePropertyType(property.getOwner(),
                             property.getType());
                     NamedEntity inheritanceRoot = getInheritanceRoot(propertyType);
 
                     // Properties whose types are members of an inheritance hierarchy should be
-                    // skipped
-                    // if they were eclipsed by lower-level properties of the owner's hierarchy
+                    // skipped if they were eclipsed by lower-level properties of the owner's
+                    // hierarchy
                     if ((inheritanceRoot == null) || !inheritanceRoots.contains(inheritanceRoot)) {
                         if (inheritanceRoot != null) {
                             inheritanceRoots.add(inheritanceRoot);
@@ -567,6 +573,138 @@ public class PropertyCodegenUtils {
             }
         }
         return roles;
+    }
+
+    /**
+     * Returns the list of attributes that were declared by the given facet or inherited from facets
+     * with the same name. Attributes are guranteed to be in the correct order of their declaration in
+     * the sequencing of the inheritance hierarchy.
+     * 
+     * @param facet
+     *            the facet for which to retrieve inherited attributes
+     * @return List<TLAttribute>
+     */
+    public static List<TLAttribute> getInheritedAttributes(TLActionFacet facet) {
+        Collection<TLFacetOwner> visitedOwners = new HashSet<TLFacetOwner>();
+        List<TLAttribute> attributeList = new ArrayList<TLAttribute>();
+        TLResource facetOwner = (TLResource) facet.getOwningEntity();
+
+        while (facetOwner != null) {
+            if (visitedOwners.contains(facetOwner)) {
+                break;
+            }
+            TLActionFacet aFacet = facetOwner.getActionFacet(facet.getName());
+
+            if (aFacet != null) {
+                List<TLAttribute> localAttributes = new ArrayList<TLAttribute>(aFacet.getAttributes());
+
+                // We are traversing upward in the inheritance hierarchy, so we must pre-pend
+                // attributes onto the list in the reverse order of their declarations in order
+                // to preserve the intended order of occurrance.
+                Collections.reverse(localAttributes);
+
+                for (TLAttribute attribute : localAttributes) {
+                    attributeList.add(0, attribute);
+                }
+            }
+            visitedOwners.add(facetOwner);
+            facetOwner = ResourceCodegenUtils.getExtendedResource(facetOwner);
+        }
+        return attributeList;
+    }
+
+    /**
+     * Returns the list of indicators that were declared by the given facet or inherited from facets
+     * with the same name. Indicators are guranteed to be in the correct order of their declaration in
+     * the sequencing of the inheritance hierarchy.
+     * 
+     * @param facet
+     *            the facet for which to retrieve inherited indicators
+     * @return List<TLIndicator>
+     */
+    public static List<TLIndicator> getInheritedIndicators(TLActionFacet facet) {
+        Collection<TLFacetOwner> visitedOwners = new HashSet<TLFacetOwner>();
+        List<TLIndicator> indicatorList = new ArrayList<TLIndicator>();
+        TLResource facetOwner = (TLResource) facet.getOwningEntity();
+
+        while (facetOwner != null) {
+            if (visitedOwners.contains(facetOwner)) {
+                break;
+            }
+            TLActionFacet aFacet = facetOwner.getActionFacet(facet.getName());
+
+            if (aFacet != null) {
+                List<TLIndicator> localIndicators = new ArrayList<TLIndicator>(
+                        aFacet.getIndicators());
+
+                // We are traversing upward in the inheritance hierarchy, so we must pre-pend
+                // indicators onto
+                // the list in the reverse order of their declarations in order to preserve the
+                // intende order
+                // of occurrance.
+                Collections.reverse(localIndicators);
+
+                for (TLIndicator indicator : localIndicators) {
+                    indicatorList.add(0, indicator);
+                }
+            }
+            visitedOwners.add(facetOwner);
+            facetOwner = ResourceCodegenUtils.getExtendedResource(facetOwner);
+        }
+        return indicatorList;
+    }
+
+    /**
+     * Returns the list of properties that were declared by the given facet or inherited from facets
+     * with the same name. Properties are guranteed to be in the correct order of their declaration in
+     * the sequencing of the inheritance hierarchy.
+     * 
+     * @param facet
+     *            the facet for which to retrieve inherited properties
+     * @return List<TLProperty>
+     */
+    public static List<TLProperty> getInheritedProperties(TLActionFacet facet) {
+        Collection<TLFacetOwner> visitedOwners = new HashSet<TLFacetOwner>();
+        Set<NamedEntity> inheritanceRoots = new HashSet<NamedEntity>();
+        List<TLProperty> propertyList = new ArrayList<TLProperty>();
+        TLResource facetOwner = (TLResource) facet.getOwningEntity();
+
+        while (facetOwner != null) {
+            if (visitedOwners.contains(facetOwner)) {
+                break;
+            }
+            TLActionFacet aFacet = facetOwner.getActionFacet(facet.getName());
+
+            if (aFacet != null) {
+                List<TLProperty> localProperties = new ArrayList<TLProperty>(aFacet.getElements());
+
+                // We are traversing upward in the inheritance hierarchy, so we must pre-pend
+                // properties onto
+                // the list in the reverse order of their declarations in order to preserve the
+                // intende order
+                // of occurrance.
+                Collections.reverse(localProperties);
+
+                for (TLProperty property : localProperties) {
+                    TLPropertyType propertyType = resolvePropertyType(property.getOwner(),
+                            property.getType());
+                    NamedEntity inheritanceRoot = getInheritanceRoot(propertyType);
+
+                    // Properties whose types are members of an inheritance hierarchy should be
+                    // skipped
+                    // if they were eclipsed by lower-level properties of the owner's hierarchy
+                    if ((inheritanceRoot == null) || !inheritanceRoots.contains(inheritanceRoot)) {
+                        if (inheritanceRoot != null) {
+                            inheritanceRoots.add(inheritanceRoot);
+                        }
+                        propertyList.add(0, property);
+                    }
+                }
+            }
+            visitedOwners.add(facetOwner);
+            facetOwner = ResourceCodegenUtils.getExtendedResource(facetOwner);
+        }
+        return propertyList;
     }
 
     /**
@@ -673,6 +811,39 @@ public class PropertyCodegenUtils {
         return elementList;
     }
 
+    /**
+     * Returns an ordered list of <code>TLProperty</code> and <code>TLIndicator</code> elements
+     * in the order they will occur in a schema-valid XML document.  Only those indicators that
+     * are published as elements will be included in the resulting list.
+     * 
+     * @param facet  the facet for which to return the sequence of XML elements
+     * @return List<TLModelElement>
+     */
+    public static List<TLModelElement> getElementSequence(TLActionFacet facet) {
+    	List<TLResource> resourceHierarchy = ResourceCodegenUtils.getInheritanceHierarchy(
+    			(TLResource) facet.getOwningEntity() );
+        List<TLModelElement> elementList = new ArrayList<TLModelElement>();
+    	String facetName = facet.getName();
+    	
+    	// Start from the top of the inheritance hierarchy and work down
+    	Collections.reverse( resourceHierarchy );
+    	
+    	for (TLResource resource : resourceHierarchy) {
+    		TLActionFacet aFacet = resource.getActionFacet( facetName );
+    		
+    		if (aFacet != null) {
+            	elementList.addAll( aFacet.getElements() );
+            	
+            	for (TLIndicator indicator : aFacet.getIndicators()) {
+            		if (indicator.isPublishAsElement()) {
+            			elementList.add( indicator );
+            		}
+            	}
+    		}
+    	}
+    	return elementList;
+    }
+    
     /**
      * Analyzes the given property instance to determine the root of its substitution group hierarchy.
      * This is typically the core or business object that is the owner of the facet or alias that is
@@ -812,6 +983,8 @@ public class PropertyCodegenUtils {
                     case DETAIL:
                         assignedType = itemFacet;
                         break;
+					default:
+						break;
                 }
             }
         }
@@ -922,7 +1095,6 @@ public class PropertyCodegenUtils {
      * Simple dispatch method used to decompose the problem from the primary 'getAlternateFacets()'
      * method.
      */
-    @SuppressWarnings("unused")
     private static TLAbstractFacet[] getAlternateFacets(TLPropertyOwner originatingFacet,
             TLCoreObject referencedOwner, TLListFacet referencedFacet) {
         TLAbstractFacet[] results = new TLAbstractFacet[0];
@@ -940,7 +1112,6 @@ public class PropertyCodegenUtils {
      * Simple dispatch method used to decompose the problem from the primary 'getAlternateFacets()'
      * method.
      */
-    @SuppressWarnings("unused")
     private static TLAbstractFacet[] getAlternateFacets(TLBusinessObject originatingOwner,
             TLFacet originatingFacet, TLBusinessObject referencedOwner,
             TLAbstractFacet referencedFacet) {
@@ -962,6 +1133,8 @@ public class PropertyCodegenUtils {
                         results = new TLAbstractFacet[] { referencedOwner.getSummaryFacet(),
                                 referencedOwner.getIdFacet() };
                         break;
+					default:
+						break;
                 }
                 break;
             case SUMMARY:
@@ -984,6 +1157,8 @@ public class PropertyCodegenUtils {
                         results = new TLAbstractFacet[] { referencedOwner.getSummaryFacet(),
                                 referencedOwner.getIdFacet() };
                         break;
+					default:
+						break;
                 }
                 break;
             case DETAIL:
@@ -1004,8 +1179,12 @@ public class PropertyCodegenUtils {
                         results = new TLAbstractFacet[] { referencedOwner.getSummaryFacet(),
                                 referencedOwner.getIdFacet() };
                         break;
+					default:
+						break;
                 }
                 break;
+			default:
+				break;
         }
         return results;
     }
@@ -1014,7 +1193,6 @@ public class PropertyCodegenUtils {
      * Simple dispatch method used to decompose the problem from the primary 'getAlternateFacets()'
      * method.
      */
-    @SuppressWarnings("unused")
     private static TLAbstractFacet[] getAlternateFacets(TLBusinessObject originatingOwner,
             TLFacet originatingFacet, TLCoreObject referencedOwner, TLAbstractFacet referencedFacet) {
         TLAbstractFacet[] results = new TLAbstractFacet[0];
@@ -1034,6 +1212,8 @@ public class PropertyCodegenUtils {
                         results = new TLAbstractFacet[] { referencedOwner.getSummaryFacet(),
                                 referencedOwner.getSimpleFacet() };
                         break;
+					default:
+						break;
                 }
                 break;
             case SUMMARY:
@@ -1050,6 +1230,8 @@ public class PropertyCodegenUtils {
                         results = new TLAbstractFacet[] { referencedOwner.getSummaryFacet(),
                                 referencedOwner.getSimpleFacet() };
                         break;
+					default:
+						break;
                 }
                 break;
             case DETAIL:
@@ -1068,8 +1250,12 @@ public class PropertyCodegenUtils {
                         results = new TLAbstractFacet[] { referencedOwner.getSummaryFacet(),
                                 referencedOwner.getSimpleFacet() };
                         break;
+					default:
+						break;
                 }
                 break;
+			default:
+				break;
         }
         return results;
     }
@@ -1078,7 +1264,6 @@ public class PropertyCodegenUtils {
      * Simple dispatch method used to decompose the problem from the primary 'getAlternateFacets()'
      * method.
      */
-    @SuppressWarnings("unused")
     private static TLAbstractFacet[] getAlternateFacets(TLCoreObject originatingOwner,
             TLFacet originatingFacet, TLBusinessObject referencedOwner,
             TLAbstractFacet referencedFacet) {
@@ -1090,7 +1275,6 @@ public class PropertyCodegenUtils {
      * Simple dispatch method used to decompose the problem from the primary 'getAlternateFacets()'
      * method.
      */
-    @SuppressWarnings("unused")
     private static TLAbstractFacet[] getAlternateFacets(TLCoreObject originatingOwner,
             TLFacet originatingFacet, TLCoreObject referencedOwner, TLAbstractFacet referencedFacet) {
         TLAbstractFacet[] results = new TLAbstractFacet[0];
@@ -1108,6 +1292,8 @@ public class PropertyCodegenUtils {
                 results = new TLAbstractFacet[] { referencedOwner.getSummaryFacet(),
                         referencedOwner.getSimpleFacet() };
                 break;
+			default:
+				break;
         }
         return results;
     }
@@ -1116,7 +1302,6 @@ public class PropertyCodegenUtils {
      * Simple dispatch method used to decompose the problem from the primary 'getAlternateFacets()'
      * method.
      */
-    @SuppressWarnings("unused")
     private static TLAbstractFacet[] getAlternateFacets(TLExtensionPointFacet originatingOwner,
             TLFacet originatingFacet, TLBusinessObject referencedOwner,
             TLAbstractFacet referencedFacet) {
@@ -1139,6 +1324,8 @@ public class PropertyCodegenUtils {
                 results = new TLAbstractFacet[] { referencedOwner.getSummaryFacet(),
                         referencedOwner.getIdFacet() };
                 break;
+			default:
+				break;
         }
         return results;
     }
@@ -1147,7 +1334,6 @@ public class PropertyCodegenUtils {
      * Simple dispatch method used to decompose the problem from the primary 'getAlternateFacets()'
      * method.
      */
-    @SuppressWarnings("unused")
     private static TLAbstractFacet[] getAlternateFacets(TLExtensionPointFacet originatingOwner,
             TLFacet originatingFacet, TLCoreObject referencedOwner, TLAbstractFacet referencedFacet) {
         TLAbstractFacet[] results = new TLAbstractFacet[0];
@@ -1165,8 +1351,122 @@ public class PropertyCodegenUtils {
                 results = new TLAbstractFacet[] { referencedOwner.getSummaryFacet(),
                         referencedOwner.getSimpleFacet() };
                 break;
+			default:
+				break;
         }
         return results;
+    }
+
+    /**
+     * Returns the type of the attribute. In most cases, this is a simple call to 'attr.getType()'.
+     * In the case of VWA attribute types, however, we must search the VWA hierarchy to retrieve the
+     * simple base type.
+     * 
+     * @param attribute  the attribute for which to return the type
+     * @return TLAttributeType
+     */
+    public static TLAttributeType getAttributeType(TLAttribute attribute) {
+        TLAttributeType attributeType = attribute.getType();
+
+        while (attributeType instanceof TLValueWithAttributes) {
+            attributeType = (TLAttributeType) ((TLValueWithAttributes) attributeType)
+                    .getParentType();
+
+            if (attributeType == null) {
+                attributeType = findEmptyStringType(attribute.getOwningModel());
+            }
+        }
+        return attributeType;
+    }
+
+    /**
+     * Scans the given model and returns the model entity used to represent the empty element type.
+     * If no such entity is defined, this method will return null.
+     * 
+     * @param model  the model to search
+     * @return TLAttributeType
+     */
+    public static TLAttributeType findEmptyStringType(TLModel model) {
+        SchemaDependency emptySD = SchemaDependency.getEmptyElement();
+        TLAttributeType emptyAttribute = null;
+
+        for (AbstractLibrary library : model.getAllLibraries()) {
+            if ((library.getNamespace() != null)
+                    && library.getNamespace().equals(emptySD.getSchemaDeclaration().getNamespace())) {
+                LibraryMember member = library.getNamedMember(emptySD.getLocalName());
+
+                if (member instanceof TLAttributeType) {
+                    emptyAttribute = (TLAttributeType) member;
+                }
+            }
+        }
+        return emptyAttribute;
+    }
+    
+    /**
+     * Returns true if the given named entity is a reference to the empty-string
+     * schema dependency.
+     * 
+     * @param entity  the entity to analyze
+     * @return boolean
+     */
+    public static boolean isEmptyStringType(NamedEntity entity) {
+        QName emptyElementType = SchemaDependency.getEmptyElement().toQName();
+
+        return emptyElementType.getNamespaceURI().equals(entity.getNamespace())
+                && emptyElementType.getLocalPart().equals(entity.getLocalName());
+    }
+
+    /**
+     * Identifies the 'maxOccurs' value for the generated element, typically this is defined by the
+     * 'repeat' attribute of the <code>TLPropertyElement</code>.
+     * 
+     * <p>Special Case: Properties that reference core object list facets as their type should assign
+     * the maxOccurs attribute to the number of roles in the core object.
+     * 
+     * @param source  the model property being rendered
+     * @return String
+     */
+    public static String getMaxOccurs(TLProperty source) {
+        TLPropertyType facetType = source.getType();
+        TLListFacet listFacet = null;
+        String maxOccurs = null;
+
+        // Check for special case with core object list facets
+        if (facetType instanceof TLListFacet) {
+            listFacet = (TLListFacet) facetType;
+
+        } else if (facetType instanceof TLAlias) {
+            TLAlias alias = (TLAlias) facetType;
+            TLAliasOwner aliasOwner = alias.getOwningEntity();
+
+            if (aliasOwner instanceof TLListFacet) {
+                listFacet = (TLListFacet) aliasOwner;
+            }
+        }
+        if (listFacet != null) {
+            TLFacetOwner facetOwner = listFacet.getOwningEntity();
+
+            if (facetOwner instanceof TLCoreObject) {
+                TLCoreObject core = (TLCoreObject) facetOwner;
+
+                if (core.getRoleEnumeration().getRoles().size() > 0) {
+                    maxOccurs = core.getRoleEnumeration().getRoles().size() + "";
+                }
+            }
+            listFacet.getOwningEntity();
+        }
+
+        // Normal processing for maxOccurs if the special case was not present
+        if (maxOccurs == null) {
+            if ((source.getRepeat() < 0) || (source.getRepeat() > MAX_OCCURS_UNBOUNDED_THRESHOLD)) {
+                maxOccurs = "unbounded";
+
+            } else if (source.getRepeat() > 0) {
+                maxOccurs = source.getRepeat() + "";
+            }
+        }
+        return maxOccurs;
     }
 
 }

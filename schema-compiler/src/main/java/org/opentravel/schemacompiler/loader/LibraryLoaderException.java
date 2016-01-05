@@ -24,7 +24,9 @@ import org.opentravel.schemacompiler.util.SchemaCompilerException;
  */
 public class LibraryLoaderException extends SchemaCompilerException {
 
-    /**
+	private static final long serialVersionUID = -6738739483590367556L;
+
+	/**
      * Default constructor.
      */
     public LibraryLoaderException() {

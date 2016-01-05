@@ -33,6 +33,7 @@ import org.opentravel.schemacompiler.util.SchemaCompilerException;
 public class CompileAllCompilerTask extends AbstractCompilerTask implements CompileAllTaskOptions {
 
     private boolean compileSchemas = true;
+    private boolean compileJson = true;
     private boolean compileServices = true;
     private URL serviceLibraryUrl;
     private String serviceEndpointUrl;
@@ -58,6 +59,14 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
             schemaTask.setOutputFolder(getSubtaskOutputFolder(compileAllContext, "schemas"));
             schemaTask.generateOutput(userDefinedLibraries, legacySchemas);
             addGeneratedFiles(schemaTask.getGeneratedFiles());
+        }
+        if (compileJson) {
+            JsonSchemaCompilerTask jsonSchemaTask = new JsonSchemaCompilerTask(projectFilename);
+
+            jsonSchemaTask.applyTaskOptions(this);
+            jsonSchemaTask.setOutputFolder(getSubtaskOutputFolder(compileAllContext, "json"));
+            jsonSchemaTask.generateOutput(userDefinedLibraries, legacySchemas);
+            addGeneratedFiles(jsonSchemaTask.getGeneratedFiles());
         }
         if (compileServices) {
             if (projectFilename != null) {
@@ -173,6 +182,24 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
     }
 
     /**
+	 * Returns the option flag indicating that JSON schema files should be generated.
+	 *
+	 * @return boolean
+	 */
+	public boolean isCompileJsonSchemas() {
+		return compileJson;
+	}
+
+	/**
+	 * Assigns the option flag indicating that JSON schema files should be generated.
+	 *
+	 * @param compileJson  the task option value to assign
+	 */
+	public void setCompileJsonSchemas(boolean compileJson) {
+		this.compileJson = compileJson;
+	}
+
+	/**
      * @see org.opentravel.schemacompiler.task.CompileAllTaskOptions#isCompileServices()
      */
     @Override

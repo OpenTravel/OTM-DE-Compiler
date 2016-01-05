@@ -1,0 +1,77 @@
+{
+	"id" : "",
+	"$schema" : "http://json-schema.org/draft-04/schema#",
+	"title" : "OTA2_Message_v2.0.0",
+	"description" : "DRAFT SCHEMA DISCLAIMER: This is an OpenTravel draft specification designed for review by OpenTravel members and other interested parties, and is not designed for implementation in a production environment, nor is it considered an official OpenTravel document. OpenTravel may at any time up to final specification publication change any aspect of this message including, but not limited to, specific elements, element names/labels, annotations or message name. Implementation of this version is done so at the risk of the implementer or implementing company. The current publication schedule can be found here http://wiki.opentravel.org/index.php/Public:2011AB_Publication_Schedule.",
+	"definitions" : {
+		"OTA2_Payload" : {
+			"description" : "Payload base type for declaring message elements. All messages elements must extend this type AND must end with a Extension element.",
+			"type" : "object",
+			"discriminator" : "typeId",
+			"properties" : {
+				"type" : {
+					"typeId" : "string"
+				},
+				"DataPolicy" : {
+					"description" : "Details about data policy(s) that apply to all or a portion of this message.",
+					"type" : "array",
+					"items" : {
+						"$ref" : "./OTA2_BuiltIns_v2.0.0.json#/definitions/DataPolicy"
+					}
+				},
+				"Encryption" : {
+					"description" : "Details about encrypted information within this message.",
+					"type" : "array",
+					"items" : {
+						"$ref" : "./OTA2_BuiltIns_v2.0.0.json#/definitions/Encryption"
+					}
+				},
+				"TargetSystem" : {
+					"description" : "The target (or receiving) processing system.",
+					"$ref" : "./OTA2_BuiltIns_v2.0.0.json#/definitions/TargetSystem"
+				},
+				"Transaction" : {
+					"description" : "Transactional processing information.",
+					"$ref" : "./OTA2_BuiltIns_v2.0.0.json#/definitions/Transaction"
+				},
+				"timeStamp" : {
+					"description" : "A timestamp for when the message was created.",
+					"$ref" : "./OTA2_BuiltIns_v2.0.0.json#/definitions/Date_Timestamp"
+				},
+				"version" : {
+					"description" : "The OpenTravel message version indicated by a decimal value.",
+					"type" : "number"
+				},
+				"dataPolicyInd" : {
+					"description" : "If true, data policy information has been specified and is contained in the DataPolicy element.",
+					"type" : "boolean"
+				},
+				"encryption" : {
+					"description" : "If true, all or portions of this message are encrypted and the Encryption element should be parsed.",
+					"type" : "boolean"
+				}
+			},
+			"required" : [ "typeId", "timeStamp", "version" ],
+			"additionalProperties": false
+		},
+		"OTA2_Request_Payload" : {
+			"description" : "Base type for SOAP request messages.",
+			"allOf" : [
+				{ "$ref": "#/definitions/OTA2_Payload" }
+			]
+		},
+		"OTA2_Response_Payload" : {
+			"description" : "Base type for SOAP response messages.",
+			"allOf" : [
+				{ "$ref": "#/definitions/OTA2_Payload" }
+			]
+		},
+		"OTA2_Notif_Payload" : {
+			"description" : "Base type for SOAP notification messages.",
+			"allOf" : [
+				{ "$ref": "#/definitions/OTA2_Payload" }
+			]
+		},
+		"ExtensionPoint" : {}
+	}
+}

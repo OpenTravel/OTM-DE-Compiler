@@ -280,6 +280,17 @@ public abstract class EntityRemovedIntegrityChecker<S, I> extends
 		 */
 		@Override
 		public boolean visitParameter(TLParameter parameter) {
+			TLModelElement referencedEntity = (TLModelElement) parameter.getFieldRef();
+
+            if (isRemovedEntity(referencedEntity)) {
+                TLModel model = parameter.getOwningModel();
+                boolean listenersEnabled = disableListeners(model);
+                
+                // If a field is deleted, we will delete any corresponing parameters
+                // rather than setting their reference to null
+                parameter.getOwner().removeParameter(parameter);
+                restoreListeners(model, listenersEnabled);
+            }
             return true;
 		}
 

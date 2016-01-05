@@ -33,6 +33,7 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
+import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
 import org.opentravel.schemacompiler.util.ClasspathResourceResolver;
 import org.opentravel.schemacompiler.util.URLUtils;
@@ -265,7 +266,8 @@ public class ImportSchemaLocations {
         try {
             SchemaFactory schemaFactory = SchemaFactory
                     .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            InputStream schemaStream = SchemaDeclarations.SCHEMA_FOR_SCHEMAS.getContent();
+            InputStream schemaStream = SchemaDeclarations.SCHEMA_FOR_SCHEMAS.getContent(
+            		CodeGeneratorFactory.XSD_TARGET_FORMAT);
 
             schemaFactory.setResourceResolver(new ClasspathResourceResolver());
             validationSchema = schemaFactory.newSchema(new StreamSource(schemaStream));

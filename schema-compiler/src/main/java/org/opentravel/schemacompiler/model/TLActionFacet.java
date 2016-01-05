@@ -15,6 +15,7 @@
  */
 package org.opentravel.schemacompiler.model;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -30,8 +31,7 @@ import org.opentravel.schemacompiler.model.TLProperty.PropertyListManager;
  * 
  * @author S. Livezey
  */
-public class TLActionFacet extends TLAbstractFacet
-		implements TLAttributeOwner, TLPropertyOwner, TLIndicatorOwner {
+public class TLActionFacet extends TLPatchableFacet {
 	
 	private String name;
     private AttributeListManager attributeManager = new AttributeListManager(this);
@@ -326,6 +326,38 @@ public class TLActionFacet extends TLAbstractFacet
     }
 
     /**
+<<<<<<< HEAD
+=======
+	 * @see org.opentravel.schemacompiler.model.TLMemberFieldOwner#getMemberFields()
+	 */
+	@Override
+	public List<TLMemberField<?>> getMemberFields() {
+		List<TLMemberField<?>> memberFields = new ArrayList<>();
+		
+		memberFields.addAll( getAttributes() );
+		memberFields.addAll( getElements() );
+		memberFields.addAll( getIndicators() );
+		return memberFields;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.model.TLMemberFieldOwner#getMemberField(java.lang.String)
+	 */
+	@Override
+	public TLMemberField<?> getMemberField(String fieldName) {
+		TLMemberField<?> memberField = getAttribute( fieldName );
+		
+		if (memberField == null) {
+			memberField = getElement( fieldName );
+		}
+		if (memberField == null) {
+			memberField = getIndicator( fieldName );
+		}
+		return memberField;
+	}
+
+    /**
+>>>>>>> otm4x
      * Returns the value of the 'notExtendable' field.
      * 
      * @return boolean

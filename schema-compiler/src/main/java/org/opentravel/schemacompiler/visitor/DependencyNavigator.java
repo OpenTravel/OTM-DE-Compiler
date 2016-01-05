@@ -39,6 +39,7 @@ import org.opentravel.schemacompiler.model.TLInclude;
 import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLListFacet;
+import org.opentravel.schemacompiler.model.TLMemberField;
 import org.opentravel.schemacompiler.model.TLNamespaceImport;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLOperation;
@@ -323,6 +324,17 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
      */
     public void navigateParameter(TLParameter parameter) {
         if (canVisit(parameter) && visitor.visitParameter(parameter)) {
+        	TLMemberField<?> fieldRef = parameter.getFieldRef();
+        	
+        	if (fieldRef instanceof TLAttribute) {
+        		navigateAttribute((TLAttribute) fieldRef);
+        		
+        	} else if (fieldRef instanceof TLProperty) {
+        		navigateElement((TLProperty) fieldRef);
+        		
+        	} else if (fieldRef instanceof TLIndicator) {
+        		navigateIndicator((TLIndicator) fieldRef);
+        	}
         }
         addVisitedNode(parameter);
     }
@@ -553,13 +565,13 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
      */
     public void navigateActionFacet(TLActionFacet actionFacet) {
         if (canVisit(actionFacet) && visitor.visitActionFacet(actionFacet)) {
-            for (TLAttribute attribute : actionFacet.getAttributes()) {
+            for (TLAttribute attribute : PropertyCodegenUtils.getInheritedAttributes(actionFacet)) {
                 navigateAttribute(attribute);
             }
-            for (TLProperty element : actionFacet.getElements()) {
+            for (TLProperty element : PropertyCodegenUtils.getInheritedProperties(actionFacet)) {
                 navigateElement(element);
             }
-            for (TLIndicator indicator : actionFacet.getIndicators()) {
+            for (TLIndicator indicator : PropertyCodegenUtils.getInheritedIndicators(actionFacet)) {
                 navigateIndicator(indicator);
             }
             navigateDependency(actionFacet.getOwningEntity());
@@ -627,7 +639,7 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
     protected void navigateAttribute(TLAttribute attribute) {
         if (canVisit(attribute) && visitor.visitAttribute(attribute)) {
             navigateDependency(attribute.getType());
-            navigateDependency(attribute.getAttributeOwner());
+            navigateDependency(attribute.getOwner());
         }
     }
 
@@ -640,7 +652,7 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
     protected void navigateElement(TLProperty element) {
         if (canVisit(element) && visitor.visitElement(element)) {
             navigateDependency(element.getType());
-            navigateDependency(element.getPropertyOwner());
+            navigateDependency(element.getOwner());
         }
     }
 

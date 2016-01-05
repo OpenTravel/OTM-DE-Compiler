@@ -26,12 +26,16 @@ import org.opentravel.schemacompiler.model.TLActionRequest;
 import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLMemberField;
 import org.opentravel.schemacompiler.model.TLParamGroup;
 import org.opentravel.schemacompiler.model.TLParameter;
+import org.opentravel.schemacompiler.model.TLPatchableFacet;
 import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLResourceParentRef;
+import org.opentravel.schemacompiler.transform.util.EntityReferenceResolutionVisitor;
 import org.opentravel.schemacompiler.util.ModelElementCloner;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
+import org.opentravel.schemacompiler.visitor.ModelNavigator;
 
 /**
  * <code>VersionHandler</code> implementation for <code>TLResource</code>
@@ -73,6 +77,7 @@ public class TLResourceVersionHandler extends TLExtensionOwnerVersionHandler<TLR
         	majorVersion.setBusinessObjectRef( resolveBusinessObjectRef( minorVersion, majorVersionLibrary ) );
             assignBaseExtension( majorVersion, minorVersion );
             majorVersionLibrary.addNamedMember( majorVersion );
+            resolveParameterReferences( majorVersion );
             referenceHandler.captureRollupReferences( majorVersion );
         	
         } else if (majorVersion instanceof TLResource) {
@@ -148,10 +153,10 @@ public class TLResourceVersionHandler extends TLExtensionOwnerVersionHandler<TLR
             
             // Rollup the parameters of each group
             for (TLParameter sourceParam : sourceParamGroup.getParameters()) {
-            	String sourceFieldRefName = sourceParam.getFieldRefName();
+            	TLMemberField<?> sourceFieldRef = sourceParam.getFieldRef();
             	
-            	if (sourceFieldRefName != null) {
-                	TLParameter targetParam = targetParamGroup.getParameter( sourceFieldRefName );
+            	if (sourceFieldRef != null) {
+                	TLParameter targetParam = targetParamGroup.getParameter( sourceFieldRef.getName() );
                 	
                 	if (targetParam == null) {
                 		targetParam = cloner.clone( sourceParam );
@@ -164,6 +169,7 @@ public class TLResourceVersionHandler extends TLExtensionOwnerVersionHandler<TLR
             	}
             }
         }
+        resolveParameterReferences( majorVersionTarget );
         
         // Rollup the actions
         for (TLAction sourceAction : minorVersion.getActions()) {
@@ -232,6 +238,45 @@ public class TLResourceVersionHandler extends TLExtensionOwnerVersionHandler<TLR
         	}
         }
         return newVersionBO;
+	}
+	
+	/**
+	 * After the major version of a resource has been processed, its parameter references need to be
+	 * resolved since the cloning process does not handle it.
+	 * 
+	 * @param majorVersion  the resource for which to resolve parameter references
+	 */
+	private void resolveParameterReferences(TLResource majorVersion) {
+		boolean hasUnresolvedReferences = false;
+		
+		for (TLParamGroup paramGroup : majorVersion.getParamGroups()) {
+			hasUnresolvedReferences = (paramGroup.getFacetRef() == null);
+			
+			for (TLParameter param : paramGroup.getParameters()) {
+				hasUnresolvedReferences = (param.getFieldRef() == null);
+			}
+		}
+		
+		if (hasUnresolvedReferences) {
+			EntityReferenceResolutionVisitor visitor = new EntityReferenceResolutionVisitor(
+					majorVersion.getOwningModel() );
+			
+			visitor.assignContextLibrary( majorVersion.getOwningLibrary() );
+			ModelNavigator.navigate(majorVersion, visitor);
+		}
+	}
+	
+	/**
+	 * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#getPatchableFacets(org.opentravel.schemacompiler.version.Versioned)
+	 */
+	@Override
+	public List<TLPatchableFacet> getPatchableFacets(TLResource entity) {
+		List<TLPatchableFacet> facetList = new ArrayList<>();
+		
+		for (TLActionFacet facet : entity.getActionFacets()) {
+			facetList.add( facet );
+		}
+		return facetList;
 	}
 	
 }

@@ -18,6 +18,7 @@ package org.opentravel.schemacompiler.codegen.example;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
@@ -25,6 +26,9 @@ import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLActionFacet;
+import org.opentravel.schemacompiler.model.TLActionRequest;
+import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLAttributeOwner;
@@ -40,6 +44,7 @@ import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.model.TLPatchableFacet;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLPropertyOwner;
 import org.opentravel.schemacompiler.model.TLPropertyType;
@@ -257,6 +262,68 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 	}
 
 	/**
+	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#startRequest(org.opentravel.schemacompiler.model.TLActionRequest)
+	 */
+	@Override
+	public void startRequest(TLActionRequest request) {
+		super.startRequest(request);
+		
+		if (request.getPayloadType() instanceof TLActionFacet) {
+			TLActionFacet payloadType = (TLActionFacet) request.getPayloadType();
+			
+	        facetStack.push(payloadType);
+	        createObjectNode(request);
+		}
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#endRequest(org.opentravel.schemacompiler.model.TLActionRequest)
+	 */
+	@Override
+	public void endRequest(TLActionRequest request) {
+		super.endRequest(request);
+		
+		if (request.getPayloadType() instanceof TLActionFacet) {
+			TLActionFacet payloadType = (TLActionFacet) request.getPayloadType();
+			
+	        if (facetStack.peek() == payloadType) {
+	            facetStack.pop();
+	        }
+		}
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#startResponse(org.opentravel.schemacompiler.model.TLActionResponse)
+	 */
+	@Override
+	public void startResponse(TLActionResponse response) {
+		super.startResponse(response);
+		
+		if (response.getPayloadType() instanceof TLActionFacet) {
+			TLActionFacet payloadType = (TLActionFacet) response.getPayloadType();
+			
+	        facetStack.push(payloadType);
+	        createObjectNode(response);
+		}
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#endResponse(org.opentravel.schemacompiler.model.TLActionResponse)
+	 */
+	@Override
+	public void endResponse(TLActionResponse response) {
+		super.endResponse(response);
+		
+		if (response.getPayloadType() instanceof TLActionFacet) {
+			TLActionFacet payloadType = (TLActionFacet) response.getPayloadType();
+			
+	        if (facetStack.peek() == payloadType) {
+	            facetStack.pop();
+	        }
+		}
+	}
+
+	/**
 	 * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#startAttribute(org.opentravel.schemacompiler.model.TLAttribute)
 	 */
 	@Override
@@ -284,7 +351,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 
 		// Capture ID values in the registry for use during post-processing
 		if (XsdCodegenUtils.isIdType(attribute.getType())) {
-			TLAttributeOwner owner = attribute.getAttributeOwner();
+			TLAttributeOwner owner = attribute.getOwner();
 			NamedEntity contextFacet = getContextFacet();
 
 			if (contextFacet != null) {
@@ -362,7 +429,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 
 		// Capture ID values in the registry for use during post-processing
 		if (XsdCodegenUtils.isIdType(element.getType())) {
-			TLPropertyOwner owner = element.getPropertyOwner();
+			TLPropertyOwner owner = element.getOwner();
 			NamedEntity contextFacet = getContextFacet();
 
 			if (contextFacet != null) {
@@ -476,10 +543,10 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 	}
 
 	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#startExtensionPoint(org.opentravel.schemacompiler.model.TLFacet)
+	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#startExtensionPoint(org.opentravel.schemacompiler.model.TLPatchableFacet)
 	 */
 	@Override
-	public void startExtensionPoint(TLFacet facet) {
+    public void startExtensionPoint(TLPatchableFacet facet) {
 		super.startExtensionPoint(facet);
 		SchemaDependency extensionElement = extensionPointTypeMap.get(facet
 				.getFacetType());
@@ -495,10 +562,10 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 	}
 
 	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#endExtensionPoint(org.opentravel.schemacompiler.model.TLFacet)
+	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#endExtensionPoint(org.opentravel.schemacompiler.model.TLPatchableFacet)
 	 */
 	@Override
-	public void endExtensionPoint(TLFacet facet) {
+	public void endExtensionPoint(TLPatchableFacet facet) {
 		super.endExtensionPoint(facet);
 		SchemaDependency extensionElement = extensionPointTypeMap.get(facet
 				.getFacetType());

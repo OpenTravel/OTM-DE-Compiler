@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Map;
 
+import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.ioc.SchemaDeclaration;
 import org.springframework.context.ApplicationContext;
@@ -161,7 +162,7 @@ public class ClasspathResourceResolver implements LSResourceResolver {
         InputStream resourceStream = null;
         try {
             SchemaDeclaration schemaDecl = systemIdMappings.get(systemID);
-            resourceStream = schemaDecl.getContent();
+            resourceStream = schemaDecl.getContent(CodeGeneratorFactory.XSD_TARGET_FORMAT);
 
         } catch (IOException e) {
             // no error - return a null input stream

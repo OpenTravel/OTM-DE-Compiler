@@ -15,15 +15,14 @@
  */
 package org.opentravel.schemacompiler.model;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.net.URL;
 import java.util.Comparator;
 import java.util.List;
-
-import junit.framework.Assert;
 
 import org.junit.Test;
 import org.opentravel.schemacompiler.model.TLAlias;
@@ -57,8 +56,8 @@ public class TestChildEntityListManager {
         TLAlias alias1 = owner.getDetailFacet().getAlias("CoreAlias_1_Detail");
         TLAlias listAlias1 = owner.getDetailListFacet().getAlias("CoreAlias_1_Detail_List");
 
-        Assert.assertNotNull(alias1);
-        Assert.assertNotNull(listAlias1);
+        assertNotNull(alias1);
+        assertNotNull(listAlias1);
     }
 
     @Test

@@ -29,8 +29,8 @@ import org.opentravel.schemacompiler.transform.symbols.SymbolTableFactory;
 public class TLModelSymbolResolver extends AbstractSymbolResolver {
 
     private SymbolTable modelSymbols;
-
-    /**
+    
+	/**
      * Constructor that initializes its symbol table from the members of the given model.
      * 
      * @param model
@@ -89,5 +89,13 @@ public class TLModelSymbolResolver extends AbstractSymbolResolver {
     public String getEntityNamespace(Object entity) {
         return modelSymbols.getNamespaceForEntity(entity);
     }
+
+    /**
+	 * @see org.opentravel.schemacompiler.transform.symbols.AbstractSymbolResolver#displaySymbolTable()
+	 */
+	@Override
+	public void displaySymbolTable() {
+    	modelSymbols.displayTable();
+	}
 
 }

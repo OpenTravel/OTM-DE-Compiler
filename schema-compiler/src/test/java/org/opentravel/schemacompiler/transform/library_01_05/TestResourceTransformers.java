@@ -83,6 +83,8 @@ public class TestResourceTransformers extends Abstract_1_5_TestTransformers {
         assertEquals("SampleBusinessObject_ID", type.getParamGroups().get(0).getFacetRefName());
         
         assertEquals(1, type.getParamGroups().get(0).getParameters().size());
+        assertNotNull(type.getParamGroups().get(0).getParameters().get(0).getFieldRef());
+        assertEquals("sample_oid", type.getParamGroups().get(0).getParameters().get(0).getFieldRef().getName());
         assertEquals("sample_oid", type.getParamGroups().get(0).getParameters().get(0).getFieldRefName());
         assertNotNull( type.getParamGroups().get(0).getParameters().get(0).getEquivalent("test"));
         assertEquals("Param-sample_oid-equivalent", 
