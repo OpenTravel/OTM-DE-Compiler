@@ -64,10 +64,12 @@ public abstract class AbstractTestTransformers {
                 		new File( getBaseLocation() + "/test-package_v2/library_1_p2.xml" ) );
                 LibraryInputSource<InputStream> library2Input = new LibraryStreamInputSource(
                 		new File( getBaseLocation() + "/test-package_v2/library_2_p2.xml" ) );
+                LibraryInputSource<InputStream> library3Input = new LibraryStreamInputSource(
+                		new File( getBaseLocation() + "/test-package_v2/library_3_p2.xml" ) );
                 LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>();
                 ValidationFindings findings = modelLoader.loadLibraryModel( library1Input );
                 findings.addAll( modelLoader.loadLibraryModel( library2Input ) );
-                
+                findings.addAll( modelLoader.loadLibraryModel( library3Input ) );
                 SchemaCompilerTestUtils.printFindings(findings);
 
                 testModel = modelLoader.getLibraryModel();

@@ -15,6 +15,8 @@
  */
 package org.opentravel.schemacompiler.task;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,6 +33,7 @@ import junit.framework.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.opentravel.schemacompiler.codegen.example.XMLExampleCodeGenerator;
 import org.opentravel.schemacompiler.codegen.impl.LibraryTrimmedFilenameBuilder;
 import org.opentravel.schemacompiler.loader.LibraryModelLoader;
 import org.opentravel.schemacompiler.loader.impl.DefaultLibraryNamespaceResolver;
@@ -53,7 +56,7 @@ public class TestServiceProjectCompilerTask {
     public TemporaryFolder tmp = new TemporaryFolder();
 
     @Test
-    public void compileOutputShouldUseTrimedServiceSchamaInExamples() throws Exception {
+    public void compileOutputShouldUseTrimmedServiceSchemaInXMLExamples() throws Exception {
         // given
         LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>();
         modelLoader.setNamespaceResolver(new DefaultLibraryNamespaceResolver());
@@ -78,12 +81,13 @@ public class TestServiceProjectCompilerTask {
         String expectedSchemaLocation = "../"
                 + new LibraryTrimmedFilenameBuilder(null).buildFilename(lib, "xsd");
 
-        Assert.assertEquals(expectedSchemaLocation, schemaLocation);
+        assertEquals(expectedSchemaLocation, schemaLocation);
     }
 
     private File findFileWithString(String pathSeg, Collection<File> files) {
         for (File f : files) {
-            if (f.getAbsolutePath().contains(pathSeg))
+        	String path = f.getAbsolutePath();
+            if (path.contains(pathSeg) && path.endsWith(XMLExampleCodeGenerator.XML_FILE_EXTENSION))
                 return f;
         }
         return null;

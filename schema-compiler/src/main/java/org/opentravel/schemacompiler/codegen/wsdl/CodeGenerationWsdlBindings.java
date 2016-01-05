@@ -31,6 +31,8 @@ import org.xmlsoap.schemas.wsdl.TOperation;
 import org.xmlsoap.schemas.wsdl.TPortType;
 import org.xmlsoap.schemas.wsdl.TService;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 /**
  * Interface for components that can add additional message components and binding information to a
  * WSDL document during code generation.
@@ -139,5 +141,16 @@ public interface CodeGenerationWsdlBindings {
      *            the operation facet from which the example XML element was generated
      */
     public void addPayloadExampleContent(Element exampleXml, Map<String,String> namespaceMappings, TLFacet operationFacet);
+
+    /**
+     * Adds any JSON attributes and/or element that are required by the base payload type of the OTM
+     * facet.
+     * 
+     * @param node
+     *            the JSON node to which the attributes and/or elements should be added
+     * @param operationFacet
+     *            the operation facet from which the example JSON node was generated
+     */
+	public void addPayloadExampleContent(ObjectNode node, TLFacet operationFacet);
 
 }
