@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_04"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_04 OTA2_LibraryModel_v1.4.7.xsd">
+    
+    <VersionScheme>OTA2</VersionScheme>
+    <Status>Draft</Status>
+    <Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package_v2</Namespace>
+    <Prefix>pkg2</Prefix>
+    <Name>library_3_p2</Name>
+    <Includes>library_2_p2.xml</Includes>
+    <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
+    <Import namespace="http://opentravel.org/common/v02" prefix="ota"/>
+    <Import fileHints="../test-package_v1/library_2_p2.xml"
+        namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package_v1" prefix="pkg1"/>
+    <Context applicationContext="context_1-applicationContext" context="context_1"/>
+    <Context applicationContext="context_2-applicationContext" context="context_2"/>
+    <Context applicationContext="test-applicationContext" context="test"/>
+    <Comments>Test Library</Comments>
+    
+    <BusinessObject name="ExampleBusinessObject" notExtendable="false">
+        <Documentation>
+            <Description>ExampleBusinessObject-documentation-line_1</Description>
+        </Documentation>
+        <Equivalent context="test">SampleCompositeObject-equivalent</Equivalent>
+        <Aliases/>
+        <ID>
+            <Element name="Id" repeat="0" type="xsd:int"/>
+        </ID>
+        <Summary>
+            <Element name="Name" repeat="0" type="xsd:string"/>
+        </Summary>
+        <Detail>
+            <Attribute name="sampleCoreAttrlist" type="SampleCore_Simple_List"/>
+            <Element name="CompoundBusinessObjectIdentifier" repeat="0" type="CompoundBusinessObject_ID"/>
+            <Element name="SampleCore_Alias1Detail" repeat="0" type="SampleCore_Alias1_Detail"/>
+            <Element name="VWAWithID" repeat="0" type="VWAWithID"/>
+            <Element name="SampleCore_Simple_List" repeat="0" type="SampleCore_Simple_List"/>
+            <Element name="SampleCoreDetail" repeat="2" type="SampleCore_Detail_List"/>
+            <Element name="SampleBusinessObject" repeat="2" type="SampleBusinessObject"/>
+            <Element name="SampleRepeatable" repeat="3" type="xsd:int"/>
+            <Element name="SampleValue" repeat="0" type="xsd:int"/>
+            <Element name="SampleOpenEnumProperty" repeat="0" type="SampleEnum_Open"/>
+            <Element mandatory="true" name="SampleCoreSummaryRef" reference="true" repeat="2" type="SampleCore_Summary"/>
+        </Detail>
+    </BusinessObject>
+    
+    <ValueWithAttrs name="VWAWithID" type="xsd:string">
+        <Attribute name="idAttr" type="xsd:ID"/>
+    </ValueWithAttrs>
+    
+     <BusinessObject name="ExampleBusinessObject2" notExtendable="false">
+        <Documentation>
+            <Description>SampleBusinessObject-documentation-line_1</Description>
+        </Documentation>
+        <Equivalent context="test">SampleCompositeObject-equivalent</Equivalent>
+        <Aliases/>
+        <ID>
+            <Element name="Id" repeat="0" type="xsd:int"/>
+        </ID>
+        <Summary>
+            <Element name="ExampleBusinessObject" repeat="0" type="ExampleBusinessObject"/>
+            <Element name="VWAWithIDRef" reference="true" repeat="0" type="VWAWithID"/>
+        </Summary>
+    </BusinessObject>
+    
+</Library>
