@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>org.opentravel.otm</groupId>
 		<artifactId>ota-parent-pom</artifactId>
-		<version>3.2-SNAPSHOT</version>
+		<version>4.0-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
