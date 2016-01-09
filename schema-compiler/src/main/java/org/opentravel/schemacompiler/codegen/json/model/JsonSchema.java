@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
@@ -625,42 +626,16 @@ public class JsonSchema {
 		if (entityInfo != null) {
 			jsonSchema.add( "x-otm-entity", entityInfo.toJson() );
 		}
-		if (documentation != null) {
-			JsonObject jsonDoc = documentation.toJson();
-			
-			if (jsonDoc != null) {
-				// Since the 'description' field is supported by the JSON schema spec,
-				// we will move that property from the 'x-otm-documentation' element
-				// to the main schema properties
-				if ((documentation.getDescription() != null) && (documentation.getDescription().length() > 0)) {
-					jsonSchema.addProperty( "description", documentation.getDescription() );
-					jsonDoc.remove( "description" );
-				}
-				if (!jsonDoc.entrySet().isEmpty()) {
-					jsonSchema.add( "x-otm-documentation", jsonDoc );
-				}
-			}
-		}
-		if (!equivalentItems.isEmpty()) {
-			JsonArray itemList = new JsonArray();
-			
-			for (JsonContextualValue item : equivalentItems) {
-				itemList.add( item.toJson() );
-			}
-			jsonSchema.add( "x-otm-equivalents", itemList );
-		}
-		if (!exampleItems.isEmpty()) {
-			JsonArray itemList = new JsonArray();
-			
-			for (JsonContextualValue item : exampleItems) {
-				itemList.add( item.toJson() );
-			}
-			jsonSchema.add( "x-otm-examples", itemList );
-		}
+		
+		createOtmAnnotations( jsonSchema, documentation, equivalentItems, exampleItems );
+		
 		if (!definitions.isEmpty()) {
 			JsonObject schemaDefs = new JsonObject();
 			
 			for (JsonSchemaNamedReference definition : definitions) {
+				if (definition.getSchema() == null) {
+					System.out.println("DEFINITION: " + definition.getName());
+				}
 				schemaDefs.add( definition.getName(), definition.getSchema().toJson() );
 			}
 			jsonSchema.add( "definitions", schemaDefs );
@@ -791,6 +766,73 @@ public class JsonSchema {
 			jsonSchema.add( "dependencies", schemaDependencies );
 		}
 		return jsonSchema;
+	}
+	
+	/**
+	 * Shared method that constructs the JSON structures for the 'x-otm-annotations' element
+	 * of a schema.  If no annotations are required, this method will return with no action.
+	 * 
+	 * @param targetSchema  the target JSON schema to which the annotation element will be applied
+	 * @param documentation  the OTM documentation for the schema
+	 * @param equivalentItems  the OTM equivalents for the schema
+	 * @param exampleItems  the OTM examples for the schema
+	 */
+	static void createOtmAnnotations(JsonObject targetSchema, JsonSchemaDocumentation documentation,
+			List<JsonContextualValue> equivalentItems, List<JsonContextualValue> exampleItems) {
+		if ((documentation != null) || !equivalentItems.isEmpty() || !exampleItems.isEmpty()) {
+			JsonObject jsonDoc = (documentation == null) ? null : documentation.toJson();
+			JsonObject otmAnnotations = new JsonObject();
+			boolean hasOtmAnnotation = false;
+			
+			if (jsonDoc != null) {
+				// Since the 'description' field is supported by the JSON schema spec,
+				// we will move that property from the 'x-otm-documentation' element
+				// to the main schema properties
+				if (documentation.hasDescription()) {
+					JsonElement jsonDesc = jsonDoc.get( "description" );
+					String firstDescription;
+					
+					if (jsonDesc instanceof JsonArray) {
+						JsonArray descList = (JsonArray) jsonDesc;
+						firstDescription = descList.remove( 0 ).getAsString();
+						
+						if (descList.size() == 1) {
+							jsonDoc.remove( "description" );
+							targetSchema.addProperty( "description", descList.get( 0 ).getAsString() );
+						}
+					} else {
+						firstDescription = jsonDesc.getAsString();
+						jsonDoc.remove( "description" );
+					}
+					targetSchema.addProperty( "description", firstDescription );
+				}
+				if (!jsonDoc.entrySet().isEmpty()) {
+					otmAnnotations.add( "documentation", jsonDoc );
+					hasOtmAnnotation = true;
+				}
+			}
+			if (!equivalentItems.isEmpty()) {
+				JsonArray itemList = new JsonArray();
+				
+				for (JsonContextualValue item : equivalentItems) {
+					itemList.add( item.toJson() );
+				}
+				otmAnnotations.add( "equivalents", itemList );
+				hasOtmAnnotation = true;
+			}
+			if (!exampleItems.isEmpty()) {
+				JsonArray itemList = new JsonArray();
+				
+				for (JsonContextualValue item : exampleItems) {
+					itemList.add( item.toJson() );
+				}
+				otmAnnotations.add( "examples", itemList );
+				hasOtmAnnotation = true;
+			}
+			if (hasOtmAnnotation) {
+				targetSchema.add( "x-otm-annotations", otmAnnotations );
+			}
+		}
 	}
 	
 }

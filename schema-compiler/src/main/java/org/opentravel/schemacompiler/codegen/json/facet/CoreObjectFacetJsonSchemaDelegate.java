@@ -15,13 +15,20 @@
  */
 package org.opentravel.schemacompiler.codegen.json.facet;
 
+import java.util.List;
+
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
+import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
+import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
+import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLFacet;
 
 /**
  * Base class for facet code generation delegates used to generate code artifacts for
  * <code>TLFacet</code model elements that are owned by <code>TLCoreObject</code> instances.
  */
-public abstract class CoreObjectFacetJsonSchemaDelegate extends TLFacetJsonSchemaDelegate {
+public class CoreObjectFacetJsonSchemaDelegate extends TLFacetJsonSchemaDelegate {
 	
     /**
      * Constructor that specifies the source facet for which code artifacts are being generated.
@@ -31,5 +38,38 @@ public abstract class CoreObjectFacetJsonSchemaDelegate extends TLFacetJsonSchem
     public CoreObjectFacetJsonSchemaDelegate(TLFacet sourceFacet) {
         super(sourceFacet);
     }
+
+	/**
+	 * @see org.opentravel.schemacompiler.codegen.json.facet.TLFacetJsonSchemaDelegate#createAttributeDefinitions()
+	 */
+	@Override
+	protected List<JsonSchemaNamedReference> createAttributeDefinitions() {
+		List<JsonSchemaNamedReference> definitions = super.createAttributeDefinitions();
+		
+        if (getLocalBaseFacet() == null) {
+            TLCoreObject owner = (TLCoreObject) getSourceFacet().getOwningEntity();
+
+            while (owner != null) {
+                TLCoreObject ownerExtension = (TLCoreObject) FacetCodegenUtils
+                        .getFacetOwnerExtension(owner);
+
+                if (owner.getRoleEnumeration().getRoles().size() > 0) {
+                	JsonSchemaNamedReference roleAttr = new JsonSchemaNamedReference();
+                	
+                	if (ownerExtension != null) {
+                		roleAttr.setName(
+                        		XsdCodegenUtils.getRoleAttributeName( owner.getLocalName() ) );
+                	} else {
+                		roleAttr.setName("role");
+                	}
+                	roleAttr.setSchema( new JsonSchemaReference(
+                			jsonUtils.getSchemaReferencePath( owner.getRoleEnumeration(), owner )));
+                	definitions.add( roleAttr );
+                }
+                owner = ownerExtension;
+            }
+        }
+		return definitions;
+	}
 
 }

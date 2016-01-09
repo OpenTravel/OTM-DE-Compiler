@@ -55,12 +55,12 @@ public class TLValueWithAttributesJsonCodegenTransformer extends AbstractJsonSch
         targetVwa.setName( source.getName() );
         targetVwa.setSchema( new JsonSchemaReference( vwaSchema ) );
         transformDocumentation( source, vwaSchema );
-        vwaSchema.setEntityInfo( JsonCodegenUtils.getEntityInfo( source ) );
+        vwaSchema.setEntityInfo( jsonUtils.getEntityInfo( source ) );
         
         // Create the attribute(s) for the VWA parent type
         if ((vwaParentType != null) && !PropertyCodegenUtils.isEmptyStringType( vwaParentType )) {
         	JsonSchemaReference vwaValueSchemaRef = new JsonSchemaReference();
-        	String referencePath = getSchemaReferencePath( vwaParentType, source );
+        	String referencePath = jsonUtils.getSchemaReferencePath( vwaParentType, source );
         	
             vwaSchema.getProperties().add( new JsonSchemaNamedReference( "value", vwaValueSchemaRef ) );
             
@@ -68,7 +68,7 @@ public class TLValueWithAttributesJsonCodegenTransformer extends AbstractJsonSch
                     || (vwaParentType instanceof TLRoleEnumeration)) {
         		JsonSchemaReference extAttrSchemaRef = new JsonSchemaReference();
         		
-        		extAttrSchemaRef.setSchemaPath( getSchemaReferencePath(
+        		extAttrSchemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath(
         				SchemaDependency.getEnumExtension(), source ) );
         		vwaSchema.getProperties().add( new JsonSchemaNamedReference( "extension", extAttrSchemaRef ) );
             	referencePath += "_Base";

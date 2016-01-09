@@ -77,13 +77,15 @@ public class TLAttributeJsonCodegenTransformer extends AbstractJsonSchemaTransfo
     		
     		extensionAttr.setName( attr.getName() + "Extension" );
     		extensionAttr.setSchema( extAttrSchemaRef );
-    		extAttrSchemaRef.setSchemaPath( getSchemaReferencePath(
+    		extAttrSchemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath(
     				SchemaDependency.getEnumExtension(), source.getOwner() ) );
             artifacts.addArtifact(extensionAttr);
-        	attrSchemaRef.setSchemaPath( getSchemaReferencePath( attributeType, source.getOwner() ) + "_Base" );
+        	attrSchemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath(
+        			attributeType, source.getOwner() ) + "_Base" );
 
         } else if (attributeType instanceof TLRoleEnumeration) {
-        	attrSchemaRef.setSchemaPath( getSchemaReferencePath( attributeType, source.getOwner() ) + "_Base" );
+        	attrSchemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath(
+        			attributeType, source.getOwner() ) + "_Base" );
         	
         } else { // normal case
         	setAttributeType( attrSchemaRef, attributeType, source );
@@ -106,15 +108,15 @@ public class TLAttributeJsonCodegenTransformer extends AbstractJsonSchemaTransfo
         	
         	attrSchema.setType( jsonType );
     		transformDocumentation( source, attrSchema );
-    		attrSchema.getExampleItems().addAll( JsonCodegenUtils.getExampleInfo( source ) );
-    		attrSchema.getEquivalentItems().addAll( JsonCodegenUtils.getEquivalentInfo( source ) );
+    		attrSchema.getExampleItems().addAll( jsonUtils.getExampleInfo( source ) );
+    		attrSchema.getEquivalentItems().addAll( jsonUtils.getEquivalentInfo( source ) );
     		attrSchemaRef.setSchema( attrSchema );
     		
         } else {
     		transformDocumentation( source, attrSchemaRef );
-    		attrSchemaRef.getSchemaPathExampleItems().addAll( JsonCodegenUtils.getExampleInfo( source ) );
-    		attrSchemaRef.getSchemaPathEquivalentItems().addAll( JsonCodegenUtils.getEquivalentInfo( source ) );
-        	attrSchemaRef.setSchemaPath( getSchemaReferencePath( attributeType, source.getOwner() ) );
+    		attrSchemaRef.getSchemaPathExampleItems().addAll( jsonUtils.getExampleInfo( source ) );
+    		attrSchemaRef.getSchemaPathEquivalentItems().addAll( jsonUtils.getEquivalentInfo( source ) );
+        	attrSchemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath( attributeType, source.getOwner() ) );
         }
 	}
 	

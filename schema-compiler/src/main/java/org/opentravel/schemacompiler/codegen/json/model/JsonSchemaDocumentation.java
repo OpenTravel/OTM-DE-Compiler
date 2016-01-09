@@ -29,7 +29,7 @@ import com.google.gson.JsonObject;
  */
 public class JsonSchemaDocumentation {
 	
-	private String description;
+	private String[] descriptions;
 	private List<String> deprecations = new ArrayList<>();
 	private List<String> references = new ArrayList<>();
 	private List<String> implementers = new ArrayList<>();
@@ -45,28 +45,50 @@ public class JsonSchemaDocumentation {
 	/**
 	 * Constructor that assigns the description for this documentation item.
 	 * 
-	 * @param description  the description for this documentation item
+	 * @param descriptions  the list of descriptions for this documentation item
 	 */
-	public JsonSchemaDocumentation(String description) {
-		this.description = description;
+	public JsonSchemaDocumentation(String... descriptions) {
+		this.descriptions = descriptions;
 	}
 
 	/**
-	 * Returns the description field for this documentation.
+	 * Returns the descriptions list for this documentation.
 	 *
 	 * @return String
 	 */
-	public String getDescription() {
-		return description;
+	public String[] getDescriptions() {
+		return descriptions;
 	}
 	
 	/**
-	 * Assigns the description field for this documentation.
+	 * Assigns the descriptions list for this documentation.
 	 *
-	 * @param description  the description to assign
+	 * @param descriptions  the list of descriptions to assign
 	 */
-	public void setDescription(String description) {
-		this.description = description;
+	public void setDescriptions(String... descriptions) {
+		this.descriptions = descriptions;
+	}
+	
+	/**
+	 * Returns true if this documentation element has one or more non-blank/null
+	 * descriptions assigned.
+	 * 
+	 * @return boolean
+	 */
+	public boolean hasDescription() {
+		boolean hasDesc = false;
+		
+		if ((descriptions != null) && (descriptions.length > 0)) {
+			for (String description : descriptions) {
+				String trimmedDesc = (description == null) ? null : description.trim();
+				
+				if ((trimmedDesc != null) && (trimmedDesc.length() > 0)) {
+					hasDesc = true;
+					break;
+				}
+			}
+		}
+		return hasDesc;
 	}
 
 	/**
@@ -178,9 +200,31 @@ public class JsonSchemaDocumentation {
 		JsonObject docItem = new JsonObject();
 		boolean hasDocumentation = false;
 		
-		if ((description != null) && (description.length() > 0)) {
-			docItem.addProperty( "description", description );
-			hasDocumentation = true;
+		if ((descriptions != null) && (descriptions.length > 0)) {
+			List<String> nonEmptyDescriptions = new ArrayList<>();
+			
+			for (String description : descriptions) {
+				String trimmedDesc = (description == null) ? null : description.trim();
+				
+				if ((trimmedDesc != null) && (trimmedDesc.length() > 0)) {
+					nonEmptyDescriptions.add( trimmedDesc );
+				}
+			}
+			
+			if (!nonEmptyDescriptions.isEmpty()) {
+				if (nonEmptyDescriptions.size() == 1) {
+					docItem.addProperty( "description", nonEmptyDescriptions.get( 0 ) );
+					
+				} else {
+					JsonArray jsonDescriptions = new JsonArray();
+					
+					for (String desc : nonEmptyDescriptions) {
+						jsonDescriptions.add( desc );
+					}
+					docItem.add( "description", jsonDescriptions );
+				}
+				hasDocumentation = true;
+			}
 		}
 		hasDocumentation |= addOtmDocumentationItems( docItem, deprecations, "deprecations" );
 		hasDocumentation |= addOtmDocumentationItems( docItem, references, "references" );

@@ -42,11 +42,11 @@ public class TLSimpleJsonCodegenTransformer extends AbstractJsonSchemaTransforme
 			JsonSchema schema = new JsonSchema();
 			
 			transformDocumentation( source, schema );
-	        schema.setEntityInfo( JsonCodegenUtils.getEntityInfo( source ) );
+	        schema.setEntityInfo( jsonUtils.getEntityInfo( source ) );
 	        
 			schema.setType( JsonType.jsonArray );
 			schema.setItems( new JsonSchemaReference(
-					getSchemaReferencePath( source.getParentType(), source ) ) );
+					jsonUtils.getSchemaReferencePath( source.getParentType(), source ) ) );
 			simple.setSchema( new JsonSchemaReference( schema ) );
 			
 		} else {
@@ -71,9 +71,9 @@ public class TLSimpleJsonCodegenTransformer extends AbstractJsonSchemaTransforme
 		JsonSchemaReference schemaRef;
 		
 		transformDocumentation( source, simpleSchema );
-		simpleSchema.setEntityInfo( JsonCodegenUtils.getEntityInfo( source ) );
-		simpleSchema.getExampleItems().addAll( JsonCodegenUtils.getExampleInfo( source ) );
-		simpleSchema.getEquivalentItems().addAll( JsonCodegenUtils.getEquivalentInfo( source ) );
+		simpleSchema.setEntityInfo( jsonUtils.getEntityInfo( source ) );
+		simpleSchema.getExampleItems().addAll( jsonUtils.getExampleInfo( source ) );
+		simpleSchema.getEquivalentItems().addAll( jsonUtils.getEquivalentInfo( source ) );
 		
 		if (type != null) { // parent must be an XSD simple
 			restrictionsSchema = simpleSchema;
@@ -124,13 +124,13 @@ public class TLSimpleJsonCodegenTransformer extends AbstractJsonSchemaTransforme
 		if (type == null) { // parent is not an XSD simple
 			if (hasRestrictions) {
 				simpleSchema.getAllOf().add( new JsonSchemaReference(
-						getSchemaReferencePath( source.getParentType(), source ) ) );
+						jsonUtils.getSchemaReferencePath( source.getParentType(), source ) ) );
 				simpleSchema.getAllOf().add( new JsonSchemaReference( restrictionsSchema ) );
 				schemaRef = new JsonSchemaReference( simpleSchema );
 				
 			} else {
 				schemaRef = new JsonSchemaReference(
-						getSchemaReferencePath( source.getParentType(), source ) );
+						jsonUtils.getSchemaReferencePath( source.getParentType(), source ) );
 			}
 		} else { // parent is an XSD simple
 			schemaRef = new JsonSchemaReference( simpleSchema );

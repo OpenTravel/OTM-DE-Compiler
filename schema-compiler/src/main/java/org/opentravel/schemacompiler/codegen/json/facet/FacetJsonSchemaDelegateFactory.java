@@ -61,29 +61,8 @@ public class FacetJsonSchemaDelegateFactory {
         FacetJsonSchemaDelegate<F> delegate = null;
 
         if (facetOwner instanceof TLBusinessObject) {
-            if (facetInstance instanceof TLFacet) {
-                TLFacet facet = (TLFacet) facetInstance;
-
-                switch (facetInstance.getFacetType()) {
-                    case ID:
-                        delegate = (FacetJsonSchemaDelegate<F>) new BusinessObjectIDFacetJsonSchemaDelegate(facet);
-                        break;
-                    case SUMMARY:
-                        delegate = (FacetJsonSchemaDelegate<F>) new BusinessObjectSummaryFacetJsonSchemaDelegate(facet);
-                        break;
-                    case DETAIL:
-                        delegate = (FacetJsonSchemaDelegate<F>) new BusinessObjectDetailFacetJsonSchemaDelegate(facet);
-                        break;
-                    case CUSTOM:
-                        delegate = (FacetJsonSchemaDelegate<F>) new BusinessObjectCustomFacetJsonSchemaDelegate(facet);
-                        break;
-                    case QUERY:
-                        delegate = (FacetJsonSchemaDelegate<F>) new BusinessObjectQueryFacetJsonSchemaDelegate(facet);
-                        break;
-					default:
-						break;
-                }
-            }
+        	delegate = (FacetJsonSchemaDelegate<F>) new TLFacetJsonSchemaDelegate( (TLFacet) facetInstance );
+        	
         } else if (facetOwner instanceof TLCoreObject) {
             if (facetInstance instanceof TLFacet) {
                 TLFacet facet = (TLFacet) facetInstance;
@@ -93,7 +72,7 @@ public class FacetJsonSchemaDelegateFactory {
                         delegate = (FacetJsonSchemaDelegate<F>) new CoreObjectSummaryFacetJsonSchemaDelegate(facet);
                         break;
                     case DETAIL:
-                        delegate = (FacetJsonSchemaDelegate<F>) new CoreObjectDetailFacetJsonSchemaDelegate(facet);
+                        delegate = (FacetJsonSchemaDelegate<F>) new CoreObjectFacetJsonSchemaDelegate(facet);
                         break;
 					default:
 						break;
@@ -124,20 +103,8 @@ public class FacetJsonSchemaDelegateFactory {
                 }
             }
         } else if (facetOwner instanceof TLChoiceObject) {
-            if (facetInstance instanceof TLFacet) {
-                TLFacet facet = (TLFacet) facetInstance;
-
-                switch (facetInstance.getFacetType()) {
-                    case SHARED:
-                        delegate = (FacetJsonSchemaDelegate<F>) new ChoiceObjectSharedFacetJsonSchemaDelegate(facet);
-                        break;
-                    case CHOICE:
-                        delegate = (FacetJsonSchemaDelegate<F>) new ChoiceObjectChoiceFacetJsonSchemaDelegate(facet);
-                        break;
-					default:
-						break;
-                }
-            }
+        	delegate = (FacetJsonSchemaDelegate<F>) new TLFacetJsonSchemaDelegate( (TLFacet) facetInstance );
+        	
         } else if (facetOwner instanceof TLResource) {
             if (facetInstance instanceof TLActionFacet) {
             	delegate = (FacetJsonSchemaDelegate<F>) new ResourceActionFacetJsonSchemaDelegate((TLActionFacet) facetInstance);

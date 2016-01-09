@@ -675,15 +675,11 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
                 if (firstCandidate == null) {
                     if (candidateFacet == null) {
                         // We should never need to do this for facet types such as ID's that are the
-                        // root of their
-                        // substitution group, and are guranteed (by validation rules) to exist. For
-                        // facet types
-                        // such as Request, Response, Query, etc., the root of the substitution
-                        // group may need to
-                        // be presumed to exist if it is inherited from an extended facet owner. In
-                        // these cases,
-                        // we will create a "ghost facet" to represent the missing base facet during
-                        // code generation.
+                        // root of their substitution group, and are guranteed (by validation rules)
+                    	// to exist. For facet types such as Request, Response, Query, etc., the root
+                    	// of the substitution group may need to be presumed to exist if it is inherited
+                    	// from an extended facet owner. In these cases, we will create a "ghost facet"
+                    	// to represent the missing base facet during code generation.
                         firstCandidate = new TLFacet();
                         firstCandidate.setFacetType(sourceFacet.getFacetType());
                         firstCandidate.setContext(sourceFacet.getContext());

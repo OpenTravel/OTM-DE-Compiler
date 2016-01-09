@@ -19,9 +19,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.xml.namespace.QName;
-
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
+import org.opentravel.schemacompiler.codegen.util.JsonSchemaNamingUtils;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
@@ -139,8 +138,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 				ExampleContext ctx = contextStack.peek();
 				if (ctx.getModelElement().getType() instanceof TLFacetOwner) {
 					((ObjectNode) context.getNode()).put("@type",
-							XsdCodegenUtils.getSubstitutableElementName(facet)
-									.getLocalPart());
+							JsonSchemaNamingUtils.getGlobalDefinitionName(facet));
 				}
 			}
 		}
@@ -683,8 +681,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 			if (alias != null) {
 				elementType = alias;
 			}
-			nodeName = XsdCodegenUtils.getGlobalElementName(elementType)
-					.getLocalPart();
+			nodeName = JsonSchemaNamingUtils.getGlobalPropertyName(elementType);
 		} else if ((context.getModelElement() != null)
 				&& ((elementType instanceof TLAttributeType) || (elementType
 						.equals(context.getModelElement().getType())))) {
@@ -828,15 +825,13 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 
 		if (!PropertyCodegenUtils.hasGlobalElement(propertyType)) {
 			if (context.getModelAlias() != null) {
-				elementName = XsdCodegenUtils.getGlobalElementName(
-						context.getModelAlias()).getLocalPart();
+				elementName = JsonSchemaNamingUtils.getGlobalPropertyName(context.getModelAlias());
 
 			} else if (propertyType instanceof TLListFacet) {
 				TLListFacet listFacetType = (TLListFacet) propertyType;
 
 				if (listFacetType.getFacetType() != TLFacetType.SIMPLE) {
-					elementName = XsdCodegenUtils.getGlobalElementName(
-							listFacetType.getItemFacet()).getLocalPart();
+					elementName = JsonSchemaNamingUtils.getGlobalPropertyName(listFacetType.getItemFacet());
 				}
 			}
 
@@ -877,8 +872,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 			}
 
 		} else if (propertyType instanceof TLAlias) {
-			elementName = XsdCodegenUtils.getGlobalElementName(propertyType)
-					.getLocalPart();
+			elementName = JsonSchemaNamingUtils.getGlobalPropertyName(propertyType);
 		} else if (propertyType instanceof TLComplexTypeBase) {
 			elementName = propertyType.getLocalName();
 		} else {
@@ -903,7 +897,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 	private String getContextElementName(NamedEntity elementType,
 			boolean isReferenceProperty) {
 		boolean useSubstitutableElementName = false;
-		QName elementQName;
+		String elementName;
 
 		// Determine whether we should be using the substitutable or
 		// non-substitutable name for the
@@ -937,27 +931,23 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 		// characteristics
 		if (context.getModelAlias() != null) {
 			if (!isReferenceProperty && useSubstitutableElementName) {
-				elementQName = XsdCodegenUtils
-						.getSubstitutableElementName((TLAlias) context
+				elementName = JsonSchemaNamingUtils.getGlobalPropertyName((TLAlias) context
 								.getModelAlias());
 
 			} else {
-				elementQName = PropertyCodegenUtils.getDefaultXmlElementName(
+				elementName = JsonSchemaNamingUtils.getGlobalPropertyName(
 						context.getModelAlias(), isReferenceProperty);
 			}
 		} else {
 			if (!isReferenceProperty && useSubstitutableElementName
 					&& (elementType instanceof TLFacet)) {
-				elementQName = XsdCodegenUtils
-						.getSubstitutableElementName((TLFacet) elementType);
+				elementName = JsonSchemaNamingUtils.getGlobalPropertyName((TLFacet) elementType);
 
 			} else {
-				elementQName = PropertyCodegenUtils.getDefaultXmlElementName(
-						elementType, isReferenceProperty);
+				elementName = JsonSchemaNamingUtils.getGlobalPropertyName(elementType, isReferenceProperty);
 			}
 		}
-		return (elementQName != null) ? elementQName.getLocalPart()
-				: elementType.getLocalName();
+		return (elementName != null) ? elementName : elementType.getLocalName();
 	}
 
 	/**

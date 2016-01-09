@@ -20,6 +20,7 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonType;
+import org.opentravel.schemacompiler.codegen.util.JsonSchemaNamingUtils;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLListFacet;
@@ -38,7 +39,7 @@ public class TLPropertyJsonCodegenTransformer extends AbstractJsonSchemaTransfor
 	@Override
 	public JsonSchemaNamedReference transform(TLProperty source) {
 		return source.isReference() ?
-				transformValueProperty( source ) : transformReferenceProperty( source );
+				transformReferenceProperty( source ) : transformValueProperty( source );
 	}
 	
     /**
@@ -64,8 +65,7 @@ public class TLPropertyJsonCodegenTransformer extends AbstractJsonSchemaTransfor
         } else {
             // If the property references a type that defines a global element, use that
         	// element name for the JSON property name
-        	jsonProperty.setName( PropertyCodegenUtils.getDefaultSchemaElementName(
-        			propertyType, false).getLocalPart() );
+        	jsonProperty.setName( JsonSchemaNamingUtils.getGlobalPropertyName( propertyType, false) );
         }
     	setPropertyType( schemaRef, propertyType, source );
     	jsonProperty.setSchema( schemaRef );
@@ -136,8 +136,8 @@ public class TLPropertyJsonCodegenTransformer extends AbstractJsonSchemaTransfor
         jsonProperty.setSchema( new JsonSchemaReference( propertySchema ) );
         
 		transformDocumentation( source, propertySchema );
-		propertySchema.getEquivalentItems().addAll( JsonCodegenUtils.getEquivalentInfo( source ) );
-		propertySchema.getExampleItems().addAll( JsonCodegenUtils.getExampleInfo( source ) );
+		propertySchema.getEquivalentItems().addAll( jsonUtils.getEquivalentInfo( source ) );
+		propertySchema.getExampleItems().addAll( jsonUtils.getExampleInfo( source ) );
 		
 		return jsonProperty;
     }
@@ -154,13 +154,15 @@ public class TLPropertyJsonCodegenTransformer extends AbstractJsonSchemaTransfor
         JsonSchemaReference typeRef = schemaRef;
         JsonSchemaReference docSchema = schemaRef;
         
-        if (source.getRepeat() > 1) {
+        if (source.getRepeat() != 0) {
         	JsonSchemaReference itemSchemaRef = new JsonSchemaReference();
         	JsonSchema arraySchema = new JsonSchema();
+        	String maxOccurs = null;
         	
         	arraySchema.setType( JsonType.jsonArray );
-        	arraySchema.setMinItems( source.isMandatory() ? 1 : 0 );
+        	arraySchema.setMinItems( source.isMandatory() ? 1 : null );
         	arraySchema.setItems( itemSchemaRef );
+        	schemaRef.setSchema( arraySchema );
         	typeRef = itemSchemaRef;
         	
 			if (propertyType instanceof TLListFacet) {
@@ -169,14 +171,13 @@ public class TLPropertyJsonCodegenTransformer extends AbstractJsonSchemaTransfor
 				if (facetOwner.getRoleEnumeration().getRoles().size() > 0) {
 		        	arraySchema.setMaxItems( facetOwner.getRoleEnumeration().getRoles().size() );
 				} else {
-					if (source.getRepeat() <= PropertyCodegenUtils.MAX_OCCURS_UNBOUNDED_THRESHOLD) {
-						arraySchema.setMaxItems( source.getRepeat() );
-					}
+					maxOccurs = PropertyCodegenUtils.getMaxOccurs( source );
 				}
 			} else {
-				if (source.getRepeat() <= PropertyCodegenUtils.MAX_OCCURS_UNBOUNDED_THRESHOLD) {
-					arraySchema.setMaxItems( source.getRepeat() );
-				}
+				maxOccurs = PropertyCodegenUtils.getMaxOccurs( source );
+			}
+			if ((maxOccurs != null) && !maxOccurs.equals("unbounded")) {
+	        	arraySchema.setMaxItems( Integer.valueOf( maxOccurs ) );
 			}
         }
         
@@ -185,21 +186,21 @@ public class TLPropertyJsonCodegenTransformer extends AbstractJsonSchemaTransfor
         	
         	if (typeRef == schemaRef) { // not an array, so put the documentation here
         		transformDocumentation( source, propertySchema );
-        		propertySchema.getEquivalentItems().addAll( JsonCodegenUtils.getEquivalentInfo( source ) );
-        		propertySchema.getExampleItems().addAll( JsonCodegenUtils.getExampleInfo( source ) );
+        		propertySchema.getEquivalentItems().addAll( jsonUtils.getEquivalentInfo( source ) );
+        		propertySchema.getExampleItems().addAll( jsonUtils.getExampleInfo( source ) );
         		docSchema = null;
         	}
         	propertySchema.setType( jsonType );
     		typeRef.setSchema( propertySchema );
     		
         } else {
-    		typeRef.setSchemaPath( getSchemaReferencePath( propertyType, source.getOwner() ) );
+    		typeRef.setSchemaPath( jsonUtils.getSchemaReferencePath( propertyType, source.getOwner() ) );
         }
         
         if (docSchema != null) {
     		transformDocumentation( source, docSchema );
-    		docSchema.getSchemaPathEquivalentItems().addAll( JsonCodegenUtils.getEquivalentInfo( source ) );
-    		docSchema.getSchemaPathExampleItems().addAll( JsonCodegenUtils.getExampleInfo( source ) );
+    		docSchema.getSchemaPathEquivalentItems().addAll( jsonUtils.getEquivalentInfo( source ) );
+    		docSchema.getSchemaPathExampleItems().addAll( jsonUtils.getExampleInfo( source ) );
         }
 	}
 	

@@ -15,6 +15,10 @@
  */
 package org.opentravel.schemacompiler.codegen.json.facet;
 
+import org.opentravel.schemacompiler.codegen.json.TLDocumentationJsonCodegenTransformer;
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaDocumentation;
+import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
+import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 import org.opentravel.schemacompiler.model.TLFacet;
 
 /**
@@ -32,4 +36,29 @@ public class CoreObjectSummaryFacetJsonSchemaDelegate extends CoreObjectFacetJso
         super(sourceFacet);
     }
 
+	/**
+	 * @see org.opentravel.schemacompiler.codegen.json.facet.TLFacetJsonSchemaDelegate#createJsonDocumentation(org.opentravel.schemacompiler.model.TLDocumentationOwner)
+	 */
+	@Override
+	protected JsonSchemaDocumentation createJsonDocumentation(TLDocumentationOwner docOwner) {
+		JsonSchemaDocumentation jsonDoc = null;
+
+        if (docOwner instanceof TLFacet) {
+            TLFacet sourceFacet = (TLFacet) docOwner;
+
+            if (XsdCodegenUtils.isSimpleCoreObject( sourceFacet.getOwningEntity() )) {
+            	JsonSchemaDocumentation ownerDoc =
+            			super.createJsonDocumentation( (TLDocumentationOwner) sourceFacet.getOwningEntity() );
+            	JsonSchemaDocumentation facetDoc =
+            			super.createJsonDocumentation( sourceFacet );
+
+                jsonDoc = TLDocumentationJsonCodegenTransformer.mergeDocumentation( ownerDoc, facetDoc );
+            }
+        }
+        if (jsonDoc == null) {
+        	jsonDoc = super.createJsonDocumentation( docOwner );
+        }
+        return jsonDoc;
+	}
+    
 }

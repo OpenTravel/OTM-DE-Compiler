@@ -93,7 +93,7 @@
 				</bean>
 				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
 					<property name="format" value="JSON_SCHEMA" />
-					<property name="location" value="classpath:/ota2-context/built-ins/OTA2_Message_v2.0.0.json" />
+					<property name="location" value="classpath:/ota2-context/built-ins/OTA2_Message_v2.0.0.schema.json" />
 				</bean>
 			</list>
 		</property>
@@ -1567,16 +1567,15 @@
 					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
 					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLCoreObjectJsonCodegenTransformer" />
 				</bean>
-				<!--
-				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.opentravel.schemacompiler.model.TLBusinessObject" />
-					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
-					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLBusinessObjectJsonCodegenTransformer" />
-				</bean>
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
 					<property name="source" value="org.opentravel.schemacompiler.model.TLChoiceObject" />
 					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
 					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLChoiceObjectJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLBusinessObject" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLBusinessObjectJsonCodegenTransformer" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
 					<property name="source" value="org.opentravel.schemacompiler.model.TLExtensionPointFacet" />
@@ -1600,15 +1599,14 @@
 				</bean>
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
 					<property name="source" value="org.opentravel.schemacompiler.model.TLActionRequest" />
-					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference" />
 					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLActionRequestJsonCodegenTransformer" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
 					<property name="source" value="org.opentravel.schemacompiler.model.TLActionResponse" />
-					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference" />
 					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLActionResponseJsonCodegenTransformer" />
 				</bean>
-				-->
 			</set>
 		</property>
 	</bean>

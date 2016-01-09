@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 OpenTravel Alliance (info@opentravel.org)
+s * Copyright (C) 2014 OpenTravel Alliance (info@opentravel.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 
-import javax.xml.namespace.QName;
-
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
-import org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder;
 import org.opentravel.schemacompiler.codegen.CodeGenerator;
-import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.codegen.impl.AbstractCodegenTransformer;
 import org.opentravel.schemacompiler.codegen.impl.AbstractJaxbCodeGenerator;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
@@ -38,8 +34,6 @@ import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDeclaration;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
-import org.opentravel.schemacompiler.model.BuiltInLibrary;
-import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 import org.opentravel.schemacompiler.model.TLLibrary;
@@ -56,62 +50,17 @@ import org.opentravel.schemacompiler.util.URLUtils;
  */
 public abstract class AbstractJsonSchemaTransformer<S, T> extends AbstractCodegenTransformer<S, T> {
 	
-	/**
-	 * Returns a relative path reference to the JSON schema definition of the given named entity.
-	 * 
-	 * @param referencedEntity  the named entity for which to return a reference
-	 * @param referencingEntity  the named entity which owns the reference
-	 * @return String
-	 */
-	@SuppressWarnings("unchecked")
-	protected String getSchemaReferencePath(NamedEntity referencedEntity, NamedEntity referencingEntity) {
-		QName elementName = XsdCodegenUtils.getGlobalElementName( referencedEntity );
-		StringBuilder referencePath = new StringBuilder();
-		
-		if (referencedEntity.getOwningLibrary() != referencingEntity.getOwningLibrary()) {
-			AbstractJsonSchemaCodeGenerator<?> codeGenerator = (AbstractJsonSchemaCodeGenerator<?>) context.getCodeGenerator();
-			CodeGenerationFilenameBuilder<AbstractLibrary> filenameBuilder =
-					(CodeGenerationFilenameBuilder<AbstractLibrary>) codeGenerator.getFilenameBuilder();
-			
-			if (referencedEntity.getOwningLibrary() instanceof BuiltInLibrary) {
-				referencePath.append( getBuiltInSchemaOutputLocation() );
-				
-			} else {
-				referencePath.append( "./" );
-			}
-			referencePath.append( filenameBuilder.buildFilename( referencedEntity.getOwningLibrary(), "json" ) );
-		}
-		referencePath.append( "#/definitions/" );
-		
-		if (elementName != null) {
-			referencePath.append( elementName.getLocalPart() );
-			
-		} else {
-			referencePath.append( XsdCodegenUtils.getGlobalTypeName( referencedEntity ) );
-		}
-		return referencePath.toString();
-	}
+	protected JsonSchemaCodegenUtils jsonUtils;
 	
 	/**
-	 * Returns a relative path reference to the JSON schema definition of the given schema dependency.  If
-	 * the referenced type does not have an associated JSON definition, this method will return null.
-	 * 
-	 * @param referencedEntity  the schema dependency for which to return a reference
-	 * @param referencingEntity  the named entity which owns the reference
-	 * @return String
+	 * @see org.opentravel.schemacompiler.transform.util.BaseTransformer#setContext(org.opentravel.schemacompiler.transform.ObjectTransformerContext)
 	 */
-	protected String getSchemaReferencePath(SchemaDependency schemaDependency, NamedEntity referencingEntity) {
-		String referencedFilename = schemaDependency.getSchemaDeclaration().getFilename(
-				CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT );
-		String referencePath = null;
-		
-		if (referencedFilename != null) {
-			referencePath = getBuiltInSchemaOutputLocation() + referencedFilename
-					+ "#/definitions/" + schemaDependency.getLocalName();
-		}
-		return referencePath;
+	@Override
+	public void setContext(CodeGenerationTransformerContext context) {
+		super.setContext(context);
+		jsonUtils = new JsonSchemaCodegenUtils( context );
 	}
-	
+
 	/**
 	 * Transforms the OTM documentation for the given owner and assigns it to the
 	 * target JSON schema provided.

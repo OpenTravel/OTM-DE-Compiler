@@ -15,6 +15,7 @@
  */
 package org.opentravel.schemacompiler.codegen.json.facet;
 
+import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.TLFacet;
 
 /**
@@ -33,4 +34,27 @@ public class OperationFacetJsonSchemaDelegate extends TLFacetJsonSchemaDelegate 
         super(sourceFacet);
     }
 
+	/**
+	 * @see org.opentravel.schemacompiler.codegen.json.facet.FacetJsonSchemaDelegate#getLocalBaseFacetDependency()
+	 */
+	@Override
+	protected SchemaDependency getLocalBaseFacetDependency() {
+        SchemaDependency messagePayload = null;
+
+        switch (getSourceFacet().getFacetType()) {
+            case REQUEST:
+                messagePayload = SchemaDependency.getRequestPayload();
+                break;
+            case RESPONSE:
+                messagePayload = SchemaDependency.getResponsePayload();
+                break;
+            case NOTIFICATION:
+                messagePayload = SchemaDependency.getNotifPayload();
+                break;
+			default:
+				break;
+        }
+        return messagePayload;
+	}
+    
 }

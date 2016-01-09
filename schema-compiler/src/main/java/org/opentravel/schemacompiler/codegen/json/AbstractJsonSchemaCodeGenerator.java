@@ -125,7 +125,7 @@ public abstract class AbstractJsonSchemaCodeGenerator<S extends TLModelElement> 
                 if (schemaDeclaration == SchemaDeclarations.SCHEMA_FOR_SCHEMAS) {
                     continue;
                 }
-                if ((sdFilename == null) || !sdFilename.endsWith(".json")) {
+                if ((sdFilename == null) || !sdFilename.endsWith(".schema.json")) {
                     continue;
                 }
                 File outputFolder = getOutputFolder(context, null);
@@ -153,8 +153,7 @@ public abstract class AbstractJsonSchemaCodeGenerator<S extends TLModelElement> 
                     reader.close();
                     writer.close();
                 }
-                addGeneratedFile(outputFile); // count dependency as generated - even if it already
-                                              // existed
+                addGeneratedFile(outputFile); // count dependency as generated - even if it already existed
             }
         } catch (IOException e) {
             throw new CodeGenerationException(e);
@@ -328,7 +327,7 @@ public abstract class AbstractJsonSchemaCodeGenerator<S extends TLModelElement> 
         String filename = context.getValue(CodeGenerationContext.CK_SCHEMA_FILENAME);
 
         if ((filename == null) || filename.trim().equals("")) {
-            filename = getFilenameBuilder().buildFilename(source, "json");
+            filename = getFilenameBuilder().buildFilename(source, JsonSchemaCodegenUtils.JSON_SCHEMA_FILENAME_EXT );
         }
         return new File(outputFolder, filename);
     }

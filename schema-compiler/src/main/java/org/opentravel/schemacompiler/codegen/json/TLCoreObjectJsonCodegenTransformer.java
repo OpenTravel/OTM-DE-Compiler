@@ -73,7 +73,7 @@ public class TLCoreObjectJsonCodegenTransformer extends AbstractJsonSchemaTransf
         		"value", new JsonSchemaReference( "#/definitions/" +
         				source.getRoleEnumeration().getLocalName() + "_Open" ) ) );
         schema.getProperties().add( new JsonSchemaNamedReference( "extension",
-        		new JsonSchemaReference( getSchemaReferencePath(
+        		new JsonSchemaReference( jsonUtils.getSchemaReferencePath(
         				SchemaDependency.getEnumExtension(), source ) ) ) );
         return roleEnum;
     }

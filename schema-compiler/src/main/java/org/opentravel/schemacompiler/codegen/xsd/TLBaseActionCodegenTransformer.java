@@ -77,7 +77,7 @@ public abstract class TLBaseActionCodegenTransformer<S> extends AbstractXsdTrans
         List<TLAttribute> attributeList = PropertyCodegenUtils.getInheritedAttributes( payloadType );
         List<TLProperty> elementList = PropertyCodegenUtils.getInheritedProperties( payloadType );
         List<TLIndicator> indicatorList = PropertyCodegenUtils.getInheritedIndicators( payloadType );
-        boolean hasFacetPayload = (typeName != null) && ((payloadType.getReferenceRepeat() > 1)
+        boolean hasFacetPayload = (typeName != null) && ((payloadType.getReferenceRepeat() != 0)
         		|| !attributeList.isEmpty() || !elementList.isEmpty() || !indicatorList.isEmpty());
         ComplexType type = null;
         

@@ -438,6 +438,7 @@ public class ResourceCodegenUtils {
     		}
     		boElement.setName( elementType.getLocalName() );
     		boElement.setType( elementType );
+    		boElement.setOwner( actionFacet );
     		boElement.setMandatory( (refType == TLReferenceType.REQUIRED ) );
     		
     		if (actionFacet.getReferenceRepeat() > 1) {

@@ -72,7 +72,7 @@ public class OperationFacetCodegenDelegate extends TLFacetCodegenDelegate {
     }
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate#getBaseFacetTypeName()
+     * @see org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate#getLocalBaseFacetTypeName()
      */
     @Override
     protected QName getLocalBaseFacetTypeName() {

@@ -149,7 +149,7 @@ public class JsonSchemaBuiltInCodeGenerator extends AbstractCodeGenerator<BuiltI
         String filename = context.getValue(CodeGenerationContext.CK_SCHEMA_FILENAME);
 
         if ((filename == null) || filename.trim().equals("")) {
-            filename = getFilenameBuilder().buildFilename(source, "json");
+            filename = getFilenameBuilder().buildFilename(source, JsonSchemaCodegenUtils.JSON_SCHEMA_FILENAME_EXT);
         }
         return new File(outputFolder, filename);
     }

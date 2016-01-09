@@ -15,26 +15,18 @@
  */
 package org.opentravel.schemacompiler.codegen.json.facet;
 
-import javax.xml.namespace.QName;
-
-import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
-import org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder;
 import org.opentravel.schemacompiler.codegen.CodeGenerator;
 import org.opentravel.schemacompiler.codegen.impl.AbstractJaxbCodeGenerator;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CorrelatedCodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
-import org.opentravel.schemacompiler.codegen.json.AbstractJsonSchemaCodeGenerator;
+import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
-import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
-import org.opentravel.schemacompiler.model.AbstractLibrary;
-import org.opentravel.schemacompiler.model.BuiltInLibrary;
-import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAbstractFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLDocumentation;
@@ -54,6 +46,7 @@ public abstract class FacetJsonSchemaDelegate<F extends TLAbstractFacet>{
 	protected static final FacetCodegenDelegateFactory xsdDelegateFactory = new FacetCodegenDelegateFactory( null );
 	
     protected CodeGenerationTransformerContext transformerContext;
+    protected JsonSchemaCodegenUtils jsonUtils;
     private F sourceFacet;
 
     /**
@@ -82,6 +75,7 @@ public abstract class FacetJsonSchemaDelegate<F extends TLAbstractFacet>{
      */
     public void setTransformerContext(CodeGenerationTransformerContext transformerContext) {
         this.transformerContext = transformerContext;
+        this.jsonUtils = new JsonSchemaCodegenUtils( transformerContext );
     }
 
     /**
@@ -142,7 +136,7 @@ public abstract class FacetJsonSchemaDelegate<F extends TLAbstractFacet>{
     public final F getLocalBaseFacet() {
     	return xsdDelegateFactory.getDelegate( sourceFacet ).getLocalBaseFacet();
     }
-
+    
     /**
      * Generates the code artifacts of the facet. Typically, the artifacts produced for each facet
      * include a JAXB type and a global element definition. Sub-classes may extend this method to
@@ -176,46 +170,6 @@ public abstract class FacetJsonSchemaDelegate<F extends TLAbstractFacet>{
     	return xsdDelegateFactory.getDelegate( sourceFacet ).getElementName( facetAlias );
     }
     
-	/**
-	 * Returns a relative path reference to the JSON schema definition of the given named entity.
-	 * 
-	 * @param referencedEntity  the named entity for which to return a reference
-	 * @param referencingEntity  the named entity which owns the reference
-	 * @return String
-	 */
-	@SuppressWarnings("unchecked")
-	protected String getSchemaReferencePath(NamedEntity referencedEntity, NamedEntity referencingEntity) {
-		QName elementName = XsdCodegenUtils.getGlobalElementName( referencedEntity );
-		StringBuilder referencePath = new StringBuilder();
-		
-		if (referencedEntity.getOwningLibrary() != referencingEntity.getOwningLibrary()) {
-			AbstractJsonSchemaCodeGenerator<?> codeGenerator =
-					(AbstractJsonSchemaCodeGenerator<?>) getTransformerFactory().getContext().getCodeGenerator();
-			CodeGenerationFilenameBuilder<AbstractLibrary> filenameBuilder =
-					(CodeGenerationFilenameBuilder<AbstractLibrary>) codeGenerator.getFilenameBuilder();
-			
-			if (referencedEntity.getOwningLibrary() instanceof BuiltInLibrary) {
-				CodeGenerationContext cgContext = getTransformerFactory().getContext().getCodegenContext();
-				String builtInLocation = XsdCodegenUtils.getBuiltInSchemaOutputLocation( cgContext );
-				
-				referencePath.append( builtInLocation );
-				
-			} else {
-				referencePath.append( "./" );
-			}
-			referencePath.append( filenameBuilder.buildFilename( referencedEntity.getOwningLibrary(), "json" ) );
-		}
-		referencePath.append( "#/definitions/" );
-		
-		if (elementName != null) {
-			referencePath.append( elementName.getLocalPart() );
-			
-		} else {
-			referencePath.append( XsdCodegenUtils.getGlobalTypeName( referencedEntity ) );
-		}
-		return referencePath.toString();
-	}
-	
 	/**
 	 * Transforms the OTM documentation for the given owner and assigns it to the
 	 * target JSON schema provided.

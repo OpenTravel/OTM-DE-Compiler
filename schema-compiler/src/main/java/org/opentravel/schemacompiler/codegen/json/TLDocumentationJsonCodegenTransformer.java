@@ -15,6 +15,10 @@
  */
 package org.opentravel.schemacompiler.codegen.json;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaDocumentation;
 import org.opentravel.schemacompiler.model.TLAdditionalDocumentationItem;
 import org.opentravel.schemacompiler.model.TLDocumentation;
@@ -51,4 +55,43 @@ public class TLDocumentationJsonCodegenTransformer extends AbstractJsonSchemaTra
 		return schemaDoc;
 	}
 	
+    /**
+     * Merges multiple JSON schema documentation elements into a single element.
+     * 
+     * @param jsonDocs  the JSON schema documentation elements to merge
+     * @return JsonSchemaDocumentation
+     */
+    public static JsonSchemaDocumentation mergeDocumentation(JsonSchemaDocumentation... jsonDocs) {
+    	JsonSchemaDocumentation mergedDoc = new JsonSchemaDocumentation();
+    	List<String> descriptions = new ArrayList<>();
+    	
+    	for (JsonSchemaDocumentation jsonDoc : jsonDocs) {
+    		if (jsonDoc == null) {
+    			continue;
+    		}
+    		if ((jsonDoc.getDescriptions() != null) && (jsonDoc.getDescriptions().length > 0)) {
+    			descriptions.addAll( Arrays.asList( jsonDoc.getDescriptions() ) );
+    		}
+    		for (String deprecation : jsonDoc.getDeprecations()) {
+    			mergedDoc.addDeprecation( deprecation );
+    		}
+    		for (String reference : jsonDoc.getReferences()) {
+    			mergedDoc.addReference( reference );
+    		}
+    		for (String implementers : jsonDoc.getImplementers()) {
+    			mergedDoc.addImplementer( implementers );
+    		}
+    		for (String moreInfo : jsonDoc.getMoreInfos()) {
+    			mergedDoc.addMoreInfo( moreInfo );
+    		}
+    		for (String docContext : jsonDoc.getOtherDocumentationContexts()) {
+    			while (mergedDoc.getOtherDocumentationContexts().contains( docContext )) {
+    				docContext = "_" + docContext;
+    			}
+    			mergedDoc.addOtherDocumentation( docContext, jsonDoc.getOtherDocumentation( docContext ) );
+    		}
+    	}
+    	return mergedDoc;
+    }
+    
 }

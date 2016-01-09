@@ -7,10 +7,10 @@
 		"OTA2_Payload" : {
 			"description" : "Payload base type for declaring message elements. All messages elements must extend this type AND must end with a Extension element.",
 			"type" : "object",
-			"discriminator" : "typeId",
+			"discriminator" : "@type",
 			"properties" : {
 				"type" : {
-					"typeId" : "string"
+					"@type" : "string"
 				},
 				"DataPolicy" : {
 					"description" : "Details about data policy(s) that apply to all or a portion of this message.",
@@ -51,7 +51,7 @@
 					"type" : "boolean"
 				}
 			},
-			"required" : [ "typeId", "timeStamp", "version" ],
+			"required" : [ "@type", "timeStamp", "version" ],
 			"additionalProperties": false
 		},
 		"OTA2_Request_Payload" : {

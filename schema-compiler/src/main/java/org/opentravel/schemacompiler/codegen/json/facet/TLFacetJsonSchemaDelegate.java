@@ -25,16 +25,21 @@ import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.CorrelatedCodegenArtifacts;
-import org.opentravel.schemacompiler.codegen.json.JsonCodegenUtils;
+import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonType;
+import org.opentravel.schemacompiler.codegen.util.JsonSchemaNamingUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttribute;
+import org.opentravel.schemacompiler.model.TLDocumentation;
+import org.opentravel.schemacompiler.model.TLDocumentationOwner;
+import org.opentravel.schemacompiler.model.TLEquivalentOwner;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLProperty;
@@ -44,9 +49,9 @@ import org.opentravel.schemacompiler.transform.ObjectTransformer;
  * Base class for facet code generation delegates used to generate code artifacts for
  * <code>TLFacet</code> model elements.
  */
-public abstract class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> {
+public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> {
 	
-	public static final String DISCRIMINATOR_PROPERTY = "discriminator";
+	public static final String DISCRIMINATOR_PROPERTY = "@type";
 	
     /**
      * Constructor that specifies the source facet for which code artifacts are being generated.
@@ -84,7 +89,7 @@ public abstract class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<
     		
     	} else {
     		definition = new JsonSchemaNamedReference( getElementName( alias ),
-    				new JsonSchemaReference( getSchemaReferencePath( getSourceFacet(), alias ) ) );
+    				new JsonSchemaReference( jsonUtils.getSchemaReferencePath( getSourceFacet(), alias ) ) );
     	}
     	return definition;
     }
@@ -96,19 +101,29 @@ public abstract class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<
 	protected JsonSchemaNamedReference createDefinition() {
         TLFacet sourceFacet = getSourceFacet();
         TLFacet baseFacet = getLocalBaseFacet();
+        SchemaDependency baseFacetDependency = getLocalBaseFacetDependency();
         JsonSchemaNamedReference definition = new JsonSchemaNamedReference();
-        JsonSchemaNamedReference extensionPoint = getExtensionPointProperty();
         JsonSchema localFacetSchema = new JsonSchema();
         JsonSchema facetSchema;
         
-        definition.setName( XsdCodegenUtils.getGlobalTypeName( sourceFacet ) );
+        definition.setName( JsonSchemaNamingUtils.getGlobalDefinitionName( sourceFacet ) );
         
         if (baseFacet != null) {
-        	JsonSchemaReference baseSchemaRef = new JsonSchemaReference( getSchemaReferencePath( baseFacet, sourceFacet ) );
+        	JsonSchemaReference baseSchemaRef = new JsonSchemaReference(
+        			jsonUtils.getSchemaReferencePath( baseFacet, sourceFacet ) );
         	
         	facetSchema = new JsonSchema();
         	facetSchema.getAllOf().add( baseSchemaRef );
         	facetSchema.getAllOf().add( new JsonSchemaReference( localFacetSchema ) );
+        	
+        } else if (baseFacetDependency != null) {
+        	JsonSchemaReference baseSchemaRef = new JsonSchemaReference(
+        			jsonUtils.getSchemaReferencePath( baseFacetDependency, sourceFacet ) );
+        	
+        	facetSchema = new JsonSchema();
+        	facetSchema.getAllOf().add( baseSchemaRef );
+        	facetSchema.getAllOf().add( new JsonSchemaReference( localFacetSchema ) );
+            addCompileTimeDependency( baseFacetDependency );
         	
         } else {
         	JsonSchemaNamedReference discriminator = createDiscriminatorProperty();
@@ -118,18 +133,37 @@ public abstract class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<
         	definition.setSchema( new JsonSchemaReference( localFacetSchema ) );
         	facetSchema = localFacetSchema;
         }
-		transformDocumentation( sourceFacet, facetSchema );
-		facetSchema.setEntityInfo( JsonCodegenUtils.getEntityInfo( sourceFacet.getOwningEntity() ) );
+        facetSchema.setDocumentation( createJsonDocumentation( sourceFacet ) );
+		facetSchema.setEntityInfo( jsonUtils.getEntityInfo( sourceFacet.getOwningEntity() ) );
+		facetSchema.getEquivalentItems().addAll( jsonUtils.getEquivalentInfo(
+				(TLEquivalentOwner) sourceFacet.getOwningEntity() ) );
+        definition.setSchema( new JsonSchemaReference( facetSchema ) );
         
 		localFacetSchema.getProperties().addAll( createAttributeDefinitions() );
 		localFacetSchema.getProperties().addAll( createElementDefinitions() );
 		
-		if (extensionPoint != null) {
-			localFacetSchema.getProperties().add( extensionPoint );
+		if (hasExtensionPoint()) {
+	        JsonSchemaNamedReference extensionPoint = getExtensionPointProperty();
+	        
+	        if (extensionPoint != null) {
+				localFacetSchema.getProperties().add( extensionPoint );
+	        }
 		}
-		return null;
+		return definition;
 	}
 	
+    /**
+     * If the value returned from '<code>getLocalBaseFacet()</code>' is null, this method
+     * may return an alternative in the form of a <code>SchemaDependency</code> object.  By
+     * default, this method returns null; subclasses may override for facet-specific
+     * configurations.
+     * 
+     * @return SchemaDependency
+     */
+    protected SchemaDependency getLocalBaseFacetDependency() {
+    	return null;
+    }
+
 	/**
 	 * Creates the discriminator property for a JSON definition that may be used to support
 	 * inheritance and polymorphism in JSON messages.
@@ -194,6 +228,25 @@ public abstract class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<
             }
         }
         return elementDefs;
+	}
+	
+	/**
+	 * Returns JSON schema documentation for the source facet of this delegate.
+	 * 
+	 * @param docOwner  the owner for which JSON documentation should be created
+	 * @return JsonSchemaDocumentation
+	 */
+	protected JsonSchemaDocumentation createJsonDocumentation(TLDocumentationOwner docOwner) {
+		TLDocumentation doc = DocumentationFinder.getDocumentation( docOwner );
+		JsonSchemaDocumentation jsonDoc = null;
+		
+		if (doc != null) {
+	        ObjectTransformer<TLDocumentation, JsonSchemaDocumentation, CodeGenerationTransformerContext> transformer =
+	        		getTransformerFactory().getTransformer(doc, JsonSchemaDocumentation.class);
+			
+	        jsonDoc = transformer.transform( doc );
+		}
+		return jsonDoc;
 	}
 
 	/**

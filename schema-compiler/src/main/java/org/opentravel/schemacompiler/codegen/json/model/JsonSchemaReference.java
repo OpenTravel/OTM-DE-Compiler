@@ -18,7 +18,6 @@ package org.opentravel.schemacompiler.codegen.json.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 /**
@@ -152,30 +151,8 @@ public class JsonSchemaReference {
 			
 		} else {
 			schemaRef = new JsonObject();
-			
-			if (schemaPathDocumentation != null) {
-				JsonObject refDoc = schemaPathDocumentation.toJson();
-				
-				if (refDoc != null) {
-					schemaRef.add( "x-otm-documentation", refDoc );
-				}
-			}
-			if (!schemaPathEquivalentItems.isEmpty()) {
-				JsonArray itemList = new JsonArray();
-				
-				for (JsonContextualValue item : schemaPathEquivalentItems) {
-					itemList.add( item.toJson() );
-				}
-				schemaRef.add( "x-otm-equivalents", itemList );
-			}
-			if (!schemaPathExampleItems.isEmpty()) {
-				JsonArray itemList = new JsonArray();
-				
-				for (JsonContextualValue item : schemaPathExampleItems) {
-					itemList.add( item.toJson() );
-				}
-				schemaRef.add( "x-otm-examples", itemList );
-			}
+			JsonSchema.createOtmAnnotations( schemaRef, schemaPathDocumentation,
+					schemaPathEquivalentItems, schemaPathExampleItems );
 			schemaRef.addProperty( "$ref", schemaPath );
 		}
 		return schemaRef;
