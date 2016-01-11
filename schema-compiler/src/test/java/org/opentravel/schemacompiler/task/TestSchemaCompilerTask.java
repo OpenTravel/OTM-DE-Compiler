@@ -21,8 +21,6 @@ import java.io.File;
 
 import org.junit.Test;
 import org.opentravel.schemacompiler.codegen.CodeGeneratorTestAssertions;
-import org.opentravel.schemacompiler.task.CompileAllCompilerTask;
-import org.opentravel.schemacompiler.task.TaskFactory;
 import org.opentravel.schemacompiler.util.SchemaCompilerTestUtils;
 import org.opentravel.schemacompiler.validate.FindingMessageFormat;
 import org.opentravel.schemacompiler.validate.FindingType;
@@ -58,28 +56,7 @@ public class TestSchemaCompilerTask {
 
         SchemaCompilerTestUtils.printFindings(findings);
         assertFalse(findings.hasFinding(FindingType.ERROR));
-
-        // Assert XML schema documents are valid
-        CodeGeneratorTestAssertions
-                .assertValidXsd(getTestOutput("testSchemaCompilerTask/schemas/library_1_p1_1_0_0.xsd"));
-        CodeGeneratorTestAssertions
-                .assertValidXsd(getTestOutput("testSchemaCompilerTask/schemas/library_1_p2_2_0_0.xsd"));
-        CodeGeneratorTestAssertions
-                .assertValidXsd(getTestOutput("testSchemaCompilerTask/schemas/library_2_p1_1_0_0.xsd"));
-        CodeGeneratorTestAssertions
-                .assertValidXsd(getTestOutput("testSchemaCompilerTask/schemas/library_2_p2_2_0_0.xsd"));
-
-        // Assert WSDL and trimmed schema documents are valid
-        CodeGeneratorTestAssertions
-                .assertValidXsd(getTestOutput("testSchemaCompilerTask/services/SampleService_v2/SampleService_Trim_library_1_p1_1_0_0.xsd"));
-        CodeGeneratorTestAssertions
-                .assertValidXsd(getTestOutput("testSchemaCompilerTask/services/SampleService_v2/SampleService_Trim_library_1_p2_2_0_0.xsd"));
-        CodeGeneratorTestAssertions
-                .assertValidXsd(getTestOutput("testSchemaCompilerTask/services/SampleService_v2/SampleService_Trim_library_2_p1_1_0_0.xsd"));
-        CodeGeneratorTestAssertions
-                .assertValidXsd(getTestOutput("testSchemaCompilerTask/services/SampleService_v2/SampleService_Trim_library_2_p2_2_0_0.xsd"));
-        CodeGeneratorTestAssertions
-                .assertValidWsdl(getTestOutput("testSchemaCompilerTask/services/SampleService_v2/SampleService.wsdl"));
+        CodeGeneratorTestAssertions.validateGeneratedFiles( compilerTask.getGeneratedFiles() );
     }
 
     @Test
@@ -101,8 +78,7 @@ public class TestSchemaCompilerTask {
 
         SchemaCompilerTestUtils.printFindings(findings);
         assertFalse(findings.hasFinding(FindingType.ERROR));
-
-        // No automated assertions - for now, the schemas must be checked manually
+        CodeGeneratorTestAssertions.validateGeneratedFiles( compilerTask.getGeneratedFiles() );
     }
 
     @Test
@@ -124,8 +100,7 @@ public class TestSchemaCompilerTask {
 
         SchemaCompilerTestUtils.printFindings(findings);
         assertFalse(findings.hasFinding(FindingType.ERROR));
-
-        // No automated assertions - for now, the schemas must be checked manually
+        CodeGeneratorTestAssertions.validateGeneratedFiles( compilerTask.getGeneratedFiles() );
     }
 
     @Test
@@ -150,28 +125,7 @@ public class TestSchemaCompilerTask {
 
         SchemaCompilerTestUtils.printFindings(findings);
         assertFalse(findings.hasFinding(FindingType.ERROR));
-
-        // Assert XML schema documents are valid
-        CodeGeneratorTestAssertions
-                .assertValidXsd(getTestOutput("testServiceGenerationForVersions/schemas/test_library_1_0_0.xsd"));
-        CodeGeneratorTestAssertions
-                .assertValidXsd(getTestOutput("testServiceGenerationForVersions/schemas/test_library_1_1_0.xsd"));
-        CodeGeneratorTestAssertions
-                .assertValidXsd(getTestOutput("testServiceGenerationForVersions/schemas/test_library_1_2_0.xsd"));
-        CodeGeneratorTestAssertions
-                .assertValidXsd(getTestOutput("testServiceGenerationForVersions/schemas/test_library_1_2_1.xsd"));
-        CodeGeneratorTestAssertions
-                .assertValidXsd(getTestOutput("testServiceGenerationForVersions/schemas/test_library_1_2_2.xsd"));
-
-        // Assert WSDL and trimmed schema documents are valid
-        CodeGeneratorTestAssertions
-                .assertValidXsd(getTestOutput("testServiceGenerationForVersions/services/VersionedService_v1/VersionedService_Trim_test_library_1_0_0.xsd"));
-        CodeGeneratorTestAssertions
-                .assertValidXsd(getTestOutput("testServiceGenerationForVersions/services/VersionedService_v1/VersionedService_Trim_test_library_1_1_0.xsd"));
-        CodeGeneratorTestAssertions
-                .assertValidXsd(getTestOutput("testServiceGenerationForVersions/services/VersionedService_v1/VersionedService_Trim_test_library_1_2_0.xsd"));
-        CodeGeneratorTestAssertions
-                .assertValidWsdl(getTestOutput("testServiceGenerationForVersions/services/VersionedService_v1/VersionedService.wsdl"));
+        CodeGeneratorTestAssertions.validateGeneratedFiles( compilerTask.getGeneratedFiles() );
     }
 
     // @Test
@@ -200,10 +154,6 @@ public class TestSchemaCompilerTask {
             }
         }
         assertFalse(findings.hasFinding(FindingType.ERROR));
-    }
-
-    private File getTestOutput(String filename) {
-        return new File(System.getProperty("user.dir") + "/target/codegen-output/" + filename);
     }
 
 }

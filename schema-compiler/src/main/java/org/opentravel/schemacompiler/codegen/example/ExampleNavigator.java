@@ -32,6 +32,7 @@ import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegate;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
+import org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAbstractFacet;
@@ -681,10 +682,9 @@ public class ExampleNavigator {
                         TLFacet hFacet = facetHierarchy.get(i);
 
                         if (!processedExtensionPointTypes.contains(hFacet.getFacetType())) {
-                            List<TLExtensionPointFacet> facetExtensions = facetExtensionsByType
-                                    .get(hFacet.getFacetType());
-
-                            navigateExtensionPoint(hFacet, facetExtensions);
+                        	if (hasExtensionPoint( hFacet )) {
+                                navigateExtensionPoint(hFacet, facetExtensionsByType.get(hFacet.getFacetType()));
+                        	}
                             processedExtensionPointTypes.add(hFacet.getFacetType());
                         }
                     }
@@ -706,11 +706,24 @@ public class ExampleNavigator {
 
         for (TLFacet hFacet : facetHierarchy) {
             if (!processedExtensionPointTypes.contains(hFacet.getFacetType())) {
-                navigateExtensionPoint(hFacet, facetExtensionsByType.get(hFacet.getFacetType()));
+            	if (hasExtensionPoint( hFacet )) {
+            		navigateExtensionPoint(hFacet, facetExtensionsByType.get(hFacet.getFacetType()));
+            	}
             }
         }
     }
-
+    
+    /**
+     * Returns true if the given facet should declare an extension point.
+     * 
+     * @param facet  the facet for which an extension point element could be declared
+     * @return boolean
+     */
+    private boolean hasExtensionPoint(TLFacet facet) {
+    	return (((TLFacetCodegenDelegate) facetDelegateFactory.getDelegate( facet ))
+    			.getExtensionPointElement() != null);
+    }
+    
     /**
      * Navigates the specified extensions of the facet.
      * 
@@ -838,11 +851,16 @@ public class ExampleNavigator {
                     TLPropertyType propertyType = element.getType();
 
                     // If the property type is a core object, select the appropriate level of detail
-                    // based
-                    // on the navigation options
+                    // based on the navigation options
                     if (propertyType instanceof TLCoreObject) {
                         propertyType = selectExampleFacet(((TLCoreObject) propertyType)
                                 .getSummaryFacet());
+                    }
+                    
+                    // If the property type is a list facet, use a repeat count of 1 since the
+                    // repeat will be handled during the list facet visitation
+                    if (propertyType instanceof TLListFacet) {
+                    	repeatCount = 1;
                     }
 
                     // Repeat the navigation as many times as required by the property and/or the

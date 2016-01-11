@@ -31,14 +31,25 @@ import org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
 import org.opentravel.schemacompiler.codegen.CodeGenerator;
 import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
+import org.opentravel.schemacompiler.codegen.impl.LibraryFilenameBuilder;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
+import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.loader.LibraryModelLoader;
 import org.opentravel.schemacompiler.loader.impl.CatalogLibraryNamespaceResolver;
 import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
+import org.opentravel.schemacompiler.model.LibraryMember;
+import org.opentravel.schemacompiler.model.TLAction;
+import org.opentravel.schemacompiler.model.TLActionFacet;
+import org.opentravel.schemacompiler.model.TLActionRequest;
+import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
+import org.opentravel.schemacompiler.model.TLModelElement;
+import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.model.TLService;
 import org.opentravel.schemacompiler.model.XSDLibrary;
 import org.opentravel.schemacompiler.repository.Project;
 import org.opentravel.schemacompiler.repository.ProjectItem;
@@ -387,6 +398,147 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
     }
 
     /**
+     * Generates example XML files for all elements of the given library.
+     * 
+     * @param userDefinedLibraries
+     *            the list of user-defined libraries for which to generate example XML files
+     * @param context
+     *            the code generation context to use for code generation
+     * @param filenameBuilder
+     *            the filename builder to use for schema location filename construction
+     * @param filter
+     *            the filter used to identify specific artifacts for which example generation is
+     *            required
+     * @param targetFormat
+     * 			  indicates the output format of the generated example files (e.g. "XML" or "JSON")
+     * @throws SchemaCompilerException
+     */
+	protected void generateExampleArtifacts(Collection<TLLibrary> userDefinedLibraries,
+            CodeGenerationContext context, CodeGenerationFilenameBuilder<AbstractLibrary> filenameBuilder,
+            CodeGenerationFilter filter, String targetFormat) throws SchemaCompilerException {
+		CodeGenerator<TLModelElement> exampleGenerator = getExampleGenerator(targetFormat, filenameBuilder);
+        CodeGenerationContext exampleContext = context.getCopy();
+
+        // Generate examples for all model entities that are not excluded by the filter
+        for (TLLibrary library : userDefinedLibraries) {
+            if ((filter != null) && !filter.processLibrary(library)) {
+                continue;
+            }
+
+            // Generate example files for each member of the library
+            for (LibraryMember member : library.getNamedMembers()) {
+                if ((filter != null) && !filter.processEntity(member)) {
+                    continue;
+                }
+                exampleContext.setValue(CodeGenerationContext.CK_OUTPUT_FOLDER,
+                        getExampleOutputFolder(member, context));
+                exampleContext.setValue(CodeGenerationContext.CK_EXAMPLE_SCHEMA_RELATIVE_PATH,
+                        getSchemaRelativeFolderPath(member, exampleContext));
+
+                if (member instanceof TLService) {
+                    TLService service = (TLService) member;
+
+                    for (TLOperation operation : service.getOperations()) {
+                        if (operation.getRequest().declaresContent()) {
+							addGeneratedFiles(exampleGenerator.generateOutput(operation.getRequest(), exampleContext));
+                        }
+                        if (operation.getResponse().declaresContent()) {
+							addGeneratedFiles(exampleGenerator.generateOutput(operation.getResponse(), exampleContext));
+                        }
+                        if (operation.getNotification().declaresContent()) {
+							addGeneratedFiles(exampleGenerator.generateOutput(operation.getNotification(), exampleContext));
+                        }
+                    }
+                    
+                } else if (member instanceof TLResource) {
+                	FacetCodegenDelegateFactory factory = new FacetCodegenDelegateFactory(null);
+                	TLResource resource = (TLResource) member;
+                	
+                	for (TLAction action : resource.getActions()) {
+                		TLActionRequest request = action.getRequest();
+                		
+                		if ((request != null) && (request.getPayloadType() instanceof TLActionFacet)) {
+                			TLActionFacet payloadType = (TLActionFacet) request.getPayloadType();
+                			
+                			if (factory.getDelegate( payloadType ).hasContent()) {
+        						addGeneratedFiles(exampleGenerator.generateOutput(request, exampleContext));
+                			}
+                		}
+                		
+                		for (TLActionResponse response : action.getResponses()) {
+                    		if (response.getPayloadType() instanceof TLActionFacet) {
+                    			TLActionFacet payloadType = (TLActionFacet) response.getPayloadType();
+                    			
+                    			if (factory.getDelegate( payloadType ).hasContent()) {
+            						addGeneratedFiles(exampleGenerator.generateOutput(response, exampleContext));
+                    			}
+                    		}
+                		}
+                	}
+                	
+				} else {
+					addGeneratedFiles(exampleGenerator.generateOutput(member, exampleContext));
+               	}
+            }
+        }
+	}
+                	
+	/**
+	 * Gets the example generator for the specified target output format.
+	 * 
+	 * @param targetFormat  the target output format of the example files to be generated
+	 * @param filenameBuilder  the filename builder for the example code generator
+	 * @return the list of example generators.
+	 * @throws CodeGenerationException
+	 */
+	private CodeGenerator<TLModelElement> getExampleGenerator(String targetFormat,
+			CodeGenerationFilenameBuilder<AbstractLibrary> filenameBuilder) throws CodeGenerationException {
+		CodeGenerator<TLModelElement> exampleGenerator =
+				CodeGeneratorFactory.getInstance().newCodeGenerator(targetFormat, TLModelElement.class);
+		TrimmedExampleFilenameBuilder trimmedFilenameBuilder = new TrimmedExampleFilenameBuilder(
+				exampleGenerator.getFilenameBuilder(), filenameBuilder);
+		
+		exampleGenerator.setFilenameBuilder(trimmedFilenameBuilder);
+		return exampleGenerator;
+	}
+
+    /**
+     * Returns the location of the example output folder for all members of the given library.
+     * 
+     * @param libraryMember
+     *            the library member element for which the example output folder is needed
+     * @param context
+     *            the code generation context
+     * @return String
+     */
+    protected String getExampleOutputFolder(LibraryMember libraryMember, CodeGenerationContext context) {
+        String libraryFolderName = "examples/"
+                + new LibraryFilenameBuilder<AbstractLibrary>().buildFilename(
+                        libraryMember.getOwningLibrary(), "");
+        String rootOutputFolder = context.getValue(CodeGenerationContext.CK_OUTPUT_FOLDER);
+
+        if (rootOutputFolder == null) {
+            rootOutputFolder = System.getProperty("user.dir");
+        }
+        return new File(rootOutputFolder, libraryFolderName).getAbsolutePath();
+    }
+
+    /**
+     * Returns a string that specifies the relative folder location of the schema to be generated
+     * for the specified library member.
+     * 
+     * @param libraryMember
+     *            the library member element for which the schema location folder is needed
+     * @param context
+     *            the code generation context
+     * @return String
+     */
+    protected String getSchemaRelativeFolderPath(LibraryMember libraryMember,
+            CodeGenerationContext context) {
+        return "../../";
+    }
+
+    /**
      * Returns application context ID of the rule set to use when validating models prior to code
      * generation.
      * 
@@ -442,6 +594,43 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
      */
     public void setOutputFolder(String outputFolder) {
         this.outputFolder = outputFolder;
+    }
+
+     /**
+     * 
+     * Wrapper around default {@link CodeGenerationFilenameBuilder} that support different handling
+     * for {@link AbstractLibrary}.
+     * 
+     * @author Pawel Jedruch
+     * 
+     */
+    class TrimmedExampleFilenameBuilder implements CodeGenerationFilenameBuilder<TLModelElement> {
+
+        private CodeGenerationFilenameBuilder<TLModelElement> defaultNonLibraryBuilder;
+        private CodeGenerationFilenameBuilder<AbstractLibrary> libraryFilenameBuilder;
+
+        /**
+         * @param defaultNonLibraryBuilder
+         *            - builder used for all non {@link AbstractLibrary} models
+         * @param libraryFilenameBuilder
+         *            - builder used only for {@link AbstractLibrary}
+         */
+        public TrimmedExampleFilenameBuilder(
+                CodeGenerationFilenameBuilder<TLModelElement> defaultNonLibraryBuilder,
+                CodeGenerationFilenameBuilder<AbstractLibrary> libraryFilenameBuilder) {
+            this.defaultNonLibraryBuilder = defaultNonLibraryBuilder;
+            this.libraryFilenameBuilder = libraryFilenameBuilder;
+        }
+
+        @Override
+        public String buildFilename(TLModelElement item, String fileExtension) {
+            if (item instanceof AbstractLibrary) {
+                return libraryFilenameBuilder.buildFilename((AbstractLibrary) item, fileExtension);
+            } else {
+                return defaultNonLibraryBuilder.buildFilename((TLModelElement) item, fileExtension);
+            }
+        }
+
     }
 
 }

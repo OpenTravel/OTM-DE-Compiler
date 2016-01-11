@@ -111,7 +111,7 @@ public class CommandLineCompilerTaskOptions implements CompileAllTaskOptions {
 	 */
 	@Override
 	public boolean isCompileJsonSchemas() {
-		return false; // JSON schemas not yet fully supported
+        return commandLineArgs.hasOption("J");
 	}
 
     /**

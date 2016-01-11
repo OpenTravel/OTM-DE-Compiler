@@ -16,16 +16,13 @@
 package org.opentravel.schemacompiler.task;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.xml.XMLConstants;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
-import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
 import org.opentravel.schemacompiler.codegen.CodeGenerator;
@@ -38,22 +35,13 @@ import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.codegen.xsd.AbstractXsdCodeGenerator;
 import org.opentravel.schemacompiler.codegen.xsd.ImportSchemaLocations;
 import org.opentravel.schemacompiler.codegen.xsd.XsdBuiltInCodeGenerator;
-import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.ioc.SchemaDeclaration;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.LibraryMember;
-import org.opentravel.schemacompiler.model.TLAction;
-import org.opentravel.schemacompiler.model.TLActionFacet;
-import org.opentravel.schemacompiler.model.TLActionRequest;
-import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
-import org.opentravel.schemacompiler.model.TLModelElement;
-import org.opentravel.schemacompiler.model.TLOperation;
-import org.opentravel.schemacompiler.model.TLResource;
-import org.opentravel.schemacompiler.model.TLService;
 import org.opentravel.schemacompiler.model.XSDLibrary;
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
 import org.springframework.context.ApplicationContext;
@@ -322,191 +310,6 @@ public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask im
     }
 
     /**
-     * Generates example XML files for all elements of the given library.
-     * 
-     * @param userDefinedLibraries
-     *            the list of user-defined libraries for which to generate example XML files
-     * @param context
-     *            the code generation context to use for code generation
-     * @param filenameBuilder
-     *            the filename builder to use for schema location filename construction
-     * @param filter
-     *            the filter used to identify specific artifacts for which example generation is
-     *            required
-     * @throws SchemaCompilerException
-     */
-	protected void generateExampleArtifacts(Collection<TLLibrary> userDefinedLibraries,
-            CodeGenerationContext context,
-            CodeGenerationFilenameBuilder<AbstractLibrary> filenameBuilder,
-            CodeGenerationFilter filter) throws SchemaCompilerException {
-		Collection<? extends CodeGenerator<TLModelElement>> exampleGenerators = getExampleGenerators(filenameBuilder);
-
-        CodeGenerationContext exampleContext = context.getCopy();
-
-        // Generate examples for all model entities that are not excluded by the filter
-        for (TLLibrary library : userDefinedLibraries) {
-            if ((filter != null) && !filter.processLibrary(library)) {
-                continue;
-            }
-
-            // Generate example files for each member of the library
-            for (LibraryMember member : library.getNamedMembers()) {
-                if ((filter != null) && !filter.processEntity(member)) {
-                    continue;
-                }
-                exampleContext.setValue(CodeGenerationContext.CK_OUTPUT_FOLDER,
-                        getExampleOutputFolder(member, context));
-                exampleContext.setValue(CodeGenerationContext.CK_EXAMPLE_SCHEMA_RELATIVE_PATH,
-                        getSchemaRelativeFolderPath(member, exampleContext));
-
-                if (member instanceof TLService) {
-                    TLService service = (TLService) member;
-
-                    for (TLOperation operation : service.getOperations()) {
-                        if (operation.getRequest().declaresContent()) {
-							for (CodeGenerator<TLModelElement> exampleGenerator : exampleGenerators) {
-								addGeneratedFiles(exampleGenerator
-										.generateOutput(operation.getRequest(),
-												exampleContext));
-							}
-                        }
-                        if (operation.getResponse().declaresContent()) {
-							for (CodeGenerator<TLModelElement> exampleGenerator : exampleGenerators) {
-								addGeneratedFiles(exampleGenerator
-										.generateOutput(
-												operation.getResponse(),
-												exampleContext));
-							}
-                        }
-                        if (operation.getNotification().declaresContent()) {
-							for (CodeGenerator<TLModelElement> exampleGenerator : exampleGenerators) {
-								addGeneratedFiles(exampleGenerator
-										.generateOutput(
-												operation.getNotification(),
-												exampleContext));
-							}
-                        }
-                    }
-                    
-                } else if (member instanceof TLResource) {
-                	FacetCodegenDelegateFactory factory = new FacetCodegenDelegateFactory(null);
-                	TLResource resource = (TLResource) member;
-                	
-                	for (TLAction action : resource.getActions()) {
-                		TLActionRequest request = action.getRequest();
-                		
-                		if ((request != null) && (request.getPayloadType() instanceof TLActionFacet)) {
-                			TLActionFacet payloadType = (TLActionFacet) request.getPayloadType();
-                			
-                			if (factory.getDelegate( payloadType ).hasContent()) {
-            					for (CodeGenerator<TLModelElement> exampleGenerator : exampleGenerators) {
-            						addGeneratedFiles(exampleGenerator.generateOutput(request, exampleContext));
-            					}
-                			}
-                		}
-                		
-                		for (TLActionResponse response : action.getResponses()) {
-                    		if (response.getPayloadType() instanceof TLActionFacet) {
-                    			TLActionFacet payloadType = (TLActionFacet) response.getPayloadType();
-                    			
-                    			if (factory.getDelegate( payloadType ).hasContent()) {
-                					for (CodeGenerator<TLModelElement> exampleGenerator : exampleGenerators) {
-                						addGeneratedFiles(exampleGenerator.generateOutput(response, exampleContext));
-                					}
-                    			}
-                    		}
-                		}
-                	}
-                	
-				} else {
-					for (CodeGenerator<TLModelElement> exampleGenerator : exampleGenerators) {
-						addGeneratedFiles(exampleGenerator.generateOutput(
-								member, exampleContext));
-                	}
-               	}
-            }
-        }
-	}
-                	
-	/**
-	 * Gets the set of example generators. Currently only JSON and XML. If any
-	 * more are to be added consider an enum for the types.
-	 * 
-	 * @param filenameBuilder
-	 * 
-	 * @return the list of example generators.
-	 * @throws CodeGenerationException
-	 */
-	private Collection<? extends CodeGenerator<TLModelElement>> getExampleGenerators(
-			CodeGenerationFilenameBuilder<AbstractLibrary> filenameBuilder) throws CodeGenerationException {
-		List<CodeGenerator<TLModelElement>> exampleGenerators = new ArrayList<CodeGenerator<TLModelElement>>();
-		CodeGenerator<TLModelElement> exampleGenerator = CodeGeneratorFactory.getInstance().newCodeGenerator(
-				CodeGeneratorFactory.XML_TARGET_FORMAT, TLModelElement.class);
-		configureFileNameBuilder(exampleGenerator, filenameBuilder);
-		exampleGenerators.add(exampleGenerator);
-		exampleGenerator = CodeGeneratorFactory.getInstance().newCodeGenerator(CodeGeneratorFactory.JSON_TARGET_FORMAT,
-				TLModelElement.class);
-		exampleGenerators.add(exampleGenerator);
-		return exampleGenerators;
-	}
-
-	private void configureFileNameBuilder(CodeGenerator<TLModelElement> exampleGenerator,
-			CodeGenerationFilenameBuilder<AbstractLibrary> filenameBuilder) {
-		TrimmedExampleFilenameBuilder trimmedFilenameBuilder = new TrimmedExampleFilenameBuilder(
-				exampleGenerator.getFilenameBuilder(), filenameBuilder);
-		exampleGenerator.setFilenameBuilder(trimmedFilenameBuilder);
-	}
-
-    /**
-     * 
-     * Wrapper around default {@link CodeGenerationFilenameBuilder} that support different handling
-     * for {@link AbstractLibrary}.
-     * 
-     * @author Pawel Jedruch
-     * 
-     */
-    class TrimmedExampleFilenameBuilder implements CodeGenerationFilenameBuilder<TLModelElement> {
-
-        private CodeGenerationFilenameBuilder<TLModelElement> defaultNonLibraryBuilder;
-        private CodeGenerationFilenameBuilder<AbstractLibrary> libraryFilenameBuilder;
-
-        /**
-         * @param defaultNonLibraryBuilder
-         *            - builder used for all non {@link AbstractLibrary} models
-         * @param libraryFilenameBuilder
-         *            - builder used only for {@link AbstractLibrary}
-         */
-        public TrimmedExampleFilenameBuilder(
-                CodeGenerationFilenameBuilder<TLModelElement> defaultNonLibraryBuilder,
-                CodeGenerationFilenameBuilder<AbstractLibrary> libraryFilenameBuilder) {
-            this.defaultNonLibraryBuilder = defaultNonLibraryBuilder;
-            this.libraryFilenameBuilder = libraryFilenameBuilder;
-        }
-
-        @Override
-        public String buildFilename(TLModelElement item, String fileExtension) {
-            if (item instanceof AbstractLibrary) {
-                return libraryFilenameBuilder.buildFilename((AbstractLibrary) item, fileExtension);
-            } else {
-                return defaultNonLibraryBuilder.buildFilename((TLModelElement) item, fileExtension);
-            }
-        }
-
-    }
-
-    /**
-     * Returns the location of the example output folder for all members of the given library.
-     * 
-     * @param libraryMember
-     *            the library member element for which the example output folder is needed
-     * @param context
-     *            the code generation context
-     * @return String
-     */
-    protected abstract String getExampleOutputFolder(LibraryMember libraryMember,
-            CodeGenerationContext context);
-
-    /**
      * Returns the relative path to the XML schema that can be used to validate the generated XML
      * output.
      * 
@@ -527,19 +330,6 @@ public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask im
         }
         return schemaLocation;
     }
-
-    /**
-     * Returns a string that specifies the relative folder location of the schema to be generated
-     * for the specified library member.
-     * 
-     * @param libraryMember
-     *            the library member element for which the schema location folder is needed
-     * @param context
-     *            the code generation context
-     * @return String
-     */
-    protected abstract String getSchemaRelativeFolderPath(LibraryMember libraryMember,
-            CodeGenerationContext context);
 
     /**
      * @see org.opentravel.schemacompiler.task.AbstractCompilerTask#createContext()

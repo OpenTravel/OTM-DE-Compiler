@@ -33,7 +33,6 @@ public final class CodeGeneratorFactory {
 
     public static final String XSD_TARGET_FORMAT = "XSD";
     public static final String EXT_XSD_TARGET_FORMAT = "EXT_XSD";
-    public static final String RAS_XSD_TARGET_FORMAT = "RASXSD";
     public static final String WSDL_TARGET_FORMAT = "WSDL";
     public static final String XML_TARGET_FORMAT = "XML";
     public static final String JSON_SCHEMA_TARGET_FORMAT = "JSON_SCHEMA";

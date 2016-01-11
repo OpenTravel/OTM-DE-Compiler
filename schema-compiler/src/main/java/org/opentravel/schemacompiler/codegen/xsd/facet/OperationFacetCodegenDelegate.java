@@ -117,7 +117,7 @@ public class OperationFacetCodegenDelegate extends TLFacetCodegenDelegate {
     public QName getExtensionPointElement() {
         QName extensionPointQName = null;
 
-        if (getBaseFacet() == null) {
+        if (!getSourceFacet().isNotExtendable()) {
             SchemaDependency extensionPoint = SchemaDependency.getExtensionPointElement();
 
             extensionPointQName = extensionPoint.toQName();

@@ -136,6 +136,7 @@ public class Main {
         options.addOption("b", "bindingStyle", true, messageBundle.getString("bindingStyle"));
         options.addOption("X", "compileXSD", false, messageBundle.getString("compileXSD"));
         options.addOption("W", "compileWSDL", false, messageBundle.getString("compileWSDL"));
+        options.addOption("J", "compileJSON", false, messageBundle.getString("compileJSON"));
         options.addOption("E", "generateExamples", false,
                 messageBundle.getString("generateExamples"));
         options.addOption("C", "exampleContext", true, messageBundle.getString("exampleContext"));

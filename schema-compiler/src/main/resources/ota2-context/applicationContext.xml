@@ -1318,16 +1318,6 @@
 					<property name="codeGenerator" value="org.opentravel.schemacompiler.codegen.xsd.XsdBuiltInCodeGenerator" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.codegen.CodeGeneratorMapping">
-					<property name="sourceType" value="org.opentravel.schemacompiler.model.TLBusinessObject" />
-					<property name="targetFormat" value="RASXSD" />
-					<property name="codeGenerator" value="org.opentravel.schemacompiler.codegen.xsd.XsdRASCodeGenerator" />
-				</bean>
-				<bean class="org.opentravel.schemacompiler.codegen.CodeGeneratorMapping">
-					<property name="sourceType" value="org.opentravel.schemacompiler.model.TLBusinessObject" />
-					<property name="targetFormat" value="WSDL" />
-					<property name="codeGenerator" value="org.opentravel.schemacompiler.codegen.wsdl.WsdlLibraryMemberCodeGenerator" />
-				</bean>
-				<bean class="org.opentravel.schemacompiler.codegen.CodeGeneratorMapping">
 					<property name="sourceType" value="org.opentravel.schemacompiler.model.TLService" />
 					<property name="targetFormat" value="WSDL" />
 					<property name="codeGenerator" value="org.opentravel.schemacompiler.codegen.wsdl.WsdlLibraryMemberCodeGenerator" />

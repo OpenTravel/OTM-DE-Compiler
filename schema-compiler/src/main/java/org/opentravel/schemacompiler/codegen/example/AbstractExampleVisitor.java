@@ -25,8 +25,9 @@ import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
 import org.opentravel.schemacompiler.codegen.wsdl.CodeGenerationWsdlBindings;
+import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
+import org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
-import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLActionRequest;
 import org.opentravel.schemacompiler.model.TLActionResponse;
@@ -69,8 +70,8 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
     private static final Logger log = LoggerFactory.getLogger(AbstractExampleVisitor.class);
     private static final boolean DEBUG = false;
     
-    protected static Map<TLFacetType, SchemaDependency> extensionPointTypeMap;
-
+	private static FacetCodegenDelegateFactory facetDelegateFactory = new FacetCodegenDelegateFactory( null );
+	
     private StringBuilder debugIndent = new StringBuilder();
     protected ExampleValueGenerator exampleValueGenerator;
     protected CodeGenerationWsdlBindings wsdlBindings = null;   
@@ -612,27 +613,24 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
    	 */
    	 protected abstract void addOperationPayloadContent(TLFacet operationFacet);
    	 
-   	 /**
-      * Initializes the mapping of facet types to the extension point elements used to encapsulate
-      * extension point facet elements in the generated XML content.
-      */
-     static {
-         try {
-             extensionPointTypeMap = new HashMap<TLFacetType, SchemaDependency>();
-             extensionPointTypeMap.put(TLFacetType.SUMMARY,
-                     SchemaDependency.getExtensionPointSummaryElement());
-             extensionPointTypeMap.put(TLFacetType.DETAIL,
-                     SchemaDependency.getExtensionPointDetailElement());
-             extensionPointTypeMap.put(TLFacetType.CUSTOM,
-                     SchemaDependency.getExtensionPointCustomElement());
-             extensionPointTypeMap.put(TLFacetType.QUERY,
-                     SchemaDependency.getExtensionPointQueryElement());
-
-         } catch (Throwable t) {
-             throw new ExceptionInInitializerError(t);
-         }
-     }
-     
+ 	/**
+ 	 * Returns the qualified name of the extension point that should be used for the given
+ 	 * facet.
+ 	 * 
+ 	 * @param facet  the facet for which to return the extension point name
+ 	 * @return QName
+ 	 */
+ 	protected QName getExtensionPoint(TLPatchableFacet facet) {
+ 		QName epfName;
+ 		
+ 		if (facet instanceof TLFacet) {
+ 			epfName = ((TLFacetCodegenDelegate) facetDelegateFactory.getDelegate(
+ 					(TLFacet) facet )).getExtensionPointElement();
+ 		} else {
+ 			epfName = null;
+ 		}
+ 		return epfName;
+ 	}
 
  	/**
  	 * Handles the deferred assignment of 'IDREF' and 'IDREFS' values as a

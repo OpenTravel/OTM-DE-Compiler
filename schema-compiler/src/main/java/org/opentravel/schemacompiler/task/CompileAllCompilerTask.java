@@ -141,6 +141,7 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
 
             setCompileSchemas(compileAllOptions.isCompileSchemas());
             setCompileServices(compileAllOptions.isCompileServices());
+            setCompileJsonSchemas(compileAllOptions.isCompileJsonSchemas());
         }
         if (taskOptions instanceof SchemaCompilerTaskOptions) {
             // No explicit options currently implemented

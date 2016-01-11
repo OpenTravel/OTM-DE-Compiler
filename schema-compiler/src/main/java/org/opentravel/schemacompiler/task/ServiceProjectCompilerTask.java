@@ -110,7 +110,8 @@ public class ServiceProjectCompilerTask extends AbstractSchemaCompilerTask imple
             // messages (not the contents of the trimmed schemas)
             if (isGenerateExamples()) {
                 generateExampleArtifacts(userDefinedLibraries, context,
-                        new LibraryTrimmedFilenameBuilder(null), createExampleFilter(service));
+                        new LibraryTrimmedFilenameBuilder(null), createExampleFilter(service),
+                        CodeGeneratorFactory.XML_TARGET_FORMAT);
             }
         }
 

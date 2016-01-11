@@ -80,6 +80,12 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
     protected boolean compileSchemas;
 
     /**
+     * Boolean flag indicating that JSON schema files should be generated.
+     */
+	@Parameter( defaultValue = "true" )
+    protected boolean compileJson;
+
+    /**
      * Boolean flag indicating that WSDL schema files should be generated.
      */
 	@Parameter( defaultValue = "true" )
@@ -206,6 +212,7 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
                 + ((outputFolder == null) ? "[NULL]" : outputFolder.getAbsolutePath()));
         log.info("bindingStyle                  = " + bindingStyle);
         log.info("compileSchemas                = " + compileSchemas);
+        log.info("compileJson                   = " + compileJson);
         log.info("compileServices               = " + compileServices);
         log.info("generateExamples              = " + generateExamples);
         log.info("serviceEndpointUrl            = " + serviceEndpointUrl);
@@ -228,7 +235,7 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
 	 */
 	@Override
 	public boolean isCompileJsonSchemas() {
-		return false; // JSON schemas not yet fully supported
+		return compileJson;
 	}
 
 	/**

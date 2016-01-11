@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -75,13 +76,11 @@ import org.w3c.dom.NodeList;
  * @author S. Livezey
  */
 public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
-
+	
 	private Map<String, String> namespaceMappings = new HashMap<String, String>();
 	private Set<String> extensionPointNamespaces = new HashSet<String>();
 	private Set<String> externalDependencyNamespaces = new HashSet<String>();
-	//private Stack<ExampleContext> contextStack = new Stack<ExampleContext>();
 	private Document domDocument;
-	//private ExampleContext context = new ExampleContext(null);
 
 	private List<DOMIdReferenceAssignment> referenceAssignments = new ArrayList<DOMIdReferenceAssignment>();
 
@@ -586,15 +585,17 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
     @Override
     public void startExtensionPoint(TLPatchableFacet facet) {
         super.startExtensionPoint(facet);
-        SchemaDependency extensionElement = extensionPointTypeMap.get(facet.getFacetType());
+        QName extensionElementName = getExtensionPoint( facet );
         Element owningDomElement = context.getNode();
 
-        if ((extensionElement != null) && (owningDomElement != null)) {
+        if ((extensionElementName != null) && (owningDomElement != null)) {
+            String preferredPrefix = SchemaDependency.getExtensionPointElement()
+            		.getSchemaDeclaration().getDefaultPrefix();
+            
             contextStack.push(context);
             context = new ExampleContext(null);
-            context.setNode(createXmlElement(extensionElement.getSchemaDeclaration()
-                    .getNamespace(), extensionElement.getLocalName(), extensionElement
-                    .getSchemaDeclaration().getDefaultPrefix()));
+            context.setNode(createXmlElement(extensionElementName.getNamespaceURI(),
+            		extensionElementName.getLocalPart(), preferredPrefix));
             owningDomElement.appendChild(context.getNode());
         }
     }
@@ -605,14 +606,13 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
     @Override
     public void endExtensionPoint(TLPatchableFacet facet) {
         super.endExtensionPoint(facet);
-        SchemaDependency extensionElement = extensionPointTypeMap.get(facet.getFacetType());
+        QName extensionElementName = getExtensionPoint( facet );
         Element domElement = context.getNode();
 
-        if ((extensionElement != null)
+        if ((extensionElementName != null)
                 && (domElement != null)
-                && domElement.getLocalName().equals(extensionElement.getLocalName())
-                && domElement.getNamespaceURI().equals(
-                        extensionElement.getSchemaDeclaration().getNamespace())) {
+                && domElement.getLocalName().equals(extensionElementName.getLocalPart())
+                && domElement.getNamespaceURI().equals(extensionElementName.getNamespaceURI())) {
             context = contextStack.pop();
         }
     }
@@ -1094,7 +1094,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
 				domDocument.createComment("  Legacy Content: {" + xsdNamespace
 						+ "}:" + xsdLocalName + "  "));
     }
-
+	
     /**
 	 * Handles the deferred assignment of 'IDREF' and 'IDREFS' values as a
 	 * post-processing step of the example generation process.
@@ -1154,27 +1154,6 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
             }
         }
 
-    }
-
-    /**
-     * Initializes the mapping of facet types to the extension point elements used to encapsulate
-     * extension point facet elements in the generated XML content.
-     */
-    static {
-        try {
-            extensionPointTypeMap = new HashMap<TLFacetType, SchemaDependency>();
-            extensionPointTypeMap.put(TLFacetType.SUMMARY,
-                    SchemaDependency.getExtensionPointSummaryElement());
-            extensionPointTypeMap.put(TLFacetType.DETAIL,
-                    SchemaDependency.getExtensionPointDetailElement());
-            extensionPointTypeMap.put(TLFacetType.CUSTOM,
-                    SchemaDependency.getExtensionPointCustomElement());
-            extensionPointTypeMap.put(TLFacetType.QUERY,
-                    SchemaDependency.getExtensionPointQueryElement());
-
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
-        }
     }
 
 }

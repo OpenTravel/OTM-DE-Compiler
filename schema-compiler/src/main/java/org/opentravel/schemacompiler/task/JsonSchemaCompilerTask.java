@@ -66,8 +66,9 @@ public class JsonSchemaCompilerTask extends AbstractCompilerTask implements Sche
 
         // Generate example files if required
         if (isGenerateExamples()) {
-            generateExampleArtifacts(userDefinedLibraries, context,
-                    new LibraryFilenameBuilder<AbstractLibrary>(), null);
+            generateExampleArtifacts(
+            		userDefinedLibraries, context, new LibraryFilenameBuilder<AbstractLibrary>(),
+            		null, CodeGeneratorFactory.JSON_TARGET_FORMAT);
         }
 	}
 	
@@ -135,22 +136,6 @@ public class JsonSchemaCompilerTask extends AbstractCompilerTask implements Sche
         }
     }
 
-    /**
-     * Generates example XML files for all elements of the given library.
-     * 
-     * @param userDefinedLibraries  the list of user-defined libraries for which to generate example XML files
-     * @param context  the code generation context to use for code generation
-     * @param filenameBuilder  the filename builder to use for schema location filename construction
-     * @param filter  the filter used to identify specific artifacts for which example generation is required
-     * @throws SchemaCompilerException
-     */
-    protected void generateExampleArtifacts(Collection<TLLibrary> userDefinedLibraries,
-            CodeGenerationContext context,
-            CodeGenerationFilenameBuilder<AbstractLibrary> filenameBuilder,
-            CodeGenerationFilter filter) throws SchemaCompilerException {
-    	// TODO: Implement the 'generateExampleArtifacts()' method
-    }
-    
     /**
      * @see org.opentravel.schemacompiler.task.AbstractCompilerTask#createContext()
      */

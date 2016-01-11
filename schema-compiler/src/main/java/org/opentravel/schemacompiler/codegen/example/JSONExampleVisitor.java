@@ -19,11 +19,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import javax.xml.namespace.QName;
+
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.JsonSchemaNamingUtils;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
-import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLActionRequest;
@@ -546,16 +547,15 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 	@Override
     public void startExtensionPoint(TLPatchableFacet facet) {
 		super.startExtensionPoint(facet);
-		SchemaDependency extensionElement = extensionPointTypeMap.get(facet
-				.getFacetType());
+        QName extensionElementName = getExtensionPoint( facet );
 		ObjectNode owningNode = (ObjectNode) context.getNode();
 
-		if ((extensionElement != null) && (owningNode != null)) {
+		if ((extensionElementName != null) && (owningNode != null)) {
 			contextStack.push(context);
 			context = new ExampleContext(null);
 			ObjectNode objectNode = nodeFactory.objectNode();
 			context.setNode(objectNode);
-			owningNode.set(extensionElement.getLocalName(), objectNode);
+			owningNode.set(extensionElementName.getLocalPart(), objectNode);
 		}
 	}
 
@@ -565,13 +565,12 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 	@Override
 	public void endExtensionPoint(TLPatchableFacet facet) {
 		super.endExtensionPoint(facet);
-		SchemaDependency extensionElement = extensionPointTypeMap.get(facet
-				.getFacetType());
+        QName extensionElementName = getExtensionPoint( facet );
 		ObjectNode domElement = (ObjectNode) context.getNode();
 
-		if (extensionElement != null && domElement != null) {
+		if (extensionElementName != null && domElement != null) {
 			JsonNode parent = contextStack.peek().getNode();
-			if (parent.findValue(extensionElement.getLocalName()) != null) {
+			if (parent.findValue(extensionElementName.getLocalPart()) != null) {
 				context = contextStack.pop();
 			}
 		}

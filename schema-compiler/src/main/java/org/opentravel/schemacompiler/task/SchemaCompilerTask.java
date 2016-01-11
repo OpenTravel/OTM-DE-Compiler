@@ -15,13 +15,12 @@
  */
 package org.opentravel.schemacompiler.task;
 
-import java.io.File;
 import java.util.Collection;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
+import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.codegen.impl.LibraryFilenameBuilder;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
-import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.XSDLibrary;
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
@@ -58,37 +57,10 @@ public class SchemaCompilerTask extends AbstractSchemaCompilerTask implements
 
         // Generate example files if required
         if (isGenerateExamples()) {
-            generateExampleArtifacts(userDefinedLibraries, context,
-                    new LibraryFilenameBuilder<AbstractLibrary>(), null);
+            generateExampleArtifacts(
+            		userDefinedLibraries, context, new LibraryFilenameBuilder<AbstractLibrary>(),
+            		null, CodeGeneratorFactory.XML_TARGET_FORMAT);
         }
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.task.AbstractSchemaCompilerTask#getExampleOutputFolder(org.opentravel.schemacompiler.model.LibraryMember,
-     *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
-     */
-    @Override
-    protected String getExampleOutputFolder(LibraryMember libraryMember,
-            CodeGenerationContext context) {
-        String libraryFolderName = "examples/"
-                + new LibraryFilenameBuilder<AbstractLibrary>().buildFilename(
-                        libraryMember.getOwningLibrary(), "");
-        String rootOutputFolder = context.getValue(CodeGenerationContext.CK_OUTPUT_FOLDER);
-
-        if (rootOutputFolder == null) {
-            rootOutputFolder = System.getProperty("user.dir");
-        }
-        return new File(rootOutputFolder, libraryFolderName).getAbsolutePath();
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.task.AbstractSchemaCompilerTask#getSchemaRelativeFolderPath(org.opentravel.schemacompiler.model.LibraryMember,
-     *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
-     */
-    @Override
-    protected String getSchemaRelativeFolderPath(LibraryMember libraryMember,
-            CodeGenerationContext context) {
-        return "../../";
     }
 
 }

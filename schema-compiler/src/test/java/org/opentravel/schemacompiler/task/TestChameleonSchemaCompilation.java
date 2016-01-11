@@ -53,10 +53,7 @@ public class TestChameleonSchemaCompilation {
 
         // Assert that no errors exist, and that the XML schema document is valid
         assertFalse(findings.hasFinding(FindingType.ERROR));
-        CodeGeneratorTestAssertions
-                .assertValidXsd(getTestOutput("schemas/chameleon_test_1_3_0_0.xsd"));
-        CodeGeneratorTestAssertions
-                .assertValidXsd(getTestOutput("schemas/legacy/chameleon_schema-1_Ext.xsd"));
+        CodeGeneratorTestAssertions.validateGeneratedFiles( compilerTask.getGeneratedFiles(), false );
     }
 
     @Test
@@ -99,10 +96,7 @@ public class TestChameleonSchemaCompilation {
 
         // Assert that no errors exist, and that the XML schema document is valid
         assertFalse(findings.hasFinding(FindingType.ERROR));
-        CodeGeneratorTestAssertions
-                .assertValidXsd(getTestOutput("schemas/chameleon_test_3_3_0_0.xsd"));
-        CodeGeneratorTestAssertions
-                .assertValidXsd(getTestOutput("schemas/legacy/chameleon_schema-1_Ext.xsd"));
+        CodeGeneratorTestAssertions.validateGeneratedFiles( compilerTask.getGeneratedFiles(), false );
     }
 
     @Test
@@ -122,8 +116,7 @@ public class TestChameleonSchemaCompilation {
 
         // Assert that no errors exist, and that the XML schema document is valid
         assertFalse(findings.hasFinding(FindingType.ERROR));
-        CodeGeneratorTestAssertions
-                .assertValidXsd(getTestOutput("schemas/chameleon_test_4_3_0_0.xsd"));
+        CodeGeneratorTestAssertions.validateGeneratedFiles( compilerTask.getGeneratedFiles(), false );
     }
 
     @Test
@@ -166,13 +159,7 @@ public class TestChameleonSchemaCompilation {
 
         // Assert that no errors exist, and that the XML schema document is valid
         assertFalse(findings.hasFinding(FindingType.ERROR));
-        CodeGeneratorTestAssertions
-                .assertValidXsd(getTestOutput("schemas/chameleon_test_6_3_0_0.xsd"));
-    }
-
-    private File getTestOutput(String filename) {
-        return new File(System.getProperty("user.dir") + "/target/codegen-output/chameleon_test/"
-                + filename);
+        CodeGeneratorTestAssertions.validateGeneratedFiles( compilerTask.getGeneratedFiles(), false );
     }
 
 }

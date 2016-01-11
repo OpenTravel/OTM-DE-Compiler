@@ -86,7 +86,7 @@ public class ServiceCompilerTask extends AbstractSchemaCompilerTask implements
                 if (isGenerateExamples()) {
                     generateExampleArtifacts(userDefinedLibraries, serviceContext,
                             new LibraryTrimmedFilenameBuilder(service),
-                            createExampleFilter(service));
+                            createExampleFilter(service), CodeGeneratorFactory.XML_TARGET_FORMAT);
                 }
             }
         }
