@@ -80,6 +80,14 @@ public class CommandLineCompilerTaskOptions implements CompileAllTaskOptions {
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.task.ResourceCompilerTaskOptions#getResourceBaseUrl()
+	 */
+	@Override
+	public String getResourceBaseUrl() {
+        return commandLineArgs.getOptionValue("p");
+	}
+
+	/**
      * @see org.opentravel.schemacompiler.task.CommonCompilerTaskOptions#getOutputFolder()
      */
     @Override
@@ -122,6 +130,14 @@ public class CommandLineCompilerTaskOptions implements CompileAllTaskOptions {
         return commandLineArgs.hasOption("W")
                 || (!commandLineArgs.hasOption("X") && !commandLineArgs.hasOption("W"));
     }
+
+	/**
+	 * @see org.opentravel.schemacompiler.task.CompileAllTaskOptions#isCompileSwagger()
+	 */
+	@Override
+	public boolean isCompileSwagger() {
+        return commandLineArgs.hasOption("S");
+	}
 
     /**
      * @see org.opentravel.schemacompiler.task.ExampleCompilerTaskOptions#isGenerateExamples()

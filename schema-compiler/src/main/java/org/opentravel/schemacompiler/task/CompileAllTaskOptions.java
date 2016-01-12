@@ -22,7 +22,7 @@ package org.opentravel.schemacompiler.task;
  * @author S. Livezey
  */
 public interface CompileAllTaskOptions extends SchemaCompilerTaskOptions,
-        ServiceCompilerTaskOptions {
+        ServiceCompilerTaskOptions, ResourceCompilerTaskOptions {
 
     /**
      * Returns the option flag indicating that XML schema (XSD) files should be generated for all
@@ -47,5 +47,13 @@ public interface CompileAllTaskOptions extends SchemaCompilerTaskOptions,
      * @return boolean
      */
     public boolean isCompileServices();
-
+    
+    /**
+     * Returns the option flag indicating that Swagger API descriptors should be generated for
+     * resource definitions.
+     * 
+     * @return boolean
+     */
+	public boolean isCompileSwagger();
+    
 }

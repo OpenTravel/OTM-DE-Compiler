@@ -36,6 +36,7 @@ public final class SchemaCompilerApplicationContext implements ApplicationContex
     public static final String WSDL_CODEGEN_TRANSFORMER_FACTORY = "wsdlCodeGeneratorTransformFactory";
     public static final String CODE_GENERATION_WSDL_BINDINGS = "codeGenerationWsdlBindings";
     public static final String JSON_SCHEMA_CODEGEN_TRANSFORMER_FACTORY = "jsonSchemaCodeGeneratorTransformFactory";
+    public static final String SWAGGER_CODEGEN_TRANSFORMER_FACTORY = "swaggerCodeGeneratorTransformFactory";
     public static final String EXAMPLE_GENERATOR = "exampleGenerator";
     public static final String PROTECTED_NAMESPACE_REGISTRY = "protectedNamespaceRegistry";
     public static final String LIBRARY_ACCESS_CONTROLLER = "libraryAccessController";

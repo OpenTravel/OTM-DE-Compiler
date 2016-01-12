@@ -15,7 +15,6 @@
  */
 package org.opentravel.schemacompiler.codegen.json;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -30,7 +29,6 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonLibraryInfo;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
-import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDeclaration;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
@@ -168,15 +166,6 @@ public abstract class AbstractJsonSchemaTransformer<S, T> extends AbstractCodege
             dependencies = Collections.emptySet();
         }
         return dependencies;
-    }
-
-    /**
-     * Returns the location of the base output folder for the schema that is being generated.
-     * 
-     * @return File
-     */
-    protected File getBaseOutputFolder() {
-        return XsdCodegenUtils.getBaseOutputFolder(context.getCodegenContext());
     }
 
 }

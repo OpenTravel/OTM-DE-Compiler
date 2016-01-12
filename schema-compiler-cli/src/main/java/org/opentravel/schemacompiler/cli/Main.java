@@ -137,6 +137,7 @@ public class Main {
         options.addOption("X", "compileXSD", false, messageBundle.getString("compileXSD"));
         options.addOption("W", "compileWSDL", false, messageBundle.getString("compileWSDL"));
         options.addOption("J", "compileJSON", false, messageBundle.getString("compileJSON"));
+        options.addOption("S", "compileSwagger", false, messageBundle.getString("compileSwagger"));
         options.addOption("E", "generateExamples", false,
                 messageBundle.getString("generateExamples"));
         options.addOption("C", "exampleContext", true, messageBundle.getString("exampleContext"));
@@ -146,6 +147,7 @@ public class Main {
                 messageBundle.getString("exampleMaxRepeat"));
         options.addOption("D", "exampleMaxDepth", true, messageBundle.getString("exampleMaxDepth"));
         options.addOption("s", "serviceEndpoint", true, messageBundle.getString("serviceEndpoint"));
+        options.addOption("p", "resourceBasePath", true, messageBundle.getString("resourceBasePath"));
         options.addOption("d", "dir", true, messageBundle.getString("dir"));
         options.addOption("c", "catalog", true, messageBundle.getString("catalog"));
         return options;

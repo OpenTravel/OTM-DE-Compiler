@@ -35,8 +35,10 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
     private boolean compileSchemas = true;
     private boolean compileJson = true;
     private boolean compileServices = true;
+    private boolean compileSwagger = true;
     private URL serviceLibraryUrl;
     private String serviceEndpointUrl;
+    private String resourceBaseUrl;
     private boolean generateExamples = true;
     private boolean generateMaxDetailsForExamples = true;
     private String exampleContext;
@@ -53,7 +55,7 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
         CodeGenerationContext compileAllContext = createContext();
 
         if (compileSchemas) {
-            SchemaCompilerTask schemaTask = new SchemaCompilerTask(projectFilename);
+            XmlSchemaCompilerTask schemaTask = new XmlSchemaCompilerTask(projectFilename);
 
             schemaTask.applyTaskOptions(this);
             schemaTask.setOutputFolder(getSubtaskOutputFolder(compileAllContext, "schemas"));
@@ -86,6 +88,14 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
                 serviceTask.generateOutput(userDefinedLibraries, legacySchemas);
                 addGeneratedFiles(serviceTask.getGeneratedFiles());
             }
+        }
+        if (compileSwagger) {
+            SwaggerCompilerTask swaggerTask = new SwaggerCompilerTask();
+
+            swaggerTask.applyTaskOptions(this);
+            swaggerTask.setOutputFolder(getSubtaskOutputFolder(compileAllContext, "swagger"));
+            swaggerTask.generateOutput(userDefinedLibraries, legacySchemas);
+            addGeneratedFiles(swaggerTask.getGeneratedFiles());
         }
     }
 
@@ -142,6 +152,7 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
             setCompileSchemas(compileAllOptions.isCompileSchemas());
             setCompileServices(compileAllOptions.isCompileServices());
             setCompileJsonSchemas(compileAllOptions.isCompileJsonSchemas());
+            setCompileSwagger(compileAllOptions.isCompileSwagger());
         }
         if (taskOptions instanceof SchemaCompilerTaskOptions) {
             // No explicit options currently implemented
@@ -160,6 +171,9 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
 
             setServiceLibraryUrl(serviceOptions.getServiceLibraryUrl());
             setServiceEndpointUrl(serviceOptions.getServiceEndpointUrl());
+        }
+        if (taskOptions instanceof ResourceCompilerTaskOptions) {
+            setResourceBaseUrl(((ResourceCompilerTaskOptions) taskOptions).getResourceBaseUrl());
         }
         super.applyTaskOptions(taskOptions);
     }
@@ -208,7 +222,7 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
         return compileServices;
     }
 
-    /**
+	/**
      * Assigns the option flag indicating that WSDL documents should be generated.
      * 
      * @param compileServices
@@ -216,6 +230,23 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
      */
     public void setCompileServices(boolean compileServices) {
         this.compileServices = compileServices;
+    }
+
+    /**
+	 * @see org.opentravel.schemacompiler.task.CompileAllTaskOptions#isCompileSwagger()
+	 */
+	@Override
+	public boolean isCompileSwagger() {
+		return compileSwagger;
+	}
+
+	/**
+     * Assigns the option flag indicating that Swagger documents should be generated.
+     * 
+     * @param compileSwagger  the task option value to assign
+     */
+    public void setCompileSwagger(boolean compileSwagger) {
+        this.compileSwagger = compileSwagger;
     }
 
     /**
@@ -257,6 +288,23 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.task.ResourceCompilerTaskOptions#getResourceBaseUrl()
+	 */
+	@Override
+	public String getResourceBaseUrl() {
+		return resourceBaseUrl;
+	}
+
+	/**
+	 * Assigns the base URL path for all generated REST API specifications.
+	 *
+	 * @param resourceBaseUrl  the base URL path to assign
+	 */
+	public void setResourceBaseUrl(String resourceBaseUrl) {
+		this.resourceBaseUrl = resourceBaseUrl;
+	}
+
+	/**
      * @see org.opentravel.schemacompiler.task.CommonCompilerTaskOptions#isGenerateExamples()
      */
     @Override

@@ -166,13 +166,15 @@ public abstract class AbstractXsdTransformer<S, T> extends AbstractCodegenTransf
             String schemaLocation = builtInFolder + schemaDependency.getFilename(
             		CodeGeneratorFactory.XSD_TARGET_FORMAT);
 
-            if (schemaLocation.toLowerCase().endsWith(".xsd")) {
-                if (builtInImport != null) {
+            if (builtInImport != null) {
+            	if (builtInImport != sourceLibrary) {
                     importList.add(builtInImport);
-                } else {
-                    // For now, only add import statements for schemas that are not formally
-                    // identified as
-                    // built-in libraries.
+            	}
+                
+            } else {
+                // For now, only add import statements for schemas that are not formally
+                // identified as built-in libraries.
+                if (schemaLocation.toLowerCase().endsWith(".xsd")) {
                     addImport(schema, schemaDependency.getNamespace(), builtInFolder
                             + schemaDependency.getFilename(CodeGeneratorFactory.XSD_TARGET_FORMAT),
                             false);

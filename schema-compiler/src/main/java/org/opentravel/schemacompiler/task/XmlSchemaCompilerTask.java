@@ -30,8 +30,7 @@ import org.opentravel.schemacompiler.util.SchemaCompilerException;
  * 
  * @author S. Livezey
  */
-public class SchemaCompilerTask extends AbstractSchemaCompilerTask implements
-        SchemaCompilerTaskOptions {
+public class XmlSchemaCompilerTask extends AbstractSchemaCompilerTask {
 
     /**
      * Constructor that specifies the filename of the project for which schemas are being compiled.
@@ -39,7 +38,7 @@ public class SchemaCompilerTask extends AbstractSchemaCompilerTask implements
      * @param projectFilename
      *            the name of the project (.otp) file
      */
-    public SchemaCompilerTask(String projectFilename) {
+    public XmlSchemaCompilerTask(String projectFilename) {
         this.projectFilename = projectFilename;
     }
 

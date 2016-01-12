@@ -31,6 +31,7 @@ import org.opentravel.schemacompiler.codegen.impl.AbstractJaxbCodeGenerator;
 import org.opentravel.schemacompiler.codegen.impl.DependencyFilterBuilder;
 import org.opentravel.schemacompiler.codegen.impl.LegacySchemaExtensionFilenameBuilder;
 import org.opentravel.schemacompiler.codegen.impl.LibraryFilenameBuilder;
+import org.opentravel.schemacompiler.codegen.json.AbstractJsonSchemaCodeGenerator;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.codegen.xsd.AbstractXsdCodeGenerator;
 import org.opentravel.schemacompiler.codegen.xsd.ImportSchemaLocations;
@@ -39,7 +40,6 @@ import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.ioc.SchemaDeclaration;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
-import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.XSDLibrary;
@@ -47,7 +47,7 @@ import org.opentravel.schemacompiler.util.SchemaCompilerException;
 import org.springframework.context.ApplicationContext;
 
 /**
- * Extends the base class by adding support for XML schema (XSD) and example
+ * Extends the base class by adding support for XML and JSON schemas, as well as example
  * output generation.
  * 
  * @author S. Livezey
@@ -195,7 +195,7 @@ public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask im
      * @return ImportSchemaLocations
      */
     @SuppressWarnings("unchecked")
-    protected ImportSchemaLocations analyzeImportDependencies(TLModel model,
+    private ImportSchemaLocations analyzeImportDependencies(TLModel model,
             CodeGenerationContext context, CodeGenerationFilenameBuilder<?> filenameBuilder,
             CodeGenerationFilter filter) {
         if (filenameBuilder == null) {
@@ -310,25 +310,67 @@ public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask im
     }
 
     /**
-     * Returns the relative path to the XML schema that can be used to validate the generated XML
-     * output.
+     * Compiles the XML schema files for the given model using the context, filename builder, and
+     * code generation filter provided.
      * 
-     * @param schemaFile
-     *            the name of the XML schema for the example output
-     * @param libraryMember
-     *            the library member element for which the schema location is needed
-     * @param context
-     *            the code generation context
-     * @return String
+     * @param userDefinedLibraries  the list of user-defined libraries for which to compile XML schema artifacts
+     * @param legacySchemas  the list of legacy schemas (xsd files) for which to compile XML schema artifacts
+     * @param context  the code generation context to use for code generation
+     * @param filenameBuilder  the filename builder to assign to the code generator(s) used by this method
+     * @param filter  the filter used to identify specific artifacts for which schema generation is required
+     * @throws SchemaCompilerException
      */
-    protected String getSchemaLocation(String schemaFile, LibraryMember libraryMember,
-            CodeGenerationContext context) {
-        String schemaLocation = null;
+    @SuppressWarnings("unchecked")
+    protected void compileJsonSchemas(Collection<TLLibrary> userDefinedLibraries,
+            Collection<XSDLibrary> legacySchemas, CodeGenerationContext context,
+            CodeGenerationFilenameBuilder<?> filenameBuilder, CodeGenerationFilter filter)
+            throws SchemaCompilerException {
 
-        if (schemaFile != null) {
-            return getSchemaRelativeFolderPath(libraryMember, context) + schemaFile;
+        // Generate output for all user-defined libraries
+        TLModel model = getModel(userDefinedLibraries, legacySchemas);
+
+        if (model == null) {
+            throw new SchemaCompilerException(
+                    "No libraries or legacy schemas found for code generation task.");
         }
-        return schemaLocation;
+
+        for (TLLibrary library : userDefinedLibraries) {
+            CodeGenerator<TLLibrary> jsonSchemaGenerator = newCodeGenerator(
+                    CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT, TLLibrary.class,
+                    (CodeGenerationFilenameBuilder<TLLibrary>) filenameBuilder, filter);
+
+            addGeneratedFiles(jsonSchemaGenerator.generateOutput(library, context));
+
+            // If any OTM built-in dependencies were identified, add them to the current filter
+            if ((filter != null) && (jsonSchemaGenerator instanceof AbstractJsonSchemaCodeGenerator)) {
+            	AbstractJsonSchemaCodeGenerator<?> generator = (AbstractJsonSchemaCodeGenerator<?>) jsonSchemaGenerator;
+
+                for (SchemaDeclaration schemaDeclaration : generator.getCompileTimeDependencies()) {
+                	String schemaFilename = schemaDeclaration.getFilename(CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT);
+                	
+                    if ((schemaFilename != null) && schemaFilename.endsWith(".json")) {
+                        AbstractLibrary dependentLib = model.getLibrary(
+                                schemaDeclaration.getNamespace(), schemaDeclaration.getName());
+
+                        if (dependentLib instanceof BuiltInLibrary) {
+                            filter.addBuiltInLibrary((BuiltInLibrary) dependentLib);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Generate output for all built-in libraries
+        if (model != null) {
+            CodeGenerator<BuiltInLibrary> xsdGenerator = newCodeGenerator(
+                    CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT, BuiltInLibrary.class,
+                    (CodeGenerationFilenameBuilder<BuiltInLibrary>) filenameBuilder, filter);
+            CodeGenerationContext builtInContext = context.getCopy();
+
+            for (BuiltInLibrary library : model.getBuiltInLibraries()) {
+                addGeneratedFiles(xsdGenerator.generateOutput(library, builtInContext));
+            }
+        }
     }
 
     /**

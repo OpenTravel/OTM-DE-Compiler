@@ -44,8 +44,8 @@ import org.opentravel.schemacompiler.version.VersionSchemeFactory;
  * 
  * @author S. Livezey
  */
-public class ServiceCompilerTask extends AbstractSchemaCompilerTask implements
-        ServiceCompilerTaskOptions {
+public class ServiceCompilerTask extends AbstractSchemaCompilerTask
+		implements ServiceCompilerTaskOptions {
 
     private URL serviceLibraryUrl;
     private String serviceEndpointUrl;

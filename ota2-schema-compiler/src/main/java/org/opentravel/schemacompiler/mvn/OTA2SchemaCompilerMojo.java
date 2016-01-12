@@ -92,6 +92,12 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
     protected boolean compileServices;
 
     /**
+     * Boolean flag indicating that Swagger files should be generated.
+     */
+	@Parameter( defaultValue = "true" )
+    protected boolean compileSwagger;
+
+    /**
      * Boolean flag indicating that example data files should be generated.
      */
 	@Parameter( defaultValue = "true" )
@@ -102,6 +108,12 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
      */
 	@Parameter
     protected String serviceEndpointUrl;
+
+    /**
+     * The base URL path for all generated REST resources.
+     */
+	@Parameter
+    protected String resourceBaseUrl;
 
     /**
      * Boolean flag indicating that the maximum amount of detail is to be included in generated
@@ -214,8 +226,10 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
         log.info("compileSchemas                = " + compileSchemas);
         log.info("compileJson                   = " + compileJson);
         log.info("compileServices               = " + compileServices);
+        log.info("compileSwagger                = " + compileSwagger);
         log.info("generateExamples              = " + generateExamples);
         log.info("serviceEndpointUrl            = " + serviceEndpointUrl);
+        log.info("resourceBaseUrl               = " + resourceBaseUrl);
         log.info("generateMaxDetailsForExamples = " + generateMaxDetailsForExamples);
         log.info("exampleContext                = " + exampleContext);
         log.info("exampleMaxRepeat              = " + exampleMaxRepeat);
@@ -246,7 +260,15 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
         return compileServices;
     }
 
-    /**
+	/**
+	 * @see org.opentravel.schemacompiler.task.CompileAllTaskOptions#isCompileSwagger()
+	 */
+	@Override
+	public boolean isCompileSwagger() {
+		return compileSwagger;
+	}
+
+	/**
      * @see org.opentravel.schemacompiler.task.CommonCompilerTaskOptions#getCatalogLocation()
      */
     @Override
@@ -277,6 +299,14 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
     public String getServiceEndpointUrl() {
         return serviceEndpointUrl;
     }
+
+    /**
+	 * @see org.opentravel.schemacompiler.task.ResourceCompilerTaskOptions#getResourceBaseUrl()
+	 */
+	@Override
+	public String getResourceBaseUrl() {
+		return resourceBaseUrl;
+	}
 
     /**
      * @see org.opentravel.schemacompiler.task.ExampleCompilerTaskOptions#isGenerateExamples()

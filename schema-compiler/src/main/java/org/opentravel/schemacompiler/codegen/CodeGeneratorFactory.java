@@ -31,12 +31,13 @@ import org.springframework.context.ApplicationContext;
  */
 public final class CodeGeneratorFactory {
 
-    public static final String XSD_TARGET_FORMAT = "XSD";
-    public static final String EXT_XSD_TARGET_FORMAT = "EXT_XSD";
-    public static final String WSDL_TARGET_FORMAT = "WSDL";
-    public static final String XML_TARGET_FORMAT = "XML";
+    public static final String XSD_TARGET_FORMAT         = "XSD";
+    public static final String EXT_XSD_TARGET_FORMAT     = "EXT_XSD";
+    public static final String WSDL_TARGET_FORMAT        = "WSDL";
+    public static final String XML_TARGET_FORMAT         = "XML";
     public static final String JSON_SCHEMA_TARGET_FORMAT = "JSON_SCHEMA";
-    public static final String JSON_TARGET_FORMAT = "JSON";
+    public static final String JSON_TARGET_FORMAT        = "JSON";
+    public static final String SWAGGER_TARGET_FORMAT     = "SWAGGER";
 
     private static final String FACTORY_NAME = "codeGeneratorFactory";
     private static final Pattern whitespacePattern = Pattern.compile("\\s+");

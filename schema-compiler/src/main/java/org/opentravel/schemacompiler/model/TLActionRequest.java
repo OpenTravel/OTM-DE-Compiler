@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.opentravel.ns.ota2.librarymodel_v01_05.MimeType;
 import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.event.ModelEventBuilder;
 import org.opentravel.schemacompiler.event.ModelEventType;
@@ -290,7 +289,7 @@ public class TLActionRequest extends TLModelElement implements NamedEntity, TLDo
 	 * 
 	 * @param mimeType  the MIME type to remove
 	 */
-	public void removeMimeType(MimeType mimeType) {
+	public void removeMimeType(TLMimeType mimeType) {
 		ModelEventBuilder eventBuilder = null;
 		
 		if (this.mimeTypes.contains(mimeType)) {

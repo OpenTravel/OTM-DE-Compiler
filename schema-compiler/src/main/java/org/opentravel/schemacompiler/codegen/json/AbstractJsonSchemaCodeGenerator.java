@@ -161,7 +161,7 @@ public abstract class AbstractJsonSchemaCodeGenerator<S extends TLModelElement> 
     }
     
     /**
-     * Performs the translation from meta-model element to a JAXB object that will be used to
+     * Performs the translation from meta-model element to a JSON schema object that will be used to
      * generate the output content.
      * 
      * @param source  the meta-model element to translate
