@@ -15,8 +15,14 @@
  */
 package org.opentravel.schemacompiler.codegen.swagger.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map.Entry;
 
+import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
+import org.opentravel.schemacompiler.codegen.json.model.JsonContextualValue;
+import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
+import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentationOwner;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 
@@ -26,11 +32,13 @@ import com.google.gson.JsonObject;
 /**
  * Class that defines the meta-model for a Swagger Parameter object.
  */
-public class SwaggerParameter {
+public class SwaggerParameter implements JsonDocumentationOwner {
 	
 	private String name;
 	private SwaggerParamType in;
-	private String description;
+	private JsonDocumentation documentation;
+	private List<JsonContextualValue> equivalentItems = new ArrayList<>();
+	private List<JsonContextualValue> exampleItems = new ArrayList<>();
 	private boolean required;
 	private JsonSchemaReference requestSchema;
 	private JsonSchema type;
@@ -72,23 +80,41 @@ public class SwaggerParameter {
 	}
 	
 	/**
-	 * Returns the value of the 'description' field.
+	 * Returns the value of the 'documentation' field.
 	 *
-	 * @return String
+	 * @return JsonDocumentation
 	 */
-	public String getDescription() {
-		return description;
+	public JsonDocumentation getDocumentation() {
+		return documentation;
 	}
 	
 	/**
-	 * Assigns the value of the 'description' field.
+	 * Assigns the value of the 'documentation' field.
 	 *
-	 * @param description  the field value to assign
+	 * @param documentation  the field value to assign
 	 */
-	public void setDescription(String description) {
-		this.description = description;
+	public void setDocumentation(JsonDocumentation documentation) {
+		this.documentation = documentation;
 	}
 	
+	/**
+	 * Returns the list of equivalent item definitions for this schema.
+	 *
+	 * @return List<JsonContextualValue>
+	 */
+	public List<JsonContextualValue> getEquivalentItems() {
+		return equivalentItems;
+	}
+
+	/**
+	 * Returns the list of example value definitions for this schema.
+	 *
+	 * @return List<JsonContextualValue>
+	 */
+	public List<JsonContextualValue> getExampleItems() {
+		return exampleItems;
+	}
+
 	/**
 	 * Returns the value of the 'required' field.
 	 *
@@ -158,9 +184,9 @@ public class SwaggerParameter {
 		if (in != null) {
 			json.addProperty( "in", in.getInValue() );
 		}
-		if (description != null) {
-			json.addProperty( "description", description );
-		}
+		
+		JsonSchemaCodegenUtils.createOtmAnnotations( json, this );
+		
 		if (required) {
 			json.addProperty( "required", true );
 		}

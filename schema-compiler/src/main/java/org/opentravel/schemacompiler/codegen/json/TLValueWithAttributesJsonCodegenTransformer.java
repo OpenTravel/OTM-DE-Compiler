@@ -18,7 +18,7 @@ package org.opentravel.schemacompiler.codegen.json;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
-import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaDocumentation;
+import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
@@ -76,10 +76,10 @@ public class TLValueWithAttributesJsonCodegenTransformer extends AbstractJsonSch
         	vwaValueSchemaRef.setSchemaPath(  referencePath );
         	
             if (source.getValueDocumentation() != null) {
-    	        ObjectTransformer<TLDocumentation, JsonSchemaDocumentation, CodeGenerationTransformerContext> docTransformer =
-    	        		getTransformerFactory().getTransformer(source.getValueDocumentation(), JsonSchemaDocumentation.class);
+    	        ObjectTransformer<TLDocumentation, JsonDocumentation, CodeGenerationTransformerContext> docTransformer =
+    	        		getTransformerFactory().getTransformer(source.getValueDocumentation(), JsonDocumentation.class);
                 
-                vwaValueSchemaRef.setSchemaPathDocumentation( docTransformer.transform( source.getValueDocumentation() ) );
+                vwaValueSchemaRef.setDocumentation( docTransformer.transform( source.getValueDocumentation() ) );
             }
         }
 

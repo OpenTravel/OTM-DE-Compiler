@@ -31,6 +31,7 @@ public class JsonLibraryInfo {
 	// 2015-12-01T17:20:42.144-06:00
 	
     private String projectName;
+    private String resourceName;
     private String libraryName;
     private String libraryVersion;
     private String libraryStatus;
@@ -56,6 +57,24 @@ public class JsonLibraryInfo {
 		this.projectName = projectName;
 	}
 	
+	/**
+	 * Returns the value of the 'resourceName' field.
+	 *
+	 * @return String
+	 */
+	public String getResourceName() {
+		return resourceName;
+	}
+
+	/**
+	 * Assigns the value of the 'resourceName' field.
+	 *
+	 * @param resourceName  the field value to assign
+	 */
+	public void setResourceName(String resourceName) {
+		this.resourceName = resourceName;
+	}
+
 	/**
 	 * Returns the name of the OTM library being compiled.
 	 *
@@ -173,6 +192,9 @@ public class JsonLibraryInfo {
 		
 		if (projectName != null) {
 			libraryInfo.addProperty( "ProjectName", projectName );
+		}
+		if (resourceName != null) {
+			libraryInfo.addProperty( "ResourceName", resourceName );
 		}
 		if (libraryName != null) {
 			libraryInfo.addProperty( "LibraryName", libraryName );

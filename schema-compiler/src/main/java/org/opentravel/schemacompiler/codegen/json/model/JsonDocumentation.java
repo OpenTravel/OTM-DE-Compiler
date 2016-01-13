@@ -27,7 +27,7 @@ import com.google.gson.JsonObject;
 /**
  * Provides documentation properties for a JSON schema.
  */
-public class JsonSchemaDocumentation {
+public class JsonDocumentation {
 	
 	private String[] descriptions;
 	private List<String> deprecations = new ArrayList<>();
@@ -40,14 +40,14 @@ public class JsonSchemaDocumentation {
 	/**
 	 * Default constructor.
 	 */
-	public JsonSchemaDocumentation() {}
+	public JsonDocumentation() {}
 	
 	/**
 	 * Constructor that assigns the description for this documentation item.
 	 * 
 	 * @param descriptions  the list of descriptions for this documentation item
 	 */
-	public JsonSchemaDocumentation(String... descriptions) {
+	public JsonDocumentation(String... descriptions) {
 		this.descriptions = descriptions;
 	}
 

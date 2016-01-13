@@ -66,7 +66,7 @@ public class TLSimpleJsonCodegenTransformer extends AbstractJsonSchemaTransforme
 	public JsonSchemaReference createSimpleSchema(TLSimple source) {
 		JsonType type = JsonType.valueOf( source.getParentType() );
 		JsonSchema simpleSchema = new JsonSchema();
-		boolean hasRestrictions = false;
+		boolean hasRestrictions;
 		JsonSchema restrictionsSchema;
 		JsonSchemaReference schemaRef;
 		
@@ -81,45 +81,7 @@ public class TLSimpleJsonCodegenTransformer extends AbstractJsonSchemaTransforme
 		} else {
 			restrictionsSchema = new JsonSchema();
 		}
-		
-        if (source.getMinLength() > 0) {
-        	restrictionsSchema.setMinLength( source.getMinLength() );
-        	hasRestrictions = true;
-        }
-        if (source.getMaxLength() > 0) {
-        	restrictionsSchema.setMaxLength( source.getMaxLength() );
-        	hasRestrictions = true;
-        }
-        if (source.getFractionDigits() > 0) {
-        	// No equivalent for fraction digits in JSON schema
-        }
-        if (source.getTotalDigits() > 0) {
-        	// No equivalent for total digits in JSON schema
-        }
-        if ((source.getPattern() != null) && (source.getPattern().length() > 0)) {
-        	restrictionsSchema.setPattern( source.getPattern() );
-        	hasRestrictions = true;
-        }
-        if ((source.getMinInclusive() != null) && (source.getMinInclusive().length() > 0)) {
-        	restrictionsSchema.setMinimum( Integer.parseInt( source.getMinInclusive() ) );
-        	restrictionsSchema.setExclusiveMinimum( false );
-        	hasRestrictions = true;
-        }
-        if ((source.getMaxInclusive() != null) && (source.getMaxInclusive().length() > 0)) {
-        	restrictionsSchema.setMaximum( Integer.parseInt( source.getMaxInclusive() ) );
-        	restrictionsSchema.setExclusiveMaximum( false );
-        	hasRestrictions = true;
-        }
-        if ((source.getMinExclusive() != null) && (source.getMinExclusive().length() > 0)) {
-        	restrictionsSchema.setMinimum( Integer.parseInt( source.getMinExclusive() ) );
-        	restrictionsSchema.setExclusiveMinimum( true );
-        	hasRestrictions = true;
-        }
-        if ((source.getMaxExclusive() != null) && (source.getMaxExclusive().length() > 0)) {
-        	restrictionsSchema.setMaximum( Integer.parseInt( source.getMaxExclusive() ) );
-        	restrictionsSchema.setExclusiveMaximum( true );
-        	hasRestrictions = true;
-        }
+		hasRestrictions = applyRestrictions( source, restrictionsSchema );
         
 		if (type == null) { // parent is not an XSD simple
 			if (hasRestrictions) {
@@ -136,6 +98,72 @@ public class TLSimpleJsonCodegenTransformer extends AbstractJsonSchemaTransforme
 			schemaRef = new JsonSchemaReference( simpleSchema );
 		}
 		return schemaRef;
+	}
+	
+	/**
+	 * Applies restrictions from the given simple to the target JSON schema.  If one
+	 * or more restrictions are applied, this method will return true; false otherwise.
+	 * 
+	 * @param source  the simple type from which to derive restrictions
+	 * @param targetSchema  the target JSON schema
+	 * @return boolean
+	 */
+	public static boolean applyRestrictions(TLSimple source, JsonSchema targetSchema) {
+		boolean hasRestrictions = false;
+		
+		if (targetSchema.getMinLength() == null) {
+	        if (source.getMinLength() > 0) {
+	        	targetSchema.setMinLength( source.getMinLength() );
+	        	hasRestrictions = true;
+	        }
+		}
+		if (targetSchema.getMaxLength() == null) {
+	        if (source.getMaxLength() > 0) {
+	        	targetSchema.setMaxLength( source.getMaxLength() );
+	        	hasRestrictions = true;
+	        }
+		}
+        if (source.getFractionDigits() > 0) {
+        	// No equivalent for fraction digits in JSON schema
+        }
+        if (source.getTotalDigits() > 0) {
+        	// No equivalent for total digits in JSON schema
+        }
+		if (targetSchema.getPattern() == null) {
+	        if ((source.getPattern() != null) && (source.getPattern().length() > 0)) {
+	        	targetSchema.setPattern( source.getPattern() );
+	        	hasRestrictions = true;
+	        }
+		}
+		if (targetSchema.getExclusiveMinimum() == null) {
+	        if ((source.getMinInclusive() != null) && (source.getMinInclusive().length() > 0)) {
+	        	targetSchema.setMinimum( Integer.parseInt( source.getMinInclusive() ) );
+	        	targetSchema.setExclusiveMinimum( false );
+	        	hasRestrictions = true;
+	        }
+		}
+		if (targetSchema.getExclusiveMaximum() == null) {
+	        if ((source.getMaxInclusive() != null) && (source.getMaxInclusive().length() > 0)) {
+	        	targetSchema.setMaximum( Integer.parseInt( source.getMaxInclusive() ) );
+	        	targetSchema.setExclusiveMaximum( false );
+	        	hasRestrictions = true;
+	        }
+		}
+		if (targetSchema.getExclusiveMinimum() == null) {
+	        if ((source.getMinExclusive() != null) && (source.getMinExclusive().length() > 0)) {
+	        	targetSchema.setMinimum( Integer.parseInt( source.getMinExclusive() ) );
+	        	targetSchema.setExclusiveMinimum( true );
+	        	hasRestrictions = true;
+	        }
+		}
+		if (targetSchema.getExclusiveMaximum() == null) {
+	        if ((source.getMaxExclusive() != null) && (source.getMaxExclusive().length() > 0)) {
+	        	targetSchema.setMaximum( Integer.parseInt( source.getMaxExclusive() ) );
+	        	targetSchema.setExclusiveMaximum( true );
+	        	hasRestrictions = true;
+	        }
+		}
+        return hasRestrictions;
 	}
 	
 }

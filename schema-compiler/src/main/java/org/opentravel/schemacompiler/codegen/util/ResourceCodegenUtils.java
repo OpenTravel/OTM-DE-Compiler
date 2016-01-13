@@ -15,11 +15,14 @@
  */
 package org.opentravel.schemacompiler.codegen.util;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.namespace.QName;
 
@@ -55,6 +58,16 @@ import org.opentravel.schemacompiler.model.XSDSimpleType;
  */
 public class ResourceCodegenUtils {
 	
+    /** This expression derived/taken from the BNF for URI (RFC2396). */
+    private static final String URL_REGEX =
+            "^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?";
+    //        12            3  4          5       6   7        8 9
+    private static final Pattern URL_PATTERN = Pattern.compile( URL_REGEX );
+    private static final int SCHEME_GROUP    = 2;
+    private static final int AUTHORITY_GROUP = 4;
+    private static final int PATH_GROUP      = 5;
+    private static final int QUERY_GROUP     = 7;
+    
 	private static final Set<Class<?>> eligibleParamTypes;
 	
 	/**
@@ -448,6 +461,92 @@ public class ResourceCodegenUtils {
 		return boElement;
 	}
 	
+	/**
+	 * Parses the components of the given URL string.
+	 * 
+	 * @param url  the URL to parse
+	 * @return URLComponents
+	 * @throws MalformedURLException  thrown if the URL is not valid
+	 */
+	public static URLComponents parseUrl(String url) throws MalformedURLException {
+		Matcher m = URL_PATTERN.matcher( url );
+		String urlPath;
+		
+		if (!m.matches()) {
+			throw new MalformedURLException("The URL is not valid - " + url);
+		}
+		urlPath = m.group( PATH_GROUP );
+		
+		if ((urlPath == null) || (urlPath.length() == 0)) {
+			urlPath = "/";
+		}
+		return new URLComponents( m.group( SCHEME_GROUP ), m.group( AUTHORITY_GROUP ),
+				urlPath, m.group( QUERY_GROUP ) );
+	}
+	
+	/**
+	 * Encapsulates the components of a parsed URL.
+	 */
+	public static class URLComponents {
+		
+		private String scheme;
+		private String authority;
+		private String path;
+		private String queryString;
+		
+		/**
+		 * Full constructor.
+		 * 
+		 * @param scheme  the scheme of a parsed URL
+		 * @param authority  the authority of a parsed URL
+		 * @param path  the path string of a parsed URL
+		 * @param queryString  the query string of a parsed URL
+		 */
+		public URLComponents(String scheme, String authority, String path, String queryString) {
+			this.scheme = scheme;
+			this.authority = authority;
+			this.path = path;
+			this.queryString = queryString;
+		}
+
+		/**
+		 * Returns the scheme of a parsed URL.
+		 *
+		 * @return String
+		 */
+		public String getScheme() {
+			return scheme;
+		}
+
+		/**
+		 * Returns the authority of a parsed URL.
+		 *
+		 * @return String
+		 */
+		public String getAuthority() {
+			return authority;
+		}
+
+		/**
+		 * Returns the path string of a parsed URL (always begins with a '/';
+		 * a no path URL returns "/"). 
+		 *
+		 * @return String
+		 */
+		public String getPath() {
+			return path;
+		}
+
+		/**
+		 * Returns the query string of a parsed URL (may be null).
+		 *
+		 * @return String
+		 */
+		public String getQueryString() {
+			return queryString;
+		}
+		
+	}
 	/**
 	 * Initializes the list of eligible simple types for <code>TLParameter</code> definitions.
 	 */

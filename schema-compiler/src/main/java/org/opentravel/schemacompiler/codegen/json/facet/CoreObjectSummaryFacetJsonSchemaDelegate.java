@@ -16,7 +16,7 @@
 package org.opentravel.schemacompiler.codegen.json.facet;
 
 import org.opentravel.schemacompiler.codegen.json.TLDocumentationJsonCodegenTransformer;
-import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaDocumentation;
+import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 import org.opentravel.schemacompiler.model.TLFacet;
@@ -40,16 +40,16 @@ public class CoreObjectSummaryFacetJsonSchemaDelegate extends CoreObjectFacetJso
 	 * @see org.opentravel.schemacompiler.codegen.json.facet.TLFacetJsonSchemaDelegate#createJsonDocumentation(org.opentravel.schemacompiler.model.TLDocumentationOwner)
 	 */
 	@Override
-	protected JsonSchemaDocumentation createJsonDocumentation(TLDocumentationOwner docOwner) {
-		JsonSchemaDocumentation jsonDoc = null;
+	protected JsonDocumentation createJsonDocumentation(TLDocumentationOwner docOwner) {
+		JsonDocumentation jsonDoc = null;
 
         if (docOwner instanceof TLFacet) {
             TLFacet sourceFacet = (TLFacet) docOwner;
 
             if (XsdCodegenUtils.isSimpleCoreObject( sourceFacet.getOwningEntity() )) {
-            	JsonSchemaDocumentation ownerDoc =
+            	JsonDocumentation ownerDoc =
             			super.createJsonDocumentation( (TLDocumentationOwner) sourceFacet.getOwningEntity() );
-            	JsonSchemaDocumentation facetDoc =
+            	JsonDocumentation facetDoc =
             			super.createJsonDocumentation( sourceFacet );
 
                 jsonDoc = TLDocumentationJsonCodegenTransformer.mergeDocumentation( ownerDoc, facetDoc );

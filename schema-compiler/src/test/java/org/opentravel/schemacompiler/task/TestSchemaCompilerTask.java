@@ -51,6 +51,7 @@ public class TestSchemaCompilerTask {
         compilerTask.setGenerateExamples(true);
         compilerTask.setExampleMaxRepeat( 3 );
         compilerTask.setServiceEndpointUrl("http://www.OpenTravel.org/services");
+        compilerTask.setResourceBaseUrl("http://www.OpenTravel.org/resources");
 
         ValidationFindings findings = compilerTask.compileOutput(sourceFile);
 
@@ -73,6 +74,7 @@ public class TestSchemaCompilerTask {
         compilerTask.setCompileServices(true);
         compilerTask.setGenerateExamples(true);
         compilerTask.setServiceEndpointUrl("http://www.OpenTravel.org/services");
+        compilerTask.setResourceBaseUrl("http://www.OpenTravel.org/resources");
 
         ValidationFindings findings = compilerTask.compileOutput(sourceFile);
 
@@ -95,6 +97,7 @@ public class TestSchemaCompilerTask {
         compilerTask.setCompileServices(true);
         compilerTask.setGenerateExamples(true);
         compilerTask.setServiceEndpointUrl("http://www.OpenTravel.org/services");
+        compilerTask.setResourceBaseUrl("http://www.OpenTravel.org/resources");
 
         ValidationFindings findings = compilerTask.compileOutput(sourceFile);
 
@@ -120,6 +123,7 @@ public class TestSchemaCompilerTask {
         compilerTask.setCompileServices(true);
         compilerTask.setGenerateExamples(true);
         compilerTask.setServiceEndpointUrl("http://www.OpenTravel.org/services");
+        compilerTask.setResourceBaseUrl("http://www.OpenTravel.org/resources");
 
         ValidationFindings findings = compilerTask.compileOutput(sourceFile);
 
@@ -142,6 +146,7 @@ public class TestSchemaCompilerTask {
         compilerTask.setCompileJsonSchemas(true);
         compilerTask.setCompileServices(true);
         compilerTask.setServiceEndpointUrl("http://www.OpenTravel.org/services");
+        compilerTask.setResourceBaseUrl("http://www.OpenTravel.org/resources");
 
         ValidationFindings findings = compilerTask.compileOutput(sourceFile);
 

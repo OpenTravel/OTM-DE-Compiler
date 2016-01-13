@@ -38,6 +38,9 @@ public class CodeGenerationContext {
     /** Context key indicating the base URL for all service endpoints generated in WSDL documents. */
     public static final String CK_SERVICE_ENDPOINT_URL = "schemacompiler.serviceEndpointUrl";
 
+    /** Context key indicating the base URL for all resource endpoints generated REST API documents. */
+    public static final String CK_RESOURCE_BASE_URL = "schemacompiler.resourceBaseUrl";
+
     /**
      * Context key indicating whether compile-time schema dependencies should be copied to the
      * output folder.

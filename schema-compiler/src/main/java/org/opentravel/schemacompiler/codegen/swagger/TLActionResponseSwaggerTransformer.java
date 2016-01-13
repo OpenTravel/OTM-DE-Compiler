@@ -15,21 +15,88 @@
  */
 package org.opentravel.schemacompiler.codegen.swagger;
 
+import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
+import org.opentravel.schemacompiler.codegen.json.facet.FacetJsonSchemaDelegate;
+import org.opentravel.schemacompiler.codegen.json.facet.FacetJsonSchemaDelegateFactory;
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerResponse;
+import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
+import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLActionResponse;
+import org.opentravel.schemacompiler.model.TLDocumentationOwner;
+import org.opentravel.schemacompiler.model.TLReferenceType;
 
 /**
  * Performs the translation from <code>TLActionResponse</code> objects to the Swagger model
  * objects used to produce the output.
  */
-public class TLActionResponseSwaggerTransformer extends AbstractSwaggerCodegenTransformer<TLActionResponse,SwaggerResponse> {
+public class TLActionResponseSwaggerTransformer extends AbstractSwaggerCodegenTransformer<TLActionResponse,CodegenArtifacts> {
 	
 	/**
 	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
 	 */
 	@Override
-	public SwaggerResponse transform(TLActionResponse source) {
-		return null;
+	public CodegenArtifacts transform(TLActionResponse source) {
+		CodegenArtifacts artifacts = new CodegenArtifacts();
+		
+		if (source.getStatusCodes().isEmpty()) {
+			artifacts.addArtifact( createResponse( source, null ) );
+			
+		} else {
+			for (Integer statusCode : source.getStatusCodes()) {
+				artifacts.addArtifact( createResponse( source, statusCode ) );
+			}
+		}
+		return artifacts;
+	}
+	
+	/**
+	 * Constructs a new Swagger response for the indicated status code.  If the status code
+	 * is null, a default response will be created.
+	 * 
+	 * @param source  the action response from which to construct the Swagger response
+	 * @param statusCode  the status code for the Swagger response
+	 * @return SwaggerResponse
+	 */
+	private SwaggerResponse createResponse(TLActionResponse source, Integer statusCode) {
+		SwaggerResponse response = new SwaggerResponse();
+		
+		response.setDefaultResponse( (statusCode == null) );
+		response.setStatusCode( statusCode );
+		transformDocumentation( source, response );
+		
+		if (source.getPayloadType() != null) {
+			NamedEntity referencedEntity = null;
+			
+			if (source.getPayloadType() instanceof TLActionFacet) {
+				TLActionFacet actionFacet = (TLActionFacet) source.getPayloadType();
+		        FacetJsonSchemaDelegateFactory delegateFactory = new FacetJsonSchemaDelegateFactory( context );
+		        FacetJsonSchemaDelegate<?> delegate = delegateFactory.getDelegate( actionFacet );
+				
+				if (delegate.hasContent() || (actionFacet.getReferenceType() != TLReferenceType.NONE)) {
+					if (delegate.hasContent() || (actionFacet.getReferenceRepeat() != 0)) {
+						referencedEntity = source;
+						
+					} else {
+						referencedEntity = ResourceCodegenUtils.getBusinessObjectElement( actionFacet ).getType();
+					}
+				}
+				
+			} else {
+				referencedEntity = source.getPayloadType();
+			}
+			
+			if (referencedEntity != null) {
+				response.setSchema( new JsonSchemaReference(
+						jsonUtils.getSchemaReferencePath( referencedEntity, source ) ));
+				
+				if (referencedEntity instanceof TLDocumentationOwner) {
+					transformDocumentation( (TLDocumentationOwner) referencedEntity, response );
+				}
+			}
+		}
+		return response;
 	}
 	
 }

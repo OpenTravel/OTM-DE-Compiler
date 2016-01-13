@@ -19,7 +19,7 @@ import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
-import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaDocumentation;
+import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.TLLibrary;
@@ -40,8 +40,8 @@ public class TLLibraryJsonCodegenTransformer extends AbstractJsonSchemaTransform
         JsonSchema schema = new JsonSchema( JsonSchema.JSON_SCHEMA_DRAFT4 );
 
         schema.setTitle( source.getName() );
-        schema.setDocumentation( new JsonSchemaDocumentation( source.getComments() ) );
-        schema.setLibraryInfo( getLibraryInfo( source ) );
+        schema.setDocumentation( new JsonDocumentation( source.getComments() ) );
+        schema.setLibraryInfo( jsonUtils.getLibraryInfo( source ) );
         
         // Add entries for each non-service term declaration
         for (LibraryMember member : source.getNamedMembers()) {

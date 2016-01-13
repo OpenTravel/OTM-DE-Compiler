@@ -1520,7 +1520,7 @@
 				</bean>
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
 					<property name="source" value="org.opentravel.schemacompiler.model.TLDocumentation" />
-					<property name="target" value="org.opentravel.schemacompiler.codegen.json.model.JsonSchemaDocumentation" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation" />
 					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLDocumentationJsonCodegenTransformer" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
@@ -1635,8 +1635,13 @@
 				</bean>
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
 					<property name="source" value="org.opentravel.schemacompiler.model.TLActionResponse" />
-					<property name="target" value="org.opentravel.schemacompiler.codegen.swagger.model.SwaggerResponse" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
 					<property name="transformer" value="org.opentravel.schemacompiler.codegen.swagger.TLActionResponseSwaggerTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLDocumentation" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLDocumentationJsonCodegenTransformer" />
 				</bean>
 			</set>
 		</property>

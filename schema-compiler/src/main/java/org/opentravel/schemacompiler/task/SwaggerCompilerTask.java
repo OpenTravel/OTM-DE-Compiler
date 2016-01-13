@@ -131,6 +131,19 @@ public class SwaggerCompilerTask extends AbstractSchemaCompilerTask
     }
     
     /**
+	 * @see org.opentravel.schemacompiler.task.AbstractSchemaCompilerTask#createContext()
+	 */
+	@Override
+	protected CodeGenerationContext createContext() {
+        CodeGenerationContext context = super.createContext();
+
+        if (resourceBaseUrl != null) {
+            context.setValue(CodeGenerationContext.CK_RESOURCE_BASE_URL, resourceBaseUrl);
+        }
+        return context;
+	}
+
+	/**
      * @see org.opentravel.schemacompiler.task.AbstractCompilerTask#applyTaskOptions(org.opentravel.schemacompiler.task.CommonCompilerTaskOptions)
      */
     @Override

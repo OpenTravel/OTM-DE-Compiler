@@ -18,17 +18,19 @@ package org.opentravel.schemacompiler.codegen.json.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
+
 import com.google.gson.JsonObject;
 
 /**
  * Encapsulates a reference to another JSON schema.  Reference may be either by-value
  * (included directly in the parent schema) or by-reference as a relative path.
  */
-public class JsonSchemaReference {
+public class JsonSchemaReference  implements JsonDocumentationOwner {
 	
 	private JsonSchema schema;
 	private String schemaPath;
-	private JsonSchemaDocumentation schemaPathDocumentation;
+	private JsonDocumentation schemaPathDocumentation;
 	private List<JsonContextualValue> schemaPathEquivalentItems = new ArrayList<>();
 	private List<JsonContextualValue> schemaPathExampleItems = new ArrayList<>();
 	
@@ -99,9 +101,9 @@ public class JsonSchemaReference {
 	 * contains a by-value schema (not a path reference), this documentation item
 	 * will be ignored during marshalling.
 	 *
-	 * @return JsonSchemaDocumentation
+	 * @return JsonDocumentation
 	 */
-	public JsonSchemaDocumentation getSchemaPathDocumentation() {
+	public JsonDocumentation getDocumentation() {
 		return schemaPathDocumentation;
 	}
 
@@ -112,7 +114,7 @@ public class JsonSchemaReference {
 	 *
 	 * @param schemaPathDocumentation  the schema path documentation to assign
 	 */
-	public void setSchemaPathDocumentation(JsonSchemaDocumentation schemaPathDocumentation) {
+	public void setDocumentation(JsonDocumentation schemaPathDocumentation) {
 		this.schemaPathDocumentation = schemaPathDocumentation;
 	}
 
@@ -123,7 +125,7 @@ public class JsonSchemaReference {
 	 *
 	 * @return List<JsonContextualValue>
 	 */
-	public List<JsonContextualValue> getSchemaPathEquivalentItems() {
+	public List<JsonContextualValue> getEquivalentItems() {
 		return schemaPathEquivalentItems;
 	}
 
@@ -134,7 +136,7 @@ public class JsonSchemaReference {
 	 *
 	 * @return List<JsonContextualValue>
 	 */
-	public List<JsonContextualValue> getSchemaPathExampleItems() {
+	public List<JsonContextualValue> getExampleItems() {
 		return schemaPathExampleItems;
 	}
 
@@ -151,8 +153,7 @@ public class JsonSchemaReference {
 			
 		} else {
 			schemaRef = new JsonObject();
-			JsonSchema.createOtmAnnotations( schemaRef, schemaPathDocumentation,
-					schemaPathEquivalentItems, schemaPathExampleItems );
+			JsonSchemaCodegenUtils.createOtmAnnotations( schemaRef, this );
 			schemaRef.addProperty( "$ref", schemaPath );
 		}
 		return schemaRef;

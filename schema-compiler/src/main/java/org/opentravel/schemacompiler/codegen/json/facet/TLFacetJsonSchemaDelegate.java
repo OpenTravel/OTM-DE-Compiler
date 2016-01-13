@@ -27,7 +27,7 @@ import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.CorrelatedCodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
-import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaDocumentation;
+import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonType;
@@ -234,15 +234,15 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
 	 * Returns JSON schema documentation for the source facet of this delegate.
 	 * 
 	 * @param docOwner  the owner for which JSON documentation should be created
-	 * @return JsonSchemaDocumentation
+	 * @return JsonDocumentation
 	 */
-	protected JsonSchemaDocumentation createJsonDocumentation(TLDocumentationOwner docOwner) {
+	protected JsonDocumentation createJsonDocumentation(TLDocumentationOwner docOwner) {
 		TLDocumentation doc = DocumentationFinder.getDocumentation( docOwner );
-		JsonSchemaDocumentation jsonDoc = null;
+		JsonDocumentation jsonDoc = null;
 		
 		if (doc != null) {
-	        ObjectTransformer<TLDocumentation, JsonSchemaDocumentation, CodeGenerationTransformerContext> transformer =
-	        		getTransformerFactory().getTransformer(doc, JsonSchemaDocumentation.class);
+	        ObjectTransformer<TLDocumentation, JsonDocumentation, CodeGenerationTransformerContext> transformer =
+	        		getTransformerFactory().getTransformer(doc, JsonDocumentation.class);
 			
 	        jsonDoc = transformer.transform( doc );
 		}

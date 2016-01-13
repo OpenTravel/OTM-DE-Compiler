@@ -16,14 +16,19 @@
 package org.opentravel.schemacompiler.codegen.json;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.opentravel.ns.ota2.appinfo_v01_00.OTA2Entity;
+import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder;
 import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.json.model.JsonContextualValue;
+import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
+import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentationOwner;
 import org.opentravel.schemacompiler.codegen.json.model.JsonEntityInfo;
+import org.opentravel.schemacompiler.codegen.json.model.JsonLibraryInfo;
 import org.opentravel.schemacompiler.codegen.util.JsonSchemaNamingUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
@@ -34,6 +39,14 @@ import org.opentravel.schemacompiler.model.TLEquivalent;
 import org.opentravel.schemacompiler.model.TLEquivalentOwner;
 import org.opentravel.schemacompiler.model.TLExample;
 import org.opentravel.schemacompiler.model.TLExampleOwner;
+import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.util.SchemaCompilerInfo;
+import org.opentravel.schemacompiler.util.URLUtils;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 /**
  * Static utility methods used during the generation of JSON schema output.
@@ -53,6 +66,46 @@ public class JsonSchemaCodegenUtils {
 		this.context = context;
 	}
 	
+    /**
+     * Returns the JSON schema information for the given OTM library.
+     * 
+     * @param library  the OTM library instance for which to return info
+     * @return JsonLibraryInfo
+     */
+    public JsonLibraryInfo getLibraryInfo(AbstractLibrary library) {
+    	CodeGenerationContext cgContext = context.getCodegenContext();
+    	JsonLibraryInfo libraryInfo = new JsonLibraryInfo();
+
+        libraryInfo.setProjectName( cgContext.getValue( CodeGenerationContext.CK_PROJECT_FILENAME ) );
+        libraryInfo.setLibraryName( library.getName() );
+        libraryInfo.setLibraryVersion( library.getVersion() );
+        libraryInfo.setSourceFile( URLUtils.getShortRepresentation( library.getLibraryUrl() ) );
+        libraryInfo.setCompilerVersion( SchemaCompilerInfo.getInstance().getCompilerVersion() );
+        libraryInfo.setCompileDate( new Date() );
+
+        if (library instanceof TLLibrary) {
+        	TLLibrary tlLibrary = (TLLibrary) library;
+        	
+        	if (tlLibrary.getStatus() != null) {
+        		libraryInfo.setLibraryStatus( tlLibrary.getStatus().toString() );
+        	}
+        }
+        return libraryInfo;
+    }
+
+    /**
+     * Returns the JSON schema information for the given OTM resource.
+     * 
+     * @param resource  the OTM resource instance for which to return info
+     * @return JsonLibraryInfo
+     */
+    public JsonLibraryInfo getResourceInfo(TLResource resource) {
+    	JsonLibraryInfo resourceInfo = getLibraryInfo( resource.getOwningLibrary() );
+    	
+    	resourceInfo.setResourceName( resource.getName() );
+    	return resourceInfo;
+    }
+    
     /**
      * Returns the JSON schema information for the given OTM named entity.
      * 
@@ -166,6 +219,74 @@ public class JsonSchemaCodegenUtils {
 					+ "#/definitions/" + schemaDependency.getLocalName();
 		}
 		return referencePath;
+	}
+	
+	/**
+	 * Shared method that constructs the JSON structures for the 'x-otm-annotations' element
+	 * of a schema.  If no annotations are required, this method will return with no action.
+	 * 
+	 * @param targetJson  the target JSON document to which the annotation element will be applied
+	 * @param docOwner  the JSON documentation owner from which to obtain the documentation content
+	 */
+	public static void createOtmAnnotations(JsonObject targetJson, JsonDocumentationOwner docOwner) {
+		JsonDocumentation documentation = docOwner.getDocumentation();
+		List<JsonContextualValue> equivalentItems = docOwner.getEquivalentItems();
+		List<JsonContextualValue> exampleItems = docOwner.getExampleItems();
+		
+		if ((documentation != null) || !equivalentItems.isEmpty() || !exampleItems.isEmpty()) {
+			JsonObject jsonDoc = (documentation == null) ? null : documentation.toJson();
+			JsonObject otmAnnotations = new JsonObject();
+			boolean hasOtmAnnotation = false;
+			
+			if (jsonDoc != null) {
+				// Since the 'description' field is supported by the JSON schema spec,
+				// we will move that property from the 'x-otm-documentation' element
+				// to the main schema properties
+				if (documentation.hasDescription()) {
+					JsonElement jsonDesc = jsonDoc.get( "description" );
+					String firstDescription;
+					
+					if (jsonDesc instanceof JsonArray) {
+						JsonArray descList = (JsonArray) jsonDesc;
+						firstDescription = descList.remove( 0 ).getAsString();
+						
+						if (descList.size() == 1) {
+							jsonDoc.remove( "description" );
+							targetJson.addProperty( "description", descList.get( 0 ).getAsString() );
+						}
+					} else {
+						firstDescription = jsonDesc.getAsString();
+						jsonDoc.remove( "description" );
+					}
+					targetJson.addProperty( "description", firstDescription );
+				}
+				if (!jsonDoc.entrySet().isEmpty()) {
+					otmAnnotations.add( "documentation", jsonDoc );
+					hasOtmAnnotation = true;
+				}
+			}
+			if (!equivalentItems.isEmpty()) {
+				JsonArray itemList = new JsonArray();
+				
+				for (JsonContextualValue item : equivalentItems) {
+					itemList.add( item.toJson() );
+				}
+				otmAnnotations.add( "equivalents", itemList );
+				hasOtmAnnotation = true;
+			}
+			if (!exampleItems.isEmpty()) {
+				JsonArray itemList = new JsonArray();
+				
+				for (JsonContextualValue item : exampleItems) {
+					itemList.add( item.toJson() );
+				}
+				otmAnnotations.add( "examples", itemList );
+				hasOtmAnnotation = true;
+			}
+			if (hasOtmAnnotation) {
+				targetJson.add( "x-otm-annotations", otmAnnotations );
+			}
+		}
 	}
 	
 }

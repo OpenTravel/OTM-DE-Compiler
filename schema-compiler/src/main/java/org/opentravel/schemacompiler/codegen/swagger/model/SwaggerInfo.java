@@ -15,15 +15,25 @@
  */
 package org.opentravel.schemacompiler.codegen.swagger.model;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
+import org.opentravel.schemacompiler.codegen.json.model.JsonContextualValue;
+import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
+import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentationOwner;
+import org.opentravel.schemacompiler.codegen.json.model.JsonLibraryInfo;
+
 import com.google.gson.JsonObject;
 
 /**
  * Class that defines the meta-model for a Swagger Info object.
  */
-public class SwaggerInfo {
+public class SwaggerInfo implements JsonDocumentationOwner {
 	
 	private String title;
-	private String description;
+	private JsonLibraryInfo libraryInfo;
+	private JsonDocumentation documentation;
 	private String termsOfService;
 	private SwaggerContact contact;
 	private SwaggerLicense license;
@@ -48,22 +58,41 @@ public class SwaggerInfo {
 	}
 	
 	/**
-	 * Returns the value of the 'description' field.
+	 * Returns the value of the 'libraryInfo' field.
 	 *
-	 * @return String
+	 * @return JsonLibraryInfo
 	 */
-	public String getDescription() {
-		return description;
+	public JsonLibraryInfo getLibraryInfo() {
+		return libraryInfo;
 	}
 	
 	/**
-	 * Assigns the value of the 'description' field.
+	 * Assigns the value of the 'libraryInfo' field.
 	 *
-	 * @param description  the field value to assign
+	 * @param libraryInfo  the field value to assign
 	 */
-	public void setDescription(String description) {
-		this.description = description;
+	public void setLibraryInfo(JsonLibraryInfo libraryInfo) {
+		this.libraryInfo = libraryInfo;
 	}
+	
+	/**
+	 * Returns the value of the 'documentation' field.
+	 *
+	 * @return JsonDocumentation
+	 */
+	public JsonDocumentation getDocumentation() {
+		return documentation;
+	}
+	
+	/**
+	 * Assigns the value of the 'documentation' field.
+	 *
+	 * @param documentation  the field value to assign
+	 */
+	public void setDocumentation(JsonDocumentation documentation) {
+		this.documentation = documentation;
+	}
+	
 	/**
 	 * Returns the value of the 'termsOfService' field.
 	 *
@@ -72,6 +101,7 @@ public class SwaggerInfo {
 	public String getTermsOfService() {
 		return termsOfService;
 	}
+	
 	/**
 	 * Assigns the value of the 'termsOfService' field.
 	 *
@@ -80,6 +110,7 @@ public class SwaggerInfo {
 	public void setTermsOfService(String termsOfService) {
 		this.termsOfService = termsOfService;
 	}
+	
 	/**
 	 * Returns the value of the 'contact' field.
 	 *
@@ -135,6 +166,22 @@ public class SwaggerInfo {
 	}
 	
 	/**
+	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonDocumentationOwner#getEquivalentItems()
+	 */
+	@Override
+	public List<JsonContextualValue> getEquivalentItems() {
+		return Collections.emptyList();
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonDocumentationOwner#getExampleItems()
+	 */
+	@Override
+	public List<JsonContextualValue> getExampleItems() {
+		return Collections.emptyList();
+	}
+
+	/**
 	 * Returns the <code>JsonObject</code> representation of this Swagger
 	 * model element.
 	 * 
@@ -146,9 +193,12 @@ public class SwaggerInfo {
 		if (title != null) {
 			json.addProperty( "title", title );
 		}
-		if (description != null) {
-			json.addProperty( "description", description );
+		if (libraryInfo != null) {
+			json.add( "x-otm-library", libraryInfo.toJson() );
 		}
+		
+		JsonSchemaCodegenUtils.createOtmAnnotations( json, this );
+		
 		if (termsOfService != null) {
 			json.addProperty( "termsOfService", termsOfService );
 		}

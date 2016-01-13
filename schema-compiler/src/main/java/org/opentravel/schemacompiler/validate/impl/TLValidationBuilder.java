@@ -17,12 +17,11 @@ package org.opentravel.schemacompiler.validate.impl;
 
 import java.util.Locale;
 
+import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
-import org.opentravel.schemacompiler.model.TLDocumentation;
-import org.opentravel.schemacompiler.model.TLDocumentationItem;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 import org.opentravel.schemacompiler.validate.ValidationBuilder;
 import org.opentravel.schemacompiler.version.VersionScheme;
@@ -237,19 +236,7 @@ public final class TLValidationBuilder extends ValidationBuilder<TLValidationBui
                 	// Special case - do not warn deprecations on ota2:Empty
                 	
                 } else if (value instanceof TLDocumentationOwner) {
-                    TLDocumentation valueDoc = ((TLDocumentationOwner) value).getDocumentation();
-
-                    if ((valueDoc != null) && (valueDoc.getDeprecations() != null)) {
-                        for (TLDocumentationItem deprecationItem : valueDoc.getDeprecations()) {
-                            String deprecationText = (deprecationItem == null) ? null
-                                    : deprecationItem.getText().trim();
-
-                            if ((deprecationText != null) && (deprecationText.length() > 0)) {
-                                isDeprecated = true;
-                                break;
-                            }
-                        }
-                    }
+                    isDeprecated = DocumentationFinder.isDeprecated( (TLDocumentationOwner) value );
                     
                 } else {
                     AbstractLibrary valueLibrary = value.getOwningLibrary();

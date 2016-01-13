@@ -199,8 +199,8 @@ public class TLPropertyJsonCodegenTransformer extends AbstractJsonSchemaTransfor
         
         if (docSchema != null) {
     		transformDocumentation( source, docSchema );
-    		docSchema.getSchemaPathEquivalentItems().addAll( jsonUtils.getEquivalentInfo( source ) );
-    		docSchema.getSchemaPathExampleItems().addAll( jsonUtils.getExampleInfo( source ) );
+    		docSchema.getEquivalentItems().addAll( jsonUtils.getEquivalentInfo( source ) );
+    		docSchema.getExampleItems().addAll( jsonUtils.getExampleInfo( source ) );
         }
 	}
 	

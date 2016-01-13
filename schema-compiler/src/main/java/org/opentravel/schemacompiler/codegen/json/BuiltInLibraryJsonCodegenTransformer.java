@@ -39,7 +39,7 @@ public class BuiltInLibraryJsonCodegenTransformer extends AbstractJsonSchemaTran
         JsonSchema schema = new JsonSchema( JsonSchema.JSON_SCHEMA_DRAFT4 );
         
         schema.setTitle( source.getName() );
-        schema.setLibraryInfo( getLibraryInfo( source ) );
+        schema.setLibraryInfo( jsonUtils.getLibraryInfo( source ) );
         
         // Add entries for each non-service term declaration
         for (LibraryMember member : source.getNamedMembers()) {

@@ -22,7 +22,7 @@ import org.opentravel.schemacompiler.codegen.impl.CorrelatedCodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
 import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
-import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaDocumentation;
+import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
@@ -181,8 +181,8 @@ public abstract class FacetJsonSchemaDelegate<F extends TLAbstractFacet>{
 		TLDocumentation doc = DocumentationFinder.getDocumentation( docOwner );
 		
 		if (doc != null) {
-	        ObjectTransformer<TLDocumentation, JsonSchemaDocumentation, CodeGenerationTransformerContext> transformer =
-	        		getTransformerFactory().getTransformer(doc, JsonSchemaDocumentation.class);
+	        ObjectTransformer<TLDocumentation, JsonDocumentation, CodeGenerationTransformerContext> transformer =
+	        		getTransformerFactory().getTransformer(doc, JsonDocumentation.class);
 			
 	        targetSchema.setDocumentation( transformer.transform( doc ) );
 		}
@@ -199,10 +199,10 @@ public abstract class FacetJsonSchemaDelegate<F extends TLAbstractFacet>{
 		TLDocumentation doc = DocumentationFinder.getDocumentation( docOwner );
 		
 		if (doc != null) {
-	        ObjectTransformer<TLDocumentation, JsonSchemaDocumentation, CodeGenerationTransformerContext> transformer =
-	        		getTransformerFactory().getTransformer(doc, JsonSchemaDocumentation.class);
+	        ObjectTransformer<TLDocumentation, JsonDocumentation, CodeGenerationTransformerContext> transformer =
+	        		getTransformerFactory().getTransformer(doc, JsonDocumentation.class);
 			
-	        targetRef.setSchemaPathDocumentation( transformer.transform( doc ) );
+	        targetRef.setDocumentation( transformer.transform( doc ) );
 		}
 	}
 	

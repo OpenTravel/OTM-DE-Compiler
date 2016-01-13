@@ -19,23 +19,23 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaDocumentation;
+import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.model.TLAdditionalDocumentationItem;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLDocumentationItem;
 
 /**
  * Performs the translation from <code>TLDocumentation</code> objects to a
- * <code>JsonSchemaDocumentation</code> item.
+ * <code>JsonDocumentation</code> item.
  */
-public class TLDocumentationJsonCodegenTransformer extends AbstractJsonSchemaTransformer<TLDocumentation, JsonSchemaDocumentation> {
+public class TLDocumentationJsonCodegenTransformer extends AbstractJsonSchemaTransformer<TLDocumentation, JsonDocumentation> {
 	
 	/**
 	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
 	 */
 	@Override
-	public JsonSchemaDocumentation transform(TLDocumentation source) {
-		JsonSchemaDocumentation schemaDoc = new JsonSchemaDocumentation( source.getDescription() );
+	public JsonDocumentation transform(TLDocumentation source) {
+		JsonDocumentation schemaDoc = new JsonDocumentation( source.getDescription() );
 		
 		for (TLDocumentationItem deprecation : source.getDeprecations()) {
 			schemaDoc.addDeprecation( deprecation.getText() );
@@ -59,13 +59,13 @@ public class TLDocumentationJsonCodegenTransformer extends AbstractJsonSchemaTra
      * Merges multiple JSON schema documentation elements into a single element.
      * 
      * @param jsonDocs  the JSON schema documentation elements to merge
-     * @return JsonSchemaDocumentation
+     * @return JsonDocumentation
      */
-    public static JsonSchemaDocumentation mergeDocumentation(JsonSchemaDocumentation... jsonDocs) {
-    	JsonSchemaDocumentation mergedDoc = new JsonSchemaDocumentation();
+    public static JsonDocumentation mergeDocumentation(JsonDocumentation... jsonDocs) {
+    	JsonDocumentation mergedDoc = new JsonDocumentation();
     	List<String> descriptions = new ArrayList<>();
     	
-    	for (JsonSchemaDocumentation jsonDoc : jsonDocs) {
+    	for (JsonDocumentation jsonDoc : jsonDocs) {
     		if (jsonDoc == null) {
     			continue;
     		}

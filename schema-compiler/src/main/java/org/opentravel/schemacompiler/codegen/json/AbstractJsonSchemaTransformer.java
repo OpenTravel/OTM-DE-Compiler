@@ -17,27 +17,19 @@ package org.opentravel.schemacompiler.codegen.json;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 
-import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerator;
 import org.opentravel.schemacompiler.codegen.impl.AbstractCodegenTransformer;
 import org.opentravel.schemacompiler.codegen.impl.AbstractJaxbCodeGenerator;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
-import org.opentravel.schemacompiler.codegen.json.model.JsonLibraryInfo;
-import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
-import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaDocumentation;
-import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
+import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
+import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentationOwner;
 import org.opentravel.schemacompiler.ioc.SchemaDeclaration;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
-import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
-import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
-import org.opentravel.schemacompiler.util.SchemaCompilerInfo;
-import org.opentravel.schemacompiler.util.URLUtils;
 
 /**
  * Base class for all <code>ObjectTransformer</code> implementations that are part of the JSON schema
@@ -66,62 +58,17 @@ public abstract class AbstractJsonSchemaTransformer<S, T> extends AbstractCodege
 	 * @param docOwner  the OTM documentation owner
 	 * @param targetSchema  the target JSON schema that will receive the documentation
 	 */
-	protected void transformDocumentation(TLDocumentationOwner docOwner, JsonSchema targetSchema) {
+	protected void transformDocumentation(TLDocumentationOwner docOwner, JsonDocumentationOwner targetSchema) {
 		TLDocumentation doc = DocumentationFinder.getDocumentation( docOwner );
 		
 		if (doc != null) {
-	        ObjectTransformer<TLDocumentation, JsonSchemaDocumentation, CodeGenerationTransformerContext> transformer =
-	        		getTransformerFactory().getTransformer(doc, JsonSchemaDocumentation.class);
+	        ObjectTransformer<TLDocumentation, JsonDocumentation, CodeGenerationTransformerContext> transformer =
+	        		getTransformerFactory().getTransformer(doc, JsonDocumentation.class);
 			
 	        targetSchema.setDocumentation( transformer.transform( doc ) );
 		}
 	}
 	
-	/**
-	 * Transforms the OTM documentation for the given owner and assigns it to the
-	 * target schema reference provided.
-	 * 
-	 * @param docOwner  the OTM documentation owner
-	 * @param targetRef  the target schema reference that will receive the documentation
-	 */
-	protected void transformDocumentation(TLDocumentationOwner docOwner, JsonSchemaReference targetRef) {
-		TLDocumentation doc = DocumentationFinder.getDocumentation( docOwner );
-		
-		if (doc != null) {
-	        ObjectTransformer<TLDocumentation, JsonSchemaDocumentation, CodeGenerationTransformerContext> transformer =
-	        		getTransformerFactory().getTransformer(doc, JsonSchemaDocumentation.class);
-			
-	        targetRef.setSchemaPathDocumentation( transformer.transform( doc ) );
-		}
-	}
-	
-    /**
-     * Returns the JSON schema information for the given OTM library.
-     * 
-     * @param library  the OTM library instance for which to return info
-     * @return JsonLibraryInfo
-     */
-    protected JsonLibraryInfo getLibraryInfo(AbstractLibrary library) {
-    	CodeGenerationContext cgContext = context.getCodegenContext();
-    	JsonLibraryInfo libraryInfo = new JsonLibraryInfo();
-
-        libraryInfo.setProjectName( cgContext.getValue( CodeGenerationContext.CK_PROJECT_FILENAME ) );
-        libraryInfo.setLibraryName( library.getName() );
-        libraryInfo.setLibraryVersion( library.getVersion() );
-        libraryInfo.setSourceFile( URLUtils.getShortRepresentation( library.getLibraryUrl() ) );
-        libraryInfo.setCompilerVersion( SchemaCompilerInfo.getInstance().getCompilerVersion() );
-        libraryInfo.setCompileDate( new Date() );
-
-        if (library instanceof TLLibrary) {
-        	TLLibrary tlLibrary = (TLLibrary) library;
-        	
-        	if (tlLibrary.getStatus() != null) {
-        		libraryInfo.setLibraryStatus( tlLibrary.getStatus().toString() );
-        	}
-        }
-        return libraryInfo;
-    }
-
     /**
      * Adds the schemas associated with the given compile-time dependency to the current list of
      * dependencies maintained by the orchestrating code generator.

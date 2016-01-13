@@ -24,6 +24,7 @@ import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLComplexTypeBase;
 import org.opentravel.schemacompiler.model.TLDocumentation;
+import org.opentravel.schemacompiler.model.TLDocumentationItem;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLListFacet;
@@ -54,6 +55,31 @@ public class DocumentationFinder {
 	 */
 	public static TLDocumentation getDocumentation(TLDocumentationOwner entity) {
 		return getDocumentation( entity, new HashSet<String>() );
+	}
+	
+	/**
+	 * Returns true if the entity's documentation includes one or more deprecation
+	 * notices.
+	 * 
+	 * @param entity  the entity to check for deprecation
+	 * @return boolean
+	 */
+	public static boolean isDeprecated(TLDocumentationOwner entity) {
+        TLDocumentation doc = entity.getDocumentation();
+        boolean deprecated = false;
+        
+        if ((doc != null) && (doc.getDeprecations() != null)) {
+            for (TLDocumentationItem deprecationItem : doc.getDeprecations()) {
+                String deprecationText = (deprecationItem == null) ? null
+                        : deprecationItem.getText().trim();
+
+                if ((deprecationText != null) && (deprecationText.length() > 0)) {
+                    deprecated = true;
+                    break;
+                }
+            }
+        }
+        return deprecated;
 	}
 	
 	/**

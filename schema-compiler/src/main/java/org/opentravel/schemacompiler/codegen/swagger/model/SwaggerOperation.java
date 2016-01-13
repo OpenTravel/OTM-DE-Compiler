@@ -16,7 +16,13 @@
 package org.opentravel.schemacompiler.codegen.swagger.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
+import org.opentravel.schemacompiler.codegen.json.model.JsonContextualValue;
+import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
+import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentationOwner;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -24,10 +30,10 @@ import com.google.gson.JsonObject;
 /**
  * Class that defines the meta-model for a Swagger Operation object.
  */
-public class SwaggerOperation {
+public class SwaggerOperation implements JsonDocumentationOwner {
 	
 	private String summary;
-	private String description;
+	private JsonDocumentation documentation;
 	private String operationId;
 	private List<String> consumes = new ArrayList<>();
 	private List<String> produces = new ArrayList<>();
@@ -55,21 +61,21 @@ public class SwaggerOperation {
 	}
 	
 	/**
-	 * Returns the value of the 'description' field.
+	 * Returns the value of the 'documentation' field.
 	 *
-	 * @return String
+	 * @return JsonDocumentation
 	 */
-	public String getDescription() {
-		return description;
+	public JsonDocumentation getDocumentation() {
+		return documentation;
 	}
 	
 	/**
-	 * Assigns the value of the 'description' field.
+	 * Assigns the value of the 'documentation' field.
 	 *
-	 * @param description  the field value to assign
+	 * @param documentation  the field value to assign
 	 */
-	public void setDescription(String description) {
-		this.description = description;
+	public void setDocumentation(JsonDocumentation documentation) {
+		this.documentation = documentation;
 	}
 	
 	/**
@@ -199,6 +205,22 @@ public class SwaggerOperation {
 	}
 	
 	/**
+	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonDocumentationOwner#getEquivalentItems()
+	 */
+	@Override
+	public List<JsonContextualValue> getEquivalentItems() {
+		return Collections.emptyList();
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonDocumentationOwner#getExampleItems()
+	 */
+	@Override
+	public List<JsonContextualValue> getExampleItems() {
+		return Collections.emptyList();
+	}
+
+	/**
 	 * Returns the <code>JsonObject</code> representation of this Swagger
 	 * model element.
 	 * 
@@ -210,9 +232,9 @@ public class SwaggerOperation {
 		if (summary != null) {
 			json.addProperty( "summary", summary );
 		}
-		if (description != null) {
-			json.addProperty( "description", description );
-		}
+		
+		JsonSchemaCodegenUtils.createOtmAnnotations( json, this );
+		
 		if (operationId != null) {
 			json.addProperty( "operationId", operationId );
 		}
@@ -238,7 +260,7 @@ public class SwaggerOperation {
 			for (SwaggerParameter param : parameters) {
 				jsonArray.add( param.toJson() );
 			}
-			json.add( "produces", jsonArray );
+			json.add( "parameters", jsonArray );
 		}
 		if (!responses.isEmpty()) {
 			JsonObject responsesJson = new JsonObject();

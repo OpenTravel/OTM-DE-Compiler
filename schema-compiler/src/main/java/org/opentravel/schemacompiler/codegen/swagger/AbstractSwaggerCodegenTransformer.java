@@ -17,7 +17,13 @@ package org.opentravel.schemacompiler.codegen.swagger;
 
 import org.opentravel.schemacompiler.codegen.impl.AbstractCodegenTransformer;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
+import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
 import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
+import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
+import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentationOwner;
+import org.opentravel.schemacompiler.model.TLDocumentation;
+import org.opentravel.schemacompiler.model.TLDocumentationOwner;
+import org.opentravel.schemacompiler.transform.ObjectTransformer;
 
 /**
  * Base class for all <code>ObjectTransformer</code> implementations that are part of the Swagger
@@ -38,5 +44,23 @@ public abstract class AbstractSwaggerCodegenTransformer<S, T> extends AbstractCo
 		super.setContext(context);
 		jsonUtils = new JsonSchemaCodegenUtils( context );
 	}
-
+	
+	/**
+	 * Transforms the OTM documentation for the given owner and assigns it to the
+	 * target JSON schema provided.
+	 * 
+	 * @param docOwner  the OTM documentation owner
+	 * @param targetSchema  the target JSON schema that will receive the documentation
+	 */
+	protected void transformDocumentation(TLDocumentationOwner docOwner, JsonDocumentationOwner targetSchema) {
+		TLDocumentation doc = DocumentationFinder.getDocumentation( docOwner );
+		
+		if (doc != null) {
+	        ObjectTransformer<TLDocumentation, JsonDocumentation, CodeGenerationTransformerContext> transformer =
+	        		getTransformerFactory().getTransformer(doc, JsonDocumentation.class);
+			
+	        targetSchema.setDocumentation( transformer.transform( doc ) );
+		}
+	}
+	
 }
