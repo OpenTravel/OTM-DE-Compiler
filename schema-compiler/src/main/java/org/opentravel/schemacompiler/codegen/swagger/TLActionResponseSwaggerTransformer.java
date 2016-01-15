@@ -16,16 +16,14 @@
 package org.opentravel.schemacompiler.codegen.swagger;
 
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
-import org.opentravel.schemacompiler.codegen.json.facet.FacetJsonSchemaDelegate;
-import org.opentravel.schemacompiler.codegen.json.facet.FacetJsonSchemaDelegateFactory;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerResponse;
+import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerXmlSchemaRef;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.model.NamedEntity;
-import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
-import org.opentravel.schemacompiler.model.TLReferenceType;
+import org.opentravel.schemacompiler.model.TLMimeType;
 
 /**
  * Performs the translation from <code>TLActionResponse</code> objects to the Swagger model
@@ -60,40 +58,25 @@ public class TLActionResponseSwaggerTransformer extends AbstractSwaggerCodegenTr
 	 * @return SwaggerResponse
 	 */
 	private SwaggerResponse createResponse(TLActionResponse source, Integer statusCode) {
+		NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( source );
 		SwaggerResponse response = new SwaggerResponse();
 		
 		response.setDefaultResponse( (statusCode == null) );
 		response.setStatusCode( statusCode );
 		transformDocumentation( source, response );
 		
-		if (source.getPayloadType() != null) {
-			NamedEntity referencedEntity = null;
-			
-			if (source.getPayloadType() instanceof TLActionFacet) {
-				TLActionFacet actionFacet = (TLActionFacet) source.getPayloadType();
-		        FacetJsonSchemaDelegateFactory delegateFactory = new FacetJsonSchemaDelegateFactory( context );
-		        FacetJsonSchemaDelegate<?> delegate = delegateFactory.getDelegate( actionFacet );
-				
-				if (delegate.hasContent() || (actionFacet.getReferenceType() != TLReferenceType.NONE)) {
-					if (delegate.hasContent() || (actionFacet.getReferenceRepeat() != 0)) {
-						referencedEntity = source;
-						
-					} else {
-						referencedEntity = ResourceCodegenUtils.getBusinessObjectElement( actionFacet ).getType();
-					}
-				}
-				
-			} else {
-				referencedEntity = source.getPayloadType();
+		if (payloadType != null) {
+			if (containsSupportedType( source.getMimeTypes(), TLMimeType.TEXT_JSON, TLMimeType.APPLICATION_JSON )) {
+				response.setSchema( new JsonSchemaReference(
+						jsonUtils.getSchemaReferencePath( payloadType, null ) ));
+			}
+			if (containsSupportedType( source.getMimeTypes(), TLMimeType.TEXT_XML, TLMimeType.APPLICATION_XML )) {
+				response.setXmlSchema( new SwaggerXmlSchemaRef(
+						jsonUtils.getXmlSchemaReferencePath( payloadType ) ) );
 			}
 			
-			if (referencedEntity != null) {
-				response.setSchema( new JsonSchemaReference(
-						jsonUtils.getSchemaReferencePath( referencedEntity, source ) ));
-				
-				if (referencedEntity instanceof TLDocumentationOwner) {
-					transformDocumentation( (TLDocumentationOwner) referencedEntity, response );
-				}
+			if (payloadType instanceof TLDocumentationOwner) {
+				transformDocumentation( (TLDocumentationOwner) payloadType, response );
 			}
 		}
 		return response;

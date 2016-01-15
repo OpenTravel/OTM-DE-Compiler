@@ -15,6 +15,7 @@
  */
 package org.opentravel.schemacompiler.codegen.json;
 
+import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonEntityInfo;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
@@ -26,6 +27,9 @@ import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLPropertyType;
+import org.opentravel.schemacompiler.model.XSDComplexType;
+import org.opentravel.schemacompiler.model.XSDElement;
+import org.opentravel.schemacompiler.model.XSDSimpleType;
 
 /**
  * Performs the translation from <code>TLProperty</code> objects to the JSON schema elements
@@ -61,7 +65,7 @@ public class TLPropertyJsonCodegenTransformer extends AbstractJsonSchemaTransfor
             } else {
             	jsonProperty.setName( source.getName() );
             }
-
+            
         } else {
             // If the property references a type that defines a global element, use that
         	// element name for the JSON property name
@@ -192,6 +196,16 @@ public class TLPropertyJsonCodegenTransformer extends AbstractJsonSchemaTransfor
         	}
         	propertySchema.setType( jsonType );
     		typeRef.setSchema( propertySchema );
+    		
+        } else if ((propertyType instanceof XSDSimpleType) || (propertyType instanceof XSDComplexType)
+        		|| (propertyType instanceof XSDElement)) {
+        	JsonDocumentation doc = new JsonDocumentation();
+        	JsonSchema typeSchema = new JsonSchema();
+        	
+        	doc.setDescriptions( "Legacy XML schema reference - {" +
+        			propertyType.getNamespace() + "}" + propertyType.getLocalName() );
+        	typeSchema.setDocumentation( doc );
+        	typeRef.setSchema( typeSchema );
     		
         } else {
     		typeRef.setSchemaPath( jsonUtils.getSchemaReferencePath( propertyType, source.getOwner() ) );

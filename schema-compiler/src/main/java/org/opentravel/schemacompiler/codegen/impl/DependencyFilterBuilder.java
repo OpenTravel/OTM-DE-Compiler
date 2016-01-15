@@ -165,7 +165,7 @@ public class DependencyFilterBuilder {
      *            the library member for which filters will be generated
      * @return DependencyFilterBuilder
      */
-    public DependencyFilterBuilder addLibraryMember(LibraryMember libraryMember) {
+    public DependencyFilterBuilder addLibraryMember(NamedEntity libraryMember) {
         navigator.navigate(libraryMember);
         return this;
     }

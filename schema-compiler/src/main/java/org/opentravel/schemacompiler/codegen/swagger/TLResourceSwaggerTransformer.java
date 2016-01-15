@@ -27,6 +27,7 @@ import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerConte
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerDocument;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerInfo;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerOperation;
+import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerOtmResource;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerPathItem;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils.URLComponents;
@@ -62,8 +63,12 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
 		swaggerDoc.setBasePath( basePath );
 		
 		// Populate the information section of the Swagger document
+		SwaggerOtmResource swaggerResource = new SwaggerOtmResource();
 		SwaggerInfo info = new SwaggerInfo();
 		
+		swaggerResource.setNamespace( source.getNamespace() );
+		swaggerResource.setLocalName( source.getLocalName() );
+		swaggerDoc.setOtmResource( swaggerResource );
 		info.setTitle( source.getName() + " API Specification" );
 		info.setLibraryInfo( jsonUtils.getResourceInfo( source ) );
 		swaggerDoc.setInfo( info );

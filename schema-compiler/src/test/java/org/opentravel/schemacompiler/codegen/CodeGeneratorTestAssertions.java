@@ -195,14 +195,14 @@ public class CodeGeneratorTestAssertions {
      */
     private static Schema getValidationSchema(File schemaFile) {
 		try {
-			Schema vSchema = xmlSchemaCache.get( schemaFile.getName() );
+			Schema vSchema = xmlSchemaCache.get( schemaFile.getCanonicalPath() );
 			
 			if (vSchema == null) {
 		    	SchemaFactory sf = SchemaFactory.newInstance( XMLConstants.W3C_XML_SCHEMA_NS_URI );
 		    	
 		    	sf.setResourceResolver( new FileSystemResourceResolver( schemaFile ) );
 				vSchema = sf.newSchema( schemaFile );
-				xmlSchemaCache.put( schemaFile.getName(), vSchema );
+				xmlSchemaCache.put( schemaFile.getCanonicalPath(), vSchema );
 			}
 			return vSchema;
 			

@@ -16,6 +16,7 @@
 package org.opentravel.schemacompiler.codegen.json;
 
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
+import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
@@ -29,6 +30,7 @@ import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLRole;
 import org.opentravel.schemacompiler.model.TLRoleEnumeration;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
+import org.opentravel.schemacompiler.model.XSDSimpleType;
 
 /**
  * Performs the translation from <code>TLAttribute</code> objects to the JSON schema elements
@@ -112,6 +114,15 @@ public class TLAttributeJsonCodegenTransformer extends AbstractJsonSchemaTransfo
     		attrSchema.getEquivalentItems().addAll( jsonUtils.getEquivalentInfo( source ) );
     		attrSchemaRef.setSchema( attrSchema );
     		
+        } else if (attributeType instanceof XSDSimpleType) {
+        	JsonDocumentation doc = new JsonDocumentation();
+        	JsonSchema attrSchema = new JsonSchema();
+        	
+        	doc.setDescriptions( "Legacy XML schema reference - {" +
+        			attributeType.getNamespace() + "}" + attributeType.getLocalName() );
+        	attrSchema.setDocumentation( doc );
+        	attrSchemaRef.setSchema( attrSchema );
+        	
         } else {
     		transformDocumentation( source, attrSchemaRef );
     		attrSchemaRef.getExampleItems().addAll( jsonUtils.getExampleInfo( source ) );

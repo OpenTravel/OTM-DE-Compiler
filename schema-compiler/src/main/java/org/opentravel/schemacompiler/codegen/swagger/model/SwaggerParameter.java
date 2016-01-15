@@ -41,6 +41,7 @@ public class SwaggerParameter implements JsonDocumentationOwner {
 	private List<JsonContextualValue> exampleItems = new ArrayList<>();
 	private boolean required;
 	private JsonSchemaReference requestSchema;
+	private SwaggerXmlSchemaRef requestXmlSchema;
 	private JsonSchema type;
 	
 	/**
@@ -152,6 +153,24 @@ public class SwaggerParameter implements JsonDocumentationOwner {
 	}
 	
 	/**
+	 * Returns the value of the 'requestXmlSchema' field.
+	 *
+	 * @return SwaggerXmlSchemaRef
+	 */
+	public SwaggerXmlSchemaRef getRequestXmlSchema() {
+		return requestXmlSchema;
+	}
+
+	/**
+	 * Assigns the value of the 'requestXmlSchema' field.
+	 *
+	 * @param requestXmlSchema  the field value to assign
+	 */
+	public void setRequestXmlSchema(SwaggerXmlSchemaRef requestXmlSchema) {
+		this.requestXmlSchema = requestXmlSchema;
+	}
+
+	/**
 	 * Returns the value of the 'type' field.
 	 *
 	 * @return JsonSchema
@@ -194,6 +213,10 @@ public class SwaggerParameter implements JsonDocumentationOwner {
 			if (requestSchema != null) {
 				json.add( "schema", requestSchema.toJson() );
 			}
+			if (requestXmlSchema != null) {
+				json.add( "x-xml-schema", requestXmlSchema.toJson() );
+			}
+			
 		} else if (type != null) {
 			JsonObject typeSchema = type.toJson();
 			

@@ -26,6 +26,8 @@ import java.util.regex.Pattern;
 
 import javax.xml.namespace.QName;
 
+import org.opentravel.schemacompiler.codegen.json.facet.FacetJsonSchemaDelegate;
+import org.opentravel.schemacompiler.codegen.json.facet.FacetJsonSchemaDelegateFactory;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAction;
 import org.opentravel.schemacompiler.model.TLActionFacet;
@@ -423,6 +425,100 @@ public class ResourceCodegenUtils {
 			}
 		}
 		return referencedFacet;
+	}
+	
+	/**
+	 * Returns the request payload as either the referenced action facet or the business
+	 * object that is referenced by the owning resource.
+	 * 
+	 * @param request  the request for which to return a payload type
+	 * @return NamedEntity
+	 */
+	public static NamedEntity getPayloadType(TLActionRequest request) {
+		NamedEntity referencedEntity = null;
+		
+		if (request.getPayloadType() != null) {
+			TLActionFacet actionFacet = request.getPayloadType();
+	        FacetJsonSchemaDelegateFactory delegateFactory = new FacetJsonSchemaDelegateFactory( null );
+	        FacetJsonSchemaDelegate<?> delegate = delegateFactory.getDelegate( actionFacet );
+			
+	        if (delegate.hasContent()) {
+	        	// If the action facet publishes any fields (i.e. attributes, elements, or indicators),
+	        	// then we will definitely have a request wrapper
+	        	referencedEntity = request;
+	        	
+	        } else if ((actionFacet.getReferenceType() != TLReferenceType.NONE)
+	        		&& (actionFacet.getReferenceRepeat() != 0)) {
+	        	// If there are no fields, but we have a repeating list of business objects, then we will
+	        	// also need a request wrapper
+	        	referencedEntity = request;
+	        	
+	        } else {
+	        	// Otherwise, we will have a standalone business object for the request payload (no wrapper)
+	    		TLResource owningResource = (TLResource) actionFacet.getOwningEntity();
+	    		TLBusinessObject referencedBO = (owningResource == null) ? null : owningResource.getBusinessObjectRef();
+	        	
+	    		if (actionFacet.getReferenceFacetName() == null) {
+		        	referencedEntity = referencedBO;
+	    			
+	    		} else {
+	    			referencedEntity = ResourceCodegenUtils.getReferencedFacet(
+	    					referencedBO, actionFacet.getReferenceFacetName() );
+	    		}
+	        }
+		}
+		return referencedEntity;
+	}
+	
+	/**
+	 * Returns the response payload as either the referenced action facet, the business
+	 * object that is referenced by the owning resource, or a core/choice object that
+	 * is referenced directly by the response.
+	 * 
+	 * @param response  the response for which to return a payload type
+	 * @return NamedEntity
+	 */
+	public static NamedEntity getPayloadType(TLActionResponse response) {
+		NamedEntity referencedEntity = null;
+		
+		if (response.getPayloadType() != null) {
+			NamedEntity payloadType = response.getPayloadType();
+			
+			if (payloadType instanceof TLActionFacet) {
+				TLActionFacet actionFacet = (TLActionFacet) payloadType;
+		        FacetJsonSchemaDelegateFactory delegateFactory = new FacetJsonSchemaDelegateFactory( null );
+		        FacetJsonSchemaDelegate<?> delegate = delegateFactory.getDelegate( actionFacet );
+				
+		        if (delegate.hasContent()) {
+		        	// If the action facet publishes any fields (i.e. attributes, elements, or indicators),
+		        	// then we will definitely have a request wrapper
+		        	referencedEntity = response;
+		        	
+		        } else if ((actionFacet.getReferenceType() != TLReferenceType.NONE)
+		        		&& (actionFacet.getReferenceRepeat() != 0)) {
+		        	// If there are no fields, but we have a repeating list of business objects, then we will
+		        	// also need a request wrapper
+		        	referencedEntity = response;
+		        	
+		        } else {
+		        	// Otherwise, we will have a standalone business object for the request payload (no wrapper)
+		    		TLResource owningResource = (TLResource) actionFacet.getOwningEntity();
+		    		TLBusinessObject referencedBO = (owningResource == null) ? null : owningResource.getBusinessObjectRef();
+		        	
+		    		if (actionFacet.getReferenceFacetName() == null) {
+			        	referencedEntity = referencedBO;
+		    			
+		    		} else {
+		    			referencedEntity = ResourceCodegenUtils.getReferencedFacet(
+		    					referencedBO, actionFacet.getReferenceFacetName() );
+		    		}
+		        }
+			} else {
+				// The payload must be a core or choice object (or a facet/alias of one)
+				referencedEntity = payloadType;
+			}
+		}
+		return referencedEntity;
 	}
 	
 	/**

@@ -32,16 +32,16 @@ import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
 import org.opentravel.schemacompiler.codegen.CodeGenerator;
 import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.codegen.impl.LibraryFilenameBuilder;
+import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
-import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.loader.LibraryModelLoader;
 import org.opentravel.schemacompiler.loader.impl.CatalogLibraryNamespaceResolver;
 import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryMember;
+import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAction;
-import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLActionRequest;
 import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLLibrary;
@@ -451,28 +451,27 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
                     }
                     
                 } else if (member instanceof TLResource) {
-                	FacetCodegenDelegateFactory factory = new FacetCodegenDelegateFactory(null);
                 	TLResource resource = (TLResource) member;
                 	
-                	for (TLAction action : resource.getActions()) {
-                		TLActionRequest request = action.getRequest();
+                	for (TLAction action : ResourceCodegenUtils.getInheritedActions( resource )) {
+                		TLActionRequest request = ResourceCodegenUtils.getDeclaredOrInheritedRequest( action );
                 		
-                		if ((request != null) && (request.getPayloadType() instanceof TLActionFacet)) {
-                			TLActionFacet payloadType = (TLActionFacet) request.getPayloadType();
+                		if (request != null) {
+                			NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( request );
                 			
-                			if (factory.getDelegate( payloadType ).hasContent()) {
-        						addGeneratedFiles(exampleGenerator.generateOutput(request, exampleContext));
+                			if ((payloadType != null) && ((filter == null) || filter.processEntity( payloadType ))) {
+        						addGeneratedFiles( exampleGenerator.generateOutput(
+        								(TLModelElement) payloadType, exampleContext ) );
                 			}
                 		}
                 		
-                		for (TLActionResponse response : action.getResponses()) {
-                    		if (response.getPayloadType() instanceof TLActionFacet) {
-                    			TLActionFacet payloadType = (TLActionFacet) response.getPayloadType();
-                    			
-                    			if (factory.getDelegate( payloadType ).hasContent()) {
-            						addGeneratedFiles(exampleGenerator.generateOutput(response, exampleContext));
-                    			}
-                    		}
+                		for (TLActionResponse response : ResourceCodegenUtils.getInheritedResponses( action )) {
+                			NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( response );
+                			
+                			if ((payloadType != null) && ((filter == null) || filter.processEntity( payloadType ))) {
+        						addGeneratedFiles( exampleGenerator.generateOutput(
+        								(TLModelElement) payloadType, exampleContext ) );
+                			}
                 		}
                 	}
                 	

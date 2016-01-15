@@ -36,6 +36,7 @@ public class SwaggerResponse implements JsonDocumentationOwner {
 	private int statusCode;
 	private JsonDocumentation documentation;
 	private JsonSchemaReference schema;
+	private SwaggerXmlSchemaRef xmlSchema;
 	private List<SwaggerHeader> headers = new ArrayList<>();
 	
 	/**
@@ -111,21 +112,30 @@ public class SwaggerResponse implements JsonDocumentationOwner {
 	}
 	
 	/**
+	 * Returns the value of the 'xmlSchema' field.
+	 *
+	 * @return SwaggerXmlSchemaRef
+	 */
+	public SwaggerXmlSchemaRef getXmlSchema() {
+		return xmlSchema;
+	}
+
+	/**
+	 * Assigns the value of the 'xmlSchema' field.
+	 *
+	 * @param xmlSchema  the field value to assign
+	 */
+	public void setXmlSchema(SwaggerXmlSchemaRef xmlSchema) {
+		this.xmlSchema = xmlSchema;
+	}
+
+	/**
 	 * Returns the value of the 'headers' field.
 	 *
 	 * @return List<SwaggerHeader>
 	 */
 	public List<SwaggerHeader> getHeaders() {
 		return headers;
-	}
-	
-	/**
-	 * Assigns the value of the 'headers' field.
-	 *
-	 * @param headers  the field value to assign
-	 */
-	public void setHeaders(List<SwaggerHeader> headers) {
-		this.headers = headers;
 	}
 	
 	/**
@@ -157,6 +167,9 @@ public class SwaggerResponse implements JsonDocumentationOwner {
 		
 		if (schema != null) {
 			json.add( "schema", schema.toJson() );
+		}
+		if (xmlSchema != null) {
+			json.add( "x-xml-schema", xmlSchema.toJson() );
 		}
 		if (!headers.isEmpty()) {
 			JsonObject headersJson = new JsonObject();

@@ -21,13 +21,12 @@ import java.util.List;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
-import org.opentravel.schemacompiler.codegen.json.facet.FacetJsonSchemaDelegate;
-import org.opentravel.schemacompiler.codegen.json.facet.FacetJsonSchemaDelegateFactory;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerOperation;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerParamType;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerParameter;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerResponse;
+import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerXmlSchemaRef;
 import org.opentravel.schemacompiler.codegen.util.JsonSchemaNamingUtils;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.model.NamedEntity;
@@ -38,7 +37,6 @@ import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 import org.opentravel.schemacompiler.model.TLMimeType;
 import org.opentravel.schemacompiler.model.TLParameter;
-import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLReferenceType;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 
@@ -65,11 +63,13 @@ public class TLActionSwaggerTransformer extends AbstractSwaggerCodegenTransforme
 		transformDocumentation( source, swaggerOp );
 		swaggerOp.setDeprecated( DocumentationFinder.isDeprecated( source ) );
 		
-		for (TLMimeType produces : sourceRequest.getMimeTypes()) {
-			swaggerOp.getProduces().add( produces.toContentType() );
+		if (bodyParam != null) {
+			for (TLMimeType consumes : sourceRequest.getMimeTypes()) {
+				swaggerOp.getConsumes().add( consumes.toContentType() );
+			}
 		}
-		for (TLMimeType consumes : getResponseMimeTypes( sourceResponses )) {
-			swaggerOp.getConsumes().add( consumes.toContentType() );
+		for (TLMimeType produces : getResponseMimeTypes( sourceResponses )) {
+			swaggerOp.getProduces().add( produces.toContentType() );
 		}
 		
 		if (sourceRequest.getParamGroup() != null) {
@@ -119,41 +119,34 @@ public class TLActionSwaggerTransformer extends AbstractSwaggerCodegenTransforme
 	 * @return SwaggerParameter
 	 */
 	private SwaggerParameter createBodyParameter(TLActionRequest request) {
+		NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( request );
 		SwaggerParameter param = null;
 		
-		if (request.getPayloadType() != null) {
-			TLActionFacet actionFacet = request.getPayloadType();
-	        FacetJsonSchemaDelegateFactory delegateFactory = new FacetJsonSchemaDelegateFactory( context );
-	        FacetJsonSchemaDelegate<?> delegate = delegateFactory.getDelegate( actionFacet );
-			NamedEntity referencedEntity = null;
-			boolean isRequired = false;
+		if (payloadType != null) {
+			TLActionFacet actionFacet = request.getPayloadType(); // Not the same as the 'payloadType' variable above
+			boolean isRequired = true;
 			
-			if (delegate.hasContent() || (actionFacet.getReferenceType() != TLReferenceType.NONE)) {
-				if (delegate.hasContent() || (actionFacet.getReferenceRepeat() != 0)) {
-					referencedEntity = request;
-					isRequired = true;
-					
-				} else {
-					TLProperty boElement = ResourceCodegenUtils.getBusinessObjectElement( actionFacet );
-					
-					referencedEntity = boElement.getType();
-					isRequired = boElement.isMandatory();
-				}
+			if ((payloadType != actionFacet) &&
+					(actionFacet.getReferenceType() == TLReferenceType.OPTIONAL)) {
+				isRequired = false;
 			}
+			param = new SwaggerParameter();
+			param.setRequired( isRequired );
+			param.setIn( SwaggerParamType.BODY );
+			param.setName( JsonSchemaNamingUtils.getGlobalDefinitionName( payloadType ) );
 			
-			if (referencedEntity != null) {
-				param = new SwaggerParameter();
-				param.setRequired( isRequired );
-				param.setIn( SwaggerParamType.BODY );
-				param.setName( JsonSchemaNamingUtils.getGlobalDefinitionName( referencedEntity ) );
+			if (containsSupportedType( request.getMimeTypes(), TLMimeType.TEXT_JSON, TLMimeType.APPLICATION_JSON )) {
 				param.setRequestSchema( new JsonSchemaReference(
-						jsonUtils.getSchemaReferencePath( referencedEntity, request ) ));
-				
-				if (referencedEntity instanceof TLDocumentationOwner) {
-					transformDocumentation( (TLDocumentationOwner) referencedEntity, param );
-				}
+						jsonUtils.getSchemaReferencePath( payloadType, null ) ));
+			}
+			if (containsSupportedType( request.getMimeTypes(), TLMimeType.TEXT_XML, TLMimeType.APPLICATION_XML )) {
+				param.setRequestXmlSchema( new SwaggerXmlSchemaRef(
+						jsonUtils.getXmlSchemaReferencePath( payloadType ) ) );
 			}
 			
+			if (payloadType instanceof TLDocumentationOwner) {
+				transformDocumentation( (TLDocumentationOwner) payloadType, param );
+			}
 		}
 		return param;
 	}

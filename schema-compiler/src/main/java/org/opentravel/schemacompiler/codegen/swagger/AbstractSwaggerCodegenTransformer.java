@@ -15,6 +15,8 @@
  */
 package org.opentravel.schemacompiler.codegen.swagger;
 
+import java.util.List;
+
 import org.opentravel.schemacompiler.codegen.impl.AbstractCodegenTransformer;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
@@ -23,6 +25,7 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentationOwner;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
+import org.opentravel.schemacompiler.model.TLMimeType;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 
 /**
@@ -63,4 +66,20 @@ public abstract class AbstractSwaggerCodegenTransformer<S, T> extends AbstractCo
 		}
 	}
 	
+    /**
+     * Returns true if the give list of MIME types contains at least one of the supported types.
+     * 
+     * @param mimeTypes  the list of MIME types to check
+     * @param supportedTypes  the array of supported MIME types
+     * @return boolean
+     */
+    protected boolean containsSupportedType(List<TLMimeType> mimeTypes, TLMimeType... supportedTypes) {
+    	boolean supported = false;
+    	
+    	for (TLMimeType supportedType : supportedTypes) {
+    		supported |= mimeTypes.contains( supportedType );
+    	}
+    	return supported;
+    }
+    
 }

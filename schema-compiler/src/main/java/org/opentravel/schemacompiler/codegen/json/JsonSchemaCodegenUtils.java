@@ -19,27 +19,35 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.xml.namespace.QName;
+
 import org.opentravel.ns.ota2.appinfo_v01_00.OTA2Entity;
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder;
 import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
+import org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
+import org.opentravel.schemacompiler.codegen.impl.LibraryTrimmedFilenameBuilder;
 import org.opentravel.schemacompiler.codegen.json.model.JsonContextualValue;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentationOwner;
 import org.opentravel.schemacompiler.codegen.json.model.JsonEntityInfo;
 import org.opentravel.schemacompiler.codegen.json.model.JsonLibraryInfo;
 import org.opentravel.schemacompiler.codegen.util.JsonSchemaNamingUtils;
+import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLEquivalent;
 import org.opentravel.schemacompiler.model.TLEquivalentOwner;
 import org.opentravel.schemacompiler.model.TLExample;
 import org.opentravel.schemacompiler.model.TLExampleOwner;
+import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLPropertyType;
 import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.util.SchemaCompilerInfo;
 import org.opentravel.schemacompiler.util.URLUtils;
@@ -171,11 +179,16 @@ public class JsonSchemaCodegenUtils {
 		String elementName = JsonSchemaNamingUtils.getGlobalDefinitionName( referencedEntity );
 		StringBuilder referencePath = new StringBuilder();
 		
-		if (referencedEntity.getOwningLibrary() != referencingEntity.getOwningLibrary()) {
-			AbstractJsonSchemaCodeGenerator<?> codeGenerator =
-					(AbstractJsonSchemaCodeGenerator<?>) context.getCodeGenerator();
-			CodeGenerationFilenameBuilder<AbstractLibrary> filenameBuilder =
-					(CodeGenerationFilenameBuilder<AbstractLibrary>) codeGenerator.getFilenameBuilder();
+		if ((referencingEntity == null) ||
+				(referencedEntity.getOwningLibrary() != referencingEntity.getOwningLibrary())) {
+			AbstractCodeGenerator<?> codeGenerator = (AbstractCodeGenerator<?>) context.getCodeGenerator();
+			CodeGenerationFilenameBuilder<AbstractLibrary> filenameBuilder;
+			
+			if (referencingEntity != null) {
+				filenameBuilder = (CodeGenerationFilenameBuilder<AbstractLibrary>) codeGenerator.getFilenameBuilder();
+			} else {
+				filenameBuilder = new LibraryTrimmedFilenameBuilder( null ); // swagger reference scenario
+			}
 			
 			if (referencedEntity.getOwningLibrary() instanceof BuiltInLibrary) {
 				String builtInLocation = XsdCodegenUtils.getBuiltInSchemaOutputLocation( context.getCodegenContext() );
@@ -219,6 +232,43 @@ public class JsonSchemaCodegenUtils {
 					+ "#/definitions/" + schemaDependency.getLocalName();
 		}
 		return referencePath;
+	}
+	
+	/**
+	 * Returns a relative path reference to the XML schema definition of the given named entity.
+	 * 
+	 * @param referencedEntity  the named entity for which to return a reference
+	 * @return String
+	 */
+	public String getXmlSchemaReferencePath(NamedEntity referencedEntity) {
+		CodeGenerationFilenameBuilder<AbstractLibrary> filenameBuilder = new LibraryTrimmedFilenameBuilder( null );
+		StringBuilder referencePath = new StringBuilder( "./" );
+		QName elementName = null;
+		String entityName = null;
+		
+		if ((referencedEntity instanceof TLPropertyType) &&
+				PropertyCodegenUtils.hasGlobalElement( (TLPropertyType) referencedEntity )) {
+			
+			if ((referencedEntity instanceof TLAlias) &&
+					(((TLAlias) referencedEntity).getOwningEntity() instanceof TLFacet)) {
+				elementName = XsdCodegenUtils.getSubstitutableElementName( (TLAlias) referencedEntity );
+			}
+			if (referencedEntity instanceof TLFacet) {
+				elementName = XsdCodegenUtils.getSubstitutableElementName( (TLFacet) referencedEntity );
+			}
+		}
+		if (elementName == null) {
+			elementName = XsdCodegenUtils.getGlobalElementName( referencedEntity );
+		}
+		if (elementName != null) {
+			entityName = elementName.getLocalPart();
+		}
+		if (entityName == null) {
+			entityName = XsdCodegenUtils.getGlobalTypeName( referencedEntity );
+		}
+		referencePath.append( filenameBuilder.buildFilename( referencedEntity.getOwningLibrary(), "xsd" ) );
+		referencePath.append( "#/" ).append( entityName );
+		return referencePath.toString();
 	}
 	
 	/**

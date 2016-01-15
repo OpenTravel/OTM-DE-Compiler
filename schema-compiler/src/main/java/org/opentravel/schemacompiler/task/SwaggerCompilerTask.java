@@ -15,7 +15,9 @@
  */
 package org.opentravel.schemacompiler.task;
 
+import java.io.File;
 import java.util.Collection;
+import java.util.List;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
@@ -24,9 +26,16 @@ import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.codegen.impl.DefaultCodeGenerationFilter;
 import org.opentravel.schemacompiler.codegen.impl.DependencyFilterBuilder;
 import org.opentravel.schemacompiler.codegen.impl.LibraryTrimmedFilenameBuilder;
+import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
+import org.opentravel.schemacompiler.model.LibraryMember;
+import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAction;
+import org.opentravel.schemacompiler.model.TLActionRequest;
 import org.opentravel.schemacompiler.model.TLActionResponse;
+import org.opentravel.schemacompiler.model.TLAlias;
+import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLMimeType;
 import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.XSDLibrary;
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
@@ -52,7 +61,6 @@ public class SwaggerCompilerTask extends AbstractSchemaCompilerTask
         for (TLLibrary library : userDefinedLibraries) {
         	for (TLResource resource : library.getResourceTypes()) {
         		if (resource.isAbstract()) continue;
-                CodeGenerationFilter filter = new DependencyFilterBuilder( resource ).buildFilter();
                 resourceContext.setValue( CodeGenerationContext.CK_OUTPUT_FOLDER,
                         getResourceOutputFolder( resource, modelContext ) );
         		
@@ -63,19 +71,23 @@ public class SwaggerCompilerTask extends AbstractSchemaCompilerTask
 
                 // Generate the trimmed XML & JSON schema documents for the service
                 compileXmlSchemas( userDefinedLibraries, legacySchemas, resourceContext,
-                        new LibraryTrimmedFilenameBuilder( null ), filter );
+                        new LibraryTrimmedFilenameBuilder( null ),
+                        createSchemaFilter( resource, TLMimeType.TEXT_XML, TLMimeType.APPLICATION_XML ) );
                 compileJsonSchemas( userDefinedLibraries, legacySchemas, resourceContext,
-                        new LibraryTrimmedFilenameBuilder( null ), filter );
+                        new LibraryTrimmedFilenameBuilder( null ),
+                        createSchemaFilter( resource, TLMimeType.TEXT_JSON, TLMimeType.APPLICATION_JSON ) );
                 
                 // Generate example files if required; examples are only created for the operation
                 // messages (not the contents of the trimmed schemas)
                 if (isGenerateExamples()) {
                     generateExampleArtifacts(userDefinedLibraries, resourceContext,
-                            new LibraryTrimmedFilenameBuilder( resource ),
-                            createExampleFilter( resource ), CodeGeneratorFactory.XML_TARGET_FORMAT );
+                            new LibraryTrimmedFilenameBuilder( null ),
+                            createExampleFilter( resource, TLMimeType.TEXT_XML, TLMimeType.APPLICATION_XML ),
+                            CodeGeneratorFactory.XML_TARGET_FORMAT );
                     generateExampleArtifacts(userDefinedLibraries, resourceContext,
-                            new LibraryTrimmedFilenameBuilder( resource ),
-                            createExampleFilter( resource ), CodeGeneratorFactory.JSON_TARGET_FORMAT );
+                            new LibraryTrimmedFilenameBuilder( null ),
+                            createExampleFilter( resource, TLMimeType.TEXT_JSON, TLMimeType.APPLICATION_JSON ),
+                            CodeGeneratorFactory.JSON_TARGET_FORMAT );
                 }
         	}
         }
@@ -105,29 +117,122 @@ public class SwaggerCompilerTask extends AbstractSchemaCompilerTask
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.task.AbstractCompilerTask#getExampleOutputFolder(org.opentravel.schemacompiler.model.LibraryMember, org.opentravel.schemacompiler.codegen.CodeGenerationContext)
+	 */
+	@Override
+	protected String getExampleOutputFolder(LibraryMember libraryMember, CodeGenerationContext context) {
+        String rootOutputFolder = context.getValue( CodeGenerationContext.CK_OUTPUT_FOLDER );
+
+        if (rootOutputFolder == null) {
+            rootOutputFolder = System.getProperty( "user.dir" );
+        }
+        return new File( rootOutputFolder, "examples/" ).getAbsolutePath();
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.task.AbstractCompilerTask#getSchemaRelativeFolderPath(org.opentravel.schemacompiler.model.LibraryMember, org.opentravel.schemacompiler.codegen.CodeGenerationContext)
+	 */
+	@Override
+	protected String getSchemaRelativeFolderPath(LibraryMember libraryMember, CodeGenerationContext context) {
+        return "../";
+	}
+	
+	/**
+	 * Constructs a filter for the generation of XML and JSON schemas.
+	 * 
+	 * @param resource  the resource for which to create a filter
+     * @param contentTypes  the MIME types for which to generate schemas
+	 * @return CodeGenerationFilter
+	 */
+    protected CodeGenerationFilter createSchemaFilter(TLResource resource, TLMimeType... contentTypes) {
+    	DependencyFilterBuilder builder = new DependencyFilterBuilder();
+    	
+    	for (TLAction action : ResourceCodegenUtils.getInheritedActions( resource )) {
+    		if (action.isCommonAction()) continue;
+    		TLActionRequest request = ResourceCodegenUtils.getDeclaredOrInheritedRequest( action );
+    		
+        	if ((request != null) && containsSupportedType( request.getMimeTypes(), contentTypes)) {
+    			builder.addLibraryMember( request );
+    		}
+    		for (TLActionResponse response : ResourceCodegenUtils.getInheritedResponses( action )) {
+        		if (containsSupportedType( response.getMimeTypes(), contentTypes)) {
+        			builder.addLibraryMember( response );
+        		}
+    		}
+    	}
+    	return builder.buildFilter();
+    }
+    
+	/**
      * Returns a <code>CodeGenerationFilter</code> that only includes the resource, its actions,
      * and their request/response payloads. None of the other dependent elements from the supporting
      * library schemas are included.
      * 
      * @param resource  the resource for which to create a filter
+     * @param contentTypes  the MIME types for which to generate example files
      * @return CodeGenerationFilter
      */
-    protected CodeGenerationFilter createExampleFilter(TLResource resource) {
+    protected CodeGenerationFilter createExampleFilter(TLResource resource, TLMimeType... contentTypes) {
         DefaultCodeGenerationFilter filter = new DefaultCodeGenerationFilter();
     	
         for (TLAction action : resource.getActions()) {
         	if (action.isCommonAction()) continue;
+        	TLActionRequest request = ResourceCodegenUtils.getDeclaredOrInheritedRequest( action );
         	
-        	if (action.getRequest() != null) {
-        		filter.addProcessedElement( action.getRequest() );
+        	if ((request != null) && containsSupportedType( request.getMimeTypes(), contentTypes)) {
+        		NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( request );
+        		
+        		if (payloadType != null) {
+        			appendToFilter( payloadType, filter );
+        		}
         	}
-        	for (TLActionResponse response : action.getResponses()) {
-        		filter.addProcessedElement( response );
+        	for (TLActionResponse response : ResourceCodegenUtils.getInheritedResponses( action )) {
+        		if (containsSupportedType( response.getMimeTypes(), contentTypes)) {
+            		NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( response );
+            		
+            		if (payloadType != null) {
+            			appendToFilter( payloadType, filter );
+            		}
+        		}
         	}
         }
-        filter.addProcessedElement( resource );
-        filter.addProcessedLibrary( resource.getOwningLibrary() );
+		appendToFilter( resource, filter );
         return filter;
+    }
+    
+    private void appendToFilter(NamedEntity entity, DefaultCodeGenerationFilter filter) {
+    	NamedEntity currentEntity = entity;
+    	
+    	while (currentEntity != null) {
+    		filter.addProcessedElement( currentEntity );
+            filter.addProcessedLibrary( currentEntity.getOwningLibrary() );
+    		
+            if (currentEntity instanceof TLAlias) {
+            	currentEntity = ((TLAlias) currentEntity).getOwningEntity();
+            	
+            } else if (currentEntity instanceof TLFacet) {
+            	currentEntity = ((TLFacet) currentEntity).getOwningEntity();
+            	
+            } else {
+            	currentEntity = null;
+            }
+    	}
+    }
+    
+    /**
+     * Returns true if the give list of MIME types contains at least one of the supported types.
+     * 
+     * @param mimeTypes  the list of MIME types to check
+     * @param supportedTypes  the array of supported MIME types
+     * @return boolean
+     */
+    private boolean containsSupportedType(List<TLMimeType> mimeTypes, TLMimeType... supportedTypes) {
+    	boolean supported = false;
+    	
+    	for (TLMimeType supportedType : supportedTypes) {
+    		supported |= mimeTypes.contains( supportedType );
+    	}
+    	return supported;
     }
     
     /**

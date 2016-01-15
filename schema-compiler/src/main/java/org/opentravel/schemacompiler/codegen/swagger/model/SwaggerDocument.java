@@ -31,6 +31,7 @@ public class SwaggerDocument {
 	public static final String SWAGGER_SPEC_V2 = "2.0";
 	
 	private String specVersion = SWAGGER_SPEC_V2;
+	private SwaggerOtmResource otmResource;
 	private SwaggerInfo info;
 	private String host;
 	private String basePath;
@@ -58,6 +59,24 @@ public class SwaggerDocument {
 		this.specVersion = specVersion;
 	}
 	
+	/**
+	 * Returns the value of the 'otmResource' field.
+	 *
+	 * @return SwaggerOtmResource
+	 */
+	public SwaggerOtmResource getOtmResource() {
+		return otmResource;
+	}
+
+	/**
+	 * Assigns the value of the 'otmResource' field.
+	 *
+	 * @param otmResource  the field value to assign
+	 */
+	public void setOtmResource(SwaggerOtmResource otmResource) {
+		this.otmResource = otmResource;
+	}
+
 	/**
 	 * Returns the value of the 'info' field.
 	 *
@@ -122,30 +141,12 @@ public class SwaggerDocument {
 	}
 	
 	/**
-	 * Assigns the value of the 'schemes' field.
-	 *
-	 * @param schemes  the field value to assign
-	 */
-	public void setSchemes(List<String> schemes) {
-		this.schemes = schemes;
-	}
-	
-	/**
 	 * Returns the value of the 'consumes' field.
 	 *
 	 * @return List<String>
 	 */
 	public List<String> getConsumes() {
 		return consumes;
-	}
-	
-	/**
-	 * Assigns the value of the 'consumes' field.
-	 *
-	 * @param consumes  the field value to assign
-	 */
-	public void setConsumes(List<String> consumes) {
-		this.consumes = consumes;
 	}
 	
 	/**
@@ -158,15 +159,6 @@ public class SwaggerDocument {
 	}
 	
 	/**
-	 * Assigns the value of the 'produces' field.
-	 *
-	 * @param produces  the field value to assign
-	 */
-	public void setProduces(List<String> produces) {
-		this.produces = produces;
-	}
-
-	/**
 	 * Returns the value of the 'pathItems' field.
 	 *
 	 * @return List<SwaggerPathItem>
@@ -176,30 +168,12 @@ public class SwaggerDocument {
 	}
 	
 	/**
-	 * Assigns the value of the 'pathItems' field.
-	 *
-	 * @param pathItems  the field value to assign
-	 */
-	public void setPathItems(List<SwaggerPathItem> pathItems) {
-		this.pathItems = pathItems;
-	}
-	
-	/**
 	 * Returns the value of the 'definitions' field.
 	 *
 	 * @return List<JsonSchemaNamedReference>
 	 */
 	public List<JsonSchemaNamedReference> getDefinitions() {
 		return definitions;
-	}
-	
-	/**
-	 * Assigns the value of the 'definitions' field.
-	 *
-	 * @param definitions  the field value to assign
-	 */
-	public void setDefinitions(List<JsonSchemaNamedReference> definitions) {
-		this.definitions = definitions;
 	}
 	
 	/**
@@ -222,6 +196,9 @@ public class SwaggerDocument {
 		
 		if (specVersion != null) {
 			json.addProperty( "swagger", specVersion );
+		}
+		if (otmResource != null) {
+			json.add( "x-otm-resource", otmResource.toJson() );
 		}
 		if (info != null) {
 			json.add( "info", info.toJson() );
