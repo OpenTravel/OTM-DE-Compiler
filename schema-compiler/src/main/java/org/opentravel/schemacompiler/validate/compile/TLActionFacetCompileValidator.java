@@ -65,14 +65,10 @@ public class TLActionFacetCompileValidator extends TLActionFacetBaseValidator{
 		
 		if (target.getReferenceType() == TLReferenceType.NONE) {
 			builder.setProperty("referenceFacetName", target.getReferenceFacetName())
-					.setFindingType(FindingType.ERROR)
+					.setFindingType(FindingType.WARNING)
 					.assertNullOrBlank();
 			
 		} else if (target.getReferenceType() != null) {
-			builder.setProperty("referenceFacetName", target.getReferenceFacetName())
-					.setFindingType(FindingType.ERROR)
-					.assertNotNullOrBlank();
-			
 			if (!owner.isAbstract() && (owner.getBusinessObjectRef() != null)
 					&& (ResourceCodegenUtils.getReferencedFacet(
 							owner.getBusinessObjectRef(), target.getReferenceFacetName()) == null)) {

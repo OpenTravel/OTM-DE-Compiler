@@ -29,6 +29,7 @@ import org.opentravel.schemacompiler.validate.ValidationFindings;
 public class SchemaCompilerTestUtils {
 
     public static boolean DEBUG = false;
+    public static FindingType PRINT_FINDINGS = FindingType.ERROR;
 
     /**
      * Returns the base folder location for test library data to be utilized by the schema compiler
@@ -91,11 +92,20 @@ public class SchemaCompilerTestUtils {
                     || ((findingType != null) && findings.hasFinding(findingType));
 
             if (hasFindings) {
-                System.out.println("Validation Findings:");
-
-                for (String message : findings
-                        .getAllValidationMessages(FindingMessageFormat.DEFAULT)) {
-                    System.out.println("  " + message);
+            	String[] findingMessages;
+                
+                if (PRINT_FINDINGS != null) {
+                	findingMessages = findings.getValidationMessages(PRINT_FINDINGS, FindingMessageFormat.DEFAULT);
+                } else {
+                	findingMessages = findings.getAllValidationMessages(FindingMessageFormat.DEFAULT);
+                }
+                
+                if (findingMessages.length > 0) {
+                    System.out.println("Validation Findings:");
+                	
+                    for (String message : findingMessages) {
+                        System.out.println("  " + message);
+                    }
                 }
             }
         }

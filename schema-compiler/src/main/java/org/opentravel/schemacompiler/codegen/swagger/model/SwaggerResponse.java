@@ -33,7 +33,7 @@ import com.google.gson.JsonObject;
 public class SwaggerResponse implements JsonDocumentationOwner {
 	
 	private boolean defaultResponse;
-	private int statusCode;
+	private Integer statusCode;
 	private JsonDocumentation documentation;
 	private JsonSchemaReference schema;
 	private SwaggerXmlSchemaRef xmlSchema;
@@ -60,9 +60,9 @@ public class SwaggerResponse implements JsonDocumentationOwner {
 	/**
 	 * Returns the value of the 'statusCode' field.
 	 *
-	 * @return int
+	 * @return Integer
 	 */
-	public int getStatusCode() {
+	public Integer getStatusCode() {
 		return statusCode;
 	}
 	
@@ -71,7 +71,7 @@ public class SwaggerResponse implements JsonDocumentationOwner {
 	 *
 	 * @param statusCode  the field value to assign
 	 */
-	public void setStatusCode(int statusCode) {
+	public void setStatusCode(Integer statusCode) {
 		this.statusCode = statusCode;
 	}
 	

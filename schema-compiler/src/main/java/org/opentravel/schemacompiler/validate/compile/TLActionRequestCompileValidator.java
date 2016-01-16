@@ -15,10 +15,12 @@
  */
 package org.opentravel.schemacompiler.validate.compile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
+import org.opentravel.schemacompiler.model.TLAction;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLActionRequest;
 import org.opentravel.schemacompiler.model.TLHttpMethod;
@@ -37,11 +39,12 @@ import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
  */
 public class TLActionRequestCompileValidator extends TLActionRequestBaseValidator {
 
-    public static final String ERROR_PARAM_GROUP_REQUIRED     = "PARAM_GROUP_REQUIRED";
-    public static final String ERROR_INVALID_PARAM_GROUP      = "INVALID_PARAM_GROUP";
-    public static final String ERROR_GET_REQUEST_PAYLOAD      = "GET_REQUEST_PAYLOAD";
-    public static final String ERROR_INVALID_ACTION_FACET_REF = "INVALID_ACTION_FACET_REF";
-    public static final String WARNING_PATCH_PARTIAL_SUPPORT  = "PATCH_PARTIAL_SUPPORT";
+    public static final String ERROR_PARAM_GROUP_REQUIRED      = "PARAM_GROUP_REQUIRED";
+    public static final String ERROR_INVALID_PARAM_GROUP       = "INVALID_PARAM_GROUP";
+    public static final String ERROR_CONFLICTING_PATH_TEMPLATE = "CONFLICTING_PATH_TEMPLATE";
+    public static final String ERROR_GET_REQUEST_PAYLOAD       = "GET_REQUEST_PAYLOAD";
+    public static final String ERROR_INVALID_ACTION_FACET_REF  = "INVALID_ACTION_FACET_REF";
+    public static final String WARNING_PATCH_PARTIAL_SUPPORT   = "PATCH_PARTIAL_SUPPORT";
     
 	private static ResourceUrlValidator urlValidator = new ResourceUrlValidator( true );
 	
@@ -86,6 +89,7 @@ public class TLActionRequestCompileValidator extends TLActionRequestBaseValidato
     	builder.setProperty("pathTemplate", target.getPathTemplate()).setFindingType(FindingType.ERROR)
     			.assertNotNullOrBlank();
     	validatePathTemplate( target.getPathTemplate(), target.getParamGroup(), builder );
+    	checkConflictingPathTemplate( target, builder );
     	
     	if (target.getPayloadType() != null) {
     		TLActionFacet payloadType = target.getPayloadType();
@@ -119,5 +123,61 @@ public class TLActionRequestCompileValidator extends TLActionRequestBaseValidato
     	
 		return builder.getFindings();
 	}
-
+	
+	/**
+	 * Determines whether the path template for the target request conflicts with any
+	 * of the action requests declared by the owning resource.  Two path templates will
+	 * only be considered conflicting if they also have the same HTTP method assigned.
+	 * 
+	 * @param target  the action request being validated
+	 * @param builder  the validation builder to which any findings will be posted
+	 */
+	private void checkConflictingPathTemplate(TLActionRequest target, TLValidationBuilder builder) {
+        TLResource owningResource = (target.getOwner() == null) ? null : target.getOwner().getOwner();
+        String targetTestPath = buildTestPath( target.getPathTemplate() );
+        TLHttpMethod targetMethod = target.getHttpMethod();
+        
+        if ((owningResource != null) && (targetTestPath != null)) {
+            List<TLActionRequest> resourceRequests = getResourceRequests( owningResource );
+        	
+            for (TLActionRequest request : resourceRequests) {
+            	if ((request == target) || (request.getHttpMethod() != targetMethod)) {
+            		continue; // skip requests that cannot create a conflict
+            	}
+            	String testPath = buildTestPath( request.getPathTemplate() );
+            	
+            	if (targetTestPath.equals( testPath )) {
+                	builder.addFinding( FindingType.ERROR, "pathTemplate", ERROR_CONFLICTING_PATH_TEMPLATE,
+                			target.getPathTemplate(), target.getHttpMethod() );
+            	}
+            }
+        }
+	}
+	
+	/**
+	 * Returns the list of actions declared or inherited by the given resource.
+	 * 
+	 * @param resource  the resource for which to return the associated actions
+	 * @return List<TLActionRequest>
+	 */
+	@SuppressWarnings("unchecked")
+	private List<TLActionRequest> getResourceRequests(TLResource resource) {
+        String cacheKey = resource.getNamespace() + ":" + resource.getLocalName() + ":resourceRequests";
+		List<TLActionRequest> requestList = (List<TLActionRequest>) getContextCacheEntry( cacheKey );
+		
+		if (requestList == null) {
+			requestList = new ArrayList<>();
+			
+			for (TLAction action : ResourceCodegenUtils.getInheritedActions( resource )) {
+				TLActionRequest request = ResourceCodegenUtils.getDeclaredOrInheritedRequest( action );
+				
+				if (request != null) {
+					requestList.add( request );
+				}
+			}
+			setContextCacheEntry( cacheKey, requestList );
+		}
+		return requestList;
+	}
+	
 }

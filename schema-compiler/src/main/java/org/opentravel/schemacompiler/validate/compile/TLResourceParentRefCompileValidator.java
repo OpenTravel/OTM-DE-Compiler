@@ -33,9 +33,10 @@ import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
  */
 public class TLResourceParentRefCompileValidator extends TLResourceParentRefBaseValidator {
 
-    public static final String ERROR_INVALID_ABSTRACT_PARENT = "INVALID_ABSTRACT_PARENT";
-    public static final String ERROR_INVALID_PARAM_GROUP     = "INVALID_PARAM_GROUP";
-    public static final String ERROR_ID_PARAM_GROUP_REQUIRED = "ID_PARAM_GROUP_REQUIRED";
+    public static final String ERROR_INVALID_ABSTRACT_PARENT   = "INVALID_ABSTRACT_PARENT";
+    public static final String ERROR_INVALID_PARAM_GROUP       = "INVALID_PARAM_GROUP";
+    public static final String ERROR_ID_PARAM_GROUP_REQUIRED   = "ID_PARAM_GROUP_REQUIRED";
+    public static final String ERROR_CONFLICTING_PATH_TEMPLATE = "CONFLICTING_PATH_TEMPLATE";
     
 	/**
 	 * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateFields(org.opentravel.schemacompiler.validate.Validatable)
@@ -80,8 +81,33 @@ public class TLResourceParentRefCompileValidator extends TLResourceParentRefBase
     	builder.setProperty("pathTemplate", target.getPathTemplate()).setFindingType(FindingType.ERROR)
     			.assertNotNullOrBlank();
     	validatePathTemplate( target.getPathTemplate(), parentParamGroup, builder );
+    	checkConflictingPathTemplate( target, builder );
     	
     	return builder.getFindings();
+	}
+	
+	/**
+	 * Determines whether the path template for the target request conflicts with any
+	 * other parent resource references of the owning resource.
+	 * 
+	 * @param target  the parent resource reference being validated
+	 * @param builder  the validation builder to which any findings will be posted
+	 */
+	private void checkConflictingPathTemplate(TLResourceParentRef target, TLValidationBuilder builder) {
+        TLResource owningResource = (target.getOwner() == null) ? null : target.getOwner();
+        String targetTestPath = buildTestPath( target.getPathTemplate() );
+        
+        if ((owningResource != null) && (targetTestPath != null)) {
+            for (TLResourceParentRef request : owningResource.getParentRefs()) {
+            	if (request == target) continue;
+            	String testPath = buildTestPath( request.getPathTemplate() );
+            	
+            	if (targetTestPath.equals( testPath )) {
+                	builder.addFinding( FindingType.ERROR, "pathTemplate",
+                			ERROR_CONFLICTING_PATH_TEMPLATE, target.getPathTemplate() );
+            	}
+            }
+        }
 	}
 	
 }

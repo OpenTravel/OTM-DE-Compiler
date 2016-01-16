@@ -184,9 +184,6 @@ public class SwaggerPathItem {
 	public JsonObject toJson() {
 		JsonObject json = new JsonObject();
 		
-		if (pathTemplate != null) {
-			json.addProperty( "pathTemplate", pathTemplate );
-		}
 		if (getOperation != null) {
 			json.add( "get", getOperation.toJson() );
 		}

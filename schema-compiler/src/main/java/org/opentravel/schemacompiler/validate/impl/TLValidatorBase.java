@@ -721,6 +721,24 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
 	}
 	
 	/**
+	 * Returns a test path that substitutes a '0' for every parameter in the template.
+	 * 
+	 * @param pathTemplate  the path template from which to derive the test path string
+	 * @return String
+	 */
+	protected String buildTestPath(String pathTemplate) {
+    	ResourceUrlValidator urlValidator = new ResourceUrlValidator( true );
+		String testPath = pathTemplate;
+		
+		if (testPath != null) {
+			for (String pathParam : urlValidator.getPathParameters( pathTemplate )) {
+				testPath = testPath.replaceAll( "\\{" + pathParam + "\\}", "0" );
+			}
+		}
+		return testPath;
+	}
+	
+	/**
 	 * Returns a string containing comma-separated values from the given list.
 	 * 
 	 * @param values  the list of values to concatenate

@@ -26,6 +26,7 @@ import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLFacet;
@@ -92,9 +93,9 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
                 .assertNotNull()
                 .assertValidEntityReference(TLSimple.class, TLSimpleFacet.class, TLClosedEnumeration.class, 
                         TLOpenEnumeration.class, TLRoleEnumeration.class, TLValueWithAttributes.class,
-                        TLFacet.class, TLListFacet.class, TLCoreObject.class, TLBusinessObject.class,
-                        TLAlias.class, TLRoleEnumeration.class, XSDSimpleType.class, XSDComplexType.class,
-                        XSDElement.class)
+                        TLFacet.class, TLListFacet.class, TLCoreObject.class, TLChoiceObject.class,
+                        TLBusinessObject.class, TLAlias.class, TLRoleEnumeration.class, XSDSimpleType.class,
+                        XSDComplexType.class, XSDElement.class)
                 .setFindingType(FindingType.WARNING).assertNotDeprecated();
 
         if (ValidatorUtils.isLegacyIDREF(propertyType)) {

@@ -159,25 +159,54 @@ public class ResourceCodegenUtils {
 	 *									 to a business object
 	 */
 	public static List<TLMemberField<?>> getEligibleParameterFields(TLFacet facet) {
-		List<TLMemberField<?>> eligibleFields = new ArrayList<>();
-		List<TLFacet> eligibleFacets = new ArrayList<>();
+		return getParameterFields( facet, false );
+	}
+	
+	/**
+	 * Returns the list of all member fields from the given facet, regardless of
+	 * whether they eligible to be parameters in a resource parameter group.  This
+	 * method is intended only for validation purposes since some members of the
+	 * resulting list may not be considered legal parameters.
+	 * 
+	 * @param facet  the facet for which to return a list of member fields
+	 * @return List<TLMemberField<TLFacet>>
+	 * @throws IllegalArgumentException  thrown if the given facet does not belong
+	 *									 to a business object
+	 */
+	public static List<TLMemberField<?>> getAllParameterFields(TLFacet facet) {
+		return getParameterFields( facet, true );
+	}
+	
+	/**
+	 * Returns the list of all member fields from the given facet.
+	 * 
+	 * @param facet  the facet for which to return a list of member fields
+	 * @param includeIneligibleFields  flag indicating whether to include ineligible fields
+	 * @return List<TLMemberField<TLFacet>>
+	 * @throws IllegalArgumentException  thrown if the given facet does not belong
+	 *									 to a business object
+	 */
+	private static List<TLMemberField<?>> getParameterFields(TLFacet facet, boolean includeIneligibleFields) {
+		List<TLMemberField<?>> paramFields = new ArrayList<>();
+		List<TLFacet> paramFacets = new ArrayList<>();
 		Set<String> fieldNames = new HashSet<>();
 		
-		findEligibleParameterFacets(facet, eligibleFacets);
+		findParameterFacets(facet, paramFacets, includeIneligibleFields);
 		
-		for (TLFacet eligibleFacet : eligibleFacets) {
+		for (TLFacet eligibleFacet : paramFacets) {
 			List<TLAttribute> attributeList = PropertyCodegenUtils.getInheritedAttributes(eligibleFacet);
 			List<TLProperty> elementList = PropertyCodegenUtils.getInheritedProperties(eligibleFacet);
 			List<TLIndicator> indicatorList = PropertyCodegenUtils.getInheritedIndicators(eligibleFacet);
 			
 			for (TLAttribute attribute : attributeList) {
 				if (!fieldNames.contains(attribute.getName())) {
-					eligibleFields.add(attribute);
+					paramFields.add(attribute);
 					fieldNames.add(attribute.getName());
 				}
 			}
 			for (TLProperty element : elementList) {
-				if (element.getRepeat() <= 1) {
+				if (includeIneligibleFields || (element.getRepeat() == 0)
+						|| (element.getRepeat() == 1)) { // Skip repeating elements unless specifically requested
 					if (element.getType() instanceof TLValueWithAttributes) {
 						TLValueWithAttributes vwa = (TLValueWithAttributes) element.getType();
 						List<TLAttribute> vwaAttributes = PropertyCodegenUtils.getInheritedAttributes(vwa);
@@ -186,13 +215,13 @@ public class ResourceCodegenUtils {
 						for (TLAttribute attribute : vwaAttributes) {
 							if (!(attribute.getType() instanceof TLValueWithAttributes) &&
 									!fieldNames.contains(attribute.getName())) {
-								eligibleFields.add(attribute);
+								paramFields.add(attribute);
 								fieldNames.add(attribute.getName());
 							}
 						}
 						for (TLIndicator indicator : vwaIndicators) {
 							if (!fieldNames.contains(indicator.getName())) {
-								eligibleFields.add(indicator);
+								paramFields.add(indicator);
 								fieldNames.add(indicator.getName());
 							}
 						}
@@ -202,7 +231,7 @@ public class ResourceCodegenUtils {
 						String elementName = (schemaName != null) ? schemaName.getLocalPart() : element.getName();
 						
 						if (!fieldNames.contains(elementName)) {
-							eligibleFields.add(element);
+							paramFields.add(element);
 							fieldNames.add(elementName);
 						}
 					}
@@ -210,12 +239,12 @@ public class ResourceCodegenUtils {
 			}
 			for (TLIndicator indicator : indicatorList) {
 				if (!fieldNames.contains(indicator.getName())) {
-					eligibleFields.add(indicator);
+					paramFields.add(indicator);
 					fieldNames.add(indicator.getName());
 				}
 			}
 		}
-		return eligibleFields;
+		return paramFields;
 	}
 	
 	/**
@@ -230,41 +259,44 @@ public class ResourceCodegenUtils {
 	}
 	
 	/**
-	 * Finds the list of all non-repeating facets that belong to the given one that
-	 * may contain parameter-eligible fields.
+	 * Finds the list of all facets that belong to or are contained within the given one.
 	 * 
-	 * @param facet  the facet for which to return parameter-eligible facets
-	 * @param eligibleFacets  the list to which parameter-eligible facets will be appended
+	 * @param facet  the facet for which to return parameter facets
+	 * @param paramFacets  the list to which parameter facets will be appended
+	 * @param includeIneligibleFacets  flag indicating whether ineligible facets should
+	 *								   be included in the resulting list
 	 */
-	private static void findEligibleParameterFacets(TLFacet facet, List<TLFacet> eligibleFacets) {
-		if (eligibleFacets.contains(facet)) {
+	private static void findParameterFacets(TLFacet facet, List<TLFacet> paramFacets,
+			boolean includeIneligibleFacets) {
+		if (paramFacets.contains(facet)) {
 			return; // avoid circular references
 		}
-		eligibleFacets.add(facet);
+		paramFacets.add(facet);
 		
 		for (TLProperty element : facet.getElements()) {
-			if (element.getRepeat() <= 1) { // Skip repeating elements
+			if (includeIneligibleFacets || (element.getRepeat() == 0)
+					|| (element.getRepeat() == 1)) { // Skip repeating elements unless specifically requested
 				TLPropertyType elementType = element.getType();
 				
 				if (elementType instanceof TLFacet) {
-					findEligibleParameterFacets((TLFacet) elementType, eligibleFacets);
+					findParameterFacets((TLFacet) elementType, paramFacets, includeIneligibleFacets);
 					
 				} else if (elementType instanceof TLBusinessObject) {
 					TLBusinessObject bo = (TLBusinessObject) elementType;
 					
-					findEligibleParameterFacets(bo.getIdFacet(), eligibleFacets);
-					findEligibleParameterFacets(bo.getSummaryFacet(), eligibleFacets);
-					findEligibleParameterFacets(bo.getDetailFacet(), eligibleFacets);
+					findParameterFacets(bo.getIdFacet(), paramFacets, includeIneligibleFacets);
+					findParameterFacets(bo.getSummaryFacet(), paramFacets, includeIneligibleFacets);
+					findParameterFacets(bo.getDetailFacet(), paramFacets, includeIneligibleFacets);
 					
 					for (TLFacet customFacet : bo.getCustomFacets()) {
-						findEligibleParameterFacets(customFacet, eligibleFacets);
+						findParameterFacets(customFacet, paramFacets, includeIneligibleFacets);
 					}
 					
 				} else if (elementType instanceof TLCoreObject) {
 					TLCoreObject core = (TLCoreObject) elementType;
 					
-					findEligibleParameterFacets(core.getSummaryFacet(), eligibleFacets);
-					findEligibleParameterFacets(core.getDetailFacet(), eligibleFacets);
+					findParameterFacets(core.getSummaryFacet(), paramFacets, includeIneligibleFacets);
+					findParameterFacets(core.getDetailFacet(), paramFacets, includeIneligibleFacets);
 				}
 			}
 		}
@@ -333,37 +365,39 @@ public class ResourceCodegenUtils {
 	 */
 	public static List<TLActionResponse> getInheritedResponses(TLAction action) {
 		List<TLResource> resourceHierarchy = getInheritanceHierarchy(action.getOwner());
+		List<TLActionResponse> defaultResponses = new ArrayList<>();
 		List<TLActionResponse> responses = new ArrayList<>();
 		Set<Integer> statusCodes = new HashSet<>();
 		String actionId = action.getActionId();
 		
 		// Start by adding responses from all of the inherited, non-common actions
 		for (TLResource extendedResource : resourceHierarchy) {
-			TLAction extendedAction = extendedResource.getAction(actionId);
-			
-			if ((extendedAction != null) && !extendedAction.isCommonAction()) {
+			for (TLAction inheritedAction : extendedResource.getActions()) {
+				List<TLActionResponse> localDefaultResponses = new ArrayList<>();
 				List<TLActionResponse> localResponses = new ArrayList<>();
 				
-				for (TLActionResponse response : extendedAction.getResponses()) {
-					if (!statusCodes.containsAll(response.getStatusCodes())) {
-						localResponses.add(response);
-						statusCodes.addAll(response.getStatusCodes());
+				if (inheritedAction.isCommonAction() || inheritedAction.getActionId().equals( actionId )) {
+					// Note that responses for common actions are included, regardless
+					// of whether their action ID's match that of the original.
+					for (TLActionResponse response : inheritedAction.getResponses()) {
+						if (response.getStatusCodes().isEmpty()) {
+							localDefaultResponses.add(response);
+							
+						} else if (!statusCodes.containsAll(response.getStatusCodes())) {
+							localResponses.add(response);
+							statusCodes.addAll(response.getStatusCodes());
+						}
 					}
+				}
+				if (defaultResponses.isEmpty()) {
+					// Default responses are considered to be overridden if any have been
+					// detected in extended resources
+					defaultResponses = localDefaultResponses;
 				}
 				responses.addAll(0, localResponses);
 			}
 		}
-		
-		// Finish by incorporating responses from all of the inherited common
-		// actions.  Note that common actions are included, regardless of whether
-		// their action ID's match that of the original.
-		for (TLResource extendedResource : resourceHierarchy) {
-			for (TLAction inheritedAction : extendedResource.getActions()) {
-				if (inheritedAction.isCommonAction()) {
-					responses.addAll( inheritedAction.getResponses() );
-				}
-			}
-		}
+		responses.addAll( defaultResponses );
 		return responses;
 	}
 	

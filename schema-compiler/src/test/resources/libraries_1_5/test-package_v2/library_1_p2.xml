@@ -320,7 +320,7 @@
     
     <Resource name="BaseResource" abstract="true" firstClass="true">
     	<Action actionId="CommonErrors" common="true">
-        	<ActionResponse statusCodes="403 500" payloadType="SampleCore" mimeTypes="APPLICATION_XML APPLICATION_JSON">
+        	<ActionResponse payloadType="SampleCore" mimeTypes="APPLICATION_XML APPLICATION_JSON">
 		        <Documentation>
     			    <Description>Action-Search-Response2-documentation-line_1</Description>
         		</Documentation>

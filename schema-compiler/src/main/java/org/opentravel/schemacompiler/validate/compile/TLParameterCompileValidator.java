@@ -17,14 +17,10 @@ package org.opentravel.schemacompiler.validate.compile;
 
 import java.util.List;
 
-import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
-import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLFacet;
-import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLMemberField;
 import org.opentravel.schemacompiler.model.TLParameter;
-import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.base.TLParameterBaseValidator;
@@ -37,7 +33,6 @@ import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
  */
 public class TLParameterCompileValidator extends TLParameterBaseValidator{
 
-    public static final String ERROR_INVALID_FIELD_REF     = "INVALID_FIELD_REF";
     public static final String ERROR_INELIGIBLE_FIELD_REF  = "INELIGIBLE_FIELD_REF";
     
 	/**
@@ -60,53 +55,17 @@ public class TLParameterCompileValidator extends TLParameterBaseValidator{
             }
             
     	} else {
-    		TLFacet facetRef;
+    		TLFacet facetRef = (target.getOwner() == null) ? null : target.getOwner().getFacetRef();
     		
-    		if ((target.getOwner() != null) && ((facetRef = target.getOwner().getFacetRef()) != null)) {
+    		if (facetRef != null) {
     			List<TLMemberField<?>> eligibleFields = ResourceCodegenUtils.getEligibleParameterFields( facetRef );
     			
-    			if (!isFacetField( fieldRef, facetRef )) {
-    	        	builder.addFinding( FindingType.ERROR, "fieldRef", ERROR_INVALID_FIELD_REF );
-    			}
     			if (!eligibleFields.contains( fieldRef )) {
-    	        	builder.addFinding( FindingType.ERROR, "fieldRef", ERROR_INELIGIBLE_FIELD_REF );
+    	        	builder.addFinding( FindingType.ERROR, "fieldRef", ERROR_INELIGIBLE_FIELD_REF, target.getOwner().getName() );
     			}
     		}
     	}
-    	
         return builder.getFindings();
-	}
-	
-	/**
-	 * Returns true if the given field is declared or inherited by the facet provided.
-	 * 
-	 * @param fieldRef  the field reference of the parameter being validated
-	 * @param facetRef  the facet referenced by the owning parameter group
-	 * @return boolean
-	 */
-	private boolean isFacetField(TLMemberField<?> fieldRef, TLFacet facetRef) {
-		boolean isValid = false;
-		
-		for (TLAttribute field : PropertyCodegenUtils.getInheritedAttributes( facetRef )) {
-			if (isValid = (fieldRef == field)) {
-				break;
-			}
-		}
-		if (!isValid) {
-			for (TLProperty field : PropertyCodegenUtils.getInheritedProperties( facetRef )) {
-				if (isValid = (fieldRef == field)) {
-					break;
-				}
-			}
-		}
-		if (!isValid) {
-			for (TLIndicator field : PropertyCodegenUtils.getInheritedIndicators( facetRef )) {
-				if (isValid = (fieldRef == field)) {
-					break;
-				}
-			}
-		}
-		return isValid;
 	}
 	
 }

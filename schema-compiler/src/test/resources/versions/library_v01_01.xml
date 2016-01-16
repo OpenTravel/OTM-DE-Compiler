@@ -138,7 +138,7 @@
             <Element name="Element11" repeat="0" type="xsd:string"/>
         </ActionFacet>
         <Action actionId="LookupAction11" common="false">
-        	<ActionRequest httpMethod="GET" pathTemplate="/{uid}" paramGroup="LookupParameters11" />
+        	<ActionRequest httpMethod="GET" pathTemplate="/Lookup11/{uid}" paramGroup="LookupParameters11" />
         	<ActionResponse statusCodes="200" payloadType="LookupResource_LookupFacet11" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
         </Action>
     </Resource>
@@ -152,7 +152,7 @@
             <Element name="Element11" repeat="0" type="xsd:string"/>
         </ActionFacet>
         <Action actionId="MinorVersionTestAction" common="false">
-        	<ActionRequest httpMethod="GET" pathTemplate="/{uid}" paramGroup="MinorVersionTestParameters" />
+        	<ActionRequest httpMethod="GET" pathTemplate="/MVT/{uid}" paramGroup="MinorVersionTestParameters" />
         	<ActionResponse statusCodes="200" payloadType="MinorVersionTestResource_MinorVersionTestFacet" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
         </Action>
     </Resource>

@@ -38,9 +38,10 @@ import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
  */
 public class TLActionCompileValidator extends TLActionBaseValidator {
 
-    public static final String ERROR_MISSING_REQUIRED_REQUEST = "MISSING_REQUIRED_REQUEST";
-    public static final String ERROR_CONFLICTING_STATUS_CODES = "CONFLICTING_STATUS_CODES";
-    public static final String WARNING_IGNORING_REQUEST       = "IGNORING_REQUEST";
+    public static final String ERROR_MISSING_REQUIRED_REQUEST   = "MISSING_REQUIRED_REQUEST";
+    public static final String ERROR_CONFLICTING_STATUS_CODES   = "CONFLICTING_STATUS_CODES";
+    public static final String ERROR_MULTIPLE_DEFAULT_RESPONSES = "MULTIPLE_DEFAULT_RESPONSES";
+    public static final String WARNING_IGNORING_REQUEST         = "IGNORING_REQUEST";
     
 	/**
 	 * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateFields(org.opentravel.schemacompiler.validate.Validatable)
@@ -48,7 +49,8 @@ public class TLActionCompileValidator extends TLActionBaseValidator {
 	@Override
 	protected ValidationFindings validateFields(TLAction target) {
         TLActionRequest request = ResourceCodegenUtils.getDeclaredOrInheritedRequest( target );
-        List<Integer> duplicateResponseCodes = getDuplicateResponseCodes( target );
+        List<TLActionResponse> responses = ResourceCodegenUtils.getInheritedResponses( target );
+        List<Integer> duplicateResponseCodes = getDuplicateResponseCodes( responses );
         TLValidationBuilder builder = newValidationBuilder(target);
         
         builder.setProperty("actionId", target.getActionId()).setFindingType(FindingType.ERROR)
@@ -80,21 +82,25 @@ public class TLActionCompileValidator extends TLActionBaseValidator {
         	builder.addFinding( FindingType.ERROR, "responses", ERROR_CONFLICTING_STATUS_CODES,
         			toCsvString( duplicateResponseCodes ) );
         }
+        
+        if (getDefaultResponses( responses ).size() > 1) {
+        	builder.addFinding( FindingType.ERROR, "responses", ERROR_MULTIPLE_DEFAULT_RESPONSES );
+        }
         return builder.getFindings();
 	}
 	
 	/**
 	 * Returns the list of duplicate HTTP response codes used across the declared
-	 * and inherited responses for the target action.
+	 * and inherited responses.
 	 * 
-	 * @param target  the target action being validated
+	 * @param responseList  the list of declared or inherited responses
 	 * @return List<Integer>
 	 */
-	public List<Integer> getDuplicateResponseCodes(TLAction target) {
+	private List<Integer> getDuplicateResponseCodes(List<TLActionResponse> responseList) {
 		Set<Integer> existingCodes = new HashSet<>();
 		List<Integer> duplicateCodes = new ArrayList<>();
 		
-		for (TLActionResponse response : ResourceCodegenUtils.getInheritedResponses( target )) {
+		for (TLActionResponse response : responseList) {
 			for (Integer statusCode : response.getStatusCodes()) {
 				if (existingCodes.contains( statusCode )) {
 					if (!duplicateCodes.contains( statusCode )) {
@@ -107,6 +113,23 @@ public class TLActionCompileValidator extends TLActionBaseValidator {
 		}
 		Collections.sort( duplicateCodes );
 		return duplicateCodes;
+	}
+	
+	/**
+	 * Returns the list of 'default' responses from the list provided.
+	 * 
+	 * @param responseList  the list of declared or inherited responses
+	 * @return List<TLActionResponse>
+	 */
+	private List<TLActionResponse> getDefaultResponses(List<TLActionResponse> responseList) {
+		List<TLActionResponse> defaultResponses = new ArrayList<>();
+		
+		for (TLActionResponse response : responseList) {
+			if (response.getStatusCodes().isEmpty()) {
+				defaultResponses.add( response );
+			}
+		}
+		return defaultResponses;
 	}
 	
 }
