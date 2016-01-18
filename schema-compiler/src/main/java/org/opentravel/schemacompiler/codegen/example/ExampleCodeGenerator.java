@@ -32,12 +32,9 @@ import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLFacet;
-import org.opentravel.schemacompiler.model.TLLibrary;
-import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLModelElement;
 import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLService;
-import org.opentravel.schemacompiler.model.XSDLibrary;
 import org.opentravel.schemacompiler.xml.XMLPrettyPrinter;
 import org.w3c.dom.Document;
 
@@ -60,9 +57,6 @@ public class ExampleCodeGenerator extends AbstractCodeGenerator<TLModelElement> 
         try {
             ExampleBuilder<Document> exampleBuilder = new ExampleDocumentBuilder(getOptions(context))
                     .setModelElement((NamedEntity) source);
-
-            // Register the schema location for each library in the model
-            registerSchemaLocations(exampleBuilder, source.getOwningModel(), context);
 
             // Generate the XML document and send formatted content to the output file
             Document domDocument = exampleBuilder.buildTree();
@@ -118,43 +112,6 @@ public class ExampleCodeGenerator extends AbstractCodeGenerator<TLModelElement> 
             options.setMaxRecursionDepth(maxDepth.intValue());
         }
         return options;
-    }
-
-    /**
-     * Registers schema output locations for all libraries in the specified model.
-     * 
-     * @param builder
-     *            the builder for which schema locations should be registered
-     * @param model
-     *            the model containing all possible libraries to be resolved
-     * @param context
-     *            the code generation context
-     */
-    private void registerSchemaLocations(ExampleBuilder<Document> builder, TLModel model,
-            CodeGenerationContext context) {
-        if (model != null) {
-            // Register the schema locations of all libraries
-            for (AbstractLibrary library : model.getAllLibraries()) {
-                String schemaPath = context
-                        .getValue(CodeGenerationContext.CK_EXAMPLE_SCHEMA_RELATIVE_PATH);
-                String schemaFilename = getFilenameBuilder().buildFilename(library, "xsd");
-                String schemaLocation;
-
-                if (library instanceof TLLibrary) {
-                    schemaLocation = schemaPath + schemaFilename;
-
-                } else if (library instanceof XSDLibrary) {
-                    schemaLocation = schemaPath + getLegacySchemaOutputLocation(context) + "/"
-                            + schemaFilename;
-
-                } else { // Built-in library
-                    schemaLocation = schemaPath + getBuiltInSchemaOutputLocation(context) + "/"
-                            + schemaFilename;
-                }
-                // TODO: Check to see if a schema location is still necessary here
-//                builder.addSchemaLocation(library, schemaLocation);
-            }
-        }
     }
 
     /**

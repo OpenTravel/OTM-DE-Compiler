@@ -37,8 +37,6 @@ import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAbstractFacet;
 import org.opentravel.schemacompiler.model.TLActionFacet;
-import org.opentravel.schemacompiler.model.TLActionRequest;
-import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAliasOwner;
 import org.opentravel.schemacompiler.model.TLAttribute;
@@ -148,11 +146,8 @@ public class ExampleNavigator {
         } else if (target instanceof TLChoiceObject) {
             navigateChoiceObject((TLChoiceObject) target);
 
-        } else if (target instanceof TLActionRequest) {
-            navigateRequest((TLActionRequest) target);
-
-        } else if (target instanceof TLActionResponse) {
-            navigateResponse((TLActionResponse) target);
+        } else if (target instanceof TLActionFacet) {
+            navigateActionFacet((TLActionFacet) target);
 
         } else if (target instanceof TLFacet) {
             navigateFacet((TLFacet) target);
@@ -431,55 +426,51 @@ public class ExampleNavigator {
     }
 
     /**
-     * Called when a <code>TLActionRequest</code> instance is encountered during model navigation.
+     * Called when a <code>TLActionFacet</code> instance is encountered during model navigation.
      * 
-     * @param request
-     *            the action request entity to visit and navigate
+     * @param actionFacet  the action facet entity to visit and navigate
      */
-    public void navigateRequest(TLActionRequest request) {
-		if (request.getPayloadType() instanceof TLActionFacet) {
-			TLActionFacet payloadType = (TLActionFacet) request.getPayloadType();
-			
-			if (facetDelegateFactory.getDelegate( payloadType ).hasContent()) {
-		        try {
-		            incrementRecursionCount(request);
+    public void navigateActionFacet(TLActionFacet actionFacet) {
+    	NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( actionFacet );
+    	
+    	if (payloadType instanceof TLCoreObject) {
+            TLAbstractFacet exampleFacet = selectExampleFacet(
+            		((TLCoreObject) payloadType).getSummaryFacet());
 
-		            if (canVisit(request)) {
-		                visitor.startRequest(request);
-		                navigateFacetMembers(payloadType);
-		                visitor.endRequest(request);
-		            }
-		        } finally {
-		            decrementRecursionCount(request);
-		        }
-			}
-		}
-    }
+            if (exampleFacet instanceof TLFacet) {
+                navigateFacet((TLFacet) exampleFacet);
+            }
+            
+    	} else if (payloadType instanceof TLChoiceObject) {
+            TLAbstractFacet exampleFacet = selectExampleFacet(
+            		((TLChoiceObject) payloadType).getSharedFacet());
 
-    /**
-     * Called when a <code>TLActionRequest</code> instance is encountered during model navigation.
-     * 
-     * @param response
-     *            the action response entity to visit and navigate
-     */
-    public void navigateResponse(TLActionResponse response) {
-		if (response.getPayloadType() instanceof TLActionFacet) {
-			TLActionFacet payloadType = (TLActionFacet) response.getPayloadType();
-			
-			if (facetDelegateFactory.getDelegate( payloadType ).hasContent()) {
-		        try {
-		            incrementRecursionCount(response);
+            if (exampleFacet instanceof TLFacet) {
+                navigateFacet((TLFacet) exampleFacet);
+            }
+    		
+    	} else if (payloadType instanceof TLActionFacet) {
+	        try {
+	            incrementRecursionCount(actionFacet);
 
-		            if (canVisit(response)) {
-		                visitor.startResponse(response);
-		                navigateFacetMembers(payloadType);
-		                visitor.endResponse(response);
-		            }
-		        } finally {
-		            decrementRecursionCount(response);
-		        }
-			}
-		}
+	            if (canVisit(actionFacet)) {
+	            	NamedEntity basePayload = actionFacet.getBasePayload();
+	            	TLFacet payloadFacet = null;
+	            	
+	            	if (basePayload instanceof TLCoreObject) {
+	            		payloadFacet = (TLFacet) selectExampleFacet(((TLCoreObject) basePayload).getSummaryFacet());
+	                    
+	            	} else if (basePayload instanceof TLChoiceObject) {
+	            		payloadFacet = (TLFacet) selectExampleFacet(((TLChoiceObject) basePayload).getSharedFacet());
+	            	}
+	            	visitor.startActionFacet(actionFacet, payloadFacet);
+	            	navigateFacetMembers(actionFacet, payloadFacet);
+	            	visitor.endActionFacet(actionFacet, payloadFacet);
+	            }
+	        } finally {
+	            decrementRecursionCount(actionFacet);
+	        }
+    	}
     }
 
     /**
@@ -714,6 +705,24 @@ public class ExampleNavigator {
     }
     
     /**
+     * Recursively navigates the members (attributes, elements, and indicators) of the given
+     * action facet.
+     * 
+     * @param actionFacet  the action facet whose members are to be navigated
+     * @param payloadFacet  the facet that will supply the members beyond the business object reference
+     */
+    protected void navigateFacetMembers(TLActionFacet actionFacet, TLFacet payloadFacet) {
+    	TLProperty boProperty = ResourceCodegenUtils.createBusinessObjectElement( actionFacet, payloadFacet );
+    	
+    	if (boProperty != null) {
+    		navigateElement( boProperty );
+    	}
+        if (payloadFacet != null) {
+            navigateFacetMembers(payloadFacet);
+        }
+    }
+    
+    /**
      * Returns true if the given facet should declare an extension point.
      * 
      * @param facet  the facet for which an extension point element could be declared
@@ -733,63 +742,6 @@ public class ExampleNavigator {
      *            the list of extension points for the facet
      */
     private void navigateExtensionPoint(TLFacet facet, List<TLExtensionPointFacet> facetExtensions) {
-        if ((facetExtensions != null) && !facetExtensions.isEmpty()) {
-            visitor.startExtensionPoint(facet);
-
-            for (TLExtensionPointFacet xpFacet : facetExtensions) {
-                navigateExtensionPointFacet(xpFacet);
-            }
-            visitor.endExtensionPoint(facet);
-        }
-    }
-
-    /**
-     * Recursively navigates the members (attributes, elements, and indicators) of the given 
-     * action facet. The navigated members that are inherited from higher-level members of the
-     * same owner, as well as members that are inherited from extended core/business objects.
-     * 
-     * @param facet
-     *            the action facet whose members are to be navigated
-     */
-    protected void navigateFacetMembers(TLActionFacet facet) {
-        // Start by navigating attributes and indicators for this facet
-        for (TLAttribute attribute : PropertyCodegenUtils.getInheritedAttributes(facet)) {
-            navigateAttribute(attribute);
-        }
-        for (TLIndicator indicator : PropertyCodegenUtils.getInheritedIndicators(facet)) {
-        	if (!indicator.isPublishAsElement()) {
-                navigateIndicator(indicator);
-        	}
-        }
-
-        // Navigate the elements (properties) and extension points for this facet
-		TLProperty boElement = ResourceCodegenUtils.getBusinessObjectElement( facet );
-		
-		if (boElement != null) {
-			navigateElement( boElement );
-		}
-        for (TLModelElement elementItem : PropertyCodegenUtils.getElementSequence(facet)) {
-        	if (elementItem instanceof TLProperty) {
-                navigateElement( (TLProperty) elementItem );
-                
-        	} else if (elementItem instanceof TLIndicator) {
-                navigateIndicator( (TLIndicator) elementItem );
-        	}
-        }
-        
-        // Wrap up by checking for any extension points for the current facet.
-        navigateExtensionPoint(facet, getExtensionPoints(facet).get(TLFacetType.ACTION));
-    }
-
-    /**
-     * Navigates the specified extensions of the action facet.
-     * 
-     * @param facet
-     *            the action facet whose extension points are to be navigated
-     * @param facetExtensions
-     *            the list of extension points for the facet
-     */
-    private void navigateExtensionPoint(TLActionFacet facet, List<TLExtensionPointFacet> facetExtensions) {
         if ((facetExtensions != null) && !facetExtensions.isEmpty()) {
             visitor.startExtensionPoint(facet);
 

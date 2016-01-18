@@ -230,10 +230,6 @@ public class TestMajorVersionHelper extends AbstractVersionHelperTests {
         assertContainsParameters(lookupResource.getParamGroup("LookupParametersShared"), "Element1", "Element11Param", "Element12");
         assertEquals(4, lookupResource.getActionFacets().size());
         assertContainsActionFacets( lookupResource, "LookupFacetShared", "LookupFacet10", "LookupFacet11", "LookupFacet12");
-        assertEquals(2, lookupResource.getActionFacet("LookupFacetShared").getAttributes().size());
-        assertContainsAttributes(lookupResource.getActionFacet("LookupFacetShared"), "extResourceAttribute121", "extResourceAttribute122");
-        assertEquals(3, lookupResource.getActionFacet("LookupFacetShared").getElements().size());
-        assertContainsElements(lookupResource.getActionFacet("LookupFacetShared"), "Element1", "Element11", "Element12");
         assertEquals(3, lookupResource.getActions().size());
         assertContainsActions( lookupResource, "LookupAction10", "LookupAction11", "LookupAction12");
         assertNotNull( lookupResource.getAction("LookupAction10").getRequest() );
@@ -308,9 +304,6 @@ public class TestMajorVersionHelper extends AbstractVersionHelperTests {
         assertContainsParameters(laterMinorVersionResource.getParamGroup("LaterMinorVersionParametersShared"), "Element1", "Element12");
         assertEquals(3, laterMinorVersionResource.getActionFacets().size());
         assertContainsActionFacets( laterMinorVersionResource, "LaterMinorVersionFacetShared", "LaterMinorVersionFacet10", "LaterMinorVersionFacet12");
-        assertEquals(0, laterMinorVersionResource.getActionFacet("LaterMinorVersionFacetShared").getAttributes().size());
-        assertEquals(2, laterMinorVersionResource.getActionFacet("LaterMinorVersionFacetShared").getElements().size());
-        assertContainsElements(laterMinorVersionResource.getActionFacet("LaterMinorVersionFacetShared"), "Element1", "Element12");
         assertEquals(2, laterMinorVersionResource.getActions().size());
         assertContainsActions( laterMinorVersionResource, "LaterMinorVersionAction10", "LaterMinorVersionAction12");
         assertNotNull( laterMinorVersionResource.getAction("LaterMinorVersionAction10").getRequest() );
@@ -384,9 +377,6 @@ public class TestMajorVersionHelper extends AbstractVersionHelperTests {
         assertContainsParameters(minorVersionTestResource.getParamGroup("MinorVersionTestParameters"), "uid");
         assertEquals(1, minorVersionTestResource.getActionFacets().size());
         assertContainsActionFacets( minorVersionTestResource, "MinorVersionTestFacet");
-        assertEquals(0, minorVersionTestResource.getActionFacet("MinorVersionTestFacet").getAttributes().size());
-        assertEquals(1, minorVersionTestResource.getActionFacet("MinorVersionTestFacet").getElements().size());
-        assertContainsElements(minorVersionTestResource.getActionFacet("MinorVersionTestFacet"), "Element11");
         assertEquals(1, minorVersionTestResource.getActions().size());
         assertContainsActions( minorVersionTestResource, "MinorVersionTestAction");
         assertNotNull( minorVersionTestResource.getAction("MinorVersionTestAction").getRequest() );

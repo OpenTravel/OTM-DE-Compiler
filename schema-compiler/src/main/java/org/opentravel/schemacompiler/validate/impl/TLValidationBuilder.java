@@ -171,14 +171,6 @@ public final class TLValidationBuilder extends ValidationBuilder<TLValidationBui
                 addFinding(INVALID_NAMED_ENTITY_REFERENCE, getDisplayNames(expectedEntityTypes),
                         entityName);
             }
-
-            // NOTE: Temporarily removed until integrity-checker implementation is complete; will
-            // re-evaluate
-            // if this validation check is necessary at that time.
-            //
-            // if ((plainTextEntityName != null) && !plainTextEntityName.equals(entityName)) {
-            // addFinding(MISMATCHED_NAMED_ENTITY_REFERENCE, entityName, plainTextEntityName);
-            // }
         }
         return getThis();
     }

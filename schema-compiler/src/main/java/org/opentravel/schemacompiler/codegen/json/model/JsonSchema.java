@@ -634,9 +634,6 @@ public class JsonSchema implements JsonDocumentationOwner {
 			JsonObject schemaDefs = new JsonObject();
 			
 			for (JsonSchemaNamedReference definition : definitions) {
-				if (definition.getSchema() == null) {
-					System.out.println("DEFINITION: " + definition.getName());
-				}
 				schemaDefs.add( definition.getName(), definition.getSchema().toJson() );
 			}
 			jsonSchema.add( "definitions", schemaDefs );

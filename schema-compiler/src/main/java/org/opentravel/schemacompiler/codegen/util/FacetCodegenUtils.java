@@ -424,9 +424,12 @@ public class FacetCodegenUtils {
             if (declaredFacet == null) {
             	TLActionFacet ghostFacet = new TLActionFacet();
 
-                ghostFacet.setFacetType(TLFacetType.ACTION);
+                ghostFacet.setOwningResource(resource);
                 ghostFacet.setName(inheritedFacet.getName());
-                ghostFacet.setOwningEntity(resource);
+                ghostFacet.setReferenceType(inheritedFacet.getReferenceType());
+                ghostFacet.setReferenceRepeat(inheritedFacet.getReferenceRepeat());
+                ghostFacet.setReferenceFacetName(inheritedFacet.getReferenceFacetName());
+                ghostFacet.setBasePayload(inheritedFacet.getBasePayload());
                 ghostFacets.add(ghostFacet);
             }
         }

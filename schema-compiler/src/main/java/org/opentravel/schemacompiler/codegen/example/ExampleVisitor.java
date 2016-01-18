@@ -17,8 +17,7 @@ package org.opentravel.schemacompiler.codegen.example;
 
 import java.util.Collection;
 
-import org.opentravel.schemacompiler.model.TLActionRequest;
-import org.opentravel.schemacompiler.model.TLActionResponse;
+import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLAttributeType;
@@ -117,38 +116,21 @@ public interface ExampleVisitor {
     public void endAlias(TLAlias alias);
 
     /**
-     * Called when a <code>TLActionRequest</code> instance is first encountered during example navigation.
+     * Called when a <code>TLActionFacet</code> instance is first encountered during example navigation.
      * 
-     * @param request
-     *            the model element to be visited
+     * @param actionFacet  the model element to be visited
+     * @param payloadFacet  the facet that will supply the members beyond the business object reference
      */
-    public void startRequest(TLActionRequest request);
+    public void startActionFacet(TLActionFacet actionFacet, TLFacet payloadFacet);
 
     /**
-     * Called when a <code>TLActionRequest</code> instance has completed processing during example
+     * Called when a <code>TLActionFacet</code> instance has completed processing during example
      * navigation.
      * 
-     * @param request
-     *            the model element to be visited
+     * @param actionFacet  the model element to be visited
+     * @param payloadFacet  the facet that will supply the members beyond the business object reference
      */
-    public void endRequest(TLActionRequest request);
-
-    /**
-     * Called when a <code>TLActionResponse</code> instance is first encountered during example navigation.
-     * 
-     * @param response
-     *            the model element to be visited
-     */
-    public void startResponse(TLActionResponse response);
-
-    /**
-     * Called when a <code>TLActionRequest</code> instance has completed processing during example
-     * navigation.
-     * 
-     * @param response
-     *            the model element to be visited
-     */
-    public void endResponse(TLActionResponse response);
+    public void endActionFacet(TLActionFacet actionFacet, TLFacet payloadFacet);
 
     /**
      * Called when a <code>TLAttribute</code> instance is first encountered during example

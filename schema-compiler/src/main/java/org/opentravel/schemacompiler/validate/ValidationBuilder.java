@@ -909,7 +909,6 @@ public abstract class ValidationBuilder<T extends ValidationBuilder<T>> {
                 }
             }
         } catch (ClassCastException e) {
-        	e.printStackTrace(System.out);
             throw new IllegalArgumentException(
                     "Unexpected exception during duplicate element validation.", e);
         }

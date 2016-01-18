@@ -319,8 +319,13 @@
     </BusinessObject>
     
     <Resource name="BaseResource" abstract="true" firstClass="true">
+        <ActionFacet label="ErrorPayload" referenceType="None" basePayload="SampleCore">
+	        <Documentation>
+    		    <Description>ActionFacet-ObjectOnly-documentation-line_1</Description>
+        	</Documentation>
+        </ActionFacet>
     	<Action actionId="CommonErrors" common="true">
-        	<ActionResponse payloadType="SampleCore" mimeTypes="APPLICATION_XML APPLICATION_JSON">
+        	<ActionResponse payloadType="BaseResource_ErrorPayload" mimeTypes="APPLICATION_XML APPLICATION_JSON">
 		        <Documentation>
     			    <Description>Action-Search-Response2-documentation-line_1</Description>
         		</Documentation>
@@ -363,18 +368,14 @@
         	<Parameter fieldName="lastName" location="Query"/>
         	<Parameter fieldName="firstName" location="Query"/>
         </ParamGroup>
-        <ActionFacet context="" label="ObjectOnly" notExtendable="false" referenceType="Required" referenceFacet="Summary">
+        <ActionFacet label="ObjectOnly" referenceType="Required">
 	        <Documentation>
     		    <Description>ActionFacet-ObjectOnly-documentation-line_1</Description>
         	</Documentation>
         </ActionFacet>
-        <ActionFacet context="" label="ObjectList" notExtendable="false" referenceType="Required" referenceFacet="Summary"
+        <ActionFacet label="ObjectList" referenceType="Required" referenceFacet="Summary"
         		referenceRepeat="1000"/>
-        <ActionFacet context="" label="ObjectWrapper" notExtendable="false" referenceType="Optional" referenceFacet="Summary">
-            <Attribute name="wrapperAttribute" type="xsd:int"/>
-            <Element name="wrapperElement" repeat="0" type="xsd:int"/>
-            <Indicator name="wrapperIndicator" publishAsElement="false"/>
-        </ActionFacet>
+        <ActionFacet label="ObjectWrapper" referenceType="Optional" referenceFacet="Summary" basePayload="SampleChoice" />
         <Action actionId="Create" common="false">
 	        <Documentation>
     		    <Description>Action-Create-documentation-line_1</Description>

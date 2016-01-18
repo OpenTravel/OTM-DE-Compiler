@@ -17,7 +17,6 @@ package org.opentravel.schemacompiler.codegen.xsd.facet;
 
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.model.TLAbstractFacet;
-import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLCoreObject;
@@ -25,7 +24,6 @@ import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLOperation;
-import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 
 /**
@@ -141,10 +139,6 @@ public class FacetCodegenDelegateFactory {
 					default:
 						break;
                 }
-            }
-        } else if (facetOwner instanceof TLResource) {
-            if (facetInstance instanceof TLActionFacet) {
-            	delegate = (FacetCodegenDelegate<F>) new ResourceActionFacetCodegenDelegate((TLActionFacet) facetInstance);
             }
         } else if (facetOwner instanceof TLOperation) {
             if (facetInstance instanceof TLFacet) {

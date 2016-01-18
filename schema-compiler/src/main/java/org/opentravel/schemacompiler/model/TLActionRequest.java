@@ -28,7 +28,7 @@ import org.opentravel.schemacompiler.event.ModelEventType;
  * 
  * @author S. Livezey
  */
-public class TLActionRequest extends TLModelElement implements NamedEntity, TLDocumentationOwner {
+public class TLActionRequest extends TLModelElement implements TLDocumentationOwner {
 	
 	private TLAction owner;
 	private TLHttpMethod httpMethod;
@@ -55,33 +55,6 @@ public class TLActionRequest extends TLModelElement implements NamedEntity, TLDo
         }
         identity.append("Request");
         return identity.toString();
-	}
-
-	/**
-	 * @see org.opentravel.schemacompiler.model.NamedEntity#getNamespace()
-	 */
-	@Override
-	public String getNamespace() {
-		AbstractLibrary owningLibrary = getOwningLibrary();
-		
-		return (owningLibrary == null) ? null : owningLibrary.getNamespace();
-	}
-
-	/**
-	 * @see org.opentravel.schemacompiler.model.NamedEntity#getLocalName()
-	 */
-	@Override
-	public String getLocalName() {
-		StringBuilder localName = new StringBuilder();
-		String actionId = (owner == null) ? null : owner.getActionId();
-		
-		if (actionId != null) {
-			localName.append( actionId );
-		} else {
-			localName.append( "Unknown_Action" );
-		}
-		localName.append('_').append( "Request" );
-		return localName.toString();
 	}
 
 	/**

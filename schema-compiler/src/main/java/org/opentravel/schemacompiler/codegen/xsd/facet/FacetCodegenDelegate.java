@@ -173,6 +173,15 @@ public abstract class FacetCodegenDelegate<F extends TLAbstractFacet> {
     protected abstract Annotated createType();
 
     /**
+     * Returns the name of the XML schema type for this facet.
+     * 
+     * @return String
+     */
+    protected String getTypeName() {
+    	return XsdCodegenUtils.getGlobalTypeName( getSourceFacet() );
+    }
+
+    /**
      * Returns a single top-level XML schema element using the information provided.
      * 
      * @param facetAlias
@@ -183,8 +192,7 @@ public abstract class FacetCodegenDelegate<F extends TLAbstractFacet> {
         Element element = new TopLevelElement();
 
         element.setName(getElementName(facetAlias));
-        element.setType(new QName(sourceFacet.getNamespace(), XsdCodegenUtils
-                .getGlobalTypeName(sourceFacet)));
+        element.setType(new QName(sourceFacet.getNamespace(), getTypeName()));
         element.setSubstitutionGroup(getSubstitutionGroup(facetAlias));
         return element;
     }

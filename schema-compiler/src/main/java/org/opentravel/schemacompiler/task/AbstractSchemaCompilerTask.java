@@ -127,8 +127,7 @@ public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask im
         // Generate output for all legacy XML schema libraries
 
         // If a filter was not passed to this method create one that will identify the legacy
-        // schemas
-        // (and schema extensions) are really needed in the output folder.
+        // schemas (and schema extensions) are really needed in the output folder.
         CodeGenerationFilter legacySchemaFilter = filter;
 
         if (legacySchemaFilter == null) {

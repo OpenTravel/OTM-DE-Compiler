@@ -24,6 +24,7 @@ import java.util.Set;
 import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
+import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
 import org.opentravel.schemacompiler.model.NamedEntity;
@@ -187,14 +188,16 @@ public class SchemaNameValidationRegistry {
      *            the entity to be added to the registry
      */
     private void addTypeNameToRegistry(NamedEntity entity) {
-        QName typeName;
+        QName typeName = null;
+        
+        if (hasGlobalType( entity )) {
+            if ((entity instanceof XSDComplexType) || (entity instanceof XSDSimpleType)) {
+                typeName = new QName(entity.getNamespace(), entity.getLocalName());
 
-        if ((entity instanceof XSDComplexType) || (entity instanceof XSDSimpleType)) {
-            typeName = new QName(entity.getNamespace(), entity.getLocalName());
-
-        } else {
-        	String localTypeName = XsdCodegenUtils.getGlobalTypeName(entity);
-            typeName = (localTypeName == null) ? null : new QName(entity.getNamespace(), localTypeName);
+            } else {
+            	String localTypeName = XsdCodegenUtils.getGlobalTypeName(entity);
+                typeName = (localTypeName == null) ? null : new QName(entity.getNamespace(), localTypeName);
+            }
         }
         
         if (typeName != null) {
@@ -226,13 +229,8 @@ public class SchemaNameValidationRegistry {
             }
 
         } else if (entity instanceof TLActionFacet) {
-    		TLActionFacet entityFacet = (TLActionFacet) entity;
-            boolean hasContent = new FacetCodegenDelegateFactory(null).getDelegate(entityFacet).hasContent();
-
-            if (hasContent && !XsdCodegenUtils.isSimpleCoreObject(entityFacet.getOwningEntity())) {
-                addElementNameToRegistry(XsdCodegenUtils.getGlobalElementName(entity), entity);
-            }
-
+        	// No additional member elements to add
+        	
         } else if (entity instanceof TLAlias) {
             TLAliasOwner aliasOwner = ((TLAlias) entity).getOwningEntity();
 
@@ -306,7 +304,7 @@ public class SchemaNameValidationRegistry {
      *            the entity to be added to the registry
      */
     private void addElementNameToRegistry(QName elementName, NamedEntity entity) {
-        if ((elementName != null) && (entity != null)) {
+        if ((elementName != null) && (entity != null) && hasGlobalType(entity)) {
             Set<NamedEntity> registeredEntities = elementNameEntities.get(elementName);
             Set<QName> elementNames = entityElementNames.get(entity);
 
@@ -321,6 +319,22 @@ public class SchemaNameValidationRegistry {
             registeredEntities.add(entity);
             elementNames.add(elementName);
         }
+    }
+    
+    /**
+     * Returns true if the given entity has a global schema type definition associated with it.
+     * 
+     * @param entity  the entity to check
+     * @return boolean
+     */
+    private boolean hasGlobalType(NamedEntity entity) {
+    	boolean result = true;
+    	
+    	if (entity instanceof TLActionFacet) {
+    		NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( (TLActionFacet) entity );
+    		result = (payloadType == entity);
+    	}
+    	return result;
     }
 
     /**
@@ -419,12 +433,13 @@ public class SchemaNameValidationRegistry {
 		 */
 		@Override
 		public boolean visitActionFacet(TLActionFacet facet) {
-            boolean hasContent = new FacetCodegenDelegateFactory(null).getDelegate(facet).hasContent();
+            boolean hasContent = (facet.getReferenceType() != null) ||
+            		(facet.getReferenceType() != TLReferenceType.NONE);
 
-            if (hasContent || ((facet.getReferenceType() != TLReferenceType.NONE) && (facet.getReferenceRepeat() != 0))) {
+            if (hasContent) {
+                addElementNameToRegistry(XsdCodegenUtils.getGlobalElementName(facet), facet);
                 addTypeNameToRegistry(facet);
             }
-            addElementNamesToRegistry(facet);
             return true;
 		}
 

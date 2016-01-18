@@ -18,6 +18,7 @@ package org.opentravel.schemacompiler.transform.tl2jaxb;
 import org.opentravel.ns.ota2.librarymodel_v01_05.Documentation;
 import org.opentravel.ns.ota2.librarymodel_v01_05.FacetAction;
 import org.opentravel.ns.ota2.librarymodel_v01_05.ReferenceType;
+import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLReferenceType;
@@ -37,26 +38,27 @@ public class TLActionFacetTransformer extends TLComplexTypeTransformer<TLActionF
 	 */
 	@Override
 	public FacetAction transform(TLActionFacet source) {
+		NamedEntity basePayload = source.getBasePayload();
 		FacetAction facet = new FacetAction();
 		
-		facet.setContext("");
 		facet.setLabel(trimString(source.getName()));
 		facet.setReferenceType(transformReferenceType(source.getReferenceType()));
 		facet.setReferenceFacet(trimString(source.getReferenceFacetName()));
 		facet.setReferenceRepeat(transformRepeatValue(source.getReferenceRepeat()));
-		facet.setNotExtendable(source.isNotExtendable());
 		
+        if (basePayload != null) {
+        	facet.setBasePayload(context.getSymbolResolver().buildEntityName(
+        			basePayload.getNamespace(), basePayload.getLocalName()));
+        } else {
+        	facet.setBasePayload(trimString(source.getBasePayloadName(), true));
+        }
+        
         if ((source.getDocumentation() != null) && !source.getDocumentation().isEmpty()) {
-            ObjectTransformer<TLDocumentation, Documentation, SymbolResolverTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(TLDocumentation.class, Documentation.class);
+            ObjectTransformer<TLDocumentation, Documentation, SymbolResolverTransformerContext> docTransformer =
+            		getTransformerFactory().getTransformer(TLDocumentation.class, Documentation.class);
 
             facet.setDocumentation(docTransformer.transform(source.getDocumentation()));
         }
-        
-        facet.getAttribute().addAll(transformAttributes(source.getAttributes()));
-        facet.getElement().addAll(transformElements(source.getElements()));
-        facet.getIndicator().addAll(transformIndicators(source.getIndicators()));
-        
 		return facet;
 	}
 	

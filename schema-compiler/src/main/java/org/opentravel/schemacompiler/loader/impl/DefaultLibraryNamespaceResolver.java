@@ -250,13 +250,10 @@ public class DefaultLibraryNamespaceResolver implements LibraryNamespaceResolver
                     }
             	}
             } catch (MalformedURLException e) {
-            	e.printStackTrace(System.out);
                 // Should never happen - return null
             } catch (RepositoryException e) {
-            	e.printStackTrace(System.out);
                 // No error - return null
             } catch (URISyntaxException e) {
-            	e.printStackTrace(System.out);
                 // No error - return null
             }
 

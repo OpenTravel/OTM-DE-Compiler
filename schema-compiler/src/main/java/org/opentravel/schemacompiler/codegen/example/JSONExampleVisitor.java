@@ -27,8 +27,6 @@ import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLActionFacet;
-import org.opentravel.schemacompiler.model.TLActionRequest;
-import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLAttributeOwner;
@@ -261,64 +259,24 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 	}
 
 	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#startRequest(org.opentravel.schemacompiler.model.TLActionRequest)
+	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#startActionFacet(org.opentravel.schemacompiler.model.TLActionFacet, org.opentravel.schemacompiler.model.TLFacet)
 	 */
 	@Override
-	public void startRequest(TLActionRequest request) {
-		super.startRequest(request);
-		
-		if (request.getPayloadType() instanceof TLActionFacet) {
-			TLActionFacet payloadType = (TLActionFacet) request.getPayloadType();
-			
-	        facetStack.push(payloadType);
-	        createObjectNode(request);
-		}
+	public void startActionFacet(TLActionFacet actionFacet, TLFacet payloadFacet) {
+		super.startActionFacet(actionFacet, payloadFacet);
+		facetStack.push(payloadFacet);
+		createObjectNode(actionFacet);
 	}
 
 	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#endRequest(org.opentravel.schemacompiler.model.TLActionRequest)
+	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#endActionFacet(org.opentravel.schemacompiler.model.TLActionFacet, org.opentravel.schemacompiler.model.TLFacet)
 	 */
 	@Override
-	public void endRequest(TLActionRequest request) {
-		super.endRequest(request);
-		
-		if (request.getPayloadType() instanceof TLActionFacet) {
-			TLActionFacet payloadType = (TLActionFacet) request.getPayloadType();
-			
-	        if (facetStack.peek() == payloadType) {
-	            facetStack.pop();
-	        }
-		}
-	}
+	public void endActionFacet(TLActionFacet actionFacet, TLFacet payloadFacet) {
+		super.endActionFacet(actionFacet, payloadFacet);
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#startResponse(org.opentravel.schemacompiler.model.TLActionResponse)
-	 */
-	@Override
-	public void startResponse(TLActionResponse response) {
-		super.startResponse(response);
-		
-		if (response.getPayloadType() instanceof TLActionFacet) {
-			TLActionFacet payloadType = (TLActionFacet) response.getPayloadType();
-			
-	        facetStack.push(payloadType);
-	        createObjectNode(response);
-		}
-	}
-
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#endResponse(org.opentravel.schemacompiler.model.TLActionResponse)
-	 */
-	@Override
-	public void endResponse(TLActionResponse response) {
-		super.endResponse(response);
-		
-		if (response.getPayloadType() instanceof TLActionFacet) {
-			TLActionFacet payloadType = (TLActionFacet) response.getPayloadType();
-			
-	        if (facetStack.peek() == payloadType) {
-	            facetStack.pop();
-	        }
+		if (facetStack.peek() == payloadFacet) {
+			facetStack.pop();
 		}
 	}
 

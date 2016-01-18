@@ -22,6 +22,8 @@ import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder;
 import org.opentravel.schemacompiler.codegen.example.ExampleGeneratorOptions.DetailLevel;
 import org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator;
+import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
+import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.NamedEntity;
@@ -113,21 +115,25 @@ public abstract class AbstractExampleCodeGenerator extends
 	protected CodeGenerationFilenameBuilder<TLModelElement> getDefaultFilenameBuilder() {
 		return new CodeGenerationFilenameBuilder<TLModelElement>() {
 
-			public String buildFilename(TLModelElement item,
-					String fileExtension) {
-				String fileExt = ((fileExtension == null) || (fileExtension
-						.length() == 0)) ? "" : ("." + fileExtension);
+			public String buildFilename(TLModelElement item, String fileExtension) {
+				String fileExt = ((fileExtension == null) || (fileExtension.length() == 0)) ? "" : ("." + fileExtension);
 				String itemName;
 
 				if ((item instanceof TLFacet)
 						&& (((TLFacet) item).getOwningEntity() instanceof TLOperation)) {
 					TLFacet facetItem = (TLFacet) item;
-					itemName = ((TLOperation) facetItem.getOwningEntity())
-							.getName()
+					itemName = ((TLOperation) facetItem.getOwningEntity()).getName()
 							+ facetItem.getFacetType().getIdentityName();
 
 				} else if (item instanceof NamedEntity) {
-					itemName = ((NamedEntity) item).getLocalName();
+					NamedEntity entity = (NamedEntity) item;
+					
+					if (PropertyCodegenUtils.hasGlobalElement(entity)) {
+						itemName = XsdCodegenUtils.getGlobalElementName(entity).getLocalPart();
+					} else {
+						itemName = entity.getLocalName();
+					}
+					
 				} else {
 					itemName = "";
 				}

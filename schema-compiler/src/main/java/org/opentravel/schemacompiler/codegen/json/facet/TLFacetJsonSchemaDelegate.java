@@ -26,8 +26,8 @@ import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerConte
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.CorrelatedCodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
-import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonType;
@@ -42,6 +42,7 @@ import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 import org.opentravel.schemacompiler.model.TLEquivalentOwner;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLIndicator;
+import org.opentravel.schemacompiler.model.TLMemberField;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 
@@ -139,8 +140,7 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
 				(TLEquivalentOwner) sourceFacet.getOwningEntity() ) );
         definition.setSchema( new JsonSchemaReference( facetSchema ) );
         
-		localFacetSchema.getProperties().addAll( createAttributeDefinitions() );
-		localFacetSchema.getProperties().addAll( createElementDefinitions() );
+		localFacetSchema.getProperties().addAll( createDefinitions() );
 		
 		if (hasExtensionPoint()) {
 	        JsonSchemaNamedReference extensionPoint = getExtensionPointProperty();
@@ -187,47 +187,28 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
 	 * 
 	 * @return List<JsonSchemaNamedReference>
 	 */
-	protected List<JsonSchemaNamedReference> createAttributeDefinitions() {
+	protected List<JsonSchemaNamedReference> createDefinitions() {
         ObjectTransformer<TLAttribute, CodegenArtifacts, CodeGenerationTransformerContext> attributeTransformer = getTransformerFactory()
                 .getTransformer(TLAttribute.class, CodegenArtifacts.class);
-        ObjectTransformer<TLIndicator, JsonSchemaNamedReference, CodeGenerationTransformerContext> indicatorTransformer = getTransformerFactory()
-                .getTransformer(TLIndicator.class, JsonSchemaNamedReference.class);
-        List<JsonSchemaNamedReference> attributeDefs = new ArrayList<JsonSchemaNamedReference>();
-
-        for (TLAttribute attribute : getAttributes()) {
-        	attributeDefs.addAll( attributeTransformer.transform( attribute ).getArtifactsOfType(
-        			JsonSchemaNamedReference.class ) );
-        }
-        for (TLIndicator indicator : getIndicators()) {
-            if (!indicator.isPublishAsElement()) {
-            	attributeDefs.add( indicatorTransformer.transform( indicator ) );
-            }
-        }
-        return attributeDefs;
-	}
-
-	/**
-	 * Constructs the list of <code>JsonSchemaNamedReference</code> definitions that are based on
-	 * OTM elements and element indicators.
-	 * 
-	 * @return List<JsonSchemaNamedReference>
-	 */
-	protected List<JsonSchemaNamedReference> createElementDefinitions() {
         ObjectTransformer<TLProperty, JsonSchemaNamedReference, CodeGenerationTransformerContext> elementTransformer = getTransformerFactory()
                 .getTransformer(TLProperty.class, JsonSchemaNamedReference.class);
         ObjectTransformer<TLIndicator, JsonSchemaNamedReference, CodeGenerationTransformerContext> indicatorTransformer = getTransformerFactory()
                 .getTransformer(TLIndicator.class, JsonSchemaNamedReference.class);
-        List<JsonSchemaNamedReference> elementDefs = new ArrayList<JsonSchemaNamedReference>();
-
-        for (TLProperty element : getElements()) {
-        	elementDefs.add( elementTransformer.transform( element ) );
+        List<JsonSchemaNamedReference> definitions = new ArrayList<JsonSchemaNamedReference>();
+		
+        for (TLMemberField<?> field : getMemberFields()) {
+        	if (field instanceof TLAttribute) {
+        		definitions.addAll( attributeTransformer.transform( (TLAttribute) field )
+        				.getArtifactsOfType( JsonSchemaNamedReference.class ) );
+        		
+        	} else if (field instanceof TLProperty) {
+        		definitions.add( elementTransformer.transform( (TLProperty) field ) );
+        		
+        	} else if (field instanceof TLIndicator) {
+        		definitions.add( indicatorTransformer.transform( (TLIndicator) field ) );
+        	}
         }
-        for (TLIndicator indicator : getIndicators()) {
-            if (indicator.isPublishAsElement()) {
-            	elementDefs.add( indicatorTransformer.transform( indicator ) );
-            }
-        }
-        return elementDefs;
+        return definitions;
 	}
 	
 	/**
@@ -318,6 +299,20 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
     				new JsonSchemaReference(schemaPath) );
     	}
     	return extensionPointProperty;
+    }
+    
+    /**
+     * Returns the list of all attribute, element, and indicator member fields.
+     * 
+     * @return List<TLMemberField<?>>
+     */
+    protected List<TLMemberField<?>> getMemberFields() {
+    	List<TLMemberField<?>> fieldList = new ArrayList<>();
+    	
+    	fieldList.addAll( getAttributes() );
+    	fieldList.addAll( getElements() );
+    	fieldList.addAll( getIndicators() );
+    	return fieldList;
     }
     
     /**

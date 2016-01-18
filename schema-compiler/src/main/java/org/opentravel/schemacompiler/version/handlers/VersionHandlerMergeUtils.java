@@ -83,9 +83,6 @@ public class VersionHandlerMergeUtils {
 
         for (TLAttribute sourceAttribute : attributesToMerge) {
             if (!existingAttributeNames.contains(sourceAttribute.getName())) {
-            	if (cloner == null) {
-            		System.out.println("NULL CLONER.");
-            	}
                 TLAttribute clone = cloner.clone(sourceAttribute);
 
                 target.addAttribute(clone);

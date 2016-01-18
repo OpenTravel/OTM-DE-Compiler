@@ -40,11 +40,11 @@ public class CoreObjectFacetJsonSchemaDelegate extends TLFacetJsonSchemaDelegate
     }
 
 	/**
-	 * @see org.opentravel.schemacompiler.codegen.json.facet.TLFacetJsonSchemaDelegate#createAttributeDefinitions()
+	 * @see org.opentravel.schemacompiler.codegen.json.facet.TLFacetJsonSchemaDelegate#createDefinitions()
 	 */
 	@Override
-	protected List<JsonSchemaNamedReference> createAttributeDefinitions() {
-		List<JsonSchemaNamedReference> definitions = super.createAttributeDefinitions();
+	protected List<JsonSchemaNamedReference> createDefinitions() {
+		List<JsonSchemaNamedReference> definitions = super.createDefinitions();
 		
         if (getLocalBaseFacet() == null) {
             TLCoreObject owner = (TLCoreObject) getSourceFacet().getOwningEntity();

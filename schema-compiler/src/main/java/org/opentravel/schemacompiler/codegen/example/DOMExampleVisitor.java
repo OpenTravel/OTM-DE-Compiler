@@ -17,7 +17,6 @@ package org.opentravel.schemacompiler.codegen.example;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -38,8 +37,6 @@ import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLActionFacet;
-import org.opentravel.schemacompiler.model.TLActionRequest;
-import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLAttributeOwner;
@@ -79,7 +76,6 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
 	
 	private Map<String, String> namespaceMappings = new HashMap<String, String>();
 	private Set<String> extensionPointNamespaces = new HashSet<String>();
-	private Set<String> externalDependencyNamespaces = new HashSet<String>();
 	private Document domDocument;
 
 	private List<DOMIdReferenceAssignment> referenceAssignments = new ArrayList<DOMIdReferenceAssignment>();
@@ -155,9 +151,6 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
 		 * 
 		 * nsList.addAll( extensionPointNamespaces );
 		 */
-		nsList.addAll(externalDependencyNamespaces);
-		Collections.sort(nsList);
-
 		if ((domDocument != null) && (domDocument.getDocumentElement() != null)) {
 			nsList.add(0, domDocument.getDocumentElement().getNamespaceURI());
 		}
@@ -325,64 +318,24 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
 	}
 
 	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#startRequest(org.opentravel.schemacompiler.model.TLActionRequest)
+	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#startActionFacet(org.opentravel.schemacompiler.model.TLActionFacet, org.opentravel.schemacompiler.model.TLFacet)
 	 */
 	@Override
-	public void startRequest(TLActionRequest request) {
-		super.startRequest(request);
-		
-		if (request.getPayloadType() instanceof TLActionFacet) {
-			TLActionFacet payloadType = (TLActionFacet) request.getPayloadType();
-			
-	        facetStack.push(payloadType);
-	        createComplexElement(request);
-		}
+	public void startActionFacet(TLActionFacet actionFacet, TLFacet payloadFacet) {
+		super.startActionFacet(actionFacet, payloadFacet);
+		facetStack.push(payloadFacet);
+		createComplexElement(actionFacet);
 	}
 
 	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#endRequest(org.opentravel.schemacompiler.model.TLActionRequest)
+	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#endActionFacet(org.opentravel.schemacompiler.model.TLActionFacet, org.opentravel.schemacompiler.model.TLFacet)
 	 */
 	@Override
-	public void endRequest(TLActionRequest request) {
-		super.endRequest(request);
-		
-		if (request.getPayloadType() instanceof TLActionFacet) {
-			TLActionFacet payloadType = (TLActionFacet) request.getPayloadType();
-			
-	        if (facetStack.peek() == payloadType) {
-	            facetStack.pop();
-	        }
-		}
-	}
+	public void endActionFacet(TLActionFacet actionFacet, TLFacet payloadFacet) {
+		super.endActionFacet(actionFacet, payloadFacet);
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#startResponse(org.opentravel.schemacompiler.model.TLActionResponse)
-	 */
-	@Override
-	public void startResponse(TLActionResponse response) {
-		super.startResponse(response);
-		
-		if (response.getPayloadType() instanceof TLActionFacet) {
-			TLActionFacet payloadType = (TLActionFacet) response.getPayloadType();
-			
-	        facetStack.push(payloadType);
-	        createComplexElement(response);
-		}
-	}
-
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#endResponse(org.opentravel.schemacompiler.model.TLActionResponse)
-	 */
-	@Override
-	public void endResponse(TLActionResponse response) {
-		super.endResponse(response);
-		
-		if (response.getPayloadType() instanceof TLActionFacet) {
-			TLActionFacet payloadType = (TLActionFacet) response.getPayloadType();
-			
-	        if (facetStack.peek() == payloadType) {
-	            facetStack.pop();
-	        }
+		if (facetStack.peek() == payloadFacet) {
+			facetStack.pop();
 		}
 	}
 
@@ -692,8 +645,8 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
 
         // Create the new DOM element
         if ((context.getModelElement() != null)
-				&& ((elementType instanceof TLAttributeType) || (elementType
-						.equals(context.getModelElement().getType())))) {
+				&& ((elementType instanceof TLAttributeType) ||
+						elementType.equals(context.getModelElement().getType()))) {
             newElement = createPropertyElement(context.getModelElement(),
                     (TLPropertyType) elementType);
         } else {
@@ -868,12 +821,10 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
         QName elementQName;
 
 		// Determine whether we should be using the substitutable or
-		// non-substitutable name for the
-        // element
+		// non-substitutable name for the element
         if (!XsdCodegenUtils.isSimpleCoreObject(elementType)) {
             if (context.getModelElement() != null) {
-				TLPropertyType modelPropertyType = context.getModelElement()
-						.getType();
+				TLPropertyType modelPropertyType = context.getModelElement().getType();
 
                 if (modelPropertyType instanceof TLAlias) {
                     modelPropertyType = (TLPropertyType) ((TLAlias) modelPropertyType)
@@ -919,6 +870,10 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
 				elementQName = XsdCodegenUtils
 						.getSubstitutableElementName((TLFacet) elementType);
 
+            } else if (elementType instanceof TLActionFacet) {
+				elementQName = XsdCodegenUtils.getPayloadElementName(
+						(TLActionFacet) elementType, (TLFacet) facetStack.peek() );
+				
             } else {
 				elementQName = PropertyCodegenUtils.getDefaultXmlElementName(
 						elementType, isReferenceProperty);

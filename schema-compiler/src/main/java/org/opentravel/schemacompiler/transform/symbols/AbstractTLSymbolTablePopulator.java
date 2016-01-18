@@ -163,7 +163,7 @@ public abstract class AbstractTLSymbolTablePopulator<S> implements SymbolTablePo
             	TLResource owner = (TLResource) libraryMember;
             	
                 for (TLActionFacet actionFacet : owner.getActionFacets()) {
-                    addFacetEntries(actionFacet, symbols);
+                    symbols.addEntity(namespace, actionFacet.getLocalName(), actionFacet);
                 }
                 
             } else if (libraryMember instanceof TLChoiceObject) {

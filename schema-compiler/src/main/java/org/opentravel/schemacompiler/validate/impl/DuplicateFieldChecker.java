@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLAttributeOwner;
@@ -99,9 +98,6 @@ public class DuplicateFieldChecker {
 			
 		} else if (fieldOwner instanceof TLValueWithAttributes) {
 			memberFields = ValidatorUtils.getInheritedMembers( (TLValueWithAttributes) fieldOwner );
-			
-		} else if (fieldOwner instanceof TLActionFacet) {
-			memberFields = ValidatorUtils.getInheritedMembers( (TLActionFacet) fieldOwner );
 			
 		} else {
 			memberFields = ValidatorUtils.getMembers( (TLExtensionPointFacet) fieldOwner );

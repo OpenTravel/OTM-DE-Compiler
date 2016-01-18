@@ -521,12 +521,11 @@ public class DependencyFilterBuilder {
 		 */
 		@Override
 		public boolean visitActionFacet(TLActionFacet facet) {
-            TLFacetOwner facetOwner = facet.getOwningEntity();
-
-            if (facetOwner instanceof LibraryMember) {
-                visitLibraryElement((LibraryMember) facetOwner);
+            visitLibraryElement(facet.getOwningResource());
+            
+            if (facet.getBasePayload() != null) {
+                visitLibraryElement(facet.getBasePayload());
             }
-            visitLibraryElement(facet);
             return true;
 		}
 

@@ -887,6 +887,15 @@ public enum ModelEventType {
     FACET_REF_REPEAT_MODIFIED(ValueChangeEvent.class),
 
     /**
+     * Event type sent when the base payload of an action facet is modified.
+     * 
+     * <p>
+     * <u>Event</u>: <code>ValueChangeEvent</code> <br>
+     * <u>Source Object</u>: <code>TLActionFacet</code>
+     */
+    BASE_PAYLOAD_MODIFIED(ValueChangeEvent.class),
+
+    /**
      * Event type sent when the HTTP method of an action request is modified.
      * 
      * <p>

@@ -49,9 +49,6 @@ public enum TLFacetType {
     /** The notification facet of a service operation. */
     NOTIFICATION("Notif", false),
 
-    /** The action facet of a REST resource. */
-    ACTION("Action", false),
-
     /** The shared facet of a choice object. */
     SHARED("Shared", false),
 

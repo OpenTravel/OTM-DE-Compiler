@@ -33,7 +33,6 @@ import org.opentravel.schemacompiler.repository.ProjectItem;
 import org.opentravel.schemacompiler.saver.LibraryModelSaver;
 import org.opentravel.schemacompiler.saver.LibrarySaveException;
 import org.opentravel.schemacompiler.util.URLUtils;
-import org.opentravel.schemacompiler.validate.FindingMessageFormat;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationException;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
@@ -401,9 +400,6 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
             findings.addAll(validate(priorMinorVersion));
 
             if (findings.hasFinding(FindingType.ERROR)) {
-            	for (String message : findings.getAllValidationMessages(FindingMessageFormat.IDENTIFIED_FORMAT)) {
-            		System.out.println(message);
-            	}
                 library.getOwningModel().removeLibrary(newLibrary);
                 throw new ValidationException(
                         "Unable to create the new version because the prior version and/or patch libraries contain errors.",

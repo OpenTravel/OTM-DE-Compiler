@@ -82,7 +82,6 @@ public class PasswordHelper {
                     .trim();
 
         } catch (GeneralSecurityException e) {
-            e.printStackTrace(System.out);
             throw new IllegalArgumentException("Unable to decrypt password.", e);
         }
     }

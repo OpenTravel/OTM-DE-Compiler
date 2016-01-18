@@ -183,15 +183,7 @@ public class LibraryFilterBuilder {
 		@Override
 		public void navigateActionFacet(TLActionFacet actionFacet) {
             if (canVisit(actionFacet) && visitor.visitActionFacet(actionFacet)) {
-                List<TLAttribute> attributeList = PropertyCodegenUtils.getInheritedAttributes(actionFacet);
-                List<TLProperty> propertyList = PropertyCodegenUtils.getInheritedProperties(actionFacet);
-
-                for (TLAttribute attribute : attributeList) {
-                    navigateAttribute(attribute);
-                }
-                for (TLProperty element : propertyList) {
-                    navigateElement(element);
-                }
+                navigate(actionFacet.getBasePayload());
             }
             addVisitedNode(actionFacet);
 		}

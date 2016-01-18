@@ -58,7 +58,7 @@ public class TLActionResponseSwaggerTransformer extends AbstractSwaggerCodegenTr
 	 * @return SwaggerResponse
 	 */
 	private SwaggerResponse createResponse(TLActionResponse source, Integer statusCode) {
-		NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( source );
+		NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( source.getPayloadType() );
 		SwaggerResponse response = new SwaggerResponse();
 		
 		response.setDefaultResponse( (statusCode == null) );

@@ -499,7 +499,6 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
         TLCoreObject newMinorVersionCore = newMinorVersionLibrary.getCoreObjectType("LookupCore");
         TLChoiceObject newMinorVersionChoice = newMinorVersionLibrary.getChoiceObjectType("LookupChoice");
         TLOperation newMinorVersionOp = newMinorVersionLibrary.getService().getOperation("LookupOperation");
-        TLResource newMinorVersionResource = newMinorVersionLibrary.getResourceType("LookupResource");
 
         assertNotNull(newMinorVersionLibrary);
         assertEquals("1.3.0", newMinorVersionLibrary.getVersion());
@@ -519,17 +518,13 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
         assertNotNull(newMinorVersionOp);
         assertContainsAttributes(newMinorVersionOp.getRequest(), "extOperationAttribute121", "extOperationAttribute122");
 
-        assertNotNull(newMinorVersionResource);
-        assertNotNull(newMinorVersionResource.getActionFacet("LookupFacetShared"));
-        assertContainsAttributes(newMinorVersionResource.getActionFacet("LookupFacetShared"),
-        		"extResourceAttribute121", "extResourceAttribute122");
-
         // Types defined in the previous minor version are not copied forward to
         // the new minor version unless patches are defined for them
         assertNull(newMinorVersionLibrary.getNamedMember("LookupVWA"));
         assertNull(newMinorVersionLibrary.getNamedMember("LookupOpenEnum"));
         assertNull(newMinorVersionLibrary.getNamedMember("LookupClosedEnum"));
         assertNull(newMinorVersionLibrary.getNamedMember("LookupSimple"));
+        assertNull(newMinorVersionLibrary.getNamedMember("LookupResource"));
     }
 
     @Test
@@ -726,10 +721,6 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
         assertNotNull(newMinorVersionResource);
         assertTrue(newMinorVersionResource.getOwningLibrary() == minorVersionLibrary11);
         assertTrue(newMinorVersionResource.getExtension().getExtendsEntity() == firstMinorVersionResource);
-        assertNotNull(newMinorVersionResource.getActionFacet("LaterMinorVersionFacetShared"));
-        assertEquals(1, newMinorVersionResource.getActionFacet("LaterMinorVersionFacetShared").getAttributes().size());
-        assertEquals(0, newMinorVersionResource.getActionFacet("LaterMinorVersionFacetShared").getElements().size());
-        assertEquals(0, newMinorVersionResource.getActionFacet("LaterMinorVersionFacetShared").getIndicators().size());
         
         // Make sure the later minor version was adjusted to extend the new minor version we just
         // created

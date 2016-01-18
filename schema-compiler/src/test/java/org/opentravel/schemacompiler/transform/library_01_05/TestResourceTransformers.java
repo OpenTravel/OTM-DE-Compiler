@@ -16,8 +16,8 @@
 package org.opentravel.schemacompiler.transform.library_01_05;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -94,17 +94,24 @@ public class TestResourceTransformers extends Abstract_1_5_TestTransformers {
         
         assertEquals(3, type.getActionFacets().size());
         assertEquals("ObjectOnly", type.getActionFacets().get(0).getName());
-        assertFalse(type.getActionFacets().get(0).isNotExtendable());
         assertNotNull(type.getActionFacets().get(0).getDocumentation());
         assertNotNull(type.getActionFacets().get(0).getDocumentation().getDescription());
         assertEquals("ActionFacet-ObjectOnly-documentation-line_1",
         		type.getActionFacets().get(0).getDocumentation().getDescription());
         assertEquals(TLReferenceType.REQUIRED, type.getActionFacets().get(0).getReferenceType());
+        assertNull(type.getActionFacets().get(0).getReferenceFacetName());
+        assertEquals(0, type.getActionFacets().get(0).getReferenceRepeat());
+        assertNull(type.getActionFacets().get(0).getBasePayload());
+        assertEquals("ObjectList", type.getActionFacets().get(1).getName());
         assertEquals("Summary", type.getActionFacets().get(1).getReferenceFacetName());
+        assertEquals(TLReferenceType.REQUIRED, type.getActionFacets().get(1).getReferenceType());
         assertEquals(1000, type.getActionFacets().get(1).getReferenceRepeat());
-        assertEquals(1, type.getActionFacets().get(2).getAttributes().size());
-        assertEquals(1, type.getActionFacets().get(2).getElements().size());
-        assertEquals(1, type.getActionFacets().get(2).getIndicators().size());
+        assertNull(type.getActionFacets().get(1).getBasePayload());
+        assertEquals("ObjectWrapper", type.getActionFacets().get(2).getName());
+        assertEquals("Summary", type.getActionFacets().get(2).getReferenceFacetName());
+        assertEquals(0, type.getActionFacets().get(2).getReferenceRepeat());
+        assertNotNull(type.getActionFacets().get(2).getBasePayload());
+        assertEquals("SampleChoice", type.getActionFacets().get(2).getBasePayload().getLocalName());
         
         assertEquals(3, type.getActions().size());
         assertEquals("Update", type.getActions().get(1).getActionId());
@@ -183,17 +190,26 @@ public class TestResourceTransformers extends Abstract_1_5_TestTransformers {
         
         assertEquals(3, type.getActionFacet().size());
         assertEquals("ObjectOnly", type.getActionFacet().get(0).getLabel());
-        assertFalse(type.getActionFacet().get(0).isNotExtendable());
         assertNotNull(type.getActionFacet().get(0).getDocumentation());
         assertNotNull(type.getActionFacet().get(0).getDocumentation().getDescription());
         assertEquals("ActionFacet-ObjectOnly-documentation-line_1",
         		type.getActionFacet().get(0).getDocumentation().getDescription().getValue());
         assertEquals(ReferenceType.REQUIRED, type.getActionFacet().get(0).getReferenceType());
+        assertNull(type.getActionFacet().get(0).getReferenceFacet());
+        assertEquals("0", type.getActionFacet().get(0).getReferenceRepeat());
+        assertNull(type.getActionFacet().get(0).getBasePayload());
+        
+        assertEquals("ObjectList", type.getActionFacet().get(1).getLabel());
+        assertEquals(ReferenceType.REQUIRED, type.getActionFacet().get(1).getReferenceType());
         assertEquals("Summary", type.getActionFacet().get(1).getReferenceFacet());
         assertEquals("1000", type.getActionFacet().get(1).getReferenceRepeat());
-        assertEquals(1, type.getActionFacet().get(2).getAttribute().size());
-        assertEquals(1, type.getActionFacet().get(2).getElement().size());
-        assertEquals(1, type.getActionFacet().get(2).getIndicator().size());
+        assertNull(type.getActionFacet().get(1).getBasePayload());
+        
+        assertEquals("ObjectWrapper", type.getActionFacet().get(2).getLabel());
+        assertEquals(ReferenceType.OPTIONAL, type.getActionFacet().get(2).getReferenceType());
+        assertEquals("Summary", type.getActionFacet().get(2).getReferenceFacet());
+        assertEquals("0", type.getActionFacet().get(2).getReferenceRepeat());
+        assertEquals("SampleChoice", type.getActionFacet().get(2).getBasePayload());
         
         assertEquals(3, type.getAction().size());
         assertEquals("Update", type.getAction().get(1).getActionId());

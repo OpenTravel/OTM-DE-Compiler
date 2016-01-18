@@ -19,6 +19,7 @@ import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.event.ValueChangeEvent;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLActionRequest;
 import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAttribute;
@@ -54,6 +55,7 @@ public class TypeNameIntegrityChecker extends
         if ((event.getType() == ModelEventType.TYPE_ASSIGNMENT_MODIFIED)
                 || (event.getType() == ModelEventType.EXTENDS_ENTITY_MODIFIED)
                 || (event.getType() == ModelEventType.PARENT_RESOURCE_MODIFIED)
+                || (event.getType() == ModelEventType.BASE_PAYLOAD_MODIFIED)
                 || (event.getType() == ModelEventType.FACET_REF_MODIFIED)
                 || (event.getType() == ModelEventType.PAYLOAD_TYPE_MODIFIED)) {
             String entityName = buildEntityName((NamedEntity) event.getNewValue(), sourceObject);
@@ -81,6 +83,9 @@ public class TypeNameIntegrityChecker extends
 
             } else if (sourceObject instanceof TLParamGroup) {
                 ((TLParamGroup) sourceObject).setFacetRefName(entityName);
+
+            } else if (sourceObject instanceof TLActionFacet) {
+                ((TLActionFacet) sourceObject).setBasePayloadName(entityName);
 
             } else if (sourceObject instanceof TLActionRequest) {
                 ((TLActionRequest) sourceObject).setPayloadTypeName(entityName);

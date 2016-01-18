@@ -41,6 +41,7 @@ public class TypeAssignmentChangeIntegrityChecker
         if ((event.getType() == ModelEventType.TYPE_ASSIGNMENT_MODIFIED)
                 || (event.getType() == ModelEventType.EXTENDS_ENTITY_MODIFIED)
                 || (event.getType() == ModelEventType.PARENT_RESOURCE_MODIFIED)
+                || (event.getType() == ModelEventType.BASE_PAYLOAD_MODIFIED)
                 || (event.getType() == ModelEventType.PARAM_GROUP_MODIFIED)
                 || (event.getType() == ModelEventType.BO_REFERENCE_MODIFIED)
                 || (event.getType() == ModelEventType.FACET_REF_MODIFIED)

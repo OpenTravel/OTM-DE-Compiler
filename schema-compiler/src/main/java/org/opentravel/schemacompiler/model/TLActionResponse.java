@@ -28,11 +28,11 @@ import org.opentravel.schemacompiler.event.ModelEventType;
  *
  * @author S. Livezey
  */
-public class TLActionResponse extends TLModelElement implements NamedEntity, TLDocumentationOwner {
+public class TLActionResponse extends TLModelElement implements TLDocumentationOwner {
 	
 	private TLAction owner;
 	private List<Integer> statusCodes = new ArrayList<>();
-	private NamedEntity payloadType;
+	private TLActionFacet payloadType;
 	private String payloadTypeName;
 	private List<TLMimeType> mimeTypes = new ArrayList<>();
     private TLDocumentation documentation;
@@ -52,33 +52,6 @@ public class TLActionResponse extends TLModelElement implements NamedEntity, TLD
         }
         identity.append("Response");
         return identity.toString();
-	}
-
-	/**
-	 * @see org.opentravel.schemacompiler.model.NamedEntity#getNamespace()
-	 */
-	@Override
-	public String getNamespace() {
-		AbstractLibrary owningLibrary = getOwningLibrary();
-		
-		return (owningLibrary == null) ? null : owningLibrary.getNamespace();
-	}
-
-	/**
-	 * @see org.opentravel.schemacompiler.model.NamedEntity#getLocalName()
-	 */
-	@Override
-	public String getLocalName() {
-		StringBuilder localName = new StringBuilder();
-		String actionId = (owner == null) ? null : owner.getActionId();
-		
-		if (actionId != null) {
-			localName.append( actionId );
-		} else {
-			localName.append( "Unknown_Action" );
-		}
-		localName.append('_').append( "Response" );
-		return localName.toString();
 	}
 
 	/**
@@ -178,9 +151,9 @@ public class TLActionResponse extends TLModelElement implements NamedEntity, TLD
 	/**
 	 * Returns the value of the 'payloadType' field.
 	 *
-	 * @return NamedEntity
+	 * @return TLActionFacet
 	 */
-	public NamedEntity getPayloadType() {
+	public TLActionFacet getPayloadType() {
 		return payloadType;
 	}
 
@@ -189,7 +162,7 @@ public class TLActionResponse extends TLModelElement implements NamedEntity, TLD
 	 *
 	 * @param payloadType  the field value to assign
 	 */
-	public void setPayloadType(NamedEntity payloadType) {
+	public void setPayloadType(TLActionFacet payloadType) {
         ModelEvent<?> event = new ModelEventBuilder(ModelEventType.PAYLOAD_TYPE_MODIFIED, this)
         		.setOldValue(this.payloadType).setNewValue(payloadType).buildEvent();
 

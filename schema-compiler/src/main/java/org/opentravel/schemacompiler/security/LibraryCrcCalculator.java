@@ -459,7 +459,7 @@ public class LibraryCrcCalculator {
             crcData.append(facet.getReferenceType()).append('|');
             crcData.append(facet.getReferenceFacetName()).append('|');
             crcData.append(facet.getReferenceRepeat()).append('|');
-            crcData.append(facet.isNotExtendable()).append('|');
+            crcData.append(facet.getBasePayloadName()).append('|');
             return true;
 		}
 

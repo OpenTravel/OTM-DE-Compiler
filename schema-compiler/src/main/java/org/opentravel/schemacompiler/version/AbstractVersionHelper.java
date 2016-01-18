@@ -26,7 +26,6 @@ import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.NamedEntity;
-import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAttributeOwner;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLContext;
@@ -41,7 +40,6 @@ import org.opentravel.schemacompiler.model.TLMemberFieldOwner;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLModelElement;
 import org.opentravel.schemacompiler.model.TLPropertyOwner;
-import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.repository.Project;
 import org.opentravel.schemacompiler.repository.ProjectItem;
 import org.opentravel.schemacompiler.repository.ProjectManager;
@@ -317,23 +315,19 @@ public abstract class AbstractVersionHelper {
     Versioned getPatchedVersion(TLExtensionPointFacet xpFacet) throws VersionSchemeException {
         NamedEntity extendedEntity = (xpFacet.getExtension() == null) ? null : xpFacet
                 .getExtension().getExtendsEntity();
-        TLFacetOwner extendedFacetOwner = null;
         Versioned patchedVersion = null;
         
         if (extendedEntity instanceof TLFacet) {
-            extendedFacetOwner = ((TLFacet) extendedEntity).getOwningEntity();
+        	TLFacetOwner extendedFacetOwner = ((TLFacet) extendedEntity).getOwningEntity();
             
-        } else if (extendedEntity instanceof TLActionFacet) {
-            extendedFacetOwner = ((TLActionFacet) extendedEntity).getOwningEntity();
-        }
-        
-        if (extendedFacetOwner instanceof Versioned) {
-            VersionScheme versionScheme = VersionSchemeFactory.getInstance().getVersionScheme(
-                    xpFacet.getVersionScheme());
-            List<String> versionChain = versionScheme.getMajorVersionChain(xpFacet.getNamespace());
+            if (extendedFacetOwner instanceof Versioned) {
+                VersionScheme versionScheme = VersionSchemeFactory.getInstance().getVersionScheme(
+                        xpFacet.getVersionScheme());
+                List<String> versionChain = versionScheme.getMajorVersionChain(xpFacet.getNamespace());
 
-            if (versionChain.indexOf(extendedFacetOwner.getNamespace()) > 0) {
-                patchedVersion = (Versioned) extendedFacetOwner;
+                if (versionChain.indexOf(extendedFacetOwner.getNamespace()) > 0) {
+                    patchedVersion = (Versioned) extendedFacetOwner;
+                }
             }
         }
         return patchedVersion;
@@ -727,22 +721,6 @@ public abstract class AbstractVersionHelper {
             } else {
                 targetFacet = FacetCodegenUtils.getFacetOfType((TLFacetOwner) majorOrMinorVersionTarget, patchedFacetType);
             }
-        	
-        } else if ((extendedEntity instanceof TLActionFacet) && (majorOrMinorVersionTarget instanceof TLResource)) {
-        	targetFacet = ((TLResource) majorOrMinorVersionTarget).getActionFacet( ((TLActionFacet) extendedEntity).getName() );
-        	
-        	// If a matching action facet does not yet exist, create one automatically
-        	if (targetFacet == null) {
-        		TLActionFacet patchedFacet = (TLActionFacet) extendedEntity;
-        		TLActionFacet actionFacet = new TLActionFacet();
-        		
-        		actionFacet.setName( patchedFacet.getName() );
-        		actionFacet.setReferenceFacetName( patchedFacet.getReferenceFacetName() );
-        		actionFacet.setReferenceType( patchedFacet.getReferenceType() );
-        		actionFacet.setReferenceRepeat( patchedFacet.getReferenceRepeat() );
-        		((TLResource) majorOrMinorVersionTarget).addActionFacet( actionFacet );
-        		targetFacet = actionFacet;
-        	}
         }
 
         if (targetFacet != null) {

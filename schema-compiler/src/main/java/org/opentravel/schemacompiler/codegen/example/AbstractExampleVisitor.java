@@ -29,8 +29,7 @@ import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFacto
 import org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.model.NamedEntity;
-import org.opentravel.schemacompiler.model.TLActionRequest;
-import org.opentravel.schemacompiler.model.TLActionResponse;
+import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLAttributeOwner;
@@ -297,42 +296,24 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
     }
 
     /**
-	 * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#startRequest(org.opentravel.schemacompiler.model.TLActionRequest)
+	 * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#startActionFacet(org.opentravel.schemacompiler.model.TLActionFacet, org.opentravel.schemacompiler.model.TLFacet)
 	 */
 	@Override
-	public void startRequest(TLActionRequest request) {
+	public void startActionFacet(TLActionFacet actionFacet, TLFacet payloadFacet) {
         if (DEBUG) {
-            log.info(debugIndent + "startRequest() : " + request.getLocalName());
+            log.info(debugIndent + "startActionFacet() : " + actionFacet.getLocalName());
+            debugIndent.append("  ");
         }
 	}
 
 	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#endRequest(org.opentravel.schemacompiler.model.TLActionRequest)
+	 * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#endActionFacet(org.opentravel.schemacompiler.model.TLActionFacet, org.opentravel.schemacompiler.model.TLFacet)
 	 */
 	@Override
-	public void endRequest(TLActionRequest request) {
+	public void endActionFacet(TLActionFacet actionFacet, TLFacet payloadFacet) {
         if (DEBUG) {
-            log.info(debugIndent + "endRequest() : " + request.getLocalName());
-        }
-	}
-
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#startResponse(org.opentravel.schemacompiler.model.TLActionResponse)
-	 */
-	@Override
-	public void startResponse(TLActionResponse response) {
-        if (DEBUG) {
-            log.info(debugIndent + "startResponse() : " + response.getLocalName());
-        }
-	}
-
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#endResponse(org.opentravel.schemacompiler.model.TLActionResponse)
-	 */
-	@Override
-	public void endResponse(TLActionResponse response) {
-        if (DEBUG) {
-            log.info(debugIndent + "endResponse() : " + response.getLocalName());
+            log.info(debugIndent + "endActionFacet() : " + actionFacet.getLocalName());
+            debugIndent.append("  ");
         }
 	}
 

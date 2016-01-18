@@ -1454,14 +1454,9 @@
 					<property name="transformer" value="org.opentravel.schemacompiler.codegen.xsd.TLResourceCodegenTransformer" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.opentravel.schemacompiler.model.TLActionRequest" />
+					<property name="source" value="org.opentravel.schemacompiler.model.TLActionFacet" />
 					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
-					<property name="transformer" value="org.opentravel.schemacompiler.codegen.xsd.TLActionRequestCodegenTransformer" />
-				</bean>
-				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.opentravel.schemacompiler.model.TLActionResponse" />
-					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
-					<property name="transformer" value="org.opentravel.schemacompiler.codegen.xsd.TLActionResponseCodegenTransformer" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.xsd.TLActionFacetCodegenTransformer" />
 				</bean>
 			</set>
 		</property>
@@ -1594,14 +1589,9 @@
 					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLResourceJsonCodegenTransformer" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.opentravel.schemacompiler.model.TLActionRequest" />
-					<property name="target" value="org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference" />
-					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLActionRequestJsonCodegenTransformer" />
-				</bean>
-				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.opentravel.schemacompiler.model.TLActionResponse" />
-					<property name="target" value="org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference" />
-					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLActionResponseJsonCodegenTransformer" />
+					<property name="source" value="org.opentravel.schemacompiler.model.TLActionFacet" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLActionFacetJsonCodegenTransformer" />
 				</bean>
 			</set>
 		</property>

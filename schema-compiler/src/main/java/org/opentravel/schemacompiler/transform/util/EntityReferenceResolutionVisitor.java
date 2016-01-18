@@ -47,6 +47,7 @@ import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.model.XSDLibrary;
 import org.opentravel.schemacompiler.transform.SymbolResolver;
 import org.opentravel.schemacompiler.validate.impl.TLModelSymbolResolver;
+import org.opentravel.schemacompiler.visitor.ModelElementVisitor;
 import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
 
 /**
@@ -69,7 +70,7 @@ public class EntityReferenceResolutionVisitor extends ModelElementVisitorAdapter
     public EntityReferenceResolutionVisitor(TLModel model) {
         this(new TLModelSymbolResolver(model));
     }
-
+    
     /**
      * Constructor that assigns the model being navigated.
      * 
@@ -79,7 +80,29 @@ public class EntityReferenceResolutionVisitor extends ModelElementVisitorAdapter
     public EntityReferenceResolutionVisitor(SymbolResolver symbolResolver) {
         this.symbolResolver = symbolResolver;
     }
-
+    
+    /**
+     * Visits and resolves the parameters of each library resource.  This covers
+     * an edge case that causes some parameters not to be resolved on the initial
+     * visit since some of the field references may not yet have been resolved on
+     * the first pass.
+     * 
+     * @param model  the model for which to resolve parameter field references
+     */
+    public static void resolveParameters(TLModel model) {
+    	ModelElementVisitor visitor = new EntityReferenceResolutionVisitor(model);
+    	
+        for (TLLibrary library : model.getUserDefinedLibraries()) {
+        	for (TLResource resource : library.getResourceTypes()) {
+        		for (TLParamGroup paramGroup : resource.getParamGroups()) {
+        			for (TLParameter param : paramGroup.getParameters()) {
+                		visitor.visitParameter(param);
+        			}
+        		}
+        	}
+        }
+    }
+    
     /**
      * Assigns the context library for the symbol resolver.
      * 
@@ -302,6 +325,22 @@ public class EntityReferenceResolutionVisitor extends ModelElementVisitorAdapter
 	}
 
 	/**
+	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionFacet(org.opentravel.schemacompiler.model.TLActionFacet)
+	 */
+	@Override
+	public boolean visitActionFacet(TLActionFacet facet) {
+        if ((facet.getOwningResource() != null) && (facet.getBasePayload() == null)
+        		&& (facet.getBasePayloadName() != null)) {
+            Object ref = symbolResolver.resolveEntity(facet.getBasePayloadName());
+
+            if (ref instanceof NamedEntity) {
+            	facet.setBasePayload((NamedEntity) ref);
+            }
+        }
+        return true;
+	}
+
+	/**
 	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionRequest(org.opentravel.schemacompiler.model.TLActionRequest)
 	 */
 	@Override
@@ -337,8 +376,8 @@ public class EntityReferenceResolutionVisitor extends ModelElementVisitorAdapter
         if ((actionResponse.getPayloadType() == null) && (actionResponse.getPayloadTypeName() != null)) {
             Object ref = symbolResolver.resolveEntity(actionResponse.getPayloadTypeName());
 
-            if (ref instanceof NamedEntity) {
-            	actionResponse.setPayloadType((NamedEntity) ref);
+            if (ref instanceof TLActionFacet) {
+            	actionResponse.setPayloadType((TLActionFacet) ref);
             }
         }
         return true;

@@ -853,15 +853,6 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateActionFacet(TLActionFacet actionFacet) {
         if (canVisit(actionFacet) && visitor.visitActionFacet(actionFacet)) {
-            for (TLAttribute attribute : actionFacet.getAttributes()) {
-                navigateAttribute(attribute);
-            }
-            for (TLProperty element : actionFacet.getElements()) {
-                navigateElement(element);
-            }
-            for (TLIndicator indicator : actionFacet.getIndicators()) {
-                navigateIndicator(indicator);
-            }
             navigateDocumentation(actionFacet.getDocumentation());
         }
         addVisitedNode(actionFacet);

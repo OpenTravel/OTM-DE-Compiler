@@ -39,9 +39,6 @@ import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
-import org.opentravel.schemacompiler.model.TLParamGroup;
-import org.opentravel.schemacompiler.model.TLParameter;
-import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.XSDComplexType;
 import org.opentravel.schemacompiler.model.XSDElement;
 import org.opentravel.schemacompiler.model.XSDLibrary;
@@ -64,7 +61,6 @@ import org.opentravel.schemacompiler.validate.compile.TLModelCompileValidator;
 import org.opentravel.schemacompiler.version.VersionScheme;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 import org.opentravel.schemacompiler.version.VersionSchemeFactory;
-import org.opentravel.schemacompiler.visitor.ModelElementVisitor;
 import org.opentravel.schemacompiler.visitor.ModelNavigator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -364,20 +360,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
             libraryModel.setListenersEnabled(false);
             ModelNavigator.navigate(libraryModel,
                     new EntityReferenceResolutionVisitor(libraryModel));
-            
-            // Re-visit the parameters of each library because some of the field
-            // references may not have been resolved on the first pass. (EDGE CASE)
-        	ModelElementVisitor visitor = new EntityReferenceResolutionVisitor(libraryModel);
-        	
-            for (TLLibrary library : libraryModel.getUserDefinedLibraries()) {
-            	for (TLResource resource : library.getResourceTypes()) {
-            		for (TLParamGroup paramGroup : resource.getParamGroups()) {
-            			for (TLParameter param : paramGroup.getParameters()) {
-                    		visitor.visitParameter(param);
-            			}
-            		}
-            	}
-            }
+            EntityReferenceResolutionVisitor.resolveParameters(libraryModel);
             
         } finally {
             libraryModel.setListenersEnabled(listenerFlag);
@@ -880,8 +863,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
                         ERROR_UNKNOWN_EXCEPTION_DURING_VALIDATION, library.getName(),
                         ExceptionUtils.getExceptionClass(t).getSimpleName(),
                         ExceptionUtils.getExceptionMessage(t));
-                log.debug("Unexpected exception validating liberary module: " + library.getName(),
-                        t);
+                log.debug("Unexpected exception validating liberary module: " + library.getName(), t);
             }
         }
     }

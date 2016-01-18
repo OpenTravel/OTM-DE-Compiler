@@ -16,6 +16,7 @@
 package org.opentravel.schemacompiler.version.handlers;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -91,7 +92,6 @@ public class TLResourceVersionHandler extends TLExtensionOwnerVersionHandler<TLR
 	@Override
 	public void rollupMinorVersion(TLResource minorVersion, TLResource majorVersionTarget,
 			RollupReferenceHandler referenceHandler) {
-		VersionHandlerMergeUtils mergeUtils = new VersionHandlerMergeUtils( getFactory() );
 		ModelElementCloner cloner = getCloner( minorVersion );
 		
 		// Rollup the parent resource references
@@ -125,14 +125,12 @@ public class TLResourceVersionHandler extends TLExtensionOwnerVersionHandler<TLR
                 targetFacet.setReferenceFacetName( sourceFacet.getReferenceFacetName() );
                 targetFacet.setReferenceRepeat( sourceFacet.getReferenceRepeat() );
                 targetFacet.setReferenceType( sourceFacet.getReferenceType() );
+                targetFacet.setBasePayload( sourceFacet.getBasePayload() );
                 majorVersionTarget.addActionFacet( targetFacet );
             }
             if (targetFacet.getDocumentation() == null) {
                 targetFacet.setDocumentation( cloner.clone( sourceFacet.getDocumentation() ) );
             }
-            mergeUtils.mergeAttributes( targetFacet, sourceFacet.getAttributes(), referenceHandler );
-            mergeUtils.mergeProperties( targetFacet, sourceFacet.getElements(), referenceHandler );
-            mergeUtils.mergeIndicators( targetFacet, sourceFacet.getIndicators() );
         }
         
         // Rollup the parameter groups
@@ -271,12 +269,7 @@ public class TLResourceVersionHandler extends TLExtensionOwnerVersionHandler<TLR
 	 */
 	@Override
 	public List<TLPatchableFacet> getPatchableFacets(TLResource entity) {
-		List<TLPatchableFacet> facetList = new ArrayList<>();
-		
-		for (TLActionFacet facet : entity.getActionFacets()) {
-			facetList.add( facet );
-		}
-		return facetList;
+		return Collections.emptyList();
 	}
 	
 }

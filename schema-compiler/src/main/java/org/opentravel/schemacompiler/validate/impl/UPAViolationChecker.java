@@ -26,7 +26,6 @@ import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
-import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttributeOwner;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
@@ -101,9 +100,6 @@ public class UPAViolationChecker {
 		
 		if (fieldOwner instanceof TLFacet) {
 			elementSequence = PropertyCodegenUtils.getElementSequence( (TLFacet) fieldOwner );
-			
-		} else if (fieldOwner instanceof TLActionFacet) {
-			elementSequence = PropertyCodegenUtils.getElementSequence( (TLActionFacet) fieldOwner );
 			
 		} else if (fieldOwner instanceof TLExtensionPointFacet) {
 			elementSequence = ValidatorUtils.getMembers( (TLExtensionPointFacet) fieldOwner );

@@ -19,13 +19,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
-import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAction;
 import org.opentravel.schemacompiler.model.TLActionFacet;
-import org.opentravel.schemacompiler.model.TLActionRequest;
 import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttribute;
@@ -349,49 +347,14 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
     public void navigateAction(TLAction action) {
         if (canVisit(action) && visitor.visitAction(action)) {
         	if (action.getRequest() != null) {
-            	NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( action.getRequest() );
-        		
-            	if (payloadType != null) {
-                	navigate( payloadType );
-            	}
+            	navigate( action.getRequest().getPayloadType() );
         	}
             
             for (TLActionResponse response : action.getResponses()) {
-            	NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( response );
-            	
-            	if (payloadType != null) {
-                	navigate( payloadType );
-            	}
+            	navigate( response.getPayloadType() );
             }
         }
         addVisitedNode(action);
-    }
-    
-    /**
-     * Called when a <code>TLActionRequest</code> instance is encountered during model navigation.
-     * 
-     * @param actionRequest
-     *            the action request entity to visit and navigate
-     */
-    public void navigateActionRequest(TLActionRequest actionRequest) {
-        if (canVisit(actionRequest) && visitor.visitActionRequest(actionRequest)) {
-        	navigateParamGroup(actionRequest.getParamGroup());
-        	navigateActionFacet(actionRequest.getPayloadType());
-        }
-        addVisitedNode(actionRequest);
-    }
-    
-    /**
-     * Called when a <code>TLActionResponse</code> instance is encountered during model navigation.
-     * 
-     * @param actionResponse
-     *            the action response entity to visit and navigate
-     */
-    public void navigateActionResponse(TLActionResponse actionResponse) {
-        if (canVisit(actionResponse) && visitor.visitActionResponse(actionResponse)) {
-        	navigateDependency(actionResponse.getPayloadType());
-        }
-        addVisitedNode(actionResponse);
     }
     
     /**
@@ -574,18 +537,10 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
      * @param actionFacet
      *            the action facet entity to visit and navigate
      */
-    public void navigateActionFacet(TLActionFacet actionFacet) {
+    protected void navigateActionFacet(TLActionFacet actionFacet) {
         if (canVisit(actionFacet) && visitor.visitActionFacet(actionFacet)) {
-            for (TLAttribute attribute : PropertyCodegenUtils.getInheritedAttributes(actionFacet)) {
-                navigateAttribute(attribute);
-            }
-            for (TLProperty element : PropertyCodegenUtils.getInheritedProperties(actionFacet)) {
-                navigateElement(element);
-            }
-            for (TLIndicator indicator : PropertyCodegenUtils.getInheritedIndicators(actionFacet)) {
-                navigateIndicator(indicator);
-            }
-            navigateDependency(actionFacet.getOwningEntity());
+            navigateDependency(actionFacet.getBasePayload());
+            navigateDependency(actionFacet.getOwningResource());
         }
         addVisitedNode(actionFacet);
     }
@@ -711,11 +666,8 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
         } else if (entity instanceof TLResource) {
             navigateResource((TLResource) entity);
 
-        } else if (entity instanceof TLActionRequest) {
-            navigateActionRequest((TLActionRequest) entity);
-
-        } else if (entity instanceof TLActionResponse) {
-            navigateActionResponse((TLActionResponse) entity);
+        } else if (entity instanceof TLActionFacet) {
+            navigateActionFacet((TLActionFacet) entity);
 
         } else if (entity instanceof XSDSimpleType) {
             navigateXSDSimpleType((XSDSimpleType) entity);

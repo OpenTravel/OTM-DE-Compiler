@@ -16,7 +16,10 @@
 package org.opentravel.schemacompiler.validate.compile;
 
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
+import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLActionFacet;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
+import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLReferenceType;
 import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.validate.FindingType;
@@ -41,7 +44,8 @@ public class TLActionFacetCompileValidator extends TLActionFacetBaseValidator{
 	@Override
 	protected ValidationFindings validateFields(TLActionFacet target) {
 		TLValidationBuilder builder = newValidationBuilder(target);
-		TLResource owner = (TLResource) target.getOwningEntity();
+		NamedEntity basePayload = target.getBasePayload();
+		TLResource owner = target.getOwningResource();
 		
 		builder.setProperty("name", target.getName()).setFindingType(FindingType.ERROR)
 				.assertNotNullOrBlank().assertPatternMatch(NAME_XML_PATTERN);
@@ -70,6 +74,7 @@ public class TLActionFacetCompileValidator extends TLActionFacetBaseValidator{
 			
 		} else if (target.getReferenceType() != null) {
 			if (!owner.isAbstract() && (owner.getBusinessObjectRef() != null)
+					&& (target.getReferenceFacetName() != null)
 					&& (ResourceCodegenUtils.getReferencedFacet(
 							owner.getBusinessObjectRef(), target.getReferenceFacetName()) == null)) {
 	        	builder.addFinding( FindingType.ERROR, "referenceFacetName", ERROR_INVALID_FACET_REFERENCE,
@@ -77,8 +82,28 @@ public class TLActionFacetCompileValidator extends TLActionFacetBaseValidator{
 			}
 		}
 		
-		checkSchemaNamingConflicts(target, builder);
-		
+		if (basePayload != null) {
+			NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( target );
+			
+	        builder.setEntityReferenceProperty("basePayload", basePayload,
+	                target.getBasePayloadName()).setFindingType(FindingType.ERROR)
+	                .assertValidEntityReference(TLCoreObject.class, TLChoiceObject.class)
+	                .setFindingType(FindingType.WARNING).assertNotNull().assertNotDeprecated();
+			
+	        // If the payload type is not an existing core/choice object, make sure the
+	        // action facet's name does not conflict with another entity
+	        if (payloadType == target) {
+	    		checkSchemaNamingConflicts(target, builder);
+	        }
+	        
+		} else {
+			String basePayloadName = target.getBasePayloadName();
+			
+			if ((basePayloadName != null) && basePayloadName.equals("")) {
+				builder.addFinding( FindingType.ERROR, "basePayload",
+						TLValidationBuilder.UNRESOLVED_NAMED_ENTITY_REFERENCE, basePayloadName );
+			}
+		}
 		return builder.getFindings();
 	}
 

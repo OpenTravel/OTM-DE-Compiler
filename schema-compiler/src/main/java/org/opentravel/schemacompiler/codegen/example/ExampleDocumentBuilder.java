@@ -31,8 +31,8 @@ import javax.xml.transform.stream.StreamResult;
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
+import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
-import org.opentravel.schemacompiler.model.TLPropertyType;
 import org.opentravel.schemacompiler.validate.ValidationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -160,8 +160,7 @@ public class ExampleDocumentBuilder extends ExampleBuilder<Document>{
         ExampleNavigator.navigate(modelElement, visitor, options);
         domDocument = visitor.getDocument();
 
-        if ((((modelElement instanceof TLPropertyType) && PropertyCodegenUtils
-                .hasGlobalElement((TLPropertyType) modelElement)) || (modelElement instanceof TLExtensionPointFacet))) {
+        if (schemaLocationRequired(modelElement)) {
             Element rootElement = domDocument.getDocumentElement();
             StringBuilder schemaLocation = new StringBuilder();
 
@@ -193,5 +192,17 @@ public class ExampleDocumentBuilder extends ExampleBuilder<Document>{
         }
         return domDocument;
     }
-
+    
+    /**
+     * Returns true if an 'xsi:schemaLocation' attribute should be added to the
+     * root element of the example for the given entity.
+     * 
+     * @param entity  the entity for which an example document is being generated
+     * @return boolean
+     */
+    private boolean schemaLocationRequired(NamedEntity entity) {
+    	return PropertyCodegenUtils.hasGlobalElement(modelElement)
+    			|| (modelElement instanceof TLExtensionPointFacet);
+    }
+    
 }

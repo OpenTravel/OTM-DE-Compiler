@@ -152,11 +152,11 @@ public class SwaggerCompilerTask extends AbstractSchemaCompilerTask
     		TLActionRequest request = ResourceCodegenUtils.getDeclaredOrInheritedRequest( action );
     		
         	if ((request != null) && containsSupportedType( request.getMimeTypes(), contentTypes)) {
-    			builder.addLibraryMember( request );
+    			builder.addLibraryMember( request.getPayloadType() );
     		}
     		for (TLActionResponse response : ResourceCodegenUtils.getInheritedResponses( action )) {
         		if (containsSupportedType( response.getMimeTypes(), contentTypes)) {
-        			builder.addLibraryMember( response );
+        			builder.addLibraryMember( response.getPayloadType() );
         		}
     		}
     	}
@@ -180,7 +180,7 @@ public class SwaggerCompilerTask extends AbstractSchemaCompilerTask
         	TLActionRequest request = ResourceCodegenUtils.getDeclaredOrInheritedRequest( action );
         	
         	if ((request != null) && containsSupportedType( request.getMimeTypes(), contentTypes)) {
-        		NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( request );
+        		NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( request.getPayloadType() );
         		
         		if (payloadType != null) {
         			appendToFilter( payloadType, filter );
@@ -188,7 +188,7 @@ public class SwaggerCompilerTask extends AbstractSchemaCompilerTask
         	}
         	for (TLActionResponse response : ResourceCodegenUtils.getInheritedResponses( action )) {
         		if (containsSupportedType( response.getMimeTypes(), contentTypes)) {
-            		NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( response );
+            		NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( response.getPayloadType() );
             		
             		if (payloadType != null) {
             			appendToFilter( payloadType, filter );

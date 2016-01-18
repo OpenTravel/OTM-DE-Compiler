@@ -17,10 +17,7 @@ package org.opentravel.schemacompiler.codegen.json;
 
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
-import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
-import org.opentravel.schemacompiler.model.TLAction;
-import org.opentravel.schemacompiler.model.TLActionRequest;
-import org.opentravel.schemacompiler.model.TLActionResponse;
+import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 
@@ -35,22 +32,15 @@ public class TLResourceJsonCodegenTransformer extends AbstractJsonSchemaTransfor
 	 */
 	@Override
 	public CodegenArtifacts transform(TLResource source) {
-        ObjectTransformer<TLActionRequest, JsonSchemaNamedReference, CodeGenerationTransformerContext> requestTransformer = getTransformerFactory()
-                .getTransformer(TLActionRequest.class, JsonSchemaNamedReference.class);
-        ObjectTransformer<TLActionResponse, JsonSchemaNamedReference, CodeGenerationTransformerContext> responseTransformer = getTransformerFactory()
-                .getTransformer(TLActionResponse.class, JsonSchemaNamedReference.class);
+        ObjectTransformer<TLActionFacet, CodegenArtifacts, CodeGenerationTransformerContext> afTransformer = getTransformerFactory()
+                .getTransformer(TLActionFacet.class, CodegenArtifacts.class);
         CodegenArtifacts artifacts = new CodegenArtifacts();
         
         // The only TLResource artifacts that need to be represented in the XML schema are the
-        // action requests and responses.
-        for (TLAction action : source.getActions()) {
-        	if (action.getRequest() != null) {
-        		artifacts.addArtifact( requestTransformer.transform( action.getRequest() ) );
-        	}
-        	for (TLActionResponse response : action.getResponses()) {
-        		artifacts.addArtifact( responseTransformer.transform( response ) );
-        	}
-        }
+        // action facets.
+    	for (TLActionFacet actionFacet : source.getActionFacets()) {
+    		artifacts.addAllArtifacts( afTransformer.transform( actionFacet ) );
+    	}
         return artifacts;
 	}
 	

@@ -59,6 +59,17 @@ public abstract class CoreObjectFacetCodegenDelegate extends TLFacetCodegenDeleg
     public QName getExtensionPointElement() {
         return null;
     }
+    
+    /**
+     * Returns true if role attributes should be created for this facet.  Default
+     * value is true; sub-classes may override to supress the creation of role
+     * attributes.
+     * 
+     * @return boolean
+     */
+    protected boolean createRoleAttributes() {
+    	return true;
+    }
 
     /**
      * @see org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate#createJaxbAttributes()
@@ -67,7 +78,7 @@ public abstract class CoreObjectFacetCodegenDelegate extends TLFacetCodegenDeleg
     protected List<Annotated> createJaxbAttributes() {
         List<Annotated> jaxbAttributes = super.createJaxbAttributes();
 
-        if (getLocalBaseFacet() == null) {
+        if (createRoleAttributes() && (getLocalBaseFacet() == null)) {
             TLCoreObject owner = (TLCoreObject) getSourceFacet().getOwningEntity();
 
             while (owner != null) {

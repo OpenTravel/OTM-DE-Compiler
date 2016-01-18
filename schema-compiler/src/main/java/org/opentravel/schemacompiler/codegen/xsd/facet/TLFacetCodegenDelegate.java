@@ -440,7 +440,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
     @Override
     protected Annotated createType() {
         TLFacet sourceFacet = getSourceFacet();
-        String typeName = XsdCodegenUtils.getGlobalTypeName(sourceFacet);
+        String typeName = getTypeName();
         QName baseType = getLocalBaseFacetTypeName();
         QName globalExtensionPointElement = hasExtensionPoint() ? getExtensionPointElement() : null;
 
@@ -509,7 +509,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
 
         return type;
     }
-
+    
     /**
      * Common method used to populate a list of the facet's JAXB attributes using the attributes and
      * indicators of the source facet.

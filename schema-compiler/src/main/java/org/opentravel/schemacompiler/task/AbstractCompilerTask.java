@@ -457,7 +457,7 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
                 		TLActionRequest request = ResourceCodegenUtils.getDeclaredOrInheritedRequest( action );
                 		
                 		if (request != null) {
-                			NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( request );
+                			NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( request.getPayloadType() );
                 			
                 			if ((payloadType != null) && ((filter == null) || filter.processEntity( payloadType ))) {
         						addGeneratedFiles( exampleGenerator.generateOutput(
@@ -466,7 +466,7 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
                 		}
                 		
                 		for (TLActionResponse response : ResourceCodegenUtils.getInheritedResponses( action )) {
-                			NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( response );
+                			NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( response.getPayloadType() );
                 			
                 			if ((payloadType != null) && ((filter == null) || filter.processEntity( payloadType ))) {
         						addGeneratedFiles( exampleGenerator.generateOutput(

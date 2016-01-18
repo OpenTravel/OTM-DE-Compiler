@@ -1648,45 +1648,63 @@
    <xsd:complexType name="Facet_Action">
       <xsd:annotation>
          <xsd:documentation>Action facets describe the message payload for RESTful
-         	action requests and responses.  In addition to their own payload, they
-         	provide basic information about how the resource's business object
-         	should be referenced in the message
+         	action requests and responses.  They provide basic information about how
+         	the resource's business object should be referenced in the message, as
+         	well as providing an optional reference to a core/choice object that
+         	defines additional items that should be included in the payload.
          </xsd:documentation>
       </xsd:annotation>
-      <xsd:complexContent>
-         <xsd:extension base="Facet_Contextual">
-            <xsd:attribute name="referenceType" type="ReferenceType" use="required">
-               <xsd:annotation>
-                  <xsd:documentation>Indicates how the business object should be
-                  	referenced in the message.
-                  </xsd:documentation>
-               </xsd:annotation>
-            </xsd:attribute>
-            <xsd:attribute name="referenceFacet" type="Name_Type" use="optional">
-               <xsd:annotation>
-                  <xsd:documentation>Specifies the name of the business object facet
-                  	to be referenced in the message.  If the 'businessObjectReferenceType'
-                  	value is 'None' this value will be ignored.
-                  </xsd:documentation>
-               </xsd:annotation>
-            </xsd:attribute>
-	        <xsd:attribute name="referenceRepeat">
-    	       <xsd:annotation>
-        	      <xsd:documentation>Specifies the maximum number of times that the business
-        	      	object reference should repeat in the message.
-	  
-    	            Best practices state that this string value should contain a positive
-        	        number that is greater than or equal to 1.
-            	  </xsd:documentation>
-	           </xsd:annotation>
-    	       <xsd:simpleType>
-        	      <xsd:restriction base="xsd:string">
-            	     <xsd:pattern value="[0-9]+|\*" />
-	              </xsd:restriction>
-    	       </xsd:simpleType>
-      	   </xsd:attribute>
-         </xsd:extension>
-      </xsd:complexContent>
+	  <xsd:sequence>
+         <xsd:element ref="Documentation" minOccurs="0" />
+      </xsd:sequence>
+      <xsd:attribute name="label" type="Name_XML" use="optional">
+         <xsd:annotation>
+            <xsd:documentation>A usage indicator that differentiates multiple
+                facets within the same context of its parent element.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="referenceType" type="ReferenceType" use="required">
+         <xsd:annotation>
+            <xsd:documentation>Indicates how the business object should be
+            	referenced in the message.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="referenceFacet" type="Name_Type" use="optional">
+         <xsd:annotation>
+            <xsd:documentation>Specifies the name of the business object facet
+               	to be referenced in the message.  If the 'businessObjectReferenceType'
+              	value is 'None' this value will be ignored.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="referenceRepeat">
+    	 <xsd:annotation>
+      	    <xsd:documentation>Specifies the maximum number of times that the business
+       	      	object reference should repeat in the message.
+	 
+    	        Best practices state that this string value should contain a positive
+        	    number that is greater than or equal to 1.
+            </xsd:documentation>
+	     </xsd:annotation>
+	     <xsd:simpleType>
+            <xsd:restriction base="xsd:string">
+               <xsd:pattern value="[0-9]+|\*" />
+	        </xsd:restriction>
+    	 </xsd:simpleType>
+      </xsd:attribute>
+      <xsd:attribute name="basePayload" type="Name_XML" use="optional">
+         <xsd:annotation>
+            <xsd:documentation>Optional reference to a core or choice object that indicates
+                the basic structure of the message payload.  If the 'referenceType' value is
+                NONE, this will indicate the entirity of the message structure.  For reference
+                type values other than NONE, the message structure will include all elements
+                of the base payload, plus reference(s) to the owning resource's business
+                object.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
    </xsd:complexType>
    
    <xsd:element name="Parameter" type="Parameter">
@@ -1848,7 +1866,7 @@
       </xsd:attribute>
       <xsd:attribute name="payloadType" type="Name_Type" use="optional">
          <xsd:annotation>
-            <xsd:documentation>Name of the action facet or core object that specifies the
+            <xsd:documentation>Name of the action facet that specifies the
             	payload (if any) for the response.
             </xsd:documentation>
          </xsd:annotation>

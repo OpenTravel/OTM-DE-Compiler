@@ -201,16 +201,6 @@ public class RollupReferenceHandler {
             	captureRollupReferences( newElement );
             }
             
-        } else if (entity instanceof TLActionFacet) {
-        	TLActionFacet facet = (TLActionFacet) entity;
-            
-            for (TLAttribute newAttribute : facet.getAttributes()) {
-            	captureRollupReferences( newAttribute );
-            }
-            for (TLProperty newElement : facet.getElements()) {
-            	captureRollupReferences( newElement );
-            }
-
         } else if (entity instanceof TLResource) {
         	TLResource resource = (TLResource) entity;
             
@@ -470,9 +460,6 @@ public class RollupReferenceHandler {
         			if (sameNameOwner instanceof TLFacet) {
         				inheritedMembers = PropertyCodegenUtils.getInheritedFacetAttributes((TLFacet) sameNameOwner);
         				
-        			} else if (sameNameOwner instanceof TLActionFacet) {
-        				inheritedMembers = PropertyCodegenUtils.getInheritedAttributes((TLActionFacet) sameNameOwner);
-        				
         			} else if (sameNameOwner instanceof TLValueWithAttributes) {
         				inheritedMembers = PropertyCodegenUtils.getInheritedAttributes((TLValueWithAttributes) sameNameOwner);
         			}
@@ -480,17 +467,11 @@ public class RollupReferenceHandler {
         		} else if (originalField instanceof TLProperty) {
         			if (sameNameOwner instanceof TLFacet) {
         				inheritedMembers = PropertyCodegenUtils.getInheritedFacetProperties((TLFacet) sameNameOwner);
-        				
-        			} else if (sameNameOwner instanceof TLActionFacet) {
-        				inheritedMembers = PropertyCodegenUtils.getInheritedProperties((TLActionFacet) sameNameOwner);
         			}
         			
         		} else if (originalField instanceof TLIndicator) {
         			if (sameNameOwner instanceof TLFacet) {
         				inheritedMembers = PropertyCodegenUtils.getInheritedFacetIndicators((TLFacet) sameNameOwner);
-        				
-        			} else if (sameNameOwner instanceof TLActionFacet) {
-        				inheritedMembers = PropertyCodegenUtils.getInheritedIndicators((TLActionFacet) sameNameOwner);
         				
         			} else if (sameNameOwner instanceof TLValueWithAttributes) {
         				inheritedMembers = PropertyCodegenUtils.getInheritedIndicators((TLValueWithAttributes) sameNameOwner);
@@ -739,8 +720,8 @@ public class RollupReferenceHandler {
 		@Override
 		public boolean visitActionResponse(TLActionResponse actionResponse) {
             if (rollupReferences.hasReference( actionResponse )) {
-                NamedEntity sameNamePayloadType = findSameNameEntity(
-                		rollupReferences.getReference( actionResponse, NamedEntity.class ),
+                TLActionFacet sameNamePayloadType = findSameNameEntity(
+                		rollupReferences.getReference( actionResponse, TLActionFacet.class ),
                 		(TLLibrary) actionResponse.getOwningLibrary() );
 
                 if (sameNamePayloadType != null) {
