@@ -53,7 +53,7 @@ public class TestModelUnits {
 
         TLModel model = modelLoader.getLibraryModel();
         assertEquals(2, model.getBuiltInLibraries().size());
-        assertEquals(5, model.getUserDefinedLibraries().size());
+        assertEquals(6, model.getUserDefinedLibraries().size());
 
         model.clearModel();
         assertEquals(2, model.getBuiltInLibraries().size());

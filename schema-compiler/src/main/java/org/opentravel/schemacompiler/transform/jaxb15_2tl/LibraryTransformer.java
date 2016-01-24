@@ -45,9 +45,6 @@ public class LibraryTransformer extends
 
     public static final String DEFAULT_CONTEXT_ID = "default";
     
-    private static final String OBSOLETE_BUILTIN_NS = "http://opentravel.org/common/v02";
-    private static final String CURRENT_BUILTIN_NS  = "http://www.opentravel.org/OTM/Common/v0";
-
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
      */
@@ -85,15 +82,13 @@ public class LibraryTransformer extends
         }
 
         for (NamespaceImport nsImport : source.getImport()) {
-        	if (!handleObsoleteBuiltIn( nsImport, target )) {
-                String[] fileHints = null;
+            String[] fileHints = null;
 
-                if ((nsImport.getFileHints() != null) && (nsImport.getFileHints().trim().length() > 0)) {
-                    fileHints = nsImport.getFileHints().split("\\s+");
-                }
-                target.addNamespaceImport(trimString(nsImport.getPrefix()),
-                        trimString(nsImport.getNamespace()), fileHints);
-        	}
+            if ((nsImport.getFileHints() != null) && (nsImport.getFileHints().trim().length() > 0)) {
+                fileHints = nsImport.getFileHints().split("\\s+");
+            }
+            target.addNamespaceImport(trimString(nsImport.getPrefix()),
+                    trimString(nsImport.getNamespace()), fileHints);
         }
 
         for (ContextDeclaration sourceContext : source.getContext()) {
@@ -150,39 +145,6 @@ public class LibraryTransformer extends
                 tlStatus = TLLibraryStatus.DRAFT;
         }
         return tlStatus;
-    }
-    
-    /**
-     * If the given include represents the obsolete built-in namespace (see below),
-     * it will be mapped to the current built-in namespace.
-     * 
-     * <ul>
-     *   <li>Obsolete Namespace: <code>http://opentravel.org/common/v02</code></li>
-     *   <li>Current Namespace: <code>http://www.opentravel.org/OTM/Common/v0</code></li>
-     * </ul>
-     * 
-     * @param nsImport  the OTM import to process
-     * @param target  the target library that will contain the namespace reference
-     * @return boolean (true if the mapping was processed; false otherwise)
-     */
-    private boolean handleObsoleteBuiltIn(NamespaceImport nsImport, TLLibrary target) {
-    	String importNS = (nsImport == null) ? null : trimString( nsImport.getNamespace() );
-    	String fileHints = (nsImport == null) ? null : trimString( nsImport.getFileHints() );
-    	boolean mappingProcessed = false;
-    	
-    	if ((fileHints == null) && OBSOLETE_BUILTIN_NS.equals( importNS )) {
-    		if (target.getNamespace().equals(CURRENT_BUILTIN_NS)) {
-    			// If the library is already in the target namespace of the built-in, no
-    			// import/include is required since the built-in is automatically loaded
-    			// by the compiler.
-    			
-    		} else {
-                target.addNamespaceImport( trimString( nsImport.getPrefix() ),
-                		CURRENT_BUILTIN_NS, null );
-    		}
-    		mappingProcessed = true;
-    	}
-    	return mappingProcessed;
     }
     
 }

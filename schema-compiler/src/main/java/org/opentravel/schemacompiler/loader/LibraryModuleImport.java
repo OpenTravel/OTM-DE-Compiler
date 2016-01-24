@@ -54,6 +54,15 @@ public class LibraryModuleImport {
     }
 
     /**
+     * Assigns the namespace that was imported by the library.
+	 *
+	 * @param namespace  the namespace URI to assign
+	 */
+	public void setNamespace(String namespace) {
+		this.namespace = namespace;
+	}
+
+	/**
      * Returns the prefix assigned to the imported namespace.
      * 
      * @return String
@@ -61,6 +70,15 @@ public class LibraryModuleImport {
     public String getPrefix() {
         return prefix;
     }
+
+	/**
+     * Assigns the prefix assigned to the imported namespace.
+	 *
+	 * @param prefix  the namespace prefix to assign
+	 */
+	public void setPrefix(String prefix) {
+		this.prefix = prefix;
+	}
 
     /**
      * Returns the file hints for associated resource locations.
@@ -70,5 +88,14 @@ public class LibraryModuleImport {
     public List<String> getFileHints() {
         return fileHints;
     }
+
+	/**
+     * Assigns the file hints for associated resource locations.
+	 *
+	 * @param fileHints  the list of file hints to assign
+	 */
+	public void setFileHints(List<String> fileHints) {
+		this.fileHints = fileHints;
+	}
 
 }

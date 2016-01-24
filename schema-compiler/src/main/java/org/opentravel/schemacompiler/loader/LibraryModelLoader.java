@@ -476,7 +476,8 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
             for (LibraryModuleImport nsImport : libraryInfo.getImports()) {
                 try {
                     if ((nsImport.getNamespace() != null) && (nsImport.getNamespace().length() > 0)) {
-                        if (!isBuiltInNamespace(nsImport.getNamespace())) {
+                        if (!isBuiltInNamespace(nsImport.getNamespace()) ||
+                        		((nsImport.getFileHints() != null) && !nsImport.getFileHints().isEmpty())) {
                             namespaceResolver.setContextLibrary(libraryInfo, libraryUrl);
 
                             URI libraryNamespace = new URI(nsImport.getNamespace());
