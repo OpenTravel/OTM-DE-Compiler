@@ -374,8 +374,10 @@ public class ResourceCodegenUtils {
 			for (TLAction inheritedAction : extendedResource.getActions()) {
 				List<TLActionResponse> localDefaultResponses = new ArrayList<>();
 				List<TLActionResponse> localResponses = new ArrayList<>();
+				String inheritedActionId = inheritedAction.getActionId();
 				
-				if (inheritedAction.isCommonAction() || inheritedAction.getActionId().equals( actionId )) {
+				if (inheritedAction.isCommonAction() ||
+						((inheritedActionId != null) && inheritedActionId.equals( actionId ))) {
 					// Note that responses for common actions are included, regardless
 					// of whether their action ID's match that of the original.
 					for (TLActionResponse response : inheritedAction.getResponses()) {
