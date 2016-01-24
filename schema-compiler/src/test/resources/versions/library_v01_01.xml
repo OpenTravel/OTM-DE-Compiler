@@ -10,7 +10,7 @@
     <Prefix>lib-0101</Prefix>
     <Name>test_library</Name>
     <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
-    <Import namespace="http://opentravel.org/common/v02" prefix="ota"/>
+    <Import namespace="http://www.opentravel.org/OTM/Common/v0" prefix="ota"/>
     <Import namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01" prefix="lib-01"/>
     <Comments>Test Library</Comments>
     
@@ -131,12 +131,8 @@
         <ParamGroup name="LookupParameters11" idGroup="true" facetName="LookupBO_ID">
         	<Parameter fieldName="uid" location="Path" />
         </ParamGroup>
-        <ActionFacet context="" label="LookupFacetShared" notExtendable="false" referenceType="None">
-            <Element name="Element11" repeat="0" type="xsd:string"/>
-        </ActionFacet>
-        <ActionFacet context="" label="LookupFacet11" notExtendable="false" referenceType="None">
-            <Element name="Element11" repeat="0" type="xsd:string"/>
-        </ActionFacet>
+        <ActionFacet label="LookupFacetShared" referenceType="None" />
+        <ActionFacet label="LookupFacet11" referenceType="None" />
         <Action actionId="LookupAction11" common="false">
         	<ActionRequest httpMethod="GET" pathTemplate="/Lookup11/{uid}" paramGroup="LookupParameters11" />
         	<ActionResponse statusCodes="200" payloadType="LookupResource_LookupFacet11" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
@@ -148,9 +144,7 @@
         <ParamGroup name="MinorVersionTestParameters" idGroup="true" facetName="MinorVersionTestBO_Summary">
         	<Parameter fieldName="uid" location="Path" />
         </ParamGroup>
-        <ActionFacet context="" label="MinorVersionTestFacet" notExtendable="false" referenceType="None">
-            <Element name="Element11" repeat="0" type="xsd:string"/>
-        </ActionFacet>
+        <ActionFacet label="MinorVersionTestFacet" referenceType="None" />
         <Action actionId="MinorVersionTestAction" common="false">
         	<ActionRequest httpMethod="GET" pathTemplate="/MVT/{uid}" paramGroup="MinorVersionTestParameters" />
         	<ActionResponse statusCodes="200" payloadType="MinorVersionTestResource_MinorVersionTestFacet" mimeTypes="APPLICATION_XML APPLICATION_JSON" />

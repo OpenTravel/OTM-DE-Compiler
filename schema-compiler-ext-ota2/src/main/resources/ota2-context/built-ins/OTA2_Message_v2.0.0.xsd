@@ -3,8 +3,9 @@
 <xsd:schema 
 	xmlns="http://opentravel.org/common/message/v02" 
 	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-	xmlns:ota="http://opentravel.org/common/v02"
+	xmlns:ota="http://www.opentravel.org/OTM/Common/v0"
 	xmlns:ota2msg="http://opentravel.org/common/message/v02"
+	xmlns:otm="http://www.OpenTravel.org/ns/OTA2/AppInfo_v01_00" 
 	targetNamespace="http://opentravel.org/common/message/v02" 
 	elementFormDefault="qualified" attributeFormDefault="unqualified">
 
@@ -18,8 +19,9 @@
 			http://wiki.opentravel.org/index.php/Public:2011AB_Publication_Schedule.</xsd:documentation>
 	</xsd:annotation>
 	
-    <xsd:import namespace="http://opentravel.org/common/v02" schemaLocation="OTA2_BuiltIns_v2.0.0.xsd"/>
-        
+    <xsd:import namespace="http://www.opentravel.org/OTM/Common/v0" schemaLocation="OTM_BuiltIns.xsd"/>
+    <xsd:import namespace="http://www.OpenTravel.org/ns/OTA2/AppInfo_v01_00" schemaLocation="OTA2_AppInfo_v1.0.0.xsd"/>
+       
 	<xsd:element name="OTA2_Envelope" type="OTA2_Envelope"/>
 	<xsd:complexType name="OTA2_Envelope">
 		<xsd:annotation>
@@ -43,28 +45,28 @@
 			</xsd:documentation>
 		</xsd:annotation>
 		<xsd:sequence>
-			<xsd:element ref="ota:DataPolicySubGrp" minOccurs="0" maxOccurs="unbounded">
+			<xsd:element ref="DataPolicy" minOccurs="0" maxOccurs="unbounded">
 				<xsd:annotation>
 					<xsd:documentation>Details about data policy(s) that apply to all or a portion of this message.</xsd:documentation>
 				</xsd:annotation>
 			</xsd:element>
-			<xsd:element ref="ota:EncryptionSubGrp" minOccurs="0" maxOccurs="unbounded">
+			<xsd:element ref="Encryption" minOccurs="0" maxOccurs="unbounded">
 				<xsd:annotation>
 					<xsd:documentation>Details about encrypted information within this message.</xsd:documentation>
 				</xsd:annotation>
 			</xsd:element>
-			<xsd:element name="TargetSystem" type="ota:TargetSystem" minOccurs="0" maxOccurs="1">
+			<xsd:element name="TargetSystem" type="TargetSystem" minOccurs="0" maxOccurs="1">
 				<xsd:annotation>
 					<xsd:documentation>The target (or receiving) processing system.</xsd:documentation>
 				</xsd:annotation>
 			</xsd:element>
-			<xsd:element name="Transaction" type="ota:Transaction" minOccurs="0" maxOccurs="1">
+			<xsd:element name="Transaction" type="Transaction" minOccurs="0" maxOccurs="1">
 				<xsd:annotation>
 					<xsd:documentation>Transactional processing information.</xsd:documentation>
 				</xsd:annotation>
 			</xsd:element>
 		</xsd:sequence>
-		<xsd:attribute name="timeStamp" type="ota:Date_Timestamp" use="required">
+		<xsd:attribute name="timeStamp" type="xsd:dateTime" use="required">
 			<xsd:annotation>
 				<xsd:documentation>A timestamp for when the message was created.</xsd:documentation>
 			</xsd:annotation>
@@ -133,19 +135,6 @@
 		</xsd:complexContent>
 	</xsd:complexType>
 	
-	<xsd:element name="ExtensionPoint" type="ExtensionPoint"/>
-	<xsd:element name="ExtensionPoint_Summary" type="ExtensionPoint"/>
-	<xsd:element name="ExtensionPoint_Detail" type="ExtensionPoint"/>
-	<xsd:element name="ExtensionPoint_Custom" type="ExtensionPoint"/>
-	<xsd:element name="ExtensionPoint_Query" type="ExtensionPoint"/>
-	<xsd:element name="ExtensionPoint_Shared" type="ExtensionPoint"/>
-	<xsd:element name="ExtensionPoint_Choice" type="ExtensionPoint"/>
-	<xsd:complexType name="ExtensionPoint">
-		<xsd:sequence>
-			<xsd:any minOccurs="0" maxOccurs="unbounded" namespace="##other" processContents="lax"/>
-		</xsd:sequence>
-	</xsd:complexType>
-
 	<xsd:complexType name="ServiceIdentifier">
 		<xsd:annotation>
 			<xsd:documentation>
@@ -196,12 +185,12 @@
 							<xsd:documentation xml:lang="en">The creation date and time of the message in UTC in ISO 8601 format (YYYY-MM-DDThh:mm:ssZ). Source: http://bit.ly/OTA2_ISO8601</xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
-					<xsd:attribute name="messageID" type="ota:String_Short" use="optional">
+					<xsd:attribute name="messageID" type="String_Short" use="optional">
 						<xsd:annotation>
 							<xsd:documentation xml:lang="en">A reference for additional message identification, assigned by the requesting system. When a request message includes an echo token the corresponding response message MUST include an echo token with an identical value.</xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
-					<xsd:attribute name="correlationID" type="ota:String_Medium" use="optional">
+					<xsd:attribute name="correlationID" type="String_Medium" use="optional">
 						<xsd:annotation>
 							<xsd:documentation xml:lang="en">A unique identifier that may be specified to relate all messages within a transaction (e.g. this would be sent in all request and response messages that are part of an on-going transaction).</xsd:documentation>
 						</xsd:annotation>
@@ -229,7 +218,7 @@
 							</xsd:restriction>
 						</xsd:simpleType>
 					</xsd:attribute>
-					<xsd:attribute name="name" type="ota:String_Short" use="optional">
+					<xsd:attribute name="name" type="String_Short" use="optional">
 						<xsd:annotation>
 							<xsd:documentation xml:lang="en">The name of the target system that may be specified if there are more than one system for a specified system type, e.g. "Test System 23." </xsd:documentation>
 						</xsd:annotation>
@@ -302,7 +291,7 @@
 							<xsd:documentation xml:lang="en">An indication that all messages within the current sequence should be ignored.</xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
-					<xsd:attribute name="logID" type="ota:String_Medium" use="prohibited">
+					<xsd:attribute name="logID" type="String_Medium" use="prohibited">
 						<xsd:annotation>
 							<xsd:documentation xml:lang="en">Allow end-to-end correlation of log messages with the corresponding Web service message throughout the processing of the Web service message.</xsd:documentation>
 						</xsd:annotation>
@@ -348,7 +337,7 @@ NOTE: It is recommended that you submit an OpenTravel comment to formally add an
 										</xsd:annotation>
 										<xsd:complexType>
 											<xsd:simpleContent>
-												<xsd:extension base="ota:Enum_BookingChannel_Base">
+												<xsd:extension base="Enum_BookingChannel">
 													<xsd:attribute name="extension" type="ota:String_EnumExtension" use="optional">
 														<xsd:annotation>
 															<xsd:documentation xml:lang="en">A string value that represents an "Other_", or extended, enumerated value agreed upon between trading partners. 
@@ -371,7 +360,7 @@ NOTE: It is recommended that you submit an OpenTravel comment to formally add an
 										<xsd:documentation xml:lang="en">Indicates whether the enumerated booking channel type is the primary means of connectivity used by the source.</xsd:documentation>
 									</xsd:annotation>
 								</xsd:attribute>
-								<xsd:attribute name="id" type="ota:String_Short" use="optional">
+								<xsd:attribute name="id" type="String_Short" use="optional">
 									<xsd:annotation>
 										<xsd:documentation xml:lang="en">A unique booking channel ID.</xsd:documentation>
 									</xsd:annotation>
@@ -383,22 +372,22 @@ NOTE: It is recommended that you submit an OpenTravel comment to formally add an
 								<xsd:documentation xml:lang="en">Travel agent identification and authentication information.</xsd:documentation>
 							</xsd:annotation>
 							<xsd:complexType>
-								<xsd:attribute name="sine" type="ota:String_Short" use="optional">
+								<xsd:attribute name="sine" type="String_Short" use="optional">
 									<xsd:annotation>
 										<xsd:documentation xml:lang="en">A unique identification of an agent location that typically includes a four digit personal identification number, a two character agent identifier and a duty code.</xsd:documentation>
 									</xsd:annotation>
 								</xsd:attribute>
-								<xsd:attribute name="pseudoCityCode" type="ota:Code_PseudoCity" use="optional">
+								<xsd:attribute name="pseudoCityCode" type="Code_PseudoCity" use="optional">
 									<xsd:annotation>
 										<xsd:documentation xml:lang="en">A three to five character code (alpha, numeric, or combination) that specifies a GDS code used to identify a travel agency location. Typically required when using negotiated rates to associate the rates to an agency.</xsd:documentation>
 									</xsd:annotation>
 								</xsd:attribute>
-								<xsd:attribute name="dutyCode" type="ota:Code_AgentDuty" use="optional">
+								<xsd:attribute name="dutyCode" type="Code_AgentDuty" use="optional">
 									<xsd:annotation>
 										<xsd:documentation xml:lang="en">Typically a two to five character code (alpha, numeric, or combination) code that specifies a travel agents duty code that is used for agency authentication.</xsd:documentation>
 									</xsd:annotation>
 								</xsd:attribute>
-								<xsd:attribute name="terminalID" type="ota:String_Short" use="optional">
+								<xsd:attribute name="terminalID" type="String_Short" use="optional">
 									<xsd:annotation>
 										<xsd:documentation xml:lang="en">The electronic address of the device from which information is entered.</xsd:documentation>
 									</xsd:annotation>
@@ -410,12 +399,12 @@ NOTE: It is recommended that you submit an OpenTravel comment to formally add an
 								<xsd:documentation xml:lang="en">Identification and authentication information related to airline travel requests.</xsd:documentation>
 							</xsd:annotation>
 							<xsd:complexType>
-								<xsd:attribute name="ERSP" type="ota:Code_IATA_ERSP" use="optional">
+								<xsd:attribute name="ERSP" type="Code_IATA_ERSP" use="optional">
 									<xsd:annotation>
 										<xsd:documentation xml:lang="en">A unique IATA (in cooperation with ATA and ARC) code used as a means of identification when performing online bookings with airlines. Source: http://bit.ly/OTA2_ERSP</xsd:documentation>
 									</xsd:annotation>
 								</xsd:attribute>
-								<xsd:attribute name="airlineVendorID" type="ota:Code_IATA_AirlineID" use="optional">
+								<xsd:attribute name="airlineVendorID" type="Code_IATA_AirlineID" use="optional">
 									<xsd:annotation>
 										<xsd:documentation xml:lang="en">A two character IATA assigned airline code. Source: http://bit.ly/OTA2_IATA_AirlineCode</xsd:documentation>
 									</xsd:annotation>
@@ -425,7 +414,7 @@ NOTE: It is recommended that you submit an OpenTravel comment to formally add an
 										<xsd:documentation xml:lang="en">A three character IATA assigned airport code. Source: http://bit.ly/OTA2_IATA_AirportCodes</xsd:documentation>
 									</xsd:annotation>
 								</xsd:attribute>
-								<xsd:attribute name="firstDeparturePoint" type="ota:Code_IATA_Airport" use="optional">
+								<xsd:attribute name="firstDeparturePoint" type="Code_IATA_Airport" use="optional">
 									<xsd:annotation>
 										<xsd:documentation xml:lang="en">An IATA airline or city code for the point of first departure in a trip. Source: http://bit.ly/OTA2_IATA_AirportOrLocationCode</xsd:documentation>
 									</xsd:annotation>
@@ -438,7 +427,7 @@ NOTE: It is recommended that you submit an OpenTravel comment to formally add an
 							</xsd:annotation>
 							<xsd:complexType>
 								<xsd:sequence>
-									<xsd:element name="TimeZone" type="ota:TimeZone" minOccurs="0">
+									<xsd:element name="TimeZone" type="TimeZone" minOccurs="0">
 										<xsd:annotation>
 											<xsd:documentation xml:lang="en">The time zone of the requestor.</xsd:documentation>
 										</xsd:annotation>
@@ -449,52 +438,52 @@ NOTE: It is recommended that you submit an OpenTravel comment to formally add an
 										<xsd:documentation xml:lang="en">The country code of the requesting party in ISO 3166 format. Source: http://bit.ly/OTA2_ISO3166</xsd:documentation>
 									</xsd:annotation>
 								</xsd:attribute>
-								<xsd:attribute name="ISOCurrency" type="ota:Code_ISO_Currency" use="optional">
+								<xsd:attribute name="ISOCurrency" type="Code_ISO_Currency" use="optional">
 									<xsd:annotation>
 										<xsd:documentation xml:lang="en">Specifies a three character currency code in ISO 4217 format. Source: http://bit.ly/OTA2_ISO4217</xsd:documentation>
 									</xsd:annotation>
 								</xsd:attribute>
 							</xsd:complexType>
 						</xsd:element>
-						<xsd:element name="Position" type="ota:String_Short" minOccurs="0">
+						<xsd:element name="Position" type="String_Short" minOccurs="0">
 							<xsd:annotation>
 								<xsd:documentation xml:lang="en">Specifies the geographical position of a requestor.</xsd:documentation>
 							</xsd:annotation>
 						</xsd:element>
 					</xsd:sequence>
-					<xsd:attribute name="requestorID" type="ota:String_Short" use="required">
+					<xsd:attribute name="requestorID" type="String_Short" use="required">
 						<xsd:annotation>
 							<xsd:documentation xml:lang="en">A unique identification for the requestor that is known between trading partners and other basic identifying information for the entity making the request. 
 NOTE: This ID is typically a unique ID agreed upon between trading partners, or the some other entity assigned ID, including ATA/IATA number, Electronic Reservation Service Provider ID and/or Association of British Travel Agents ID.
 NOTE: The type specified is associated with this ID.</xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
-					<xsd:attribute name="idContext" type="ota:String_Short" use="optional">
+					<xsd:attribute name="idContext" type="String_Short" use="optional">
 						<xsd:annotation>
 							<xsd:documentation xml:lang="en">May be used to specifiy the source of the requestor ID, such as IATA, ARC, and ERSP.</xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
-					<xsd:attribute name="url" type="ota:URL" use="optional">
+					<xsd:attribute name="url" type="URL" use="optional">
 						<xsd:annotation>
 							<xsd:documentation xml:lang="en">A URL that identifies the location associated with the ID in a W3C recommended format. Source: http://bit.ly/W3C_Specification</xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
-					<xsd:attribute name="travelSegment" type="ota:Enum_TravelSector_Base">
+					<xsd:attribute name="travelSegment" type="Enum_TravelSector">
 						<xsd:annotation>
 							<xsd:documentation xml:lang="en">The travel segment associated with the requestor type, e.g. hotel, cruise, day tour, rental car and airline.</xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
-					<xsd:attribute name="messagePassword" type="ota:String_Short" use="optional">
+					<xsd:attribute name="messagePassword" type="String_Short" use="optional">
 						<xsd:annotation>
 							<xsd:documentation xml:lang="en">A message password that provides an additional level of security that the recipient can use to validate the sending party's authority to use the message.</xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
-					<xsd:attribute name="domain" type="ota:String_Short" use="optional">
+					<xsd:attribute name="domain" type="String_Short" use="optional">
 						<xsd:annotation>
 							<xsd:documentation xml:lang="en">The domain associated with the message password and/or requestor ID.</xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
-					<xsd:attribute name="instance" type="ota:String_Short" use="prohibited">
+					<xsd:attribute name="instance" type="String_Short" use="prohibited">
 						<xsd:annotation>
 							<xsd:documentation xml:lang="en">The identification of a record as it exists at a point in time. An instance is used in update messages where the sender must assure the server that the update sent refers to the most recent modification level of the object being updated.</xsd:documentation>
 						</xsd:annotation>
@@ -535,7 +524,7 @@ NOTE: If any processing conditions have ocurred, there will be a compensation (h
 							<xsd:documentation xml:lang="en">When the failureInd is TRUE and this compensationInd is TRUE, a condition has ocurred that may require human intervention.</xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
-					<xsd:attribute name="moreDataToken" type="ota:String_Medium" use="prohibited">
+					<xsd:attribute name="moreDataToken" type="String_Medium" use="prohibited">
 						<xsd:annotation>
 							<xsd:documentation xml:lang="en">The response returns this attribute if there was additional data. The text value should be echoed in this request to indicate where to begin the next block of data.TIED to biz warnings and errors.</xsd:documentation>
 						</xsd:annotation>
@@ -585,34 +574,34 @@ NOTE: It is recommended that you submit an OpenTravel comment to formally add an
 				</xsd:complexType>
 			</xsd:element>
 		</xsd:sequence>
-		<xsd:attribute name="recordID" type="ota:String_Short" use="optional">
+		<xsd:attribute name="recordID" type="String_Short" use="optional">
 			<xsd:annotation>
 				<xsd:documentation xml:lang="en">The record ID of the record within a group of records that failed successful processing and generated a processing condition.
 
 NOTE: Typically used for batch processing and this value may contain a concatenation of a unique failed transaction ID with specific record(s) associated with that transaction.</xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attribute name="code" type="ota:Code_OpenTravel" use="optional">
+		<xsd:attribute name="code" type="Code_OpenTravel" use="optional">
 			<xsd:annotation>
 				<xsd:documentation xml:lang="en">A value from the OpenTravel Code List Error Codes (ERR) table to describe this processing condition in more detail.</xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attribute name="description" type="ota:String_Medium" use="optional">
+		<xsd:attribute name="description" type="String_Medium" use="optional">
 			<xsd:annotation>
 				<xsd:documentation xml:lang="en">Additional information about this processing condition.</xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attribute name="url" type="ota:URL" use="optional">
+		<xsd:attribute name="url" type="URL" use="optional">
 			<xsd:annotation>
 				<xsd:documentation xml:lang="en">A URL to a source that further describes this processing condition.</xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attribute name="language" type="ota:Code_ISO_Language" use="optional">
+		<xsd:attribute name="language" type="Code_ISO_Language" use="optional">
 			<xsd:annotation>
 				<xsd:documentation xml:lang="en">The ISO-639-2 language identification code for the language that this processing condition description is in. Source: http://bit.ly/OTA2_ISO639</xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attribute name="xmlTag" type="ota:String_Medium" use="optional">
+		<xsd:attribute name="xmlTag" type="String_Medium" use="optional">
 			<xsd:annotation>
 				<xsd:documentation xml:lang="en">Identifies an unknown or misspelled tag that caused a processing condition. It is recommended that the Tag attribute use XPath notation to identify the location of a tag in the event that more than one tag of the same name is present in the document. Alternatively, the tag name alone can be used to identify missing data, e.g. [Type=ReqFieldMissing]. 
 Source: http://bit.ly/OTA2_XpathSyntax</xsd:documentation>
@@ -702,4 +691,483 @@ Source: http://bit.ly/OTA2_XpathSyntax</xsd:documentation>
 		</xsd:restriction>
 	</xsd:simpleType>
 	
+    <xsd:element name="DataPolicy" type="DataPolicy">
+        <xsd:annotation>
+            <xsd:documentation source="Description">Information about data policy(s) that may apply to all or a portion of the message contents.</xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+    <xsd:element name="DataPolicyDetail" substitutionGroup="DataPolicy" type="DataPolicy_Detail"/>
+    
+    <xsd:complexType name="DataPolicy">
+        <xsd:annotation>
+            <xsd:documentation source="Description">Summary data policy information.</xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element minOccurs="1" name="type" type="Enum_DataPolicyType">
+                <xsd:annotation>
+                    <xsd:documentation source="Description">An extensible list of data policy types.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+        <xsd:attribute name="schemaFieldXPath"
+            type="String_Medium" use="required">
+            <xsd:annotation>
+                <xsd:documentation source="Description">An xPath to the tag of the schema element or attribute (field) that the data policy(s) applies to.</xsd:documentation>
+                <xsd:appinfo>
+                    <otm:Example context="OTM2">AirInventoryQueryRQ/Traveler/@birthDate</otm:Example>
+                </xsd:appinfo>
+            </xsd:annotation>
+        </xsd:attribute>
+    </xsd:complexType>
+    
+    <xsd:complexType name="DataPolicy_Detail">
+        <xsd:annotation>
+            <xsd:documentation source="Description">Detail data policy information.</xsd:documentation>
+            <xsd:documentation source="Deprecation">OTA2_BuiltIns_v2.0.0 (http://opentravel.org/common/v02) is deprecated and may be removed from future releases, use OTA2_SimpleTypes_0.0.0 (http://www.opentravel.org/OTM/Common/v0) instead.</xsd:documentation>
+            <xsd:appinfo>
+                <otm:OTA2Entity type="CoreObject">DataPolicy</otm:OTA2Entity>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="DataPolicy">
+                <xsd:attribute name="description"
+                    type="String_Medium" use="optional">
+                    <xsd:annotation>
+                        <xsd:documentation source="Description">A brief description of the data policy intended to be used for logging and compliance purposes.</xsd:documentation>
+                        <xsd:appinfo>
+                            <otm:Example context="OTM2">Restricted to internal sharing as needed-no third party sharing.</otm:Example>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:attribute>
+                <xsd:attribute name="url" type="URL" use="optional">
+                    <xsd:annotation>
+                        <xsd:documentation source="Description">A URL to a source that describes the data policy.</xsd:documentation>
+                        <xsd:appinfo>
+                            <otm:Example context="OTM2">http://www.BTCCO.com/datapolicy.aspx</otm:Example>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:attribute>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+    
+    <xsd:complexType name="Enum_DataPolicyType">
+        <xsd:simpleContent>
+            <xsd:extension base="Enum_DataPolicyType_Base">
+                <xsd:attribute name="extension" type="ota:String_EnumExtension"/>
+            </xsd:extension>
+        </xsd:simpleContent>
+    </xsd:complexType>
+    
+    <xsd:simpleType name="Enum_DataPolicyType_Base">
+        <xsd:annotation>
+            <xsd:documentation source="Description">An extensible list of identifiers for a type of data usage policy and/or restriction.</xsd:documentation>
+            <xsd:documentation source="Implementer">Note that any data use, sharing or retention policies MUST be agreed upon by trading partners. Exchanging a warning and/or data restriction policy content in an electronic message does indicate policy compliance awareness by the receiving party. This functionality is typically used for privacy compliance and log auditing purposes only.</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="Retention">
+                <xsd:annotation>
+                    <xsd:documentation source="Description">Indicates the encrypted information is subject to a data retention (data storage) policy established by the sending party and known to recipient parties.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="Sharing">
+                <xsd:annotation>
+                    <xsd:documentation source="Description">Indicates the encrypted information is subject to a data sharing policy (internal and third party) established by the sending party and known to recipient parties.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="Use">
+                <xsd:annotation>
+                    <xsd:documentation source="Description">Indicates the encrypted information is subject to a data use policy (internal and third party) established by the sending party and known to recipient parties.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="Retention, Sharing and Use">
+                <xsd:annotation>
+                    <xsd:documentation source="Description">Indicates the encrypted information is subject to a data retention, sharing and use policy established by the sending party and known to recipient parties.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="Other_"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    
+    <xsd:element name="Encryption" type="Encryption">
+        <xsd:annotation>
+            <xsd:documentation source="Description">Information about encrypted elements and attributes within the message.</xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+    <xsd:element name="EncryptionDetail" substitutionGroup="Encryption" type="Encryption_Detail"/>
+    
+    <xsd:complexType name="Encryption">
+        <xsd:annotation>
+            <xsd:documentation source="Description">Summary payload information.</xsd:documentation>
+        </xsd:annotation>
+        <xsd:attribute name="schemaFieldXPath"
+            type="String_Medium" use="required">
+            <xsd:annotation>
+                <xsd:documentation source="Description">An xPath to the tag of the schema element or attribute (field) that is encrypted.</xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="value" type="xsd:string" use="required">
+            <xsd:annotation>
+                <xsd:documentation source="Description">The encrypted value.</xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+    </xsd:complexType>
+    
+    <xsd:complexType name="Encryption_Detail">
+        <xsd:annotation>
+            <xsd:documentation source="Description">Detail encryption information.</xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="Encryption">
+                <xsd:attribute name="method"
+                    type="String_Short" use="optional">
+                    <xsd:annotation>
+                        <xsd:documentation source="Description">The encryption method being used.</xsd:documentation>
+                        <xsd:documentation source="Implementer">Note that if you do not specify the encryption method, it should be known to your trading partners.</xsd:documentation>
+                        <xsd:appinfo>
+                            <otm:Example context="OTM2">Triple DES</otm:Example>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:attribute>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+    
+    <xsd:complexType name="TargetSystem">
+        <xsd:annotation>
+            <xsd:documentation source="Description">Metadata that describes a target (or receiving) processing system.</xsd:documentation>
+        </xsd:annotation>
+        <xsd:simpleContent>
+            <xsd:annotation>
+                <xsd:documentation source="Description">An extensible list of target message processing system types..</xsd:documentation>
+            </xsd:annotation>
+            <xsd:extension base="Enum_TargetProcessingSystem">
+                <xsd:attribute name="extension" type="ota:String_EnumExtension"/>
+                <xsd:attribute name="systemName"
+                    type="String_Short" use="optional">
+                    <xsd:annotation>
+                        <xsd:documentation source="Description">The name of the target system that may be specified if there are more than one system for the specified system type.</xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
+            </xsd:extension>
+        </xsd:simpleContent>
+    </xsd:complexType>
+    
+    <xsd:simpleType name="Enum_TargetProcessingSystem">
+        <xsd:annotation>
+            <xsd:documentation source="Description">An extensible list of target processing system types.</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="Production"/>
+            <xsd:enumeration value="Staging"/>
+            <xsd:enumeration value="Test"/>
+            <xsd:enumeration value="Other_"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    
+    <xsd:complexType name="Transaction">
+        <xsd:annotation>
+            <xsd:documentation source="Description">Metadata that describes a message transaction.</xsd:documentation>
+            <xsd:appinfo>
+                <otm:Example context="OTM2">12345</otm:Example>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:simpleContent>
+            <xsd:annotation>
+                <xsd:documentation source="Description">The transaction ID.</xsd:documentation>
+                <xsd:documentation source="Implementer">Unique identifier to relate all messages within a transaction (e.g. this would be sent in all request and response messages that are part of an on-going transaction).</xsd:documentation>
+                <xsd:documentation source="Implementer">This would be sent in all request and response messages that are part of an on-going transaction.</xsd:documentation>
+            </xsd:annotation>
+            <xsd:extension base="String_Short">
+                <xsd:attribute name="correlationID"
+                    type="String_Short" use="optional">
+                    <xsd:annotation>
+                        <xsd:documentation source="Description">An ID for end-to-end correlation of log messages with the corresponding Web service message throughout the processing of the Web service message.</xsd:documentation>
+                        <xsd:appinfo>
+                            <otm:Example context="OTM2">6712</otm:Example>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:attribute>
+                <xsd:attribute name="sequenceNumber"
+                    type="xsd:positiveInteger" use="optional">
+                    <xsd:annotation>
+                        <xsd:documentation source="Description">The sequence number of the transaction assigned by the sending system for ordered message processing or message resynchronization.</xsd:documentation>
+                        <xsd:documentation source="Implementer">Message resynchronization typically is required if a system has been off-line and needs to retrieve messages that were missed.</xsd:documentation>
+                        <xsd:appinfo>
+                            <otm:Example context="OTM2">6</otm:Example>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:attribute>
+                <xsd:attribute name="status"
+                    type="Enum_TransactionStatus" use="optional">
+                    <xsd:annotation>
+                        <xsd:documentation source="Description">Where this message falls within a sequence of messages.</xsd:documentation>
+                        <xsd:appinfo>
+                            <otm:Example context="OTM2">Start</otm:Example>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:attribute>
+                <xsd:attribute name="retransmissionInd"
+                    type="xsd:boolean" use="optional">
+                    <xsd:annotation>
+                        <xsd:documentation source="Description">If true, the message is being re-sent after a failure.</xsd:documentation>
+                        <xsd:documentation source="Implementer">It is recommended that this attribute is used (i.e., set to TRUE) only when a message is retransmitted.</xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
+            </xsd:extension>
+        </xsd:simpleContent>
+    </xsd:complexType>
+    
+    <xsd:simpleType name="Enum_TransactionStatus">
+        <xsd:annotation>
+            <xsd:documentation source="Description">An identifier for where this message falls within a sequence of messages.</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="Start"/>
+            <xsd:enumeration value="End"/>
+            <xsd:enumeration value="Rollback"/>
+            <xsd:enumeration value="InSeries"/>
+            <xsd:enumeration value="Continuation"/>
+            <xsd:enumeration value="Subsequent"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    
+    <xsd:simpleType name="String_Tiny">
+        <xsd:annotation>
+            <xsd:documentation source="Description">A string with a minimum length of 1 and a maximum length of 32.</xsd:documentation>
+            <xsd:appinfo>
+                <otm:Example context="OTM2">I am a tiny string.</otm:Example>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="32"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    
+    <xsd:simpleType name="String_Short">
+        <xsd:annotation>
+            <xsd:documentation source="Description">A string with a minimum length of 1 and a maximum length of 128.</xsd:documentation>
+            <xsd:appinfo>
+                <otm:Example context="OTM2">I am a short string.</otm:Example>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="128"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    
+    <xsd:simpleType name="String_Medium">
+        <xsd:annotation>
+            <xsd:documentation source="Description">A string with a minimum length of 1 and a maximum length of 512.</xsd:documentation>
+            <xsd:appinfo>
+                <otm:Example context="OTM2">I am a medium string.</otm:Example>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="512"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    
+    <xsd:simpleType name="URL">
+        <xsd:annotation>
+            <xsd:documentation source="Description">A URL in W3C recommended format.</xsd:documentation>
+            <xsd:documentation source="Reference">http://www.w3.org/Addressing/URL/url-spec.txt</xsd:documentation>
+            <xsd:appinfo>
+                <otm:Example context="OTM2">http://www.opentravel.org</otm:Example>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:anyURI"/>
+    </xsd:simpleType>
+    
+    <xsd:complexType name="TimeZone">
+        <xsd:annotation>
+            <xsd:documentation source="Description">Metadata that describes a time zone.</xsd:documentation>
+            <xsd:appinfo>
+                <otm:Example context="OTM2">ET</otm:Example>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:simpleContent>
+            <xsd:annotation>
+                <xsd:documentation source="Description">The time zone name or abbreviation.</xsd:documentation>
+            </xsd:annotation>
+            <xsd:extension base="String_Tiny">
+                <xsd:attribute name="utcOffset"
+                    type="String_Tiny" use="optional">
+                    <xsd:annotation>
+                        <xsd:documentation source="Description">The Coordinated Universal Time (UTC) time zone offset.</xsd:documentation>
+                        <xsd:documentation source="Implementer">A UTC offset is typically represented with a plus or minus sign, an hour increment and an hour designator, such as - 5h.</xsd:documentation>
+                        <xsd:appinfo>
+                            <otm:Example context="OTM2">- 5h</otm:Example>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:attribute>
+                <xsd:attribute name="daylightSavingsInd"
+                    type="xsd:boolean" use="optional">
+                    <xsd:annotation>
+                        <xsd:documentation source="Description">If true, daylight (or summer) savings time is used in the time zone.</xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
+            </xsd:extension>
+        </xsd:simpleContent>
+    </xsd:complexType>
+    
+    <xsd:simpleType name="Enum_BookingChannel">
+        <xsd:annotation>
+            <xsd:documentation source="Description">An extensible list of identifiers for a type or category of a booking channel.</xsd:documentation>
+            <xsd:documentation source="OpenTravel Codelist">Booking Channel Type (BCT)</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="Agent"/>
+            <xsd:enumeration value="Alternative Distribution System (ADS)"/>
+            <xsd:enumeration value="Central Reservation System (CRS)"/>
+            <xsd:enumeration value="Global Distribution System (GDS)"/>
+            <xsd:enumeration value="Internet"/>
+            <xsd:enumeration value="Kiosk"/>
+            <xsd:enumeration value="Property Management System (PMS)"/>
+            <xsd:enumeration value="Sales And Catering System (SCS)"/>
+            <xsd:enumeration value="Tour Operator System (TOS)"/>
+            <xsd:enumeration value="Other_"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    
+    <xsd:simpleType name="Enum_TravelSector">
+        <xsd:annotation>
+            <xsd:documentation source="Description">An extensible list of travel industry sector types.</xsd:documentation>
+            <xsd:documentation source="OpenTravel Codelist">Travel Sector (TVS)</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="Activity/Attraction/Theme Park"/>
+            <xsd:enumeration value="Airline"/>
+            <xsd:enumeration value="Bed And Breakfast/Hostel"/>
+            <xsd:enumeration value="Car Rental"/>
+            <xsd:enumeration value="Casino"/>
+            <xsd:enumeration value="Convention/Visitor Bureau"/>
+            <xsd:enumeration value="Cruise Line"/>
+            <xsd:enumeration value="Ferry"/>
+            <xsd:enumeration value="Golf"/>
+            <xsd:enumeration value="Ground Transportation: Black Car/Limousine"/>
+            <xsd:enumeration value="Ground Transportation: Bus/Taxi"/>
+            <xsd:enumeration value="Hotel/Resort"/>
+            <xsd:enumeration value="Multi Modal Packages"/>
+            <xsd:enumeration value="Passenger Rail Line"/>
+            <xsd:enumeration value="Restaurant"/>
+            <xsd:enumeration value="Spa"/>
+            <xsd:enumeration value="Tour Operator: Day Tour"/>
+            <xsd:enumeration value="Tour Operator: Package Tour"/>
+            <xsd:enumeration value="Travel Agent"/>
+            <xsd:enumeration value="Travel Market Research Organization"/>
+            <xsd:enumeration value="Travel Insurance"/>
+            <xsd:enumeration value="Travel Media"/>
+            <xsd:enumeration value="Vacation Rental"/>
+            <xsd:enumeration value="Other_"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    
+    <xsd:simpleType name="Code_PseudoCity">
+        <xsd:annotation>
+            <xsd:documentation source="Description">A three to five character code (alpha, numeric or combination) that specifies a GDS code used to identify a travel agency location.</xsd:documentation>
+            <xsd:documentation source="Reference">http://sharepoint.opentraveldevelopersnetwork.com/Lists/The OpenTravel Glossary/AllItems.aspx</xsd:documentation>
+            <xsd:documentation source="Implementer">This code is typically required when using negotiated rates that are tied to an agency through this code.</xsd:documentation>
+            <xsd:appinfo>
+                <otm:Example context="OTM2">DFW</otm:Example>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="[a-zA-Z0-9]{3,5}"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    
+    <xsd:simpleType name="Code_AgentDuty">
+        <xsd:annotation>
+            <xsd:documentation source="Description">Typically a two to five character code (alpha, numeric, or combination) that specifies a travel agent duty code that is used for agency authentication.</xsd:documentation>
+            <xsd:appinfo>
+                <otm:Example context="OTM2">AG</otm:Example>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="[a-zA-Z0-9]{2,5}"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    
+    <xsd:simpleType name="Code_IATA_ERSP">
+        <xsd:annotation>
+            <xsd:documentation source="Description">A unique IATA (in cooperation with ATA and ARC) code used as a means of identification when performing online bookings with airlines.</xsd:documentation>
+            <xsd:documentation source="Reference">http://www.iata.org/ps/accreditation-travel/ersp/pages/index.aspx</xsd:documentation>
+            <xsd:appinfo>
+                <otm:Example context="OTM2">123456789</otm:Example>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="[0-9]{1,16}"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    
+    <xsd:simpleType name="Code_IATA_AirlineID">
+        <xsd:annotation>
+            <xsd:documentation source="Description">A two character IATA assigned airline code.</xsd:documentation>
+            <xsd:documentation source="Reference">https://en.wikipedia.org/wiki/IATA_aircraft_type_designator</xsd:documentation>
+            <xsd:appinfo>
+                <otm:Example context="OTM2">UA</otm:Example>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="[a-zA-Z]{2}"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    
+    <xsd:simpleType name="Code_IATA_Airport">
+        <xsd:annotation>
+            <xsd:documentation source="Description">A three character code for an airport.</xsd:documentation>
+            <xsd:documentation source="Reference">http://www.iata.org/ps/publications/pages/code-search.aspx</xsd:documentation>
+            <xsd:appinfo>
+                <otm:Example context="OTM2">JFK</otm:Example>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="[a-zA-Z]{3}"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    
+    <xsd:simpleType name="Code_ISO_Currency">
+        <xsd:annotation>
+            <xsd:documentation source="Description">A three character currency code as defined in ISO 4217.</xsd:documentation>
+            <xsd:documentation source="Reference">http://bit.ly/OTA2_ISO4217</xsd:documentation>
+            <xsd:appinfo>
+                <otm:Example context="OTM2">USD</otm:Example>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="[a-zA-Z]{3}"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    
+    <xsd:simpleType name="Code_ISO_Language">
+        <xsd:annotation>
+            <xsd:documentation source="Description">A code for a language in ISO 639-1 (2 alpha character) format.</xsd:documentation>
+            <xsd:documentation source="Reference">http://sharepoint.opentraveldevelopersnetwork.com/Lists/The OpenTravel Glossary/AllItems.aspx</xsd:documentation>
+            <xsd:documentation source="Implementer">Language codes are typically used to describe spoken languages and languages that descriptive information is requested and/or provided in. An example is "en" which is English.</xsd:documentation>
+            <xsd:appinfo>
+                <otm:Example context="OTM2">en</otm:Example>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="[a-zA-Z]{2}"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    
+    <xsd:simpleType name="Code_OpenTravel">
+        <xsd:annotation>
+            <xsd:documentation source="Description">Specifies a one to three character length code that represents a value from an OpenTravel Code List.</xsd:documentation>
+            <xsd:appinfo>
+                <otm:Example context="OTM2">123</otm:Example>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="[0-9]{1,3}"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    
 </xsd:schema>

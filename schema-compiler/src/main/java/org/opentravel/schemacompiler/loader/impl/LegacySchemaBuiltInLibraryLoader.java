@@ -77,6 +77,7 @@ public class LegacySchemaBuiltInLibraryLoader extends AbstractBuiltInLibraryLoad
                 }
             }
         } catch (Throwable t) {
+        	t.printStackTrace(System.out);
             throw new LibraryLoaderException("Error constructing built-in library instance ("
                     + inputSource.getLibraryURL() + ")");
         }

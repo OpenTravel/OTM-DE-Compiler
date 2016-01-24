@@ -52,11 +52,11 @@ public class TestModelUnits {
         assertFalse(findings.hasFinding(FindingType.ERROR));
 
         TLModel model = modelLoader.getLibraryModel();
-        assertEquals(3, model.getBuiltInLibraries().size());
+        assertEquals(2, model.getBuiltInLibraries().size());
         assertEquals(5, model.getUserDefinedLibraries().size());
 
         model.clearModel();
-        assertEquals(3, model.getBuiltInLibraries().size());
+        assertEquals(2, model.getBuiltInLibraries().size());
         assertEquals(0, model.getUserDefinedLibraries().size());
     }
 

@@ -10,7 +10,7 @@
     <Prefix>lib-010001</Prefix>
     <Name>test_library</Name>
     <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
-    <Import namespace="http://opentravel.org/common/v02" prefix="ota"/>
+    <Import namespace="http://www.opentravel.org/OTM/Common/v0" prefix="ota"/>
     <Import namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01" prefix="lib-01"/>
     <Comments>Test Library</Comments>
     

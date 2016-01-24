@@ -9,7 +9,7 @@
     <Prefix>pkg1</Prefix>
 	<Name>library_1</Name>
 	<Import prefix="xsd" namespace="http://www.w3.org/2001/XMLSchema" />
-	<Import prefix="ota" namespace="http://opentravel.org/common/v02" />
+	<Import prefix="ota" namespace="http://www.opentravel.org/OTM/Common/v0" />
 	<Comments>Test Library</Comments>
 
 	<Simple type="DirectCircularReferenceType" name="DirectCircularReferenceType" />

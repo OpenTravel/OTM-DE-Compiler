@@ -9,7 +9,7 @@
     <Prefix>extsvc</Prefix>
     <Name>extended_service</Name>
 	<Import prefix="xsd" namespace="http://www.w3.org/2001/XMLSchema" />
-	<Import prefix="ota" namespace="http://opentravel.org/common/v02" />
+	<Import prefix="ota" namespace="http://www.opentravel.org/OTM/Common/v0" />
 	<Import prefix="ext" namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-inheritance/extended/v1_0"
 			fileHints="extended_library.xml" />
     <Comments>Extended Service Entities for Inheritance Tests</Comments>

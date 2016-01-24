@@ -11,7 +11,7 @@
     <Name>library_2_p2</Name>
     <Includes>library_1_p2.xml</Includes>
     <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
-    <Import namespace="http://opentravel.org/common/v02" prefix="ota"/>
+    <Import namespace="http://www.opentravel.org/OTM/Common/v0" prefix="ota"/>
     <Import fileHints="../test-package_v1/library_2_p1.xml"
         namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package_v1" prefix="pkg1"/>
     <Context applicationContext="context_1-applicationContext" context="context_1"/>

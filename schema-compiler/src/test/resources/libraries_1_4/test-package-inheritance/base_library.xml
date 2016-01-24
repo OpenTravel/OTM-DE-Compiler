@@ -9,7 +9,7 @@
     <Prefix>base</Prefix>
     <Name>base_library</Name>
 	<Import prefix="xsd" namespace="http://www.w3.org/2001/XMLSchema" />
-	<Import prefix="ota" namespace="http://opentravel.org/common/v02" />
+	<Import prefix="ota" namespace="http://www.opentravel.org/OTM/Common/v0" />
 	<Context context="Context1" applicationContext="Context1" />
 	<Context context="Context2" applicationContext="Context2" />
 	<Context context="Context3" applicationContext="Context3" />

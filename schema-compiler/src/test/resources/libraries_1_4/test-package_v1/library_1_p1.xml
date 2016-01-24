@@ -10,7 +10,7 @@
     <Prefix>pkg1</Prefix>
     <Name>library_1_p1</Name>
     <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
-    <Import namespace="http://opentravel.org/common/v02" prefix="ota"/>
+    <Import namespace="http://www.opentravel.org/OTM/Common/v0" prefix="ota"/>
     <Context applicationContext="default-applicationContext" context="default"/>
     <Comments>Test Library</Comments>
     

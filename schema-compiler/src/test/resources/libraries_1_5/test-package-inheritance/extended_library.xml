@@ -9,7 +9,7 @@
     <Prefix>ext</Prefix>
     <Name>extended_library</Name>
 	<Import prefix="xsd" namespace="http://www.w3.org/2001/XMLSchema" />
-	<Import prefix="ota" namespace="http://opentravel.org/common/v02" />
+	<Import prefix="ota" namespace="http://www.opentravel.org/OTM/Common/v0" />
 	<Import prefix="base" namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-inheritance/base/v1_0"
 			fileHints="base_library.xml" />
 	<Context context="Context1" applicationContext="Context1" />

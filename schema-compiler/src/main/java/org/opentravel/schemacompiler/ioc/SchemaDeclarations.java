@@ -33,7 +33,7 @@ public class SchemaDeclarations {
     public static final SchemaDeclaration WSDL_SCHEMA;
     public static final SchemaDeclaration SOAP_SCHEMA;
     public static final SchemaDeclaration SCHEMA_FOR_SCHEMAS;
-    public static final SchemaDeclaration OTA2_COMMON_SCHEMA;
+    public static final SchemaDeclaration OTM_COMMON_SCHEMA;
     public static final SchemaDeclaration OTA2_APPINFO_SCHEMA;
 
     private static final String OTA2_LIBRARY_SCHEMA_1_4_ID = "ota2LibrarySchema_1_4";
@@ -44,7 +44,7 @@ public class SchemaDeclarations {
     private static final String WSDL_SCHEMA_ID = "wsdlSchema";
     private static final String SOAP_SCHEMA_ID = "soapSchema";
     private static final String SCHEMA_FOR_SCHEMAS_ID = "schemaForSchemas";
-    private static final String OTA2_COMMON_SCHEMA_ID = "ota2CommonSchema";
+    private static final String OTM_COMMON_SCHEMA_ID = "otmCommonSchema";
     private static final String OTA2_APPINFO_SCHEMA_ID = "ota2AppInfoSchema";
 
     /**
@@ -62,7 +62,7 @@ public class SchemaDeclarations {
             WSDL_SCHEMA = (SchemaDeclaration) appContext.getBean(WSDL_SCHEMA_ID);
             SOAP_SCHEMA = (SchemaDeclaration) appContext.getBean(SOAP_SCHEMA_ID);
             SCHEMA_FOR_SCHEMAS = (SchemaDeclaration) appContext.getBean(SCHEMA_FOR_SCHEMAS_ID);
-            OTA2_COMMON_SCHEMA = (SchemaDeclaration) appContext.getBean(OTA2_COMMON_SCHEMA_ID);
+            OTM_COMMON_SCHEMA = (SchemaDeclaration) appContext.getBean(OTM_COMMON_SCHEMA_ID);
             OTA2_APPINFO_SCHEMA = (SchemaDeclaration) appContext.getBean(OTA2_APPINFO_SCHEMA_ID);
 
         } catch (Throwable t) {

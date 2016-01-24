@@ -13,7 +13,7 @@
     <Includes>chameleon_schema.xsd</Includes>
     <Includes>legacy_schema_1.xsd</Includes>
     <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
-    <Import namespace="http://opentravel.org/common/v02" prefix="ota"/>
+    <Import namespace="http://www.opentravel.org/OTM/Common/v0" prefix="ota"/>
     <Context applicationContext="Test-applicationContext" context="Test"/>
     <Comments>Sample Library</Comments>
     

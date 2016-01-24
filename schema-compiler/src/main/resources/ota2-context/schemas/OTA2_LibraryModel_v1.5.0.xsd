@@ -1856,7 +1856,7 @@
       <xsd:sequence>
          <xsd:element ref="Documentation" minOccurs="0" />
       </xsd:sequence>
-      <xsd:attribute name="statusCodes" use="required">
+      <xsd:attribute name="statusCodes" use="optional">
          <xsd:annotation>
             <xsd:documentation>Specifies the acceptable HTTP response codes.</xsd:documentation>
          </xsd:annotation>

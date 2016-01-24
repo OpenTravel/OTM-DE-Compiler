@@ -41,11 +41,8 @@
 				<bean class="org.opentravel.schemacompiler.loader.impl.XMLSchemaBuiltInLibraryLoader">
 					<property name="defaultPrefix" value="xsd" />
 				</bean>
-				<bean class="org.opentravel.schemacompiler.loader.impl.OTA2BuiltInLibraryLoader">
-					<property name="libraryDeclaration" ref="ota2SimpleTypes" />
-				</bean>
-				<bean class="org.opentravel.schemacompiler.loader.impl.OTA2BuiltInLibraryLoader">
-					<property name="libraryDeclaration" ref="ota2CommonSchema" />
+				<bean class="org.opentravel.schemacompiler.loader.impl.LegacySchemaBuiltInLibraryLoader">
+					<property name="libraryDeclaration" ref="otmCommonSchema" />
 				</bean>
 				
 				<!--
@@ -92,12 +89,12 @@
 			<list>
 				<bean class="org.opentravel.schemacompiler.ioc.SchemaDependency">
 					<property name="id" value="EMPTY_ELEMENT" />
-					<property name="schemaDeclaration" ref="ota2CommonSchema" />
+					<property name="schemaDeclaration" ref="otmCommonSchema" />
 					<property name="localName" value="Empty" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.ioc.SchemaDependency">
 					<property name="id" value="ENUM_EXTENSION" />
-					<property name="schemaDeclaration" ref="ota2CommonSchema" />
+					<property name="schemaDeclaration" ref="otmCommonSchema" />
 					<property name="localName" value="String_EnumExtension" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.ioc.SchemaDependency">
@@ -127,37 +124,37 @@
 				</bean>
 				<bean class="org.opentravel.schemacompiler.ioc.SchemaDependency">
 					<property name="id" value="EXTENSION_POINT" />
-					<property name="schemaDeclaration" ref="ota2MessageSchema" />
+					<property name="schemaDeclaration" ref="otmCommonSchema" />
 					<property name="localName" value="ExtensionPoint" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.ioc.SchemaDependency">
 					<property name="id" value="EXTENSION_POINT_SUMMARY" />
-					<property name="schemaDeclaration" ref="ota2MessageSchema" />
+					<property name="schemaDeclaration" ref="otmCommonSchema" />
 					<property name="localName" value="ExtensionPoint_Summary" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.ioc.SchemaDependency">
 					<property name="id" value="EXTENSION_POINT_DETAIL" />
-					<property name="schemaDeclaration" ref="ota2MessageSchema" />
+					<property name="schemaDeclaration" ref="otmCommonSchema" />
 					<property name="localName" value="ExtensionPoint_Detail" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.ioc.SchemaDependency">
 					<property name="id" value="EXTENSION_POINT_CUSTOM" />
-					<property name="schemaDeclaration" ref="ota2MessageSchema" />
+					<property name="schemaDeclaration" ref="otmCommonSchema" />
 					<property name="localName" value="ExtensionPoint_Custom" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.ioc.SchemaDependency">
 					<property name="id" value="EXTENSION_POINT_QUERY" />
-					<property name="schemaDeclaration" ref="ota2MessageSchema" />
+					<property name="schemaDeclaration" ref="otmCommonSchema" />
 					<property name="localName" value="ExtensionPoint_Query" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.ioc.SchemaDependency">
 					<property name="id" value="EXTENSION_POINT_SHARED" />
-					<property name="schemaDeclaration" ref="ota2MessageSchema" />
+					<property name="schemaDeclaration" ref="otmCommonSchema" />
 					<property name="localName" value="ExtensionPoint_Shared" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.ioc.SchemaDependency">
 					<property name="id" value="EXTENSION_POINT_CHOICE" />
-					<property name="schemaDeclaration" ref="ota2MessageSchema" />
+					<property name="schemaDeclaration" ref="otmCommonSchema" />
 					<property name="localName" value="ExtensionPoint_Choice" />
 				</bean>
 			</list>

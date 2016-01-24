@@ -44,41 +44,22 @@
 	  the compiler.
 	  -->
 	  
-	<bean id="ota2CommonSchema" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
-		<property name="namespace" value="http://opentravel.org/common/v02" />
-		<property name="name" value="OTA2_BuiltIns_v2.0.0" />
-		<property name="defaultPrefix" value="ota2-dep" />
-		<property name="locations">
-			<list>
-				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
-					<property name="format" value="XSD" />
-					<property name="location" value="classpath:/ota2-context/built-ins/OTA2_BuiltIns_v2.0.0.otm" />
-				</bean>
-				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
-					<property name="format" value="JSON_SCHEMA" />
-					<property name="location" value="classpath:/ota2-context/built-ins/OTA2_BuiltIns_v2.0.0.otm" />
-				</bean>
-			</list>
-		</property>
-	</bean>
-
-	<bean id="ota2SimpleTypes" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
+	<bean id="otmCommonSchema" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
 		<property name="namespace" value="http://www.opentravel.org/OTM/Common/v0" />
-		<property name="name" value="OTA_SimpleTypes" />
+		<property name="name" value="OTM_BuiltIns.xsd" />
 		<property name="defaultPrefix" value="ota2" />
 		<property name="locations">
 			<list>
 				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
 					<property name="format" value="XSD" />
-					<property name="location" value="classpath:/ota2-context/built-ins/OTA_SimpleTypes_0_0_0.otm" />
+					<property name="location" value="classpath:/ota2-context/built-ins/OTM_BuiltIns.xsd" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
 					<property name="format" value="JSON_SCHEMA" />
-					<property name="location" value="classpath:/ota2-context/built-ins/OTA_SimpleTypes_0_0_0.otm" />
+					<property name="location" value="classpath:/ota2-context/built-ins/OTM_BuiltIns.schema.json" />
 				</bean>
 			</list>
 		</property>
-		<property name="importByDefault" value="true" />
 	</bean>
 	
 	<bean id="ota2MessageSchema" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
@@ -99,7 +80,7 @@
 		</property>
 		<property name="dependencies">
 			<list>
-				<value>ota2CommonSchema</value>
+				<value>otmCommonSchema</value>
 			</list>
 		</property>
 	</bean>

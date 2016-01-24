@@ -9,7 +9,7 @@
     <Prefix>test</Prefix>
     <Name>library_2_p2</Name>
 	<Import prefix="xsd" namespace="http://www.w3.org/2001/XMLSchema" />
-	<Import prefix="ota" namespace="http://opentravel.org/common/v02" />
+	<Import prefix="ota" namespace="http://www.opentravel.org/OTM/Common/v0" />
 	<Import prefix="stl2" namespace="http://services.sabre.com/STL/v02" />
     <Comments>STL2 Test Library</Comments>
     

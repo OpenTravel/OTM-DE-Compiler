@@ -11,7 +11,7 @@
     <Name>library_2_p1</Name>
     <Includes>library_1_p1.xml</Includes>
     <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
-    <Import namespace="http://opentravel.org/common/v02" prefix="ota"/>
+    <Import namespace="http://www.opentravel.org/OTM/Common/v0" prefix="ota"/>
     <Comments>Test Library</Comments>
     
     <Simple name="Counter_2" type="xsd:int"/>

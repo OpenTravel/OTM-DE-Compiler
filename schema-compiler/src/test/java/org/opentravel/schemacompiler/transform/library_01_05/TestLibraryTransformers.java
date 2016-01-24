@@ -70,14 +70,14 @@ public class TestLibraryTransformers extends Abstract_1_5_TestTransformers {
         for (TLNamespaceImport nsImport : library.getNamespaceImports()) {
             libraryImports.put(nsImport.getPrefix(), nsImport);
         }
-        assertEquals(5, libraryImports.size());
+        assertEquals(4, libraryImports.size());
 
         assertNotNull(testImport = libraryImports.get("xsd"));
         assertEquals(XMLConstants.W3C_XML_SCHEMA_NS_URI, testImport.getNamespace());
         assertEquals(0, testImport.getFileHints().size());
 
         assertNotNull(testImport = libraryImports.get("ota"));
-        assertEquals(SchemaDeclarations.OTA2_COMMON_SCHEMA.getNamespace(),
+        assertEquals(SchemaDeclarations.OTM_COMMON_SCHEMA.getNamespace(),
                 testImport.getNamespace());
         assertEquals(0, testImport.getFileHints().size());
 
@@ -135,14 +135,14 @@ public class TestLibraryTransformers extends Abstract_1_5_TestTransformers {
         for (NamespaceImport nsImport : jaxbLibrary.getImport()) {
             libraryImports.put(nsImport.getPrefix(), nsImport);
         }
-        assertEquals(5, libraryImports.size());
+        assertEquals(4, libraryImports.size());
 
         assertNotNull(testImport = libraryImports.get("xsd"));
         assertEquals(XMLConstants.W3C_XML_SCHEMA_NS_URI, testImport.getNamespace());
         assertNull(testImport.getFileHints());
 
         assertNotNull(testImport = libraryImports.get("ota"));
-        assertEquals(SchemaDeclarations.OTA2_COMMON_SCHEMA.getNamespace(),
+        assertEquals(SchemaDeclarations.OTM_COMMON_SCHEMA.getNamespace(),
                 testImport.getNamespace());
         assertNull(testImport.getFileHints());
 

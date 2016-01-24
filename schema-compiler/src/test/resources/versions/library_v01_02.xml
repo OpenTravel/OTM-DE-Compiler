@@ -10,7 +10,7 @@
     <Prefix>lib-0102</Prefix>
     <Name>test_library</Name>
     <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
-    <Import namespace="http://opentravel.org/common/v02" prefix="ota"/>
+    <Import namespace="http://www.opentravel.org/OTM/Common/v0" prefix="ota"/>
     <Import namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01_01" prefix="lib-0101"/>
     <Comments>Test Library</Comments>
     
@@ -181,12 +181,8 @@
         <ParamGroup name="LookupParameters12" idGroup="true" facetName="LookupBO_ID">
         	<Parameter fieldName="uid" location="Path" />
         </ParamGroup>
-        <ActionFacet context="" label="LookupFacetShared" notExtendable="false" referenceType="None">
-            <Element name="Element12" repeat="0" type="xsd:string"/>
-        </ActionFacet>
-        <ActionFacet context="" label="LookupFacet12" notExtendable="false" referenceType="None">
-            <Element name="Element12" repeat="0" type="xsd:string"/>
-        </ActionFacet>
+        <ActionFacet label="LookupFacetShared" referenceType="None" />
+        <ActionFacet label="LookupFacet12" referenceType="None" />
         <Action actionId="LookupAction12" common="false">
         	<ActionRequest httpMethod="GET" pathTemplate="/Lookup12/{uid}" paramGroup="LookupParameters12" />
         	<ActionResponse statusCodes="200" payloadType="LookupResource_LookupFacet12" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
@@ -198,9 +194,7 @@
         <ParamGroup name="PatchTestParameters" idGroup="false" facetName="PatchTestBO_Summary">
         	<Parameter fieldName="Element12" location="Path" />
         </ParamGroup>
-        <ActionFacet context="" label="PatchTestFacet" notExtendable="false" referenceType="None">
-            <Element name="Element12" repeat="0" type="xsd:string"/>
-        </ActionFacet>
+        <ActionFacet label="PatchTestFacet" referenceType="None" />
         <Action actionId="PatchTestAction" common="false">
         	<ActionRequest httpMethod="GET" pathTemplate="/{Element12}" paramGroup="PatchTestParameters" />
         	<ActionResponse statusCodes="200" payloadType="PatchTestResource_PatchTestFacet" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
@@ -217,12 +211,8 @@
         <ParamGroup name="LaterMinorVersionParameters12" idGroup="true" facetName="LaterMinorVersionBO_ID">
         	<Parameter fieldName="uid" location="Path" />
         </ParamGroup>
-        <ActionFacet context="" label="LaterMinorVersionFacetShared" notExtendable="false" referenceType="None">
-            <Element name="Element12" repeat="0" type="xsd:string"/>
-        </ActionFacet>
-        <ActionFacet context="" label="LaterMinorVersionFacet12" notExtendable="false" referenceType="None">
-            <Element name="Element12" repeat="0" type="xsd:string"/>
-        </ActionFacet>
+        <ActionFacet label="LaterMinorVersionFacetShared" referenceType="None" />
+        <ActionFacet label="LaterMinorVersionFacet12" referenceType="None" />
         <Action actionId="LaterMinorVersionAction12" common="false">
         	<ActionRequest httpMethod="GET" pathTemplate="/LMV/{uid}" paramGroup="LaterMinorVersionParameters12" />
         	<ActionResponse statusCodes="200" payloadType="LaterMinorVersionResource_LaterMinorVersionFacet12" mimeTypes="APPLICATION_XML APPLICATION_JSON" />

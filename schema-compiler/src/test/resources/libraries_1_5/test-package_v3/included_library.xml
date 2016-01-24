@@ -10,7 +10,7 @@
     <Prefix>pkg3</Prefix>
     <Name>included_library</Name>
     <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
-    <Import namespace="http://opentravel.org/common/v02" prefix="ota"/>
+    <Import namespace="http://www.opentravel.org/OTM/Common/v0" prefix="ota"/>
     <Import fileHints="legacy_schema_4.xsd"
         namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/legacy_namespace" prefix="legacy"/>
     <Comments>Sample Included Library</Comments>

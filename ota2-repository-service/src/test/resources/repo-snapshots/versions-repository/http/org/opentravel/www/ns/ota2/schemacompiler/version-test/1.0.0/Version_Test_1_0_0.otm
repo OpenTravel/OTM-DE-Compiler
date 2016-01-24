@@ -9,7 +9,7 @@
     <Prefix>vt0100</Prefix>
     <Name>Version_Test</Name>
     <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
-    <Import namespace="http://opentravel.org/common/v02" prefix="ota"/>
+    <Import namespace="http://www.opentravel.org/OTM/Common/v0" prefix="ota"/>
     <Context applicationContext="http://appcontext/context100" context="context100"/>
     <Comments>Version Test Sample Library</Comments>
     

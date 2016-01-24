@@ -53,6 +53,7 @@ import org.opentravel.schemacompiler.saver.LibrarySaveException;
 import org.opentravel.schemacompiler.tests.util.ModelBuilder;
 import org.opentravel.schemacompiler.transform.SymbolResolver;
 import org.opentravel.schemacompiler.transform.util.LibraryPrefixResolver;
+import org.opentravel.schemacompiler.util.SchemaCompilerTestUtils;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.ValidationException;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
@@ -778,6 +779,7 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
         TLCoreObject minorCO = (TLCoreObject) minorv020.getNamedMember(co.getName());
         assertNotNull(minorCO.getExtension());
         Assert.assertSame(co, minorCO.getExtension().getExtendsEntity());
+        SchemaCompilerTestUtils.printFindings(findings);
         assertFalse(findings.hasFinding());
     }
 
