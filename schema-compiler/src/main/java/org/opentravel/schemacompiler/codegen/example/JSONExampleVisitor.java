@@ -319,13 +319,15 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 		}
 
 		// Queue up IDREF(S) attributes for assignment during post-processing
-		if (XsdCodegenUtils.isIdRefType(attribute.getType())) {
-			referenceAssignments.add(new JsonIdReferenceAssignment(null, 1,
-					attribute.getName()));
-		}
-		if (XsdCodegenUtils.isIdRefsType(attribute.getType())) {
-			referenceAssignments.add(new JsonIdReferenceAssignment(null, 3,
-					attribute.getName()));
+		if (!contextStack.isEmpty()) { // TODO: Temporary fix; not sure why the context stack would be empty
+			if (XsdCodegenUtils.isIdRefType(attribute.getType())) {
+				referenceAssignments.add(new JsonIdReferenceAssignment(null, 1,
+						attribute.getName()));
+			}
+			if (XsdCodegenUtils.isIdRefsType(attribute.getType())) {
+				referenceAssignments.add(new JsonIdReferenceAssignment(null, 3,
+						attribute.getName()));
+			}
 		}
 
 		// If the attribute was an open enumeration type, we have to add an
@@ -360,7 +362,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 			JsonNode node = context.getNode();
 			JsonNode jn = node.findValue(nodeName);
 			ArrayNode arrayNode;
-			if (jn != null) {
+			if (jn instanceof ArrayNode) {
 				// must be an array
 				arrayNode = (ArrayNode) jn;
 			} else {
@@ -999,16 +1001,19 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 
 			if (referenceValue != null) {
 				JsonNode jn = parentNode.get(nodeName);
-				if (jn.isArray()) {
-					ArrayNode an = (ArrayNode) jn;
-					an.removeAll();
-					for (String str : referenceValue.split(" ")) {
-						an.add(nodeFactory.textNode(str));
-					}
-				} else if (jn.isTextual()) {
-					parentNode.set(nodeName,
-							nodeFactory.textNode(referenceValue));
+				
+				if (jn != null) {
+					if (jn.isArray()) {
+						ArrayNode an = (ArrayNode) jn;
+						an.removeAll();
+						for (String str : referenceValue.split(" ")) {
+							an.add(nodeFactory.textNode(str));
+						}
+					} else if (jn.isTextual()) {
+						parentNode.set(nodeName,
+								nodeFactory.textNode(referenceValue));
 
+					}
 				}
 			}
 		}
