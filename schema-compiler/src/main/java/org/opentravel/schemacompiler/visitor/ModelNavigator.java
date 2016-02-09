@@ -41,7 +41,6 @@ import org.opentravel.schemacompiler.model.TLInclude;
 import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLListFacet;
-import org.opentravel.schemacompiler.model.TLMemberField;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLNamespaceImport;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
@@ -620,7 +619,6 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
     public void navigateResource(TLResource resource) {
         if (canVisit(resource) && visitor.visitResource(resource)) {
             navigateDocumentation(resource.getDocumentation());
-            navigateBusinessObject(resource.getBusinessObjectRef());
             navigateExtension(resource.getExtension());
             
             for (TLResourceParentRef parentRef : resource.getParentRefs()) {
@@ -660,7 +658,6 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateParamGroup(TLParamGroup paramGroup) {
         if (canVisit(paramGroup) && visitor.visitParamGroup(paramGroup)) {
-        	navigateFacet(paramGroup.getFacetRef());
             navigateDocumentation(paramGroup.getDocumentation());
             
             for (TLParameter parameter : paramGroup.getParameters()) {
@@ -678,18 +675,6 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateParameter(TLParameter parameter) {
         if (canVisit(parameter) && visitor.visitParameter(parameter)) {
-        	TLMemberField<?> fieldRef = parameter.getFieldRef();
-        	
-        	if (fieldRef instanceof TLAttribute) {
-        		navigateAttribute((TLAttribute) fieldRef);
-        		
-        	} else if (fieldRef instanceof TLProperty) {
-        		navigateElement((TLProperty) fieldRef);
-        		
-        	} else if (fieldRef instanceof TLIndicator) {
-        		navigateIndicator((TLIndicator) fieldRef);
-        	}
-        	
             for (TLEquivalent equivalent : parameter.getEquivalents()) {
                 navigateEquivalent(equivalent);
             }

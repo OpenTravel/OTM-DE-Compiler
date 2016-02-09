@@ -49,26 +49,6 @@ public class ModelIntegrityChecker extends AbstractModelIntegrityChecker {
 
         listeners.add(new LibraryRemovedIntegrityChecker());
         listeners.add(new ModelElementRemovedIntegrityChecker<TLModelElement>(TLModelElement.class));
-        /*
-        listeners.add(new ModelElementRemovedIntegrityChecker<TLLibrary>(TLLibrary.class));
-        listeners.add(new ModelElementRemovedIntegrityChecker<TLBusinessObject>(TLBusinessObject.class));
-        listeners.add(new ModelElementRemovedIntegrityChecker<TLCoreObject>(TLCoreObject.class));
-        listeners.add(new ModelElementRemovedIntegrityChecker<TLChoiceObject>(TLChoiceObject.class));
-        listeners.add(new ModelElementRemovedIntegrityChecker<TLService>(TLService.class));
-        listeners.add(new ModelElementRemovedIntegrityChecker<TLOperation>(TLOperation.class));
-        listeners.add(new ModelElementRemovedIntegrityChecker<TLFacet>(TLFacet.class));
-        listeners.add(new ModelElementRemovedIntegrityChecker<TLActionFacet>(TLActionFacet.class));
-        listeners.add(new ModelElementRemovedIntegrityChecker<TLListFacet>(TLListFacet.class));
-        listeners.add(new ModelElementRemovedIntegrityChecker<TLRole>(TLRole.class));
-        listeners.add(new ModelElementRemovedIntegrityChecker<TLAlias>(TLAlias.class));
-        listeners.add(new ModelElementRemovedIntegrityChecker<TLResource>(TLResource.class));
-        listeners.add(new ModelElementRemovedIntegrityChecker<TLResourceParentRef>(TLResourceParentRef.class));
-        listeners.add(new ModelElementRemovedIntegrityChecker<TLActionFacet>(TLActionFacet.class));
-        listeners.add(new ModelElementRemovedIntegrityChecker<TLParameter>(TLParameter.class));
-        listeners.add(new ModelElementRemovedIntegrityChecker<TLParamGroup>(TLParamGroup.class));
-        listeners.add(new ModelElementRemovedIntegrityChecker<TLAction>(TLAction.class));
-        listeners.add(new ModelElementRemovedIntegrityChecker<TLActionResponse>(TLActionResponse.class));
-		*/
         
         listeners.add(new ContextDeletionIntegrityChecker());
         listeners.add(new ContextDeclarationChangeIntegrityChecker());

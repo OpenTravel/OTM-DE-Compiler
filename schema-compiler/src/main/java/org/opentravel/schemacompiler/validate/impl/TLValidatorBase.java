@@ -691,7 +691,7 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
 	 */
 	@SuppressWarnings("unchecked")
 	private List<String> getPathParameterNames(TLParamGroup paramGroup) {
-		if (paramGroup == null) {
+		if ((paramGroup == null) || (paramGroup.getOwner() == null)) {
 			return new ArrayList<>(); // return empty list for null param group
 		}
         String cacheKey = paramGroup.getOwner().getNamespace() + ":" + paramGroup.getOwner().getLocalName()
