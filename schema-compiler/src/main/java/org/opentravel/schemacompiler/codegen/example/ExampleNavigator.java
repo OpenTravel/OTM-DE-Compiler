@@ -763,14 +763,13 @@ public class ExampleNavigator {
             incrementRecursionCount(attribute);
 
             if (canVisit(attribute)) {
-                TLAttributeType attributeType = attribute.getType();
+                TLAttributeType attributeType = PropertyCodegenUtils.getAttributeType( attribute );
 
-                while (attributeType instanceof TLValueWithAttributes) {
-                    attributeType = ((TLValueWithAttributes) attributeType).getParentType();
+                if (!PropertyCodegenUtils.isEmptyStringType( attributeType )) {
+                    visitor.startAttribute(attribute);
+                    navigateSimpleType(attributeType);
+                    visitor.endAttribute(attribute);
                 }
-                visitor.startAttribute(attribute);
-                navigateSimpleType(attributeType);
-                visitor.endAttribute(attribute);
             }
         } finally {
             decrementRecursionCount(attribute);

@@ -43,12 +43,29 @@ public class EnumCodegenUtils {
 	 * @return List<TLEnumValue>
 	 */
 	public static List<TLEnumValue> getInheritedValues(TLAbstractEnumeration enumEntity) {
+		return getInheritedValues( enumEntity, true );
+	}
+	
+	/**
+	 * Returns the list of inherited enumeration values for the given entity.  If the
+	 * 'includeDeclaredValues' is true, all valid enumeration values will be returned
+	 * (declared and inherited).  If false, only those values inherited from parent enum(s)
+	 * will be returned.
+	 * 
+	 * @param enumEntity  the enumeration entity for which to return values
+	 * @param includeDeclaredValues  flag indicating whether declared values should be included
+	 * @return List<TLEnumValue>
+	 */
+	public static List<TLEnumValue> getInheritedValues(TLAbstractEnumeration enumEntity, boolean includeDeclaredValues) {
 		List<TLEnumValue> valueList = new ArrayList<>();
 		
 		if (enumEntity != null) {
 			List<TLAbstractEnumeration> enumHierarchy = getInheritanceHierarchy( enumEntity );
 			
 			for (TLAbstractEnumeration hierarchyEnum : enumHierarchy) {
+				if (!includeDeclaredValues && (hierarchyEnum == enumEntity)) {
+					continue;
+				}
 				valueList.addAll( hierarchyEnum.getValues() );
 			}
 		}

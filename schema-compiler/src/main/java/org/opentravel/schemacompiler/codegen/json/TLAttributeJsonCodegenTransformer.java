@@ -44,54 +44,57 @@ public class TLAttributeJsonCodegenTransformer extends AbstractJsonSchemaTransfo
 	@Override
 	public CodegenArtifacts transform(TLAttribute source) {
         TLAttributeType attributeType = PropertyCodegenUtils.getAttributeType(source);
-		JsonSchemaNamedReference attr = new JsonSchemaNamedReference();
-		JsonSchemaReference attrSchemaRef = new JsonSchemaReference();
 		CodegenArtifacts artifacts = new CodegenArtifacts();
 		
-        // If the attribute's name has not been specified, use the name of its assigned type
-        if ((source.getName() == null) || (source.getName().length() == 0)) {
-            attr.setName(attributeType.getLocalName());
-        } else {
-            attr.setName(source.getName());
-        }
-		attr.setSchema( attrSchemaRef );
-		attr.setRequired( source.isMandatory() );
-		artifacts.addArtifact( attr );
-		
-        if (attributeType instanceof TLCoreObject) {
-            // Special Case: For core objects, use the simple facet as the attribute type
-            TLCoreObject coreObject = (TLCoreObject) attributeType;
-            TLSimpleFacet coreSimple = coreObject.getSimpleFacet();
-            
-        	setAttributeType( attrSchemaRef, coreSimple, source );
+		if (!PropertyCodegenUtils.isEmptyStringType( attributeType )) {
+			JsonSchemaNamedReference attr = new JsonSchemaNamedReference();
+			JsonSchemaReference attrSchemaRef = new JsonSchemaReference();
+			
+	        // If the attribute's name has not been specified, use the name of its assigned type
+	        if ((source.getName() == null) || (source.getName().length() == 0)) {
+	            attr.setName(attributeType.getLocalName());
+	        } else {
+	            attr.setName(source.getName());
+	        }
+			attr.setSchema( attrSchemaRef );
+			attr.setRequired( source.isMandatory() );
+			artifacts.addArtifact( attr );
+			
+	        if (attributeType instanceof TLCoreObject) {
+	            // Special Case: For core objects, use the simple facet as the attribute type
+	            TLCoreObject coreObject = (TLCoreObject) attributeType;
+	            TLSimpleFacet coreSimple = coreObject.getSimpleFacet();
+	            
+	        	setAttributeType( attrSchemaRef, coreSimple, source );
 
-        } else if (attributeType instanceof TLRole) {
-            // Special Case: For role assignments, use the core object's simple facet as the
-            // attribute type
-            TLCoreObject coreObject = ((TLRole) attributeType).getRoleEnumeration().getOwningEntity();
-            TLSimpleFacet coreSimple = coreObject.getSimpleFacet();
-            
-        	setAttributeType( attrSchemaRef, coreSimple, source );
+	        } else if (attributeType instanceof TLRole) {
+	            // Special Case: For role assignments, use the core object's simple facet as the
+	            // attribute type
+	            TLCoreObject coreObject = ((TLRole) attributeType).getRoleEnumeration().getOwningEntity();
+	            TLSimpleFacet coreSimple = coreObject.getSimpleFacet();
+	            
+	        	setAttributeType( attrSchemaRef, coreSimple, source );
 
-        } else if (attributeType instanceof TLOpenEnumeration) {
-    		JsonSchemaNamedReference extensionAttr = new JsonSchemaNamedReference();
-    		JsonSchemaReference extAttrSchemaRef = new JsonSchemaReference();
-    		
-    		extensionAttr.setName( attr.getName() + "Extension" );
-    		extensionAttr.setSchema( extAttrSchemaRef );
-    		extAttrSchemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath(
-    				SchemaDependency.getEnumExtension(), source.getOwner() ) );
-            artifacts.addArtifact(extensionAttr);
-        	attrSchemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath(
-        			attributeType, source.getOwner() ) + "_Base" );
+	        } else if (attributeType instanceof TLOpenEnumeration) {
+	    		JsonSchemaNamedReference extensionAttr = new JsonSchemaNamedReference();
+	    		JsonSchemaReference extAttrSchemaRef = new JsonSchemaReference();
+	    		
+	    		extensionAttr.setName( attr.getName() + "Extension" );
+	    		extensionAttr.setSchema( extAttrSchemaRef );
+	    		extAttrSchemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath(
+	    				SchemaDependency.getEnumExtension(), source.getOwner() ) );
+	            artifacts.addArtifact(extensionAttr);
+	        	attrSchemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath(
+	        			attributeType, source.getOwner() ) + "_Base" );
 
-        } else if (attributeType instanceof TLRoleEnumeration) {
-        	attrSchemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath(
-        			attributeType, source.getOwner() ) + "_Base" );
-        	
-        } else { // normal case
-        	setAttributeType( attrSchemaRef, attributeType, source );
-        }
+	        } else if (attributeType instanceof TLRoleEnumeration) {
+	        	attrSchemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath(
+	        			attributeType, source.getOwner() ) + "_Base" );
+	        	
+	        } else { // normal case
+	        	setAttributeType( attrSchemaRef, attributeType, source );
+	        }
+		}
 		return artifacts;
 	}
 	
