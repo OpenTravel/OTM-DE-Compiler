@@ -21,6 +21,7 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
+import org.opentravel.schemacompiler.codegen.json.model.JsonType;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.NamedEntity;
@@ -60,20 +61,29 @@ public class TLValueWithAttributesJsonCodegenTransformer extends AbstractJsonSch
         // Create the attribute(s) for the VWA parent type
         if ((vwaParentType != null) && !PropertyCodegenUtils.isEmptyStringType( vwaParentType )) {
         	JsonSchemaReference vwaValueSchemaRef = new JsonSchemaReference();
-        	String referencePath = jsonUtils.getSchemaReferencePath( vwaParentType, source );
-        	
-            vwaSchema.getProperties().add( new JsonSchemaNamedReference( "value", vwaValueSchemaRef ) );
+            JsonType jsonValueType = JsonType.valueOf( vwaParentType );
             
-            if ((vwaParentType instanceof TLOpenEnumeration)
-                    || (vwaParentType instanceof TLRoleEnumeration)) {
-        		JsonSchemaReference extAttrSchemaRef = new JsonSchemaReference();
-        		
-        		extAttrSchemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath(
-        				SchemaDependency.getEnumExtension(), source ) );
-        		vwaSchema.getProperties().add( new JsonSchemaNamedReference( "extension", extAttrSchemaRef ) );
-            	referencePath += "_Base";
+            if (jsonValueType != null) {
+            	JsonSchema jsonValueSchema = new JsonSchema();
+            	
+            	jsonValueSchema.setType( jsonValueType );
+            	vwaValueSchemaRef.setSchema( jsonValueSchema );
+            	
+            } else {
+            	String referencePath = jsonUtils.getSchemaReferencePath( vwaParentType, source );
+            	
+                if ((vwaParentType instanceof TLOpenEnumeration)
+                        || (vwaParentType instanceof TLRoleEnumeration)) {
+            		JsonSchemaReference extAttrSchemaRef = new JsonSchemaReference();
+            		
+            		extAttrSchemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath(
+            				SchemaDependency.getEnumExtension(), source ) );
+            		vwaSchema.getProperties().add( new JsonSchemaNamedReference( "extension", extAttrSchemaRef ) );
+                	referencePath += "_Base";
+                }
+            	vwaValueSchemaRef.setSchemaPath( referencePath );
             }
-        	vwaValueSchemaRef.setSchemaPath(  referencePath );
+            vwaSchema.getProperties().add( new JsonSchemaNamedReference( "value", vwaValueSchemaRef ) );
         	
             if (source.getValueDocumentation() != null) {
     	        ObjectTransformer<TLDocumentation, JsonDocumentation, CodeGenerationTransformerContext> docTransformer =

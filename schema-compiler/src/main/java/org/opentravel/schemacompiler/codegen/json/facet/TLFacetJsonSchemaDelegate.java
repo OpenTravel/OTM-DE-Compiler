@@ -68,11 +68,26 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
 	 */
 	@Override
 	public CorrelatedCodegenArtifacts generateArtifacts() {
-		CorrelatedCodegenArtifacts artifacts = super.generateArtifacts();
-		
-		for (TLAlias alias : getSourceFacet().getAliases()) {
-			artifacts.addArtifact( alias, createDefinition( alias ) );
-		}
+    	CorrelatedCodegenArtifacts artifacts = new CorrelatedCodegenArtifacts();
+
+        if (hasContent()) {
+			JsonSchemaNamedReference facetDef = createDefinition();
+			TLFacet sourceFacet = getSourceFacet();
+			
+			if (facetDef != null) {
+	            artifacts.addArtifact( sourceFacet, facetDef );
+				artifacts.addArtifact( sourceFacet, createGlobalElement( null, facetDef.getName() ) );
+			}
+    		
+    		for (TLAlias alias : sourceFacet.getAliases()) {
+    			JsonSchemaNamedReference aliasDef = createDefinition( alias );
+    			
+    			if (aliasDef != null) {
+        			artifacts.addArtifact( alias, aliasDef );
+        			artifacts.addArtifact( alias, createGlobalElement( alias, aliasDef.getName() ) );
+    			}
+    		}
+        }
 		return artifacts;
 	}
 
@@ -89,7 +104,7 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
     		definition = createDefinition();
     		
     	} else {
-    		definition = new JsonSchemaNamedReference( getElementName( alias ),
+    		definition = new JsonSchemaNamedReference( JsonSchemaNamingUtils.getGlobalDefinitionName( alias ),
     				new JsonSchemaReference( jsonUtils.getSchemaReferencePath( getSourceFacet(), alias ) ) );
     	}
     	return definition;
@@ -150,6 +165,38 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
 	        }
 		}
 		return definition;
+	}
+	
+	/**
+	 * Constructs a global definition in the form of a single-property schema of the type
+	 * specified by the global element and type names provided.
+	 * 
+	 * @param elementName  the name of the global element
+	 * @param typeName  the name of the type to reference in the #/definitions section of the local schema
+	 * @return JsonSchemaReference
+	 */
+	protected JsonSchemaReference createGlobalElement(TLAlias alias, String typeName) {
+		JsonSchemaReference globalElement = null;
+		QName globalElementName;
+		
+		if (alias == null) {
+			globalElementName = XsdCodegenUtils.getGlobalElementName( getSourceFacet() );
+			
+		} else {
+			globalElementName = XsdCodegenUtils.getGlobalElementName( alias );
+		}
+		
+		if (globalElementName != null) {
+			JsonSchemaNamedReference globalDef = new JsonSchemaNamedReference();
+			JsonSchema globalDefSchema = new JsonSchema();
+			
+			globalDef.setName( globalElementName.getLocalPart() );
+			globalDef.setRequired( true );
+			globalDef.setSchema( new JsonSchemaReference( "#/definitions/" + typeName ) );
+			globalDefSchema.getProperties().add( globalDef );
+			globalElement = new JsonSchemaReference( globalDefSchema );
+		}
+		return globalElement;
 	}
 	
     /**
@@ -291,6 +338,7 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
     				
     				if (referencedFilename != null) {
     					schemaPath = builtInLocation + referencedFilename + "#/definitions/" + dependency.getLocalName();
+    					addCompileTimeDependency( dependency );
     				}
     			}
     		}

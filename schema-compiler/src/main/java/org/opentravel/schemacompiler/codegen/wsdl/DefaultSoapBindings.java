@@ -493,7 +493,7 @@ public class DefaultSoapBindings implements CodeGenerationWsdlBindings {
 	@Override
 	public void addPayloadExampleContent(Element exampleXml,
 			Map<String, String> namespaceMappings, TLFacet operationFacet) {
-		String version = getVersion(operationFacet);
+		String version = getVersion(operationFacet).toString();
 
 		exampleXml.setAttribute(VERSION_ATTRIBUTE_NAME, version);
 		exampleXml.setAttribute(TIMESTAMP_ATTRIBUTE_NAME,
@@ -502,7 +502,8 @@ public class DefaultSoapBindings implements CodeGenerationWsdlBindings {
 
 	@Override
 	public void addPayloadExampleContent(ObjectNode node, TLFacet operationFacet) {
-		String version = getVersion(operationFacet);
+		Integer version = getVersion(operationFacet);
+		
 		node.put(VERSION_ATTRIBUTE_NAME, version);
 		node.put(TIMESTAMP_ATTRIBUTE_NAME, DatatypeConverter.printDateTime(Calendar.getInstance()));
 	}
@@ -512,19 +513,18 @@ public class DefaultSoapBindings implements CodeGenerationWsdlBindings {
 	 * @param operationFacet
 	 * @return the facet version, default is "1".
 	 */
-	protected String getVersion(TLFacet operationFacet) {
+	protected Integer getVersion(TLFacet operationFacet) {
 		AbstractLibrary owningLibrary = operationFacet.getOwningLibrary();
-		String versionValue = "1";
+		Integer versionValue = 1;
 
 		if (owningLibrary instanceof TLLibrary) {
 			try {
 				VersionScheme vScheme = VersionSchemeFactory.getInstance()
-						.getVersionScheme(
-								((TLLibrary) owningLibrary).getVersionScheme());
-				versionValue = vScheme
-						.getMajorVersion(((TLLibrary) owningLibrary)
-								.getVersion());
-
+						.getVersionScheme(((TLLibrary) owningLibrary).getVersionScheme());
+				String versionStr = vScheme.getMajorVersion(((TLLibrary) owningLibrary).getVersion());
+				
+				versionValue = Integer.parseInt( versionStr );
+				
 			} catch (VersionSchemeException e) {
 				// Ignore and use the default value of "1"
 			}

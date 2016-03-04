@@ -21,12 +21,17 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonType;
+import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.JsonSchemaNamingUtils;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
+import org.opentravel.schemacompiler.model.TLAbstractFacet;
+import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLCoreObject;
+import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLPropertyType;
+import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.XSDComplexType;
 import org.opentravel.schemacompiler.model.XSDElement;
 import org.opentravel.schemacompiler.model.XSDSimpleType;
@@ -157,11 +162,35 @@ public class TLPropertyJsonCodegenTransformer extends AbstractJsonSchemaTransfor
         JsonType jsonType = JsonType.valueOf( propertyType );
         JsonSchemaReference typeRef = schemaRef;
         JsonSchemaReference docSchema = schemaRef;
-        
-        if (source.getRepeat() != 0) {
+    	String maxOccurs = null;
+    	
+    	// Calculate the max-occurs based on the source property or the property
+    	// type (in the case of non-simple list facets).
+    	TLPropertyType maxOccursType = propertyType;
+    	
+    	if (maxOccursType instanceof TLAlias) {
+    		maxOccursType = (TLPropertyType) ((TLAlias) maxOccursType).getOwningEntity();
+    	}
+		if (maxOccursType instanceof TLListFacet) {
+			TLListFacet listFacet = (TLListFacet) maxOccursType;
+			
+			if (!(listFacet.getItemFacet() instanceof TLSimpleFacet)) {
+				TLCoreObject facetOwner = (TLCoreObject) listFacet.getOwningEntity();
+				
+				if (facetOwner.getRoleEnumeration().getRoles().size() > 0) {
+					maxOccurs = facetOwner.getRoleEnumeration().getRoles().size() + "";
+				} else {
+					maxOccurs = PropertyCodegenUtils.getMaxOccurs( source );
+				}
+			}
+		} else if ((source.getRepeat() < 0) || (source.getRepeat() > 1)) {
+			maxOccurs = PropertyCodegenUtils.getMaxOccurs( source );
+        }
+		
+		// If a max-occurs was specified, the resulting property schema should be an array
+		if (maxOccurs != null) {
         	JsonSchemaReference itemSchemaRef = new JsonSchemaReference();
         	JsonSchema arraySchema = new JsonSchema();
-        	String maxOccurs = null;
         	
         	arraySchema.setType( JsonType.jsonArray );
         	arraySchema.setMinItems( source.isMandatory() ? 1 : null );
@@ -169,21 +198,10 @@ public class TLPropertyJsonCodegenTransformer extends AbstractJsonSchemaTransfor
         	schemaRef.setSchema( arraySchema );
         	typeRef = itemSchemaRef;
         	
-			if (propertyType instanceof TLListFacet) {
-				TLCoreObject facetOwner = (TLCoreObject) ((TLListFacet) propertyType).getOwningEntity();
-				
-				if (facetOwner.getRoleEnumeration().getRoles().size() > 0) {
-		        	arraySchema.setMaxItems( facetOwner.getRoleEnumeration().getRoles().size() );
-				} else {
-					maxOccurs = PropertyCodegenUtils.getMaxOccurs( source );
-				}
-			} else {
-				maxOccurs = PropertyCodegenUtils.getMaxOccurs( source );
-			}
-			if ((maxOccurs != null) && !maxOccurs.equals("unbounded")) {
+			if (!maxOccurs.equals("unbounded")) {
 	        	arraySchema.setMaxItems( Integer.valueOf( maxOccurs ) );
 			}
-        }
+		}
         
         if (jsonType != null) {
         	JsonSchema propertySchema = new JsonSchema();
@@ -208,7 +226,33 @@ public class TLPropertyJsonCodegenTransformer extends AbstractJsonSchemaTransfor
         	typeRef.setSchema( typeSchema );
     		
         } else {
-    		typeRef.setSchemaPath( jsonUtils.getSchemaReferencePath( propertyType, source.getOwner() ) );
+        	TLPropertyType baseType = propertyType;
+        	TLAlias alias = null;
+        	
+        	if (baseType instanceof TLAlias) {
+        		alias = ((TLAlias) baseType);
+        		baseType = (TLPropertyType) alias.getOwningEntity();
+        	}
+        	if (baseType instanceof TLListFacet) {
+        		TLAbstractFacet facet = ((TLListFacet) baseType).getItemFacet();
+        		
+        		if (facet instanceof TLFacet) {
+            		TLFacet itemFacet = (TLFacet) facet;
+            		
+            		if (alias != null) {
+            			TLAlias ownerAlias = AliasCodegenUtils.getOwnerAlias( alias );
+            			alias = AliasCodegenUtils.getFacetAlias( ownerAlias, itemFacet.getFacetType(),
+            					itemFacet.getContext(), itemFacet.getLabel() );
+            		}
+            		baseType = itemFacet;
+        		}
+        	}
+        	
+        	if (alias != null) {
+        		typeRef.setSchemaPath( jsonUtils.getSchemaReferencePath( alias, source.getOwner() ) );
+        	} else {
+        		typeRef.setSchemaPath( jsonUtils.getSchemaReferencePath( baseType, source.getOwner() ) );
+        	}
         }
         
         if (docSchema != null) {

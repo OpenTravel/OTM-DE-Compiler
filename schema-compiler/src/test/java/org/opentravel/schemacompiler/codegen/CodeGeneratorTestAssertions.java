@@ -15,6 +15,8 @@
  */
 package org.opentravel.schemacompiler.codegen;
 
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -23,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +41,10 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
+import junit.framework.AssertionFailedError;
+
+import org.junit.Assert;
+import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
 import org.opentravel.schemacompiler.util.ClasspathResourceResolver;
 import org.opentravel.schemacompiler.util.FileSystemResourceResolver;
@@ -47,7 +54,21 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-import junit.framework.AssertionFailedError;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.fge.jackson.JsonLoader;
+import com.github.fge.jsonschema.core.exceptions.InvalidSchemaException;
+import com.github.fge.jsonschema.core.exceptions.ProcessingException;
+import com.github.fge.jsonschema.core.load.configuration.LoadingConfiguration;
+import com.github.fge.jsonschema.core.load.uri.URITranslatorConfiguration;
+import com.github.fge.jsonschema.core.report.ListProcessingReport;
+import com.github.fge.jsonschema.core.report.LogLevel;
+import com.github.fge.jsonschema.core.report.ProcessingMessage;
+import com.github.fge.jsonschema.core.report.ProcessingReport;
+import com.github.fge.jsonschema.main.JsonSchema;
+import com.github.fge.jsonschema.main.JsonSchemaFactory;
 
 /**
  * Static assertion methods used to validate generated XML schema and WSDL documents.
@@ -112,6 +133,9 @@ public class CodeGeneratorTestAssertions {
     			
     		} else if (filename.endsWith(".schema.json")) {
     			validateJSONSchema( generatedFile );
+    			
+    		} else if (filename.endsWith(".swagger.json")) {
+    			validateSwaggerDocument( generatedFile );
     			
     		} else if (filename.endsWith(".json")) {
     			if (validateExamples) {
@@ -268,7 +292,24 @@ public class CodeGeneratorTestAssertions {
      * @param jsonSchemaFile  the JSON schema file to validate
      */
     private static void validateJSONSchema(File jsonSchemaFile) {
-    	// TODO: Implement JSON schema validation checks
+    	try {
+    		JsonNode schemaNode = JsonLoader.fromFile( jsonSchemaFile );
+    		JsonSchema schema = newJsonSchemaFactory( jsonSchemaFile.getParentFile() ).getJsonSchema( schemaNode );
+    		
+    		try {
+    			schema.validate( new ObjectNode( JsonNodeFactory.instance ) );
+    			
+    		} catch (InvalidSchemaException e) {
+    			System.out.println( e.getProcessingMessage().asJson().asText() );
+    			fail( e.getMessage() );
+    		}
+    		
+    	} catch (ProcessingException | IOException e) {
+    		if (DEBUG) {
+    			e.printStackTrace( System.out );
+    		}
+            throw new AssertionFailedError( "Error validating JSON schema: " + jsonSchemaFile.getName() );
+    	}
     }
     
     /**
@@ -277,9 +318,240 @@ public class CodeGeneratorTestAssertions {
      * @param jsonFile  the JSON file to validate
      */
     private static void validateJSONDocument(File jsonFile) {
-    	// TODO: Implement JSON document validation checks
+    	try {
+    		JsonNode jsonNode = JsonLoader.fromFile( jsonFile );
+    		File jsonSchemaFile = findJsonSchema( jsonFile.getParentFile(), jsonNode );
+    		
+    		if (jsonSchemaFile != null) {
+        		JsonNode schemaNode = JsonLoader.fromFile( jsonSchemaFile );
+        		JsonSchema schema = newJsonSchemaFactory( jsonSchemaFile.getParentFile() ).getJsonSchema( schemaNode );
+        		ProcessingReport report = schema.validate( jsonNode );
+        		List<ProcessingMessage> errors = getValidationErrors( report );
+        		
+        		if (DEBUG) {
+        			if (errors.size() > 0) {
+        				System.out.println("Validation Results: " + jsonFile.getAbsolutePath());
+        				
+            			for (ProcessingMessage error : errors) {
+            				System.out.println( error );
+            			}
+        				System.out.println("ERROR COUNT: " + errors.size());
+        			}
+        		}
+        		Assert.assertEquals( 0, errors.size() );
+    		}
+    		
+    	} catch (ProcessingException | IOException e) {
+    		if (DEBUG) {
+    			System.out.println("Error validating JSON document: " + jsonFile.getAbsolutePath());
+    			System.out.println(e.getMessage());
+    		}
+            throw new AssertionFailedError( "Error validating JSON document: " + jsonFile.getName() );
+    	}
     }
     
+    /**
+     * Validates that the given Swagger API specification is syntactically and
+     * symantically correct.
+     * 
+     * @param swaggerFile  the Swagger document to validate
+     */
+    public static void validateSwaggerDocument(File swaggerFile) {
+    	// TODO: Implement the 'validateSwaggerDocument()' method
+    }
+    
+	/**
+	 * Returns a new <code>JsonSchemaFactory</code> instance.
+	 * 
+	 * @param schemaFolder  the folder location where JSON schemas are located
+	 * @return JsonSchemaFactory
+	 */
+	private static JsonSchemaFactory newJsonSchemaFactory(File schemaFolder) {
+		return JsonSchemaFactory.newBuilder().setLoadingConfiguration(
+				LoadingConfiguration.newBuilder().setURITranslatorConfiguration(
+						URITranslatorConfiguration.newBuilder()
+								.setNamespace( "http://opentravel.org/schemas/json/" )
+								.addPathRedirect( "http://opentravel.org/schemas/json/", schemaFolder.toURI().toString() )
+			            		.freeze()
+						).freeze()
+				).freeze();
+
+	}
+	
+	/**
+	 * Returns the JSON schema file that should be used to validate the given JSON document.
+	 * If no qualifying schema can be located, this method will return null.
+	 * 
+	 * @param jsonFolder  the folder from which the JSON document was loaded
+	 * @param jsonDocument  the JSON document to be validated
+	 * @return File
+	 */
+	private static File findJsonSchema(File jsonFolder, JsonNode jsonDocument) {
+		Iterator<String> fieldNames = jsonDocument.fieldNames();
+		String rootElement = fieldNames.hasNext() ? fieldNames.next() : null;
+		File[] searchFolders = new File[] {
+				jsonFolder.getParentFile(), jsonFolder.getParentFile().getParentFile()
+		};
+		File schemaFile = null;
+		
+		for (File schemaFolder : searchFolders) {
+			for (File candidateFile : schemaFolder.listFiles()) {
+				if (candidateFile.isFile() && candidateFile.getName().endsWith(
+						JsonSchemaCodegenUtils.JSON_SCHEMA_FILENAME_EXT )) {
+		    		try {
+						JsonNode schemaNode = JsonLoader.fromFile( candidateFile );
+						
+						if (canValidate( schemaNode, rootElement )) {
+							schemaFile = candidateFile;
+							break;
+						}
+						
+					} catch (IOException e) {
+						// Ignore error and skip this file
+					}
+				}
+			}
+		}
+		return schemaFile;
+	}
+	
+	/**
+	 * Returns true if the given JSON schema can be used to validate a JSON document
+	 * with the specified root element.
+	 * 
+	 * @param jsonSchema  the JSON schema that may be used to validate the document
+	 * @param rootElement  the root element name of the JSON document to be validated
+	 * @return boolean
+	 */
+	private static boolean canValidate(JsonNode jsonSchema, String rootElement) {
+		boolean validatable = false;
+		
+		if (rootElement != null) {
+			JsonNode schemaOneOf = jsonSchema.get( "oneOf" );
+			
+			if (schemaOneOf instanceof ArrayNode) {
+				for (JsonNode oneOfEntry : (ArrayNode) schemaOneOf) {
+					JsonNode oneOfProperties = oneOfEntry.get( "properties" );
+					
+					if ((oneOfProperties != null) && (oneOfProperties.get( rootElement ) != null)) {
+						validatable = true;
+						break;
+					}
+				}
+			}
+		}
+		return validatable;
+	}
+	
+	/**
+	 * Flattens the contents of the given JSON validation report and returns the
+	 * entries that represent errors.
+	 * 
+	 * @param report  the JSON validation report
+	 * @return ProcessingMessage
+	 * @throws ProcessingException  thrown if an error occurs during JSON validation
+	 */
+	private static List<ProcessingMessage> getValidationErrors(ProcessingReport report) throws ProcessingException {
+		Iterator<ProcessingMessage> iterator = report.iterator();
+		List<ProcessingMessage> errors = new ArrayList<>();
+		
+		while (iterator.hasNext()) {
+			ProcessingMessage message = iterator.next();
+			
+			if (message.getLogLevel() == LogLevel.ERROR) {
+				JsonNode messageNode = message.asJson();
+				JsonNode reportsNode = messageNode.get( "reports" );
+				
+				if (reportsNode == null) {
+					errors.add( message );
+					
+				} else {
+					Iterator<String> rnIterator = reportsNode.fieldNames();
+					
+					while (rnIterator.hasNext()) {
+						ArrayNode reportJson = (ArrayNode) reportsNode.get( rnIterator.next() );
+						
+						if (!isSuperfluousReportNode( reportJson )) {
+							errors.addAll( getValidationErrors( buildReport( reportJson ) ) );
+						}
+					}
+				}
+			}
+		}
+		return errors;
+	}
+	
+	/**
+	 * Returns true if the given JSON report contains a single error that is not relevant
+	 * to the overall validation findings.
+	 * 
+	 * @param reportJson  the JSON contents of the validation report
+	 * @return boolean
+	 */
+	private static boolean isSuperfluousReportNode(ArrayNode reportJson) {
+		boolean result = false;
+		
+		if (reportJson.size() == 1) {
+			JsonNode messageJson = reportJson.get( 0 );
+			JsonNode schemaJson = messageJson.get( "schema" );
+			
+			if (schemaJson != null) {
+				JsonNode pointerJson = schemaJson.get( "pointer" );
+				result = (pointerJson != null) && pointerJson.asText( "" ).startsWith( "/oneOf/" );
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * Reconstructs a <code>ProcessingReport</code> instance from the JSON content provided.
+	 * 
+	 * @param reportJson  the JSON content of the validation report
+	 * @return ProcessingReport
+	 * @throws ProcessingException  thrown if an error occurs while reconstructing the report instance
+	 */
+	private static ProcessingReport buildReport(ArrayNode reportJson) throws ProcessingException {
+		ProcessingReport report = new ListProcessingReport();
+		Iterator<JsonNode> iterator = reportJson.iterator();
+		
+		while (iterator.hasNext()) {
+			ProcessingMessage message = new ProcessingMessage();
+			JsonNode messageJson = iterator.next();
+			Iterator<String> fnIterator = messageJson.fieldNames();
+			
+			while (fnIterator.hasNext()) {
+				String fieldName = fnIterator.next();
+				JsonNode fieldValue = messageJson.get( fieldName );
+				
+				if (fieldName.equals("level")) {
+					message.setLogLevel( LogLevel.valueOf( fieldValue.asText().toUpperCase() ) );
+				} else {
+					message.put( fieldName, fieldValue );
+				}
+			}
+			switch (message.getLogLevel()) {
+				case FATAL:
+					report.fatal( message );
+					break;
+				case ERROR:
+					report.error( message );
+					break;
+				case WARNING:
+					report.warn( message );
+					break;
+				case INFO:
+					report.info( message );
+					break;
+				case DEBUG:
+					report.debug( message );
+					break;
+				default:
+					break;
+			}
+		}
+		return report;
+	}
+	
     /**
      * Initializes the validation schema and shared JAXB context.
      */

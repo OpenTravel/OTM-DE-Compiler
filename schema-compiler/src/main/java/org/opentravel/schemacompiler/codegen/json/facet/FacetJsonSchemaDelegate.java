@@ -16,13 +16,13 @@
 package org.opentravel.schemacompiler.codegen.json.facet;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerator;
-import org.opentravel.schemacompiler.codegen.impl.AbstractJaxbCodeGenerator;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CorrelatedCodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
+import org.opentravel.schemacompiler.codegen.json.AbstractJsonSchemaCodeGenerator;
 import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
-import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
@@ -40,7 +40,7 @@ import org.opentravel.schemacompiler.transform.TransformerFactory;
  * 
  * @param <F>  the type of facet for which the delegate will generate artifacts
  */
-public abstract class FacetJsonSchemaDelegate<F extends TLAbstractFacet>{
+public abstract class FacetJsonSchemaDelegate<F extends TLAbstractFacet> {
 	
 	/** Reference to the XSD facet delegates that helps to avoid duplication of OTM code generation logic. */
 	protected static final FacetCodegenDelegateFactory xsdDelegateFactory = new FacetCodegenDelegateFactory( null );
@@ -89,8 +89,8 @@ public abstract class FacetJsonSchemaDelegate<F extends TLAbstractFacet>{
         if (transformerContext != null) {
             CodeGenerator<?> codeGenerator = transformerContext.getCodeGenerator();
 
-            if (codeGenerator instanceof AbstractJaxbCodeGenerator) {
-                ((AbstractJaxbCodeGenerator<?>) codeGenerator).addCompileTimeDependency(dependency
+            if (codeGenerator instanceof AbstractJsonSchemaCodeGenerator) {
+                ((AbstractJsonSchemaCodeGenerator<?>) codeGenerator).addCompileTimeDependency(dependency
                         .getSchemaDeclaration());
             }
         }

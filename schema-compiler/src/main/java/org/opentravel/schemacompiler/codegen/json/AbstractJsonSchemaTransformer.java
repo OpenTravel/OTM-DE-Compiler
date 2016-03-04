@@ -20,7 +20,6 @@ import java.util.Collections;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerator;
 import org.opentravel.schemacompiler.codegen.impl.AbstractCodegenTransformer;
-import org.opentravel.schemacompiler.codegen.impl.AbstractJaxbCodeGenerator;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
@@ -90,8 +89,8 @@ public abstract class AbstractJsonSchemaTransformer<S, T> extends AbstractCodege
     protected void addCompileTimeDependency(SchemaDeclaration schemaDeclaration) {
         CodeGenerator<?> codeGenerator = context.getCodeGenerator();
 
-        if (codeGenerator instanceof AbstractJaxbCodeGenerator) {
-            ((AbstractJaxbCodeGenerator<?>) codeGenerator)
+        if (codeGenerator instanceof AbstractJsonSchemaCodeGenerator) {
+            ((AbstractJsonSchemaCodeGenerator<?>) codeGenerator)
                     .addCompileTimeDependency(schemaDeclaration);
         }
     }
@@ -106,8 +105,8 @@ public abstract class AbstractJsonSchemaTransformer<S, T> extends AbstractCodege
         CodeGenerator<?> codeGenerator = context.getCodeGenerator();
         Collection<SchemaDeclaration> dependencies;
 
-        if (codeGenerator instanceof AbstractJaxbCodeGenerator) {
-            dependencies = ((AbstractJaxbCodeGenerator<?>) codeGenerator)
+        if (codeGenerator instanceof AbstractJsonSchemaCodeGenerator) {
+            dependencies = ((AbstractJsonSchemaCodeGenerator<?>) codeGenerator)
                     .getCompileTimeDependencies();
         } else {
             dependencies = Collections.emptySet();

@@ -106,7 +106,6 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      * @return String
      */
     protected String generateExampleValue(Object entity) {
-    	
         String exampleValue = null;
 
         if (entity instanceof TLSimple) {
@@ -165,10 +164,6 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      * 
      * @return TLFacet
      */
-    /**
-	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#getContextFacet()
-	 */
-	//@Override
 	protected NamedEntity getContextFacet() {
 		NamedEntity elementType = (context.modelElement == null) ? null
 				: context.modelElement.getType();

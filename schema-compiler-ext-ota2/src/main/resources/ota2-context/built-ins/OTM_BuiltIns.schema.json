@@ -14,7 +14,13 @@
 			"type" : "string",
 			"minLength" : 1,
 			"maxLength" : 128
-		}
-		"ExtensionPoint" : {}
+		},
+		"ExtensionPoint" : {},
+		"ExtensionPoint_Summary" : {},
+		"ExtensionPoint_Detail" : {},
+		"ExtensionPoint_Custom" : {},
+		"ExtensionPoint_Query" : {},
+		"ExtensionPoint_Shared" : {},
+		"ExtensionPoint_Choice" : {}
 	}
 }

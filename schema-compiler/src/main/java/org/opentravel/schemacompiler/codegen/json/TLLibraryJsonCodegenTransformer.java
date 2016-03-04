@@ -15,12 +15,16 @@
  */
 package org.opentravel.schemacompiler.codegen.json;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
-import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
@@ -38,7 +42,8 @@ public class TLLibraryJsonCodegenTransformer extends AbstractJsonSchemaTransform
 	public JsonSchema transform(TLLibrary source) {
         CodeGenerationFilter filter = context.getCodeGenerator().getFilter();
         JsonSchema schema = new JsonSchema( JsonSchema.JSON_SCHEMA_DRAFT4 );
-
+        List<JsonSchemaReference> globalDefs = new ArrayList<>();
+        
         schema.setTitle( source.getName() );
         schema.setDocumentation( new JsonDocumentation( source.getComments() ) );
         schema.setLibraryInfo( jsonUtils.getLibraryInfo( source ) );
@@ -52,13 +57,22 @@ public class TLLibraryJsonCodegenTransformer extends AbstractJsonSchemaTransform
                 CodegenArtifacts artifacts = transformer.transform(member);
 
                 if (artifacts != null) {
-                    for (JsonSchemaNamedReference schemaDef : artifacts.getArtifactsOfType(JsonSchemaNamedReference.class)) {
-                        schema.getDefinitions().add( schemaDef );
+                    for (JsonSchemaNamedReference memberDef : artifacts.getArtifactsOfType(JsonSchemaNamedReference.class)) {
+                        schema.getDefinitions().add( memberDef );
+                    }
+                    for (JsonSchemaReference globalDef : artifacts.getArtifactsOfType(JsonSchemaReference.class)) {
+                    	globalDefs.add( globalDef );
                     }
                 }
             }
         }
+        
+        // Add the list of global element definitions to the schema
+        if (!globalDefs.isEmpty()) {
+        	schema.getOneOf().addAll( globalDefs );
+        }
+        
         return schema;
 	}
-
+	
 }

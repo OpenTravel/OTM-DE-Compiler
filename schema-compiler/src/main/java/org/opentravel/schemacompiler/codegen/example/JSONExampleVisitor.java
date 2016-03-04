@@ -19,13 +19,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 
+import org.opentravel.ns.ota2.librarymodel_v01_05.EnumXsdSimpleType;
+import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.JsonSchemaNamingUtils;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
+import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLAbstractEnumeration;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttribute;
@@ -36,7 +41,6 @@ import org.opentravel.schemacompiler.model.TLComplexTypeBase;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
-import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLListFacet;
@@ -53,11 +57,14 @@ import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.model.XSDComplexType;
 import org.opentravel.schemacompiler.model.XSDElement;
+import org.opentravel.schemacompiler.model.XSDSimpleType;
+import org.w3._2001.xmlschema.TopLevelSimpleType;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ValueNode;
 
 /**
  * <code>ExampleVisitor</code> component used to construct a JSON tree
@@ -123,26 +130,54 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 		super.startFacet(facet);
 		facetStack.push(facet);
 		createObjectNode(facet);
-
+		
+		// check if this facet is in a substitution group
+		TLAlias elementAlias = context.getModelAlias();
+		
+		addJsonFacetType( facet, elementAlias );
+//		NamedEntity elementType = facet;
+		
+		// If this element is part of a polymorphic array, use the array values for
+		// the @type property
+//		if (!contextStack.isEmpty()) {
+//			ExampleContext ctx = contextStack.peek();
+//			
+//			if (ctx.getNode().isArray() && (ctx.getModelElement() != null)) {
+//				elementType = ctx.getModelElement().getType();
+//				elementAlias = ctx.getModelAlias();
+//			}
+//		}
+//		
+//		if (elementType instanceof TLAlias) {
+//			elementAlias = (TLAlias) elementType;
+//			elementType = elementAlias.getOwningEntity();
+//		}
+		/*
+		if ((elementType instanceof TLFacet) || (elementType instanceof TLFacetOwner)) {
+			String typeName;
+			
+			if (elementAlias != null) {
+				typeName = JsonSchemaNamingUtils.getGlobalDefinitionName( elementAlias );
+			} else {
+				typeName = JsonSchemaNamingUtils.getGlobalDefinitionName( elementType );
+			}
+			((ObjectNode) context.getNode()).put("@type", typeName);
+			if ("SampleCore_Detail".equals(typeName)) {
+				System.out.println("tag-1");
+			}
+		}
+		((ObjectNode) context.getNode()).put("@type", "DUMMYTYPE-FACET");
+		*/
+		
+		// Add additional properties for specialized entity types
 		if (facet.getOwningEntity() instanceof TLCoreObject) {
 			addRoleAttributes((TLCoreObject) facet.getOwningEntity());
 
 		} else if (facet.getOwningEntity() instanceof TLOperation) {
 			addOperationPayloadContent(facet);
 		}
-		// check if this facet is in a polymorphic list
-		if (!contextStack.isEmpty()) {
-			JsonNode node = contextStack.peek().getNode();
-			if (node.isArray()) {
-				ExampleContext ctx = contextStack.peek();
-				if (ctx.getModelElement().getType() instanceof TLFacetOwner) {
-					((ObjectNode) context.getNode()).put("@type",
-							JsonSchemaNamingUtils.getGlobalDefinitionName(facet));
-				}
-			}
-		}
 	}
-
+	
 	/**
 	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#endFacet(org.opentravel.schemacompiler.model.TLFacet)
 	 */
@@ -205,11 +240,27 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 			context.setModelAlias(contextAlias);
 		} 
 		createObjectNode(listFacet);
-
-		if ((listFacet.getOwningEntity() instanceof TLCoreObject)
-				&& !(listFacet.getItemFacet() instanceof TLSimpleFacet)) {
-			addRoleAttributes((TLCoreObject) listFacet.getOwningEntity());
+		
+		if (listFacet.getItemFacet() instanceof TLFacet) {
+			TLFacet itemFacet = (TLFacet) listFacet.getItemFacet();
+			TLAlias contextAlias = context.getModelAlias();
+			TLAlias ownerAlias = (contextAlias == null) ? null : AliasCodegenUtils.getOwnerAlias( contextAlias );
+			TLAlias itemAlias = (ownerAlias == null) ? null : AliasCodegenUtils.getFacetAlias(
+					ownerAlias, itemFacet.getFacetType(), itemFacet.getContext(), itemFacet.getLabel() );
+			
+			addJsonFacetType( itemFacet, itemAlias );
+			
+			if (listFacet.getOwningEntity() instanceof TLCoreObject) {
+				addRoleAttributes((TLCoreObject) listFacet.getOwningEntity());
+			}
 		}
+
+//		((ObjectNode) context.getNode()).put("@type", "DUMMYTYPE-LISTFACET");
+
+//		if ((listFacet.getOwningEntity() instanceof TLCoreObject)
+//				&& !(listFacet.getItemFacet() instanceof TLSimpleFacet)) {
+//			addRoleAttributes((TLCoreObject) listFacet.getOwningEntity());
+//		}
 	}
 
 	/**
@@ -439,7 +490,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 		if (!attributeName.endsWith("Ind")) {
 			attributeName += "Ind";
 		}
-		((ObjectNode) context.getNode()).put(attributeName, "true");
+		((ObjectNode) context.getNode()).put(attributeName, Boolean.TRUE);
 	}
 
 	/**
@@ -453,7 +504,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 		if (!elementName.endsWith("Ind")) {
 			elementName += "Ind";
 		}
-		((ObjectNode) context.getNode()).put(elementName, "true");
+		((ObjectNode) context.getNode()).put(elementName, Boolean.TRUE);
 	}
 
 	/**
@@ -497,8 +548,8 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 				|| (parentType instanceof TLRoleEnumeration)) {
 			((ObjectNode) context.getNode()).put("extension", "Other_Value");
 		}
-		((ObjectNode) context.getNode()).put("value",
-				generateExampleValue(valueWithAttributes));
+		((ObjectNode) context.getNode()).set("value",
+				generateExampleValueNode(valueWithAttributes));
 	}
 
 	/**
@@ -623,6 +674,29 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 	}
 
 	/**
+	 * Adds the <code>@type</code> property to the current JSON node.  If an
+	 * <code>@type</code> property has already been defined, this method returns
+	 * without action.
+	 * 
+	 * @param facet  the facet that is represented by the current context node
+	 * @param alias  the alias for the given facet (may be null)
+	 */
+	private void addJsonFacetType(TLFacet facet, TLAlias alias) {
+		ObjectNode jsonNode = (ObjectNode) context.getNode();
+		
+		if ((jsonNode != null) && (jsonNode.get("@type") == null)) {
+			String typeName;
+			
+			if (alias != null) {
+				typeName = JsonSchemaNamingUtils.getGlobalDefinitionName( alias );
+			} else {
+				typeName = JsonSchemaNamingUtils.getGlobalDefinitionName( facet );
+			}
+			jsonNode.put("@type", typeName);
+		}
+	}
+
+	/**
 	 * Constructs a complex XML element using the current context information.
 	 * The new element is assigned as a child of the 'currentElement' for this
 	 * visitor, and replaces that 'currentElement' as the DOM element that will
@@ -670,11 +744,11 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 						"No element available for new attribute creation.");
 			}
 			JsonNode node;
-			String value = generateExampleValue(context.getModelAttribute());
+			
 			if (elementType instanceof TLListFacet) {
-				node = getArrayNode(value);
+				node = generateExampleValueArrayNode(context.getModelAttribute());
 			} else {
-				node = getTextNode(value);
+				node = generateExampleValueNode(context.getModelAttribute());
 			}
 			((ObjectNode) context.getNode()).set(context.getModelAttribute()
 					.getName(), node);
@@ -726,12 +800,197 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 		}
 	}
 
-	private JsonNode createOpenEnumNode(String value, NamedEntity elementType) {
-		ObjectNode node = createObjectNode(elementType);
-		node.set("value", getTextNode(value));
-		return node;
-	}
-
+    /**
+     * Generates an example value node for the given model entity (if possible).
+     * 
+     * @param entity  the entity for which to generate an example
+     * @return ValueNode
+     */
+    private ValueNode generateExampleValueNode(Object entity) {
+    	return getExampleValueNode( entity, generateExampleValue( entity ) );
+    }
+    
+    /**
+     * Generates an example value node for the given model entity (if possible).
+     * 
+     * @param entity  the entity for which to generate an example
+     * @return ArrayNode
+     */
+    private ArrayNode generateExampleValueArrayNode(Object entity) {
+    	String values = generateExampleValue( entity );
+    	ArrayNode arrayNode = nodeFactory.arrayNode();
+    	
+    	if (values != null) {
+    		for (String value : values.split(" ")) {
+    			arrayNode.add( getExampleValueNode( entity, value) );
+    		}
+    	}
+    	return arrayNode;
+    }
+    
+    /**
+     * Returns an example value node for the given model entity (if possible).
+     * 
+     * @param entity  the entity for which to generate an example
+     * @param exampleStr  string representation of the exaple value to return
+     * @return ValueNode
+     */
+    private ValueNode getExampleValueNode(Object entity, String exampleStr) {
+    	Class<?> literalType = getLiteralType( entity );
+    	ValueNode exampleNode = null;
+    	
+    	if (literalType == null) {
+    		exampleNode = nodeFactory.textNode( exampleStr ); // unknown types as text nodes
+    		
+    	} else if (Number.class.isAssignableFrom( literalType )) {
+    		try {
+    	    	if (literalType.equals( Byte.class )) {
+    	    		exampleNode = nodeFactory.numberNode( Byte.parseByte( exampleStr ) );
+    	    		
+    	    	} else if (literalType.equals( Short.class )) {
+    	    		exampleNode = nodeFactory.numberNode( Short.parseShort( exampleStr ) );
+    	    		
+    	    	} else if (literalType.equals( Integer.class )) {
+    	    		exampleNode = nodeFactory.numberNode( Integer.parseInt( exampleStr ) );
+    	    		
+    	    	} else if (literalType.equals( Long.class )) {
+    	    		exampleNode = nodeFactory.numberNode( Long.parseLong( exampleStr ) );
+    	    		
+    	    	} else if (literalType.equals( Float.class )) {
+    	    		exampleNode = nodeFactory.numberNode( Float.parseFloat( exampleStr ) );
+    	    		
+    	    	} else if (literalType.equals( Double.class )) {
+    	    		exampleNode = nodeFactory.numberNode( Double.parseDouble( exampleStr ) );
+    	    	}
+    		} catch (NumberFormatException e) {
+    			exampleNode = nodeFactory.numberNode( 0 ); // assign zero on error
+    		}
+    				
+    	} else if (literalType.equals( Boolean.class )) {
+    		exampleNode = nodeFactory.booleanNode( Boolean.parseBoolean( exampleStr ) );
+    		
+    	} else { // Render strings or anything else as text nodes
+    		exampleNode = nodeFactory.textNode( exampleStr );
+    	}
+    	return exampleNode;
+    }
+    
+    /**
+     * Returns the type of the given entity as either a <code>java.lang.String</code>,
+     * <code>java.lang.Number</code> (or a Number sub-class), or <code>java.lang.Boolean</code>.
+     * 
+     * @param entity  the entity type to analyze
+     * @return Class<?>
+     */
+    private Class<?> getLiteralType(Object entity) {
+    	Class<?> literalType;
+    	
+    	if (entity instanceof TLAttribute) {
+    		literalType = getLiteralType( ((TLAttribute) entity).getType() );
+    		
+    	} else if (entity instanceof TLProperty) {
+    		literalType = getLiteralType( ((TLProperty) entity).getType() );
+    		
+    	} else if (entity instanceof TLIndicator) {
+    		literalType = Boolean.class;
+    		
+    	} else if (entity instanceof TLSimple) {
+    		literalType = getLiteralType( ((TLSimple) entity).getParentType() );
+    		
+    	} else if (entity instanceof TLSimpleFacet) {
+    		literalType = getLiteralType( ((TLSimpleFacet) entity).getSimpleType() );
+    		
+    	} else if (entity instanceof TLAbstractEnumeration) {
+    		literalType = String.class;
+    		
+    	} else if (entity instanceof TLRoleEnumeration) {
+    		literalType = String.class;
+    		
+    	} else if (entity instanceof TLValueWithAttributes) {
+    		literalType = getLiteralType( ((TLValueWithAttributes) entity).getParentType() );
+    		
+    	} else if (entity instanceof TLCoreObject) {
+    		literalType = getLiteralType( ((TLCoreObject) entity).getSimpleFacet() );
+    		
+    	} else if (entity instanceof XSDSimpleType) {
+    		XSDSimpleType xsdSimple = (XSDSimpleType) entity;
+    		
+    		if (XMLConstants.W3C_XML_SCHEMA_NS_URI.equals( xsdSimple.getNamespace() )) {
+    			try {
+        			switch (EnumXsdSimpleType.fromValue( xsdSimple.getLocalName() )) {
+						case BOOLEAN:
+		    				literalType = Boolean.class;
+							break;
+						case FLOAT:
+		    				literalType = Float.class;
+							break;
+						case DECIMAL:
+						case DOUBLE:
+		    				literalType = Double.class;
+							break;
+						case INT:
+						case INTEGER:
+						case POSITIVE_INTEGER:
+		    				literalType = Integer.class;
+							break;
+						case LONG:
+		    				literalType = Long.class;
+							break;
+						default:
+		    				literalType = String.class;
+							break;
+        			}
+    				
+    			} catch (IllegalArgumentException e) {
+    				literalType = String.class;
+    			}
+    			
+    		} else {
+    			XSDSimpleType xsdBaseType = findParentType( xsdSimple );
+    			
+    			if (xsdBaseType == null) {
+    				literalType = String.class;
+    			} else {
+    				literalType = getLiteralType( xsdBaseType );
+    			}
+    		}
+    	} else {
+    		literalType = null;
+    	}
+    	return literalType;
+    }
+    
+    /**
+     * Attempts to locate the parent (base) type of the given <code>XSDSimpleType</code>
+     * entity.  If the parent type cannot be identified, this method will return null.
+     * 
+     * @param xsdSimple  the simple type for which to return the parent or base type
+     * @return XSDSimpleType
+     */
+    private XSDSimpleType findParentType(XSDSimpleType xsdSimple) {
+    	TopLevelSimpleType jaxbSimple = xsdSimple.getJaxbType();
+    	XSDSimpleType parentType = null;
+    	
+    	if ((jaxbSimple != null) && (jaxbSimple.getRestriction() != null)) {
+    		QName parentTypeName = jaxbSimple.getRestriction().getBase();
+    		
+    		if (parentTypeName != null) {
+    			List<AbstractLibrary> libs = xsdSimple.getOwningModel().getLibrariesForNamespace(
+    					parentTypeName.getNamespaceURI() );
+    			
+    			for (AbstractLibrary lib : libs) {
+    				NamedEntity entity = lib.getNamedMember( parentTypeName.getLocalPart() );
+    				
+    				if (entity instanceof XSDSimpleType) {
+    					parentType = (XSDSimpleType) entity;
+    				}
+    				if (entity != null) break;
+    			}
+    		}
+    	}
+    	return parentType;
+    }
+    
 	private JsonNode getTextNode(String value) {
 		return nodeFactory.textNode(value);
 	}
@@ -746,24 +1005,22 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 
 	private JsonNode getSimpleTypeNode(NamedEntity elementType) {
 		JsonNode node;
-		String value;
+		
 		// we are a simple type so we should be a TLPopertyType
 		if (elementType instanceof TLListFacet || XsdCodegenUtils.isIdType((TLPropertyType) elementType)) {
-			value = generateExampleValue(context.getModelElement());
+			node = generateExampleValueNode(context.getModelElement());
 		} else {
-			value = generateExampleValue(elementType);
+			node = generateExampleValueNode(elementType);
 		}
+		
 		if (elementType instanceof TLOpenEnumeration) {
-			node = createOpenEnumNode(value, elementType);
+			ObjectNode objNode = createObjectNode(elementType);
+			objNode.set("value", node);
+			node = objNode;
+			
 		} else if ((elementType instanceof TLSimple && ((TLSimple) elementType)
 				.isListTypeInd()) || elementType instanceof TLListFacet) {
-			ArrayNode arrayNode = nodeFactory.arrayNode();
-			for (String str : value.split(" ")) {
-				arrayNode.add(str);
-			}
-			node = arrayNode;
-		} else {
-			node = getTextNode(value);
+			node = generateExampleValueArrayNode( elementType );
 		}
 		return node;
 	}

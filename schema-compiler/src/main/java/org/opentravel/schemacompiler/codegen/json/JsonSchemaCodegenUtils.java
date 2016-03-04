@@ -194,9 +194,6 @@ public class JsonSchemaCodegenUtils {
 				String builtInLocation = XsdCodegenUtils.getBuiltInSchemaOutputLocation( context.getCodegenContext() );
 				
 				referencePath.append( builtInLocation );
-				
-			} else {
-				referencePath.append( "./" );
 			}
 			referencePath.append( filenameBuilder.buildFilename(
 					referencedEntity.getOwningLibrary(), JsonSchemaCodegenUtils.JSON_SCHEMA_FILENAME_EXT ) );
@@ -242,7 +239,7 @@ public class JsonSchemaCodegenUtils {
 	 */
 	public String getXmlSchemaReferencePath(NamedEntity referencedEntity) {
 		CodeGenerationFilenameBuilder<AbstractLibrary> filenameBuilder = new LibraryTrimmedFilenameBuilder( null );
-		StringBuilder referencePath = new StringBuilder( "./" );
+		StringBuilder referencePath = new StringBuilder();
 		QName elementName = null;
 		String entityName = null;
 		

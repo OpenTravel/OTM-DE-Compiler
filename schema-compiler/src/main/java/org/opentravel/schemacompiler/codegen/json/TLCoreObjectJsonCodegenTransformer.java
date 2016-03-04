@@ -64,6 +64,7 @@ public class TLCoreObjectJsonCodegenTransformer extends AbstractJsonSchemaTransf
      * @return JsonSchemaNamedReference
      */
     private JsonSchemaNamedReference createRoleEnumerationComplexType(TLCoreObject source) {
+        SchemaDependency enumExtension = SchemaDependency.getEnumExtension();
         JsonSchemaNamedReference roleEnum = new JsonSchemaNamedReference();
         JsonSchema schema = new JsonSchema();
         
@@ -74,7 +75,8 @@ public class TLCoreObjectJsonCodegenTransformer extends AbstractJsonSchemaTransf
         				source.getRoleEnumeration().getLocalName() + "_Open" ) ) );
         schema.getProperties().add( new JsonSchemaNamedReference( "extension",
         		new JsonSchemaReference( jsonUtils.getSchemaReferencePath(
-        				SchemaDependency.getEnumExtension(), source ) ) ) );
+        				enumExtension, source ) ) ) );
+        addCompileTimeDependency( enumExtension );
         return roleEnum;
     }
 

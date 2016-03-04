@@ -171,6 +171,28 @@ public class JsonSchemaBuiltInCodeGenerator extends AbstractCodeGenerator<BuiltI
     }
     
     /**
+	 * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#getFilenameBuilder()
+	 */
+	@Override
+	public CodeGenerationFilenameBuilder<BuiltInLibrary> getFilenameBuilder() {
+		return new CodeGenerationFilenameBuilder<BuiltInLibrary>() {
+			public String buildFilename(BuiltInLibrary item, String fileExtension) {
+		        String fileExt = (fileExtension.length() == 0) ? "" : ("." + fileExtension);
+		        String filename = item.getName();
+
+		        if (filename.toLowerCase().endsWith(".xsd")) {
+		        	filename = filename.substring( 0, filename.length() - 4 );
+		        }
+		        if (!filename.toLowerCase().endsWith(fileExt)) {
+		            filename += fileExt;
+		        }
+		        return filename;
+			}
+			
+		};
+	}
+
+	/**
      * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#isSupportedSourceObject(java.lang.Object)
      */
     @Override
