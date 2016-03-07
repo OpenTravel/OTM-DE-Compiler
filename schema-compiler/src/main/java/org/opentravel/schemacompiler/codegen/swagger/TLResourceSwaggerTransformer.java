@@ -24,6 +24,7 @@ import java.util.Map.Entry;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
+import org.opentravel.schemacompiler.codegen.json.model.JsonLibraryInfo;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerDocument;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerInfo;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerOperation;
@@ -63,6 +64,7 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
 		swaggerDoc.setBasePath( basePath );
 		
 		// Populate the information section of the Swagger document
+		JsonLibraryInfo libraryInfo = jsonUtils.getResourceInfo( source );
 		SwaggerOtmResource swaggerResource = new SwaggerOtmResource();
 		SwaggerInfo info = new SwaggerInfo();
 		
@@ -70,7 +72,8 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
 		swaggerResource.setLocalName( source.getLocalName() );
 		swaggerDoc.setOtmResource( swaggerResource );
 		info.setTitle( source.getName() + " API Specification" );
-		info.setLibraryInfo( jsonUtils.getResourceInfo( source ) );
+		info.setLibraryInfo( libraryInfo );
+		info.setVersion( libraryInfo.getLibraryVersion() );
 		swaggerDoc.setInfo( info );
 		
 		// Construct a map of operations indexed by path template and HTTP method

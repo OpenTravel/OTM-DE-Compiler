@@ -190,9 +190,8 @@ public class SwaggerInfo implements JsonDocumentationOwner {
 	public JsonObject toJson() {
 		JsonObject json = new JsonObject();
 		
-		if (title != null) {
-			json.addProperty( "title", title );
-		}
+		json.addProperty( "title", (title != null) ? title : "unknown" );
+		
 		if (libraryInfo != null) {
 			json.add( "x-otm-library", libraryInfo.toJson() );
 		}
@@ -208,9 +207,7 @@ public class SwaggerInfo implements JsonDocumentationOwner {
 		if (license != null) {
 			json.add( "license", license.toJson() );
 		}
-		if (version != null) {
-			json.addProperty( "version", version );
-		}
+		json.addProperty( "version", (version != null) ? version : "unknown" );
 		return json;
 	}
 

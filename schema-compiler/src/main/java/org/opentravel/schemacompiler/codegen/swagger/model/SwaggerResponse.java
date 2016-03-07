@@ -165,6 +165,9 @@ public class SwaggerResponse implements JsonDocumentationOwner {
 		
 		JsonSchemaCodegenUtils.createOtmAnnotations( json, this );
 		
+		if (json.get( "description" ) == null) {
+			json.addProperty( "description", "" );
+		}
 		if (schema != null) {
 			json.add( "schema", schema.toJson() );
 		}

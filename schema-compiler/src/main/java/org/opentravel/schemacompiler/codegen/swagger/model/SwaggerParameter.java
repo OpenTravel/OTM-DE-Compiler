@@ -206,9 +206,12 @@ public class SwaggerParameter implements JsonDocumentationOwner {
 		
 		JsonSchemaCodegenUtils.createOtmAnnotations( json, this );
 		
-		if (required) {
+		if (in == SwaggerParamType.PATH) {
 			json.addProperty( "required", true );
+		} else {
+			json.addProperty( "required", required );
 		}
+		
 		if (in == SwaggerParamType.BODY) {
 			if (requestSchema != null) {
 				json.add( "schema", requestSchema.toJson() );

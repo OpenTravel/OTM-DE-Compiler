@@ -16,11 +16,13 @@
 package org.opentravel.schemacompiler.codegen;
 
 import static org.junit.Assert.fail;
+import io.swagger.parser.SwaggerParser;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -92,10 +94,13 @@ public class CodeGeneratorTestAssertions {
     		"cvc-id.1"					// There is no ID/IDREF binding for IDREF 'a333'.
     	);
     
+    private static final String SWAGGER_SCHEMA_LOCATION = "/schemas/swagger_v2.schema.json";
+    
     private static DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
     private static Map<String,Schema> xmlSchemaCache = new HashMap<>();
     private static Schema wsdlValidationSchema;
     private static JAXBContext jaxbWsdlContext;
+    private static JsonSchema swaggerSchema;
     
     /**
      * For each file in the given list perform a format-specific validation check.
@@ -357,7 +362,35 @@ public class CodeGeneratorTestAssertions {
      * @param swaggerFile  the Swagger document to validate
      */
     public static void validateSwaggerDocument(File swaggerFile) {
-    	// TODO: Implement the 'validateSwaggerDocument()' method
+    	try {
+    		JsonNode swaggerNode = JsonLoader.fromFile( swaggerFile );
+    		ProcessingReport report = swaggerSchema.validate( swaggerNode );
+    		List<ProcessingMessage> errors = getValidationErrors( report );
+    		
+    		if (DEBUG) {
+    			if (errors.size() > 0) {
+    				System.out.println("Validation Results: " + swaggerFile.getAbsolutePath());
+    				
+        			for (ProcessingMessage error : errors) {
+        				System.out.println( error );
+        			}
+    				System.out.println("ERROR COUNT: " + errors.size());
+    			}
+    		}
+    		Assert.assertEquals( 0, errors.size() );
+    		
+    		// Run Swagger parser to ensure semantic correctness
+    		if (errors.size() == 0) {
+        		new SwaggerParser().read( swaggerNode, true );
+    		}
+    		
+    	} catch (ProcessingException | IOException e) {
+    		if (DEBUG) {
+    			System.out.println("Error validating Swagger document: " + swaggerFile.getAbsolutePath());
+    			System.out.println(e.getMessage());
+    		}
+            throw new AssertionFailedError( "Error validating Swagger document: " + swaggerFile.getName() );
+    	}
     }
     
 	/**
@@ -553,20 +586,22 @@ public class CodeGeneratorTestAssertions {
 	}
 	
     /**
-     * Initializes the validation schema and shared JAXB context.
+     * Initializes the validation schemas and shared JAXB context.
      */
     static {
         try {
         	SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
             InputStream schemaStream = SchemaDeclarations.SCHEMA_FOR_SCHEMAS.getContent(
             		CodeGeneratorFactory.XSD_TARGET_FORMAT);
-
+            InputStream swaggerStream = CodeGeneratorTestAssertions.class.getResourceAsStream( SWAGGER_SCHEMA_LOCATION );
+            JsonNode swaggerNode = JsonLoader.fromReader( new InputStreamReader( swaggerStream ) );
+            
             schemaFactory.setResourceResolver(new ClasspathResourceResolver());
-
             schemaStream = SchemaDeclarations.WSDL_SCHEMA.getContent(
             		CodeGeneratorFactory.XSD_TARGET_FORMAT);
             wsdlValidationSchema = schemaFactory.newSchema(new StreamSource(schemaStream));
             jaxbWsdlContext = JAXBContext.newInstance(WSDL_SCHEMA_CONTEXT);
+            swaggerSchema = JsonSchemaFactory.byDefault().getJsonSchema( swaggerNode );
 
         } catch (Throwable t) {
             throw new ExceptionInInitializerError(t);

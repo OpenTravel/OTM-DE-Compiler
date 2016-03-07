@@ -28,6 +28,7 @@
 		<!-- Dependency Versions -->
 		<jaxb.version>2.2.11</jaxb.version>
 		<gson.version>2.5</gson.version>
+		<jackson.version>2.4.5</jackson.version>
 		<spring.version>4.1.5.RELEASE</spring.version>
 		<httpcomponents.version>4.4</httpcomponents.version>
 		<maven.plugin.api.version>3.2.5</maven.plugin.api.version>
@@ -45,6 +46,7 @@
 		<slf4j.version>1.7.10</slf4j.version>
 		<junit.version>4.12</junit.version>
 		<fge.version>2.2.6</fge.version>
+		<swagger.parser.version>1.0.17</swagger.parser.version>
 		
 		<!-- Plugin Versions -->
 		<jaxb2.plugin.version>0.12.1</jaxb2.plugin.version>
@@ -133,7 +135,12 @@
 			<dependency>
 				<groupId>com.google.code.gson</groupId>
 				<artifactId>gson</artifactId>
-				<version>2.5</version>
+				<version>${gson.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>${jackson.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
@@ -259,6 +266,11 @@
 				<groupId>com.github.fge</groupId>
 				<artifactId>json-schema-validator</artifactId>
 				<version>${fge.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.swagger</groupId>
+				<artifactId>swagger-parser</artifactId>
+				<version>${swagger.parser.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

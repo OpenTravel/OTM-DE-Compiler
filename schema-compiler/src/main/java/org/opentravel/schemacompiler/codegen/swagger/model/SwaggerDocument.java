@@ -192,6 +192,7 @@ public class SwaggerDocument {
 	 * @return JsonObject
 	 */
 	public JsonObject toJson() {
+		JsonObject pathsJson = new JsonObject();
 		JsonObject json = new JsonObject();
 		
 		if (specVersion != null) {
@@ -200,9 +201,8 @@ public class SwaggerDocument {
 		if (otmResource != null) {
 			json.add( "x-otm-resource", otmResource.toJson() );
 		}
-		if (info != null) {
-			json.add( "info", info.toJson() );
-		}
+		json.add( "info", (info != null) ? info.toJson() : new SwaggerInfo().toJson() );
+		
 		if (host != null) {
 			json.addProperty( "host", host );
 		}
@@ -233,14 +233,12 @@ public class SwaggerDocument {
 			}
 			json.add( "produces", jsonArray );
 		}
-		if (!pathItems.isEmpty()) {
-			JsonObject pathsJson = new JsonObject();
-			
-			for (SwaggerPathItem pathItem : pathItems) {
-				pathsJson.add( pathItem.getPathTemplate(), pathItem.toJson() );
-			}
-			json.add( "paths", pathsJson );
+		
+		for (SwaggerPathItem pathItem : pathItems) {
+			pathsJson.add( pathItem.getPathTemplate(), pathItem.toJson() );
 		}
+		json.add( "paths", pathsJson );
+		
 		if (!definitions.isEmpty()) {
 			JsonObject defsJson = new JsonObject();
 			
