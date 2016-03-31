@@ -215,8 +215,10 @@ public class UPAViolationChecker {
 	private Set<QName> getPossibleElementNames(TLIndicator indicator) {
 		Set<QName> elementNames = new HashSet<>();
 		
-		elementNames.add( new QName( indicator.getOwningLibrary().getNamespace(),
-				fieldNameResolver.getIdentity( indicator ) ) );
+		if ((indicator != null) && (indicator.getOwningLibrary() != null)) {
+			elementNames.add( new QName( indicator.getOwningLibrary().getNamespace(),
+					fieldNameResolver.getIdentity( indicator ) ) );
+		}
 		return elementNames;
 	}
 	
@@ -229,36 +231,38 @@ public class UPAViolationChecker {
 	private Set<QName> getPossibleElementNames(TLProperty element) {
 		Set<QName> elementNames = new HashSet<>();
 		
-		if (isSubstitutionGroupElement( element )) {
-			TLPropertyType elementType = element.getType();
-			TLAlias ownerAlias = null;
-			
-			if (elementType instanceof TLAlias) {
-				ownerAlias = (TLAlias) elementType;
-				elementType = (TLPropertyType) ownerAlias.getOwningEntity();
-			}
-			
-			if (elementType instanceof TLCoreObject) {
-				TLCoreObject core = (TLCoreObject) elementType;
+		if ((element != null) && (element.getOwningLibrary() != null)) {
+			if (isSubstitutionGroupElement( element )) {
+				TLPropertyType elementType = element.getType();
+				TLAlias ownerAlias = null;
 				
-				addElementName( core.getSummaryFacet(), core, ownerAlias, elementNames );
-				addElementName( core.getDetailFacet(), core, ownerAlias, elementNames );
-				
-			} else { // instanceof TLBusinessObject
-				TLBusinessObject bo = (TLBusinessObject) elementType;
-				
-				addElementName( bo.getIdFacet(), bo, ownerAlias, elementNames );
-				addElementName( bo.getSummaryFacet(), bo, ownerAlias, elementNames );
-				addElementName( bo.getDetailFacet(), bo, ownerAlias, elementNames );
-				
-				for (TLFacet customFacet : bo.getCustomFacets()) {
-					addElementName( customFacet, bo, ownerAlias, elementNames );
+				if (elementType instanceof TLAlias) {
+					ownerAlias = (TLAlias) elementType;
+					elementType = (TLPropertyType) ownerAlias.getOwningEntity();
 				}
+				
+				if (elementType instanceof TLCoreObject) {
+					TLCoreObject core = (TLCoreObject) elementType;
+					
+					addElementName( core.getSummaryFacet(), core, ownerAlias, elementNames );
+					addElementName( core.getDetailFacet(), core, ownerAlias, elementNames );
+					
+				} else { // instanceof TLBusinessObject
+					TLBusinessObject bo = (TLBusinessObject) elementType;
+					
+					addElementName( bo.getIdFacet(), bo, ownerAlias, elementNames );
+					addElementName( bo.getSummaryFacet(), bo, ownerAlias, elementNames );
+					addElementName( bo.getDetailFacet(), bo, ownerAlias, elementNames );
+					
+					for (TLFacet customFacet : bo.getCustomFacets()) {
+						addElementName( customFacet, bo, ownerAlias, elementNames );
+					}
+				}
+				
+			} else {
+				elementNames.add( new QName( element.getOwningLibrary().getNamespace(),
+						fieldNameResolver.getIdentity( element ) ) );
 			}
-			
-		} else {
-			elementNames.add( new QName( element.getOwningLibrary().getNamespace(),
-					fieldNameResolver.getIdentity( element ) ) );
 		}
 		return elementNames;
 	}

@@ -323,7 +323,7 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
         }
 
         // Determine whether the candidate is a version or non-version extension
-        if (candidateVersion != null) {
+        if ((versionedEntity != null) && (candidateVersion != null)) {
             if (versionedEntity.getBaseNamespace().equals(candidateVersion.getBaseNamespace())) {
                 String versionedEntityName = (versionedEntity instanceof TLOperation) ?
                 		((TLOperation) versionedEntity).getName() : versionedEntity.getLocalName();
