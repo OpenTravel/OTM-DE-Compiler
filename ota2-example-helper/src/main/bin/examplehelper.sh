@@ -15,4 +15,4 @@
 # limitations under the License.
 #
 SCRIPTDIR="$( cd "$( dirname "$0" )" && pwd )"
-java -cp $SCRIPTDIR/lib/* org.opentravel.schemacompiler.cli.Main "$@"
+java -cp $SCRIPTDIR/lib/* org.opentravel.examplehelper.ExampleHelper "$@"

@@ -176,6 +176,7 @@ public class XsdCodegenUtils {
         	}
         	
         } else if ((modelEntity instanceof TLCoreObject)
+        		|| (modelEntity instanceof TLChoiceObject)
                 || !(modelEntity instanceof TLAttributeType)) {
             elementName = new QName(modelEntity.getNamespace(), modelEntity.getLocalName());
         }

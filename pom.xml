@@ -18,6 +18,7 @@
 		<module>ota2-schema-compiler</module>
 		<module>ota2-repository-service</module>
 		<module>ota2-repository-plugin</module>
+		<module>ota2-example-helper</module>
 	</modules>
 
 	<properties>
@@ -47,6 +48,7 @@
 		<junit.version>4.12</junit.version>
 		<fge.version>2.2.6</fge.version>
 		<swagger.parser.version>1.0.17</swagger.parser.version>
+		<jsyntaxpane.version>1.0.0</jsyntaxpane.version>
 		
 		<!-- Plugin Versions -->
 		<jaxb2.plugin.version>0.12.1</jaxb2.plugin.version>
@@ -105,6 +107,7 @@
 						<!-- exclude eclipse launchers -->
 						<exclude>**/*.launch</exclude>
 						<exclude>**/*.txt</exclude>
+						<exclude>**/*.sh</exclude>
 						<exclude>src/test/resources/**</exclude>
 						<exclude>src/main/resources/**</exclude>
 					</excludes>
@@ -271,6 +274,11 @@
 				<groupId>io.swagger</groupId>
 				<artifactId>swagger-parser</artifactId>
 				<version>${swagger.parser.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>de.sciss</groupId>
+				<artifactId>jsyntaxpane</artifactId>
+				<version>${jsyntaxpane.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
