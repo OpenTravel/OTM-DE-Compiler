@@ -1595,12 +1595,12 @@
 					<property name="transformer" value="org.opentravel.schemacompiler.codegen.swagger.TLResourceSwaggerTransformer" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.opentravel.schemacompiler.model.TLAction" />
+					<property name="source" value="org.opentravel.schemacompiler.codegen.impl.QualifiedAction" />
 					<property name="target" value="org.opentravel.schemacompiler.codegen.swagger.model.SwaggerOperation" />
 					<property name="transformer" value="org.opentravel.schemacompiler.codegen.swagger.TLActionSwaggerTransformer" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.opentravel.schemacompiler.model.TLParameter" />
+					<property name="source" value="org.opentravel.schemacompiler.codegen.impl.QualifiedParameter" />
 					<property name="target" value="org.opentravel.schemacompiler.codegen.swagger.model.SwaggerParameter" />
 					<property name="transformer" value="org.opentravel.schemacompiler.codegen.swagger.TLParameterSwaggerTransformer" />
 				</bean>

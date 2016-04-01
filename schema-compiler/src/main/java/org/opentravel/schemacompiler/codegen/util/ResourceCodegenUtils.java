@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
 
 import javax.xml.namespace.QName;
 
+import org.opentravel.schemacompiler.codegen.impl.QualifiedAction;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAction;
 import org.opentravel.schemacompiler.model.TLActionFacet;
@@ -46,6 +47,7 @@ import org.opentravel.schemacompiler.model.TLPropertyOwner;
 import org.opentravel.schemacompiler.model.TLPropertyType;
 import org.opentravel.schemacompiler.model.TLReferenceType;
 import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.model.TLResourceParentRef;
 import org.opentravel.schemacompiler.model.TLRoleEnumeration;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
@@ -86,6 +88,33 @@ public class ResourceCodegenUtils {
 			extendedResource = (TLResource) extension.getExtendsEntity();
 		}
 		return extendedResource;
+	}
+	
+	/**
+	 * Returns the list of all parameter groups declared and inherited by the given
+	 * resource.
+	 * 
+	 * @param resource  the resource for which to return inherited parameter groups
+	 * @return List<TLParamGroup>
+	 */
+	public static List<TLResourceParentRef> getInheritedParentRefs(TLResource resource) {
+		List<TLResourceParentRef> parentRefs = new ArrayList<>();
+		Set<String> parentResourceNames = new HashSet<>();
+		
+		for (TLResource extendedResource : getInheritanceHierarchy(resource)) {
+			List<TLResourceParentRef> localParentRefs = new ArrayList<>();
+			
+			for (TLResourceParentRef parentRef : extendedResource.getParentRefs()) {
+				if ((parentRef.getParentResource() != null)
+						&& !parentResourceNames.contains(parentRef.getParentResource().getName())) {
+					localParentRefs.add(parentRef);
+					parentResourceNames.add(parentRef.getParentResource().getName());
+				}
+			}
+			parentRefs.addAll(0, localParentRefs);
+		}
+		Collections.reverse(parentRefs);
+		return parentRefs;
 	}
 	
 	/**
@@ -324,6 +353,50 @@ public class ResourceCodegenUtils {
 		}
 		Collections.reverse(actions);
 		return actions;
+	}
+	
+	/**
+	 * Returns the list of all actions declared and inherited by the given resource.
+	 * 
+	 * @param resource  the resource for which to return inherited actions
+	 * @return List<QualifiedAction>
+	 */
+	public static List<QualifiedAction> getQualifiedActions(TLResource resource) {
+		List<QualifiedAction> actionList = new ArrayList<>();
+		
+		for (TLAction action : getInheritedActions( resource )) {
+			if (resource.isFirstClass()) {
+				// First-class resources can be accessed independently of a parent resource
+				actionList.add( new QualifiedAction( null, action ) );
+			}
+			for (TLResourceParentRef parentRef : getInheritedParentRefs( resource )) {
+				buildQualifiedActions( action, parentRef, new ArrayList<TLResourceParentRef>(), actionList );
+			}
+		}
+		return actionList;
+	}
+	
+	/**
+	 * Recursive method that constructs all of the valid permutations of qualified actions.
+	 * 
+	 * @param action  the action to be associated with any qualified action that is created
+	 * @param parentRef  the current parent reference for the qualified action that should be considered
+	 * @param parentList  the list of child resource parent references that are currently under consideration
+	 * @param actionList  the list of qualified actions that have already been created
+	 */
+	private static void buildQualifiedActions(TLAction action, TLResourceParentRef parentRef,
+			List<TLResourceParentRef> parentList, List<QualifiedAction> actionList) {
+		TLResource parentResource = parentRef.getParentResource();
+		List<TLResourceParentRef> newParentList = new ArrayList<>( parentList );
+		
+		newParentList.add( parentRef );
+		
+		if (parentResource.isFirstClass()) {
+			actionList.add( new QualifiedAction( newParentList, action ) );
+		}
+		for (TLResourceParentRef pRef : getInheritedParentRefs( parentResource )) {
+			buildQualifiedActions( action, pRef, newParentList, actionList );
+		}
 	}
 	
 	/**

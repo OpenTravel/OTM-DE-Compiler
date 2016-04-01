@@ -27,6 +27,7 @@ import org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.ResourceFilenameBuilder;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerDocument;
+import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.TLResource;
@@ -132,7 +133,7 @@ public class SwaggerCodeGenerator extends AbstractCodeGenerator<TLResource> {
 	 */
 	@Override
 	protected boolean canGenerateOutput(TLResource source, CodeGenerationContext context) {
-		return !source.isAbstract();
+		return !source.isAbstract() && !ResourceCodegenUtils.getQualifiedActions( source ).isEmpty();
 	}
 	
 	/**

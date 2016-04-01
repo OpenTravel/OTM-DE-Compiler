@@ -21,6 +21,8 @@ import java.util.List;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
+import org.opentravel.schemacompiler.codegen.impl.QualifiedAction;
+import org.opentravel.schemacompiler.codegen.impl.QualifiedParameter;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerOperation;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerParamType;
@@ -36,32 +38,43 @@ import org.opentravel.schemacompiler.model.TLActionRequest;
 import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 import org.opentravel.schemacompiler.model.TLMimeType;
-import org.opentravel.schemacompiler.model.TLParameter;
 import org.opentravel.schemacompiler.model.TLReferenceType;
+import org.opentravel.schemacompiler.model.TLResourceParentRef;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 
 /**
- * Performs the translation from <code>TLAction</code> objects to the Swagger model
+ * Performs the translation from <code>QualifiedAction</code> objects to the Swagger model
  * objects used to produce the output.
  */
-public class TLActionSwaggerTransformer extends AbstractSwaggerCodegenTransformer<TLAction,SwaggerOperation> {
+public class TLActionSwaggerTransformer extends AbstractSwaggerCodegenTransformer<QualifiedAction,SwaggerOperation> {
 	
 	/**
 	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
 	 */
 	@Override
-	public SwaggerOperation transform(TLAction source) {
+	public SwaggerOperation transform(QualifiedAction source) {
+        ObjectTransformer<QualifiedParameter,SwaggerParameter,CodeGenerationTransformerContext> paramTransformer =
+        		getTransformerFactory().getTransformer(QualifiedParameter.class, SwaggerParameter.class);
         ObjectTransformer<TLActionResponse,CodegenArtifacts,CodeGenerationTransformerContext> responseTransformer =
         		getTransformerFactory().getTransformer(TLActionResponse.class, CodegenArtifacts.class);
-		TLActionRequest sourceRequest = ResourceCodegenUtils.getDeclaredOrInheritedRequest( source );
-		List<TLActionResponse> sourceResponses = ResourceCodegenUtils.getInheritedResponses( source );
+		List<TLResourceParentRef> sourceParentRefs = source.getParentRefs();
+		TLAction sourceAction = source.getAction();
+		TLActionRequest sourceRequest = ResourceCodegenUtils.getDeclaredOrInheritedRequest( sourceAction );
+		List<TLActionResponse> sourceResponses = ResourceCodegenUtils.getInheritedResponses( sourceAction );
 		SwaggerParameter bodyParam = createBodyParameter( sourceRequest );
 		SwaggerOperation swaggerOp = new SwaggerOperation();
+		StringBuilder operationId = new StringBuilder( sourceAction.getActionId() );
 		
-		swaggerOp.setOperationId( source.getActionId() );
-		swaggerOp.setSummary( source.getOwner().getName() + " - " + source.getActionId() );
-		transformDocumentation( source, swaggerOp );
-		swaggerOp.setDeprecated( DocumentationFinder.isDeprecated( source ) );
+		for (TLResourceParentRef parentRef : sourceParentRefs) {
+			if (operationId.length() > 0) {
+				operationId.append("_");
+			}
+			operationId.append( parentRef.getParentResourceName() );
+		}
+		swaggerOp.setOperationId( operationId.toString() );
+		swaggerOp.setSummary( sourceAction.getOwner().getName() + " - " + sourceAction.getActionId() );
+		transformDocumentation( sourceAction, swaggerOp );
+		swaggerOp.setDeprecated( DocumentationFinder.isDeprecated( sourceAction ) );
 		
 		if (bodyParam != null) {
 			for (TLMimeType consumes : sourceRequest.getMimeTypes()) {
@@ -72,19 +85,14 @@ public class TLActionSwaggerTransformer extends AbstractSwaggerCodegenTransforme
 			swaggerOp.getProduces().add( produces.toContentType() );
 		}
 		
-		if (sourceRequest.getParamGroup() != null) {
-	        ObjectTransformer<TLParameter,SwaggerParameter,CodeGenerationTransformerContext> paramTransformer =
-	        		getTransformerFactory().getTransformer(TLParameter.class, SwaggerParameter.class);
-	        
-			for (TLParameter sourceParam : sourceRequest.getParamGroup().getParameters()) {
-				swaggerOp.getParameters().add( paramTransformer.transform( sourceParam ) );
-			}
+		for (QualifiedParameter sourceParam : source.getParameters()) {
+			swaggerOp.getParameters().add( paramTransformer.transform( sourceParam ) );
 		}
 		if (bodyParam != null) {
 			swaggerOp.getParameters().add( bodyParam );
 		}
 		
-		for (TLActionResponse response : ResourceCodegenUtils.getInheritedResponses( source )) {
+		for (TLActionResponse response : ResourceCodegenUtils.getInheritedResponses( sourceAction )) {
 			swaggerOp.getResponses().addAll( responseTransformer.transform( response )
 					.getArtifactsOfType( SwaggerResponse.class ) );
 		}

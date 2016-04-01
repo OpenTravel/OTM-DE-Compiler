@@ -17,6 +17,7 @@ package org.opentravel.schemacompiler.codegen.swagger;
 
 import java.util.List;
 
+import org.opentravel.schemacompiler.codegen.impl.QualifiedParameter;
 import org.opentravel.schemacompiler.codegen.json.TLSimpleJsonCodegenTransformer;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonType;
@@ -40,21 +41,21 @@ import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 
 /**
- * Performs the translation from <code>TLParameter</code> objects to the Swagger model
+ * Performs the translation from <code>QualifiedParameter</code> objects to the Swagger model
  * objects used to produce the output.
  */
-public class TLParameterSwaggerTransformer extends AbstractSwaggerCodegenTransformer<TLParameter,SwaggerParameter> {
+public class TLParameterSwaggerTransformer extends AbstractSwaggerCodegenTransformer<QualifiedParameter,SwaggerParameter> {
 	
 	/**
 	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
 	 */
 	@Override
-	public SwaggerParameter transform(TLParameter source) {
-		TLMemberField<?> fieldRef = source.getFieldRef();
+	public SwaggerParameter transform(QualifiedParameter source) {
+		TLMemberField<?> fieldRef = source.getParameter().getFieldRef();
 		SwaggerParameter swaggerParam = new SwaggerParameter();
 		
-		swaggerParam.setName( fieldRef.getName() );
-		swaggerParam.setIn( getParamType( source ) );
+		swaggerParam.setName( source.getParameterName() );
+		swaggerParam.setIn( getParamType( source.getParameter() ) );
 		swaggerParam.setRequired( isRequired( fieldRef ) );
 		swaggerParam.setType( getFieldSchema( fieldRef ) );
 		

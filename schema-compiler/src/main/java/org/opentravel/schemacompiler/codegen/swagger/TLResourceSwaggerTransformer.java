@@ -24,6 +24,7 @@ import java.util.Map.Entry;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
+import org.opentravel.schemacompiler.codegen.impl.QualifiedAction;
 import org.opentravel.schemacompiler.codegen.json.model.JsonLibraryInfo;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerDocument;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerInfo;
@@ -32,7 +33,6 @@ import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerOtmResource;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerPathItem;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils.URLComponents;
-import org.opentravel.schemacompiler.model.TLAction;
 import org.opentravel.schemacompiler.model.TLActionRequest;
 import org.opentravel.schemacompiler.model.TLHttpMethod;
 import org.opentravel.schemacompiler.model.TLResource;
@@ -77,17 +77,17 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
 		swaggerDoc.setInfo( info );
 		
 		// Construct a map of operations indexed by path template and HTTP method
-        ObjectTransformer<TLAction,SwaggerOperation,CodeGenerationTransformerContext> actionTransformer =
-        		getTransformerFactory().getTransformer(TLAction.class, SwaggerOperation.class);
+        ObjectTransformer<QualifiedAction,SwaggerOperation,CodeGenerationTransformerContext> actionTransformer =
+        		getTransformerFactory().getTransformer(QualifiedAction.class, SwaggerOperation.class);
 		Map<String,Map<TLHttpMethod,SwaggerOperation>> operationMap = new HashMap<>();
 		List<String> pathList = new ArrayList<>();
 		
-		for (TLAction action : ResourceCodegenUtils.getInheritedActions( source )) {
-			if (action.isCommonAction()) continue;
-			TLActionRequest actionRequest = ResourceCodegenUtils.getDeclaredOrInheritedRequest( action );
-			String pathTemplate = actionRequest.getPathTemplate();
+		for (QualifiedAction qAction : ResourceCodegenUtils.getQualifiedActions( source )) {
+			if (qAction.getAction().isCommonAction()) continue;
+			TLActionRequest actionRequest = qAction.getActionRequest();
+			String pathTemplate = qAction.getPathTemplate();
 			TLHttpMethod httpMethod = actionRequest.getHttpMethod();
-			SwaggerOperation operation = actionTransformer.transform( action );
+			SwaggerOperation operation = actionTransformer.transform( qAction );
 			Map<TLHttpMethod,SwaggerOperation> methodMap = operationMap.get( pathTemplate );
 			
 			if (methodMap == null) {
