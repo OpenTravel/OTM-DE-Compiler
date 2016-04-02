@@ -735,6 +735,50 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
         assertTrue(laterMinorVersionSimple.getParentType() == newMinorVersionSimple);
         assertTrue(laterMinorVersionResource.getExtension().getExtendsEntity() == newMinorVersionResource);
     }
+    
+    @Test
+    public void testNewMinorVersion_resourceAdjustments() throws Exception {
+        File newVersionLibraryFile11 = purgeExistingFile(new File(System.getProperty("user.dir"),
+                "/target/test-save-location/library_v01_01.otm"));
+        File newVersionLibraryFile12 = purgeExistingFile(new File(System.getProperty("user.dir"),
+                "/target/test-save-location/library_v01_02.otm"));
+        MinorVersionHelper helper = new MinorVersionHelper();
+        TLModel model = loadTestModel(FILE_VERSION_1);
+        TLLibrary minorVersionLibrary10 = (TLLibrary) model.getLibrary(NS_VERSION_1, TEST_LIBRARY_NAME);
+        TLLibrary minorVersionLibrary11 = helper.createNewMinorVersion( minorVersionLibrary10, newVersionLibraryFile11 );
+        TLLibrary minorVersionLibrary12 = helper.createNewMinorVersion( minorVersionLibrary11, newVersionLibraryFile12 );
+        TLResource resource10 = minorVersionLibrary10.getResourceType("LookupResource");
+        TLResource resource11 = helper.createNewMinorVersion( resource10, minorVersionLibrary11 );
+        TLResource resource12;
+        TLBusinessObject bo10 = minorVersionLibrary10.getBusinessObjectType("LookupBO");
+        TLBusinessObject bo11, bo12;
+        
+        // No later version of the BO exists, so the resource v1.1 should point to BO v1.0
+        assertEquals( resource10.getBusinessObjectRef(), bo10 );
+        assertEquals( resource11.getBusinessObjectRef(), bo10 );
+        
+        // After creating a v1.1 of the BO, resource v1.1 should point to BO v1.1.  Resource
+        // v1.0 should still point to the BO v1.0.
+        bo11 = helper.createNewMinorVersion( bo10, minorVersionLibrary11 );
+        
+        assertEquals( resource10.getBusinessObjectRef(), bo10 );
+        assertEquals( resource11.getBusinessObjectRef(), bo11 );
+        
+        // After creating a v1.2 of the BO, the existing resource versions should not change
+        // their reference since they are not allowed to reference a later version BO.
+        bo12 = helper.createNewMinorVersion( bo11, minorVersionLibrary12 );
+        
+        assertEquals( resource10.getBusinessObjectRef(), bo10 );
+        assertEquals( resource11.getBusinessObjectRef(), bo11 );
+        
+        // After creating v1.2 of the resource, only the v1.2 resource should change.  The
+        // previous versions should not have changed.
+        resource12 = helper.createNewMinorVersion( resource11, minorVersionLibrary12 );
+        
+        assertEquals( resource10.getBusinessObjectRef(), bo10 );
+        assertEquals( resource11.getBusinessObjectRef(), bo11 );
+        assertEquals( resource12.getBusinessObjectRef(), bo12 );
+    }
 
     @Test
     public void patchRollupWithCOAndEPFShouldCreateNewCoAndSetBaseType()

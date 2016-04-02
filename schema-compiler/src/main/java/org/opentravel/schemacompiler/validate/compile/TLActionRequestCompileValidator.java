@@ -18,7 +18,6 @@ package org.opentravel.schemacompiler.validate.compile;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.model.TLAction;
 import org.opentravel.schemacompiler.model.TLActionFacet;
@@ -31,6 +30,8 @@ import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.base.TLActionRequestBaseValidator;
 import org.opentravel.schemacompiler.validate.impl.ResourceUrlValidator;
 import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
+import org.opentravel.schemacompiler.version.MinorVersionHelper;
+import org.opentravel.schemacompiler.version.VersionSchemeException;
 
 /**
  * Validator for the <code>TLActionRequest</code> class.
@@ -39,12 +40,13 @@ import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
  */
 public class TLActionRequestCompileValidator extends TLActionRequestBaseValidator {
 
-    public static final String ERROR_PARAM_GROUP_REQUIRED      = "PARAM_GROUP_REQUIRED";
-    public static final String ERROR_INVALID_PARAM_GROUP       = "INVALID_PARAM_GROUP";
-    public static final String ERROR_CONFLICTING_PATH_TEMPLATE = "CONFLICTING_PATH_TEMPLATE";
-    public static final String ERROR_GET_REQUEST_PAYLOAD       = "GET_REQUEST_PAYLOAD";
-    public static final String ERROR_INVALID_ACTION_FACET_REF  = "INVALID_ACTION_FACET_REF";
-    public static final String WARNING_PATCH_PARTIAL_SUPPORT   = "PATCH_PARTIAL_SUPPORT";
+    public static final String ERROR_PARAM_GROUP_REQUIRED        = "PARAM_GROUP_REQUIRED";
+    public static final String ERROR_INVALID_PARAM_GROUP         = "INVALID_PARAM_GROUP";
+    public static final String ERROR_CONFLICTING_PATH_TEMPLATE   = "CONFLICTING_PATH_TEMPLATE";
+    public static final String ERROR_MINOR_VERSION_PATH_TEMPLATE = "MINOR_VERSION_PATH_TEMPLATE";
+    public static final String ERROR_GET_REQUEST_PAYLOAD         = "GET_REQUEST_PAYLOAD";
+    public static final String ERROR_INVALID_ACTION_FACET_REF    = "INVALID_ACTION_FACET_REF";
+    public static final String WARNING_PATCH_PARTIAL_SUPPORT     = "PATCH_PARTIAL_SUPPORT";
     
 	private static ResourceUrlValidator urlValidator = new ResourceUrlValidator( true );
 	
@@ -90,6 +92,7 @@ public class TLActionRequestCompileValidator extends TLActionRequestBaseValidato
     			.assertNotNullOrBlank();
     	validatePathTemplate( target.getPathTemplate(), target.getParamGroup(), builder );
     	checkConflictingPathTemplate( target, builder );
+    	checkMinorVersionPathTemplateChange( target, builder );
     	
     	if (target.getPayloadType() != null) {
     		TLActionFacet payloadType = target.getPayloadType();
@@ -98,8 +101,7 @@ public class TLActionRequestCompileValidator extends TLActionRequestBaseValidato
             	builder.addFinding( FindingType.ERROR, "payloadType", ERROR_GET_REQUEST_PAYLOAD );
         	}
         	if (owningResource != null) {
-        		if (!owningResource.getActionFacets().contains( payloadType ) &&
-        				!FacetCodegenUtils.findGhostFacets( owningResource ).contains( payloadType )) {
+        		if (!isDeclaredOrInheritedFacet( owningResource, payloadType )) {
                 	builder.addFinding( FindingType.ERROR, "payloadType", ERROR_INVALID_ACTION_FACET_REF,
                 			payloadType.getName() );
         		}
@@ -151,6 +153,49 @@ public class TLActionRequestCompileValidator extends TLActionRequestBaseValidato
                 			target.getPathTemplate(), target.getHttpMethod() );
             	}
             }
+        }
+	}
+	
+	/**
+	 * Checks the same-name action in a prior minor version of the owning resource (if one
+	 * exists) to ensure that the path template did not change.
+	 * 
+	 * @param target  the action request being validated
+	 * @param builder  the validation builder to which any findings will be posted
+	 */
+	private void checkMinorVersionPathTemplateChange(TLActionRequest target, TLValidationBuilder builder) {
+        TLResource owningResource = (target.getOwner() == null) ? null : target.getOwner().getOwner();
+        String targetActionId = (target.getOwner() == null) ? null : target.getOwner().getActionId();
+        String targetPathTemplate = target.getPathTemplate();
+        
+        if ((owningResource != null) && (targetActionId != null) && (targetPathTemplate != null)) {
+    		MinorVersionHelper versionHelper = new MinorVersionHelper();
+    		TLResource priorVersionResource = owningResource;
+        	TLActionRequest priorVersionRequest = null;
+    		
+        	// Start by finding the same-name action in a prior minor version
+        	// of the resource (if one exists).
+        	try {
+				while ((priorVersionRequest == null) && (priorVersionResource =
+						versionHelper.getVersionExtension( priorVersionResource )) != null) {
+					TLAction priorVersionAction = priorVersionResource.getAction( targetActionId );
+					
+					if (priorVersionAction != null) {
+						priorVersionRequest = ResourceCodegenUtils.getDeclaredOrInheritedRequest( priorVersionAction );
+					}
+				}
+				
+			} catch (VersionSchemeException e) {
+				// Ignore - cannot validate until this error is fixed
+			}
+        	
+        	// If a request for the same-name action was found, verify that the path template
+        	// did not change.
+        	if ((priorVersionRequest != null) &&
+        			!targetPathTemplate.equals( priorVersionRequest.getPathTemplate() )) {
+            	builder.addFinding( FindingType.ERROR, "pathTemplate", ERROR_MINOR_VERSION_PATH_TEMPLATE,
+            			target.getPathTemplate() );
+        	}
         }
 	}
 	

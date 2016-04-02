@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLActionResponse;
@@ -62,8 +61,8 @@ public class TLActionResponseCompileValidator extends TLActionResponseBaseValida
     		NamedEntity payloadType = target.getPayloadType();
     		
     		if (payloadType instanceof TLActionFacet) {
-        		if ((owningResource != null) && !owningResource.getActionFacets().contains( payloadType )
-        				&& !FacetCodegenUtils.findGhostFacets( owningResource ).contains( payloadType )) {
+        		if ((owningResource != null) &&
+        				!isDeclaredOrInheritedFacet( owningResource, (TLActionFacet) payloadType )) {
                 	builder.addFinding( FindingType.ERROR, "payloadType", ERROR_INVALID_ACTION_FACET_REF,
                 			payloadType.getLocalName() );
         		}

@@ -24,8 +24,10 @@ import java.util.Map;
 
 import javax.xml.namespace.QName;
 
+import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLExampleOwner;
 import org.opentravel.schemacompiler.model.TLExtension;
@@ -36,6 +38,7 @@ import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLParamGroup;
 import org.opentravel.schemacompiler.model.TLParamLocation;
 import org.opentravel.schemacompiler.model.TLParameter;
+import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.transform.SymbolResolver;
@@ -756,6 +759,33 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
 			}
 		}
 		return csv.toString();
+	}
+	
+	/**
+	 * Returns true if the given action facet is either declared or inherited by
+	 * the given resource.
+	 * 
+	 * @param resource  the resource in which the facet should be declared or inherited
+	 * @param actionFacet  the action facet to check for inheritance
+	 * @return boolean
+	 */
+	protected boolean isDeclaredOrInheritedFacet(TLResource resource, TLActionFacet actionFacet) {
+		boolean result = false;
+		
+		if (resource.getActionFacets().contains( actionFacet )) {
+			result = true;
+			
+		} else if (actionFacet.getName() != null) {
+			String facetName = actionFacet.getName();
+			
+			for (TLActionFacet ghostFacet : FacetCodegenUtils.findGhostFacets( resource )) {
+				if (facetName.equals( ghostFacet.getName() )) {
+					result = true;
+					break;
+				}
+			}
+		}
+		return result;
 	}
 	
 }
