@@ -23,10 +23,12 @@ import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
 import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentationOwner;
+import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 import org.opentravel.schemacompiler.model.TLMimeType;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
+import org.springframework.context.ApplicationContext;
 
 /**
  * Base class for all <code>ObjectTransformer</code> implementations that are part of the Swagger
@@ -37,8 +39,21 @@ import org.opentravel.schemacompiler.transform.ObjectTransformer;
  */
 public abstract class AbstractSwaggerCodegenTransformer<S, T> extends AbstractCodegenTransformer<S, T> {
 	
+	protected CodeGenerationSwaggerBindings swaggerBindings;
 	protected JsonSchemaCodegenUtils jsonUtils;
 	
+    /**
+     * Default constructor.
+     */
+    public AbstractSwaggerCodegenTransformer() {
+        ApplicationContext appContext = SchemaCompilerApplicationContext.getContext();
+
+        if (appContext.containsBean( SchemaCompilerApplicationContext.CODE_GENERATION_SWAGGER_BINDINGS )) {
+        	swaggerBindings = (CodeGenerationSwaggerBindings) appContext
+                    .getBean( SchemaCompilerApplicationContext.CODE_GENERATION_SWAGGER_BINDINGS );
+        }
+    }
+
 	/**
 	 * @see org.opentravel.schemacompiler.transform.util.BaseTransformer#setContext(org.opentravel.schemacompiler.transform.ObjectTransformerContext)
 	 */

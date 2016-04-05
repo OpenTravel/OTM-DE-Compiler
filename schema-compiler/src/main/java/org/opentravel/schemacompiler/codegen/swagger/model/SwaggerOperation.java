@@ -38,6 +38,7 @@ public class SwaggerOperation implements JsonDocumentationOwner {
 	private List<String> consumes = new ArrayList<>();
 	private List<String> produces = new ArrayList<>();
 	private List<SwaggerParameter> parameters = new ArrayList<>();
+	private List<SwaggerParameter> globalParameters = new ArrayList<>();
 	private List<SwaggerResponse> responses = new ArrayList<>();
 	private List<String> schemes = new ArrayList<>();
 	private boolean deprecated;
@@ -106,30 +107,12 @@ public class SwaggerOperation implements JsonDocumentationOwner {
 	}
 	
 	/**
-	 * Assigns the value of the 'consumes' field.
-	 *
-	 * @param consumes  the field value to assign
-	 */
-	public void setConsumes(List<String> consumes) {
-		this.consumes = consumes;
-	}
-	
-	/**
 	 * Returns the value of the 'produces' field.
 	 *
 	 * @return List<String>
 	 */
 	public List<String> getProduces() {
 		return produces;
-	}
-	
-	/**
-	 * Assigns the value of the 'produces' field.
-	 *
-	 * @param produces  the field value to assign
-	 */
-	public void setProduces(List<String> produces) {
-		this.produces = produces;
 	}
 	
 	/**
@@ -142,12 +125,12 @@ public class SwaggerOperation implements JsonDocumentationOwner {
 	}
 	
 	/**
-	 * Assigns the value of the 'parameters' field.
+	 * Returns the value of the 'globalParameters' field.
 	 *
-	 * @param parameters  the field value to assign
+	 * @return List<SwaggerParameter>
 	 */
-	public void setParameters(List<SwaggerParameter> parameters) {
-		this.parameters = parameters;
+	public List<SwaggerParameter> getGlobalParameters() {
+		return globalParameters;
 	}
 	
 	/**
@@ -160,30 +143,12 @@ public class SwaggerOperation implements JsonDocumentationOwner {
 	}
 	
 	/**
-	 * Assigns the value of the 'responses' field.
-	 *
-	 * @param responses  the field value to assign
-	 */
-	public void setResponses(List<SwaggerResponse> responses) {
-		this.responses = responses;
-	}
-	
-	/**
 	 * Returns the value of the 'schemes' field.
 	 *
 	 * @return List<String>
 	 */
 	public List<String> getSchemes() {
 		return schemes;
-	}
-	
-	/**
-	 * Assigns the value of the 'schemes' field.
-	 *
-	 * @param schemes  the field value to assign
-	 */
-	public void setSchemes(List<String> schemes) {
-		this.schemes = schemes;
 	}
 	
 	/**
@@ -259,6 +224,14 @@ public class SwaggerOperation implements JsonDocumentationOwner {
 			
 			for (SwaggerParameter param : parameters) {
 				jsonArray.add( param.toJson() );
+			}
+			if (!globalParameters.isEmpty()) {
+				for (SwaggerParameter param : globalParameters) {
+					JsonObject paramRef = new JsonObject();
+					
+					paramRef.addProperty( "$ref", "#/parameters/" + param.getName() );
+					jsonArray.add( paramRef );
+				}
 			}
 			json.add( "parameters", jsonArray );
 		}

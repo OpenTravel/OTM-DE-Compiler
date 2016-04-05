@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.impl.QualifiedAction;
+import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerScheme;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAction;
 import org.opentravel.schemacompiler.model.TLActionFacet;
@@ -618,6 +619,7 @@ public class ResourceCodegenUtils {
 	 */
 	public static URLComponents parseUrl(String url) throws MalformedURLException {
 		Matcher m = URL_PATTERN.matcher( url );
+		SwaggerScheme scheme;
 		String urlPath;
 		
 		if (!m.matches()) {
@@ -628,8 +630,10 @@ public class ResourceCodegenUtils {
 		if ((urlPath == null) || (urlPath.length() == 0)) {
 			urlPath = "/";
 		}
-		return new URLComponents( m.group( SCHEME_GROUP ), m.group( AUTHORITY_GROUP ),
-				urlPath, m.group( QUERY_GROUP ) );
+		scheme = SwaggerScheme.fromDisplayValue( m.group( SCHEME_GROUP ) );
+		
+		return new URLComponents( (scheme == null) ? SwaggerScheme.HTTP : scheme,
+				m.group( AUTHORITY_GROUP ), urlPath, m.group( QUERY_GROUP ) );
 	}
 	
 	/**
@@ -637,7 +641,7 @@ public class ResourceCodegenUtils {
 	 */
 	public static class URLComponents {
 		
-		private String scheme;
+		private SwaggerScheme scheme;
 		private String authority;
 		private String path;
 		private String queryString;
@@ -650,7 +654,7 @@ public class ResourceCodegenUtils {
 		 * @param path  the path string of a parsed URL
 		 * @param queryString  the query string of a parsed URL
 		 */
-		public URLComponents(String scheme, String authority, String path, String queryString) {
+		public URLComponents(SwaggerScheme scheme, String authority, String path, String queryString) {
 			this.scheme = scheme;
 			this.authority = authority;
 			this.path = path;
@@ -660,9 +664,9 @@ public class ResourceCodegenUtils {
 		/**
 		 * Returns the scheme of a parsed URL.
 		 *
-		 * @return String
+		 * @return SwaggerScheme
 		 */
-		public String getScheme() {
+		public SwaggerScheme getScheme() {
 			return scheme;
 		}
 

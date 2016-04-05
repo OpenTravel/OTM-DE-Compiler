@@ -88,6 +88,9 @@ public class TLActionSwaggerTransformer extends AbstractSwaggerCodegenTransforme
 		for (QualifiedParameter sourceParam : source.getParameters()) {
 			swaggerOp.getParameters().add( paramTransformer.transform( sourceParam ) );
 		}
+		if ((swaggerBindings != null) && (swaggerBindings.getGlobalParameters() != null)) {
+			swaggerOp.getGlobalParameters().addAll( swaggerBindings.getGlobalParameters() );
+		}
 		if (bodyParam != null) {
 			swaggerOp.getParameters().add( bodyParam );
 		}

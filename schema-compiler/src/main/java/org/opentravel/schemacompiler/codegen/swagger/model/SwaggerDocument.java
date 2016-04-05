@@ -35,11 +35,13 @@ public class SwaggerDocument {
 	private SwaggerInfo info;
 	private String host;
 	private String basePath;
-	private List<String> schemes = new ArrayList<>();
+	private List<SwaggerScheme> schemes = new ArrayList<>();
 	private List<String> consumes = new ArrayList<>();
 	private List<String> produces = new ArrayList<>();
 	private List<SwaggerPathItem> pathItems = new ArrayList<>();
 	private List<JsonSchemaNamedReference> definitions = new ArrayList<>();
+	private List<SwaggerParameter> globalParameters = new ArrayList<>();
+	private List<SwaggerSecurityScheme> securitySchemes = new ArrayList<>();
 	
 	/**
 	 * Returns the value of the 'specVersion' field.
@@ -134,9 +136,9 @@ public class SwaggerDocument {
 	/**
 	 * Returns the value of the 'schemes' field.
 	 *
-	 * @return List<String>
+	 * @return List<SwaggerScheme>
 	 */
-	public List<String> getSchemes() {
+	public List<SwaggerScheme> getSchemes() {
 		return schemes;
 	}
 	
@@ -177,6 +179,24 @@ public class SwaggerDocument {
 	}
 	
 	/**
+	 * Returns the value of the 'globalParameters' field.
+	 *
+	 * @return List<SwaggerParameter>
+	 */
+	public List<SwaggerParameter> getGlobalParameters() {
+		return globalParameters;
+	}
+	
+	/**
+	 * Returns the value of the 'securitySchemes' field.
+	 *
+	 * @return List<SwaggerSecurityScheme>
+	 */
+	public List<SwaggerSecurityScheme> getSecuritySchemes() {
+		return securitySchemes;
+	}
+	
+	/**
 	 * Returns the value of the 'swaggerSpecV2' field.
 	 *
 	 * @return String
@@ -212,8 +232,10 @@ public class SwaggerDocument {
 		if (!schemes.isEmpty()) {
 			JsonArray jsonArray = new JsonArray();
 			
-			for (String value : schemes) {
-				jsonArray.add( value );
+			for (SwaggerScheme value : schemes) {
+				if (value != null) {
+					jsonArray.add( value.getDisplayValue() );
+				}
 			}
 			json.add( "schemes", jsonArray );
 		}
@@ -246,6 +268,36 @@ public class SwaggerDocument {
 				defsJson.add( definition.getName(), definition.getSchema().toJson() );
 			}
 			json.add( "definitons", defsJson );
+		}
+		
+		if (!globalParameters.isEmpty()) {
+			JsonObject paramsJson = new JsonObject();
+			
+			for (SwaggerParameter param : globalParameters) {
+				paramsJson.add( param.getName(), param.toJson() );
+			}
+			json.add( "parameters", paramsJson );
+		}
+		
+		if (!securitySchemes.isEmpty()) {
+			JsonObject securityDefsJson = new JsonObject();
+			JsonArray securityReqsJson = new JsonArray();
+			
+			for (SwaggerSecurityScheme securityScheme : securitySchemes) {
+				JsonObject securityReqirement = new JsonObject();
+				JsonArray scopeNames = new JsonArray();
+				
+				if (securityScheme.getType() == SwaggerSecurityType.OAUTH2) {
+					for (SwaggerSecurityScope scope : securityScheme.getScopes()) {
+						scopeNames.add( scope.getName() );
+					}
+				}
+				securityReqirement.add( securityScheme.getName(), scopeNames );
+				securityReqsJson.add( securityReqirement );
+				securityDefsJson.add( securityScheme.getName(), securityScheme.toJson() );
+			}
+			json.add( "securityDefinitions", securityDefsJson );
+			json.add( "security", securityReqsJson );
 		}
 		return json;
 	}

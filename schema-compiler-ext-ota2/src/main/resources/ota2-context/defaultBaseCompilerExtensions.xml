@@ -171,4 +171,14 @@
 	  -->
 	<bean id="codeGenerationWsdlBindings" class="org.opentravel.schemacompiler.codegen.wsdl.DefaultSoapBindings" scope="singleton" />
 	
+	<!--
+	  Code Generation Swagger Bindings
+	  
+	  Defines the class that will be used to define the supported schemes, global parameters, global request
+	  headers, and security schemes for generated Swagger documents.  The class that is assigned to this bean
+	  definition must implement the 'org.opentravel.schemacompiler.codegen.swagger.CodeGenerationSwaggerBindings'
+	  interface.
+	  -->
+	<bean id="codeGenerationSwaggerBindings" class="org.opentravel.schemacompiler.codegen.swagger.DefaultSwaggerBindings" scope="singleton" />
+	
 </beans>

@@ -79,6 +79,10 @@ public class TLActionResponseSwaggerTransformer extends AbstractSwaggerCodegenTr
 				transformDocumentation( (TLDocumentationOwner) payloadType, response );
 			}
 		}
+		
+		if ((swaggerBindings != null) && (swaggerBindings.getGlobalResponseHeaders() != null)) {
+			response.getHeaders().addAll( swaggerBindings.getGlobalResponseHeaders() );
+		}
 		return response;
 	}
 	

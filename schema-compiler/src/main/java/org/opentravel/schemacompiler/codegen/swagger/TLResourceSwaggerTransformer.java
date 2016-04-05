@@ -31,6 +31,7 @@ import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerInfo;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerOperation;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerOtmResource;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerPathItem;
+import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerScheme;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils.URLComponents;
 import org.opentravel.schemacompiler.model.TLActionRequest;
@@ -131,6 +132,23 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
 			pathItem.setPathTemplate( pathTemplate );
 			swaggerDoc.getPathItems().add( pathItem );
 		}
+		
+		// Add any extensions provided by the Swagger code generation bindings
+		if (swaggerBindings != null) {
+			if (swaggerBindings.getSupportedSchemes() != null) {
+				for (SwaggerScheme scheme : swaggerBindings.getSupportedSchemes()) {
+					if (!swaggerDoc.getSchemes().contains( scheme )) {
+						swaggerDoc.getSchemes().add( scheme );
+					}
+				}
+			}
+			if (swaggerBindings.getGlobalParameters() != null) {
+				swaggerDoc.getGlobalParameters().addAll( swaggerBindings.getGlobalParameters() );
+			}
+			if (swaggerBindings.getSecuritySchemes() != null) {
+				swaggerDoc.getSecuritySchemes().addAll( swaggerBindings.getSecuritySchemes() );
+			}
+		}
 		return swaggerDoc;
 	}
 	
@@ -152,7 +170,7 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
 			// No error - use default values
 		}
 		if (components == null) {
-			components = new URLComponents( "http", "127.0.0.1", "/", null );
+			components = new URLComponents( SwaggerScheme.HTTP, "127.0.0.1", "/", null );
 		}
 		return components;
 	}
