@@ -67,27 +67,31 @@ public class SwaggerCompilerTask extends AbstractSchemaCompilerTask
                 // Generate the Swagger document
                 CodeGenerator<TLResource> swaggerGenerator = CodeGeneratorFactory.getInstance()
                         .newCodeGenerator( CodeGeneratorFactory.SWAGGER_TARGET_FORMAT, TLResource.class );
-                addGeneratedFiles(swaggerGenerator.generateOutput( resource, resourceContext ) );
-
-                // Generate the trimmed XML & JSON schema documents for the service
-                compileXmlSchemas( userDefinedLibraries, legacySchemas, resourceContext,
-                        new LibraryTrimmedFilenameBuilder( null ),
-                        createSchemaFilter( resource, TLMimeType.TEXT_XML, TLMimeType.APPLICATION_XML ) );
-                compileJsonSchemas( userDefinedLibraries, legacySchemas, resourceContext,
-                        new LibraryTrimmedFilenameBuilder( null ),
-                        createSchemaFilter( resource, TLMimeType.TEXT_JSON, TLMimeType.APPLICATION_JSON ) );
+                Collection<File> swaggerFiles = swaggerGenerator.generateOutput( resource, resourceContext );
                 
-                // Generate example files if required; examples are only created for the operation
-                // messages (not the contents of the trimmed schemas)
-                if (isGenerateExamples()) {
-                    generateExampleArtifacts(userDefinedLibraries, resourceContext,
+                if (!swaggerFiles.isEmpty()) {
+                    addGeneratedFiles( swaggerFiles );
+
+                    // Generate the trimmed XML & JSON schema documents for the service
+                    compileXmlSchemas( userDefinedLibraries, legacySchemas, resourceContext,
                             new LibraryTrimmedFilenameBuilder( null ),
-                            createExampleFilter( resource, TLMimeType.TEXT_XML, TLMimeType.APPLICATION_XML ),
-                            CodeGeneratorFactory.XML_TARGET_FORMAT );
-                    generateExampleArtifacts(userDefinedLibraries, resourceContext,
+                            createSchemaFilter( resource, TLMimeType.TEXT_XML, TLMimeType.APPLICATION_XML ) );
+                    compileJsonSchemas( userDefinedLibraries, legacySchemas, resourceContext,
                             new LibraryTrimmedFilenameBuilder( null ),
-                            createExampleFilter( resource, TLMimeType.TEXT_JSON, TLMimeType.APPLICATION_JSON ),
-                            CodeGeneratorFactory.JSON_TARGET_FORMAT );
+                            createSchemaFilter( resource, TLMimeType.TEXT_JSON, TLMimeType.APPLICATION_JSON ) );
+                    
+                    // Generate example files if required; examples are only created for the operation
+                    // messages (not the contents of the trimmed schemas)
+                    if (isGenerateExamples()) {
+                        generateExampleArtifacts(userDefinedLibraries, resourceContext,
+                                new LibraryTrimmedFilenameBuilder( null ),
+                                createExampleFilter( resource, TLMimeType.TEXT_XML, TLMimeType.APPLICATION_XML ),
+                                CodeGeneratorFactory.XML_TARGET_FORMAT );
+                        generateExampleArtifacts(userDefinedLibraries, resourceContext,
+                                new LibraryTrimmedFilenameBuilder( null ),
+                                createExampleFilter( resource, TLMimeType.TEXT_JSON, TLMimeType.APPLICATION_JSON ),
+                                CodeGeneratorFactory.JSON_TARGET_FORMAT );
+                    }
                 }
         	}
         }

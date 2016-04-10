@@ -139,7 +139,7 @@ public class CodeGeneratorTestAssertions {
     		} else if (filename.endsWith(".schema.json")) {
     			validateJSONSchema( generatedFile );
     			
-    		} else if (filename.endsWith(".swagger.json")) {
+    		} else if (filename.endsWith(".swagger")) {
     			validateSwaggerDocument( generatedFile );
     			
     		} else if (filename.endsWith(".json")) {

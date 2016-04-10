@@ -72,7 +72,7 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
 		swaggerResource.setNamespace( source.getNamespace() );
 		swaggerResource.setLocalName( source.getLocalName() );
 		swaggerDoc.setOtmResource( swaggerResource );
-		info.setTitle( source.getName() + " API Specification" );
+		info.setTitle( source.getName() );
 		info.setLibraryInfo( libraryInfo );
 		info.setVersion( libraryInfo.getLibraryVersion() );
 		swaggerDoc.setInfo( info );

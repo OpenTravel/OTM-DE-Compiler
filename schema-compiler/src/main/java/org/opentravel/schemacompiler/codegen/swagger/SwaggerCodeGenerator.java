@@ -48,7 +48,7 @@ import com.google.gson.GsonBuilder;
  */
 public class SwaggerCodeGenerator extends AbstractCodeGenerator<TLResource> {
 	
-	public static final String JSON_SCHEMA_FILENAME_EXT = "swagger.json";
+	public static final String SWAGGER_FILENAME_EXT = "swagger";
 	
     private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
     
@@ -147,7 +147,7 @@ public class SwaggerCodeGenerator extends AbstractCodeGenerator<TLResource> {
         AbstractLibrary library = getLibrary( source );
         URL libraryUrl = (library == null) ? null : library.getLibraryUrl();
         File outputFolder = getOutputFolder( context, libraryUrl );
-        String filename = getFilenameBuilder().buildFilename( source, JSON_SCHEMA_FILENAME_EXT );
+        String filename = getFilenameBuilder().buildFilename( source, SWAGGER_FILENAME_EXT );
 
         return new File( outputFolder, filename );
 	}
