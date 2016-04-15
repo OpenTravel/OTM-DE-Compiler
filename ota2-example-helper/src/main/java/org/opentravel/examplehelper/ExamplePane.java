@@ -37,16 +37,16 @@ public class ExamplePane extends JEditorPane {
 	public static final String JSON_FORMAT = "text/json";
 	
 	private String exampleFormat = XML_FORMAT;
-	private String exampleXml;
+	private String exampleContent;
 	private boolean initialized = false;
 	
 	/**
-	 * Returns the example XML document that is currently being displayed.
+	 * Returns the contents of example document that is currently being displayed.
 	 * 
 	 * @return String
 	 */
-	public String getExampleXml() {
-		return exampleXml;
+	public String getExampleContent() {
+		return exampleContent;
 	}
 	
 	/**
@@ -61,18 +61,18 @@ public class ExamplePane extends JEditorPane {
 	}
 
 	/**
-	 * Assigns the example XML content that will be displayed with syntax highlighting.
+	 * Assigns the example content that will be displayed with syntax highlighting.
 	 * 
-	 * @param exampleXml  the example XML document to be displayed
+	 * @param exampleContent  the example content to be displayed
 	 */
-	public void setExampleText(String exampleXml) {
+	public void setExampleContent(String exampleContent) {
 		if (!initialized) {
 			DefaultSyntaxKit.initKit();
 			setContentType( exampleFormat );
 			initialized = true;
 		}
-		setText( exampleXml );
-		this.exampleXml = exampleXml;
+		setText( exampleContent );
+		this.exampleContent = exampleContent;
 	}
 
 	/**

@@ -480,8 +480,8 @@ public class ExampleHelper extends JFrame {
 					exampleFormat = ExamplePane.JSON_FORMAT;
 				}
 				previewPane.setExampleFormat( exampleFormat );
-				previewPane.setExampleText(new String(out.toByteArray(), "UTF-8"));
-				previewLineCount = previewPane.getExampleXml().split("[\n|\r]").length;
+				previewPane.setExampleContent(new String(out.toByteArray(), "UTF-8"));
+				previewLineCount = previewPane.getExampleContent().split("[\n|\r]").length;
 
 				// Restore the scroll position
 				SwingUtilities.invokeLater(new Runnable() {
@@ -509,8 +509,9 @@ public class ExampleHelper extends JFrame {
 	 * Saves the contents of the preview pane to a file selected by the user.
 	 */
 	private void saveXml() {
-		String entityName = (selectedObject == null) ? "unknown"
-				: selectedObject.getLocalName();
+		String entityName = (selectedObject == null) ? "unknown" : selectedObject.getLocalName();
+		final boolean xmlFormat = xmlRadio.isSelected();
+		final String fileExtension = (xmlFormat ? ".xml" : ".json");
 		JFileChooser fc = new JFileChooser();
 		File exampleFile;
 
@@ -518,19 +519,22 @@ public class ExampleHelper extends JFrame {
 		if (exampleFolder == null) {
 			exampleFolder = new File(System.getProperty("user.dir"));
 		}
-		exampleFile = new File(exampleFolder, entityName + ".xml");
+		exampleFile = new File(exampleFolder, entityName + fileExtension);
 
 		// Configure the file chooser
 		fc.setSelectedFile(exampleFile);
 		fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		fc.setFileFilter(new FileFilter() {
+			
+			private String description = xmlFormat ? "XML Files (*.xml)" : "JSON Files (*.json)";
+			
 			public String getDescription() {
-				return "XML Files (*.xml)";
+				return description;
 			}
 
 			public boolean accept(File f) {
 				String filename = f.getName().toLowerCase();
-				return (f.isDirectory() || filename.endsWith(".xml"));
+				return (f.isDirectory() || filename.endsWith( fileExtension ));
 			}
 		});
 
@@ -549,7 +553,7 @@ public class ExampleHelper extends JFrame {
 			}
 			if (canSave) {
 				try (Writer writer = new FileWriter(exampleFile)) {
-					writer.write(previewPane.getExampleXml());
+					writer.write(previewPane.getExampleContent());
 
 				} catch (IOException e) {
 					JOptionPane.showMessageDialog(this, e.getMessage(),

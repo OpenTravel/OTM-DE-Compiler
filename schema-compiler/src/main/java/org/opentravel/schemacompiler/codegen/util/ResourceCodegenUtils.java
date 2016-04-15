@@ -33,8 +33,11 @@ import org.opentravel.schemacompiler.model.TLAction;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLActionRequest;
 import org.opentravel.schemacompiler.model.TLActionResponse;
+import org.opentravel.schemacompiler.model.TLAlias;
+import org.opentravel.schemacompiler.model.TLAliasOwner;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtension;
@@ -302,10 +305,18 @@ public class ResourceCodegenUtils {
 		}
 		paramFacets.add(facet);
 		
-		for (TLProperty element : facet.getElements()) {
+		for (TLProperty element : PropertyCodegenUtils.getInheritedProperties(facet)) {
 			if (includeIneligibleFacets || (element.getRepeat() == 0)
 					|| (element.getRepeat() == 1)) { // Skip repeating elements unless specifically requested
 				TLPropertyType elementType = element.getType();
+				
+				if (elementType instanceof TLAlias) {
+					TLAliasOwner aliasOwner = ((TLAlias) elementType).getOwningEntity();
+					
+					if (aliasOwner instanceof TLPropertyType) {
+						elementType = (TLPropertyType) aliasOwner;
+					}
+				}
 				
 				if (elementType instanceof TLFacet) {
 					findParameterFacets((TLFacet) elementType, paramFacets, includeIneligibleFacets);
@@ -326,6 +337,15 @@ public class ResourceCodegenUtils {
 					
 					findParameterFacets(core.getSummaryFacet(), paramFacets, includeIneligibleFacets);
 					findParameterFacets(core.getDetailFacet(), paramFacets, includeIneligibleFacets);
+					
+				} else if (elementType instanceof TLChoiceObject) {
+					TLChoiceObject choice = (TLChoiceObject) elementType;
+					
+					findParameterFacets(choice.getSharedFacet(), paramFacets, includeIneligibleFacets);
+					
+					for (TLFacet choiceFacet : choice.getChoiceFacets()) {
+						findParameterFacets(choiceFacet, paramFacets, includeIneligibleFacets);
+					}
 				}
 			}
 		}

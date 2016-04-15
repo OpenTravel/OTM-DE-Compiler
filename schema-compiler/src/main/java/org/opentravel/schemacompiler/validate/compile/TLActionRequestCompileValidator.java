@@ -47,6 +47,7 @@ public class TLActionRequestCompileValidator extends TLActionRequestBaseValidato
     public static final String ERROR_GET_REQUEST_PAYLOAD         = "GET_REQUEST_PAYLOAD";
     public static final String ERROR_INVALID_ACTION_FACET_REF    = "INVALID_ACTION_FACET_REF";
     public static final String WARNING_PATCH_PARTIAL_SUPPORT     = "PATCH_PARTIAL_SUPPORT";
+    public static final String WARNING_DISCOURAGED_HTTP_METHOD   = "DISCOURAGED_HTTP_METHOD";
     
 	private static ResourceUrlValidator urlValidator = new ResourceUrlValidator( true );
 	
@@ -64,6 +65,9 @@ public class TLActionRequestCompileValidator extends TLActionRequestBaseValidato
         
         if (target.getHttpMethod() == TLHttpMethod.PATCH) {
         	builder.addFinding( FindingType.WARNING, "httpMethod", WARNING_PATCH_PARTIAL_SUPPORT );
+        }
+        if ((target.getHttpMethod() == TLHttpMethod.HEAD) || (target.getHttpMethod() == TLHttpMethod.OPTIONS)) {
+        	builder.addFinding( FindingType.WARNING, "httpMethod", WARNING_DISCOURAGED_HTTP_METHOD, target.getHttpMethod() );
         }
         
     	if (paramGroup == null) {
