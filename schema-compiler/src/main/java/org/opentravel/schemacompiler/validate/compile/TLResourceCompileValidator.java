@@ -15,9 +15,6 @@
  */
 package org.opentravel.schemacompiler.validate.compile;
 
-import java.util.Comparator;
-import java.util.List;
-
 import org.opentravel.schemacompiler.model.TLAction;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLResource;
@@ -26,11 +23,6 @@ import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.base.TLResourceBaseValidator;
 import org.opentravel.schemacompiler.validate.impl.ResourceUrlValidator;
 import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
-import org.opentravel.schemacompiler.version.MinorVersionHelper;
-import org.opentravel.schemacompiler.version.VersionScheme;
-import org.opentravel.schemacompiler.version.VersionSchemeException;
-import org.opentravel.schemacompiler.version.VersionSchemeFactory;
-import org.opentravel.schemacompiler.version.Versioned;
 
 /**
  * Validator for the <code>TLResource</code> class.
@@ -40,9 +32,6 @@ import org.opentravel.schemacompiler.version.Versioned;
 public class TLResourceCompileValidator extends TLResourceBaseValidator {
 
     public static final String ERROR_INVALID_BASE_PATH             = "INVALID_BASE_PATH";
-    public static final String ERROR_INVALID_BUSINESS_OBJ_NS       = "INVALID_BUSINESS_OBJ_NS";
-    public static final String ERROR_INVALID_BUSINESS_OBJ_VERSION1 = "INVALID_BUSINESS_OBJ_VERSION1";
-    public static final String ERROR_INVALID_BUSINESS_OBJ_VERSION2 = "INVALID_BUSINESS_OBJ_VERSION2";
     public static final String ERROR_PARAM_GROUPS_NOT_ALLOWED      = "PARAM_GROUPS_NOT_ALLOWED";
     public static final String ERROR_MULTIPLE_COMMON_ACTIONS       = "MULTIPLE_COMMON_ACTIONS";
     
@@ -81,46 +70,7 @@ public class TLResourceCompileValidator extends TLResourceBaseValidator {
             	builder.addFinding( FindingType.ERROR, "basePath", ERROR_INVALID_BASE_PATH, basePath );
         	}
         	builder.setEntityReferenceProperty("businessObjectRef", businessObjectRef, target.getBusinessObjectRefName())
-        			.setFindingType(FindingType.ERROR)
-        			.assertNotNull();
-        	
-        	if ((businessObjectRef != null) && (target.getNamespace() != null) && (businessObjectRef.getNamespace() != null)) {
-        		if (!target.getBaseNamespace().equals( businessObjectRef.getBaseNamespace() )) {
-        			// The resource and the business object must be in the same base namespace
-                	builder.addFinding( FindingType.ERROR, "businessObjectRef", ERROR_INVALID_BUSINESS_OBJ_NS );
-                	
-        		} else {
-        			try {
-						VersionScheme vScheme = VersionSchemeFactory.getInstance().getVersionScheme( target.getVersionScheme() );
-						Comparator<Versioned> vComparator = vScheme.getComparator( true );
-						String resourceVersion = target.getVersion();
-						String boVersion = businessObjectRef.getVersion();
-						
-						// The resource must be in the same major version as the business object, and have
-						// a minor version that is greater than or equal to that of the business object
-						if (!vScheme.getMajorVersion( resourceVersion ).equals( vScheme.getMajorVersion( boVersion ))
-								|| (vComparator.compare( target, businessObjectRef ) < 0)) {
-		                	builder.addFinding( FindingType.ERROR, "businessObjectRef", ERROR_INVALID_BUSINESS_OBJ_VERSION1 );
-		                	
-						} else {
-							// A later minor version of the business object cannot exist whose version is less than
-							// or equal to that of the target resource
-							MinorVersionHelper versionHelper = new MinorVersionHelper();
-							List<TLBusinessObject> laterBOVersions = versionHelper.getLaterMinorVersions( businessObjectRef );
-							
-							for (TLBusinessObject laterBOVersion : laterBOVersions) {
-								if (vComparator.compare( target, laterBOVersion ) >= 0) {
-				                	builder.addFinding( FindingType.ERROR, "businessObjectRef", ERROR_INVALID_BUSINESS_OBJ_VERSION2 );
-									break;
-								}
-							}
-						}
-						
-					} catch (VersionSchemeException e) {
-						// Ignore and skip these version-related validation rules
-					}
-        		}
-        	}
+        			.setFindingType(FindingType.ERROR).assertNotNull();
         }
         
         if (countCommonActions( target ) > 1) {

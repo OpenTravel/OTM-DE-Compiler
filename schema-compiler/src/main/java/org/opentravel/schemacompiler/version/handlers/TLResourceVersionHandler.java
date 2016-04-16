@@ -21,15 +21,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.TLAction;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLActionRequest;
 import org.opentravel.schemacompiler.model.TLActionResponse;
-import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLMemberField;
-import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLParamGroup;
 import org.opentravel.schemacompiler.model.TLParameter;
 import org.opentravel.schemacompiler.model.TLPatchableFacet;
@@ -37,7 +34,6 @@ import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLResourceParentRef;
 import org.opentravel.schemacompiler.transform.util.EntityReferenceResolutionVisitor;
 import org.opentravel.schemacompiler.util.ModelElementCloner;
-import org.opentravel.schemacompiler.version.MinorVersionHelper;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 import org.opentravel.schemacompiler.visitor.ModelNavigator;
 
@@ -61,7 +57,7 @@ public class TLResourceVersionHandler extends TLExtensionOwnerVersionHandler<TLR
         newVersion.setBasePath( origVersion.getBasePath() );
         newVersion.setFirstClass( origVersion.isFirstClass() );
         newVersion.setDocumentation( cloner.clone( origVersion.getDocumentation() ) );
-        newVersion.setBusinessObjectRef( resolveBusinessObjectRef( origVersion, targetLibrary ) );
+        newVersion.setBusinessObjectRef( origVersion.getBusinessObjectRef() );
         setExtension( newVersion, origVersion );
         
         targetLibrary.addNamedMember( newVersion );
@@ -78,7 +74,7 @@ public class TLResourceVersionHandler extends TLExtensionOwnerVersionHandler<TLR
 		
         if (majorVersion == null) {
         	majorVersion = getCloner( minorVersion ).clone( minorVersion );
-        	majorVersion.setBusinessObjectRef( resolveBusinessObjectRef( minorVersion, majorVersionLibrary ) );
+        	majorVersion.setBusinessObjectRef( minorVersion.getBusinessObjectRef() );
             assignBaseExtension( majorVersion, minorVersion );
             majorVersionLibrary.addNamedMember( majorVersion );
             resolveParameterReferences( majorVersion );
@@ -114,8 +110,7 @@ public class TLResourceVersionHandler extends TLExtensionOwnerVersionHandler<TLR
 		
 		// Rollup the business object reference
 		if (majorVersionTarget.getBusinessObjectRef() != null) {
-			majorVersionTarget.setBusinessObjectRef( resolveBusinessObjectRef( minorVersion,
-					(TLLibrary) majorVersionTarget.getOwningLibrary() ) );
+			majorVersionTarget.setBusinessObjectRef( minorVersion.getBusinessObjectRef() );
 		}
 		
 		// Rollup the action facets
@@ -214,56 +209,6 @@ public class TLResourceVersionHandler extends TLExtensionOwnerVersionHandler<TLR
             	}
             }
         }
-	}
-	
-	/**
-	 * Obtains the business object reference for the new version of a resource.
-	 * 
-	 * NOTE: When a new minor version of a resource is created, the new resource version should
-	 * reference the latest minor version of the same business object which the new resource version
-	 * can validly reference.
-	 * 
-	 * @param origVersion  the original version of the resource
-	 * @param targetLibrary  the target library for the new resource version
-	 * @return TLBusinessObject
-	 */
-	private TLBusinessObject resolveBusinessObjectRef(TLResource origVersion, TLLibrary targetLibrary) {
-        TLBusinessObject origBO = origVersion.getBusinessObjectRef();
-        TLBusinessObject newVersionBO = null;
-        
-        if (origBO != null) {
-        	try {
-				List<TLLibrary> laterVersionLibs = new MinorVersionHelper()
-						.getLaterMinorVersions( (TLLibrary) origVersion.getOwningLibrary() );
-				TLModel model = targetLibrary.getOwningModel();
-				
-				// Search all later minor versions of the original resource's namespace
-				for (TLLibrary laterVersionLib : laterVersionLibs) {
-					
-					// The BO may be in a different library with the same namespace as the current version we are searching
-					for (AbstractLibrary searchLib : model.getLibrariesForNamespace( laterVersionLib.getNamespace() )) {
-						if (searchLib instanceof TLLibrary) {
-			        		newVersionBO = ((TLLibrary) searchLib).getBusinessObjectType( origBO.getLocalName() );
-						}
-					}
-					
-					// Quit looking if we have reached the library version of the new resource
-					if (laterVersionLib == targetLibrary) {
-						break;
-					}
-				}
-				
-			} catch (VersionSchemeException | ClassCastException e) {
-				// Should never happen, but alternate processing provided just in case
-	        	newVersionBO = targetLibrary.getBusinessObjectType( origBO.getLocalName() );
-			}
-        	
-        	// If no valid later versions of the BO could be found, use the original BO reference
-        	if (newVersionBO == null) {
-        		newVersionBO = origBO;
-        	}
-        }
-        return newVersionBO;
 	}
 	
 	/**

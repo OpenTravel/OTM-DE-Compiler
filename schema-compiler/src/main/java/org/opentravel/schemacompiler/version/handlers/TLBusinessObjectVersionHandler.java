@@ -16,7 +16,6 @@
 package org.opentravel.schemacompiler.version.handlers;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,15 +25,8 @@ import org.opentravel.schemacompiler.model.TLEquivalent;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLPatchableFacet;
-import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.util.ModelElementCloner;
-import org.opentravel.schemacompiler.version.VersionScheme;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
-import org.opentravel.schemacompiler.version.VersionSchemeFactory;
-import org.opentravel.schemacompiler.version.Versioned;
-import org.opentravel.schemacompiler.visitor.ModelElementVisitor;
-import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
-import org.opentravel.schemacompiler.visitor.ModelNavigator;
 
 /**
  * <code>VersionHandler</code> implementation for <code>TLBusinessObject</code>
@@ -60,7 +52,6 @@ public class TLBusinessObjectVersionHandler extends TLExtensionOwnerVersionHandl
             newVersion.addEquivalent(cloner.clone( equivalent ) );
         }
         targetLibrary.addNamedMember( newVersion );
-        updateResourceReferences( origVersion, newVersion );
         return newVersion;
 	}
 	
@@ -144,38 +135,6 @@ public class TLBusinessObjectVersionHandler extends TLExtensionOwnerVersionHandl
         facetList.add(entity.getSummaryFacet());
         facetList.add(entity.getDetailFacet());
 		return facetList;
-	}
-	
-	/**
-	 * When a new minor version of a business object is created, all of the resources that
-	 * reference the original version should be updated to reference the new version if it
-	 * is legal for them to do so.
-	 * 
-	 * @param origVersion  the original version of the business object
-	 * @param newVersion  the new version of the business object
-	 */
-	private void updateResourceReferences(final TLBusinessObject origVersion, final TLBusinessObject newVersion) {
-		try {
-			VersionScheme vScheme = VersionSchemeFactory.getInstance().getVersionScheme( origVersion.getVersionScheme() );
-			final Comparator<Versioned> vComparator = vScheme.getComparator( true );
-			ModelElementVisitor visitor = new ModelElementVisitorAdapter() {
-				
-				public boolean visitResource(TLResource resource) {
-					if (resource.getBusinessObjectRef().equals( origVersion )) {
-						if (vComparator.compare( resource, newVersion ) >= 0) {
-							resource.setBusinessObjectRef( newVersion );
-						}
-					}
-					return false;
-				}
-				
-			};
-			
-			ModelNavigator.navigate( origVersion.getOwningModel(), visitor );
-			
-		} catch (VersionSchemeException e) {
-			// No action - should never happen at this point in the processing
-		}
 	}
 	
 }
