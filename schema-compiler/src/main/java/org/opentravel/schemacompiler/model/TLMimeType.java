@@ -48,4 +48,24 @@ public enum TLMimeType {
     	return contentType;
     }
     
+    /**
+     * Returns the <code>TLMimeType</code> value associated with the given
+     * content type.  If no such MIME type exists, this method will return
+     * null.
+     * 
+     * @param contentType  the content type string for which to return a value
+     * @return TLMimeType
+     */
+    public TLMimeType fromContentType(String contentType) {
+    	TLMimeType value = null;
+    	
+    	for (TLMimeType mt : values()) {
+    		if (mt.toContentType().equals( contentType )) {
+    			value = mt;
+    			break;
+    		}
+    	}
+    	return value;
+    }
+    
 }

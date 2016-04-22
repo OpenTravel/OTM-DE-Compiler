@@ -244,6 +244,10 @@ public class ResourceCodegenUtils {
 						List<TLAttribute> vwaAttributes = PropertyCodegenUtils.getInheritedAttributes(vwa);
 						List<TLIndicator> vwaIndicators = PropertyCodegenUtils.getInheritedIndicators(vwa);
 						
+						if (!fieldNames.contains( element.getName() )) {
+							paramFields.add(element);
+							fieldNames.add(element.getName());
+						}
 						for (TLAttribute attribute : vwaAttributes) {
 							if (!(attribute.getType() instanceof TLValueWithAttributes) &&
 									!fieldNames.contains(attribute.getName())) {
