@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_05"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_05 ../../../../main/resources/ota2-context/schemas/OTA2_LibraryModel_v1.5.0.xsd">
+    
+    <VersionScheme>OTA2</VersionScheme>
+    <Status>Draft</Status>
+    <Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package_v3</Namespace>
+    <Prefix>pkg3</Prefix>
+    <Name>sample_library_html</Name>
+    <Includes>included_library.xml</Includes>
+    <Includes>chameleon_schema.xsd</Includes>
+    <Includes>legacy_schema_1.xsd</Includes>
+    <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
+    <Import namespace="http://www.opentravel.org/OTM/Common/v0" prefix="ota"/>
+    <Context applicationContext="Test-applicationContext" context="Test"/>
+    <Comments>Sample Library</Comments>
+    
+    <Simple name="SampleString" type="IncludedString"/>
+    
+    <ValueWithAttrs name="SampleValueWithAttributes" type="xsd:string">
+        <Attribute name="attr1" type="xsd:string"/>
+    </ValueWithAttrs>
+    
+    <BusinessObject name="SampleBusinessObject" notExtendable="false">
+        <Aliases/>
+        <ID>
+            <Element name="oid" repeat="0" type="xsd:int"/>
+        </ID>
+        <Summary>
+            <Element name="summaryName" repeat="0" type="xsd:string"/>
+        </Summary>
+        <Detail>
+            <Element name="detailName" repeat="0" type="xsd:string"/>
+        </Detail>
+        <Query context="Test" label="" notExtendable="false">
+            <Element name="summaryName" repeat="0" type="xsd:string"/>
+        </Query>
+    </BusinessObject>
+    
+</Library>

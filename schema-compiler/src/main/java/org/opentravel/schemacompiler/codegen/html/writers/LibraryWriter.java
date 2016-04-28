@@ -1,0 +1,219 @@
+package org.opentravel.schemacompiler.codegen.html.writers;
+
+import java.io.IOException;
+import org.opentravel.schemacompiler.codegen.html.builders.LibraryDocumentationBuilder;
+import org.opentravel.schemacompiler.codegen.html.Configuration;
+import org.opentravel.schemacompiler.codegen.html.Content;
+import org.opentravel.schemacompiler.codegen.html.markup.HtmlStyle;
+import org.opentravel.schemacompiler.codegen.html.markup.HtmlTag;
+import org.opentravel.schemacompiler.codegen.html.markup.HtmlTree;
+import org.opentravel.schemacompiler.codegen.html.markup.RawHtml;
+import org.opentravel.schemacompiler.codegen.html.markup.HtmlConstants;
+import org.opentravel.schemacompiler.codegen.html.markup.StringContent;
+import org.opentravel.schemacompiler.codegen.html.DirectoryManager;
+import org.opentravel.schemacompiler.codegen.html.writers.info.LibraryInfoWriter;
+
+public class LibraryWriter extends SubWriterHolderWriter implements
+		LibrarySummaryWriter {
+
+	/**
+	 * The prev package name in the alpha-order list.
+	 */
+	protected LibraryDocumentationBuilder prev;
+
+	/**
+	 * The next package name in the alpha-order list.
+	 */
+	protected LibraryDocumentationBuilder next;
+
+	/**
+	 * The package being documented.
+	 */
+	protected LibraryDocumentationBuilder library;
+
+
+	/**
+	 * The name of the output file.
+	 */
+	public static final String OUTPUT_FILE_NAME = "library-summary.html";
+
+	/**
+	 * Return the name of the output file.
+	 *
+	 * @return the name of the output file.
+	 */
+	public String getOutputFileName() {
+		return OUTPUT_FILE_NAME;
+	}
+	
+	/**
+	 * Constructor to construct PackageWriter object and to generate
+	 * "package-summary.html" file in the respective package directory. For
+	 * example for package "java.lang" this will generate file
+	 * "package-summary.html" file in the "java/lang" directory. It will also
+	 * create "java/lang" directory in the current or the destination directory
+	 * if it doesen't exist.
+	 *
+	 * @param configuration
+	 *            the configuration of the doclet.
+	 * @param library
+	 *            PackageDoc under consideration.
+	 * @param prev
+	 *            Previous package in the sorted array.
+	 * @param next
+	 *            Next package in the sorted array.
+	 */
+	public LibraryWriter(Configuration configuration,
+			LibraryDocumentationBuilder library,
+			LibraryDocumentationBuilder prev, LibraryDocumentationBuilder next)
+			throws IOException {
+		super(configuration, DirectoryManager.getDirectoryPath(library
+				.getName()), OUTPUT_FILE_NAME, DirectoryManager
+				.getRelativePath(library.getName()));
+		this.prev = prev;
+		this.next = next;
+		this.library = library;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Content getHeader() {
+		String namespace = library.getNamespace();
+		Content bodyTree = getBody(true, getWindowTitle(namespace));
+		//addTop(bodyTree);
+		addNavLinks(true, bodyTree);
+		HtmlTree div = new HtmlTree(HtmlTag.DIV);
+		div.addStyle(HtmlStyle.header);
+		Content tHeading = HtmlTree.HEADING(HtmlConstants.TITLE_HEADING, true,
+				HtmlStyle.title, libraryLabel);
+		tHeading.addContent(getSpace());
+		Content libraryHead = new RawHtml(library.getName());
+		tHeading.addContent(libraryHead);
+		div.addContent(tHeading);
+		tHeading = HtmlTree.HEADING(HtmlConstants.TITLE_HEADING, true,
+				HtmlStyle.title, namespaceLabel );
+		tHeading.addContent(getSpace());
+		libraryHead = new RawHtml(namespace);
+		tHeading.addContent(libraryHead);
+		div.addContent(tHeading);
+		bodyTree.addContent(div);
+		return bodyTree;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Content getSummaryHeader() {
+		HtmlTree ul = new HtmlTree(HtmlTag.UL);
+		ul.addStyle(HtmlStyle.blockList);
+		return ul;
+	}
+	
+	public void addObjectsSummary(Content summaryContentTree) {
+		LibraryInfoWriter infoWriter = new LibraryInfoWriter(this, library);
+		infoWriter.addInfo(summaryContentTree);
+	}
+
+
+	@Override
+	public void addNamespaceDescription(Content packageContentTree) {
+		String doc = library.getDescription();
+		if (doc != null) {
+			packageContentTree
+					.addContent(getMarkerAnchor("library_description"));
+			Content h2Content = new StringContent(configuration.getText(
+					"doclet.Library_Description", library.getName()));
+			packageContentTree.addContent(HtmlTree.HEADING(
+					HtmlConstants.PACKAGE_HEADING, true, h2Content));
+			addInlineComment(doc, packageContentTree);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void addFooter(Content contentTree) {
+		addNavLinks(false, contentTree);
+		//addBottom(contentTree);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void printDocument(Content contentTree) {
+		printHtmlDocument(null, true, contentTree);
+	}
+
+
+	/**
+	 * Get "Use" link for this pacakge in the navigation bar.
+	 *
+	 * @return a content tree for the class use link
+	 */
+	protected Content getNavLinkClassUse() {
+		Content useLink = getHyperLink("library-use.html", "", useLabel, "", "");
+		Content li = HtmlTree.LI(useLink);
+		return li;
+	}
+
+	/**
+	 * Get "PREV PACKAGE" link in the navigation bar.
+	 *
+	 * @return a content tree for the previous link
+	 */
+	public Content getNavLinkPrevious() {
+		Content li;
+		if (prev == null) {
+			li = HtmlTree.LI(prevLibraryLabel);
+		} else {
+			String path = DirectoryManager.getRelativePath(library.getName(),
+					prev.getName());
+			li = HtmlTree.LI(getHyperLink(path + OUTPUT_FILE_NAME, "",
+					prevLibraryLabel, "", ""));
+		}
+		return li;
+	}
+
+	/**
+	 * Get "NEXT PACKAGE" link in the navigation bar.
+	 *
+	 * @return a content tree for the next link
+	 */
+	public Content getNavLinkNext() {
+		Content li;
+		if (next == null) {
+			li = HtmlTree.LI(nextLibraryLabel);
+		} else {
+			String path = DirectoryManager.getRelativePath(library.getName(),
+					next.getName());
+			li = HtmlTree.LI(getHyperLink(path + "library-summary.html", "",
+					nextLibraryLabel, "", ""));
+		}
+		return li;
+	}
+
+	/**
+	 * Get "Tree" link in the navigation bar. This will be link to the package
+	 * tree file.
+	 *
+	 * @return a content tree for the tree link
+	 */
+	protected Content getNavLinkTree() {
+		Content useLink = getHyperLink("package-tree.html", "", treeLabel, "",
+				"");
+		Content li = HtmlTree.LI(useLink);
+		return li;
+	}
+
+	/**
+	 * Highlight "Library" in the navigation bar, as this is the package page.
+	 *
+	 * @return a content tree for the package link
+	 */
+	protected Content getNavLinkLibrary() {
+		Content li = HtmlTree.LI(HtmlStyle.navBarCell1Rev, libraryLabel);
+		return li;
+	}
+
+}
