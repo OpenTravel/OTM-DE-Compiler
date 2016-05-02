@@ -18,6 +18,12 @@ package org.opentravel.schemacompiler.codegen.util;
 import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLAlias;
+import org.opentravel.schemacompiler.model.TLAliasOwner;
+import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
+import org.opentravel.schemacompiler.model.TLCoreObject;
+import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLProperty;
 
 /**
@@ -33,12 +39,16 @@ public class JsonSchemaNamingUtils {
      * be null.  This indicates that there is no global schema type name associated with the
      * given model entity.
      * 
-     * @param modelEntity
-     *            the model entity for which to return the element name
+     * @param modelEntity  the model entity for which to return the element name
      * @return String
      */
     public static String getGlobalDefinitionName(NamedEntity modelEntity) {
-        return XsdCodegenUtils.getGlobalTypeName( modelEntity );
+    	String definitionName = getGlobalElementName( modelEntity );
+    	
+    	if (definitionName == null) {
+    		definitionName = XsdCodegenUtils.getGlobalTypeName( modelEntity );
+    	}
+        return definitionName;
     }
 
     /**
@@ -48,13 +58,82 @@ public class JsonSchemaNamingUtils {
      * be null.  This indicates that there is no global schema type name associated with the
      * given model entity.
      * 
-     * @param modelEntity
-     *            the model entity for which to return the element name
+     * @param modelEntity  the model entity for which to return the element name
      * @param referencingProperty
      * @return String
      */
     public static String getGlobalDefinitionName(NamedEntity modelEntity, TLProperty referencingProperty) {
-        return XsdCodegenUtils.getGlobalTypeName( modelEntity, referencingProperty );
+    	String definitionName = getGlobalElementName( modelEntity );
+    	
+    	if (definitionName == null) {
+    		definitionName = XsdCodegenUtils.getGlobalTypeName( modelEntity, referencingProperty );
+    	}
+        return definitionName;
+    }
+    
+    /**
+     * Returns the global XML element name for the given entity or null if the entity
+     * does not have one.
+     * 
+     * @param modelEntity  the model entity for which to return the element name
+     * @return String
+     */
+    private static String getGlobalElementName(NamedEntity modelEntity) {
+    	QName elementName = null;
+    	
+    	if (modelEntity instanceof TLAlias) {
+    		TLAliasOwner aliasOwner = ((TLAlias) modelEntity).getOwningEntity();
+    		
+    		if (aliasOwner instanceof TLFacet) {
+    			elementName = XsdCodegenUtils.getSubstitutableElementName( (TLAlias) modelEntity );
+    			
+    		} else {
+        		TLFacet facet = null;
+        		
+        		if (aliasOwner instanceof TLBusinessObject) {
+        			facet = ((TLBusinessObject) aliasOwner).getIdFacet();
+        			
+        		} else if (aliasOwner instanceof TLCoreObject) {
+        			facet = ((TLCoreObject) aliasOwner).getSummaryFacet();
+        			
+        		} else if (aliasOwner instanceof TLChoiceObject) {
+        			facet = ((TLChoiceObject) aliasOwner).getSharedFacet();
+        		}
+        		
+        		if (facet != null) {
+        			TLAlias facetAlias = AliasCodegenUtils.getFacetAlias(
+        					(TLAlias) modelEntity, facet.getFacetType() );
+        			
+        			elementName = XsdCodegenUtils.getSubstitutableElementName( facetAlias );
+        		}
+    		}
+    		
+    		// Last resort since all aliases must have a global element name
+    		if (elementName == null) {
+        		elementName = XsdCodegenUtils.getGlobalElementName( modelEntity );
+    		}
+    		
+    	} else {
+    		TLFacet entityFacet = null;
+    		
+    		if (modelEntity instanceof TLFacet) {
+    			entityFacet = (TLFacet) modelEntity;
+    			
+    		} else if (modelEntity instanceof TLBusinessObject) {
+    			entityFacet = ((TLBusinessObject) modelEntity).getIdFacet();
+    			
+    		} else if (modelEntity instanceof TLCoreObject) {
+    			entityFacet = ((TLCoreObject) modelEntity).getSummaryFacet();
+    			
+    		} else if (modelEntity instanceof TLChoiceObject) {
+    			entityFacet = ((TLChoiceObject) modelEntity).getSharedFacet();
+    		}
+    		
+    		if (entityFacet != null) {
+    			elementName = XsdCodegenUtils.getSubstitutableElementName( entityFacet );
+    		}
+    	}
+    	return (elementName == null) ? null : elementName.getLocalPart();
     }
     
     /**
@@ -64,25 +143,11 @@ public class JsonSchemaNamingUtils {
      * be null.  This indicates that there is no global schema type name associated with the
      * given model entity.
      * 
-     * @param modelEntity
-     *            the model entity for which to return the element name
+     * @param modelEntity  the model entity for which to return the element name
      * @return String
      */
     public static String getGlobalPropertyName(NamedEntity modelEntity) {
     	return getGlobalPropertyName( modelEntity, false );
-    	/*
-    	String propertyName;
-    	
-    	if ((modelEntity instanceof TLBusinessObject) || (modelEntity instanceof TLCoreObject)
-    			|| (modelEntity instanceof TLChoiceObject)) {
-    		propertyName = modelEntity.getLocalName();
-    		
-    	} else {
-    		QName propertyQName = XsdCodegenUtils.getGlobalElementName( modelEntity );
-    		propertyName = (propertyQName == null) ? null : propertyQName.getLocalPart();
-    	}
-    	return propertyName;
-    	*/
     }
 
     /**
@@ -99,14 +164,6 @@ public class JsonSchemaNamingUtils {
     public static String getGlobalPropertyName(NamedEntity modelEntity, boolean isReferenceProperty) {
     	QName propertyName = PropertyCodegenUtils.getDefaultXmlElementName( modelEntity, isReferenceProperty );
     	return (propertyName == null) ? null : propertyName.getLocalPart();
-    	/*
-    	String propertyName = getGlobalPropertyName( modelEntity );
-    	
-    	if ((propertyName != null) && isReferenceProperty) {
-    		propertyName += "Ref";
-    	}
-    	return propertyName;
-    	*/
     }
     
 }

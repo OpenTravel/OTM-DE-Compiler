@@ -39,6 +39,7 @@ import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLRole;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
+import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 
 /**
  * Performs the translation from <code>QualifiedParameter</code> objects to the Swagger model
@@ -139,6 +140,9 @@ public class TLParameterSwaggerTransformer extends AbstractSwaggerCodegenTransfo
             // attribute type
         	parentType = (((TLRole) childType).getRoleEnumeration().getOwningEntity())
         			.getSimpleFacet().getSimpleType();
+        	
+        } else if (childType instanceof TLValueWithAttributes) {
+        	parentType = ((TLValueWithAttributes) childType).getParentType();
         	
         } else if (childType instanceof TLSimpleFacet) {
         	parentType = ((TLSimpleFacet) childType).getSimpleType();
