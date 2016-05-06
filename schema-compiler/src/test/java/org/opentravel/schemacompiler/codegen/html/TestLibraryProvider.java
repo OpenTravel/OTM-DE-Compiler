@@ -121,7 +121,7 @@ public class TestLibraryProvider {
 		TLService service = null;
 		for(TLLibrary lib : getModel().getUserDefinedLibraries()){
 			service = lib.getService();
-			if(service.getName().equals(name)){
+			if((service != null) && service.getName().equals(name)){
 				break;
 			}
 		}
