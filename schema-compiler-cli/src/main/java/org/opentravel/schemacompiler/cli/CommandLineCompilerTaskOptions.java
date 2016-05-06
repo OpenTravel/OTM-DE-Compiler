@@ -138,6 +138,11 @@ public class CommandLineCompilerTaskOptions implements CompileAllTaskOptions {
 	public boolean isCompileSwagger() {
         return commandLineArgs.hasOption("S");
 	}
+	
+	@Override
+	public boolean isCompileHtml() {
+		return commandLineArgs.hasOption("H");
+	}
 
     /**
      * @see org.opentravel.schemacompiler.task.ExampleCompilerTaskOptions#isGenerateExamples()
@@ -208,5 +213,6 @@ public class CommandLineCompilerTaskOptions implements CompileAllTaskOptions {
     public void applyTaskOptions(CommonCompilerTaskOptions taskOptions) {
         throw new UnsupportedOperationException();
     }
+
 
 }

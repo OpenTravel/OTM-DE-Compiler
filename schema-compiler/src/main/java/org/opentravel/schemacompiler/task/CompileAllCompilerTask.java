@@ -36,6 +36,7 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
     private boolean compileJson = true;
     private boolean compileServices = true;
     private boolean compileSwagger = true;
+    private boolean compileHtml = true;
     private URL serviceLibraryUrl;
     private String serviceEndpointUrl;
     private String resourceBaseUrl;
@@ -97,6 +98,13 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
             swaggerTask.generateOutput(userDefinedLibraries, legacySchemas);
             addGeneratedFiles(swaggerTask.getGeneratedFiles());
         }
+        
+        if(compileHtml){
+        	DocumentationCompileTask docTask = new DocumentationCompileTask();
+			docTask.setOutputFolder(getOutputFolder() + "/documentation");
+			docTask.generateOutput(userDefinedLibraries, legacySchemas);
+			addGeneratedFiles(docTask.getGeneratedFiles());
+        }
     }
 
     /**
@@ -153,6 +161,7 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
             setCompileServices(compileAllOptions.isCompileServices());
             setCompileJsonSchemas(compileAllOptions.isCompileJsonSchemas());
             setCompileSwagger(compileAllOptions.isCompileSwagger());
+            setCompileHtml(compileAllOptions.isCompileHtml());
         }
         if (taskOptions instanceof SchemaCompilerTaskOptions) {
             // No explicit options currently implemented
@@ -395,6 +404,23 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
      */
     public void setExampleMaxDepth(Integer exampleMaxDepth) {
         this.exampleMaxDepth = exampleMaxDepth;
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.task.CommonCompilerTaskOptions#isCompileHtml()
+     */
+	@Override
+	public boolean isCompileHtml() {
+		return compileHtml;
+	}
+	
+	/**
+     * Assigns the option flag indicating that HTML documentation should be generated.
+     * 
+     * @param compileHtml  the task option value to assign
+     */
+    public void setCompileHtml(boolean compileHtml) {
+        this.compileHtml = compileHtml;
     }
 
 }

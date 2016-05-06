@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Doclet>
+
+	<NamespaceDoc>
+		<Content>
+			<Summary>
+				<BusinessObjectSummary />
+				<CoreObjectSummary />
+				<VWASummary />
+				<EnumsSummary />
+				<SimpleTypesSummary />
+				<ServicesSummary />
+			</Summary>
+			<NamespaceDescription />
+		</Content>
+	</NamespaceDoc>
+
+	<CoreObjectDoc>
+		<ObjectTree />
+		<ObjectInfo>
+			<ObjectDescription />
+			<FacetInfo />
+			<AliasInfo />
+		</ObjectInfo>
+	</CoreObjectDoc>
+
+	<BusinessObjectDoc>
+		<ObjectTree />
+		<ObjectInfo>
+			<ObjectDescription />
+			<FacetInfo />
+			<AliasInfo />
+		</ObjectInfo>
+	</BusinessObjectDoc>
+
+	<VWADoc>
+		<ObjectTree />
+		<ObjectInfo>
+			<ObjectDescription />
+			<ValueInfo />
+			<MemberDetails>
+				<AttributeDetails>
+					<AttributeDoc />
+				</AttributeDetails>
+				<IndicatorDetails>
+					<IndicatorDoc />
+				</IndicatorDetails>
+			</MemberDetails>
+			<Examples />
+		</ObjectInfo>
+	</VWADoc>
+
+	<ServiceDoc>
+		<ObjectInfo />
+		<OperationSummary />
+	</ServiceDoc>
+
+	<EnumDoc>
+		<ObjectInfo />
+		<EnumConstantsDetails>
+			<EnumConstant>
+				<EnumDescription />
+			</EnumConstant>
+		</EnumConstantsDetails>
+	</EnumDoc>
+
+	<SimpleDoc>
+		<ObjectInfo />
+	</SimpleDoc>
+
+	<FacetDoc>
+		<ObjectTree />
+		<ObjectInfo>
+			<ObjectDescription />
+			<MemberDetails>
+				<PropertyDetails>
+					<PropertyDoc />
+				</PropertyDetails>
+				<AttributeDetails>
+					<AttributeDoc />
+				</AttributeDetails>
+				<IndicatorDetails>
+					<IndicatorDoc />
+				</IndicatorDetails>
+			</MemberDetails>
+			<AliasSummary />
+			<Examples />
+		</ObjectInfo>
+	</FacetDoc>
+
+</Doclet>

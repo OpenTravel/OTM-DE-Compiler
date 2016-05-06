@@ -96,6 +96,12 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
      */
 	@Parameter( defaultValue = "true" )
     protected boolean compileSwagger;
+	
+	 /**
+     * Boolean flag indicating that html files should be generated.
+     */
+	@Parameter( defaultValue = "true" )
+    protected boolean compileHtml;
 
     /**
      * Boolean flag indicating that example data files should be generated.
@@ -266,6 +272,14 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
 	@Override
 	public boolean isCompileSwagger() {
 		return compileSwagger;
+	}
+	
+	/**
+	 * @see org.opentravel.schemacompiler.task.CompileAllTaskOptions#isCompileHtml()
+	 */
+	@Override
+	public boolean isCompileHtml() {
+		return compileHtml;
 	}
 
 	/**

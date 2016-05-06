@@ -1334,6 +1334,11 @@
 					<property name="targetFormat" value="SWAGGER" />
 					<property name="codeGenerator" value="org.opentravel.schemacompiler.codegen.swagger.SwaggerCodeGenerator" />
 				</bean>
+				<bean class="org.opentravel.schemacompiler.codegen.CodeGeneratorMapping">
+					<property name="sourceType"	value="org.opentravel.schemacompiler.model.TLModel" />
+					<property name="targetFormat" value="HTML" />
+					<property name="codeGenerator" value="org.opentravel.schemacompiler.codegen.html.DocumentationGenerator" />
+				</bean>
 			</set>
 		</property>
 	</bean>
