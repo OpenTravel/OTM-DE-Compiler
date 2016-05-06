@@ -55,5 +55,13 @@ public interface CompileAllTaskOptions extends SchemaCompilerTaskOptions,
      * @return boolean
      */
 	public boolean isCompileSwagger();
+	
+	/**
+     * Returns the option flag indicating that HTML documentation files should be generated for
+     * user libraries.
+     * 
+     * @return boolean
+     */
+	public boolean isCompileHtml();
     
 }

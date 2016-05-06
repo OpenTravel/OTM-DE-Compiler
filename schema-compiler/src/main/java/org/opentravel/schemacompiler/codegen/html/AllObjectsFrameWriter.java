@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2014 OpenTravel Alliance (info@opentravel.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 /*
  * Copyright (c) 1998, 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
@@ -29,13 +44,13 @@ import java.io.IOException;
 import java.util.List;
 
 import org.opentravel.schemacompiler.model.LibraryMember;
-
 import org.opentravel.schemacompiler.codegen.html.LinkInfoImpl;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlStyle;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTag;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTree;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlConstants;
 import org.opentravel.schemacompiler.codegen.html.markup.RawHtml;
+import org.opentravel.schemacompiler.codegen.html.markup.StringContent;
 import org.opentravel.schemacompiler.codegen.html.DocletAbortException;
 import org.opentravel.schemacompiler.codegen.html.IndexBuilder;
 
@@ -164,12 +179,18 @@ public class AllObjectsFrameWriter extends HtmlDocletWriter {
             Content content) {
         for (LibraryMember member : memberList) {
             String label = italicsObjectName(member, false);
-            Content linkContent;
+            Content linkContent = null;
+        	String link;
             if(wantFrames){
-                linkContent = new RawHtml(getLink(new LinkInfoImpl(
-                        LinkInfoImpl.ALL_CLASSES_FRAME, member, label, "classFrame")));
+            	link = getLink(new LinkInfoImpl(
+                        LinkInfoImpl.ALL_CLASSES_FRAME, member, label, "classFrame"));              
             } else {
-                linkContent = new RawHtml(getLink(new LinkInfoImpl(member, label)));
+            	link = getLink(new LinkInfoImpl(member, label));
+            }
+            if(link != null){
+            	linkContent = new RawHtml(link);
+            }else{
+            	linkContent = new StringContent();
             }
             Content li = HtmlTree.LI(linkContent);
             content.addContent(li);

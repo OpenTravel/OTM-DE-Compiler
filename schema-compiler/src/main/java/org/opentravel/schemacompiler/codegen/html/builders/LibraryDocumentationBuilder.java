@@ -1,5 +1,17 @@
 /**
- * 
+ * Copyright (C) 2014 OpenTravel Alliance (info@opentravel.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.opentravel.schemacompiler.codegen.html.builders;
 
@@ -8,6 +20,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLLibrary;
@@ -15,7 +28,6 @@ import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLService;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
-
 import org.opentravel.schemacompiler.codegen.html.Configuration;
 import org.opentravel.schemacompiler.codegen.html.Content;
 import org.opentravel.schemacompiler.codegen.html.writers.LibraryWriter;
@@ -34,6 +46,7 @@ public class LibraryDocumentationBuilder implements DocumentationBuilder {
 	
 	private List<DocumentationBuilder> businessObjects = new ArrayList<DocumentationBuilder>();
 	private List<DocumentationBuilder> coreObjects = new ArrayList<DocumentationBuilder>();
+	private List<DocumentationBuilder> choiceObjects = new ArrayList<DocumentationBuilder>();
 	private List<DocumentationBuilder> vwaObjects = new ArrayList<DocumentationBuilder>();
 	private List<DocumentationBuilder> serviceObjects = new ArrayList<DocumentationBuilder>();
 	private List<DocumentationBuilder> enumObjects = new ArrayList<DocumentationBuilder>();
@@ -53,6 +66,10 @@ public class LibraryDocumentationBuilder implements DocumentationBuilder {
 			coreObjects.add(DocumentationBuilderFactory.getInstance()
 					.getDocumentationBuilder(bo));
 		}
+		for (TLChoiceObject co : library.getChoiceObjectTypes()) {
+			choiceObjects.add(DocumentationBuilderFactory.getInstance()
+					.getDocumentationBuilder(co));
+		}		
 		for (TLClosedEnumeration bo : library.getClosedEnumerationTypes()) {
 			enumObjects.add(DocumentationBuilderFactory.getInstance()
 					.getDocumentationBuilder(bo));
@@ -76,6 +93,7 @@ public class LibraryDocumentationBuilder implements DocumentationBuilder {
 		}
 		allObjects.addAll(businessObjects);
 		allObjects.addAll(coreObjects);
+		allObjects.addAll(choiceObjects);
 		allObjects.addAll(enumObjects);
 		allObjects.addAll(vwaObjects);
 		allObjects.addAll(serviceObjects);
@@ -86,7 +104,7 @@ public class LibraryDocumentationBuilder implements DocumentationBuilder {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder#getDocType
+	 * com.travelport.otm.sourcegen.documentation.DocumentationBuilder#getDocType
 	 * ()
 	 */
 	@Override
@@ -170,6 +188,13 @@ public class LibraryDocumentationBuilder implements DocumentationBuilder {
 		return coreObjects;
 	}
 
+	/**
+	 * @return the choiceObjects
+	 */
+	public List<DocumentationBuilder> getChoiceObjects() {
+		return choiceObjects;
+	}
+	
 	/**
 	 * @return the vwaObjects
 	 */

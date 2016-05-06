@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2014 OpenTravel Alliance (info@opentravel.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 /*
  * Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
@@ -25,7 +40,6 @@
 package org.opentravel.schemacompiler.codegen.html.markup;
 
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -62,8 +76,8 @@ public abstract class HtmlDocWriter extends HtmlWriter {
               null, configuration.destDirName + filename,
               configuration.docencoding);
         // use File to normalize file separators
-        configuration.message.notice("doclet.Generating_0",
-            new File(configuration.destDirName, filename));
+//        configuration.message.notice("doclet.Generating_0",
+//            new File(configuration.destDirName, filename));
     }
 
     public HtmlDocWriter(Configuration configuration,
@@ -72,9 +86,9 @@ public abstract class HtmlDocWriter extends HtmlWriter {
               configuration.destDirName + path, filename,
               configuration.docencoding);
         // use File to normalize file separators
-        configuration.message.notice("doclet.Generating_0",
-            new File(configuration.destDirName,
-                    ((path.length() > 0)? path + File.separator: "") + filename));
+//        configuration.message.notice("doclet.Generating_0",
+//            new File(configuration.destDirName,
+//                    ((path.length() > 0)? path + File.separator: "") + filename));
     }
 
     /**

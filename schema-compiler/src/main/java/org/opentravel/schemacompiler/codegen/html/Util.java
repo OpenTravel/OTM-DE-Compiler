@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2014 OpenTravel Alliance (info@opentravel.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 /*
  * Copyright (c) 1998, 2008, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
@@ -24,7 +39,6 @@
  */
 package org.opentravel.schemacompiler.codegen.html;
 
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -43,7 +57,8 @@ import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.Configuration;
 
 /**
- * Utilities Class for Documentation. Modified from the original JavaDoc Util class.
+ * Utilities Class for Documentation. Modified from the original JavaDoc Util
+ * class.
  *
  * @author Atul M Dambalkar
  * @author Jamie Ho
@@ -59,9 +74,15 @@ public class Util {
 			{ "<", "&lt;" }, { ">", "&gt;" } };
 
 	/**
-	 * Name of the resource directory.
+	 * Name of the destination resource directory.
 	 */
 	public static final String RESOURCESDIR = "resources";
+	
+	/**
+	 * Name of the source resource directory.
+	 */
+	public static final String SOURCE_RESOURCESDIR = "/org/opentravel/schemacompiler/html/" + RESOURCESDIR;
+	
 
 	/**
 	 * Resource bundle corresponding to the doclets.properties file.
@@ -78,19 +99,19 @@ public class Util {
 	public static void copyFile(File destfile, File srcfile) throws IOException {
 		byte[] bytearr = new byte[512];
 		int len = 0;
-		
+
 		try (FileInputStream input = new FileInputStream(srcfile)) {
 			File destDir = destfile.getParentFile();
 			destDir.mkdirs();
-			
+
 			try (FileOutputStream output = new FileOutputStream(destfile)) {
-				
+
 				while ((len = input.read(bytearr)) != -1) {
 					output.write(bytearr, 0, len);
 				}
-				 
+
 			} catch (FileNotFoundException exc) {
-			} catch (SecurityException exc) {				
+			} catch (SecurityException exc) {
 			}
 		}
 	}
@@ -111,7 +132,7 @@ public class Util {
 	public static void copyResourceFile(Configuration configuration,
 			String resourcefile, boolean overwrite) {
 		String destresourcesdir = configuration.destDirName + RESOURCESDIR;
-		copyFile(configuration, resourcefile, RESOURCESDIR, destresourcesdir,
+		copyFile(configuration, resourcefile, SOURCE_RESOURCESDIR, destresourcesdir,
 				overwrite, false);
 	}
 
@@ -140,13 +161,15 @@ public class Util {
 			boolean replaceNewLine) {
 		DirectoryManager.createDirectory(configuration, destination);
 		File destfile = new File(destination, file);
-		if (destfile.exists() && (!overwrite))
+		if (destfile.exists() && (!overwrite)) {
 			return;
-		try (InputStream in = Configuration.class.getResourceAsStream(source
-					+ DirectoryManager.URL_FILE_SEPARATOR + file)) {
-			if (in == null)
+		}
+		String path = source + File.separator + file;
+		try (InputStream in = Configuration.class.getResourceAsStream(path)) {
+			if (in == null) {
 				return;
-			
+			}
+
 			try (OutputStream out = new FileOutputStream(destfile)) {
 				if (!replaceNewLine) {
 					byte[] buf = new byte[2048];
@@ -159,10 +182,12 @@ public class Util {
 						BufferedWriter writer = null;
 						try {
 							if (configuration.docencoding == null) {
-								writer = new BufferedWriter(new OutputStreamWriter(out));
+								writer = new BufferedWriter(
+										new OutputStreamWriter(out));
 							} else {
-								writer = new BufferedWriter(new OutputStreamWriter(out,
-										configuration.docencoding));
+								writer = new BufferedWriter(
+										new OutputStreamWriter(out,
+												configuration.docencoding));
 							}
 							String line;
 							while ((line = reader.readLine()) != null) {
@@ -172,15 +197,16 @@ public class Util {
 						} finally {
 							if (writer != null) {
 								try {
-									writer.close();									
+									writer.close();
 								} catch (IOException ioe) {
-									//-TODO: what to do with IOException on close
+									// -TODO: what to do with IOException on
+									// close
 								}
 							}
 						}
 					}
 				}
-			} 
+			}
 		} catch (IOException ie) {
 			throw new DocletAbortException();
 		}
@@ -192,7 +218,6 @@ public class Util {
 	public static String quote(String filepath) {
 		return ("\"" + filepath + "\"");
 	}
-
 
 	/**
 	 * Given a string, replace all occurraces of 'newStr' with 'oldStr'.
@@ -282,12 +307,13 @@ public class Util {
 		if (docencoding == null) {
 			return new OutputStreamWriter(fos);
 		} else {
-			try(OutputStreamWriter os = new OutputStreamWriter(fos, docencoding)){
+			try (OutputStreamWriter os = new OutputStreamWriter(fos,
+					docencoding)) {
 				return os;
-			}catch(IOException ex){
+			} catch (IOException ex) {
 				throw new IOException(ex);
 			}
-			
+
 		}
 	}
 
@@ -309,6 +335,5 @@ public class Util {
 			Configuration configuration) {
 		return configuration.isGeneratedDoc(builder);
 	}
-
 
 }

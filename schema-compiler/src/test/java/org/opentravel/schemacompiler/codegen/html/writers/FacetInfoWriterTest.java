@@ -1,5 +1,17 @@
 /**
- * 
+ * Copyright (C) 2014 OpenTravel Alliance (info@opentravel.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.opentravel.schemacompiler.codegen.html.writers;
 
@@ -30,7 +42,7 @@ public class FacetInfoWriterTest extends WriterTest{
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		WriterTest.setUpBeforeClass();
-		bo = TestLibraryProvider.getBusinessObject();
+		bo = TestLibraryProvider.getBusinessObject("ExampleBusinessObject");
 	}
 
 	@After
@@ -68,7 +80,7 @@ public class FacetInfoWriterTest extends WriterTest{
 	@Test
 	public void testItShouldAddInheritedFacetsToTheContent() throws Exception {
 		TLBusinessObject extendedBO = TestLibraryProvider
-				.getExtendedBusinessObject();
+				.getBusinessObject("ExtendedBusinessObject");
 		BusinessObjectDocumentationBuilder builder = new BusinessObjectDocumentationBuilder(
 				extendedBO);
 		boWriter = new BusinessObjectWriter(builder, null,
@@ -78,13 +90,13 @@ public class FacetInfoWriterTest extends WriterTest{
 		writer.addInfo(div);
 		String content = div.toString();
 		assertTrue("No facet.",
-				content.contains(bo.getSummaryFacet().getLocalName()));
+				content.contains(extendedBO.getCustomFacet("test", "ExtendedCustomFacet").getLocalName()));
 	}
 	
 	@Test
-	public void testItShouldNotAddInheritedFacetsToTheContent() throws Exception {
+	public void testItShouldNotAddOverridenInheritedFacetsToTheContent() throws Exception {
 		TLBusinessObject extendedBO = TestLibraryProvider
-				.getExtendedBusinessObject();
+				.getBusinessObject("ExtendedBusinessObject");
 		BusinessObjectDocumentationBuilder builder = new BusinessObjectDocumentationBuilder(
 				extendedBO);
 		boWriter = new BusinessObjectWriter(builder, null,

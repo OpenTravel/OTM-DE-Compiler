@@ -1,5 +1,17 @@
 /**
- * 
+ * Copyright (C) 2014 OpenTravel Alliance (info@opentravel.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.opentravel.schemacompiler.codegen.html.builders;
 
@@ -39,6 +51,19 @@ public class FacetDocumentationBuilder extends
 		for (TLProperty prop : t.getElements()) {
 			properties.add(new PropertyDocumentationBuilder(prop));
 		}
+		TLFacet superFacet = getSuperFacet(t);
+
+		if (superFacet != null && superFacet.declaresContent()) {
+			superType = DocumentationBuilderFactory.getInstance()
+					.getDocumentationBuilder(superFacet);
+		}
+		aliases = new ArrayList<String>();
+		for (TLAlias alias : t.getAliases()) {
+			aliases.add(alias.getLocalName());
+		}
+	}
+
+	private TLFacet getSuperFacet(TLFacet t) {
 		TLFacet superFacet = null;
 		TLFacetOwner owner = t.getOwningEntity();
 		switch (t.getFacetType()) {
@@ -68,42 +93,34 @@ public class FacetDocumentationBuilder extends
 		case DETAIL:
 			superFacet = FacetCodegenUtils.getFacetOfType(owner,
 					TLFacetType.SUMMARY);
-				if (!superFacet.declaresContent()) {
-					TLFacetOwner ext = FacetCodegenUtils
-							.getFacetOwnerExtension(owner);
-					while (ext != null) {
-						TLFacet extFacet = FacetCodegenUtils.getFacetOfType(
-								ext, TLFacetType.SUMMARY);
-						if (extFacet.declaresContent()) {
-							superFacet = extFacet;
-							ext = null;
-						} else {
-							ext = FacetCodegenUtils
-									.getFacetOwnerExtension(ext);
-						}
+			if (!superFacet.declaresContent()) {
+				TLFacetOwner ext = FacetCodegenUtils
+						.getFacetOwnerExtension(owner);
+				while (ext != null) {
+					TLFacet extFacet = FacetCodegenUtils.getFacetOfType(ext,
+							TLFacetType.SUMMARY);
+					if (extFacet.declaresContent()) {
+						superFacet = extFacet;
+						ext = null;
+					} else {
+						ext = FacetCodegenUtils.getFacetOwnerExtension(ext);
 					}
-
 				}
+
+			}
 			if (!superFacet.declaresContent()) {
 				superFacet = FacetCodegenUtils.getFacetOfType(owner,
 						TLFacetType.ID);
 			}
 			break;
 		case SUMMARY:
-			superFacet = FacetCodegenUtils.getFacetOfType(t.getOwningEntity(),
-					TLFacetType.ID);
+			superFacet = FacetCodegenUtils
+					.getFacetOfType(owner, TLFacetType.ID);
 			break;
 		default:
 			break;
 		}
-		if (superFacet != null && superFacet.declaresContent()) {
-			superType = DocumentationBuilderFactory.getInstance()
-					.getDocumentationBuilder(superFacet);
-		}
-		aliases = new ArrayList<String>();
-		for (TLAlias alias : t.getAliases()) {
-			aliases.add(alias.getLocalName());
-		}
+		return superFacet;
 	}
 
 	protected String getLocalName() {

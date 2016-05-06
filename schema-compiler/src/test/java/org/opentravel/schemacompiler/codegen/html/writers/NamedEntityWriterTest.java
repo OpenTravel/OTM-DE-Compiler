@@ -1,5 +1,17 @@
 /**
- * 
+ * Copyright (C) 2014 OpenTravel Alliance (info@opentravel.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.opentravel.schemacompiler.codegen.html.writers;
 
@@ -37,7 +49,7 @@ public class NamedEntityWriterTest extends WriterTest {
 		final TLLibrary lib = new TLLibrary();
 		lib.setName("TestLibrary");
 		entity = new TestEntity();
-		
+		entity.setOwningLibrary(lib);
 		writer = new NamedEntityWriter<NamedEntityDocumentationBuilder<?>>(
 				new NamedEntityDocumentationBuilder<TestEntity>(entity) {
 
@@ -84,12 +96,17 @@ public class NamedEntityWriterTest extends WriterTest {
 	
 	private class TestEntity implements NamedEntity, TLDocumentationOwner{
 
+		private AbstractLibrary library;
+		
 		@Override
 		public AbstractLibrary getOwningLibrary() {
-			// TODO Auto-generated method stub
-			return null;
+			return library;
 		}
 
+		public void setOwningLibrary(AbstractLibrary library) {
+			this.library = library;
+		}
+		
 		@Override
 		public LibraryElement cloneElement() {
 			// TODO Auto-generated method stub
