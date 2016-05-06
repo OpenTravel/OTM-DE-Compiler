@@ -116,6 +116,10 @@ public class HtmlDoclet extends AbstractDoclet {
 		performCopy(configdestdir, configstylefile);
 		Util.copyResourceFile(configuration, "expand_normal_closed_16x16.png", false);
 		Util.copyResourceFile(configuration, "expand_normal_open_16x16.png", false);
+		Util.copyResourceFile(configuration, "background.gif", false);
+		Util.copyResourceFile(configuration, "tab.gif", false);
+		Util.copyResourceFile(configuration, "titlebar.gif", false);
+		Util.copyResourceFile(configuration, "titlebar_end.gif", false);
 		
 		AllObjectsFrameWriter.generate(configuration, new IndexBuilder(
 				configuration, false, true));
@@ -131,7 +135,7 @@ public class HtmlDoclet extends AbstractDoclet {
 			if(configdestdir.isEmpty()){
 				throw new RuntimeException("Style sheet output Directory not specified");
 			}
-			Util.copyFile(configuration, DEFAULT_STYLESHEET, Util.SOURCE_RESOURCESDIR,
+			Util.copyFile(configuration, DEFAULT_STYLESHEET, Util.RESOURCESDIR,
 					configdestdir, false, true);
 		}
 	}

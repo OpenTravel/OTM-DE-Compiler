@@ -77,7 +77,7 @@ public class Configuration {
 	/**
 	 * Location of doclet properties file.
 	 */
-	public static final String DOCLETS_RESOURCE = "org.opentravel.schemacompiler.html.resources.doclets";
+	public static final String DOCLETS_RESOURCE = "org.opentravel.schemacompiler.codegen.html.resources.doclets";
 	
 	/**
 	 * The namespace for XSD schemas.

@@ -75,11 +75,11 @@ public abstract class AbstractFieldInfoWriter<T extends NamedEntityDocumentation
 	protected Content getDetailedInfo(S field) {
 		Content detailTable = getDetailTableTree();
 		addDetailFieldType(field, detailTable, 0);
-		addValue("Example Value", field.getExampleValue(), detailTable, 0);
-		addValue("Required", String.valueOf(field.isRequired()), detailTable, 1);
-		addValue("Pattern", field.getPattern(), detailTable, 0);
+		addValue("Example Value", field.getExampleValue(), detailTable, 1);
+		addValue("Required", String.valueOf(field.isRequired()), detailTable, 0);
+		addValue("Pattern", field.getPattern(), detailTable, 1);
 		addValue("Max Occurrences", String.valueOf(field.getMaxOcurrences()),
-				detailTable, 1);
+				detailTable, 0);
 		// TODO add later
 		// addValue("Since Version", String.valueOf(field.getSinceVersion()),
 		// detailTable, 1);

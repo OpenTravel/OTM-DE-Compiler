@@ -33,7 +33,7 @@ public class WriterTest {
 
 	protected static Configuration config;
 	
-	public static final File DEST_DIR = new File("test");
+	public static final File DEST_DIR = new File("target/test");
 
 	/**
 	 * @throws java.lang.Exception

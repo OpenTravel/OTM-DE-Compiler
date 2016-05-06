@@ -81,7 +81,7 @@ public class Util {
 	/**
 	 * Name of the source resource directory.
 	 */
-	public static final String SOURCE_RESOURCESDIR = "/org/opentravel/schemacompiler/html/" + RESOURCESDIR;
+	public static final String SOURCE_RESOURCESDIR = "org/opentravel/schemacompiler/codegen/html/" + RESOURCESDIR;
 	
 
 	/**
@@ -132,7 +132,7 @@ public class Util {
 	public static void copyResourceFile(Configuration configuration,
 			String resourcefile, boolean overwrite) {
 		String destresourcesdir = configuration.destDirName + RESOURCESDIR;
-		copyFile(configuration, resourcefile, SOURCE_RESOURCESDIR, destresourcesdir,
+		copyFile(configuration, resourcefile, RESOURCESDIR, destresourcesdir,
 				overwrite, false);
 	}
 
@@ -165,7 +165,8 @@ public class Util {
 			return;
 		}
 		String path = source + File.separator + file;
-		try (InputStream in = Configuration.class.getResourceAsStream(path)) {
+		try (InputStream in = Configuration.class.getResourceAsStream(source
+				+ DirectoryManager.URL_FILE_SEPARATOR + file)) {
 			if (in == null) {
 				return;
 			}
