@@ -164,7 +164,6 @@ public class Util {
 		if (destfile.exists() && (!overwrite)) {
 			return;
 		}
-		String path = source + File.separator + file;
 		try (InputStream in = Configuration.class.getResourceAsStream(source
 				+ DirectoryManager.URL_FILE_SEPARATOR + file)) {
 			if (in == null) {

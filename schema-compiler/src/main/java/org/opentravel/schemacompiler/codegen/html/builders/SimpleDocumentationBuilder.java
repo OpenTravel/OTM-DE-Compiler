@@ -34,8 +34,11 @@ public class SimpleDocumentationBuilder extends
 	public SimpleDocumentationBuilder(TLSimple t) {
 		super(t);
 		TLAttributeType parentType = t.getParentType();
-		superType = DocumentationBuilderFactory.getInstance()
-				.getDocumentationBuilder(parentType);
+		
+		if (parentType != null) {
+			superType = DocumentationBuilderFactory.getInstance()
+					.getDocumentationBuilder(parentType);
+		}
 	}
 
 	@Override

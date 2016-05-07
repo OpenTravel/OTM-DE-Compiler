@@ -21,11 +21,6 @@ import java.io.File;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opentravel.schemacompiler.model.LibraryMember;
-import org.opentravel.schemacompiler.model.TLLibrary;
-import org.opentravel.schemacompiler.codegen.html.DirectoryManager;
-import org.opentravel.schemacompiler.codegen.html.Util;
-import org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.writers.WriterTest;
 
 /**
@@ -79,15 +74,15 @@ public class HtmlDocletTest extends WriterTest {
 	public void testGenerateLibraryFiles() throws Exception {
 		DEST_DIR.mkdir();
 		doclet.generateLibraryFiles(config.getModel());
-		for (TLLibrary lib : config.getModel().getUserDefinedLibraries()) {
-			String basePath = config.getDestDirName()
-					+ DirectoryManager.getPath(AbstractDocumentationBuilder.getLibraryName(lib));
-			for(LibraryMember member : lib.getNamedMembers()){
+//		for (TLLibrary lib : config.getModel().getUserDefinedLibraries()) {
+//			String basePath = config.getDestDirName()
+//					+ DirectoryManager.getPath(AbstractDocumentationBuilder.getLibraryName(lib));
+//			for(LibraryMember member : lib.getNamedMembers()){
 //				if(! (member instanceof TLResource)){ //TODO temporary
 //				File file = new File(basePath + File.separator + member.getLocalName() + ".html");
 //				assertTrue("No member file: " + member.getLocalName(), file.exists());
 //				}
-			}
-		}
+//			}
+//		}
 	}
 }

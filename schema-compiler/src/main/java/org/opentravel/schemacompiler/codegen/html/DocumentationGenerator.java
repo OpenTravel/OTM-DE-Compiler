@@ -37,8 +37,8 @@ public class DocumentationGenerator implements CodeGenerator<TLModel> {
 
 	private CodeGenerationFilenameBuilder<TLModel> filenameBuilder;
 
-	private Logger log;
-
+	protected Logger log;
+	
 	@Override
 	public Collection<File> generateOutput(TLModel model,
 			CodeGenerationContext context) throws ValidationException,

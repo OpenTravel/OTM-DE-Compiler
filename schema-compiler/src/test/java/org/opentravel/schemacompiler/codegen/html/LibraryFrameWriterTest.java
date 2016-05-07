@@ -51,10 +51,10 @@ public class LibraryFrameWriterTest extends WriterTest {
 	public void test() {
 		List<LibraryMember> members = library.getNamedMembers();
 		assertTrue(members.size() > 0);
-		for(LibraryMember member : members){
+//		for(LibraryMember member : members){
 			//TODO uncomment when we can handle resources and extension points
-		//	assertTrue(content.contains(member.getLocalName()));
-		}
+//			assertTrue(content.contains(member.getLocalName()));
+//		}
 	}
 
 }

@@ -115,8 +115,16 @@ public class MessageRetriever {
                                     ") for javadoc doclets is missing.");
             }
         }
-        String message = messageRB.getString(key);
-        return MessageFormat.format(message, args);
+        String messageText;
+        
+        try {
+            String message = messageRB.getString(key);
+            messageText = MessageFormat.format(message, args);
+            
+        } catch (MissingResourceException e) {
+        	messageText = key;
+        }
+        return messageText;
     }
 
     /**

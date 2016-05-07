@@ -15,9 +15,11 @@
  */
 package org.opentravel.schemacompiler.codegen.html.writers;
 
+import java.util.List;
+
+import org.opentravel.schemacompiler.codegen.html.Content;
 import org.opentravel.schemacompiler.codegen.html.builders.ComplexTypeDocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
-import org.opentravel.schemacompiler.codegen.html.Content;
 import org.opentravel.schemacompiler.codegen.html.writers.info.AliasInfoWriter;
 
 /**
@@ -40,9 +42,10 @@ public class ComplexObjectWriter<T extends ComplexTypeDocumentationBuilder<?>> e
 	 */
 	@Override
 	public void addAliasInfo(Content aliasTree) {
-		if (member.getAliases().size() > 0) {
-			AliasInfoWriter aliasWriter = new AliasInfoWriter(this,
-					member);
+		List<String> aliasList = member.getAliases();
+		
+		if ((aliasList != null) && (aliasList.size() > 0)) {
+			AliasInfoWriter aliasWriter = new AliasInfoWriter(this, member);
 			aliasWriter.addInfo(aliasTree);
 		}
 	}

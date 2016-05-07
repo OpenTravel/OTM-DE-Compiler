@@ -41,12 +41,12 @@
 package org.opentravel.schemacompiler.codegen.html;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.text.MessageFormat;
-import java.util.ResourceBundle;
 import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
-import org.opentravel.schemacompiler.codegen.html.SourcePosition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility for integrating with javadoc tools and for localization.
@@ -60,16 +60,9 @@ import org.opentravel.schemacompiler.codegen.html.SourcePosition;
  * @author Neal Gafter (rewrite)
  */
 public class Messager {//extends Log implements DocErrorReporter {
-
-	//@Deprecated
-    public final PrintWriter errWriter;
-
-    //@Deprecated
-    public final PrintWriter warnWriter;
-
-    //@Deprecated
-    public final PrintWriter noticeWriter;
-
+	
+    private static final Logger log = LoggerFactory.getLogger(Messager.class);
+	
     /** The maximum number of errors/warnings that are reported.
      */
     public final int MaxErrors;
@@ -95,41 +88,16 @@ public class Messager {//extends Log implements DocErrorReporter {
 
     private ResourceBundle messageRB = null;
 
-    /** The default writer for diagnostics
-     */
-    static final PrintWriter defaultErrWriter = new PrintWriter(System.err);
-    static final PrintWriter defaultWarnWriter = new PrintWriter(System.err);
-    static final PrintWriter defaultNoticeWriter = new PrintWriter(System.out);
-
     /**
      * Constructor
      * @param programName  Name of the program (for error messages).
      */
     public Messager(String programName) {
-        this(programName, defaultErrWriter, defaultWarnWriter, defaultNoticeWriter);
-    }
-
-    /**
-     * Constructor
-     * @param programName  Name of the program (for error messages).
-     * @param errWriter    Stream for error messages
-     * @param warnWriter   Stream for warnings
-     * @param noticeWriter Stream for other messages
-     */
-    protected Messager(String programName,
-                       PrintWriter errWriter,
-                       PrintWriter warnWriter,
-                       PrintWriter noticeWriter) {
-       // super(context, errWriter, warnWriter, noticeWriter);
-    	this.errWriter = errWriter;
-    	this.warnWriter = warnWriter;
-    	this.noticeWriter = noticeWriter;
         this.programName = programName;
         this.MaxErrors = getDefaultMaxErrors();
         this.MaxWarnings = getDefaultMaxWarnings();
     }
 
-   
     protected int getDefaultMaxErrors() {
         return Integer.MAX_VALUE;
     }
@@ -247,10 +215,9 @@ public class Messager {//extends Log implements DocErrorReporter {
      * @param msg message to print
      */
     public void printError(SourcePosition pos, String msg) {
-        if (nerrors < MaxErrors) {
+        if (log.isErrorEnabled() && (nerrors < MaxErrors)) {
             String prefix = (pos == null) ? programName : pos.toString();
-            errWriter.println(prefix + ": " + getText("javadoc.error") + " - " + msg);
-            errWriter.flush();
+            log.error(prefix + ": " + getText("javadoc.error") + " - " + msg);
             prompt();
             nerrors++;
         }
@@ -274,10 +241,9 @@ public class Messager {//extends Log implements DocErrorReporter {
      * @param msg message to print
      */
     public void printWarning(SourcePosition pos, String msg) {
-        if (nwarnings < MaxWarnings) {
+        if (log.isWarnEnabled() && (nwarnings < MaxWarnings)) {
             String prefix = (pos == null) ? programName : pos.toString();
-            warnWriter.println(prefix +  ": " + getText("javadoc.warning") +" - " + msg);
-            warnWriter.flush();
+            log.warn(prefix +  ": " + getText("javadoc.warning") +" - " + msg);
             nwarnings++;
         }
     }
@@ -300,11 +266,12 @@ public class Messager {//extends Log implements DocErrorReporter {
      * @param msg message to print
      */
     public void printNotice(SourcePosition pos, String msg) {
-        if (pos == null)
-            noticeWriter.println(msg);
-        else
-            noticeWriter.println(pos + ": " + msg);
-        noticeWriter.flush();
+    	if (log.isInfoEnabled()) {
+            if (pos == null)
+                log.info(msg);
+            else
+            	log.info(pos + ": " + msg);
+    	}
     }
 
     /**
@@ -475,7 +442,7 @@ public class Messager {//extends Log implements DocErrorReporter {
     /**
      * Force program exit, e.g., from a fatal error.
      * <p>
-     * TODO: This method does not really belong here.
+     * NOTE: This method does not really belong here.
      */
     public void exit() {
         throw new ExitJavadoc();

@@ -1106,7 +1106,8 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 			link = ((LinkOutputImpl) factory.getLinkOutput(linkInfo))
 					.toString();
 		} catch (NullPointerException npe) {
-			System.out.println("Missing link for: " + linkInfo.label);
+			// TODO: This occurs numerous times during document generation
+			configuration.printNotice("Missing link for: " + linkInfo.label);
 		}
 		displayLength += linkInfo.displayLength;
 		return link;
@@ -1149,10 +1150,9 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 			className = packageName.substring(periodIndex + 1,
 					packageName.length())
 					+ (className.length() > 0 ? "." + className : "");
-			String defaultLabel = code ? getCode() + className + getCodeEnd()
-					: className;
 			packageName = packageName.substring(0, periodIndex);
 			if (getCrossNamespaceLink(packageName) != null) {
+//				String defaultLabel = code ? getCode() + className + getCodeEnd() : className;
 //				// The package exists in external documentation, so link to the
 //				// external
 //				// class (assuming that it exists). This is definitely a

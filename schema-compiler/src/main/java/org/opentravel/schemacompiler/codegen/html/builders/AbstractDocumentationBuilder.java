@@ -97,7 +97,7 @@ public abstract class AbstractDocumentationBuilder<T extends TLDocumentationOwne
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		AbstractDocumentationBuilder other = (AbstractDocumentationBuilder) obj;
+		AbstractDocumentationBuilder<?> other = (AbstractDocumentationBuilder<?>) obj;
 		if (name == null) {
 			if (other.name != null)
 				return false;

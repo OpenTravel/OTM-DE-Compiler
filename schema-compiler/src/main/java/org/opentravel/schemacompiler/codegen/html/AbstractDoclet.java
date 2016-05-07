@@ -65,6 +65,7 @@ public abstract class AbstractDoclet {
         try {
             doclet.startGeneration(model);
         } catch (Exception exc) {
+        	exc.printStackTrace(System.out);
             return false;
         }
         return true;
@@ -87,8 +88,7 @@ public abstract class AbstractDoclet {
      */
     private void startGeneration(TLModel model) throws Exception {
         if (model.getUserDefinedLibraries().size() == 0) {
-            configuration.message.
-                error("doclet.No_Libraries_To_Document");
+            configuration.message.notice("doclet.No_Libraries_To_Document");
             return;
         }
         configuration.getDocletSpecificMsg().notice("doclet.build_version",

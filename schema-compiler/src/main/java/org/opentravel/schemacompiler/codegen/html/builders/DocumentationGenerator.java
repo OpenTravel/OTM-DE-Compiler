@@ -40,7 +40,7 @@ public class DocumentationGenerator implements CodeGenerator<TLModel> {
 
 	private CodeGenerationFilenameBuilder<TLModel> filenameBuilder;
 
-	private Logger log;
+	protected Logger log;
 
 	/**
 	 * 

@@ -15,6 +15,7 @@
  */
 package org.opentravel.schemacompiler.task;
 
+import java.io.File;
 import java.util.Collection;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerator;
@@ -22,8 +23,8 @@ import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.XSDLibrary;
-import org.opentravel.schemacompiler.task.AbstractCompilerTask;
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
+import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 
 /**
@@ -34,12 +35,39 @@ public class DocumentationCompileTask extends AbstractCompilerTask {
 
 	private static final String HTML = "HTML";
 
-	public static final String CODE_GENERATOR_FACTORY = "javaCodeGeneratorFactory";
-
 	/**
 	 * Default Constructor
 	 */
 	public DocumentationCompileTask() {
+	}
+	
+	/**
+	 * Static method that will compile HTML documentation to the specified output folder.  If
+	 * successful, the file handle that is returned will be the 'index.html' file for the documentation
+	 * bundle.  If the compilation was unsuccessful (e.g. due to validation errors), this method will
+	 * return null.
+	 * 
+	 * @param model  the model to be compiled
+	 * @param outputFolder  the output folder where HTML documentation will be created
+	 * @param findings  holder for validation errors/warnings that are discovered during compilation (may be null)
+	 * @return File
+	 * @throws SchemaCompilerException  thrown if an error occurs during compilation
+	 */
+	public static File compileDocumentation(TLModel model, File outputFolder, ValidationFindings findings) throws SchemaCompilerException {
+		DocumentationCompileTask task = new DocumentationCompileTask();
+		File indexFile = new File( outputFolder, "/index.html" );
+		
+		task.setOutputFolder( outputFolder.getAbsolutePath() );
+		ValidationFindings compilerFindings = task.compileOutput( model );
+		
+		if (findings != null) {
+			findings.addAll( compilerFindings );
+		}
+		if (!indexFile.exists() ||
+				((compilerFindings != null) && compilerFindings.hasFinding( FindingType.ERROR ))) {
+			indexFile = null; // Do not return the index file if compilation failed
+		}
+		return indexFile;
 	}
 
 	/**
