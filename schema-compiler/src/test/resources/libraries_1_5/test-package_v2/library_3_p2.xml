@@ -32,10 +32,10 @@
             <Element name="Name" repeat="0" type="xsd:string"/>
         </Summary>
         <Detail>
-            <Attribute name="sampleCoreAttrlist" type="SampleCore_Simple_List"/>
+            <Attribute name="sampleCoreAttrlist" type="SampleCore_Simple_List" />
             <Element name="CompoundBusinessObjectIdentifier" repeat="0" type="CompoundBusinessObject_ID"/>
             <Element name="SampleCore_Alias1Detail" repeat="0" type="SampleCore_Alias1_Detail"/>
-            <Element name="VWAWithID" repeat="0" type="VWAWithID"/>
+            <Element name="VWAWithID" repeat="3" type="VWAWithID"/>
             <Element name="SampleCore_Simple_List" repeat="0" type="SampleCore_Simple_List"/>
             <Element name="SampleCoreDetail" repeat="2" type="SampleCore_Detail_List"/>
             <Element name="SampleBusinessObject" repeat="2" type="SampleBusinessObject"/>
@@ -43,11 +43,13 @@
             <Element name="SampleValue" repeat="0" type="xsd:int"/>
             <Element name="SampleOpenEnumProperty" repeat="0" type="SampleEnum_Open"/>
             <Element mandatory="true" name="SampleCoreSummaryRef" reference="true" repeat="2" type="SampleCore_Summary"/>
+            <Element name="ElementRef" type="xsd:IDREF"/>
         </Detail>
     </BusinessObject>
-    
+     
     <ValueWithAttrs name="VWAWithID" type="xsd:string">
         <Attribute name="idAttr" type="xsd:ID"/>
+        <Attribute name="attRef" type="xsd:IDREF"/>
     </ValueWithAttrs>
     
      <BusinessObject name="ExampleBusinessObject2" notExtendable="false">
