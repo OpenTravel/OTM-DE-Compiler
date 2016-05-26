@@ -745,7 +745,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 			}
 			JsonNode node;
 			
-			if (elementType instanceof TLListFacet) {
+			if (elementType instanceof TLListFacet || XsdCodegenUtils.isIdRefsType((TLPropertyType) elementType)) {
 				node = generateExampleValueArrayNode(context.getModelAttribute());
 			} else {
 				node = generateExampleValueNode(context.getModelAttribute());
