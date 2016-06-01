@@ -1655,12 +1655,6 @@ public final class ProjectManager {
         File backupFile = null;
         File wipFile = null;
         try {
-            // Refresh the content from the remote repository to make sure we are working with the
-            // most current data
-            if (item.getRepository() instanceof RemoteRepository) {
-                ((RemoteRepository) item.getRepository()).downloadContent(item, true);
-            }
-
             // Perform validation checks
             switch (item.getState()) {
                 case MANAGED_LOCKED:

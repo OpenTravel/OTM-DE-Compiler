@@ -72,6 +72,7 @@ import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryItemState;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.repository.RepositoryNamespaceUtils;
+import org.opentravel.schemacompiler.repository.RepositoryOutOfSyncException;
 import org.opentravel.schemacompiler.repository.RepositoryUnavailableException;
 import org.opentravel.schemacompiler.security.PasswordHelper;
 import org.opentravel.schemacompiler.version.VersionScheme;
@@ -883,6 +884,13 @@ public class RemoteRepositoryClient implements RemoteRepository {
         try {
             validateRepositoryItem(item);
             manager.getFileManager().startChangeSet();
+            
+            // Before performing the lock, check to see if we need to refresh the
+            // library from the remote repository
+            if (isLocalContentStale( item )) {
+            	throw new RepositoryOutOfSyncException("Unable to lock '" + item.getFilename() +
+            			"' because the local copy is out of date (refresh required).");
+            }
 
             // Build the HTTP request for the remote service
             RepositoryItemIdentityType itemIdentity = createItemIdentity(item);
@@ -1348,6 +1356,56 @@ public class RemoteRepositoryClient implements RemoteRepository {
             }
         }
         return isStaleContent;
+    }
+    
+    /**
+     * Returns true if the copy of the item in the remote repository has been updated
+     * since the local copy was last downloaded.
+     * 
+     * @param item  the repository item to check for staleness
+     * @return boolean
+     * @throws RepositoryException  thrown if the remote web service is not available
+     */
+    @SuppressWarnings("unchecked")
+	private boolean isLocalContentStale(RepositoryItem item) throws RepositoryException {
+    	try {
+            HttpPost metadataRequest = newPostRequest(REPOSITORY_ITEM_METADATA_ENDPOINT);
+            RepositoryItemIdentityType itemIdentity = new RepositoryItemIdentityType();
+            Marshaller marshaller = RepositoryFileManager.getSharedJaxbContext().createMarshaller();
+            StringWriter xmlWriter = new StringWriter();
+
+            itemIdentity.setBaseNamespace( item.getBaseNamespace() );
+            itemIdentity.setFilename( item.getFilename() );
+            itemIdentity.setVersion( item.getVersion() );
+
+            marshaller.marshal( objectFactory.createRepositoryItemIdentity(itemIdentity), xmlWriter );
+            metadataRequest.setEntity( new StringEntity( xmlWriter.toString(), ContentType.TEXT_XML ) );
+
+            // Send the request for meta-data to the remote web service
+            HttpResponse metadataResponse = executeWithAuthentication(metadataRequest);
+
+            if (metadataResponse.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
+                throw new RepositoryException(getResponseErrorMessage(metadataResponse));
+            }
+            Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
+            JAXBElement<LibraryInfoType> jaxbElement = (JAXBElement<LibraryInfoType>) unmarshaller
+                    .unmarshal( metadataResponse.getEntity().getContent() );
+            LibraryInfoType remoteMetadata = jaxbElement.getValue();
+    		
+            // Get the local meta-data for the item and compare the last-updated timestamps
+            LibraryInfoType localMetadata = manager.getFileManager().loadLibraryMetadata(
+            		item.getBaseNamespace(), item.getFilename(), item.getVersion() );
+            Date localLastUpdated = XMLGregorianCalendarConverter.toJavaDate( localMetadata.getLastUpdated() );
+            Date remoteLastUpdated = XMLGregorianCalendarConverter.toJavaDate( remoteMetadata.getLastUpdated() );
+            
+            return localLastUpdated.before( remoteLastUpdated );
+            
+        } catch (IOException e) {
+            throw new RepositoryUnavailableException( "The remote repository is unavailable.", e);
+
+        } catch (JAXBException e) {
+            throw new RepositoryException("The format of the library meta-data is unreadable.", e);
+        }
     }
 
     /**

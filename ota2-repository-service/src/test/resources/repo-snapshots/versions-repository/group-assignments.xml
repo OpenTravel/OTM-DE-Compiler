@@ -5,8 +5,10 @@
 	<Group name="Administrators">
 		<Member>admin</Member>
 		<Member>testuser</Member>
+		<Member>testuser2</Member>
 	</Group>
 	<Group name="SchemaAuthors">
 		<Member>testuser</Member>
+		<Member>testuser2</Member>
 	</Group>
 </GroupAssignments>

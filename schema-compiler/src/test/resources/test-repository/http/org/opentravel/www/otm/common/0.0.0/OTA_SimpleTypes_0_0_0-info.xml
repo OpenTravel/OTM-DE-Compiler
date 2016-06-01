@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<otp:LibraryInfo xmlns="http://www.w3.org/2001/XMLSchema" xmlns:otp="http://www.OpenTravel.org/ns/OTA2/RepositoryInfo_v01_00">
+    <otp:Namespace>http://www.opentravel.org/OTM/Common/v0</otp:Namespace>
+    <otp:BaseNamespace>http://www.opentravel.org/OTM/Common</otp:BaseNamespace>
+    <otp:Filename>OTA_SimpleTypes_0_0_0.otm</otp:Filename>
+    <otp:LibraryName>OTA_SimpleTypes</otp:LibraryName>
+    <otp:Version>0.0.0</otp:Version>
+    <otp:VersionScheme>OTA2</otp:VersionScheme>
+    <otp:Status>Final</otp:Status>
+    <otp:State>ManagedUnlocked</otp:State>
+    <otp:LastUpdated>2016-03-20T12:30:11.267Z</otp:LastUpdated>
+    <otp:OwningRepository>Opentravel</otp:OwningRepository>
+</otp:LibraryInfo>

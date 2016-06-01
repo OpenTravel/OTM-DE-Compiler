@@ -2,7 +2,7 @@
 <otp:Project xmlns="http://www.w3.org/2001/XMLSchema" xmlns:otp="http://www.OpenTravel.org/ns/OTA2/Project_v01_00"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/Project_v01_00 ../../../../../../schema-compiler/src/main/resources/ota2-context/schemas/OTA2_Project_v1.0.0.xsd">
-    <otp:projectId>http://www.OpenTravel.org/projects/test/versions</otp:projectId>
+    <otp:projectId>http://www.OpenTravel.org/projects/test/versions/1</otp:projectId>
     <otp:name>Version Test Project</otp:name>
     <otp:description>Test description for the project.</otp:description>
     <otp:ManagedProjectItem defaultItem="true">

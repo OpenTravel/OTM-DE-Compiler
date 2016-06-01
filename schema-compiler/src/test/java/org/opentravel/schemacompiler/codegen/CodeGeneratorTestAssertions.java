@@ -601,8 +601,10 @@ public class CodeGeneratorTestAssertions {
             		CodeGeneratorFactory.XSD_TARGET_FORMAT);
             wsdlValidationSchema = schemaFactory.newSchema(new StreamSource(schemaStream));
             jaxbWsdlContext = JAXBContext.newInstance(WSDL_SCHEMA_CONTEXT);
-            swaggerSchema = JsonSchemaFactory.byDefault().getJsonSchema( swaggerNode );
-
+            swaggerSchema = JsonSchemaFactory.newBuilder().setLoadingConfiguration(
+            		LoadingConfiguration.newBuilder().preloadSchema( "http://swagger.io/v2/schema.json#", swaggerNode ).freeze() )
+            		.freeze().getJsonSchema( swaggerNode );
+            
         } catch (Throwable t) {
             throw new ExceptionInInitializerError(t);
         }

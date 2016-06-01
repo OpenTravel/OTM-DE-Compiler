@@ -29,11 +29,14 @@ import java.util.Set;
 
 import javax.xml.XMLConstants;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opentravel.schemacompiler.loader.impl.CatalogLibraryNamespaceResolver;
 import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
+import org.opentravel.schemacompiler.repository.ProjectManager;
+import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.util.SchemaCompilerTestUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
@@ -52,14 +55,25 @@ public class TestLibraryModelLoader {
     public static final String LEGACY_NAMESPACE = "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/legacy_namespace";
 
     private static final String OTA2_COMMON_SCHEMA_URI = "http://www.opentravel.org/OTM/Common/v0";
+    
+    private static RepositoryManager testRepositoryManager;
+    
+    @BeforeClass
+    public static void setupLocalRepository() throws Exception {
+    	// Create a repository that can load the required OpenTravel library even when the local workstation
+    	// does not have a reference to the remote OpenTravel repository
+    	File localRepository = new File( System.getProperty("user.dir"), "/src/test/resources/test-repository" );
+    	testRepositoryManager = new RepositoryManager( localRepository );
+    }
 
     @Test
     public void testLoadLibraryNoDependencies() throws Exception {
         LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>();
+        TLModel model = modelLoader.getLibraryModel();
+        new ProjectManager( model, false, testRepositoryManager );
         modelLoader.setNamespaceResolver(getNamespaceResolver());
         ValidationFindings findings = modelLoader.loadLibraryModel(new URI(PACKAGE_1_NAMESPACE));
 
-        TLModel model = modelLoader.getLibraryModel();
         assertNotNull(model);
         SchemaCompilerTestUtils.printFindings(findings, FindingType.ERROR);
         assertFalse(findings.hasFinding(FindingType.ERROR));
@@ -90,10 +104,11 @@ public class TestLibraryModelLoader {
     @Test
     public void testLoadNamespaceWithDependencies() throws Exception {
         LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>();
+        TLModel model = modelLoader.getLibraryModel();
+        new ProjectManager( model, false, testRepositoryManager );
         modelLoader.setNamespaceResolver(getNamespaceResolver());
         ValidationFindings findings = modelLoader.loadLibraryModel(new URI(PACKAGE_2_NAMESPACE));
 
-        TLModel model = modelLoader.getLibraryModel();
         assertNotNull(model);
         SchemaCompilerTestUtils.printFindings(findings, FindingType.ERROR);
         assertFalse(findings.hasFinding(FindingType.ERROR));
@@ -143,11 +158,12 @@ public class TestLibraryModelLoader {
                 SchemaCompilerTestUtils.getBaseLibraryLocation()
                         + "/test-package_v2/library_1_p2.xml"));
         LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>();
-
+        TLModel model = modelLoader.getLibraryModel();
+        
+        new ProjectManager( model, false, testRepositoryManager );
         modelLoader.setNamespaceResolver(namespaceResolver);
         ValidationFindings findings = modelLoader.loadLibraryModel(libraryInput);
 
-        TLModel model = modelLoader.getLibraryModel();
         assertNotNull(model);
         SchemaCompilerTestUtils.printFindings(findings, FindingType.ERROR);
         assertFalse(findings.hasFinding(FindingType.ERROR));
@@ -191,12 +207,13 @@ public class TestLibraryModelLoader {
                 SchemaCompilerTestUtils.getBaseLibraryLocation()
                         + "/test-package_v3/sample_library.xml"));
         LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>();
-
+        TLModel model = modelLoader.getLibraryModel();
+        
+        new ProjectManager( model, false, testRepositoryManager );
         modelLoader.setNamespaceResolver(namespaceResolver);
 
         Set<String> libraryNames = new HashSet<String>();
         ValidationFindings findings = modelLoader.loadLibraryModel(libraryInput);
-        TLModel model = modelLoader.getLibraryModel();
 
         SchemaCompilerTestUtils.printFindings(findings);
         assertNotNull(model);
@@ -236,12 +253,13 @@ public class TestLibraryModelLoader {
                 SchemaCompilerTestUtils.getBaseLibraryLocation()
                         + "/test-package_v3/legacy_schema_1.xsd"));
         LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>();
-
+        TLModel model = modelLoader.getLibraryModel();
+        
+        new ProjectManager( model, false, testRepositoryManager );
         modelLoader.setNamespaceResolver(namespaceResolver);
 
         Set<String> libraryNames = new HashSet<String>();
         ValidationFindings findings = modelLoader.loadLibraryModel(libraryInput);
-        TLModel model = modelLoader.getLibraryModel();
 
         assertNotNull(model);
         SchemaCompilerTestUtils.printFindings(findings);

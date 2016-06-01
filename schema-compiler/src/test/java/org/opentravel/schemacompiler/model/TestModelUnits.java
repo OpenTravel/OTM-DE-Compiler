@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.InputStream;
@@ -53,7 +54,7 @@ public class TestModelUnits {
 
         TLModel model = modelLoader.getLibraryModel();
         assertEquals(2, model.getBuiltInLibraries().size());
-        assertEquals(6, model.getUserDefinedLibraries().size());
+        assertTrue(model.getUserDefinedLibraries().size() > 0);
 
         model.clearModel();
         assertEquals(2, model.getBuiltInLibraries().size());

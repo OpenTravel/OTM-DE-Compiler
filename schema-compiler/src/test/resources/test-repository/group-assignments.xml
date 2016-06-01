@@ -4,11 +4,5 @@
     xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/Security_v01_00 ../../../../main/resources/schemas/OTA2_Security_v1.0.0.xsd">
 	<Group name="Administrators">
 		<Member>admin</Member>
-		<Member>testuser</Member>
-		<Member>testuser2</Member>
-	</Group>
-	<Group name="SchemaAuthors">
-		<Member>testuser</Member>
-		<Member>testuser2</Member>
 	</Group>
 </GroupAssignments>
