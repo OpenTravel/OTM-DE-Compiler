@@ -745,7 +745,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 			}
 			JsonNode node;
 			
-			if (elementType instanceof TLListFacet) {
+			if (elementType instanceof TLListFacet || XsdCodegenUtils.isIdRefsType((TLPropertyType) elementType)) {
 				node = generateExampleValueArrayNode(context.getModelAttribute());
 			} else {
 				node = generateExampleValueNode(context.getModelAttribute());
@@ -1245,7 +1245,13 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 		public JsonIdReferenceAssignment(NamedEntity referencedEntity,
 				int referenceCount, String nodeName) {
 			super(referencedEntity, referenceCount, nodeName);
-			parentNode = (ObjectNode) contextStack.peek().getNode();
+			
+			JsonNode jn = contextStack.peek().getNode();
+			// for attributes we don't push the context which causes an issue here. Should we?
+			if(jn.isArray()){
+				jn = context.getNode();
+			}
+			parentNode = (ObjectNode) jn ;
 		}
 
 		/**
