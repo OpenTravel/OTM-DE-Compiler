@@ -43,7 +43,6 @@ public class XMLSchemaLineBreakProcessor implements PrettyPrintLineBreakProcesso
         Node topLevelNode = rootElement.getFirstChild();
         boolean importOrIncludeBreakAdded = false;
         boolean lastTokenWasElement = false;
-        boolean lastElementHadSubGrp = false;
 
         while (topLevelNode != null) {
             if (topLevelNode.getNodeType() != Node.ELEMENT_NODE) {
@@ -67,26 +66,13 @@ public class XMLSchemaLineBreakProcessor implements PrettyPrintLineBreakProcesso
             }
 
             if (elementName.equals("element")) {
-                boolean elementHasSubGrp = (topLevelNode.getAttributes().getNamedItem("substitutionGroup") != null);
+            	boolean elementIsAbstract = (topLevelNode.getAttributes().getNamedItem("abstract") != null);
                 
-                addLineBreakToken = !lastTokenWasElement;
+            	addLineBreakToken = elementIsAbstract || !lastTokenWasElement;
                 lastTokenWasElement = true;
-
-                if (!addLineBreakToken) {
-                    Element element = (Element) topLevelNode;
-                    String nameAttr = element.getAttribute("name");
-
-                    // Also add a line break before elements that are the head of
-                    // a substitution group
-                    if ((nameAttr != null) && !elementHasSubGrp && lastElementHadSubGrp) {
-                        addLineBreakToken = true;
-                    }
-                }
-                lastElementHadSubGrp = elementHasSubGrp;
-                
+            	
             } else {
                 lastTokenWasElement = false;
-                lastElementHadSubGrp = false;
             }
 
             if (addLineBreakToken) {

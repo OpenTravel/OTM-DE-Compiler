@@ -259,6 +259,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
             element.setName(XsdCodegenUtils.getSubstitutionGroupElementName(owner).getLocalPart());
         }
 
+        element.setAbstract( true );
         element.setType(new QName(sourceFacet.getNamespace(), XsdCodegenUtils
                 .getGlobalTypeName(sourceFacet)));
 
@@ -300,22 +301,12 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
      * @return Element
      */
     protected Element createNonSubstitutableElement(TLAlias facetAlias) {
-        TLAlias ownerAlias = (facetAlias == null) ? null : AliasCodegenUtils
-                .getOwnerAlias(facetAlias);
         TLFacet sourceFacet = getSourceFacet();
         Element element = new TopLevelElement();
 
         element.setName(getNonSubstitableElementName(facetAlias));
         element.setType(new QName(sourceFacet.getNamespace(), XsdCodegenUtils
                 .getGlobalTypeName(sourceFacet)));
-
-        if (ownerAlias == null) {
-            element.setSubstitutionGroup(new QName(sourceFacet.getNamespace(), XsdCodegenUtils
-                    .getSubstitutionGroupElementName(sourceFacet.getOwningEntity()).getLocalPart()));
-        } else {
-            element.setSubstitutionGroup(new QName(sourceFacet.getNamespace(), XsdCodegenUtils
-                    .getSubstitutionGroupElementName(ownerAlias).getLocalPart()));
-        }
         return element;
     }
 
@@ -376,24 +367,14 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
      */
     @Override
     protected QName getSubstitutionGroup(TLAlias facetAlias) {
-        TLFacet baseFacet = getLocalBaseFacet();
         QName subGrp = null;
-
-        if (baseFacet != null) {
-            if (facetAlias != null) {
-                subGrp = XsdCodegenUtils.getSubstitutableElementName(AliasCodegenUtils
-                        .getSiblingAlias(facetAlias, baseFacet.getFacetType()));
-            } else {
-                subGrp = XsdCodegenUtils.getSubstitutableElementName(baseFacet);
-            }
+        
+        if (facetAlias != null) {
+            subGrp = XsdCodegenUtils.getSubstitutionGroupElementName(AliasCodegenUtils
+                    .getOwnerAlias(facetAlias));
         } else {
-            if (facetAlias != null) {
-                subGrp = XsdCodegenUtils.getSubstitutionGroupElementName(AliasCodegenUtils
-                        .getOwnerAlias(facetAlias));
-            } else {
-                subGrp = XsdCodegenUtils.getSubstitutionGroupElementName(getSourceFacet()
-                        .getOwningEntity());
-            }
+            subGrp = XsdCodegenUtils.getSubstitutionGroupElementName(getSourceFacet()
+                    .getOwningEntity());
         }
         return subGrp;
     }

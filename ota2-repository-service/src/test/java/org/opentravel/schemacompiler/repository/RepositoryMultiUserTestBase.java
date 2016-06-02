@@ -36,7 +36,7 @@ import org.opentravel.schemacompiler.validate.ValidationFindings;
  */
 public class RepositoryMultiUserTestBase {
 	
-	protected static final boolean DEBUG = true;
+	protected static final boolean DEBUG = false;
 	
 	private static final long WAIT_TIMEOUT = 30000L;
 	
