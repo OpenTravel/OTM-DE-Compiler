@@ -15,6 +15,7 @@
  */
 package org.opentravel.schemacompiler.model;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -180,6 +181,26 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.model.TLFacetOwner#getAllFacets()
+	 */
+	@Override
+	public List<TLFacet> getAllFacets() {
+		List<TLFacet> facetList = new ArrayList<>();
+		
+		facetList.add( getIdFacet() );
+		facetList.add( getSummaryFacet() );
+		facetList.add( getDetailFacet() );
+		
+		for (TLFacet facet : getCustomFacets()) {
+			facetList.add( facet );
+		}
+		for (TLFacet facet : getQueryFacets()) {
+			facetList.add( facet );
+		}
+		return facetList;
+	}
+
+	/**
      * Returns the value of the 'idFacet' field.
      * 
      * @return TLFacet

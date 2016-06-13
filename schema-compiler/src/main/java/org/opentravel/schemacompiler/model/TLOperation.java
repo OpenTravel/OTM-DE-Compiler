@@ -15,6 +15,7 @@
  */
 package org.opentravel.schemacompiler.model;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -41,6 +42,7 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
     private TLFacet notification;
     private boolean notExtendable;
     private TLExtension extension;
+    private List<String> payloadFacetFilter = new ArrayList<>();
 
     /**
      * @see org.opentravel.schemacompiler.model.ModelElement#getOwningModel()
@@ -310,6 +312,19 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.model.TLFacetOwner#getAllFacets()
+	 */
+	@Override
+	public List<TLFacet> getAllFacets() {
+		List<TLFacet> facetList = new ArrayList<>();
+		
+		facetList.add( getRequest() );
+		facetList.add( getResponse() );
+		facetList.add( getNotification() );
+		return facetList;
+	}
+
+    /**
      * Returns the value of the 'request' field.
      * 
      * @return TLFacet
@@ -483,6 +498,24 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
     }
 
     /**
+	 * Returns the value of the 'payloadFacetFilter' field.
+	 *
+	 * @return List<String>
+	 */
+	public List<String> getPayloadFacetFilter() {
+		return payloadFacetFilter;
+	}
+
+	/**
+	 * Assigns the value of the 'payloadFacetFilter' field.
+	 *
+	 * @param payloadFacetFilter  the field value to assign
+	 */
+	public void setPayloadFacetFilter(List<String> payloadFacetFilter) {
+		this.payloadFacetFilter = payloadFacetFilter;
+	}
+
+	/**
      * Manages lists of <code>TLOperation</code> entities.
      * 
      * @author S. Livezey

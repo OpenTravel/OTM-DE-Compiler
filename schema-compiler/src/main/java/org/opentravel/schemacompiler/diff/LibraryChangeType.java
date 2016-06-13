@@ -13,22 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.model;
 
-import java.util.List;
+package org.opentravel.schemacompiler.diff;
 
 /**
- * Interface to be implemented by named entities that are capable of owning facets.
- * 
- * @author S. Livezey
+ * Enumeration of the possible types of changes that can be discovered when comparing
+ * two OTM libraries.
  */
-public interface TLFacetOwner extends NamedEntity {
+public enum LibraryChangeType {
 	
-	/**
-	 * Returns a list of all facets owned by this entity.
-	 * 
-	 * @return List<TLFacet>
-	 */
-	public List<TLFacet> getAllFacets();
+	NAME_CHANGED,
+	NAMESPACE_CHANGED,
+	PREFIX_CHANGED,
+	VERSION_SCHEME_CHANGED,
+	STATUS_CHANGED,
+	COMMENTS_CHANGED,
+	MEMBER_ADDED,
+	MEMBER_DELETED,
+	MEMBER_CHANGED,
 	
 }

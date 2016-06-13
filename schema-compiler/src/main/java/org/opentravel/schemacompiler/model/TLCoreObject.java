@@ -15,6 +15,7 @@
  */
 package org.opentravel.schemacompiler.model;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -234,6 +235,18 @@ public class TLCoreObject extends TLComplexTypeBase implements TLFacetOwner, TLA
             this.simpleListFacet = (simpleFacet == null) ? null : new TLListFacet(simpleFacet);
         }
     }
+
+    /**
+	 * @see org.opentravel.schemacompiler.model.TLFacetOwner#getAllFacets()
+	 */
+	@Override
+	public List<TLFacet> getAllFacets() {
+		List<TLFacet> facetList = new ArrayList<>();
+		
+		facetList.add( getSummaryFacet() );
+		facetList.add( getDetailFacet() );
+		return facetList;
+	}
 
     /**
      * Returns the value of the 'summaryFacet' field.

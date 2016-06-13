@@ -33,7 +33,7 @@ import org.opentravel.schemacompiler.version.Versioned;
  * 
  * @author S. Livezey
  */
-public class TLResource extends LibraryMember implements TLFacetOwner, TLVersionedExtensionOwner, TLDocumentationOwner {
+public class TLResource extends LibraryMember implements TLVersionedExtensionOwner, TLDocumentationOwner {
 	
 	private String name;
 	private String basePath;

@@ -51,6 +51,7 @@ public class TLAttributeTransformer extends
 
         attribute.setName(trimString(source.getName(), false));
         attribute.setMandatory(source.isMandatory() ? Boolean.TRUE : null);
+        attribute.setReference(source.isReference() ? Boolean.TRUE : null);
 
         if ((source.getDocumentation() != null) && !source.getDocumentation().isEmpty()) {
             ObjectTransformer<TLDocumentation, Documentation, SymbolResolverTransformerContext> docTransformer = getTransformerFactory()

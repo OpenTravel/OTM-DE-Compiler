@@ -123,7 +123,9 @@
 	<xsd:simpleType name="LibraryStatus">
 		<xsd:restriction base="xsd:string">
 			<xsd:enumeration value="Draft" />
+            <xsd:enumeration value="UnderReview"/>
 			<xsd:enumeration value="Final" />
+            <xsd:enumeration value="Obsolete"/>
 		</xsd:restriction>
 	</xsd:simpleType>
 

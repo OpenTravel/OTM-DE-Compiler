@@ -15,6 +15,9 @@
  */
 package org.opentravel.schemacompiler.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.event.ModelEventBuilder;
 import org.opentravel.schemacompiler.event.ModelEventType;
@@ -33,6 +36,7 @@ public class TLActionFacet extends TLModelElement implements NamedEntity, TLDocu
     private int referenceRepeat;
     private NamedEntity basePayload;
     private String basePayloadName;
+    private List<String> payloadFacetFilter = new ArrayList<>();
     private TLDocumentation documentation;
 	
     /**
@@ -240,6 +244,24 @@ public class TLActionFacet extends TLModelElement implements NamedEntity, TLDocu
 	 */
 	public void setBasePayloadName(String basePayloadName) {
 		this.basePayloadName = basePayloadName;
+	}
+
+    /**
+	 * Returns the value of the 'payloadFacetFilter' field.
+	 *
+	 * @return List<String>
+	 */
+	public List<String> getPayloadFacetFilter() {
+		return payloadFacetFilter;
+	}
+
+	/**
+	 * Assigns the value of the 'payloadFacetFilter' field.
+	 *
+	 * @param payloadFacetFilter  the field value to assign
+	 */
+	public void setPayloadFacetFilter(List<String> payloadFacetFilter) {
+		this.payloadFacetFilter = payloadFacetFilter;
 	}
 
 	/**

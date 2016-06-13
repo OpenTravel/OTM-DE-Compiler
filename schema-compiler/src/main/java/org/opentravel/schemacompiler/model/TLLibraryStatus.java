@@ -30,8 +30,17 @@ public enum TLLibraryStatus {
      */
     DRAFT(LibraryStatus.DRAFT),
 
+    /**
+     * Indicates that the contents of a library is under review and pending finalization, and
+     * may be modified only by certain repository users.
+     */
+    UNDER_REVIEW(LibraryStatus.UNDER_REVIEW),
+
     /** Indicates that a new version must be created before modifying the content of a library. */
-    FINAL(LibraryStatus.FINAL);
+    FINAL(LibraryStatus.FINAL),
+
+    /** Indicates that the library version is obsolete and should not be used. */
+    OBSOLETE(LibraryStatus.OBSOLETE);
 
     private LibraryStatus repositoryStatus;
 

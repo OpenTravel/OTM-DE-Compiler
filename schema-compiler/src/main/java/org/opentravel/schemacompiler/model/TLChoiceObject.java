@@ -15,6 +15,7 @@
  */
 package org.opentravel.schemacompiler.model;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -174,6 +175,21 @@ public class TLChoiceObject extends TLComplexTypeBase implements TLFacetOwner, T
     public void sortAliases(Comparator<TLAlias> comparator) {
         aliasManager.sortChildren(comparator);
     }
+
+    /**
+	 * @see org.opentravel.schemacompiler.model.TLFacetOwner#getAllFacets()
+	 */
+	@Override
+	public List<TLFacet> getAllFacets() {
+		List<TLFacet> facetList = new ArrayList<>();
+		
+		facetList.add( getSharedFacet() );
+		
+		for (TLFacet facet : getChoiceFacets()) {
+			facetList.add( facet );
+		}
+		return facetList;
+	}
 
     /**
      * Returns the value of the 'sharedFacet' field.

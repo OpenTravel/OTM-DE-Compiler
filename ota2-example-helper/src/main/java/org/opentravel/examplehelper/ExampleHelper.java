@@ -585,12 +585,12 @@ public class ExampleHelper extends JFrame {
 	 * @return String
 	 */
 	private static String getDisplayName(NamedEntity entity, boolean showVersion) {
+		TLLibrary library = (TLLibrary) entity.getOwningLibrary();
 		StringBuilder displayName = new StringBuilder();
 		String objectVersion = null;
 		
 		if (showVersion) {
 			try {
-				TLLibrary library = (TLLibrary) entity.getOwningLibrary();
 				VersionScheme vScheme = VersionSchemeFactory.getInstance().getVersionScheme( library.getVersionScheme() );
 				
 				objectVersion = vScheme.getVersionIdentifier( library.getNamespace() );
@@ -598,6 +598,9 @@ public class ExampleHelper extends JFrame {
 			} catch (VersionSchemeException e) {
 				objectVersion = "?";
 			}
+		}
+		if (library.getPrefix() != null) {
+			displayName.append( library.getPrefix() ).append( ":" );
 		}
 		displayName.append( XsdCodegenUtils.getGlobalElementName(entity).getLocalPart() );
 		

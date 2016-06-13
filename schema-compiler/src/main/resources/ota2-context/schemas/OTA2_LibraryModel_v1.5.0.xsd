@@ -70,6 +70,13 @@
             </xsd:documentation>
          </xsd:annotation>
       </xsd:attribute>
+      <xsd:attribute name="reference" type="xsd:boolean" use="optional">
+         <xsd:annotation>
+            <xsd:documentation>Indicates whether the 'type' attribute indicates a reference
+            to the indicated type using an IDREF (or IDREFS) element.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
       <xsd:attribute name="mandatory" type="xsd:boolean" use="optional">
          <xsd:annotation>
             <xsd:documentation>A boolean indicator of the cardinality of the
@@ -1026,7 +1033,9 @@
       </xsd:annotation>
       <xsd:restriction base="xsd:string">
          <xsd:enumeration value="Draft"/>
+         <xsd:enumeration value="UnderReview"/>
          <xsd:enumeration value="Final"/>
+         <xsd:enumeration value="Obsolete"/>
       </xsd:restriction>
    </xsd:simpleType>
    <xsd:simpleType name="Name_XML">
@@ -1139,6 +1148,14 @@
       <xsd:attribute name="extends" type="Name_Type">
          <xsd:annotation>
             <xsd:documentation>A mechanism to represent if object extends the definition of another object (Phase 2.)
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="payloadFacetFilter" type="Name_XML_List" use="optional">
+         <xsd:annotation>
+            <xsd:documentation>List of facet names from the base payload or business object
+            	that should be included in the trimmed schemas for the message payload.  If
+            	null or empty, all declared and inherited facets will be included.
             </xsd:documentation>
          </xsd:annotation>
       </xsd:attribute>
@@ -1702,6 +1719,14 @@
                 type values other than NONE, the message structure will include all elements
                 of the base payload, plus reference(s) to the owning resource's business
                 object.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="payloadFacetFilter" type="Name_XML_List" use="optional">
+         <xsd:annotation>
+            <xsd:documentation>List of facet names from the base payload or business object
+            	that should be included in the trimmed schemas for the message payload.  If
+            	null or empty, all declared and inherited facets will be included.
             </xsd:documentation>
          </xsd:annotation>
       </xsd:attribute>

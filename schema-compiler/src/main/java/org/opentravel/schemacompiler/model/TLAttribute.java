@@ -36,6 +36,7 @@ public class TLAttribute extends TLModelElement implements TLMemberField<TLAttri
     private String name;
     private TLAttributeType type;
     private String typeName;
+    private boolean isReference;
     private boolean mandatory;
     private TLDocumentation documentation;
     private EquivalentListManager equivalentManager = new EquivalentListManager(this);
@@ -205,6 +206,29 @@ public class TLAttribute extends TLModelElement implements TLMemberField<TLAttri
      */
     public void setTypeName(String typeName) {
         this.typeName = typeName;
+    }
+
+    /**
+     * Returns the value of the 'isReference' field.
+     * 
+     * @return boolean
+     */
+    public boolean isReference() {
+        return isReference;
+    }
+
+    /**
+     * Assigns the value of the 'isReference' field.
+     * 
+     * @param isReference
+     *            the field value to assign
+     */
+    public void setReference(boolean isReference) {
+        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.REFERENCE_FLAG_MODIFIED, this)
+                .setOldValue(this.isReference).setNewValue(isReference).buildEvent();
+
+        this.isReference = isReference;
+        publishEvent(event);
     }
 
     /**

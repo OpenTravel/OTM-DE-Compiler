@@ -122,7 +122,8 @@ public class TLAttributeCompileValidator extends TLAttributeBaseValidator {
         }
 
         if (ValidatorUtils.isLegacyIDREF(target.getType())) {
-            builder.addFinding(FindingType.WARNING, "type", WARNING_LEGACY_IDREF);
+        	// TODO: Temporarily disabled this warning until strongly-typed attribute IDREF's are available
+            // builder.addFinding(FindingType.WARNING, "type", WARNING_LEGACY_IDREF);
         }
         
         // For xsd:ID attributes, make sure they are contained in the top-level facet
