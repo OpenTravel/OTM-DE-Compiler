@@ -21,14 +21,11 @@ import org.opentravel.schemacompiler.model.NamedEntity;
 /**
  * Describes a single change identified during comparison of two OTM libraries.
  */
-public class LibraryChangeItem {
+public class LibraryChangeItem extends ChangeItem<LibraryChangeType> {
 	
-	private LibraryChangeType changeType;
 	private NamedEntity addedEntity;
 	private NamedEntity deletedEntity;
 	private EntityChangeSet modifiedEntity;
-	private String oldValue;
-	private String newValue;
 	
 	/**
 	 * Constructor used when an entity was added or deleted from its owning library.
@@ -75,15 +72,6 @@ public class LibraryChangeItem {
 	}
 
 	/**
-	 * Returns the type of library change.
-	 *
-	 * @return LibraryChangeType
-	 */
-	public LibraryChangeType getChangeType() {
-		return changeType;
-	}
-
-	/**
 	 * Returns the entity that was added.
 	 *
 	 * @return NamedEntity
@@ -108,24 +96,6 @@ public class LibraryChangeItem {
 	 */
 	public EntityChangeSet getModifiedEntity() {
 		return modifiedEntity;
-	}
-
-	/**
-	 * Returns the affected value from the old version.
-	 *
-	 * @return String
-	 */
-	public String getOldValue() {
-		return oldValue;
-	}
-
-	/**
-	 * Returns the affected value from the new version.
-	 *
-	 * @return String
-	 */
-	public String getNewValue() {
-		return newValue;
 	}
 
 }

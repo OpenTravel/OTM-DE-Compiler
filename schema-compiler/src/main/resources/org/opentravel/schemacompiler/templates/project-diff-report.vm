@@ -1,0 +1,83 @@
+<html>
+<head>
+	<title>OTM Model Comparison Report</title>
+	<style>
+#parse( "$TEMPLATE_FOLDER/diff-styles.vm" )
+	</style>
+</head>
+<body>
+
+<h1>OTM Comparison Report</h1>
+
+<table class="headerTable">
+	<tr>
+		<td class="headerTableTh">Old Project Version:</td>
+		<td class="headerTableTd">$changeSet.oldProject.projectFile.name</td>
+	</tr><tr>
+		<td class="headerTableTh">New Project Version:</td>
+		<td class="headerTableTd">$changeSet.newProject.projectFile.name</td>
+	</tr><tr>
+		<td class="headerTableTh">Report Date/Time:</td>
+		<td class="headerTableTd">$formatter.reportTimestamp()</td>
+	</tr>
+</table>
+
+
+<h2>Project Changes</h2>
+#set ( $rowstyle = "rowColor" )
+<table width="80%">
+	<tr>
+		<th>Change Description</th>
+		<th>Old Value</th>
+		<th>New Value</th>
+	</tr>
+	#if ($changeSet.projectChangeItems.empty)
+		<td colspan="3">No differences found.</td>
+	#end
+	#foreach ( $changeItem in $changeSet.projectChangeItems )
+		<tr class="$rowstyle">
+			<td>$changeItem.displayMessage</td>
+			#if ($changeItem.modifiedLibrary)
+				<td colspan="2">$formatter.getLibraryDisplayName( $changeItem.modifiedLibrary.newLibrary ) (<a href="#$changeItem.modifiedLibrary.bookmarkId">View Details</a>)</td>
+			#elseif ($changeItem.addedLibrary)
+				<td>&nbsp;</td>
+				<td>$formatter.getLibraryDisplayName( $changeItem.addedLibrary )</td>
+			#elseif ($changeItem.deletedLibrary)
+				<td>$formatter.getLibraryDisplayName( $changeItem.deletedLibrary )</td>
+				<td>&nbsp;</td>
+			#else
+				<td>#if ($changeItem.oldValue) $changeItem.oldValue #else &nbsp; #end</td>
+				<td>#if ($changeItem.newValue) $changeItem.newValue #else &nbsp; #end</td>
+			#end
+		</tr>
+		#if ($rowstyle == "rowColor") #set ($rowstyle = "altColor") #else #set ($rowstyle = "rowColor") #end
+	#end
+</table>
+
+#foreach ( $changeItem in $changeSet.projectChangeItems )
+#if ($changeItem.modifiedLibrary)
+#set ( $libraryChangeSet = $changeItem.modifiedLibrary )
+<br><a name="$libraryChangeSet.bookmarkId" />
+<h3>Modified Library: $formatter.getLibraryDisplayName( $libraryChangeSet.newLibrary )</h3>
+#parse( "$TEMPLATE_FOLDER/library-diff-table.vm" )
+
+#foreach ( $libraryChangeItem in $libraryChangeSet.libraryChangeItems )
+#if ($libraryChangeItem.modifiedEntity)
+#set ( $entityChangeSet = $libraryChangeItem.modifiedEntity )
+<br><a name="$entityChangeSet.bookmarkId" />
+<h4>Modified Entity: $formatter.getLocalDisplayName( $entityChangeSet.newEntity ) ($formatter.getLibraryDisplayName( $libraryChangeSet.newLibrary ))</h4>
+#parse( "$TEMPLATE_FOLDER/entity-diff-table.vm" )
+
+#end
+#end
+
+#end
+#end
+
+<p/><br/><p/><br/><p/><br/><p/><br/><p/><br/>
+<p/><br/><p/><br/><p/><br/><p/><br/><p/><br/>
+<p/><br/><p/><br/><p/><br/><p/><br/><p/><br/>
+<p/><br/><p/><br/><p/><br/><p/><br/><p/><br/>
+
+</body>
+</html>

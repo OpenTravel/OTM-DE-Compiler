@@ -19,6 +19,7 @@
 		<module>ota2-repository-service</module>
 		<module>ota2-repository-plugin</module>
 		<module>ota2-example-helper</module>
+		<module>ota2-diff-utility</module>
 	</modules>
 
 	<properties>
@@ -49,6 +50,7 @@
 		<fge.version>2.2.6</fge.version>
 		<swagger.parser.version>1.0.17</swagger.parser.version>
 		<jsyntaxpane.version>1.0.0</jsyntaxpane.version>
+		<velocity.version>1.5</velocity.version>
 		
 		<!-- Plugin Versions -->
 		<jaxb2.plugin.version>0.12.1</jaxb2.plugin.version>
@@ -279,6 +281,11 @@
 				<groupId>de.sciss</groupId>
 				<artifactId>jsyntaxpane</artifactId>
 				<version>${jsyntaxpane.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>velocity</groupId>
+				<artifactId>velocity</artifactId>
+				<version>${velocity.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

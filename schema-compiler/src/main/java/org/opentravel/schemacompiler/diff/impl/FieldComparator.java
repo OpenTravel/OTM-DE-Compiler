@@ -40,12 +40,12 @@ public class FieldComparator extends BaseComparator {
 		int oldRepeatCount = (oldField.getRepeatCount() <= 1) ? 0 : oldField.getRepeatCount();
 		int newRepeatCount = (newField.getRepeatCount() <= 1) ? 0 : newField.getRepeatCount();
 		FieldChangeSet changeSet = new FieldChangeSet( oldField.getField(), newField.getField() );
-		List<FieldChangeItem> changeItems = changeSet.getFieldChanges();
+		List<FieldChangeItem> changeItems = changeSet.getFieldChangeItems();
 		
 		if (valueChanged( oldField.getMemberType(), newField.getMemberType() )) {
 			changeItems.add( new FieldChangeItem( FieldChangeType.MEMBER_TYPE_CHANGED,
-					formatter.getDisplayName( oldField.getMemberType() ),
-					formatter.getDisplayName( newField.getMemberType() ) ) );
+					formatter.getEntityTypeDisplayName( oldField.getMemberType() ),
+					formatter.getEntityTypeDisplayName( newField.getMemberType() ) ) );
 		}
 		if (valueChanged( oldField.getOwningFacet(), newField.getOwningFacet() )) {
 			changeItems.add( new FieldChangeItem( FieldChangeType.OWNING_FACET_CHANGED,
@@ -53,8 +53,8 @@ public class FieldComparator extends BaseComparator {
 		}
 		if (valueChanged( getEntityName( oldField.getAssignedType() ), getEntityName( newField.getAssignedType() ) )) {
 			changeItems.add( new FieldChangeItem( FieldChangeType.TYPE_CHANGED,
-					formatter.getDisplayName( oldField.getAssignedType() ),
-					formatter.getDisplayName( newField.getAssignedType() ) ) );
+					formatter.getEntityDisplayName( oldField.getAssignedType() ),
+					formatter.getEntityDisplayName( newField.getAssignedType() ) ) );
 		}
 		if (oldRepeatCount != newRepeatCount) {
 			changeItems.add( new FieldChangeItem( FieldChangeType.CARDINALITY_CHANGE,

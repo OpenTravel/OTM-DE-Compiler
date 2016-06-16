@@ -26,11 +26,11 @@ import org.opentravel.schemacompiler.model.NamedEntity;
  * well as the field change sets for the fields that existed in both versions of the
  * entity.
  */
-public class EntityChangeSet {
+public class EntityChangeSet extends ChangeSet {
 	
 	private NamedEntity oldEntity;
 	private NamedEntity newEntity;
-	private List<EntityChangeItem> entityChanges = new ArrayList<>();
+	private List<EntityChangeItem> entityChangeItems = new ArrayList<>();
 	
 	/**
 	 * Constructor that assigns the old and new version of an entity that was modified.
@@ -42,7 +42,7 @@ public class EntityChangeSet {
 		this.oldEntity = oldEntity;
 		this.newEntity = newEntity;
 	}
-
+	
 	/**
 	 * Returns the old version of the entity.
 	 *
@@ -66,8 +66,15 @@ public class EntityChangeSet {
 	 *
 	 * @return List<EntityChangeItem>
 	 */
-	public List<EntityChangeItem> getEntityChanges() {
-		return entityChanges;
+	public List<EntityChangeItem> getEntityChangeItems() {
+		return entityChangeItems;
 	}
 	
+	/**
+	 * @see org.opentravel.schemacompiler.diff.ChangeSet#getBookmarkId()
+	 */
+	public String getBookmarkId() {
+		return getBookmarkId( (newEntity != null) ? newEntity : oldEntity );
+	}
+
 }

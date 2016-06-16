@@ -21,14 +21,11 @@ import org.opentravel.schemacompiler.model.TLLibrary;
 /**
  * Describes a single change identified during comparison of two OTM projects.
  */
-public class ProjectChangeItem {
+public class ProjectChangeItem extends ChangeItem<ProjectChangeType> {
 	
-	private ProjectChangeType changeType;
 	private TLLibrary addedLibrary;
 	private TLLibrary deletedLibrary;
 	private LibraryChangeSet modifiedLibrary;
-	private String oldValue;
-	private String newValue;
 	
 	/**
 	 * Constructor used when a library was added or deleted from its owning project.
@@ -75,15 +72,6 @@ public class ProjectChangeItem {
 	}
 
 	/**
-	 * Returns the type of project change.
-	 *
-	 * @return ProjectChangeType
-	 */
-	public ProjectChangeType getChangeType() {
-		return changeType;
-	}
-
-	/**
 	 * Returns the library that was added.
 	 *
 	 * @return TLLibrary
@@ -108,24 +96,6 @@ public class ProjectChangeItem {
 	 */
 	public LibraryChangeSet getModifiedLibrary() {
 		return modifiedLibrary;
-	}
-
-	/**
-	 * Returns the affected value from the old version.
-	 *
-	 * @return String
-	 */
-	public String getOldValue() {
-		return oldValue;
-	}
-
-	/**
-	 * Returns the affected value from the new version.
-	 *
-	 * @return String
-	 */
-	public String getNewValue() {
-		return newValue;
 	}
 
 }

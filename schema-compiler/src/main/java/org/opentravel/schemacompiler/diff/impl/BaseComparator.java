@@ -40,7 +40,8 @@ public abstract class BaseComparator {
 	 * @return boolean
 	 */
 	protected boolean valueChanged(Object oldValue, Object newValue) {
-		return (oldValue == null) ? (newValue == null) : oldValue.equals( newValue );
+		boolean result = (oldValue == null) ? (newValue != null) : !oldValue.equals( newValue );
+		return result;
 	}
 	
 	/**
@@ -55,7 +56,7 @@ public abstract class BaseComparator {
 		boolean changed;
 		
 		if ((oldValue == null) || (oldValue.length() == 0)) {
-			changed = ((newValue == null) || (newValue.length() == 0));
+			changed = ((newValue != null) && (newValue.length() > 0));
 			
 		} else {
 			changed = !oldValue.equals( newValue );

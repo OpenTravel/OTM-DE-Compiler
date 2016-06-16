@@ -21,14 +21,11 @@ import org.opentravel.schemacompiler.model.TLMemberField;
 /**
  * Describes a single change identified during comparison of two OTM entities.
  */
-public class EntityChangeItem {
+public class EntityChangeItem extends ChangeItem<EntityChangeType> {
 	
-	private EntityChangeType changeType;
 	private TLMemberField<?> addedField;
 	private TLMemberField<?> deletedField;
 	private FieldChangeSet modifiedField;
-	private String oldValue;
-	private String newValue;
 	
 	/**
 	 * Constructor used when a field was added or deleted from its owning entity.
@@ -75,15 +72,6 @@ public class EntityChangeItem {
 	}
 
 	/**
-	 * Returns the type of entity change.
-	 *
-	 * @return EntityChangeType
-	 */
-	public EntityChangeType getChangeType() {
-		return changeType;
-	}
-
-	/**
 	 * Returns the field that was added.
 	 *
 	 * @return TLMemberField<?>
@@ -110,22 +98,4 @@ public class EntityChangeItem {
 		return modifiedField;
 	}
 
-	/**
-	 * Returns the affected value from the old version.
-	 *
-	 * @return String
-	 */
-	public String getOldValue() {
-		return oldValue;
-	}
-
-	/**
-	 * Returns the affected value from the new version.
-	 *
-	 * @return String
-	 */
-	public String getNewValue() {
-		return newValue;
-	}
-	
 }

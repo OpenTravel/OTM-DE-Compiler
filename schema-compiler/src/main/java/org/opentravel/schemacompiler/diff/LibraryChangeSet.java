@@ -26,7 +26,7 @@ import org.opentravel.schemacompiler.model.TLLibrary;
  * well as the entity change sets for the library members that existed in both versions
  * of the library.
  */
-public class LibraryChangeSet {
+public class LibraryChangeSet extends ChangeSet {
 	
 	private TLLibrary oldLibrary;
 	private TLLibrary newLibrary;
@@ -70,4 +70,11 @@ public class LibraryChangeSet {
 		return libraryChangeItems;
 	}
 	
+	/**
+	 * @see org.opentravel.schemacompiler.diff.ChangeSet#getBookmarkId()
+	 */
+	public String getBookmarkId() {
+		return getBookmarkId( (newLibrary != null) ? newLibrary : oldLibrary );
+	}
+
 }

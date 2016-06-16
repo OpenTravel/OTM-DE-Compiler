@@ -16,6 +16,10 @@
 
 package org.opentravel.schemacompiler.diff.impl;
 
+import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 
 import javax.xml.namespace.QName;
@@ -35,14 +39,25 @@ import org.opentravel.schemacompiler.model.TLPropertyType;
  */
 public class DisplayFomatter {
 	
+	private static DateFormat dateFormat = new SimpleDateFormat( "MMMMM d, yyyy '&amp;' h:mma z" );
+	
+	/**
+	 * Returns a user-displayable string with the current date and time.
+	 * 
+	 * @return String
+	 */
+	public String reportTimestamp() {
+		return dateFormat.format( new Date() );
+	}
+	
 	/**
 	 * Returns the display name for the given entity type.
 	 * 
 	 * @param entityType  the entity type for which to return a display name
 	 * @return String
 	 */
-	public String getDisplayName(Class<?> entityType) {
-		return SchemaCompilerApplicationContext.getContext().getMessage(
+	public String getEntityTypeDisplayName(Class<?> entityType) {
+		return (entityType == null) ? null : SchemaCompilerApplicationContext.getContext().getMessage(
 				entityType.getSimpleName() + ".displayName", null, Locale.getDefault() );
 	}
 	
@@ -52,7 +67,7 @@ public class DisplayFomatter {
 	 * @param library  the library for which to return a display name
 	 * @return String
 	 */
-	public String getDisplayName(TLLibrary library) {
+	public String getLibraryDisplayName(TLLibrary library) {
 		String displayName = null;
 		
 		if (library != null) {
@@ -71,12 +86,38 @@ public class DisplayFomatter {
 	}
 	
 	/**
-	 * Returns a display name for the given library.
+	 * Returns the filename component of the library's URL.
 	 * 
-	 * @param library  the library for which to return a display name
+	 * @param library  the library for which to return the filename
 	 * @return String
 	 */
-	public String getDisplayName(NamedEntity entity) {
+	public String getLibraryFilename(TLLibrary library) {
+		String filename = null;
+		
+		if (library != null) {
+			URL libraryUrl = (library == null) ? null : library.getLibraryUrl();
+			String url = (libraryUrl == null) ? null : libraryUrl.toExternalForm();
+			
+			if (url != null) {
+				filename = url.substring( url.lastIndexOf('/') + 1 );
+			}
+			if (filename == null) {
+				filename = library.getName();
+			}
+		}
+		if (filename == null) {
+			filename = "UNKNOWN";
+		}
+		return filename;
+	}
+	
+	/**
+	 * Returns a display name for the given entity.
+	 * 
+	 * @param entity  the entity for which to return a display name
+	 * @return String
+	 */
+	public String getEntityDisplayName(NamedEntity entity) {
 		String displayName = null;
 		
 		if (entity != null) {

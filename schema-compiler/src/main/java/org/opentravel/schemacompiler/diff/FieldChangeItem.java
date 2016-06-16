@@ -20,11 +20,7 @@ package org.opentravel.schemacompiler.diff;
 /**
  * Describes a single change identified during comparison of two OTM fields.
  */
-public class FieldChangeItem {
-	
-	private FieldChangeType changeType;
-	private String oldValue;
-	private String newValue;
+public class FieldChangeItem extends ChangeItem<FieldChangeType> {
 	
 	/**
 	 * Constructor used when a field value was changed.
@@ -39,31 +35,4 @@ public class FieldChangeItem {
 		this.newValue = newValue;
 	}
 
-	/**
-	 * Returns the type of field change.
-	 *
-	 * @return FieldChangeType
-	 */
-	public FieldChangeType getChangeType() {
-		return changeType;
-	}
-
-	/**
-	 * Returns the affected value from the old version.
-	 *
-	 * @return String
-	 */
-	public String getOldValue() {
-		return oldValue;
-	}
-
-	/**
-	 * Returns the affected value from the new version.
-	 *
-	 * @return String
-	 */
-	public String getNewValue() {
-		return newValue;
-	}
-	
 }

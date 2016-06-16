@@ -26,6 +26,7 @@ import java.util.TreeSet;
 import org.opentravel.schemacompiler.diff.EntityChangeItem;
 import org.opentravel.schemacompiler.diff.EntityChangeSet;
 import org.opentravel.schemacompiler.diff.EntityChangeType;
+import org.opentravel.schemacompiler.diff.FieldChangeSet;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLMemberField;
@@ -46,19 +47,20 @@ public class EntityComparator extends BaseComparator {
 	 */
 	public EntityChangeSet compareEntities(EntityComparisonFacade oldEntity, EntityComparisonFacade newEntity) {
 		EntityChangeSet changeSet = new EntityChangeSet( oldEntity.getEntity(), newEntity.getEntity() );
-		List<EntityChangeItem> changeItems = changeSet.getEntityChanges();
+		List<EntityChangeItem> changeItems = changeSet.getEntityChangeItems();
 		TLLibrary oldLibrary = oldEntity.getOwningLibrary();
 		TLLibrary newLibrary = newEntity.getOwningLibrary();
 		
 		// Look for changes in the library values
 		if (valueChanged( oldEntity.getEntityType(), newEntity.getEntityType() )) {
 			changeItems.add( new EntityChangeItem( EntityChangeType.ENTITY_TYPE_CHANGED,
-					formatter.getDisplayName( oldEntity.getEntityType() ),
-					formatter.getDisplayName( newEntity.getEntityType() ) ) );
+					formatter.getEntityTypeDisplayName( oldEntity.getEntityType() ),
+					formatter.getEntityTypeDisplayName( newEntity.getEntityType() ) ) );
 		}
 		if (valueChanged( getLibraryName( oldLibrary ), getLibraryName( newLibrary ) )) {
 			changeItems.add( new EntityChangeItem( EntityChangeType.OWNING_LIBRARY_CHANGED,
-					formatter.getDisplayName( oldLibrary ), formatter.getDisplayName( newLibrary ) ) );
+					formatter.getLibraryDisplayName( oldLibrary ),
+					formatter.getLibraryDisplayName( newLibrary ) ) );
 		}
 		if (valueChanged( oldEntity.getName(), newEntity.getName() )) {
 			changeItems.add( new EntityChangeItem( EntityChangeType.NAME_CHANGED,
@@ -69,18 +71,18 @@ public class EntityComparator extends BaseComparator {
 		}
 		if (valueChanged( getEntityName( oldEntity.getParentType() ), getEntityName( newEntity.getParentType() ) )) {
 			changeItems.add( new EntityChangeItem( EntityChangeType.PARENT_TYPE_CHANGED,
-					formatter.getDisplayName( oldEntity.getParentType() ),
-					formatter.getDisplayName( newEntity.getParentType() ) ) );
+					formatter.getEntityDisplayName( oldEntity.getParentType() ),
+					formatter.getEntityDisplayName( newEntity.getParentType() ) ) );
 		}
 		if (valueChanged( getEntityName( oldEntity.getExtendsType() ), getEntityName( newEntity.getExtendsType() ) )) {
 			changeItems.add( new EntityChangeItem( EntityChangeType.EXTENSION_CHANGED,
-					formatter.getDisplayName( oldEntity.getExtendsType() ),
-					formatter.getDisplayName( newEntity.getExtendsType() ) ) );
+					formatter.getEntityDisplayName( oldEntity.getExtendsType() ),
+					formatter.getEntityDisplayName( newEntity.getExtendsType() ) ) );
 		}
 		if (valueChanged( getEntityName( oldEntity.getSimpleCoreType() ), getEntityName( newEntity.getSimpleCoreType() ) )) {
 			changeItems.add( new EntityChangeItem( EntityChangeType.SIMPLE_CORE_TYPE_CHANGED,
-					formatter.getDisplayName( oldEntity.getSimpleCoreType() ),
-					formatter.getDisplayName( newEntity.getSimpleCoreType() ) ) );
+					formatter.getEntityDisplayName( oldEntity.getSimpleCoreType() ),
+					formatter.getEntityDisplayName( newEntity.getSimpleCoreType() ) ) );
 		}
 		if (oldEntity.isSimpleList() != newEntity.isSimpleList()) {
 			EntityChangeType changeType = newEntity.isSimpleList() ?
@@ -215,9 +217,13 @@ public class EntityComparator extends BaseComparator {
 				// Simple Case: One field of this name in each version (even if its facet location
 				// may have changed)
 				if ((oldVersionFields.size() == 1) && (newVersionFields.size() == 1)) {
-					changeItems.add( new EntityChangeItem( new FieldComparator().compareFields(
+					FieldChangeSet fieldChangeSet = new FieldComparator().compareFields(
 							new FieldComparisonFacade( oldVersionFields.get( 0 ) ),
-							new FieldComparisonFacade( newVersionFields.get( 0 ) ) ) ) );
+							new FieldComparisonFacade( newVersionFields.get( 0 ) ) );
+					
+					if (!fieldChangeSet.getFieldChangeItems().isEmpty()) {
+						changeItems.add( new EntityChangeItem( fieldChangeSet ) );
+					}
 					
 				} else {
 					// Complex Case: Multiple fields with the same name in the old and/or new
@@ -272,8 +278,12 @@ public class EntityComparator extends BaseComparator {
 									changeItems.add( new EntityChangeItem( EntityChangeType.MEMBER_FIELD_DELETED, oldField ) );
 									
 								} else {
-									changeItems.add( new EntityChangeItem( new FieldComparator().compareFields(
-											new FieldComparisonFacade( oldField ), new FieldComparisonFacade( newField ) ) ) );
+									FieldChangeSet fieldChangeSet = new FieldComparator().compareFields(
+											new FieldComparisonFacade( oldField ), new FieldComparisonFacade( newField ) );
+									
+									if (!fieldChangeSet.getFieldChangeItems().isEmpty()) {
+										changeItems.add( new EntityChangeItem( fieldChangeSet ) );
+									}
 								}
 							}
 						}
@@ -317,7 +327,7 @@ public class EntityComparator extends BaseComparator {
 		Map<String,List<TLMemberField<?>>> fieldMap = new HashMap<>();
 		
 		for (TLMemberField<?> field : fieldList) {
-			String ownerName = formatter.getDisplayName( (NamedEntity) field.getOwner() );
+			String ownerName = formatter.getEntityDisplayName( (NamedEntity) field.getOwner() );
 			List<TLMemberField<?>> fields = fieldMap.get( ownerName );
 			
 			if (fields == null) {

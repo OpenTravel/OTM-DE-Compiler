@@ -26,7 +26,7 @@ import org.opentravel.schemacompiler.repository.Project;
  * well as the library change sets for the libraries that existed in both versions of the
  * project.
  */
-public class ProjectChangeSet {
+public class ProjectChangeSet extends ChangeSet {
 	
 	private Project oldProject;
 	private Project newProject;
@@ -70,4 +70,12 @@ public class ProjectChangeSet {
 		return projectChangeItems;
 	}
 	
+	/**
+	 * @see org.opentravel.schemacompiler.diff.ChangeSet#getBookmarkId()
+	 */
+	public String getBookmarkId() {
+		Project project = (newProject != null) ? newProject : oldProject;
+		return (project == null) ? "UNKNOWN_PROJECT" : ("prj$" + project.getName());
+	}
+
 }

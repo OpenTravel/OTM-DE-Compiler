@@ -1,0 +1,29 @@
+#set ( $rowstyle = "rowColor" )
+<table width="80%">
+	<tr>
+		<th>Change Description</th>
+		<th>Old Value</th>
+		<th>New Value</th>
+	</tr>
+	#if ($libraryChangeSet.libraryChangeItems.empty)
+		<td colspan="3">No differences found.</td>
+	#end
+	#foreach ( $libraryChangeItem in $libraryChangeSet.libraryChangeItems )
+		<tr class="$rowstyle">
+			<td>$libraryChangeItem.displayMessage</td>
+			#if ($libraryChangeItem.modifiedEntity)
+				<td colspan="2">$formatter.getEntityDisplayName( $libraryChangeItem.modifiedEntity.newEntity ) (<a href="#$libraryChangeItem.modifiedEntity.bookmarkId">View Details</a>)</td>
+			#elseif ($libraryChangeItem.addedEntity)
+				<td>&nbsp;</td>
+				<td>$formatter.getEntityDisplayName( $libraryChangeItem.addedEntity )</td>
+			#elseif ($libraryChangeItem.deletedEntity)
+				<td>$formatter.getEntityDisplayName( $libraryChangeItem.deletedEntity )</td>
+				<td>&nbsp;</td>
+			#else
+				<td>#if ($libraryChangeItem.oldValue) $libraryChangeItem.oldValue #else &nbsp; #end</td>
+				<td>#if ($libraryChangeItem.newValue) $libraryChangeItem.newValue #else &nbsp; #end</td>
+			#end
+		</tr>
+		#if ($rowstyle == "rowColor") #set ($rowstyle = "altColor") #else #set ($rowstyle = "rowColor") #end
+	#end
+</table>

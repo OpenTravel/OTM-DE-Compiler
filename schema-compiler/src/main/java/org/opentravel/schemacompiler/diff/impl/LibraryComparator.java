@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.opentravel.schemacompiler.diff.EntityChangeSet;
 import org.opentravel.schemacompiler.diff.LibraryChangeItem;
 import org.opentravel.schemacompiler.diff.LibraryChangeSet;
 import org.opentravel.schemacompiler.diff.LibraryChangeType;
@@ -98,11 +99,13 @@ public class LibraryComparator extends BaseComparator {
 			if (newEntities.containsKey( entityName )) {
 				NamedEntity oldEntity = oldEntities.get( entityName );
 				NamedEntity newEntity = newEntities.get( entityName );
+				EntityChangeSet entityChangeSet = new EntityComparator().compareEntities(
+						new EntityComparisonFacade( oldEntity ),
+						new EntityComparisonFacade( newEntity ) );
 				
-				changeItems.add( new LibraryChangeItem(
-						new EntityComparator().compareEntities(
-								new EntityComparisonFacade( oldEntity ),
-								new EntityComparisonFacade( newEntity ) ) ) );
+				if (!entityChangeSet.getEntityChangeItems().isEmpty()) {
+					changeItems.add( new LibraryChangeItem( entityChangeSet ) );
+				}
 			}
 		}
 		return changeSet;

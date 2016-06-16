@@ -25,6 +25,7 @@ import java.util.TreeSet;
 
 import javax.xml.namespace.QName;
 
+import org.opentravel.schemacompiler.diff.LibraryChangeSet;
 import org.opentravel.schemacompiler.diff.ProjectChangeItem;
 import org.opentravel.schemacompiler.diff.ProjectChangeSet;
 import org.opentravel.schemacompiler.diff.ProjectChangeType;
@@ -90,9 +91,12 @@ public class ProjectComparator extends BaseComparator {
 			if (newLibraries.containsKey( libraryName )) {
 				TLLibrary oldLibrary = oldLibraries.get( libraryName );
 				TLLibrary newLibrary = newLibraries.get( libraryName );
+				LibraryChangeSet libraryChangeSet =
+						new LibraryComparator().compareLibraries( oldLibrary, newLibrary );
 				
-				changeItems.add( new ProjectChangeItem(
-						new LibraryComparator().compareLibraries( oldLibrary, newLibrary ) ) );
+				if (!libraryChangeSet.getLibraryChangeItems().isEmpty()) {
+					changeItems.add( new ProjectChangeItem( libraryChangeSet ) );
+				}
 			}
 		}
 		return changeSet;

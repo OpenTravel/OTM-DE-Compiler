@@ -1,0 +1,38 @@
+#set ( $rowstyle = "rowColor" )
+<table width="80%">
+	<tr>
+		<th>Change Description</th>
+		<th>Old Value</th>
+		<th>New Value</th>
+	</tr>
+	#if ($entityChangeSet.entityChangeItems.empty)
+		<td colspan="3">No differences found.</td>
+	#end
+	#foreach ( $entityChangeItem in $entityChangeSet.entityChangeItems )
+		<tr class="$rowstyle">
+			<td>$entityChangeItem.displayMessage</td>
+			#if ($entityChangeItem.modifiedField)
+				#set ( $fieldChangeSet = $entityChangeItem.modifiedField )
+				<td colspan="2">$formatter.getFieldName( $fieldChangeSet.newField )
+					<div id="$fieldChangeSet.bookmarkId">
+						<ul class="fieldDetails">
+						#foreach ($fieldChangeItem in $fieldChangeSet.fieldChangeItems)
+							<li>$fieldChangeItem.displayMessage</li>
+						#end
+						</ul>
+					</div>
+				</td>
+			#elseif ($entityChangeItem.addedField)
+				<td>&nbsp;</td>
+				<td>$formatter.getFieldName( $entityChangeItem.addedField )</td>
+			#elseif ($entityChangeItem.deletedField)
+				<td>$formatter.getFieldName( $entityChangeItem.deletedField )</td>
+				<td>&nbsp;</td>
+			#else
+				<td>#if ($entityChangeItem.oldValue) $entityChangeItem.oldValue #else &nbsp; #end</td>
+				<td>#if ($entityChangeItem.newValue) $entityChangeItem.newValue #else &nbsp; #end</td>
+			#end
+		</tr>
+		#if ($rowstyle == "rowColor") #set ($rowstyle = "altColor") #else #set ($rowstyle = "rowColor") #end
+	#end
+</table>

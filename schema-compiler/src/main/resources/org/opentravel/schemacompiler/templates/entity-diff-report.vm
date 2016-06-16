@@ -1,0 +1,35 @@
+<html>
+<head>
+	<title>OTM Model Comparison Report</title>
+	<style>
+#parse( "$TEMPLATE_FOLDER/diff-styles.vm" )
+	</style>
+</head>
+<body>
+
+<h1>OTM Comparison Report</h1>
+
+<table class="headerTable">
+	<tr>
+		<td class="headerTableTh">Old Entity Version:</td>
+		<td class="headerTableTd">$formatter.getLocalDisplayName( $changeSet.oldEntity ) ($formatter.getLibraryFilename( $changeSet.oldEntity.owningLibrary ))</td>
+	</tr><tr>
+		<td class="headerTableTh">New Entity Version:</td>
+		<td class="headerTableTd">$formatter.getLocalDisplayName( $changeSet.newEntity ) ($formatter.getLibraryFilename( $changeSet.newEntity.owningLibrary ))</td>
+	</tr><tr>
+		<td class="headerTableTh">Report Date/Time:</td>
+		<td class="headerTableTd">$formatter.reportTimestamp()</td>
+	</tr>
+</table>
+
+<h4>Modified Entity: $formatter.getLocalDisplayName( $changeSet.newEntity ) ($formatter.getLibraryDisplayName( $changeSet.newEntity.owningLibrary ))</h4>
+#set ( $entityChangeSet = $changeSet )
+#parse( "$TEMPLATE_FOLDER/entity-diff-table.vm" )
+
+<p/><br/><p/><br/><p/><br/><p/><br/><p/><br/>
+<p/><br/><p/><br/><p/><br/><p/><br/><p/><br/>
+<p/><br/><p/><br/><p/><br/><p/><br/><p/><br/>
+<p/><br/><p/><br/><p/><br/><p/><br/><p/><br/>
+
+</body>
+</html>

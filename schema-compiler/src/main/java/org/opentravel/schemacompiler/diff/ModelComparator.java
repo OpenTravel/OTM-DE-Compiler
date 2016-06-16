@@ -16,6 +16,18 @@
 
 package org.opentravel.schemacompiler.diff;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.VelocityEngine;
+import org.opentravel.schemacompiler.diff.impl.DisplayFomatter;
 import org.opentravel.schemacompiler.diff.impl.EntityComparator;
 import org.opentravel.schemacompiler.diff.impl.EntityComparisonFacade;
 import org.opentravel.schemacompiler.diff.impl.LibraryComparator;
@@ -32,6 +44,15 @@ import org.opentravel.schemacompiler.repository.Project;
  */
 public class ModelComparator {
 	
+	private static final String TEMPLATE_FOLDER = "/org/opentravel/schemacompiler/templates";
+	private static final String PROJECT_DIFF_TEMPLATE = TEMPLATE_FOLDER + "/project-diff-report.vm";
+	private static final String LIBRARY_DIFF_TEMPLATE = TEMPLATE_FOLDER + "/library-diff-report.vm";
+	private static final String ENTITY_DIFF_TEMPLATE  = TEMPLATE_FOLDER + "/entity-diff-report.vm";
+	
+	private static final String VELOCITY_CONFIG_FILE = TEMPLATE_FOLDER + "/velocity.properties";
+	
+	private static VelocityEngine velocityEngine;
+	
 	/**
 	 * Compares two versions of the same OTM project.
 	 * 
@@ -41,6 +62,20 @@ public class ModelComparator {
 	 */
 	public static ProjectChangeSet compareProjects(Project oldProject, Project newProject) {
 		return new ProjectComparator().compareProjects( oldProject, newProject );
+	}
+	
+	/**
+	 * Compares two versions of the same OTM project and writes a formatted HTML report of the
+	 * results to the output stream provided.
+	 * 
+	 * @param oldProject  the old project version
+	 * @param newProject  the new project version
+	 * @param out  the output stream to which the formatted report will be written
+	 * @throws IOException  thrown if an error occurs during report generation
+	 */
+	public static void compareProjects(Project oldProject, Project newProject, OutputStream out)
+			throws IOException {
+		generateReport( compareProjects( oldProject, newProject), PROJECT_DIFF_TEMPLATE, out );
 	}
 	
 	/**
@@ -55,6 +90,20 @@ public class ModelComparator {
 	}
 	
 	/**
+	 * Compares two versions of the same OTM library and writes a formatted HTML report of the
+	 * results to the output stream provided.
+	 * 
+	 * @param oldLibrary  the old library version
+	 * @param newLibrary  the new library version
+	 * @param out  the output stream to which the formatted report will be written
+	 * @throws IOException  thrown if an error occurs during report generation
+	 */
+	public static void compareLibraries(TLLibrary oldLibrary, TLLibrary newLibrary, OutputStream out)
+			throws IOException {
+		generateReport( compareLibraries( oldLibrary, newLibrary), LIBRARY_DIFF_TEMPLATE, out );
+	}
+	
+	/**
 	 * Compares two versions of the same OTM entity.
 	 * 
 	 * @param oldEntity  the old entity version
@@ -64,6 +113,62 @@ public class ModelComparator {
 	public static EntityChangeSet compareEntities(NamedEntity oldEntity, NamedEntity newEntity) {
 		return new EntityComparator().compareEntities(
 				new EntityComparisonFacade( oldEntity ), new EntityComparisonFacade( newEntity ) );
+	}
+	
+	/**
+	 * Compares two versions of the same OTM entity and writes a formatted HTML report of the
+	 * results to the output stream provided.
+	 * 
+	 * @param oldEntity  the old entity version
+	 * @param newEntity  the new entity version
+	 * @param out  the output stream to which the formatted report will be written
+	 * @throws IOException  thrown if an error occurs during report generation
+	 */
+	public static void compareEntities(NamedEntity oldEntity, NamedEntity newEntity, OutputStream out)
+			throws IOException {
+		generateReport( compareEntities( oldEntity, newEntity), ENTITY_DIFF_TEMPLATE, out );
+	}
+	
+	/**
+	 * Generates a formatted HTML report using a velocity template and the OTM-Diff
+	 * results provided.
+	 * 
+	 * @param changeSet  the results of an OTM-Diff comparison
+	 * @param templateName  the name of the velocity template to use
+	 * @param out  the output stream to which the formatted report will be written
+	 * @throws IOException  thrown if an error occurs during report generation
+	 */
+	private static void generateReport(Object changeSet, String templateName, OutputStream out)
+			throws IOException {
+		Map<String,Object> context = new HashMap<>();
+		
+		context.put( "changeSet", changeSet );
+		context.put( "formatter", new DisplayFomatter() );
+		context.put( "TEMPLATE_FOLDER", TEMPLATE_FOLDER );
+		
+		try (Writer writer = new OutputStreamWriter( out )) {
+			velocityEngine.mergeTemplate( templateName, "UTF-8", new VelocityContext( context ), writer );
+			
+		} catch (Exception e) {
+			throw new IOException("Error during report generation.", e);
+		}
+	}
+	
+	/**
+	 * Initializes and configures the default instance of the Velocity template
+	 * processing engine.
+	 */
+	static {
+		try {
+			InputStream is = ModelComparator.class.getResourceAsStream (VELOCITY_CONFIG_FILE );
+			Properties velocityConfig = new Properties();
+			
+			velocityConfig.load( is );
+			velocityEngine = new VelocityEngine( velocityConfig );
+			
+		} catch (Exception t) {
+			throw new ExceptionInInitializerError( t );
+		}
 	}
 	
 }
