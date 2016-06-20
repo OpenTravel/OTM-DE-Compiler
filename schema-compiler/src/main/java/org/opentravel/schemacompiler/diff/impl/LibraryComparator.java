@@ -36,6 +36,20 @@ import org.opentravel.schemacompiler.model.TLOperation;
 public class LibraryComparator extends BaseComparator {
 	
 	/**
+	 * Default constructor.
+	 */
+	public LibraryComparator() {}
+	
+	/**
+	 * Constructor that initializes the namespace mappings for the comparator.
+	 * 
+	 * @param namespaceMappings  the initial namespace mappings
+	 */
+	protected LibraryComparator(Map<String,String> namespaceMappings) {
+		super( namespaceMappings );
+	}
+	
+	/**
 	 * Compares two versions of the same OTM library.
 	 * 
 	 * @param oldLibrary  the old library version
@@ -99,9 +113,10 @@ public class LibraryComparator extends BaseComparator {
 			if (newEntities.containsKey( entityName )) {
 				NamedEntity oldEntity = oldEntities.get( entityName );
 				NamedEntity newEntity = newEntities.get( entityName );
-				EntityChangeSet entityChangeSet = new EntityComparator().compareEntities(
-						new EntityComparisonFacade( oldEntity ),
-						new EntityComparisonFacade( newEntity ) );
+				EntityChangeSet entityChangeSet =
+						new EntityComparator( getNamespaceMappings() ).compareEntities(
+								new EntityComparisonFacade( oldEntity ),
+								new EntityComparisonFacade( newEntity ) );
 				
 				if (!entityChangeSet.getEntityChangeItems().isEmpty()) {
 					changeItems.add( new LibraryChangeItem( entityChangeSet ) );

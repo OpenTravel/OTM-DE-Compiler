@@ -81,6 +81,8 @@ public class DiffUtilityController {
 	@FXML private Button runProjectButton;
 	@FXML private Button runLibraryButton;
 	@FXML private WebView reportViewer;
+	@FXML private Button backButton;
+	@FXML private Button forwardButton;
 	@FXML private Button saveReportButton;
 	@FXML private Label statusBarLabel;
 	
@@ -328,6 +330,26 @@ public class DiffUtilityController {
 	}
 	
 	/**
+	 * Called when the user clicks the back button for the report viewer browser.
+	 * 
+	 * @param event  the action event that triggered this method call
+	 */
+	@FXML public void browserBack(ActionEvent event) {
+		reportViewer.getEngine().getHistory().go( -1 );
+		updateControlStates();
+	}
+	
+	/**
+	 * Called when the user clicks the forward button for the report viewer browser.
+	 * 
+	 * @param event  the action event that triggered this method call
+	 */
+	@FXML public void browserForward(ActionEvent event) {
+		reportViewer.getEngine().getHistory().go( 1 );
+		updateControlStates();
+	}
+	
+	/**
 	 * Initializes the dialog stage and controller used to select an OTM library
 	 * from a remote repository.
 	 * 
@@ -387,7 +409,11 @@ public class DiffUtilityController {
 		Platform.runLater( new Runnable() {
 			public void run() {
 				String reportLocation = reportViewer.getEngine().getLocation();
+				int historyIdx = reportViewer.getEngine().getHistory().getCurrentIndex();
+				int historySize = reportViewer.getEngine().getHistory().getEntries().size();
 				boolean reportDisplayed = (reportLocation != null) && reportLocation.startsWith( "file:" );
+				boolean canBrowseBack = historyIdx > 0;
+				boolean canBrowseForward = historyIdx < (historySize - 1);
 				boolean runProjectEnabled = (oldProjectFile != null) && oldProjectFile.exists()
 						&& (newProjectFile != null) && newProjectFile.exists();
 				boolean oldLibrarySelected = (((oldLibraryFile != null) && oldLibraryFile.exists()) || (oldLibraryRepo != null));
@@ -399,6 +425,8 @@ public class DiffUtilityController {
 				runProjectButton.disableProperty().set( !runProjectEnabled );
 				runLibraryButton.disableProperty().set( !runLibraryEnabled );
 				saveReportButton.disableProperty().set( !reportDisplayed );
+				backButton.disableProperty().set( !canBrowseBack );
+				forwardButton.disableProperty().set( !canBrowseForward );
 			}
 		});
 	}
@@ -426,6 +454,8 @@ public class DiffUtilityController {
 		Platform.runLater( new Runnable() {
 			public void run() {
 				if (reportFile != null) {
+					reportViewer.getEngine().getHistory().setMaxSize( 0 );
+					reportViewer.getEngine().getHistory().setMaxSize( 100 );
 					reportViewer.getEngine().load( reportFile.toURI().toString() );
 					
 				} else {
@@ -456,6 +486,9 @@ public class DiffUtilityController {
 				newLibraryRepoButton.disableProperty().set( disableControls );
 				runProjectButton.disableProperty().set( disableControls );
 				runLibraryButton.disableProperty().set( disableControls );
+				saveReportButton.disableProperty().set( disableControls );
+				backButton.disableProperty().set( disableControls );
+				forwardButton.disableProperty().set( disableControls );
 			}
 		});
 	}
@@ -581,7 +614,7 @@ public class DiffUtilityController {
 					showReport( null );
 					Project oldProject = oldProjectManager.loadProject( oldProjectFile );
 					Project newProject = newProjectManager.loadProject( newProjectFile );
-					File reportFile = File.createTempFile( "otmDiff", "html" );
+					File reportFile = File.createTempFile( "otmDiff", ".html" );
 					
 					try (OutputStream out = new FileOutputStream( reportFile )) {
 						ModelComparator.compareProjects( oldProject, newProject, out );
@@ -678,6 +711,11 @@ public class DiffUtilityController {
 				updateControlStates();
 			}
 		} );
+		reportViewer.getEngine().getHistory().currentIndexProperty().addListener( new ChangeListener<Number>() {
+			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+				updateControlStates();
+			}
+		});
 		updateControlStates();
 	}
 	

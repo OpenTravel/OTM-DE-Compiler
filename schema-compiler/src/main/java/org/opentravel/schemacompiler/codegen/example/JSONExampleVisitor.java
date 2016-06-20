@@ -315,6 +315,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 	@Override
 	public void startActionFacet(TLActionFacet actionFacet, TLFacet payloadFacet) {
 		super.startActionFacet(actionFacet, payloadFacet);
+		context.setModelActionFacet(actionFacet);
 		facetStack.push(payloadFacet);
 		createObjectNode(actionFacet);
 	}
@@ -329,6 +330,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 		if (facetStack.peek() == payloadFacet) {
 			facetStack.pop();
 		}
+		context.setModelActionFacet(null);
 	}
 
 	/**

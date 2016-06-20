@@ -202,6 +202,9 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
 				}
 				contextFacet = facetAlias;
 
+			} else if (facetContext.getModelActionFacet() != null) {
+				contextFacet = facetContext.getModelActionFacet();
+				
 			} else {
 				contextFacet = facetStack.isEmpty() ? null : facetStack.peek();
 			}
@@ -834,6 +837,7 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
 		private T node;
 		private TLProperty modelElement;
 		private TLAlias modelAlias;
+		private TLActionFacet modelActionFacet;
 		private TLAttribute modelAttribute;
 
 		/**
@@ -897,6 +901,24 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
 		 */
 		public void setModelAlias(TLAlias modelAlias) {
 			this.modelAlias = modelAlias;
+		}
+
+		/**
+		 * Returns the action facet (if any) that is associated with this context.
+		 *
+		 * @return TLActionFacet
+		 */
+		public TLActionFacet getModelActionFacet() {
+			return modelActionFacet;
+		}
+
+		/**
+		 * Assigns the action facet (if any) that is associated with this context.
+		 *
+		 * @param modelActionFacet  the action facet to assign
+		 */
+		public void setModelActionFacet(TLActionFacet modelActionFacet) {
+			this.modelActionFacet = modelActionFacet;
 		}
 
 		/**

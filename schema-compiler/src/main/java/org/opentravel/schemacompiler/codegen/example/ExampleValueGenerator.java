@@ -33,6 +33,7 @@ import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAbstractEnumeration;
+import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAliasOwner;
 import org.opentravel.schemacompiler.model.TLAttribute;
@@ -222,7 +223,12 @@ public class ExampleValueGenerator {
         if ((attribute != null) && !isEmptyValueType(attribute.getType())) {
             if (XsdCodegenUtils.isIdType(attribute.getType())) {
                 NamedEntity ownerBase = getBaseEntity( (owner != null) ? owner : attribute.getOwner() );
-                exampleValue = idFactory.getMessageId(ownerBase.getNamespace(), ownerBase.getLocalName());
+                String localName = ownerBase.getLocalName();
+                
+                if (ownerBase instanceof TLActionFacet) {
+                	localName = ((TLActionFacet) ownerBase).getName();
+                }
+                exampleValue = idFactory.getMessageId(ownerBase.getNamespace(), localName);
             } else {
                 exampleValue = getExampleValue((TLExampleOwner) attribute, attribute.getType());
             }
@@ -247,7 +253,12 @@ public class ExampleValueGenerator {
         if ((element != null) && !isEmptyValueType(element.getType())) {
             if (XsdCodegenUtils.isIdType(element.getType())) {
                 NamedEntity ownerBase = getBaseEntity( (owner != null) ? owner : element.getOwner() );
-                exampleValue = idFactory.getMessageId(ownerBase.getNamespace(), ownerBase.getLocalName());
+                String localName = ownerBase.getLocalName();
+                
+                if (ownerBase instanceof TLActionFacet) {
+                	localName = ((TLActionFacet) ownerBase).getName();
+                }
+                exampleValue = idFactory.getMessageId(ownerBase.getNamespace(), localName);
             } else {
                 exampleValue = getExampleValue((TLExampleOwner) element, element.getType());
             }

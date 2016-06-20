@@ -23,12 +23,14 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import javax.xml.namespace.QName;
+
 import org.opentravel.schemacompiler.diff.EntityChangeItem;
 import org.opentravel.schemacompiler.diff.EntityChangeSet;
 import org.opentravel.schemacompiler.diff.EntityChangeType;
 import org.opentravel.schemacompiler.diff.FieldChangeSet;
+import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
-import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLMemberField;
 
 /**
@@ -37,6 +39,20 @@ import org.opentravel.schemacompiler.model.TLMemberField;
 public class EntityComparator extends BaseComparator {
 	
 	private DisplayFomatter formatter = new DisplayFomatter();
+	
+	/**
+	 * Default constructor.
+	 */
+	public EntityComparator() {}
+	
+	/**
+	 * Constructor that initializes the namespace mappings for the comparator.
+	 * 
+	 * @param namespaceMappings  the initial namespace mappings
+	 */
+	protected EntityComparator(Map<String,String> namespaceMappings) {
+		super( namespaceMappings );
+	}
 	
 	/**
 	 * Compares two versions of the same OTM entity.
@@ -48,19 +64,21 @@ public class EntityComparator extends BaseComparator {
 	public EntityChangeSet compareEntities(EntityComparisonFacade oldEntity, EntityComparisonFacade newEntity) {
 		EntityChangeSet changeSet = new EntityChangeSet( oldEntity.getEntity(), newEntity.getEntity() );
 		List<EntityChangeItem> changeItems = changeSet.getEntityChangeItems();
-		TLLibrary oldLibrary = oldEntity.getOwningLibrary();
-		TLLibrary newLibrary = newEntity.getOwningLibrary();
 		
 		// Look for changes in the library values
+		AbstractLibrary owningLibrary = oldEntity.getOwningLibrary();
+		String versionScheme = (owningLibrary == null) ? null : owningLibrary.getVersionScheme();
+		QName oldParentTypeName = getEntityName( oldEntity.getParentType() );
+		QName newParentTypeName = getEntityName( newEntity.getParentType() );
+		QName oldExtendsTypeName = getEntityName( oldEntity.getExtendsType() );
+		QName newExtendsTypeName = getEntityName( newEntity.getExtendsType() );
+		QName oldSimpleCoreTypeName = getEntityName( oldEntity.getSimpleCoreType() );
+		QName newSimpleCoreTypeName = getEntityName( newEntity.getSimpleCoreType() );
+		
 		if (valueChanged( oldEntity.getEntityType(), newEntity.getEntityType() )) {
 			changeItems.add( new EntityChangeItem( EntityChangeType.ENTITY_TYPE_CHANGED,
 					formatter.getEntityTypeDisplayName( oldEntity.getEntityType() ),
 					formatter.getEntityTypeDisplayName( newEntity.getEntityType() ) ) );
-		}
-		if (valueChanged( getLibraryName( oldLibrary ), getLibraryName( newLibrary ) )) {
-			changeItems.add( new EntityChangeItem( EntityChangeType.OWNING_LIBRARY_CHANGED,
-					formatter.getLibraryDisplayName( oldLibrary ),
-					formatter.getLibraryDisplayName( newLibrary ) ) );
 		}
 		if (valueChanged( oldEntity.getName(), newEntity.getName() )) {
 			changeItems.add( new EntityChangeItem( EntityChangeType.NAME_CHANGED,
@@ -69,20 +87,38 @@ public class EntityComparator extends BaseComparator {
 		if (valueChanged( oldEntity.getDocumentation(), newEntity.getDocumentation() )) {
 			changeItems.add( new EntityChangeItem( EntityChangeType.DOCUMENTATION_CHANGED, null, null ) );
 		}
-		if (valueChanged( getEntityName( oldEntity.getParentType() ), getEntityName( newEntity.getParentType() ) )) {
-			changeItems.add( new EntityChangeItem( EntityChangeType.PARENT_TYPE_CHANGED,
-					formatter.getEntityDisplayName( oldEntity.getParentType() ),
-					formatter.getEntityDisplayName( newEntity.getParentType() ) ) );
+		if (valueChanged( oldParentTypeName, newParentTypeName )) {
+			if (isVersionChange( oldParentTypeName, newParentTypeName, versionScheme )) {
+				changeItems.add( new EntityChangeItem( EntityChangeType.PARENT_TYPE_VERSION_CHANGED,
+						oldEntity.getOwningLibrary().getVersion(), newEntity.getOwningLibrary().getVersion() ) );
+				
+			} else {
+				changeItems.add( new EntityChangeItem( EntityChangeType.PARENT_TYPE_CHANGED,
+						formatter.getEntityDisplayName( oldEntity.getParentType() ),
+						formatter.getEntityDisplayName( newEntity.getParentType() ) ) );
+			}
 		}
-		if (valueChanged( getEntityName( oldEntity.getExtendsType() ), getEntityName( newEntity.getExtendsType() ) )) {
-			changeItems.add( new EntityChangeItem( EntityChangeType.EXTENSION_CHANGED,
-					formatter.getEntityDisplayName( oldEntity.getExtendsType() ),
-					formatter.getEntityDisplayName( newEntity.getExtendsType() ) ) );
+		if (valueChanged( oldExtendsTypeName, newExtendsTypeName )) {
+			if (isVersionChange( oldExtendsTypeName, newExtendsTypeName, versionScheme )) {
+				changeItems.add( new EntityChangeItem( EntityChangeType.EXTENSION_VERSION_CHANGED,
+						oldEntity.getOwningLibrary().getVersion(), newEntity.getOwningLibrary().getVersion() ) );
+				
+			} else {
+				changeItems.add( new EntityChangeItem( EntityChangeType.EXTENSION_CHANGED,
+						formatter.getEntityDisplayName( oldEntity.getExtendsType() ),
+						formatter.getEntityDisplayName( newEntity.getExtendsType() ) ) );
+			}
 		}
-		if (valueChanged( getEntityName( oldEntity.getSimpleCoreType() ), getEntityName( newEntity.getSimpleCoreType() ) )) {
-			changeItems.add( new EntityChangeItem( EntityChangeType.SIMPLE_CORE_TYPE_CHANGED,
-					formatter.getEntityDisplayName( oldEntity.getSimpleCoreType() ),
-					formatter.getEntityDisplayName( newEntity.getSimpleCoreType() ) ) );
+		if (valueChanged( oldSimpleCoreTypeName, newSimpleCoreTypeName )) {
+			if (isVersionChange( oldSimpleCoreTypeName, newSimpleCoreTypeName, versionScheme )) {
+				changeItems.add( new EntityChangeItem( EntityChangeType.SIMPLE_CORE_TYPE_VERSION_CHANGED,
+						oldEntity.getOwningLibrary().getVersion(), newEntity.getOwningLibrary().getVersion() ) );
+				
+			} else {
+				changeItems.add( new EntityChangeItem( EntityChangeType.SIMPLE_CORE_TYPE_CHANGED,
+						formatter.getEntityDisplayName( oldEntity.getSimpleCoreType() ),
+						formatter.getEntityDisplayName( newEntity.getSimpleCoreType() ) ) );
+			}
 		}
 		if (oldEntity.isSimpleList() != newEntity.isSimpleList()) {
 			EntityChangeType changeType = newEntity.isSimpleList() ?
@@ -217,7 +253,7 @@ public class EntityComparator extends BaseComparator {
 				// Simple Case: One field of this name in each version (even if its facet location
 				// may have changed)
 				if ((oldVersionFields.size() == 1) && (newVersionFields.size() == 1)) {
-					FieldChangeSet fieldChangeSet = new FieldComparator().compareFields(
+					FieldChangeSet fieldChangeSet = new FieldComparator( getNamespaceMappings() ).compareFields(
 							new FieldComparisonFacade( oldVersionFields.get( 0 ) ),
 							new FieldComparisonFacade( newVersionFields.get( 0 ) ) );
 					
@@ -278,7 +314,7 @@ public class EntityComparator extends BaseComparator {
 									changeItems.add( new EntityChangeItem( EntityChangeType.MEMBER_FIELD_DELETED, oldField ) );
 									
 								} else {
-									FieldChangeSet fieldChangeSet = new FieldComparator().compareFields(
+									FieldChangeSet fieldChangeSet = new FieldComparator( getNamespaceMappings() ).compareFields(
 											new FieldComparisonFacade( oldField ), new FieldComparisonFacade( newField ) );
 									
 									if (!fieldChangeSet.getFieldChangeItems().isEmpty()) {

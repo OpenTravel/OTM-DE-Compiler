@@ -28,7 +28,6 @@ import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
@@ -241,55 +240,6 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
 	}
 
 	/**
-	 * @see org.opentravel.schemacompiler.codegen.example.AbstractExampleVisitor#getContextFacet()
-	 */
-	@Override
-	protected NamedEntity getContextFacet() {
-		NamedEntity elementType = (context.getModelElement() == null) ? null
-				: context.getModelElement().getType();
-		NamedEntity contextFacet;
-
-		if (elementType instanceof TLExtensionPointFacet) {
-			contextFacet = null; // No inheritance or aliases for extension
-									// point facets
-
-		} else if (elementType instanceof TLValueWithAttributes) {
-			contextFacet = elementType;
-
-		} else {
-			ExampleContext facetContext = context;
-
-			// If we are currently processing an attribute value, the facet
-			// context will be the
-			// current one. If we are processing an element value, the facet
-			// context will be
-			// on top of the context stack.
-			if ((facetContext.getModelAttribute() == null)
-					&& !contextStack.isEmpty()) {
-				facetContext = contextStack.peek();
-			}
-
-			if (facetContext.getModelAlias() != null) {
-				TLAlias facetAlias = facetContext.getModelAlias();
-
-				if (facetAlias.getOwningEntity() instanceof TLListFacet) {
-					TLAlias coreAlias = AliasCodegenUtils
-							.getOwnerAlias(facetAlias);
-
-					facetAlias = AliasCodegenUtils.getFacetAlias(coreAlias,
-							((TLListFacet) facetAlias.getOwningEntity())
-									.getItemFacet().getFacetType());
-				}
-				contextFacet = facetAlias;
-
-			} else {
-				contextFacet = facetStack.isEmpty() ? null : facetStack.peek();
-			}
-		}
-		return contextFacet;
-	}
-
-	/**
      * @see org.opentravel.schemacompiler.codegen.example.ExampleVisitor#startAlias(org.opentravel.schemacompiler.model.TLAlias)
      */
     @Override
@@ -323,6 +273,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
 	@Override
 	public void startActionFacet(TLActionFacet actionFacet, TLFacet payloadFacet) {
 		super.startActionFacet(actionFacet, payloadFacet);
+		context.setModelActionFacet(actionFacet);
 		facetStack.push(payloadFacet);
 		createComplexElement(actionFacet);
 	}
@@ -337,6 +288,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
 		if (facetStack.peek() == payloadFacet) {
 			facetStack.pop();
 		}
+		context.setModelActionFacet(null);
 	}
 
 	/**
@@ -379,12 +331,10 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
 
         // Queue up IDREF(S) attributes for assignment during post-processing
         if (XsdCodegenUtils.isIdRefType(attribute.getType())) {
-			referenceAssignments.add(new DOMIdReferenceAssignment(null, 1,
-					attribute.getName()));
+			referenceAssignments.add(new DOMIdReferenceAssignment(null, 1, attribute.getName()));
         }
         if (XsdCodegenUtils.isIdRefsType(attribute.getType())) {
-			referenceAssignments.add(new DOMIdReferenceAssignment(null, 3,
-					attribute.getName()));
+			referenceAssignments.add(new DOMIdReferenceAssignment(null, 3, attribute.getName()));
         }
 
 		// If the attribute was an open enumeration type, we have to add an

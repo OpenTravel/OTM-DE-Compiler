@@ -200,6 +200,7 @@
         <Equivalent context="test">SampleChoice-equivalent</Equivalent>
         <Aliases>SampleChoice_Alias1 SampleChoice_Alias2</Aliases>
         <Shared>
+            <Attribute name="id" type="xsd:ID"/>
             <Attribute name="sharedAttribute" type="xsd:string"/>
             <Element name="sharedElement" repeat="0" type="xsd:int"/>
             <Indicator name="sharedIndicator" publishAsElement="false"/>

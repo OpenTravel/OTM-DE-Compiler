@@ -16,21 +16,64 @@
 
 package org.opentravel.schemacompiler.diff.impl;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 
+import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAdditionalDocumentationItem;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLDocumentationItem;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.version.VersionScheme;
+import org.opentravel.schemacompiler.version.VersionSchemeException;
+import org.opentravel.schemacompiler.version.VersionSchemeFactory;
 
 /**
  * Base class for all components used to compare an aspect of the OTM model.
  */
 public abstract class BaseComparator {
+	
+	private Map<String,String> namespaceMappings = new HashMap<>();
+	
+	/**
+	 * Default constructor.
+	 */
+	public BaseComparator() {}
+	
+	/**
+	 * Constructor that initializes the namespace mappings for the comparator.
+	 * 
+	 * @param namespaceMappings  the initial namespace mappings
+	 */
+	protected BaseComparator(Map<String,String> namespaceMappings) {
+		this.namespaceMappings.putAll( namespaceMappings );
+	}
+	
+	/**
+	 * Returns the namespace mappings for this comparator.
+	 * 
+	 * @return Map<String,String>
+	 */
+	public Map<String,String> getNamespaceMappings() {
+		return Collections.unmodifiableMap( namespaceMappings );
+	}
+	
+	/**
+	 * Adds a mapping the forces the namespace of a old version libraries to be evaluated
+	 * as if it were assigned to the new version namespace.
+	 *  
+	 * @param oldVersionNS  the old version namespace to be mapped
+	 * @param newVersionNS  the new version namespace to which the old version is mapped
+	 */
+	public void addNamespaceMapping(String oldVersionNS, String newVersionNS) {
+		namespaceMappings.put( oldVersionNS, newVersionNS );
+	}
 	
 	/**
 	 * Returns true if the old value and new object values are different.
@@ -124,6 +167,74 @@ public abstract class BaseComparator {
 	}
 	
 	/**
+	 * Returns true if the old and new of the entity names differ only by their version identifiers.
+	 * 
+	 * @param oldVersionName  the old version qualified name
+	 * @param newVersionName  the new version qualified name
+	 * @return boolean
+	 */
+	protected boolean isVersionChange(QName oldVersionName, QName newVersionName, String versionScheme) {
+		boolean result = false;
+		try {
+			if (versionScheme == null) {
+				versionScheme = VersionSchemeFactory.getInstance().getDefaultVersionScheme();
+			}
+			if ((oldVersionName != null) && (newVersionName != null) && (oldVersionName.getLocalPart() != null)
+					&& oldVersionName.getLocalPart().equals( newVersionName.getLocalPart() )) {
+				VersionScheme vScheme = VersionSchemeFactory.getInstance().getVersionScheme( versionScheme );
+				String oldVersionNS = oldVersionName.getNamespaceURI();
+				String newVersionNS = newVersionName.getNamespaceURI();
+				String oldVersionBaseNS = (oldVersionNS == null) ? null : vScheme.getBaseNamespace( oldVersionNS );
+				String newVersionBaseNS = (newVersionNS == null) ? null : vScheme.getBaseNamespace( newVersionNS );
+				
+				return (oldVersionBaseNS == null) ? false : oldVersionBaseNS.equals( newVersionBaseNS );
+			}
+			
+		} catch (VersionSchemeException e) {
+			// Do not throw an exception - just return false
+		}
+		return result;
+	}
+	
+	/**
+	 * Returns the version scheme for the library that owns the given entity.
+	 * 
+	 * @param entity  the entity for which to return the version scheme
+	 * @return String
+	 */
+	protected String getVersionScheme(NamedEntity entity) {
+		String versionScheme = null;
+		
+		if (entity != null) {
+			AbstractLibrary owningLibrary = entity.getOwningLibrary();
+			
+			if (owningLibrary != null) {
+				versionScheme = owningLibrary.getVersionScheme();
+			}
+		}
+		return versionScheme;
+	}
+	
+	/**
+	 * Returns the version of the library that owns the given entity.
+	 * 
+	 * @param entity  the entity for which to return the version identifier
+	 * @return String
+	 */
+	protected String getVersion(NamedEntity entity) {
+		String version = null;
+		
+		if (entity != null) {
+			AbstractLibrary owningLibrary = entity.getOwningLibrary();
+			
+			if (owningLibrary != null) {
+				version = owningLibrary.getVersion();
+			}
+		}
+		return version;
+	}
+	
+	/**
 	 * Returns the qualified name of the given library.
 	 * 
 	 * @param library  the library for which to return the qualified name
@@ -140,15 +251,27 @@ public abstract class BaseComparator {
 	 * @return QName
 	 */
 	protected QName getEntityName(NamedEntity entity) {
-		String localName = null;
+		QName entityName = null;
 		
-		if (entity instanceof TLOperation) {
-			localName = ((TLOperation) entity).getName();
+		if (entity != null) {
+			String ns = namespaceMappings.get( entity.getNamespace() );
+			String localName = null;
 			
-		} else if (entity != null) {
-			localName = entity.getLocalName();
+			if (ns == null) {
+				ns = entity.getNamespace();
+			}
+			if (entity instanceof TLOperation) {
+				localName = ((TLOperation) entity).getName();
+				
+			} else {
+				localName = entity.getLocalName();
+			}
+			if (localName == null) {
+				localName = "UNKNOWN";
+			}
+			entityName = new QName( ns, localName );
 		}
-		return (entity == null) ? null : new QName( entity.getNamespace(), localName );
+		return entityName;
 	}
 	
 }

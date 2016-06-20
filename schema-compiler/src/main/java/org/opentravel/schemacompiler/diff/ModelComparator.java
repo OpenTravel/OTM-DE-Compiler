@@ -86,7 +86,10 @@ public class ModelComparator {
 	 * @return LibraryChangeSet
 	 */
 	public static LibraryChangeSet compareLibraries(TLLibrary oldLibrary, TLLibrary newLibrary) {
-		return new LibraryComparator().compareLibraries( oldLibrary, newLibrary );
+		LibraryComparator comparator = new LibraryComparator();
+		
+		comparator.addNamespaceMapping( oldLibrary.getNamespace(), newLibrary.getNamespace() );
+		return comparator.compareLibraries( oldLibrary, newLibrary );
 	}
 	
 	/**
@@ -111,7 +114,10 @@ public class ModelComparator {
 	 * @return EntityChangeSet
 	 */
 	public static EntityChangeSet compareEntities(NamedEntity oldEntity, NamedEntity newEntity) {
-		return new EntityComparator().compareEntities(
+		EntityComparator comparator = new EntityComparator();
+		
+		comparator.addNamespaceMapping( oldEntity.getNamespace(), newEntity.getNamespace() );
+		return comparator.compareEntities(
 				new EntityComparisonFacade( oldEntity ), new EntityComparisonFacade( newEntity ) );
 	}
 	

@@ -92,7 +92,8 @@ public class ProjectComparator extends BaseComparator {
 				TLLibrary oldLibrary = oldLibraries.get( libraryName );
 				TLLibrary newLibrary = newLibraries.get( libraryName );
 				LibraryChangeSet libraryChangeSet =
-						new LibraryComparator().compareLibraries( oldLibrary, newLibrary );
+						new LibraryComparator( getNamespaceMappings() )
+								.compareLibraries( oldLibrary, newLibrary );
 				
 				if (!libraryChangeSet.getLibraryChangeItems().isEmpty()) {
 					changeItems.add( new ProjectChangeItem( libraryChangeSet ) );

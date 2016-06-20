@@ -17,10 +17,14 @@
 package org.opentravel.schemacompiler.diff.impl;
 
 import java.util.List;
+import java.util.Map;
+
+import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.diff.FieldChangeItem;
 import org.opentravel.schemacompiler.diff.FieldChangeSet;
 import org.opentravel.schemacompiler.diff.FieldChangeType;
+import org.opentravel.schemacompiler.model.NamedEntity;
 
 /**
  * Performs a comparison of two OTM member fields.
@@ -28,6 +32,20 @@ import org.opentravel.schemacompiler.diff.FieldChangeType;
 public class FieldComparator extends BaseComparator {
 	
 	private DisplayFomatter formatter = new DisplayFomatter();
+	
+	/**
+	 * Default constructor.
+	 */
+	public FieldComparator() {}
+	
+	/**
+	 * Constructor that initializes the namespace mappings for the comparator.
+	 * 
+	 * @param namespaceMappings  the initial namespace mappings
+	 */
+	protected FieldComparator(Map<String,String> namespaceMappings) {
+		super( namespaceMappings );
+	}
 	
 	/**
 	 * Compares two versions of the same OTM member field.
@@ -41,6 +59,8 @@ public class FieldComparator extends BaseComparator {
 		int newRepeatCount = (newField.getRepeatCount() <= 1) ? 0 : newField.getRepeatCount();
 		FieldChangeSet changeSet = new FieldChangeSet( oldField.getField(), newField.getField() );
 		List<FieldChangeItem> changeItems = changeSet.getFieldChangeItems();
+		QName oldAssignedTypeName = getEntityName( oldField.getAssignedType() );
+		QName newAssignedTypeName = getEntityName( newField.getAssignedType() );
 		
 		if (valueChanged( oldField.getMemberType(), newField.getMemberType() )) {
 			changeItems.add( new FieldChangeItem( FieldChangeType.MEMBER_TYPE_CHANGED,
@@ -51,10 +71,23 @@ public class FieldComparator extends BaseComparator {
 			changeItems.add( new FieldChangeItem( FieldChangeType.OWNING_FACET_CHANGED,
 					oldField.getOwningFacet(), newField.getOwningFacet() ) );
 		}
-		if (valueChanged( getEntityName( oldField.getAssignedType() ), getEntityName( newField.getAssignedType() ) )) {
-			changeItems.add( new FieldChangeItem( FieldChangeType.TYPE_CHANGED,
-					formatter.getEntityDisplayName( oldField.getAssignedType() ),
-					formatter.getEntityDisplayName( newField.getAssignedType() ) ) );
+		if (valueChanged( oldAssignedTypeName, newAssignedTypeName )) {
+			String versionScheme = getVersionScheme( oldField.getAssignedType() );
+			
+			if (versionScheme == null) {
+				versionScheme = getVersionScheme( newField.getAssignedType() );
+			}
+			
+			if (isVersionChange( oldAssignedTypeName, newAssignedTypeName, versionScheme )) {
+				changeItems.add( new FieldChangeItem( FieldChangeType.TYPE_VERSION_CHANGED,
+						getVersion( (NamedEntity) oldField.getAssignedType() ),
+						getVersion( (NamedEntity) newField.getAssignedType() ) ) );
+				
+			} else {
+				changeItems.add( new FieldChangeItem( FieldChangeType.TYPE_CHANGED,
+						formatter.getEntityDisplayName( oldField.getAssignedType() ),
+						formatter.getEntityDisplayName( newField.getAssignedType() ) ) );
+			}
 		}
 		if (oldRepeatCount != newRepeatCount) {
 			changeItems.add( new FieldChangeItem( FieldChangeType.CARDINALITY_CHANGE,

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
 <?import javafx.scene.web.*?>
 <?import javafx.scene.effect.*?>
 <?import javafx.scene.image.*?>
@@ -201,7 +202,17 @@
                   <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
                </padding>
             </Label>
-            <Button fx:id="saveReportButton" alignment="CENTER_RIGHT" mnemonicParsing="false" onAction="#saveReport" text="Save Report...">
+            <Button fx:id="backButton" minWidth="-Infinity" mnemonicParsing="false" onAction="#browserBack" prefWidth="30.0" text="&lt;">
+               <HBox.margin>
+                  <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+               </HBox.margin>
+            </Button>
+            <Button fx:id="forwardButton" minWidth="-Infinity" mnemonicParsing="false" onAction="#browserForward" prefWidth="30.0" text="&gt;">
+               <HBox.margin>
+                  <Insets bottom="2.0" left="2.0" right="10.0" top="2.0" />
+               </HBox.margin>
+            </Button>
+            <Button fx:id="saveReportButton" alignment="CENTER" mnemonicParsing="false" onAction="#saveReport" prefHeight="25.0" prefWidth="167.0" text="Save Report...">
                <HBox.margin>
                   <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
                </HBox.margin>

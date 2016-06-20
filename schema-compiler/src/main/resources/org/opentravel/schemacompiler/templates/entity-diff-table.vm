@@ -28,6 +28,8 @@
 			#elseif ($entityChangeItem.deletedField)
 				<td>$formatter.getFieldName( $entityChangeItem.deletedField )</td>
 				<td>&nbsp;</td>
+			#elseif ($entityChangeItem.changeType == "DOCUMENTATION_CHANGED")
+				<td colspan="2">See model for details</td>
 			#else
 				<td>#if ($entityChangeItem.oldValue) $entityChangeItem.oldValue #else &nbsp; #end</td>
 				<td>#if ($entityChangeItem.newValue) $entityChangeItem.newValue #else &nbsp; #end</td>
