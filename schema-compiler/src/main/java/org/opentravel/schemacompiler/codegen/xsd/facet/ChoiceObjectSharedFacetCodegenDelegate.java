@@ -44,6 +44,14 @@ public class ChoiceObjectSharedFacetCodegenDelegate extends ChoiceObjectFacetCod
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate#hasContent()
+	 */
+	@Override
+	public boolean hasContent() {
+		return true; // shared facets will always be generated - even if they are empty types
+	}
+
+	/**
 	 * @see org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate#hasDefaultFacetElement()
 	 */
 	@Override

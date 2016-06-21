@@ -18,19 +18,22 @@ package org.opentravel.diffutil;
 
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.io.IOException;
 
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 /**
  * JavaFX application for the OTM-Diff Utility.
  */
-public class Application extends javafx.application.Application {
+public class OTMDiffApplication extends javafx.application.Application {
 	
 	/**
 	 * Main method invoked from the command-line.
@@ -47,12 +50,13 @@ public class Application extends javafx.application.Application {
 	@Override
 	public void start(Stage primaryStage) {
 		try {
-			FXMLLoader loader = new FXMLLoader( Application.class.getResource(
+			FXMLLoader loader = new FXMLLoader( OTMDiffApplication.class.getResource(
 					DiffUtilityController.FXML_FILE ) );
 			Parent root = loader.load();
 			DiffUtilityController controller = loader.getController();
 			UserSettings userSettings = UserSettings.load();
 			
+			validateWindowLocation( userSettings );
 			primaryStage.setTitle("OTM-Diff Utility");
 			primaryStage.setScene( new Scene( root, userSettings.getWindowSize().getWidth(),
 					userSettings.getWindowSize().getHeight() ) );
@@ -79,4 +83,40 @@ public class Application extends javafx.application.Application {
 			throw new RuntimeException("Unable to initialize JavaFX application.", e);
 		}
 	}
+	
+	/**
+	 * Compares the window dimensions contained within the given user settings against the
+	 * current screen dimensions.  If the previous coordinates are outside of the current
+	 * viewing area, they will be adjusted so that the main window is visible.
+	 * 
+	 * @param userSettings  the user settings that specify the preferred window size and location
+	 */
+	private void validateWindowLocation(UserSettings userSettings) {
+		Point position = new Point( userSettings.getWindowPosition() );
+		Dimension size = userSettings.getWindowSize();
+		Rectangle windowBounds = new Rectangle( position.x, position.y, size.width, size.height);
+		Rectangle screenBounds = new Rectangle( 0, 0, 0, 0 );
+		
+		// Calculate the full dimensions of the visible screen area
+		for (Screen screen : Screen.getScreens()) {
+			Rectangle2D bounds = screen.getBounds();
+			
+			screenBounds.x = Math.min( screenBounds.x, (int) bounds.getMinX() );
+			screenBounds.y = Math.min( screenBounds.y, (int) bounds.getMinY() );
+		}
+		for (Screen screen : Screen.getScreens()) {
+			Rectangle2D bounds = screen.getBounds();
+			
+			screenBounds.width  = Math.max( screenBounds.width - screenBounds.x, (int) bounds.getWidth() - screenBounds.x );
+			screenBounds.height = Math.max( screenBounds.height - screenBounds.y, (int) bounds.getHeight() - screenBounds.y );
+		}
+		
+		// If the window is outside of the visible area, move the origin to the default
+		// coordinates (0,0)
+		if (!screenBounds.contains(windowBounds)) {
+			userSettings.setWindowPosition( new Point( 0, 0 ) );
+			userSettings.setWindowSize( UserSettings.getDefaultSettings().getWindowSize() );
+		}
+	}
+	
 }

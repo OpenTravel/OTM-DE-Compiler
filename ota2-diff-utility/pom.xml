@@ -45,7 +45,7 @@
                 			<goal>jar</goal>
                 		</goals>
                 		<configuration>
-		                    <mainClass>org.opentravel.diffutil.Application</mainClass>
+		                    <mainClass>org.opentravel.diffutil.OTMDiffApplication</mainClass>
         		            <jfxMainAppJarName>${project.artifactId}.jar</jfxMainAppJarName>
                 		    <nativeInstallers/>
                 		</configuration>
