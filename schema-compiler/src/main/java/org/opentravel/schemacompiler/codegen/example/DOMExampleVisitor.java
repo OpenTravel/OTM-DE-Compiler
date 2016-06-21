@@ -474,6 +474,14 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
         super.startValueWithAttributes(valueWithAttributes);
         createComplexElement(valueWithAttributes);
 
+        // Queue up IDREF(S) attributes for assignment during post-processing
+        if (XsdCodegenUtils.isIdRefType(valueWithAttributes.getParentType())) {
+			referenceAssignments.add(new DOMIdReferenceAssignment(null, 1));
+        }
+        if (XsdCodegenUtils.isIdRefsType(valueWithAttributes.getParentType())) {
+			referenceAssignments.add(new DOMIdReferenceAssignment(null, 3));
+        }
+        
 		if ((parentType instanceof TLOpenEnumeration)
 				|| (parentType instanceof TLRoleEnumeration)) {
 			context.getNode().setAttribute("extension", "Other_Value");

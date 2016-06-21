@@ -109,9 +109,8 @@ public class TLAttributeJsonCodegenTransformer extends AbstractJsonSchemaTransfo
         JsonType jsonType = JsonType.valueOf( attributeType );
         
         if (jsonType != null) {
-        	JsonSchema attrSchema = new JsonSchema();
+        	JsonSchema attrSchema = jsonUtils.buildSimpleTypeSchema( jsonType );
         	
-        	attrSchema.setType( jsonType );
     		transformDocumentation( source, attrSchema );
     		attrSchema.getExampleItems().addAll( jsonUtils.getExampleInfo( source ) );
     		attrSchema.getEquivalentItems().addAll( jsonUtils.getEquivalentInfo( source ) );

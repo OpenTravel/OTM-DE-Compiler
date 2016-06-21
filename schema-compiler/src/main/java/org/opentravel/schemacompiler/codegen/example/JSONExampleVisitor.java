@@ -372,15 +372,13 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 		}
 
 		// Queue up IDREF(S) attributes for assignment during post-processing
-		if (!contextStack.isEmpty()) { // TODO: Temporary fix; not sure why the context stack would be empty
-			if (XsdCodegenUtils.isIdRefType(attribute.getType())) {
-				referenceAssignments.add(new JsonIdReferenceAssignment(null, 1,
-						attribute.getName()));
-			}
-			if (XsdCodegenUtils.isIdRefsType(attribute.getType())) {
-				referenceAssignments.add(new JsonIdReferenceAssignment(null, 3,
-						attribute.getName()));
-			}
+		if (XsdCodegenUtils.isIdRefType(attribute.getType())) {
+			referenceAssignments.add(new JsonIdReferenceAssignment(null, 1,
+					attribute.getName(), false));
+		}
+		if (XsdCodegenUtils.isIdRefsType(attribute.getType())) {
+			referenceAssignments.add(new JsonIdReferenceAssignment(null, 3,
+					attribute.getName(), false));
 		}
 
 		// If the attribute was an open enumeration type, we have to add an
@@ -453,17 +451,17 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 
 		// Queue up IDREF(S) attributes for assignment during post-processing
 		if (XsdCodegenUtils.isIdRefType(element.getType())) {
-			referenceAssignments.add(new JsonIdReferenceAssignment(null, 1));
+			referenceAssignments.add(new JsonIdReferenceAssignment(null, 1, element.getName(), true));
 		}
 		if (XsdCodegenUtils.isIdRefsType(element.getType())) {
-			referenceAssignments.add(new JsonIdReferenceAssignment(null, 3));
+			referenceAssignments.add(new JsonIdReferenceAssignment(null, 3, element.getName(), true));
 		}
 		if (element.isReference()) {
 			int referenceCount = (element.getRepeat() <= 1) ? 1 : element
 					.getRepeat();
 
 			referenceAssignments.add(new JsonIdReferenceAssignment(element
-					.getType(), referenceCount, element.getName()));
+					.getType(), referenceCount, element.getName(), true));
 		}
 		context = contextStack.pop();
 		int repeat = element.getRepeat();
@@ -546,12 +544,25 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 		super.startValueWithAttributes(valueWithAttributes);
 		createObjectNode(valueWithAttributes);
 
+		// Queue up IDREF(S) attributes for assignment during post-processing
+		if (XsdCodegenUtils.isIdRefType(valueWithAttributes.getParentType())) {
+			referenceAssignments.add(new JsonIdReferenceAssignment(null, 1, "value", false));
+		}
+		if (XsdCodegenUtils.isIdRefsType(valueWithAttributes.getParentType())) {
+			referenceAssignments.add(new JsonIdReferenceAssignment(null, 3, "value", false));
+		}
+		
 		if ((parentType instanceof TLOpenEnumeration)
 				|| (parentType instanceof TLRoleEnumeration)) {
 			((ObjectNode) context.getNode()).put("extension", "Other_Value");
 		}
-		((ObjectNode) context.getNode()).set("value",
-				generateExampleValueNode(valueWithAttributes));
+		if (XsdCodegenUtils.isIdRefsType(valueWithAttributes.getParentType())) {
+			((ObjectNode) context.getNode()).set("value",
+					generateExampleValueArrayNode(valueWithAttributes));
+		} else {
+			((ObjectNode) context.getNode()).set("value",
+					generateExampleValueNode(valueWithAttributes));
+		}
 	}
 
 	/**
@@ -1012,7 +1023,11 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 		if (elementType instanceof TLListFacet || XsdCodegenUtils.isIdType((TLPropertyType) elementType)) {
 			node = generateExampleValueNode(context.getModelElement());
 		} else {
-			node = generateExampleValueNode(elementType);
+			if (XsdCodegenUtils.isIdRefsType((TLPropertyType) elementType)) {
+				node = generateExampleValueArrayNode(elementType);
+			} else {
+				node = generateExampleValueNode(elementType);
+			}
 		}
 		
 		if (elementType instanceof TLOpenEnumeration) {
@@ -1214,22 +1229,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 	 */
 	private class JsonIdReferenceAssignment extends IdReferenceAssignment{
 
-		private ObjectNode parentNode;
-
-		/**
-		 * Constructor used for assigning an IDREF(S) value to an XML element.
-		 * 
-		 * @param referencedEntity
-		 *            the named entity that was referenced (may be null for
-		 *            legacy IDREF(S) values)
-		 * @param referenceCount
-		 *            indicates the number of reference values that should be
-		 *            applied
-		 */
-		public JsonIdReferenceAssignment(NamedEntity referencedEntity,
-				int referenceCount) {
-			this(referencedEntity, referenceCount, null);
-		}
+		private JsonNode parentNode;
 
 		/**
 		 * Constructor used for assigning an IDREF(S) value to an XML attribute.
@@ -1245,15 +1245,20 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 		 *            should be assigned
 		 */
 		public JsonIdReferenceAssignment(NamedEntity referencedEntity,
-				int referenceCount, String nodeName) {
+				int referenceCount, String nodeName, boolean isElement) {
 			super(referencedEntity, referenceCount, nodeName);
 			
-			JsonNode jn = contextStack.peek().getNode();
-			// for attributes we don't push the context which causes an issue here. Should we?
-			if(jn.isArray()){
-				jn = context.getNode();
+			if (!isElement) { // attribute or VWA value
+				parentNode = context.getNode();
+				
+			} else { // element value
+				JsonNode jn = contextStack.peek().getNode();
+				
+				if(jn.isArray()){
+					jn = context.getNode();
+				}
+				parentNode = jn ;
 			}
-			parentNode = (ObjectNode) jn ;
 		}
 
 		/**
@@ -1275,7 +1280,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 							an.add(nodeFactory.textNode(str));
 						}
 					} else if (jn.isTextual()) {
-						parentNode.set(nodeName,
+						((ObjectNode) parentNode).set(nodeName,
 								nodeFactory.textNode(referenceValue));
 
 					}

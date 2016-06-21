@@ -43,7 +43,8 @@ public enum JsonType {
 	jsonPassword ( "string",  "password"  ),
 	jsonArray    ( "array",    null       ),
 	jsonObject   ( "object",   null       ),
-	jsonNull     ( "null",     null       );
+	jsonNull     ( "null",     null       ),
+	jsonRefs     ( "array",    null       );
 	
 	private static Map<String,JsonType> xsdSimpleMap;
 	private String schemaType;
@@ -113,7 +114,7 @@ public enum JsonType {
 			typeMappings.put( "duration", jsonString );
 			typeMappings.put( "ID", jsonString );
 			typeMappings.put( "IDREF", jsonString );
-			typeMappings.put( "IDREFS", jsonString );
+			typeMappings.put( "IDREFS", jsonRefs );
 			typeMappings.put( "long", jsonLong );
 			typeMappings.put( "int", jsonInteger );
 			typeMappings.put( "integer", jsonInteger );

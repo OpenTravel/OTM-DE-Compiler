@@ -82,6 +82,7 @@
         <Attribute name="attr4" type="xsd:int">
             <Equivalent context="test">attr4-equivalent</Equivalent>
         </Attribute>
+        <Attribute mandatory="true" name="idrefAttr" type="xsd:IDREFS"/>
         <Indicator name="indicator1" publishAsElement="false"/>
     </ValueWithAttrs>
     
@@ -134,6 +135,8 @@
             </Element>
             <Element name="element5" repeat="5" type="EmptyBusinessObject"/>
             <Element name="element6" repeat="*" type="SampleBusinessObject_Alias1_Detail"/>
+            <Element name="IdrefElement" repeat="0" type="xsd:IDREFS"/>
+            <Element name="vwaElement" repeat="0" type="SampleValueWithAttributes"/>
             <Indicator name="indicator1" publishAsElement="false">
                 <Documentation>
                     <Description>indicator1-description</Description>

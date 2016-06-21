@@ -204,7 +204,7 @@ public class TLPropertyJsonCodegenTransformer extends AbstractJsonSchemaTransfor
 		}
         
         if (jsonType != null) {
-        	JsonSchema propertySchema = new JsonSchema();
+        	JsonSchema propertySchema = jsonUtils.buildSimpleTypeSchema( jsonType );
         	
         	if (typeRef == schemaRef) { // not an array, so put the documentation here
         		transformDocumentation( source, propertySchema );
@@ -212,7 +212,6 @@ public class TLPropertyJsonCodegenTransformer extends AbstractJsonSchemaTransfor
         		propertySchema.getExampleItems().addAll( jsonUtils.getExampleInfo( source ) );
         		docSchema = null;
         	}
-        	propertySchema.setType( jsonType );
     		typeRef.setSchema( propertySchema );
     		
         } else if ((propertyType instanceof XSDSimpleType) || (propertyType instanceof XSDComplexType)

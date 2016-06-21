@@ -33,6 +33,9 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentationOwner;
 import org.opentravel.schemacompiler.codegen.json.model.JsonEntityInfo;
 import org.opentravel.schemacompiler.codegen.json.model.JsonLibraryInfo;
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
+import org.opentravel.schemacompiler.codegen.json.model.JsonType;
 import org.opentravel.schemacompiler.codegen.util.JsonSchemaNamingUtils;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
@@ -72,6 +75,27 @@ public class JsonSchemaCodegenUtils {
 	 */
 	public JsonSchemaCodegenUtils(CodeGenerationTransformerContext context) {
 		this.context = context;
+	}
+	
+	/**
+	 * Returns a JSON schema for the given JSON simple type.
+	 * 
+	 * @param jsonType  the JSON simple type for which to return a schema
+	 * @return JsonSchema
+	 */
+	public JsonSchema buildSimpleTypeSchema(JsonType jsonType) {
+    	JsonSchema schema = new JsonSchema();
+		
+		schema.setType( jsonType );
+		
+		// Special case for IDREFS; schema is an array of strings
+    	if (jsonType == JsonType.jsonRefs) {
+        	JsonSchema itemSchema = new JsonSchema();
+    		
+        	itemSchema.setType( JsonType.jsonString );
+        	schema.setItems( new JsonSchemaReference( itemSchema ));
+    	}
+    	return schema;
 	}
 	
     /**

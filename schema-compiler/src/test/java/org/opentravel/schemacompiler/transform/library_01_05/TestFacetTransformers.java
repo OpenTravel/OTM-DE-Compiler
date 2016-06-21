@@ -37,6 +37,7 @@ import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLSimple;
+import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.model.XSDSimpleType;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.TransformerFactory;
@@ -170,7 +171,7 @@ public class TestFacetTransformers extends Abstract_1_5_TestTransformers {
                 .getSummaryFacet();
 
         assertNotNull(facet.getElements());
-        assertEquals(6, facet.getElements().size());
+        assertEquals(8, facet.getElements().size());
 
         assertEquals("element1", facet.getElements().get(0).getName());
         assertNotNull(facet.getElements().get(0).getDocumentation());
@@ -252,8 +253,27 @@ public class TestFacetTransformers extends Abstract_1_5_TestTransformers {
         assertNotNull(facet.getElements().get(5).getType());
         assertEquals(TLAlias.class, facet.getElements().get(5).getType().getClass());
         assertEquals(PACKAGE_2_NAMESPACE, facet.getElements().get(5).getType().getNamespace());
-        assertEquals("SampleBusinessObject_Alias1_Detail", facet.getElements().get(5).getType()
-                .getLocalName());
+        assertEquals("SampleBusinessObject_Alias1_Detail", facet.getElements().get(5).getType().getLocalName());
+
+        assertEquals("IdrefElement", facet.getElements().get(6).getName());
+        assertNull(facet.getElements().get(6).getDocumentation());
+        assertFalse(facet.getElements().get(6).isMandatory());
+        assertEquals(0, facet.getElements().get(6).getRepeat());
+        assertEquals("xsd:IDREFS", facet.getElements().get(6).getTypeName());
+        assertNotNull(facet.getElements().get(6).getType());
+        assertEquals(XSDSimpleType.class, facet.getElements().get(6).getType().getClass());
+        assertEquals(XMLConstants.W3C_XML_SCHEMA_NS_URI, facet.getElements().get(6).getType().getNamespace());
+        assertEquals("IDREFS", facet.getElements().get(6).getType().getLocalName());
+
+        assertEquals("vwaElement", facet.getElements().get(7).getName());
+        assertNull(facet.getElements().get(7).getDocumentation());
+        assertFalse(facet.getElements().get(7).isMandatory());
+        assertEquals(0, facet.getElements().get(7).getRepeat());
+        assertEquals("SampleValueWithAttributes", facet.getElements().get(7).getTypeName());
+        assertNotNull(facet.getElements().get(7).getType());
+        assertEquals(TLValueWithAttributes.class, facet.getElements().get(7).getType().getClass());
+        assertEquals(PACKAGE_2_NAMESPACE, facet.getElements().get(7).getType().getNamespace());
+        assertEquals("SampleValueWithAttributes", facet.getElements().get(7).getType().getLocalName());
     }
 
     @Test
@@ -361,7 +381,7 @@ public class TestFacetTransformers extends Abstract_1_5_TestTransformers {
                 .getSummary();
 
         assertNotNull(facet.getElement());
-        assertEquals(6, facet.getElement().size());
+        assertEquals(8, facet.getElement().size());
 
         assertEquals("element1", facet.getElement().get(0).getName());
         assertNotNull(facet.getElement().get(0).getDocumentation());
@@ -411,6 +431,18 @@ public class TestFacetTransformers extends Abstract_1_5_TestTransformers {
         assertNull(facet.getElement().get(5).isMandatory());
         assertEquals("*", facet.getElement().get(5).getRepeat());
         assertEquals("SampleBusinessObject_Alias1_Detail", facet.getElement().get(5).getType());
+        
+        assertEquals("IdrefElement", facet.getElement().get(6).getName());
+        assertNull(facet.getElement().get(6).getDocumentation());
+        assertNull(facet.getElement().get(6).isMandatory());
+        assertEquals("0", facet.getElement().get(6).getRepeat());
+        assertEquals("xsd:IDREFS", facet.getElement().get(6).getType());
+        
+        assertEquals("vwaElement", facet.getElement().get(7).getName());
+        assertNull(facet.getElement().get(7).getDocumentation());
+        assertNull(facet.getElement().get(7).isMandatory());
+        assertEquals("0", facet.getElement().get(7).getRepeat());
+        assertEquals("SampleValueWithAttributes", facet.getElement().get(7).getType());
     }
 
     @Test

@@ -64,9 +64,7 @@ public class TLValueWithAttributesJsonCodegenTransformer extends AbstractJsonSch
             JsonType jsonValueType = JsonType.valueOf( vwaParentType );
             
             if (jsonValueType != null) {
-            	JsonSchema jsonValueSchema = new JsonSchema();
-            	
-            	jsonValueSchema.setType( jsonValueType );
+            	JsonSchema jsonValueSchema = jsonUtils.buildSimpleTypeSchema( jsonValueType );
             	vwaValueSchemaRef.setSchema( jsonValueSchema );
             	
             } else {
