@@ -20,6 +20,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 
+import org.opentravel.ns.ota2.repositoryinfoext_v01_00.UserInfo;
+
 /**
  * Encapsulates the user ID and group assignments for an authenticated client of the OTA2.0
  * repository web service.
@@ -29,22 +31,33 @@ import java.util.HashSet;
 public final class UserPrincipal {
 
     public static final String ANONYMOUS_USER_ID = "anonymous";
-    public static final UserPrincipal ANONYMOUS_USER = new UserPrincipal(ANONYMOUS_USER_ID, null);
+    public static final UserPrincipal ANONYMOUS_USER;
 
     private String userId;
+    private String lastName;
+    private String firstName;
+    private String emailAddress;
     private Collection<String> assignedGroups = new ArrayList<String>();
     private Collection<String> authorizationIds = new HashSet<String>();
-
+    
+    /**
+     * Default constructor.
+     */
+    public UserPrincipal() {}
+    
     /**
      * Full constructor that provides the user's ID and his/her group assignments.
      * 
-     * @param userId
-     *            the ID of the authenticated user
+     * @param userInfo
+     *            the basic information about the authenticated user
      * @param assignedGroups
      *            the group assignments of the user
      */
-    public UserPrincipal(String userId, String[] assignedGroups) {
-        this.userId = userId;
+    public UserPrincipal(UserInfo userInfo, String[] assignedGroups) {
+        this.userId = userInfo.getUserId();
+        this.lastName = userInfo.getLastName();
+        this.firstName = userInfo.getFirstName();
+        this.emailAddress = userInfo.getEmailAddress();
 
         if (assignedGroups != null) {
             for (String groupName : assignedGroups) {
@@ -66,6 +79,69 @@ public final class UserPrincipal {
     }
 
     /**
+	 * Assigns the ID of the authenticated user.
+	 *
+	 * @param userId  the user ID to assign
+	 */
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+	/**
+	 * Returns the last name of the authenticated user.
+	 *
+	 * @return String
+	 */
+	public String getLastName() {
+		return lastName;
+	}
+
+	/**
+	 * Assigns the last name of the authenticated user.
+	 *
+	 * @param lastName  the last name value to assign
+	 */
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	/**
+	 * Returns the first name of the authenticated user.
+	 *
+	 * @return String
+	 */
+	public String getFirstName() {
+		return firstName;
+	}
+
+	/**
+	 * Assigns the first name of the authenticated user.
+	 *
+	 * @param firstName  the first name value to assign
+	 */
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	/**
+	 * Returns the email address of the authenticated user.
+	 *
+	 * @return String
+	 */
+	public String getEmailAddress() {
+		return emailAddress;
+	}
+
+	/**
+	 * Assigns the email address of the authenticated user.
+	 *
+	 * @param emailAddress  the email address to assign
+	 */
+	public void setEmailAddress(String emailAddress) {
+		this.emailAddress = emailAddress;
+	}
+
+	/**
      * Returns the group assignments of the user.
      * 
      * @return Collection<String>
@@ -83,5 +159,21 @@ public final class UserPrincipal {
     public Collection<String> getAuthorizationIds() {
         return Collections.unmodifiableCollection(authorizationIds);
     }
-
+    
+    /**
+     * Initializes the anonymous user information.
+     */
+    static {
+    	try {
+    		UserInfo anonymousUser = new UserInfo();
+    		
+    		anonymousUser.setUserId( ANONYMOUS_USER_ID );
+    		anonymousUser.setLastName( "Anonymous" );
+    		ANONYMOUS_USER = new UserPrincipal( anonymousUser, null );
+    		 
+    	} catch (Throwable t) {
+    		throw new ExceptionInInitializerError( t );
+    	}
+    }
+    
 }

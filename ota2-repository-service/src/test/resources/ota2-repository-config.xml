@@ -66,7 +66,7 @@
 	<!--
 	-->
 	<bean id="authenticationProvider" class="org.opentravel.schemacompiler.security.impl.FileAuthenticationProvider">
-		<constructor-arg ref="repositoryLocation" />
+		<property name="repositoryManager" ref="repositoryManager" />
 	</bean>
 	
 	<!--
@@ -83,6 +83,8 @@
 	<bean id="authenticationProvider" class="org.opentravel.schemacompiler.security.impl.JNDIAuthenticationProvider">
 		<property name="connectionUrl" value="ldap://localhost:389/dc=opentravel,dc=com" />
 		<property name="securityAuthentication" value="simple" />
+		<property name="connectionPrincipal" value="cn=Manager,dc=opentravel,dc=com" />
+		<property name="connectionPassword" value="password" />
 		<property name="userPattern" value="uid={0},ou=users,dc=opentravel,dc=com" />
 	</bean>
 	-->

@@ -16,11 +16,10 @@
 package org.opentravel.schemacompiler.console;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpSession;
 
@@ -32,16 +31,15 @@ import org.opentravel.schemacompiler.index.FreeTextSearchService;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.RepositoryComponentFactory;
 import org.opentravel.schemacompiler.repository.RepositoryException;
-import org.opentravel.schemacompiler.repository.RepositoryFileManager;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
+import org.opentravel.schemacompiler.security.AuthenticationProvider;
 import org.opentravel.schemacompiler.security.AuthorizationResource;
 import org.opentravel.schemacompiler.security.GroupAssignmentsResource;
 import org.opentravel.schemacompiler.security.RepositorySecurityException;
 import org.opentravel.schemacompiler.security.RepositorySecurityManager;
 import org.opentravel.schemacompiler.security.UserGroup;
 import org.opentravel.schemacompiler.security.UserPrincipal;
-import org.opentravel.schemacompiler.security.impl.FileAuthenticationProvider;
 import org.opentravel.schemacompiler.security.impl.SecurityFileUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -57,6 +55,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class AdminController extends BaseController {
 
+	protected static Pattern emailPattern = Pattern.compile(
+			"^([\\!#\\$%&'\\*\\+/\\=?\\^`\\{\\|\\}~a-zA-Z0-9_-]+[\\.]?)+[\\!#\\$%&'\\*\\+/\\=?\\^`\\{\\|\\}~a-zA-Z0-9_-]+@{1}((([0-9A-Za-z_-]+)([\\.]{1}[0-9A-Za-z_-]+)*\\.{1}([A-Za-z]){1,6})|(([0-9]{1,3}[\\.]{1}){3}([0-9]{1,3}){1}))$"
+		);
+	
     private static Log log = LogFactory.getLog(AdminController.class);
 
     private FreeTextSearchService searchService;
@@ -354,10 +356,11 @@ public class AdminController extends BaseController {
      */
     @RequestMapping({ "/adminUsers.html", "/adminUsers.htm" })
     public String adminUsersPage(HttpSession session, Model model) {
-        String[] userAccounts = FileAuthenticationProvider.getAllUserIds(getRepositoryManager()
-                .getRepositoryLocation());
-
-        model.addAttribute("userAccounts", userAccounts);
+        RepositorySecurityManager securityManager = RepositoryComponentFactory.getDefault().getSecurityManager();
+        List<UserPrincipal> allUsers = securityManager.getAllUsers();
+        
+        model.addAttribute("userAccounts", allUsers);
+        model.addAttribute("isLocalUserManagement", isLocalUserManagement());
         return applyCommonValues(session, model, "adminUsers");
     }
 
@@ -367,6 +370,12 @@ public class AdminController extends BaseController {
      * 
      * @param userId
      *            the ID of the user account to add
+     * @param lastName
+     *            the last name for the user account to add
+     * @param firstName
+     *            the first name for the user account to add
+     * @param emailAddress
+     *            the email address for the user account to add
      * @param password
      *            the password of the user to add
      * @param passwordConfirm
@@ -377,20 +386,29 @@ public class AdminController extends BaseController {
      *            the model context to be used when rendering the page view
      * @return String
      */
-    @RequestMapping(value = { "/adminUsersAdd.html", "/adminUsersAdd.htm" })
-    public String adminUsersAddPage(
+    @RequestMapping(value = { "/adminUsersAddLocal.html", "/adminUsersAddLocal.htm" })
+    public String adminUsersAddLocalPage(
             @RequestParam(value = "userId", required = false) String userId,
+            @RequestParam(value = "lastName", required = false) String lastName,
+            @RequestParam(value = "firstName", required = false) String firstName,
+            @RequestParam(value = "emailAddress", required = false) String emailAddress,
             @RequestParam(value = "password", required = false) String password,
             @RequestParam(value = "passwordConfirm", required = false) String passwordConfirm,
             HttpSession session, Model model) {
         boolean success = false;
         try {
             if (userId != null) {
-                RepositoryFileManager fileManager = getRepositoryManager().getFileManager();
+                RepositorySecurityManager securityManager = RepositoryComponentFactory.getDefault().getSecurityManager();
                 
-            	if (FileAuthenticationProvider.isExistingUserId( userId, fileManager.getRepositoryLocation() )) {
+            	if (securityManager.getUser( userId ) != null) {
                     setErrorMessage("A user with the ID '" + userId + "' already exists.", model);
             		
+            	} else if ((lastName == null) || (lastName.length() == 0)) {
+                    setErrorMessage("The last name is a required value.", model);
+
+            	} else if ((emailAddress != null) && !emailPattern.matcher( emailAddress ).matches()) {
+                    setErrorMessage("The email provided is not a valid address.", model);
+
             	} else if ((password == null) || (password.length() == 0)) {
                     setErrorMessage("The password is a required value.", model);
 
@@ -401,19 +419,171 @@ public class AdminController extends BaseController {
                     setErrorMessage("The passwords do not match.", model);
 
                 } else { // everything is ok - add the user
-                    FileAuthenticationProvider.saveUserCredentials(userId, password, false,
-                            fileManager);
+                	UserPrincipal newUser = new UserPrincipal();
+                	
+                	newUser.setUserId( userId );
+                	newUser.setLastName( lastName );
+                	newUser.setFirstName( firstName );
+                	newUser.setEmailAddress( emailAddress );
+                	
+                	securityManager.addUser( newUser );
+                	securityManager.setUserPassword( userId, password );
                     setStatusMessage("User '" + userId + "' created successfully.", model);
                     success = true;
                 }
             }
-        } catch (IOException e) {
+            
+            if (!success) {
+                model.addAttribute("userId", userId);
+                model.addAttribute("lastName", lastName);
+                model.addAttribute("firstName", firstName);
+                model.addAttribute("emailAddress", emailAddress);
+            }
+            
+        } catch (RepositoryException e) {
             setErrorMessage("Unable to create user account: " + userId, model);
             log.error("Unable to create user account: " + userId, e);
         }
-        return success ? adminUsersPage(session, model) : "adminUsersAdd";
+        return success ? adminUsersPage(session, model) : "adminUsersAddLocal";
     }
 
+    /**
+     * Called by the Spring MVC controller to display the application administration page used to
+     * manage local user accounts.
+     * 
+     * @param userId
+     *            the ID of the user account to add
+     * @param lastName
+     *            the last name for the user account to add
+     * @param firstName
+     *            the first name for the user account to add
+     * @param emailAddress
+     *            the email address for the user account to add
+     * @param session
+     *            the HTTP session that contains information about an authenticated user
+     * @param model
+     *            the model context to be used when rendering the page view
+     * @return String
+     */
+    @RequestMapping(value = { "/adminUsersEditLocal.html", "/adminUsersEditLocal.htm" })
+    public String adminUsersEditLocalPage(
+            @RequestParam(value = "userId", required = false) String userId,
+            @RequestParam(value = "lastName", required = false) String lastName,
+            @RequestParam(value = "firstName", required = false) String firstName,
+            @RequestParam(value = "emailAddress", required = false) String emailAddress,
+            @RequestParam(value = "updateUser", required = false) boolean updateUser,
+            HttpSession session, Model model) {
+        boolean success = false;
+        try {
+            RepositorySecurityManager securityManager = RepositoryComponentFactory.getDefault().getSecurityManager();
+            UserPrincipal user = securityManager.getUser( userId );
+            
+        	if (user == null) {
+                setErrorMessage("No user exists with the ID '" + userId + "'.", model);
+        		success = true; // Not a success, but will reroute back to the main user's page
+        	}
+        	
+            if (updateUser) {
+            	if ((lastName == null) || (lastName.length() == 0)) {
+                    setErrorMessage("The last name is a required value.", model);
+
+            	} else if ((emailAddress != null) && !emailPattern.matcher( emailAddress ).matches()) {
+                    setErrorMessage("The email provided is not a valid address.", model);
+
+                } else { // everything is ok - add the user
+                	user.setUserId( userId );
+                	user.setLastName( lastName );
+                	user.setFirstName( firstName );
+                	user.setEmailAddress( emailAddress );
+                	
+                	securityManager.updateUser( user );
+                    setStatusMessage("User '" + userId + "' updated successfully.", model);
+                    success = true;
+                }
+                if (!success) {
+                    model.addAttribute("userId", userId);
+                    model.addAttribute("lastName", lastName);
+                    model.addAttribute("firstName", firstName);
+                    model.addAttribute("emailAddress", emailAddress);
+                }
+                
+            } else if (user != null) {
+                model.addAttribute("userId", user.getUserId());
+                model.addAttribute("lastName", user.getLastName());
+                model.addAttribute("firstName", user.getFirstName());
+                model.addAttribute("emailAddress", user.getEmailAddress());
+            }
+            
+            
+        } catch (RepositoryException e) {
+            setErrorMessage("Unable to create user account: " + userId, model);
+            log.error("Unable to create user account: " + userId, e);
+        }
+        return success ? adminUsersPage(session, model) : "adminUsersEditLocal";
+    }
+
+    /**
+     * Called by the Spring MVC controller to display the application administration page used to
+     * manage local user accounts.
+     * 
+     * @param searchFilter
+     *            the search string that will be used for the directory search
+     * @param maxResults
+     *            the maximum number of results to return from the directory search
+     * @param userId
+     *            the ID of the user account to add
+     * @param createUser
+     *            flag indicating that the user to create has been selected
+     * @param session
+     *            the HTTP session that contains information about an authenticated user
+     * @param model
+     *            the model context to be used when rendering the page view
+     * @return String
+     */
+    @RequestMapping(value = { "/adminUsersAddDirectory.html", "/adminUsersAddDirectory.htm" })
+    public String adminUsersAddDirectoryPage(
+            @RequestParam(value = "searchFilter", required = false) String searchFilter,
+            @RequestParam(value = "maxResults", required = false) Integer maxResults,
+            @RequestParam(value = "userId", required = false) String userId,
+            @RequestParam(value = "createUser", required = false) boolean createUser,
+            HttpSession session, Model model) {
+        boolean success = false;
+        try {
+        	if (createUser && (userId != null) && (userId.length() > 0)) {
+                RepositorySecurityManager securityManager = RepositoryComponentFactory.getDefault().getSecurityManager();
+                
+            	if (securityManager.getUser( userId ) == null) {
+            		UserPrincipal newUser = new UserPrincipal();
+            		
+            		newUser.setUserId( userId );
+                    securityManager.addUser( newUser );
+                    success = true;
+                    
+            	} else {
+                    setErrorMessage("A user with the ID '" + userId + "' already exists.", model);
+            	}
+                
+        	}
+        	
+        	if (!success && (searchFilter != null) && (searchFilter.length() > 0)) {
+        		AuthenticationProvider authProvider = RepositoryComponentFactory.getDefault().getAuthenticationProvider();
+        		List<UserPrincipal> candidateUsers = authProvider.searchCandidateUsers( searchFilter, maxResults );
+        		
+                model.addAttribute("candidateUsers", candidateUsers);
+        	}
+        	
+        } catch (RepositoryException e) {
+            setErrorMessage("Unable to create user account: " + userId, model);
+            log.error("Unable to create user account: " + userId, e);
+        }
+        
+        if (!success) {
+            model.addAttribute("searchFilter", searchFilter);
+            model.addAttribute("maxResults", maxResults);
+        }
+        return success ? adminUsersPage(session, model) : "adminUsersAddDirectory";
+    }
+    
     /**
      * Called by the Spring MVC controller to display the application administration page used to
      * manage local user accounts.
@@ -437,16 +607,16 @@ public class AdminController extends BaseController {
             HttpSession session, Model model) {
         try {
             if (confirmDelete) {
-                RepositoryFileManager fileManager = getRepositoryManager().getFileManager();
-
-                FileAuthenticationProvider.saveUserCredentials(userId, null, true, fileManager);
+                RepositorySecurityManager securityManager = RepositoryComponentFactory.getDefault().getSecurityManager();
+                
+                securityManager.deleteUser( userId );
                 setStatusMessage("User '" + userId + "' deleted successfully.", model);
 
             } else {
                 model.addAttribute("userId", userId);
             }
 
-        } catch (IOException e) {
+        } catch (RepositoryException e) {
             setErrorMessage("Unable to delete user account: " + userId, model);
             log.error("Unable to delete user account: " + userId, e);
         }
@@ -491,18 +661,16 @@ public class AdminController extends BaseController {
                     setErrorMessage("The passwords do not match.", model);
 
                 } else { // everything is ok - change the password
-                    RepositoryFileManager fileManager = getRepositoryManager().getFileManager();
-
-                    FileAuthenticationProvider.saveUserCredentials(userId, newPassword, false,
-                            fileManager);
-                    setStatusMessage("The password for '" + userId + "' was changed successfully.",
-                            model);
+                    RepositorySecurityManager securityManager = RepositoryComponentFactory.getDefault().getSecurityManager();
+                    
+                    securityManager.setUserPassword(userId, newPassword);
+                    setStatusMessage("The password for '" + userId + "' was changed successfully.", model);
                     success = true;
                 }
             }
             model.addAttribute("userId", userId);
 
-        } catch (IOException e) {
+        } catch (RepositoryException e) {
             setErrorMessage("Unable to change password for user: " + userId, model);
             log.error("Unable to change password for user: " + userId, e);
         }
@@ -522,19 +690,19 @@ public class AdminController extends BaseController {
     @RequestMapping({ "/adminGroups.html", "/adminGroups.htm" })
     public String adminGroupsPage(HttpSession session, Model model) {
         try {
-            RepositorySecurityManager securityManager = RepositoryComponentFactory.getDefault()
-                    .getSecurityManager();
+            RepositorySecurityManager securityManager = RepositoryComponentFactory.getDefault().getSecurityManager();
+            List<UserPrincipal> allUsers = securityManager.getAllUsers();
             List<UserGroup> allGroups = new ArrayList<UserGroup>();
 
             for (String groupName : securityManager.getGroupNames()) {
                 allGroups.add(securityManager.getGroup(groupName));
             }
             model.addAttribute("allGroups", allGroups);
+            model.addAttribute("allUsers", allUsers);
 
         } catch (RepositoryException e) {
             log.error("Error displaying group assignments.", e);
-            setErrorMessage("Error displaying group assignments (see server log for details).",
-                    model);
+            setErrorMessage("Error displaying group assignments (see server log for details).", model);
         }
         return applyCommonValues(session, model, "adminGroups");
     }
@@ -557,8 +725,7 @@ public class AdminController extends BaseController {
 
         if (groupName != null) {
             try {
-                GroupAssignmentsResource groupsResource = new GroupAssignmentsResource(
-                        getRepositoryManager());
+                GroupAssignmentsResource groupsResource = new GroupAssignmentsResource(getRepositoryManager());
                 List<UserGroup> groupList = new ArrayList<UserGroup>();
                 List<String> groupNames = Arrays.asList(groupsResource.getGroupNames());
 
@@ -616,8 +783,7 @@ public class AdminController extends BaseController {
 
         if (confirmDelete) {
             try {
-                GroupAssignmentsResource groupsResource = new GroupAssignmentsResource(
-                        getRepositoryManager());
+                GroupAssignmentsResource groupsResource = new GroupAssignmentsResource(getRepositoryManager());
                 List<UserGroup> groupList = new ArrayList<UserGroup>();
                 List<String> groupNames = Arrays.asList(groupsResource.getGroupNames());
 
@@ -666,8 +832,8 @@ public class AdminController extends BaseController {
             @RequestParam(value = "groupName", required = true) String groupName,
             @RequestParam(value = "groupMembers", required = false) String groupMembers,
             HttpSession session, Model model) {
-        GroupAssignmentsResource groupsResource = new GroupAssignmentsResource(
-                getRepositoryManager());
+        RepositorySecurityManager securityManager = RepositoryComponentFactory.getDefault().getSecurityManager();
+        GroupAssignmentsResource groupsResource = new GroupAssignmentsResource(getRepositoryManager());
         String targetPage = null;
 
         if (groupMembers != null) {
@@ -712,7 +878,7 @@ public class AdminController extends BaseController {
                 groupMembers = memberIds.toString();
             }
             model.addAttribute("groupName", groupName);
-            model.addAttribute("knownUsers", getKnownUserIds());
+            model.addAttribute("allUsers", securityManager.getAllUsers());
             model.addAttribute("groupMembers", groupMembers);
             targetPage = applyCommonValues(session, model, "adminGroupsEdit");
         }
@@ -786,8 +952,7 @@ public class AdminController extends BaseController {
 
                 if (getSecurityManager().isAdministrator(user)) {
                     RepositoryManager repositoryManager = getRepositoryManager();
-                    RepositoryItem item = repositoryManager.getRepositoryItem(baseNamespace,
-                            filename, version);
+                    RepositoryItem item = repositoryManager.getRepositoryItem(baseNamespace, filename, version);
 
                     repositoryManager.delete(item);
                     searchService.deleteRepositoryItemIndex(item);
@@ -795,27 +960,22 @@ public class AdminController extends BaseController {
                     setStatusMessage("Repository item deleted successfully: " + filename, model);
 
                 } else {
-                    setErrorMessage("You do not have permission to delete the repository item.",
-                            model);
-                    targetPage = new ViewItemController().itemDetails(baseNamespace, filename,
-                            version, session, model);
+                    setErrorMessage("You do not have permission to delete the repository item.", model);
+                    targetPage = new ViewItemController().itemDetails(baseNamespace, filename, version, session, model);
                 }
             } catch (Exception e) {
                 log.error("Unable to delete the repository item.", e);
-                setErrorMessage(
-                        "Unable to delete the repository item (see server log for details).", model);
+                setErrorMessage("Unable to delete the repository item (see server log for details).", model);
 
             } finally {
                 if (targetPage == null) {
-                    targetPage = new BrowseController().browsePage(baseNamespace, null, session,
-                            model);
+                    targetPage = new BrowseController().browsePage(baseNamespace, null, session, model);
                 }
             }
         }
         if (targetPage == null) {
             try {
-                RepositoryItem item = getRepositoryManager().getRepositoryItem(baseNamespace,
-                        filename, version);
+                RepositoryItem item = getRepositoryManager().getRepositoryItem(baseNamespace, filename, version);
 
                 model.addAttribute("item", item);
                 targetPage = applyCommonValues(session, model, "adminDeleteItem");
@@ -862,8 +1022,7 @@ public class AdminController extends BaseController {
 
                 if (getSecurityManager().isAdministrator(user)) {
                     RepositoryManager repositoryManager = getRepositoryManager();
-                    RepositoryItem item = repositoryManager.getRepositoryItem(baseNamespace,
-                            filename, version);
+                    RepositoryItem item = repositoryManager.getRepositoryItem(baseNamespace, filename, version);
 
                     repositoryManager.promote(item);
                     searchService.indexRepositoryItem(item);
@@ -871,24 +1030,19 @@ public class AdminController extends BaseController {
                     setStatusMessage("Repository item promoted successfully: " + filename, model);
 
                 } else {
-                    setErrorMessage("You do not have permission to promote the repository item.",
-                            model);
+                    setErrorMessage("You do not have permission to promote the repository item.", model);
                 }
             } catch (Exception e) {
                 log.error("Unable to promote the repository item.", e);
-                setErrorMessage(
-                        "Unable to promote the repository item (see server log for details).",
-                        model);
+                setErrorMessage("Unable to promote the repository item (see server log for details).", model);
 
             } finally {
-                targetPage = new ViewItemController().itemDetails(baseNamespace, filename, version,
-                        session, model);
+                targetPage = new ViewItemController().itemDetails(baseNamespace, filename, version, session, model);
             }
         }
         if (targetPage == null) {
             try {
-                RepositoryItem item = getRepositoryManager().getRepositoryItem(baseNamespace,
-                        filename, version);
+                RepositoryItem item = getRepositoryManager().getRepositoryItem(baseNamespace, filename, version);
 
                 model.addAttribute("item", item);
                 targetPage = applyCommonValues(session, model, "adminPromoteItem");
@@ -935,8 +1089,7 @@ public class AdminController extends BaseController {
 
                 if (getSecurityManager().isAdministrator(user)) {
                     RepositoryManager repositoryManager = getRepositoryManager();
-                    RepositoryItem item = repositoryManager.getRepositoryItem(baseNamespace,
-                            filename, version);
+                    RepositoryItem item = repositoryManager.getRepositoryItem(baseNamespace, filename, version);
 
                     repositoryManager.demote(item);
                     searchService.indexRepositoryItem(item);
@@ -960,8 +1113,7 @@ public class AdminController extends BaseController {
         }
         if (targetPage == null) {
             try {
-                RepositoryItem item = getRepositoryManager().getRepositoryItem(baseNamespace,
-                        filename, version);
+                RepositoryItem item = getRepositoryManager().getRepositoryItem(baseNamespace, filename, version);
 
                 model.addAttribute("item", item);
                 targetPage = applyCommonValues(session, model, "adminDemoteItem");
@@ -1008,8 +1160,7 @@ public class AdminController extends BaseController {
 
                 if (getSecurityManager().isAdministrator(user)) {
                     RepositoryManager repositoryManager = getRepositoryManager();
-                    RepositoryItem item = repositoryManager.getRepositoryItem(baseNamespace,
-                            filename, version);
+                    RepositoryItem item = repositoryManager.getRepositoryItem(baseNamespace, filename, version);
 
                     repositoryManager.unlock(item, false);
                     searchService.indexRepositoryItem(item);
@@ -1022,9 +1173,7 @@ public class AdminController extends BaseController {
                 }
             } catch (Exception e) {
                 log.error("Unable to unlock the repository item.", e);
-                setErrorMessage(
-                        "Unable to unlock the repository item (see server log for details).",
-                        model);
+                setErrorMessage("Unable to unlock the repository item (see server log for details).", model);
 
             } finally {
                 targetPage = new ViewItemController().itemDetails(baseNamespace, filename, version,
@@ -1086,23 +1235,20 @@ public class AdminController extends BaseController {
 
                     if (item.getStatus() != TLLibraryStatus.FINAL) {
                         setErrorMessage(
-                                "Only repository items in FINAL status are assigned a CRC value.",
-                                model);
+                                "Only repository items in FINAL status are assigned a CRC value.", model);
 
                     } else {
                         repositoryManager.recalculateCrc(item);
                         searchService.indexRepositoryItem(item);
 
-                        setStatusMessage("Repository item CRC recalculated successfully: "
-                                + filename, model);
+                        setStatusMessage("Repository item CRC recalculated successfully: " + filename, model);
                     }
                     targetPage = new ViewItemController().itemDetails(baseNamespace, filename,
                             version, session, model);
 
                 } else {
                     setErrorMessage(
-                            "You do not have permission to recalculate the repository item's CRC.",
-                            model);
+                            "You do not have permission to recalculate the repository item's CRC.", model);
                     targetPage = new ViewItemController().itemDetails(baseNamespace, filename,
                             version, session, model);
                 }
@@ -1114,15 +1260,13 @@ public class AdminController extends BaseController {
 
             } finally {
                 if (targetPage == null) {
-                    targetPage = new BrowseController().browsePage(baseNamespace, null, session,
-                            model);
+                    targetPage = new BrowseController().browsePage(baseNamespace, null, session, model);
                 }
             }
         }
         if (targetPage == null) {
             try {
-                RepositoryItem item = getRepositoryManager().getRepositoryItem(baseNamespace,
-                        filename, version);
+                RepositoryItem item = getRepositoryManager().getRepositoryItem(baseNamespace, filename, version);
 
                 model.addAttribute("item", item);
                 targetPage = applyCommonValues(session, model, "adminRecalculateItemCrc");
@@ -1168,40 +1312,6 @@ public class AdminController extends BaseController {
             }
         }
         return applyCommonValues(session, model, "adminDeleteRepository");
-    }
-
-    /**
-     * Returns the list of all user ID's that are known locally to the repository. If user accounts
-     * are managed locally, the local list is returned. If user authentication is performed using
-     * JNDI, the list of user ID's is the union of all users assigned to one or more repository
-     * groups.
-     * 
-     * @return List<String>
-     */
-    protected List<String> getKnownUserIds() {
-        List<String> userIds = new ArrayList<String>();
-
-        if (isLocalUserManagement()) {
-            String[] localUserIds = FileAuthenticationProvider.getAllUserIds(getRepositoryManager()
-                    .getRepositoryLocation());
-
-            for (String userId : localUserIds) {
-                userIds.add(userId);
-            }
-        } else { // collect the union of all known users from the local group assignments
-            GroupAssignmentsResource groupsResource = new GroupAssignmentsResource(
-                    getRepositoryManager());
-
-            for (String groupName : groupsResource.getGroupNames()) {
-                for (String userId : groupsResource.getAssignedUsers(groupName)) {
-                    if (!userIds.contains(userId)) {
-                        userIds.add(userId);
-                    }
-                }
-            }
-        }
-        Collections.sort(userIds);
-        return userIds;
     }
 
     /**

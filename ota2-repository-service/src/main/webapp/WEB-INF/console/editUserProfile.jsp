@@ -16,23 +16,28 @@
 
 --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<form id="changePasswordForm" action="${pageContext.request.contextPath}/console/adminUsersAdd.html" method="post">
-<table id="passwordTable">
+<form id="editUserForm" action="${pageContext.request.contextPath}/console/editUserProfile.html" method="post">
+<input name="updateUser" type="hidden" value="true" />
+<table id="editUserTable">
 	<tr>
 		<td>User ID:</td>
-		<td><input name="userId" type="text" value="${userId}" /></td>
+		<td>${userId}</td>
 	</tr>
 	<tr>
-		<td>Password:</td>
-		<td><input name="password" type="password" /></td>
+		<td>Last Name:</td>
+		<td><input name="lastName" type="text" value="${lastName}" /></td>
 	</tr>
 	<tr>
-		<td>Confirm Password:</td>
-		<td><input name="passwordConfirm" type="password" /></td>
+		<td>First Name:</td>
+		<td><input name="firstName" type="text" value="${firstName}" /></td>
+	</tr>
+	<tr>
+		<td>Email:</td>
+		<td><input name="emailAddress" type="text" value="${emailAddress}" /></td>
 	</tr>
 	<tr>
 		<td colspan="2" style="text-align:right;">
-			<br/><input type="submit" value="Create User Account" class="formButton" />
+			<br/><input type="submit" value="Update Profile" class="formButton" />
 		</td>
 	</tr>
 </table>

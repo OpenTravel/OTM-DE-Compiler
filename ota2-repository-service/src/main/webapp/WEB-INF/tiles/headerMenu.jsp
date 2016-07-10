@@ -32,9 +32,11 @@
 	</c:when>
 	<c:otherwise>
 		<div id="headerlogin">
-			User: <span id="userid">${sessionScope.user.userId}</span>
+			<c:set var="user" value="${sessionScope.user}" />
+			User: <span id="userid"><c:if test="${(user.firstName!=null)&&(user.firstName!='')}">${user.firstName} </c:if>${user.lastName}</span>
 			[ <a href="${pageContext.request.contextPath}/console/logout.html">Logout</a> ]
 			<c:if test="${isLocalUserManagement}">
+				[ <a href="${pageContext.request.contextPath}/console/editUserProfile.html?currentPage=${currentPage}">Edit Profile</a> ]
 				[ <a href="${pageContext.request.contextPath}/console/changePassword.html?currentPage=${currentPage}">Change Password</a> ]
 			</c:if>
 		</div>

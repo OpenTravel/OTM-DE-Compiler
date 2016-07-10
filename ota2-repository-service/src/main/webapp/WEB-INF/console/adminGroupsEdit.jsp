@@ -23,20 +23,12 @@
 	<tr>
 		<td>
 			<small>Select an existing user:</small><br/>
-			<select id="groupEditKnownUsers" onchange="clearNewUser();">
+			<select id="groupEditKnownUsers" onchange="clearNewUser();" style="width:20em;">
 				<option value="" selected></option>
-				<c:forEach var="userId" items="${knownUsers}">
-					<option value="${userId}">${userId}</option>
+				<c:forEach var="user" items="${allUsers}">
+					<option value="${user.userId}">${user.lastName}<c:if test="${(user.firstName!=null)&&(user.firstName!='')}">, ${user.firstName}</c:if> (${user.userId})</option>
 				</c:forEach>
 			</select>
-			<c:if test="${!isLocalUserManagement}">
-				<div style="text-align:center; width:100%; margin-top:10px; margin-bottom:10px;">- OR -</div>
-				<small>Enter the ID of a new user:</small>
-				<br/><input id="groupEditNewUser" type="text" name="newUserId" onchange="clearKnownUser();" onkeyup="clearKnownUser();" />
-			</c:if>
-			<c:if test="${isLocalUserManagement}">
-				<br/><br/><br/>
-			</c:if>
 		</td>
 		<td style="text-align:center;">
 			<input id="addButton" type="button" value="Add Member ->" disabled class="formButtonSmall" onclick="addSelectedUser();" style="width:100%;" />
@@ -44,7 +36,7 @@
 			<input id="removeButton" type="button" value="<- Remove Member" disabled class="formButtonSmall" onclick="removeSelectedUser();" />
 		</td>
 		<td>
-			<select size="10" id="groupMembersSelect" onclick="groupMemberSelectionChanged();">
+			<select size="10" id="groupMembersSelect" onclick="groupMemberSelectionChanged();" style="width:20em;">
 			</select>
 			<input id="groupMembers" name="groupMembers" type="hidden" value="${groupMembers}" />
 			<input name="groupName" type="hidden" value="${groupName}" />
@@ -61,6 +53,10 @@
 </form>
 <br>
 <script type="text/javascript">
+var userAccounts = new Object();
+<c:forEach var="user" items="${allUsers}">
+	userAccounts["${user.userId}"] = "${user.lastName}<c:if test="${(user.firstName!=null)&&(user.firstName!='')}">, ${user.firstName}</c:if>";
+</c:forEach>
 
 // Populate the select list of group members when the page is loaded
 refreshGroupMembersSelect();
@@ -119,9 +115,10 @@ function refreshGroupMembersSelect() {
 	for (var i = 0; i < memberIds.length; i++) {
 		if ((memberIds[i] != null) && (memberIds[i].length > 0)) {
 			var option = document.createElement('option');
+			var userName = userAccounts[memberIds[i]];
 			
 			option.setAttribute('value', memberIds[i]);
-			option.appendChild(document.createTextNode(memberIds[i]));
+			option.appendChild(document.createTextNode(userName + " (" + memberIds[i] + ")"));
 			groupMembersSelect.appendChild(option);
 		}
 	}

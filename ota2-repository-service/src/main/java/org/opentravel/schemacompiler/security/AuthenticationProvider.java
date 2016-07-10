@@ -15,6 +15,11 @@
  */
 package org.opentravel.schemacompiler.security;
 
+import java.util.List;
+
+import org.opentravel.ns.ota2.repositoryinfoext_v01_00.UserInfo;
+import org.opentravel.schemacompiler.repository.RepositoryException;
+
 /**
  * Handles the verification of user ID and password credentials submitted by a web service client
  * request.
@@ -23,18 +28,78 @@ package org.opentravel.schemacompiler.security;
  */
 public interface AuthenticationProvider {
 
+	public static final String REPOSITORY_USERS_FILE = "repository-users.xml";
+	
     /**
      * Returns true if the given user is an authorized user of this repository and the password is
      * verified as being valid.
      * 
-     * @param userId
-     *            the user ID to verify
-     * @param password
-     *            the user's password to be authenticated
+     * @param userId  the user ID to verify
+     * @param password  the user's password to be authenticated
      * @return boolean
      * @throws RepositorySecurityException
      *             thrown if an error occurs during the authentication process
      */
     public boolean isValidUser(String userId, String password) throws RepositorySecurityException;
-
+    
+    /**
+     * Returns account information for the user with the specified ID, or null if the
+     * user account does not exist.
+     * 
+     * @param userId  the ID of the user for which to return account information
+     * @return UserInfo
+     */
+    public UserInfo getUserInfo(String userId);
+    
+    /**
+     * Loads the list of all user accounts for the repository.
+     * 
+     * @return List<UserInfo>
+     */
+    public List<UserInfo> getAllUsers();
+    
+    /**
+     * Adds a user to the list of accounts who are authorized to access the repository.
+     * 
+     * @param userInfo  the account information of the user to add
+     * @throws RepositoryException  thrown if the user account cannot be added for any reason
+     */
+    public void addUser(UserInfo userInfo) throws RepositoryException;
+    
+    /**
+     * Updates the account information for an existing repository user.
+     * 
+     * @param userInfo  the user account information to update
+     * @throws RepositoryException  thrown if the user account cannot be updated for any reason
+     */
+    public void updateUser(UserInfo userInfo) throws RepositoryException;
+    
+    /**
+     * Deletes a user from the list of accounts who are authorized to access the repository.
+     * 
+     * @param userId  the ID of the user account to delete
+     * @throws RepositoryException  thrown if the user account cannot be deleted for any reason
+     */
+    public void deleteUser(String userId) throws RepositoryException;
+    
+    /**
+     * Assigns or modifies the user's password.
+     * 
+     * @param userId  the ID of the user whose password is to be assigned
+     * @param password  the clear-text password to assign
+     * @throws RepositoryException  thrown if the user's password cannot be assigned
+     */
+    public void setUserPassword(String userId, String password) throws RepositoryException;
+    
+	/**
+	 * Searches the directory and returns the candidate users based on the search criteria
+	 * provided.
+	 * 
+	 * @param searchCriteria  the search string that will be compared against multiple directory attributes
+	 * @param maxResults  the maximum number of results to return
+	 * @return List<UserPrincipal>
+	 * @throws RepositoryException  thrown if an error occurs while searching the remote directory
+	 */
+	public List<UserPrincipal> searchCandidateUsers(String searchCriteria, int maxResults) throws RepositoryException;
+	
 }

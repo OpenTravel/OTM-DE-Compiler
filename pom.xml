@@ -44,7 +44,7 @@
 		<jstl.version>1.2</jstl.version>
 		<jetty.version>9.2.10.v20150310</jetty.version>
 		<servlet.api.version>2.5</servlet.api.version>
-		<jsp.api.version>2.0</jsp.api.version>
+		<jsp.api.version>2.1</jsp.api.version>
 		<slf4j.version>1.7.10</slf4j.version>
 		<junit.version>4.12</junit.version>
 		<fge.version>2.2.6</fge.version>
@@ -253,7 +253,7 @@
 				<version>${servlet.api.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>javax.servlet</groupId>
+				<groupId>javax.servlet.jsp</groupId>
 				<artifactId>jsp-api</artifactId>
 				<version>${jsp.api.version}</version>
 			</dependency>

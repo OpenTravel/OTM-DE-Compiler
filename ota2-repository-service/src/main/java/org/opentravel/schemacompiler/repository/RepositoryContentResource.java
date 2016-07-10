@@ -131,7 +131,7 @@ public class RepositoryContentResource {
     public JAXBElement<NamespaceListType> listAllNamespaces(
             @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
 
-        UserPrincipal user = securityManager.getUser(authorizationHeader);
+        UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
         RepositoryInfoType repositoryMetadata = repositoryMetadataResource.getResource();
         List<String> nsList = repositoryManager.getFileManager().findAllNamespaces(
                 repositoryMetadata.getRootNamespace());
@@ -161,7 +161,7 @@ public class RepositoryContentResource {
     public JAXBElement<NamespaceListType> listBaseNamespaces(
             @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
 
-        UserPrincipal user = securityManager.getUser(authorizationHeader);
+        UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
         RepositoryInfoType repositoryMetadata = repositoryMetadataResource.getResource();
         List<String> nsList = repositoryManager.getFileManager().findAllBaseNamespaces(
                 repositoryMetadata.getRootNamespace());
@@ -194,7 +194,7 @@ public class RepositoryContentResource {
             @QueryParam("baseNamespace") String baseNamespace,
             @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
 
-        UserPrincipal user = securityManager.getUser(authorizationHeader);
+        UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
         List<String> childPaths = repositoryManager.listNamespaceChildren(baseNamespace);
         NamespaceListType namespaceList = new NamespaceListType();
 
@@ -235,7 +235,7 @@ public class RepositoryContentResource {
         List<RepositoryItem> namespaceItems = repositoryManager.listItems(listItemsRQ.getValue()
                 .getNamespace(), listItemsRQ.getValue().isLatestVersionOnly(), listItemsRQ
                 .getValue().isIncludeDraft());
-        UserPrincipal user = securityManager.getUser(authorizationHeader);
+        UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
         LibraryInfoListType metadataList = new LibraryInfoListType();
 
         for (RepositoryItem item : namespaceItems) {
@@ -275,7 +275,7 @@ public class RepositoryContentResource {
         Map<String, Map<TLLibraryStatus, Boolean>> accessibleItemCache = new HashMap<String, Map<TLLibraryStatus, Boolean>>();
         List<RepositoryItem> searchResults = FreeTextSearchService.getInstance().query(
                 freeTextQuery, latestVersionsOnly, includeDraftVersions);
-        UserPrincipal user = securityManager.getUser(authorizationHeader);
+        UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
         LibraryInfoListType metadataList = new LibraryInfoListType();
 
         for (RepositoryItem item : searchResults) {
@@ -314,7 +314,7 @@ public class RepositoryContentResource {
         RepositoryItemImpl requestItem = RepositoryUtils.createRepositoryItem(repositoryManager,
                 itemMetadata);
         List<RepositoryItem> historyItems = repositoryManager.getVersionHistory(requestItem);
-        UserPrincipal user = securityManager.getUser(authorizationHeader);
+        UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
         LibraryInfoListType metadataList = new LibraryInfoListType();
 
         for (RepositoryItem item : historyItems) {
@@ -340,7 +340,7 @@ public class RepositoryContentResource {
     public Response createRootNamespace(@QueryParam("rootNamespace") String rootNamespace,
             @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
 
-        UserPrincipal user = securityManager.getUser(authorizationHeader);
+        UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
 
         if (securityManager.isAdministrator(user)) {
             repositoryManager.createRootNamespace(rootNamespace);
@@ -367,7 +367,7 @@ public class RepositoryContentResource {
     public Response deleteRootNamespace(@QueryParam("rootNamespace") String rootNamespace,
             @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
 
-        UserPrincipal user = securityManager.getUser(authorizationHeader);
+        UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
 
         if (securityManager.isAdministrator(user)) {
             repositoryManager.deleteRootNamespace(rootNamespace);
@@ -394,7 +394,7 @@ public class RepositoryContentResource {
     public Response createNamespace(@QueryParam("baseNamespace") String baseNamespace,
             @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
 
-        UserPrincipal user = securityManager.getUser(authorizationHeader);
+        UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
         String parentNS = RepositoryNamespaceUtils.getParentNamespace(baseNamespace,
                 repositoryManager);
 
@@ -428,7 +428,7 @@ public class RepositoryContentResource {
     public Response deleteNamespace(@QueryParam("baseNamespace") String baseNamespace,
             @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
 
-        UserPrincipal user = securityManager.getUser(authorizationHeader);
+        UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
         String parentNS = RepositoryNamespaceUtils.getParentNamespace(baseNamespace,
                 repositoryManager);
 
@@ -496,7 +496,7 @@ public class RepositoryContentResource {
         }
 
         try {
-            UserPrincipal user = securityManager.getUser(authorizationHeader);
+            UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
 
             if (securityManager.isAuthorized(user, namespace, RepositoryPermission.WRITE)) {
                 repositoryManager.getFileManager().setCurrentUserId(user.getUserId());
@@ -548,7 +548,7 @@ public class RepositoryContentResource {
             LibraryInfoType itemMetadata = repositoryManager.getFileManager().loadLibraryMetadata(
                     itemIdentity.getBaseNamespace(), itemIdentity.getFilename(),
                     itemIdentity.getVersion());
-            UserPrincipal user = securityManager.getUser(authorizationHeader);
+            UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
 
             if (securityManager.isAuthorized(user, itemMetadata.getBaseNamespace(),
                     RepositoryPermission.WRITE)) {
@@ -596,7 +596,7 @@ public class RepositoryContentResource {
             LibraryInfoType itemMetadata = repositoryManager.getFileManager().loadLibraryMetadata(
                     itemIdentity.getBaseNamespace(), itemIdentity.getFilename(),
                     itemIdentity.getVersion());
-            UserPrincipal user = securityManager.getUser(authorizationHeader);
+            UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
 
             if (securityManager.isAuthorized(user, itemMetadata.getBaseNamespace(),
                     RepositoryPermission.WRITE)) {
@@ -656,7 +656,7 @@ public class RepositoryContentResource {
             LibraryInfoType itemMetadata = repositoryManager.getFileManager().loadLibraryMetadata(
                     itemIdentity.getBaseNamespace(), itemIdentity.getFilename(),
                     itemIdentity.getVersion());
-            UserPrincipal user = securityManager.getUser(authorizationHeader);
+            UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
 
             if (securityManager.isAuthorized(user, itemMetadata.getBaseNamespace(),
                     RepositoryPermission.WRITE)) {
@@ -711,7 +711,7 @@ public class RepositoryContentResource {
             LibraryInfoType itemMetadata = repositoryManager.getFileManager().loadLibraryMetadata(
                     itemIdentity.getBaseNamespace(), itemIdentity.getFilename(),
                     itemIdentity.getVersion());
-            UserPrincipal user = securityManager.getUser(authorizationHeader);
+            UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
 
             if (securityManager.isAuthorized(user, itemMetadata.getBaseNamespace(),
                     RepositoryPermission.WRITE)) {
@@ -765,7 +765,7 @@ public class RepositoryContentResource {
             LibraryInfoType itemMetadata = repositoryManager.getFileManager().loadLibraryMetadata(
                     itemIdentity.getBaseNamespace(), itemIdentity.getFilename(),
                     itemIdentity.getVersion());
-            UserPrincipal user = securityManager.getUser(authorizationHeader);
+            UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
 
             if (securityManager.isAdministrator(user)) {
                 repositoryManager.getFileManager().setCurrentUserId(user.getUserId());
@@ -819,7 +819,7 @@ public class RepositoryContentResource {
             LibraryInfoType itemMetadata = repositoryManager.getFileManager().loadLibraryMetadata(
                     itemIdentity.getBaseNamespace(), itemIdentity.getFilename(),
                     itemIdentity.getVersion());
-            UserPrincipal user = securityManager.getUser(authorizationHeader);
+            UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
 
             if (securityManager.isAdministrator(user)) {
                 repositoryManager.getFileManager().setCurrentUserId(user.getUserId());
@@ -871,7 +871,7 @@ public class RepositoryContentResource {
             LibraryInfoType itemMetadata = repositoryManager.getFileManager().loadLibraryMetadata(
                     itemIdentity.getBaseNamespace(), itemIdentity.getFilename(),
                     itemIdentity.getVersion());
-            UserPrincipal user = securityManager.getUser(authorizationHeader);
+            UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
 
             if (securityManager.isAdministrator(user)) {
                 repositoryManager.getFileManager().setCurrentUserId(user.getUserId());
@@ -922,7 +922,7 @@ public class RepositoryContentResource {
             LibraryInfoType itemMetadata = repositoryManager.getFileManager().loadLibraryMetadata(
                     itemIdentity.getBaseNamespace(), itemIdentity.getFilename(),
                     itemIdentity.getVersion());
-            UserPrincipal user = securityManager.getUser(authorizationHeader);
+            UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
 
             if (securityManager.isAuthorized(user, itemMetadata.getBaseNamespace(),
                     getMinimumReadPermission(itemMetadata))) {
@@ -963,7 +963,7 @@ public class RepositoryContentResource {
             LibraryInfoType itemMetadata = repositoryManager.getFileManager().loadLibraryMetadata(
                     itemIdentity.getBaseNamespace(), itemIdentity.getFilename(),
                     itemIdentity.getVersion());
-            UserPrincipal user = securityManager.getUser(authorizationHeader);
+            UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
 
             if (securityManager.isAuthorized(user, itemMetadata.getBaseNamespace(),
                     getMinimumReadPermission(itemMetadata))) {
@@ -1003,9 +1003,9 @@ public class RepositoryContentResource {
             @DefaultValue("") @QueryParam("baseNamespace") String baseNamespace,
             @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
 
-        UserPrincipal user = securityManager.getUser(authorizationHeader);
-        RepositoryPermission securityAuthorization = securityManager.getAuthorization(user,
-                baseNamespace);
+        UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
+        RepositoryPermission securityAuthorization =
+        		(user == null) ? null : securityManager.getAuthorization(user, baseNamespace);
         org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryPermission repositoryAuthorization = null;
         RepositoryPermissionType result = new RepositoryPermissionType();
 

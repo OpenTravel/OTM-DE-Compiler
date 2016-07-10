@@ -15,11 +15,14 @@
  */
 package org.opentravel.schemacompiler.security.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.codec.binary.Base64;
+import org.opentravel.ns.ota2.repositoryinfoext_v01_00.UserInfo;
 import org.opentravel.ns.ota2.security_v01_00.RepositoryPermission;
+import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.repository.RepositoryNamespaceUtils;
 import org.opentravel.schemacompiler.security.AuthenticationProvider;
@@ -61,16 +64,42 @@ public class DefaultRepositorySecurityManager implements RepositorySecurityManag
     }
 
     /**
-     * @see org.opentravel.schemacompiler.security.RepositorySecurityManager#getUser(java.lang.String)
+	 * @see org.opentravel.schemacompiler.security.RepositorySecurityManager#getUser(java.lang.String)
+	 */
+	@Override
+	public UserPrincipal getUser(String userId) {
+		UserInfo userInfo = authenticationProvider.getUserInfo( userId );
+		
+		return (userInfo == null) ? null :
+			new UserPrincipal( userInfo, groupAssignmentsResource.getAssignedGroups( userId ) );
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.security.RepositorySecurityManager#getAllUsers()
+	 */
+	@Override
+	public List<UserPrincipal> getAllUsers() {
+		List<UserInfo> userInfos = authenticationProvider.getAllUsers();
+		List<UserPrincipal> allUsers = new ArrayList<>();
+		
+		for (UserInfo userInfo : userInfos) {
+			allUsers.add( new UserPrincipal(
+					userInfo, groupAssignmentsResource.getAssignedGroups( userInfo.getUserId() ) ) );
+		}
+		return allUsers;
+	}
+
+	/**
+     * @see org.opentravel.schemacompiler.security.RepositorySecurityManager#authenticateUser(java.lang.String)
      */
     @Override
-    public UserPrincipal getUser(String authorizationHeader) throws RepositorySecurityException {
+    public UserPrincipal authenticateUser(String authorizationHeader) throws RepositorySecurityException {
         UserPrincipal user;
 
         if (authorizationHeader != null) {
             String[] credentials = getAuthorizationCredentials(authorizationHeader);
 
-            user = getUser(credentials[0], credentials[1]);
+            user = authenticateUser(credentials[0], credentials[1]);
 
         } else {
             user = UserPrincipal.ANONYMOUS_USER;
@@ -79,19 +108,20 @@ public class DefaultRepositorySecurityManager implements RepositorySecurityManag
     }
 
     /**
-     * @see org.opentravel.schemacompiler.security.RepositorySecurityManager#getUser(java.lang.String,
-     *      java.lang.String)
+     * @see org.opentravel.schemacompiler.security.RepositorySecurityManager#authenticateUser(java.lang.String, java.lang.String)
      */
     @Override
-    public UserPrincipal getUser(String userId, String password) throws RepositorySecurityException {
+    public UserPrincipal authenticateUser(String userId, String password) throws RepositorySecurityException {
         UserPrincipal user;
 
         if ((userId != null) && (password != null)) {
-            if (!authenticationProvider.isValidUser(userId, password)) {
+        	UserInfo userInfo = authenticationProvider.getUserInfo( userId );
+        	
+            if ((userInfo == null) || !authenticationProvider.isValidUser( userId, password )) {
                 throw new RepositorySecurityException(
                         "Invalid user name or password submitted for principal: " + userId + "/'" + password + "'");
             }
-            user = new UserPrincipal(userId, groupAssignmentsResource.getAssignedGroups(userId));
+            user = new UserPrincipal( userInfo, groupAssignmentsResource.getAssignedGroups( userId ) );
 
         } else {
             user = UserPrincipal.ANONYMOUS_USER;
@@ -100,8 +130,55 @@ public class DefaultRepositorySecurityManager implements RepositorySecurityManag
     }
 
     /**
-     * @see org.opentravel.schemacompiler.security.RepositorySecurityManager#isAuthorized(org.opentravel.schemacompiler.security.UserPrincipal,
-     *      java.lang.String, org.opentravel.ns.ota2.security_v01_00.RepositoryPermission)
+	 * @see org.opentravel.schemacompiler.security.RepositorySecurityManager#addUser(org.opentravel.schemacompiler.security.UserPrincipal)
+	 */
+	@Override
+	public void addUser(UserPrincipal user) throws RepositoryException {
+		authenticationProvider.addUser( toUserInfo( user ) );
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.security.RepositorySecurityManager#updateUser(org.opentravel.schemacompiler.security.UserPrincipal)
+	 */
+	@Override
+	public void updateUser(UserPrincipal user) throws RepositoryException {
+		authenticationProvider.updateUser( toUserInfo( user ) );
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.security.RepositorySecurityManager#deleteUser(java.lang.String)
+	 */
+	@Override
+	public void deleteUser(String userId) throws RepositoryException {
+		authenticationProvider.deleteUser( userId );
+	}
+	
+	/**
+	 * @see org.opentravel.schemacompiler.security.RepositorySecurityManager#setUserPassword(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public void setUserPassword(String userId, String password) throws RepositoryException {
+		authenticationProvider.setUserPassword( userId, password );
+	}
+
+	/**
+	 * Returns a new <code>UserInfo</code> object that is based upon the given principal.
+	 * 
+	 * @param user  the user from which to create the UserInfo object
+	 * @return UserInfo
+	 */
+	private UserInfo toUserInfo(UserPrincipal user) {
+		UserInfo userInfo = new UserInfo();
+		
+		userInfo.setUserId( user.getUserId() );
+		userInfo.setLastName( user.getLastName() );
+		userInfo.setFirstName( user.getFirstName() );
+		userInfo.setEmailAddress( user.getEmailAddress() );
+		return userInfo;
+	}
+
+	/**
+     * @see org.opentravel.schemacompiler.security.RepositorySecurityManager#isAuthorized(org.opentravel.schemacompiler.security.UserPrincipal,java.lang.String, org.opentravel.ns.ota2.security_v01_00.RepositoryPermission)
      */
     @Override
     public boolean isAuthorized(UserPrincipal user, String namespace,

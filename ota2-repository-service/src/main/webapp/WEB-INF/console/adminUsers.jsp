@@ -18,32 +18,52 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <table id="userTable">
 	<tr>
-	<c:set var="count" value="0" />
-	<c:forEach var="userId" items="${userAccounts}">
-		<c:url var="editUrl" value="/console/adminUsersChangePassword.html">
-			<c:param name="userId" value="${userId}" />
+		<th>Action</th>
+		<th>User ID</th>
+		<th>Full Name</th>
+		<th>Email</th>
+	</tr>
+	<c:set var="rowStyle" value="d0" />
+	<c:forEach var="user" items="${userAccounts}">
+		<c:url var="editUrl" value="/console/adminUsersEditLocal.html">
+			<c:param name="userId" value="${user.userId}" />
+		</c:url>
+		<c:url var="passwordUrl" value="/console/adminUsersChangePassword.html">
+			<c:param name="userId" value="${user.userId}" />
 		</c:url>
 		<c:url var="deleteUrl" value="/console/adminUsersDelete.html">
-			<c:param name="userId" value="${userId}" />
+			<c:param name="userId" value="${user.userId}" />
 		</c:url>
-		<td>${userId} &nbsp;
-		<a href="${editUrl}" title="Change Password"><img src="${pageContext.request.contextPath}/images/edit.png" class="imageLink"/></a>
-		 <a href="${deleteUrl}" title="Delete User"><img src="${pageContext.request.contextPath}/images/delete.png" class="imageLink"/></a></td>
+		<tr class="${rowStyle}">
+			<td>
+				<c:if test="${isLocalUserManagement}">
+					<a href="${editUrl}" title="Edit User"><img src="${pageContext.request.contextPath}/images/edit.png" class="imageLink"/></a>
+					<a href="${passwordUrl}" title="Change Password"><img src="${pageContext.request.contextPath}/images/passwd.png" class="imageLink"/></a>
+				</c:if>
+				<a href="${deleteUrl}" title="Delete User"><img src="${pageContext.request.contextPath}/images/delete.png" class="imageLink"/></a>
+			</td>
+			<td>${user.userId}</td>
+			<td>${user.lastName}<c:if test="${(user.firstName!=null)&&(user.firstName!='')}">, ${user.firstName}</c:if></td>
+			<td>${user.emailAddress}</td>
+		</tr>
 		<c:choose>
-			<c:when test="${count == 4}">
-				<%= "</tr><tr>" %>
-				<c:set var="count" value="0" />
+			<c:when test="${rowStyle=='d0'}">
+				<c:set var="rowStyle" value="d1" />
 			</c:when>
 			<c:otherwise>
-				<c:set var="count" value="${count + 1}" />
+				<c:set var="rowStyle" value="d0" />
 			</c:otherwise>
 		</c:choose>
 	</c:forEach>
-	<c:forEach var="i" begin="${count}" end="4">
-		<td></td>
-	</c:forEach>
-	</tr>
 </table>
 <div style="clear:both;">
-	<br/><a href="${pageContext.request.contextPath}/console/adminUsersAdd.html">Add a New User</a>
+	<br/>
+	<c:choose>
+		<c:when test="${isLocalUserManagement}">
+			<a href="${pageContext.request.contextPath}/console/adminUsersAddLocal.html">Add a New User</a>
+		</c:when>
+		<c:otherwise>
+			<a href="${pageContext.request.contextPath}/console/adminUsersAddDirectory.html">Add a New User</a>
+		</c:otherwise>
+	</c:choose>
 </div>

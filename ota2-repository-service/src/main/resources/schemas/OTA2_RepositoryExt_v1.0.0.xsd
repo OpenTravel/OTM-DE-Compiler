@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns="http://www.OpenTravel.org/ns/OTA2/RepositoryInfoExt_v01_00" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.OpenTravel.org/ns/OTA2/RepositoryInfoExt_v01_00"
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
+	
+	<xsd:element name="RepositoryUsers" type="RepositoryUsers" />
+	<xsd:complexType name="RepositoryUsers">
+		<xsd:sequence>
+			<xsd:element ref="User" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:element name="User" type="UserInfo" />
+	<xsd:complexType name="UserInfo">
+		<xsd:attribute name="userId" type="UserID" use="required" />
+		<xsd:attribute name="lastName" type="UserName" use="optional" />
+		<xsd:attribute name="firstName" type="UserName" use="optional" />
+		<xsd:attribute name="emailAddress" type="EmailAddress" use="optional" />
+		<xsd:attribute name="encryptedPassword" type="Password" use="optional" />
+	</xsd:complexType>
+	
+	<xsd:element name="SubscriptionList" type="SubscriptionList" />
+	<xsd:complexType name="SubscriptionList">
+		<xsd:sequence>
+			<xsd:element ref="Subscription" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:element name="Subscription" type="Subscription" />
+	<xsd:complexType name="Subscription">
+		<xsd:attribute name="userId" type="xsd:string" use="required" />
+		<xsd:attribute name="onLock" type="xsd:boolean" use="required" />
+		<xsd:attribute name="onUnlock" type="xsd:boolean" use="required" />
+		<xsd:attribute name="onCommit" type="xsd:boolean" use="required" />
+		<xsd:attribute name="onStatusChange" type="xsd:boolean" use="required" />
+		<xsd:attribute name="onDelete" type="xsd:boolean" use="required" />
+	</xsd:complexType>
+	
+	<xsd:element name="CommitHistory" type="CommitHistory" />
+	<xsd:complexType name="CommitHistory">
+		<xsd:sequence>
+			<xsd:element ref="Commit" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:element name="Commit" type="CommitHistoryItem" />
+	<xsd:complexType name="CommitHistoryItem">
+		<xsd:simpleContent>
+			<xsd:extension base="CommitRemarks">
+				<xsd:attribute name="committedBy" type="xsd:string" use="required" />
+				<xsd:attribute name="snapshotFile" type="xsd:string" use="required" />
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	
+	<!-- # RFC-3986 URI component:  segment with ':'-->
+	<xsd:simpleType name="UserID">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="[A-Za-z_][A-Za-z0-9\.\-_]*" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="Password">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="[enc:]?.*" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="UserName">
+		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="100" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<xsd:simpleType name="EmailAddress">
+		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="200" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<xsd:simpleType name="CommitRemarks">
+		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="2000" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+</xsd:schema>

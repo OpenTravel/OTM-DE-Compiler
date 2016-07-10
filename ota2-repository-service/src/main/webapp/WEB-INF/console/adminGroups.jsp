@@ -40,7 +40,7 @@
 <table id="groupMembersTable">
 	<tr>
 		<td>
-			<select size="10" id="groupMembersSelect">
+			<select size="10" id="groupMembersSelect" style="width:20em;">
 			</select>
 		</td>
 	</tr>
@@ -57,6 +57,11 @@ var groupAssignments = [
 	{ groupName: "${group.groupName}", members: new Array( <c:set var="firstId" value="true"/><c:forEach var="userId" items="${group.memberIds}"><c:if test="${firstId!=true}">,</c:if><c:set var="firstId" value="false"/>"${userId}"</c:forEach> ) },
 </c:forEach>
 ];
+var userAccounts = new Object();
+<c:forEach var="user" items="${allUsers}">
+	userAccounts["${user.userId}"] = "${user.lastName}<c:if test="${(user.firstName!=null)&&(user.firstName!='')}">, ${user.firstName}</c:if>";
+</c:forEach>
+
 function displayGroupMembers( groupName ) {
 	var groupMembers = null;
 	
@@ -72,9 +77,11 @@ function displayGroupMembers( groupName ) {
 		
 		for (var i = 0; i < groupMembers.length; i++) {
 			var option = document.createElement('option');
+			var userId = groupMembers[i];
+			var userName = userAccounts[groupMembers[i]];
 			
-			option.setAttribute('value', groupMembers[i]);
-			option.appendChild(document.createTextNode(groupMembers[i]));
+			option.setAttribute('value', userId);
+			option.appendChild(document.createTextNode(userName + " (" + userId + ")"));
 			selectList.appendChild(option);
 		}
 	}

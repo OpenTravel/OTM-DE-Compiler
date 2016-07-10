@@ -18,6 +18,7 @@ package org.opentravel.schemacompiler.security;
 import java.util.List;
 
 import org.opentravel.ns.ota2.security_v01_00.RepositoryPermission;
+import org.opentravel.schemacompiler.repository.RepositoryException;
 
 /**
  * Provides all authentication and authorization services required for secure operation of the
@@ -28,7 +29,22 @@ import org.opentravel.ns.ota2.security_v01_00.RepositoryPermission;
 public interface RepositorySecurityManager {
 
     public static final String ADMINISTRATORS_GROUP_NAME = "Administrators";
-
+    
+    /**
+     * Returns the user with the specified ID or null if such a user does not exist.
+     * 
+     * @param userId  the ID of the user account to return
+     * @return UserPrincipal
+     */
+    public UserPrincipal getUser(String userId);
+    
+    /**
+     * Returns a list of all known user accounts for the repository.
+     * 
+     * @return List<UserPrincipal>
+     */
+    public List<UserPrincipal> getAllUsers();
+    
     /**
      * Returns the user principal indicated by the HTTP authorization header provided. If the header
      * value is null, the anonymous user will be returned. If the user fails authentication, a
@@ -40,7 +56,7 @@ public interface RepositorySecurityManager {
      * @throws RepositorySecurityException
      *             thrown if the user's ID and password do not pass authentication
      */
-    public UserPrincipal getUser(String authorizationHeader) throws RepositorySecurityException;
+    public UserPrincipal authenticateUser(String authorizationHeader) throws RepositorySecurityException;
 
     /**
      * Returns the user principal indicated by the user ID and password credentials provided. If the
@@ -55,8 +71,41 @@ public interface RepositorySecurityManager {
      * @throws RepositorySecurityException
      *             thrown if the user's ID and password do not pass authentication
      */
-    public UserPrincipal getUser(String userId, String password) throws RepositorySecurityException;
-
+    public UserPrincipal authenticateUser(String userId, String password) throws RepositorySecurityException;
+    
+    /**
+     * Adds a user to the list of accounts who are authorized to access the repository.
+     * 
+     * @param user  the account information of the user to add
+     * @throws RepositoryException  thrown if the user account cannot be added for any reason
+     */
+    public void addUser(UserPrincipal user) throws RepositoryException;
+    
+    /**
+     * Updates the account information for an existing repository user.
+     * 
+     * @param user  the user account information to update
+     * @throws RepositoryException  thrown if the user account cannot be updated for any reason
+     */
+    public void updateUser(UserPrincipal user) throws RepositoryException;
+    
+    /**
+     * Deletes a user from the list of accounts who are authorized to access the repository.
+     * 
+     * @param userId  the ID of the user account to delete
+     * @throws RepositoryException  thrown if the user account cannot be deleted for any reason
+     */
+    public void deleteUser(String userId) throws RepositoryException;
+    
+    /**
+     * Assigns or modifies the user's password.
+     * 
+     * @param userId  the ID of the user whose password is to be assigned
+     * @param password  the clear-text password to assign
+     * @throws RepositoryException  thrown if the user's password cannot be assigned
+     */
+    public void setUserPassword(String userId, String password) throws RepositoryException;
+    
     /**
      * Returns true if the user is authorized to perform the specified operation within the
      * requested namespace.
@@ -71,8 +120,8 @@ public interface RepositorySecurityManager {
      * @throws RepositorySecurityException
      *             thrown if the user's authorizations cannot be resolved
      */
-    public boolean isAuthorized(UserPrincipal user, String namespace,
-            RepositoryPermission permission) throws RepositorySecurityException;
+    public boolean isAuthorized(UserPrincipal user, String namespace, RepositoryPermission permission)
+    		throws RepositorySecurityException;
 
     /**
      * Returns true if the user is assigned to the 'Administrators' group.

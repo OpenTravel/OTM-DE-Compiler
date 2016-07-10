@@ -17,7 +17,7 @@
 --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <form id="changePasswordForm" action="${pageContext.request.contextPath}/console/changePassword.html" method="post">
-<table id="passwordTable">
+<table id="editUserTable">
 	<tr>
 		<td>Old Password:</td>
 		<td><input name="oldPassword" type="password" /></td>

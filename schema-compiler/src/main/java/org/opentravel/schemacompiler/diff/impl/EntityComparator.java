@@ -272,7 +272,7 @@ public class EntityComparator extends BaseComparator {
 					// Consider the field to be added if the owner is in the new version but not in the old
 					for (String fieldOwner : newFieldsByOwner.keySet()) {
 						if (!oldFieldsByOwner.containsKey( fieldOwner )) {
-							List<TLMemberField<?>> newVersionOwnerFields = newFieldsByOwner.get( fieldName );
+							List<TLMemberField<?>> newVersionOwnerFields = newFieldsByOwner.get( fieldOwner );
 							
 							for (TLMemberField<?> addedField : newVersionOwnerFields) {
 								changeItems.add( new EntityChangeItem( EntityChangeType.MEMBER_FIELD_ADDED, addedField ) );
@@ -283,7 +283,7 @@ public class EntityComparator extends BaseComparator {
 					// Consider the field to be deleted if the owner is in the old version but not in the new
 					for (String fieldOwner : oldFieldsByOwner.keySet()) {
 						if (!newFieldsByOwner.containsKey( fieldOwner )) {
-							List<TLMemberField<?>> oldVersionOwnerFields = oldFieldsByOwner.get( fieldName );
+							List<TLMemberField<?>> oldVersionOwnerFields = oldFieldsByOwner.get( fieldOwner );
 							
 							for (TLMemberField<?> deletedField : oldVersionOwnerFields) {
 								changeItems.add( new EntityChangeItem( EntityChangeType.MEMBER_FIELD_DELETED, deletedField ) );
@@ -296,8 +296,8 @@ public class EntityComparator extends BaseComparator {
 					// and new versions
 					for (String fieldOwner : newFieldsByOwner.keySet()) {
 						if (oldFieldsByOwner.containsKey( fieldOwner )) {
-							List<TLMemberField<?>> oldVersionOwnerFields = oldFieldsByOwner.get( fieldName );
-							List<TLMemberField<?>> newVersionOwnerFields = newFieldsByOwner.get( fieldName );
+							List<TLMemberField<?>> oldVersionOwnerFields = oldFieldsByOwner.get( fieldOwner );
+							List<TLMemberField<?>> newVersionOwnerFields = newFieldsByOwner.get( fieldOwner );
 							int maxLength = Math.max( oldVersionOwnerFields.size(), newVersionOwnerFields.size() );
 							
 							// Extreme Edge Case:  If there are multiple members of both list, make a guess that

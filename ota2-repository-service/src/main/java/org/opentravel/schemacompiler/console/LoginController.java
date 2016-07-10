@@ -15,18 +15,15 @@
  */
 package org.opentravel.schemacompiler.console;
 
-import java.io.IOException;
-
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opentravel.schemacompiler.repository.RepositoryComponentFactory;
-import org.opentravel.schemacompiler.repository.RepositoryFileManager;
+import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.security.RepositorySecurityException;
 import org.opentravel.schemacompiler.security.RepositorySecurityManager;
 import org.opentravel.schemacompiler.security.UserPrincipal;
-import org.opentravel.schemacompiler.security.impl.FileAuthenticationProvider;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -69,7 +66,7 @@ public class LoginController extends BaseController {
         if ((userId != null) && (userId.length() > 0) && (password != null)
                 && (password.length() > 0)) {
             try {
-                user = securityManager.getUser(userId, password);
+                user = securityManager.authenticateUser(userId, password);
 
             } catch (RepositorySecurityException e) {
                 // Authentication failed.
@@ -104,6 +101,81 @@ public class LoginController extends BaseController {
         session.removeAttribute("isAdminAuthorized");
         new BrowseController().browsePage(null, null, session, model);
         return applyCommonValues(model, "homePage");
+    }
+
+    /**
+     * Called by the Spring MVC controller to display the application administration page used to
+     * manage local user accounts.
+     * 
+     * @param userId
+     *            the ID of the user account to add
+     * @param lastName
+     *            the last name for the user account to add
+     * @param firstName
+     *            the first name for the user account to add
+     * @param emailAddress
+     *            the email address for the user account to add
+     * @param session
+     *            the HTTP session that contains information about an authenticated user
+     * @param model
+     *            the model context to be used when rendering the page view
+     * @return String
+     */
+    @RequestMapping(value = { "/editUserProfile.html", "/editUserProfile.htm" })
+    public String editProfilePage(
+            @RequestParam(value = "lastName", required = false) String lastName,
+            @RequestParam(value = "firstName", required = false) String firstName,
+            @RequestParam(value = "emailAddress", required = false) String emailAddress,
+            @RequestParam(value = "updateUser", required = false) boolean updateUser,
+            HttpSession session, Model model) {
+        boolean success = false;
+        try {
+            UserPrincipal currentUser = (UserPrincipal) session.getAttribute("user");
+            String userId = (currentUser == null) ? null : currentUser.getUserId();
+            
+        	if (currentUser == null) {
+                setErrorMessage("You must be logged in to edit your profile.", model);
+        		success = true; // Not a success, but will reroute back to the home page
+        		
+        	} else if (updateUser) {
+            	if ((lastName == null) || (lastName.length() == 0)) {
+                    setErrorMessage("The last name is a required value.", model);
+
+            	} else if ((emailAddress != null) && !AdminController.emailPattern.matcher( emailAddress ).matches()) {
+                    setErrorMessage("The email provided is not a valid address.", model);
+
+                } else { // everything is ok - add the user
+                    RepositorySecurityManager securityManager = RepositoryComponentFactory.getDefault().getSecurityManager();
+                    
+                	currentUser.setUserId( userId );
+                	currentUser.setLastName( lastName );
+                	currentUser.setFirstName( firstName );
+                	currentUser.setEmailAddress( emailAddress );
+                	
+                	securityManager.updateUser( currentUser );
+                    setStatusMessage("User '" + userId + "' updated successfully.", model);
+                    success = true;
+                }
+                if (!success) {
+                    model.addAttribute("userId", userId);
+                    model.addAttribute("lastName", lastName);
+                    model.addAttribute("firstName", firstName);
+                    model.addAttribute("emailAddress", emailAddress);
+                }
+                
+            } else {
+                model.addAttribute("userId", userId);
+                model.addAttribute("lastName", currentUser.getLastName());
+                model.addAttribute("firstName", currentUser.getFirstName());
+                model.addAttribute("emailAddress", currentUser.getEmailAddress());
+            }
+            
+            
+        } catch (RepositoryException e) {
+            setErrorMessage("Unable to update user profile.", model);
+            log.error("Unable to update user profile.", e);
+        }
+        return applyCommonValues(model, success ? "homePage" : "editUserProfile");
     }
 
     /**
@@ -154,31 +226,22 @@ public class LoginController extends BaseController {
 
                 } else { // everything is ok - change the password
                     try {
-                        RepositorySecurityManager securityManager = RepositoryComponentFactory
-                                .getDefault().getSecurityManager();
-                        RepositoryFileManager fileManager = getRepositoryManager().getFileManager();
-
-                        securityManager.getUser(currentUser.getUserId(), oldPassword); // throws an
-                                                                                       // exception
-                                                                                       // if
-                                                                                       // password
-                                                                                       // is not
-                                                                                       // valid
-                        FileAuthenticationProvider.saveUserCredentials(currentUser.getUserId(),
-                                newPassword, false, fileManager);
+                        RepositorySecurityManager securityManager = RepositoryComponentFactory.getDefault().getSecurityManager();
+                        
+                        // throws an exception if the old password is not valid
+                        securityManager.authenticateUser(currentUser.getUserId(), oldPassword);
+                        securityManager.setUserPassword(currentUser.getUserId(), newPassword);
                         setStatusMessage("Your password has been changed.", model);
                         success = true;
 
                     } catch (RepositorySecurityException e) {
                         setErrorMessage("The old password you provided is invalid.", model);
-                    }
+					}
                 }
             }
 
-        } catch (IOException e) {
-            setErrorMessage(
-                    "Unable to change your password - please contact your system administrator.",
-                    model);
+        } catch (RepositoryException e) {
+            setErrorMessage("Unable to change your password - please contact your system administrator.", model);
             log.error("Unable to change password for user: " + session.getAttribute("user"), e);
         }
         if (success) {

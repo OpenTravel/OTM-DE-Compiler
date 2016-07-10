@@ -87,10 +87,20 @@
 		<put-attribute name="pageTitle" value="Manage User Accounts" />
 		<put-attribute name="body" value="/WEB-INF/console/adminUsers.jsp" />
 	</definition>
-	<definition name="adminUsersAdd" extends="baseLayout">
+	<definition name="adminUsersAddLocal" extends="baseLayout">
 		<put-attribute name="title" value="OTA2.0 Repository - Manage User Accounts" />
 		<put-attribute name="pageTitle" value="Add User Account" />
-		<put-attribute name="body" value="/WEB-INF/console/adminUsersAdd.jsp" />
+		<put-attribute name="body" value="/WEB-INF/console/adminUsersAddLocal.jsp" />
+	</definition>
+	<definition name="adminUsersAddDirectory" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Manage User Accounts" />
+		<put-attribute name="pageTitle" value="Add User Account" />
+		<put-attribute name="body" value="/WEB-INF/console/adminUsersAddDirectory.jsp" />
+	</definition>
+	<definition name="adminUsersEditLocal" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Manage User Accounts" />
+		<put-attribute name="pageTitle" value="Edit User Account" />
+		<put-attribute name="body" value="/WEB-INF/console/adminUsersEditLocal.jsp" />
 	</definition>
 	<definition name="adminUsersDelete" extends="baseLayout">
 		<put-attribute name="title" value="OTA2.0 Repository - Manage User Accounts" />
@@ -161,5 +171,10 @@
 		<put-attribute name="title" value="OTA2.0 Repository - Change Password" />
 		<put-attribute name="pageTitle" value="Change Password" />
 		<put-attribute name="body" value="/WEB-INF/console/changePassword.jsp" />
+	</definition>
+	<definition name="editUserProfile" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Edit Profile" />
+		<put-attribute name="pageTitle" value="Edit Profile" />
+		<put-attribute name="body" value="/WEB-INF/console/editUserProfile.jsp" />
 	</definition>
 </tiles-definitions>

@@ -25,11 +25,9 @@
 <ul>
 	<li><h3><a href="${pageContext.request.contextPath}/console/adminPermissions.html">Manage Namespace Permissions</a></h3></li>
 </ul>
-<c:if test="${isLocalUserManagement}">
 <ul>
 	<li><h3><a href="${pageContext.request.contextPath}/console/adminUsers.html">Manage User Accounts</a></h3></li>
 </ul>
-</c:if>
 <ul>
 	<li><h3><a href="${pageContext.request.contextPath}/console/adminGroups.html">Manage Group Assignments</a></h3></li>
 </ul>
