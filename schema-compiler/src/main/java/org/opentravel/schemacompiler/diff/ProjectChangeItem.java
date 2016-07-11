@@ -51,10 +51,18 @@ public class ProjectChangeItem extends ChangeItem<ProjectChangeType> {
 	/**
 	 * Constructor used when a project library was modified.
 	 * 
+	 * @param changeType  the type of project change
 	 * @param modifiedLibrary  the change set for a modified library
 	 */
-	public ProjectChangeItem(LibraryChangeSet modifiedLibrary) {
-		this.changeType = ProjectChangeType.LIBRARY_CHANGED;
+	public ProjectChangeItem(ProjectChangeType changeType, LibraryChangeSet modifiedLibrary) {
+		switch (changeType) {
+			case LIBRARY_CHANGED:
+			case LIBRARY_VERSION_CHANGED:
+				this.changeType = changeType;
+				break;
+			default:
+				throw new IllegalArgumentException("Illegal change type for library modification: " + changeType);
+		}
 		this.modifiedLibrary = modifiedLibrary;
 	}
 	

@@ -16,10 +16,14 @@
 
 package org.opentravel.schemacompiler.diff.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -29,14 +33,24 @@ import org.opentravel.schemacompiler.diff.LibraryChangeSet;
 import org.opentravel.schemacompiler.diff.ProjectChangeItem;
 import org.opentravel.schemacompiler.diff.ProjectChangeSet;
 import org.opentravel.schemacompiler.diff.ProjectChangeType;
+import org.opentravel.schemacompiler.model.AbstractLibrary;
+import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.repository.Project;
 import org.opentravel.schemacompiler.repository.ProjectItem;
+import org.opentravel.schemacompiler.version.OTA2VersionComparator;
+import org.opentravel.schemacompiler.version.VersionScheme;
+import org.opentravel.schemacompiler.version.VersionSchemeException;
+import org.opentravel.schemacompiler.version.VersionSchemeFactory;
+import org.opentravel.schemacompiler.version.Versioned;
 
 /**
  * Performs a comparison of two OTM projects.
  */
 public class ProjectComparator extends BaseComparator {
+	
+	private static VersionSchemeFactory vsFactory = VersionSchemeFactory.getInstance();
 	
 	/**
 	 * Compares two versions of the same OTM project.
@@ -52,6 +66,8 @@ public class ProjectComparator extends BaseComparator {
 		Map<QName,TLLibrary> newLibraries = buildLibraryMap( newProject );
 		SortedSet<QName> oldLibraryNames = new TreeSet<QName>( new QNameComparator() );
 		SortedSet<QName> newLibraryNames = new TreeSet<QName>( new QNameComparator() );
+		List<ChangeSetItem> pendingChangeSets = new ArrayList<>();
+		Iterator<QName> iterator;
 		
 		oldLibraryNames.addAll( oldLibraries.keySet() );
 		newLibraryNames.addAll( newLibraries.keySet() );
@@ -70,36 +86,75 @@ public class ProjectComparator extends BaseComparator {
 					oldProject.getDescription(), newProject.getDescription() ) );
 		}
 		
-		// Identify new libraries that were added
-		for (QName newName : newLibraryNames) {
-			if (!oldLibraries.containsKey( newName )) {
-				changeItems.add( new ProjectChangeItem(
-						ProjectChangeType.LIBRARY_ADDED, newLibraries.get( newName ) ) );
-			}
-		}
+		// Identify libraries that were modified at the same version.  As we identify
+		// matching libraries, remove the names that were processed so they will not be
+		// considered in subsequent steps.
+		iterator = oldLibraryNames.iterator();
 		
-		// Identify old libraries that were deleted
-		for (QName oldName : oldLibraryNames) {
-			if (!newLibraries.containsKey( oldName )) {
-				changeItems.add( new ProjectChangeItem(
-						ProjectChangeType.LIBRARY_DELETED, oldLibraries.get( oldName ) ) );
-			}
-		}
-		
-		// Identify libraries that were modified
-		for (QName libraryName : oldLibraryNames) {
+		while (iterator.hasNext()) {
+			QName libraryName = iterator.next();
+			
 			if (newLibraries.containsKey( libraryName )) {
 				TLLibrary oldLibrary = oldLibraries.get( libraryName );
 				TLLibrary newLibrary = newLibraries.get( libraryName );
-				LibraryChangeSet libraryChangeSet =
-						new LibraryComparator( getNamespaceMappings() )
-								.compareLibraries( oldLibrary, newLibrary );
 				
-				if (!libraryChangeSet.getLibraryChangeItems().isEmpty()) {
-					changeItems.add( new ProjectChangeItem( libraryChangeSet ) );
+				pendingChangeSets.add( new ChangeSetItem(
+						ProjectChangeType.LIBRARY_CHANGED, oldLibrary, newLibrary ) );
+				newLibraryNames.remove( libraryName );
+				iterator.remove();
+			}
+		}
+		
+		// Identify libraries that were modified at a different version.  As we identify
+		// matching libraries, remove the names that were processed so they will not be
+		// considered in subsequent steps.
+		iterator = oldLibraryNames.iterator();
+		
+		while (iterator.hasNext()) {
+			QName libraryName = iterator.next();
+			TLLibrary oldLibrary = oldLibraries.get( libraryName );
+			String versionScheme = oldLibrary.getVersionScheme();
+			List<QName> newVersionMatches = findMatchingVersions( libraryName, newLibraryNames, versionScheme );
+			
+			if (!newVersionMatches.isEmpty()) {
+				QName closestVersionMatch = findClosestVersion( libraryName, newVersionMatches, versionScheme );
+				
+				if (closestVersionMatch != null) {
+					TLLibrary newLibrary = newLibraries.get( closestVersionMatch );
+					
+					addNamespaceMapping( oldLibrary.getNamespace(), newLibrary.getNamespace() );
+					pendingChangeSets.add( new ChangeSetItem(
+							ProjectChangeType.LIBRARY_VERSION_CHANGED, oldLibrary, newLibrary ) );
+					newLibraryNames.remove( closestVersionMatch );
+					iterator.remove();
 				}
 			}
 		}
+		
+		// Any new names left over represent libraries that were added
+		for (QName newName : newLibraryNames) {
+			changeItems.add( new ProjectChangeItem(
+					ProjectChangeType.LIBRARY_ADDED, newLibraries.get( newName ) ) );
+		}
+		
+		// Any old names left over represent libraries that were removed
+		for (QName oldName : oldLibraryNames) {
+			changeItems.add( new ProjectChangeItem(
+					ProjectChangeType.LIBRARY_DELETED, oldLibraries.get( oldName ) ) );
+		}
+		
+		// Process all of the pending change sets that were identified during library
+		// comparisons.
+		for (ChangeSetItem item : pendingChangeSets) {
+			LibraryChangeSet libraryChangeSet =
+					new LibraryComparator( getNamespaceMappings() )
+							.compareLibraries( item.oldVersion, item.newVersion );
+			
+			if (!libraryChangeSet.getLibraryChangeItems().isEmpty()) {
+				changeItems.add( new ProjectChangeItem( item.changeType, libraryChangeSet ) );
+			}
+		}
+		
 		return changeSet;
 	}
 	
@@ -121,6 +176,229 @@ public class ProjectComparator extends BaseComparator {
 			}
 		}
 		return libraryMap;
+	}
+	
+	/**
+	 * Identifies all of the name versions in the given library that match the specified
+	 * name.
+	 * 
+	 * @param name  the name to which all resulting versions should be matched
+	 * @param nameSet  the set of all names from which to extract matching versions
+	 * @param versionScheme  the versioning scheme to use when comparing namespace URI's
+	 * @return List<QName>
+	 */
+	private List<QName> findMatchingVersions(QName name, Set<QName> nameSet, String versionScheme) {
+		List<QName> matchingNames = new ArrayList<>();
+		
+		try {
+			if ((name != null) && (name.getLocalPart() != null) && (name.getNamespaceURI() != null)) {
+				VersionScheme vScheme = vsFactory.getVersionScheme( versionScheme );
+				String targetBaseNS = vScheme.getBaseNamespace( name.getNamespaceURI() );
+				
+				for (QName testName : nameSet) {
+					if (name.getLocalPart().equals( testName.getLocalPart() )) {
+						String testBaseNS = vScheme.getBaseNamespace( testName.getNamespaceURI() );
+						
+						if (targetBaseNS.equals( testBaseNS )) {
+							matchingNames.add( testName );
+						}
+					}
+				}
+			}
+		} catch (VersionSchemeException e) {
+			// Ignore and return no matching names
+		}
+		return matchingNames;
+	}
+	
+	/**
+	 * Returns the QName version from the given list that most closely matches the one provided.
+	 * 
+	 * @param name  the name to which the closest match should be returned
+	 * @param matchingVersions  the list of matching versions from which the closest match should be identified
+	 * @param versionScheme  the versioning scheme to use when comparing namespace URI's
+	 * @return QName
+	 */
+	private QName findClosestVersion(QName name, List<QName> matchingVersions, String versionScheme) {
+		QName closestMatch = null;
+		
+		if (!matchingVersions.isEmpty()) {
+			List<VersionedName> nameVersions = new ArrayList<>();
+			
+			// Sort the list of all versions in ascending order
+			for (QName matchingVersion : matchingVersions) {
+				nameVersions.add( new VersionedName( matchingVersion, versionScheme ) );
+			}
+			nameVersions.add( new VersionedName( name, versionScheme ) );
+			Collections.sort( nameVersions, new OTA2VersionComparator( true ) );
+			
+			// Locate the original name in the sorted list
+			for (int i = 0; i < nameVersions.size(); i++) {
+				VersionedName vName = nameVersions.get( i );
+				
+				if (vName.name == name) {
+					// If the name was the last item in the list, take the previous
+					// version; otherwise, always assume that the next later version
+					// is the closest match.
+					if (i == (nameVersions.size() - 1)) {
+						closestMatch = nameVersions.get( i - 1 ).name;
+						
+					} else {
+						closestMatch = nameVersions.get( i + 1 ).name;
+					}
+					break;
+				}
+			}
+		}
+		return closestMatch;
+	}
+	
+	/**
+	 * Encapsulates a library change set that has not yet been processed.
+	 */
+	private static class ChangeSetItem {
+		
+		public ProjectChangeType changeType;
+		public TLLibrary oldVersion;
+		public TLLibrary newVersion;
+		
+		/**
+		 * Full constructor.
+		 * 
+		 * @param changeType  the type of library change that occurred
+		 * @param oldVersion  the old version of the library
+		 * @param newVersion  the new version of the library
+		 */
+		public ChangeSetItem(ProjectChangeType changeType, TLLibrary oldVersion, TLLibrary newVersion) {
+			this.changeType = changeType;
+			this.oldVersion = oldVersion;
+			this.newVersion = newVersion;
+		}
+		
+	}
+	
+	/**
+	 * Versioned wrapper for library QNames used for sorting in version number order.
+	 */
+	private class VersionedName implements Versioned {
+		
+		public QName name;
+		private String baseNS;
+		private String versionSchemeId;
+		private String versionId;
+		
+		/**
+		 * Constructor that provides the qualified name and version scheme to use for
+		 * processing.
+		 * 
+		 * @param name  the qualified name
+		 * @param versionScheme  the version scheme to use for processing and comparisons
+		 */
+		public VersionedName(QName name, String versionScheme) {
+			this.name = name;
+			this.versionSchemeId = versionScheme;
+			
+			try {
+				VersionScheme vScheme = vsFactory.getVersionScheme( versionScheme );
+				
+				this.baseNS = vScheme.getBaseNamespace( name.getNamespaceURI() );
+				this.versionId = vScheme.getVersionIdentifier( name.getNamespaceURI() );
+				
+			} catch (VersionSchemeException e) {
+				// Ignore and assign default values
+				this.baseNS = name.getNamespaceURI();
+				this.versionId = "0.0.0";
+			}
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.version.Versioned#getNamespace()
+		 */
+		@Override
+		public String getNamespace() {
+			return name.getNamespaceURI();
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.model.NamedEntity#getLocalName()
+		 */
+		@Override
+		public String getLocalName() {
+			return name.getLocalPart();
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.version.Versioned#getVersion()
+		 */
+		@Override
+		public String getVersion() {
+			return versionId;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.version.Versioned#getVersionScheme()
+		 */
+		@Override
+		public String getVersionScheme() {
+			return versionSchemeId;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.version.Versioned#getBaseNamespace()
+		 */
+		@Override
+		public String getBaseNamespace() {
+			return baseNS;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.model.LibraryElement#getOwningLibrary()
+		 */
+		@Override
+		public AbstractLibrary getOwningLibrary() {
+			return null;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.model.LibraryElement#cloneElement()
+		 */
+		@Override
+		public LibraryElement cloneElement() {
+			return null;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.model.LibraryElement#cloneElement(org.opentravel.schemacompiler.model.AbstractLibrary)
+		 */
+		@Override
+		public LibraryElement cloneElement(AbstractLibrary namingContext) {
+			return null;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.model.ModelElement#getOwningModel()
+		 */
+		@Override
+		public TLModel getOwningModel() {
+			return null;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.validate.Validatable#getValidationIdentity()
+		 */
+		@Override
+		public String getValidationIdentity() {
+			return null;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.version.Versioned#isLaterVersion(org.opentravel.schemacompiler.version.Versioned)
+		 */
+		@Override
+		public boolean isLaterVersion(Versioned otherVersionedItem) {
+			return false;
+		}
+		
 	}
 	
 	/**
