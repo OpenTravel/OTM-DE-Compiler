@@ -17,12 +17,17 @@
 package org.opentravel.schemacompiler.diff.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.XMLConstants;
+import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
+import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
+import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAbstractEnumeration;
 import org.opentravel.schemacompiler.model.TLAlias;
@@ -38,11 +43,18 @@ import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLRole;
+import org.opentravel.schemacompiler.version.OTA2VersionComparator;
+import org.opentravel.schemacompiler.version.VersionScheme;
+import org.opentravel.schemacompiler.version.VersionSchemeException;
+import org.opentravel.schemacompiler.version.VersionSchemeFactory;
+import org.opentravel.schemacompiler.version.Versioned;
 
 /**
  * Static utility methods required for model comparisons.
  */
 public class ModelCompareUtils {
+	
+	private static VersionSchemeFactory vsFactory = VersionSchemeFactory.getInstance();
 	
 	/**
 	 * Returns the built-in model entity for the 'xsd:boolean' simple type.
@@ -175,6 +187,212 @@ public class ModelCompareUtils {
 			enumValues.add( value.getLiteral() );
 		}
 		return enumValues;
+	}
+	
+	/**
+	 * Identifies all of the name versions in the given <code>QName</code> that match the
+	 * specified name.
+	 * 
+	 * @param name  the name to which all resulting versions should be matched
+	 * @param nameSet  the set of all names from which to extract matching versions
+	 * @param versionScheme  the versioning scheme to use when comparing namespace URI's
+	 * @return List<QName>
+	 */
+	public static List<QName> findMatchingVersions(QName name, Set<QName> nameSet, String versionScheme) {
+		List<QName> matchingNames = new ArrayList<>();
+		
+		try {
+			if ((name != null) && (name.getLocalPart() != null) && (name.getNamespaceURI() != null)) {
+				VersionScheme vScheme = vsFactory.getVersionScheme( versionScheme );
+				String targetBaseNS = vScheme.getBaseNamespace( name.getNamespaceURI() );
+				
+				for (QName testName : nameSet) {
+					if (name.getLocalPart().equals( testName.getLocalPart() )) {
+						String testBaseNS = vScheme.getBaseNamespace( testName.getNamespaceURI() );
+						
+						if (targetBaseNS.equals( testBaseNS )) {
+							matchingNames.add( testName );
+						}
+					}
+				}
+			}
+		} catch (VersionSchemeException e) {
+			// Ignore and return no matching names
+		}
+		return matchingNames;
+	}
+	
+	/**
+	 * Returns the <code>QName</code> version from the given list that most closely matches
+	 * the one provided.
+	 * 
+	 * @param name  the name to which the closest match should be returned
+	 * @param matchingVersions  the list of matching versions from which the closest match should be identified
+	 * @param versionScheme  the versioning scheme to use when comparing namespace URI's
+	 * @return QName
+	 */
+	public static QName findClosestVersion(QName name, List<QName> matchingVersions, String versionScheme) {
+		QName closestMatch = null;
+		
+		if (!matchingVersions.isEmpty()) {
+			List<VersionedQName> nameVersions = new ArrayList<>();
+			
+			if (matchingVersions.contains( name )) { // Exact match found
+				closestMatch = name;
+				
+			} else { // Look for closest match
+				
+				// Sort the list of all versions in ascending order
+				for (QName matchingVersion : matchingVersions) {
+					nameVersions.add( new VersionedQName( matchingVersion, versionScheme ) );
+				}
+				nameVersions.add( new VersionedQName( name, versionScheme ) );
+				Collections.sort( nameVersions, new OTA2VersionComparator( true ) );
+				
+				// Locate the original name in the sorted list
+				for (int i = 0; i < nameVersions.size(); i++) {
+					VersionedQName vName = nameVersions.get( i );
+					
+					if (vName.name == name) {
+						// If the name was the last item in the list, take the previous
+						// version; otherwise, always assume that the next later version
+						// is the closest match.
+						if (i == (nameVersions.size() - 1)) {
+							closestMatch = nameVersions.get( i - 1 ).name;
+							
+						} else {
+							closestMatch = nameVersions.get( i + 1 ).name;
+						}
+						break;
+					}
+				}
+			}
+		}
+		return closestMatch;
+	}
+	
+	/**
+	 * Versioned wrapper for qualified names used for sorting in version number order.
+	 */
+	private static class VersionedQName implements Versioned {
+		
+		public QName name;
+		private String baseNS;
+		private String versionSchemeId;
+		private String versionId;
+		
+		/**
+		 * Constructor that provides the qualified name and version scheme to use for
+		 * processing.
+		 * 
+		 * @param name  the qualified name
+		 * @param versionScheme  the version scheme to use for processing and comparisons
+		 */
+		public VersionedQName(QName name, String versionScheme) {
+			this.name = name;
+			this.versionSchemeId = versionScheme;
+			
+			try {
+				VersionScheme vScheme = vsFactory.getVersionScheme( versionScheme );
+				
+				this.baseNS = vScheme.getBaseNamespace( name.getNamespaceURI() );
+				this.versionId = vScheme.getVersionIdentifier( name.getNamespaceURI() );
+				
+			} catch (VersionSchemeException e) {
+				// Ignore and assign default values
+				this.baseNS = name.getNamespaceURI();
+				this.versionId = "0.0.0";
+			}
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.version.Versioned#getNamespace()
+		 */
+		@Override
+		public String getNamespace() {
+			return name.getNamespaceURI();
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.model.NamedEntity#getLocalName()
+		 */
+		@Override
+		public String getLocalName() {
+			return name.getLocalPart();
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.version.Versioned#getVersion()
+		 */
+		@Override
+		public String getVersion() {
+			return versionId;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.version.Versioned#getVersionScheme()
+		 */
+		@Override
+		public String getVersionScheme() {
+			return versionSchemeId;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.version.Versioned#getBaseNamespace()
+		 */
+		@Override
+		public String getBaseNamespace() {
+			return baseNS;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.model.LibraryElement#getOwningLibrary()
+		 */
+		@Override
+		public AbstractLibrary getOwningLibrary() {
+			return null;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.model.LibraryElement#cloneElement()
+		 */
+		@Override
+		public LibraryElement cloneElement() {
+			return null;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.model.LibraryElement#cloneElement(org.opentravel.schemacompiler.model.AbstractLibrary)
+		 */
+		@Override
+		public LibraryElement cloneElement(AbstractLibrary namingContext) {
+			return null;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.model.ModelElement#getOwningModel()
+		 */
+		@Override
+		public TLModel getOwningModel() {
+			return null;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.validate.Validatable#getValidationIdentity()
+		 */
+		@Override
+		public String getValidationIdentity() {
+			return null;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.version.Versioned#isLaterVersion(org.opentravel.schemacompiler.version.Versioned)
+		 */
+		@Override
+		public boolean isLaterVersion(Versioned otherVersionedItem) {
+			return false;
+		}
+		
 	}
 	
 }
