@@ -23,7 +23,9 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opentravel.ns.ota2.security_v01_00.RepositoryPermission;
-import org.opentravel.schemacompiler.index.FreeTextSearchService;
+import org.opentravel.schemacompiler.index.IndexingSearchService;
+import org.opentravel.schemacompiler.index.LibrarySearchResult;
+import org.opentravel.schemacompiler.index.SearchResult;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.RepositoryComponentFactory;
 import org.opentravel.schemacompiler.repository.RepositoryException;
@@ -45,16 +47,16 @@ public class SearchController extends BaseController {
 
     private static Log log = LogFactory.getLog(SearchController.class);
 
-    private FreeTextSearchService searchService;
+    private IndexingSearchService searchService;
 
     /**
      * Default constructor.
      */
     public SearchController() {
         try {
-            FreeTextSearchService.initializeSingleton(RepositoryComponentFactory.getDefault()
+        	IndexingSearchService.initializeSingleton(RepositoryComponentFactory.getDefault()
                     .getSearchIndexLocation(), getRepositoryManager());
-            searchService = FreeTextSearchService.getInstance();
+            searchService = IndexingSearchService.getInstance();
 
         } catch (Throwable t) {
             log.error("Error initializing the free-text search service.", t);
@@ -88,19 +90,23 @@ public class SearchController extends BaseController {
 
             if (searchService != null) {
                 try {
-                    List<RepositoryItem> results = searchService.query(keywords, latestVersions,
-                            !finalVersions);
+                	TLLibraryStatus searchStatus = finalVersions ? TLLibraryStatus.FINAL : null;
+                    List<SearchResult<?>> results = searchService.search(keywords, searchStatus, latestVersions, false );
                     RepositorySecurityManager securityManager = getSecurityManager();
                     UserPrincipal user = getCurrentUser(session);
 
-                    for (RepositoryItem item : results) {
-                        RepositoryPermission requiredPermission = (item.getStatus() == TLLibraryStatus.DRAFT) ? RepositoryPermission.READ_DRAFT
-                                : RepositoryPermission.READ_FINAL;
+                    for (SearchResult<?> result : results) {
+                    	if (result instanceof LibrarySearchResult) {
+                    		RepositoryItem item = ((LibrarySearchResult) result).getRepositoryItem();
+                            RepositoryPermission requiredPermission =
+                            		(item.getStatus() == TLLibraryStatus.DRAFT) ?
+                            				RepositoryPermission.READ_DRAFT : RepositoryPermission.READ_FINAL;
 
-                        if (securityManager.isAuthorized(user, item.getNamespace(),
-                                requiredPermission)) {
-                            searchResults.add(new NamespaceItem(item));
-                        }
+                            if (securityManager.isAuthorized(user, item.getNamespace(),
+                                    requiredPermission)) {
+                                searchResults.add(new NamespaceItem(item));
+                            }
+                    	}
                     }
                 } catch (RepositoryException e) {
                     log.error("An error occured while performing the requested search.", e);

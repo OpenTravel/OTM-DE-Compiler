@@ -11,6 +11,6 @@
     <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
     <Import namespace="http://www.opentravel.org/OTM/Common/v0" prefix="ota"/>
     <Context applicationContext="http://appcontext/context111" context="context111"/>
-    <Comments>Version Test Sample Library</Comments>
+    <Comments>Version Test Sample Library RED GREEN</Comments>
     
 </Library>

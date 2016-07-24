@@ -24,9 +24,9 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.junit.Test;
-import org.opentravel.schemacompiler.index.FreeTextSearchService;
-import org.opentravel.schemacompiler.repository.RepositoryItem;
-import org.opentravel.schemacompiler.repository.RepositoryManager;
+import org.opentravel.schemacompiler.index.IndexingSearchService;
+import org.opentravel.schemacompiler.index.LibrarySearchResult;
+import org.opentravel.schemacompiler.index.SearchResult;
 import org.opentravel.schemacompiler.util.RepositoryTestUtils;
 
 /**
@@ -35,15 +35,15 @@ import org.opentravel.schemacompiler.util.RepositoryTestUtils;
  * 
  * @author S. Livezey
  */
-public class TestFreeTextSearchService {
+public class TestIndexingSearchService {
 
     @Test
     public void testIndexAllRepositoryItems() throws Exception {
-        FreeTextSearchService service = initSearchService("testIndexAllRepositoryItems");
+        IndexingSearchService service = initSearchService("testIndexAllRepositoryItems");
 
         // Search on the base namespace and make sure all three repository items are returned
         try {
-            List<RepositoryItem> searchResults = service.query("version", false, true);
+            List<SearchResult<?>> searchResults = service.search("version", null, false, false);
             Collection<String> filenames = getFilenames(searchResults);
 
             assertEquals(3, searchResults.size());
@@ -60,7 +60,7 @@ public class TestFreeTextSearchService {
         service.startService();
 
         try {
-            List<RepositoryItem> searchResults = service.query("version", false, true);
+            List<SearchResult<?>> searchResults = service.search("version", null, false, false);
             Collection<String> filenames = getFilenames(searchResults);
 
             assertEquals(3, searchResults.size());
@@ -75,63 +75,67 @@ public class TestFreeTextSearchService {
 
     @Test
     public void testContentKeywordSearch() throws Exception {
-        FreeTextSearchService service = initSearchService("testContentKeywordSearch");
-        List<RepositoryItem> searchResults;
+    	IndexingSearchService service = initSearchService("testContentKeywordSearch");
+        List<SearchResult<?>> searchResults;
         Collection<String> filenames;
 
         try {
-            // Search for a keyword in only two libraries
-            searchResults = service.query("red", false, true);
+            // Search for a keyword in all three libraries
+            searchResults = service.search("red", null, false, false);
             filenames = getFilenames(searchResults);
-
-            assertEquals(2, searchResults.size());
+            
+            assertEquals(3, filenames.size());
             assertTrue(filenames.contains("Version_Test_1_0_0.otm"));
             assertTrue(filenames.contains("Version_Test_1_1_0.otm"));
+            assertTrue(filenames.contains("Version_Test_1_1_1.otm"));
 
-            // Search for a keyword in only one library
-            searchResults = service.query("green", false, true);
+            // Search for a keyword in only two libraries
+            searchResults = service.search("green", null, false, false);
             filenames = getFilenames(searchResults);
 
-            assertEquals(1, searchResults.size());
+            assertEquals(2, filenames.size());
             assertTrue(filenames.contains("Version_Test_1_1_0.otm"));
+            assertTrue(filenames.contains("Version_Test_1_1_1.otm"));
 
             // Search for a non-existent keyword
-            searchResults = service.query("blue", false, true);
+            searchResults = service.search("blue", null, false, false);
             filenames = getFilenames(searchResults);
 
-            assertEquals(0, searchResults.size());
+            assertEquals(0, filenames.size());
 
         } finally {
             service.stopService();
         }
     }
 
-    protected FreeTextSearchService initSearchService(String testName) throws Exception {
+    protected IndexingSearchService initSearchService(String testName) throws Exception {
         File repositorySnapshot = new File(System.getProperty("user.dir"),
                 "/src/test/resources/repo-snapshots/versions-repository");
         File testRepository = new File(System.getProperty("user.dir"), "/target/test-workspace/"
-                + TestFreeTextSearchService.class.getSimpleName() + "/" + testName
+                + TestIndexingSearchService.class.getSimpleName() + "/" + testName
                 + "/test-repository");
         File indexFolder = new File(System.getProperty("user.dir"), "/target/test-workspace/"
-                + TestFreeTextSearchService.class.getSimpleName() + "/" + testName + "/index-test");
-        FreeTextSearchService service;
+                + TestIndexingSearchService.class.getSimpleName() + "/" + testName + "/index-test");
+        IndexingSearchService service;
 
         RepositoryTestUtils.deleteContents(indexFolder);
         RepositoryTestUtils.deleteContents(testRepository);
         RepositoryTestUtils.copyContents(repositorySnapshot, testRepository);
 
-        service = new FreeTextSearchService(indexFolder, new RepositoryManager(testRepository));
+        service = new IndexingSearchService(indexFolder, new RepositoryManager(testRepository));
         service.setRealTimeIndexing(true);
         service.startService();
         service.indexAllRepositoryItems();
         return service;
     }
 
-    private Collection<String> getFilenames(Collection<RepositoryItem> items) {
+    private Collection<String> getFilenames(Collection<SearchResult<?>> searchResults) {
         Collection<String> filenames = new HashSet<String>();
 
-        for (RepositoryItem item : items) {
-            filenames.add(item.getFilename());
+        for (SearchResult<?> result : searchResults) {
+        	if (result instanceof LibrarySearchResult) {
+                filenames.add( ((LibrarySearchResult) result).getRepositoryItem().getFilename() );
+        	}
         }
         return filenames;
     }

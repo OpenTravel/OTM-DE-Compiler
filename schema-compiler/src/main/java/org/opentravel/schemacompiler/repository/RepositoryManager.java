@@ -76,7 +76,7 @@ import org.opentravel.schemacompiler.xml.XMLGregorianCalendarConverter;
  * 
  * @author S. Livezey
  */
-public final class RepositoryManager implements Repository {
+public class RepositoryManager implements Repository {
 
     private static final String CURRENT_USER_BASE_NAMESPACE = "http://opentravel.org/local/";
     private static final String ENCRYPTED_PASSWORD_PREFIX = "enc:";

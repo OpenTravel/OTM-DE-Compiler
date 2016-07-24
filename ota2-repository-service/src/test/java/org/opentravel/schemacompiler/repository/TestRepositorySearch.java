@@ -207,15 +207,17 @@ public class TestRepositorySearch extends RepositoryTestBase {
         // Search for a keyword in only two libraries
         itemFilenames = getFilenames(repositoryManager.get().search("red", false, true));
 
-        assertEquals(2, itemFilenames.size());
+        assertEquals(3, itemFilenames.size());
         assertTrue(itemFilenames.contains("Version_Test_1_0_0.otm"));
         assertTrue(itemFilenames.contains("Version_Test_1_1_0.otm"));
+        assertTrue(itemFilenames.contains("Version_Test_1_1_1.otm"));
 
         // Search for a keyword in only one library
         itemFilenames = getFilenames(repositoryManager.get().search("green", false, true));
 
-        assertEquals(1, itemFilenames.size());
+        assertEquals(2, itemFilenames.size());
         assertTrue(itemFilenames.contains("Version_Test_1_1_0.otm"));
+        assertTrue(itemFilenames.contains("Version_Test_1_1_1.otm"));
 
         // Search for a non-existent keyword
         itemFilenames = getFilenames(repositoryManager.get().search("blue", false, true));

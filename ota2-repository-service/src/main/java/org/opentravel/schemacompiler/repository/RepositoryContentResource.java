@@ -51,7 +51,9 @@ import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryInfoType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryItemIdentityType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryPermissionType;
 import org.opentravel.ns.ota2.security_v01_00.RepositoryPermission;
-import org.opentravel.schemacompiler.index.FreeTextSearchService;
+import org.opentravel.schemacompiler.index.IndexingSearchService;
+import org.opentravel.schemacompiler.index.LibrarySearchResult;
+import org.opentravel.schemacompiler.index.SearchResult;
 import org.opentravel.schemacompiler.lock.LockableResource;
 import org.opentravel.schemacompiler.lock.RepositoryLockManager;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
@@ -96,7 +98,7 @@ public class RepositoryContentResource {
         this.securityManager = componentFactory.getSecurityManager();
 
         try {
-            FreeTextSearchService.initializeSingleton(componentFactory.getSearchIndexLocation(),
+            IndexingSearchService.initializeSingleton(componentFactory.getSearchIndexLocation(),
                     repositoryManager);
 
         } catch (IOException e) {
@@ -273,15 +275,20 @@ public class RepositoryContentResource {
             @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
 
         Map<String, Map<TLLibraryStatus, Boolean>> accessibleItemCache = new HashMap<String, Map<TLLibraryStatus, Boolean>>();
-        List<RepositoryItem> searchResults = FreeTextSearchService.getInstance().query(
-                freeTextQuery, latestVersionsOnly, includeDraftVersions);
+        TLLibraryStatus searchStatus = includeDraftVersions ? null : TLLibraryStatus.FINAL;
+        List<SearchResult<?>> searchResults = IndexingSearchService.getInstance().search(
+                freeTextQuery, searchStatus, latestVersionsOnly, false );
         UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
         LibraryInfoListType metadataList = new LibraryInfoListType();
 
-        for (RepositoryItem item : searchResults) {
-            if (isReadable(item, user, accessibleItemCache)) {
-                metadataList.getLibraryInfo().add(RepositoryUtils.createItemMetadata(item));
-            }
+        for (SearchResult<?> result : searchResults) {
+        	if (result instanceof LibrarySearchResult) {
+        		RepositoryItem item = ((LibrarySearchResult) result).getRepositoryItem();
+        		
+                if (isReadable(item, user, accessibleItemCache)) {
+                    metadataList.getLibraryInfo().add(RepositoryUtils.createItemMetadata(item));
+                }
+        	}
         }
         return objectFactory.createLibraryInfoList(metadataList);
     }
@@ -1100,7 +1107,7 @@ public class RepositoryContentResource {
      *            flag indicating whether the item's search index is to be deleted
      */
     private void indexRepositoryItem(RepositoryItem item, boolean deleteIndex) {
-        FreeTextSearchService service = FreeTextSearchService.getInstance();
+        IndexingSearchService service = IndexingSearchService.getInstance();
 
         if ((service != null) && (item != null)) {
             try {

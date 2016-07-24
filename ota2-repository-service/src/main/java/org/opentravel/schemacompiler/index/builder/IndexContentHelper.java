@@ -1,0 +1,409 @@
+/**
+ * Copyright (C) 2014 OpenTravel Alliance (info@opentravel.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.opentravel.schemacompiler.index.builder;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.xml.XMLConstants;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.validation.SchemaFactory;
+
+import org.opentravel.ns.ota2.librarymodel_v01_05.BusinessObject;
+import org.opentravel.ns.ota2.librarymodel_v01_05.ChoiceObject;
+import org.opentravel.ns.ota2.librarymodel_v01_05.CoreObject;
+import org.opentravel.ns.ota2.librarymodel_v01_05.EnumerationClosed;
+import org.opentravel.ns.ota2.librarymodel_v01_05.EnumerationOpen;
+import org.opentravel.ns.ota2.librarymodel_v01_05.ExtensionPointFacet;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Library;
+import org.opentravel.ns.ota2.librarymodel_v01_05.ObjectFactory;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Operation;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Resource;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Simple;
+import org.opentravel.ns.ota2.librarymodel_v01_05.ValueWithAttributes;
+import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
+import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
+import org.opentravel.schemacompiler.model.TLClosedEnumeration;
+import org.opentravel.schemacompiler.model.TLCoreObject;
+import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
+import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLOpenEnumeration;
+import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.model.TLSimple;
+import org.opentravel.schemacompiler.model.TLValueWithAttributes;
+import org.opentravel.schemacompiler.repository.RepositoryException;
+import org.opentravel.schemacompiler.repository.RepositoryItem;
+import org.opentravel.schemacompiler.transform.ObjectTransformer;
+import org.opentravel.schemacompiler.transform.TransformerFactory;
+import org.opentravel.schemacompiler.transform.symbols.DefaultTransformerContext;
+import org.opentravel.schemacompiler.util.ClasspathResourceResolver;
+
+/**
+ * Helper class that provides static utility methods for marshalling, unmarshalling, and
+ * transforming OTM library and entity content.
+ */
+public class IndexContentHelper {
+	
+    private static final String SCHEMA_CONTEXT = ":org.w3._2001.xmlschema:"
+    		+ "org.opentravel.ns.ota2.librarymodel_v01_04:org.opentravel.ns.ota2.librarymodel_v01_05";
+    
+    private static Map<Class<?>,JaxbLibraryVersionConverter<?>> libraryVersionConverters;
+    private static Map<Class<?>,Class<?>> entityClassMappings;
+    private static Map<Class<?>,Method> objectFactoryMethods;
+    private static TransformerFactory<?> loaderTransformFactory;
+    private static TransformerFactory<?> saverTransformFactory;
+    private static ObjectFactory objectFactory = new ObjectFactory();
+    private static JAXBContext jaxbContext;
+    
+	/**
+	 * Returns the qualified identity key for the search index term.
+	 * 
+	 * @return String
+	 */
+	public static String getIdentityKey(RepositoryItem item) {
+		StringBuilder identityKey = new StringBuilder();
+		
+		identityKey.append("LIB:");
+		identityKey.append( item.getNamespace() ).append(":");
+		identityKey.append( item.getLibraryName() );
+		return identityKey.toString();
+	}
+	
+	/**
+	 * Returns the qualified identity key for the given library.
+	 * 
+	 * @return String
+	 */
+	public static String getIdentityKey(TLLibrary library) {
+		StringBuilder identityKey = new StringBuilder();
+		
+		identityKey.append("LIB:");
+		identityKey.append( library.getNamespace() ).append(":");
+		identityKey.append( library.getName() );
+		return identityKey.toString();
+	}
+	
+	/**
+	 * Returns the qualified identity key for the given OTM model entity.
+	 * 
+	 * @param entity  the named entity for which to return an identity key
+	 * @return String
+	 */
+	public static String getIdentityKey(NamedEntity entity) {
+		StringBuilder identityKey = new StringBuilder();
+		
+		identityKey.append( entity.getNamespace() ).append(":");
+		identityKey.append( entity.getLocalName() );
+		return identityKey.toString();
+	}
+	
+	/**
+	 * Unmarshalls the contents of the given file as a JAXB library.
+	 * 
+	 * @param contentFile  the file that provides the raw XML library content
+	 * @return Library
+	 * @throws RepositoryException  thrown if an error occurs during unmarshalling
+	 */
+	public static Library unmarshallLibrary(File contentFile) throws RepositoryException {
+		try {
+			Unmarshaller u = jaxbContext.createUnmarshaller();
+			JAXBElement<?> libraryElement = (JAXBElement<?>) u.unmarshal( contentFile );
+			JaxbLibraryVersionConverter<?> versionConverter;
+			Object jaxbLibrary = libraryElement.getValue();
+			Library library;
+			
+			versionConverter = libraryVersionConverters.get( jaxbLibrary.getClass() );
+			
+			if (versionConverter != null) {
+				library = versionConverter.convertVersion( jaxbLibrary );
+				
+			} else {
+				throw new RepositoryException("Unrecognized library file format: " + contentFile.getName());
+			}
+			return library;
+			
+		} catch (JAXBException e) {
+			throw new RepositoryException("Error unmarshalling library content: " + contentFile.getName(), e);
+		}
+	}
+	
+	/**
+	 * Unmarshalls the given XML content string as an OTM library.
+	 * 
+	 * @param libraryContent  the string that provides the raw XML library content
+	 * @return TLLibrary
+	 * @throws RepositoryException  thrown if an error occurs during unmarshalling
+	 */
+	@SuppressWarnings("unchecked")
+	public static TLLibrary unmarshallLibrary(String libraryContent) throws RepositoryException {
+		try (Reader reader = new StringReader( libraryContent )) {
+			Unmarshaller u = jaxbContext.createUnmarshaller();
+			JAXBElement<Library> libraryElement = (JAXBElement<Library>) u.unmarshal( reader );
+			Library jaxbLibrary = libraryElement.getValue();
+			
+			return transformLibrary( jaxbLibrary );
+			
+		} catch (JAXBException | IOException e) {
+			throw new RepositoryException("Error unmarshalling library content.", e);
+		}
+	}
+	
+	/**
+	 * Unmarshalls the given XML content string as an OTM named entity.
+	 * 
+	 * @param entityContent  the string that provides the raw XML entity content
+	 * @return NamedEntity
+	 * @throws RepositoryException  thrown if an error occurs during unmarshalling
+	 */
+	@SuppressWarnings("unchecked")
+	public static NamedEntity unmarshallEntity(String entityContent) throws RepositoryException {
+		try (Reader reader = new StringReader( entityContent )) {
+			Unmarshaller u = jaxbContext.createUnmarshaller();
+			JAXBElement<Object> entityElement = (JAXBElement<Object>) u.unmarshal( reader );
+			Object jaxbEntity = entityElement.getValue();
+			
+			return transformEntity( jaxbEntity );
+			
+		} catch (JAXBException | IOException e) {
+			throw new RepositoryException("Error unmarshalling library content.", e);
+		}
+	}
+	
+	/**
+	 * Marshalls the contents of the given JAXB library as a string.
+	 * 
+	 * @param jaxbLibrary  the JAXB library to be marshalled as a string
+	 * @return String
+	 * @throws RepositoryException  thrown if an error occurs during marshalling
+	 */
+	public static String marshallLibrary(Library jaxbLibrary) throws RepositoryException {
+		try {
+			JAXBElement<Library> libraryElement = objectFactory.createLibrary( jaxbLibrary );
+			Marshaller m = jaxbContext.createMarshaller();
+			StringWriter writer = new StringWriter();
+			
+			m.marshal( libraryElement, writer );
+			return writer.toString();
+			
+		} catch (JAXBException e) {
+			throw new RepositoryException("Error marshalling library content.", e);
+		}
+	}
+	
+	/**
+	 * Marshalls the contents of the given OTM entity as a string.
+	 * 
+	 * @param jaxbLibrary  the OTM named entity to be marshalled as a string
+	 * @return String
+	 * @throws RepositoryException  thrown if an error occurs during marshalling
+	 */
+	public static String marshallEntity(NamedEntity entity) throws RepositoryException {
+		Class<? extends NamedEntity> entityClass = (entity == null) ? null : entity.getClass();
+		Class<?> targetClass = entityClassMappings.get( entityClass );
+		
+		if (targetClass != null) {
+			try {
+				ObjectTransformer<NamedEntity,?,?> transformer =
+						saverTransformFactory.getTransformer( entity, targetClass );
+				Object jaxbEntity = transformer.transform( entity );
+				Class<?> jaxbEntityClass = jaxbEntity.getClass();
+				Method factoryMethod = objectFactoryMethods.get( jaxbEntityClass );
+				Marshaller m = jaxbContext.createMarshaller();
+				StringWriter writer = new StringWriter();
+				
+				m.marshal( factoryMethod.invoke( objectFactory,  jaxbEntity ), writer );
+				return writer.toString();
+				
+			} catch (JAXBException | IllegalAccessException | IllegalArgumentException |
+					InvocationTargetException | SecurityException e) {
+				throw new RepositoryException("Error marshalling library content.", e);
+			}
+			
+		} else {
+			String entityType = (entityClass == null) ? "UNKNOWN" : entityClass.getSimpleName();
+			throw new Error("No entity class mapping defined for: " + entityType);
+		}
+		
+	}
+	
+	/**
+	 * Transforms the given JAXB library into its OTM model equivalent.  It should be
+	 * noted that the library that is returned is not part of a fully-resolved model.
+	 * Instead, it contains all of the raw data but none of the entity references are
+	 * resolved.
+	 * 
+	 * @param jaxbLibrary  the JAXB library to be transformed
+	 * @return TLLibrary
+	 */
+	public static TLLibrary transformLibrary(Library jaxbLibrary) {
+		ObjectTransformer<Library,TLLibrary,?> transformer =
+				loaderTransformFactory.getTransformer( jaxbLibrary, TLLibrary.class );
+		
+		return transformer.transform( jaxbLibrary );
+	}
+	
+	/**
+	 * Transforms the given JAXB entity into its OTM model equivalent.  It should be
+	 * noted that the entity that is returned is not part of a fully-resolved model.
+	 * Instead, it contains all of the raw data but none of the entity references are
+	 * resolved.
+	 * 
+	 * @param jaxbLibrary  the JAXB library to be transformed
+	 * @return NamedEntity
+	 */
+	@SuppressWarnings("unchecked")
+	public static NamedEntity transformEntity(Object jaxbEntity) {
+		Class<?> entityClass = jaxbEntity.getClass();
+		Class<? extends NamedEntity> targetClass = (Class<? extends NamedEntity>) entityClassMappings.get( entityClass );
+		
+		if (targetClass == null) {
+			throw new Error("No entity class mapping defined for: " +
+					jaxbEntity.getClass().getSimpleName());
+		}
+		ObjectTransformer<Object,? extends NamedEntity,?> transformer =
+				loaderTransformFactory.getTransformer( jaxbEntity, targetClass );
+		
+		return transformer.transform( jaxbEntity );
+	}
+	
+	/**
+	 * Handles the conversion of a JAXB library from its original version (as stored in the
+	 * repository file system) to the latest version which is compatible with the indexing
+	 * service API's.
+	 *
+	 * @param <L>  the JAXB library type that can be converted by this handler
+	 */
+	private static class JaxbLibraryVersionConverter<L> {
+		
+		private Class<L> libraryType;
+		
+		/**
+		 * Constructor that specifies the library type version that can be processed
+		 * by this converter.
+		 * 
+		 * @param libraryType  class reference to the JAXB library version type
+		 */
+		public JaxbLibraryVersionConverter(Class<L> libraryType) {
+			this.libraryType = libraryType;
+		}
+		
+		/**
+		 * Converts the given JAXB library to the latest version.
+		 * 
+		 * @param jaxbLibrary  the JAXB library to be converted
+		 * @return Library
+		 */
+		@SuppressWarnings("unchecked")
+		public Library convertVersion(Object jaxbLibrary) {
+			Library library;
+			
+			if (jaxbLibrary instanceof Library) {
+				library = (Library) jaxbLibrary; // skip transformation if we are already at the latest version
+				
+			} else {
+				ObjectTransformer<L,TLLibrary,?> loadTransformer =
+						loaderTransformFactory.getTransformer( libraryType, TLLibrary.class );
+				ObjectTransformer<TLLibrary,Library,?> saveTransformer =
+						saverTransformFactory.getTransformer( TLLibrary.class, Library.class );
+				TLLibrary otmLibrary = loadTransformer.transform( (L) jaxbLibrary );
+				
+				library = saveTransformer.transform( otmLibrary );
+			}
+			return library;
+		}
+		
+	}
+	
+    /**
+     * Initializes the JAXB context and transformer factory.
+     */
+    static {
+        try {
+        	Map<Class<?>,JaxbLibraryVersionConverter<?>> versionConverters = new HashMap<>();
+            Map<Class<?>,Class<?>> classMappings = new HashMap<>();
+            Map<Class<?>,Method> methodMappings = new HashMap<>();
+            SchemaFactory schemaFactory = SchemaFactory
+                    .newInstance( XMLConstants.W3C_XML_SCHEMA_NS_URI );
+            
+            // Initialize the library version converters
+            versionConverters.put( org.opentravel.ns.ota2.librarymodel_v01_04.Library.class,
+            		new JaxbLibraryVersionConverter<>( org.opentravel.ns.ota2.librarymodel_v01_04.Library.class ) );
+            versionConverters.put( org.opentravel.ns.ota2.librarymodel_v01_05.Library.class,
+            		new JaxbLibraryVersionConverter<>( org.opentravel.ns.ota2.librarymodel_v01_05.Library.class ) );
+            libraryVersionConverters = Collections.unmodifiableMap( versionConverters );
+            
+            // Initialize entity class mappings for transformer target lookups
+            classMappings.put( TLSimple.class, Simple.class );
+            classMappings.put( Simple.class, TLSimple.class );
+            classMappings.put( EnumerationClosed.class, TLClosedEnumeration.class );
+            classMappings.put( TLClosedEnumeration.class, EnumerationClosed.class );
+            classMappings.put( EnumerationOpen.class, TLOpenEnumeration.class );
+            classMappings.put( TLOpenEnumeration.class, EnumerationOpen.class );
+            classMappings.put( TLValueWithAttributes.class, ValueWithAttributes.class );
+            classMappings.put( ValueWithAttributes.class, TLValueWithAttributes.class );
+            classMappings.put( TLCoreObject.class, CoreObject.class );
+            classMappings.put( CoreObject.class, TLCoreObject.class );
+            classMappings.put( TLChoiceObject.class, ChoiceObject.class );
+            classMappings.put( ChoiceObject.class, TLChoiceObject.class );
+            classMappings.put( TLBusinessObject.class, BusinessObject.class );
+            classMappings.put( BusinessObject.class, TLBusinessObject.class );
+            classMappings.put( TLOperation.class, Operation.class );
+            classMappings.put( Operation.class, TLOperation.class );
+            classMappings.put( TLResource.class, Resource.class );
+            classMappings.put( Resource.class, TLResource.class );
+            classMappings.put( TLExtensionPointFacet.class, ExtensionPointFacet.class );
+            classMappings.put( ExtensionPointFacet.class, TLExtensionPointFacet.class );
+            entityClassMappings = Collections.unmodifiableMap( classMappings );
+            
+            // Initialize the JAXB object factory method mappings
+            for (Method m : ObjectFactory.class.getDeclaredMethods()) {
+            	Class<?>[] paramTypes = m.getParameterTypes();
+            	
+            	if (m.getName().startsWith( "create" ) && (paramTypes.length == 1)) {
+            		methodMappings.put( paramTypes[0], m );
+            	}
+            }
+            objectFactoryMethods = Collections.unmodifiableMap( methodMappings );
+            
+            // Initialize the transformer factories and the JAXB context
+            loaderTransformFactory = TransformerFactory.getInstance(
+            		SchemaCompilerApplicationContext.LOADER_TRANSFORMER_FACTORY, new DefaultTransformerContext() );
+            saverTransformFactory = TransformerFactory.getInstance(
+            		SchemaCompilerApplicationContext.SAVER_TRANSFORMER_FACTORY, new DefaultTransformerContext() );
+            schemaFactory.setResourceResolver( new ClasspathResourceResolver() );
+            jaxbContext = JAXBContext.newInstance( SCHEMA_CONTEXT );
+            
+        } catch (Throwable t) {
+            throw new ExceptionInInitializerError(t);
+        }
+    }
+
+}
