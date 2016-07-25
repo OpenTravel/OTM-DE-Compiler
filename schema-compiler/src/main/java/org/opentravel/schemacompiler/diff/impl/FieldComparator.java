@@ -17,7 +17,6 @@
 package org.opentravel.schemacompiler.diff.impl;
 
 import java.util.List;
-import java.util.Map;
 
 import javax.xml.namespace.QName;
 
@@ -37,15 +36,6 @@ public class FieldComparator extends BaseComparator {
 	 * Default constructor.
 	 */
 	public FieldComparator() {}
-	
-	/**
-	 * Constructor that initializes the namespace mappings for the comparator.
-	 * 
-	 * @param namespaceMappings  the initial namespace mappings
-	 */
-	protected FieldComparator(Map<String,String> namespaceMappings) {
-		super( namespaceMappings );
-	}
 	
 	/**
 	 * Compares two versions of the same OTM member field.

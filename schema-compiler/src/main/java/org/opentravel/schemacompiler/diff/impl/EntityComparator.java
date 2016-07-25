@@ -249,7 +249,7 @@ public class EntityComparator extends BaseComparator {
 				// Simple Case: One field of this name in each version (even if its facet location
 				// may have changed)
 				if ((oldVersionFields.size() == 1) && (newVersionFields.size() == 1)) {
-					FieldChangeSet fieldChangeSet = new FieldComparator( getNamespaceMappings() ).compareFields(
+					FieldChangeSet fieldChangeSet = new FieldComparator().compareFields(
 							new FieldComparisonFacade( oldVersionFields.get( 0 ) ),
 							new FieldComparisonFacade( newVersionFields.get( 0 ) ) );
 					
@@ -310,7 +310,7 @@ public class EntityComparator extends BaseComparator {
 									pendingChangeItems.add( new EntityChangeItem( EntityChangeType.MEMBER_FIELD_DELETED, oldField ) );
 									
 								} else {
-									FieldChangeSet fieldChangeSet = new FieldComparator( getNamespaceMappings() ).compareFields(
+									FieldChangeSet fieldChangeSet = new FieldComparator().compareFields(
 											new FieldComparisonFacade( oldField ), new FieldComparisonFacade( newField ) );
 									
 									if (!fieldChangeSet.getFieldChangeItems().isEmpty()) {
