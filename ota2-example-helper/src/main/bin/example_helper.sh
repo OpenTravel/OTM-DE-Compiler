@@ -14,12 +14,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-SCRIPTDIR="$( cd "$( dirname "$0" )" && pwd )"
-
-PROXY_HOST=myproxy.example.com
-PROXY_PORT=8080
-NON_PROXY_HOSTS="localhost|127.0.0.1|*.example.com"
-
-JAVA_OPTS=-Dhttp.proxyHost=%PROXY_HOST% -Dhttp.proxyPort=%PROXY_PORT% -Dhttp.nonProxyHosts=%NON_PROXY_HOSTS%
-
-java $JAVA_OPTS -cp $SCRIPTDIR/lib/* org.opentravel.examplehelper.ExampleHelper "$@"
+java -jar example-helper-2.jar "$@"

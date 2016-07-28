@@ -30,21 +30,11 @@
 	<fileSets>
 		<fileSet>
 			<directory>${project.basedir}/src/main/bin</directory>
-			<outputDirectory>OTMExampleHelper</outputDirectory>
+			<outputDirectory>OTM_ExampleHelper</outputDirectory>
 		</fileSet>
 		<fileSet>
-			<directory>${project.basedir}/target</directory>
-			<outputDirectory>OTMExampleHelper/lib</outputDirectory>
-			<includes>
-				<include>*.jar</include>
-			</includes>
-		</fileSet>
-		<fileSet>
-			<directory>${project.basedir}/target/libs</directory>
-			<outputDirectory>OTMExampleHelper/lib</outputDirectory>
-			<includes>
-				<include>*.jar</include>
-			</includes>
+			<directory>${project.build.directory}/jfx/app</directory>
+			<outputDirectory>OTM_ExampleHelper</outputDirectory>
 		</fileSet>
 	</fileSets>
 	

@@ -15,10 +15,4 @@
 @REM
 
 @echo off
-set PROXY_HOST=myproxy.example.com
-set PROXY_PORT=8080
-set NON_PROXY_HOSTS="localhost|127.0.0.1|*.example.com"
-
-set JAVA_OPTS=-Dhttp.proxyHost=%PROXY_HOST% -Dhttp.proxyPort=%PROXY_PORT% -Dhttp.nonProxyHosts=%NON_PROXY_HOSTS%
-
-java %JAVA_OPTS% -cp ./lib/* org.opentravel.examplehelper.ExampleHelper %*
+java -jar example-helper-2.jar %*
