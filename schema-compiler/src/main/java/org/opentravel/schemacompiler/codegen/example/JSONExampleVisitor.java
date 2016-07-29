@@ -787,8 +787,11 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 							newNode = getTextNode(value);
 						}
 					} else {
-						newNode = getSimpleTypeNode(elementType);
-
+						if (context.getModelElement() != null) {
+							newNode = nodeFactory.textNode( generateExampleValue( context.getModelElement() ) );
+						} else {
+							newNode = getSimpleTypeNode(elementType);
+						}
 					}
 					context.setNode(newNode);
 
