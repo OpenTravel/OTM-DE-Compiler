@@ -49,7 +49,7 @@
 		<junit.version>4.12</junit.version>
 		<fge.version>2.2.6</fge.version>
 		<swagger.parser.version>1.0.17</swagger.parser.version>
-		<jsyntaxpane.version>1.0.0</jsyntaxpane.version>
+		<richtextfx.version>0.7-M2</richtextfx.version>
 		<velocity.version>1.5</velocity.version>
 		
 		<!-- Plugin Versions -->
@@ -278,9 +278,9 @@
 				<version>${swagger.parser.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>de.sciss</groupId>
-				<artifactId>jsyntaxpane</artifactId>
-				<version>${jsyntaxpane.version}</version>
+				<groupId>org.fxmisc.richtext</groupId>
+				<artifactId>richtextfx</artifactId>
+				<version>${richtextfx.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>velocity</groupId>

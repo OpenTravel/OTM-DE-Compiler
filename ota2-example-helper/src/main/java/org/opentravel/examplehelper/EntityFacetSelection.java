@@ -17,6 +17,7 @@
 package org.opentravel.examplehelper;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,6 +73,15 @@ public class EntityFacetSelection {
 			if (basePayload instanceof TLFacetOwner) {
 				this.facetOwner = (TLFacetOwner) basePayload;
 			}
+			
+		} else if (realEntityType instanceof TLFacet) {
+			// If the entity is a facet, then it will be the only member of the facet list
+			TLFacet facet = (TLFacet) realEntityType;
+			String facetName = HelperUtils.getDisplayName( facet, false );
+			
+			facetList = Arrays.asList( facet );
+			facetNames = Arrays.asList( facetName );
+			facetsByName.put( facetName, facet );
 		}
 		
 		// Retrieve the facet list based upon the entity type
@@ -188,6 +198,9 @@ public class EntityFacetSelection {
 	public String getFacetName(TLFacet facet) {
 		String facetName = null;
 		
+		if (facetNames == null) {
+			System.out.println("BREAKPOINT");
+		}
 		for (String fn : facetNames) {
 			if (facet == facetsByName.get( fn )) {
 				facetName = fn;

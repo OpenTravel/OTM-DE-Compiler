@@ -15,4 +15,4 @@
 @REM
 
 @echo off
-java -jar example-helper-2.jar %*
+java -jar ota2-example-helper.jar %*

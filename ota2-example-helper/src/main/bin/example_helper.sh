@@ -14,4 +14,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-java -jar example-helper-2.jar "$@"
+java -jar ota2-example-helper.jar "$@"

@@ -21,4 +21,4 @@ set NON_PROXY_HOSTS="localhost|127.0.0.1|*.example.com"
 
 set JAVA_OPTS=-Dhttp.proxyHost=%PROXY_HOST% -Dhttp.proxyPort=%PROXY_PORT% -Dhttp.nonProxyHosts=%NON_PROXY_HOSTS%
 
-java %JAVA_OPTS% -jar example-helper-2.jar %*
+java %JAVA_OPTS% -jar ota2-example-helper.jar %*
