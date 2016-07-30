@@ -787,11 +787,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 							newNode = getTextNode(value);
 						}
 					} else {
-						if (context.getModelElement() != null) {
-							newNode = nodeFactory.textNode( generateExampleValue( context.getModelElement() ) );
-						} else {
-							newNode = getSimpleTypeNode(elementType);
-						}
+						newNode = getSimpleTypeNode(elementType);
 					}
 					context.setNode(newNode);
 
@@ -1022,14 +1018,18 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 	private JsonNode getSimpleTypeNode(NamedEntity elementType) {
 		JsonNode node;
 		
-		// we are a simple type so we should be a TLPopertyType
+		// we are a simple type so we should be a TLPropertyType
 		if (elementType instanceof TLListFacet || XsdCodegenUtils.isIdType((TLPropertyType) elementType)) {
 			node = generateExampleValueNode(context.getModelElement());
 		} else {
 			if (XsdCodegenUtils.isIdRefsType((TLPropertyType) elementType)) {
 				node = generateExampleValueArrayNode(elementType);
 			} else {
-				node = generateExampleValueNode(elementType);
+				if (context.getModelElement() != null) {
+					node = generateExampleValueNode(context.getModelElement());
+				} else {
+					node = generateExampleValueNode(elementType);
+				}
 			}
 		}
 		

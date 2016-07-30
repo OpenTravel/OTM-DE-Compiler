@@ -23,7 +23,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opentravel.ns.ota2.security_v01_00.RepositoryPermission;
-import org.opentravel.schemacompiler.index.IndexingSearchService;
+import org.opentravel.schemacompiler.index.FreeTextSearchService;
 import org.opentravel.schemacompiler.index.LibrarySearchResult;
 import org.opentravel.schemacompiler.index.SearchResult;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
@@ -47,16 +47,16 @@ public class SearchController extends BaseController {
 
     private static Log log = LogFactory.getLog(SearchController.class);
 
-    private IndexingSearchService searchService;
+    private FreeTextSearchService searchService;
 
     /**
      * Default constructor.
      */
     public SearchController() {
         try {
-        	IndexingSearchService.initializeSingleton(RepositoryComponentFactory.getDefault()
+        	FreeTextSearchService.initializeSingleton(RepositoryComponentFactory.getDefault()
                     .getSearchIndexLocation(), getRepositoryManager());
-            searchService = IndexingSearchService.getInstance();
+            searchService = FreeTextSearchService.getInstance();
 
         } catch (Throwable t) {
             log.error("Error initializing the free-text search service.", t);

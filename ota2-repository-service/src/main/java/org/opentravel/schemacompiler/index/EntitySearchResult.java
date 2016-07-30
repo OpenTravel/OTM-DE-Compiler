@@ -49,7 +49,7 @@ public class EntitySearchResult extends SearchResult<NamedEntity> {
 	 * @param doc  the index document from which to initialize the library information
 	 * @param searchService  the indexing search service that created this search result
 	 */
-	public EntitySearchResult(Document doc, IndexingSearchService searchService) {
+	public EntitySearchResult(Document doc, FreeTextSearchService searchService) {
 		super( doc, searchService );
 		String statusStr = doc.get( STATUS_FIELD );
 		

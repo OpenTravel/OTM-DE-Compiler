@@ -331,7 +331,7 @@ public abstract class ImportManagementIntegrityChecker<E extends ModelEvent<S>, 
         if ((projectManager != null) && projectManager.isRepositoryUrl(referencedLibraryUrl)) {
             ProjectItem item = projectManager.getProjectItem(referencedLibrary);
 
-            if (item != null) {
+            if ((item != null) && (item.getRepository() != null)) {
                 referenceUrl = RepositoryUtils.newURI(item, false).toString();
             }
         }

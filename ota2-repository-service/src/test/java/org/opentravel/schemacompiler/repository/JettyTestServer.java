@@ -27,7 +27,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.log.Logger;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
-import org.opentravel.schemacompiler.index.IndexingSearchService;
+import org.opentravel.schemacompiler.index.FreeTextSearchService;
 import org.opentravel.schemacompiler.repository.impl.RemoteRepositoryClient;
 import org.opentravel.schemacompiler.util.RepositoryTestUtils;
 
@@ -158,7 +158,7 @@ public class JettyTestServer {
      * Indexes the contents of the server's test repository.
      */
     private void indexTestRepository() throws Exception {
-        IndexingSearchService service = IndexingSearchService.getInstance();
+        FreeTextSearchService service = FreeTextSearchService.getInstance();
 
         while (!service.isRunning()) {
             try {

@@ -44,7 +44,7 @@ public class ValidationResult extends SearchResult<ValidationFinding> {
 	 * @param libraryIndexId  the search index ID of the library to which this finding applies
 	 * @param entityIndexId  the search index ID of the entity to which this finding applies (may be null)
 	 */
-	public ValidationResult(Document doc, IndexingSearchService searchService) {
+	public ValidationResult(Document doc, FreeTextSearchService searchService) {
 		super( doc, searchService );
 		String findingTypeStr = doc.get( FINDING_TYPE_FIELD );
 		

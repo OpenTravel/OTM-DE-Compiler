@@ -51,7 +51,7 @@ import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryInfoType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryItemIdentityType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryPermissionType;
 import org.opentravel.ns.ota2.security_v01_00.RepositoryPermission;
-import org.opentravel.schemacompiler.index.IndexingSearchService;
+import org.opentravel.schemacompiler.index.FreeTextSearchService;
 import org.opentravel.schemacompiler.index.LibrarySearchResult;
 import org.opentravel.schemacompiler.index.SearchResult;
 import org.opentravel.schemacompiler.lock.LockableResource;
@@ -98,7 +98,7 @@ public class RepositoryContentResource {
         this.securityManager = componentFactory.getSecurityManager();
 
         try {
-            IndexingSearchService.initializeSingleton(componentFactory.getSearchIndexLocation(),
+            FreeTextSearchService.initializeSingleton(componentFactory.getSearchIndexLocation(),
                     repositoryManager);
 
         } catch (IOException e) {
@@ -276,7 +276,7 @@ public class RepositoryContentResource {
 
         Map<String, Map<TLLibraryStatus, Boolean>> accessibleItemCache = new HashMap<String, Map<TLLibraryStatus, Boolean>>();
         TLLibraryStatus searchStatus = includeDraftVersions ? null : TLLibraryStatus.FINAL;
-        List<SearchResult<?>> searchResults = IndexingSearchService.getInstance().search(
+        List<SearchResult<?>> searchResults = FreeTextSearchService.getInstance().search(
                 freeTextQuery, searchStatus, latestVersionsOnly, false );
         UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
         LibraryInfoListType metadataList = new LibraryInfoListType();
@@ -1107,7 +1107,7 @@ public class RepositoryContentResource {
      *            flag indicating whether the item's search index is to be deleted
      */
     private void indexRepositoryItem(RepositoryItem item, boolean deleteIndex) {
-        IndexingSearchService service = IndexingSearchService.getInstance();
+        FreeTextSearchService service = FreeTextSearchService.getInstance();
 
         if ((service != null) && (item != null)) {
             try {

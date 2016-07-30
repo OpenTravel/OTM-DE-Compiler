@@ -222,8 +222,7 @@ public class RepositoryUtils {
      * @return URI
      */
     public static URI newURI(RepositoryItem item, boolean fullyQualified) {
-        StringBuilder uriString = new StringBuilder("otm://").append(item.getRepository().getId())
-                .append("/");
+        StringBuilder uriString = new StringBuilder("otm://").append(item.getRepository().getId()).append("/");
         VersionSchemeFactory vsFactory = VersionSchemeFactory.getInstance();
         String itemFilename = null;
 

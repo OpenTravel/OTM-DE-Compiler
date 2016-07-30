@@ -56,7 +56,7 @@ public class LibrarySearchResult extends SearchResult<TLLibrary> {
 	 * @param owningRepository  the repository instance that owns the item represented by this search result
 	 * @param searchService  the indexing search service that created this search result
 	 */
-	public LibrarySearchResult(Document doc, Repository owningRepository, IndexingSearchService searchService) {
+	public LibrarySearchResult(Document doc, Repository owningRepository, FreeTextSearchService searchService) {
 		super( doc, searchService );
 		RepositoryItemImpl item = new RepositoryItemImpl();
 		String statusStr = doc.get( STATUS_FIELD );

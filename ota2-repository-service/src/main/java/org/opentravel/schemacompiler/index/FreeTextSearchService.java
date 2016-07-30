@@ -64,7 +64,7 @@ import org.opentravel.schemacompiler.repository.RepositoryManager;
  * 
  * @author S. Livezey
  */
-public class IndexingSearchService implements IndexingTerms {
+public class FreeTextSearchService implements IndexingTerms {
 	
 	private static final Set<String> nonContentAttrs = new HashSet<>( Arrays.asList(
 			IDENTITY_FIELD, ENTITY_TYPE_FIELD, ENTITY_NAME_FIELD, ENTITY_NAMESPACE_FIELD,
@@ -73,9 +73,9 @@ public class IndexingSearchService implements IndexingTerms {
 		) );
 	private static final Set<String> contentAttr = new HashSet<>( Arrays.asList( CONTENT_DATA_FIELD ) );
 	
-    private static Log log = LogFactory.getLog(IndexingSearchService.class);
+    private static Log log = LogFactory.getLog(FreeTextSearchService.class);
 
-    private static IndexingSearchService defaultInstance;
+    private static FreeTextSearchService defaultInstance;
     private static Set<Object> serviceOwners = new HashSet<Object>();
 
     private Thread indexingThread;
@@ -107,7 +107,7 @@ public class IndexingSearchService implements IndexingTerms {
      * @throws IOException
      *             thrown if a low-level error occurs while initializing the search index
      */
-    public IndexingSearchService(File indexLocation, RepositoryManager repositoryManager)
+    public FreeTextSearchService(File indexLocation, RepositoryManager repositoryManager)
             throws IOException {
         if (!indexLocation.exists()) {
             indexLocation.mkdirs();
@@ -124,7 +124,7 @@ public class IndexingSearchService implements IndexingTerms {
      * 
      * @return FreeTextSearchService
      */
-    public static IndexingSearchService getInstance() {
+    public static FreeTextSearchService getInstance() {
         return defaultInstance;
     }
 
@@ -142,7 +142,7 @@ public class IndexingSearchService implements IndexingTerms {
     public static synchronized void initializeSingleton(File indexLocation,
             RepositoryManager repositoryManager) throws IOException {
         if (defaultInstance == null) {
-            defaultInstance = new IndexingSearchService(indexLocation, repositoryManager);
+            defaultInstance = new FreeTextSearchService(indexLocation, repositoryManager);
             defaultInstance.startService();
         }
     }

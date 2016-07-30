@@ -20,13 +20,13 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.document.Document;
 
 /**
- * Abstract base class for all search results returned by the <code>IndexingSearchService</code>.
+ * Abstract base class for all search results returned by the <code>FreeTextSearchService</code>.
  */
 public abstract class SearchResult<T> implements IndexingTerms {
 	
     private static Log log = LogFactory.getLog( SearchResult.class );
 
-    private IndexingSearchService searchService;
+    private FreeTextSearchService searchService;
     private String searchIndexId;
     private Class<?> entityType;
     private String itemNamespace;
@@ -41,7 +41,7 @@ public abstract class SearchResult<T> implements IndexingTerms {
 	 * @param doc  the index document from which to initialize the library information
 	 * @param searchService  the indexing search service that created this search result
 	 */
-	public SearchResult(Document doc, IndexingSearchService searchService) {
+	public SearchResult(Document doc, FreeTextSearchService searchService) {
 		String entityTypeStr = doc.get( ENTITY_TYPE_FIELD );
 		
 		this.searchIndexId = doc.get( IDENTITY_FIELD );
@@ -60,9 +60,9 @@ public abstract class SearchResult<T> implements IndexingTerms {
 	/**
 	 * Returns the indexing search service that created this search result.
 	 *
-	 * @return IndexingSearchService
+	 * @return FreeTextSearchService
 	 */
-	public IndexingSearchService getSearchService() {
+	public FreeTextSearchService getSearchService() {
 		return searchService;
 	}
 

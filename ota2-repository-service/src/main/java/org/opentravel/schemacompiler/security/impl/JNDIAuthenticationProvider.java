@@ -552,7 +552,6 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
 		String userDn;
 		
 		if (userId != null) {
-			System.out.println("REFRESHING USER: " + userId);
 			if (mode == AuthenticationMode.USER_LOOKUP) {
 				userDn = userPattern.format(new String[] { userId });
 				

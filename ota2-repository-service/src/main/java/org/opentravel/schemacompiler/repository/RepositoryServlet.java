@@ -24,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
-import org.opentravel.schemacompiler.index.IndexingSearchService;
+import org.opentravel.schemacompiler.index.FreeTextSearchService;
 
 /**
  * Servlet class that extends the Jersey JAX-RS servlet, adding a function to gracefully release the
@@ -61,7 +61,7 @@ public class RepositoryServlet extends ServletContainer {
     @Override
     public void init() throws ServletException {
         super.init();
-        IndexingSearchService.registerServiceOwner(this);
+        FreeTextSearchService.registerServiceOwner(this);
     }
 
     /**
@@ -70,12 +70,12 @@ public class RepositoryServlet extends ServletContainer {
     @Override
     public void destroy() {
         super.destroy();
-        IndexingSearchService.unregisterServiceOwner(this);
+        FreeTextSearchService.unregisterServiceOwner(this);
 
         // Attempt to shut down the singleton instance of the service. If this servlet is not the
         // last remaining instance for the container, this method will have no effect.
         try {
-        	IndexingSearchService.destroySingleton();
+        	FreeTextSearchService.destroySingleton();
 
         } catch (IOException e) {
             log.error("Error shutting down the free-text search service.", e);

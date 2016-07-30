@@ -24,7 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.junit.Test;
-import org.opentravel.schemacompiler.index.IndexingSearchService;
+import org.opentravel.schemacompiler.index.FreeTextSearchService;
 import org.opentravel.schemacompiler.index.LibrarySearchResult;
 import org.opentravel.schemacompiler.index.SearchResult;
 import org.opentravel.schemacompiler.util.RepositoryTestUtils;
@@ -35,11 +35,11 @@ import org.opentravel.schemacompiler.util.RepositoryTestUtils;
  * 
  * @author S. Livezey
  */
-public class TestIndexingSearchService {
+public class TestFreeTextSearchService {
 
     @Test
     public void testIndexAllRepositoryItems() throws Exception {
-        IndexingSearchService service = initSearchService("testIndexAllRepositoryItems");
+        FreeTextSearchService service = initSearchService("testIndexAllRepositoryItems");
 
         // Search on the base namespace and make sure all three repository items are returned
         try {
@@ -75,7 +75,7 @@ public class TestIndexingSearchService {
 
     @Test
     public void testContentKeywordSearch() throws Exception {
-    	IndexingSearchService service = initSearchService("testContentKeywordSearch");
+    	FreeTextSearchService service = initSearchService("testContentKeywordSearch");
         List<SearchResult<?>> searchResults;
         Collection<String> filenames;
 
@@ -108,21 +108,21 @@ public class TestIndexingSearchService {
         }
     }
 
-    protected IndexingSearchService initSearchService(String testName) throws Exception {
+    protected FreeTextSearchService initSearchService(String testName) throws Exception {
         File repositorySnapshot = new File(System.getProperty("user.dir"),
                 "/src/test/resources/repo-snapshots/versions-repository");
         File testRepository = new File(System.getProperty("user.dir"), "/target/test-workspace/"
-                + TestIndexingSearchService.class.getSimpleName() + "/" + testName
+                + TestFreeTextSearchService.class.getSimpleName() + "/" + testName
                 + "/test-repository");
         File indexFolder = new File(System.getProperty("user.dir"), "/target/test-workspace/"
-                + TestIndexingSearchService.class.getSimpleName() + "/" + testName + "/index-test");
-        IndexingSearchService service;
+                + TestFreeTextSearchService.class.getSimpleName() + "/" + testName + "/index-test");
+        FreeTextSearchService service;
 
         RepositoryTestUtils.deleteContents(indexFolder);
         RepositoryTestUtils.deleteContents(testRepository);
         RepositoryTestUtils.copyContents(repositorySnapshot, testRepository);
 
-        service = new IndexingSearchService(indexFolder, new RepositoryManager(testRepository));
+        service = new FreeTextSearchService(indexFolder, new RepositoryManager(testRepository));
         service.setRealTimeIndexing(true);
         service.startService();
         service.indexAllRepositoryItems();
