@@ -42,7 +42,6 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
     private TLFacet notification;
     private boolean notExtendable;
     private TLExtension extension;
-    private List<String> payloadFacetFilter = new ArrayList<>();
 
     /**
      * @see org.opentravel.schemacompiler.model.ModelElement#getOwningModel()
@@ -496,24 +495,6 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
             }
         }
     }
-
-    /**
-	 * Returns the value of the 'payloadFacetFilter' field.
-	 *
-	 * @return List<String>
-	 */
-	public List<String> getPayloadFacetFilter() {
-		return payloadFacetFilter;
-	}
-
-	/**
-	 * Assigns the value of the 'payloadFacetFilter' field.
-	 *
-	 * @param payloadFacetFilter  the field value to assign
-	 */
-	public void setPayloadFacetFilter(List<String> payloadFacetFilter) {
-		this.payloadFacetFilter = payloadFacetFilter;
-	}
 
 	/**
      * Manages lists of <code>TLOperation</code> entities.

@@ -45,10 +45,6 @@ public class FacetActionTransformer extends ComplexTypeTransformer<FacetAction,T
 		facet.setReferenceRepeat(PropertyTransformer.convertRepeatValue(source.getReferenceRepeat()));
 		facet.setBasePayloadName( source.getBasePayload() );
 		
-        if ((source.getPayloadFacetFilter() != null) && !source.getPayloadFacetFilter().isEmpty()) {
-        	facet.setPayloadFacetFilter( source.getPayloadFacetFilter() );
-        }
-
         if (source.getDocumentation() != null) {
             ObjectTransformer<Documentation, TLDocumentation, DefaultTransformerContext> docTransformer = getTransformerFactory()
                     .getTransformer(Documentation.class, TLDocumentation.class);

@@ -53,10 +53,6 @@ public class TLActionFacetTransformer extends TLComplexTypeTransformer<TLActionF
         	facet.setBasePayload(trimString(source.getBasePayloadName(), true));
         }
         
-        if ((source.getPayloadFacetFilter() != null) && !source.getPayloadFacetFilter().isEmpty()) {
-        	facet.getPayloadFacetFilter().addAll( source.getPayloadFacetFilter() );
-        }
-
         if ((source.getDocumentation() != null) && !source.getDocumentation().isEmpty()) {
             ObjectTransformer<TLDocumentation, Documentation, SymbolResolverTransformerContext> docTransformer =
             		getTransformerFactory().getTransformer(TLDocumentation.class, Documentation.class);

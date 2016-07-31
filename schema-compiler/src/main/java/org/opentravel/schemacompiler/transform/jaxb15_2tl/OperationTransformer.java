@@ -70,10 +70,6 @@ public class OperationTransformer extends
             operation.addEquivalent(equivTransformer.transform(sourceEquiv));
         }
         
-        if ((source.getPayloadFacetFilter() != null) && !source.getPayloadFacetFilter().isEmpty()) {
-        	operation.setPayloadFacetFilter( source.getPayloadFacetFilter() );
-        }
-
         if (source.getRequest() != null) {
             operation.setRequest(facetTransformer.transform(source.getRequest()));
         }

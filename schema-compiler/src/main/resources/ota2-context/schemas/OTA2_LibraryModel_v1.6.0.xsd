@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_05" targetNamespace="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_05"
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_06" targetNamespace="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_06"
    elementFormDefault="qualified" attributeFormDefault="unqualified">
 
    <xsd:complexType name="AdditionalDoc">
@@ -67,6 +67,13 @@
          <xsd:annotation>
             <xsd:documentation>The atomic XML or 2.0 simpleType base type of the
                attribute.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="reference" type="xsd:boolean" use="optional">
+         <xsd:annotation>
+            <xsd:documentation>Indicates whether the 'type' attribute indicates a reference
+            to the indicated type using an IDREF (or IDREFS) element.
             </xsd:documentation>
          </xsd:annotation>
       </xsd:attribute>
@@ -1026,7 +1033,9 @@
       </xsd:annotation>
       <xsd:restriction base="xsd:string">
          <xsd:enumeration value="Draft"/>
+         <xsd:enumeration value="UnderReview"/>
          <xsd:enumeration value="Final"/>
+         <xsd:enumeration value="Obsolete"/>
       </xsd:restriction>
    </xsd:simpleType>
    <xsd:simpleType name="Name_XML">

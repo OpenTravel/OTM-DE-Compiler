@@ -47,7 +47,7 @@ public class AttributeTransformer extends
 
         attribute.setName(trimString(source.getName()));
         attribute.setMandatory((source.isMandatory() == null) ? false : source.isMandatory().booleanValue());
-        attribute.setReference((source.isReference() == null) ? false : source.isReference().booleanValue());
+//        attribute.setReference((source.isReference() == null) ? false : source.isReference().booleanValue());
         attribute.setTypeName(trimString(attributeTypeName));
 
         if (source.getDocumentation() != null) {

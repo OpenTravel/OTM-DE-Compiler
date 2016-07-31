@@ -136,15 +136,15 @@ public class LibraryTransformer extends
         }
 
         switch (jaxbStatus) {
-            case UNDER_REVIEW:
-                tlStatus = TLLibraryStatus.UNDER_REVIEW;
-                break;
+//            case UNDER_REVIEW:
+//                tlStatus = TLLibraryStatus.UNDER_REVIEW;
+//                break;
             case FINAL:
                 tlStatus = TLLibraryStatus.FINAL;
                 break;
-            case OBSOLETE:
-                tlStatus = TLLibraryStatus.OBSOLETE;
-                break;
+//            case OBSOLETE:
+//                tlStatus = TLLibraryStatus.OBSOLETE;
+//                break;
             case DRAFT:
             default:
                 tlStatus = TLLibraryStatus.DRAFT;

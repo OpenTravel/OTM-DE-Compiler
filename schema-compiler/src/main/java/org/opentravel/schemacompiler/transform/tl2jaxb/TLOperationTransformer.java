@@ -59,10 +59,6 @@ public class TLOperationTransformer extends
             operation.getEquivalent().add(equivTransformer.transform(sourceEquiv));
         }
 
-        if ((source.getPayloadFacetFilter() != null) && !source.getPayloadFacetFilter().isEmpty()) {
-        	operation.getPayloadFacetFilter().addAll( source.getPayloadFacetFilter() );
-        }
-
         operation.setRequest(facetTransformer.transform(source.getRequest()));
         operation.setResponse(facetTransformer.transform(source.getResponse()));
         operation.setNotification(facetTransformer.transform(source.getNotification()));
