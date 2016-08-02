@@ -66,6 +66,7 @@ import org.opentravel.schemacompiler.codegen.example.ExampleBuilder;
 import org.opentravel.schemacompiler.codegen.example.ExampleDocumentBuilder;
 import org.opentravel.schemacompiler.codegen.example.ExampleGeneratorOptions;
 import org.opentravel.schemacompiler.codegen.example.ExampleJsonBuilder;
+import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
 import org.opentravel.schemacompiler.ioc.CompilerExtensionRegistry;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
@@ -98,6 +99,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 public class ExampleHelperController {
 	
 	public static final String FXML_FILE = "/ota2-example-helper.fxml";
+	
+	private static final FacetCodegenDelegateFactory facetDelegateFactory = new FacetCodegenDelegateFactory( null );
 	
 	private Stage primaryStage;
 	
@@ -239,7 +242,15 @@ public class ExampleHelperController {
 				}
 				if (library.getService() != null) {
 					for (TLOperation op : library.getService().getOperations()) {
-						selectableObjects.add( new OTMObjectChoice( op ) );
+						if (facetDelegateFactory.getDelegate( op.getRequest() ).hasContent()) {
+							selectableObjects.add( new OTMObjectChoice( op.getRequest() ) );
+						}
+						if (facetDelegateFactory.getDelegate( op.getResponse() ).hasContent()) {
+							selectableObjects.add( new OTMObjectChoice( op.getResponse() ) );
+						}
+						if (facetDelegateFactory.getDelegate( op.getNotification() ).hasContent()) {
+							selectableObjects.add( new OTMObjectChoice( op.getNotification() ) );
+						}
 					}
 				}
 			}
@@ -574,6 +585,7 @@ public class ExampleHelperController {
 	private static class OTMObjectChoice {
 
 		private NamedEntity otmObject;
+		private String displayName;
 
 		/**
 		 * Constructor that provides the OTM object.
@@ -583,6 +595,7 @@ public class ExampleHelperController {
 		 */
 		public OTMObjectChoice(NamedEntity otmObject) {
 			this.otmObject = otmObject;
+			this.displayName = HelperUtils.getDisplayName( otmObject, true );
 		}
 
 		/**
@@ -600,7 +613,7 @@ public class ExampleHelperController {
 		 * @return String
 		 */
 		public String toString() {
-			return HelperUtils.getDisplayName( otmObject, true );
+			return displayName;
 		}
 
 	}

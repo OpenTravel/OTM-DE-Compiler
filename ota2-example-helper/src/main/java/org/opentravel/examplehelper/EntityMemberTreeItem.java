@@ -67,7 +67,15 @@ public class EntityMemberTreeItem extends TreeItem<EntityMemberNode> {
 	@Override
 	public ObservableList<TreeItem<EntityMemberNode>> getChildren() {
 		String selectedFacet = getValue().getFacetSelection().getSelectedFacetName();
-		ObservableList<TreeItem<EntityMemberNode>> children = childrenByFacetName.get( selectedFacet );
+		ObservableList<TreeItem<EntityMemberNode>> children = null;
+		
+		if (selectedFacet == null) {
+			if (childrenByFacetName.size() == 1) {
+				children = childrenByFacetName.values().iterator().next();
+			}
+		} else {
+			children = childrenByFacetName.get( selectedFacet );
+		}
 		
 		if (children == null) {
 			children = FXCollections.observableArrayList();
@@ -80,10 +88,7 @@ public class EntityMemberTreeItem extends TreeItem<EntityMemberNode> {
 	 */
 	@Override
 	public boolean isLeaf() {
-		String selectedFacet = getValue().getFacetSelection().getSelectedFacetName();
-		List<TreeItem<EntityMemberNode>> children = childrenByFacetName.get( selectedFacet );
-		
-		return (children == null) || children.isEmpty();
+		return getChildren().isEmpty();
 	}
 	
 }
