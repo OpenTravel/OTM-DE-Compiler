@@ -26,6 +26,7 @@ import org.opentravel.schemacompiler.diff.EntityChangeSet;
 import org.opentravel.schemacompiler.diff.LibraryChangeItem;
 import org.opentravel.schemacompiler.diff.LibraryChangeSet;
 import org.opentravel.schemacompiler.diff.LibraryChangeType;
+import org.opentravel.schemacompiler.diff.ModelCompareOptions;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLOperation;
@@ -36,17 +37,14 @@ import org.opentravel.schemacompiler.model.TLOperation;
 public class LibraryComparator extends BaseComparator {
 	
 	/**
-	 * Default constructor.
-	 */
-	public LibraryComparator() {}
-	
-	/**
-	 * Constructor that initializes the namespace mappings for the comparator.
+	 * Constructor that initializes the comparison options and namespace mappings
+	 * for the comparator.
 	 * 
+	 * @param compareOptions  the model comparison options to apply during processing
 	 * @param namespaceMappings  the initial namespace mappings
 	 */
-	protected LibraryComparator(Map<String,String> namespaceMappings) {
-		super( namespaceMappings );
+	public LibraryComparator(ModelCompareOptions compareOptions, Map<String,String> namespaceMappings) {
+		super( compareOptions, namespaceMappings );
 	}
 	
 	/**
@@ -114,9 +112,10 @@ public class LibraryComparator extends BaseComparator {
 				NamedEntity oldEntity = oldEntities.get( entityName );
 				NamedEntity newEntity = newEntities.get( entityName );
 				EntityChangeSet entityChangeSet =
-						new EntityComparator( getNamespaceMappings() ).compareEntities(
-								new EntityComparisonFacade( oldEntity ),
-								new EntityComparisonFacade( newEntity ) );
+						new EntityComparator(
+								getCompareOptions(), getNamespaceMappings() ).compareEntities(
+										new EntityComparisonFacade( oldEntity ),
+										new EntityComparisonFacade( newEntity ) );
 				
 				if (!entityChangeSet.getEntityChangeItems().isEmpty()) {
 					changeItems.add( new LibraryChangeItem( entityChangeSet ) );

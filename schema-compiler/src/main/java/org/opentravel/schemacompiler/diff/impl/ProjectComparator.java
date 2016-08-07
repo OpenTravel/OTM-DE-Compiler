@@ -27,6 +27,7 @@ import java.util.TreeSet;
 import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.diff.LibraryChangeSet;
+import org.opentravel.schemacompiler.diff.ModelCompareOptions;
 import org.opentravel.schemacompiler.diff.ProjectChangeItem;
 import org.opentravel.schemacompiler.diff.ProjectChangeSet;
 import org.opentravel.schemacompiler.diff.ProjectChangeType;
@@ -38,6 +39,15 @@ import org.opentravel.schemacompiler.repository.ProjectItem;
  * Performs a comparison of two OTM projects.
  */
 public class ProjectComparator extends BaseComparator {
+	
+	/**
+	 * Constructor that initializes the comparison options for the comparator.
+	 * 
+	 * @param compareOptions  the model comparison options to apply during processing
+	 */
+	public ProjectComparator(ModelCompareOptions compareOptions) {
+		super( compareOptions, null );
+	}
 	
 	/**
 	 * Compares two versions of the same OTM project.
@@ -136,7 +146,7 @@ public class ProjectComparator extends BaseComparator {
 		// comparisons.
 		for (ChangeSetItem item : pendingChangeSets) {
 			LibraryChangeSet libraryChangeSet =
-					new LibraryComparator( getNamespaceMappings() )
+					new LibraryComparator( getCompareOptions(), getNamespaceMappings() )
 							.compareLibraries( item.oldVersion, item.newVersion );
 			
 			if (!libraryChangeSet.getLibraryChangeItems().isEmpty()) {

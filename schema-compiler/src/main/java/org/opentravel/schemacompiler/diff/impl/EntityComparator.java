@@ -31,6 +31,7 @@ import org.opentravel.schemacompiler.diff.EntityChangeItem;
 import org.opentravel.schemacompiler.diff.EntityChangeSet;
 import org.opentravel.schemacompiler.diff.EntityChangeType;
 import org.opentravel.schemacompiler.diff.FieldChangeSet;
+import org.opentravel.schemacompiler.diff.ModelCompareOptions;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLMemberField;
@@ -47,17 +48,14 @@ public class EntityComparator extends BaseComparator {
 	private DisplayFomatter formatter = new DisplayFomatter();
 	
 	/**
-	 * Default constructor.
-	 */
-	public EntityComparator() {}
-	
-	/**
-	 * Constructor that initializes the namespace mappings for the comparator.
+	 * Constructor that initializes the comparison options and namespace mappings
+	 * for the comparator.
 	 * 
+	 * @param compareOptions  the model comparison options to apply during processing
 	 * @param namespaceMappings  the initial namespace mappings
 	 */
-	protected EntityComparator(Map<String,String> namespaceMappings) {
-		super( namespaceMappings );
+	public EntityComparator(ModelCompareOptions compareOptions, Map<String,String> namespaceMappings) {
+		super( compareOptions, namespaceMappings );
 	}
 	
 	/**
@@ -222,6 +220,9 @@ public class EntityComparator extends BaseComparator {
 	 */
 	private void compareMemberFields(List<TLMemberField<?>> oldFields, List<TLMemberField<?>> newFields,
 			List<EntityChangeItem> changeItems) {
+		ModelCompareOptions options = getCompareOptions();
+		Map<String,String> fieldNSMappings = options.isSuppressFieldVersionChanges() ?
+				getNamespaceMappings() : new HashMap<String,String>();
 		Map<QName,List<TLMemberField<?>>> oldFieldMap = buildFieldMap( oldFields );
 		Map<QName,List<TLMemberField<?>>> newFieldMap = buildFieldMap( newFields );
 		SortedSet<QName> oldFieldNames = new TreeSet<>( new QNameComparator() );
@@ -249,9 +250,10 @@ public class EntityComparator extends BaseComparator {
 				// Simple Case: One field of this name in each version (even if its facet location
 				// may have changed)
 				if ((oldVersionFields.size() == 1) && (newVersionFields.size() == 1)) {
-					FieldChangeSet fieldChangeSet = new FieldComparator().compareFields(
-							new FieldComparisonFacade( oldVersionFields.get( 0 ) ),
-							new FieldComparisonFacade( newVersionFields.get( 0 ) ) );
+					FieldChangeSet fieldChangeSet =
+							new FieldComparator( options, fieldNSMappings ).compareFields(
+									new FieldComparisonFacade( oldVersionFields.get( 0 ) ),
+									new FieldComparisonFacade( newVersionFields.get( 0 ) ) );
 					
 					if (!fieldChangeSet.getFieldChangeItems().isEmpty()) {
 						pendingChangeItems.add( new EntityChangeItem( fieldChangeSet ) );
@@ -310,7 +312,7 @@ public class EntityComparator extends BaseComparator {
 									pendingChangeItems.add( new EntityChangeItem( EntityChangeType.MEMBER_FIELD_DELETED, oldField ) );
 									
 								} else {
-									FieldChangeSet fieldChangeSet = new FieldComparator().compareFields(
+									FieldChangeSet fieldChangeSet = new FieldComparator( options, fieldNSMappings ).compareFields(
 											new FieldComparisonFacade( oldField ), new FieldComparisonFacade( newField ) );
 									
 									if (!fieldChangeSet.getFieldChangeItems().isEmpty()) {

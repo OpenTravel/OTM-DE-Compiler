@@ -56,14 +56,24 @@ public class SelectLibraryDialogController {
 	@FXML private TreeView<RepositoryTreeNode> repositoryTreeView;
 	@FXML private Button okButton;
 	
-	@FXML
-	public void selectOk(ActionEvent event) {
+	/**
+	 * Called when the user clicks the Ok button to confirm their library
+	 * selection.
+	 * 
+	 * @param event  the action event that triggered this method call
+	 */
+	@FXML public void selectOk(ActionEvent event) {
 		okSelected = true;
 		dialogStage.close();
 	}
 	
-	@FXML
-	public void selectCancel(ActionEvent event) {
+	/**
+	 * Called when the user clicks the Ok button to cancel their library
+	 * selection.
+	 * 
+	 * @param event  the action event that triggered this method call
+	 */
+	@FXML public void selectCancel(ActionEvent event) {
 		dialogStage.close();
 	}
 	

@@ -53,6 +53,22 @@ public class ModelComparator {
 	
 	private static VelocityEngine velocityEngine;
 	
+	private ModelCompareOptions compareOptions;
+	
+	/**
+	 * Default constructor.
+	 */
+	public ModelComparator() {}
+	
+	/**
+	 * Constructor that initializes the comparison options for the comparator.
+	 * 
+	 * @param compareOptions  the model comparison options to apply during processing
+	 */
+	public ModelComparator(ModelCompareOptions compareOptions) {
+		this.compareOptions = compareOptions;
+	}
+	
 	/**
 	 * Compares two versions of the same OTM project.
 	 * 
@@ -60,8 +76,8 @@ public class ModelComparator {
 	 * @param newProject  the new project version
 	 * @return ProjectChangeSet
 	 */
-	public static ProjectChangeSet compareProjects(Project oldProject, Project newProject) {
-		return new ProjectComparator().compareProjects( oldProject, newProject );
+	public ProjectChangeSet compareProjects(Project oldProject, Project newProject) {
+		return new ProjectComparator( compareOptions ).compareProjects( oldProject, newProject );
 	}
 	
 	/**
@@ -73,9 +89,9 @@ public class ModelComparator {
 	 * @param out  the output stream to which the formatted report will be written
 	 * @throws IOException  thrown if an error occurs during report generation
 	 */
-	public static void compareProjects(Project oldProject, Project newProject, OutputStream out)
+	public void compareProjects(Project oldProject, Project newProject, OutputStream out)
 			throws IOException {
-		generateReport( compareProjects( oldProject, newProject), PROJECT_DIFF_TEMPLATE, out );
+		generateReport( compareProjects( oldProject, newProject ), PROJECT_DIFF_TEMPLATE, out );
 	}
 	
 	/**
@@ -85,8 +101,8 @@ public class ModelComparator {
 	 * @param newLibrary  the new library version
 	 * @return LibraryChangeSet
 	 */
-	public static LibraryChangeSet compareLibraries(TLLibrary oldLibrary, TLLibrary newLibrary) {
-		LibraryComparator comparator = new LibraryComparator();
+	public LibraryChangeSet compareLibraries(TLLibrary oldLibrary, TLLibrary newLibrary) {
+		LibraryComparator comparator = new LibraryComparator( compareOptions, null );
 		
 		comparator.addNamespaceMapping( oldLibrary.getNamespace(), newLibrary.getNamespace() );
 		return comparator.compareLibraries( oldLibrary, newLibrary );
@@ -101,7 +117,7 @@ public class ModelComparator {
 	 * @param out  the output stream to which the formatted report will be written
 	 * @throws IOException  thrown if an error occurs during report generation
 	 */
-	public static void compareLibraries(TLLibrary oldLibrary, TLLibrary newLibrary, OutputStream out)
+	public void compareLibraries(TLLibrary oldLibrary, TLLibrary newLibrary, OutputStream out)
 			throws IOException {
 		generateReport( compareLibraries( oldLibrary, newLibrary), LIBRARY_DIFF_TEMPLATE, out );
 	}
@@ -113,8 +129,8 @@ public class ModelComparator {
 	 * @param newEntity  the new entity version
 	 * @return EntityChangeSet
 	 */
-	public static EntityChangeSet compareEntities(NamedEntity oldEntity, NamedEntity newEntity) {
-		EntityComparator comparator = new EntityComparator();
+	public EntityChangeSet compareEntities(NamedEntity oldEntity, NamedEntity newEntity) {
+		EntityComparator comparator = new EntityComparator( compareOptions, null );
 		
 		comparator.addNamespaceMapping( oldEntity.getNamespace(), newEntity.getNamespace() );
 		return comparator.compareEntities(
@@ -130,7 +146,7 @@ public class ModelComparator {
 	 * @param out  the output stream to which the formatted report will be written
 	 * @throws IOException  thrown if an error occurs during report generation
 	 */
-	public static void compareEntities(NamedEntity oldEntity, NamedEntity newEntity, OutputStream out)
+	public void compareEntities(NamedEntity oldEntity, NamedEntity newEntity, OutputStream out)
 			throws IOException {
 		generateReport( compareEntities( oldEntity, newEntity), ENTITY_DIFF_TEMPLATE, out );
 	}
@@ -144,7 +160,7 @@ public class ModelComparator {
 	 * @param out  the output stream to which the formatted report will be written
 	 * @throws IOException  thrown if an error occurs during report generation
 	 */
-	private static void generateReport(Object changeSet, String templateName, OutputStream out)
+	private void generateReport(Object changeSet, String templateName, OutputStream out)
 			throws IOException {
 		Map<String,Object> context = new HashMap<>();
 		
@@ -166,7 +182,7 @@ public class ModelComparator {
 	 */
 	static {
 		try {
-			InputStream is = ModelComparator.class.getResourceAsStream (VELOCITY_CONFIG_FILE );
+			InputStream is = ModelComparator.class.getResourceAsStream ( VELOCITY_CONFIG_FILE );
 			Properties velocityConfig = new Properties();
 			
 			velocityConfig.load( is );

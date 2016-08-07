@@ -26,6 +26,19 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opentravel.schemacompiler.diff.ModelComparator;
+import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLModel;
+import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.model.TLService;
+import org.opentravel.schemacompiler.repository.Project;
+import org.opentravel.schemacompiler.repository.ProjectItem;
+import org.opentravel.schemacompiler.repository.ProjectManager;
+import org.opentravel.schemacompiler.repository.RepositoryItem;
+import org.opentravel.schemacompiler.saver.LibrarySaveException;
+import org.opentravel.schemacompiler.util.SchemaCompilerException;
+
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -39,23 +52,11 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
-import org.opentravel.schemacompiler.diff.ModelComparator;
-import org.opentravel.schemacompiler.model.NamedEntity;
-import org.opentravel.schemacompiler.model.TLLibrary;
-import org.opentravel.schemacompiler.model.TLModel;
-import org.opentravel.schemacompiler.model.TLOperation;
-import org.opentravel.schemacompiler.model.TLService;
-import org.opentravel.schemacompiler.repository.Project;
-import org.opentravel.schemacompiler.repository.ProjectItem;
-import org.opentravel.schemacompiler.repository.ProjectManager;
-import org.opentravel.schemacompiler.repository.RepositoryItem;
-import org.opentravel.schemacompiler.saver.LibrarySaveException;
-import org.opentravel.schemacompiler.util.SchemaCompilerException;
 
 /**
  * JavaFX controller class for the OTM-Diff application.
@@ -95,6 +96,7 @@ public class DiffUtilityController {
 	
 	private ProjectManager oldProjectManager = new ProjectManager( new TLModel(), false, null );
 	private ProjectManager newProjectManager = new ProjectManager( new TLModel(), false, null );
+	private UserSettings userSettings;
 	
 	/**
 	 * Called when the user clicks the button select the file for the old version
@@ -103,7 +105,6 @@ public class DiffUtilityController {
 	 * @param event  the action event that triggered this method call
 	 */
 	@FXML public void selectOldProject(ActionEvent event) {
-		UserSettings userSettings = UserSettings.load();
 		FileChooser chooser = newFileChooser( "Select Old Project Version",
 				userSettings.getOldProjectFolder(), "otp", "OTM Project Files" );
 		File selectedFile = chooser.showOpenDialog( primaryStage );
@@ -124,7 +125,6 @@ public class DiffUtilityController {
 	 * @param event  the action event that triggered this method call
 	 */
 	@FXML public void selectNewProject(ActionEvent event) {
-		UserSettings userSettings = UserSettings.load();
 		FileChooser chooser = newFileChooser( "Select New Project Version",
 				userSettings.getNewProjectFolder(), "otp", "OTM Project Files" );
 		File selectedFile = chooser.showOpenDialog( primaryStage );
@@ -145,7 +145,6 @@ public class DiffUtilityController {
 	 * @param event  the action event that triggered this method call
 	 */
 	@FXML public void selectOldLibraryFromFile(ActionEvent event) {
-		UserSettings userSettings = UserSettings.load();
 		FileChooser chooser = newFileChooser( "Select Old Library Version",
 				userSettings.getOldLibraryFolder(), "otm", "OTM Library Files" );
 		File selectedFile = chooser.showOpenDialog( primaryStage );
@@ -218,7 +217,6 @@ public class DiffUtilityController {
 	 * @param event  the action event that triggered this method call
 	 */
 	@FXML public void selectNewLibraryFromFile(ActionEvent event) {
-		UserSettings userSettings = UserSettings.load();
 		FileChooser chooser = newFileChooser( "Select New Library Version",
 				userSettings.getNewLibraryFolder(), "otm", "OTM Library Files" );
 		File selectedFile = chooser.showOpenDialog( primaryStage );
@@ -295,7 +293,6 @@ public class DiffUtilityController {
 	 * @param event  the action event that triggered this method call
 	 */
 	@FXML public void saveReport(ActionEvent event) {
-		UserSettings userSettings = UserSettings.load();
 		FileChooser chooser = newFileChooser( "Save Report",
 				userSettings.getReportFolder(), "html", "HTML Files" );
 		File targetFile = chooser.showSaveDialog( primaryStage );
@@ -347,6 +344,39 @@ public class DiffUtilityController {
 	@FXML public void browserForward(ActionEvent event) {
 		reportViewer.getEngine().getHistory().go( 1 );
 		updateControlStates();
+	}
+	
+	/**
+	 * Called when the user clicks the back button for the report viewer browser.
+	 * 
+	 * @param event  the action event that triggered this method call
+	 */
+	@FXML public void editSettings(ActionEvent event) {
+		OptionsDialogController controller = null;
+		try {
+			FXMLLoader loader = new FXMLLoader( DiffUtilityController.class.getResource(
+					OptionsDialogController.FXML_FILE ) );
+			BorderPane page = loader.load();
+			Stage dialogStage = new Stage();
+			Scene scene = new Scene( page );
+			
+			dialogStage.setTitle( "Model Comparison Options" );
+			dialogStage.initModality( Modality.WINDOW_MODAL );
+			dialogStage.initOwner( primaryStage );
+			dialogStage.setScene( scene );
+			
+			controller = loader.getController();
+			controller.setDialogStage( dialogStage );
+			controller.setCompareOptions( userSettings.getCompareOptions() );
+			controller.showAndWait();
+			
+			if (controller.isOkSelected()) {
+				userSettings.save();
+			}
+			
+		} catch (IOException e) {
+			e.printStackTrace( System.out );
+		}
 	}
 	
 	/**
@@ -617,7 +647,8 @@ public class DiffUtilityController {
 					File reportFile = File.createTempFile( "otmDiff", ".html" );
 					
 					try (OutputStream out = new FileOutputStream( reportFile )) {
-						ModelComparator.compareProjects( oldProject, newProject, out );
+						new ModelComparator( userSettings.getCompareOptions() )
+								.compareProjects( oldProject, newProject, out );
 					}
 					showReport( reportFile );
 					reportFile.deleteOnExit();
@@ -666,7 +697,8 @@ public class DiffUtilityController {
 					if (oldEntityChoice.getValue().value == null) { // compare libraries
 						
 						try (OutputStream out = new FileOutputStream( reportFile )) {
-							ModelComparator.compareLibraries( oldLibrary, newLibrary, out );
+							new ModelComparator( userSettings.getCompareOptions() )
+									.compareLibraries( oldLibrary, newLibrary, out );
 						}
 						
 					} else { // compare entities
@@ -678,7 +710,8 @@ public class DiffUtilityController {
 						}
 						
 						try (OutputStream out = new FileOutputStream( reportFile )) {
-							ModelComparator.compareEntities( oldEntity, newEntity, out );
+							new ModelComparator( userSettings.getCompareOptions() )
+									.compareEntities( oldEntity, newEntity, out );
 						}
 					}
 					showReport( reportFile );
@@ -700,7 +733,10 @@ public class DiffUtilityController {
 	 * @param primaryStage  the primary stage for this controller
 	 */
 	public void setPrimaryStage(Stage primaryStage) {
+		
 		this.primaryStage = primaryStage;
+		this.userSettings = UserSettings.load();
+		
 		oldEntityChoice.valueProperty().addListener( new ChangeListener<ChoiceItem>() {
 			public void changed(ObservableValue<? extends ChoiceItem> observable, ChoiceItem oldValue, ChoiceItem newValue) {
 				updateControlStates();

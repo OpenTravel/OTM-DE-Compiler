@@ -25,6 +25,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Properties;
 
+import org.opentravel.schemacompiler.diff.ModelCompareOptions;
+
 /**
  * Persists settings for the <code>ExampleHelper</code> application between sessions.
  */
@@ -41,6 +43,7 @@ public class UserSettings {
 	private File oldLibraryFolder;
 	private File newLibraryFolder;
 	private File reportFolder;
+	private ModelCompareOptions compareOptions = new ModelCompareOptions();
 	
 	/**
 	 * Returns the user settings from the prior session.  If no prior settings exist,
@@ -78,8 +81,10 @@ public class UserSettings {
 				settings.setOldLibraryFolder( new File( olFolder ) );
 				settings.setNewLibraryFolder( new File( nlFolder ) );
 				settings.setReportFolder( new File( reportFolder ) );
+				settings.compareOptions.loadOptions( usProps );
 				
-			} catch(Exception e) {
+			} catch(Throwable t) {
+				t.printStackTrace( System.out );
 				System.out.println("Error loading settings from prior session (using defaults).");
 				settings = getDefaultSettings();
 			}
@@ -119,6 +124,7 @@ public class UserSettings {
 			usProps.put( "oldLibraryFolder", olFolder );
 			usProps.put( "newLibraryFolder", nlFolder );
 			usProps.put( "reportFolder", rptFolder );
+			compareOptions.saveOptions( usProps );
 			
 			usProps.store( out, null );
 			
@@ -143,6 +149,7 @@ public class UserSettings {
 		settings.setNewProjectFolder( new File( userHomeDirectory ) );
 		settings.setOldLibraryFolder( new File( userHomeDirectory ) );
 		settings.setNewLibraryFolder( new File( userHomeDirectory ) );
+		settings.compareOptions = new ModelCompareOptions();
 		return settings;
 	}
 
@@ -272,4 +279,14 @@ public class UserSettings {
 		this.reportFolder = reportFolder;
 	}
 
+	/**
+	 * Returns the options that should be applied when comparing two OTM models,
+	 * libraries, or entities.
+	 * 
+	 * @return ModelCompareOptions
+	 */
+	public ModelCompareOptions getCompareOptions() {
+		return compareOptions;
+	}
+	
 }

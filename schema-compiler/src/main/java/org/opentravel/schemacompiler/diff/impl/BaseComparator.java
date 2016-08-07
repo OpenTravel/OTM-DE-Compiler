@@ -23,6 +23,7 @@ import java.util.Map;
 
 import javax.xml.namespace.QName;
 
+import org.opentravel.schemacompiler.diff.ModelCompareOptions;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAdditionalDocumentationItem;
@@ -40,19 +41,21 @@ import org.opentravel.schemacompiler.version.VersionSchemeFactory;
 public abstract class BaseComparator {
 	
 	private Map<String,String> namespaceMappings = new HashMap<>();
+	private ModelCompareOptions compareOptions;
 	
 	/**
-	 * Default constructor.
-	 */
-	public BaseComparator() {}
-	
-	/**
-	 * Constructor that initializes the namespace mappings for the comparator.
+	 * Constructor that initializes the comparison options and namespace mappings
+	 * for the comparator.
 	 * 
+	 * @param compareOptions  the model comparison options to apply during processing
 	 * @param namespaceMappings  the initial namespace mappings
 	 */
-	protected BaseComparator(Map<String,String> namespaceMappings) {
-		this.namespaceMappings.putAll( namespaceMappings );
+	protected BaseComparator(ModelCompareOptions compareOptions, Map<String,String> namespaceMappings) {
+		this.compareOptions = (compareOptions == null) ? ModelCompareOptions.getDefaultOptions() : compareOptions;
+		
+		if (namespaceMappings != null) {
+			this.namespaceMappings.putAll( namespaceMappings );
+		}
 	}
 	
 	/**
@@ -73,6 +76,15 @@ public abstract class BaseComparator {
 	 */
 	public void addNamespaceMapping(String oldVersionNS, String newVersionNS) {
 		namespaceMappings.put( oldVersionNS, newVersionNS );
+	}
+	
+	/**
+	 * Returns the model comparison options that should be applied during processing.
+	 * 
+	 * @return ModelCompareOptions
+	 */
+	public ModelCompareOptions getCompareOptions() {
+		return compareOptions;
 	}
 	
 	/**

@@ -501,6 +501,13 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
                 // Expected exception - test passed
             }
         }
+        
+        // Create a child namespace to ensure the root is configured properly
+        String childNS = rootNS + "/test";
+        
+        testRepository.get().createNamespace(childNS);
+        testRepository.get().deleteNamespace(childNS);
+        
         if (DEBUG)
             System.out.println("DONE - Success.");
     }

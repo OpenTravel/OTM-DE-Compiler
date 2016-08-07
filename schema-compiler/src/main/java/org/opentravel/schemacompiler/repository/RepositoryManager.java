@@ -956,9 +956,9 @@ public class RepositoryManager implements Repository {
             }
 
             // Create the new root namespace if all of the validation checks passed
-            fileManager.createNamespaceIdFiles(rootNS);
             rootNamespaces.add(rootNS);
             saveLocalRepositoryMetadata();
+            fileManager.createNamespaceIdFiles(rootNS);
             success = true;
 
             log.info("Successfully created root namespace: " + rootNS + " by "

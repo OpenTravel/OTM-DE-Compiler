@@ -17,12 +17,14 @@
 package org.opentravel.schemacompiler.diff.impl;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.diff.FieldChangeItem;
 import org.opentravel.schemacompiler.diff.FieldChangeSet;
 import org.opentravel.schemacompiler.diff.FieldChangeType;
+import org.opentravel.schemacompiler.diff.ModelCompareOptions;
 import org.opentravel.schemacompiler.model.NamedEntity;
 
 /**
@@ -33,9 +35,15 @@ public class FieldComparator extends BaseComparator {
 	private DisplayFomatter formatter = new DisplayFomatter();
 	
 	/**
-	 * Default constructor.
+	 * Constructor that initializes the comparison options and namespace mappings
+	 * for the comparator.
+	 * 
+	 * @param compareOptions  the model comparison options to apply during processing
+	 * @param namespaceMappings  the initial namespace mappings
 	 */
-	public FieldComparator() {}
+	public FieldComparator(ModelCompareOptions compareOptions, Map<String,String> namespaceMappings) {
+		super( compareOptions, namespaceMappings );
+	}
 	
 	/**
 	 * Compares two versions of the same OTM member field.
