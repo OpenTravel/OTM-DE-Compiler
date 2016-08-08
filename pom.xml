@@ -50,7 +50,7 @@
 		<fge.version>2.2.6</fge.version>
 		<swagger.parser.version>1.0.17</swagger.parser.version>
 		<richtextfx.version>0.7-M2</richtextfx.version>
-		<velocity.version>1.5</velocity.version>
+		<velocity.version>1.7</velocity.version>
 		
 		<!-- Plugin Versions -->
 		<jaxb2.plugin.version>0.12.1</jaxb2.plugin.version>
@@ -283,7 +283,7 @@
 				<version>${richtextfx.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>velocity</groupId>
+				<groupId>org.apache.velocity</groupId>
 				<artifactId>velocity</artifactId>
 				<version>${velocity.version}</version>
 			</dependency>

@@ -183,17 +183,23 @@ public class DefaultRepositorySecurityManager implements RepositorySecurityManag
     @Override
     public boolean isAuthorized(UserPrincipal user, String namespace,
             RepositoryPermission permission) throws RepositorySecurityException {
-        String authNS = RepositoryNamespaceUtils.normalizeUri(namespace);
-        RepositoryPermission authorizedPermission = getAuthorization(user, authNS);
         boolean result = false;
-
-        switch (permission) {
-            case READ_FINAL:
-                result |= (authorizedPermission == RepositoryPermission.READ_FINAL);
-            case READ_DRAFT:
-                result |= (authorizedPermission == RepositoryPermission.READ_DRAFT);
-            case WRITE:
-                result |= (authorizedPermission == RepositoryPermission.WRITE);
+        
+        if (isAdministrator(user)) {
+        	result = true; // Administrators automatically have write access to everything
+        	
+        } else {
+            String authNS = RepositoryNamespaceUtils.normalizeUri(namespace);
+            RepositoryPermission authorizedPermission = getAuthorization(user, authNS);
+            
+            switch (permission) {
+                case READ_FINAL:
+                    result |= (authorizedPermission == RepositoryPermission.READ_FINAL);
+                case READ_DRAFT:
+                    result |= (authorizedPermission == RepositoryPermission.READ_DRAFT);
+                case WRITE:
+                    result |= (authorizedPermission == RepositoryPermission.WRITE);
+            }
         }
         return result;
     }
