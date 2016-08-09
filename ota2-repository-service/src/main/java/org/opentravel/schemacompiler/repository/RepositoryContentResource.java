@@ -20,8 +20,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
@@ -42,15 +44,20 @@ import org.apache.commons.logging.LogFactory;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.opentravel.ns.ota2.repositoryinfo_v01_00.EntityInfoListType;
+import org.opentravel.ns.ota2.repositoryinfo_v01_00.EntityInfoType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoListType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoType;
+import org.opentravel.ns.ota2.repositoryinfo_v01_00.ListItems2RQType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.ListItemsRQType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.NamespaceListType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.ObjectFactory;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryInfoType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryItemIdentityType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryPermissionType;
+import org.opentravel.ns.ota2.repositoryinfo_v01_00.SearchResultsListType;
 import org.opentravel.ns.ota2.security_v01_00.RepositoryPermission;
+import org.opentravel.schemacompiler.index.EntitySearchResult;
 import org.opentravel.schemacompiler.index.FreeTextSearchService;
 import org.opentravel.schemacompiler.index.LibrarySearchResult;
 import org.opentravel.schemacompiler.index.SearchResult;
@@ -249,6 +256,43 @@ public class RepositoryContentResource {
     }
 
     /**
+     * Returns a list of the latest version of each <code>RepositoryItem</code>'s meta-data record
+     * in the repository.
+     * 
+     * @param listItemsRQ
+     *            the request object that specifies which base namespace and items are to be
+     *            returned
+     * @param authorizationHeader
+     *            the value of the HTTP "Authorization" header
+     * @return JAXBElement<LibraryInfoListType>
+     * @throws RepositoryException
+     *             thrown if the request cannot be processed
+     */
+    @POST
+    @Path("list-items2")
+    @Consumes(MediaType.TEXT_XML)
+    @Produces(MediaType.TEXT_XML)
+    // TODO: Test the updated 'listItems()' API operation
+    public JAXBElement<LibraryInfoListType> listItemsForNamespace2(
+            JAXBElement<ListItems2RQType> listItemsRQ,
+            @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
+
+        Map<String, Map<TLLibraryStatus, Boolean>> accessibleItemCache = new HashMap<String, Map<TLLibraryStatus, Boolean>>();
+        List<RepositoryItem> namespaceItems = repositoryManager.listItems(
+        		listItemsRQ.getValue().getNamespace(), getStatus( listItemsRQ.getValue().getIncludeStatus().toString() ),
+        		listItemsRQ.getValue().isLatestVersionOnly());
+        UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
+        LibraryInfoListType metadataList = new LibraryInfoListType();
+
+        for (RepositoryItem item : namespaceItems) {
+            if (isReadable(item, user, accessibleItemCache)) {
+                metadataList.getLibraryInfo().add(RepositoryUtils.createItemMetadata(item));
+            }
+        }
+        return objectFactory.createLibraryInfoList(metadataList);
+    }
+
+    /**
      * Returns a list of the latest version of each <code>RepositoryItem</code>'s that match the
      * free-text search criteria provided.
      * 
@@ -294,6 +338,86 @@ public class RepositoryContentResource {
     }
 
     /**
+     * Returns a list of the latest version of each <code>RepositoryItem</code>'s that match the
+     * free-text search criteria provided.
+     * 
+     * @param freeTextQuery
+     *            the string containing space-separated keywords for the free-text search
+     * @param latestVersionsOnly
+     *            flag indicating whether the results should include all matching versions or just
+     *            the latest version of each library
+     * @param includeStatusStr
+     *            string representation of the library status that indicating the latest status to
+     *            include in the results (null = all statuses)
+     * @param authorizationHeader
+     *            the value of the HTTP "Authorization" header
+     * @return JAXBElement<LibraryInfoListType>
+     * @throws RepositoryException
+     *             thrown if the request cannot be processed
+     */
+    @GET
+    @Path("search2")
+    @Produces(MediaType.TEXT_XML)
+    // TODO: Test the updated 'search()' API operation
+    public JAXBElement<SearchResultsListType> search(@QueryParam("query") String freeTextQuery,
+            @QueryParam("latestVersion") boolean latestVersionsOnly,
+            @QueryParam("includeStatus") String includeStatusStr,
+            @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
+
+        Map<String, Map<TLLibraryStatus, Boolean>> accessibleItemCache = new HashMap<String, Map<TLLibraryStatus, Boolean>>();
+        TLLibraryStatus searchStatus = getStatus( includeStatusStr );
+        List<SearchResult<?>> searchResults = FreeTextSearchService.getInstance().search(
+                freeTextQuery, searchStatus, latestVersionsOnly, false );
+        UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
+        SearchResultsListType resultsList = new SearchResultsListType();
+        Set<String> referencedLibraryIds = new HashSet<>();
+        
+        // First pass to build the list of referenced libraries
+        for (SearchResult<?> result : searchResults) {
+        	if (result instanceof EntitySearchResult) {
+        		referencedLibraryIds.add( ((EntitySearchResult) result).getOwningLibraryId() );
+        	}
+        }
+        
+        // Build a map of all referenced libraries
+        List<LibrarySearchResult> referencedLibraries = FreeTextSearchService.getInstance()
+        		.getLibraries( referencedLibraryIds, false );
+        Map<String,LibrarySearchResult> referencedLibrariesById = new HashMap<>();
+        
+        for (LibrarySearchResult referencedLib : referencedLibraries) {
+        	referencedLibrariesById.put( referencedLib.getSearchIndexId(), referencedLib );
+        }
+        
+        // Second pass to build the search results
+        for (SearchResult<?> result : searchResults) {
+        	if (result instanceof LibrarySearchResult) {
+        		RepositoryItem item = ((LibrarySearchResult) result).getRepositoryItem();
+        		
+                if (isReadable(item, user, accessibleItemCache)) {
+                	resultsList.getSearchResult().add(
+                			objectFactory.createLibrarySearchResult(
+                					RepositoryUtils.createItemMetadata( item ) ) );
+                }
+                
+        	} else if (result instanceof EntitySearchResult) {
+        		EntitySearchResult entityResult = (EntitySearchResult) result;
+        		LibrarySearchResult referencedLib = referencedLibrariesById.get( entityResult.getOwningLibraryId() );
+        		
+        		if (referencedLib != null) {
+        			RepositoryItem item = referencedLib.getRepositoryItem();
+        			
+                    if (isReadable(item, user, accessibleItemCache)) {
+                    	resultsList.getSearchResult().add(
+                    			objectFactory.createLibrarySearchResult(
+                    					createEntityMetadata( entityResult, item ) ) );
+                    }
+        		}
+        	}
+        }
+        return objectFactory.createSearchResultsList( resultsList );
+    }
+    
+    /**
      * Called by remote clients to retrieve the version history for an item in the OTA2.0
      * repository.
      * 
@@ -330,6 +454,178 @@ public class RepositoryContentResource {
             }
         }
         return objectFactory.createLibraryInfoList(metadataList);
+    }
+
+    /**
+     * Returns a list of meta-data records for the repository items which reference the item
+     * specified in the request payload.
+     * 
+     * @param itemMetadata
+     *            meta-data for the repository item for which to return where-used items
+     * @param includeIndirectStr
+     *            string representation of the flag indicating whether to include indirect
+     *            where-used references
+     * @param authorizationHeader
+     *            the value of the HTTP "Authorization" header
+     * @return JAXBElement<LibraryInfoListType>
+     * @throws RepositoryException
+     *             thrown if the request cannot be processed
+     */
+    @POST
+    @Path("item-where-used")
+    @Consumes(MediaType.TEXT_XML)
+    @Produces(MediaType.TEXT_XML)
+    // TODO: Test the 'getItemWhereUsed()' API operation
+    public JAXBElement<LibraryInfoListType> getItemWhereUsed(
+            JAXBElement<LibraryInfoType> itemMetadata,
+            @QueryParam("includeIndirect") String includeIndirectStr,
+            @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
+    	
+        Map<String, Map<TLLibraryStatus, Boolean>> accessibleItemCache = new HashMap<String, Map<TLLibraryStatus, Boolean>>();
+        UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
+    	FreeTextSearchService searchService = FreeTextSearchService.getInstance();
+    	RepositoryItem searchItem = RepositoryUtils.createRepositoryItem(repositoryManager, itemMetadata.getValue());
+    	LibrarySearchResult library = searchService.getLibrary(searchItem, false);
+        LibraryInfoListType metadataList = new LibraryInfoListType();
+    	
+    	if ((library != null) && isReadable( searchItem, user, accessibleItemCache)) {
+            List<LibrarySearchResult> searchResults = searchService.getLibraryWhereUsed(
+            		library, Boolean.parseBoolean( includeIndirectStr ), false );
+    		
+            for (LibrarySearchResult searchResult : searchResults) {
+            	RepositoryItem item = searchResult.getRepositoryItem();
+            	
+                if (isReadable(item, user, accessibleItemCache)) {
+                    metadataList.getLibraryInfo().add(RepositoryUtils.createItemMetadata(item));
+                }
+            }
+    	}
+        return objectFactory.createLibraryInfoList(metadataList);
+    }
+
+    /**
+     * Returns a list of meta-data records for the entities which reference the entity
+     * specified in the request payload.
+     * 
+     * @param entityMetadataElement
+     *            meta-data for the entity for which to return where-used entities
+     * @param includeIndirectStr
+     *            string representation of the flag indicating whether to include indirect
+     *            where-used references
+     * @param authorizationHeader
+     *            the value of the HTTP "Authorization" header
+     * @return JAXBElement<EntityInfoListType>
+     * @throws RepositoryException
+     *             thrown if the request cannot be processed
+     */
+    @POST
+    @Path("entity-where-used")
+    @Consumes(MediaType.TEXT_XML)
+    @Produces(MediaType.TEXT_XML)
+    // TODO: Test the 'getEntityWhereUsed()' API operation
+    public JAXBElement<EntityInfoListType> getEntityWhereUsed(
+            JAXBElement<EntityInfoType> entityMetadataElement,
+            @QueryParam("includeIndirect") String includeIndirectStr,
+            @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
+    	
+        EntityInfoType entityMetadata = entityMetadataElement.getValue();
+        Map<String, Map<TLLibraryStatus, Boolean>> accessibleItemCache = new HashMap<String, Map<TLLibraryStatus, Boolean>>();
+        UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
+    	FreeTextSearchService searchService = FreeTextSearchService.getInstance();
+    	RepositoryItem searchItem = RepositoryUtils.createRepositoryItem(repositoryManager, entityMetadata);
+    	LibrarySearchResult library = searchService.getLibrary(searchItem, false);
+        EntityInfoListType metadataList = new EntityInfoListType();
+    	
+    	if ((library != null) && isReadable( searchItem, user, accessibleItemCache)) {
+    		EntitySearchResult entity = searchService.getEntity( library.getSearchIndexId(),
+    				entityMetadata.getEntityName(), false );
+            List<EntitySearchResult> searchResults = searchService.getEntityWhereUsed(
+            		entity, Boolean.parseBoolean( includeIndirectStr ), false );
+    		Map<String,LibrarySearchResult> libraryCache = new HashMap<>();
+    		Map<String,Boolean> libraryAccessCache = new HashMap<>();
+    		
+            for (EntitySearchResult searchResult : searchResults) {
+            	Boolean isReadable = libraryAccessCache.get( searchResult.getOwningLibraryId() );
+            	
+            	if (isReadable == null) {
+                	LibrarySearchResult srLibrary = searchService.getLibrary( searchResult.getOwningLibraryId(), false );
+                	
+            		isReadable = (srLibrary != null) && isReadable(srLibrary.getRepositoryItem(), user, accessibleItemCache);
+            		libraryCache.put( srLibrary.getSearchIndexId(), srLibrary );
+            	}
+            	
+                if (isReadable) {
+                	LibrarySearchResult srLibrary = libraryCache.get( searchResult.getOwningLibraryId() );
+                	EntityInfoType srEntity = new EntityInfoType();
+                	
+                	RepositoryUtils.populateMetadata( srLibrary.getRepositoryItem(), srEntity );
+                	srEntity.setEntityName( searchResult.getItemName() );
+                	srEntity.setEntityName( searchResult.getEntityType().getName() );
+                    metadataList.getEntityInfo().add( srEntity );
+                }
+            }
+    	}
+        return objectFactory.createEntityInfoList(metadataList);
+    }
+
+    /**
+     * Returns a list of meta-data records for the entities which extend the entity
+     * specified in the request payload.
+     * 
+     * @param entityMetadataElement
+     *            meta-data for the entity for which to return extended entities
+     * @param authorizationHeader
+     *            the value of the HTTP "Authorization" header
+     * @return JAXBElement<EntityInfoListType>
+     * @throws RepositoryException
+     *             thrown if the request cannot be processed
+     */
+    @POST
+    @Path("entity-where-extended")
+    @Consumes(MediaType.TEXT_XML)
+    @Produces(MediaType.TEXT_XML)
+    // TODO: Test the 'getEntityWhereExtended()' API operation
+    public JAXBElement<EntityInfoListType> getEntityWhereExtended(
+            JAXBElement<EntityInfoType> entityMetadataElement,
+            @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
+    	
+        EntityInfoType entityMetadata = entityMetadataElement.getValue();
+        Map<String, Map<TLLibraryStatus, Boolean>> accessibleItemCache = new HashMap<String, Map<TLLibraryStatus, Boolean>>();
+        UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
+    	FreeTextSearchService searchService = FreeTextSearchService.getInstance();
+    	RepositoryItem searchItem = RepositoryUtils.createRepositoryItem(repositoryManager, entityMetadata);
+    	LibrarySearchResult library = searchService.getLibrary(searchItem, false);
+        EntityInfoListType metadataList = new EntityInfoListType();
+    	
+    	if ((library != null) && isReadable( searchItem, user, accessibleItemCache)) {
+    		EntitySearchResult entity = searchService.getEntity( library.getSearchIndexId(),
+    				entityMetadata.getEntityName(), false );
+            List<EntitySearchResult> searchResults = searchService.getExtendedByEntities( entity, false );
+    		Map<String,LibrarySearchResult> libraryCache = new HashMap<>();
+    		Map<String,Boolean> libraryAccessCache = new HashMap<>();
+    		
+            for (EntitySearchResult searchResult : searchResults) {
+            	Boolean isReadable = libraryAccessCache.get( searchResult.getOwningLibraryId() );
+            	
+            	if (isReadable == null) {
+                	LibrarySearchResult srLibrary = searchService.getLibrary( searchResult.getOwningLibraryId(), false );
+                	
+            		isReadable = (srLibrary != null) && isReadable(srLibrary.getRepositoryItem(), user, accessibleItemCache);
+            		libraryCache.put( srLibrary.getSearchIndexId(), srLibrary );
+            	}
+            	
+                if (isReadable) {
+                	LibrarySearchResult srLibrary = libraryCache.get( searchResult.getOwningLibraryId() );
+                	EntityInfoType srEntity = new EntityInfoType();
+                	
+                	RepositoryUtils.populateMetadata( srLibrary.getRepositoryItem(), srEntity );
+                	srEntity.setEntityName( searchResult.getItemName() );
+                	srEntity.setEntityName( searchResult.getEntityType().getName() );
+                    metadataList.getEntityInfo().add( srEntity );
+                }
+            }
+    	}
+        return objectFactory.createEntityInfoList(metadataList);
     }
 
     /**
@@ -614,9 +910,7 @@ public class RepositoryContentResource {
                 // Obtain the lock in the local repository
                 item.setLockedByUser(user.getUserId());
                 repositoryManager.lock(item);
-
-                // NOTE: No need to re-index the item because locking does not change its content -
-                // only the state of its meta-data
+                indexRepositoryItem(item);
 
                 // Refresh the item's meta-data and return it to the caller
                 itemMetadata = repositoryManager.getFileManager().loadLibraryMetadata(
@@ -1027,6 +1321,45 @@ public class RepositoryContentResource {
     }
 
     /**
+     * Returns the list of items locked by the calling user.  If the request is anonymous, this method
+     * will always return an empty list.
+     * 
+     * @param authorizationHeader
+     *            the authorization header for the request
+     * @return JAXBElement<LibraryInfoListType> 
+     * @throws RepositoryException
+     *             thrown if the request cannot be processed
+     */
+    @GET
+    @Path("locked-items")
+    @Produces(MediaType.TEXT_XML)
+    // TODO: Test the 'getLockedItems()' API operation
+    public JAXBElement<LibraryInfoListType>  getLockedItems(
+            @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
+    	
+        UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
+        LibraryInfoListType lockedItems = new LibraryInfoListType();
+        
+        if (user != UserPrincipal.ANONYMOUS_USER) {
+            Map<String, Map<TLLibraryStatus, Boolean>> accessibleItemCache =
+            		new HashMap<String, Map<TLLibraryStatus, Boolean>>();
+        	List<LibrarySearchResult> lockedLibraries =
+        			FreeTextSearchService.getInstance().getLockedLibraries( user.getUserId(), false );
+        	
+        	for (LibrarySearchResult searchItem : lockedLibraries) {
+        		RepositoryItem item = searchItem.getRepositoryItem();
+        		
+        		// The user has this item locked, but we will still check for read permission
+        		// just in case
+                if (isReadable(item, user, accessibleItemCache)) {
+                	lockedItems.getLibraryInfo().add( RepositoryUtils.createItemMetadata( item ) );
+                }
+        	}
+        }
+        return objectFactory.createLibraryInfoList( lockedItems );
+    }
+    
+    /**
      * Returns true if the specified user should be allowed read access to the given repository item
      * 
      * @param item
@@ -1080,6 +1413,7 @@ public class RepositoryContentResource {
 
         switch (itemMetadata.getStatus()) {
             case DRAFT:
+            case UNDER_REVIEW:
                 permission = RepositoryPermission.READ_DRAFT;
                 break;
             default:
@@ -1088,6 +1422,40 @@ public class RepositoryContentResource {
         return permission;
     }
 
+    /**
+     * Returns the status enumeration from the given string value, or null if the string
+     * is null or empty.
+     * 
+     * @param statusStr  the status string for which to return the enumeration value
+     * @return TLLibraryStatus
+     * @throws RepositoryException  thrown if the status string value is not valid
+     */
+    private TLLibraryStatus getStatus(String statusStr) throws RepositoryException {
+    	try {
+    		return ((statusStr == null) || (statusStr.length() == 0)) ?
+    				null : TLLibraryStatus.valueOf( statusStr );
+    		
+    	} catch (IllegalArgumentException e) {
+    		throw new RepositoryException("Unknown library status: " + statusStr);
+    	}
+    }
+    
+    /**
+     * Creates a new meta-data record using information from the given entity search result.
+     * 
+     * @param searchResult  the search result instance for which to create a meta-data record
+     * @param item  the repository item associated with the entity's owning library
+     * @return EntityInfoType
+     */
+    public static EntityInfoType createEntityMetadata(EntitySearchResult searchResult, RepositoryItem item) {
+        EntityInfoType entityMetadata = new EntityInfoType();
+        
+        entityMetadata.setEntityName( searchResult.getItemName() );
+        entityMetadata.setEntityType( searchResult.getEntityType().getName() );
+        RepositoryUtils.populateMetadata( item, entityMetadata );
+        return entityMetadata;
+    }
+    
     /**
      * Submits the given repository item for indexing by the <code>FreeTextSearchService</code>.
      * 

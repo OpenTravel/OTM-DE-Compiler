@@ -39,6 +39,24 @@
 		</xsd:sequence>
 	</xsd:complexType>
 	
+	<xsd:element name="EntityInfoList" type="EntityInfoListType" />
+	<xsd:complexType name="EntityInfoListType">
+		<xsd:sequence>
+			<xsd:element ref="EntityInfo" minOccurs="0" maxOccurs="999" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:element name="SearchResultsList" type="SearchResultsListType" />
+	<xsd:complexType name="SearchResultsListType">
+		<xsd:sequence>
+			<xsd:element ref="SearchResult" minOccurs="0" maxOccurs="999" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:element name="SearchResult" type="LibraryInfoType" />
+	<xsd:element name="LibrarySearchResult" type="LibraryInfoType" substitutionGroup="SearchResult" />
+	<xsd:element name="EntitySearchResult" type="EntityInfoType" substitutionGroup="SearchResult" />
+	
 	<xsd:element name="LibraryInfo" type="LibraryInfoType" />
 	<xsd:complexType name="LibraryInfoType">
 		<xsd:sequence>
@@ -54,6 +72,18 @@
 			<xsd:element name="LastUpdated" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
 			<xsd:element name="OwningRepository" type="RepositoryID" minOccurs="1" maxOccurs="1" />
 		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:element name="EntityInfo" type="EntityInfoType" />
+	<xsd:complexType name="EntityInfoType">
+		<xsd:complexContent>
+			<xsd:extension base="LibraryInfoType">
+				<xsd:sequence>
+					<xsd:element name="EntityName" type="Entity_Name" minOccurs="1" maxOccurs="1" />
+					<xsd:element name="EntityType" type="Entity_Name" minOccurs="1" maxOccurs="1" />
+				</xsd:sequence>
+			</xsd:extension>
+		</xsd:complexContent>
 	</xsd:complexType>
 	
 	<xsd:element name="RepositoryItemIdentity" type="RepositoryItemIdentityType" />
@@ -79,6 +109,15 @@
 		</xsd:sequence>
 		<xsd:attribute name="latestVersionOnly" type="xsd:boolean" use="required" />
 		<xsd:attribute name="includeDraft" type="xsd:boolean" use="required" />
+	</xsd:complexType>
+	
+	<xsd:element name="ListItems2RQ" type="ListItems2RQType" />
+	<xsd:complexType name="ListItems2RQType">
+		<xsd:sequence>
+			<xsd:element name="Namespace" type="xsd:anyURI" minOccurs="1" maxOccurs="1" />
+		</xsd:sequence>
+		<xsd:attribute name="includeStatus" type="LibraryStatus" use="required" />
+		<xsd:attribute name="latestVersionOnly" type="xsd:boolean" use="required" />
 	</xsd:complexType>
 	
 	<xsd:element name="RepositoryPermission" type="RepositoryPermissionType" />
@@ -169,6 +208,12 @@
    <xsd:simpleType name="Library_Name">
       <xsd:restriction base="xsd:string">
          <xsd:pattern value="[A-Za-z][A-Za-z0-9/\.\-\|:_\s]*" />
+      </xsd:restriction>
+   </xsd:simpleType>
+
+   <xsd:simpleType name="Entity_Name">
+      <xsd:restriction base="xsd:string">
+         <xsd:pattern value="([A-Za-z_][A-Za-z0-9\.\-_]*)?" />
       </xsd:restriction>
    </xsd:simpleType>
 

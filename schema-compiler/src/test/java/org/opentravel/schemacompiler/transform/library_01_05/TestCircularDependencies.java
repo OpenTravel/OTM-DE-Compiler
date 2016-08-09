@@ -87,7 +87,9 @@ public class TestCircularDependencies extends Abstract_1_5_TestTransformers {
 
     private TLLibrary getTestLibrary(TLModel model) {
         for (TLLibrary lib : model.getUserDefinedLibraries()) {
-            return lib;
+        	if (lib.getName().equals("library_1")) {
+        		return lib;
+        	}
         }
         return null;
     }

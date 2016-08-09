@@ -22,9 +22,12 @@ import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
+import org.opentravel.ns.ota2.repositoryinfo_v01_00.EntityInfoType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryStatus;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryState;
+import org.opentravel.schemacompiler.model.AbstractLibrary;
+import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.ProjectItem;
@@ -32,6 +35,7 @@ import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryItemState;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
+import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.version.VersionScheme;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 import org.opentravel.schemacompiler.version.VersionSchemeFactory;
@@ -78,18 +82,56 @@ public class RepositoryUtils {
      */
     public static LibraryInfoType createItemMetadata(RepositoryItem item) {
         LibraryInfoType itemMetadata = new LibraryInfoType();
-
-        itemMetadata.setOwningRepository(item.getRepository().getId());
-        itemMetadata.setNamespace(item.getNamespace());
-        itemMetadata.setBaseNamespace(item.getBaseNamespace());
-        itemMetadata.setFilename(item.getFilename());
-        itemMetadata.setLibraryName(item.getLibraryName());
-        itemMetadata.setVersion(item.getVersion());
-        itemMetadata.setVersionScheme(item.getVersionScheme());
-        itemMetadata.setStatus(LibraryStatus.valueOf(item.getStatus().toString()));
-        itemMetadata.setState(RepositoryState.valueOf(item.getState().toString()));
-        itemMetadata.setLockedBy(item.getLockedByUser());
+        
+        populateMetadata( item, itemMetadata );
         return itemMetadata;
+    }
+    
+    /**
+     * Populates the contents of the library meta-data object.
+     * 
+     * @param source  the repository item from which to copy meta-data values
+     * @param itemMetadata  the library meta-data object to populate
+     */
+    public static void populateMetadata(RepositoryItem source, LibraryInfoType itemMetadata) {
+        itemMetadata.setOwningRepository(source.getRepository().getId());
+        itemMetadata.setNamespace(source.getNamespace());
+        itemMetadata.setBaseNamespace(source.getBaseNamespace());
+        itemMetadata.setFilename(source.getFilename());
+        itemMetadata.setLibraryName(source.getLibraryName());
+        itemMetadata.setVersion(source.getVersion());
+        itemMetadata.setVersionScheme(source.getVersionScheme());
+        itemMetadata.setStatus(LibraryStatus.valueOf(source.getStatus().toString()));
+        itemMetadata.setState(RepositoryState.valueOf(source.getState().toString()));
+        itemMetadata.setLockedBy(source.getLockedByUser());
+    }
+    
+    /**
+     * Returns a new meta-data instance for the given entity.
+     * 
+     * @param entity  the entity for which to return repository meta-data
+     * @param manager  the repository manager for the local environment
+     * @return EntityInfoType
+     * @throws RepositoryException  thrown if the entity's owning library cannot be resolved by the repository manager
+     */
+    public static EntityInfoType createEntityMetadata(NamedEntity entity, RepositoryManager manager) throws RepositoryException {
+    	AbstractLibrary owningLibrary = entity.getOwningLibrary();
+    	try {
+			VersionScheme vScheme = VersionSchemeFactory.getInstance().getVersionScheme( owningLibrary.getVersionScheme() );
+        	String libraryFilename = URLUtils.getUrlFilename( owningLibrary.getLibraryUrl() );
+			String baseNS = vScheme.getBaseNamespace( owningLibrary.getNamespace() );
+			RepositoryItem owningItem = manager.getRepositoryItem( baseNS, libraryFilename, owningLibrary.getVersion() );
+	    	EntityInfoType entityMetadata = new EntityInfoType();
+	    	
+	    	populateMetadata( owningItem, entityMetadata );
+	    	entityMetadata.setEntityName( entity.getLocalName() );
+	    	entityMetadata.setEntityType( entity.getClass().getName() );
+	    	return entityMetadata;
+	    	
+		} catch (VersionSchemeException e) {
+			throw new RepositoryException("Unknown version scheme for entity: " + owningLibrary.getVersionScheme());
+		}
+    	
     }
 
     /**
@@ -268,5 +310,46 @@ public class RepositoryUtils {
             throw new RuntimeException(e);
         }
     }
-
+    
+    public static TLLibraryStatus getLibraryStatus(LibraryStatus repoStatus) {
+    	TLLibraryStatus result = null;
+    	
+    	if (repoStatus != null) {
+    		switch (repoStatus) {
+				case DRAFT:
+					result = TLLibraryStatus.DRAFT;
+					break;
+				case UNDER_REVIEW:
+					result = TLLibraryStatus.UNDER_REVIEW;
+					break;
+				case FINAL:
+					result = TLLibraryStatus.FINAL;
+					break;
+				case OBSOLETE:
+					result = TLLibraryStatus.OBSOLETE;
+					break;
+    		}
+    	}
+    	return result;
+    }
+    
+    /**
+     * Returns true if the given 'status' should be considered included in queries for the
+     * 'checkStatus' value.
+     * 
+     * @param status  the status value being evalulated
+     * @param checkStatus  value to determine whether the 'status' is included within
+     * @return boolean
+     */
+    public static boolean isInclusiveStatus(TLLibraryStatus status, TLLibraryStatus checkStatus) {
+    	boolean result = false;
+    	
+    	if (status != null) {
+    		int checkRank = (checkStatus == null) ? 0 : checkStatus.getRank();
+    		
+    		result = (checkRank <= status.getRank());
+    	}
+    	return result;
+    }
+    
 }

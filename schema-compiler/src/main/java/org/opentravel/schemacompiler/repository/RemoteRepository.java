@@ -15,7 +15,10 @@
  */
 package org.opentravel.schemacompiler.repository;
 
+import java.util.List;
+
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RefreshPolicy;
+import org.opentravel.schemacompiler.model.NamedEntity;
 
 /**
  * Interface that defines the interaction model between a local OTA2.0 project and a single remote
@@ -49,6 +52,43 @@ public interface RemoteRepository extends Repository {
     public RefreshPolicy getRefreshPolicy();
 
     /**
+     * Returns the list of repository items that reference the one provided.
+     * 
+     * @param item  the repository item for which to retrieve the where-used items
+     * @param includeIndirect
+     *            flag indicating whether to include indirect where-used references; if false,
+     *            only repository items that directly reference the given one will be returned
+     * @return List<RepositoryItem>
+     * @throws RepositoryException  thrown if the remote repository cannot be accessed
+     */
+    public List<RepositoryItem> getItemWhereUsed(RepositoryItem item, boolean includeIndirect)
+    		throws RepositoryException;
+    
+    /**
+     * Returns the list of entities that reference the given one.  References may come in the form
+     * of field-level type references, extensions, etc.  If the given entity is not defined within
+     * this remote repository, this method will return an empty list.
+     * 
+     * @param entity  the entity for which to return where-used entity references
+     * @param includeIndirect
+     *            flag indicating whether to include indirect where-used references; if false,
+     *            only entities that directly reference the given one will be returned
+     * @return List<EntitySearchResult>
+     * @throws RepositoryException  thrown if the remote repository cannot be accessed
+     */
+    public List<EntitySearchResult> getEntityWhereUsed(NamedEntity entity, boolean includeIndirect)
+    		throws RepositoryException;
+    
+    /**
+     * Returns the list of entities that extend the given one.
+     * 
+     * @param entity  the entity for which to return the list of extending entities
+     * @return List<EntitySearchResult>
+     * @throws RepositoryException  thrown if the remote repository cannot be accessed
+     */
+    public List<EntitySearchResult> getEntityWhereExtended(NamedEntity entity) throws RepositoryException;
+    
+    /**
      * Downloads the specified content (and its associated meta-data) from the remote repository
      * into the local instance. If the refresh policy for this repository does not require an update
      * (or the remote repository is not accessible), the locally cached copy of the content will be
@@ -67,7 +107,6 @@ public interface RemoteRepository extends Repository {
      * @throws RepositoryException
      *             thrown if the remote repository cannot be accessed
      */
-    public boolean downloadContent(RepositoryItem item, boolean forceUpdate)
-            throws RepositoryException;
-
+    public boolean downloadContent(RepositoryItem item, boolean forceUpdate) throws RepositoryException;
+    
 }

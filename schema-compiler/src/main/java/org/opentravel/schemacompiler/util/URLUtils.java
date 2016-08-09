@@ -368,5 +368,28 @@ public class URLUtils {
         }
         return result;
     }
+    
+    /**
+     * Returns the filename component of the given URL without the associated path information.
+     * 
+     * @param url  the URL for which to return the filename component
+     * @return String
+     */
+    public static final String getUrlFilename(URL url) {
+        String filepath = url.getFile();
+        int lastPathBreak = filepath.lastIndexOf('/');
+        String filename;
 
+        if (lastPathBreak < 0) {
+            filename = filepath;
+
+        } else if (lastPathBreak < filepath.length()) {
+            filename = filepath.substring(lastPathBreak + 1);
+
+        } else {
+            filename = null; // No filename if the path ends with a '/'
+        }
+        return filename;
+    }
+    
 }

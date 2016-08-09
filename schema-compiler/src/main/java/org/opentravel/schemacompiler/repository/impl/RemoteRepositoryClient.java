@@ -53,9 +53,12 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.opentravel.ns.ota2.repositoryinfo_v01_00.EntityInfoListType;
+import org.opentravel.ns.ota2.repositoryinfo_v01_00.EntityInfoType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoListType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryStatus;
+import org.opentravel.ns.ota2.repositoryinfo_v01_00.ListItems2RQType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.ListItemsRQType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.NamespaceListType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.ObjectFactory;
@@ -64,7 +67,11 @@ import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryInfoType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryItemIdentityType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryPermission;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryPermissionType;
+import org.opentravel.ns.ota2.repositoryinfo_v01_00.SearchResultsListType;
+import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
+import org.opentravel.schemacompiler.repository.EntitySearchResult;
+import org.opentravel.schemacompiler.repository.LibrarySearchResult;
 import org.opentravel.schemacompiler.repository.RemoteRepository;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryFileManager;
@@ -73,6 +80,7 @@ import org.opentravel.schemacompiler.repository.RepositoryItemState;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.repository.RepositoryNamespaceUtils;
 import org.opentravel.schemacompiler.repository.RepositoryOutOfSyncException;
+import org.opentravel.schemacompiler.repository.RepositorySearchResult;
 import org.opentravel.schemacompiler.repository.RepositoryUnavailableException;
 import org.opentravel.schemacompiler.security.PasswordHelper;
 import org.opentravel.schemacompiler.version.VersionScheme;
@@ -93,8 +101,10 @@ public class RemoteRepositoryClient implements RemoteRepository {
     private static final String BASE_NAMSPACES_ENDPOINT = SERVICE_CONTEXT + "/base-namespaces";
     private static final String NAMESPACE_CHILDREN_ENDPOINT = SERVICE_CONTEXT + "/namespace-children";
     private static final String LIST_ITEMS_ENDPOINT = SERVICE_CONTEXT + "/list-items";
+    private static final String LIST_ITEMS2_ENDPOINT = SERVICE_CONTEXT + "/list-items2";
     private static final String VERSION_HISTORY_ENDPOINT = SERVICE_CONTEXT + "/version-history";
     private static final String SEARCH_ENDPOINT = SERVICE_CONTEXT + "/search";
+    private static final String SEARCH2_ENDPOINT = SERVICE_CONTEXT + "/search2";
     private static final String CREATE_ROOT_NAMESPACE_ENDPOINT = SERVICE_CONTEXT + "/create-root-namespace";
     private static final String DELETE_ROOT_NAMESPACE_ENDPOINT = SERVICE_CONTEXT + "/delete-root-namespace";
     private static final String CREATE_NAMESPACE_ENDPOINT = SERVICE_CONTEXT + "/create-namespace";
@@ -110,6 +120,10 @@ public class RemoteRepositoryClient implements RemoteRepository {
     private static final String REPOSITORY_ITEM_METADATA_ENDPOINT = SERVICE_CONTEXT + "/metadata";
     private static final String REPOSITORY_ITEM_CONTENT_ENDPOINT = SERVICE_CONTEXT + "/content";
     private static final String USER_AUTHORIZATION_ENDPOINT = SERVICE_CONTEXT + "/user-authorization";
+    private static final String LOCKED_ITEMS_ENDPOINT = SERVICE_CONTEXT + "/locked-items";
+    private static final String ITEM_WHERE_USED_ENDPOINT = SERVICE_CONTEXT + "/item-where-used";
+    private static final String ENTITY_WHERE_USED_ENDPOINT = SERVICE_CONTEXT + "/entity-where-used";
+    private static final String ENTITY_WHERE_EXTENDED_ENDPOINT = SERVICE_CONTEXT + "/entity-where-extended";
 
     private static final int HTTP_RESPONSE_STATUS_OK = 200;
 
@@ -447,8 +461,54 @@ public class RemoteRepositoryClient implements RemoteRepository {
     }
 
     /**
-     * @see org.opentravel.schemacompiler.repository.Repository#search(java.lang.String, boolean,
-     *      boolean)
+	 * @see org.opentravel.schemacompiler.repository.Repository#listItems(java.lang.String, org.opentravel.schemacompiler.model.TLLibraryStatus, boolean)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<RepositoryItem> listItems(String baseNamespace, TLLibraryStatus includeStatus,
+			boolean latestVersionsOnly) throws RepositoryException {
+        try {
+            String baseNS = RepositoryNamespaceUtils.normalizeUri(baseNamespace);
+            HttpPost request = newPostRequest(LIST_ITEMS2_ENDPOINT);
+            Marshaller marshaller = RepositoryFileManager.getSharedJaxbContext().createMarshaller();
+            ListItems2RQType listItemsRQ = new ListItems2RQType();
+            StringWriter xmlWriter = new StringWriter();
+
+            listItemsRQ.setNamespace(baseNS);
+            listItemsRQ.setIncludeStatus(includeStatus.toRepositoryStatus());
+            listItemsRQ.setLatestVersionOnly(latestVersionsOnly);
+            marshaller.marshal(objectFactory.createListItems2RQ(listItemsRQ), xmlWriter);
+            request.setEntity(new StringEntity(xmlWriter.toString(), ContentType.TEXT_XML));
+
+            HttpResponse response = executeWithAuthentication(request);
+
+            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
+                throw new RepositoryException(getResponseErrorMessage(response));
+            }
+            Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
+            JAXBElement<LibraryInfoListType> jaxbElement = (JAXBElement<LibraryInfoListType>)
+            		unmarshaller.unmarshal(response.getEntity().getContent());
+            List<RepositoryItem> itemList = new ArrayList<RepositoryItem>();
+
+            for (LibraryInfoType itemMetadata : jaxbElement.getValue().getLibraryInfo()) {
+                RepositoryItemImpl item = RepositoryUtils.createRepositoryItem(manager,
+                        itemMetadata);
+
+                RepositoryUtils.checkItemState(item, manager);
+                itemList.add(item);
+            }
+            return itemList;
+
+        } catch (JAXBException e) {
+            throw new RepositoryException("The format of the service response is unreadable.", e);
+
+        } catch (IOException e) {
+            throw new RepositoryException("The remote repository is unavailable.", e);
+        }
+	}
+
+	/**
+     * @see org.opentravel.schemacompiler.repository.Repository#search(java.lang.String, boolean, boolean)
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -463,8 +523,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
             if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
                 throw new RepositoryException(getResponseErrorMessage(response));
             }
-            Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext()
-                    .createUnmarshaller();
+            Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
             JAXBElement<LibraryInfoListType> jaxbElement = (JAXBElement<LibraryInfoListType>) unmarshaller
                     .unmarshal(response.getEntity().getContent());
             List<RepositoryItem> itemList = new ArrayList<RepositoryItem>();
@@ -487,6 +546,55 @@ public class RemoteRepositoryClient implements RemoteRepository {
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.repository.Repository#search(java.lang.String, org.opentravel.schemacompiler.model.TLLibraryStatus, boolean)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<RepositorySearchResult> search(String freeTextQuery, TLLibraryStatus includeStatus,
+			boolean latestVersionsOnly) throws RepositoryException {
+        try {
+        	List<HttpGetParam> paramList = new ArrayList<>();
+        	
+        	paramList.add( new HttpGetParam( "query", freeTextQuery ) );
+        	paramList.add( new HttpGetParam( "latestVersion", latestVersionsOnly + "" ) );
+        	
+        	if (includeStatus != null) {
+            	paramList.add( new HttpGetParam( "includeStatus", includeStatus.toString() ) );
+        	}
+        	
+            HttpGet request = newGetRequest( SEARCH2_ENDPOINT, paramList.toArray( new HttpGetParam[ paramList.size() ] ) );
+            HttpResponse response = executeWithAuthentication( request );
+
+            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
+                throw new RepositoryException( getResponseErrorMessage( response ) );
+            }
+            Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
+            JAXBElement<SearchResultsListType> jaxbElement = (JAXBElement<SearchResultsListType>) unmarshaller
+                    .unmarshal( response.getEntity().getContent() );
+            List<RepositorySearchResult> itemList = new ArrayList<>();
+
+            for (JAXBElement<? extends LibraryInfoType> resultElement : jaxbElement.getValue().getSearchResult()) {
+            	LibraryInfoType resultItem = resultElement.getValue();
+            	RepositorySearchResult item;
+            	
+            	if (resultItem instanceof EntityInfoType) {
+            		item = new EntitySearchResult( (EntityInfoType) resultItem, manager );
+            	} else {
+            		item = new LibrarySearchResult( resultItem, manager );
+            	}
+                itemList.add( item );
+            }
+            return itemList;
+
+        } catch (JAXBException e) {
+            throw new RepositoryException("The format of the library meta-data is unreadable.", e);
+
+        } catch (IOException e) {
+            throw new RepositoryException("The remote repository is unavailable.", e);
+        }
+	}
+
+	/**
      * @see org.opentravel.schemacompiler.repository.Repository#getVersionHistory(org.opentravel.schemacompiler.repository.RepositoryItem)
      */
     @SuppressWarnings("unchecked")
@@ -610,7 +718,125 @@ public class RemoteRepositoryClient implements RemoteRepository {
         return item;
     }
 
-    /**
+	/**
+	 * @see org.opentravel.schemacompiler.repository.RemoteRepository#getItemWhereUsed(org.opentravel.schemacompiler.repository.RepositoryItem, boolean)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<RepositoryItem> getItemWhereUsed(RepositoryItem item, boolean includeIndirect) throws RepositoryException {
+        try {
+            HttpPost request = newPostRequest(ITEM_WHERE_USED_ENDPOINT,
+            		new HttpGetParam("includeIndirect", includeIndirect + ""));
+            Marshaller marshaller = RepositoryFileManager.getSharedJaxbContext().createMarshaller();
+            LibraryInfoType itemMetadata = RepositoryUtils.createItemMetadata( item );
+            StringWriter xmlWriter = new StringWriter();
+            marshaller.marshal(objectFactory.createLibraryInfo(itemMetadata), xmlWriter);
+            request.setEntity(new StringEntity(xmlWriter.toString(), ContentType.TEXT_XML));
+
+            HttpResponse response = executeWithAuthentication(request);
+
+            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
+                throw new RepositoryException(getResponseErrorMessage(response));
+            }
+            Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
+            JAXBElement<LibraryInfoListType> jaxbElement = (JAXBElement<LibraryInfoListType>) unmarshaller
+                    .unmarshal(response.getEntity().getContent());
+            List<RepositoryItem> itemList = new ArrayList<RepositoryItem>();
+
+            for (LibraryInfoType rsItemMetadata : jaxbElement.getValue().getLibraryInfo()) {
+                RepositoryItemImpl rsItem = RepositoryUtils.createRepositoryItem(manager, rsItemMetadata);
+
+                RepositoryUtils.checkItemState(rsItem, manager);
+                itemList.add(rsItem);
+            }
+            return itemList;
+
+        } catch (JAXBException e) {
+            throw new RepositoryException("The format of the library meta-data is unreadable.", e);
+
+        } catch (IOException e) {
+            throw new RepositoryException("The remote repository is unavailable.", e);
+        }
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.repository.RemoteRepository#getEntityWhereUsed(org.opentravel.schemacompiler.model.NamedEntity, boolean)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<EntitySearchResult> getEntityWhereUsed(NamedEntity entity, boolean includeIndirect)
+			throws RepositoryException {
+        try {
+            HttpPost request = newPostRequest(ENTITY_WHERE_USED_ENDPOINT,
+            		new HttpGetParam("includeIndirect", includeIndirect + ""));
+            Marshaller marshaller = RepositoryFileManager.getSharedJaxbContext().createMarshaller();
+            EntityInfoType entityMetadata = RepositoryUtils.createEntityMetadata( entity, manager );
+            StringWriter xmlWriter = new StringWriter();
+            marshaller.marshal(objectFactory.createEntityInfo(entityMetadata), xmlWriter);
+            request.setEntity(new StringEntity(xmlWriter.toString(), ContentType.TEXT_XML));
+
+            HttpResponse response = executeWithAuthentication(request);
+
+            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
+                throw new RepositoryException(getResponseErrorMessage(response));
+            }
+            Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
+            JAXBElement<EntityInfoListType> jaxbElement = (JAXBElement<EntityInfoListType>) unmarshaller
+                    .unmarshal(response.getEntity().getContent());
+            List<EntitySearchResult> searchResults = new ArrayList<EntitySearchResult>();
+
+            for (EntityInfoType rsEntityMetadata : jaxbElement.getValue().getEntityInfo()) {
+            	searchResults.add( new EntitySearchResult( rsEntityMetadata, manager ) );
+            }
+            return searchResults;
+
+        } catch (JAXBException e) {
+            throw new RepositoryException("The format of the library meta-data is unreadable.", e);
+
+        } catch (IOException e) {
+            throw new RepositoryException("The remote repository is unavailable.", e);
+        }
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.repository.RemoteRepository#getEntityWhereExtended(org.opentravel.schemacompiler.model.NamedEntity)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<EntitySearchResult> getEntityWhereExtended(NamedEntity entity)
+			throws RepositoryException {
+        try {
+            HttpPost request = newPostRequest(ENTITY_WHERE_EXTENDED_ENDPOINT);
+            Marshaller marshaller = RepositoryFileManager.getSharedJaxbContext().createMarshaller();
+            EntityInfoType entityMetadata = RepositoryUtils.createEntityMetadata( entity, manager );
+            StringWriter xmlWriter = new StringWriter();
+            marshaller.marshal(objectFactory.createEntityInfo(entityMetadata), xmlWriter);
+            request.setEntity(new StringEntity(xmlWriter.toString(), ContentType.TEXT_XML));
+
+            HttpResponse response = executeWithAuthentication(request);
+
+            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
+                throw new RepositoryException(getResponseErrorMessage(response));
+            }
+            Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
+            JAXBElement<EntityInfoListType> jaxbElement = (JAXBElement<EntityInfoListType>) unmarshaller
+                    .unmarshal(response.getEntity().getContent());
+            List<EntitySearchResult> searchResults = new ArrayList<EntitySearchResult>();
+
+            for (EntityInfoType rsEntityMetadata : jaxbElement.getValue().getEntityInfo()) {
+            	searchResults.add( new EntitySearchResult( rsEntityMetadata, manager ) );
+            }
+            return searchResults;
+
+        } catch (JAXBException e) {
+            throw new RepositoryException("The format of the library meta-data is unreadable.", e);
+
+        } catch (IOException e) {
+            throw new RepositoryException("The remote repository is unavailable.", e);
+        }
+	}
+
+	/**
      * @see org.opentravel.schemacompiler.repository.RemoteRepository#getUserAuthorization(java.lang.String)
      */
     @SuppressWarnings("unchecked")
@@ -646,6 +872,40 @@ public class RemoteRepositoryClient implements RemoteRepository {
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.repository.Repository#getLockedItems()
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<RepositoryItem> getLockedItems() throws RepositoryException {
+        try {
+            HttpGet request = newGetRequest(LOCKED_ITEMS_ENDPOINT);
+            HttpResponse response = executeWithAuthentication(request);
+
+            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
+                throw new RepositoryException(getResponseErrorMessage(response));
+            }
+            Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
+            JAXBElement<LibraryInfoListType> jaxbElement = (JAXBElement<LibraryInfoListType>) unmarshaller
+                    .unmarshal(response.getEntity().getContent());
+            List<RepositoryItem> itemList = new ArrayList<RepositoryItem>();
+
+            for (LibraryInfoType itemMetadata : jaxbElement.getValue().getLibraryInfo()) {
+                RepositoryItemImpl item = RepositoryUtils.createRepositoryItem(manager, itemMetadata);
+
+                RepositoryUtils.checkItemState(item, manager);
+                itemList.add(item);
+            }
+            return itemList;
+
+        } catch (JAXBException e) {
+            throw new RepositoryException("The format of the library meta-data is unreadable.", e);
+
+        } catch (IOException e) {
+            throw new RepositoryException("The remote repository is unavailable.", e);
+        }
+	}
+
+	/**
      * @see org.opentravel.schemacompiler.repository.Repository#createRootNamespace(java.lang.String)
      */
     @Override
@@ -1511,6 +1771,28 @@ public class RemoteRepositoryClient implements RemoteRepository {
      * @return HttpGet
      */
     protected HttpGet newGetRequest(String path, HttpGetParam... urlParams) {
+        return new HttpGet( buildRequestUrl( path, urlParams ) );
+    }
+
+    /**
+     * Returns a new HTTP-POST request for the remote web service.
+     * 
+     * @param path
+     *            the base URL path for the request
+     * @return HttpPost
+     */
+    protected HttpPost newPostRequest(String path, HttpGetParam... urlParams) {
+        return new HttpPost( buildRequestUrl( path, urlParams ) );
+    }
+    
+    /**
+     * Constructs a REST service request URL using the information provided.
+     * 
+     * @param path  the base URL path
+     * @param urlParams  the URL query parameters
+     * @return String
+     */
+    private String buildRequestUrl(String path, HttpGetParam... urlParams) {
         StringBuilder requestUrl = new StringBuilder(endpointUrl).append(path);
         boolean firstParam = true;
 
@@ -1528,23 +1810,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
             }
             firstParam = false;
         }
-
-        HttpGet request = new HttpGet(requestUrl.toString());
-
-        return request;
-    }
-
-    /**
-     * Returns a new HTTP-POST request for the remote web service.
-     * 
-     * @param path
-     *            the base URL path for the request
-     * @return HttpPost
-     */
-    protected HttpPost newPostRequest(String path) {
-        HttpPost request = new HttpPost(endpointUrl + path);
-
-        return request;
+        return requestUrl.toString();
     }
 
     /**

@@ -28,30 +28,32 @@ public enum TLLibraryStatus {
      * Indicates that the contents of a library may be modified without increasing its version
      * number.
      */
-    DRAFT(LibraryStatus.DRAFT),
+    DRAFT(LibraryStatus.DRAFT, 10),
 
     /**
      * Indicates that the contents of a library is under review and pending finalization, and
      * may be modified only by certain repository users.
      */
-    UNDER_REVIEW(LibraryStatus.UNDER_REVIEW),
+    UNDER_REVIEW(LibraryStatus.UNDER_REVIEW, 20),
 
     /** Indicates that a new version must be created before modifying the content of a library. */
-    FINAL(LibraryStatus.FINAL),
+    FINAL(LibraryStatus.FINAL, 30),
 
     /** Indicates that the library version is obsolete and should not be used. */
-    OBSOLETE(LibraryStatus.OBSOLETE);
+    OBSOLETE(LibraryStatus.OBSOLETE, 40);
 
     private LibraryStatus repositoryStatus;
+    private int rank;
 
     /**
      * Constructor that associates the corresponding repository status with the new value.
      * 
-     * @param repositoryStatus
-     *            the associated repository status value
+     * @param repositoryStatus  the associated repository status value
+     * @param rank  the relative rank of this status value
      */
-    private TLLibraryStatus(LibraryStatus repositoryStatus) {
+    private TLLibraryStatus(LibraryStatus repositoryStatus, int rank) {
         this.repositoryStatus = repositoryStatus;
+        this.rank = rank;
     }
 
     /**
@@ -62,5 +64,14 @@ public enum TLLibraryStatus {
     public LibraryStatus toRepositoryStatus() {
         return repositoryStatus;
     }
-
+    
+    /**
+     * Returns the relative rank of this status value.
+     * 
+     * @return int
+     */
+    public int getRank() {
+    	return rank;
+    }
+    
 }

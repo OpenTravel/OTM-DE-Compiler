@@ -638,22 +638,31 @@ public class RepositoryManager implements Repository {
     }
 
     /**
-     * @see org.opentravel.schemacompiler.repository.Repository#listItems(java.lang.String, boolean,
-     *      boolean)
+     * @see org.opentravel.schemacompiler.repository.Repository#listItems(java.lang.String, boolean, boolean)
      */
     @Override
     public List<RepositoryItem> listItems(String baseNamespace, boolean latestVersionsOnly,
             boolean includeDraftVersions) throws RepositoryException {
+    	return listItems( baseNamespace, includeDraftVersions ? null : TLLibraryStatus.FINAL, latestVersionsOnly );
+    }
+
+    /**
+	 * @see org.opentravel.schemacompiler.repository.Repository#listItems(java.lang.String, org.opentravel.schemacompiler.model.TLLibraryStatus, boolean)
+	 */
+	@Override
+	public List<RepositoryItem> listItems(String baseNamespace, TLLibraryStatus includeStatus,
+			boolean latestVersionsOnly) throws RepositoryException {
         String baseNS = RepositoryNamespaceUtils.normalizeUri(baseNamespace);
         Map<String, List<RepositoryItemVersionedWrapper>> libraryVersionMap = new HashMap<String, List<RepositoryItemVersionedWrapper>>();
         List<LibraryInfoType> metadataList = fileManager.loadLibraryMetadataRecords(baseNS);
         List<RepositoryItem> itemList = new ArrayList<RepositoryItem>();
 
         for (LibraryInfoType itemMetadata : metadataList) {
-
+        	TLLibraryStatus itemStatus = RepositoryUtils.getLibraryStatus( itemMetadata.getStatus() );
+        	
             // Create a map that groups each library's versions together
             if (localRepositoryId.equals(itemMetadata.getOwningRepository())
-                    && (includeDraftVersions || (itemMetadata.getStatus() == LibraryStatus.FINAL))) {
+                    && RepositoryUtils.isInclusiveStatus(itemStatus, includeStatus)) {
                 RepositoryItem item = RepositoryUtils.createRepositoryItem(this, itemMetadata);
                 List<RepositoryItemVersionedWrapper> libraryVersions = libraryVersionMap.get(item
                         .getLibraryName());
@@ -665,7 +674,7 @@ public class RepositoryManager implements Repository {
                 libraryVersions.add(new RepositoryItemVersionedWrapper(item));
             }
         }
-
+        
         // Sort the results by library name first, then by descending version number
         List<String> libraryNames = new ArrayList<String>();
 
@@ -701,13 +710,13 @@ public class RepositoryManager implements Repository {
             }
         }
         return itemList;
-    }
+	}
 
-    /**
-     * @see org.opentravel.schemacompiler.repository.Repository#search(java.lang.String, boolean,
-     *      boolean)
+	/**
+     * @see org.opentravel.schemacompiler.repository.Repository#search(java.lang.String, boolean, boolean)
      */
-    @Override
+    @SuppressWarnings("deprecation")
+	@Override
     public List<RepositoryItem> search(String freeTextQuery, boolean latestVersionsOnly,
             boolean includeDraftVersions) throws RepositoryException {
         List<RepositoryItem> searchResults = new ArrayList<RepositoryItem>();
@@ -731,6 +740,29 @@ public class RepositoryManager implements Repository {
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.repository.Repository#search(java.lang.String, org.opentravel.schemacompiler.model.TLLibraryStatus, boolean)
+	 */
+	@Override
+	public List<RepositorySearchResult> search(String freeTextQuery, TLLibraryStatus includeStatus,
+			boolean latestVersionsOnly) throws RepositoryException {
+        List<RepositorySearchResult> searchResults = new ArrayList<>();
+
+        for (RemoteRepository repository : remoteRepositories) {
+            try {
+                List<RepositorySearchResult> resultList = repository.search(freeTextQuery,
+                        includeStatus, latestVersionsOnly);
+                
+                searchResults.addAll( resultList );
+
+            } catch (RepositoryException e) {
+                log.warn("Error contacting remote repository: " + repository.getId() + ", reason: "
+                        + ExceptionUtils.getExceptionMessage(e));
+            }
+        }
+        return searchResults;
+	}
+
+	/**
      * @see org.opentravel.schemacompiler.repository.Repository#getVersionHistory(org.opentravel.schemacompiler.repository.RepositoryItem)
      */
     @Override
@@ -893,6 +925,23 @@ public class RepositoryManager implements Repository {
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.repository.Repository#getLockedItems()
+	 */
+	@Override
+	public List<RepositoryItem> getLockedItems() throws RepositoryException {
+		List<RepositoryItem> lockedItems = new ArrayList<>();
+		
+		for (String baseNS : listBaseNamespaces()) {
+			for (RepositoryItem item : listItems( baseNS, null, false )) {
+				if (item.getState() == RepositoryItemState.MANAGED_WIP) {
+					lockedItems.add( item );
+				}
+			}
+		}
+		return lockedItems;
+	}
+
+	/**
      * @see org.opentravel.schemacompiler.repository.Repository#createRootNamespace(java.lang.String)
      */
     @Override

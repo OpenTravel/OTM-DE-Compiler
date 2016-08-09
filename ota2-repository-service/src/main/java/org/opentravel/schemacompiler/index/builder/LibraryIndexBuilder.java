@@ -163,6 +163,7 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
 			indexDoc.add( new StringField( BASE_NAMESPACE_FIELD, baseNS, Field.Store.YES ) );
 			indexDoc.add( new StringField( FILENAME_FIELD, sourceObject.getFilename(), Field.Store.YES ) );
 			indexDoc.add( new StringField( VERSION_FIELD, sourceObject.getVersion(), Field.Store.YES ) );
+			indexDoc.add( new StringField( VERSION_SCHEME_FIELD, sourceObject.getVersionScheme(), Field.Store.YES ) );
 			indexDoc.add( new StringField( LATEST_VERSION_FIELD, latestVersion + "", Field.Store.NO ) );
 			indexDoc.add( new StringField( LATEST_VERSION_AT_UNDER_REVIEW_FIELD, latestVersionAtUnderReview + "", Field.Store.NO ) );
 			indexDoc.add( new StringField( LATEST_VERSION_AT_FINAL_FIELD, latestVersionAtFinal + "", Field.Store.NO ) );

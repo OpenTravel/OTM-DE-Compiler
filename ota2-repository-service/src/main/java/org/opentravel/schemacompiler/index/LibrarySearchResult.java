@@ -79,6 +79,7 @@ public class LibrarySearchResult extends SearchResult<TLLibrary> {
 		item.setLibraryName( doc.get( ENTITY_NAME_FIELD ) );
 		item.setFilename( doc.get( FILENAME_FIELD ) );
 		item.setVersion( doc.get( VERSION_FIELD ) );
+		item.setVersionScheme( doc.get( VERSION_SCHEME_FIELD ) );
 		item.setLockedByUser( doc.get( LOCKED_BY_USER_FIELD ) );
 		item.setStatus( this.status );
 		item.setState( (this.lockedByUser == null) ?

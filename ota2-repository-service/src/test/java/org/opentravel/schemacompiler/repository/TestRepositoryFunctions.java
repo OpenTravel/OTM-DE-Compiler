@@ -156,14 +156,20 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
 
         // Also make sure that listing the repository item returns the correct state of WIP
         List<RepositoryItem> itemList = testRepository.get().listItems(
-                projectItem.getBaseNamespace(), true, true);
+                projectItem.getBaseNamespace(), TLLibraryStatus.DRAFT, true);
 
         for (RepositoryItem item : itemList) {
             if (item.getFilename().equals(projectItem.getFilename())) {
                 assertEquals(RepositoryItemState.MANAGED_WIP, item.getState());
             }
         }
-
+        
+        // Verifiy that the locked library is returned by Repository.getLockedItems()
+        List<RepositoryItem> lockedItems = projectItem.getRepository().getLockedItems();
+        
+        assertEquals(1, lockedItems.size());
+        assertEquals("library_1_p2_2_0_0.otm", lockedItems.get(0).getFilename());
+        
         if (DEBUG)
             System.out.println("DONE - Success.");
     }

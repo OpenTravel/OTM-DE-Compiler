@@ -44,6 +44,7 @@ public interface IndexingTerms {
 	
 	public static final String BASE_NAMESPACE_FIELD     = "baseNamespace";
 	public static final String FILENAME_FIELD           = "filename";
+	public static final String VERSION_SCHEME_FIELD     = "versionScheme";
 	public static final String REFERENCED_LIBRARY_FIELD = "referencedLibrary";
 	public static final String PREFIX_MAPPING_FIELD     = "prefixMapping";
 	

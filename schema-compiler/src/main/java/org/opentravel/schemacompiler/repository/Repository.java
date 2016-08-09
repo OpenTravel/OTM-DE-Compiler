@@ -116,9 +116,33 @@ public interface Repository {
      * @return List<RepositoryItem>
      * @throws RepositoryException
      *             thrown if the remote repository cannot be accessed
+     * @deprecated  Use the {@link Repository#listItems(String, TLLibraryStatus, boolean)} method instead
      */
+    @Deprecated
     public List<RepositoryItem> listItems(String baseNamespace, boolean latestVersionsOnly,
             boolean includeDraftVersions) throws RepositoryException;
+
+    /**
+     * Returns a list of each <code>RepositoryItem</code> assigned to the specified base namespace.
+     * If multiple versions of a <code>RepositoryItem</code> are present, only the latest version
+     * will be returned when the 'latestVersionsOnly' flag is true.  If the 'includeStatus' is
+     * non-null, only versions with the specified status or later will be considered durng the
+     * search.
+     * 
+     * @param baseNamespace
+     *            the base namespace that does not include the trailing version component of the URI
+     *            path
+     * @param includeStatus
+     *            indicates the latest library status to include in the results (null = all statuses)
+     * @param latestVersionsOnly
+     *            flag indicating whether the results should include all matching versions or just
+     *            the latest version of each library
+     * @return List<RepositoryItem>
+     * @throws RepositoryException
+     *             thrown if the remote repository cannot be accessed
+     */
+    public List<RepositoryItem> listItems(String baseNamespace, TLLibraryStatus includeStatus,
+    		boolean latestVersionsOnly) throws RepositoryException;
 
     /**
      * Searches the contents of the repository using the free-text keywords provided. If multiple
@@ -137,18 +161,37 @@ public interface Repository {
      * @return List<RepositoryItem>
      * @throws RepositoryException
      *             thrown if the remote repository cannot be accessed
+     * @deprecated  Use the {@link Repository#search(String, TLLibraryStatus, boolean)} method instead
      */
+    @Deprecated
     public List<RepositoryItem> search(String freeTextQuery, boolean latestVersionsOnly,
             boolean includeDraftVersions) throws RepositoryException;
+
+    /**
+     * Searches the contents of the repository using the free-text keywords provided. If multiple
+     * versions of a <code>RepositoryItem</code> match the query, only the latest version will be
+     * returned when the 'latestVersionsOnly' flag is true. If the 'includeStatus' is non-null, only
+     * versions with the specified status or later will be considered durng the search.
+     * 
+     * @param freeTextQuery
+     *            the string containing space-separated keywords for the free-text search
+     * @param includeStatus
+     *            indicates the latest library status to include in the results (null = all statuses)
+     * @param latestVersionsOnly
+     *            flag indicating whether the results should include all matching versions or just
+     *            the latest version of each library
+     * @return List<RepositorySearchResult>
+     * @throws RepositoryException
+     *             thrown if the remote repository cannot be accessed
+     */
+    public List<RepositorySearchResult> search(String freeTextQuery, TLLibraryStatus includeStatus,
+    		boolean latestVersionsOnly) throws RepositoryException;
 
     /**
      * Returns a list containing all versions of the given <code>RepositoryItem</code>.
      * 
      * @param item
      *            the repository item for which to retrieve the version history
-     * @param includeDraftVersions
-     *            flag indicating whether versions in <code>DRAFT</code> status should be included
-     *            in the resulting list
      * @return List<RepositoryItem>
      * @throws RepositoryException
      *             thrown if the remote repository cannot be accessed
@@ -257,7 +300,21 @@ public interface Repository {
      */
     public RepositoryPermission getUserAuthorization(String baseNamespace)
             throws RepositoryException;
-
+    
+    /**
+     * Returns the list of repository items that are locked by the current user of this
+     * repository.  If access to this repository is based on anonymous credentials, this
+     * method will always return an empty list.
+     * 
+     * <p>If this repository is the local <code>RepositoryManager</code>, this method will
+     * only return locked items from the user's local repository.  Use the <code>RemoteRepository</code>
+     * handles to retrieve locked items from remote repositories.
+     * 
+     * @return List<RepositoryItem>
+     * @throws RepositoryException  thrown if an error occurs while performing the search
+     */
+    public List<RepositoryItem> getLockedItems() throws RepositoryException;
+    
     /**
      * Creates the given root namespace within the repository. If the namespace URI provided is
      * nested under an existing root namespace, an exception will be thrown.

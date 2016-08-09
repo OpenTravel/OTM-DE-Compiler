@@ -2263,7 +2263,7 @@ public final class ProjectManager {
                     versionIdentifier = userLibrary.getVersion();
                 }
                 repositoryItem = repositoryManager.getRepositoryItem(baseNamespace,
-                        getLibraryUrlFilename(library), versionIdentifier);
+                		URLUtils.getUrlFilename( library.getLibraryUrl() ), versionIdentifier);
             }
             return ProjectItemImpl.newManagedItem(repositoryItem, library, this);
 
@@ -2298,32 +2298,7 @@ public final class ProjectManager {
             }
         }
         if ((filename == null) && (library != null)) {
-            filename = getLibraryUrlFilename(library);
-        }
-        return filename;
-    }
-
-    /**
-     * Returns the name of the file content for the given library without any path-specific
-     * information.
-     * 
-     * @param library
-     *            the library whose filename is to be returned
-     * @return String
-     */
-    private String getLibraryUrlFilename(AbstractLibrary library) {
-        String filepath = library.getLibraryUrl().getFile();
-        int lastPathBreak = filepath.lastIndexOf('/');
-        String filename;
-
-        if (lastPathBreak < 0) {
-            filename = filepath;
-
-        } else if (lastPathBreak < filepath.length()) {
-            filename = filepath.substring(lastPathBreak + 1);
-
-        } else {
-            filename = null; // No filename if the path ends with a '/'
+            filename = URLUtils.getUrlFilename( library.getLibraryUrl() );
         }
         return filename;
     }

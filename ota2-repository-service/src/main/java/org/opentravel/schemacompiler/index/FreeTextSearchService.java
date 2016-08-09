@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -594,7 +595,7 @@ public class FreeTextSearchService implements IndexingTerms {
      * @return List<LibrarySearchResult>
      * @throws RepositoryException  thrown if an error occurs while performing the search
      */
-    public List<LibrarySearchResult> getLibraries(List<String> searchIndexIds, boolean resolveContent) throws RepositoryException {
+    public List<LibrarySearchResult> getLibraries(Collection<String> searchIndexIds, boolean resolveContent) throws RepositoryException {
     	List<LibrarySearchResult> searchResults = new ArrayList<>();
     	
     	if ((searchIndexIds != null) && (searchIndexIds.size() > 0)) {
@@ -765,6 +766,22 @@ public class FreeTextSearchService implements IndexingTerms {
     }
     
     /**
+     * Returns the entity with the given namespace and local name.
+     * 
+     * @param libraryIndexId  the search index ID of the owning library for which to retrieve entities
+     * @param entityName  the local name of the entity to retrieve
+     * @param resolveContent  flag indicating whether the content details should be pre-resolved; if false, content
+     *						  is still available in the search results, but it will be initialized in a lazy fashion
+     * @return EntitySearchResult
+     * @throws RepositoryException  thrown if an error occurs while performing the search
+     */
+    public EntitySearchResult getEntity(String libraryIndexId, String entityName, boolean resolveContent)
+    		throws RepositoryException {
+    	// TODO: Implement the 'getEntity(ns, name)' method
+    	return null;
+    }
+    
+    /**
      * Returns all entities that are owned by the library the specified search index ID.
      * 
      * @param libraryIndexId  the search index ID of the owning library for which to retrieve entities
@@ -868,6 +885,7 @@ public class FreeTextSearchService implements IndexingTerms {
      * @return List<EntitySearchResult>
      * @throws RepositoryException  thrown if an error occurs while performing the search
      */
+    // TODO: Expose the 'getExtendedByEntities()' method as an external REST API
     public List<EntitySearchResult> getExtendedByEntities(EntitySearchResult entityIndex, boolean resolveContents)
     		throws RepositoryException {
     	String entityIndexId = (entityIndex == null) ? null : entityIndex.getSearchIndexId();
@@ -899,6 +917,7 @@ public class FreeTextSearchService implements IndexingTerms {
      * @return List<LibrarySearchResult>
      * @throws RepositoryException  thrown if an error occurs while performing the search
      */
+    // TODO: Expose the 'getEntityWhereUsed()' method as an external REST API
     public List<EntitySearchResult> getEntityWhereUsed(EntitySearchResult entityIndex, boolean includeIndirectReferences,
     		boolean resolveContent) throws RepositoryException {
         IndexSearcher searcher = null;
