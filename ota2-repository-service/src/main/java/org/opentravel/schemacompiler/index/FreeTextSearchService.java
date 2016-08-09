@@ -69,8 +69,9 @@ public class FreeTextSearchService implements IndexingTerms {
 	
 	private static final Set<String> nonContentAttrs = new HashSet<>( Arrays.asList(
 			IDENTITY_FIELD, ENTITY_TYPE_FIELD, ENTITY_NAME_FIELD, ENTITY_NAMESPACE_FIELD,
-			BASE_NAMESPACE_FIELD, FILENAME_FIELD, VERSION_FIELD, STATUS_FIELD, LOCKED_BY_USER_FIELD,
-			REFERENCED_LIBRARY_FIELD, PREFIX_MAPPING_FIELD, EXTENDS_ENTITY_FIELD, REFERENCE_IDENTITY_FIELD
+			BASE_NAMESPACE_FIELD, FILENAME_FIELD, VERSION_FIELD, VERSION_SCHEME_FIELD,
+			STATUS_FIELD, LOCKED_BY_USER_FIELD, REFERENCED_LIBRARY_FIELD, PREFIX_MAPPING_FIELD,
+			OWNING_LIBRARY_FIELD, EXTENDS_ENTITY_FIELD, REFERENCE_IDENTITY_FIELD
 		) );
 	private static final Set<String> contentAttr = new HashSet<>( Arrays.asList( CONTENT_DATA_FIELD ) );
 	
@@ -777,8 +778,25 @@ public class FreeTextSearchService implements IndexingTerms {
      */
     public EntitySearchResult getEntity(String libraryIndexId, String entityName, boolean resolveContent)
     		throws RepositoryException {
-    	// TODO: Implement the 'getEntity(ns, name)' method
-    	return null;
+    	EntitySearchResult searchResult = null;
+    	
+    	if (libraryIndexId != null) {
+        	BooleanQuery query = new BooleanQuery();
+        	List<Document> queryResults;
+        	
+        	query.add( new BooleanClause( new TermQuery(
+    				new Term( ENTITY_TYPE_FIELD, TLLibrary.class.getName() ) ), Occur.MUST_NOT ));
+        	query.add( new BooleanClause( new TermQuery(
+    				new Term( OWNING_LIBRARY_FIELD, libraryIndexId ) ), Occur.MUST ));
+        	query.add( new BooleanClause( new TermQuery(
+    				new Term( ENTITY_NAME_FIELD, entityName ) ), Occur.MUST ));
+        	queryResults = executeQuery( query, resolveContent ? null : nonContentAttrs );
+        	
+        	if (queryResults.size() > 0) {
+        		searchResult = new EntitySearchResult( queryResults.get(0), this );
+        	}
+    	}
+    	return searchResult;
     }
     
     /**
@@ -885,7 +903,6 @@ public class FreeTextSearchService implements IndexingTerms {
      * @return List<EntitySearchResult>
      * @throws RepositoryException  thrown if an error occurs while performing the search
      */
-    // TODO: Expose the 'getExtendedByEntities()' method as an external REST API
     public List<EntitySearchResult> getExtendedByEntities(EntitySearchResult entityIndex, boolean resolveContents)
     		throws RepositoryException {
     	String entityIndexId = (entityIndex == null) ? null : entityIndex.getSearchIndexId();
@@ -917,7 +934,6 @@ public class FreeTextSearchService implements IndexingTerms {
      * @return List<LibrarySearchResult>
      * @throws RepositoryException  thrown if an error occurs while performing the search
      */
-    // TODO: Expose the 'getEntityWhereUsed()' method as an external REST API
     public List<EntitySearchResult> getEntityWhereUsed(EntitySearchResult entityIndex, boolean includeIndirectReferences,
     		boolean resolveContent) throws RepositoryException {
         IndexSearcher searcher = null;

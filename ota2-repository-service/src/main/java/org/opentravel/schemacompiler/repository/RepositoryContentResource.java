@@ -272,7 +272,6 @@ public class RepositoryContentResource {
     @Path("list-items2")
     @Consumes(MediaType.TEXT_XML)
     @Produces(MediaType.TEXT_XML)
-    // TODO: Test the updated 'listItems()' API operation
     public JAXBElement<LibraryInfoListType> listItemsForNamespace2(
             JAXBElement<ListItems2RQType> listItemsRQ,
             @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
@@ -358,7 +357,6 @@ public class RepositoryContentResource {
     @GET
     @Path("search2")
     @Produces(MediaType.TEXT_XML)
-    // TODO: Test the updated 'search()' API operation
     public JAXBElement<SearchResultsListType> search(@QueryParam("query") String freeTextQuery,
             @QueryParam("latestVersion") boolean latestVersionsOnly,
             @QueryParam("includeStatus") String includeStatusStr,
@@ -375,7 +373,11 @@ public class RepositoryContentResource {
         // First pass to build the list of referenced libraries
         for (SearchResult<?> result : searchResults) {
         	if (result instanceof EntitySearchResult) {
-        		referencedLibraryIds.add( ((EntitySearchResult) result).getOwningLibraryId() );
+        		EntitySearchResult entityResult = (EntitySearchResult) result;
+        		
+        		if (entityResult.getOwningLibraryId() != null) {
+            		referencedLibraryIds.add( entityResult.getOwningLibraryId() );
+        		}
         	}
         }
         
@@ -475,7 +477,6 @@ public class RepositoryContentResource {
     @Path("item-where-used")
     @Consumes(MediaType.TEXT_XML)
     @Produces(MediaType.TEXT_XML)
-    // TODO: Test the 'getItemWhereUsed()' API operation
     public JAXBElement<LibraryInfoListType> getItemWhereUsed(
             JAXBElement<LibraryInfoType> itemMetadata,
             @QueryParam("includeIndirect") String includeIndirectStr,
@@ -522,7 +523,6 @@ public class RepositoryContentResource {
     @Path("entity-where-used")
     @Consumes(MediaType.TEXT_XML)
     @Produces(MediaType.TEXT_XML)
-    // TODO: Test the 'getEntityWhereUsed()' API operation
     public JAXBElement<EntityInfoListType> getEntityWhereUsed(
             JAXBElement<EntityInfoType> entityMetadataElement,
             @QueryParam("includeIndirect") String includeIndirectStr,
@@ -560,7 +560,7 @@ public class RepositoryContentResource {
                 	
                 	RepositoryUtils.populateMetadata( srLibrary.getRepositoryItem(), srEntity );
                 	srEntity.setEntityName( searchResult.getItemName() );
-                	srEntity.setEntityName( searchResult.getEntityType().getName() );
+                	srEntity.setEntityType( searchResult.getEntityType().getName() );
                     metadataList.getEntityInfo().add( srEntity );
                 }
             }
@@ -584,7 +584,6 @@ public class RepositoryContentResource {
     @Path("entity-where-extended")
     @Consumes(MediaType.TEXT_XML)
     @Produces(MediaType.TEXT_XML)
-    // TODO: Test the 'getEntityWhereExtended()' API operation
     public JAXBElement<EntityInfoListType> getEntityWhereExtended(
             JAXBElement<EntityInfoType> entityMetadataElement,
             @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
@@ -1333,7 +1332,6 @@ public class RepositoryContentResource {
     @GET
     @Path("locked-items")
     @Produces(MediaType.TEXT_XML)
-    // TODO: Test the 'getLockedItems()' API operation
     public JAXBElement<LibraryInfoListType>  getLockedItems(
             @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
     	
