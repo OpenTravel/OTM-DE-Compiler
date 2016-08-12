@@ -94,7 +94,7 @@ public class SchemaCompilerTestUtils {
             if (hasFindings) {
             	String[] findingMessages;
                 
-                if (PRINT_FINDINGS != null) {
+                if (PRINT_FINDINGS == FindingType.ERROR) {
                 	findingMessages = findings.getValidationMessages(PRINT_FINDINGS, FindingMessageFormat.DEFAULT);
                 } else {
                 	findingMessages = findings.getAllValidationMessages(FindingMessageFormat.DEFAULT);

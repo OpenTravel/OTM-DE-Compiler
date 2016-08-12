@@ -521,6 +521,20 @@ public class ResourceCodegenUtils {
 	}
 	
 	/**
+	 * Returns true if the given action facet only exists as a template and should not
+	 * be included in the generated schema (and example) output.
+	 * 
+	 * @param actionFacet  the action facet to check
+	 * @return boolean
+	 */
+	public static boolean isTemplateActionFacet(TLActionFacet actionFacet) {
+		return (actionFacet != null) && (actionFacet.getOwningResource() != null)
+				&& (actionFacet.getReferenceType() != null)
+				&& actionFacet.getOwningResource().isAbstract()
+				&& (actionFacet.getReferenceType() != TLReferenceType.NONE);
+	}
+	
+	/**
 	 * Returns a valid name that may be used by an action facet to reference the given facet.
 	 * 
 	 * @param facet  the facet to be referenced by an action facet

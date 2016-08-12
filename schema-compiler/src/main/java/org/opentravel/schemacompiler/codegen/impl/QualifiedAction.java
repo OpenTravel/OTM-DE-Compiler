@@ -36,14 +36,17 @@ public class QualifiedAction {
 	private TLAction action;
 	
 	/**
-	 * Full constructor.
+	 * Full constructor.  The list of parent reference supplied to this method should be
+	 * ordered from the most immediate parent resource reference to the most distant.
 	 * 
 	 * @param parentRefs  the list of parent references for the the qualified action
 	 * @param action  the action for which an API operation will be generated
 	 */
 	public QualifiedAction(List<TLResourceParentRef> parentRefs, TLAction action) {
 		if (parentRefs != null) {
-			this.parentRefs.addAll( parentRefs );
+			for (TLResourceParentRef pRef : parentRefs) {
+				this.parentRefs.add( 0, pRef );
+			}
 		}
 		this.action = action;
 	}

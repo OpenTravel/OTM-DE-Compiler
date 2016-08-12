@@ -35,8 +35,8 @@ import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
  */
 public class TLActionFacetCompileValidator extends TLActionFacetBaseValidator{
 
-    public static final String ERROR_INVALID_REFERENCE_TYPE  = "INVALID_REFERENCE_TYPE";
-    public static final String ERROR_INVALID_FACET_REFERENCE = "INVALID_FACET_REFERENCE";
+    public static final String ERROR_NOT_ALLOWED_FOR_ABSTRACT = "NOT_ALLOWED_FOR_ABSTRACT";
+    public static final String ERROR_INVALID_FACET_REFERENCE  = "INVALID_FACET_REFERENCE";
     
 	/**
 	 * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateFields(org.opentravel.schemacompiler.validate.Validatable)
@@ -44,6 +44,7 @@ public class TLActionFacetCompileValidator extends TLActionFacetBaseValidator{
 	@Override
 	protected ValidationFindings validateFields(TLActionFacet target) {
 		TLValidationBuilder builder = newValidationBuilder(target);
+		String referenceFacetName = target.getReferenceFacetName();
 		NamedEntity basePayload = target.getBasePayload();
 		TLResource owner = target.getOwningResource();
 		
@@ -62,21 +63,25 @@ public class TLActionFacetCompileValidator extends TLActionFacetBaseValidator{
 				.setFindingType(FindingType.ERROR)
 				.assertNotNull();
         
-		if ((target.getReferenceType() != null) && (owner != null)
-				&& owner.isAbstract() && (target.getReferenceType() != TLReferenceType.NONE)) {
-        	builder.addFinding( FindingType.ERROR, "referenceType", ERROR_INVALID_REFERENCE_TYPE );
+		if ((target.getReferenceType() != null) && (owner != null) && owner.isAbstract()) {
+			if ((referenceFacetName != null) && (referenceFacetName.length() > 0)) {
+	        	builder.addFinding( FindingType.ERROR, "referenceFacetName", ERROR_NOT_ALLOWED_FOR_ABSTRACT );
+			}
 		}
 		
 		if (target.getReferenceType() == TLReferenceType.NONE) {
 			builder.setProperty("referenceFacetName", target.getReferenceFacetName())
 					.setFindingType(FindingType.WARNING)
 					.assertNullOrBlank();
+			builder.setProperty("referenceRepeat", target.getReferenceRepeat())
+					.setFindingType(FindingType.WARNING)
+					.assertLessThanOrEqual(1);
 			
 		} else if (target.getReferenceType() != null) {
 			if (!owner.isAbstract() && (owner.getBusinessObjectRef() != null)
-					&& (target.getReferenceFacetName() != null)
+					&& (referenceFacetName != null)
 					&& (ResourceCodegenUtils.getReferencedFacet(
-							owner.getBusinessObjectRef(), target.getReferenceFacetName()) == null)) {
+							owner.getBusinessObjectRef(), referenceFacetName) == null)) {
 	        	builder.addFinding( FindingType.ERROR, "referenceFacetName", ERROR_INVALID_FACET_REFERENCE,
 	        			target.getReferenceFacetName(), owner.getBusinessObjectRef().getLocalName() );
 			}

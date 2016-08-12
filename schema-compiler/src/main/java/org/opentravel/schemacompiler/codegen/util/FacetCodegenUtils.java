@@ -397,6 +397,9 @@ public class FacetCodegenUtils {
             List<TLActionFacet> facetList = extendedResource.getActionFacets();
 
             for (TLActionFacet facet : facetList) {
+            	if (ResourceCodegenUtils.isTemplateActionFacet( facet )) {
+            		continue; // Skip template action facets
+            	}
                 String facetKey = facet.getName();
 
                 if (!inheritedFacetNames.contains(facetKey)) {

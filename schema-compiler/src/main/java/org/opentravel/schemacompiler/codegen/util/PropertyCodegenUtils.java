@@ -523,19 +523,23 @@ public class PropertyCodegenUtils {
                 Collections.reverse(localProperties);
 
                 for (TLProperty property : localProperties) {
-                    TLPropertyType propertyType = resolvePropertyType(property.getOwner(),
-                            property.getType());
-                    NamedEntity inheritanceRoot = getInheritanceRoot(propertyType);
-
-                    // Properties whose types are members of an inheritance hierarchy should be
-                    // skipped if they were eclipsed by lower-level properties of the owner's
-                    // hierarchy
-                    if ((inheritanceRoot == null) || !inheritanceRoots.contains(inheritanceRoot)) {
-                        if (inheritanceRoot != null) {
-                            inheritanceRoots.add(inheritanceRoot);
-                        }
+                	if (property.isReference()) {
                         propertyList.add(0, property);
-                    }
+                		
+                	} else {
+                        TLPropertyType propertyType = resolvePropertyType(property.getOwner(), property.getType());
+                        NamedEntity inheritanceRoot = getInheritanceRoot(propertyType);
+
+                        // Properties whose types are members of an inheritance hierarchy should be
+                        // skipped if they were eclipsed by lower-level properties of the owner's
+                        // hierarchy
+                        if ((inheritanceRoot == null) || !inheritanceRoots.contains(inheritanceRoot)) {
+                            if (inheritanceRoot != null) {
+                                inheritanceRoots.add(inheritanceRoot);
+                            }
+                            propertyList.add(0, property);
+                        }
+                	}
                 }
             }
             visitedOwners.add(facetOwner);

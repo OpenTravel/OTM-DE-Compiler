@@ -328,6 +328,7 @@
     		    <Description>ActionFacet-ObjectOnly-documentation-line_1</Description>
         	</Documentation>
         </ActionFacet>
+        <ActionFacet label="TemplateFacet" referenceType="Required" referenceRepeat="10" basePayload="SampleChoice"/>
     	<Action actionId="CommonErrors" common="true">
         	<ActionResponse payloadType="BaseResource_ErrorPayload" mimeTypes="APPLICATION_XML APPLICATION_JSON">
 		        <Documentation>

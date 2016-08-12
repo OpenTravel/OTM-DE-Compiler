@@ -66,6 +66,7 @@ import org.opentravel.schemacompiler.codegen.example.ExampleBuilder;
 import org.opentravel.schemacompiler.codegen.example.ExampleDocumentBuilder;
 import org.opentravel.schemacompiler.codegen.example.ExampleGeneratorOptions;
 import org.opentravel.schemacompiler.codegen.example.ExampleJsonBuilder;
+import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
 import org.opentravel.schemacompiler.ioc.CompilerExtensionRegistry;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
@@ -235,7 +236,8 @@ public class ExampleHelperController {
 				}
 				for (TLResource resource : library.getResourceTypes()) {
 					for (TLActionFacet actionFacet : resource.getActionFacets()) {
-						if (actionFacet.getReferenceType() != TLReferenceType.NONE) {
+						if ((actionFacet.getReferenceType() != TLReferenceType.NONE)
+								&& !ResourceCodegenUtils.isTemplateActionFacet( actionFacet )) {
 							selectableObjects.add( new OTMObjectChoice( actionFacet ) );
 						}
 					}

@@ -17,6 +17,7 @@ package org.opentravel.schemacompiler.codegen.json;
 
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
+import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
@@ -39,7 +40,9 @@ public class TLResourceJsonCodegenTransformer extends AbstractJsonSchemaTransfor
         // The only TLResource artifacts that need to be represented in the XML schema are the
         // action facets.
     	for (TLActionFacet actionFacet : source.getActionFacets()) {
-    		artifacts.addAllArtifacts( afTransformer.transform( actionFacet ) );
+    		if (!ResourceCodegenUtils.isTemplateActionFacet( actionFacet )) {
+    			artifacts.addAllArtifacts( afTransformer.transform( actionFacet ) );
+    		}
     	}
         return artifacts;
 	}
