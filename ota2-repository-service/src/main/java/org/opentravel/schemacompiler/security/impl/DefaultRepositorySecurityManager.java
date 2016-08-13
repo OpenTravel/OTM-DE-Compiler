@@ -119,7 +119,7 @@ public class DefaultRepositorySecurityManager implements RepositorySecurityManag
         	
             if ((userInfo == null) || !authenticationProvider.isValidUser( userId, password )) {
                 throw new RepositorySecurityException(
-                        "Invalid user name or password submitted for principal: " + userId + "/'" + password + "'");
+                        "Invalid user name or password submitted for principal: " + userId);
             }
             user = new UserPrincipal( userInfo, groupAssignmentsResource.getAssignedGroups( userId ) );
 
