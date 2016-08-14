@@ -13,23 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.transform.library_01_05;
-
-import org.opentravel.schemacompiler.transform.AbstractTestTransformers;
+package org.opentravel.schemacompiler.util;
 
 /**
- * Base class for all transformer tests that utilize library schema v1.5 data.
- * 
- * @author S. Livezey
+ * Temporary class used to indicate whether the OTM1.6 file format is enabled for the compiler.
  */
-public abstract class Abstract_1_5_TestTransformers extends AbstractTestTransformers {
-
-    /**
-     * @see org.opentravel.schemacompiler.transform.AbstractTestTransformers#getBaseLocation()
-     */
-    @Override
-    protected String getBaseLocation() {
-        return System.getProperty("user.dir") + "/src/test/resources/libraries_1_5";
-    }
-
+public class OTM16Upgrade {
+	
+	public static boolean otm16Enabled = false;
+	
 }
