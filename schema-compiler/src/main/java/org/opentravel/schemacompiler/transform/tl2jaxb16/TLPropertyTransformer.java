@@ -78,7 +78,7 @@ public class TLPropertyTransformer extends
         return property;
     }
 
-    private String convertRepeatValue(int repeatInt) {
+    protected static String convertRepeatValue(int repeatInt) {
         return (repeatInt < 0) ? UNLIMITED_TOKEN : (repeatInt + "");
     }
 

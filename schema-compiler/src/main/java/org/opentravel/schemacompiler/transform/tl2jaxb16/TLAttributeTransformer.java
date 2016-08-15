@@ -20,10 +20,10 @@ import org.opentravel.ns.ota2.librarymodel_v01_06.Documentation;
 import org.opentravel.ns.ota2.librarymodel_v01_06.Equivalent;
 import org.opentravel.ns.ota2.librarymodel_v01_06.Example;
 import org.opentravel.schemacompiler.model.TLAttribute;
-import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLEquivalent;
 import org.opentravel.schemacompiler.model.TLExample;
+import org.opentravel.schemacompiler.model.TLPropertyType;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.symbols.SymbolResolverTransformerContext;
 import org.opentravel.schemacompiler.transform.util.BaseTransformer;
@@ -46,12 +46,13 @@ public class TLAttributeTransformer extends
                 .getTransformer(TLEquivalent.class, Equivalent.class);
         ObjectTransformer<TLExample, Example, SymbolResolverTransformerContext> exTransformer = getTransformerFactory()
                 .getTransformer(TLExample.class, Example.class);
-        TLAttributeType attributeType = source.getType();
+        TLPropertyType attributeType = source.getType();
         Attribute attribute = new Attribute();
 
         attribute.setName(trimString(source.getName(), false));
         attribute.setMandatory(source.isMandatory() ? Boolean.TRUE : null);
-//        attribute.setReference(source.isReference() ? Boolean.TRUE : null);
+        attribute.setReference(source.isReference() ? Boolean.TRUE : null);
+        attribute.setReferenceRepeat(TLPropertyTransformer.convertRepeatValue(source.getReferenceRepeat()));
 
         if ((source.getDocumentation() != null) && !source.getDocumentation().isEmpty()) {
             ObjectTransformer<TLDocumentation, Documentation, SymbolResolverTransformerContext> docTransformer = getTransformerFactory()

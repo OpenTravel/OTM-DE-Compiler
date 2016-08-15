@@ -380,11 +380,14 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 			referenceAssignments.add(new JsonIdReferenceAssignment(null, 3,
 					attribute.getName(), false));
 		}
+        if (attribute.isReference()) {
+			referenceAssignments.add(new JsonIdReferenceAssignment(attribute.getType(),
+					getRepeatCount(attribute), getAttributeName(attribute), false));
+        }
 
 		// If the attribute was an open enumeration type, we have to add an
-		// additional attribute
-		// for the 'Extension' value.
-		TLAttributeType attributeType = attribute.getType();
+		// additional attribute for the 'Extension' value.
+		TLPropertyType attributeType = attribute.getType();
 
 		while (attributeType instanceof TLValueWithAttributes) {
 			attributeType = ((TLValueWithAttributes) attributeType)
@@ -758,31 +761,45 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 			}
 			JsonNode node;
 			
-			if (elementType instanceof TLListFacet || XsdCodegenUtils.isIdRefsType((TLPropertyType) elementType)) {
+			if (context.getModelAttribute().isReference()) {
+				String value = generateExampleValue(elementType);
+				
+				if (context.getModelAttribute().getReferenceRepeat() > 1) {
+					node = getArrayNode(value); // should be an array
+				} else {
+					node = getTextNode(value);
+				}
+				
+			} else if ((elementType instanceof TLListFacet)
+					|| XsdCodegenUtils.isIdRefsType((TLPropertyType) elementType)) {
 				node = generateExampleValueArrayNode(context.getModelAttribute());
+			
 			} else {
 				node = generateExampleValueNode(context.getModelAttribute());
 			}
-			((ObjectNode) context.getNode()).set(context.getModelAttribute()
-					.getName(), node);
+			((ObjectNode) context.getNode()).set(
+					getAttributeName(context.getModelAttribute()), node);
 
 		} else {
 			String nodeName = getElementName(elementType);
+			
 			if (contextStack.isEmpty() && (context.getNode() == null)) {
 				JsonNode jn = getSimpleTypeNode(elementType);
+				
 				context.setNode(node);
 				node.set(nodeName, jn);
+				
 			} else {
 				// If the element has not already been created, do it now
 				if (context.getNode() == null) {
-					JsonNode newNode;
 					TLProperty prop = context.getModelElement();
+					JsonNode newNode;
+					
 					if (prop.isReference()) {
 						String value = generateExampleValue(elementType);
+						
 						if (prop.getRepeat() > 1) {
-							// should be an array
-
-							newNode = getArrayNode(value);
+							newNode = getArrayNode(value); // should be an array
 						} else {
 							newNode = getTextNode(value);
 						}
@@ -794,8 +811,10 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 					// Assign the new DOM element as a child of the previous
 					// context
 					JsonNode currentNode = contextStack.peek().getNode();
+					
 					if (contextStack.isEmpty() || (currentNode == null)) {
 						node.set(nodeName, newNode);
+						
 					} else {
 						if (currentNode.isArray()) {
 							((ArrayNode) currentNode).add(newNode);
@@ -803,9 +822,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 							((ObjectNode) currentNode).set(nodeName, newNode);
 						}
 					}
-					// constructs a new DOM
-					// element with no
-					// content
+					// constructs a new DOM element with no content
 				}
 
 			}
@@ -834,7 +851,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
     	
     	if (values != null) {
     		for (String value : values.split(" ")) {
-    			arrayNode.add( getExampleValueNode( entity, value) );
+    			arrayNode.add(getExampleValueNode(entity, value));
     		}
     	}
     	return arrayNode;

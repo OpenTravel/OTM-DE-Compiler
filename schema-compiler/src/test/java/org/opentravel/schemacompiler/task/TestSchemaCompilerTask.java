@@ -19,8 +19,11 @@ import static org.junit.Assert.assertFalse;
 
 import java.io.File;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opentravel.schemacompiler.codegen.CodeGeneratorTestAssertions;
+import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.util.SchemaCompilerTestUtils;
 import org.opentravel.schemacompiler.validate.FindingMessageFormat;
 import org.opentravel.schemacompiler.validate.FindingType;
@@ -32,7 +35,19 @@ import org.opentravel.schemacompiler.validate.ValidationFindings;
  * @author S. Livezey
  */
 public class TestSchemaCompilerTask {
-
+	
+	/*
+	 */
+	@BeforeClass
+	public static void enableOTM16() throws Exception {
+		OTM16Upgrade.otm16Enabled = true;
+	}
+	
+	@AfterClass
+	public static void disableOTM16() throws Exception {
+		OTM16Upgrade.otm16Enabled = false;
+	}
+	
     @Test
     public void testSchemaCompilerTask() throws Exception {
         File catalogFile = new File(SchemaCompilerTestUtils.getBaseLibraryLocation()

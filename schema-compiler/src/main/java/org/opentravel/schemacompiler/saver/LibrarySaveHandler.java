@@ -17,16 +17,23 @@ package org.opentravel.schemacompiler.saver;
 
 import java.net.URL;
 
-import org.opentravel.ns.ota2.librarymodel_v01_05.Library;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 
 /**
  * Performs the work of saving library content back to its original URL location.
  * 
+ * @param <T>  the target type for the library format to be processed by this save handler
  * @author S. Livezey
  */
-public interface LibrarySaveHandler {
-
+public interface LibrarySaveHandler<T> {
+	
+	/**
+	 * Returns the target library format for the implementing class.
+	 * 
+	 * @return Class<T>
+	 */
+	public Class<T> getTargetFormat();
+	
     /**
      * Returns true if this handler is capable of saving library content to the given URL.
      * 
@@ -46,7 +53,7 @@ public interface LibrarySaveHandler {
      *            the library content to validate
      * @return ValidationFindings
      */
-    public ValidationFindings validateLibraryContent(Library library);
+    public ValidationFindings validateLibraryContent(T library);
 
     /**
      * Saves the given JAXB library to the specified URL location.
@@ -61,7 +68,7 @@ public interface LibrarySaveHandler {
      *             thrown if the handler does not support the protocol or location specified by the
      *             URL provided
      */
-    public void saveLibraryContent(URL libraryUrl, Library library) throws LibrarySaveException;
+    public void saveLibraryContent(URL libraryUrl, T library) throws LibrarySaveException;
 
     /**
      * Returns true if this save handler will create a backup file during processing of the

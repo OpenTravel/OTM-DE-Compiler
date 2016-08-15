@@ -75,10 +75,15 @@ public class FieldComparisonFacade {
 		this.assignedType = field.getType();
 		this.documentation = field.getDocumentation();
 		this.mandatory = field.isMandatory();
+		this.reference = field.isReference();
 		this.repeatCount = 0;
 		this.reference = false;
 		this.examples = ModelCompareUtils.getExamples( field );
 		this.equivalents = ModelCompareUtils.getEquivalents( field );
+		
+		if (this.reference) {
+			this.repeatCount = field.getReferenceRepeat();
+		}
 	}
 	
 	/**

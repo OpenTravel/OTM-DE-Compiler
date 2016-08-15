@@ -15,13 +15,15 @@
  */
 package org.opentravel.schemacompiler.saver;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-import org.opentravel.ns.ota2.librarymodel_v01_05.Library;
+import org.apache.commons.beanutils.BeanUtils;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
-import org.opentravel.schemacompiler.saver.impl.LibraryFileSaveHandler;
+import org.opentravel.schemacompiler.saver.impl.Library15FileSaveHandler;
+import org.opentravel.schemacompiler.saver.impl.Library16FileSaveHandler;
 import org.opentravel.schemacompiler.security.LibraryCrcCalculator;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.SymbolResolver;
@@ -31,6 +33,7 @@ import org.opentravel.schemacompiler.transform.symbols.SymbolTableFactory;
 import org.opentravel.schemacompiler.transform.tl2jaxb.TL2JaxbLibrarySymbolResolver;
 import org.opentravel.schemacompiler.transform.util.ChameleonFilter;
 import org.opentravel.schemacompiler.transform.util.LibraryPrefixResolver;
+import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.save.TLModelSaveValidator;
 
@@ -43,15 +46,16 @@ import org.opentravel.schemacompiler.validate.save.TLModelSaveValidator;
  */
 public final class LibraryModelSaver {
 
-    private LibrarySaveHandler saveHandler = new LibraryFileSaveHandler();
-
+    private LibrarySaveHandler<?> saveHandler =
+    		OTM16Upgrade.otm16Enabled ? new Library16FileSaveHandler() : new Library15FileSaveHandler();
+    
     /**
      * Returns the <code>LibrarySaveHandler</code> instance that will be used to persist the JAXB
      * library instances.
      * 
      * @return LibrarySaveHandler
      */
-    public LibrarySaveHandler getSaveHandler() {
+    public LibrarySaveHandler<?> getSaveHandler() {
         return saveHandler;
     }
 
@@ -62,7 +66,7 @@ public final class LibraryModelSaver {
      * @param saveHandler
      *            the save handler instance to assign
      */
-    public void setSaveHandler(LibrarySaveHandler saveHandler) {
+    public void setSaveHandler(LibrarySaveHandler<?> saveHandler) {
         this.saveHandler = saveHandler;
     }
 
@@ -153,7 +157,8 @@ public final class LibraryModelSaver {
      * @throws LibrarySaveException
      *             thrown if a problem occurs during the save operation
      */
-    private ValidationFindings saveLibrary(TLLibrary library,
+    @SuppressWarnings("unchecked")
+	private <T> ValidationFindings saveLibrary(TLLibrary library,
             SymbolResolverTransformerContext transformContext) throws LibrarySaveException {
         // Do some preliminary validation checks before proceeding
         if (library == null) {
@@ -167,25 +172,38 @@ public final class LibraryModelSaver {
         }
 
         // Transform the library to JAXB and use the handler to save the file
+        LibrarySaveHandler<T> handler = (LibrarySaveHandler<T>) getSaveHandler();
         TransformerFactory<SymbolResolverTransformerContext> factory = TransformerFactory
                 .getInstance(SchemaCompilerApplicationContext.SAVER_TRANSFORMER_FACTORY,
                         transformContext);
-        ObjectTransformer<TLLibrary, Library, SymbolResolverTransformerContext> libraryTransformer = factory
-                .getTransformer(TLLibrary.class, Library.class);
-        Library jaxbLibrary = libraryTransformer.transform(library);
+        ObjectTransformer<TLLibrary, T, SymbolResolverTransformerContext> libraryTransformer = factory
+        				.getTransformer(TLLibrary.class, handler.getTargetFormat());
+        T jaxbLibrary = libraryTransformer.transform(library);
 
         if (jaxbLibrary == null) {
             throw new LibrarySaveException("Unable to perform JAXB transformation for library '"
                     + library.getName() + "' during save operation.");
         }
-        jaxbLibrary.setCrcValue(calculateCrcValue(library));
+        
+        // Calculate the CRC value for any final libraries
+        try {
+        	Long crcValue = calculateCrcValue(library);
+        	
+        	if (crcValue != null) {
+    			BeanUtils.setProperty( jaxbLibrary, "crcValue", crcValue );
+        	}
+			
+		} catch (IllegalAccessException | InvocationTargetException e) {
+			// Should never happen, but ignore the exception if the JAXB library does not contain
+			// a 'crcValue' property.
+		}
 
         // Check for validation and JAXB problems before we save
         ValidationFindings findings = TLModelSaveValidator.validateModelElement(library);
-        findings.addAll(saveHandler.validateLibraryContent(jaxbLibrary));
+        findings.addAll(handler.validateLibraryContent(jaxbLibrary));
 
         // Now attempt to save the file
-        saveHandler.saveLibraryContent(library.getLibraryUrl(), jaxbLibrary);
+        handler.saveLibraryContent(library.getLibraryUrl(), jaxbLibrary);
 
         return findings;
     }

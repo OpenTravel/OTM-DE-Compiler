@@ -34,9 +34,10 @@ public class TLAttribute extends TLModelElement implements TLMemberField<TLAttri
 
     private TLAttributeOwner attributeOwner;
     private String name;
-    private TLAttributeType type;
+    private TLPropertyType type;
     private String typeName;
     private boolean isReference;
+    private int referenceRepeat;
     private boolean mandatory;
     private TLDocumentation documentation;
     private EquivalentListManager equivalentManager = new EquivalentListManager(this);
@@ -169,9 +170,9 @@ public class TLAttribute extends TLModelElement implements TLMemberField<TLAttri
     /**
      * Returns the value of the 'type' field.
      * 
-     * @return TLAttributeType
+     * @return TLPropertyType
      */
-    public TLAttributeType getType() {
+    public TLPropertyType getType() {
         return type;
     }
 
@@ -181,7 +182,7 @@ public class TLAttribute extends TLModelElement implements TLMemberField<TLAttri
      * @param type
      *            the field value to assign
      */
-    public void setType(TLAttributeType type) {
+    public void setType(TLPropertyType type) {
         ModelEvent<?> event = new ModelEventBuilder(ModelEventType.TYPE_ASSIGNMENT_MODIFIED, this)
                 .setOldValue(this.type).setNewValue(type).buildEvent();
 
@@ -228,6 +229,29 @@ public class TLAttribute extends TLModelElement implements TLMemberField<TLAttri
                 .setOldValue(this.isReference).setNewValue(isReference).buildEvent();
 
         this.isReference = isReference;
+        publishEvent(event);
+    }
+
+    /**
+     * Returns the value of the 'getReferenceRepeat' field.
+     * 
+     * @return int
+     */
+    public int getReferenceRepeat() {
+        return referenceRepeat;
+    }
+
+    /**
+     * Assigns the value of the 'isReferenceRepeat' field.
+     * 
+     * @param isReferenceRepeat
+     *            the field value to assign
+     */
+    public void setReferenceRepeat(int referenceRepeat) {
+        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.REFERENCE_REPEAT_MODIFIED, this)
+                .setOldValue(this.referenceRepeat).setNewValue(referenceRepeat).buildEvent();
+
+        this.referenceRepeat = referenceRepeat;
         publishEvent(event);
     }
 

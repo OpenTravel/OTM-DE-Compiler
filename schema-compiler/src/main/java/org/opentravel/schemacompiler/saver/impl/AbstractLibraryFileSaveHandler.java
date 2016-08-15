@@ -18,11 +18,13 @@ package org.opentravel.schemacompiler.saver.impl;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.XMLConstants;
@@ -30,13 +32,8 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
 
-import org.opentravel.ns.ota2.librarymodel_v01_05.Library;
-import org.opentravel.ns.ota2.librarymodel_v01_05.ObjectFactory;
-import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
 import org.opentravel.schemacompiler.loader.impl.LibraryValidationSource;
 import org.opentravel.schemacompiler.saver.LibrarySaveException;
@@ -54,23 +51,17 @@ import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
 /**
  * Default implementation that saves JAXB library content as a file on the local file system.
  * 
+ * @param <T>  the target type for the library format to be processed by this save handler
  * @author S. Livezey
  */
-public class LibraryFileSaveHandler implements LibrarySaveHandler {
-
-    private static final String SCHEMA_CONTEXT = ":org.w3._2001.xmlschema:org.opentravel.ns.ota2.librarymodel_v01_05";
+public abstract class AbstractLibraryFileSaveHandler<T> implements LibrarySaveHandler<T> {
 
     private static final String VALIDATION_MESSAGE_KEY = "org.opentravel.schemacompiler.TLLibrary.jaxbValidationWarning";
-    private static final String LIBRARY_SCHEMA_LOCATION_DECL = SchemaDeclarations.OTA2_LIBRARY_SCHEMA_1_5.getNamespace() +
-    		" " + SchemaDeclarations.OTA2_LIBRARY_SCHEMA_1_5.getFilename(CodeGeneratorFactory.XSD_TARGET_FORMAT);
 
     private static final Map<String, String> preferredPrefixMappings;
     private static final String[] schemaDeclarations = new String[] {
-            XMLConstants.W3C_XML_SCHEMA_NS_URI, XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI,
-            SchemaDeclarations.OTA2_LIBRARY_SCHEMA_1_5.getNamespace() };
-
-    private static JAXBContext jaxbContext;
-    private static Schema validationSchema;
+        XMLConstants.W3C_XML_SCHEMA_NS_URI, XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI
+    };
 
     private boolean createBackupFile = true;
 
@@ -83,16 +74,16 @@ public class LibraryFileSaveHandler implements LibrarySaveHandler {
     }
 
     /**
-     * @see org.opentravel.schemacompiler.saver.LibrarySaveHandler#validateLibraryContent(org.opentravel.ns.ota2.librarymodel_v01_03.Library)
+     * @see org.opentravel.schemacompiler.saver.LibrarySaveHandler#validateLibraryContent(java.lang.Object)
      */
     @Override
-    public ValidationFindings validateLibraryContent(Library library) {
+    public ValidationFindings validateLibraryContent(T library) {
         ValidationFindings findings = new ValidationFindings();
         try {
-            JAXBElement<Library> documentElement = new ObjectFactory().createLibrary(library);
-            Marshaller marshaller = jaxbContext.createMarshaller();
+            JAXBElement<T> documentElement = createLibraryElement(library);
+            Marshaller marshaller = getJaxbContext().createMarshaller();
 
-            marshaller.setSchema(validationSchema);
+            marshaller.setSchema(getValidationSchema());
             marshaller.marshal(documentElement, new DefaultHandler()); // effectively marshalls to
                                                                        // dev/null output
 
@@ -104,26 +95,25 @@ public class LibraryFileSaveHandler implements LibrarySaveHandler {
     }
 
     /**
-     * @see org.opentravel.schemacompiler.saver.LibrarySaveHandler#saveLibraryContent(java.net.URL,
-     *      org.opentravel.ns.ota2.librarymodel_v01_03.Library)
+     * @see org.opentravel.schemacompiler.saver.LibrarySaveHandler#saveLibraryContent(java.net.URL, java.lang.Object)
      */
     @Override
-    public void saveLibraryContent(URL libraryUrl, Library library) throws LibrarySaveException {
+    public void saveLibraryContent(URL libraryUrl, T library) throws LibrarySaveException {
         File libraryFile = getFileForURL(libraryUrl);
         File backupFile = createBackupFile ? createBackupFile(libraryFile) : null;
         boolean success = false;
         OutputStream out = null;
 
         try {
-            JAXBElement<Library> documentElement = new ObjectFactory().createLibrary(library);
-            Marshaller marshaller = jaxbContext.createMarshaller();
+            JAXBElement<T> documentElement = createLibraryElement(library);
+            Marshaller marshaller = getJaxbContext().createMarshaller();
             Document domDocument = XMLPrettyPrinter.newDocument();
 
             // Marshall the JAXB content
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
             marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper",
                     new LibrarySaveNamespacePrefixMapper());
-            marshaller.setProperty("jaxb.schemaLocation", LIBRARY_SCHEMA_LOCATION_DECL);
+            marshaller.setProperty("jaxb.schemaLocation", getLibrarySchemaLocation());
             marshaller.marshal(documentElement, domDocument); // no schema validation during
                                                               // file-save marshalling
 
@@ -171,7 +161,43 @@ public class LibraryFileSaveHandler implements LibrarySaveHandler {
     public void setCreateBackupFile(boolean createBackupFile) {
         this.createBackupFile = createBackupFile;
     }
-
+    
+    /**
+     * Returns the target namespace of the library file.
+     * 
+     * @return String
+     */
+    protected abstract String getLibraryTargetNamespace();
+    
+    /**
+     * Returns the <code>JAXBContext</code> to use when saving library files.
+     * 
+     * @return JAXBContext
+     */
+    protected abstract JAXBContext getJaxbContext();
+    
+    /**
+     * Returns a <code>JAXBElement</code> wrapper for the given JAXB library instance.
+     * 
+     * @param library  the JAXB library for which to return an element wrapper
+     * @return JAXBElement<T>
+     */
+    protected abstract JAXBElement<T> createLibraryElement(T library);
+    
+    /**
+     * Returns the validation schema for the target library file format.
+     * 
+     * @return Schema
+     */
+    protected abstract Schema getValidationSchema();
+    
+    /**
+     * Returns the XSI schema location declaration for the target library format.
+     * 
+     * @return String
+     */
+    protected abstract String getLibrarySchemaLocation();
+    
     /**
      * If the indicated 'libraryFile' already exists, the existing file will be renamed with a
      * ".bak" extension. If a backup file already exists, it will be deleted. If a backup file is
@@ -266,7 +292,16 @@ public class LibraryFileSaveHandler implements LibrarySaveHandler {
      * @author S. Livezey
      */
     private class LibrarySaveNamespacePrefixMapper extends NamespacePrefixMapper {
-
+    	
+    	private String[] schemaDecls;
+    	
+    	public LibrarySaveNamespacePrefixMapper() {
+    		List<String> decls = new ArrayList<>();
+    		
+    		decls.addAll( Arrays.asList( schemaDeclarations ) );
+    		decls.add( getLibraryTargetNamespace() );
+    		schemaDecls = decls.toArray( new String[ decls.size() ] );
+    	}
         /**
          * @see com.sun.xml.bind.marshaller.NamespacePrefixMapper#getPreferredPrefix(java.lang.String,
          *      java.lang.String, boolean)
@@ -283,27 +318,9 @@ public class LibraryFileSaveHandler implements LibrarySaveHandler {
          */
         @Override
         public String[] getPreDeclaredNamespaceUris() {
-            return schemaDeclarations;
+            return schemaDecls;
         }
 
-    }
-
-    /**
-     * Initializes the validation schema and shared JAXB context.
-     */
-    static {
-        try {
-            SchemaFactory schemaFactory = SchemaFactory
-                    .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            InputStream schemaStream = SchemaDeclarations.OTA2_LIBRARY_SCHEMA_1_5.getContent(
-            		CodeGeneratorFactory.XSD_TARGET_FORMAT);
-
-            validationSchema = schemaFactory.newSchema(new StreamSource(schemaStream));
-            jaxbContext = JAXBContext.newInstance(SCHEMA_CONTEXT);
-
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
-        }
     }
 
     /**

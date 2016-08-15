@@ -763,11 +763,20 @@ public class ExampleNavigator {
             incrementRecursionCount(attribute);
 
             if (canVisit(attribute)) {
-                TLAttributeType attributeType = PropertyCodegenUtils.getAttributeType( attribute );
+            	TLPropertyType attributeType = PropertyCodegenUtils.getAttributeType( attribute );
 
                 if (!PropertyCodegenUtils.isEmptyStringType( attributeType )) {
                     visitor.startAttribute(attribute);
-                    navigateSimpleType(attributeType);
+                    
+                    if (attribute.isReference()) {
+                        boolean multipleValues = (attribute.getReferenceRepeat() > 1);
+
+                        navigateSimpleType(getSchemaForSchemasType(attribute.getOwningModel(),
+                                multipleValues ? "IDREFS" : "IDREF"));
+                        
+                    } else {
+                        navigateSimpleType((TLAttributeType) attributeType);
+                    }
                     visitor.endAttribute(attribute);
                 }
             }

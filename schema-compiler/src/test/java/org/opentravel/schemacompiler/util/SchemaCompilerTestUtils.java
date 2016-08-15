@@ -38,7 +38,11 @@ public class SchemaCompilerTestUtils {
      * @return String
      */
     public static String getBaseLibraryLocation() {
-        return System.getProperty("user.dir") + "/src/test/resources/libraries_1_5";
+    	if (OTM16Upgrade.otm16Enabled) {
+            return System.getProperty("user.dir") + "/src/test/resources/libraries_1_6";
+    	} else {
+            return System.getProperty("user.dir") + "/src/test/resources/libraries_1_5";
+    	}
     }
 
     /**

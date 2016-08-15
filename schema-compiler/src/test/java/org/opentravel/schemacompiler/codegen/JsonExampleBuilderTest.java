@@ -26,17 +26,17 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.opentravel.schemacompiler.codegen.example.ExampleGeneratorOptions;
-import org.opentravel.schemacompiler.codegen.example.ExampleJsonBuilder;
 import org.opentravel.schemacompiler.codegen.example.ExampleGeneratorOptions.DetailLevel;
+import org.opentravel.schemacompiler.codegen.example.ExampleJsonBuilder;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.model.TLAttribute;
-import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLProperty;
+import org.opentravel.schemacompiler.model.TLPropertyType;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
@@ -124,7 +124,7 @@ public class JsonExampleBuilderTest extends AbstractTestTransformers {
 	public void testSimpleListsShouldBeAnArray() throws Exception {
 		JsonNode node = exampleBuilder.buildTree();
 		TLAttribute attribute = testFacet.getAttribute("sampleCoreAttrlist");
-		TLAttributeType type = attribute.getType();
+		TLPropertyType type = attribute.getType();
 		assertTrue(type instanceof TLListFacet);
 		assertTrue(((TLListFacet) type).getItemFacet() instanceof TLSimpleFacet);
 		String name = attribute.getName();

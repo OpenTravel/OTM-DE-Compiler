@@ -194,7 +194,8 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
             } else {
                 if (target.isReference() && (target.getName() != null)
                         && !target.getName().endsWith("Ref")) {
-                    builder.addFinding(FindingType.WARNING, "name", WARNING_INVALID_REFERENCE_NAME);
+                    builder.addFinding(FindingType.WARNING, "name", WARNING_INVALID_REFERENCE_NAME,
+                    		target.getName() + "Ref");
                 }
             }
         }
@@ -291,7 +292,7 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
      *            the named entity to analyze
      * @return boolean
      */
-    private boolean hasID(NamedEntity entity) {
+    protected static boolean hasID(NamedEntity entity) {
         boolean result = false;
 
         if (entity instanceof TLValueWithAttributes) {
@@ -313,6 +314,9 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
 
             if (entity instanceof TLFacet) {
                 entityFacet = (TLFacet) entity;
+
+            } else if (entity instanceof TLChoiceObject) {
+                entityFacet = ((TLChoiceObject) entity).getSharedFacet();
 
             } else if (entity instanceof TLCoreObject) {
                 entityFacet = ((TLCoreObject) entity).getSummaryFacet();
@@ -350,7 +354,7 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
      *            the type reference to analyze
      * @return boolean
      */
-    private boolean isIDType(NamedEntity type) {
+    private static boolean isIDType(NamedEntity type) {
         return (type != null) && type.getNamespace().equals(XMLConstants.W3C_XML_SCHEMA_NS_URI)
                 && type.getLocalName().equals("ID");
     }

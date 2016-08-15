@@ -24,11 +24,11 @@ import java.util.Set;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAttribute;
-import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLModelElement;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
+import org.opentravel.schemacompiler.model.TLPropertyType;
 import org.opentravel.schemacompiler.model.TLRoleEnumeration;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
@@ -131,10 +131,10 @@ public class TLValueWithAttributesCompileValidator extends TLValueWithAttributes
         // name but different type assignments.
         List<TLAttribute> attributesWithDuplicates = PropertyCodegenUtils
                 .getInheritedAttributes(target);
-        Map<String, TLAttributeType> attributeTypes = new HashMap<String, TLAttributeType>();
+        Map<String, TLPropertyType> attributeTypes = new HashMap<>();
 
         for (TLAttribute attribute : attributesWithDuplicates) {
-            TLAttributeType existingType = attributeTypes.get(attribute.getName());
+        	TLPropertyType existingType = attributeTypes.get(attribute.getName());
 
             if (existingType == null) { // First time we have seen an attribute with this name
                 attributeTypes.put(attribute.getName(), attribute.getType());
@@ -167,7 +167,7 @@ public class TLValueWithAttributesCompileValidator extends TLValueWithAttributes
      * @return boolean
      */
     private boolean isOpenEnumerationAttribute(TLAttribute attribute) {
-        TLAttributeType attributeType = attribute.getType();
+    	TLPropertyType attributeType = attribute.getType();
 
         return (attributeType instanceof TLOpenEnumeration)
                 || ((attributeType instanceof TLValueWithAttributes) && parentTypeIsOpenEnumeration((TLValueWithAttributes) attributeType));

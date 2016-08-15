@@ -217,8 +217,8 @@ public class EntityReferenceResolutionVisitor extends ModelElementVisitorAdapter
         if ((attribute.getType() == null) && (attribute.getTypeName() != null)) {
             Object ref = symbolResolver.resolveEntity(attribute.getTypeName());
 
-            if (ref instanceof TLAttributeType) {
-                attribute.setType((TLAttributeType) ref);
+            if (ref instanceof TLPropertyType) {
+            	attribute.setType((TLPropertyType) ref);
             }
         }
         return true;

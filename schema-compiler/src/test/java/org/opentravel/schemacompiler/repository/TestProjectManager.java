@@ -30,11 +30,6 @@ import org.opentravel.schemacompiler.ic.ModelIntegrityChecker;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLSimple;
-import org.opentravel.schemacompiler.repository.Project;
-import org.opentravel.schemacompiler.repository.ProjectItem;
-import org.opentravel.schemacompiler.repository.ProjectManager;
-import org.opentravel.schemacompiler.repository.RemoteRepository;
-import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.util.SchemaCompilerTestUtils;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingMessageFormat;
@@ -160,19 +155,26 @@ public class TestProjectManager {
         Project project = projectManager.newProject(projectFile,
                 "http://www.OpenTravel.org/projects/test/t1", "Test Project",
                 "Description of the test project");
-
+        ValidationFindings saveFindings = new ValidationFindings();
+        
         projectManager.addUnmanagedProjectItem(libraryFile, project);
 
         for (ProjectItem item : project.getProjectItems()) {
             item.getContent().setLibraryUrl(
                     URLUtils.toURL(new File(projectTestFolder, "/" + item.getFilename())));
         }
-        projectManager.saveProject(project);
+        projectManager.saveProject(project, saveFindings);
+        SchemaCompilerTestUtils.printFindings(saveFindings);
+        assertFalse(saveFindings.hasFinding());
+        
         projectManager.closeAll();
         project = null;
 
         // Re-load the file we just finished saving
-        project = projectManager.loadProject(projectFile);
+        ValidationFindings loadFindings = new ValidationFindings();
+        project = projectManager.loadProject(projectFile, loadFindings);
+        SchemaCompilerTestUtils.printFindings(loadFindings);
+        assertFalse(loadFindings.hasFinding(FindingType.ERROR));
 
         // Verify that all of the required project-items were included in the file we just re-loaded
         List<String> globalProjectItems = getProjectItemNames(projectManager);

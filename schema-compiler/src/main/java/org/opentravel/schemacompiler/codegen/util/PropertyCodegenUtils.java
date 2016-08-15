@@ -1203,10 +1203,10 @@ public class PropertyCodegenUtils {
      * simple base type.
      * 
      * @param attribute  the attribute for which to return the type
-     * @return TLAttributeType
+     * @return TLPropertyType
      */
-    public static TLAttributeType getAttributeType(TLAttribute attribute) {
-        TLAttributeType attributeType = attribute.getType();
+    public static TLPropertyType getAttributeType(TLAttribute attribute) {
+    	TLPropertyType attributeType = attribute.getType();
 
         while (attributeType instanceof TLValueWithAttributes) {
             attributeType = (TLAttributeType) ((TLValueWithAttributes) attributeType)

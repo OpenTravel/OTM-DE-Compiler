@@ -47,6 +47,9 @@ public class FacetMemberIdentityResolver implements IdentityResolver<TLModelElem
             } else {
                 identity = attribute.getName();
             }
+            if ((identity != null) && attribute.isReference() && !identity.endsWith("Ref")) {
+            	identity += "Ref";
+            }
 
         } else if (entity instanceof TLProperty) {
             TLProperty element = (TLProperty) entity;
@@ -62,6 +65,10 @@ public class FacetMemberIdentityResolver implements IdentityResolver<TLModelElem
             } else {
                 identity = element.getName();
             }
+            if ((identity != null) && element.isReference() && !identity.endsWith("Ref")) {
+            	identity += "Ref";
+            }
+            
         } else if (entity instanceof TLIndicator) {
             identity = ((TLIndicator) entity).getName();
 

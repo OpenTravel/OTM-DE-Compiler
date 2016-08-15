@@ -433,13 +433,22 @@ public enum ModelEventType {
     TYPE_ASSIGNMENT_MODIFIED(ValueChangeEvent.class),
 
     /**
-     * Event type sent when the 'isReference' flag of a property was modified.
+     * Event type sent when the 'isReference' flag of an attribute or property was modified.
      * 
      * <p>
      * <u>Event</u>: <code>ValueChangeEvent</code> <br>
-     * <u>Source Object</u>: <code>TLProperty</code>
+     * <u>Source Object</u>: <code>TLAttribute</code> or <code>TLProperty</code>
      */
     REFERENCE_FLAG_MODIFIED(ValueChangeEvent.class),
+
+    /**
+     * Event type sent when the 'referenceRepeat' value of an attribute was modified.
+     * 
+     * <p>
+     * <u>Event</u>: <code>ValueChangeEvent</code> <br>
+     * <u>Source Object</u>: <code>TLAttribute</code>
+     */
+    REFERENCE_REPEAT_MODIFIED(ValueChangeEvent.class),
 
     /**
      * Event type sent when the prefix of a namespace import was modified.

@@ -83,6 +83,7 @@
             <Equivalent context="test">attr4-equivalent</Equivalent>
         </Attribute>
         <Attribute mandatory="true" name="idrefAttr" type="xsd:IDREFS"/>
+        <Attribute mandatory="true" name="sampleChoice" type="SampleChoice" reference="true" referenceRepeat="2" />
         <Indicator name="indicator1" publishAsElement="false"/>
     </ValueWithAttrs>
     
@@ -307,6 +308,7 @@
             <Element name="name" repeat="0" type="xsd:string"/>
         </Summary>
         <Detail>
+	        <Attribute mandatory="true" name="sampleBusinessObject" type="SampleBusinessObject" reference="true" referenceRepeat="2" />
             <Element name="SampleVWA" repeat="0" type="MyVWA"/>
             <Element name="SampleCore_Simple_List" repeat="0" type="SampleCore_Simple_List"/>
             <Element name="SampleCoreDetail" repeat="2" type="SampleCore_Detail_List"/>

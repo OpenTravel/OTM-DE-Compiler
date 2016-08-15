@@ -331,16 +331,20 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
 
         // Queue up IDREF(S) attributes for assignment during post-processing
         if (XsdCodegenUtils.isIdRefType(attribute.getType())) {
-			referenceAssignments.add(new DOMIdReferenceAssignment(null, 1, attribute.getName()));
+			referenceAssignments.add(new DOMIdReferenceAssignment(null, 1, getAttributeName(attribute)));
         }
         if (XsdCodegenUtils.isIdRefsType(attribute.getType())) {
-			referenceAssignments.add(new DOMIdReferenceAssignment(null, 3, attribute.getName()));
+			referenceAssignments.add(new DOMIdReferenceAssignment(null, 3, getAttributeName(attribute)));
+        }
+        if (attribute.isReference()) {
+			referenceAssignments.add(new DOMIdReferenceAssignment(
+					attribute.getType(), getRepeatCount(attribute), getAttributeName(attribute)));
         }
 
 		// If the attribute was an open enumeration type, we have to add an
 		// additional attribute
         // for the 'Extension' value.
-        TLAttributeType attributeType = attribute.getType();
+        TLPropertyType attributeType = attribute.getType();
 
         while (attributeType instanceof TLValueWithAttributes) {
 			attributeType = ((TLValueWithAttributes) attributeType)
@@ -391,11 +395,10 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
 			referenceAssignments.add(new DOMIdReferenceAssignment(null, 3));
         }
         if (element.isReference()) {
-			int referenceCount = (element.getRepeat() <= 1) ? 1 : element
-					.getRepeat();
+			int referenceCount = (element.getRepeat() <= 1) ? 1 : element.getRepeat();
 
-			referenceAssignments.add(new DOMIdReferenceAssignment(element
-					.getType(), referenceCount));
+			referenceAssignments.add(
+					new DOMIdReferenceAssignment(element.getType(), referenceCount));
         }
         context = contextStack.pop();
     }
@@ -639,33 +642,39 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
 				throw new IllegalStateException(
 						"No element available for new attribute creation.");
             }
-			context.getNode().setAttribute(
-					context.getModelAttribute().getName(),
-                    generateExampleValue(context.getModelAttribute()));
+			
+			if (context.getModelAttribute().isReference()) {
+				context.getNode().setAttribute(
+						getAttributeName(context.getModelAttribute()),
+	                    generateExampleValue(elementType));
+				
+			} else {
+				context.getNode().setAttribute(
+						getAttributeName(context.getModelAttribute()),
+	                    generateExampleValue(context.getModelAttribute()));
+			}
 
         } else {
 			if (contextStack.isEmpty() && (context.getNode() == null)) {
 				Element rootElement = createXmlElement(
-						elementType.getNamespace(), elementType.getLocalName(),
-						elementType);
+						elementType.getNamespace(), elementType.getLocalName(), elementType);
 
                 rootElement.setTextContent(generateExampleValue(elementType));
 				context.setNode(rootElement);
                 domDocument.appendChild(rootElement);
+                
             } else {
-                // If the element has not already been created, do it now
+                // If the element has not already been created, do it now...
 				if (context.getNode() == null) {
-					createComplexElement(elementType); // constructs a new DOM
-														// element with no
-                                                       // content
+					// Constructs a new DOM element with no content
+					createComplexElement(elementType); 
                 }
+				
                 if (context.getModelElement().isReference()) {
-					context.getNode().setTextContent(
-							generateExampleValue(elementType));
+					context.getNode().setTextContent(generateExampleValue(elementType));
 
                 } else {
-					context.getNode().setTextContent(
-                            generateExampleValue(context.getModelElement()));
+					context.getNode().setTextContent(generateExampleValue(context.getModelElement()));
                 }
             }
         }

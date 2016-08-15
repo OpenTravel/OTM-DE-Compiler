@@ -24,9 +24,9 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonType;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.TLAttribute;
-import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
+import org.opentravel.schemacompiler.model.TLPropertyType;
 import org.opentravel.schemacompiler.model.TLRole;
 import org.opentravel.schemacompiler.model.TLRoleEnumeration;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
@@ -43,7 +43,7 @@ public class TLAttributeJsonCodegenTransformer extends AbstractJsonSchemaTransfo
 	 */
 	@Override
 	public CodegenArtifacts transform(TLAttribute source) {
-        TLAttributeType attributeType = PropertyCodegenUtils.getAttributeType(source);
+		TLPropertyType attributeType = PropertyCodegenUtils.getAttributeType(source);
 		CodegenArtifacts artifacts = new CodegenArtifacts();
 		
 		if (!PropertyCodegenUtils.isEmptyStringType( attributeType )) {
@@ -54,7 +54,12 @@ public class TLAttributeJsonCodegenTransformer extends AbstractJsonSchemaTransfo
 	        if ((source.getName() == null) || (source.getName().length() == 0)) {
 	            attr.setName(attributeType.getLocalName());
 	        } else {
-	            attr.setName(source.getName());
+            	String attrName = source.getName();
+            	
+            	if (source.isReference() && !attrName.endsWith("Ref")) {
+            		attrName += "Ref";
+            	}
+	            attr.setName(attrName);
 	        }
 			attr.setSchema( attrSchemaRef );
 			attr.setRequired( source.isMandatory() );
@@ -105,7 +110,7 @@ public class TLAttributeJsonCodegenTransformer extends AbstractJsonSchemaTransfo
 	 * @param attributeType  the attribute type to assign
 	 * @param source  the source attribute from the OTM model
 	 */
-	private void setAttributeType(JsonSchemaReference attrSchemaRef, TLAttributeType attributeType, TLAttribute source) {
+	private void setAttributeType(JsonSchemaReference attrSchemaRef, TLPropertyType attributeType, TLAttribute source) {
         JsonType jsonType = JsonType.valueOf( attributeType );
         
         if (jsonType != null) {
@@ -116,6 +121,26 @@ public class TLAttributeJsonCodegenTransformer extends AbstractJsonSchemaTransfo
     		attrSchema.getEquivalentItems().addAll( jsonUtils.getEquivalentInfo( source ) );
     		attrSchemaRef.setSchema( attrSchema );
     		
+        } else if (source.isReference()) {
+            boolean isMultipleReference = (source.getReferenceRepeat() > 1) || (source.getReferenceRepeat() < 0);
+        	
+            if (isMultipleReference) {
+        		JsonSchema attrSchema = new JsonSchema();
+            	JsonSchema itemSchema = new JsonSchema();
+            	
+            	itemSchema.setType( JsonType.jsonString );
+            	attrSchema.setType( JsonType.jsonArray );
+            	attrSchema.setItems( new JsonSchemaReference( itemSchema ) );
+        		attrSchemaRef.setSchema( attrSchema );
+            	
+            } else {
+            	JsonSchema attrSchema = jsonUtils.buildSimpleTypeSchema( JsonType.jsonString );
+            	
+        		transformDocumentation( source, attrSchema );
+        		attrSchema.getExampleItems().addAll( jsonUtils.getExampleInfo( source ) );
+        		attrSchema.getEquivalentItems().addAll( jsonUtils.getEquivalentInfo( source ) );
+        		attrSchemaRef.setSchema( attrSchema );
+            }
         } else if (attributeType instanceof XSDSimpleType) {
         	JsonDocumentation doc = new JsonDocumentation();
         	JsonSchema attrSchema = new JsonSchema();

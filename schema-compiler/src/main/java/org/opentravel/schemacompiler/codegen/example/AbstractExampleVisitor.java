@@ -35,6 +35,7 @@ import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLAttributeOwner;
 import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
@@ -610,12 +611,44 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
  		}
  		return epfName;
  	}
+ 	
+ 	/**
+ 	 * Returns the attribute name as it should be generated in the example document.
+ 	 * 
+ 	 * @param attribute  the attribute whose name is to be returned
+ 	 * @return String
+ 	 */
+ 	protected String getAttributeName(TLAttribute attribute) {
+ 		String attrName = attribute.getName();
+ 		
+ 		if ((attrName != null) && attribute.isReference() && !attrName.endsWith("Ref")) {
+ 			attrName += "Ref";
+ 		}
+ 		return attrName;
+ 	}
+ 	
+ 	/**
+ 	 * Returns the repeat count for the given attribute.
+ 	 * 
+ 	 * @param attribute  the attribute to check
+ 	 * @return int
+ 	 */
+ 	protected int getRepeatCount(TLAttribute attribute) {
+ 		int refRepeat = attribute.getReferenceRepeat();
+ 		
+ 		if (refRepeat == 0) {
+ 			refRepeat = 1;
+ 		} else if (refRepeat < 0) {
+ 			refRepeat = 3;
+ 		}
+ 		return refRepeat;
+ 	}
 
  	/**
  	 * Handles the deferred assignment of 'IDREF' and 'IDREFS' values as a
  	 * post-processing step of the example generation process.
  	 */
- 	protected abstract class IdReferenceAssignment {
+	protected abstract class IdReferenceAssignment {
 
  		protected String nodeName;
  		protected NamedEntity referencedEntity;
@@ -671,15 +704,15 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
  		protected String getIdValues() {
  			QName elementName = getReferenceElementName();
  			List<String> idValues = idRegistry.get(elementName);
- 			int count = (idValues == null) ? 0 : Math.min(referenceCount,
- 					idValues.size());
+ 			int count = (idValues == null) ? 0 : Math.min(referenceCount, idValues.size());
  			StringBuilder valueStr = new StringBuilder();
 
  			for (int i = 0; i < count; i++) {
  				String id = idValues.remove(0);
 
- 				if (valueStr.length() > 0)
+ 				if (valueStr.length() > 0) {
  					valueStr.append(" ");
+ 				}
  				valueStr.append(id);
  				idValues.add(id); // rotate to the end of the list
  			}
@@ -747,27 +780,20 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
  			entityNames.add(new QName(entityRef.getNamespace(), entityRef
  					.getLocalName()));
 
- 			// If the entity is a Core or Business Object (or a Core/BO alias),
- 			// we can include the
- 			// names of
- 			// its non-query facets in the list of eligible entities
+ 			// If the entity is a Core, Business Object, or Choice (or a Core/BO/Choice alias),
+ 			// we can include the names of its non-query facets in the list of eligible entities
  			if (entityRef instanceof TLAlias) {
  				TLAlias entityAlias = (TLAlias) entityRef;
  				NamedEntity owner = entityAlias.getOwningEntity();
 
  				if (owner instanceof TLBusinessObject) {
  					TLBusinessObject entity = (TLBusinessObject) owner;
- 					TLAlias idAlias = AliasCodegenUtils.getFacetAlias(
- 							entityAlias, TLFacetType.ID);
- 					TLAlias summaryAlias = AliasCodegenUtils.getFacetAlias(
- 							entityAlias, TLFacetType.SUMMARY);
- 					TLAlias detailAlias = AliasCodegenUtils.getFacetAlias(
- 							entityAlias, TLFacetType.DETAIL);
+ 					TLAlias idAlias = AliasCodegenUtils.getFacetAlias(entityAlias, TLFacetType.ID);
+ 					TLAlias summaryAlias = AliasCodegenUtils.getFacetAlias(entityAlias, TLFacetType.SUMMARY);
+ 					TLAlias detailAlias = AliasCodegenUtils.getFacetAlias(entityAlias, TLFacetType.DETAIL);
 
- 					entityNames.add(new QName(idAlias.getNamespace(), idAlias
- 							.getLocalName()));
- 					entityNames.add(new QName(summaryAlias.getNamespace(),
- 							summaryAlias.getLocalName()));
+ 					entityNames.add(new QName(idAlias.getNamespace(), idAlias.getLocalName()));
+ 					entityNames.add(new QName(summaryAlias.getNamespace(), summaryAlias.getLocalName()));
 
  					for (TLFacet customFacet : entity.getCustomFacets()) {
  						TLAlias customAlias = AliasCodegenUtils.getFacetAlias(
@@ -775,51 +801,68 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
  								customFacet.getContext(),
  								customFacet.getLabel());
 
- 						entityNames.add(new QName(customAlias.getNamespace(),
- 								customAlias.getLocalName()));
+ 						entityNames.add(new QName(customAlias.getNamespace(), customAlias.getLocalName()));
  					}
- 					entityNames.add(new QName(detailAlias.getNamespace(),
- 							detailAlias.getLocalName()));
+ 					entityNames.add(new QName(detailAlias.getNamespace(), detailAlias.getLocalName()));
 
  				} else if (owner instanceof TLCoreObject) {
- 					TLAlias summaryAlias = AliasCodegenUtils.getFacetAlias(
- 							entityAlias, TLFacetType.SUMMARY);
- 					TLAlias detailAlias = AliasCodegenUtils.getFacetAlias(
- 							entityAlias, TLFacetType.DETAIL);
+ 					TLAlias summaryAlias = AliasCodegenUtils.getFacetAlias(entityAlias, TLFacetType.SUMMARY);
+ 					TLAlias detailAlias = AliasCodegenUtils.getFacetAlias(entityAlias, TLFacetType.DETAIL);
 
- 					entityNames.add(new QName(summaryAlias.getNamespace(),
- 							summaryAlias.getLocalName()));
- 					entityNames.add(new QName(detailAlias.getNamespace(),
- 							detailAlias.getLocalName()));
+ 					entityNames.add(new QName(summaryAlias.getNamespace(), summaryAlias.getLocalName()));
+ 					entityNames.add(new QName(detailAlias.getNamespace(), detailAlias.getLocalName()));
+ 					
+ 				} else if (owner instanceof TLChoiceObject) {
+ 					TLChoiceObject entity = (TLChoiceObject) owner;
+ 					TLAlias sharedAlias = AliasCodegenUtils.getFacetAlias(entityAlias, TLFacetType.SHARED);
+
+ 					entityNames.add(new QName(sharedAlias.getNamespace(), sharedAlias.getLocalName()));
+
+ 					for (TLFacet choiceFacet : entity.getChoiceFacets()) {
+ 						TLAlias choiceAlias = AliasCodegenUtils.getFacetAlias(
+ 								entityAlias, TLFacetType.CHOICE,
+ 								choiceFacet.getContext(),
+ 								choiceFacet.getLabel());
+
+ 						entityNames.add(new QName(choiceAlias.getNamespace(), choiceAlias.getLocalName()));
+ 					}
  				}
+ 				
  			} else {
  				if (entityRef instanceof TLBusinessObject) {
  					TLBusinessObject entity = (TLBusinessObject) entityRef;
 
- 					entityNames
- 							.add(new QName(entity.getIdFacet().getNamespace(),
- 									entity.getIdFacet().getLocalName()));
- 					entityNames.add(new QName(entity.getSummaryFacet()
- 							.getNamespace(), entity.getSummaryFacet()
- 							.getLocalName()));
+ 					entityNames.add(new QName(entity.getIdFacet().getNamespace(),
+ 							entity.getIdFacet().getLocalName()));
+ 					entityNames.add(new QName(entity.getSummaryFacet().getNamespace(),
+ 							entity.getSummaryFacet().getLocalName()));
 
  					for (TLFacet customFacet : entity.getCustomFacets()) {
  						entityNames.add(new QName(customFacet.getNamespace(),
  								customFacet.getLocalName()));
  					}
- 					entityNames.add(new QName(entity.getDetailFacet()
- 							.getNamespace(), entity.getDetailFacet()
- 							.getLocalName()));
+ 					entityNames.add(new QName(entity.getDetailFacet().getNamespace(),
+ 							entity.getDetailFacet().getLocalName()));
 
  				} else if (entityRef instanceof TLCoreObject) {
  					TLCoreObject entity = (TLCoreObject) entityRef;
 
- 					entityNames.add(new QName(entity.getSummaryFacet()
- 							.getNamespace(), entity.getSummaryFacet()
- 							.getLocalName()));
- 					entityNames.add(new QName(entity.getDetailFacet()
- 							.getNamespace(), entity.getDetailFacet()
- 							.getLocalName()));
+ 					entityNames.add(new QName(entity.getSummaryFacet().getNamespace(),
+ 							entity.getSummaryFacet().getLocalName()));
+ 					entityNames.add(new QName(entity.getDetailFacet().getNamespace(),
+ 							entity.getDetailFacet().getLocalName()));
+ 					
+ 				} else if (entityRef instanceof TLChoiceObject) {
+ 					TLChoiceObject entity = (TLChoiceObject) entityRef;
+
+ 					entityNames.add(new QName(entity.getSharedFacet().getNamespace(),
+ 							entity.getSharedFacet().getLocalName()));
+
+ 					for (TLFacet choiceFacet : entity.getChoiceFacets()) {
+ 						entityNames.add(new QName(choiceFacet.getNamespace(),
+ 								choiceFacet.getLocalName()));
+ 					}
+ 					
  				}
  			}
  		}

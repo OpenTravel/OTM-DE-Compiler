@@ -73,9 +73,21 @@
       <xsd:attribute name="reference" type="xsd:boolean" use="optional">
          <xsd:annotation>
             <xsd:documentation>Indicates whether the 'type' attribute indicates a reference
-            to the indicated type using an IDREF (or IDREFS) element.
+            to the indicated type using an IDREF (or IDREFS) attribute.
             </xsd:documentation>
          </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="referenceRepeat">
+         <xsd:annotation>
+            <xsd:documentation>When the 'reference' indicator is true, this field specifies the
+            maximum number of occurrances of the reference.
+            </xsd:documentation>
+         </xsd:annotation>
+         <xsd:simpleType>
+            <xsd:restriction base="xsd:string">
+               <xsd:pattern value="[0-9]+|\*" />
+            </xsd:restriction>
+         </xsd:simpleType>
       </xsd:attribute>
       <xsd:attribute name="mandatory" type="xsd:boolean" use="optional">
          <xsd:annotation>

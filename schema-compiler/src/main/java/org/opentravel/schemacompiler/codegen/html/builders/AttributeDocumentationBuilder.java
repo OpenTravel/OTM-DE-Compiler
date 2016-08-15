@@ -18,7 +18,7 @@ package org.opentravel.schemacompiler.codegen.html.builders;
 import org.opentravel.schemacompiler.codegen.example.ExampleValueGenerator;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLAttributeOwner;
-import org.opentravel.schemacompiler.model.TLAttributeType;
+import org.opentravel.schemacompiler.model.TLPropertyType;
 import org.opentravel.schemacompiler.model.TLSimple;
 
 
@@ -37,7 +37,7 @@ public class AttributeDocumentationBuilder extends
 		name = t.getName();		
 		isRequired = t.isMandatory();
 		
-		TLAttributeType  propertyType = t.getType();	
+		TLPropertyType  propertyType = t.getType();	
 		type = DocumentationBuilderFactory.getInstance().getDocumentationBuilder(propertyType);
 		typeName = propertyType.getNamespace() +":" + propertyType.getLocalName();
 		TLAttributeOwner attributeOwner = t.getOwner();

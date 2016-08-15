@@ -15,6 +15,7 @@
  */
 package org.opentravel.schemacompiler.codegen.xsd;
 
+import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
@@ -24,10 +25,10 @@ import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.TLAttribute;
-import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
+import org.opentravel.schemacompiler.model.TLPropertyType;
 import org.opentravel.schemacompiler.model.TLRole;
 import org.opentravel.schemacompiler.model.TLRoleEnumeration;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
@@ -50,7 +51,7 @@ public class TLAttributeCodegenTransformer extends
      */
     @Override
     public CodegenArtifacts transform(TLAttribute source) {
-        TLAttributeType attributeType = PropertyCodegenUtils.getAttributeType(source);
+    	TLPropertyType attributeType = PropertyCodegenUtils.getAttributeType(source);
         CodegenArtifacts artifacts = new CodegenArtifacts();
         
         if (!PropertyCodegenUtils.isEmptyStringType( attributeType )) {
@@ -60,11 +61,23 @@ public class TLAttributeCodegenTransformer extends
             if ((source.getName() == null) || (source.getName().length() == 0)) {
                 attr.setName(attributeType.getLocalName());
             } else {
-                attr.setName(source.getName());
+            	String attrName = source.getName();
+            	
+            	if (source.isReference() && !attrName.endsWith("Ref")) {
+            		attrName += "Ref";
+            	}
+                attr.setName(attrName);
             }
             artifacts.addArtifact(attr);
-
-            if (attributeType instanceof TLCoreObject) {
+            
+            if (source.isReference()) {
+                boolean isMultipleReference =
+                		(source.getReferenceRepeat() > 1) || (source.getReferenceRepeat() < 0);
+            	
+                attr.setType(new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI,
+                        isMultipleReference ? "IDREFS" : "IDREF"));
+                
+            } else if (attributeType instanceof TLCoreObject) {
                 // Special Case: For core objects, use the simple facet as the attribute type
                 TLCoreObject coreObject = (TLCoreObject) attributeType;
                 TLSimpleFacet coreSimple = coreObject.getSimpleFacet();
