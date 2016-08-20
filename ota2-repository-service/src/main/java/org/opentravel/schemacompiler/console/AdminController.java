@@ -33,6 +33,7 @@ import org.opentravel.schemacompiler.repository.RepositoryComponentFactory;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
+import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
 import org.opentravel.schemacompiler.security.AuthenticationProvider;
 import org.opentravel.schemacompiler.security.AuthorizationResource;
 import org.opentravel.schemacompiler.security.GroupAssignmentsResource;
@@ -235,8 +236,7 @@ public class AdminController extends BaseController {
             if (authorizationFile.exists()) {
                 jaxbAuthorizations = fileUtils.loadNamespaceAuthorizations(authorizationFile);
             }
-            model.addAttribute("permissions", new NamespacePermissions(baseNamespace,
-                    jaxbAuthorizations));
+            model.addAttribute("permissions", new NamespacePermissions(baseNamespace, jaxbAuthorizations));
             model.addAttribute("baseNamespaces", getRepositoryManager().listBaseNamespaces());
 
         } catch (Exception e) {
@@ -1043,8 +1043,10 @@ public class AdminController extends BaseController {
         if (targetPage == null) {
             try {
                 RepositoryItem item = getRepositoryManager().getRepositoryItem(baseNamespace, filename, version);
-
+                boolean otm16Enabled = RepositoryUtils.isOTM16LifecycleEnabled( item.getStatus().toRepositoryStatus() );
+                
                 model.addAttribute("item", item);
+                model.addAttribute("otm16Enabled", otm16Enabled);
                 targetPage = applyCommonValues(session, model, "adminPromoteItem");
 
             } catch (RepositoryException e) {
@@ -1114,8 +1116,10 @@ public class AdminController extends BaseController {
         if (targetPage == null) {
             try {
                 RepositoryItem item = getRepositoryManager().getRepositoryItem(baseNamespace, filename, version);
-
+                boolean otm16Enabled = RepositoryUtils.isOTM16LifecycleEnabled( item.getStatus().toRepositoryStatus() );
+                
                 model.addAttribute("item", item);
+                model.addAttribute("otm16Enabled", otm16Enabled);
                 targetPage = applyCommonValues(session, model, "adminDemoteItem");
 
             } catch (RepositoryException e) {
@@ -1233,9 +1237,9 @@ public class AdminController extends BaseController {
                     RepositoryItem item = repositoryManager.getRepositoryItem(baseNamespace,
                             filename, version);
 
-                    if (item.getStatus() != TLLibraryStatus.FINAL) {
+                    if (item.getStatus() == TLLibraryStatus.DRAFT) {
                         setErrorMessage(
-                                "Only repository items in FINAL status are assigned a CRC value.", model);
+                                "Only repository items in non-Draft status are assigned a CRC value.", model);
 
                     } else {
                         repositoryManager.recalculateCrc(item);

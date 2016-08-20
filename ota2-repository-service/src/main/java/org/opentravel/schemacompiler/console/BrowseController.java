@@ -23,7 +23,6 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opentravel.ns.ota2.security_v01_00.RepositoryPermission;
-import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
@@ -93,11 +92,7 @@ public class BrowseController extends BaseController {
                                 .getVersionHistory(item);
 
                         for (RepositoryItem itemVersion : versionHistory) {
-                            RepositoryPermission requiredPermission = (itemVersion.getStatus() == TLLibraryStatus.DRAFT) ? RepositoryPermission.READ_DRAFT
-                                    : RepositoryPermission.READ_FINAL;
-
-                            if (securityManager.isAuthorized(user, itemVersion.getNamespace(),
-                                    requiredPermission)) {
+                            if (securityManager.isReadAuthorized(user, itemVersion)) {
                                 browseItems.add(new NamespaceItem(itemVersion));
                             }
                         }
@@ -121,10 +116,7 @@ public class BrowseController extends BaseController {
                 }
 
                 for (RepositoryItem item : itemList) {
-                    RepositoryPermission requiredPermission = (item.getStatus() == TLLibraryStatus.DRAFT) ? RepositoryPermission.READ_DRAFT
-                            : RepositoryPermission.READ_FINAL;
-
-                    if (securityManager.isAuthorized(user, item.getNamespace(), requiredPermission)) {
+                    if (securityManager.isReadAuthorized(user, item)) {
                         browseItems.add(new NamespaceItem(item));
                     }
                 }
@@ -132,8 +124,8 @@ public class BrowseController extends BaseController {
 
             if (baseNamespace != null) {
                 model.addAttribute("parentItems", getParentNamespaceItems(baseNamespace));
-                model.addAttribute("canCreateNamespaceExtension", securityManager.isAuthorized(
-                        user, baseNamespace, RepositoryPermission.WRITE));
+                model.addAttribute("canCreateNamespaceExtension",
+                		securityManager.isAuthorized( user, baseNamespace, RepositoryPermission.WRITE));
 
                 if (!repositoryManager.listRootNamespaces().contains(baseNamespace)
                         && repositoryManager.listNamespaceChildren(baseNamespace).isEmpty()
@@ -141,8 +133,8 @@ public class BrowseController extends BaseController {
                     String parentNS = RepositoryNamespaceUtils.getParentNamespace(baseNamespace,
                             repositoryManager);
 
-                    model.addAttribute("canDeleteNamespace", securityManager.isAuthorized(user,
-                            parentNS, RepositoryPermission.WRITE));
+                    model.addAttribute("canDeleteNamespace",
+                    		securityManager.isAuthorized(user, parentNS, RepositoryPermission.WRITE));
                 }
             }
             model.addAttribute("baseNamespace", baseNamespace);

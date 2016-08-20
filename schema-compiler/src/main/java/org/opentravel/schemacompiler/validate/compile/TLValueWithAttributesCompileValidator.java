@@ -75,8 +75,10 @@ public class TLValueWithAttributesCompileValidator extends TLValueWithAttributes
                 .setFindingType(FindingType.ERROR)
                 .assertValidEntityReference(TLSimple.class, TLClosedEnumeration.class,
                         XSDSimpleType.class, TLOpenEnumeration.class, TLRoleEnumeration.class,
-                        TLValueWithAttributes.class).setFindingType(FindingType.WARNING)
-                .assertNotDeprecated();
+                        TLValueWithAttributes.class)
+                .setFindingType(FindingType.WARNING)
+                .assertNotDeprecated()
+                .assertNotObsolete();
 
         builder.setProperty("attributes", target.getAttributes()).setFindingType(FindingType.ERROR)
                 .assertNotNull().assertContainsNoNullElements();

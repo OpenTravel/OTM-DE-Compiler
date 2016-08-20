@@ -107,7 +107,8 @@ public class TLAttributeCompileValidator extends TLAttributeBaseValidator {
         builder.setEntityReferenceProperty("type", target.getType(), target.getTypeName())
                 .setFindingType(FindingType.ERROR)
                 .assertNotNull()
-                .setFindingType(FindingType.WARNING).assertNotDeprecated();
+                .setFindingType(FindingType.WARNING)
+                .assertNotDeprecated().assertNotObsolete();
         
         if (target.isReference()) {
         	validateReferenceType( target, builder );

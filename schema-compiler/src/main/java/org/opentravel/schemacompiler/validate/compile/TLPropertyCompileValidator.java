@@ -96,7 +96,7 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
                         TLFacet.class, TLListFacet.class, TLCoreObject.class, TLChoiceObject.class,
                         TLBusinessObject.class, TLAlias.class, TLRoleEnumeration.class, XSDSimpleType.class,
                         XSDComplexType.class, XSDElement.class)
-                .setFindingType(FindingType.WARNING).assertNotDeprecated();
+                .setFindingType(FindingType.WARNING).assertNotDeprecated().assertNotObsolete();
 
         if (ValidatorUtils.isLegacyIDREF(propertyType)) {
             builder.addFinding(FindingType.WARNING, "type", WARNING_LEGACY_IDREF);

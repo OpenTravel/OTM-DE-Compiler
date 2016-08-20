@@ -88,8 +88,7 @@ public class LibraryCrcCalculator {
 
     /**
      * Returns true if a CRC value is required for the given library. CRC's are required for all
-     * libraries that are a member of a protected namespace, or are assigned a status of 'FINAL' (in
-     * any namespace).
+     * libraries that are assigned a status later than 'DRAFT' in the library status lifecycle.
      * 
      * @param library
      *            the library instance to check
@@ -99,13 +98,10 @@ public class LibraryCrcCalculator {
         boolean crcRequired = false;
 
         if (library != null) {
-            if (library.getStatus() == TLLibraryStatus.FINAL) {
-                crcRequired = true;
-
-            } else {
-                crcRequired = ProtectedNamespaceRegistry.getInstance().isProtectedNamespace(
-                        library.getNamespace());
-            }
+        	TLLibraryStatus status = library.getStatus();
+        	
+        	crcRequired = (status != null)
+        			&& (status.getRank() > TLLibraryStatus.DRAFT.getRank());
         }
         return crcRequired;
     }

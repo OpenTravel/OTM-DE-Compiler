@@ -19,9 +19,8 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.opentravel.ns.ota2.security_v01_00.RepositoryPermission;
-import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
+import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
 import org.opentravel.schemacompiler.security.RepositorySecurityManager;
 import org.opentravel.schemacompiler.security.UserPrincipal;
 import org.springframework.stereotype.Controller;
@@ -64,17 +63,16 @@ public class ViewItemController extends BaseController {
         try {
             RepositorySecurityManager securityManager = getSecurityManager();
             UserPrincipal user = getCurrentUser(session);
-            RepositoryItem item = getRepositoryManager().getRepositoryItem(baseNamespace, filename,
-                    version);
-            RepositoryPermission requiredPermission = (item.getStatus() == TLLibraryStatus.DRAFT) ? RepositoryPermission.READ_DRAFT
-                    : RepositoryPermission.READ_FINAL;
+            RepositoryItem item = getRepositoryManager().getRepositoryItem(baseNamespace, filename, version);
 
-            if (securityManager.isAuthorized(user, item.getNamespace(), requiredPermission)) {
+            if (securityManager.isReadAuthorized(user, item)) {
+                boolean otm16Enabled = RepositoryUtils.isOTM16LifecycleEnabled( item.getStatus().toRepositoryStatus() );
+                
+                model.addAttribute("otm16Enabled", otm16Enabled);
                 model.addAttribute("item", item);
 
             } else {
-                setErrorMessage("You are not authorized to view the requested repository item.",
-                        model);
+                setErrorMessage("You are not authorized to view the requested repository item.", model);
                 targetPage = new SearchController().searchPage(null, false, false, session, model);
             }
 

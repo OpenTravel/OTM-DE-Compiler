@@ -59,7 +59,7 @@ public class TLSimpleCompileValidator extends TLSimpleBaseValidator {
 
         builder.setEntityReferenceProperty("parentType", target.getParentType(),
                 target.getParentTypeName()).setFindingType(FindingType.ERROR).assertNotNull()
-                .setFindingType(FindingType.WARNING).assertNotDeprecated();
+                .setFindingType(FindingType.WARNING).assertNotDeprecated().assertNotObsolete();
         
         // Validate allowable parent types (closed enumerations are allowed for list types
         if (!target.isListTypeInd()) {

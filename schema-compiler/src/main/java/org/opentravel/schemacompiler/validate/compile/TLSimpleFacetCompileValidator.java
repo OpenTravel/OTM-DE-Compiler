@@ -49,7 +49,8 @@ public class TLSimpleFacetCompileValidator extends TLSimpleFacetBaseValidator {
                 .setFindingType(FindingType.ERROR)
                 .assertValidEntityReference(TLCoreObject.class, TLSimpleFacet.class,
                         TLClosedEnumeration.class, TLSimple.class, XSDSimpleType.class)
-                .setFindingType(FindingType.WARNING).assertNotNull().assertNotDeprecated();
+                .setFindingType(FindingType.WARNING)
+                .assertNotNull().assertNotDeprecated().assertNotObsolete();
 
         checkEmptyValueType(target, target.getSimpleType(), "simpleType", builder);
 

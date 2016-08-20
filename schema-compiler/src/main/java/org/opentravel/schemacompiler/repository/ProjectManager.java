@@ -70,6 +70,7 @@ import org.opentravel.schemacompiler.repository.impl.BuiltInProject;
 import org.opentravel.schemacompiler.repository.impl.ProjectFileUtils;
 import org.opentravel.schemacompiler.repository.impl.ProjectItemDependencyNavigator;
 import org.opentravel.schemacompiler.repository.impl.ProjectItemImpl;
+import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
 import org.opentravel.schemacompiler.saver.LibraryModelSaver;
 import org.opentravel.schemacompiler.saver.LibrarySaveException;
 import org.opentravel.schemacompiler.util.ExceptionUtils;
@@ -1837,8 +1838,8 @@ public final class ProjectManager {
     }
 
     /**
-     * Promotes a managed <code>ProjectItem</code> from <code>DRAFT</code> status to
-     * <code>FINAL</code>. Items must be in the <code>MANAGED_UNLOCKED</code> state in order to be
+     * Promotes a managed <code>ProjectItem</code> from its current lifecycle status to the next
+     * available one. Items must be in the <code>MANAGED_UNLOCKED</code> state in order to be
      * promoted.
      * 
      * @param item
@@ -1846,6 +1847,7 @@ public final class ProjectManager {
      * @throws RepositoryException
      */
     public void promote(ProjectItem item) throws RepositoryException {
+        boolean otm16Enabled = RepositoryUtils.isOTM16LifecycleEnabled( item.getStatus().toRepositoryStatus() );
         TLLibraryStatus currentStatus = TLLibraryStatus.FINAL;
 
         if (item.getContent() instanceof TLLibrary) {
@@ -1855,21 +1857,32 @@ public final class ProjectManager {
             throw new RepositoryException(
                     "Unable to promote - the item must be a managed resource that not locked for editing.");
         }
-        if (currentStatus != TLLibraryStatus.DRAFT) {
-            throw new RepositoryException(
-                    "Unable to promote - only user-defined libraries in DRAFT status can be promoted.");
+        if (RepositoryUtils.isOTM16LifecycleEnabled( currentStatus.toRepositoryStatus() )) {
+            if (currentStatus == TLLibraryStatus.OBSOLETE) {
+                throw new RepositoryException(
+                        "Unable to promote - only user-defined libraries not in OBSOLETE status can be promoted.");
+            }
+        	
+        } else {
+            if (currentStatus != TLLibraryStatus.DRAFT) {
+                throw new RepositoryException(
+                        "Unable to promote - only user-defined libraries in DRAFT status can be promoted.");
+            }
         }
         repositoryManager.promote(item);
 
         if (item.getContent() instanceof TLLibrary) {
-            ((TLLibrary) item.getContent()).setStatus(TLLibraryStatus.FINAL);
+            TLLibraryStatus targetStatus = otm16Enabled ? currentStatus.nextStatus() : TLLibraryStatus.FINAL;
+        	TLLibrary library = (TLLibrary) item.getContent();
+        	
+            library.setStatus(targetStatus);
         }
     }
 
     /**
-     * Promotes a managed <code>ProjectItem</code> from <code>DRAFT</code> status to
-     * <code>FINAL</code>. This operation can only be performed if the local user has administrative
-     * permissions to modify the requested item, and the item is in the
+     * Promotes a managed <code>ProjectItem</code> from its current lifecycle status
+     * to the previous one. This operation can only be performed if the local user has
+     * administrative permissions to modify the requested item, and the item is in the
      * <code>MANAGED_UNLOCKED</code> state.
      * 
      * @param item
@@ -1877,6 +1890,7 @@ public final class ProjectManager {
      * @throws RepositoryException
      */
     public void demote(ProjectItem item) throws RepositoryException {
+        boolean otm16Enabled = RepositoryUtils.isOTM16LifecycleEnabled( item.getStatus().toRepositoryStatus() );
         TLLibraryStatus currentStatus = TLLibraryStatus.FINAL;
 
         if (item.getContent() instanceof TLLibrary) {
@@ -1886,17 +1900,57 @@ public final class ProjectManager {
             throw new RepositoryException(
                     "Unable to demote - the item must be a managed resource that is not locked for editing.");
         }
-        if (currentStatus != TLLibraryStatus.FINAL) {
-            throw new RepositoryException(
-                    "Unable to demote - only user-defined libraries in FINAL status can be demoted.");
+        if (RepositoryUtils.isOTM16LifecycleEnabled( currentStatus.toRepositoryStatus() )) {
+            if (currentStatus == TLLibraryStatus.DRAFT) {
+                throw new RepositoryException(
+                        "Unable to demote - only user-defined libraries that are not in DRAFT status can be demoted.");
+            }
+        	
+        } else {
+            if (currentStatus != TLLibraryStatus.FINAL) {
+                throw new RepositoryException(
+                        "Unable to demote - only user-defined libraries in FINAL status can be demoted.");
+            }
         }
         repositoryManager.demote(item);
 
         if (item.getContent() instanceof TLLibrary) {
-            ((TLLibrary) item.getContent()).setStatus(TLLibraryStatus.DRAFT);
+            TLLibraryStatus targetStatus = otm16Enabled ? currentStatus.previousStatus() : TLLibraryStatus.DRAFT;
+        	TLLibrary library = (TLLibrary) item.getContent();
+        	
+            library.setStatus(targetStatus);
         }
     }
 
+    /**
+     * Assigns the item's status to an arbitrary value, regardless of its current position in
+     * the library status lifecycle.  If the new status is earlier/lower in the lifecycle than
+     * the item's current status, the local user must have administrative permissions to modify
+     * the requested item.  The item must also be in the <code>MANAGED_UNLOCKED</code> state in
+     * order to perform this operation.
+     * 
+     * @param item
+     *            the project item whose status is to be updated
+     * @param newStatus
+     *            the new status value to assign
+     * @throws RepositoryException
+     */
+    public void updateStatus(ProjectItem item, TLLibraryStatus newStatus) throws RepositoryException {
+        if (item.getState() != RepositoryItemState.MANAGED_UNLOCKED) {
+            throw new RepositoryException(
+                    "Unable to update status - the item must be a managed resource that is not locked for editing.");
+        }
+        if (newStatus == null) {
+            throw new RepositoryException(
+                    "Unable to update status - the new status cannot be null.");
+        }
+        repositoryManager.updateStatus(item, newStatus);
+
+        if (item.getContent() instanceof TLLibrary) {
+            ((TLLibrary) item.getContent()).setStatus(newStatus);
+        }
+    }
+    
     /**
      * Returns true if the given URL references a location in the user's local repository -- either
      * as a locally-managed item or a local copy of a remotely-managed library.

@@ -15,8 +15,17 @@
     limitations under the License.
 
 --%>
+<%@taglib prefix="spring" uri="http://www.springframework.org/tags" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <form id="confirmForm" action="${pageContext.request.contextPath}/console/adminDemoteItem.html" method="POST">
-	<span class="confirmMessage">Demote repository item "${item.filename}" to DRAFT status.  The library will be editable by authorized users.<br/>Are you sure?</span>
+	<c:set var="prevStatus" value="${item.status.previousStatus()}"/>
+	<c:if test="${otm16Enabled}">
+		<span class="confirmMessage">Demote repository item "${item.filename}" to <spring:message code="${prevStatus.toString()}" /> status.
+		<br/>Are you sure?</span>
+	</c:if>
+	<c:if test="${!otm16Enabled}">
+		<span class="confirmMessage">Demote repository item "${item.filename}" to DRAFT status.  The library will be editable by authorized users.<br/>Are you sure?</span>
+	</c:if>
 	<p><br>
 	<input name="baseNamespace" type="hidden" value="${item.baseNamespace}" />
 	<input name="filename" type="hidden" value="${item.filename}" />

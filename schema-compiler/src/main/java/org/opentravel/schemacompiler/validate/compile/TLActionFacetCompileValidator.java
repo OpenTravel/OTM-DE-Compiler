@@ -93,7 +93,8 @@ public class TLActionFacetCompileValidator extends TLActionFacetBaseValidator{
 	        builder.setEntityReferenceProperty("basePayload", basePayload,
 	                target.getBasePayloadName()).setFindingType(FindingType.ERROR)
 	                .assertValidEntityReference(TLCoreObject.class, TLChoiceObject.class)
-	                .setFindingType(FindingType.WARNING).assertNotNull().assertNotDeprecated();
+	                .setFindingType(FindingType.WARNING)
+	                .assertNotNull().assertNotDeprecated().assertNotObsolete();
 			
 	        // If the payload type is not an existing core/choice object, make sure the
 	        // action facet's name does not conflict with another entity

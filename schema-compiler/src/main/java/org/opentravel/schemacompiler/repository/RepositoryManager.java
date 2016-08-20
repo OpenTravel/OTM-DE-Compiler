@@ -1560,14 +1560,28 @@ public class RepositoryManager implements Repository {
                 item.getFilename(), item.getVersion());
         File contentFile = fileManager.getLibraryContentLocation(baseNS, item.getFilename(),
                 item.getVersion());
-
+        boolean otm16Enabled = RepositoryUtils.isOTM16LifecycleEnabled( libraryMetadata.getStatus() );
+        
         if (libraryMetadata.getState() != RepositoryState.MANAGED_UNLOCKED) {
             throw new RepositoryException(
                     "Unable to promote - the item is currently locked for editing.");
         }
-        if (libraryMetadata.getStatus() != LibraryStatus.DRAFT) {
+        if (libraryMetadata.getStatus() == null) {
             throw new RepositoryException(
-                    "Unable to promote - only user-defined libraries in DRAFT status can be promoted.");
+                    "Unable to promote - the item's status is not yet assigned.");
+        }
+        
+        if (otm16Enabled) {
+            if (libraryMetadata.getStatus() == LibraryStatus.OBSOLETE) {
+                throw new RepositoryException(
+                        "Unable to promote - only user-defined libraries that are not in OBSOLETE status can be promoted.");
+            }
+        	
+        } else {
+            if (libraryMetadata.getStatus() != LibraryStatus.DRAFT) {
+                throw new RepositoryException(
+                        "Unable to promote - only user-defined libraries in DRAFT status can be promoted.");
+            }
         }
 
         if (item.getRepository() == this) {
@@ -1575,13 +1589,15 @@ public class RepositoryManager implements Repository {
             try {
                 fileManager.startChangeSet();
 
-                // Change the status of the library metadata and content (if necessary) to FINAL
+                // Change the status of the library metadata and content
                 TLLibrary libraryContent = loadOtmLibraryContent(contentFile);
+                TLLibraryStatus currentStatus = TLLibraryStatus.fromRepositoryStatus( libraryMetadata.getStatus() );
+                TLLibraryStatus targetStatus = otm16Enabled ? currentStatus.nextStatus() : TLLibraryStatus.FINAL;
 
                 if (libraryContent != null) {
-                    libraryContent.setStatus(TLLibraryStatus.FINAL);
+                    libraryContent.setStatus(targetStatus);
                 }
-                libraryMetadata.setStatus(LibraryStatus.FINAL);
+                libraryMetadata.setStatus(targetStatus.toRepositoryStatus());
                 libraryMetadata.setLastUpdated(XMLGregorianCalendarConverter
                         .toXMLGregorianCalendar(new Date()));
 
@@ -1598,10 +1614,10 @@ public class RepositoryManager implements Repository {
                 if (!(item instanceof ProjectItem)) {
                     // Only required for non-ProjectItems; ProjectItem derives the status value from
                     // its library content
-                    ((RepositoryItemImpl) item).setStatus(TLLibraryStatus.FINAL);
+                    ((RepositoryItemImpl) item).setStatus(targetStatus);
                 }
                 log.info("Successfully promoted managed item '" + item.getFilename()
-                        + "' to FINAL status by " + fileManager.getCurrentUserId());
+                        + "' to " + targetStatus + " status by " + fileManager.getCurrentUserId());
                 success = true;
 
             } catch (Exception e) {
@@ -1636,14 +1652,28 @@ public class RepositoryManager implements Repository {
                 item.getFilename(), item.getVersion());
         File contentFile = fileManager.getLibraryContentLocation(baseNS, item.getFilename(),
                 item.getVersion());
+        boolean otm16Enabled = RepositoryUtils.isOTM16LifecycleEnabled( libraryMetadata.getStatus() );
 
         if (libraryMetadata.getState() != RepositoryState.MANAGED_UNLOCKED) {
             throw new RepositoryException(
                     "Unable to demote - the item is currently locked for editing.");
         }
-        if (libraryMetadata.getStatus() != LibraryStatus.FINAL) {
+        if (libraryMetadata.getStatus() == null) {
             throw new RepositoryException(
-                    "Unable to demote - only user-defined libraries in FINAL status can be demoted.");
+                    "Unable to demote - the item's status is not yet assigned.");
+        }
+        
+        if (otm16Enabled) {
+            if (libraryMetadata.getStatus() == LibraryStatus.DRAFT) {
+                throw new RepositoryException(
+                        "Unable to demote - only user-defined libraries that are not in DRAFT status can be demoted.");
+            }
+        	
+        } else {
+            if (libraryMetadata.getStatus() != LibraryStatus.FINAL) {
+                throw new RepositoryException(
+                        "Unable to demote - only user-defined libraries in FINAL status can be demoted.");
+            }
         }
 
         if (item.getRepository() == this) {
@@ -1651,13 +1681,15 @@ public class RepositoryManager implements Repository {
             try {
                 fileManager.startChangeSet();
 
-                // Change the status of the library metadata and content (if necessary) to FINAL
+                // Change the status of the library metadata and content
                 TLLibrary libraryContent = loadOtmLibraryContent(contentFile);
+                TLLibraryStatus currentStatus = TLLibraryStatus.fromRepositoryStatus( libraryMetadata.getStatus() );
+                TLLibraryStatus targetStatus = otm16Enabled ? currentStatus.previousStatus() : TLLibraryStatus.DRAFT;
 
                 if (libraryContent != null) {
-                    libraryContent.setStatus(TLLibraryStatus.DRAFT);
+                    libraryContent.setStatus(targetStatus);
                 }
-                libraryMetadata.setStatus(LibraryStatus.DRAFT);
+                libraryMetadata.setStatus(targetStatus.toRepositoryStatus());
                 libraryMetadata.setLastUpdated(XMLGregorianCalendarConverter
                         .toXMLGregorianCalendar(new Date()));
 
@@ -1673,10 +1705,10 @@ public class RepositoryManager implements Repository {
                 if (!(item instanceof ProjectItem)) {
                     // Only required for non-ProjectItems; ProjectItem derives the status value from
                     // its library content
-                    ((RepositoryItemImpl) item).setStatus(TLLibraryStatus.DRAFT);
+                    ((RepositoryItemImpl) item).setStatus(targetStatus);
                 }
                 log.info("Successfully demoted managed item '" + item.getFilename()
-                        + "' to DRAFT status by " + fileManager.getCurrentUserId());
+                        + "' to " + targetStatus + " status by " + fileManager.getCurrentUserId());
                 success = true;
 
             } catch (Exception e) {
@@ -1700,6 +1732,81 @@ public class RepositoryManager implements Repository {
             ((RemoteRepository) item.getRepository()).demote(item);
         }
     }
+    
+    /**
+	 * @see org.opentravel.schemacompiler.repository.Repository#updateStatus(org.opentravel.schemacompiler.repository.RepositoryItem, org.opentravel.schemacompiler.model.TLLibraryStatus)
+	 */
+	@Override
+	public void updateStatus(RepositoryItem item, TLLibraryStatus newStatus) throws RepositoryException {
+        String baseNS = RepositoryNamespaceUtils.normalizeUri(item.getBaseNamespace());
+        LibraryInfoType libraryMetadata = fileManager.loadLibraryMetadata(baseNS,
+                item.getFilename(), item.getVersion());
+        File contentFile = fileManager.getLibraryContentLocation(baseNS, item.getFilename(),
+                item.getVersion());
+
+        if (libraryMetadata.getState() != RepositoryState.MANAGED_UNLOCKED) {
+            throw new RepositoryException(
+                    "Unable to update status - the item is currently locked for editing.");
+        }
+        if (newStatus == null) {
+            throw new RepositoryException(
+                    "Unable to update status - the new status cannot be null.");
+        }
+        
+        if (item.getRepository() == this) {
+            boolean success = false;
+            try {
+                fileManager.startChangeSet();
+
+                // Change the status of the library metadata and content
+                TLLibrary libraryContent = loadOtmLibraryContent(contentFile);
+
+                if (libraryContent != null) {
+                    libraryContent.setStatus(newStatus);
+                }
+                libraryMetadata.setStatus(newStatus.toRepositoryStatus());
+                libraryMetadata.setLastUpdated(XMLGregorianCalendarConverter
+                        .toXMLGregorianCalendar(new Date()));
+
+                if (libraryContent != null) {
+                    LibraryModelSaver modelSaver = new LibraryModelSaver();
+
+                    fileManager.addToChangeSet(contentFile);
+                    modelSaver.getSaveHandler().setCreateBackupFile(false);
+                    modelSaver.saveLibrary(libraryContent);
+                }
+                fileManager.saveLibraryMetadata(libraryMetadata);
+
+                if (!(item instanceof ProjectItem)) {
+                    // Only required for non-ProjectItems; ProjectItem derives the status value from
+                    // its library content
+                    ((RepositoryItemImpl) item).setStatus(newStatus);
+                }
+                log.info("Successfully assigned managed item '" + item.getFilename()
+                        + "' to " + newStatus + " status by " + fileManager.getCurrentUserId());
+                success = true;
+
+            } catch (Exception e) {
+                throw new RepositoryException("Unable to the repository item's status: "
+                        + item.getFilename(), e);
+
+            } finally {
+                // Commit or roll back the changes based on the result of the operation
+                if (success) {
+                    fileManager.commitChangeSet();
+                } else {
+                    try {
+                        fileManager.rollbackChangeSet();
+                    } catch (Throwable t) {
+                        log.error("Error rolling back the current change set.", t);
+                    }
+                }
+            }
+
+        } else {
+            ((RemoteRepository) item.getRepository()).updateStatus(item, newStatus);
+        }
+	}
 
     /**
      * @see org.opentravel.schemacompiler.repository.Repository#recalculateCrc(org.opentravel.schemacompiler.repository.RepositoryItem)
@@ -1712,9 +1819,9 @@ public class RepositoryManager implements Repository {
         File contentFile = fileManager.getLibraryContentLocation(baseNS, item.getFilename(),
                 item.getVersion());
 
-        if (libraryMetadata.getStatus() != LibraryStatus.FINAL) {
+        if ((libraryMetadata.getStatus() == null) || (libraryMetadata.getStatus() == LibraryStatus.DRAFT)) {
             throw new RepositoryException(
-                    "Unable to demote - CRC values can only be recalculated for user-defined libraries in FINAL status.");
+                    "Unable to recalculate - CRC values can only be recalculated for user-defined libraries in non-DRAFT status.");
         }
 
         if (item.getRepository() == this) {
@@ -1728,10 +1835,10 @@ public class RepositoryManager implements Repository {
                 if (libraryContent != null) {
                     LibraryModelSaver modelSaver = new LibraryModelSaver();
 
+                    // Set the library's status - just in case it is out of sync with the meta-data record
+                    libraryContent.setStatus(TLLibraryStatus.fromRepositoryStatus(libraryMetadata.getStatus()));
+                    
                     fileManager.addToChangeSet(contentFile);
-                    libraryContent.setStatus(TLLibraryStatus.FINAL); // just in case the library and
-                                                                     // its meta-data are out of
-                                                                     // sync
                     modelSaver.getSaveHandler().setCreateBackupFile(false);
                     modelSaver.saveLibrary(libraryContent);
                 }
@@ -1766,7 +1873,7 @@ public class RepositoryManager implements Repository {
         }
     }
 
-    /**
+	/**
      * @see org.opentravel.schemacompiler.repository.Repository#delete(org.opentravel.schemacompiler.repository.RepositoryItem)
      */
     @Override

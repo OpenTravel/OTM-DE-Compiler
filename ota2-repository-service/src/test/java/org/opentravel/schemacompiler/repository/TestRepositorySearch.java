@@ -88,7 +88,8 @@ public class TestRepositorySearch extends RepositoryTestBase {
                 .contains("http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01_01_01"));
     }
 
-    @Test
+    @SuppressWarnings("deprecation")
+	@Test
     public void testListNamespaceItems_allVersions_includeDraft() throws Exception {
         Repository testRepository = repositoryManager.get().getRepository("test-repository");
         List<RepositoryItem> items = testRepository.listItems(
@@ -101,7 +102,8 @@ public class TestRepositorySearch extends RepositoryTestBase {
         assertTrue(itemFilenames.contains("Version_Test_1_1_1.otm"));
     }
 
-    @Test
+    @SuppressWarnings("deprecation")
+	@Test
     public void testListNamespaceItems_allVersions_finalOnly() throws Exception {
         Repository testRepository = repositoryManager.get().getRepository("test-repository");
         List<RepositoryItem> items = testRepository.listItems(
@@ -128,7 +130,8 @@ public class TestRepositorySearch extends RepositoryTestBase {
         }
     }
 
-    @Test
+    @SuppressWarnings("deprecation")
+	@Test
     public void testListNamespaceItems_latestVersion_includeDraft() throws Exception {
         Repository testRepository = repositoryManager.get().getRepository("test-repository");
         List<RepositoryItem> items = testRepository.listItems(
@@ -139,7 +142,8 @@ public class TestRepositorySearch extends RepositoryTestBase {
         assertTrue(itemFilenames.contains("Version_Test_1_1_1.otm"));
     }
 
-    @Test
+    @SuppressWarnings("deprecation")
+	@Test
     public void testListNamespaceItems_latestVersion_finalOnly() throws Exception {
         Repository testRepository = repositoryManager.get().getRepository("test-repository");
         List<RepositoryItem> items = testRepository.listItems(
@@ -165,7 +169,8 @@ public class TestRepositorySearch extends RepositoryTestBase {
         }
     }
 
-    @Test
+    @SuppressWarnings("deprecation")
+	@Test
     public void testGetVersionHistory() throws Exception {
         Repository testRepository = repositoryManager.get().getRepository("test-repository");
         List<RepositoryItem> allItems = testRepository.listItems(
@@ -225,7 +230,8 @@ public class TestRepositorySearch extends RepositoryTestBase {
         assertEquals(0, itemFilenames.size());
     }
 
-    @Test
+    @SuppressWarnings("deprecation")
+	@Test
     public void testFreeTextSearch_allVersions_finalOnly() throws Exception {
         Repository testRepository = repositoryManager.get().getRepository("test-repository");
         List<RepositoryItem> items = testRepository.listItems(
@@ -284,7 +290,8 @@ public class TestRepositorySearch extends RepositoryTestBase {
         assertEquals(0, itemFilenames.size());
     }
 
-    @Test
+    @SuppressWarnings("deprecation")
+	@Test
     public void testFreeTextSearch_latestVersion_finalOnly() throws Exception {
         Repository testRepository = repositoryManager.get().getRepository("test-repository");
         List<RepositoryItem> items = testRepository.listItems(

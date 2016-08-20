@@ -433,7 +433,8 @@ public interface Repository {
     public void unlock(RepositoryItem item, boolean commitWIP) throws RepositoryException;
 
     /**
-     * Promotes a <code>RepositoryItem</code> from <code>DRAFT</code> status to <code>FINAL</code>.
+     * Promotes a <code>RepositoryItem</code> from its current lifecycle status to the next
+     * available one.
      * 
      * @param item
      *            the repository item to promote
@@ -442,18 +443,32 @@ public interface Repository {
     public void promote(RepositoryItem item) throws RepositoryException;
 
     /**
-     * Demotes a <code>RepositoryItem</code> from <code>FINAL</code> status to <code>DRAFT</code>.
-     * This operation can only be performed if the local user has administrative permissions to
-     * modify the requested item.
+     * Demotes a <code>RepositoryItem</code> from its current lifecycle status to the previous
+     * one.  This operation can only be performed if the local user has administrative permissions
+     * to modify the requested item.
      * 
      * @param item
      *            the repository item to demote
      * @throws RepositoryException
      */
     public void demote(RepositoryItem item) throws RepositoryException;
+    
+    /**
+     * Assigns the item's status to an arbitrary value, regardless of its current position in
+     * the library status lifecycle.  If the new status is earlier/lower in the lifecycle than
+     * the item's current status, the local user must have administrative permissions to modify
+     * the requested item.
+     * 
+     * @param item
+     *            the repository item whose status is to be updated
+     * @param newStatus
+     *            the new status value to assign
+     * @throws RepositoryException
+     */
+    public void updateStatus(RepositoryItem item, TLLibraryStatus newStatus) throws RepositoryException;
 
     /**
-     * Recalculates the CRC of a <code>RepositoryItem</code> that is in the <code>FINAL</code>
+     * Recalculates the CRC of a <code>RepositoryItem</code> that is in a non-<code>DRAFT</code>
      * status.
      * 
      * @param item

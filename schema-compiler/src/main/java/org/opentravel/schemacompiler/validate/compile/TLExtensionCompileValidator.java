@@ -57,7 +57,7 @@ public class TLExtensionCompileValidator extends TLValidatorBase<TLExtension> {
 
         builder.setEntityReferenceProperty("extendsEntity", target.getExtendsEntity(),
                 target.getExtendsEntityName()).setFindingType(FindingType.ERROR).assertNotNull()
-                .setFindingType(FindingType.WARNING).assertNotDeprecated();
+                .setFindingType(FindingType.WARNING).assertNotDeprecated().assertNotObsolete();
 
         if (target.getExtendsEntity() != null) {
             // Assert the correct type of entity reference based on the extension owner's type

@@ -23,6 +23,11 @@ import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
+import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLLibraryStatus;
+import org.opentravel.schemacompiler.model.TLMemberField;
+import org.opentravel.schemacompiler.model.TLMemberFieldOwner;
+import org.opentravel.schemacompiler.validate.Validatable;
 import org.opentravel.schemacompiler.validate.ValidationBuilder;
 import org.opentravel.schemacompiler.version.VersionScheme;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
@@ -44,6 +49,7 @@ public final class TLValidationBuilder extends ValidationBuilder<TLValidationBui
     public static final String UNRECOGNIZED_VERSION_SCHEME = "UNRECOGNIZED_VERSION_SCHEME";
     public static final String INVALID_NAMESPACE_FOR_VERSION_SCHEME = "INVALID_NAMESPACE_FOR_VERSION_SCHEME";
     public static final String DEPRECATED_TYPE_REFERENCE = "DEPRECATED_TYPE_REFERENCE";
+    public static final String OBSOLETE_TYPE_REFERENCE = "OBSOLETE_TYPE_REFERENCE";
 
     private TLModelValidationContext validationContext;
     private boolean isNamedEntityProperty = false;
@@ -233,11 +239,9 @@ public final class TLValidationBuilder extends ValidationBuilder<TLValidationBui
                 } else {
                     AbstractLibrary valueLibrary = value.getOwningLibrary();
 
-                    // Entities defined in built-in libraries that contain the keyword "Deprecated"
-                    // will always
-                    // be considered to be deprecated. YES - this is a kludge, but we have no other
-                    // (easy) way
-                    // to deprecate legacy (XSD) built-in schema entities. :)
+                    // Entities defined in built-in libraries that contain the keyword "Deprecated" will
+                    // always be considered to be deprecated. YES - this is a kludge, but we have no other
+                    // (easy) way to deprecate legacy (XSD) built-in schema entities. :)
                     if (valueLibrary instanceof BuiltInLibrary) {
                         isDeprecated = (valueLibrary.getName() != null)
                                 && (valueLibrary.getName().indexOf("Deprecated") >= 0);
@@ -251,6 +255,31 @@ public final class TLValidationBuilder extends ValidationBuilder<TLValidationBui
             return super.assertNotNull();
         }
         return getThis();
+    }
+    
+    /**
+     * Adds a validation finding if the <code>NamedEntity</code> value is obsolete. Entities are
+     * obsolete if their owning library is obsolete, and the owning library of the target validation
+     * object is not.
+     * 
+     * @return TLValidationBuilder
+     */
+    public TLValidationBuilder assertNotObsolete() {
+    	TLLibrary targetLibrary = getOwningLibrary( targetObject );
+    	
+    	if ((targetLibrary != null) && (targetLibrary.getStatus() != TLLibraryStatus.OBSOLETE)) {
+            NamedEntity value = propertyValueAsNamedEntity();
+
+            if (value != null) {
+            	TLLibrary referencedLibrary = getOwningLibrary( value );
+            	
+            	if ((referencedLibrary != null)
+            			&& (referencedLibrary.getStatus() == TLLibraryStatus.OBSOLETE)) {
+                    addFinding(OBSOLETE_TYPE_REFERENCE, value.getLocalName());
+            	}
+            }
+    	}
+    	return getThis();
     }
 
     /**
@@ -268,6 +297,38 @@ public final class TLValidationBuilder extends ValidationBuilder<TLValidationBui
             throw new IllegalArgumentException(
                     "The requested assertion only applies to NamedEntity values");
         }
+    }
+    
+    /**
+     * Returns the owning library for the given object or null if the object does
+     * not belong to a user-defined library.
+     * 
+     * @param obj  the object for which to return the owning library
+     * @return TLLibrary
+     */
+    private TLLibrary getOwningLibrary(Validatable obj) {
+    	NamedEntity targetEntity = null;
+    	TLLibrary owningLibrary = null;
+    	
+    	if (obj instanceof NamedEntity) {
+    		targetEntity = (NamedEntity) obj;
+    		
+    	} else if (obj instanceof TLMemberField) {
+    		TLMemberFieldOwner fieldOwner = ((TLMemberField<?>) obj).getOwner();
+    		
+    		if (fieldOwner instanceof NamedEntity) {
+        		targetEntity = (NamedEntity) fieldOwner;
+    		}
+    	}
+    	
+    	if (targetEntity != null) {
+    		AbstractLibrary lib = targetEntity.getOwningLibrary();
+    		
+    		if (lib instanceof TLLibrary) {
+    			owningLibrary = (TLLibrary) lib;
+    		}
+    	}
+    	return owningLibrary;
     }
 
     /**

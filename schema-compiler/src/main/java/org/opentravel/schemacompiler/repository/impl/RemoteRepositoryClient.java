@@ -115,6 +115,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
     private static final String COMMIT_ENDPOINT = SERVICE_CONTEXT + "/commit";
     private static final String PROMOTE_ENDPOINT = SERVICE_CONTEXT + "/promote";
     private static final String DEMOTE_ENDPOINT = SERVICE_CONTEXT + "/demote";
+    private static final String UPDATE_STATUS_ENDPOINT = SERVICE_CONTEXT + "/update-status";
     private static final String RECALCULATE_CRC_ENDPOINT = SERVICE_CONTEXT + "/recalculate-crc";
     private static final String DELETE_ENDPOINT = SERVICE_CONTEXT + "/delete";
     private static final String REPOSITORY_ITEM_METADATA_ENDPOINT = SERVICE_CONTEXT + "/metadata";
@@ -1359,7 +1360,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
             if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
                 throw new RepositoryException(getResponseErrorMessage(response));
             }
-            log.info("Promote response received - Status OK");
+            log.info("Demote response received - Status OK");
 
             // Update the local cache by deleting the local copy of the item
             downloadContent(item, true);
@@ -1373,6 +1374,44 @@ public class RemoteRepositoryClient implements RemoteRepository {
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.repository.Repository#updateStatus(org.opentravel.schemacompiler.repository.RepositoryItem, org.opentravel.schemacompiler.model.TLLibraryStatus)
+	 */
+	@Override
+	public void updateStatus(RepositoryItem item, TLLibraryStatus newStatus) throws RepositoryException {
+        try {
+            validateRepositoryItem(item);
+
+            // Build the HTTP request for the remote service
+            RepositoryItemIdentityType itemIdentity = createItemIdentity(item);
+            Marshaller marshaller = RepositoryFileManager.getSharedJaxbContext().createMarshaller();
+            HttpPost request = newPostRequest(UPDATE_STATUS_ENDPOINT,
+            		new HttpGetParam("newStatus", newStatus.toString()));
+            StringWriter xmlWriter = new StringWriter();
+
+            marshaller.marshal(objectFactory.createRepositoryItemIdentity(itemIdentity), xmlWriter);
+            request.setEntity(new StringEntity(xmlWriter.toString(), ContentType.TEXT_XML));
+
+            // Send the web service request and check the response
+            log.info("Sending update-status request to HTTP endpoint: " + endpointUrl);
+            HttpResponse response = executeWithAuthentication(request);
+
+            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
+                throw new RepositoryException(getResponseErrorMessage(response));
+            }
+            log.info("Update-Status response received - Status OK");
+
+            // Update the local cache by deleting the local copy of the item
+            downloadContent(item, true);
+
+        } catch (JAXBException e) {
+            throw new RepositoryException("The format of the library meta-data is unreadable.", e);
+
+        } catch (IOException e) {
+            throw new RepositoryException("The remote repository is unavailable.", e);
+        }
+	}
+
+	/**
      * @see org.opentravel.schemacompiler.repository.Repository#recalculateCrc(org.opentravel.schemacompiler.repository.RepositoryItem)
      */
     @Override

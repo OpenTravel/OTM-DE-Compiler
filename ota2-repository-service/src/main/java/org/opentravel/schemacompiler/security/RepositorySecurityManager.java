@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.opentravel.ns.ota2.security_v01_00.RepositoryPermission;
 import org.opentravel.schemacompiler.repository.RepositoryException;
+import org.opentravel.schemacompiler.repository.RepositoryItem;
 
 /**
  * Provides all authentication and authorization services required for secure operation of the
@@ -122,6 +123,33 @@ public interface RepositorySecurityManager {
      */
     public boolean isAuthorized(UserPrincipal user, String namespace, RepositoryPermission permission)
     		throws RepositorySecurityException;
+
+    /**
+     * Returns true if the user is authorized to read the given repository item.
+     * 
+     * @param user
+     *            the user for which authorization is being requested
+     * @param item
+     *            the repository item to check for read permission
+     * @return boolean
+     * @throws RepositorySecurityException
+     *             thrown if the user's authorizations cannot be resolved
+     */
+    public boolean isReadAuthorized(UserPrincipal user, RepositoryItem item) throws RepositorySecurityException;
+
+    /**
+     * Returns true if the user is authorized to write the given repository item.  Note that
+     * this method will always return false for items not in DRAFT status.
+     * 
+     * @param user
+     *            the user for which authorization is being requested
+     * @param item
+     *            the repository item to check for write permission
+     * @return boolean
+     * @throws RepositorySecurityException
+     *             thrown if the user's authorizations cannot be resolved
+     */
+    public boolean isWriteAuthorized(UserPrincipal user, RepositoryItem item) throws RepositorySecurityException;
 
     /**
      * Returns true if the user is assigned to the 'Administrators' group.

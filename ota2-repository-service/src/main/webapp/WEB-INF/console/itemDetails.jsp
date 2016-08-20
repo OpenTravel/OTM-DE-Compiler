@@ -15,6 +15,7 @@
     limitations under the License.
 
 --%>
+<%@taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <c:url var="namespaceUrl" value="/console/browse.html">
 	<c:param name="baseNamespace" value="${item.baseNamespace}" />
@@ -42,8 +43,30 @@
 	</tr>
 	<tr class="d0">
 		<td>Status:</td>
-		<td>${item.status}
+		<td><spring:message code="${item.status.toString()}" />
 			<c:if test="${sessionScope.isAdminAuthorized}">
+			<c:if test="${otm16Enabled}">
+				<c:set var="nextStatus" value="${item.status.nextStatus()}"/>
+				<c:set var="prevStatus" value="${item.status.previousStatus()}"/>
+				
+				<c:if test="${nextStatus != null}">
+					<c:url var="promoteItemUrl" value="/console/adminPromoteItem.html">
+						<c:param name="baseNamespace" value="${item.baseNamespace}" />
+						<c:param name="filename" value="${item.filename}" />
+						<c:param name="version" value="${item.version}" />
+					</c:url>
+					&nbsp; &nbsp; [ <a href="${promoteItemUrl}">Promote to <spring:message code="${nextStatus.toString()}" /></a> ]
+				</c:if>
+				<c:if test="${prevStatus != null}">
+					<c:url var="demoteItemUrl" value="/console/adminDemoteItem.html">
+						<c:param name="baseNamespace" value="${item.baseNamespace}" />
+						<c:param name="filename" value="${item.filename}" />
+						<c:param name="version" value="${item.version}" />
+					</c:url>
+					&nbsp; &nbsp; [ <a href="${demoteItemUrl}">Demote to <spring:message code="${prevStatus.toString()}" /></a> ]
+				</c:if>
+			</c:if>
+			<c:if test="${!otm16Enabled}">
 				<c:if test="${item.status.toString()=='DRAFT'}">
 					<c:url var="promoteItemUrl" value="/console/adminPromoteItem.html">
 						<c:param name="baseNamespace" value="${item.baseNamespace}" />
@@ -58,12 +81,16 @@
 						<c:param name="filename" value="${item.filename}" />
 						<c:param name="version" value="${item.version}" />
 					</c:url>
+					&nbsp; &nbsp; [ <a href="${demoteItemUrl}">Demote to Draft</a> ]
+				</c:if>
+			</c:if>
+			
+				<c:if test="${item.status.toString()!='DRAFT'}">
 					<c:url var="recalculateItemCrcUrl" value="/console/adminRecalculateItemCrc.html">
 						<c:param name="baseNamespace" value="${item.baseNamespace}" />
 						<c:param name="filename" value="${item.filename}" />
 						<c:param name="version" value="${item.version}" />
 					</c:url>
-					&nbsp; &nbsp; [ <a href="${demoteItemUrl}">Demote to DRAFT</a> ]
 					&nbsp; &nbsp; [ <a href="${recalculateItemCrcUrl}">Recalculate CRC</a> ]
 				</c:if>
 			</c:if>
@@ -71,7 +98,7 @@
 	</tr>
 	<tr class="d1">
 		<td>Repository State:</td>
-		<td>${item.state}
+		<td><spring:message code="${item.state.toString()}" />
 			<c:if test="${sessionScope.isAdminAuthorized}">
 				<c:if test="${item.state.toString()=='MANAGED_LOCKED'}">
 					<c:url var="unlockItemUrl" value="/console/adminUnlockItem.html">

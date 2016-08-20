@@ -22,7 +22,9 @@ import java.util.List;
 import org.apache.commons.codec.binary.Base64;
 import org.opentravel.ns.ota2.repositoryinfoext_v01_00.UserInfo;
 import org.opentravel.ns.ota2.security_v01_00.RepositoryPermission;
+import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.RepositoryException;
+import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.repository.RepositoryNamespaceUtils;
 import org.opentravel.schemacompiler.security.AuthenticationProvider;
@@ -181,7 +183,7 @@ public class DefaultRepositorySecurityManager implements RepositorySecurityManag
      * @see org.opentravel.schemacompiler.security.RepositorySecurityManager#isAuthorized(org.opentravel.schemacompiler.security.UserPrincipal,java.lang.String, org.opentravel.ns.ota2.security_v01_00.RepositoryPermission)
      */
     @Override
-    public boolean isAuthorized(UserPrincipal user, String namespace,
+	public boolean isAuthorized(UserPrincipal user, String namespace,
             RepositoryPermission permission) throws RepositorySecurityException {
         boolean result = false;
         
@@ -205,6 +207,39 @@ public class DefaultRepositorySecurityManager implements RepositorySecurityManag
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.security.RepositorySecurityManager#isReadAuthorized(org.opentravel.schemacompiler.security.UserPrincipal, org.opentravel.schemacompiler.repository.RepositoryItem)
+	 */
+	@Override
+	public boolean isReadAuthorized(UserPrincipal user, RepositoryItem item) throws RepositorySecurityException {
+        TLLibraryStatus status = item.getStatus();
+        RepositoryPermission requiredPermission;
+        
+        if ((status == TLLibraryStatus.DRAFT) || (status == TLLibraryStatus.UNDER_REVIEW)) {
+        	requiredPermission = RepositoryPermission.READ_DRAFT;
+        	
+        } else { // FINAL or OBSOLETE
+        	requiredPermission = RepositoryPermission.READ_FINAL;
+        }
+        return isAuthorized(user, item.getNamespace(), requiredPermission);
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.security.RepositorySecurityManager#isWriteAuthorized(org.opentravel.schemacompiler.security.UserPrincipal, org.opentravel.schemacompiler.repository.RepositoryItem)
+	 */
+	@Override
+	public boolean isWriteAuthorized(UserPrincipal user, RepositoryItem item) throws RepositorySecurityException {
+		boolean isAuthorized;
+		
+		if (item.getStatus() == TLLibraryStatus.DRAFT) {
+			isAuthorized = isAuthorized(user, item.getNamespace(), RepositoryPermission.WRITE);
+			
+		} else { // no write authorization for any status but draft
+			isAuthorized = false;
+		}
+		return isAuthorized;
+	}
+
+	/**
      * @see org.opentravel.schemacompiler.security.RepositorySecurityManager#isAdministrator(org.opentravel.schemacompiler.security.UserPrincipal)
      */
     @Override

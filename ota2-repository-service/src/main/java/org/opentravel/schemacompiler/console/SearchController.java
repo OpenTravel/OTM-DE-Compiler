@@ -22,7 +22,6 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.opentravel.ns.ota2.security_v01_00.RepositoryPermission;
 import org.opentravel.schemacompiler.index.FreeTextSearchService;
 import org.opentravel.schemacompiler.index.LibrarySearchResult;
 import org.opentravel.schemacompiler.index.SearchResult;
@@ -98,12 +97,8 @@ public class SearchController extends BaseController {
                     for (SearchResult<?> result : results) {
                     	if (result instanceof LibrarySearchResult) {
                     		RepositoryItem item = ((LibrarySearchResult) result).getRepositoryItem();
-                            RepositoryPermission requiredPermission =
-                            		(item.getStatus() == TLLibraryStatus.DRAFT) ?
-                            				RepositoryPermission.READ_DRAFT : RepositoryPermission.READ_FINAL;
 
-                            if (securityManager.isAuthorized(user, item.getNamespace(),
-                                    requiredPermission)) {
+                            if (securityManager.isReadAuthorized(user, item)) {
                                 searchResults.add(new NamespaceItem(item));
                             }
                     	}

@@ -850,13 +850,11 @@ public class RepositoryContentResource {
             LibraryInfoType itemMetadata = repositoryManager.getFileManager().loadLibraryMetadata(
                     itemIdentity.getBaseNamespace(), itemIdentity.getFilename(),
                     itemIdentity.getVersion());
+            RepositoryItemImpl item = RepositoryUtils.createRepositoryItem(repositoryManager, itemMetadata);
             UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
 
-            if (securityManager.isAuthorized(user, itemMetadata.getBaseNamespace(),
-                    RepositoryPermission.WRITE)) {
+            if (securityManager.isWriteAuthorized(user, item)) {
                 repositoryManager.getFileManager().setCurrentUserId(user.getUserId());
-                RepositoryItemImpl item = RepositoryUtils.createRepositoryItem(repositoryManager,
-                        itemMetadata);
 
                 repositoryManager.commit(item, contentStream);
                 indexRepositoryItem(item);
@@ -898,13 +896,11 @@ public class RepositoryContentResource {
             LibraryInfoType itemMetadata = repositoryManager.getFileManager().loadLibraryMetadata(
                     itemIdentity.getBaseNamespace(), itemIdentity.getFilename(),
                     itemIdentity.getVersion());
+            RepositoryItemImpl item = RepositoryUtils.createRepositoryItem(repositoryManager, itemMetadata);
             UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
 
-            if (securityManager.isAuthorized(user, itemMetadata.getBaseNamespace(),
-                    RepositoryPermission.WRITE)) {
+            if (securityManager.isWriteAuthorized(user, item)) {
                 repositoryManager.getFileManager().setCurrentUserId(user.getUserId());
-                RepositoryItemImpl item = RepositoryUtils.createRepositoryItem(repositoryManager,
-                        itemMetadata);
 
                 // Obtain the lock in the local repository
                 item.setLockedByUser(user.getUserId());
@@ -956,13 +952,11 @@ public class RepositoryContentResource {
             LibraryInfoType itemMetadata = repositoryManager.getFileManager().loadLibraryMetadata(
                     itemIdentity.getBaseNamespace(), itemIdentity.getFilename(),
                     itemIdentity.getVersion());
+            RepositoryItemImpl item = RepositoryUtils.createRepositoryItem(repositoryManager, itemMetadata);
             UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
 
-            if (securityManager.isAuthorized(user, itemMetadata.getBaseNamespace(),
-                    RepositoryPermission.WRITE)) {
+            if (securityManager.isWriteAuthorized(user, item)) {
                 repositoryManager.getFileManager().setCurrentUserId(user.getUserId());
-                RepositoryItemImpl item = RepositoryUtils.createRepositoryItem(repositoryManager,
-                        itemMetadata);
 
                 // Release the lock in the local repository
                 item.setLockedByUser(user.getUserId());
@@ -986,7 +980,7 @@ public class RepositoryContentResource {
     }
 
     /**
-     * Called by remote clients to promote an item in the OTA2.0 repository from DRAFT to FINAL.
+     * Called by remote clients to promote an item in the OTA2.0 repository.
      * 
      * @param identityElement
      *            the XML element that identifies the repository item to be promoted
@@ -1011,13 +1005,11 @@ public class RepositoryContentResource {
             LibraryInfoType itemMetadata = repositoryManager.getFileManager().loadLibraryMetadata(
                     itemIdentity.getBaseNamespace(), itemIdentity.getFilename(),
                     itemIdentity.getVersion());
+            RepositoryItemImpl item = RepositoryUtils.createRepositoryItem(repositoryManager, itemMetadata);
             UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
 
-            if (securityManager.isAuthorized(user, itemMetadata.getBaseNamespace(),
-                    RepositoryPermission.WRITE)) {
+            if (securityManager.isWriteAuthorized(user, item)) {
                 repositoryManager.getFileManager().setCurrentUserId(user.getUserId());
-                RepositoryItemImpl item = RepositoryUtils.createRepositoryItem(repositoryManager,
-                        itemMetadata);
 
                 // Promote the item in the local repository
                 repositoryManager.promote(item);
@@ -1040,7 +1032,7 @@ public class RepositoryContentResource {
     }
 
     /**
-     * Called by remote clients to demote an item in the OTA2.0 repository from FINAL to DRAFT.
+     * Called by remote clients to demote an item in the OTA2.0 repository.
      * 
      * @param identityElement
      *            the XML element that identifies the repository item to be demoted
@@ -1074,6 +1066,64 @@ public class RepositoryContentResource {
 
                 // Promote the item in the local repository
                 repositoryManager.demote(item);
+                indexRepositoryItem(item);
+
+                // Refresh the item's meta-data and return it to the caller
+                itemMetadata = repositoryManager.getFileManager().loadLibraryMetadata(
+                        itemIdentity.getBaseNamespace(), itemIdentity.getFilename(),
+                        itemIdentity.getVersion());
+                return objectFactory.createLibraryInfo(itemMetadata);
+
+            } else {
+                throw new RepositorySecurityException(
+                        "The user does not have permission to demote an item in the repository - administration access required.");
+            }
+
+        } finally {
+            RepositoryLockManager.getInstance().releaseWriteLock(lockedResource);
+        }
+    }
+
+    /**
+     * Called by remote clients to update the status of an item in the OTA2.0 repository.
+     * 
+     * @param identityElement
+     *            the XML element that identifies the repository item to be demoted
+     * @param authorizationHeader
+     *            the value of the HTTP "Authorization" header
+     * @return JAXBElement<LibraryInfoType>
+     * @throws RepositoryException
+     *             thrown if the request cannot be processed
+     */
+    @POST
+    @Path("update-status")
+    @Consumes(MediaType.TEXT_XML)
+    @Produces(MediaType.TEXT_XML)
+    public JAXBElement<LibraryInfoType> updateRepositoryItemStatus(
+            JAXBElement<RepositoryItemIdentityType> identityElement,
+            @QueryParam("newStatus") String newStatusStr,
+            @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
+
+        RepositoryItemIdentityType itemIdentity = identityElement.getValue();
+        LockableResource lockedResource = RepositoryLockManager.getInstance().acquireWriteLock(
+                itemIdentity.getBaseNamespace(), itemIdentity.getFilename());
+        TLLibraryStatus newStatus = getStatus( newStatusStr );
+        try {
+            LibraryInfoType itemMetadata = repositoryManager.getFileManager().loadLibraryMetadata(
+                    itemIdentity.getBaseNamespace(), itemIdentity.getFilename(),
+                    itemIdentity.getVersion());
+            TLLibraryStatus currentStatus = TLLibraryStatus.fromRepositoryStatus( itemMetadata.getStatus() );
+            UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
+            boolean hasAccess = (currentStatus.getRank() <= newStatus.getRank())
+            		|| securityManager.isAdministrator(user);
+            
+            if (hasAccess) {
+                repositoryManager.getFileManager().setCurrentUserId(user.getUserId());
+                RepositoryItemImpl item = RepositoryUtils.createRepositoryItem(repositoryManager,
+                        itemMetadata);
+
+                // Update the item's status in the local repository
+                repositoryManager.updateStatus(item, newStatus);
                 indexRepositoryItem(item);
 
                 // Refresh the item's meta-data and return it to the caller
@@ -1222,10 +1272,10 @@ public class RepositoryContentResource {
             LibraryInfoType itemMetadata = repositoryManager.getFileManager().loadLibraryMetadata(
                     itemIdentity.getBaseNamespace(), itemIdentity.getFilename(),
                     itemIdentity.getVersion());
+            RepositoryItemImpl item = RepositoryUtils.createRepositoryItem(repositoryManager, itemMetadata);
             UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
 
-            if (securityManager.isAuthorized(user, itemMetadata.getBaseNamespace(),
-                    getMinimumReadPermission(itemMetadata))) {
+            if (securityManager.isReadAuthorized(user, item)) {
                 return objectFactory.createLibraryInfo(itemMetadata);
 
             } else {
@@ -1263,10 +1313,10 @@ public class RepositoryContentResource {
             LibraryInfoType itemMetadata = repositoryManager.getFileManager().loadLibraryMetadata(
                     itemIdentity.getBaseNamespace(), itemIdentity.getFilename(),
                     itemIdentity.getVersion());
+            RepositoryItemImpl item = RepositoryUtils.createRepositoryItem(repositoryManager, itemMetadata);
             UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
 
-            if (securityManager.isAuthorized(user, itemMetadata.getBaseNamespace(),
-                    getMinimumReadPermission(itemMetadata))) {
+            if (securityManager.isReadAuthorized(user, item)) {
                 File contentFile = repositoryManager.getFileManager().getLibraryContentLocation(
                         itemIdentity.getBaseNamespace(), itemIdentity.getFilename(),
                         itemIdentity.getVersion());
@@ -1384,40 +1434,10 @@ public class RepositoryContentResource {
         Boolean hasAccess = cacheRecord.get(item.getStatus());
 
         if (hasAccess == null) {
-            RepositoryPermission permission;
-
-            if (item.getStatus() == TLLibraryStatus.DRAFT) {
-                permission = RepositoryPermission.READ_DRAFT;
-
-            } else { // status is FINAL
-                permission = RepositoryPermission.READ_FINAL;
-            }
-            hasAccess = securityManager.isAuthorized(user, item.getBaseNamespace(), permission);
+            hasAccess = securityManager.isReadAuthorized(user, item);
             cacheRecord.put(item.getStatus(), hasAccess);
         }
         return hasAccess;
-    }
-
-    /**
-     * Returns the permission level that is required to read the meta-data or content of the
-     * indicated repository item.
-     * 
-     * @param itemMetadata
-     *            the meta-data for the repository item to be accessed
-     * @return RepositoryPermission
-     */
-    private RepositoryPermission getMinimumReadPermission(LibraryInfoType itemMetadata) {
-        RepositoryPermission permission;
-
-        switch (itemMetadata.getStatus()) {
-            case DRAFT:
-            case UNDER_REVIEW:
-                permission = RepositoryPermission.READ_DRAFT;
-                break;
-            default:
-                permission = RepositoryPermission.READ_FINAL;
-        }
-        return permission;
     }
 
     /**

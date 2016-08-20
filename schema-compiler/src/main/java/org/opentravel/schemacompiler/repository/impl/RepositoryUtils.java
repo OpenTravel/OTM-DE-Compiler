@@ -35,6 +35,7 @@ import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryItemState;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
+import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.version.VersionScheme;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
@@ -352,4 +353,17 @@ public class RepositoryUtils {
     	return result;
     }
     
+    /**
+     * Returns true if the OTM 1.6 features are enabled AND the given repository status
+     * is DRAFT or FINAL.  Other statuses that are part of the 1.6 lifecycle will always
+     * behave as if 1.6 features are enabled.
+     * 
+     * @param status  the repository status to check
+     * @return boolean
+     */
+    public static boolean isOTM16LifecycleEnabled(LibraryStatus status) {
+    	return OTM16Upgrade.otm16Enabled || (status == LibraryStatus.UNDER_REVIEW)
+    			  || (status == LibraryStatus.OBSOLETE);
+    }
+
 }
