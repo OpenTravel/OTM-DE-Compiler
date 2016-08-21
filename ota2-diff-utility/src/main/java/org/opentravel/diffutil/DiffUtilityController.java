@@ -422,9 +422,18 @@ public class DiffUtilityController {
 	private FileChooser newFileChooser(String title, File initialDirectory,
 			String fileExtension, String extensionDescription) {
 		FileChooser chooser = new FileChooser();
+		File directory = initialDirectory;
+		
+		// Make sure the initial directory for the chooser exists
+		while ((directory != null) && !directory.exists()) {
+			directory = directory.getParentFile();
+		}
+		if (directory == null) {
+			directory = new File( System.getProperty("user.home") );
+		}
 		
 		chooser.setTitle( title );
-		chooser.setInitialDirectory( initialDirectory );
+		chooser.setInitialDirectory( directory );
 		chooser.getExtensionFilters().addAll(
 				new FileChooser.ExtensionFilter(extensionDescription, "*." + fileExtension ),
 				new FileChooser.ExtensionFilter("All Files", "*.*") );

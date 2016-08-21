@@ -24,6 +24,7 @@ import org.opentravel.schemacompiler.model.TLResourceParentRef;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.base.TLResourceParentRefBaseValidator;
+import org.opentravel.schemacompiler.validate.impl.CircularReferenceChecker;
 import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
 
 /**
@@ -33,10 +34,11 @@ import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
  */
 public class TLResourceParentRefCompileValidator extends TLResourceParentRefBaseValidator {
 
-    public static final String ERROR_INVALID_ABSTRACT_PARENT   = "INVALID_ABSTRACT_PARENT";
-    public static final String ERROR_INVALID_PARAM_GROUP       = "INVALID_PARAM_GROUP";
-    public static final String ERROR_ID_PARAM_GROUP_REQUIRED   = "ID_PARAM_GROUP_REQUIRED";
-    public static final String ERROR_CONFLICTING_PATH_TEMPLATE = "CONFLICTING_PATH_TEMPLATE";
+    public static final String ERROR_INVALID_ABSTRACT_PARENT     = "INVALID_ABSTRACT_PARENT";
+    public static final String ERROR_INVALID_PARAM_GROUP         = "INVALID_PARAM_GROUP";
+    public static final String ERROR_ID_PARAM_GROUP_REQUIRED     = "ID_PARAM_GROUP_REQUIRED";
+    public static final String ERROR_CONFLICTING_PATH_TEMPLATE   = "CONFLICTING_PATH_TEMPLATE";
+    public static final String ERROR_INVALID_CIRCULAR_PARENT_REF = "INVALID_CIRCULAR_PARENT_REF";
     
 	/**
 	 * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateFields(org.opentravel.schemacompiler.validate.Validatable)
@@ -54,6 +56,10 @@ public class TLResourceParentRefCompileValidator extends TLResourceParentRefBase
     	if ((parentResource != null) && parentResource.isAbstract()) {
         	builder.addFinding( FindingType.ERROR, "parentResource", ERROR_INVALID_ABSTRACT_PARENT );
     	}
+
+        if (CircularReferenceChecker.hasCircularParentRef(target)) {
+            builder.addFinding(FindingType.ERROR, "parentResource", ERROR_INVALID_CIRCULAR_PARENT_REF);
+        }
     	
     	if (parentParamGroup == null) {
     		String paramGroupName = target.getParentParamGroupName();

@@ -307,7 +307,10 @@ public final class ProjectManager {
 
             // Attempt to register any new repositories that are defined in this project file
             registerUnknownRepositories(jaxbProject, projectFile, loaderFindings);
-
+            
+            // Reset the download cache for all remote repositories
+            repositoryManager.resetDownloadCache();
+            
             // Construct the new project instance and add it to the current list of projects
             project = new Project(this);
             project.setProjectId(jaxbProject.getProjectId());
@@ -319,10 +322,9 @@ public final class ProjectManager {
             validateProjectID(project.getProjectId(), null);
             validateProjectFile(projectFile, null);
             projects.add(project);
-
+            
             // Load the contents of the model using the library reference from each of the project
-            // items
-            // defined in the file.
+            // items defined in the file.
             List<RepositoryItem> managedItems = new ArrayList<RepositoryItem>();
             List<File> unmanagedItemFiles = new ArrayList<File>();
             RepositoryItem defaultItem = null;
@@ -455,6 +457,10 @@ public final class ProjectManager {
             		project.getFailedProjectItems().add( item );
             	}
             }
+            
+            // Reset the download cache to ensure future operations are forced to re-download
+            // content from remote repositories
+            repositoryManager.resetDownloadCache();
 
         } else {
             throw new LibraryLoaderException("Unable to load project: " + projectFile.getName());
@@ -926,6 +932,7 @@ public final class ProjectManager {
      */
     public List<ProjectItem> addManagedProjectItems(List<RepositoryItem> items, Project project,
             ValidationFindings findings) throws LibraryLoaderException, RepositoryException {
+        repositoryManager.resetDownloadCache();
         ValidationFindings loaderFindings = new ValidationFindings();
         List<ProjectItem> projectItems = loadAllProjectItems(new ArrayList<File>(), items, project,
                 loaderFindings);
@@ -1394,6 +1401,7 @@ public final class ProjectManager {
                         initialStatus = library.getStatus();
                         versionScheme = library.getVersionScheme();
                     }
+                    repositoryManager.resetDownloadCache();
                     RepositoryItem repositoryItem = repository.publish(contentStream,
                             getPublicationFilename(item.getContent()), item.getLibraryName(),
                             item.getNamespace(), item.getVersion(), versionScheme, initialStatus);
@@ -1688,6 +1696,7 @@ public final class ProjectManager {
             if (managedItem.getRepository() == repositoryManager) {
                 managedItem.setLockedByUser(System.getProperty("user.name"));
             }
+            repositoryManager.resetDownloadCache();
             repositoryManager.lock(managedItem);
 
             // Update the project item and its library to reference the WIP file instead of the
@@ -1754,6 +1763,7 @@ public final class ProjectManager {
         // Call the remote web service to obtain the lock
         ProjectItemImpl managedItem = (ProjectItemImpl) item;
 
+        repositoryManager.resetDownloadCache();
         repositoryManager.unlock(managedItem, commitWIP);
 
         // Update the project item and its library to reference the managed repository item instead
@@ -1796,6 +1806,7 @@ public final class ProjectManager {
                         "Error saving library before committing content to the repository.", e);
             }
         }
+        repositoryManager.resetDownloadCache();
         repositoryManager.commit(item);
     }
 
@@ -1816,6 +1827,7 @@ public final class ProjectManager {
             throw new RepositoryException(
                     "Unable to revert - the item is not a work-in-process copy.");
         }
+        repositoryManager.resetDownloadCache();
         repositoryManager.revert(item);
     }
 
@@ -1869,6 +1881,7 @@ public final class ProjectManager {
                         "Unable to promote - only user-defined libraries in DRAFT status can be promoted.");
             }
         }
+        repositoryManager.resetDownloadCache();
         repositoryManager.promote(item);
 
         if (item.getContent() instanceof TLLibrary) {
@@ -1912,6 +1925,7 @@ public final class ProjectManager {
                         "Unable to demote - only user-defined libraries in FINAL status can be demoted.");
             }
         }
+        repositoryManager.resetDownloadCache();
         repositoryManager.demote(item);
 
         if (item.getContent() instanceof TLLibrary) {
@@ -1944,6 +1958,7 @@ public final class ProjectManager {
             throw new RepositoryException(
                     "Unable to update status - the new status cannot be null.");
         }
+        repositoryManager.resetDownloadCache();
         repositoryManager.updateStatus(item, newStatus);
 
         if (item.getContent() instanceof TLLibrary) {

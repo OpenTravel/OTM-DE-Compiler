@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
+import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAliasOwner;
@@ -32,6 +33,8 @@ import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLPropertyOwner;
 import org.opentravel.schemacompiler.model.TLPropertyType;
+import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.model.TLResourceParentRef;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
@@ -314,4 +317,58 @@ public class CircularReferenceChecker {
         return result;
     }
 
+    /**
+     * Performs a recursive check to determine whether any circular parent references exist for
+     * the given parent-ref.
+     * 
+     * @param parentRef
+     *            the resource parent reference to be analyzed
+     * @return boolean
+     */
+    public static boolean hasCircularParentRef(TLResourceParentRef parentRef) {
+        boolean result = false;
+
+        if (parentRef != null) {
+            result = checkCircularParentRef(parentRef.getParentResource(), parentRef,
+                    new HashSet<TLResource>());
+        }
+        return result;
+    }
+
+    /**
+     * Recursive method that searches the dependency tree to identify circular references for the
+     * owner of the given extension.
+     * 
+     * @param referencedResource
+     *            the resource that is referenced by an parent reference
+     * @param originalParentRef
+     *            the original parent reference that is being checked for circular references
+     * @param visitedResources
+     *            the set of referenced parents that have already been checked
+     * @return boolean
+     */
+    private static boolean checkCircularParentRef(TLResource referencedResource,
+    		TLResourceParentRef originalParentRef, Set<TLResource> visitedResources) {
+    	boolean result = false;
+    	
+    	if (referencedResource != null) {
+    		List<TLResourceParentRef> refList =
+    				ResourceCodegenUtils.getInheritedParentRefs( referencedResource );
+    		
+    		if (refList.contains( originalParentRef )) {
+    			result = true;
+    			
+    		} else if (!visitedResources.contains( referencedResource )){
+    			
+    			visitedResources.add( referencedResource );
+    			
+    			for (TLResourceParentRef ref : refList) {
+    				result = checkCircularParentRef(
+    						ref.getParentResource(), originalParentRef, visitedResources );
+    			}
+    		}
+    	}
+    	return result;
+    }
+    
 }

@@ -381,9 +381,10 @@ public class ResourceCodegenUtils {
 	}
 	
 	/**
-	 * Returns the list of all actions declared and inherited by the given resource.
+	 * Returns the list of all qualified actions declared and inherited by the
+	 * given resource.
 	 * 
-	 * @param resource  the resource for which to return inherited actions
+	 * @param resource  the resource for which to return qualified actions
 	 * @return List<QualifiedAction>
 	 */
 	public static List<QualifiedAction> getQualifiedActions(TLResource resource) {
@@ -395,7 +396,31 @@ public class ResourceCodegenUtils {
 				actionList.add( new QualifiedAction( null, action ) );
 			}
 			for (TLResourceParentRef parentRef : getInheritedParentRefs( resource )) {
-				buildQualifiedActions( action, parentRef, new ArrayList<TLResourceParentRef>(), actionList );
+				buildQualifiedActions( action, parentRef, new ArrayList<TLResourceParentRef>(),
+						actionList, new HashSet<TLResourceParentRef>() );
+			}
+		}
+		return actionList;
+	}
+	
+	/**
+	 * Returns the list of all qualified actions for the given OTM model action.
+	 * 
+	 * @param action  the resource action for which to return qualified actions
+	 * @return List<QualifiedAction>
+	 */
+	public static List<QualifiedAction> getQualifiedActions(TLAction action) {
+		List<QualifiedAction> actionList = new ArrayList<>();
+		TLResource resource = action.getOwner();
+		
+		if (resource != null) {
+			if (resource.isFirstClass()) {
+				// First-class resources can be accessed independently of a parent resource
+				actionList.add( new QualifiedAction( null, action ) );
+			}
+			for (TLResourceParentRef parentRef : getInheritedParentRefs( resource )) {
+				buildQualifiedActions( action, parentRef, new ArrayList<TLResourceParentRef>(),
+						actionList, new HashSet<TLResourceParentRef>() );
 			}
 		}
 		return actionList;
@@ -408,9 +433,11 @@ public class ResourceCodegenUtils {
 	 * @param parentRef  the current parent reference for the qualified action that should be considered
 	 * @param parentList  the list of child resource parent references that are currently under consideration
 	 * @param actionList  the list of qualified actions that have already been created
+	 * @param visitedParentRefs  the list of parent references that have already been traversed
 	 */
 	private static void buildQualifiedActions(TLAction action, TLResourceParentRef parentRef,
-			List<TLResourceParentRef> parentList, List<QualifiedAction> actionList) {
+			List<TLResourceParentRef> parentList, List<QualifiedAction> actionList,
+			Set<TLResourceParentRef> visitedParentRefs) {
 		TLResource parentResource = parentRef.getParentResource();
 		List<TLResourceParentRef> newParentList = new ArrayList<>( parentList );
 		
@@ -420,7 +447,10 @@ public class ResourceCodegenUtils {
 			actionList.add( new QualifiedAction( newParentList, action ) );
 		}
 		for (TLResourceParentRef pRef : getInheritedParentRefs( parentResource )) {
-			buildQualifiedActions( action, pRef, newParentList, actionList );
+			if (!visitedParentRefs.contains( pRef )) {
+				visitedParentRefs.add( pRef );
+				buildQualifiedActions( action, pRef, newParentList, actionList, visitedParentRefs );
+			}
 		}
 	}
 	

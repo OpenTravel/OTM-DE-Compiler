@@ -138,9 +138,18 @@ public class ExampleHelperController {
 	 */
 	private FileChooser newFileChooser(String title, File initialDirectory, FileChooser.ExtensionFilter... extensionFilters) {
 		FileChooser chooser = new FileChooser();
+		File directory = initialDirectory;
+		
+		// Make sure the initial directory for the chooser exists
+		while ((directory != null) && !directory.exists()) {
+			directory = directory.getParentFile();
+		}
+		if (directory == null) {
+			directory = new File( System.getProperty("user.home") );
+		}
 		
 		chooser.setTitle( title );
-		chooser.setInitialDirectory( initialDirectory );
+		chooser.setInitialDirectory( directory );
 		chooser.getExtensionFilters().addAll( extensionFilters );
 		return chooser;
 	}

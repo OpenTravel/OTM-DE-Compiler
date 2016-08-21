@@ -30,7 +30,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -141,6 +143,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
     private RefreshPolicy refreshPolicy;
     private String userId;
     private String encryptedPassword;
+    private Set<String> downloadCache = new HashSet<>();
 
     /**
      * Initializes this instance with a handle to the <code>RepositoryManager</code> that controls
@@ -153,16 +156,38 @@ public class RemoteRepositoryClient implements RemoteRepository {
         this.manager = manager;
     }
 
+    /**
+     * Returns an HTTP client to use when accessing the remote repository.
+     * 
+     * @return HttpClient
+     */
     private static HttpClient createHttpClient() {
 		return HttpClientBuilder.create().useSystemProperties()
                 .setDefaultCredentialsProvider(new NTLMSystemCredentialsProvider()).build();
     }
 
+    /**
+     * Applies the user's credentials to the given request and sends the request to
+     * the remote repository.
+     * 
+     * @param request  the request to send to the remote repository
+     * @return HttpResponse
+     * @throws ClientProtocolException  thrown if an error occurs in the HTTP protocol
+     * @throws IOException  thrown if an error occurs during request execution
+     */
     private HttpResponse executeWithAuthentication(HttpUriRequest request)
             throws ClientProtocolException, IOException {
         return createHttpClient().execute(request, createHttpContext());
     }
 
+    /**
+     * Sends the given request to the remote repository.
+     * 
+     * @param request  the request to send to the remote repository
+     * @return HttpResponse
+     * @throws ClientProtocolException  thrown if an error occurs in the HTTP protocol
+     * @throws IOException  thrown if an error occurs during request execution
+     */
     private static HttpResponse execute(HttpUriRequest request) throws ClientProtocolException,
             IOException {
         return createHttpClient().execute(request);
@@ -174,6 +199,13 @@ public class RemoteRepositoryClient implements RemoteRepository {
     @Override
     public RepositoryManager getManager() {
         return manager;
+    }
+    
+    /**
+     * Clears the cache memory of recently downloaded files.
+     */
+    public void resetDownloadCache() {
+    	downloadCache.clear();
     }
 
     /**
@@ -1531,6 +1563,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
     public boolean downloadContent(String baseNamespace, String filename, String versionIdentifier,
             boolean forceUpdate) throws RepositoryException {
         String baseNS = RepositoryNamespaceUtils.normalizeUri(baseNamespace);
+        String cacheKey = baseNS + "~" + filename + "~" + versionIdentifier;
         LibraryInfoType contentMetadata = null;
         boolean refreshRequired, isStaleContent = false;
         Date localLastUpdated;
@@ -1549,7 +1582,14 @@ public class RemoteRepositoryClient implements RemoteRepository {
         	localLastUpdated = new Date( 0L ); // make sure the local date is earlier than anything we will get from the repository
             refreshRequired = true;
         }
-
+        
+        // Skip the download if the item has been downloaded recently
+        if (refreshRequired && downloadCache.contains( cacheKey )) {
+            log.info("Skipping download of repository item '" + id + "' - " + baseNS + "; "
+                    + filename + "; " + versionIdentifier);
+            refreshRequired = false;
+        }
+        
         // If the item was previously downloaded, make sure it originated from this remote
         // repository
         if ((contentMetadata != null) && !contentMetadata.getOwningRepository().equals(id)) {
@@ -1620,8 +1660,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
 
             } catch (UnknownHostException e) {
                 // If the remote repository is inaccessible, it is only an error if we are
-                // downloading the
-                // files for the first time.
+                // downloading the files for the first time.
                 File repositoryMetadataFile = manager.getFileManager().getLibraryMetadataLocation(
                         baseNS, filename, versionIdentifier);
 
@@ -1635,10 +1674,10 @@ public class RemoteRepositoryClient implements RemoteRepository {
                 }
 
             } catch (JAXBException e) {
-                throw new RepositoryException("The format of the library meta-data is unreadable.",
-                        e);
+                throw new RepositoryException("The format of the library meta-data is unreadable.", e);
 
             } catch (IOException e) {
+            	log.warn("The remote repository '" + id + "' is unavailable.");
                 throw new RepositoryException("The remote repository is unavailable.", e);
 
             } finally {
@@ -1652,6 +1691,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
                         log.error("Error rolling back the current change set.", t);
                     }
                 }
+                downloadCache.add( cacheKey );
             }
         }
         return isStaleContent;

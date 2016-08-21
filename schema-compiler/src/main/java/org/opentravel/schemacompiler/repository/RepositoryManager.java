@@ -177,6 +177,15 @@ public class RepositoryManager implements Repository {
     }
 
     /**
+     * Clears the cache memory of recently downloaded files.
+     */
+    public void resetDownloadCache() {
+    	for (RemoteRepositoryClient remoteRepo : remoteRepositories) {
+    		remoteRepo.resetDownloadCache();
+    	}
+    }
+    
+    /**
      * @see org.opentravel.schemacompiler.repository.Repository#getId()
      */
     @Override
@@ -1971,6 +1980,7 @@ public class RepositoryManager implements Repository {
         boolean isRefreshed = false;
         
         if (repository instanceof RemoteRepository) {
+        	resetDownloadCache();
             isRefreshed = ((RemoteRepository) repository).downloadContent(item, true);
         }
         return isRefreshed;
