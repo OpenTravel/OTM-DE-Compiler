@@ -20,12 +20,14 @@ import java.net.URL;
 import java.util.Set;
 
 import org.opentravel.ns.ota2.librarymodel_v01_06.ContextDeclaration;
+import org.opentravel.ns.ota2.librarymodel_v01_06.Folder;
 import org.opentravel.ns.ota2.librarymodel_v01_06.Library;
 import org.opentravel.ns.ota2.librarymodel_v01_06.LibraryStatus;
 import org.opentravel.ns.ota2.librarymodel_v01_06.NamespaceImport;
 import org.opentravel.ns.ota2.librarymodel_v01_06.Service;
 import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.TLContext;
+import org.opentravel.schemacompiler.model.TLFolder;
 import org.opentravel.schemacompiler.model.TLInclude;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
@@ -43,7 +45,8 @@ import org.opentravel.schemacompiler.transform.util.BaseTransformer;
 public class LibraryTransformer extends
         BaseTransformer<Library, TLLibrary, DefaultTransformerContext> {
 
-    public static final String DEFAULT_CONTEXT_ID = "default";
+    public static final String DEFAULT_CONTEXT_ID        = "default";
+    public static final String TARGET_LIBRARY_CONTEXT_ID = "targetLibrary";
     
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
@@ -53,6 +56,8 @@ public class LibraryTransformer extends
     public TLLibrary transform(Library source) {
         ObjectTransformer<ContextDeclaration, TLContext, DefaultTransformerContext> contextTransformer = getTransformerFactory()
                 .getTransformer(ContextDeclaration.class, TLContext.class);
+        ObjectTransformer<Folder, TLFolder, DefaultTransformerContext> folderTransformer = getTransformerFactory()
+                .getTransformer(Folder.class, TLFolder.class);
         String credentialsUrl = trimString(source.getAlternateCredentials());
         TLLibrary target = new TLLibrary();
 
@@ -116,7 +121,15 @@ public class LibraryTransformer extends
 
             target.setService(serviceTransformer.transform(source.getService()));
         }
-
+        
+        // Perform transforms for the library's folder structure
+        context.setContextCacheEntry( TARGET_LIBRARY_CONTEXT_ID, target );
+        
+        for (Folder folder : source.getFolder()) {
+        	target.addFolder( folderTransformer.transform( folder ) );
+        }
+        context.setContextCacheEntry( TARGET_LIBRARY_CONTEXT_ID, null );
+        
         return target;
     }
 

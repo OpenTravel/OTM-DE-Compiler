@@ -39,7 +39,7 @@ import org.opentravel.schemacompiler.version.VersionSchemeFactory;
  * 
  * @author S. Livezey
  */
-public class TLLibrary extends AbstractLibrary {
+public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
 
     private static final Set<Class<?>> validMemberTypes;
 
@@ -49,6 +49,7 @@ public class TLLibrary extends AbstractLibrary {
     private TLLibraryStatus status = TLLibraryStatus.DRAFT;
     private String comments;
     private TLService service;
+    private TLFolder rootFolder = new TLFolder( this );
 
     /**
      * Default constructor.
@@ -705,6 +706,56 @@ public class TLLibrary extends AbstractLibrary {
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.model.TLFolderOwner#getFolders()
+	 */
+	@Override
+	public List<TLFolder> getFolders() {
+		return rootFolder.getFolders();
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.model.TLFolderOwner#addFolder(org.opentravel.schemacompiler.model.TLFolder)
+	 */
+	@Override
+	public void addFolder(TLFolder folder) {
+		rootFolder.addFolder( folder );
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.model.TLFolderOwner#removeFolder(org.opentravel.schemacompiler.model.TLFolder)
+	 */
+	@Override
+	public void removeFolder(TLFolder folder) {
+		rootFolder.removeFolder( folder );
+	}
+	
+	/**
+	 * Returns the list of member entities that are not currently assigned to a folder.
+	 * 
+	 * @return List<LibraryMember>
+	 */
+	public List<LibraryMember> getUnfolderedMembers() {
+		List<LibraryMember> unfolderedMembers = new ArrayList<>( getNamedMembers() );
+		
+		purgeFolderedMembers( rootFolder, unfolderedMembers );
+		return unfolderedMembers;
+	}
+	
+	/**
+	 * Removes all entities that are assigned to the given folder or its sub-folders from
+	 * the list of members provided.
+	 * 
+	 * @param folder  the folder whose member entities are to be removed from the list
+	 * @param memberList  the list of members to be purged
+	 */
+	private void purgeFolderedMembers(TLFolder folder, List<LibraryMember> memberList) {
+		for (TLFolder subFolder : folder.getFolders()) {
+			purgeFolderedMembers( subFolder, memberList );
+		}
+		memberList.removeAll( folder.getEntities() );
+	}
+
+	/**
      * Constructs an unmodifiable list of member entities of the specified type.
      * 
      * @param <T>
@@ -724,7 +775,7 @@ public class TLLibrary extends AbstractLibrary {
         }
         return Collections.unmodifiableList(memberList);
     }
-
+    
     /**
      * Initializes the list of valid member types for this library.
      */

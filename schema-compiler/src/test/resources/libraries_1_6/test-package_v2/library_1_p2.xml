@@ -462,4 +462,17 @@
         </Operation>
     </Service>
     
+    <Folder name="Folder1">
+    	<FolderItem>EmptyBusinessObject</FolderItem>
+    	<FolderItem>SampleBusinessObject</FolderItem>
+    	<Folder name="Folder1-1">
+    	</Folder>
+    	<Folder name="Folder1-2">
+	    	<FolderItem>CompoundBusinessObject</FolderItem>
+    	</Folder>
+    </Folder>
+    <Folder name="Folder2">
+    	<FolderItem>SampleCore</FolderItem>
+    </Folder>
+    
 </Library>

@@ -80,7 +80,6 @@ public class TLModelValidationContext implements ValidationContext {
      *            the key for the validation cache entry to assign
      * @param cacheValue
      *            the value to be associated with the specified key
-     * @return Object
      */
     public void setContextCacheEntry(String cacheKey, Object cacheValue) {
         validationCache.put(cacheKey, cacheValue);

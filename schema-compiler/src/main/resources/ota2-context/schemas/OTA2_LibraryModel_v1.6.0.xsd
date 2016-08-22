@@ -816,6 +816,52 @@
       </xsd:complexContent>
    </xsd:complexType>
 
+   <xsd:element name="Folder" type="Folder">
+      <xsd:annotation>
+         <xsd:documentation>A folder used to organize entities within an OTM library.
+         	Beyond this purpose, folders have no functional relevance in how generated
+         	artifacts are produced from the library.
+         </xsd:documentation>
+      </xsd:annotation>
+   </xsd:element>
+   <xsd:complexType name="Folder">
+      <xsd:annotation>
+         <xsd:documentation>A folder used to organize entities within an OTM library.
+         	Beyond this purpose, folders have no functional relevance in how generated
+         	artifacts are produced from the library.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:sequence>
+         <xsd:element ref="Folder" minOccurs="0" maxOccurs="100" />
+         <xsd:element ref="FolderItem" minOccurs="0" maxOccurs="100" />
+      </xsd:sequence>
+      <xsd:attribute name="name" type="Name_File" use="required">
+         <xsd:annotation>
+            <xsd:documentation>The name of the folder.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+   </xsd:complexType>
+
+   <xsd:element name="FolderItem" type="FolderItem">
+      <xsd:annotation>
+         <xsd:documentation>A folder used to organize entities within an OTM library.
+         	Beyond this purpose, folders have no functional relevance in how generated
+         	artifacts are produced from the library.
+         </xsd:documentation>
+      </xsd:annotation>
+   </xsd:element>
+   <xsd:complexType name="FolderItem">
+      <xsd:annotation>
+         <xsd:documentation>Specifies the name of an OTM entity (term) that resides
+         	within a folder.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:simpleContent>
+         <xsd:extension base="Name_XML" />
+      </xsd:simpleContent>
+   </xsd:complexType>
+
    <xsd:element name="Indicator" type="Indicator">
       <xsd:annotation>
          <xsd:documentation>All boolean indicator properties that are
@@ -993,6 +1039,13 @@
             <xsd:annotation>
                <xsd:documentation>A sample (reference) web service XSD message
                   that includes one or more service operations.
+               </xsd:documentation>
+            </xsd:annotation>
+         </xsd:element>
+         <xsd:element ref="Folder" minOccurs="0" maxOccurs="100">
+            <xsd:annotation>
+               <xsd:documentation>A list of nested folders used to organize entities
+                  within a library.
                </xsd:documentation>
             </xsd:annotation>
          </xsd:element>

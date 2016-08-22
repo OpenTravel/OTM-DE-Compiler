@@ -38,4 +38,21 @@ public interface ObjectTransformerContext {
      */
     public void setTransformerFactory(TransformerFactory<?> factory);
 
+    /**
+     * Returns an entry from the context cache, or null if an entry with the specified
+     * key has not been defined.
+     * 
+     * @param cacheKey  the key for the validation cache entry to return
+     * @return Object
+     */
+    public Object getContextCacheEntry(String cacheKey);
+    
+    /**
+     * Assigns a key/value entry to the context cache.
+     * 
+     * @param cacheKey  the key for the validation cache entry to assign
+     * @param cacheValue  the value to be associated with the specified key
+     */
+    public void setContextCacheEntry(String cacheKey, Object cacheValue);
+    
 }

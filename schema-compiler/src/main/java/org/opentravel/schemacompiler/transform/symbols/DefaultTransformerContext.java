@@ -15,6 +15,9 @@
  */
 package org.opentravel.schemacompiler.transform.symbols;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.opentravel.schemacompiler.transform.ObjectTransformerContext;
 import org.opentravel.schemacompiler.transform.TransformerFactory;
 
@@ -25,6 +28,7 @@ import org.opentravel.schemacompiler.transform.TransformerFactory;
  */
 public class DefaultTransformerContext implements ObjectTransformerContext {
 
+    private Map<String, Object> contextCache = new HashMap<String, Object>();
     private TransformerFactory<?> factory;
 
     /**
@@ -42,5 +46,21 @@ public class DefaultTransformerContext implements ObjectTransformerContext {
     public void setTransformerFactory(TransformerFactory<?> factory) {
         this.factory = factory;
     }
-
+    
+	/**
+	 * @see org.opentravel.schemacompiler.transform.ObjectTransformerContext#getContextCacheEntry(java.lang.String)
+	 */
+	@Override
+	public Object getContextCacheEntry(String cacheKey) {
+		return contextCache.get( cacheKey );
+	}
+	
+	/**
+	 * @see org.opentravel.schemacompiler.transform.ObjectTransformerContext#setContextCacheEntry(java.lang.String, java.lang.Object)
+	 */
+	@Override
+	public void setContextCacheEntry(String cacheKey, Object cacheValue) {
+		contextCache.put( cacheKey, cacheValue );
+	}
+	
 }

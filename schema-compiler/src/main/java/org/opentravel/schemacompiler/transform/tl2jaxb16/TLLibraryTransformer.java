@@ -28,6 +28,7 @@ import org.opentravel.ns.ota2.librarymodel_v01_06.CoreObject;
 import org.opentravel.ns.ota2.librarymodel_v01_06.EnumerationClosed;
 import org.opentravel.ns.ota2.librarymodel_v01_06.EnumerationOpen;
 import org.opentravel.ns.ota2.librarymodel_v01_06.ExtensionPointFacet;
+import org.opentravel.ns.ota2.librarymodel_v01_06.Folder;
 import org.opentravel.ns.ota2.librarymodel_v01_06.Library;
 import org.opentravel.ns.ota2.librarymodel_v01_06.LibraryStatus;
 import org.opentravel.ns.ota2.librarymodel_v01_06.NamespaceImport;
@@ -42,6 +43,7 @@ import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLContext;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
+import org.opentravel.schemacompiler.model.TLFolder;
 import org.opentravel.schemacompiler.model.TLInclude;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
@@ -73,6 +75,8 @@ public class TLLibraryTransformer extends
     public Library transform(TLLibrary source) {
         ObjectTransformer<TLContext, ContextDeclaration, SymbolResolverTransformerContext> contextTransformer = getTransformerFactory()
                 .getTransformer(TLContext.class, ContextDeclaration.class);
+        ObjectTransformer<TLFolder, Folder, SymbolResolverTransformerContext> folderTransformer = getTransformerFactory()
+                .getTransformer(TLFolder.class, Folder.class);
         Library target = new Library();
 
         target.setName(trimString(source.getName(), false));
@@ -133,6 +137,12 @@ public class TLLibraryTransformer extends
                 }
             }
         }
+        
+        // Perform transforms for the library's folder structure
+        for (TLFolder folder : source.getFolders()) {
+        	target.getFolder().add( folderTransformer.transform( folder ) );
+        }
+        
         return target;
     }
 
