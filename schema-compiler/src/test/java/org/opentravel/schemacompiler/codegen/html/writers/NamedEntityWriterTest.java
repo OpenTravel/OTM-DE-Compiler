@@ -109,38 +109,31 @@ public class NamedEntityWriterTest extends WriterTest {
 		
 		@Override
 		public LibraryElement cloneElement() {
-			// TODO Auto-generated method stub
 			return null;
 		}
 
 		@Override
 		public LibraryElement cloneElement(AbstractLibrary namingContext) {
-			// TODO Auto-generated method stub
 			return null;
 		}
 
 		@Override
 		public TLModel getOwningModel() {
-			// TODO Auto-generated method stub
 			return null;
 		}
 
 		@Override
 		public String getValidationIdentity() {
-			// TODO Auto-generated method stub
 			return null;
 		}
 
 		@Override
 		public TLDocumentation getDocumentation() {
-			// TODO Auto-generated method stub
 			return null;
 		}
 
 		@Override
 		public void setDocumentation(TLDocumentation documentation) {
-			// TODO Auto-generated method stub
-			
 		}
 
 		@Override

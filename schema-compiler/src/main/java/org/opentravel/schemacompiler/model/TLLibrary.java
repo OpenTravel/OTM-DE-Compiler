@@ -737,6 +737,9 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
 	public List<LibraryMember> getUnfolderedMembers() {
 		List<LibraryMember> unfolderedMembers = new ArrayList<>( getNamedMembers() );
 		
+		if (service != null) {
+			unfolderedMembers.remove( service );
+		}
 		purgeFolderedMembers( rootFolder, unfolderedMembers );
 		return unfolderedMembers;
 	}

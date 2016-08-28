@@ -72,8 +72,6 @@ public class PropertyDocumentationBuilder extends
 
 	@Override
 	public void build() throws Exception {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

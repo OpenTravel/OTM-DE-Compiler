@@ -225,13 +225,11 @@ public class LibraryDocumentationBuilder implements DocumentationBuilder {
 
 	@Override
 	public String getDescription() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public String getOwningLibrary() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

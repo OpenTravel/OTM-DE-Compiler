@@ -20,12 +20,16 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.opentravel.schemacompiler.event.ModelEvent;
+import org.opentravel.schemacompiler.event.ModelEventBuilder;
+import org.opentravel.schemacompiler.event.ModelEventType;
+
 /**
  * Non-functional container within an OTM library used to organize its member
  * entities.  Beyond this purpose, folders have no effect on artifacts generated
  * by the compiler.
  */
-public class TLFolder implements TLFolderOwner {
+public class TLFolder extends TLModelElement implements TLFolderOwner {
 	
 	private static final Comparator<TLFolder> folderComparator = new FolderComparator();
 	private static final Comparator<LibraryMember> itemComparator = new FolderItemComparator();
@@ -62,6 +66,32 @@ public class TLFolder implements TLFolderOwner {
 	}
 	
 	/**
+	 * @see org.opentravel.schemacompiler.validate.Validatable#getValidationIdentity()
+	 */
+	@Override
+	public String getValidationIdentity() {
+		StringBuilder identity = new StringBuilder();
+		TLFolder f = this;
+		
+		while (f != null) {
+			String fName = "/" + ((f.name == null) ? "???" : f.name);
+			identity.insert( 0, fName );
+		}
+        if (owningLibrary != null) {
+            identity.insert( 0, owningLibrary.getValidationIdentity() + " : " );
+        }
+		return identity.toString();
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.model.ModelElement#getOwningModel()
+	 */
+	@Override
+	public TLModel getOwningModel() {
+		return (owningLibrary == null) ? null : owningLibrary.getOwningModel();
+	}
+
+	/**
 	 * Returns the name of the folder.
 	 *
 	 * @return String
@@ -76,13 +106,21 @@ public class TLFolder implements TLFolderOwner {
 	 * @param name  the field value to assign
 	 */
 	public void setName(String name) {
-		// TODO: Check for duplicate folder when setting name
-		// TODO: Sort sub-folders of parent when changing folder name
-		// TODO: Broadcast model event
+		if ((parentFolder != null) && isDuplicateName(name, parentFolder.subFolders)) {
+			throw new IllegalArgumentException("A folder with the name '" + name + "' already exists.");
+		}
 		if ((name == null) || (name.length() == 0)) {
 			throw new IllegalArgumentException("The folder name is a required value");
 		}
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.NAME_MODIFIED, this )
+                .setOldValue( this.name ).setNewValue( name ).buildEvent();
+        
 		this.name = name;
+        publishEvent( event );
+		
+		if (parentFolder != null) {
+			Collections.sort( parentFolder.subFolders, folderComparator );
+		}
 	}
 	
 	/**
@@ -109,9 +147,6 @@ public class TLFolder implements TLFolderOwner {
 	 */
 	@Override
 	public List<TLFolder> getFolders() {
-		List<TLFolder> sortedSubFolders = new ArrayList<>( subFolders );
-		
-		Collections.sort( sortedSubFolders, folderComparator );
 		return Collections.unmodifiableList( subFolders );
 	}
 	
@@ -120,9 +155,9 @@ public class TLFolder implements TLFolderOwner {
 	 */
 	@Override
 	public void addFolder(TLFolder folder) {
-		// TODO: Check for duplicate folder when adding sub-folder
-		// TODO: Sort folders when adding new sub-folder
-		// TODO: Broadcast model event
+		if ((parentFolder != null) && isDuplicateName(folder.name, subFolders)) {
+			throw new IllegalArgumentException("A sub-folder with the name '" + folder.name + "' already exists.");
+		}
 		if (folder == null) {
 			throw new IllegalArgumentException("The sub-folder cannot be null.");
 		}
@@ -132,8 +167,13 @@ public class TLFolder implements TLFolderOwner {
 		}
 		checkCircularFolders( folder );
 		
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.FOLDER_ADDED, this )
+                .setAffectedItem( folder ).buildEvent();
+        
 		folder.parentFolder = this;
 		subFolders.add( folder );
+		Collections.sort( subFolders, folderComparator );
+		publishEvent( event );
 	}
 	
 	/**
@@ -141,10 +181,13 @@ public class TLFolder implements TLFolderOwner {
 	 */
 	@Override
 	public void removeFolder(TLFolder folder) {
-		// TODO: Broadcast model event
 		if (subFolders.contains( folder )) {
+	        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.FOLDER_REMOVED, this )
+	                .setAffectedItem( folder ).buildEvent();
+	        
 			subFolders.remove( folder );
 			folder.parentFolder = null;
+			publishEvent( event );
 		}
 	}
 	
@@ -156,11 +199,7 @@ public class TLFolder implements TLFolderOwner {
 	 * @return List<LibraryMember>
 	 */
 	public List<LibraryMember> getEntities() {
-		// TODO: Sort entities when adding new items
-		List<LibraryMember> sortedItems = new ArrayList<>( entities );
-		
-		Collections.sort( sortedItems, itemComparator );
-		return Collections.unmodifiableList( sortedItems );
+		return Collections.unmodifiableList( entities );
 	}
 	
 	/**
@@ -172,9 +211,11 @@ public class TLFolder implements TLFolderOwner {
 	 *									 owning library
 	 */
 	public void addEntity(LibraryMember entity) {
-		// TODO: Broadcast model event
 		if (entity == null) {
 			throw new IllegalArgumentException("The member entity cannot be null.");
+		}
+		if (entity instanceof TLService) {
+			throw new IllegalArgumentException("Services cannot be added to a library's folder structure.");
 		}
 		if (entity.getOwningLibrary() != this.owningLibrary) {
 			throw new IllegalArgumentException(
@@ -184,7 +225,12 @@ public class TLFolder implements TLFolderOwner {
 			throw new IllegalArgumentException(
 					"The entity is already assigned to the folder structure for its owning library.");
 		}
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.FOLDER_ITEM_ADDED, this )
+                .setAffectedItem( entity ).buildEvent();
+        
 		entities.add( entity );
+		Collections.sort( entities, itemComparator );
+		publishEvent( event );
 	}
 	
 	/**
@@ -194,9 +240,12 @@ public class TLFolder implements TLFolderOwner {
 	 * @param entity  the library entity to remove
 	 */
 	public void removeEntity(LibraryMember entity) {
-		// TODO: Broadcast model event
 		if (entities.contains( entity )) {
+	        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.FOLDER_ITEM_REMOVED, this )
+	                .setAffectedItem( entity ).buildEvent();
+	        
 			entities.remove( entity );
+			publishEvent( event );
 		}
 	}
 	
@@ -244,6 +293,28 @@ public class TLFolder implements TLFolderOwner {
 		} else {
 			for (TLFolder sf : subFolder.subFolders) {
 				result = isChildFolder( sf, checkFolder );
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * Returns true if one of the folders in the given list is already assigned the
+	 * specified name.
+	 * 
+	 * @param folderName  the folder name to check for
+	 * @param folders  the list of folders to be checked for the existing name
+	 * @return boolean
+	 */
+	private boolean isDuplicateName(String folderName, List<TLFolder> folders) {
+		boolean result = false;
+		
+		if (folderName != null) {
+			for (TLFolder folder : folders) {
+				if (folderName.equals( folder.getName() )) {
+					result = true;
+					break;
+				}
 			}
 		}
 		return result;

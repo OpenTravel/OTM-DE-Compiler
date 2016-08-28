@@ -57,8 +57,6 @@ public class AttributeDocumentationBuilder extends
 
 	@Override
 	public void build() throws Exception {
-		// TODO Auto-generated method stub
-		
 	}
 
 

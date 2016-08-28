@@ -124,6 +124,42 @@ public enum ModelEventType {
     MEMBER_MOVED(ValueChangeEvent.class),
 
     /**
+     * Event type sent when a sub-folder was added to the source object.
+     * 
+     * <p>
+     * <u>Event</u>: <code>OwnershipEvent</code> <br>
+     * <u>Source Object</u>: <code>TLFolder</code>
+     */
+    FOLDER_ADDED(OwnershipEvent.class),
+
+    /**
+     * Event type sent when a sub-folder was removed from the source object.
+     * 
+     * <p>
+     * <u>Event</u>: <code>OwnershipEvent</code> <br>
+     * <u>Source Object</u>: <code>TLFolder</code>
+     */
+    FOLDER_REMOVED(OwnershipEvent.class),
+
+    /**
+     * Event type sent when a named entity was added to a library folder.
+     * 
+     * <p>
+     * <u>Event</u>: <code>OwnershipEvent</code> <br>
+     * <u>Source Object</u>: <code>NamedEntity</code>
+     */
+    FOLDER_ITEM_ADDED(OwnershipEvent.class),
+
+    /**
+     * Event type sent when a named entity was removed from a library folder.
+     * 
+     * <p>
+     * <u>Event</u>: <code>OwnershipEvent</code> <br>
+     * <u>Source Object</u>: <code>NamedEntity</code>
+     */
+    FOLDER_ITEM_REMOVED(OwnershipEvent.class),
+
+    /**
      * Event type sent when an alias was added to the source object.
      * 
      * <p>

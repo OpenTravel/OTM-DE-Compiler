@@ -38,7 +38,5 @@ public class EnumValueDocumentationBuilder extends AbstractDocumentationBuilder<
 
 	@Override
 	public void build() throws Exception {
-		// TODO Auto-generated method stub
-		
 	}
 }

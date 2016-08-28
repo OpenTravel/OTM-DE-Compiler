@@ -16,13 +16,17 @@
 package org.opentravel.schemacompiler.transform.library_01_06;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Test;
 import org.opentravel.ns.ota2.librarymodel_v01_06.Folder;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
+import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.TLFolder;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
@@ -93,6 +97,34 @@ public class TestFolderTransformers extends Abstract_1_6_TestTransformers {
         assertEquals("Folder2", folder2.getName());
         assertEquals(1, folder2.getFolderItem().size());
         assertEquals("SampleCore", folder2.getFolderItem().get(0).getValue());
+    }
+    
+    @Test
+    public void testGetUnfolderedItems() throws Exception {
+        TLLibrary library = getLibrary(PACKAGE_2_NAMESPACE, "library_1_p2");
+    	List<LibraryMember> unfolderedItems = library.getUnfolderedMembers();
+    	Set<String> itemNames = new HashSet<>();
+    	
+    	for (LibraryMember unfolderedItem : unfolderedItems) {
+    		itemNames.add( unfolderedItem.getLocalName() );
+    	}
+    	assertEquals(14, unfolderedItems.size());
+    	assertEquals(14, itemNames.size());
+    	
+    	assertTrue(itemNames.contains("Counter_3"));
+    	assertTrue(itemNames.contains("TestFloat"));
+    	assertTrue(itemNames.contains("SampleEnum_Open"));
+    	assertTrue(itemNames.contains("SampleEnumExt_Open"));
+    	assertTrue(itemNames.contains("SampleValueWithAttributes"));
+    	assertTrue(itemNames.contains("NestedValueWithAttributes"));
+    	assertTrue(itemNames.contains("SimpleCore"));
+    	assertTrue(itemNames.contains("EnumCore"));
+    	assertTrue(itemNames.contains("NoSimpleBaseTypeCore"));
+    	assertTrue(itemNames.contains("SampleChoice"));
+    	assertTrue(itemNames.contains("ExtendedChoice"));
+    	assertTrue(itemNames.contains("BaseResource"));
+    	assertTrue(itemNames.contains("ParentResource"));
+    	assertTrue(itemNames.contains("SampleResource"));
     }
     
     private List<TLFolder> getFolders(String namespace, String libraryName) throws Exception {
