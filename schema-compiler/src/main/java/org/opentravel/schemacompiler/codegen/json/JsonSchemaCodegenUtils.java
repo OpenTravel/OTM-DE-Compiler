@@ -200,11 +200,11 @@ public class JsonSchemaCodegenUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	public String getSchemaReferencePath(NamedEntity referencedEntity, NamedEntity referencingEntity) {
-		String elementName = JsonSchemaNamingUtils.getGlobalDefinitionName( referencedEntity );
+		JsonTypeNameBuilder typeNameBuilder = getTypeNameBuilder();
 		StringBuilder referencePath = new StringBuilder();
 		
-		if ((referencingEntity == null) ||
-				(referencedEntity.getOwningLibrary() != referencingEntity.getOwningLibrary())) {
+		if ((typeNameBuilder == null) && ((referencingEntity == null) ||
+				(referencedEntity.getOwningLibrary() != referencingEntity.getOwningLibrary()))) {
 			AbstractCodeGenerator<?> codeGenerator = (AbstractCodeGenerator<?>) context.getCodeGenerator();
 			CodeGenerationFilenameBuilder<AbstractLibrary> filenameBuilder;
 			
@@ -224,9 +224,8 @@ public class JsonSchemaCodegenUtils {
 		}
 		referencePath.append( "#/definitions/" );
 		
-		if (elementName != null) {
-			referencePath.append( elementName );
-			
+		if (typeNameBuilder != null) {
+			referencePath.append( typeNameBuilder.getJsonTypeName( referencedEntity ) );
 		} else {
 			referencePath.append( JsonSchemaNamingUtils.getGlobalDefinitionName( referencedEntity ) );
 		}
@@ -242,15 +241,18 @@ public class JsonSchemaCodegenUtils {
 	 * @return String
 	 */
 	public String getSchemaReferencePath(SchemaDependency schemaDependency, NamedEntity referencingEntity) {
+		JsonTypeNameBuilder typeNameBuilder = getTypeNameBuilder();
 		String referencedFilename = schemaDependency.getSchemaDeclaration().getFilename(
 				CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT );
 		String referencePath = null;
 		
-		if (referencedFilename != null) {
+		if ((typeNameBuilder == null) && (referencedFilename != null)) {
 			String builtInLocation = XsdCodegenUtils.getBuiltInSchemaOutputLocation( context.getCodegenContext() );
 			
 			referencePath = builtInLocation + referencedFilename
 					+ "#/definitions/" + schemaDependency.getLocalName();
+		} else {
+			referencePath = "#/definitions/" + schemaDependency.getLocalName();
 		}
 		return referencePath;
 	}
@@ -290,6 +292,17 @@ public class JsonSchemaCodegenUtils {
 		referencePath.append( filenameBuilder.buildFilename( referencedEntity.getOwningLibrary(), "xsd" ) );
 		referencePath.append( "#/" ).append( entityName );
 		return referencePath.toString();
+	}
+	
+	/**
+	 * If the context has been configured for single-file swagger generation, this method
+	 * will return the shared <code>JsonTypeNameBuilder</code>.  Otherwise, null will be
+	 * returned.
+	 * 
+	 * @return JsonTypeNameBuilder
+	 */
+	private JsonTypeNameBuilder getTypeNameBuilder() {
+		return (JsonTypeNameBuilder) context.getContextCacheEntry( JsonTypeNameBuilder.class.getSimpleName() );
 	}
 	
 	/**

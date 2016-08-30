@@ -61,8 +61,9 @@ public class SwaggerCompilerTask extends AbstractSchemaCompilerTask
         for (TLLibrary library : userDefinedLibraries) {
         	for (TLResource resource : library.getResourceTypes()) {
         		if (resource.isAbstract()) continue;
+                resourceContext.setValue( CodeGenerationContext.CK_ENABLE_SINGLE_FILE_SWAGGER, "false" );
                 resourceContext.setValue( CodeGenerationContext.CK_OUTPUT_FOLDER,
-                        getResourceOutputFolder( resource, modelContext ) );
+                        getResourceOutputFolder( resource, modelContext, false ) );
         		
                 // Generate the Swagger document
                 CodeGenerator<TLResource> swaggerGenerator = CodeGeneratorFactory.getInstance()
@@ -93,6 +94,15 @@ public class SwaggerCompilerTask extends AbstractSchemaCompilerTask
                                 CodeGeneratorFactory.JSON_TARGET_FORMAT );
                     }
                 }
+                
+                // Also generate a standalone Swagger document that contains all of the JSON
+                // definitions that are normally broken out into separate JSON schemas.
+                resourceContext.setValue( CodeGenerationContext.CK_ENABLE_SINGLE_FILE_SWAGGER, "true" );
+                resourceContext.setValue( CodeGenerationContext.CK_OUTPUT_FOLDER,
+                        getResourceOutputFolder( resource, modelContext, true ) );
+                swaggerGenerator.setFilter( createSchemaFilter(
+                		resource, TLMimeType.TEXT_JSON, TLMimeType.APPLICATION_JSON ) );
+                addGeneratedFiles( swaggerGenerator.generateOutput( resource, resourceContext ) );
         	}
         }
 	}
@@ -102,21 +112,26 @@ public class SwaggerCompilerTask extends AbstractSchemaCompilerTask
      * 
      * @param resource  the resource for which the output folder is needed
      * @param context  the code generation context
+     * @param isSingleFileEnabled  flag indicating whether single-file swagger document
+     *							   generation is enabled
      * @return String
      * @throws SchemaCompilerException  thrown if an error occurs due to an unrecognized version scheme
      */
-    protected String getResourceOutputFolder(TLResource resource, CodeGenerationContext context)
-            throws SchemaCompilerException {
+    protected String getResourceOutputFolder(TLResource resource, CodeGenerationContext context,
+    		boolean isSingleFileEnabled) throws SchemaCompilerException {
         String rootOutputFolder = context.getValue( CodeGenerationContext.CK_OUTPUT_FOLDER );
         StringBuilder outputFolder = new StringBuilder();
-
+        
         if (rootOutputFolder == null) {
             rootOutputFolder = System.getProperty("user.dir");
         }
         outputFolder.append( rootOutputFolder );
         outputFolder.append('/').append( resource.getOwningLibrary().getName() );
         outputFolder.append('_').append( resource.getName() );
-        outputFolder.append("/v").append( resource.getVersion().replaceAll("\\.", "_") );
+        
+        if (!isSingleFileEnabled) {
+            outputFolder.append("/v").append( resource.getVersion().replaceAll("\\.", "_") );
+        }
         return outputFolder.toString();
     }
 

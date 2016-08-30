@@ -26,6 +26,7 @@ import org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder;
 import org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.ResourceFilenameBuilder;
+import org.opentravel.schemacompiler.codegen.json.JsonTypeNameBuilder;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerDocument;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
@@ -48,7 +49,8 @@ import com.google.gson.GsonBuilder;
  */
 public class SwaggerCodeGenerator extends AbstractCodeGenerator<TLResource> {
 	
-	public static final String SWAGGER_FILENAME_EXT = "swagger";
+	public static final String SWAGGER_FILENAME_EXT     = "swagger";
+	public static final String SWAGGER_DEFS_FILENAME_EXT = "defs.swagger";
 	
     private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
     
@@ -106,6 +108,12 @@ public class SwaggerCodeGenerator extends AbstractCodeGenerator<TLResource> {
         		getTransformerFactory( context ).getTransformer( source, SwaggerDocument.class );
         
 		if (transformer != null) {
+			if (isSingleFileEnabled( context )) {
+				// If single-file swagger generation is enabled, we need to create a JSON Type
+				// Name Builder and add it to the transform context
+				transformerFactory.getContext().setContextCacheEntry(
+						JsonTypeNameBuilder.class.getSimpleName(), new JsonTypeNameBuilder( source.getOwningModel() ) );
+			}
 			return transformer.transform(source);
 			
 		} else {
@@ -147,9 +155,20 @@ public class SwaggerCodeGenerator extends AbstractCodeGenerator<TLResource> {
         AbstractLibrary library = getLibrary( source );
         URL libraryUrl = (library == null) ? null : library.getLibraryUrl();
         File outputFolder = getOutputFolder( context, libraryUrl );
-        String filename = getFilenameBuilder().buildFilename( source, SWAGGER_FILENAME_EXT );
+        String filename = getFilenameBuilder().buildFilename( source,
+        		isSingleFileEnabled( context ) ? SWAGGER_DEFS_FILENAME_EXT : SWAGGER_FILENAME_EXT );
 
         return new File( outputFolder, filename );
+	}
+	
+	/**
+	 * Returns true if single-file Swagger document generation is enabled.
+	 * 
+	 * @param context  the code generation context
+	 * @return boolean
+	 */
+	private boolean isSingleFileEnabled(CodeGenerationContext context) {
+        return "true".equalsIgnoreCase( context.getValue( CodeGenerationContext.CK_ENABLE_SINGLE_FILE_SWAGGER ) );
 	}
 	
 	/**

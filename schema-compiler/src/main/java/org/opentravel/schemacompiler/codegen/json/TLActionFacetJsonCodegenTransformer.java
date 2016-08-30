@@ -27,7 +27,6 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.JsonSchemaNamingUtils;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
-import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
@@ -128,7 +127,7 @@ public class TLActionFacetJsonCodegenTransformer extends AbstractJsonSchemaTrans
         JsonSchemaNamedReference definition = new JsonSchemaNamedReference();
         JsonSchema schema = new JsonSchema();
         
-        definition.setName( XsdCodegenUtils.getGlobalElementName( source ).getLocalPart() );
+        definition.setName( getDefinitionName( source ) );
 		transformDocumentation( source, schema );
         schema.setEntityInfo( jsonUtils.getEntityInfo( source ) );
         definition.setSchema( new JsonSchemaReference( schema ) );
@@ -154,12 +153,6 @@ public class TLActionFacetJsonCodegenTransformer extends AbstractJsonSchemaTrans
 	
 	/**
 	 * Delegate used to generate wrapper class elements for core object summary facets.
-	 */
-	/**
-	 *
-	 */
-	/**
-	 *
 	 */
 	private class WrapperFacetJsonDelegate extends TLFacetJsonSchemaDelegate {
 		

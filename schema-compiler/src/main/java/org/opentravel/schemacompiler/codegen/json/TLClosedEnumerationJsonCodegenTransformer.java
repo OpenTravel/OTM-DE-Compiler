@@ -42,7 +42,7 @@ public class TLClosedEnumerationJsonCodegenTransformer extends AbstractJsonSchem
 		JsonSchema schema = new JsonSchema();
 		List<String> enumValues = schema.getEnumValues();
 		
-		closedEnum.setName( source.getName() );
+		closedEnum.setName( getDefinitionName( source ) );
 		closedEnum.setSchema( new JsonSchemaReference( schema ) );
 		
 		transformDocumentation( source, schema );

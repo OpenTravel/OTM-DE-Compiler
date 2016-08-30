@@ -53,7 +53,7 @@ public class TLValueWithAttributesJsonCodegenTransformer extends AbstractJsonSch
 		JsonSchemaNamedReference targetVwa = new JsonSchemaNamedReference();
 		JsonSchema vwaSchema = new JsonSchema();
 
-        targetVwa.setName( source.getName() );
+        targetVwa.setName( getDefinitionName( source ) );
         targetVwa.setSchema( new JsonSchemaReference( vwaSchema ) );
         transformDocumentation( source, vwaSchema );
         vwaSchema.setEntityInfo( jsonUtils.getEntityInfo( source ) );

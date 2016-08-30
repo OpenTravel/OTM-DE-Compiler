@@ -22,7 +22,6 @@ import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
-import org.opentravel.schemacompiler.codegen.util.JsonSchemaNamingUtils;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLIndicator;
@@ -53,7 +52,7 @@ public class TLExtensionPointFacetJsonCodegenTransformer extends AbstractJsonSch
         JsonSchemaNamedReference definition = new JsonSchemaNamedReference();
 		JsonSchema defSchema = new JsonSchema();
 		
-        definition.setName( JsonSchemaNamingUtils.getGlobalDefinitionName(source) );
+        definition.setName( getDefinitionName( source ) );
         definition.setSchema( new JsonSchemaReference( defSchema ) );
         transformDocumentation( source, defSchema );
         

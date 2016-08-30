@@ -267,7 +267,7 @@ public class SwaggerDocument {
 			for (JsonSchemaNamedReference definition : definitions) {
 				defsJson.add( definition.getName(), definition.getSchema().toJson() );
 			}
-			json.add( "definitons", defsJson );
+			json.add( "definitions", defsJson );
 		}
 		
 		if (!globalParameters.isEmpty()) {

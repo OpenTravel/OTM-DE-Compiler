@@ -19,7 +19,6 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonType;
-import org.opentravel.schemacompiler.codegen.util.JsonSchemaNamingUtils;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
@@ -50,7 +49,7 @@ public class TLSimpleFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLS
 		NamedEntity baseType = sourceFacet.getSimpleType();
 		JsonType jsonType;
 		
-		definition.setName( JsonSchemaNamingUtils.getGlobalDefinitionName( sourceFacet ));
+		definition.setName( getDefinitionName( sourceFacet ) );
 		definition.setSchema( schemaRef );
 		
         // Special Case: For core objects, use the simple facet as the base type

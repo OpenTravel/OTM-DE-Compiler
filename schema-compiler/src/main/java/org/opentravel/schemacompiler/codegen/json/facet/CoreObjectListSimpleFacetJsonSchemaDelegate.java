@@ -19,7 +19,6 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonType;
-import org.opentravel.schemacompiler.codegen.util.JsonSchemaNamingUtils;
 import org.opentravel.schemacompiler.model.TLListFacet;
 
 /**
@@ -50,7 +49,7 @@ public class CoreObjectListSimpleFacetJsonSchemaDelegate extends TLListFacetJson
         arraySchema.setType( JsonType.jsonArray );
 		arraySchema.setItems( itemSchemaRef );
         itemSchemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath( sourceFacet.getItemFacet(), sourceFacet ) );
-		definition.setName( JsonSchemaNamingUtils.getGlobalDefinitionName( sourceFacet ) );
+		definition.setName( getDefinitionName( sourceFacet ) );
 		definition.setSchema( new JsonSchemaReference( arraySchema ) );
 		return definition;
 	}

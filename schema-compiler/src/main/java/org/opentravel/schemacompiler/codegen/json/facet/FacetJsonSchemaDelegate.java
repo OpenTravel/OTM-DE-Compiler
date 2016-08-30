@@ -21,12 +21,15 @@ import org.opentravel.schemacompiler.codegen.impl.CorrelatedCodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
 import org.opentravel.schemacompiler.codegen.json.AbstractJsonSchemaCodeGenerator;
 import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
+import org.opentravel.schemacompiler.codegen.json.JsonTypeNameBuilder;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
+import org.opentravel.schemacompiler.codegen.util.JsonSchemaNamingUtils;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
+import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAbstractFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLDocumentation;
@@ -167,7 +170,14 @@ public abstract class FacetJsonSchemaDelegate<F extends TLAbstractFacet> {
      * @return String
      */
     protected final String getElementName(TLAlias facetAlias) {
-    	return xsdDelegateFactory.getDelegate( sourceFacet ).getElementName( facetAlias );
+    	String elementName;
+    	
+    	if (facetAlias != null) {
+    		elementName = getDefinitionName( facetAlias );
+    	} else {
+    		elementName = getDefinitionName( sourceFacet );
+    	}
+    	return elementName;
     }
     
 	/**
@@ -204,6 +214,36 @@ public abstract class FacetJsonSchemaDelegate<F extends TLAbstractFacet> {
 			
 	        targetRef.setDocumentation( transformer.transform( doc ) );
 		}
+	}
+	
+	/**
+	 * Returns the definition name for the entity as it should be represented in the JSON schema.
+	 * 
+	 * @param entity  the entity for which to return a definition name
+	 * @return String
+	 */
+	protected String getDefinitionName(NamedEntity entity) {
+		JsonTypeNameBuilder nameBuilder = (JsonTypeNameBuilder)
+				transformerContext.getContextCacheEntry( JsonTypeNameBuilder.class.getSimpleName() );
+		String definitionName;
+		
+		if (nameBuilder != null) {
+			definitionName = nameBuilder.getJsonTypeName( entity );
+		} else {
+			definitionName = JsonSchemaNamingUtils.getGlobalDefinitionName( entity );
+		}
+		return definitionName;
+	}
+	
+	/**
+	 * Returns true if the code generator has been configured to include all name references
+	 * within the same set of definitions (i.e. within a single file).
+	 * 
+	 * @return boolean
+	 */
+	protected boolean isLocalNameReferencesEnabled() {
+		return transformerContext.getContextCacheEntry(
+				JsonTypeNameBuilder.class.getSimpleName() ) != null;
 	}
 	
 }

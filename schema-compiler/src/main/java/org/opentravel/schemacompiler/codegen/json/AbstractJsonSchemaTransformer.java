@@ -24,8 +24,10 @@ import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerConte
 import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentationOwner;
+import org.opentravel.schemacompiler.codegen.util.JsonSchemaNamingUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDeclaration;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
+import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
@@ -48,6 +50,25 @@ public abstract class AbstractJsonSchemaTransformer<S, T> extends AbstractCodege
 	public void setContext(CodeGenerationTransformerContext context) {
 		super.setContext(context);
 		jsonUtils = new JsonSchemaCodegenUtils( context );
+	}
+	
+	/**
+	 * Returns the definition name for the entity as it should be represented in the JSON schema.
+	 * 
+	 * @param entity  the entity for which to return a definition name
+	 * @return String
+	 */
+	protected String getDefinitionName(NamedEntity entity) {
+		JsonTypeNameBuilder nameBuilder = (JsonTypeNameBuilder)
+				context.getContextCacheEntry( JsonTypeNameBuilder.class.getSimpleName() );
+		String definitionName;
+		
+		if (nameBuilder != null) {
+			definitionName = nameBuilder.getJsonTypeName( entity );
+		} else {
+			definitionName = JsonSchemaNamingUtils.getGlobalDefinitionName( entity );
+		}
+		return definitionName;
 	}
 
 	/**

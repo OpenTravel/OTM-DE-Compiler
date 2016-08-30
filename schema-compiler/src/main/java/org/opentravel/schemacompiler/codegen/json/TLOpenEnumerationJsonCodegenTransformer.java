@@ -57,7 +57,7 @@ public class TLOpenEnumerationJsonCodegenTransformer extends AbstractJsonSchemaT
 		JsonSchemaNamedReference complexEnum = new JsonSchemaNamedReference();
 		JsonSchema schema = new JsonSchema();
     	
-		complexEnum.setName( source.getName() );
+		complexEnum.setName( getDefinitionName( source ) );
 		complexEnum.setSchema( new JsonSchemaReference( schema ) );
 		
 		transformDocumentation( source, schema );
@@ -82,7 +82,7 @@ public class TLOpenEnumerationJsonCodegenTransformer extends AbstractJsonSchemaT
 		JsonSchema schema = new JsonSchema();
 		List<String> enumValues = schema.getEnumValues();
 		
-		simpleEnum.setName( source.getName() + "_Base" );
+		simpleEnum.setName( getDefinitionName( source ) + "_Base" );
 		simpleEnum.setSchema( new JsonSchemaReference( schema ) );
 		
 		transformDocumentation( source, schema );

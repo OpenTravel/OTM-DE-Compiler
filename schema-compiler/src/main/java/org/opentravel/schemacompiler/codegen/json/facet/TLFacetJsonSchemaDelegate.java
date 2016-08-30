@@ -31,7 +31,6 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonType;
-import org.opentravel.schemacompiler.codegen.util.JsonSchemaNamingUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
@@ -104,7 +103,7 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
     		definition = createDefinition();
     		
     	} else {
-    		definition = new JsonSchemaNamedReference( JsonSchemaNamingUtils.getGlobalDefinitionName( alias ),
+    		definition = new JsonSchemaNamedReference( getDefinitionName( alias ),
     				new JsonSchemaReference( jsonUtils.getSchemaReferencePath( getSourceFacet(), alias ) ) );
     	}
     	return definition;
@@ -122,7 +121,7 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
         JsonSchema localFacetSchema = new JsonSchema();
         JsonSchema facetSchema;
         
-        definition.setName( JsonSchemaNamingUtils.getGlobalDefinitionName( sourceFacet ) );
+        definition.setName( getDefinitionName( sourceFacet ) );
         
         if (baseFacet != null) {
         	JsonSchemaReference baseSchemaRef = new JsonSchemaReference(
@@ -336,9 +335,11 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
     				String referencedFilename = dependency.getSchemaDeclaration().getFilename(
     						CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT );
     				
-    				if (referencedFilename != null) {
+    				if ((referencedFilename != null) && !isLocalNameReferencesEnabled()) {
     					schemaPath = builtInLocation + referencedFilename + "#/definitions/" + dependency.getLocalName();
     					addCompileTimeDependency( dependency );
+    				} else {
+    					schemaPath = "#/definitions/" + dependency.getLocalName();
     				}
     			}
     		}

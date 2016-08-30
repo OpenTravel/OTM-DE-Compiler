@@ -36,7 +36,7 @@ public class TLSimpleJsonCodegenTransformer extends AbstractJsonSchemaTransforme
 		JsonSchemaNamedReference simple = new JsonSchemaNamedReference();
 		CodegenArtifacts artifacts = new CodegenArtifacts();
 		
-		simple.setName( source.getName() );
+		simple.setName( getDefinitionName( source ) );
 		
 		if (source.isListTypeInd()) {
 			JsonSchema schema = new JsonSchema();

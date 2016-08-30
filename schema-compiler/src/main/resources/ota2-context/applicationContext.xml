@@ -1673,18 +1673,12 @@
 	  interface.
 	  -->
 	<bean id="jsonSchemaCodeGeneratorTransformFactory" class="org.opentravel.schemacompiler.transform.TransformerFactory" scope="prototype">
-		<property name="transformerMappings">
+		<property name="transformerMappings" ref="jsonCodeGeneratorTransformers"/>
+	</bean>
+	
+	<bean id="commonJsonCodeGeneratorTransformers" class="org.springframework.beans.factory.config.SetFactoryBean" abstract="true">
+		<property name="sourceSet">
 			<set>
-				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.opentravel.schemacompiler.model.TLLibrary" />
-					<property name="target" value="org.opentravel.schemacompiler.codegen.json.model.JsonSchema" />
-					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLLibraryJsonCodegenTransformer" />
-				</bean>
-				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
-					<property name="source" value="org.opentravel.schemacompiler.model.BuiltInLibrary" />
-					<property name="target" value="org.opentravel.schemacompiler.codegen.json.model.JsonSchema" />
-					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.BuiltInLibraryJsonCodegenTransformer" />
-				</bean>
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
 					<property name="source" value="org.opentravel.schemacompiler.model.TLDocumentation" />
 					<property name="target" value="org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation" />
@@ -1769,6 +1763,23 @@
 		</property>
 	</bean>
 	
+	<bean id="jsonCodeGeneratorTransformers" parent="commonJsonCodeGeneratorTransformers" class="org.springframework.beans.factory.config.SetFactoryBean">
+		<property name="sourceSet">
+			<set merge="true">
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLLibrary" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.json.model.JsonSchema" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLLibraryJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.BuiltInLibrary" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.json.model.JsonSchema" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.BuiltInLibraryJsonCodegenTransformer" />
+				</bean>
+			</set>
+		</property>
+	</bean>
+	
 	<!--
 	  Transform Factory: Swagger Code Generator
 	  
@@ -1778,8 +1789,12 @@
 	  interface.
 	  -->
 	<bean id="swaggerCodeGeneratorTransformFactory" class="org.opentravel.schemacompiler.transform.TransformerFactory" scope="prototype">
-		<property name="transformerMappings">
-			<set>
+		<property name="transformerMappings" ref="swaggerCodeGeneratorTransformers"/>
+	</bean>
+	
+	<bean id="swaggerCodeGeneratorTransformers" parent="commonJsonCodeGeneratorTransformers" class="org.springframework.beans.factory.config.SetFactoryBean">
+		<property name="sourceSet">
+			<set merge="true">
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
 					<property name="source" value="org.opentravel.schemacompiler.model.TLResource" />
 					<property name="target" value="org.opentravel.schemacompiler.codegen.swagger.model.SwaggerDocument" />

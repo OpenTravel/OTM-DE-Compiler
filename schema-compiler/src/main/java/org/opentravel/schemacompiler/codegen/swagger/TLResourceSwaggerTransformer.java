@@ -23,9 +23,16 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
+import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
+import org.opentravel.schemacompiler.codegen.CodeGenerator;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
+import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.QualifiedAction;
 import org.opentravel.schemacompiler.codegen.json.model.JsonLibraryInfo;
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
+import org.opentravel.schemacompiler.codegen.json.model.JsonType;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerDocument;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerInfo;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerOperation;
@@ -34,8 +41,11 @@ import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerPathItem;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerScheme;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils.URLComponents;
+import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.TLActionRequest;
 import org.opentravel.schemacompiler.model.TLHttpMethod;
+import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 
@@ -133,6 +143,11 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
 			swaggerDoc.getPathItems().add( pathItem );
 		}
 		
+		// If required, generate definitions for the Swagger document
+		if (isSingleFileEnabled()) {
+			swaggerDoc.getDefinitions().addAll( buildJsonDefinitions( source.getOwningModel() ) );
+		}
+		
 		// Add any extensions provided by the Swagger code generation bindings
 		if (swaggerBindings != null) {
 			if (swaggerBindings.getSupportedSchemes() != null) {
@@ -150,6 +165,81 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
 			}
 		}
 		return swaggerDoc;
+	}
+	
+	/**
+	 * Builds the set of all definitions that should be included in the Swagger document.  The
+	 * definitions that are included are based on the current code generation filter.
+	 * 
+	 * @param model  the model from which to generate JSON definitions
+	 * @return List<JsonSchemaNamedReference>
+	 */
+	private List<JsonSchemaNamedReference> buildJsonDefinitions(TLModel model) {
+		List<JsonSchemaNamedReference> definitions = new ArrayList<>();
+		CodeGenerator<?> codeGenerator = context.getCodeGenerator();
+		CodeGenerationFilter filter = codeGenerator.getFilter();
+		
+		// Add definitions for all of the OTM entities that are within the
+		// scope of the current filter
+		for (TLLibrary library : model.getUserDefinedLibraries()) {
+			if (!filter.processLibrary( library )) continue;
+			
+	        for (LibraryMember member : library.getNamedMembers()) {
+	        	if (member instanceof TLResource) continue;
+	            ObjectTransformer<LibraryMember, CodegenArtifacts, CodeGenerationTransformerContext> transformer = getTransformerFactory()
+	                    .getTransformer(member, CodegenArtifacts.class);
+
+	            if ((transformer != null) && ((filter == null) || filter.processEntity(member))) {
+	                CodegenArtifacts artifacts = transformer.transform(member);
+
+	                if (artifacts != null) {
+	                    for (JsonSchemaNamedReference memberDef : artifacts.getArtifactsOfType(JsonSchemaNamedReference.class)) {
+	                    	definitions.add( memberDef );
+	                    }
+	                }
+	            }
+	        }
+		}
+		
+		// Add hard-coded built-in definitions (not a great solution, but expedient for now)
+		JsonSchema emptySchema = new JsonSchema();
+		JsonSchema enumExtensionSchema = new JsonSchema();
+		JsonSchema extensionPointSchema = new JsonSchema();
+		
+		emptySchema.setType( JsonType.jsonString );
+		emptySchema.setMaxLength( 0 );
+		definitions.add( new JsonSchemaNamedReference( "Empty", new JsonSchemaReference( emptySchema ) ) );
+		
+		enumExtensionSchema.setType( JsonType.jsonString );
+		enumExtensionSchema.setMinLength( 1 );
+		enumExtensionSchema.setMaxLength( 128 );
+		definitions.add( new JsonSchemaNamedReference( "String_EnumExtension", new JsonSchemaReference( enumExtensionSchema ) ) );
+		
+		definitions.add( new JsonSchemaNamedReference( "ExtensionPoint", new JsonSchemaReference( extensionPointSchema ) ) );
+		definitions.add( new JsonSchemaNamedReference( "ExtensionPoint_Summary", new JsonSchemaReference( extensionPointSchema ) ) );
+		definitions.add( new JsonSchemaNamedReference( "ExtensionPoint_Detail", new JsonSchemaReference( extensionPointSchema ) ) );
+		definitions.add( new JsonSchemaNamedReference( "ExtensionPoint_Custom", new JsonSchemaReference( extensionPointSchema ) ) );
+		definitions.add( new JsonSchemaNamedReference( "ExtensionPoint_Query", new JsonSchemaReference( extensionPointSchema ) ) );
+		definitions.add( new JsonSchemaNamedReference( "ExtensionPoint_Shared", new JsonSchemaReference( extensionPointSchema ) ) );
+		definitions.add( new JsonSchemaNamedReference( "ExtensionPoint_Choice", new JsonSchemaReference( extensionPointSchema ) ) );
+		
+		return definitions;
+	}
+	
+	/**
+	 * Returns true if single-file Swagger document generation is enabled.
+	 * 
+	 * @return boolean
+	 */
+	private boolean isSingleFileEnabled() {
+		CodeGenerationContext cgContext = (context == null) ? null : context.getCodegenContext();
+		boolean result = false;
+		
+		if (cgContext != null) {
+	         result = "true".equalsIgnoreCase(
+	        		 cgContext.getValue( CodeGenerationContext.CK_ENABLE_SINGLE_FILE_SWAGGER ) );
+		}
+		return result;
 	}
 	
 	/**
