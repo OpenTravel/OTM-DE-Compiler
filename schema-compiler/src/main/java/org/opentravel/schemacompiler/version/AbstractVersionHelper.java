@@ -28,7 +28,9 @@ import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAttributeOwner;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLContext;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
@@ -49,6 +51,7 @@ import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryItemState;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.util.ModelElementCloner;
+import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationException;
@@ -505,7 +508,7 @@ public abstract class AbstractVersionHelper {
                 if (baseNamespace == null) {
                     continue;
                 }
-                for (RepositoryItem item : repository.listItems(baseNamespace, false, true)) {
+                for (RepositoryItem item : repository.listItems(baseNamespace, TLLibraryStatus.DRAFT, false)) {
                     String itemKey = getRepositoryItemKey(item);
 
                     if (!itemKeys.contains(itemKey)
@@ -691,35 +694,45 @@ public abstract class AbstractVersionHelper {
         if (extendedEntity instanceof TLFacet) {
             TLFacetType patchedFacetType = ((TLFacet) extendedEntity).getFacetType();
             
-            if (patchedFacetType.isContextual()) {
-            	TLFacet patchedFacet = (TLFacet) extendedEntity;
-            	
-                targetFacet = FacetCodegenUtils.getFacetOfType((TLFacetOwner) majorOrMinorVersionTarget,
-                		patchedFacetType, patchedFacet.getContext(), patchedFacet.getLabel());
-            	
-            	// If a matching contextual facet does not yet exist, create one automatically
-                if (targetFacet == null) {
-                	if (majorOrMinorVersionTarget instanceof TLBusinessObject) {
-                		TLFacet contextualFacet = new TLFacet();
+            // Skip contextual facets since their versions will be created independently
+            // of their owners
+            if (!patchedFacetType.isContextual()) {
+                targetFacet = FacetCodegenUtils.getFacetOfType(
+                		(TLFacetOwner) majorOrMinorVersionTarget, patchedFacetType);
+                
+            } else {
+            	if (!OTM16Upgrade.otm16Enabled) {
+                	TLContextualFacet patchedFacet = (TLContextualFacet) extendedEntity;
+                	
+                    targetFacet = FacetCodegenUtils.getFacetOfType((TLFacetOwner) majorOrMinorVersionTarget,
+                    		patchedFacetType, patchedFacet.getName());
+                	
+                	// If a matching contextual facet does not yet exist, create one automatically
+                    if (targetFacet == null) {
+                		TLContextualFacet contextualFacet = new TLContextualFacet();
                 		
-                		contextualFacet.setContext( patchedFacet.getContext() );
-                		contextualFacet.setLabel( patchedFacet.getLabel() );
+                		contextualFacet.setName( patchedFacet.getName() );
                 		
-                		if (patchedFacet.getFacetType() == TLFacetType.CUSTOM) {
-                			((TLBusinessObject) majorOrMinorVersionTarget).addCustomFacet( contextualFacet );
+                    	if (majorOrMinorVersionTarget instanceof TLBusinessObject) {
+                    		if (patchedFacet.getFacetType() == TLFacetType.CUSTOM) {
+                    			((TLBusinessObject) majorOrMinorVersionTarget).addCustomFacet( contextualFacet );
+                        		targetFacet = contextualFacet;
+                        		
+                    		} else {
+                    			((TLBusinessObject) majorOrMinorVersionTarget).addQueryFacet( contextualFacet );
+                        		targetFacet = contextualFacet;
+                    		}
+                    		
+                    	} else if (majorOrMinorVersionTarget instanceof TLChoiceObject) {
+                			((TLChoiceObject) majorOrMinorVersionTarget).addChoiceFacet( contextualFacet );
                     		targetFacet = contextualFacet;
                     		
-                		} else {
-                			((TLBusinessObject) majorOrMinorVersionTarget).addQueryFacet( contextualFacet );
-                    		targetFacet = contextualFacet;
-                		}
-                		
-                	} else {
-                		// At this time, only business objects have contextual facets
-                	}
-                }
-            } else {
-                targetFacet = FacetCodegenUtils.getFacetOfType((TLFacetOwner) majorOrMinorVersionTarget, patchedFacetType);
+
+                    	} else {
+                    		// At this time, only business objects have contextual facets
+                    	}
+                    }
+            	}
             }
         }
 

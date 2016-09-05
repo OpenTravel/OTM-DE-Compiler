@@ -346,7 +346,7 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
      */
     @Override
     public LibraryMember getNamedMember(String memberName) {
-        LibraryMember member = super.getNamedMember(memberName);
+    	LibraryMember member = super.getNamedMember(memberName);
 
         if ((member == null) && (memberName != null) && (service != null)
                 && memberName.equals(service.getName())) {
@@ -493,7 +493,7 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
      * @return TLSimple
      */
     public TLSimple getSimpleType(String localName) {
-        LibraryMember member = getNamedMember(localName);
+    	NamedEntity member = getNamedMember(localName);
         return (member instanceof TLSimple) ? (TLSimple) member : null;
     }
 
@@ -514,7 +514,7 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
      * @return TLClosedEnumeration
      */
     public TLClosedEnumeration getClosedEnumerationType(String localName) {
-        LibraryMember member = getNamedMember(localName);
+    	NamedEntity member = getNamedMember(localName);
         return (member instanceof TLClosedEnumeration) ? (TLClosedEnumeration) member : null;
     }
 
@@ -535,7 +535,7 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
      * @return TLOpenEnumeration
      */
     public TLOpenEnumeration getOpenEnumerationType(String localName) {
-        LibraryMember member = getNamedMember(localName);
+    	NamedEntity member = getNamedMember(localName);
         return (member instanceof TLOpenEnumeration) ? (TLOpenEnumeration) member : null;
     }
 
@@ -556,7 +556,7 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
      * @return TLValueWithAttributes
      */
     public TLValueWithAttributes getValueWithAttributesType(String localName) {
-        LibraryMember member = getNamedMember(localName);
+    	NamedEntity member = getNamedMember(localName);
         return (member instanceof TLValueWithAttributes) ? (TLValueWithAttributes) member : null;
     }
 
@@ -577,7 +577,7 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
      * @return TLChoiceObject
      */
     public TLChoiceObject getChoiceObjectType(String localName) {
-        LibraryMember member = getNamedMember(localName);
+    	NamedEntity member = getNamedMember(localName);
         return (member instanceof TLChoiceObject) ? (TLChoiceObject) member : null;
     }
 
@@ -598,7 +598,7 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
      * @return TLCoreObject
      */
     public TLCoreObject getCoreObjectType(String localName) {
-        LibraryMember member = getNamedMember(localName);
+    	NamedEntity member = getNamedMember(localName);
         return (member instanceof TLCoreObject) ? (TLCoreObject) member : null;
     }
 
@@ -619,7 +619,7 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
      * @return TLBusinessObject
      */
     public TLBusinessObject getBusinessObjectType(String localName) {
-        LibraryMember member = getNamedMember(localName);
+    	NamedEntity member = getNamedMember(localName);
         return (member instanceof TLBusinessObject) ? (TLBusinessObject) member : null;
     }
 
@@ -631,7 +631,28 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
     public List<TLBusinessObject> getBusinessObjectTypes() {
         return buildMemberList(TLBusinessObject.class);
     }
+    
+    /**
+     * Returns the contextual facet type with the specified name.
+     * 
+     * @param localName
+     *            the local name of the contextual facet type to return
+     * @return TLContextualFacet
+     */
+    public TLContextualFacet getContextualFacetType(String localName) {
+    	NamedEntity member = getNamedMember(localName);
+        return (member instanceof TLContextualFacet) ? (TLContextualFacet) member : null;
+    }
 
+    /**
+     * Returns the list of business object member types.
+     * 
+     * @return List<TLContextualFacet>
+     */
+    public List<TLContextualFacet> getContextualFacetTypes() {
+        return buildMemberList(TLContextualFacet.class);
+    }
+    
     /**
      * Returns the resource type with the specified name.
      * 
@@ -640,7 +661,7 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
      * @return TLResource
      */
     public TLResource getResourceType(String localName) {
-        LibraryMember member = getNamedMember(localName);
+    	NamedEntity member = getNamedMember(localName);
         return (member instanceof TLResource) ? (TLResource) member : null;
     }
 
@@ -661,7 +682,7 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
      * @return TLExtensionPointFacet
      */
     public TLExtensionPointFacet getExtensionPointFacetType(String localName) {
-        LibraryMember member = getNamedMember(localName);
+    	NamedEntity member = getNamedMember(localName);
         return (member instanceof TLExtensionPointFacet) ? (TLExtensionPointFacet) member : null;
     }
 
@@ -795,6 +816,7 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
             validTypes.add(TLBusinessObject.class);
             validTypes.add(TLResource.class);
             validTypes.add(TLExtensionPointFacet.class);
+            validTypes.add(TLContextualFacet.class);
             validMemberTypes = Collections.unmodifiableSet(validTypes);
 
         } catch (Throwable t) {

@@ -29,27 +29,24 @@
 			<Attribute name="detailBaseAttr" type="xsd:string" />
 			<Element name="detailBase" type="xsd:string" />
 		</Detail>
-		<Query context="">
-			<Attribute name="defaultQueryBaseAttr" type="xsd:string" />
-			<Element name="defaultQueryBase" type="xsd:string" />
-		</Query>
-		<Query context="Context1" label="Label1">
-			<Attribute name="context1Label1BaseAttr" type="xsd:string" />
-			<Element name="context1Label1Base" type="xsd:string" />
-		</Query>
-		<Query context="Context3">
-			<Attribute name="context3BaseAttr" type="xsd:string" />
-			<Element name="context3Base" type="xsd:string" />
-		</Query>
-		<Custom context="Context1" label="Label1">
-			<Attribute name="context1Label1BaseAttr" type="xsd:string" />
-			<Element name="context1Label1Base" type="xsd:string" />
-		</Custom>
-		<Custom context="Context3">
-			<Attribute name="context3BaseAttr" type="xsd:string" />
-			<Element name="context3Base" type="xsd:string" />
-		</Custom>
 	</BusinessObject>
+	
+	<ContextualFacet name="Context1Label1" type="Query" facetOwner="BaseBusinessObject">
+		<Attribute name="context1Label1BaseAttr" type="xsd:string" />
+		<Element name="context1Label1Base" type="xsd:string" />
+	</ContextualFacet>
+	<ContextualFacet name="Context3" type="Query" facetOwner="BaseBusinessObject">
+		<Attribute name="context3BaseAttr" type="xsd:string" />
+		<Element name="context3Base" type="xsd:string" />
+	</ContextualFacet>
+	<ContextualFacet name="Context1Label1" type="Custom" facetOwner="BaseBusinessObject">
+		<Attribute name="context1Label1BaseAttr" type="xsd:string" />
+		<Element name="context1Label1Base" type="xsd:string" />
+	</ContextualFacet>
+	<ContextualFacet name="Context3" type="Custom" facetOwner="BaseBusinessObject">
+		<Attribute name="context3BaseAttr" type="xsd:string" />
+		<Element name="context3Base" type="xsd:string" />
+	</ContextualFacet>
 	
 	<BusinessObject name="ExtendedBusinessObject" notExtendable="false">
 		<Extension extends="BaseBusinessObject" />
@@ -66,27 +63,26 @@
 			<Attribute name="detailExtendedAttr" type="xsd:string" />
 			<Element name="detailExtended" type="xsd:string" />
 		</Detail>
-		<Query context="">
-			<Attribute name="defaultQueryExtendedAttr" type="xsd:string" />
-			<Element name="defaultQueryExtended" type="xsd:string" />
-		</Query>
-		<Query context="Context1" label="Label1">
-			<Attribute name="context1Label1ExtendedAttr" type="xsd:string" />
-			<Element name="context1Label1Extended" type="xsd:string" />
-		</Query>
-		<Query context="Context2">
-			<Attribute name="context2ExtendedAttr" type="xsd:string" />
-			<Element name="context2Extended" type="xsd:string" />
-		</Query>
-		<Custom context="Context1" label="Label1">
-			<Attribute name="context1Label1ExtendedAttr" type="xsd:string" />
-			<Element name="context1Label1Extended" type="xsd:string" />
-		</Custom>
-		<Custom context="Context2">
-			<Attribute name="context2ExtendedAttr" type="xsd:string" />
-			<Element name="context2Extended" type="xsd:string" />
-		</Custom>
 	</BusinessObject>
+	
+	<ContextualFacet name="Context1Label1" type="Query" facetOwner="BaseBusinessObject">
+		<Attribute name="context1Label1ExtendedAttr" type="xsd:string" />
+		<Element name="context1Label1Extended" type="xsd:string" />
+		<Extension extends="BaseBusinessObject_Query_Context1Label1" />
+	</ContextualFacet>
+	<ContextualFacet name="Context2" type="Query" facetOwner="BaseBusinessObject">
+		<Attribute name="context2ExtendedAttr" type="xsd:string" />
+		<Element name="context2Extended" type="xsd:string" />
+	</ContextualFacet>
+	<ContextualFacet name="Context1Label1" type="Custom" facetOwner="BaseBusinessObject">
+		<Attribute name="context1Label1ExtendedAttr" type="xsd:string" />
+		<Element name="context1Label1Extended" type="xsd:string" />
+		<Extension extends="BaseBusinessObject_Context1Label1" />
+	</ContextualFacet>
+	<ContextualFacet name="Context2" type="Custom" facetOwner="BaseBusinessObject">
+		<Attribute name="context2ExtendedAttr" type="xsd:string" />
+		<Element name="context2Extended" type="xsd:string" />
+	</ContextualFacet>
 	
 	<Service name="BaseService">
 		<Operation Name="Operation1">

@@ -34,9 +34,10 @@
         <Detail>
             <Element name="detailName" repeat="0" type="xsd:string"/>
         </Detail>
-        <Query context="Test" label="" notExtendable="false">
-            <Element name="summaryName" repeat="0" type="xsd:string"/>
-        </Query>
     </BusinessObject>
     
+	<ContextualFacet name="Test" type="Query" facetOwner="SampleBusinessObject">
+        <Element name="summaryName" repeat="0" type="xsd:string"/>
+	</ContextualFacet>
+	
 </Library>

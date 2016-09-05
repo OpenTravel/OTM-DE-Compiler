@@ -26,7 +26,7 @@ import org.opentravel.schemacompiler.codegen.impl.LibraryFilterBuilder;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
-import org.opentravel.schemacompiler.model.LibraryMember;
+import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.w3._2001.xmlschema.Annotation;
 import org.w3._2001.xmlschema.OpenAttrs;
@@ -58,9 +58,9 @@ public class BuiltInLibraryCodegenTransformer extends
         schema.getIncludeOrImportOrRedefine().add(schemaAnnotation);
 
         // Add entries for each non-service term declaration
-        for (LibraryMember member : source.getNamedMembers()) {
-            ObjectTransformer<LibraryMember, CodegenArtifacts, CodeGenerationTransformerContext> transformer = getTransformerFactory()
-                    .getTransformer(member, CodegenArtifacts.class);
+        for (NamedEntity member : source.getNamedMembers()) {
+            ObjectTransformer<NamedEntity, CodegenArtifacts, CodeGenerationTransformerContext> transformer =
+            		getTransformerFactory().getTransformer(member, CodegenArtifacts.class);
 
             if ((transformer != null) && ((filter == null) || filter.processEntity(member))) {
                 CodegenArtifacts artifacts = transformer.transform(member);

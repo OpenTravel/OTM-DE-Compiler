@@ -23,6 +23,7 @@ import org.opentravel.ns.ota2.librarymodel_v01_05.Facet;
 import org.opentravel.ns.ota2.librarymodel_v01_05.FacetContextual;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLEquivalent;
 import org.opentravel.schemacompiler.model.TLExtension;
@@ -46,8 +47,8 @@ public class ChoiceObjectTransformer extends
 	public TLChoiceObject transform(ChoiceObject source) {
         ObjectTransformer<Facet, TLFacet, DefaultTransformerContext> facetTransformer = getTransformerFactory()
                 .getTransformer(Facet.class, TLFacet.class);
-        ObjectTransformer<FacetContextual, TLFacet, DefaultTransformerContext> facetContextualTransformer = getTransformerFactory()
-                .getTransformer(FacetContextual.class, TLFacet.class);
+        ObjectTransformer<FacetContextual, TLContextualFacet, DefaultTransformerContext> facetContextualTransformer =
+        		getTransformerFactory().getTransformer(FacetContextual.class, TLContextualFacet.class);
         ObjectTransformer<Equivalent, TLEquivalent, DefaultTransformerContext> equivTransformer = getTransformerFactory()
                 .getTransformer(Equivalent.class, TLEquivalent.class);
         TLChoiceObject choiceObject = new TLChoiceObject();

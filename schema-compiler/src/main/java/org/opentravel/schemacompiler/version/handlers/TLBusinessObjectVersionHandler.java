@@ -21,11 +21,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLEquivalent;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLPatchableFacet;
 import org.opentravel.schemacompiler.util.ModelElementCloner;
+import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 
 /**
@@ -88,33 +90,31 @@ public class TLBusinessObjectVersionHandler extends TLExtensionOwnerVersionHandl
         mergeUtils.addToIdentityFacetMap( majorVersionTarget.getDetailFacet(), targetFacets );
         mergeUtils.addToIdentityFacetMap( minorVersion.getSummaryFacet(), sourceFacets );
         mergeUtils.addToIdentityFacetMap( minorVersion.getDetailFacet(), sourceFacets );
+        
+        if (!OTM16Upgrade.otm16Enabled) {
+            for (TLContextualFacet sourceFacet : minorVersion.getCustomFacets()) {
+                TLContextualFacet targetFacet = majorVersionTarget.getCustomFacet( sourceFacet.getName() );
 
-        for (TLFacet sourceFacet : minorVersion.getCustomFacets()) {
-            TLFacet targetFacet = majorVersionTarget.getCustomFacet(
-            		sourceFacet.getContext(), sourceFacet.getLabel() );
-
-            if (targetFacet == null) {
-                targetFacet = new TLFacet();
-                targetFacet.setContext( sourceFacet.getContext() );
-                targetFacet.setLabel( sourceFacet.getLabel() );
-                majorVersionTarget.addCustomFacet( targetFacet );
+                if (targetFacet == null) {
+                    targetFacet = new TLContextualFacet();
+                    targetFacet.setName( sourceFacet.getName() );
+                    majorVersionTarget.addCustomFacet( targetFacet );
+                }
+                mergeUtils.addToIdentityFacetMap( targetFacet, targetFacets );
+                mergeUtils.addToIdentityFacetMap( sourceFacet, sourceFacets );
             }
-            mergeUtils.addToIdentityFacetMap( targetFacet, targetFacets );
-            mergeUtils.addToIdentityFacetMap( sourceFacet, sourceFacets );
-        }
 
-        for (TLFacet sourceFacet : minorVersion.getQueryFacets()) {
-            TLFacet targetFacet = majorVersionTarget.getQueryFacet(
-            		sourceFacet.getContext(), sourceFacet.getLabel() );
+            for (TLContextualFacet sourceFacet : minorVersion.getQueryFacets()) {
+            	TLContextualFacet targetFacet = majorVersionTarget.getQueryFacet( sourceFacet.getName() );
 
-            if (targetFacet == null) {
-                targetFacet = new TLFacet();
-                targetFacet.setContext( sourceFacet.getContext() );
-                targetFacet.setLabel( sourceFacet.getLabel() );
-                majorVersionTarget.addQueryFacet( targetFacet );
+                if (targetFacet == null) {
+                    targetFacet = new TLContextualFacet();
+                    targetFacet.setName( sourceFacet.getName() );
+                    majorVersionTarget.addQueryFacet( targetFacet );
+                }
+                mergeUtils.addToIdentityFacetMap( targetFacet, targetFacets );
+                mergeUtils.addToIdentityFacetMap( sourceFacet, sourceFacets );
             }
-            mergeUtils.addToIdentityFacetMap( targetFacet, targetFacets );
-            mergeUtils.addToIdentityFacetMap( sourceFacet, sourceFacets );
         }
         mergeUtils.mergeFacets( targetFacets, sourceFacets, referenceHandler );
 	}

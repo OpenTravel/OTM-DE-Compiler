@@ -20,7 +20,6 @@ import org.opentravel.ns.ota2.librarymodel_v01_06.Documentation;
 import org.opentravel.ns.ota2.librarymodel_v01_06.Equivalent;
 import org.opentravel.ns.ota2.librarymodel_v01_06.Extension;
 import org.opentravel.ns.ota2.librarymodel_v01_06.Facet;
-import org.opentravel.ns.ota2.librarymodel_v01_06.FacetContextual;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLDocumentation;
@@ -46,8 +45,6 @@ public class BusinessObjectTransformer extends
     public TLBusinessObject transform(BusinessObject source) {
         ObjectTransformer<Facet, TLFacet, DefaultTransformerContext> facetTransformer = getTransformerFactory()
                 .getTransformer(Facet.class, TLFacet.class);
-        ObjectTransformer<FacetContextual, TLFacet, DefaultTransformerContext> facetContextualTransformer = getTransformerFactory()
-                .getTransformer(FacetContextual.class, TLFacet.class);
         ObjectTransformer<Equivalent, TLEquivalent, DefaultTransformerContext> equivTransformer = getTransformerFactory()
                 .getTransformer(Equivalent.class, TLEquivalent.class);
         TLBusinessObject businessObject = new TLBusinessObject();
@@ -89,17 +86,6 @@ public class BusinessObjectTransformer extends
         }
         if (source.getDetail() != null) {
             businessObject.setDetailFacet(facetTransformer.transform(source.getDetail()));
-        }
-
-        if (source.getCustom() != null) {
-            for (FacetContextual sourceFacet : source.getCustom()) {
-                businessObject.addCustomFacet(facetContextualTransformer.transform(sourceFacet));
-            }
-        }
-        if (source.getQuery() != null) {
-            for (FacetContextual sourceFacet : source.getQuery()) {
-                businessObject.addQueryFacet(facetContextualTransformer.transform(sourceFacet));
-            }
         }
 
         return businessObject;

@@ -25,7 +25,7 @@ import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.LibraryElement;
-import org.opentravel.schemacompiler.model.LibraryMember;
+import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAction;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLActionRequest;
@@ -263,7 +263,7 @@ public class LibraryFilterBuilder {
 
             for (BuiltInLibrary library : model.getBuiltInLibraries()) {
                 if (library.getNamespace().equals(dependencyQName.getNamespaceURI())) {
-                    LibraryMember builtInType = library.getNamedMember(dependencyQName
+                	NamedEntity builtInType = library.getNamedMember(dependencyQName
                             .getLocalPart());
 
                     if (builtInType != null) {

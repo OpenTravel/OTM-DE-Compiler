@@ -40,6 +40,9 @@ public enum TLFacetType {
     /** The query facet of a business object. */
     QUERY("Query", true),
 
+    /** The update facet of a business object. */
+    UPDATE("Update", true),
+
     /** The request facet of a service operation. */
     REQUEST("RQ", false),
 
@@ -84,12 +87,12 @@ public enum TLFacetType {
      * Returns the identity name of the facet type, or the given context/label values in the case of
      * a contextual facet.
      * 
-     * @param facetContext
-     *            the context value of a contextual facet
-     * @param facetLabel
-     *            the label value of a contextual facet
+     * @deprecated  use the {@link #getIdentityName(String)} method instead
+     * @param facetContext  the context value of a contextual facet
+     * @param facetLabel  the label value of a contextual facet
      * @return String
      */
+    @Deprecated
     public String getIdentityName(String facetContext, String facetLabel) {
         StringBuilder identity = new StringBuilder();
 
@@ -118,6 +121,35 @@ public enum TLFacetType {
         return identity.toString();
     }
 
+    /**
+     * Returns the identity name of the facet type, or the given name value
+     * in the case of a contextual facet.
+     * 
+     * @param facetName  the name of the contextual facet
+     * @return String
+     */
+    public String getIdentityName(String facetName) {
+        StringBuilder identity = new StringBuilder();
+
+        if (!contextual) {
+            identity.append(identityName);
+
+        } else {
+            if ((this == TLFacetType.QUERY) || (this == TLFacetType.UPDATE)) {
+                identity.append(identityName);
+
+                if ((facetName != null) && (facetName.length() > 0)) {
+                    identity.append("_").append(facetName);
+                }
+            } else { // custom or choice facet type
+                if ((facetName != null) && (facetName.length() > 0)) {
+                    identity.append(facetName);
+                }
+            }
+        }
+        return identity.toString();
+    }
+    
     /**
      * Returns true if the facet type should be considered contextual in nature.
      * 

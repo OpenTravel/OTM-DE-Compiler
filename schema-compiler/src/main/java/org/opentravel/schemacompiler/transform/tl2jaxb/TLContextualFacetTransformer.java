@@ -13,29 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.transform.tl2jaxb16;
+package org.opentravel.schemacompiler.transform.tl2jaxb;
 
-import org.opentravel.ns.ota2.librarymodel_v01_06.Documentation;
-import org.opentravel.ns.ota2.librarymodel_v01_06.FacetContextual;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Documentation;
+import org.opentravel.ns.ota2.librarymodel_v01_05.FacetContextual;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLDocumentation;
-import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.symbols.SymbolResolverTransformerContext;
 
 /**
- * Handles the transformation of objects from the <code>TLFacet</code> type to the
+ * Handles the transformation of objects from the <code>TLContextualFacet</code> type to the
  * <code>FacetContextual</code> type.
  * 
  * @author S. Livezey
  */
-public class TLFacetToContextualFacetTransformer extends
-        TLComplexTypeTransformer<TLFacet, FacetContextual> {
+public class TLContextualFacetTransformer extends
+        TLComplexTypeTransformer<TLContextualFacet, FacetContextual> {
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
      */
     @Override
-    public FacetContextual transform(TLFacet source) {
+    public FacetContextual transform(TLContextualFacet source) {
         FacetContextual facet = new FacetContextual();
 
         if ((source.getDocumentation() != null) && !source.getDocumentation().isEmpty()) {
@@ -45,8 +45,7 @@ public class TLFacetToContextualFacetTransformer extends
             facet.setDocumentation(docTransformer.transform(source.getDocumentation()));
         }
         facet.setNotExtendable(source.isNotExtendable());
-        facet.setContext(trimString(source.getContext(), false));
-        facet.setLabel(trimString(source.getLabel(), false));
+        facet.setLabel(trimString(source.getName(), false));
         facet.getAttribute().addAll(transformAttributes(source.getAttributes()));
         facet.getElement().addAll(transformElements(source.getElements()));
         facet.getIndicator().addAll(transformIndicators(source.getIndicators()));

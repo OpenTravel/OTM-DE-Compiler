@@ -41,7 +41,7 @@ public class TestChoiceObjectTransformers extends Abstract_1_6_TestTransformers 
     @Test
     public void testChoiceObjectTransformer() throws Exception {
         TLChoiceObject type = getChoiceObject(PACKAGE_2_NAMESPACE, "library_1_p2", "SampleChoice");
-        TLFacet choiceA = (type == null) ? null : type.getChoiceFacet( null, "ChoiceA" );
+        TLFacet choiceA = (type == null) ? null : type.getChoiceFacet( "ChoiceA" );
         
         assertNotNull(type);
         assertEquals("SampleChoice", type.getName());
@@ -86,10 +86,6 @@ public class TestChoiceObjectTransformers extends Abstract_1_6_TestTransformers 
         assertEquals(2, type.getShared().getAttribute().size());
         assertEquals(1, type.getShared().getElement().size());
         assertEquals(1, type.getShared().getIndicator().size());
-        assertEquals(2, type.getChoice().size());
-        assertEquals(1, type.getChoice().get(0).getAttribute().size());
-        assertEquals(1, type.getChoice().get(0).getElement().size());
-        assertEquals(1, type.getChoice().get(0).getIndicator().size());
     }
     
     private TLChoiceObject getChoiceObject(String namespace, String libraryName, String typeName)

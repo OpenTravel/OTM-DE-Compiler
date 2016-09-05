@@ -44,5 +44,5 @@ public abstract class Abstract_1_6_TestTransformers extends AbstractTestTransfor
     protected String getBaseLocation() {
         return System.getProperty("user.dir") + "/src/test/resources/libraries_1_6";
     }
-
+    
 }

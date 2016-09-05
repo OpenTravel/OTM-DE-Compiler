@@ -166,42 +166,6 @@
                </xsd:documentation>
             </xsd:annotation>
          </xsd:element>
-         <xsd:element name="Query" type="Facet_Contextual" minOccurs="0" maxOccurs="100">
-            <xsd:annotation>
-               <xsd:documentation>The Query facet contains a set of properties
-                  that are used to retrieve one or more of
-                  its associated
-                  Business
-                  Objects.
-               </xsd:documentation>
-            </xsd:annotation>
-         </xsd:element>
-         <xsd:element name="Custom" type="Facet_Contextual" minOccurs="0" maxOccurs="100">
-            <xsd:annotation>
-               <xsd:documentation>The Custom facet provides proprietary
-                  implementer extensions of the Business Object.
-                  The Custom
-                  facet
-                  extends the Summary facet. It is typically
-                  contains:
-
-                  1) a subset of properties contained
-                  in the Detail facet
-                  (for example, the Detail facet contains 30 elements, but only two
-                  are required for
-                  the implementation
-                  and using the Custom facet
-                  provides a lighter-weight implementation)
-
-                  2) implementer
-                  proprietary elements and attributes not contained
-                  in either the Summary or Detail
-                  facets. These are
-                  typically specific
-                  to a company's usage of data, application or process.
-               </xsd:documentation>
-            </xsd:annotation>
-         </xsd:element>
       </xsd:sequence>
       <xsd:attribute name="name" type="Name_XML" use="required">
          <xsd:annotation>
@@ -779,28 +743,48 @@
          <xsd:element ref="Indicator" minOccurs="0" maxOccurs="100" />
       </xsd:sequence>
    </xsd:complexType>
+   
+   <xsd:element name="ContextualFacet" type="Facet_Contextual">
+      <xsd:annotation>
+         <xsd:documentation>A description of an object facet whose context is
+            specific to a usage of the data, a company, application or process
+            for example. The parent of a custom contextual facets may be a
+            business/choice object's summary facet or another custom contextual
+            facet.
+         </xsd:documentation>
+      </xsd:annotation>
+   </xsd:element>
    <xsd:complexType name="Facet_Contextual">
       <xsd:annotation>
          <xsd:documentation>A description of an object facet whose context is
-            specific to a usage of the data, a company,
-            application or process
-            for example. Custom facets extend the
-            object's summary facet.
+            specific to a usage of the data, a company, application or process
+            for example. The parent of a custom contextual facets may be a
+            business/choice object's summary facet or another custom contextual
+            facet.
          </xsd:documentation>
       </xsd:annotation>
       <xsd:complexContent>
          <xsd:extension base="Facet">
-            <xsd:attribute name="context" type="Name_XML" use="required">
+         	<xsd:sequence>
+		         <xsd:element ref="Extension" />
+         	</xsd:sequence>
+            <xsd:attribute name="name" type="Name_XML" use="required">
                <xsd:annotation>
-                  <xsd:documentation>A usage indicator that describes a
-                     contextual use for its parent element.
+                  <xsd:documentation>Specifies the name of the facet within the
+                  	context of its parent entity.
                   </xsd:documentation>
                </xsd:annotation>
             </xsd:attribute>
-            <xsd:attribute name="label" type="Name_XML" use="optional">
+            <xsd:attribute name="type" type="Facet_Contextual_Type" use="required">
                <xsd:annotation>
-                  <xsd:documentation>A usage indicator that differentiates multiple
-                      facets within the same context of its parent element.
+                  <xsd:documentation>Specifies the type of the contextual facet.
+                  </xsd:documentation>
+               </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="facetOwner" type="Name_XML" use="required">
+               <xsd:annotation>
+                  <xsd:documentation>Specifies the name of the business object, core,
+                  	choice, or contextual facet that owns this facet.
                   </xsd:documentation>
                </xsd:annotation>
             </xsd:attribute>
@@ -1101,6 +1085,19 @@
          <xsd:enumeration value="UnderReview"/>
          <xsd:enumeration value="Final"/>
          <xsd:enumeration value="Obsolete"/>
+      </xsd:restriction>
+   </xsd:simpleType>
+   <xsd:simpleType name="Facet_Contextual_Type">
+      <xsd:annotation>
+          <xsd:documentation>Enumeration indicating the type of a contextual
+          	facet.
+          </xsd:documentation>
+      </xsd:annotation>
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="Custom"/>
+         <xsd:enumeration value="Query"/>
+         <xsd:enumeration value="Update"/>
+         <xsd:enumeration value="Choice"/>
       </xsd:restriction>
    </xsd:simpleType>
    <xsd:simpleType name="Name_XML">
@@ -1540,6 +1537,7 @@
          <xsd:element ref="CoreObject" minOccurs="0" maxOccurs="unbounded" />
          <xsd:element ref="ChoiceObject" minOccurs="0" maxOccurs="unbounded" />
          <xsd:element ref="BusinessObject" minOccurs="0" maxOccurs="unbounded" />
+         <xsd:element ref="ContextualFacet" minOccurs="0" maxOccurs="unbounded" />
          <xsd:element ref="Resource" minOccurs="0" maxOccurs="unbounded" />
          <xsd:element ref="ExtensionPointFacet" minOccurs="0" maxOccurs="unbounded" />
       </xsd:choice>
@@ -2167,14 +2165,6 @@
             <xsd:annotation>
                <xsd:documentation>The Shared facet is a collection of fields
                	  that are common to all of the available choices.
-               </xsd:documentation>
-            </xsd:annotation>
-         </xsd:element>
-         <xsd:element name="Choice" type="Facet_Contextual" minOccurs="0" maxOccurs="100">
-            <xsd:annotation>
-               <xsd:documentation>The choice facet provides the fields that are
-                  members of a mutually-exclusive choice or option.  Choice objects
-                  may have multiple choice facets.
                </xsd:documentation>
             </xsd:annotation>
          </xsd:element>

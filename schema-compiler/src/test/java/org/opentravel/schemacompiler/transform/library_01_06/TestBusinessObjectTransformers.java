@@ -96,8 +96,6 @@ public class TestBusinessObjectTransformers extends Abstract_1_6_TestTransformer
         assertNotNull(type.getID());
         assertNotNull(type.getSummary());
         assertNotNull(type.getDetail());
-        assertEquals(2, type.getQuery().size());
-        assertEquals(2, type.getCustom().size());
         assertTrue(type.isNotExtendable());
         assertNotNull(type.getExtension());
         assertEquals("EmptyBusinessObject", type.getExtension().getExtends());
@@ -115,8 +113,6 @@ public class TestBusinessObjectTransformers extends Abstract_1_6_TestTransformer
         assertNotNull(type.getID());
         assertNotNull(type.getSummary());
         assertNotNull(type.getDetail());
-        assertTrue(type.getQuery().isEmpty());
-        assertTrue(type.getCustom().isEmpty());
         assertFalse(type.isNotExtendable());
         assertNull(type.getExtension());
     }

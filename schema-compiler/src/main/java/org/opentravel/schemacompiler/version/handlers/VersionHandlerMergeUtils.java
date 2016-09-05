@@ -26,6 +26,7 @@ import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAbstractEnumeration;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLAttributeOwner;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLEnumValue;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLIndicator;
@@ -211,8 +212,13 @@ public class VersionHandlerMergeUtils {
      */
     public void addToIdentityFacetMap(TLFacet facet, Map<String,TLFacet> identityFacetMap) {
         if (facet != null) {
-            identityFacetMap.put( facet.getFacetType().getIdentityName(
-            		facet.getContext(), facet.getLabel() ), facet);
+        	if (facet instanceof TLContextualFacet) {
+                identityFacetMap.put( facet.getFacetType().getIdentityName(
+                		((TLContextualFacet) facet).getName() ), facet);
+        		
+        	} else {
+                identityFacetMap.put( facet.getFacetType().getIdentityName(), facet);
+        	}
         }
     }
 

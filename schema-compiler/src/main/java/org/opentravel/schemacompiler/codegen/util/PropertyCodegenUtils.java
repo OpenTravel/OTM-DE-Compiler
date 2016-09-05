@@ -28,7 +28,6 @@ import javax.xml.namespace.QName;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
-import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAbstractFacet;
 import org.opentravel.schemacompiler.model.TLActionFacet;
@@ -1233,7 +1232,7 @@ public class PropertyCodegenUtils {
         for (AbstractLibrary library : model.getAllLibraries()) {
             if ((library.getNamespace() != null)
                     && library.getNamespace().equals(emptySD.getSchemaDeclaration().getNamespace())) {
-                LibraryMember member = library.getNamedMember(emptySD.getLocalName());
+            	NamedEntity member = library.getNamedMember(emptySD.getLocalName());
 
                 if (member instanceof TLAttributeType) {
                     emptyAttribute = (TLAttributeType) member;

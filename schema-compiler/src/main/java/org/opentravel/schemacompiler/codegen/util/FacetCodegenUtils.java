@@ -26,6 +26,7 @@ import org.opentravel.schemacompiler.model.OperationType;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLExtensionOwner;
@@ -88,32 +89,40 @@ public class FacetCodegenUtils {
      * NOTE: This method assumes null values for the facet's context and label when looking up
      * contextual facets.
      * 
-     * @param owner
-     *            the facet owner from which to return a member facet
-     * @param facetType
-     *            the type of member facet to return
+     * @param owner  the facet owner from which to return a member facet
+     * @param facetType  the type of member facet to return
      * @return TLFacet
      */
     public static TLFacet getFacetOfType(TLFacetOwner owner, TLFacetType facetType) {
-        return getFacetOfType(owner, facetType, null, null);
+        return getFacetOfType(owner, facetType, null);
     }
 
     /**
      * Returns a facet of the specified type from the given owner. If no such facet is available
      * from the owner, this method will return null.
      * 
-     * @param owner
-     *            the facet owner from which to return a member facet
-     * @param facetType
-     *            the type of member facet to return
-     * @param facetContext
-     *            the context ID of the facet to return (only used for contextual facets)
-     * @param facetLabel
-     *            the label of the facet to return (only used for contextual or action facets)
+     * @param owner  the facet owner from which to return a member facet
+     * @param facetType  the type of member facet to return
+     * @param facetContext  the context ID of the facet to return (only used for contextual facets)
+     * @param facetLabel  the label of the facet to return (only used for contextual or action facets)
      * @return TLFacet
      */
+    @Deprecated
     public static TLFacet getFacetOfType(TLFacetOwner owner, TLFacetType facetType,
             String facetContext, String facetLabel) {
+    	return getFacetOfType( owner, facetType, facetLabel );
+    }
+    
+    /**
+     * Returns a facet of the specified type from the given owner. If no such facet is available
+     * from the owner, this method will return null.
+     * 
+     * @param owner  the facet owner from which to return a member facet
+     * @param facetType  the type of member facet to return
+     * @param facetName  the name of the contextual facet to return (only used for contextual facets)
+     * @return TLFacet
+     */
+    public static TLFacet getFacetOfType(TLFacetOwner owner, TLFacetType facetType, String facetName) {
         TLFacet memberFacet;
 
         if (owner instanceof TLBusinessObject) {
@@ -130,12 +139,13 @@ public class FacetCodegenUtils {
                     memberFacet = boOwner.getDetailFacet();
                     break;
                 case CUSTOM:
-                    memberFacet = findContextualFacet(boOwner.getCustomFacets(), facetContext,
-                            facetLabel);
+                    memberFacet = findContextualFacet(boOwner.getCustomFacets(), facetName);
                     break;
                 case QUERY:
-                    memberFacet = findContextualFacet(boOwner.getQueryFacets(), facetContext,
-                            facetLabel);
+                    memberFacet = findContextualFacet(boOwner.getQueryFacets(), facetName);
+                    break;
+                case UPDATE:
+                    memberFacet = findContextualFacet(boOwner.getUpdateFacets(), facetName);
                     break;
 				default:
 					memberFacet = null;
@@ -164,7 +174,7 @@ public class FacetCodegenUtils {
         			memberFacet = choiceOwner.getSharedFacet();
         			break;
         		case CHOICE:
-        			memberFacet = findContextualFacet(choiceOwner.getChoiceFacets(), facetContext, facetLabel);
+        			memberFacet = findContextualFacet(choiceOwner.getChoiceFacets(), facetName);
         			break;
 				default:
 					memberFacet = null;
@@ -194,31 +204,24 @@ public class FacetCodegenUtils {
     }
 
     /**
-     * Returns the contextual facet from the list with the specified context and label value. If no
-     * such facet exists, this method will return null.
+     * Returns the contextual facet from the list with the specified name. If no such facet exists,
+     * this method will return null.
      * 
-     * @param facetList
-     *            the list of facets from which to select a member
-     * @param facetContext
-     *            the context ID of the facet to return
-     * @param facetLabel
-     *            the label of the facet to return
-     * @return TLFacet
+     * @param facetList  the list of facets from which to select a member
+     * @param facetName  the name of the contextual facet to return
+     * @return TLContextualFacet
      */
-    private static TLFacet findContextualFacet(List<TLFacet> facetList, String facetContext,
-            String facetLabel) {
-        TLFacet memberFacet = null;
-
-        for (TLFacet facet : facetList) {
-            String facetIdentity = facet.getFacetType().getIdentityName(facet.getContext(),
-                    facet.getLabel());
-            String testIdentity = facet.getFacetType().getIdentityName(facetContext, facetLabel);
-
-            if ((facetIdentity != null) && facetIdentity.equals(testIdentity)) {
-                memberFacet = facet;
-                break;
+    private static TLContextualFacet findContextualFacet(List<TLContextualFacet> facetList, String facetName) {
+    	TLContextualFacet memberFacet = null;
+    	
+    	if (facetName != null) {
+            for (TLContextualFacet facet : facetList) {
+                if (facetName.equals(facet.getName())) {
+                    memberFacet = facet;
+                    break;
+                }
             }
-        }
+    	}
         return memberFacet;
     }
 

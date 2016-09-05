@@ -38,7 +38,7 @@ import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.LibraryMember;
-import org.opentravel.schemacompiler.model.TLModelElement;
+import org.opentravel.schemacompiler.model.ModelElement;
 import org.opentravel.schemacompiler.model.XSDLibrary;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.TransformerFactory;
@@ -54,7 +54,7 @@ import org.opentravel.schemacompiler.xml.XMLSchemaLineBreakProcessor;
  *            the source type for which output content will be generated
  * @author S. Livezey
  */
-public abstract class AbstractXsdCodeGenerator<S extends TLModelElement> extends
+public abstract class AbstractXsdCodeGenerator<S extends ModelElement> extends
         AbstractJaxbCodeGenerator<S> {
 
     public static final String SCHEMA_CONTEXT = ":org.w3._2001.xmlschema:org.opentravel.ns.ota2.appinfo_v01_00";

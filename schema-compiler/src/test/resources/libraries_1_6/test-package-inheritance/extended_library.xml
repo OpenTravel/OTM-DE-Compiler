@@ -32,31 +32,38 @@
 			<Attribute name="detailNSExtendedAttr" type="xsd:string" />
 			<Element name="detailNSExtended" type="xsd:string" />
 		</Detail>
-		<Query context="Context1" label="Label1">
-			<Attribute name="context1Label1NSExtendedAttr" type="xsd:string" />
-			<Element name="context1Label1NSExtended" type="xsd:string" />
-		</Query>
-		<Query context="Context2">
-			<Attribute name="context2NSExtendedAttr" type="xsd:string" />
-			<Element name="context2NSExtended" type="xsd:string" />
-		</Query>
-		<Query context="Context3">
-			<Attribute name="context3NSExtendedAttr" type="xsd:string" />
-			<Element name="context3NSExtended" type="xsd:string" />
-		</Query>
-		<Custom context="Context1" label="Label1">
-			<Attribute name="context1Label1NSExtendedAttr" type="xsd:string" />
-			<Element name="context1Label1NSExtended" type="xsd:string" />
-		</Custom>
-		<Custom context="Context2">
-			<Attribute name="context2NSExtendedAttr" type="xsd:string" />
-			<Element name="context2NSExtended" type="xsd:string" />
-		</Custom>
-		<Custom context="Context3">
-			<Attribute name="context3NSExtendedAttr" type="xsd:string" />
-			<Element name="context3NSExtended" type="xsd:string" />
-		</Custom>
 	</BusinessObject>
+	
+	<ContextualFacet name="Context1Label1" type="Query" facetOwner="NSExtendedBusinessObject">
+		<Attribute name="context1Label1NSExtendedAttr" type="xsd:string" />
+		<Element name="context1Label1NSExtended" type="xsd:string" />
+		<Extension extends="base:ExtendedBusinessObject_Query_Context1Label1" />
+	</ContextualFacet>
+	<ContextualFacet name="Context2" type="Query" facetOwner="NSExtendedBusinessObject">
+		<Attribute name="context2NSExtendedAttr" type="xsd:string" />
+		<Element name="context2NSExtended" type="xsd:string" />
+		<Extension extends="base:ExtendedBusinessObject_Query_Context2" />
+	</ContextualFacet>
+	<ContextualFacet name="Context3" type="Query" facetOwner="NSExtendedBusinessObject">
+		<Attribute name="context3NSExtendedAttr" type="xsd:string" />
+		<Element name="context3NSExtended" type="xsd:string" />
+		<Extension extends="base:BaseBusinessObject_Query_Context3" />
+	</ContextualFacet>
+	<ContextualFacet name="Context1Label1" type="Custom" facetOwner="NSExtendedBusinessObject">
+		<Attribute name="context1Label1NSExtendedAttr" type="xsd:string" />
+		<Element name="context1Label1NSExtended" type="xsd:string" />
+		<Extension extends="base:ExtendedBusinessObject_Context1Label1" />
+	</ContextualFacet>
+	<ContextualFacet name="Context2" type="Custom" facetOwner="NSExtendedBusinessObject">
+		<Attribute name="context2NSExtendedAttr" type="xsd:string" />
+		<Element name="context2NSExtended" type="xsd:string" />
+		<Extension extends="base:ExtendedBusinessObject_Context2" />
+	</ContextualFacet>
+	<ContextualFacet name="Context3" type="Custom" facetOwner="NSExtendedBusinessObject">
+		<Attribute name="context3NSExtendedAttr" type="xsd:string" />
+		<Element name="context3NSExtended" type="xsd:string" />
+		<Extension extends="base:BaseBusinessObject_Context3" />
+	</ContextualFacet>
 	
 	<Service name="ExtendedService">
 		<Operation Name="Operation1">

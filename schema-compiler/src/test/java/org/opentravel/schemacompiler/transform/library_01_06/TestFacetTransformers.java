@@ -26,13 +26,12 @@ import java.util.List;
 import javax.xml.XMLConstants;
 
 import org.junit.Test;
-import org.opentravel.ns.ota2.librarymodel_v01_06.BusinessObject;
 import org.opentravel.ns.ota2.librarymodel_v01_06.CoreObject;
 import org.opentravel.ns.ota2.librarymodel_v01_06.Facet;
-import org.opentravel.ns.ota2.librarymodel_v01_06.FacetContextual;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
@@ -278,17 +277,16 @@ public class TestFacetTransformers extends Abstract_1_6_TestTransformers {
 
     @Test
     public void testFacetContextualTransformer() throws Exception {
-        List<TLFacet> facetList = getBusinessObject(PACKAGE_2_NAMESPACE, "library_1_p2",
+        List<TLContextualFacet> facetList = getBusinessObject(PACKAGE_2_NAMESPACE, "library_1_p2",
                 "SampleBusinessObject").getCustomFacets();
 
         assertNotNull(facetList);
         assertEquals(2, facetList.size());
 
-        TLFacet facet = facetList.get(0);
+        TLContextualFacet facet = facetList.get(0);
 
         assertNotNull(facet);
-        assertEquals("Sample", facet.getContext());
-        assertEquals("Test1", facet.getLabel());
+        assertEquals("Test1", facet.getName());
         assertEquals(2, facet.getAliases().size());
         assertEquals("SampleBusinessObject_Alias1_Test1", facet.getAliases().get(0).getName());
         assertEquals("SampleBusinessObject_Alias2_Test1", facet.getAliases().get(1).getName());
@@ -445,24 +443,6 @@ public class TestFacetTransformers extends Abstract_1_6_TestTransformers {
         assertEquals("SampleValueWithAttributes", facet.getElement().get(7).getType());
     }
 
-    @Test
-    public void testTLFacetContextualTransformer() throws Exception {
-        List<FacetContextual> facetList = transformBusinessObject(PACKAGE_2_NAMESPACE,
-                "library_1_p2", "SampleBusinessObject").getCustom();
-
-        assertNotNull(facetList);
-        assertEquals(2, facetList.size());
-
-        FacetContextual facet = facetList.get(0);
-
-        assertNotNull(facet);
-        assertEquals("Sample", facet.getContext());
-        assertEquals("Test1", facet.getLabel());
-        assertEquals(1, facet.getAttribute().size());
-        assertEquals(1, facet.getElement().size());
-        assertEquals(1, facet.getIndicator().size());
-    }
-
     private TLCoreObject getCoreObject(String namespace, String libraryName, String typeName)
             throws Exception {
         TLLibrary library = getLibrary(namespace, libraryName);
@@ -487,18 +467,6 @@ public class TestFacetTransformers extends Abstract_1_6_TestTransformers {
         TLLibrary library = getLibrary(namespace, libraryName);
 
         return (library == null) ? null : library.getBusinessObjectType(typeName);
-    }
-
-    private BusinessObject transformBusinessObject(String namespace, String libraryName,
-            String typeName) throws Exception {
-        TLBusinessObject origType = getBusinessObject(namespace, libraryName, typeName);
-        TransformerFactory<SymbolResolverTransformerContext> factory = TransformerFactory
-                .getInstance(SchemaCompilerApplicationContext.SAVER_TRANSFORMER_FACTORY,
-                        getContextJAXBTransformation(origType.getOwningLibrary()));
-        ObjectTransformer<TLBusinessObject, BusinessObject, SymbolResolverTransformerContext> transformer = factory
-                .getTransformer(origType, BusinessObject.class);
-
-        return transformer.transform(origType);
     }
 
 }

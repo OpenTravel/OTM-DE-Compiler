@@ -22,6 +22,7 @@ import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.event.ValueChangeEvent;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryElement;
+import org.opentravel.schemacompiler.model.ModelElement;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLActionRequest;
@@ -54,14 +55,14 @@ import org.opentravel.schemacompiler.visitor.ModelNavigator;
  * @author S. Livezey
  */
 public class NameChangeIntegrityChecker extends
-        AbstractIntegrityChecker<ValueChangeEvent<TLModelElement, NamedEntity>, TLModelElement> {
+        AbstractIntegrityChecker<ValueChangeEvent<ModelElement, NamedEntity>, ModelElement> {
 
     /**
      * @see org.opentravel.schemacompiler.event.ModelEventListener#processModelEvent(org.opentravel.schemacompiler.event.ModelEvent)
      */
     @Override
-    public void processModelEvent(ValueChangeEvent<TLModelElement, NamedEntity> event) {
-        TLModelElement sourceObject = event.getSource();
+    public void processModelEvent(ValueChangeEvent<ModelElement, NamedEntity> event) {
+        ModelElement sourceObject = event.getSource();
         
         if (event.getType() == ModelEventType.NAME_MODIFIED) {
             if (sourceObject instanceof NamedEntity) {
@@ -159,8 +160,8 @@ public class NameChangeIntegrityChecker extends
      * @see org.opentravel.schemacompiler.event.ModelEventListener#getSourceObjectClass()
      */
     @Override
-    public Class<TLModelElement> getSourceObjectClass() {
-        return TLModelElement.class;
+    public Class<ModelElement> getSourceObjectClass() {
+        return ModelElement.class;
     }
 
     /**

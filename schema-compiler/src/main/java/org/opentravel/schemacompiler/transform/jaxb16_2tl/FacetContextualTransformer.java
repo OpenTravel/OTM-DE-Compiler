@@ -17,29 +17,29 @@ package org.opentravel.schemacompiler.transform.jaxb16_2tl;
 
 import org.opentravel.ns.ota2.librarymodel_v01_06.FacetContextual;
 import org.opentravel.schemacompiler.model.TLAttribute;
-import org.opentravel.schemacompiler.model.TLFacet;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLProperty;
 
 /**
  * Handles the transformation of objects from the <code>FacetContextual</code> type to the
- * <code>TLFacet</code> type.
+ * <code>TLContextualFacet</code> type.
  * 
  * @author S. Livezey
  */
-public class FacetContextualTransformer extends ComplexTypeTransformer<FacetContextual, TLFacet> {
+public class FacetContextualTransformer extends ComplexTypeTransformer<FacetContextual, TLContextualFacet> {
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
      */
     @Override
-    public TLFacet transform(FacetContextual source) {
-        final TLFacet facet = new TLFacet();
+    public TLContextualFacet transform(FacetContextual source) {
+        final TLContextualFacet facet = new TLContextualFacet();
 
-        facet.setContext(trimString(source.getContext()));
-        facet.setLabel(trimString(source.getLabel()));
-        facet.setNotExtendable((source.isNotExtendable() == null) ? false : source
-                .isNotExtendable());
+        facet.setName(trimString(source.getName()));
+        facet.setOwningEntityName(trimString(source.getFacetOwner()));
+        facet.setNotExtendable((source.isNotExtendable() == null) ?
+        		false : source.isNotExtendable());
 
         for (TLAttribute attribute : transformAttributes(source.getAttribute())) {
             facet.addAttribute(attribute);

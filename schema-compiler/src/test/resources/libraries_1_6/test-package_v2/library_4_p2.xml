@@ -32,14 +32,16 @@
             <Attribute name="extendedAttribute" type="xsd:string"/>
             <Element name="ExtendedElement" repeat="0" type="xsd:string"/>
         </Detail>
-        <Query context="test" label="ExtendedQueryFacet" notExtendable="false">
-        	<Element name="Prop1" repeat="0" type="xsd:string"/>
-        </Query>
-        <Custom context="test" label="ExtendedCustomFacet" notExtendable="false">
-            <Element name="Prop1" repeat="0" type="xsd:string"/>
-        </Custom>
     </BusinessObject>
     
+	<ContextualFacet name="ExtendedQueryFacet" type="Custom" facetOwner="ExtendedBusinessObject">
+    	<Element name="Prop1" repeat="0" type="xsd:string"/>
+	</ContextualFacet>
+	
+	<ContextualFacet name="ExtendedCustomFacet" type="Custom" facetOwner="ExtendedBusinessObject">
+        <Element name="Prop1" repeat="0" type="xsd:string"/>
+	</ContextualFacet>
+	
     <BusinessObject name="SampleBusinessObjectWithAliases" notExtendable="false">
         <Documentation>
             <Description>SampleBusinessObject-documentation-line_1</Description>

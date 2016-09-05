@@ -431,7 +431,7 @@ public class DependencyFilterBuilder {
 
                 for (BuiltInLibrary library : model.getBuiltInLibraries()) {
                     if (library.getNamespace().equals(dependencyQName.getNamespaceURI())) {
-                        LibraryMember builtInType = library.getNamedMember(dependencyQName
+                    	NamedEntity builtInType = library.getNamedMember(dependencyQName
                                 .getLocalPart());
 
                         if (builtInType != null) {

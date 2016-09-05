@@ -48,7 +48,7 @@ public abstract class AbstractLibrary extends TLModelElement {
     private String prefix;
     private IncludeListManager includeManager = new IncludeListManager(this);
     private NamespaceImportListManager namespaceImportManager = new NamespaceImportListManager(this);
-    private List<LibraryMember> namedMembers = new ArrayList<LibraryMember>();
+    private List<LibraryMember> namedMembers = new ArrayList<>();
     protected String versionScheme;
     protected VersionScheme vScheme;
 
@@ -472,7 +472,7 @@ public abstract class AbstractLibrary extends TLModelElement {
     /**
      * Returns the consolidated list of all types and services defined for this library.
      * 
-     * @return List<NamedEntity>
+     * @return List<LibraryMember>
      */
     public List<LibraryMember> getNamedMembers() {
         return Collections.unmodifiableList(namedMembers);
@@ -486,12 +486,12 @@ public abstract class AbstractLibrary extends TLModelElement {
      * @return LibraryMember
      */
     public LibraryMember getNamedMember(String memberName) {
-        LibraryMember member = null;
+    	LibraryMember member = null;
 
         if (memberName != null) {
-            for (LibraryMember m : namedMembers) {
-                if (memberName.equals(m.getLocalName())) {
-                    member = m;
+            for (LibraryMember e : namedMembers) {
+                if (memberName.equals(e.getLocalName())) {
+                    member = e;
                     break;
                 }
             }
@@ -500,7 +500,7 @@ public abstract class AbstractLibrary extends TLModelElement {
     }
 
     /**
-     * Adds a <code>NamedEntity</code> member to the list of type and service definitions for this
+     * Adds a <code>LibraryMember</code> member to the list of type and service definitions for this
      * library.
      * 
      * @param namedMember
@@ -524,7 +524,7 @@ public abstract class AbstractLibrary extends TLModelElement {
     }
 
     /**
-     * Removes a <code>NamedEntity</code> member from the list of type and service definitions for
+     * Removes a <code>LibraryMember</code> member from the list of type and service definitions for
      * this library.
      * 
      * @param namedMember
@@ -538,7 +538,7 @@ public abstract class AbstractLibrary extends TLModelElement {
                     .setAffectedItem(namedMember).buildEvent());
         }
     }
-
+    
     /**
      * Returns true if the given member is a valid member of this library (false otherwise).
      * 

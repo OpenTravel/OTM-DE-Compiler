@@ -20,7 +20,6 @@ import org.opentravel.ns.ota2.librarymodel_v01_06.Documentation;
 import org.opentravel.ns.ota2.librarymodel_v01_06.Equivalent;
 import org.opentravel.ns.ota2.librarymodel_v01_06.Extension;
 import org.opentravel.ns.ota2.librarymodel_v01_06.Facet;
-import org.opentravel.ns.ota2.librarymodel_v01_06.FacetContextual;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLEquivalent;
@@ -45,8 +44,6 @@ public class TLBusinessObjectTransformer extends
     public BusinessObject transform(TLBusinessObject source) {
         ObjectTransformer<TLFacet, Facet, SymbolResolverTransformerContext> facetTransformer = getTransformerFactory()
                 .getTransformer(TLFacet.class, Facet.class);
-        ObjectTransformer<TLFacet, FacetContextual, SymbolResolverTransformerContext> facetContextualTransformer = getTransformerFactory()
-                .getTransformer(TLFacet.class, FacetContextual.class);
         ObjectTransformer<TLEquivalent, Equivalent, SymbolResolverTransformerContext> equivTransformer = getTransformerFactory()
                 .getTransformer(TLEquivalent.class, Equivalent.class);
         BusinessObject businessObject = new BusinessObject();
@@ -68,13 +65,6 @@ public class TLBusinessObjectTransformer extends
         businessObject.setID(facetTransformer.transform(source.getIdFacet()));
         businessObject.setSummary(facetTransformer.transform(source.getSummaryFacet()));
         businessObject.setDetail(facetTransformer.transform(source.getDetailFacet()));
-
-        for (TLFacet customFacet : source.getCustomFacets()) {
-            businessObject.getCustom().add(facetContextualTransformer.transform(customFacet));
-        }
-        for (TLFacet queryFacet : source.getQueryFacets()) {
-            businessObject.getQuery().add(facetContextualTransformer.transform(queryFacet));
-        }
 
         if (source.getExtension() != null) {
             ObjectTransformer<TLExtension, Extension, SymbolResolverTransformerContext> extensionTransformer = getTransformerFactory()

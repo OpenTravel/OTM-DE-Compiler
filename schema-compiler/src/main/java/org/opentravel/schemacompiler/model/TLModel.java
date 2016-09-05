@@ -242,7 +242,7 @@ public class TLModel implements Validatable {
 
             // Update the typeName fields for all entities in the model that reference
             // the moved entity
-            ValueChangeEvent<TLModelElement, NamedEntity> nameChangeEvent = new ValueChangeEvent<TLModelElement, NamedEntity>(
+            ValueChangeEvent<ModelElement, NamedEntity> nameChangeEvent = new ValueChangeEvent<ModelElement, NamedEntity>(
                     ModelEventType.NAME_MODIFIED, member);
             new NameChangeIntegrityChecker().processModelEvent(nameChangeEvent);
 

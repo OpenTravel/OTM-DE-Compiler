@@ -22,6 +22,7 @@ import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.event.ModelEventBuilder;
 import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.model.TLEquivalent.EquivalentListManager;
+import org.opentravel.schemacompiler.util.OTM16Upgrade;
 
 /**
  * Abstract class that represents the common fields for complex object types such as Core and
@@ -29,7 +30,7 @@ import org.opentravel.schemacompiler.model.TLEquivalent.EquivalentListManager;
  * 
  * @author S. Livezey
  */
-public abstract class TLComplexTypeBase extends LibraryMember implements TLPropertyType,
+public abstract class TLComplexTypeBase extends LibraryMemberImpl implements TLPropertyType,
         TLVersionedExtensionOwner, TLDocumentationOwner, TLEquivalentOwner {
 
     private String name;
@@ -218,5 +219,37 @@ public abstract class TLComplexTypeBase extends LibraryMember implements TLPrope
             publishEvent(event);
         }
     }
-
+    
+    /**
+     * Called when a contextual facet is added to this entity, regardless of
+     * its facet type.
+     * 
+     * @param facet  the contextual facet that was added
+     */
+    protected void contextualFacetAdded(TLContextualFacet facet) {
+    	if (OTM16Upgrade.otm16Enabled) {
+    		AbstractLibrary owningLibrary = getOwningLibrary();
+    		
+    		if (owningLibrary != null) {
+    			owningLibrary.addNamedMember( facet );
+    		}
+    	}
+    }
+    
+    /**
+     * Called when a contextual facet is removed from this entity, regardless of
+     * its facet type.
+     * 
+     * @param facet  the contextual facet that was removed
+     */
+    protected void contextualFacetRemoved(TLContextualFacet facet) {
+    	if (OTM16Upgrade.otm16Enabled) {
+    		AbstractLibrary owningLibrary = getOwningLibrary();
+    		
+    		if (owningLibrary != null) {
+    			owningLibrary.removeNamedMember( facet );
+    		}
+    	}
+    }
+    
 }

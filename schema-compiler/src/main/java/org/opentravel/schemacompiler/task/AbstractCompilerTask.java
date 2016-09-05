@@ -476,7 +476,7 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
                 	}
                 	
 				} else {
-					addGeneratedFiles(exampleGenerator.generateOutput(member, exampleContext));
+					addGeneratedFiles(exampleGenerator.generateOutput((TLModelElement) member, exampleContext));
                	}
             }
         }

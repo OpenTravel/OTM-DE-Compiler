@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.model.TLAlias.AliasListManager;
-import org.opentravel.schemacompiler.model.TLFacet.FacetListManager;
+import org.opentravel.schemacompiler.model.TLContextualFacet.ContextualFacetListManager;
 import org.opentravel.schemacompiler.version.Versioned;
 
 /**
@@ -32,10 +32,12 @@ import org.opentravel.schemacompiler.version.Versioned;
 public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner, TLAliasOwner {
 
     protected AliasListManager aliasManager = new AliasListManager(this);
-    private FacetListManager customFacetManager = new FacetListManager(this, TLFacetType.CUSTOM,
-            ModelEventType.CUSTOM_FACET_ADDED, ModelEventType.CUSTOM_FACET_REMOVED);
-    private FacetListManager queryFacetManager = new FacetListManager(this, TLFacetType.QUERY,
-            ModelEventType.QUERY_FACET_ADDED, ModelEventType.QUERY_FACET_REMOVED);
+    private ContextualFacetListManager customFacetManager = new ContextualFacetListManager(this,
+    		TLFacetType.CUSTOM, ModelEventType.CUSTOM_FACET_ADDED, ModelEventType.CUSTOM_FACET_REMOVED);
+    private ContextualFacetListManager queryFacetManager = new ContextualFacetListManager(this,
+    		TLFacetType.QUERY, ModelEventType.QUERY_FACET_ADDED, ModelEventType.QUERY_FACET_REMOVED);
+    private ContextualFacetListManager updateFacetManager = new ContextualFacetListManager(this,
+    		TLFacetType.UPDATE, ModelEventType.UPDATE_FACET_ADDED, ModelEventType.UPDATE_FACET_REMOVED);
     private TLFacet idFacet;
     private TLFacet summaryFacet;
     private TLFacet detailFacet;
@@ -315,35 +317,34 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
     }
 
     /**
-     * Returns the value of the 'customFacets' field.
+     * Returns the list of custom facets for this business object.
      * 
-     * @return List<TLFacet>
+     * @return List<TLContextualFacet>
      */
-    public List<TLFacet> getCustomFacets() {
+    public List<TLContextualFacet> getCustomFacets() {
         return customFacetManager.getChildren();
     }
 
     /**
      * Returns the custom facet with the specified context.
      * 
-     * @param context
-     *            the context of the custom facet to return
-     * @return TLFacet
+     * @param name  the name of the custom facet to return
+     * @return TLContextualFacet
      */
-    public TLFacet getCustomFacet(String context) {
-        return getCustomFacet(context, null);
+    public TLContextualFacet getCustomFacet(String name) {
+        return customFacetManager.getChild( name );
     }
 
     /**
      * Returns the custom facet with the specified context.
      * 
-     * @param context
-     *            the context of the custom facet to return
-     * @param label
-     *            the label of the custom facet to return
-     * @return TLFacet
+     * @param context  the context of the custom facet to return
+     * @param label  the label of the custom facet to return
+     * @return TLContextualFacet
+     * @deprecated  Use the {@link #getCustomFacet(String)} method instead
      */
-    public TLFacet getCustomFacet(String context, String label) {
+    @Deprecated
+    public TLContextualFacet getCustomFacet(String context, String label) {
         StringBuilder contextualName = new StringBuilder();
 
         contextualName.append((context == null) ? "Unknown" : context);
@@ -355,36 +356,35 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
     }
 
     /**
-     * Adds a custom <code>TLFacet</code> element to the current list.
+     * Adds a custom <code>TLContextualFacet</code> element to the current list.
      * 
-     * @param customFacet
-     *            the custom facet value to add
+     * @param customFacet  the custom facet value to add
      */
-    public void addCustomFacet(TLFacet customFacet) {
+    public void addCustomFacet(TLContextualFacet customFacet) {
+    	contextualFacetAdded(customFacet);
         customFacetManager.addChild(customFacet);
     }
 
     /**
-     * Adds a custom <code>TLFacet</code> element to the current list.
+     * Adds a custom <code>TLContextualFacet</code> element to the current list.
      * 
-     * @param index
-     *            the index at which the given custom facet should be added
-     * @param customFacet
-     *            the custom facet value to add
+     * @param index  the index at which the given custom facet should be added
+     * @param customFacet  the custom facet value to add
      * @throws IndexOutOfBoundsException
      *             thrown if the index is out of range (index < 0 || index > size())
      */
-    public void addCustomFacet(int index, TLFacet customFacet) {
+    public void addCustomFacet(int index, TLContextualFacet customFacet) {
+    	contextualFacetAdded(customFacet);
         customFacetManager.addChild(index, customFacet);
     }
 
     /**
-     * Removes the specified custom <code>TLFacet</code> from the current list.
+     * Removes the specified custom <code>TLContextualFacet</code> from the current list.
      * 
-     * @param customFacet
-     *            the custom facet value to remove
+     * @param customFacet  the custom facet value to remove
      */
-    public void removeCustomFacet(TLFacet customFacet) {
+    public void removeCustomFacet(TLContextualFacet customFacet) {
+    	contextualFacetRemoved(customFacet);
         customFacetManager.removeChild(customFacet);
     }
 
@@ -392,10 +392,9 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
      * Moves this custom facet up by one position in the list. If the custom facet is not owned by
      * this object or it is already at the front of the list, this method has no effect.
      * 
-     * @param customFacet
-     *            the custom facet to move
+     * @param customFacet  the custom facet to move
      */
-    public void moveCustomFacetUp(TLFacet customFacet) {
+    public void moveCustomFacetUp(TLContextualFacet customFacet) {
         customFacetManager.moveUp(customFacet);
     }
 
@@ -403,53 +402,50 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
      * Moves this custom facet down by one position in the list. If the custom facet is not owned by
      * this object or it is already at the end of the list, this method has no effect.
      * 
-     * @param customFacet
-     *            the custom facet to move
+     * @param customFacet  the custom facet to move
      */
-    public void moveCustomFacetDown(TLFacet customFacet) {
+    public void moveCustomFacetDown(TLContextualFacet customFacet) {
         customFacetManager.moveDown(customFacet);
     }
 
     /**
      * Sorts the list of custom facets using the comparator provided.
      * 
-     * @param comparator
-     *            the comparator to use when sorting the list
+     * @param comparator  the comparator to use when sorting the list
      */
-    public void sortCustomFacets(Comparator<TLFacet> comparator) {
+    public void sortCustomFacets(Comparator<TLContextualFacet> comparator) {
         customFacetManager.sortChildren(comparator);
     }
 
     /**
-     * Returns the value of the 'queryFacets' field.
+     * Returns the list of query facets for this business object.
      * 
-     * @return List<TLFacet>
+     * @return List<TLContextualFacet>
      */
-    public List<TLFacet> getQueryFacets() {
+    public List<TLContextualFacet> getQueryFacets() {
         return queryFacetManager.getChildren();
     }
 
     /**
-     * Returns the query facet with the specified name.
+     * Returns the query facet with the specified context.
      * 
-     * @param context
-     *            the context of the query facet to return
-     * @return TLFacet
+     * @param name  the name of the query facet to return
+     * @return TLContextualFacet
      */
-    public TLFacet getQueryFacet(String context) {
-        return getQueryFacet(context, null);
+    public TLContextualFacet getQueryFacet(String name) {
+        return queryFacetManager.getChild( name );
     }
 
     /**
      * Returns the query facet with the specified name.
      * 
-     * @param context
-     *            the context of the query facet to return
-     * @param label
-     *            the label of the query facet to return
+     * @param context  the context of the query facet to return
+     * @param label  the label of the query facet to return
      * @return TLFacet
+     * @deprecated  Use the {@link #getQueryFacet(String)} method instead
      */
-    public TLFacet getQueryFacet(String context, String label) {
+    @Deprecated
+    public TLContextualFacet getQueryFacet(String context, String label) {
         StringBuilder contextualName = new StringBuilder();
 
         contextualName.append((context == null) ? "Unknown" : context);
@@ -461,36 +457,35 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
     }
 
     /**
-     * Adds a query <code>TLFacet</code> element to the current list.
+     * Adds a query <code>TLContextualFacet</code> element to the current list.
      * 
-     * @param queryFacet
-     *            the query facet value to add
+     * @param queryFacet  the query facet value to add
      */
-    public void addQueryFacet(TLFacet queryFacet) {
+    public void addQueryFacet(TLContextualFacet queryFacet) {
+    	contextualFacetAdded(queryFacet);
         queryFacetManager.addChild(queryFacet);
     }
 
     /**
-     * Adds a query <code>TLFacet</code> element to the current list.
+     * Adds a query <code>TLContextualFacet</code> element to the current list.
      * 
-     * @param index
-     *            the index at which the given query facet should be added
-     * @param queryFacet
-     *            the query facet value to add
+     * @param index  the index at which the given query facet should be added
+     * @param queryFacet  the query facet value to add
      * @throws IndexOutOfBoundsException
      *             thrown if the index is out of range (index < 0 || index > size())
      */
-    public void addQueryFacet(int index, TLFacet queryFacet) {
+    public void addQueryFacet(int index, TLContextualFacet queryFacet) {
+    	contextualFacetAdded(queryFacet);
         queryFacetManager.addChild(index, queryFacet);
     }
 
     /**
-     * Removes the specified query <code>TLFacet</code> from the current list.
+     * Removes the specified query <code>TLContextualFacet</code> from the current list.
      * 
-     * @param queryFacet
-     *            the query facet value to remove
+     * @param queryFacet  the query facet value to remove
      */
-    public void removeQueryFacet(TLFacet queryFacet) {
+    public void removeQueryFacet(TLContextualFacet queryFacet) {
+    	contextualFacetRemoved(queryFacet);
         queryFacetManager.removeChild(queryFacet);
     }
 
@@ -498,10 +493,9 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
      * Moves this query facet up by one position in the list. If the query facet is not owned by
      * this object or it is already at the front of the list, this method has no effect.
      * 
-     * @param queryFacet
-     *            the query facet to move
+     * @param queryFacet  the query facet to move
      */
-    public void moveQueryFacetUp(TLFacet queryFacet) {
+    public void moveQueryFacetUp(TLContextualFacet queryFacet) {
         queryFacetManager.moveUp(queryFacet);
     }
 
@@ -509,20 +503,119 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
      * Moves this query facet down by one position in the list. If the query facet is not owned by
      * this object or it is already at the end of the list, this method has no effect.
      * 
-     * @param queryFacet
-     *            the query facet to move
+     * @param queryFacet  the query facet to move
      */
-    public void moveQueryFacetDown(TLFacet queryFacet) {
+    public void moveQueryFacetDown(TLContextualFacet queryFacet) {
         queryFacetManager.moveDown(queryFacet);
     }
 
     /**
      * Sorts the list of query facets using the comparator provided.
      * 
-     * @param comparator
-     *            the comparator to use when sorting the list
+     * @param comparator  the comparator to use when sorting the list
      */
-    public void sortQueryFacets(Comparator<TLFacet> comparator) {
+    public void sortQueryFacets(Comparator<TLContextualFacet> comparator) {
+        queryFacetManager.sortChildren(comparator);
+    }
+
+    /**
+     * Returns the list of update facets for this business object.
+     * 
+     * @return List<TLContextualFacet>
+     */
+    public List<TLContextualFacet> getUpdateFacets() {
+        return updateFacetManager.getChildren();
+    }
+
+    /**
+     * Returns the update facet with the specified context.
+     * 
+     * @param name  the name of the update facet to return
+     * @return TLContextualFacet
+     */
+    public TLContextualFacet getUpdateFacet(String name) {
+        return updateFacetManager.getChild( name );
+    }
+
+    /**
+     * Returns the update facet with the specified name.
+     * 
+     * @param context  the context of the update facet to return
+     * @param label  the label of the update facet to return
+     * @return TLContextualFacet
+     * @deprecated  Use the {@link #getUpdateFacet(String)} method instead
+     */
+    @Deprecated
+    public TLFacet getUpdateFacet(String context, String label) {
+        StringBuilder contextualName = new StringBuilder();
+
+        contextualName.append((context == null) ? "Unknown" : context);
+
+        if ((label != null) && (label.length() > 0)) {
+            contextualName.append(':').append(label);
+        }
+        return updateFacetManager.getChild(contextualName.toString());
+    }
+
+    /**
+     * Adds an update <code>TLContextualFacet</code> element to the current list.
+     * 
+     * @param updateFacet  the update facet to add
+     */
+    public void addUpdateFacet(TLContextualFacet updateFacet) {
+    	contextualFacetAdded(updateFacet);
+        updateFacetManager.addChild(updateFacet);
+    }
+
+    /**
+     * Adds an update <code>TLContextualFacet</code> element to the current list.
+     * 
+     * @param index  the index at which the given update facet should be added
+     * @param updateFacet  the update facet value to add
+     * @throws IndexOutOfBoundsException
+     *             thrown if the index is out of range (index < 0 || index > size())
+     */
+    public void addUpdateFacet(int index, TLContextualFacet updateFacet) {
+    	contextualFacetAdded(updateFacet);
+    	updateFacetManager.addChild(index, updateFacet);
+    }
+
+    /**
+     * Removes the specified update <code>TLContextualFacet</code> from the current list.
+     * 
+     * @param updateFacet  the update facet value to remove
+     */
+    public void removeUpdateFacet(TLContextualFacet updateFacet) {
+    	contextualFacetRemoved(updateFacet);
+    	updateFacetManager.removeChild(updateFacet);
+    }
+
+    /**
+     * Moves this update facet up by one position in the list. If the update facet is not owned by
+     * this object or it is already at the front of the list, this method has no effect.
+     * 
+     * @param updateFacet  the query facet to move
+     */
+    public void moveUpdateFacetUp(TLContextualFacet updateFacet) {
+    	updateFacetManager.moveUp(updateFacet);
+    }
+
+    /**
+     * Moves this update facet down by one position in the list. If the update facet is not owned by
+     * this object or it is already at the end of the list, this method has no effect.
+     * 
+     * @param updateFacet  the update facet to move
+     */
+    public void moveUpdateFacetDown(TLContextualFacet updateFacet) {
+    	updateFacetManager.moveDown(updateFacet);
+    }
+
+    /**
+     * Sorts the list of update facets using the comparator provided.
+     * 
+     * @param comparator  the comparator to use when sorting the list
+     */
+    public void sortUpdateFacets(Comparator<TLContextualFacet> comparator) {
         queryFacetManager.sortChildren(comparator);
     }
 

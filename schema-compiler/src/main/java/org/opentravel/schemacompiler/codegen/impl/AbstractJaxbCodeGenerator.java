@@ -37,7 +37,7 @@ import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.ioc.SchemaDeclaration;
 import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
-import org.opentravel.schemacompiler.model.TLModelElement;
+import org.opentravel.schemacompiler.model.ModelElement;
 import org.opentravel.schemacompiler.transform.TransformerFactory;
 import org.opentravel.schemacompiler.xml.PrettyPrintLineBreakProcessor;
 import org.opentravel.schemacompiler.xml.XMLPrettyPrinter;
@@ -56,7 +56,7 @@ import org.xmlsoap.schemas.wsdl.TTypes;
  *            the source type for which output content will be generated
  * @author S. Livezey
  */
-public abstract class AbstractJaxbCodeGenerator<S extends TLModelElement> extends
+public abstract class AbstractJaxbCodeGenerator<S extends ModelElement> extends
         AbstractCodeGenerator<S> {
 
     private static final String LINE_SEPARATOR = System.getProperty("line.separator");

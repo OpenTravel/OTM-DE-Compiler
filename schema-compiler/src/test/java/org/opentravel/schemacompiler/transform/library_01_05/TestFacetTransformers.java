@@ -33,6 +33,7 @@ import org.opentravel.ns.ota2.librarymodel_v01_05.FacetContextual;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
@@ -278,17 +279,16 @@ public class TestFacetTransformers extends Abstract_1_5_TestTransformers {
 
     @Test
     public void testFacetContextualTransformer() throws Exception {
-        List<TLFacet> facetList = getBusinessObject(PACKAGE_2_NAMESPACE, "library_1_p2",
+        List<TLContextualFacet> facetList = getBusinessObject(PACKAGE_2_NAMESPACE, "library_1_p2",
                 "SampleBusinessObject").getCustomFacets();
 
         assertNotNull(facetList);
         assertEquals(2, facetList.size());
 
-        TLFacet facet = facetList.get(0);
+        TLContextualFacet facet = facetList.get(0);
 
         assertNotNull(facet);
-        assertEquals("Sample", facet.getContext());
-        assertEquals("Test1", facet.getLabel());
+        assertEquals("Test1", facet.getName());
         assertEquals(2, facet.getAliases().size());
         assertEquals("SampleBusinessObject_Alias1_Test1", facet.getAliases().get(0).getName());
         assertEquals("SampleBusinessObject_Alias2_Test1", facet.getAliases().get(1).getName());

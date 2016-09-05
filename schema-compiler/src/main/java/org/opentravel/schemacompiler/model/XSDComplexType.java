@@ -32,7 +32,7 @@ import org.w3._2001.xmlschema.TopLevelComplexType;
  * 
  * @author S. Livezey
  */
-public class XSDComplexType extends LibraryMember implements TLPropertyType {
+public class XSDComplexType extends LibraryMemberImpl implements TLPropertyType {
 
     private String name;
     private TopLevelComplexType jaxbType;

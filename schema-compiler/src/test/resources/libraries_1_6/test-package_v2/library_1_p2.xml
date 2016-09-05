@@ -209,18 +209,20 @@
             <Element name="sharedElement" repeat="0" type="xsd:int"/>
             <Indicator name="sharedIndicator" publishAsElement="false"/>
         </Shared>
-        <Choice label="ChoiceA" context="">
-            <Attribute name="attributeA" type="xsd:string"/>
-            <Element name="elementA" repeat="0" type="xsd:int"/>
-            <Indicator name="indicatorA" publishAsElement="false"/>
-        </Choice>
-        <Choice label="ChoiceB" context="">
-            <Attribute name="attributeB" type="xsd:string"/>
-            <Element name="elementB" repeat="3" type="xsd:int"/>
-            <Indicator name="indicatorB" publishAsElement="false"/>
-        </Choice>
     </ChoiceObject>
     
+	<ContextualFacet name="ChoiceA" type="Choice" facetOwner="SampleChoice">
+        <Attribute name="attributeA" type="xsd:string"/>
+        <Element name="elementA" repeat="0" type="xsd:int"/>
+        <Indicator name="indicatorA" publishAsElement="false"/>
+	</ContextualFacet>
+	
+	<ContextualFacet name="ChoiceB" type="Choice" facetOwner="SampleChoice">
+        <Attribute name="attributeB" type="xsd:string"/>
+        <Element name="elementB" repeat="3" type="xsd:int"/>
+        <Indicator name="indicatorB" publishAsElement="false"/>
+	</ContextualFacet>
+	
     <ChoiceObject name="ExtendedChoice" notExtendable="false">
         <Extension extends="SampleChoice"/>
         <Aliases>ExtChoice_Alias1 ExtChoice_Alias2</Aliases>
@@ -229,18 +231,21 @@
             <Element name="sharedElement2" repeat="0" type="xsd:int"/>
             <Indicator name="sharedIndicator2" publishAsElement="false"/>
         </Shared>
-        <Choice label="ChoiceA" context="">
-            <Attribute name="extAttributeA" type="xsd:string"/>
-            <Element name="extElementA" repeat="0" type="xsd:int"/>
-            <Indicator name="extIndicatorA" publishAsElement="false"/>
-        </Choice>
-        <Choice label="ChoiceC" context="">
-            <Attribute name="attributeC" type="xsd:string"/>
-            <Element name="elementC" repeat="3" type="xsd:int"/>
-            <Indicator name="indicatorC" publishAsElement="false"/>
-        </Choice>
     </ChoiceObject>
     
+	<ContextualFacet name="ChoiceA" type="Choice" facetOwner="ExtendedChoice">
+        <Attribute name="extAttributeA" type="xsd:string"/>
+        <Element name="extElementA" repeat="0" type="xsd:int"/>
+        <Indicator name="extIndicatorA" publishAsElement="false"/>
+        <Extension extends="SampleChoice_ChoiceA"/>
+	</ContextualFacet>
+	
+	<ContextualFacet name="ChoiceC" type="Choice" facetOwner="SampleChoice">
+        <Attribute name="attributeC" type="xsd:string"/>
+        <Element name="elementC" repeat="3" type="xsd:int"/>
+        <Indicator name="indicatorC" publishAsElement="false"/>
+	</ContextualFacet>
+	
     <BusinessObject name="EmptyBusinessObject" notExtendable="false">
         <Aliases/>
         <ID>
@@ -272,29 +277,33 @@
         <Detail>
             <Element name="detailName" repeat="0" type="xsd:string"/>
         </Detail>
-        <Query context="Sample" label="FindByName" notExtendable="false">
-            <Attribute name="queryAttribute" type="xsd:int"/>
-            <Element name="lastName" repeat="0" type="xsd:string"/>
-            <Element name="firstName" repeat="0" type="xsd:string"/>
-            <Indicator name="queryIndicator" publishAsElement="false"/>
-        </Query>
-        <Query context="Sample" label="FindByAge" notExtendable="false">
-            <Attribute name="queryAttribute" type="xsd:int"/>
-            <Element name="age" repeat="0" type="xsd:int"/>
-            <Indicator name="queryIndicator" publishAsElement="false"/>
-        </Query>
-        <Custom context="Sample" label="Test1" notExtendable="true">
-            <Attribute name="attr1" type="xsd:int"/>
-            <Element name="element1" repeat="0" type="xsd:string"/>
-            <Indicator name="indicator1" publishAsElement="false"/>
-        </Custom>
-        <Custom context="Sample" label="Test2" notExtendable="false">
-            <Attribute name="attr1" type="xsd:int"/>
-            <Element name="element1" repeat="0" type="xsd:string"/>
-            <Indicator name="indicator1" publishAsElement="false"/>
-        </Custom>
     </BusinessObject>
-    
+
+	<ContextualFacet name="FindByName" type="Query" facetOwner="SampleBusinessObject">
+		<Attribute name="queryAttribute" type="xsd:int" />
+		<Element name="lastName" repeat="0" type="xsd:string" />
+		<Element name="firstName" repeat="0" type="xsd:string" />
+		<Indicator name="queryIndicator" publishAsElement="false" />
+	</ContextualFacet>
+
+	<ContextualFacet name="FindByAge" type="Query" facetOwner="SampleBusinessObject">
+		<Attribute name="queryAttribute" type="xsd:int" />
+		<Element name="age" repeat="0" type="xsd:int" />
+		<Indicator name="queryIndicator" publishAsElement="false" />
+	</ContextualFacet>
+
+	<ContextualFacet name="Test1" type="Custom" facetOwner="SampleBusinessObject">
+		<Attribute name="attr1" type="xsd:int" />
+		<Element name="element1" repeat="0" type="xsd:string" />
+		<Indicator name="indicator1" publishAsElement="false" />
+	</ContextualFacet>
+
+	<ContextualFacet name="Test2" type="Custom" facetOwner="SampleBusinessObject">
+		<Attribute name="attr1" type="xsd:int" />
+		<Element name="element1" repeat="0" type="xsd:string" />
+		<Indicator name="indicator1" publishAsElement="false" />
+	</ContextualFacet>
+	
     <BusinessObject name="CompoundBusinessObject" notExtendable="false">
         <Documentation>
             <Description>SampleBusinessObject-documentation-line_1</Description>

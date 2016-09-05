@@ -21,11 +21,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.opentravel.schemacompiler.model.TLChoiceObject;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLEquivalent;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLPatchableFacet;
 import org.opentravel.schemacompiler.util.ModelElementCloner;
+import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 
 /**
@@ -86,19 +88,19 @@ public class TLChoiceObjectVersionHandler extends TLExtensionOwnerVersionHandler
 		
         mergeUtils.addToIdentityFacetMap( majorVersionTarget.getSharedFacet(), targetFacets );
         mergeUtils.addToIdentityFacetMap( minorVersion.getSharedFacet(), sourceFacets );
+        
+        if (!OTM16Upgrade.otm16Enabled) {
+            for (TLContextualFacet sourceFacet : minorVersion.getChoiceFacets()) {
+            	TLContextualFacet targetFacet = majorVersionTarget.getChoiceFacet( sourceFacet.getName() );
 
-        for (TLFacet sourceFacet : minorVersion.getChoiceFacets()) {
-            TLFacet targetFacet = majorVersionTarget.getChoiceFacet(
-            		sourceFacet.getContext(), sourceFacet.getLabel() );
-
-            if (targetFacet == null) {
-                targetFacet = new TLFacet();
-                targetFacet.setContext( sourceFacet.getContext() );
-                targetFacet.setLabel( sourceFacet.getLabel() );
-                majorVersionTarget.addChoiceFacet( targetFacet );
+                if (targetFacet == null) {
+                    targetFacet = new TLContextualFacet();
+                    targetFacet.setName( sourceFacet.getName() );
+                    majorVersionTarget.addChoiceFacet( targetFacet );
+                }
+                mergeUtils.addToIdentityFacetMap( targetFacet, targetFacets );
+                mergeUtils.addToIdentityFacetMap( sourceFacet, sourceFacets );
             }
-            mergeUtils.addToIdentityFacetMap( targetFacet, targetFacets );
-            mergeUtils.addToIdentityFacetMap( sourceFacet, sourceFacets );
         }
         mergeUtils.mergeFacets( targetFacets, sourceFacets, referenceHandler );
 	}

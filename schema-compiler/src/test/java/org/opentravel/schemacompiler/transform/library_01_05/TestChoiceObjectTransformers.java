@@ -41,7 +41,7 @@ public class TestChoiceObjectTransformers extends Abstract_1_5_TestTransformers 
     @Test
     public void testChoiceObjectTransformer() throws Exception {
         TLChoiceObject type = getChoiceObject(PACKAGE_2_NAMESPACE, "library_1_p2", "SampleChoice");
-        TLFacet choiceA = (type == null) ? null : type.getChoiceFacet( null, "ChoiceA" );
+        TLFacet choiceA = (type == null) ? null : type.getChoiceFacet( "ChoiceA" );
         
         assertNotNull(type);
         assertEquals("SampleChoice", type.getName());

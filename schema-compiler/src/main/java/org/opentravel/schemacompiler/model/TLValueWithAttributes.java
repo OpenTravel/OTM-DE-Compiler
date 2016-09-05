@@ -33,7 +33,7 @@ import org.opentravel.schemacompiler.version.Versioned;
  * 
  * @author S. Livezey
  */
-public class TLValueWithAttributes extends LibraryMember implements Versioned, TLAttributeType,
+public class TLValueWithAttributes extends LibraryMemberImpl implements Versioned, TLAttributeType,
         TLAttributeOwner, TLIndicatorOwner, TLDocumentationOwner, TLEquivalentOwner, TLExampleOwner {
 
     private String name;

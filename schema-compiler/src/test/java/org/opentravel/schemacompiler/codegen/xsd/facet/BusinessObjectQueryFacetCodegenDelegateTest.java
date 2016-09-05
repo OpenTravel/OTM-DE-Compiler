@@ -21,8 +21,8 @@ import javax.xml.namespace.QName;
 
 import org.junit.Test;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLExtension;
-import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLProperty;
 
@@ -32,7 +32,7 @@ public class BusinessObjectQueryFacetCodegenDelegateTest {
     public void shouldReturnExtensionPointElementQuery() {
         // given
         TLBusinessObject base = new TLBusinessObject();
-        TLFacet query = createQueryFacet("BaseQuery");
+        TLContextualFacet query = createQueryFacet("BaseQuery");
         base.addQueryFacet(query);
         // has to have content, empty one is ignored
         TLProperty prop = new TLProperty();
@@ -50,7 +50,7 @@ public class BusinessObjectQueryFacetCodegenDelegateTest {
     public void shouldReturnExtensionPointElementForQueryFacetWithSubtype() {
         // given
         TLBusinessObject base = new TLBusinessObject();
-        TLFacet query = createQueryFacet("BaseQuery");
+        TLContextualFacet query = createQueryFacet("BaseQuery");
         base.addQueryFacet(query);
         // has to have content, empty one is ignored
         TLProperty prop = new TLProperty();
@@ -61,7 +61,7 @@ public class BusinessObjectQueryFacetCodegenDelegateTest {
         ext.setExtendsEntity(base);
         extBO.setExtension(ext);
 
-        TLFacet queryExt = createQueryFacet(query.getLabel());
+        TLContextualFacet queryExt = createQueryFacet(query.getName());
         extBO.addQueryFacet(queryExt);
 
         // when
@@ -72,10 +72,10 @@ public class BusinessObjectQueryFacetCodegenDelegateTest {
         assertNotNull(epe);
     }
 
-    private TLFacet createQueryFacet(String name) {
-        TLFacet ret = new TLFacet();
+    private TLContextualFacet createQueryFacet(String name) {
+    	TLContextualFacet ret = new TLContextualFacet();
         ret.setFacetType(TLFacetType.QUERY);
-        ret.setLabel(name);
+        ret.setName(name);
         return ret;
     }
 }

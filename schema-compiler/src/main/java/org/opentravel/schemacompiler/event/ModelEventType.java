@@ -706,6 +706,15 @@ public enum ModelEventType {
     LABEL_MODIFIED(ValueChangeEvent.class),
 
     /**
+     * Event type sent when the owner relationship of a contextual facet was modified.
+     * 
+     * <p>
+     * <u>Event</u>: <code>ValueChangeEvent</code> <br>
+     * <u>Source Object</u>: <code>TLContextualFacet</code>
+     */
+    FACET_OWNER_MODIFIED(ValueChangeEvent.class),
+
+    /**
      * Event type sent when the entire content of a facet has been cleared.
      * 
      * <p>
@@ -749,6 +758,44 @@ public enum ModelEventType {
      * <u>Source Object</u>: <code>TLBusinessObject</code>
      */
     QUERY_FACET_REMOVED(OwnershipEvent.class),
+
+    /**
+     * Event type sent when an update facet is added to a business object.
+     * 
+     * <p>
+     * <u>Event</u>: <code>OwnershipEvent</code> <br>
+     * <u>Source Object</u>: <code>TLBusinessObject</code>
+     */
+    UPDATE_FACET_ADDED(OwnershipEvent.class),
+
+    /**
+     * Event type sent when an update facet is removed from a business object.
+     * 
+     * <p>
+     * <u>Event</u>: <code>OwnershipEvent</code> <br>
+     * <u>Source Object</u>: <code>TLBusinessObject</code>
+     */
+    UPDATE_FACET_REMOVED(OwnershipEvent.class),
+
+    /**
+     * Event type sent when a contextual facet is added as a child of another
+     * contextual facet.
+     * 
+     * <p>
+     * <u>Event</u>: <code>OwnershipEvent</code> <br>
+     * <u>Source Object</u>: <code>TLContextualFacet</code>
+     */
+    CHILD_FACET_ADDED(OwnershipEvent.class),
+
+    /**
+     * Event type sent when a contextual facet is removed from its parent-child
+     * relationship with another contextual facet.
+     * 
+     * <p>
+     * <u>Event</u>: <code>OwnershipEvent</code> <br>
+     * <u>Source Object</u>: <code>TLContextualFacet</code>
+     */
+    CHILD_FACET_REMOVED(OwnershipEvent.class),
 
     /**
      * Event type sent when an action facet is added to a resource.

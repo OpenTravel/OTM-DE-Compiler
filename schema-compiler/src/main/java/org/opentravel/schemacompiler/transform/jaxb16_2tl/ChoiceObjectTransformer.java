@@ -20,7 +20,6 @@ import org.opentravel.ns.ota2.librarymodel_v01_06.Documentation;
 import org.opentravel.ns.ota2.librarymodel_v01_06.Equivalent;
 import org.opentravel.ns.ota2.librarymodel_v01_06.Extension;
 import org.opentravel.ns.ota2.librarymodel_v01_06.Facet;
-import org.opentravel.ns.ota2.librarymodel_v01_06.FacetContextual;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLDocumentation;
@@ -46,8 +45,6 @@ public class ChoiceObjectTransformer extends
 	public TLChoiceObject transform(ChoiceObject source) {
         ObjectTransformer<Facet, TLFacet, DefaultTransformerContext> facetTransformer = getTransformerFactory()
                 .getTransformer(Facet.class, TLFacet.class);
-        ObjectTransformer<FacetContextual, TLFacet, DefaultTransformerContext> facetContextualTransformer = getTransformerFactory()
-                .getTransformer(FacetContextual.class, TLFacet.class);
         ObjectTransformer<Equivalent, TLEquivalent, DefaultTransformerContext> equivTransformer = getTransformerFactory()
                 .getTransformer(Equivalent.class, TLEquivalent.class);
         TLChoiceObject choiceObject = new TLChoiceObject();
@@ -82,12 +79,6 @@ public class ChoiceObjectTransformer extends
 
         if (source.getShared() != null) {
         	choiceObject.setSharedFacet(facetTransformer.transform(source.getShared()));
-        }
-
-        if (source.getChoice() != null) {
-            for (FacetContextual sourceFacet : source.getChoice()) {
-            	choiceObject.addChoiceFacet(facetContextualTransformer.transform(sourceFacet));
-            }
         }
 
         return choiceObject;

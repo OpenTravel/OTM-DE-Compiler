@@ -30,7 +30,6 @@ import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
-import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAbstractEnumeration;
 import org.opentravel.schemacompiler.model.TLActionFacet;
@@ -713,7 +712,7 @@ public class ExampleValueGenerator {
 
         for (AbstractLibrary library : model.getLibrariesForNamespace(simpleTypeName
                 .getNamespaceURI())) {
-            for (LibraryMember member : library.getNamedMembers()) {
+            for (NamedEntity member : library.getNamedMembers()) {
                 if ((member instanceof XSDSimpleType)
                         && member.getLocalName().equals(simpleTypeName.getLocalPart())) {
                     simpleType = ((XSDSimpleType) member).getJaxbType();

@@ -21,7 +21,7 @@ import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
-import org.opentravel.schemacompiler.model.LibraryMember;
+import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 
 /**
@@ -42,8 +42,8 @@ public class BuiltInLibraryJsonCodegenTransformer extends AbstractJsonSchemaTran
         schema.setLibraryInfo( jsonUtils.getLibraryInfo( source ) );
         
         // Add entries for each non-service term declaration
-        for (LibraryMember member : source.getNamedMembers()) {
-            ObjectTransformer<LibraryMember, CodegenArtifacts, CodeGenerationTransformerContext> transformer = getTransformerFactory()
+        for (NamedEntity member : source.getNamedMembers()) {
+            ObjectTransformer<NamedEntity, CodegenArtifacts, CodeGenerationTransformerContext> transformer = getTransformerFactory()
                     .getTransformer(member, CodegenArtifacts.class);
 
             if ((transformer != null) && ((filter == null) || filter.processEntity(member))) {
