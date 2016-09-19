@@ -324,7 +324,7 @@ public class XsdCodegenUtils {
     			case DETAIL:
     			case CHOICE:
     				facetSuffix = payloadFacet.getFacetType().getIdentityName(
-    						payloadFacet.getContext(), payloadFacet.getLabel() );
+    						FacetCodegenUtils.getFacetName( payloadFacet ) );
     				break;
     			default:
     				break;
@@ -514,25 +514,13 @@ public class XsdCodegenUtils {
 
         if (facetType.isContextual() && (facet instanceof TLFacet)) {
             TLFacet tlFacet = (TLFacet) facet;
-
-            if (!isLegacyFacetNamingEnabled()) {
-                if ((facetType != TLFacetType.CUSTOM) && (facetType != TLFacetType.CHOICE)) {
-                    suffix.append("_").append(facetType.getIdentityName());
-                }
-                if ((tlFacet.getLabel() != null) && !tlFacet.getLabel().equals("")) {
-                    suffix.append("_").append(tlFacet.getLabel());
-
-                } else if ((tlFacet.getContext() != null) && !tlFacet.getContext().equals("")) {
-                    suffix.append("_").append(tlFacet.getContext());
-                }
-            } else { // legacy naming - remove when no longer required
-                if ((tlFacet.getContext() != null) && !tlFacet.getContext().equals("")) {
-                    suffix.append("_").append(tlFacet.getContext());
-                }
-                if ((tlFacet.getLabel() != null) && !tlFacet.getLabel().equals("")) {
-                    suffix.append("_").append(tlFacet.getLabel());
-                }
+            String facetName = FacetCodegenUtils.getFacetName( tlFacet );
+            
+            if ((facetType != TLFacetType.CUSTOM) && (facetType != TLFacetType.CHOICE)) {
                 suffix.append("_").append(facetType.getIdentityName());
+            }
+            if ((facetName != null) && !facetName.equals("")) {
+                suffix.append("_").append(facetName);
             }
         } else {
             suffix.append("_").append(facetType.getIdentityName());
@@ -888,17 +876,6 @@ public class XsdCodegenUtils {
 
         cal.setTimeInMillis(System.currentTimeMillis());
         return jaxbDatatypeFactory.newXMLGregorianCalendar(cal);
-    }
-
-    /**
-     * Returns true if the JVM flag is active that enables legacy naming conventions for custom and
-     * query facets. This is a temporary feature that should be added when this function is no
-     * longer required by implementation team(s).
-     * 
-     * @return boolean
-     */
-    private static boolean isLegacyFacetNamingEnabled() {
-        return System.getProperties().containsKey("ota2.legacyFacetNaming");
     }
 
     /**

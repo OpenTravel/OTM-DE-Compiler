@@ -52,7 +52,11 @@ public class SchemaCompilerTestUtils {
      * @return String
      */
     public static String getBaseProjectLocation() {
-        return System.getProperty("user.dir") + "/src/test/resources/projects";
+    	if (OTM16Upgrade.otm16Enabled) {
+            return System.getProperty("user.dir") + "/src/test/resources/projects_1_6";
+    	} else {
+            return System.getProperty("user.dir") + "/src/test/resources/projects";
+    	}
     }
 
     /**
@@ -62,9 +66,8 @@ public class SchemaCompilerTestUtils {
      * @return String
      */
     public static String getTestProjectLocation() {
-        File projectTestFolder = new File(System.getProperty("user.dir")
-                + "/target/codegen-output/projects");
-
+        File projectTestFolder = new File(System.getProperty("user.dir") + "/target/codegen-output/projects");
+        
         if (!projectTestFolder.exists()) {
             projectTestFolder.mkdirs();
         }

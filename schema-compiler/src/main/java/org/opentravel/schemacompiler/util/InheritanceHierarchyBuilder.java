@@ -145,9 +145,9 @@ public class InheritanceHierarchyBuilder {
                     .getOwningEntity());
 
             while (baseFacetOwner != null) {
+    			String facetName = FacetCodegenUtils.getFacetName(memberFacet);
                 TLFacet baseFacet = FacetCodegenUtils.getFacetOfType(baseFacetOwner,
-                        memberFacet.getFacetType(), memberFacet.getContext(),
-                        memberFacet.getLabel());
+                        memberFacet.getFacetType(), facetName);
 
                 if (baseFacet != null) {
                     if (memberAlias != null) {

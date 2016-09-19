@@ -15,12 +15,20 @@
  */
 package org.opentravel.schemacompiler.version.handlers;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLExtensionOwner;
+import org.opentravel.schemacompiler.model.TLFacet;
+import org.opentravel.schemacompiler.model.TLFacetType;
+import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLVersionedExtensionOwner;
+import org.opentravel.schemacompiler.util.ModelElementCloner;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 
 /**
@@ -111,5 +119,91 @@ public abstract class TLExtensionOwnerVersionHandler<V extends TLVersionedExtens
     		majorVersion.setExtension( null );
     	}
 	}
-
+	
+	/**
+	 * Clones each of the source contextual facets (including all nested child facets) that are local to
+	 * their owner's library.
+	 * 
+	 * @param sourceFacets  the list of source contextual facets to clone
+	 * @param targetLibrary  the target library where each of the cloned facets will be assigned
+	 * @param cloner  the cloner to use when replicating the source facets
+	 * @return List<TLContextualFacet>
+	 */
+	protected List<TLContextualFacet> cloneLocalContextualFacets(List<TLContextualFacet> sourceFacets, TLLibrary targetLibrary, ModelElementCloner cloner) {
+		List<TLContextualFacet> targetFacets = new ArrayList<>();
+		
+		for (TLContextualFacet sourceFacet : sourceFacets) {
+			TLContextualFacet targetFacet = cloneLocalContextualFacet( sourceFacet, targetLibrary, cloner );
+			
+			if (targetFacet != null) {
+				targetFacets.add( targetFacet );
+			}
+		}
+		return targetFacets;
+	}
+	
+	/**
+	 * Clones the given source facet and all of its children as long as they are local to the original
+	 * owner's library.  If the given source facet is not local, this method will return null.
+	 * 
+	 * @param sourceFacet  the source facet to be cloned
+	 * @param targetLibrary  the target library where the cloned facet will be assigned
+	 * @param cloner  the cloner to use when replicating the source facets
+	 * @return TLContextualFacet
+	 */
+	private TLContextualFacet cloneLocalContextualFacet(TLContextualFacet sourceFacet, TLLibrary targetLibrary, ModelElementCloner cloner) {
+		TLContextualFacet targetFacet = null;
+		
+		if (sourceFacet.isLocalFacet()) {
+			targetFacet = cloner.clone( sourceFacet );
+			targetLibrary.addNamedMember( targetFacet );
+			
+			for (TLContextualFacet sourceChildFacet : sourceFacet.getChildFacets()) {
+				TLContextualFacet targetChildFacet = cloneLocalContextualFacet( sourceChildFacet, targetLibrary, cloner );
+				
+				if (targetChildFacet != null) {
+					targetFacet.addChildFacet( targetChildFacet );
+				}
+			}
+		}
+		return targetFacet;
+	}
+	
+	/**
+	 * Recursively performs a rollup of all nested contextual facets that have not already been
+	 * processed.
+	 * 
+	 * @param sourceOwningFacet  the source contextual facet whose children are to be rolled-up
+	 * @param targetOwningFacet  the target contextual facet that will receive the rolled-up children
+	 * @param mergeUtils  the version handler merge utilities instance
+	 * @param sourceFacets  the identity facet map for all source facets
+	 * @param targetFacets  the identity facet map for all target facets
+	 * @param visitedSourceFacets  the set of source owning facets that have already been visited (in case of circular references)
+	 */
+	protected void rollupNestedLocalContextualFacets(TLContextualFacet sourceOwningFacet, TLContextualFacet targetOwningFacet,
+			VersionHandlerMergeUtils mergeUtils, Map<String, TLFacet> sourceFacets, Map<String, TLFacet> targetFacets,
+			Set<TLContextualFacet> visitedSourceFacets) {
+		if (!visitedSourceFacets.contains( sourceOwningFacet )) {
+			visitedSourceFacets.add( sourceOwningFacet );
+			
+	        for (TLContextualFacet sourceFacet : sourceOwningFacet.getChildFacets()) {
+	            TLContextualFacet targetFacet = targetOwningFacet.getChildFacet( sourceFacet.getName() );
+	            
+	            if (sourceFacet.isLocalFacet()) {
+	                if (targetFacet == null) {
+	                    targetFacet = new TLContextualFacet();
+	                    targetFacet.setName( sourceFacet.getName() );
+	                    targetFacet.setFacetType( TLFacetType.CUSTOM );
+	                    targetFacet.setOwningLibrary( targetOwningFacet.getOwningLibrary() );
+	                    targetOwningFacet.addChildFacet( targetFacet );
+	                    rollupNestedLocalContextualFacets( sourceFacet, targetFacet, mergeUtils,
+	                    		sourceFacets, targetFacets, visitedSourceFacets );
+	                }
+	                mergeUtils.addToIdentityFacetMap( targetFacet, targetFacets );
+	                mergeUtils.addToIdentityFacetMap( sourceFacet, sourceFacets );
+	            }
+	        }
+		}
+	}
+	
 }

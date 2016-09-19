@@ -17,6 +17,7 @@ package org.opentravel.schemacompiler.version.handlers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -24,10 +25,10 @@ import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLEquivalent;
 import org.opentravel.schemacompiler.model.TLFacet;
+import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLPatchableFacet;
 import org.opentravel.schemacompiler.util.ModelElementCloner;
-import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 
 /**
@@ -61,19 +62,38 @@ public class TLBusinessObjectVersionHandler extends TLExtensionOwnerVersionHandl
 	 * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#rollupMinorVersion(org.opentravel.schemacompiler.version.Versioned, org.opentravel.schemacompiler.model.TLLibrary, org.opentravel.schemacompiler.version.handlers.RollupReferenceHandler)
 	 */
 	@Override
-	public void rollupMinorVersion(TLBusinessObject minorVersion, TLLibrary majorVersionLibrary,
+	public TLBusinessObject rollupMinorVersion(TLBusinessObject minorVersion, TLLibrary majorVersionLibrary,
 			RollupReferenceHandler referenceHandler) throws VersionSchemeException {
 		TLBusinessObject majorVersion = retrieveExistingVersion( minorVersion, majorVersionLibrary );
 		
         if (majorVersion == null) {
-        	majorVersion = getCloner( minorVersion ).clone( minorVersion );
+        	ModelElementCloner cloner = getCloner( minorVersion );
+        	List<TLContextualFacet> targetCustomFacets = cloneLocalContextualFacets(
+        			minorVersion.getCustomFacets(), majorVersionLibrary, cloner );
+        	List<TLContextualFacet> targetQueryFacets = cloneLocalContextualFacets(
+        			minorVersion.getQueryFacets(), majorVersionLibrary, cloner );
+        	List<TLContextualFacet> targetUpdateFacets = cloneLocalContextualFacets(
+        			minorVersion.getUpdateFacets(), majorVersionLibrary, cloner );
+        	
+        	majorVersion = cloner.clone( minorVersion );
             assignBaseExtension( majorVersion, minorVersion );
+            
+            for (TLContextualFacet facet : targetCustomFacets) {
+            	majorVersion.addCustomFacet( facet );
+            }
+            for (TLContextualFacet facet : targetQueryFacets) {
+            	majorVersion.addQueryFacet( facet );
+            }
+            for (TLContextualFacet facet : targetUpdateFacets) {
+            	majorVersion.addUpdateFacet( facet );
+            }
             majorVersionLibrary.addNamedMember( majorVersion );
             referenceHandler.captureRollupReferences( majorVersion );
         	
         } else if (majorVersion instanceof TLBusinessObject) {
             rollupMinorVersion( minorVersion, majorVersion, referenceHandler );
         }
+        return majorVersion;
 	}
 	
 	/**
@@ -91,26 +111,54 @@ public class TLBusinessObjectVersionHandler extends TLExtensionOwnerVersionHandl
         mergeUtils.addToIdentityFacetMap( minorVersion.getSummaryFacet(), sourceFacets );
         mergeUtils.addToIdentityFacetMap( minorVersion.getDetailFacet(), sourceFacets );
         
-        if (!OTM16Upgrade.otm16Enabled) {
-            for (TLContextualFacet sourceFacet : minorVersion.getCustomFacets()) {
-                TLContextualFacet targetFacet = majorVersionTarget.getCustomFacet( sourceFacet.getName() );
-
+        for (TLContextualFacet sourceFacet : minorVersion.getCustomFacets()) {
+            TLContextualFacet targetFacet = majorVersionTarget.getCustomFacet( sourceFacet.getName() );
+            
+            if (sourceFacet.isLocalFacet()) {
                 if (targetFacet == null) {
                     targetFacet = new TLContextualFacet();
                     targetFacet.setName( sourceFacet.getName() );
+                    targetFacet.setFacetType( TLFacetType.CUSTOM );
+                    majorVersionTarget.getOwningLibrary().addNamedMember( targetFacet );
                     majorVersionTarget.addCustomFacet( targetFacet );
+                    rollupNestedLocalContextualFacets( sourceFacet, targetFacet, mergeUtils,
+                    		sourceFacets, targetFacets, new HashSet<TLContextualFacet>() );
                 }
                 mergeUtils.addToIdentityFacetMap( targetFacet, targetFacets );
                 mergeUtils.addToIdentityFacetMap( sourceFacet, sourceFacets );
             }
+        }
 
-            for (TLContextualFacet sourceFacet : minorVersion.getQueryFacets()) {
-            	TLContextualFacet targetFacet = majorVersionTarget.getQueryFacet( sourceFacet.getName() );
+        for (TLContextualFacet sourceFacet : minorVersion.getQueryFacets()) {
+        	TLContextualFacet targetFacet = majorVersionTarget.getQueryFacet( sourceFacet.getName() );
 
+            if (sourceFacet.isLocalFacet()) {
                 if (targetFacet == null) {
                     targetFacet = new TLContextualFacet();
                     targetFacet.setName( sourceFacet.getName() );
+                    targetFacet.setFacetType( TLFacetType.QUERY );
+                    majorVersionTarget.getOwningLibrary().addNamedMember( targetFacet );
                     majorVersionTarget.addQueryFacet( targetFacet );
+                    rollupNestedLocalContextualFacets( sourceFacet, targetFacet, mergeUtils,
+                    		sourceFacets, targetFacets, new HashSet<TLContextualFacet>() );
+                }
+                mergeUtils.addToIdentityFacetMap( targetFacet, targetFacets );
+                mergeUtils.addToIdentityFacetMap( sourceFacet, sourceFacets );
+            }
+        }
+
+        for (TLContextualFacet sourceFacet : minorVersion.getUpdateFacets()) {
+        	TLContextualFacet targetFacet = majorVersionTarget.getUpdateFacet( sourceFacet.getName() );
+
+            if (sourceFacet.isLocalFacet()) {
+                if (targetFacet == null) {
+                    targetFacet = new TLContextualFacet();
+                    targetFacet.setName( sourceFacet.getName() );
+                    targetFacet.setFacetType( TLFacetType.UPDATE );
+                    majorVersionTarget.getOwningLibrary().addNamedMember( targetFacet );
+                    majorVersionTarget.addUpdateFacet( targetFacet );
+                    rollupNestedLocalContextualFacets( sourceFacet, targetFacet, mergeUtils,
+                    		sourceFacets, targetFacets, new HashSet<TLContextualFacet>() );
                 }
                 mergeUtils.addToIdentityFacetMap( targetFacet, targetFacets );
                 mergeUtils.addToIdentityFacetMap( sourceFacet, sourceFacets );
@@ -131,6 +179,9 @@ public class TLBusinessObjectVersionHandler extends TLExtensionOwnerVersionHandl
         }
         for (TLFacet queryFacet : entity.getQueryFacets()) {
         	facetList.add(queryFacet);
+        }
+        for (TLFacet updateFacet : entity.getUpdateFacets()) {
+        	facetList.add(updateFacet);
         }
         facetList.add(entity.getSummaryFacet());
         facetList.add(entity.getDetailFacet());

@@ -22,6 +22,7 @@ import java.util.List;
 import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.model.TLAlias.AliasListManager;
 import org.opentravel.schemacompiler.model.TLContextualFacet.ContextualFacetListManager;
+import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.version.Versioned;
 
 /**
@@ -177,6 +178,14 @@ public class TLChoiceObject extends TLComplexTypeBase implements TLFacetOwner, T
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.model.TLAliasOwner#getAliasListManager()
+	 */
+	@Override
+	public ChildEntityListManager<TLAlias, ?> getAliasListManager() {
+		return aliasManager;
+	}
+
+    /**
 	 * @see org.opentravel.schemacompiler.model.TLFacetOwner#getAllFacets()
 	 */
 	@Override
@@ -227,6 +236,19 @@ public class TLChoiceObject extends TLComplexTypeBase implements TLFacetOwner, T
             this.sharedFacet = sharedFacet;
         }
     }
+
+    /**
+	 * @see org.opentravel.schemacompiler.model.LibraryMemberImpl#setOwningLibrary(org.opentravel.schemacompiler.model.AbstractLibrary)
+	 */
+	@Override
+	public void setOwningLibrary(AbstractLibrary owningLibrary) {
+    	if (!OTM16Upgrade.otm16Enabled) {
+    		for (TLContextualFacet facet : getChoiceFacets()) {
+    			owningLibrary.addNamedMember( facet );
+    		}
+    	}
+		super.setOwningLibrary(owningLibrary);
+	}
 
     /**
      * Returns the list of choice facets for this choice object.

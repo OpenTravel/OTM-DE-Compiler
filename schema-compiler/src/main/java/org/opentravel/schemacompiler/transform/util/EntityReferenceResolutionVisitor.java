@@ -47,7 +47,6 @@ import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.model.XSDLibrary;
 import org.opentravel.schemacompiler.transform.SymbolResolver;
 import org.opentravel.schemacompiler.validate.impl.TLModelSymbolResolver;
-import org.opentravel.schemacompiler.visitor.ModelElementVisitor;
 import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
 
 /**
@@ -56,8 +55,8 @@ import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
  * 
  * @author S. Livezey
  */
-public class EntityReferenceResolutionVisitor extends ModelElementVisitorAdapter {
-
+class EntityReferenceResolutionVisitor extends ModelElementVisitorAdapter {
+	
     private SymbolResolver symbolResolver;
     private Map<String,List<TLMemberField<?>>> inheritedFieldCache = new HashMap<>();
     
@@ -68,39 +67,7 @@ public class EntityReferenceResolutionVisitor extends ModelElementVisitorAdapter
      *            the model from which all entity names will be obtained
      */
     public EntityReferenceResolutionVisitor(TLModel model) {
-        this(new TLModelSymbolResolver(model));
-    }
-    
-    /**
-     * Constructor that assigns the model being navigated.
-     * 
-     * @param symbolResolver
-     *            the symbol resolver to use for all named entity lookups
-     */
-    public EntityReferenceResolutionVisitor(SymbolResolver symbolResolver) {
-        this.symbolResolver = symbolResolver;
-    }
-    
-    /**
-     * Visits and resolves the parameters of each library resource.  This covers
-     * an edge case that causes some parameters not to be resolved on the initial
-     * visit since some of the field references may not yet have been resolved on
-     * the first pass.
-     * 
-     * @param model  the model for which to resolve parameter field references
-     */
-    public static void resolveParameters(TLModel model) {
-    	ModelElementVisitor visitor = new EntityReferenceResolutionVisitor(model);
-    	
-        for (TLLibrary library : model.getUserDefinedLibraries()) {
-        	for (TLResource resource : library.getResourceTypes()) {
-        		for (TLParamGroup paramGroup : resource.getParamGroups()) {
-        			for (TLParameter param : paramGroup.getParameters()) {
-                		visitor.visitParameter(param);
-        			}
-        		}
-        	}
-        }
+        this.symbolResolver = new TLModelSymbolResolver(model);
     }
     
     /**
@@ -112,6 +79,14 @@ public class EntityReferenceResolutionVisitor extends ModelElementVisitorAdapter
     public void assignContextLibrary(AbstractLibrary library) {
         symbolResolver.setPrefixResolver(new LibraryPrefixResolver(library));
         symbolResolver.setAnonymousEntityFilter(new ChameleonFilter(library));
+    }
+    
+    /**
+     * Resets this visitor for another navigation through the model without the
+     * performance impact of rebuilding the symbol table from scratch.
+     */
+    public void reset() {
+    	inheritedFieldCache.clear();
     }
 
     /**

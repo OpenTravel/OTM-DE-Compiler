@@ -149,6 +149,19 @@ abstract class ChildEntityListManager<C, O> {
         }
         return child;
     }
+    
+    /**
+     * Called when the given child entity (assumed to be managed by this list)
+     * has been renamed.
+     * 
+     * @param child  the child endity that was renamed
+     * @param originalChildName  the original name of the child entity
+     */
+    public void notifyChildRenamed(C child, String originalChildName) {
+    	for (DerivedChildEntityListManager<C, ?> derivedListManager : derivedListManagers) {
+    		derivedListManager.originalEntityNameUpdated(child, originalChildName);
+    	}
+    }
 
     /**
      * Adds a child to the current list.

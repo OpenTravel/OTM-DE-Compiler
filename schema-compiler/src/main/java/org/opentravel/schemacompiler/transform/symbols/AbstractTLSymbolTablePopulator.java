@@ -15,7 +15,6 @@
  */
 package org.opentravel.schemacompiler.transform.symbols;
 
-import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAbstractFacet;
@@ -24,9 +23,9 @@ import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAliasOwner;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLFacet;
-import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLResource;
@@ -132,9 +131,8 @@ public abstract class AbstractTLSymbolTablePopulator<S> implements SymbolTablePo
                 for (TLFacet queryFacet : owner.getQueryFacets()) {
                     addFacetEntries(queryFacet, symbols);
                 }
-                for (TLAlias alias : owner.getAliases()) {
-                    symbols.addEntity(namespace, alias.getLocalName(), alias);
-                }
+                addAliasEntries(owner, symbols);
+                
             } else if (libraryMember instanceof TLCoreObject) {
                 TLCoreObject owner = (TLCoreObject) libraryMember;
 
@@ -153,19 +151,10 @@ public abstract class AbstractTLSymbolTablePopulator<S> implements SymbolTablePo
                 if (owner.getDetailListFacet() != null) {
                     addFacetEntries(owner.getDetailListFacet(), symbols);
                 }
-                for (TLAlias alias : owner.getAliases()) {
-                    symbols.addEntity(namespace, alias.getLocalName(), alias);
-                }
-                symbols.addEntity(namespace, owner.getRoleEnumeration().getLocalName(),
+                addAliasEntries(owner, symbols);
+                symbols.addEntity(namespace,owner.getRoleEnumeration().getLocalName(),
                         owner.getRoleEnumeration());
 
-            } else if (libraryMember instanceof TLResource) {
-            	TLResource owner = (TLResource) libraryMember;
-            	
-                for (TLActionFacet actionFacet : owner.getActionFacets()) {
-                    symbols.addEntity(namespace, actionFacet.getLocalName(), actionFacet);
-                }
-                
             } else if (libraryMember instanceof TLChoiceObject) {
             	TLChoiceObject owner = (TLChoiceObject) libraryMember;
 
@@ -175,8 +164,16 @@ public abstract class AbstractTLSymbolTablePopulator<S> implements SymbolTablePo
                 for (TLFacet choiceFacet : owner.getChoiceFacets()) {
                     addFacetEntries(choiceFacet, symbols);
                 }
-                for (TLAlias alias : owner.getAliases()) {
-                    symbols.addEntity(namespace, alias.getLocalName(), alias);
+                addAliasEntries(owner, symbols);
+                
+            } else if (libraryMember instanceof TLContextualFacet) {
+            	addAliasEntries((TLContextualFacet) libraryMember, symbols);
+            	
+            } else if (libraryMember instanceof TLResource) {
+            	TLResource owner = (TLResource) libraryMember;
+            	
+                for (TLActionFacet actionFacet : owner.getActionFacets()) {
+                    symbols.addEntity(namespace, actionFacet.getLocalName(), actionFacet);
                 }
                 
             } else if (libraryMember instanceof TLService) {
@@ -212,79 +209,31 @@ public abstract class AbstractTLSymbolTablePopulator<S> implements SymbolTablePo
     }
 
     /**
-     * Adds the required symbol table entries for the given facet.
+     * Adds the given facet entries to the symbol table.
      * 
-     * <p>
-     * NOTE: For contextual facets and facet aliases, we also need to add a second name to the
-     * symbol table that will represent the "old style" of local names. This will prevent us from
-     * dropping references in existing OTM files that were authored before the change in naming
-     * conventions was implemented.
-     * 
-     * @param facet
-     *            the facet instance to process
-     * @param symbols
-     *            the symbol table being constructed
+     * @param entity  the alias owner entity to process
+     * @param symbols  the symbol table being constructed
      */
     private static void addFacetEntries(TLAbstractFacet facet, SymbolTable symbols) {
-        String namespace = facet.getNamespace();
-        TLFacet contextualFacet = null;
-
-        if ((facet instanceof TLFacet) && ((TLFacet) facet).getFacetType().isContextual()) {
-            contextualFacet = (TLFacet) facet;
-        }
-
-        if (contextualFacet != null) {
-            symbols.addEntity(namespace, getContextualFacetLegacyName(contextualFacet, null), facet);
-        }
-        symbols.addEntity(namespace, facet.getLocalName(), facet);
-
+        symbols.addEntity(facet.getNamespace(), facet.getLocalName(), facet);
+        
         if (facet instanceof TLAliasOwner) {
-            for (TLAlias alias : ((TLAliasOwner) facet).getAliases()) {
-                if (contextualFacet != null) {
-                    symbols.addEntity(namespace,
-                            getContextualFacetLegacyName(contextualFacet, alias), facet);
-                }
-                symbols.addEntity(namespace, alias.getLocalName(), alias);
-            }
+            addAliasEntries((TLAliasOwner) facet, symbols);
         }
-
     }
-
+    
     /**
-     * Returns the legacy "old style" name for the given contextual facet (or facet alias).
+     * Adds the aliases for the given entity to the symbol table.
      * 
-     * @param contextualFacet
-     *            the contextual facet for which to return an "old style" name
-     * @param facetAlias
-     *            the alias of the given contextual facet (may be null)
-     * @return String
+     * @param entity  the alias owner entity to process
+     * @param symbols  the symbol table being constructed
      */
-    private static String getContextualFacetLegacyName(TLFacet contextualFacet, TLAlias facetAlias) {
-        TLFacetOwner facetOwner = contextualFacet.getOwningEntity();
-        StringBuilder facetName = new StringBuilder();
-
-        if (facetAlias == null) {
-            facetName.append(facetOwner.getLocalName()).append("_");
-
-        } else {
-            TLAlias ownerAlias = AliasCodegenUtils.getOwnerAlias(facetAlias);
-
-            if (ownerAlias != null) {
-                facetName.append(ownerAlias.getLocalName()).append("_");
-            } else {
-                facetName.append(facetAlias.getName()).append("_"); // invalid name, but this should
-                                                                    // never happen
-            }
+    private static void addAliasEntries(TLAliasOwner entity, SymbolTable symbols) {
+        String namespace = entity.getNamespace();
+        
+        for (TLAlias alias : entity.getAliases()) {
+            symbols.addEntity(namespace, alias.getLocalName(), alias);
         }
-        facetName.append(contextualFacet.getFacetType().getIdentityName());
-
-        if (contextualFacet.getContext() != null) {
-            facetName.append("_").append(contextualFacet.getContext());
-        }
-        if (contextualFacet.getLabel() != null) {
-            facetName.append("_").append(contextualFacet.getLabel());
-        }
-        return facetName.toString();
     }
 
 }

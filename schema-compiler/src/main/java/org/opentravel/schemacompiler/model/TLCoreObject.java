@@ -187,6 +187,14 @@ public class TLCoreObject extends TLComplexTypeBase implements TLFacetOwner, TLA
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.model.TLAliasOwner#getAliasListManager()
+	 */
+	@Override
+	public ChildEntityListManager<TLAlias, ?> getAliasListManager() {
+		return aliasManager;
+	}
+
+    /**
      * Returns the role enumeration entity associated with this core object instance.
      * 
      * @return TLRoleEnumeration

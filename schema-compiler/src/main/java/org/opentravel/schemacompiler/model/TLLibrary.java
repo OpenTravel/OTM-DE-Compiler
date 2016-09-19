@@ -735,6 +735,24 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
 	}
 
 	/**
+	 * @see org.opentravel.schemacompiler.model.TLFolderOwner#getFolder(java.lang.String)
+	 */
+	@Override
+	public TLFolder getFolder(String folderName) {
+		TLFolder folder = null;
+		
+		if (folderName != null) {
+			for (TLFolder f : rootFolder.getFolders()) {
+				if (folderName.equals( f.getName() )) {
+					folder = f;
+					break;
+				}
+			}
+		}
+		return folder;
+	}
+
+	/**
 	 * @see org.opentravel.schemacompiler.model.TLFolderOwner#addFolder(org.opentravel.schemacompiler.model.TLFolder)
 	 */
 	@Override
@@ -758,8 +776,15 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
 	public List<LibraryMember> getUnfolderedMembers() {
 		List<LibraryMember> unfolderedMembers = new ArrayList<>( getNamedMembers() );
 		
+		// Items that can be added to folders do not include services or contextual facets
+		// whose owners reside within the same library
 		if (service != null) {
 			unfolderedMembers.remove( service );
+		}
+		for (TLContextualFacet facet : getContextualFacetTypes()) {
+			if (facet.isLocalFacet()) {
+				unfolderedMembers.remove( facet );
+			}
 		}
 		purgeFolderedMembers( rootFolder, unfolderedMembers );
 		return unfolderedMembers;

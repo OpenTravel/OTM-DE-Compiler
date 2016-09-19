@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_06"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_06 ../../../main/resources/ota2-context/schemas/OTA2_LibraryModel_v1.6.0.xsd">
+    
+    <VersionScheme>OTA2</VersionScheme>
+    <Status>Draft</Status>
+    <Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01_02_01</Namespace>
+    <Prefix>lib-010201</Prefix>
+    <Name>test_library</Name>
+    <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
+    <Import namespace="http://www.opentravel.org/OTM/Common/v0" prefix="ota"/>
+    <Import namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01" prefix="lib-01"/>
+    <Import namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01_02" prefix="lib-0102"/>
+    <Comments>Test Library</Comments>
+    
+    <ExtensionPointFacet>
+        <Attribute name="extCoreAttribute121" type="lib-0101:LookupSimple"/>
+        <Extension extends="lib-0102:LookupCore_Summary"/>
+    </ExtensionPointFacet>
+    
+    <ExtensionPointFacet>
+        <Attribute name="extChoiceAttribute121" type="lib-01:LookupSimple"/>
+        <Extension extends="lib-0102:LookupChoice_Shared"/>
+    </ExtensionPointFacet>
+    
+    <ExtensionPointFacet>
+        <Attribute name="extBOAttribute121" type="lib-01:LookupSimple"/>
+        <Extension extends="lib-0102:LookupBO_Summary"/>
+    </ExtensionPointFacet>
+    
+    <ExtensionPointFacet>
+        <Attribute name="extResourceAttribute121" type="lib-01:LookupSimple"/>
+        <Extension extends="lib-0102:LookupResource_LookupFacetShared"/>
+    </ExtensionPointFacet>
+    
+    <ExtensionPointFacet>
+        <Attribute name="extOperationAttribute121" type="xsd:string"/>
+        <Extension extends="lib-0102:VersionedService_LookupOperation_RQ"/>
+    </ExtensionPointFacet>
+    
+</Library>

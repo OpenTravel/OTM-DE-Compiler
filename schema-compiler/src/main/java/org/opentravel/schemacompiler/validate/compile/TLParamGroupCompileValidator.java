@@ -94,8 +94,8 @@ public class TLParamGroupCompileValidator extends TLParamGroupBaseValidator{
 		boolean isValid = false;
 		
 		while (!isValid && (bo != null)) {
-			TLFacet boFacet = FacetCodegenUtils.getFacetOfType( bo, facetRef.getFacetType(),
-					facetRef.getContext(), facetRef.getLabel() );
+			String facetName = FacetCodegenUtils.getFacetName(facetRef);
+			TLFacet boFacet = FacetCodegenUtils.getFacetOfType( bo, facetRef.getFacetType(), facetName );
 			
 			if (facetRef == boFacet) {
 				isValid = true;

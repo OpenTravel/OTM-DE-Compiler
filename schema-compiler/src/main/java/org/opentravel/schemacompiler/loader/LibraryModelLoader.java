@@ -50,7 +50,7 @@ import org.opentravel.schemacompiler.security.LibraryCrcCalculator;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.TransformerFactory;
 import org.opentravel.schemacompiler.transform.symbols.DefaultTransformerContext;
-import org.opentravel.schemacompiler.transform.util.EntityReferenceResolutionVisitor;
+import org.opentravel.schemacompiler.transform.util.ModelReferenceResolver;
 import org.opentravel.schemacompiler.util.ExceptionUtils;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
@@ -61,7 +61,6 @@ import org.opentravel.schemacompiler.validate.compile.TLModelCompileValidator;
 import org.opentravel.schemacompiler.version.VersionScheme;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 import org.opentravel.schemacompiler.version.VersionSchemeFactory;
-import org.opentravel.schemacompiler.visitor.ModelNavigator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3._2001.xmlschema.Schema;
@@ -234,7 +233,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
             // Examine all entity references within the model and attempt to resolve them
             // before validating the model
             if (resolveModelReferences) {
-                resolveModelEntityReferences();
+            	ModelReferenceResolver.resolveReferences(libraryModel);
             }
             validateModel(jaxbArtifacts);
 
@@ -304,7 +303,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
             // Examine all entity references within the model and attempt to resolve them
             // before validating the model
             if (resolveModelReferences) {
-                resolveModelEntityReferences();
+            	ModelReferenceResolver.resolveReferences(libraryModel);
             }
             validateModel(jaxbArtifacts);
 
@@ -346,25 +345,6 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
         findings.addAll(loaderFindings);
 
         return findings;
-    }
-
-    /**
-     * Scans the contents of the current model and automatically assigns any entity references that
-     * were not explicitly assigned during the loading process. Typically, this call is invoked
-     * automatically, but may be manually called by clients if the 'resolveModelReferences' flag is
-     * set to false.
-     */
-    public void resolveModelEntityReferences() {
-        boolean listenerFlag = libraryModel.isListenersEnabled();
-        try {
-            libraryModel.setListenersEnabled(false);
-            ModelNavigator.navigate(libraryModel,
-                    new EntityReferenceResolutionVisitor(libraryModel));
-            EntityReferenceResolutionVisitor.resolveParameters(libraryModel);
-            
-        } finally {
-            libraryModel.setListenersEnabled(listenerFlag);
-        }
     }
 
     /**
@@ -797,8 +777,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
 
                 // If a CRC was specified in the library, we need to verify it before incorporating
                 // the new library into the model
-                Long libraryCrcValue = LibraryCrcCalculator.getLibraryCrcValue(libraryInfo
-                        .getJaxbArtifact());
+                Long libraryCrcValue = LibraryCrcCalculator.getLibraryCrcValue(libraryInfo.getJaxbArtifact());
                 boolean isValidCrc = true;
 
                 if ((libraryCrcValue != null) || LibraryCrcCalculator.isCrcRequired(modelLibrary)) {

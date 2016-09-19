@@ -62,7 +62,15 @@ public abstract class DerivedChildEntityListManager<E, D> {
      * @return String
      */
     protected abstract String getDerivedEntityName(String originalEntityName);
-
+    
+    /**
+     * Updates the name of the derived entity.
+     * 
+     * @param derivedEntity  the derived entity whose name is to be updated
+     * @param derivedEntityName  the new name for the derived entity
+     */
+    protected abstract void setDerivedEntityName(D derivedEntity, String derivedEntityName);
+    
     /**
      * Constructs a new derived entity instance using the original entity as a template.
      * 
@@ -71,6 +79,26 @@ public abstract class DerivedChildEntityListManager<E, D> {
      * @return D
      */
     protected abstract D createDerivedEntity(E originalEntity);
+    
+    /**
+     * When the name of a child entity is updated that is under the control of this manager,
+     * this method will ensure that all derived entities are kept in-sync with the original
+     * entity's name.
+     * 
+     * @param originalEntity  the original entity whose name was updated
+     * @param oldOriginalEntityName  the original name of the entity before the update
+     */
+    public void originalEntityNameUpdated(E originalEntity, String oldOriginalEntityName) {
+    	String oldDerivedEntityName = getDerivedEntityName(oldOriginalEntityName);
+    	D derivedEntity = derivedEntityManager.getChild(oldDerivedEntityName);
+    	
+    	if (derivedEntity != null) {
+    		String originalEntityName = getOriginalEntityName(originalEntity);
+    		String newDerivedEntityName = getDerivedEntityName(originalEntityName);
+    		
+    		setDerivedEntityName(derivedEntity, newDerivedEntityName);
+    	}
+    }
 
     /**
      * Adds a derived child entity that corresponds to the original one provided.

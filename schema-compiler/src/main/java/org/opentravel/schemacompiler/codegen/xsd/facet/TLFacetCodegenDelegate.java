@@ -33,6 +33,7 @@ import org.opentravel.schemacompiler.model.TLAbstractFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
@@ -650,8 +651,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
 
             while ((inheritedFacet == null) && (extendedOwner != null)) {
                 TLFacet candidateFacet = FacetCodegenUtils.getFacetOfType(extendedOwner,
-                        sourceFacet.getFacetType(), sourceFacet.getContext(),
-                        sourceFacet.getLabel());
+                        sourceFacet.getFacetType(), FacetCodegenUtils.getFacetName( sourceFacet ) );
 
                 if (firstCandidate == null) {
                     if (candidateFacet == null) {
@@ -661,10 +661,16 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
                     	// of the substitution group may need to be presumed to exist if it is inherited
                     	// from an extended facet owner. In these cases, we will create a "ghost facet"
                     	// to represent the missing base facet during code generation.
-                        firstCandidate = new TLFacet();
+                    	if (sourceFacet instanceof TLContextualFacet) {
+                    		TLContextualFacet cFacet = new TLContextualFacet();
+                    		
+                    		cFacet.setName( ((TLContextualFacet) sourceFacet).getName() );
+                    		cFacet.setOwningLibrary( sourceFacet.getOwningLibrary() );
+                    		firstCandidate = cFacet;
+                    	} else {
+                            firstCandidate = new TLFacet();
+                    	}
                         firstCandidate.setFacetType(sourceFacet.getFacetType());
-                        firstCandidate.setContext(sourceFacet.getContext());
-                        firstCandidate.setLabel(sourceFacet.getLabel());
                         firstCandidate.setOwningEntity(extendedOwner);
 
                     } else {

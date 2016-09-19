@@ -151,6 +151,24 @@ public class TLFolder extends TLModelElement implements TLFolderOwner {
 	}
 	
 	/**
+	 * @see org.opentravel.schemacompiler.model.TLFolderOwner#getFolder(java.lang.String)
+	 */
+	@Override
+	public TLFolder getFolder(String folderName) {
+		TLFolder subFolder = null;
+		
+		if (folderName != null) {
+			for (TLFolder f : subFolders) {
+				if (folderName.equals( f.getName() )) {
+					subFolder = f;
+					break;
+				}
+			}
+		}
+		return subFolder;
+	}
+
+	/**
 	 * @see org.opentravel.schemacompiler.model.TLFolderOwner#addFolder(org.opentravel.schemacompiler.model.TLFolder)
 	 */
 	@Override
@@ -203,6 +221,26 @@ public class TLFolder extends TLModelElement implements TLFolderOwner {
 	}
 	
 	/**
+	 * Returns the entity from this folder with the given local name.
+	 * 
+	 * @param localName  the local name of the entity to return
+	 * @return LibraryMember
+	 */
+	public LibraryMember getEntity(String localName) {
+		LibraryMember entity = null;
+		
+		if (localName != null) {
+			for (LibraryMember m : entities) {
+				if (localName.equals(m.getLocalName())) {
+					entity = m;
+					break;
+				}
+			}
+		}
+		return entity;
+	}
+	
+	/**
 	 * Adds the given entity to the list for this folder.
 	 * 
 	 * @param entity  the library entity to add
@@ -216,6 +254,10 @@ public class TLFolder extends TLModelElement implements TLFolderOwner {
 		}
 		if (entity instanceof TLService) {
 			throw new IllegalArgumentException("Services cannot be added to a library's folder structure.");
+		}
+		if ((entity instanceof TLContextualFacet) && ((TLContextualFacet) entity).isLocalFacet()) {
+			throw new IllegalArgumentException(
+					"Only non-local contextual facets can be added to a library's folder structure.");
 		}
 		if (entity.getOwningLibrary() != this.owningLibrary) {
 			throw new IllegalArgumentException(

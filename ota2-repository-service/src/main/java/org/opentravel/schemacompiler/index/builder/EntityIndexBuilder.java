@@ -41,6 +41,7 @@ import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLDocumentationItem;
@@ -554,8 +555,18 @@ public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> i
 		@Override
 		public boolean visitFacet(TLFacet facet) {
 			addReferenceIdentity( facet );
-			addEntityReference( facet.getFacetType().getIdentityName(
-					facet.getContext(), facet.getLabel() ) );
+			addEntityReference( facet.getFacetType().getIdentityName() );
+			return true;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitContextualFacet(org.opentravel.schemacompiler.model.TLContextualFacet)
+		 */
+		@Override
+		public boolean visitContextualFacet(TLContextualFacet facet) {
+			addReferenceIdentity( facet );
+			addFreeTextKeywords( facet.getName() );
+			addEntityReference( facet.getFacetType().getIdentityName( facet.getName() ) );
 			return true;
 		}
 

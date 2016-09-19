@@ -369,11 +369,10 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
             TLLibrary newLibrary = createNewLibrary(library);
 
             if (library.getPrefix() != null) {
-                newLibrary
-                        .setPrefix(versionScheme.getPrefix(library.getPrefix(), newLibraryVersion));
+                newLibrary.setPrefix(versionScheme.getPrefix(library.getPrefix(), newLibraryVersion));
             }
-            newLibrary.setNamespace(versionScheme.setVersionIdentifier(library.getNamespace(),
-                    newLibraryVersion));
+            newLibrary.setNamespace(versionScheme.setVersionIdentifier(
+            		library.getNamespace(), newLibraryVersion));
 
             if (libraryFile == null) {
                 libraryFile = getDefaultLibraryFileLocation(newLibrary, library);
@@ -385,6 +384,7 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
             }
             newLibrary.setLibraryUrl(URLUtils.toURL(libraryFile));
             library.getOwningModel().addLibrary(newLibrary);
+            copyLibraryFolders(library, newLibrary);
 
             // Validate all of the patch libraries to be rolled-up to ensure no errors exist
             TLLibrary priorMinorVersion = getPriorMinorVersion(newLibrary);

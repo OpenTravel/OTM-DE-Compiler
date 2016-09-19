@@ -40,6 +40,7 @@ import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLContext;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLDocumentationItem;
@@ -118,11 +119,10 @@ public class LibraryCrcCalculator {
         Long crcValue = null;
 
         if (jaxbLibrary instanceof org.opentravel.ns.ota2.librarymodel_v01_05.Library) {
-            crcValue = ((org.opentravel.ns.ota2.librarymodel_v01_05.Library) jaxbLibrary)
-                    .getCrcValue();
+            crcValue = ((org.opentravel.ns.ota2.librarymodel_v01_05.Library) jaxbLibrary).getCrcValue();
+            
         } else if (jaxbLibrary instanceof org.opentravel.ns.ota2.librarymodel_v01_04.Library) {
-            crcValue = ((org.opentravel.ns.ota2.librarymodel_v01_04.Library) jaxbLibrary)
-                    .getCrcValue();
+            crcValue = ((org.opentravel.ns.ota2.librarymodel_v01_04.Library) jaxbLibrary).getCrcValue();
         }
         return crcValue;
     }
@@ -149,8 +149,8 @@ public class LibraryCrcCalculator {
 
         // Load the library as a JAXB data structure
         LibraryModuleLoader<InputStream> loader = new MultiVersionLibraryModuleLoader();
-        LibraryModuleInfo<Object> moduleInfo = loader.loadLibrary(new LibraryStreamInputSource(
-                libraryFile), new ValidationFindings());
+        LibraryModuleInfo<Object> moduleInfo = loader.loadLibrary(
+        		new LibraryStreamInputSource(libraryFile), new ValidationFindings());
         Object jaxbLibrary = moduleInfo.getJaxbArtifact();
 
         if (jaxbLibrary == null) {
@@ -471,21 +471,31 @@ public class LibraryCrcCalculator {
         /**
          * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitFacet(org.opentravel.schemacompiler.model.TLFacet)
          */
-        @Override
+		@Override
         public boolean visitFacet(TLFacet facet) {
             TLFacetType facetType = facet.getFacetType();
 
             crcData.append((facetType == null) ? null : facetType.toString()).append('|');
             crcData.append(facet.isNotExtendable()).append('|');
-
-            if ((facetType != null) && facetType.isContextual()) {
-                crcData.append(facet.getContext()).append('|');
-                crcData.append(facet.getLabel()).append('|');
-            }
             return true;
         }
 
         /**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitContextualFacet(org.opentravel.schemacompiler.model.TLContextualFacet)
+		 */
+		@SuppressWarnings("deprecation")
+		@Override
+		public boolean visitContextualFacet(TLContextualFacet facet) {
+            TLFacetType facetType = facet.getFacetType();
+
+            crcData.append((facetType == null) ? null : facetType.toString()).append('|');
+            crcData.append(facet.isNotExtendable()).append('|');
+            crcData.append(facet.getContext()).append('|'); // required for backwards-compatibility
+            crcData.append(facet.getName()).append('|');
+            return true;
+		}
+
+		/**
          * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitSimpleFacet(org.opentravel.schemacompiler.model.TLSimpleFacet)
          */
         @Override

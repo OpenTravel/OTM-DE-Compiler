@@ -30,6 +30,7 @@ import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
@@ -226,13 +227,13 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
      * @param choiceObject
      *            the choice object entity to visit and navigate
      */
-    public void navigateChoiceObject(TLChoiceObject choiceObject) {
+    protected void navigateChoiceObject(TLChoiceObject choiceObject) {
         if (canVisit(choiceObject) && visitor.visitChoiceObject(choiceObject)) {
             navigateFacet(choiceObject.getSharedFacet());
             navigateExtension(choiceObject.getExtension());
 
-            for (TLFacet choiceFacet : choiceObject.getChoiceFacets()) {
-                navigateFacet(choiceFacet);
+            for (TLContextualFacet choiceFacet : choiceObject.getChoiceFacets()) {
+                navigateContextualFacet(choiceFacet);
             }
         }
     }
@@ -267,11 +268,14 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
             navigateFacet(businessObject.getSummaryFacet());
             navigateFacet(businessObject.getDetailFacet());
 
-            for (TLFacet customFacet : businessObject.getCustomFacets()) {
-                navigateFacet(customFacet);
+            for (TLContextualFacet customFacet : businessObject.getCustomFacets()) {
+            	navigateContextualFacet(customFacet);
             }
-            for (TLFacet queryFacet : businessObject.getQueryFacets()) {
-                navigateFacet(queryFacet);
+            for (TLContextualFacet queryFacet : businessObject.getQueryFacets()) {
+            	navigateContextualFacet(queryFacet);
+            }
+            for (TLContextualFacet updateFacet : businessObject.getUpdateFacets()) {
+            	navigateContextualFacet(updateFacet);
             }
             navigateExtension(businessObject.getExtension());
         }
@@ -283,7 +287,7 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
      * @param resource
      *            the resource entity to visit and navigate
      */
-    public void navigateResource(TLResource resource) {
+    protected void navigateResource(TLResource resource) {
         if (canVisit(resource) && visitor.visitResource(resource)) {
             navigateBusinessObject(resource.getBusinessObjectRef());
             navigateExtension(resource.getExtension());
@@ -304,7 +308,7 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
      * @param paramGroup
      *            the parameter group entity to visit and navigate
      */
-    public void navigateParamGroup(TLParamGroup paramGroup) {
+    protected void navigateParamGroup(TLParamGroup paramGroup) {
         if (canVisit(paramGroup) && visitor.visitParamGroup(paramGroup)) {
         	navigateFacet(paramGroup.getFacetRef());
             
@@ -321,7 +325,7 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
      * @param parameter
      *            the parameter entity to visit and navigate
      */
-    public void navigateParameter(TLParameter parameter) {
+    protected void navigateParameter(TLParameter parameter) {
         if (canVisit(parameter) && visitor.visitParameter(parameter)) {
         	TLMemberField<?> fieldRef = parameter.getFieldRef();
         	
@@ -344,7 +348,7 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
      * @param action
      *            the action entity to visit and navigate
      */
-    public void navigateAction(TLAction action) {
+    protected void navigateAction(TLAction action) {
         if (canVisit(action) && visitor.visitAction(action)) {
         	if (action.getRequest() != null) {
             	navigate( action.getRequest().getPayloadType() );
@@ -364,7 +368,7 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
      * @param extensionPointFacet
      *            the extension point facet entity to visit and navigate
      */
-    public void navigateExtensionPointFacet(TLExtensionPointFacet extensionPointFacet) {
+    protected void navigateExtensionPointFacet(TLExtensionPointFacet extensionPointFacet) {
         if (canVisit(extensionPointFacet) && visitor.visitExtensionPointFacet(extensionPointFacet)) {
 
             if (extensionPointFacet.getExtension() != null) {
@@ -515,20 +519,44 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
      */
     protected void navigateFacet(TLFacet facet) {
         if (canVisit(facet) && visitor.visitFacet(facet)) {
-            for (TLAlias alias : facet.getAliases()) {
-                navigateAlias(alias);
-            }
-            for (TLAttribute attribute : PropertyCodegenUtils.getInheritedAttributes(facet)) {
-                navigateAttribute(attribute);
-            }
-            for (TLProperty element : PropertyCodegenUtils.getInheritedProperties(facet)) {
-                navigateElement(element);
-            }
-            for (TLIndicator indicator : PropertyCodegenUtils.getInheritedIndicators(facet)) {
-                navigateIndicator(indicator);
-            }
-            navigateDependency(facet.getOwningEntity());
+        	navigateFacetMembers(facet);
         }
+    }
+
+    /**
+     * Called when a <code>TLContextualFacet</code> instance is encountered during model navigation.
+     * 
+     * @param facet
+     *            the facet entity to visit and navigate
+     */
+    protected void navigateContextualFacet(TLContextualFacet facet) {
+        if (canVisit(facet) && visitor.visitContextualFacet(facet)) {
+        	if (!facet.isLocalFacet()) {
+        		navigate(facet.getOwningEntity());
+        	}
+        	navigateFacetMembers(facet);
+        }
+    }
+    
+    /**
+     * Navigates all field members and aliases as well as the owner of the given facet.
+     * 
+     * @param facet  the facet whose members are to be navigated
+     */
+    private void navigateFacetMembers(TLFacet facet) {
+        for (TLAlias alias : facet.getAliases()) {
+            navigateAlias(alias);
+        }
+        for (TLAttribute attribute : PropertyCodegenUtils.getInheritedAttributes(facet)) {
+            navigateAttribute(attribute);
+        }
+        for (TLProperty element : PropertyCodegenUtils.getInheritedProperties(facet)) {
+            navigateElement(element);
+        }
+        for (TLIndicator indicator : PropertyCodegenUtils.getInheritedIndicators(facet)) {
+            navigateIndicator(indicator);
+        }
+        navigateDependency(facet.getOwningEntity());
     }
 
     /**

@@ -24,6 +24,7 @@ import java.util.Set;
 import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
+import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
@@ -257,18 +258,16 @@ public class SchemaNameValidationRegistry {
                     substitutableFacet = ((TLChoiceObject) aliasOwner).getSharedFacet();
                 }
                 if (substitutableFacet != null) {
+                    String facetName = FacetCodegenUtils.getFacetName(substitutableFacet);
                     TLAlias substitutableAlias = AliasCodegenUtils.getFacetAlias((TLAlias) entity,
-                            substitutableFacet.getFacetType(), substitutableFacet.getContext(),
-                            substitutableFacet.getLabel());
+                            substitutableFacet.getFacetType(), facetName);
 
                     if (substitutableAlias != null) {
                         addElementNameToRegistry(
-                                XsdCodegenUtils.getSubstitutableElementName(substitutableAlias),
-                                entity);
+                                XsdCodegenUtils.getSubstitutableElementName(substitutableAlias), entity);
                     }
                 }
-                addElementNameToRegistry(XsdCodegenUtils.getSubstitutionGroupElementName(entity),
-                        entity);
+                addElementNameToRegistry(XsdCodegenUtils.getSubstitutionGroupElementName(entity), entity);
             }
 
         } else if (XsdCodegenUtils.isSimpleCoreObject(entity)) {

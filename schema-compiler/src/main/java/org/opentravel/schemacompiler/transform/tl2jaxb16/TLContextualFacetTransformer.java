@@ -17,9 +17,11 @@ package org.opentravel.schemacompiler.transform.tl2jaxb16;
 
 import org.opentravel.ns.ota2.librarymodel_v01_06.Documentation;
 import org.opentravel.ns.ota2.librarymodel_v01_06.FacetContextual;
+import org.opentravel.ns.ota2.librarymodel_v01_06.FacetContextualType;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLDocumentation;
+import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.symbols.SymbolResolverTransformerContext;
 
@@ -57,12 +59,44 @@ public class TLContextualFacetTransformer extends
         }
 
         facet.setName(trimString(source.getName(), false));
+        facet.setType(getTargetType(source.getFacetType()));
         facet.setNotExtendable(source.isNotExtendable());
         facet.getAttribute().addAll(transformAttributes(source.getAttributes()));
         facet.getElement().addAll(transformElements(source.getElements()));
         facet.getIndicator().addAll(transformIndicators(source.getIndicators()));
 
         return facet;
+    }
+    
+    /**
+     * Returns the JAXB contextual facet type that corresponds with the given 
+     * model facet type.
+     * 
+     * @param sourceType  the model facet type
+     * @return FacetContextualType
+     */
+    private FacetContextualType getTargetType(TLFacetType sourceType) {
+    	FacetContextualType targetType = null;
+    	
+    	if (sourceType != null) {
+    		switch (sourceType) {
+				case CHOICE:
+					targetType = FacetContextualType.CHOICE;
+					break;
+				case CUSTOM:
+					targetType = FacetContextualType.CUSTOM;
+					break;
+				case QUERY:
+					targetType = FacetContextualType.QUERY;
+					break;
+				case UPDATE:
+					targetType = FacetContextualType.UPDATE;
+					break;
+				default:
+					break;
+    		}
+    	}
+    	return targetType;
     }
 
 }

@@ -84,7 +84,7 @@ public class BusinessObjectWriterTest extends WriterTest {
 		writer.addFacetInfo(div);
 		String content = div.toString();
 		assertTrue("No facet.",
-				content.contains(bo.getCustomFacet("test", "ExtendedCustomFacet").getLocalName()));
+				content.contains(bo.getCustomFacet("ExtendedCustomFacet").getLocalName()));
 	}
 
 	@Test

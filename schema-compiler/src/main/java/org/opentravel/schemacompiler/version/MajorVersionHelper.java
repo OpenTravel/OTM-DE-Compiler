@@ -18,13 +18,25 @@ package org.opentravel.schemacompiler.version;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.ic.ImportManagementIntegrityChecker;
+import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLContext;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
+import org.opentravel.schemacompiler.model.TLFacet;
+import org.opentravel.schemacompiler.model.TLFacetOwner;
+import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.repository.Project;
@@ -38,6 +50,8 @@ import org.opentravel.schemacompiler.validate.ValidationException;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.version.handlers.RollupReferenceHandler;
 import org.opentravel.schemacompiler.version.handlers.VersionHandler;
+import org.opentravel.schemacompiler.version.handlers.VersionHandlerFactory;
+import org.opentravel.schemacompiler.version.handlers.VersionHandlerMergeUtils;
 
 /**
  * Helper methods used to construct new major versions of <code>TLLibrary</code> instances.
@@ -390,15 +404,18 @@ public final class MajorVersionHelper extends AbstractVersionHelper {
      */
     private void rollupMinorVersionLibrary(TLLibrary majorVersionLibrary, TLLibrary minorVersionLibrary,
             RollupReferenceHandler referenceHandler) throws VersionSchemeException {
+    	// Start by rolling up the contexts and the folder structure
         for (TLContext context : minorVersionLibrary.getContexts()) {
             if (majorVersionLibrary.getContext(context.getContextId()) == null) {
             	ModelElementCloner cloner = getCloner( minorVersionLibrary.getOwningModel() );
                 majorVersionLibrary.addContext(cloner.clone(context));
             }
         }
-        List<Versioned> minorVersionList = new ArrayList<>();
+        copyLibraryFolders(minorVersionLibrary, majorVersionLibrary);
         
         // Collect the list of all versioned entities from the minor version library
+        List<Versioned> minorVersionList = new ArrayList<>();
+        
         for (LibraryMember member : minorVersionLibrary.getNamedMembers()) {
         	if (member instanceof Versioned) {
             	minorVersionList.add( (Versioned) member );
@@ -412,9 +429,128 @@ public final class MajorVersionHelper extends AbstractVersionHelper {
         
         // Roll up all of the entities we just collected to the major version library
         for (Versioned minorVersion : minorVersionList) {
-        	getVersionHandler( minorVersion ).rollupMinorVersion(
-        			minorVersion, majorVersionLibrary, referenceHandler );
+        	Versioned majorVersion = getVersionHandler( minorVersion )
+        			.rollupMinorVersion( minorVersion, majorVersionLibrary, referenceHandler );
+        	
+        	if (majorVersion instanceof LibraryMember) {
+        		assignTargetFolder( (LibraryMember) minorVersion, (LibraryMember) majorVersion );
+        	}
         }
     }
-
+    
+    /**
+     * Returns the list all non-local contextual facets that are assigned to the business
+     * and choice objects of the given library.  The resulting list will contain non-local
+     * facets that are directly owned by the library's busines/choice objects as well as
+     * any non-local child facets of those contextual facets.
+     * 
+     * @param library  the library for which to return non-local facets of business/choice objects
+     * @return List<TLContextualFacet>
+     */
+    public List<TLContextualFacet> getNonLocalEntityFacets(TLLibrary library) {
+    	List<TLContextualFacet> nonLocalFacets = new ArrayList<>();
+    	
+    	for (TLBusinessObject entity : library.getBusinessObjectTypes()) {
+    		findNonLocalFacets( entity, TLFacetType.CUSTOM, library, nonLocalFacets, new HashSet<TLFacetOwner>() );
+    		findNonLocalFacets( entity, TLFacetType.QUERY, library, nonLocalFacets, new HashSet<TLFacetOwner>() );
+    		findNonLocalFacets( entity, TLFacetType.UPDATE, library, nonLocalFacets, new HashSet<TLFacetOwner>() );
+    	}
+    	for (TLChoiceObject entity : library.getChoiceObjectTypes()) {
+    		findNonLocalFacets( entity, TLFacetType.CHOICE, library, nonLocalFacets, new HashSet<TLFacetOwner>() );
+    	}
+    	return nonLocalFacets;
+    }
+    
+    /**
+     * Recursive routine that searches for all non-local contextual facets within the hierarchy of
+     * the given facet owner.
+     * 
+     * @param owner  the owner for which to find non-local contextual facets
+     * @param facetType  the type of non-local contextual facets to retrieve
+     * @param localLibrary  the library that should be considered the "local" owner
+     * @param localFacets  the list of local contextual facets that have been collected
+     * @param visitedOwners  the collection of facet owners that have already been visited
+     */
+	private void findNonLocalFacets(TLFacetOwner owner, TLFacetType facetType, AbstractLibrary localLibrary,
+			List<TLContextualFacet> localFacets, Set<TLFacetOwner> visitedOwners) {
+		if (!visitedOwners.contains( owner )) {
+			visitedOwners.add( owner );
+			
+			for (TLFacet f : FacetCodegenUtils.getAllFacetsOfType( owner, facetType )) {
+				if (f instanceof TLContextualFacet) {
+					TLContextualFacet facet = (TLContextualFacet) f;
+					
+					if (facet.getOwningLibrary() != localLibrary) {
+						localFacets.add( facet );
+					}
+					findNonLocalFacets( facet, facetType, localLibrary, localFacets, visitedOwners );
+				}
+			}
+		}
+	}
+	
+	public List<TLContextualFacet> rollupNonLocalFacets(List<TLContextualFacet> sourceFacets, Map<TLLibrary,TLLibrary> sourceToTargetLibraryMap) {
+		RollupReferenceHandler referenceHandler = new RollupReferenceHandler( new ArrayList<TLLibrary>( sourceToTargetLibraryMap.keySet() ) );
+		List<TLContextualFacet> targetFacets = new ArrayList<>();
+		List<TLContextualFacet> remainingFacets = new ArrayList<>( sourceFacets );
+		int originalFacetCount = -1;
+		
+		while (!remainingFacets.isEmpty() && (remainingFacets.size() != originalFacetCount)) {
+			
+			// We don't know what order the source facets came in, so some of the owners may not yet
+			// exist.  For this reason, we need to continue iterating through the list until we do
+			// not find a facet that can be processed
+			originalFacetCount = remainingFacets.size();
+			
+			for (TLContextualFacet sourceFacet : sourceFacets) {
+				TLFacetOwner sourceFacetOwner = sourceFacet.getOwningEntity();
+				TLLibrary targetOwnerLibrary = (sourceFacetOwner == null) ?
+						null : sourceToTargetLibraryMap.get( sourceFacetOwner.getOwningLibrary() );
+				TLLibrary targetLibrary = sourceToTargetLibraryMap.get( sourceFacet.getOwningLibrary() );
+				
+				if ((targetOwnerLibrary != null) && (targetLibrary != null)) {
+					NamedEntity targetEntity = targetOwnerLibrary.getNamedMember( sourceFacetOwner.getLocalName() );
+					TLFacetOwner targetOwner = (targetEntity instanceof TLFacetOwner) ? ((TLFacetOwner) targetEntity) : null;
+					
+					if (targetOwner != null) {
+						TLContextualFacet targetFacet = rollupNonLocalFacet(
+								sourceFacet, targetOwner, targetLibrary, referenceHandler );
+						
+						targetFacets.add( targetFacet );
+						remainingFacets.remove( sourceFacet );
+					}
+				}
+			}
+		}
+		return targetFacets;
+	}
+	
+	/**
+	 * For non-local contextual facets, this method will roll-up all fields from the original facet's
+	 * minor version chain and assign the new facet to the target owner.
+	 * 
+	 * @param sourceFacet  the original (source) facet to be rolled-up
+	 * @param targetOwner  the owner of the new rolled-up facet that will be created
+	 * @param targetLibrary  the target library that will own the new rolled-up facet
+     * @param referenceHandler  handler that stores reference information for the libraries being rolled up
+	 * @return TLContextualFacet
+	 */
+	private TLContextualFacet rollupNonLocalFacet(TLContextualFacet sourceFacet, TLFacetOwner targetOwner,
+			TLLibrary targetLibrary, RollupReferenceHandler referenceHandler) {
+		VersionHandlerMergeUtils mergeUtils = new VersionHandlerMergeUtils( new VersionHandlerFactory() );
+        Map<String, TLFacet> targetFacets = new HashMap<String, TLFacet>();
+        Map<String, TLFacet> sourceFacets = new HashMap<String, TLFacet>();
+		TLContextualFacet targetFacet = new TLContextualFacet();
+		
+		targetFacet.setName( sourceFacet.getName() );
+		targetFacet.setFacetType( sourceFacet.getFacetType() );
+		targetFacet.setOwningEntity( targetOwner );
+		targetLibrary.addNamedMember( targetFacet );
+		
+        mergeUtils.addToIdentityFacetMap( targetFacet, targetFacets );
+        mergeUtils.addToIdentityFacetMap( sourceFacet, sourceFacets );
+        mergeUtils.mergeFacets( targetFacets, sourceFacets, referenceHandler );
+        return targetFacet;
+	}
+	
 }

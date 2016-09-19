@@ -90,7 +90,7 @@ public class FacetInfoWriterTest extends WriterTest{
 		writer.addInfo(div);
 		String content = div.toString();
 		assertTrue("No facet.",
-				content.contains(extendedBO.getCustomFacet("test", "ExtendedCustomFacet").getLocalName()));
+				content.contains(extendedBO.getCustomFacet("ExtendedCustomFacet").getLocalName()));
 	}
 	
 	@Test

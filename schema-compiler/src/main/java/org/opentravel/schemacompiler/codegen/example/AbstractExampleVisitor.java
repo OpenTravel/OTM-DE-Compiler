@@ -24,6 +24,7 @@ import java.util.Stack;
 import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
+import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.wsdl.CodeGenerationWsdlBindings;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
 import org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate;
@@ -797,9 +798,7 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
 
  					for (TLFacet customFacet : entity.getCustomFacets()) {
  						TLAlias customAlias = AliasCodegenUtils.getFacetAlias(
- 								entityAlias, TLFacetType.CUSTOM,
- 								customFacet.getContext(),
- 								customFacet.getLabel());
+ 								entityAlias, TLFacetType.CUSTOM, FacetCodegenUtils.getFacetName(customFacet));
 
  						entityNames.add(new QName(customAlias.getNamespace(), customAlias.getLocalName()));
  					}
@@ -820,9 +819,7 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
 
  					for (TLFacet choiceFacet : entity.getChoiceFacets()) {
  						TLAlias choiceAlias = AliasCodegenUtils.getFacetAlias(
- 								entityAlias, TLFacetType.CHOICE,
- 								choiceFacet.getContext(),
- 								choiceFacet.getLabel());
+ 								entityAlias, TLFacetType.CHOICE,FacetCodegenUtils.getFacetName(choiceFacet));
 
  						entityNames.add(new QName(choiceAlias.getNamespace(), choiceAlias.getLocalName()));
  					}

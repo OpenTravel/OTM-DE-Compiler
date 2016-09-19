@@ -28,7 +28,7 @@ public class TLAlias extends TLModelElement implements TLPropertyType {
 
     private TLAliasOwner owningEntity;
     private String name;
-
+    
     /**
      * @see org.opentravel.schemacompiler.validate.Validatable#getValidationIdentity()
      */
@@ -136,10 +136,28 @@ public class TLAlias extends TLModelElement implements TLPropertyType {
      *            the field value to assign
      */
     public void setName(String name) {
+    	String oldName = this.name;
         ModelEvent<?> event = new ModelEventBuilder(ModelEventType.NAME_MODIFIED, this)
-                .setOldValue(this.name).setNewValue(name).buildEvent();
-
+                .setOldValue(oldName).setNewValue(name).buildEvent();
+        ChildEntityListManager<TLAlias,?> listManager =
+        		(owningEntity == null) ? null : owningEntity.getAliasListManager();
+        
         this.name = name;
+        
+        if (listManager != null) {
+            // Disable events while we update the derived alias names.  All references
+        	// will be refreshed when the real event is broadcast at the end.
+        	TLModel model = getOwningModel();
+        	boolean eventsEnabled = (model != null) && model.isListenersEnabled();
+        	
+        	try {
+            	if (model != null) model.setListenersEnabled(false);
+            	listManager.notifyChildRenamed(this, oldName);
+            	
+        	} finally {
+            	if (model != null) model.setListenersEnabled(eventsEnabled);
+        	}
+        }
         publishEvent(event);
     }
 

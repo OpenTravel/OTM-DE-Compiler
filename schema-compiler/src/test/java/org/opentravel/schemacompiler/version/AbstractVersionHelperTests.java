@@ -44,6 +44,7 @@ import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLPropertyOwner;
 import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLResourceParentRef;
+import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.util.SchemaCompilerTestUtils;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
@@ -57,6 +58,8 @@ import org.opentravel.schemacompiler.validate.ValidationFindings;
 public abstract class AbstractVersionHelperTests {
 
     public static final String TEST_LIBRARY_NAME = "test_library";
+    public static final String FACET1_LIBRARY_NAME = "cf1_library";
+    public static final String FACET2_LIBRARY_NAME = "cf2_library";
 
     public static final String LIBNAME_VERSION_1 = "library_v01_00";
     public static final String LIBNAME_VERSION_1_0_1 = "library_v01_00_01";
@@ -71,6 +74,10 @@ public abstract class AbstractVersionHelperTests {
     public static final String FILE_VERSION_1_2 = LIBNAME_VERSION_1_2 + ".xml";
     public static final String FILE_VERSION_1_2_1 = LIBNAME_VERSION_1_2_1 + ".xml";
     public static final String FILE_VERSION_1_2_2 = LIBNAME_VERSION_1_2_2 + ".xml";
+    public static final String FILE_FACET1_1 = "facets1_v01_00.xml";
+    public static final String FILE_FACET1_2 = "facets1_v02_00.xml";
+    public static final String FILE_FACET2_1 = "facets2_v01_00.xml";
+    public static final String FILE_FACET2_2 = "facets2_v02_00.xml";
 
     public static final String NS_VERSION_1 = "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01";
     public static final String NS_VERSION_1_0_1 = "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01_00_01";
@@ -79,10 +86,30 @@ public abstract class AbstractVersionHelperTests {
     public static final String NS_VERSION_1_2_1 = "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01_02_01";
     public static final String NS_VERSION_1_2_2 = "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01_02_02";
 
-    protected File testFolder = new File(System.getProperty("user.dir"),
-            "/src/test/resources/versions");
-    protected File catalogFile = new File(testFolder, "/version-catalog.xml");
-
+    public static final String NS_FACET1_VERSION_1 = "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/cf1/v01";
+    public static final String NS_FACET1_VERSION_2 = "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/cf1/v02";
+    public static final String NS_FACET2_VERSION_1 = "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/cf2/v01";
+    public static final String NS_FACET2_VERSION_2 = "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/cf2/v02";
+    
+    /**
+     * Returns the folder location of the test library files.
+     * 
+     * @return File
+     */
+    private File getTestFolder() {
+    	return new File(System.getProperty("user.dir"), OTM16Upgrade.otm16Enabled ?
+    			"/src/test/resources/versions_1_6" : "/src/test/resources/versions");
+    }
+    
+    /**
+     * Returns the location of the test catalog file.
+     * 
+     * @return File
+     */
+    private File getCatalogFile() {
+    	return new File(getTestFolder(), "/version-catalog.xml");
+    }
+    
     /**
      * Loads the specified library and all of its dependencies. Prior to returning the model, it
      * will be checked to ensure that no validation errors exist.
@@ -94,22 +121,22 @@ public abstract class AbstractVersionHelperTests {
      */
     protected TLModel loadTestModel(String... libraryFilenames) throws Exception {
         LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>();
-
-        modelLoader.setNamespaceResolver(new CatalogLibraryNamespaceResolver(catalogFile));
+        
+        modelLoader.setNamespaceResolver(new CatalogLibraryNamespaceResolver(getCatalogFile()));
 
         for (String libraryFilename : libraryFilenames) {
-            LibraryInputSource<InputStream> libraryInput = new LibraryStreamInputSource(new File(
-                    testFolder, "/" + libraryFilename));
+            LibraryInputSource<InputStream> libraryInput = new LibraryStreamInputSource(
+            		new File(getTestFolder(), "/" + libraryFilename));
             ValidationFindings findings = modelLoader.loadLibraryModel(libraryInput);
 
-            SchemaCompilerTestUtils.printFindings(findings, FindingType.ERROR);
+            SchemaCompilerTestUtils.printFindings(findings, null);//FindingType.ERROR);
             assertFalse(findings.hasFinding(FindingType.ERROR));
         }
         TLModel model = modelLoader.getLibraryModel();
         assertNotNull(model);
         return model;
     }
-
+    
     protected List<String> getLibraryNames(List<TLLibrary> libraryList) {
         List<String> libraryNames = new ArrayList<String>();
 

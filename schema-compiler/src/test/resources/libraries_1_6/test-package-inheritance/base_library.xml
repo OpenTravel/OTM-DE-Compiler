@@ -65,21 +65,21 @@
 		</Detail>
 	</BusinessObject>
 	
-	<ContextualFacet name="Context1Label1" type="Query" facetOwner="BaseBusinessObject">
+	<ContextualFacet name="Context1Label1" type="Query" facetOwner="ExtendedBusinessObject">
 		<Attribute name="context1Label1ExtendedAttr" type="xsd:string" />
 		<Element name="context1Label1Extended" type="xsd:string" />
 		<Extension extends="BaseBusinessObject_Query_Context1Label1" />
 	</ContextualFacet>
-	<ContextualFacet name="Context2" type="Query" facetOwner="BaseBusinessObject">
+	<ContextualFacet name="Context2" type="Query" facetOwner="ExtendedBusinessObject">
 		<Attribute name="context2ExtendedAttr" type="xsd:string" />
 		<Element name="context2Extended" type="xsd:string" />
 	</ContextualFacet>
-	<ContextualFacet name="Context1Label1" type="Custom" facetOwner="BaseBusinessObject">
+	<ContextualFacet name="Context1Label1" type="Custom" facetOwner="ExtendedBusinessObject">
 		<Attribute name="context1Label1ExtendedAttr" type="xsd:string" />
 		<Element name="context1Label1Extended" type="xsd:string" />
 		<Extension extends="BaseBusinessObject_Context1Label1" />
 	</ContextualFacet>
-	<ContextualFacet name="Context2" type="Custom" facetOwner="BaseBusinessObject">
+	<ContextualFacet name="Context2" type="Custom" facetOwner="ExtendedBusinessObject">
 		<Attribute name="context2ExtendedAttr" type="xsd:string" />
 		<Element name="context2Extended" type="xsd:string" />
 	</ContextualFacet>

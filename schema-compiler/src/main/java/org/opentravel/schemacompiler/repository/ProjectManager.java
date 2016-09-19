@@ -73,6 +73,7 @@ import org.opentravel.schemacompiler.repository.impl.ProjectItemImpl;
 import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
 import org.opentravel.schemacompiler.saver.LibraryModelSaver;
 import org.opentravel.schemacompiler.saver.LibrarySaveException;
+import org.opentravel.schemacompiler.transform.util.ModelReferenceResolver;
 import org.opentravel.schemacompiler.util.ExceptionUtils;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
@@ -751,7 +752,7 @@ public final class ProjectManager {
 							ExceptionUtils.getExceptionMessage(t));
             }
     	}
-    	modelLoader.resolveModelEntityReferences();
+    	ModelReferenceResolver.resolveReferences(modelLoader.getLibraryModel());
     	
     	// Run a final validation check (if necessary)
     	if (findings != null) {
@@ -987,15 +988,8 @@ public final class ProjectManager {
                     URLUtils.toFile(library.getLibraryUrl()), library, this);
 
             if (model.getLibrary(library.getLibraryUrl()) == null) {
-                try {
-                    model.addLibrary(library);
-                    new LibraryModelLoader<InputStream>(model).resolveModelEntityReferences();
-
-                } catch (LibraryLoaderException e) {
-                    // Should never happen, but just in case...
-                    throw new RepositoryException("Error resolving references during library add.",
-                            e);
-                }
+                model.addLibrary(library);
+            	ModelReferenceResolver.resolveReferences(model);
             }
         }
 
@@ -1246,7 +1240,7 @@ public final class ProjectManager {
         if (loaderFindings != null) {
             loaderFindings.addAll(modelLoader.getLoaderFindings());
         }
-        modelLoader.resolveModelEntityReferences();
+    	ModelReferenceResolver.resolveReferences(modelLoader.getLibraryModel());
         updateProjectDependencies(project, newItems);
 
         // Update all import/include references in the project, just in case any have changed since

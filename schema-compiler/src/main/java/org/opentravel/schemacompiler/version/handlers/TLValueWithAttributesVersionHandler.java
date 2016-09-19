@@ -102,7 +102,7 @@ public class TLValueWithAttributesVersionHandler extends VersionHandler<TLValueW
 	 * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#rollupMinorVersion(org.opentravel.schemacompiler.version.Versioned, org.opentravel.schemacompiler.model.TLLibrary, org.opentravel.schemacompiler.version.handlers.RollupReferenceHandler)
 	 */
 	@Override
-	public void rollupMinorVersion(TLValueWithAttributes minorVersion, TLLibrary majorVersionLibrary,
+	public TLValueWithAttributes rollupMinorVersion(TLValueWithAttributes minorVersion, TLLibrary majorVersionLibrary,
 			RollupReferenceHandler referenceHandler) throws VersionSchemeException {
 		TLValueWithAttributes majorVersion = retrieveExistingVersion( minorVersion, majorVersionLibrary );
 		
@@ -115,6 +115,7 @@ public class TLValueWithAttributesVersionHandler extends VersionHandler<TLValueW
         } else if (majorVersion instanceof TLValueWithAttributes) {
             rollupMinorVersion( minorVersion, majorVersion, referenceHandler );
         }
+        return majorVersion;
 	}
 	
 	/**

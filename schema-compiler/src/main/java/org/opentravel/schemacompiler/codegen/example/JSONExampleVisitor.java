@@ -246,7 +246,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 			TLAlias contextAlias = context.getModelAlias();
 			TLAlias ownerAlias = (contextAlias == null) ? null : AliasCodegenUtils.getOwnerAlias( contextAlias );
 			TLAlias itemAlias = (ownerAlias == null) ? null : AliasCodegenUtils.getFacetAlias(
-					ownerAlias, itemFacet.getFacetType(), itemFacet.getContext(), itemFacet.getLabel() );
+					ownerAlias, itemFacet.getFacetType(), FacetCodegenUtils.getFacetName(itemFacet) );
 			
 			addJsonFacetType( itemFacet, itemAlias );
 			

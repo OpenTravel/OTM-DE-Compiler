@@ -23,10 +23,10 @@ import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAbstractEnumeration;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
-import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLMemberField;
 import org.opentravel.schemacompiler.model.TLOperation;
@@ -191,8 +191,10 @@ public class EntityComparisonFacade {
 		this.documentation = entity.getDocumentation();
 		this.memberFields.addAll( entity.getSharedFacet().getMemberFields() );
 		
-		for (TLFacet facet : entity.getChoiceFacets()) {
-			this.memberFields.addAll( facet.getMemberFields() );
+		for (TLContextualFacet facet : entity.getChoiceFacets()) {
+			if (facet.isLocalFacet()) {
+				this.memberFields.addAll( facet.getMemberFields() );
+			}
 		}
 	}
 	
@@ -214,12 +216,17 @@ public class EntityComparisonFacade {
 		this.memberFields.addAll( entity.getSummaryFacet().getMemberFields() );
 		this.memberFields.addAll( entity.getDetailFacet().getMemberFields() );
 		
-		for (TLFacet facet : entity.getCustomFacets()) {
-			this.memberFields.addAll( facet.getMemberFields() );
+		for (TLContextualFacet facet : entity.getCustomFacets()) {
+			if (facet.isLocalFacet()) {
+				this.memberFields.addAll( facet.getMemberFields() );
+			}
 		}
-		for (TLFacet facet : entity.getQueryFacets()) {
-			this.memberFields.addAll( facet.getMemberFields() );
+		for (TLContextualFacet facet : entity.getQueryFacets()) {
+			if (facet.isLocalFacet()) {
+				this.memberFields.addAll( facet.getMemberFields() );
+			}
 		}
+		// TODO: Add diff support for update facet comparisons
 	}
 	
 	/**

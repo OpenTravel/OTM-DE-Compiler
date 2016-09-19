@@ -31,7 +31,7 @@ public abstract class TLAbstractEnumerationVersionHandler<V extends TLAbstractEn
 	 * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#rollupMinorVersion(org.opentravel.schemacompiler.version.Versioned, org.opentravel.schemacompiler.model.TLLibrary, org.opentravel.schemacompiler.version.handlers.RollupReferenceHandler)
 	 */
 	@Override
-	public void rollupMinorVersion(V minorVersion, TLLibrary majorVersionLibrary,
+	public V rollupMinorVersion(V minorVersion, TLLibrary majorVersionLibrary,
 			RollupReferenceHandler referenceHandler) throws VersionSchemeException {
 		V majorVersion = retrieveExistingVersion( minorVersion, majorVersionLibrary );
 		
@@ -44,6 +44,7 @@ public abstract class TLAbstractEnumerationVersionHandler<V extends TLAbstractEn
         } else if (majorVersion instanceof TLAbstractEnumeration) {
             rollupMinorVersion( minorVersion, majorVersion, referenceHandler );
         }
+        return majorVersion;
 	}
 	
 	/**

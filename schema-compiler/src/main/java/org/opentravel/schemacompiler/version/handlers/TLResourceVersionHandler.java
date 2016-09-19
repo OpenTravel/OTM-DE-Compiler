@@ -32,10 +32,9 @@ import org.opentravel.schemacompiler.model.TLParameter;
 import org.opentravel.schemacompiler.model.TLPatchableFacet;
 import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLResourceParentRef;
-import org.opentravel.schemacompiler.transform.util.EntityReferenceResolutionVisitor;
+import org.opentravel.schemacompiler.transform.util.ModelReferenceResolver;
 import org.opentravel.schemacompiler.util.ModelElementCloner;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
-import org.opentravel.schemacompiler.visitor.ModelNavigator;
 
 /**
  * <code>VersionHandler</code> implementation for <code>TLResource</code>
@@ -68,7 +67,7 @@ public class TLResourceVersionHandler extends TLExtensionOwnerVersionHandler<TLR
 	 * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#rollupMinorVersion(org.opentravel.schemacompiler.version.Versioned, org.opentravel.schemacompiler.model.TLLibrary, org.opentravel.schemacompiler.version.handlers.RollupReferenceHandler)
 	 */
 	@Override
-	public void rollupMinorVersion(TLResource minorVersion, TLLibrary majorVersionLibrary,
+	public TLResource rollupMinorVersion(TLResource minorVersion, TLLibrary majorVersionLibrary,
 			RollupReferenceHandler referenceHandler) throws VersionSchemeException {
 		TLResource majorVersion = retrieveExistingVersion( minorVersion, majorVersionLibrary );
 		
@@ -83,6 +82,7 @@ public class TLResourceVersionHandler extends TLExtensionOwnerVersionHandler<TLR
         } else if (majorVersion instanceof TLResource) {
             rollupMinorVersion( minorVersion, majorVersion, referenceHandler );
         }
+        return majorVersion;
 	}
 	
 	/**
@@ -229,11 +229,7 @@ public class TLResourceVersionHandler extends TLExtensionOwnerVersionHandler<TLR
 		}
 		
 		if (hasUnresolvedReferences) {
-			EntityReferenceResolutionVisitor visitor = new EntityReferenceResolutionVisitor(
-					majorVersion.getOwningModel() );
-			
-			visitor.assignContextLibrary( majorVersion.getOwningLibrary() );
-			ModelNavigator.navigate(majorVersion, visitor);
+			ModelReferenceResolver.resolveReferences( majorVersion.getOwningModel() );
 		}
 	}
 	

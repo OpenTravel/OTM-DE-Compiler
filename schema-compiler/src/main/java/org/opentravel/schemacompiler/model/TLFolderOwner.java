@@ -33,6 +33,14 @@ public interface TLFolderOwner {
 	public List<TLFolder> getFolders();
 	
 	/**
+	 * Returns the folder with the given name for this folder owner.
+	 * 
+	 * @param folderName  the name of the folder to return
+	 * @return TLFolder
+	 */
+	public TLFolder getFolder(String folderName);
+	
+	/**
 	 * Adds a new sub-folder to the current list for this owner.
 	 * 
 	 * @param folder  the sub-folder to be added

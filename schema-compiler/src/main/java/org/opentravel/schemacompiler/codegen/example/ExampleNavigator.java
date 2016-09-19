@@ -1225,7 +1225,7 @@ public class ExampleNavigator {
                     } else {
                         if (hFacet instanceof TLFacet) {
                             hFacet = FacetCodegenUtils.getFacetOfType( facetOwner, hFacet.getFacetType(),
-                            		((TLFacet) hFacet).getContext(), ((TLFacet) hFacet).getLabel());
+                            		FacetCodegenUtils.getFacetName((TLFacet) hFacet));
                         } else {
                             hFacet = FacetCodegenUtils.getFacetOfType( facetOwner, hFacet.getFacetType());
                         }

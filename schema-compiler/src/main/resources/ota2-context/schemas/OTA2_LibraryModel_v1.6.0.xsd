@@ -765,9 +765,6 @@
       </xsd:annotation>
       <xsd:complexContent>
          <xsd:extension base="Facet">
-         	<xsd:sequence>
-		         <xsd:element ref="Extension" />
-         	</xsd:sequence>
             <xsd:attribute name="name" type="Name_XML" use="required">
                <xsd:annotation>
                   <xsd:documentation>Specifies the name of the facet within the

@@ -30,6 +30,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
+import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.RemoteRepository;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
@@ -90,7 +91,8 @@ public class SelectLibraryDialogController {
 			
 			if (treeNode.tempNode) {
 				try {
-					List<RepositoryItem> repoItemList = treeNode.repository.listItems( treeNode.baseNS, false, true );
+					List<RepositoryItem> repoItemList = treeNode.repository.listItems(
+							treeNode.baseNS, TLLibraryStatus.DRAFT, false );
 					
 					// Remove the temporary item and replace it with OTM library items
 					treeItem.getChildren().clear();

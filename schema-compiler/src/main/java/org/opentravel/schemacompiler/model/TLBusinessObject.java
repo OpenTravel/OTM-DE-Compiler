@@ -22,6 +22,7 @@ import java.util.List;
 import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.model.TLAlias.AliasListManager;
 import org.opentravel.schemacompiler.model.TLContextualFacet.ContextualFacetListManager;
+import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.version.Versioned;
 
 /**
@@ -183,6 +184,14 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.model.TLAliasOwner#getAliasListManager()
+	 */
+	@Override
+	public ChildEntityListManager<TLAlias, ?> getAliasListManager() {
+		return aliasManager;
+	}
+
+	/**
 	 * @see org.opentravel.schemacompiler.model.TLFacetOwner#getAllFacets()
 	 */
 	@Override
@@ -317,6 +326,25 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.model.LibraryMemberImpl#setOwningLibrary(org.opentravel.schemacompiler.model.AbstractLibrary)
+	 */
+	@Override
+	public void setOwningLibrary(AbstractLibrary owningLibrary) {
+    	if (!OTM16Upgrade.otm16Enabled) {
+    		for (TLContextualFacet facet : getCustomFacets()) {
+    			owningLibrary.addNamedMember( facet );
+    		}
+    		for (TLContextualFacet facet : getQueryFacets()) {
+    			owningLibrary.addNamedMember( facet );
+    		}
+    		for (TLContextualFacet facet : getUpdateFacets()) {
+    			owningLibrary.addNamedMember( facet );
+    		}
+    	}
+		super.setOwningLibrary(owningLibrary);
+	}
+
+    /**
      * Returns the list of custom facets for this business object.
      * 
      * @return List<TLContextualFacet>
@@ -345,14 +373,7 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
      */
     @Deprecated
     public TLContextualFacet getCustomFacet(String context, String label) {
-        StringBuilder contextualName = new StringBuilder();
-
-        contextualName.append((context == null) ? "Unknown" : context);
-
-        if ((label != null) && (label.length() > 0)) {
-            contextualName.append(':').append(label);
-        }
-        return customFacetManager.getChild(contextualName.toString());
+    	return getCustomFacet(label);
     }
 
     /**

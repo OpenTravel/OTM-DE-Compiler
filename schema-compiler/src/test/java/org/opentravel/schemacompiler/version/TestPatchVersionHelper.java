@@ -216,7 +216,7 @@ public class TestPatchVersionHelper extends AbstractVersionHelperTests {
         assertEquals(1, eligibleLibraries.size());
         assertTrue(eligibleLibraries.contains(patchVersionLibrary123));
 
-        eligibleLibraries = helper.getEligiblePatchVersionTargets(minorVersionChoice.getChoiceFacet(null, "ChoiceA"));
+        eligibleLibraries = helper.getEligiblePatchVersionTargets(minorVersionChoice.getChoiceFacet("ChoiceA"));
         assertEquals(2, eligibleLibraries.size());
         assertTrue(eligibleLibraries.contains(patchVersionLibrary121));
         assertTrue(eligibleLibraries.contains(patchVersionLibrary123));

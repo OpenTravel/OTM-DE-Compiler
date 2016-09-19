@@ -23,19 +23,17 @@ import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.event.ModelEventBuilder;
 import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.util.OTM16Upgrade;
-import org.opentravel.schemacompiler.version.Versioned;
 
 /**
  * Contextual facet definition for complex types that may or may not reside within
  * the same library (or namespace) as their facet owners.
  */
-public class TLContextualFacet extends TLFacet implements LibraryMember, TLExtensionOwner, TLFacetOwner, Versioned {
+public class TLContextualFacet extends TLFacet implements LibraryMember, TLFacetOwner {
 	
     private ContextualFacetListManager childFacetManager = new ContextualFacetListManager(
     		this, null, ModelEventType.CHILD_FACET_ADDED, ModelEventType.CHILD_FACET_REMOVED);
     private AbstractLibrary owningLibrary;
     private String owningEntityName;
-    private TLExtension extension;
     private String name;
     
 	/**
@@ -67,6 +65,19 @@ public class TLContextualFacet extends TLFacet implements LibraryMember, TLExten
     public void setOwningLibrary(AbstractLibrary owningLibrary) {
         this.owningLibrary = owningLibrary;
     }
+	
+	/**
+	 * Returns true if this facet's owner resides within the same library to which this facet
+	 * is assigned.
+	 * 
+	 * @return boolean
+	 */
+	public boolean isLocalFacet() {
+		TLFacetOwner owningEntity = getOwningEntity();
+		AbstractLibrary owningEntityLibrary = (owningEntity == null) ? null : owningEntity.getOwningLibrary();
+		
+		return (owningLibrary == owningEntityLibrary);
+	}
 
     /**
      * @see org.opentravel.schemacompiler.model.NamedEntity#getLocalName()
@@ -76,7 +87,8 @@ public class TLContextualFacet extends TLFacet implements LibraryMember, TLExten
         TLFacetOwner owningEntity = getOwningEntity();
         TLFacetType facetType = getFacetType();
         StringBuilder localName = new StringBuilder();
-
+        
+        // TODO: Make sure this works for nested contextual facets
         if (owningEntity != null) {
             localName.append(owningEntity.getLocalName()).append('_');
         }
@@ -123,56 +135,6 @@ public class TLContextualFacet extends TLFacet implements LibraryMember, TLExten
 		return (library == null) ? null : library.getNamespace();
 	}
 	
-	/**
-	 * @see org.opentravel.schemacompiler.version.Versioned#getBaseNamespace()
-	 */
-	@Override
-	public String getBaseNamespace() {
-		AbstractLibrary library = getOwningLibrary();
-        String baseNamespace;
-
-        if (library instanceof TLLibrary) {
-            baseNamespace = ((TLLibrary) library).getBaseNamespace();
-        } else {
-            baseNamespace = getNamespace();
-        }
-        return baseNamespace;
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.version.Versioned#getVersion()
-	 */
-	@Override
-	public String getVersion() {
-		AbstractLibrary library = getOwningLibrary();
-		return (library == null) ? null : library.getVersion();
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.version.Versioned#getVersionScheme()
-	 */
-	@Override
-	public String getVersionScheme() {
-		AbstractLibrary library = getOwningLibrary();
-		return (library == null) ? null : library.getVersionScheme();
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.version.Versioned#isLaterVersion(org.opentravel.schemacompiler.version.Versioned)
-	 */
-	@Override
-	public boolean isLaterVersion(Versioned otherVersionedItem) {
-        boolean result = false;
-
-        if ((otherVersionedItem != null) && otherVersionedItem.getClass().equals(this.getClass())
-                && (this.getOwningLibrary() != null)
-                && (otherVersionedItem.getOwningLibrary() != null) && (this.getLocalName() != null)
-                && this.getLocalName().equals(otherVersionedItem.getLocalName())) {
-            result = this.getOwningLibrary().isLaterVersion(otherVersionedItem.getOwningLibrary());
-        }
-        return result;
-	}
-	
     /**
 	 * @see org.opentravel.schemacompiler.model.TLAbstractFacet#setFacetType(org.opentravel.schemacompiler.model.TLFacetType)
 	 */
@@ -212,41 +174,6 @@ public class TLContextualFacet extends TLFacet implements LibraryMember, TLExten
         publishEvent(event);
 	}
 
-	/**
-     * @see org.opentravel.schemacompiler.model.TLExtensionOwner#getExtension()
-     */
-    @Override
-    public TLExtension getExtension() {
-        return extension;
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLExtensionOwner#setExtension(org.opentravel.schemacompiler.model.TLExtension)
-     */
-    @Override
-    public void setExtension(TLExtension extension) {
-        if (extension != this.extension) {
-            // Even though there is only one extension, send to events so that all extension owners
-            // behave the same (as if there is a list of multiple extensions).
-            if (this.extension != null) {
-                ModelEvent<?> event = new ModelEventBuilder(ModelEventType.EXTENDS_REMOVED, this)
-                        .setAffectedItem(this.extension).buildEvent();
-
-                this.extension.setOwner(null);
-                this.extension = null;
-                publishEvent(event);
-            }
-            if (extension != null) {
-                ModelEvent<?> event = new ModelEventBuilder(ModelEventType.EXTENDS_ADDED, this)
-                        .setAffectedItem(extension).buildEvent();
-
-                extension.setOwner(this);
-                this.extension = extension;
-                publishEvent(event);
-            }
-        }
-    }
-    
 	/**
 	 * Returns the name of this contextual facet.
 	 *

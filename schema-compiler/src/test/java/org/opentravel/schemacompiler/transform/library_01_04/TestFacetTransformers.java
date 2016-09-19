@@ -257,7 +257,8 @@ public class TestFacetTransformers extends Abstract_1_4_TestTransformers {
                 .getLocalName());
     }
 
-    @Test
+    @SuppressWarnings("deprecation")
+	@Test
     public void testFacetContextualTransformer() throws Exception {
         List<TLContextualFacet> facetList = getBusinessObject(PACKAGE_2_NAMESPACE, "library_1_p2",
                 "SampleBusinessObject").getCustomFacets();
@@ -268,6 +269,7 @@ public class TestFacetTransformers extends Abstract_1_4_TestTransformers {
         TLContextualFacet facet = facetList.get(0);
 
         assertNotNull(facet);
+        assertEquals("Sample", facet.getContext());
         assertEquals("Test1", facet.getName());
         assertEquals(2, facet.getAliases().size());
         assertEquals("SampleBusinessObject_Alias1_Test1", facet.getAliases().get(0).getName());

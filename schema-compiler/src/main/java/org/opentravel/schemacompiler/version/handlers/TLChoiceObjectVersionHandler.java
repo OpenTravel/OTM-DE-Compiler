@@ -17,6 +17,7 @@ package org.opentravel.schemacompiler.version.handlers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -24,10 +25,10 @@ import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLEquivalent;
 import org.opentravel.schemacompiler.model.TLFacet;
+import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLPatchableFacet;
 import org.opentravel.schemacompiler.util.ModelElementCloner;
-import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 
 /**
@@ -61,19 +62,28 @@ public class TLChoiceObjectVersionHandler extends TLExtensionOwnerVersionHandler
 	 * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#rollupMinorVersion(org.opentravel.schemacompiler.version.Versioned, org.opentravel.schemacompiler.model.TLLibrary, org.opentravel.schemacompiler.version.handlers.RollupReferenceHandler)
 	 */
 	@Override
-	public void rollupMinorVersion(TLChoiceObject minorVersion, TLLibrary majorVersionLibrary,
+	public TLChoiceObject rollupMinorVersion(TLChoiceObject minorVersion, TLLibrary majorVersionLibrary,
 			RollupReferenceHandler referenceHandler) throws VersionSchemeException {
 		TLChoiceObject majorVersion = retrieveExistingVersion( minorVersion, majorVersionLibrary );
 		
         if (majorVersion == null) {
-        	majorVersion = getCloner( minorVersion ).clone( minorVersion );
+        	ModelElementCloner cloner = getCloner( minorVersion );
+        	List<TLContextualFacet> targetChoiceFacets = cloneLocalContextualFacets(
+        			minorVersion.getChoiceFacets(), majorVersionLibrary, cloner );
+        	
+        	majorVersion = cloner.clone( minorVersion );
             assignBaseExtension( majorVersion, minorVersion );
+            
+            for (TLContextualFacet facet : targetChoiceFacets) {
+            	majorVersion.addChoiceFacet( facet );
+            }
             majorVersionLibrary.addNamedMember( majorVersion );
             referenceHandler.captureRollupReferences( majorVersion );
         	
         } else if (majorVersion instanceof TLChoiceObject) {
             rollupMinorVersion( minorVersion, majorVersion, referenceHandler );
         }
+        return majorVersion;
 	}
 	
 	/**
@@ -89,14 +99,18 @@ public class TLChoiceObjectVersionHandler extends TLExtensionOwnerVersionHandler
         mergeUtils.addToIdentityFacetMap( majorVersionTarget.getSharedFacet(), targetFacets );
         mergeUtils.addToIdentityFacetMap( minorVersion.getSharedFacet(), sourceFacets );
         
-        if (!OTM16Upgrade.otm16Enabled) {
-            for (TLContextualFacet sourceFacet : minorVersion.getChoiceFacets()) {
-            	TLContextualFacet targetFacet = majorVersionTarget.getChoiceFacet( sourceFacet.getName() );
+        for (TLContextualFacet sourceFacet : minorVersion.getChoiceFacets()) {
+        	TLContextualFacet targetFacet = majorVersionTarget.getChoiceFacet( sourceFacet.getName() );
 
+            if (sourceFacet.isLocalFacet()) {
                 if (targetFacet == null) {
                     targetFacet = new TLContextualFacet();
                     targetFacet.setName( sourceFacet.getName() );
+                    targetFacet.setFacetType( TLFacetType.CHOICE );
+                    majorVersionTarget.getOwningLibrary().addNamedMember( targetFacet );
                     majorVersionTarget.addChoiceFacet( targetFacet );
+                    rollupNestedLocalContextualFacets( sourceFacet, targetFacet, mergeUtils,
+                    		sourceFacets, targetFacets, new HashSet<TLContextualFacet>() );
                 }
                 mergeUtils.addToIdentityFacetMap( targetFacet, targetFacets );
                 mergeUtils.addToIdentityFacetMap( sourceFacet, sourceFacets );

@@ -571,7 +571,7 @@ public class ResourceCodegenUtils {
 	 * @return String
 	 */
 	public static String getActionFacetReferenceName(TLFacet facet) {
-		return facet.getFacetType().getIdentityName( facet.getContext(), facet.getLabel() );
+		return facet.getFacetType().getIdentityName( FacetCodegenUtils.getFacetName(facet) );
 	}
 	
 	/**

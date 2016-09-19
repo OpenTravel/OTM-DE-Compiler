@@ -110,6 +110,38 @@ public class TestModelUnits {
         assertNotNull(library.getService());
         assertNotNull(service.getOwningLibrary());
     }
+    
+    @Test
+    public void testContextualFacetAliases() throws Exception {
+    	TLBusinessObject bo = getTestBusinessObject();
+    	TLContextualFacet cfa = bo.getCustomFacet("CFA");
+    	TLContextualFacet cfb = cfa.getChildFacet("CFB");
+    	TLAlias boAlias = new TLAlias();
+		
+		// Starting assertions - no aliases
+		assertEquals(0, bo.getAliases().size());
+		assertEquals(0, cfa.getAliases().size());
+		assertEquals(0, cfb.getAliases().size());
+		
+		// Add alias and ensure it propagates to the facets
+		boAlias.setName("BOAlias");
+		bo.addAlias(boAlias);
+		
+		assertEquals(1, bo.getAliases().size());
+		assertEquals("BOAlias", bo.getAliases().get(0).getName());
+		assertEquals(1, cfa.getAliases().size());
+		assertEquals("BOAlias_CFA", cfa.getAliases().get(0).getName());
+		assertEquals(1, cfb.getAliases().size());
+		assertEquals("BOAlias_CFA_CFB", cfb.getAliases().get(0).getName());
+		
+		// Change the alias name and be sure it propagates to the facets
+		boAlias.setName("BOAlias2");
+		assertEquals("BOAlias2", bo.getAliases().get(0).getName());
+		assertEquals(1, cfa.getAliases().size());
+		assertEquals("BOAlias2_CFA", cfa.getAliases().get(0).getName());
+		assertEquals(1, cfb.getAliases().size());
+		assertEquals("BOAlias2_CFA_CFB", cfb.getAliases().get(0).getName());
+    }
 
     @Test
     public void testDocumentationOwner() throws Exception {
@@ -131,5 +163,20 @@ public class TestModelUnits {
         assertEquals(doc, sourceBO.getDocumentation());
         assertEquals(destinationBO, doc.getOwner());
     }
-
+    
+    private TLBusinessObject getTestBusinessObject() {
+    	TLBusinessObject bo = new TLBusinessObject();
+    	TLContextualFacet cfa = new TLContextualFacet();
+    	TLContextualFacet cfb = new TLContextualFacet();
+    	
+		bo.setName("BO");
+		cfa.setName("CFA");
+		cfa.setFacetType(TLFacetType.CUSTOM);
+		bo.addCustomFacet(cfa);
+		cfb.setName("CFB");
+		cfb.setFacetType(TLFacetType.CUSTOM);
+		cfa.addChildFacet(cfb);
+    	return bo;
+    }
+    
 }

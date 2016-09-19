@@ -17,6 +17,7 @@ package org.opentravel.schemacompiler.codegen.util;
 
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAliasOwner;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLFacetType;
@@ -55,10 +56,9 @@ public class AliasCodegenUtils {
         // Locate the corresponding alias on the facet owner
         if (facetAlias.getOwningEntity() instanceof TLFacet) {
             TLFacet sourceFacet = (TLFacet) facetAlias.getOwningEntity();
+            String facetName = FacetCodegenUtils.getFacetName(sourceFacet);
             TLAliasOwner owner = (TLAliasOwner) sourceFacet.getOwningEntity();
-            String aliasSuffix = "_"
-                    + sourceFacet.getFacetType().getIdentityName(sourceFacet.getContext(),
-                            sourceFacet.getLabel());
+            String aliasSuffix = "_" + sourceFacet.getFacetType().getIdentityName(facetName);
 
             if (facetAlias.getName().endsWith(aliasSuffix)) {
                 if (owner instanceof TLAliasOwner) {
@@ -100,31 +100,29 @@ public class AliasCodegenUtils {
 
         if (facetAlias.getOwningEntity() instanceof TLFacet) {
             TLFacet sourceFacet = (TLFacet) facetAlias.getOwningEntity();
-            String aliasSuffix = "_"
-                    + sourceFacet.getFacetType().getIdentityName(sourceFacet.getContext(),
-                            sourceFacet.getLabel());
+            String facetName = FacetCodegenUtils.getFacetName(sourceFacet);
+            String aliasSuffix = "_" + sourceFacet.getFacetType().getIdentityName(facetName);
 
             if (facetAlias.getName().endsWith(aliasSuffix)) {
                 String aliasPrefix = facetAlias.getName().replace(aliasSuffix, "");
                 TLFacet siblingFacet = FacetCodegenUtils.getFacetOfType(
-                        sourceFacet.getOwningEntity(), siblingFacetType, sourceFacet.getContext(),
-                        sourceFacet.getLabel());
+                        sourceFacet.getOwningEntity(), siblingFacetType, facetName);
 
                 // First, find the sibling facet; if one cannot be located, create a ghost facet
                 if (siblingFacet == null) {
                     siblingFacet = new TLFacet();
                     siblingFacet.setOwningEntity(sourceFacet.getOwningEntity());
                     siblingFacet.setFacetType(siblingFacetType);
-                    siblingFacet.setContext(sourceFacet.getContext());
-                    siblingFacet.setLabel(sourceFacet.getLabel());
+                    
+                    if (facetName != null) {
+                    	((TLContextualFacet) siblingFacet).setName(facetName);
+                    }
                 }
 
                 // Next, find the corresponding alias on the sibling facet; if one cannot be
-                // located,
-                // create a ghost alias (yes, this means we can have ghost aliases for ghost facets)
-                String siblingSuffix = "_"
-                        + siblingFacet.getFacetType().getIdentityName(sourceFacet.getContext(),
-                                sourceFacet.getLabel());
+                // located, create a ghost alias (yes, this means we can have ghost aliases
+                // for ghost facets)
+                String siblingSuffix = "_" + siblingFacet.getFacetType().getIdentityName(facetName);
                 String derivedAlias = aliasPrefix + siblingSuffix;
 
                 for (TLAlias candidateAlias : siblingFacet.getAliases()) {
@@ -157,9 +155,42 @@ public class AliasCodegenUtils {
      * @return TLAlias
      */
     public static TLAlias getFacetAlias(TLAlias ownerAlias, TLFacetType facetType) {
-        return getFacetAlias(ownerAlias, facetType, null, null);
+        return getFacetAlias(ownerAlias, facetType, null);
     }
 
+    /**
+     * Returns the corresponding alias from the facet of the specified type.
+     * 
+     * @param ownerAlias
+     *            the alias of the facet owner
+     * @param facetType
+     *            the type of facet from which the alias should be retrieved
+     * @param facetName
+     *            the name of the contextual facet from which the alias should be retrieved
+     * @return TLAlias
+     */
+    public static TLAlias getFacetAlias(TLAlias ownerAlias, TLFacetType facetType, String facetName) {
+        TLAlias facetAlias = null;
+
+        if (ownerAlias.getOwningEntity() instanceof TLFacetOwner) {
+            TLFacet facet = FacetCodegenUtils.getFacetOfType(
+                    (TLFacetOwner) ownerAlias.getOwningEntity(), facetType, facetName);
+            
+            if (facet != null) {
+                String derivedAlias = ownerAlias.getName() + "_"
+                        + facetType.getIdentityName(facetName);
+
+                for (TLAlias alias : facet.getAliases()) {
+                    if (alias.getName().equals(derivedAlias)) {
+                        facetAlias = alias;
+                        break;
+                    }
+                }
+            }
+        }
+        return facetAlias;
+    }
+    
     /**
      * Returns the corresponding alias from the facet of the specified type.
      * 
@@ -172,28 +203,12 @@ public class AliasCodegenUtils {
      * @param facetLabel
      *            the label of the facet from which the alias should be retrieved
      * @return TLAlias
+     * @deprecated  use the {@link #getFacetAlias(TLAlias, TLFacetType, String) method instead}
      */
+    @Deprecated
     public static TLAlias getFacetAlias(TLAlias ownerAlias, TLFacetType facetType,
             String facetContext, String facetLabel) {
-        TLAlias facetAlias = null;
-
-        if (ownerAlias.getOwningEntity() instanceof TLFacetOwner) {
-            TLFacet facet = FacetCodegenUtils.getFacetOfType(
-                    (TLFacetOwner) ownerAlias.getOwningEntity(), facetType, facetContext, facetLabel);
-            
-            if (facet != null) {
-                String derivedAlias = ownerAlias.getName() + "_"
-                        + facetType.getIdentityName(facetContext, facetLabel);
-
-                for (TLAlias alias : facet.getAliases()) {
-                    if (alias.getName().equals(derivedAlias)) {
-                        facetAlias = alias;
-                        break;
-                    }
-                }
-            }
-        }
-        return facetAlias;
+    	return getFacetAlias(ownerAlias, facetType, facetLabel);
     }
 
 }

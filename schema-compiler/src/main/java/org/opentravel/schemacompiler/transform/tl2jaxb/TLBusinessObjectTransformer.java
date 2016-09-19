@@ -22,6 +22,7 @@ import org.opentravel.ns.ota2.librarymodel_v01_05.Extension;
 import org.opentravel.ns.ota2.librarymodel_v01_05.Facet;
 import org.opentravel.ns.ota2.librarymodel_v01_05.FacetContextual;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLEquivalent;
 import org.opentravel.schemacompiler.model.TLExtension;
@@ -45,8 +46,8 @@ public class TLBusinessObjectTransformer extends
     public BusinessObject transform(TLBusinessObject source) {
         ObjectTransformer<TLFacet, Facet, SymbolResolverTransformerContext> facetTransformer = getTransformerFactory()
                 .getTransformer(TLFacet.class, Facet.class);
-        ObjectTransformer<TLFacet, FacetContextual, SymbolResolverTransformerContext> facetContextualTransformer = getTransformerFactory()
-                .getTransformer(TLFacet.class, FacetContextual.class);
+        ObjectTransformer<TLContextualFacet, FacetContextual, SymbolResolverTransformerContext> facetContextualTransformer =
+        		getTransformerFactory().getTransformer(TLContextualFacet.class, FacetContextual.class);
         ObjectTransformer<TLEquivalent, Equivalent, SymbolResolverTransformerContext> equivTransformer = getTransformerFactory()
                 .getTransformer(TLEquivalent.class, Equivalent.class);
         BusinessObject businessObject = new BusinessObject();
@@ -69,10 +70,10 @@ public class TLBusinessObjectTransformer extends
         businessObject.setSummary(facetTransformer.transform(source.getSummaryFacet()));
         businessObject.setDetail(facetTransformer.transform(source.getDetailFacet()));
 
-        for (TLFacet customFacet : source.getCustomFacets()) {
+        for (TLContextualFacet customFacet : source.getCustomFacets()) {
             businessObject.getCustom().add(facetContextualTransformer.transform(customFacet));
         }
-        for (TLFacet queryFacet : source.getQueryFacets()) {
+        for (TLContextualFacet queryFacet : source.getQueryFacets()) {
             businessObject.getQuery().add(facetContextualTransformer.transform(queryFacet));
         }
 

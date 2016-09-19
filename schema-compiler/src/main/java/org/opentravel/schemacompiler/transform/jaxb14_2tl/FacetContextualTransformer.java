@@ -32,7 +32,8 @@ public class FacetContextualTransformer extends ComplexTypeTransformer<FacetCont
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
      */
-    @Override
+    @SuppressWarnings("deprecation")
+	@Override
     public TLContextualFacet transform(FacetContextual source) {
         final TLContextualFacet facet = new TLContextualFacet();
         String name = trimString(source.getLabel());
@@ -41,6 +42,7 @@ public class FacetContextualTransformer extends ComplexTypeTransformer<FacetCont
         	name = trimString(source.getContext());
         }
         facet.setName(name);
+        facet.setContext(trimString(source.getContext()));
         facet.setNotExtendable((source.isNotExtendable() == null) ? false : source
                 .isNotExtendable());
 

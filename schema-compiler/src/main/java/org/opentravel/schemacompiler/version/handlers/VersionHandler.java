@@ -203,7 +203,7 @@ public abstract class VersionHandler<V extends Versioned> {
      * @param referenceHandler  handler that stores reference information for the libraries being rolled up
      * @throws VersionSchemeException  thrown if the entity's version scheme is not recognized
      */
-    public abstract void rollupMinorVersion(V minorVersion, TLLibrary majorVersionLibrary,
+    public abstract V rollupMinorVersion(V minorVersion, TLLibrary majorVersionLibrary,
     		RollupReferenceHandler referenceHandler) throws VersionSchemeException;
     
     /**

@@ -512,7 +512,8 @@ public class TLActionFacetCodegenTransformer extends AbstractXsdTransformer<TLAc
 		 */
 		@Override
 		protected String getTypeName() {
-			return XsdCodegenUtils.getGlobalTypeName( actionFacet ) + "_" + getSourceFacet().getLabel();
+			return XsdCodegenUtils.getGlobalTypeName( actionFacet ) + "_" +
+					FacetCodegenUtils.getFacetName( getSourceFacet() );
 		}
 
 		/**

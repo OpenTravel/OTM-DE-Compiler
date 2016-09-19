@@ -226,6 +226,14 @@ public class TLListFacet extends TLAbstractFacet implements TLAttributeType, TLA
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.model.TLAliasOwner#getAliasListManager()
+	 */
+	@Override
+	public ChildEntityListManager<TLAlias, ?> getAliasListManager() {
+		return aliasManager;
+	}
+
+    /**
      * List manager that synchronizes the list of derived aliases with those of the corresponding
      * 'itemFacet'.
      * 
@@ -257,6 +265,16 @@ public class TLListFacet extends TLAbstractFacet implements TLAttributeType, TLA
         }
 
         /**
+		 * @see org.opentravel.schemacompiler.model.DerivedChildEntityListManager#setDerivedEntityName(java.lang.Object, java.lang.String)
+		 */
+		@Override
+		protected void setDerivedEntityName(TLAlias derivedEntity, String derivedEntityName) {
+			if (derivedEntity != null) {
+				derivedEntity.setName(derivedEntityName);
+			}
+		}
+
+		/**
          * @see org.opentravel.schemacompiler.model.DerivedChildEntityListManager#createDerivedEntity(java.lang.Object)
          */
         @Override

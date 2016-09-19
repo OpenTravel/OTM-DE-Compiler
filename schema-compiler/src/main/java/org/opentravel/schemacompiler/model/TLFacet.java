@@ -39,6 +39,7 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
     private AttributeListManager attributeManager = new AttributeListManager(this);
     private PropertyListManager elementManager = new PropertyListManager(this);
     private IndicatorListManager indicatorManager = new IndicatorListManager(this);
+    private String context;
     private boolean notExtendable;
 
     /**
@@ -231,6 +232,14 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
     public void sortAliases(Comparator<TLAlias> comparator) {
         throw new UnsupportedOperationException("Operation not supported for facets.");
     }
+
+    /**
+	 * @see org.opentravel.schemacompiler.model.TLAliasOwner#getAliasListManager()
+	 */
+	@Override
+	public ChildEntityListManager<TLAlias, ?> getAliasListManager() {
+		return aliasManager;
+	}
 
     /**
      * @see org.opentravel.schemacompiler.model.TLAttributeOwner#getAttributes()
@@ -480,7 +489,7 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
      */
     @Deprecated
     public String getContext() {
-        return null;
+        return context;
     }
 
     /**
@@ -488,6 +497,11 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
      */
     @Deprecated
     public void setContext(String context) {
+        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.CONTEXT_MODIFIED, this)
+        		.setOldValue(this.context).setNewValue(context).buildEvent();
+
+        this.context = context;
+        publishEvent(event);
     }
 
     /**
@@ -538,11 +552,22 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
          */
         @Override
         protected String getDerivedEntityName(String originalEntityName) {
+        	// TODO: Refactor so that the deprecated getLabel() method is not called (root cause is contextual facet refactoring)
             return (originalEntityName == null) ? null : (originalEntityName + "_" + getFacetType()
                     .getIdentityName(getLabel()));
         }
 
         /**
+		 * @see org.opentravel.schemacompiler.model.DerivedChildEntityListManager#setDerivedEntityName(java.lang.Object, java.lang.String)
+		 */
+		@Override
+		protected void setDerivedEntityName(TLAlias derivedEntity, String derivedEntityName) {
+			if (derivedEntity != null) {
+				derivedEntity.setName(derivedEntityName);
+			}
+		}
+
+		/**
          * @see org.opentravel.schemacompiler.model.DerivedChildEntityListManager#createDerivedEntity(java.lang.Object)
          */
         @Override

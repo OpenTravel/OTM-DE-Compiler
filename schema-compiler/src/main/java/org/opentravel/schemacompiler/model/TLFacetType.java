@@ -100,7 +100,7 @@ public enum TLFacetType {
             identity.append(identityName);
 
         } else {
-            if (this == TLFacetType.QUERY) {
+            if ((this == TLFacetType.QUERY) || (this == TLFacetType.UPDATE)) {
                 identity.append(identityName);
 
                 if ((facetLabel != null) && (facetLabel.length() > 0)) {

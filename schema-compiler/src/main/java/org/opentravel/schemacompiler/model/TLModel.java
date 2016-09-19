@@ -35,9 +35,8 @@ import org.opentravel.schemacompiler.ic.LibraryMemberChangeIntegrityChecker;
 import org.opentravel.schemacompiler.ic.NameChangeIntegrityChecker;
 import org.opentravel.schemacompiler.loader.BuiltInLibraryFactory;
 import org.opentravel.schemacompiler.transform.AnonymousEntityFilter;
-import org.opentravel.schemacompiler.transform.util.EntityReferenceResolutionVisitor;
+import org.opentravel.schemacompiler.transform.util.ModelReferenceResolver;
 import org.opentravel.schemacompiler.validate.Validatable;
-import org.opentravel.schemacompiler.visitor.ModelNavigator;
 
 /**
  * Container that encapsulates all namespaces and libraries within a single semantic model. Every
@@ -444,7 +443,7 @@ public class TLModel implements Validatable {
         chameleonCounter = 0;
 
         // Resolve any type references between members of the built-in libraries
-        ModelNavigator.navigate(this, new EntityReferenceResolutionVisitor(this));
+    	ModelReferenceResolver.resolveReferences(this);
     }
 
     /**

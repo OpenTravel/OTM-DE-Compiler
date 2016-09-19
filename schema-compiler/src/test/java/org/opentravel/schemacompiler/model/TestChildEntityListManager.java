@@ -175,7 +175,6 @@ public class TestChildEntityListManager {
         assertEquals(0, detailFacet.getIndicators().size());
         assertNull(detailFacet.getDocumentation());
         assertFalse(detailFacet.isNotExtendable());
-        assertNull(detailFacet.getContext());
         assertEquals(0, detailAliases.size());
         assertEquals(0, detailListAliases.size());
     }

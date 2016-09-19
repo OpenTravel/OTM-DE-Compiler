@@ -25,6 +25,7 @@ import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLActionRequest;
 import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAttribute;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
@@ -184,6 +185,23 @@ public abstract class EntityRemovedIntegrityChecker<S, I> extends
         }
 
         /**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitContextualFacet(org.opentravel.schemacompiler.model.TLContextualFacet)
+		 */
+		@Override
+		public boolean visitContextualFacet(TLContextualFacet facet) {
+        	TLModelElement referencedEntity = (TLModelElement) facet.getOwningEntity();
+
+            if (isRemovedEntity(referencedEntity)) {
+                TLModel model = facet.getOwningModel();
+                boolean listenersEnabled = disableListeners(model);
+
+                facet.setOwningEntity(null);
+                restoreListeners(model, listenersEnabled);
+            }
+            return true;
+		}
+
+		/**
          * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitAttribute(org.opentravel.schemacompiler.model.TLAttribute)
          */
         @Override

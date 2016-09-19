@@ -21,6 +21,7 @@ import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegate;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenElements;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetType;
 
@@ -44,11 +45,15 @@ public class TLChoiceObjectCodegenTransformer extends
 
         generateFacetArtifacts(delegateFactory.getDelegate(source.getSharedFacet()), elementArtifacts, otherArtifacts);
         
-        for (TLFacet choiceFacet : source.getChoiceFacets()) {
-            generateFacetArtifacts(delegateFactory.getDelegate(choiceFacet), elementArtifacts, otherArtifacts);
+        for (TLContextualFacet choiceFacet : source.getChoiceFacets()) {
+        	if (choiceFacet.isLocalFacet()) {
+                generateFacetArtifacts(delegateFactory.getDelegate(choiceFacet), elementArtifacts, otherArtifacts);
+        	}
         }
-        for (TLFacet ghostFacet : FacetCodegenUtils.findGhostFacets(source, TLFacetType.CHOICE)) {
-            generateFacetArtifacts(delegateFactory.getDelegate(ghostFacet), elementArtifacts, otherArtifacts);
+        for (TLContextualFacet ghostFacet : FacetCodegenUtils.findGhostFacets(source, TLFacetType.CHOICE)) {
+        	if (ghostFacet.isLocalFacet()) {
+                generateFacetArtifacts(delegateFactory.getDelegate(ghostFacet), elementArtifacts, otherArtifacts);
+        	}
         }
 
         return buildCorrelatedArtifacts(source, elementArtifacts, otherArtifacts);
@@ -62,7 +67,7 @@ public class TLChoiceObjectCodegenTransformer extends
      * @param elementArtifacts  the container for all generated schema elements
      * @param otherArtifacts  the container for all generated non-element schema artifacts
      */
-    private void generateFacetArtifacts(FacetCodegenDelegate<TLFacet> facetDelegate,
+    private void generateFacetArtifacts(FacetCodegenDelegate<? extends TLFacet> facetDelegate,
             FacetCodegenElements elementArtifacts, CodegenArtifacts otherArtifacts) {
         elementArtifacts.addAll(facetDelegate.generateElements());
         otherArtifacts.addAllArtifacts(facetDelegate.generateArtifacts());

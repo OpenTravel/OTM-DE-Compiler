@@ -95,5 +95,13 @@ public interface TLAliasOwner extends NamedEntity {
      *            the comparator to use when sorting the list
      */
     public void sortAliases(Comparator<TLAlias> comparator);
-
+    
+    /**
+     * Returns the child entity list manager that manages the list of aliases for
+     * this entity.
+     * 
+     * @return ChildEntityListManager<TLAlias,?>
+     */
+    public ChildEntityListManager<TLAlias,?> getAliasListManager();
+    
 }

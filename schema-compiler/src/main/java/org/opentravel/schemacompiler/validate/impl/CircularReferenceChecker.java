@@ -26,6 +26,7 @@ import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAliasOwner;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLExtensionOwner;
@@ -172,6 +173,49 @@ public class CircularReferenceChecker {
         return result;
     }
 
+    /**
+     * Performs a recursive check to determine whether any circular references exist in the
+     * owning entity relationship of the given contextual facet.
+     * 
+     * @param vwa  the contextual facet to be analyzed
+     * @return boolean
+     */
+    public static boolean hasCircularReference(TLContextualFacet facet) {
+        return checkCircularReference(facet, facet, new HashSet<TLContextualFacet>());
+    }
+
+    /**
+     * Recursive method that searches the owning entity relationship to identify circular
+     * references for the given contextual facet.
+     * 
+     * @param referencedFacet  the contextual facet to be analyzed
+     * @param originalFacet  the original facet that is being checked for circular references
+     * @param visitedFacets  the set of contextual facetsthat have already been checked
+     * @return boolean
+     */
+    private static boolean checkCircularReference(TLContextualFacet referencedFacet,
+    		TLContextualFacet originalFacet, Set<TLContextualFacet> visitedFacets) {
+    	boolean result = false;
+    	
+    	if (referencedFacet != null) {
+            if (visitedFacets.contains(referencedFacet)) {
+            	if (referencedFacet == originalFacet) {
+                    result = true;
+            	}
+
+            } else {
+            	visitedFacets.add(referencedFacet);
+
+                if (referencedFacet.getOwningEntity() instanceof TLContextualFacet) {
+                    result = checkCircularReference(
+                            (TLContextualFacet) referencedFacet.getOwningEntity(),
+                            originalFacet, visitedFacets);
+                }
+            }
+    	}
+    	return result;
+    }
+    
     /**
      * Performs a recursive check to determine whether any circular references exist for the given
      * facet property. Normally, circular references are allowed for complex types. Such recursive

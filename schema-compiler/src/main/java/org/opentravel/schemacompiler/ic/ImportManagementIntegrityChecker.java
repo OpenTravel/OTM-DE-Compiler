@@ -29,6 +29,7 @@ import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.TLActionRequest;
 import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAttribute;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLInclude;
 import org.opentravel.schemacompiler.model.TLLibrary;
@@ -508,6 +509,17 @@ public abstract class ImportManagementIntegrityChecker<E extends ModelEvent<S>, 
         }
 
         /**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitContextualFacet(org.opentravel.schemacompiler.model.TLContextualFacet)
+		 */
+		@Override
+		public boolean visitContextualFacet(TLContextualFacet facet) {
+            if (facet.getOwningEntity() != null) {
+                addReferencedLibrary(facet.getOwningEntity().getOwningLibrary());
+            }
+            return true;
+		}
+
+		/**
          * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitAttribute(org.opentravel.schemacompiler.model.TLAttribute)
          */
         @Override

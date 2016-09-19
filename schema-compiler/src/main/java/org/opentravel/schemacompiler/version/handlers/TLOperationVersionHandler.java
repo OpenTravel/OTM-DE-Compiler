@@ -75,7 +75,7 @@ public class TLOperationVersionHandler extends TLExtensionOwnerVersionHandler<TL
 	 * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#rollupMinorVersion(org.opentravel.schemacompiler.version.Versioned, org.opentravel.schemacompiler.model.TLLibrary, org.opentravel.schemacompiler.version.handlers.RollupReferenceHandler)
 	 */
 	@Override
-	public void rollupMinorVersion(TLOperation minorVersion, TLLibrary majorVersionLibrary,
+	public TLOperation rollupMinorVersion(TLOperation minorVersion, TLLibrary majorVersionLibrary,
 			RollupReferenceHandler referenceHandler) throws VersionSchemeException {
 		TLOperation majorVersion = retrieveExistingVersion( minorVersion, majorVersionLibrary );
 		
@@ -90,6 +90,7 @@ public class TLOperationVersionHandler extends TLExtensionOwnerVersionHandler<TL
         } else if (majorVersion instanceof TLOperation) {
             rollupMinorVersion( minorVersion, majorVersion, referenceHandler );
         }
+        return majorVersion;
 	}
 	
 	/**

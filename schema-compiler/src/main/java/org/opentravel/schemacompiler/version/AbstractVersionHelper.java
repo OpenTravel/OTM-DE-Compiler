@@ -25,6 +25,7 @@ import java.util.List;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryElement;
+import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAttributeOwner;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
@@ -35,6 +36,8 @@ import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLFacetType;
+import org.opentravel.schemacompiler.model.TLFolder;
+import org.opentravel.schemacompiler.model.TLFolderOwner;
 import org.opentravel.schemacompiler.model.TLIndicatorOwner;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
@@ -744,7 +747,95 @@ public abstract class AbstractVersionHelper {
         	mergeUtils.mergeIndicators((TLIndicatorOwner) targetFacet, patchVersion.getIndicators());
         }
     }
-
+    
+    /**
+     * Replicates all folders that exist in the source library for the target library.  Only
+     * the folders themselves are replicated by this routine, no members are assigned within
+     * the structure.
+     * 
+     * @param sourceLibrary  the source library from which to replicate the folder structure
+     * @param targetLibrary  the library for which the new folder structure will be created
+     */
+    void copyLibraryFolders(TLLibrary sourceLibrary, TLLibrary targetLibrary) {
+    	copyFolders( sourceLibrary, targetLibrary, targetLibrary );
+    }
+    
+    /**
+     * Recursive routine to replicate all folders that exist in the source folder owner for
+     * the target owner.
+     * 
+     * @param sourceOwner  the source folder owner from which to replicate the structure
+     * @param targetOwner  the folder owner for which the new structure will be created
+     * @param targetLibrary  the library within which the new folder structure will be created
+     */
+    private void copyFolders(TLFolderOwner sourceOwner, TLFolderOwner targetOwner, TLLibrary targetLibrary) {
+    	for (TLFolder sourceFolder : sourceOwner.getFolders()) {
+    		TLFolder targetFolder = targetOwner.getFolder( sourceFolder.getName() );
+    		
+    		if (targetFolder == null) {
+    			targetFolder = new TLFolder( sourceFolder.getName(), targetLibrary );
+    			targetOwner.addFolder( targetFolder );
+    		}
+    		copyFolders( sourceFolder, targetFolder, targetLibrary );
+    	}
+    }
+    
+    /**
+     * Assigns the target entity to the same folder path in its owning library as the
+     * source entity occupies in its owner.  If the source entity is not assigned to a
+     * folder or the target folder does not exist, this method will return without
+     * action.  If the target folder is successfully assigned, this method will return
+     * true; false otherwise.
+     * 
+     * @param sourceEntity  the source entity from which to derive the target folder path
+     * @param targetEntity  the target entity to assign to a folder
+     */
+    boolean assignTargetFolder(LibraryMember sourceEntity, LibraryMember targetEntity) {
+    	List<String> sourcePath = new ArrayList<>();
+    	List<String> targetPath = new ArrayList<>();
+    	boolean result = false;
+    	
+    	findFolderPath( sourceEntity, (TLLibrary) sourceEntity.getOwningLibrary(), sourcePath );
+    	findFolderPath( targetEntity, (TLLibrary) targetEntity.getOwningLibrary(), targetPath );
+    	
+    	if (!sourcePath.isEmpty() && targetPath.isEmpty()) {
+    		TLFolderOwner folderOwner = (TLFolderOwner) targetEntity.getOwningLibrary();
+    		TLFolder targetFolder = null;
+    		
+    		for (String folderName : sourcePath) {
+    			folderOwner = targetFolder = folderOwner.getFolder( folderName );
+    			if (targetFolder == null) break; // give up - the target folder does not exist
+    		}
+    		
+    		if (targetFolder != null) {
+    			targetFolder.addEntity( targetEntity );
+    			result = true;
+    		}
+    	}
+    	return result;
+    }
+    
+    /**
+     * Returns the folder path for the entity within its owning library.  If the
+     * entity is not assigned to a folder, the folder path list will remain empty
+     * after this method call.
+     * 
+     * @param entity  the entity for which to retreive the folder path
+     * @return List<String>
+     */
+    private boolean findFolderPath(LibraryMember entity, TLFolderOwner folderOwner, List<String> folderPath) {
+    	boolean result = false;
+    	
+    	for (TLFolder folder : folderOwner.getFolders()) {
+    		if (folder.getEntities().contains( entity ) || findFolderPath( entity, folder, folderPath )) {
+    			folderPath.add( 0, folder.getName() );
+    			result = true;
+    			break;
+    		}
+    	}
+    	return result;
+    }
+    
     /**
      * Adds the given library to the active project. If no active project is assigned, this method
      * will take no action.

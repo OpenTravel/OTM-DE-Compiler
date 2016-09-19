@@ -23,6 +23,7 @@ import org.opentravel.schemacompiler.codegen.impl.LibraryFilterBuilder;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryMember;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.w3._2001.xmlschema.Annotation;
@@ -57,8 +58,9 @@ public class TLLibraryCodegenTransformer extends AbstractXsdTransformer<TLLibrar
         for (LibraryMember member : source.getNamedMembers()) {
             ObjectTransformer<LibraryMember, CodegenArtifacts, CodeGenerationTransformerContext> transformer = getTransformerFactory()
                     .getTransformer(member, CodegenArtifacts.class);
-
-            if ((transformer != null) && ((filter == null) || filter.processEntity(member))) {
+            boolean isLocalFacet = (member instanceof TLContextualFacet) && ((TLContextualFacet) member).isLocalFacet();
+            
+            if ((transformer != null) && !isLocalFacet && ((filter == null) || filter.processEntity(member))) {
                 CodegenArtifacts artifacts = transformer.transform(member);
 
                 if (artifacts != null) {

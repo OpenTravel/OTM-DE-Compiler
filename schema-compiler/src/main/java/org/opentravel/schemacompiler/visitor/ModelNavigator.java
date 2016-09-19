@@ -29,6 +29,7 @@ import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLContext;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLEnumValue;
@@ -175,6 +176,11 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
         } else if (libraryElement instanceof TLResource) {
             navigateResource((TLResource) libraryElement);
 
+        } else if (libraryElement instanceof TLContextualFacet) {
+        	if (!((TLContextualFacet) libraryElement).isLocalFacet()) {
+                navigateContextualFacet((TLContextualFacet) libraryElement);
+        	}
+
         } else if (libraryElement instanceof TLFacet) {
             navigateFacet((TLFacet) libraryElement);
 
@@ -267,6 +273,11 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
                 } else if (builtInType instanceof TLBusinessObject) {
                     navigateBusinessObject((TLBusinessObject) builtInType);
 
+                } else if (builtInType instanceof TLContextualFacet) {
+                	if (!((TLContextualFacet) builtInType).isLocalFacet()) {
+                        navigateContextualFacet((TLContextualFacet) builtInType);
+                	}
+
                 } else if (builtInType instanceof TLResource) {
                     navigateResource((TLResource) builtInType);
 
@@ -357,6 +368,11 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
             for (TLBusinessObject entity : library.getBusinessObjectTypes()) {
                 navigateBusinessObject(entity);
             }
+    		for (TLContextualFacet entity : library.getContextualFacetTypes()) {
+    			if (!entity.isLocalFacet()) {
+                    navigateContextualFacet(entity);
+    			}
+        	}
             for (TLResource entity : library.getResourceTypes()) {
                 navigateResource(entity);
             }
@@ -490,8 +506,10 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
             for (TLAlias alias : choiceObject.getAliases()) {
                 navigateAlias(alias);
             }
-            for (TLFacet choiceFacet : choiceObject.getChoiceFacets()) {
-                navigateFacet(choiceFacet);
+            for (TLContextualFacet choiceFacet : choiceObject.getChoiceFacets()) {
+            	if (choiceFacet.isLocalFacet()) {
+                    navigateContextualFacet(choiceFacet);
+            	}
             }
             for (TLEquivalent equivalent : choiceObject.getEquivalents()) {
                 navigateEquivalent(equivalent);
@@ -556,11 +574,20 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
             for (TLAlias alias : businessObject.getAliases()) {
                 navigateAlias(alias);
             }
-            for (TLFacet customFacet : businessObject.getCustomFacets()) {
-                navigateFacet(customFacet);
+            for (TLContextualFacet customFacet : businessObject.getCustomFacets()) {
+            	if (customFacet.isLocalFacet()) {
+                    navigateContextualFacet(customFacet);
+            	}
             }
-            for (TLFacet queryFacet : businessObject.getQueryFacets()) {
-                navigateFacet(queryFacet);
+            for (TLContextualFacet queryFacet : businessObject.getQueryFacets()) {
+            	if (queryFacet.isLocalFacet()) {
+                    navigateContextualFacet(queryFacet);
+            	}
+            }
+            for (TLContextualFacet updateFacet : businessObject.getUpdateFacets()) {
+            	if (updateFacet.isLocalFacet()) {
+                    navigateContextualFacet(updateFacet);
+            	}
             }
             for (TLEquivalent equivalent : businessObject.getEquivalents()) {
                 navigateEquivalent(equivalent);
@@ -813,23 +840,45 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateFacet(TLFacet facet) {
         if (canVisit(facet) && visitor.visitFacet(facet)) {
-            for (TLAlias alias : facet.getAliases()) {
-                navigateAlias(alias);
-            }
-            for (TLAttribute attribute : facet.getAttributes()) {
-                navigateAttribute(attribute);
-            }
-            for (TLProperty element : facet.getElements()) {
-                navigateElement(element);
-            }
-            for (TLIndicator indicator : facet.getIndicators()) {
-                navigateIndicator(indicator);
-            }
-            navigateDocumentation(facet.getDocumentation());
+        	navigateFacetMembers(facet);
         }
         addVisitedNode(facet);
     }
 
+    /**
+     * Called when a <code>TLContextualFacet</code> instance is encountered during model navigation.
+     * 
+     * @param facet
+     *            the contextual facet entity to visit and navigate
+     */
+    public void navigateContextualFacet(TLContextualFacet facet) {
+        if (canVisit(facet) && visitor.visitContextualFacet(facet)) {
+        	navigateFacetMembers(facet);
+        }
+        addVisitedNode(facet);
+    }
+    
+    /**
+     * Navigates the member fields of the given facet.
+     * 
+     * @param facet  the facet whose members are to be navigated
+     */
+    private void navigateFacetMembers(TLFacet facet) {
+        for (TLAlias alias : facet.getAliases()) {
+            navigateAlias(alias);
+        }
+        for (TLAttribute attribute : facet.getAttributes()) {
+            navigateAttribute(attribute);
+        }
+        for (TLProperty element : facet.getElements()) {
+            navigateElement(element);
+        }
+        for (TLIndicator indicator : facet.getIndicators()) {
+            navigateIndicator(indicator);
+        }
+        navigateDocumentation(facet.getDocumentation());
+    }
+    
     /**
      * Called when a <code>TLActionFacet</code> instance is encountered during model navigation.
      * 

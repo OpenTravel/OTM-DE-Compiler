@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_06"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_06 ../../../main/resources/ota2-context/schemas/OTA2_LibraryModel_v1.6.0.xsd">
+    
+    <VersionScheme>OTA2</VersionScheme>
+    <Status>Draft</Status>
+    <Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01_02</Namespace>
+    <Prefix>lib-0102</Prefix>
+    <Name>test_library</Name>
+    <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
+    <Import namespace="http://www.opentravel.org/OTM/Common/v0" prefix="ota"/>
+    <Import namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01_01" prefix="lib-0101"/>
+    <Comments>Test Library</Comments>
+    
+    <Simple name="LookupSimple" type="lib-0101:LookupSimple" maxLength="5"/>
+    
+    <Simple name="TestMinorVersionSimple" type="xsd:string" pattern="[A-Za-z]*" minLength="2" maxLength="5" />
+    
+    <Simple name="LaterMinorVersionSimple" type="lib-01:LaterMinorVersionSimple" />
+    
+    <Enumeration_Closed name="TestMinorVersionClosedEnum">
+        <Value literal="a12" />
+        <Value literal="b12" />
+        <Value literal="c12" />
+    </Enumeration_Closed>
+    
+    <Enumeration_Closed name="LookupClosedEnum">
+        <Extension extends="lib-0101:LookupClosedEnum"/>
+        <Value literal="a12" />
+        <Value literal="b12" />
+        <Value literal="c12" />
+    </Enumeration_Closed>
+    
+    <Enumeration_Closed name="LaterMinorVersionClosedEnum">
+        <Extension extends="lib-01:LaterMinorVersionClosedEnum"/>
+        <Value literal="a12" />
+        <Value literal="b12" />
+        <Value literal="c12" />
+    </Enumeration_Closed>
+    
+    <Enumeration_Open name="TestMinorVersionOpenEnum">
+        <Value literal="a12" />
+        <Value literal="b12" />
+        <Value literal="c12" />
+    </Enumeration_Open>
+    
+    <Enumeration_Open name="LookupOpenEnum">
+        <Extension extends="lib-0101:LookupOpenEnum"/>
+        <Value literal="a12" />
+        <Value literal="b12" />
+        <Value literal="c12" />
+    </Enumeration_Open>
+    
+    <Enumeration_Open name="LaterMinorVersionOpenEnum">
+        <Extension extends="lib-01:LaterMinorVersionOpenEnum"/>
+        <Value literal="a12" />
+        <Value literal="b12" />
+        <Value literal="c12" />
+    </Enumeration_Open>
+    
+    <ValueWithAttrs name="LookupVWA" type="lib-0101:LookupVWA">
+        <Attribute mandatory="false" name="vwaAttribute12" type="xsd:string"/>
+    </ValueWithAttrs>
+    
+    <ValueWithAttrs name="LaterMinorVersionVWA" type="lib-01:LaterMinorVersionVWA">
+        <Attribute mandatory="false" name="vwaAttribute12" type="xsd:string"/>
+    </ValueWithAttrs>
+    
+    <CoreObject name="LookupCore" notExtendable="false">
+        <Extension extends="lib-0101:LookupCore"/>
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="Element12" repeat="0" type="xsd:string"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <CoreObject name="PatchTestCore" notExtendable="false">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="Element12" repeat="0" type="xsd:string"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <CoreObject name="LaterMinorVersionCore" notExtendable="false">
+        <Extension extends="lib-01:LaterMinorVersionCore"/>
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="Element12" repeat="0" type="xsd:string"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <ChoiceObject name="LookupChoice" notExtendable="false">
+        <Extension extends="lib-0101:LookupChoice"/>
+        <Aliases/>
+        <Shared>
+            <Element name="sharedElement12" repeat="0" type="xsd:string"/>
+        </Shared>
+    </ChoiceObject>
+    
+	<ContextualFacet name="ChoiceA" type="Choice" facetOwner="LookupChoice">
+        <Element name="choiceAElement12" repeat="0" type="xsd:string"/>
+	</ContextualFacet>
+	
+	<ContextualFacet name="ChoiceB" type="Choice" facetOwner="LookupChoice">
+        <Element name="choiceBElement12" repeat="0" type="xsd:string"/>
+	</ContextualFacet>
+	
+    <ChoiceObject name="PatchTestChoice" notExtendable="false">
+        <Aliases/>
+        <Shared>
+            <Element name="sharedElement12" repeat="0" type="xsd:string"/>
+        </Shared>
+    </ChoiceObject>
+    
+	<ContextualFacet name="ChoiceA" type="Choice" facetOwner="PatchTestChoice">
+        <Element name="choiceAElement12" repeat="0" type="xsd:string"/>
+	</ContextualFacet>
+	
+	<ContextualFacet name="ChoiceB" type="Choice" facetOwner="PatchTestChoice">
+        <Element name="choiceBElement12" repeat="0" type="xsd:string"/>
+	</ContextualFacet>
+	
+    <ChoiceObject name="LaterMinorVersionChoice" notExtendable="false">
+        <Extension extends="lib-01:LaterMinorVersionChoice"/>
+        <Aliases/>
+        <Shared>
+            <Element name="sharedElement12" repeat="0" type="xsd:string"/>
+        </Shared>
+    </ChoiceObject>
+    
+	<ContextualFacet name="ChoiceA" type="Choice" facetOwner="LaterMinorVersionChoice">
+        <Element name="choiceAElement12" repeat="0" type="xsd:string"/>
+	</ContextualFacet>
+	
+	<ContextualFacet name="ChoiceB" type="Choice" facetOwner="LaterMinorVersionChoice">
+        <Element name="choiceBElement12" repeat="0" type="xsd:string"/>
+	</ContextualFacet>
+	
+    <BusinessObject name="LookupBO" notExtendable="false">
+        <Extension extends="lib-0101:LookupBO"/>
+        <Aliases/>
+        <ID/>
+        <Summary>
+            <Element name="Element12" repeat="0" type="xsd:string"/>
+        </Summary>
+        <Detail/>
+    </BusinessObject>
+    
+    <BusinessObject name="PatchTestBO" notExtendable="false">
+        <Aliases/>
+        <ID>
+            <Element name="uid" repeat="1" type="xsd:string"/>
+        </ID>
+        <Summary>
+            <Element name="Element12" repeat="0" type="xsd:string"/>
+        </Summary>
+        <Detail/>
+    </BusinessObject>
+    
+    <BusinessObject name="LaterMinorVersionBO" notExtendable="false">
+        <Extension extends="lib-01:LaterMinorVersionBO"/>
+        <Aliases/>
+        <ID/>
+        <Summary>
+            <Element name="Element12" repeat="0" type="xsd:string"/>
+        </Summary>
+        <Detail/>
+    </BusinessObject>
+    
+    <Resource name="LookupResource" businessObjectRef="LookupBO" basePath="/resources/LookupResource"
+    			abstract="false" firstClass="true">
+        <Extension extends="lib-0101:LookupResource"/>
+        <ParamGroup name="LookupParametersShared" idGroup="false" facetName="LookupBO_Summary">
+        	<Parameter fieldName="Element12" location="Path" />
+        </ParamGroup>
+        <ParamGroup name="LookupParameters12" idGroup="true" facetName="LookupBO_ID">
+        	<Parameter fieldName="uid" location="Path" />
+        </ParamGroup>
+        <ActionFacet label="LookupFacetShared" referenceType="None" />
+        <ActionFacet label="LookupFacet12" referenceType="None" />
+        <Action actionId="LookupAction12" common="false">
+        	<ActionRequest httpMethod="GET" pathTemplate="/Lookup12/{uid}" paramGroup="LookupParameters12" />
+        	<ActionResponse statusCodes="200" payloadType="LookupResource_LookupFacet12" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+        </Action>
+    </Resource>
+    
+    <Resource name="PatchTestResource" businessObjectRef="PatchTestBO" basePath="/resources/PatchTestResource"
+    			abstract="false" firstClass="true">
+        <ParamGroup name="PatchTestParameters" idGroup="false" facetName="PatchTestBO_Summary">
+        	<Parameter fieldName="Element12" location="Path" />
+        </ParamGroup>
+        <ActionFacet label="PatchTestFacet" referenceType="None" />
+        <Action actionId="PatchTestAction" common="false">
+        	<ActionRequest httpMethod="GET" pathTemplate="/{Element12}" paramGroup="PatchTestParameters" />
+        	<ActionResponse statusCodes="200" payloadType="PatchTestResource_PatchTestFacet" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+        </Action>
+    </Resource>
+    
+    <Resource name="LaterMinorVersionResource" businessObjectRef="LaterMinorVersionBO" basePath="/resources/LaterMinorVersionResource"
+    			abstract="false" firstClass="true">
+    	<ResourceParentRef parent="lib-0101:MinorVersionTestResource" parentParamGroup="MinorVersionTestParameters" pathTemplate="/parent2/{uid}" />
+        <Extension extends="lib-01:LaterMinorVersionResource"/>
+        <ParamGroup name="LaterMinorVersionParametersShared" idGroup="false" facetName="LaterMinorVersionBO_Summary">
+        	<Parameter fieldName="Element12" location="Path" />
+        </ParamGroup>
+        <ParamGroup name="LaterMinorVersionParameters12" idGroup="true" facetName="LaterMinorVersionBO_ID">
+        	<Parameter fieldName="uid" location="Path" />
+        </ParamGroup>
+        <ActionFacet label="LaterMinorVersionFacetShared" referenceType="None" />
+        <ActionFacet label="LaterMinorVersionFacet12" referenceType="None" />
+        <Action actionId="LaterMinorVersionAction12" common="false">
+        	<ActionRequest httpMethod="GET" pathTemplate="/LMV/{uid}" paramGroup="LaterMinorVersionParameters12" />
+        	<ActionResponse statusCodes="200" payloadType="LaterMinorVersionResource_LaterMinorVersionFacet12" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+        </Action>
+    </Resource>
+    
+    <Service name="VersionedService">
+        <Operation Name="LookupOperation" notExtendable="false">
+	        <Extension extends="lib-0101:VersionedService_LookupOperation"/>
+            <Request>
+                <Element name="RequestValue12" repeat="0" type="xsd:string"/>
+            </Request>
+            <Response>
+                <Element name="ResponseValue12" repeat="0" type="xsd:string"/>
+            </Response>
+            <Notification/>
+        </Operation>
+        <Operation Name="PatchTestOperation" notExtendable="false">
+            <Request>
+                <Element name="RequestValue12" repeat="0" type="xsd:string"/>
+            </Request>
+            <Response>
+                <Element name="ResponseValue12" repeat="0" type="xsd:string"/>
+            </Response>
+            <Notification/>
+        </Operation>
+        <Operation Name="LaterMinorVersionOperation" notExtendable="false">
+	        <Extension extends="lib-01:VersionedService_LaterMinorVersionOperation"/>
+            <Request>
+                <Element name="RequestValue12" repeat="0" type="xsd:string"/>
+            </Request>
+            <Response>
+                <Element name="ResponseValue12" repeat="0" type="xsd:string"/>
+            </Response>
+            <Notification/>
+        </Operation>
+    </Service>
+    
+    <Folder name="Folder1">
+    	<Folder name="Folder1-3">
+    	</Folder>
+    </Folder>
+    <Folder name="Folder2">
+    	<FolderItem>LookupBO</FolderItem>
+    </Folder>
+    
+</Library>

@@ -277,8 +277,8 @@ public class TestFacetTransformers extends Abstract_1_6_TestTransformers {
 
     @Test
     public void testFacetContextualTransformer() throws Exception {
-        List<TLContextualFacet> facetList = getBusinessObject(PACKAGE_2_NAMESPACE, "library_1_p2",
-                "SampleBusinessObject").getCustomFacets();
+    	TLBusinessObject bo = getBusinessObject(PACKAGE_2_NAMESPACE, "library_1_p2", "SampleBusinessObject");
+        List<TLContextualFacet> facetList = bo.getCustomFacets();
 
         assertNotNull(facetList);
         assertEquals(2, facetList.size());

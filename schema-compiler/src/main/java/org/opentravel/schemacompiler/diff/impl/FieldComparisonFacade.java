@@ -19,6 +19,7 @@ package org.opentravel.schemacompiler.diff.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLDocumentation;
@@ -133,7 +134,7 @@ public class FieldComparisonFacade {
 			TLFacet owningFacet = (TLFacet) owner;
 			
 			facetName = owningFacet.getFacetType().getIdentityName(
-					owningFacet.getContext(), owningFacet.getLabel() );
+					FacetCodegenUtils.getFacetName( owningFacet ) );
 		}
 		return facetName;
 	}

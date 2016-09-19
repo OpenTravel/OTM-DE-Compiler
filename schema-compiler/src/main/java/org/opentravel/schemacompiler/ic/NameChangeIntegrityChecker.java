@@ -29,6 +29,7 @@ import org.opentravel.schemacompiler.model.TLActionRequest;
 import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLMemberField;
@@ -249,6 +250,20 @@ public class NameChangeIntegrityChecker extends
         }
 
         /**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitContextualFacet(org.opentravel.schemacompiler.model.TLContextualFacet)
+		 */
+		@Override
+		public boolean visitContextualFacet(TLContextualFacet facet) {
+            NamedEntity referencedEntity = facet.getOwningEntity();
+
+            if (modifiedEntities.contains(referencedEntity)) {
+            	facet.setOwningEntityName(symbolResolver.buildEntityName(
+                        referencedEntity.getNamespace(), referencedEntity.getLocalName()));
+            }
+            return true;
+		}
+
+		/**
          * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitAttribute(org.opentravel.schemacompiler.model.TLAttribute)
          */
         @Override

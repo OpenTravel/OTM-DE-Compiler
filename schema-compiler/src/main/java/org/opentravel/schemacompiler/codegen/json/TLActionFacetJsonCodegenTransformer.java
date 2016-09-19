@@ -203,7 +203,7 @@ public class TLActionFacetJsonCodegenTransformer extends AbstractJsonSchemaTrans
 				case CHOICE:
 					definition.setName(
 							JsonSchemaNamingUtils.getGlobalDefinitionName( actionFacet ) + "_" +
-									getSourceFacet().getLabel() );
+									FacetCodegenUtils.getFacetName( getSourceFacet() ) );
 					break;
 				default:
 					break;

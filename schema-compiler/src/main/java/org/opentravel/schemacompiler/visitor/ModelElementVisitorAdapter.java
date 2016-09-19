@@ -26,6 +26,7 @@ import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLContext;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLEnumValue;
@@ -62,7 +63,7 @@ import org.opentravel.schemacompiler.model.XSDSimpleType;
  * 
  * @author S. Livezey
  */
-public class ModelElementVisitorAdapter implements ModelElementVisitor {
+public abstract class ModelElementVisitorAdapter implements ModelElementVisitor {
 
     /**
      * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitBuiltInLibrary(org.opentravel.schemacompiler.model.BuiltInLibrary)
@@ -169,6 +170,14 @@ public class ModelElementVisitorAdapter implements ModelElementVisitor {
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitContextualFacet(org.opentravel.schemacompiler.model.TLContextualFacet)
+	 */
+	@Override
+	public boolean visitContextualFacet(TLContextualFacet facet) {
+		return true;
+	}
+
+	/**
      * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitService(org.opentravel.schemacompiler.model.TLService)
      */
     @Override

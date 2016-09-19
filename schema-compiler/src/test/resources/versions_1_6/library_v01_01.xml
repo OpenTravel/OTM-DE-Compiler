@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_06"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_06 ../../../main/resources/ota2-context/schemas/OTA2_LibraryModel_v1.6.0.xsd">
+    
+    <VersionScheme>OTA2</VersionScheme>
+    <Status>Draft</Status>
+    <Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01_01</Namespace>
+    <Prefix>lib-0101</Prefix>
+    <Name>test_library</Name>
+    <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
+    <Import namespace="http://www.opentravel.org/OTM/Common/v0" prefix="ota"/>
+    <Import namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01" prefix="lib-01"/>
+    <Comments>Test Library</Comments>
+    
+    <Simple name="LookupSimple" type="lib-01:LookupSimple" minLength="2" />
+    
+    <Simple name="MinorVersionTestSimple" type="xsd:string" pattern="[A-Za-z]*" minLength="2" maxLength="5" />
+    
+    <Enumeration_Closed name="LookupClosedEnum">
+        <Extension extends="lib-01:LookupClosedEnum"/>
+        <Value literal="a11" />
+        <Value literal="b11" />
+        <Value literal="c11" />
+    </Enumeration_Closed>
+    
+    <Enumeration_Closed name="MinorVersionTestClosedEnum">
+        <Value literal="a11" />
+        <Value literal="b11" />
+        <Value literal="c11" />
+    </Enumeration_Closed>
+    
+    <Enumeration_Open name="LookupOpenEnum">
+        <Extension extends="lib-01:LookupOpenEnum"/>
+        <Value literal="a11" />
+        <Value literal="b11" />
+        <Value literal="c11" />
+    </Enumeration_Open>
+    
+    <Enumeration_Open name="MinorVersionTestOpenEnum">
+        <Value literal="a11" />
+        <Value literal="b11" />
+        <Value literal="c11" />
+    </Enumeration_Open>
+    
+    <ValueWithAttrs name="LookupVWA" type="lib-01:LookupVWA">
+        <Attribute mandatory="false" name="vwaAttribute11" type="xsd:string"/>
+    </ValueWithAttrs>
+    
+    <ValueWithAttrs name="MinorVersionTestVWA" type="xsd:string">
+        <Attribute mandatory="false" name="vwaAttribute11" type="xsd:string"/>
+    </ValueWithAttrs>
+    
+    <CoreObject name="LookupCore" notExtendable="false">
+        <Extension extends="lib-01:LookupCore"/>
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="Element11" repeat="0" type="xsd:string"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <CoreObject name="MinorVersionTestCore" notExtendable="false">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="Element11" repeat="0" type="xsd:string"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <ChoiceObject name="LookupChoice" notExtendable="false">
+        <Extension extends="lib-01:LookupChoice"/>
+        <Aliases/>
+        <Shared>
+            <Element name="sharedElement11" repeat="0" type="xsd:string"/>
+        </Shared>
+    </ChoiceObject>
+    
+	<ContextualFacet name="ChoiceA" type="Choice" facetOwner="LookupChoice">
+        <Element name="choiceAElement11" repeat="0" type="xsd:string"/>
+	</ContextualFacet>
+	
+	<ContextualFacet name="ChoiceB" type="Choice" facetOwner="LookupChoice">
+        <Element name="choiceBElement11" repeat="0" type="xsd:string"/>
+	</ContextualFacet>
+	
+    <ChoiceObject name="MinorVersionTestChoice" notExtendable="false">
+        <Aliases/>
+        <Shared>
+            <Element name="sharedElement11" repeat="0" type="xsd:string"/>
+        </Shared>
+    </ChoiceObject>
+    
+	<ContextualFacet name="ChoiceA" type="Choice" facetOwner="MinorVersionTestChoice">
+        <Element name="choiceAElement11" repeat="0" type="xsd:string"/>
+	</ContextualFacet>
+	
+	<ContextualFacet name="ChoiceB" type="Choice" facetOwner="MinorVersionTestChoice">
+        <Element name="choiceBElement11" repeat="0" type="xsd:string"/>
+	</ContextualFacet>
+	
+    <BusinessObject name="LookupBO" notExtendable="false">
+        <Extension extends="lib-01:LookupBO"/>
+        <Aliases/>
+        <ID/>
+        <Summary>
+            <Element name="Element11" repeat="0" type="MinorVersionTestVWA"/>
+            <Element name="Element11Param" repeat="0" type="xsd:string"/>
+        </Summary>
+        <Detail/>
+    </BusinessObject>
+    
+    <BusinessObject name="MinorVersionTestBO" notExtendable="false">
+        <Aliases/>
+        <ID>
+            <Element name="uid" repeat="1" type="xsd:string"/>
+        </ID>
+        <Summary>
+            <Element name="Element11" repeat="0" type="xsd:string"/>
+        </Summary>
+        <Detail/>
+    </BusinessObject>
+    
+    <Resource name="LookupResource" businessObjectRef="LookupBO" basePath="/resources/LookupResource"
+    			abstract="false" firstClass="true">
+        <Extension extends="lib-01:LookupResource"/>
+        <ParamGroup name="LookupParametersShared" idGroup="false" facetName="LookupBO_Summary">
+        	<Parameter fieldName="Element11Param" location="Path" />
+        </ParamGroup>
+        <ParamGroup name="LookupParameters11" idGroup="true" facetName="LookupBO_ID">
+        	<Parameter fieldName="uid" location="Path" />
+        </ParamGroup>
+        <ActionFacet label="LookupFacetShared" referenceType="None" />
+        <ActionFacet label="LookupFacet11" referenceType="None" />
+        <Action actionId="LookupAction11" common="false">
+        	<ActionRequest httpMethod="GET" pathTemplate="/Lookup11/{uid}" paramGroup="LookupParameters11" />
+        	<ActionResponse statusCodes="200" payloadType="LookupResource_LookupFacet11" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+        </Action>
+    </Resource>
+    
+    <Resource name="MinorVersionTestResource" businessObjectRef="MinorVersionTestBO" basePath="/resources/MinorVersionTestResource"
+    			abstract="false" firstClass="true">
+        <ParamGroup name="MinorVersionTestParameters" idGroup="true" facetName="MinorVersionTestBO_Summary">
+        	<Parameter fieldName="uid" location="Path" />
+        </ParamGroup>
+        <ActionFacet label="MinorVersionTestFacet" referenceType="None" />
+        <Action actionId="MinorVersionTestAction" common="false">
+        	<ActionRequest httpMethod="GET" pathTemplate="/MVT/{uid}" paramGroup="MinorVersionTestParameters" />
+        	<ActionResponse statusCodes="200" payloadType="MinorVersionTestResource_MinorVersionTestFacet" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+        </Action>
+    </Resource>
+    
+    <Service name="VersionedService">
+        <Operation Name="LookupOperation" notExtendable="false">
+	        <Extension extends="lib-01:VersionedService_LookupOperation"/>
+            <Request>
+                <Element name="RequestValue11" repeat="0" type="xsd:string"/>
+            </Request>
+            <Response>
+                <Element name="ResponseValue11" repeat="0" type="xsd:string"/>
+            </Response>
+            <Notification/>
+        </Operation>
+        <Operation Name="MinorVersionTestOperation" notExtendable="false">
+            <Request>
+                <Element name="RequestValue11" repeat="0" type="xsd:string"/>
+            </Request>
+            <Response>
+                <Element name="ResponseValue11" repeat="0" type="xsd:string"/>
+            </Response>
+            <Notification/>
+        </Operation>
+    </Service>
+    
+    <Folder name="Folder1">
+    	<FolderItem>LookupCore</FolderItem>
+    	<Folder name="Folder1-1">
+	    	<FolderItem>LookupChoice</FolderItem>
+    	</Folder>
+    	<Folder name="Folder1-2">
+    	</Folder>
+    </Folder>
+    
+</Library>

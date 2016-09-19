@@ -27,14 +27,17 @@ import org.opentravel.schemacompiler.util.OTM16Upgrade;
  */
 public abstract class Abstract_1_6_TestTransformers extends AbstractTestTransformers {
 	
+	private static boolean originalEnabledFlag;
+	
 	@BeforeClass
 	public static void enableOTM16() throws Exception {
+		originalEnabledFlag = OTM16Upgrade.otm16Enabled;
 		OTM16Upgrade.otm16Enabled = true;
 	}
 	
 	@AfterClass
 	public static void disableOTM16() throws Exception {
-		OTM16Upgrade.otm16Enabled = false;
+		OTM16Upgrade.otm16Enabled = originalEnabledFlag;
 	}
 	
     /**

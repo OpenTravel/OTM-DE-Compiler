@@ -24,6 +24,7 @@ import java.util.Set;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 
+import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
@@ -153,7 +154,7 @@ public class ModelCompareUtils {
 		for (TLFacet facet : entity.getAllFacets()) {
 			if (factory.getDelegate( facet ).hasContent()) {
 				facetNames.add( facet.getFacetType().getIdentityName(
-						facet.getContext(), facet.getLabel() ) );
+						FacetCodegenUtils.getFacetName( facet ) ) );
 			}
 		}
 		return facetNames;

@@ -26,6 +26,7 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.model.LibraryMember;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 
@@ -52,8 +53,9 @@ public class TLLibraryJsonCodegenTransformer extends AbstractJsonSchemaTransform
         for (LibraryMember member : source.getNamedMembers()) {
             ObjectTransformer<LibraryMember, CodegenArtifacts, CodeGenerationTransformerContext> transformer = getTransformerFactory()
                     .getTransformer(member, CodegenArtifacts.class);
+            boolean isLocalFacet = (member instanceof TLContextualFacet) && ((TLContextualFacet) member).isLocalFacet();
 
-            if ((transformer != null) && ((filter == null) || filter.processEntity(member))) {
+            if ((transformer != null) && !isLocalFacet && ((filter == null) || filter.processEntity(member))) {
                 CodegenArtifacts artifacts = transformer.transform(member);
 
                 if (artifacts != null) {

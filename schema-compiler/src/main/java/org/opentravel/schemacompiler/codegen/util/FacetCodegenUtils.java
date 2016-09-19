@@ -42,7 +42,18 @@ import org.opentravel.schemacompiler.model.TLResource;
  * @author S. Livezey
  */
 public class FacetCodegenUtils {
-
+	
+	/**
+	 * For contextual facets, this method will return the value of the 'name' field.  For
+	 * non-contextual facets, null will be returned.
+	 * 
+	 * @param facet  the facet for which to return a name
+	 * @return String
+	 */
+	public static String getFacetName(TLFacet facet) {
+		return (facet instanceof TLContextualFacet) ? ((TLContextualFacet) facet).getName() : null;
+	}
+	
     /**
      * Returns all of the facets from the specified owner of the requested type. For non-contextual
      * facet types (e.g. summary or ID), the list that is returned will contain a single element.
@@ -67,12 +78,21 @@ public class FacetCodegenUtils {
                     case QUERY:
                         facetList.addAll(((TLBusinessObject) owner).getQueryFacets());
                         break;
+                    case UPDATE:
+                        facetList.addAll(((TLBusinessObject) owner).getUpdateFacets());
+                        break;
 					default:
 						break;
                 }
             } else if (owner instanceof TLChoiceObject) {
             	if (facetType == TLFacetType.CHOICE) {
             		facetList.addAll(((TLChoiceObject) owner).getChoiceFacets());
+            	}
+            } else if (owner instanceof TLContextualFacet) {
+            	TLContextualFacet owningFacet = (TLContextualFacet) owner;
+            	
+            	if (owningFacet.getFacetType() == facetType) {
+            		facetList.addAll( owningFacet.getChildFacets() );
             	}
             }
         } else {
@@ -180,6 +200,14 @@ public class FacetCodegenUtils {
 					memberFacet = null;
 					break;
         	}
+        } else if (owner instanceof TLContextualFacet) {
+        	TLContextualFacet owningFacet = (TLContextualFacet) owner;
+        	
+        	if (owningFacet.getFacetType() == facetType) {
+        		memberFacet = findContextualFacet(owningFacet.getChildFacets(), facetName);
+        	} else {
+        		memberFacet = null;
+        	}
         } else if (owner instanceof TLOperation) {
             TLOperation opOwner = (TLOperation) owner;
 
@@ -245,6 +273,9 @@ public class FacetCodegenUtils {
         } else if (owner instanceof TLChoiceObject) {
             result = !((TLChoiceObject) owner).isNotExtendable();
             
+        } else if (owner instanceof TLContextualFacet) {
+            result = !((TLContextualFacet) owner).isNotExtendable();
+            
         } else if (owner instanceof TLOperation) {
             result = !((TLOperation) owner).isNotExtendable();
         }
@@ -253,11 +284,10 @@ public class FacetCodegenUtils {
 
     /**
      * Returns the <code>TLFacetOwner</code> instance that is extended by the facet owner that is
-     * passed to this method. If the owner does not extend another model entity, this method will
+     * passed to this method.  If the owner does not extend another model entity, this method will
      * return null.
      * 
-     * @param owner
-     *            the facet owner for which to return the extended entity
+     * @param owner  the facet owner for which to return the extended entity
      * @return TLFacetOwner
      */
     public static TLFacetOwner getFacetOwnerExtension(TLFacetOwner owner) {
@@ -271,8 +301,51 @@ public class FacetCodegenUtils {
                 // This should always be true, but check the type before assigning - just in case
                 result = (TLFacetOwner) extendedEntity;
             }
+            
+        } else if (owner instanceof TLContextualFacet) {
+        	TLContextualFacet cfOwner = (TLContextualFacet) owner;
+        	TLFacetType facetType = cfOwner.getFacetType();
+        	List<String> cfNamePath = new ArrayList<>();
+        	TLFacetOwner baseOwner = null;
+        	
+        	while (cfOwner != null) {
+        		cfNamePath.add(0, cfOwner.getName());
+        		
+        		if (cfOwner.getOwningEntity() instanceof TLContextualFacet) {
+        			cfOwner = (TLContextualFacet) cfOwner.getOwningEntity();
+        			
+        		} else {
+            		baseOwner = cfOwner.getOwningEntity();
+        			cfOwner = null;
+        		}
+        	}
+        	
+        	while ((result == null) && (baseOwner instanceof TLExtensionOwner)) {
+        		baseOwner = getFacetOwnerExtension( baseOwner );
+        		result = getContextualFacet( baseOwner, facetType, cfNamePath );
+        	}
         }
         return result;
+    }
+    
+    /**
+     * Returns the contextual facet that conforms with the specified path relative to the
+     * given owner.  If no such facet exists, this method will return null.
+     * 
+     * @param owner  the base owner from which the path originates
+     * @param facetType  the type of the contextual facet to return
+     * @param namePath  the list of names to follow
+     * @return TLContextualFacet
+     */
+    private static TLContextualFacet getContextualFacet(TLFacetOwner owner, TLFacetType facetType,
+    		List<String> namePath) {
+    	TLFacetOwner currentOwner = owner;
+    	TLContextualFacet facet = null;
+    	
+    	for (String facetName : namePath) {
+    		currentOwner = facet = (TLContextualFacet) getFacetOfType( currentOwner, facetType, facetName );
+    	}
+    	return facet;
     }
 
     /**
@@ -311,6 +384,9 @@ public class FacetCodegenUtils {
             if (facet.getFacetType() == TLFacetType.CHOICE) {
                 localHierarchy.add(0, getFacetOfType(facetOwner, TLFacetType.SHARED));
             }
+        } else if (facetOwner instanceof TLContextualFacet) {
+        	localHierarchy.addAll(0, getLocalFacetHierarchy((TLContextualFacet) facetOwner));
+        	
         } else if (facetOwner instanceof TLOperation) {
             // No detail hierarchy within an operation's facets
         }
@@ -328,25 +404,28 @@ public class FacetCodegenUtils {
      *            the facet owner for which to return "ghost facets"
      * @param facetType
      *            the type of ghost facets to retrieve
-     * @return List<TLFacet>
+     * @return List<TLContextualFacet>
      */
-    public static List<TLFacet> findGhostFacets(TLFacetOwner facetOwner, TLFacetType facetType) {
-        Set<String> inheritedFacetNames = new HashSet<String>();
-        List<TLFacet> inheritedFacets = new ArrayList<TLFacet>();
+    public static List<TLContextualFacet> findGhostFacets(TLFacetOwner facetOwner, TLFacetType facetType) {
+        Set<String> inheritedFacetNames = new HashSet<>();
+        List<TLContextualFacet> inheritedFacets = new ArrayList<>();
         TLFacetOwner extendedOwner = getFacetOwnerExtension(facetOwner);
         Set<TLFacetOwner> visitedOwners = new HashSet<TLFacetOwner>();
 
         // Find all of the inherited facets of the specified facet type
         while (extendedOwner != null) {
             List<TLFacet> facetList = getAllFacetsOfType(extendedOwner, facetType);
+            
+            for (TLFacet f : facetList) {
+            	if (f instanceof TLContextualFacet) {
+            		TLContextualFacet facet = (TLContextualFacet) f;
+                    String facetKey = facetType.getIdentityName(facet.getName());
 
-            for (TLFacet facet : facetList) {
-                String facetKey = facetType.getIdentityName(facet.getContext(), facet.getLabel());
-
-                if (!inheritedFacetNames.contains(facetKey)) {
-                    inheritedFacetNames.add(facetKey);
-                    inheritedFacets.add(facet);
-                }
+                    if (!inheritedFacetNames.contains(facetKey)) {
+                        inheritedFacetNames.add(facetKey);
+                        inheritedFacets.add(facet);
+                    }
+            	}
             }
             visitedOwners.add(extendedOwner);
             extendedOwner = getFacetOwnerExtension(extendedOwner);
@@ -360,18 +439,17 @@ public class FacetCodegenUtils {
         // facets that are declared by the facetOwner's ancestors. Any ancestor facets that do not
         // have a matching item that is explicitly declared by the facetOwner should be considered a
         // ghost facet.
-        List<TLFacet> ghostFacets = new ArrayList<TLFacet>();
+        List<TLContextualFacet> ghostFacets = new ArrayList<>();
 
-        for (TLFacet inheritedFacet : inheritedFacets) {
-            TLFacet declaredFacet = getFacetOfType(facetOwner, facetType,
-                    inheritedFacet.getContext(), inheritedFacet.getLabel());
+        for (TLContextualFacet inheritedFacet : inheritedFacets) {
+        	TLContextualFacet declaredFacet = (TLContextualFacet) getFacetOfType(
+        			facetOwner, facetType, inheritedFacet.getName());
 
             if (declaredFacet == null) {
-                TLFacet ghostFacet = new TLFacet();
+            	TLContextualFacet ghostFacet = new TLContextualFacet();
 
                 ghostFacet.setFacetType(facetType);
-                ghostFacet.setContext(inheritedFacet.getContext());
-                ghostFacet.setLabel(inheritedFacet.getLabel());
+                ghostFacet.setName(inheritedFacet.getName());
                 ghostFacet.setOwningEntity(facetOwner);
                 ghostFacets.add(ghostFacet);
             }

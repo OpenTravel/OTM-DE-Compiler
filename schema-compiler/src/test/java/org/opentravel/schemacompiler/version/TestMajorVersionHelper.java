@@ -27,6 +27,7 @@ import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLCoreObject;
+import org.opentravel.schemacompiler.model.TLFolder;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
@@ -34,6 +35,7 @@ import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
+import org.opentravel.schemacompiler.util.OTM16Upgrade;
 
 /**
  * Verifies the operation of the <code>MajorVersionHelper</code> class.
@@ -189,6 +191,18 @@ public class TestMajorVersionHelper extends AbstractVersionHelperTests {
         assertEquals(3, lookupChoice.getSharedFacet().getElements().size());
         assertContainsAttributes(lookupChoice.getSharedFacet(), "extChoiceAttribute121", "extChoiceAttribute122");
         assertContainsElements(lookupChoice.getSharedFacet(), "sharedElement1", "sharedElement11", "sharedElement12");
+        assertEquals(2, lookupChoice.getChoiceFacets().size());
+        assertEquals("ChoiceA", lookupChoice.getChoiceFacets().get(0).getName());
+        assertEquals("ChoiceB", lookupChoice.getChoiceFacets().get(1).getName());
+        assertEquals(3, lookupChoice.getChoiceFacet("ChoiceB").getElements().size());
+        assertContainsElements(lookupChoice.getChoiceFacet("ChoiceB"), "choiceBElement1", "choiceBElement11", "choiceBElement12");
+        
+        if (OTM16Upgrade.otm16Enabled) {
+            assertEquals(1, lookupChoice.getChoiceFacet("ChoiceB").getChildFacets().size());
+            assertEquals("SubChoice1", lookupChoice.getChoiceFacet("ChoiceB").getChildFacets().get(0).getName());
+            assertEquals(1, lookupChoice.getChoiceFacet("ChoiceB").getChildFacet("SubChoice1").getElements().size());
+            assertContainsElements(lookupChoice.getChoiceFacet("ChoiceB").getChildFacet("SubChoice1"), "subChoiceB1Element1");
+        }
 
         assertNotNull(lookupVWA);
         assertNotNull(lookupVWA.getParentType());
@@ -382,9 +396,30 @@ public class TestMajorVersionHelper extends AbstractVersionHelperTests {
         assertNotNull( minorVersionTestResource.getAction("MinorVersionTestAction").getRequest() );
         assertEquals(1, minorVersionTestResource.getAction("MinorVersionTestAction").getResponses().size());
         
+        // Validate that the folder structure was rolled-up correctly
+        if (OTM16Upgrade.otm16Enabled) {
+            List<TLFolder> folders = newMajorVersionLibrary.getFolders();
+            
+            assertEquals(2, folders.size());
+            assertEquals(3, folders.get(0).getFolders().size());
+            assertEquals(0, folders.get(1).getFolders().size());
+            assertEquals("Folder1", folders.get(0).getName());
+            assertEquals("Folder1-1", folders.get(0).getFolders().get(0).getName());
+            assertEquals("Folder1-2", folders.get(0).getFolders().get(1).getName());
+            assertEquals("Folder1-3", folders.get(0).getFolders().get(2).getName());
+            assertEquals("Folder2", folders.get(1).getName());
+            assertEquals(1, folders.get(0).getEntities().size());
+            assertEquals("LookupCore", folders.get(0).getEntities().get(0).getLocalName());
+            assertEquals(1, folders.get(0).getFolders().get(0).getEntities().size());
+            assertEquals("LookupChoice", folders.get(0).getFolders().get(0).getEntities().get(0).getLocalName());
+            assertEquals(1, folders.get(1).getEntities().size());
+            assertEquals("LookupBO", folders.get(1).getEntities().get(0).getLocalName());
+        }
+        
         // Verify the total number of elements to make sure nothing
         // exists, except for the items we just tested.
-        assertEquals(35, newMajorVersionLibrary.getNamedMembers().size());
+        assertEquals(35, newMajorVersionLibrary.getNamedMembers().size() -
+        		newMajorVersionLibrary.getContextualFacetTypes().size());
         assertEquals(4, newMajorVersionLibrary.getService().getOperations().size());
     }
 

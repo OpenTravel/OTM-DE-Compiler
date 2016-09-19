@@ -26,6 +26,7 @@ import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLContext;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLEnumValue;
@@ -182,6 +183,15 @@ public interface ModelElementVisitor {
      * @return boolean flag indicating whether to traverse child elements (if any exist)
      */
     public boolean visitBusinessObject(TLBusinessObject businessObject);
+    
+    /**
+     * Called when a <code>TLContextualFacet</code> instance is encountered during model navigation.
+     * 
+     * @param facet
+     *            the contextual facet entity to visit
+     * @return boolean flag indicating whether to traverse child elements (if any exist)
+     */
+    public boolean visitContextualFacet(TLContextualFacet facet);
 
     /**
      * Called when a <code>TLService</code> instance is encountered during model navigation.

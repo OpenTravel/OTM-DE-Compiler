@@ -25,7 +25,10 @@ import org.opentravel.ns.ota2.librarymodel_v01_05.LibraryStatus;
 import org.opentravel.ns.ota2.librarymodel_v01_05.NamespaceImport;
 import org.opentravel.ns.ota2.librarymodel_v01_05.Service;
 import org.opentravel.schemacompiler.model.LibraryMember;
+import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLContext;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLInclude;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
@@ -33,6 +36,7 @@ import org.opentravel.schemacompiler.model.TLService;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.symbols.DefaultTransformerContext;
 import org.opentravel.schemacompiler.transform.util.BaseTransformer;
+import org.opentravel.schemacompiler.util.OTM16Upgrade;
 
 /**
  * Handles the transformation of objects from the <code>Library</code> type to the
@@ -116,6 +120,27 @@ public class LibraryTransformer extends
 
             target.setService(serviceTransformer.transform(source.getService()));
         }
+        
+        // Handle special case for assigning contextual facets to this owning library
+        // if the OTM16 Upgrade flag is enabled.
+        if (OTM16Upgrade.otm16Enabled) {
+        	for (TLBusinessObject bo : target.getBusinessObjectTypes()) {
+        		for (TLContextualFacet facet : bo.getCustomFacets()) {
+        			target.addNamedMember( facet );
+        		}
+        		for (TLContextualFacet facet : bo.getQueryFacets()) {
+        			target.addNamedMember( facet );
+        		}
+        		for (TLContextualFacet facet : bo.getUpdateFacets()) {
+        			target.addNamedMember( facet );
+        		}
+        	}
+        	for (TLChoiceObject choice : target.getChoiceObjectTypes()) {
+        		for (TLContextualFacet facet : choice.getChoiceFacets()) {
+        			target.addNamedMember( facet );
+        		}
+        	}
+        }
 
         return target;
     }
@@ -136,15 +161,9 @@ public class LibraryTransformer extends
         }
 
         switch (jaxbStatus) {
-//            case UNDER_REVIEW:
-//                tlStatus = TLLibraryStatus.UNDER_REVIEW;
-//                break;
             case FINAL:
                 tlStatus = TLLibraryStatus.FINAL;
                 break;
-//            case OBSOLETE:
-//                tlStatus = TLLibraryStatus.OBSOLETE;
-//                break;
             case DRAFT:
             default:
                 tlStatus = TLLibraryStatus.DRAFT;

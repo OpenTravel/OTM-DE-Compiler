@@ -34,7 +34,8 @@ public class TLContextualFacetTransformer extends
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
      */
-    @Override
+    @SuppressWarnings("deprecation")
+	@Override
     public FacetContextual transform(TLContextualFacet source) {
         FacetContextual facet = new FacetContextual();
 
@@ -45,6 +46,7 @@ public class TLContextualFacetTransformer extends
             facet.setDocumentation(docTransformer.transform(source.getDocumentation()));
         }
         facet.setNotExtendable(source.isNotExtendable());
+        facet.setContext(trimString(source.getContext(), false));
         facet.setLabel(trimString(source.getName(), false));
         facet.getAttribute().addAll(transformAttributes(source.getAttributes()));
         facet.getElement().addAll(transformElements(source.getElements()));

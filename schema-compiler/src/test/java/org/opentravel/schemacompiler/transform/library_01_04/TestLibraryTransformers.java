@@ -92,13 +92,14 @@ public class TestLibraryTransformers extends Abstract_1_4_TestTransformers {
         assertEquals(1, testImport.getFileHints().size());
         assertTrue(testImport.getFileHints().contains("library_3_ext.xml"));
 
-        assertEquals(14, library.getNamedMembers().size());
+        assertEquals(18, library.getNamedMembers().size());
         assertEquals(2, library.getSimpleTypes().size());
         assertEquals(0, library.getClosedEnumerationTypes().size());
         assertEquals(2, library.getOpenEnumerationTypes().size());
         assertEquals(2, library.getValueWithAttributesTypes().size());
         assertEquals(4, library.getCoreObjectTypes().size());
         assertEquals(3, library.getBusinessObjectTypes().size());
+        assertEquals(4, library.getContextualFacetTypes().size());
         assertNotNull(library.getService());
     }
 
@@ -156,9 +157,9 @@ public class TestLibraryTransformers extends Abstract_1_4_TestTransformers {
         // Make sure the total number of terms matches the count from
         // the original model library
         int termAdjust = (modelLibrary.getService() == null) ? 0 : 1;
+        termAdjust += modelLibrary.getContextualFacetTypes().size();
 
-        assertEquals(modelLibrary.getNamedMembers().size() - termAdjust, jaxbLibrary.getTerms()
-                .size());
+        assertEquals(modelLibrary.getNamedMembers().size() - termAdjust, jaxbLibrary.getTerms().size());
     }
 
     @Test

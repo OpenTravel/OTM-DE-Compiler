@@ -108,8 +108,7 @@ public abstract class TLComplexTypeBase extends LibraryMemberImpl implements TLP
     public void setExtension(TLExtension extension) {
         if (extension != this.extension) {
             // Even though there is only one extension, send to events so that all extension owners
-            // behave
-            // the same (as if there is a list of multiple extensions).
+            // behave the same (as if there is a list of multiple extensions).
             if (this.extension != null) {
                 ModelEvent<?> event = new ModelEventBuilder(ModelEventType.EXTENDS_REMOVED, this)
                         .setAffectedItem(this.extension).buildEvent();
@@ -220,19 +219,20 @@ public abstract class TLComplexTypeBase extends LibraryMemberImpl implements TLP
         }
     }
     
-    /**
+	/**
      * Called when a contextual facet is added to this entity, regardless of
      * its facet type.
      * 
      * @param facet  the contextual facet that was added
      */
     protected void contextualFacetAdded(TLContextualFacet facet) {
-    	if (OTM16Upgrade.otm16Enabled) {
+    	if (!OTM16Upgrade.otm16Enabled) {
     		AbstractLibrary owningLibrary = getOwningLibrary();
     		
     		if (owningLibrary != null) {
     			owningLibrary.addNamedMember( facet );
     		}
+    		facet.setOwningEntityName( getLocalName() );
     	}
     }
     
@@ -243,7 +243,7 @@ public abstract class TLComplexTypeBase extends LibraryMemberImpl implements TLP
      * @param facet  the contextual facet that was removed
      */
     protected void contextualFacetRemoved(TLContextualFacet facet) {
-    	if (OTM16Upgrade.otm16Enabled) {
+    	if (!OTM16Upgrade.otm16Enabled) {
     		AbstractLibrary owningLibrary = getOwningLibrary();
     		
     		if (owningLibrary != null) {

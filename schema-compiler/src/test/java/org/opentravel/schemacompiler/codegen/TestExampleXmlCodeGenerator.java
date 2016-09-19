@@ -43,7 +43,7 @@ public class TestExampleXmlCodeGenerator extends AbstractTestTransformers {
                 "library_1_p2", "SampleBusinessObject");
         TLBusinessObject compoundBusinessObject = getBusinessObject(PACKAGE_2_NAMESPACE,
                 "library_1_p2", "CompoundBusinessObject");
-        TLFacet customFacet = sampleBusinessObject.getCustomFacet("Sample", "Test1");
+        TLFacet customFacet = sampleBusinessObject.getCustomFacet("Test1");
         ExampleGeneratorOptions options = new ExampleGeneratorOptions();
 
         options.setDetailLevel(DetailLevel.MAXIMUM);

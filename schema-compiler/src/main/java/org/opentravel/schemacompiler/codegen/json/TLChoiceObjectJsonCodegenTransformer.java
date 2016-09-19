@@ -20,7 +20,7 @@ import org.opentravel.schemacompiler.codegen.impl.CorrelatedCodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.json.facet.FacetJsonSchemaDelegateFactory;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
-import org.opentravel.schemacompiler.model.TLFacet;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLFacetType;
 
 /**
@@ -39,11 +39,15 @@ public class TLChoiceObjectJsonCodegenTransformer extends AbstractJsonSchemaTran
 
         artifacts.addAllArtifacts( delegateFactory.getDelegate( source.getSharedFacet() ).generateArtifacts() );
         
-        for (TLFacet choiceFacet : source.getChoiceFacets()) {
-        	artifacts.addAllArtifacts( delegateFactory.getDelegate( choiceFacet ).generateArtifacts() );
+        for (TLContextualFacet choiceFacet : source.getChoiceFacets()) {
+        	if (choiceFacet.isLocalFacet()) {
+            	artifacts.addAllArtifacts( delegateFactory.getDelegate( choiceFacet ).generateArtifacts() );
+        	}
         }
-        for (TLFacet ghostFacet : FacetCodegenUtils.findGhostFacets( source, TLFacetType.CHOICE )) {
-        	artifacts.addAllArtifacts( delegateFactory.getDelegate( ghostFacet ).generateArtifacts() );
+        for (TLContextualFacet ghostFacet : FacetCodegenUtils.findGhostFacets( source, TLFacetType.CHOICE )) {
+        	if (ghostFacet.isLocalFacet()) {
+            	artifacts.addAllArtifacts( delegateFactory.getDelegate( ghostFacet ).generateArtifacts() );
+        	}
         }
         return artifacts.getConsolidatedArtifacts();
 	}

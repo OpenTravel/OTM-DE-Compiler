@@ -391,8 +391,8 @@ public class PropertyCodegenUtils {
             if (visitedOwners.contains(facetOwner)) {
                 break;
             }
-            TLFacet aFacet = FacetCodegenUtils.getFacetOfType(facetOwner, facet.getFacetType(),
-                    facet.getContext(), facet.getLabel());
+            String facetName = FacetCodegenUtils.getFacetName(facet);
+            TLFacet aFacet = FacetCodegenUtils.getFacetOfType(facetOwner, facet.getFacetType(), facetName);
 
             if (aFacet != null) {
                 List<TLAttribute> localAttributes = new ArrayList<TLAttribute>(
@@ -450,8 +450,8 @@ public class PropertyCodegenUtils {
             if (visitedOwners.contains(facetOwner)) {
                 break;
             }
-            TLFacet aFacet = FacetCodegenUtils.getFacetOfType(facetOwner, facet.getFacetType(),
-                    facet.getContext(), facet.getLabel());
+            String facetName = FacetCodegenUtils.getFacetName(facet);
+            TLFacet aFacet = FacetCodegenUtils.getFacetOfType(facetOwner, facet.getFacetType(), facetName);
 
             if (aFacet != null) {
                 List<TLIndicator> localIndicators = new ArrayList<TLIndicator>(
@@ -510,8 +510,8 @@ public class PropertyCodegenUtils {
             if (visitedOwners.contains(facetOwner)) {
                 break;
             }
-            TLFacet aFacet = FacetCodegenUtils.getFacetOfType(facetOwner, facet.getFacetType(),
-                    facet.getContext(), facet.getLabel());
+            String facetName = FacetCodegenUtils.getFacetName(facet);
+            TLFacet aFacet = FacetCodegenUtils.getFacetOfType(facetOwner, facet.getFacetType(), facetName);
 
             if (aFacet != null) {
                 List<TLProperty> localProperties = new ArrayList<TLProperty>(aFacet.getElements());
@@ -609,16 +609,14 @@ public class PropertyCodegenUtils {
 
             // Traverse upward in the inheritance root, looking for the highest-level query facet
             // that matches the one passed to this method
-            TLFacetOwner parentEntity = FacetCodegenUtils.getFacetOwnerExtension(facet
-                    .getOwningEntity());
+            TLFacetOwner parentEntity = FacetCodegenUtils.getFacetOwnerExtension(facet.getOwningEntity());
 
             while (parentEntity != null) {
-                TLFacet baseQueryFacet = FacetCodegenUtils.getFacetOfType(parentEntity,
-                        facet.getFacetType(), facet.getContext(), facet.getLabel());
+                String facetName = FacetCodegenUtils.getFacetName(facet);
+                TLFacet baseQueryFacet = FacetCodegenUtils.getFacetOfType(parentEntity, facet.getFacetType(), facetName);
 
                 if (baseQueryFacet != null) {
-                    inheritanceRoot = (alias == null) ? baseQueryFacet : baseQueryFacet
-                            .getAlias(alias.getName());
+                    inheritanceRoot = (alias == null) ? baseQueryFacet : baseQueryFacet.getAlias(alias.getName());
                 }
                 parentEntity = FacetCodegenUtils.getFacetOwnerExtension(parentEntity);
             }

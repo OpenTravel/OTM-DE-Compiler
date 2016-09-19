@@ -21,6 +21,7 @@ import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegate;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenElements;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetType;
 
@@ -49,24 +50,30 @@ public class TLBusinessObjectCodegenTransformer extends
         generateFacetArtifacts(delegateFactory.getDelegate(source.getDetailFacet()),
                 elementArtifacts, otherArtifacts);
 
-        for (TLFacet customFacet : source.getCustomFacets()) {
-            generateFacetArtifacts(delegateFactory.getDelegate(customFacet), elementArtifacts,
-                    otherArtifacts);
+        for (TLContextualFacet customFacet : source.getCustomFacets()) {
+        	if (customFacet.isLocalFacet()) {
+                generateFacetArtifacts(delegateFactory.getDelegate(customFacet), elementArtifacts, otherArtifacts);
+        	}
         }
-        for (TLFacet ghostFacet : FacetCodegenUtils.findGhostFacets(source, TLFacetType.CUSTOM)) {
-            generateFacetArtifacts(delegateFactory.getDelegate(ghostFacet), elementArtifacts,
-                    otherArtifacts);
-        }
-
-        for (TLFacet queryFacet : source.getQueryFacets()) {
-            generateFacetArtifacts(delegateFactory.getDelegate(queryFacet), elementArtifacts,
-                    otherArtifacts);
-        }
-        for (TLFacet ghostFacet : FacetCodegenUtils.findGhostFacets(source, TLFacetType.QUERY)) {
-            generateFacetArtifacts(delegateFactory.getDelegate(ghostFacet), elementArtifacts,
-                    otherArtifacts);
+        for (TLContextualFacet ghostFacet : FacetCodegenUtils.findGhostFacets(source, TLFacetType.CUSTOM)) {
+        	if (ghostFacet.isLocalFacet()) {
+                generateFacetArtifacts(delegateFactory.getDelegate(ghostFacet), elementArtifacts, otherArtifacts);
+        	}
         }
 
+        for (TLContextualFacet queryFacet : source.getQueryFacets()) {
+        	if (queryFacet.isLocalFacet()) {
+                generateFacetArtifacts(delegateFactory.getDelegate(queryFacet), elementArtifacts, otherArtifacts);
+        	}
+        }
+        for (TLContextualFacet ghostFacet : FacetCodegenUtils.findGhostFacets(source, TLFacetType.QUERY)) {
+        	if (ghostFacet.isLocalFacet()) {
+                generateFacetArtifacts(delegateFactory.getDelegate(ghostFacet), elementArtifacts, otherArtifacts);
+        	}
+        }
+        
+        // TODO: Add XML schema generation for update facets
+        
         return buildCorrelatedArtifacts(source, elementArtifacts, otherArtifacts);
     }
 
@@ -81,7 +88,7 @@ public class TLBusinessObjectCodegenTransformer extends
      * @param otherArtifacts
      *            the container for all generated non-element schema artifacts
      */
-    private void generateFacetArtifacts(FacetCodegenDelegate<TLFacet> facetDelegate,
+    private void generateFacetArtifacts(FacetCodegenDelegate<? extends TLFacet> facetDelegate,
             FacetCodegenElements elementArtifacts, CodegenArtifacts otherArtifacts) {
         elementArtifacts.addAll(facetDelegate.generateElements());
         otherArtifacts.addAllArtifacts(facetDelegate.generateArtifacts());

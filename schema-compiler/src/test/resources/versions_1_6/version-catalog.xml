@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Catalog xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryCatalog_v01_00"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryCatalog_v01_00 ../../../main/resources/ota2-context/schemas/OTA2_LibraryCatalog_v1.0.0.xsd">
+	
+	<CatalogEntry>
+		<Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01</Namespace>
+		<Location>./library_v01_00.xml</Location>
+	</CatalogEntry>
+	<CatalogEntry>
+		<Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01_00_01</Namespace>
+		<Location>./library_v01_00_01.xml</Location>
+	</CatalogEntry>
+	<CatalogEntry>
+		<Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01_01</Namespace>
+		<Location>./library_v01_01.xml</Location>
+	</CatalogEntry>
+	<CatalogEntry>
+		<Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01_02</Namespace>
+		<Location>./library_v01_02.xml</Location>
+	</CatalogEntry>
+	<CatalogEntry>
+		<Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01_02_01</Namespace>
+		<Location>./library_v01_02_01.xml</Location>
+	</CatalogEntry>
+	<CatalogEntry>
+		<Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01_02_02</Namespace>
+		<Location>./library_v01_02_02.xml</Location>
+	</CatalogEntry>
+	<CatalogEntry>
+		<Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/cf1/v01</Namespace>
+		<Location>./facets1_v01_00.xml</Location>
+	</CatalogEntry>
+	<CatalogEntry>
+		<Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/cf2/v01</Namespace>
+		<Location>./facets1_v02_00.xml</Location>
+	</CatalogEntry>
+</Catalog>

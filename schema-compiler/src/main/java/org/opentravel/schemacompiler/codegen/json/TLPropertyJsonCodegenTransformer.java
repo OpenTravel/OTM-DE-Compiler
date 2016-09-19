@@ -22,6 +22,7 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonType;
 import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
+import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.JsonSchemaNamingUtils;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.model.TLAbstractFacet;
@@ -241,7 +242,7 @@ public class TLPropertyJsonCodegenTransformer extends AbstractJsonSchemaTransfor
             		if (alias != null) {
             			TLAlias ownerAlias = AliasCodegenUtils.getOwnerAlias( alias );
             			alias = AliasCodegenUtils.getFacetAlias( ownerAlias, itemFacet.getFacetType(),
-            					itemFacet.getContext(), itemFacet.getLabel() );
+            					FacetCodegenUtils.getFacetName( itemFacet ) );
             		}
             		baseType = itemFacet;
         		}

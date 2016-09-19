@@ -26,6 +26,7 @@ import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLIndicator;
@@ -128,6 +129,15 @@ public class ModelElementCollector extends ModelElementVisitorAdapter {
 	public boolean visitChoiceObject(TLChoiceObject choiceObject) {
         libraryEntities.add(choiceObject);
         return true;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitContextualFacet(org.opentravel.schemacompiler.model.TLContextualFacet)
+	 */
+	@Override
+	public boolean visitContextualFacet(TLContextualFacet facet) {
+        libraryEntities.add(facet);
+		return false;
 	}
 
 	/**
