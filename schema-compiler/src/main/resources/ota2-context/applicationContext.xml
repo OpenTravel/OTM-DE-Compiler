@@ -267,6 +267,10 @@
 					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.compile.TLContextCompileValidator" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLContextualFacet" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.compile.TLContextualFacetCompileValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
 					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLCoreObject" />
 					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.compile.TLCoreObjectCompileValidator" />
 				</bean>
@@ -413,6 +417,10 @@
 				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
 					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLContext" />
 					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.save.TLContextSaveValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLContextualFacet" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.save.TLContextualFacetSaveValidator" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
 					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLCoreObject" />
@@ -1621,6 +1629,11 @@
 					<property name="transformer" value="org.opentravel.schemacompiler.codegen.xsd.TLChoiceObjectCodegenTransformer" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLContextualFacet" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.xsd.TLContextualFacetCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
 					<property name="source" value="org.opentravel.schemacompiler.model.TLResource" />
 					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
 					<property name="transformer" value="org.opentravel.schemacompiler.codegen.xsd.TLResourceCodegenTransformer" />
@@ -1733,6 +1746,11 @@
 					<property name="source" value="org.opentravel.schemacompiler.model.TLBusinessObject" />
 					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
 					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLBusinessObjectJsonCodegenTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLContextualFacet" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLContextualFacetJsonCodegenTransformer" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
 					<property name="source" value="org.opentravel.schemacompiler.model.TLExtensionPointFacet" />

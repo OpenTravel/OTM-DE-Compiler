@@ -690,12 +690,11 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
 	 *            than the property's assigned type)
      * @return Element
      */
-	private Element createPropertyElement(TLProperty property,
-			TLPropertyType propertyType) {
+	private Element createPropertyElement(TLProperty property, TLPropertyType propertyType) {
         NamedEntity prefixEntity = null;
         String elementNamespace = null;
         String elementName = null;
-
+        
         if (!PropertyCodegenUtils.hasGlobalElement(propertyType)) {
             if (context.getModelAlias() != null) {
 				elementName = XsdCodegenUtils.getGlobalElementName(
@@ -715,43 +714,42 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
             }
 
             if (elementName == null) {
-				if ((property.getName() == null)
-						|| (property.getName().length() == 0)) {
+				if ((property.getName() == null) || (property.getName().length() == 0)) {
                     elementName = propertyType.getLocalName();
                 } else {
                     elementName = property.getName();
                 }
 
-				// The element may be inherited, so to obtain the proper
-				// namespace we need to use
-                // the
-				// most recently encountered facet (i.e. the top of the facet
+				// The element may be inherited, so to obtain the proper namespace we need
+				// to use the most recently encountered facet (i.e. the top of the facet
 				// stack)
 
                 if (facetStack.isEmpty()) {
-					elementNamespace = property.getOwner()
-							.getNamespace();
+					elementNamespace = property.getOwner().getNamespace();
 					prefixEntity = property.getOwner();
+					
                 } else {
                     TLPropertyOwner propertyOwner;
 
                     if (facetStack.peek() == propertyType) {
-						// If the top of the facet stack is our property type,
-						// we need to go up one
-                        // more level
-						// to find the facet that declared (or inherited) this
+						// If the top of the facet stack is our property type, we need to go up
+                    	// one more level to find the facet that declared (or inherited) this
 						// property.
                         if (facetStack.size() > 1) {
-							propertyOwner = facetStack
-									.get(facetStack.size() - 2);
+							propertyOwner = facetStack.get(facetStack.size() - 2);
                         } else {
 							propertyOwner = property.getOwner();
                         }
                     } else {
                         propertyOwner = facetStack.peek();
                     }
-                    elementNamespace = propertyOwner.getNamespace();
-                    prefixEntity = propertyOwner;
+                    
+                    if (propertyOwner instanceof TLFacet) {
+                        prefixEntity = findDeclaringFacet( property, (TLFacet) propertyOwner );
+                    } else {
+                        prefixEntity = propertyOwner;
+                    }
+                    elementNamespace = prefixEntity.getNamespace();
                 }
             }
 
@@ -764,11 +762,33 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
         } else {
             prefixEntity = propertyType;
             elementNamespace = propertyType.getNamespace();
-			elementName = getContextElementName(propertyType,
-					property.isReference());
+			elementName = getContextElementName(propertyType, property.isReference());
         }
         return createXmlElement(elementNamespace, elementName, prefixEntity);
     }
+	
+	/**
+	 * Returns the facet in the given one's local hierarchy that declared or inherited
+	 * the given property.
+	 * 
+	 * @param property  the property for which to return the declaring facet
+	 * @param propertyFacet  the property facet from which to start the search
+	 * @return TLFacet
+	 */
+	private TLFacet findDeclaringFacet(TLProperty property, TLFacet propertyFacet) {
+		List<TLFacet> localFacetHierarchy = FacetCodegenUtils.getLocalFacetHierarchy( propertyFacet );
+		TLFacet declaringFacet = propertyFacet;
+		
+		for (TLFacet facet : localFacetHierarchy) {
+			List<TLProperty> facetProperties = PropertyCodegenUtils.getInheritedFacetProperties( facet );
+			
+			if (facetProperties.contains( property )) {
+				declaringFacet = facet;
+				break;
+			}
+		}
+		return declaringFacet;
+	}
 
     /**
      * Returns the element name for the current context model element.

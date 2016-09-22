@@ -19,6 +19,7 @@ import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerConte
 import org.opentravel.schemacompiler.model.TLAbstractFacet;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
@@ -82,6 +83,9 @@ public class FacetCodegenDelegateFactory {
                     case QUERY:
                         delegate = (FacetCodegenDelegate<F>) new BusinessObjectQueryFacetCodegenDelegate(facet);
                         break;
+                    case UPDATE:
+                        delegate = (FacetCodegenDelegate<F>) new BusinessObjectUpdateFacetCodegenDelegate(facet);
+                        break;
 					default:
 						break;
                 }
@@ -139,6 +143,25 @@ public class FacetCodegenDelegateFactory {
 					default:
 						break;
                 }
+            }
+        } else if (facetOwner instanceof TLContextualFacet) {
+        	TLContextualFacet facet = (TLContextualFacet) facetInstance;
+
+            switch (facetInstance.getFacetType()) {
+                case CUSTOM:
+                    delegate = (FacetCodegenDelegate<F>) new BusinessObjectCustomFacetCodegenDelegate(facet);
+                    break;
+                case QUERY:
+                    delegate = (FacetCodegenDelegate<F>) new BusinessObjectQueryFacetCodegenDelegate(facet);
+                    break;
+                case UPDATE:
+                    delegate = (FacetCodegenDelegate<F>) new BusinessObjectUpdateFacetCodegenDelegate(facet);
+                    break;
+                case CHOICE:
+                    delegate = (FacetCodegenDelegate<F>) new ChoiceObjectChoiceFacetCodegenDelegate(facet);
+                    break;
+				default:
+					break;
             }
         } else if (facetOwner instanceof TLOperation) {
             if (facetInstance instanceof TLFacet) {

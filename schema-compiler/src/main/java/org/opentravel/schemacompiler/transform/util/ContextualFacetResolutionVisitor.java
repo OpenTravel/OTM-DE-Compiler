@@ -16,6 +16,10 @@
 
 package org.opentravel.schemacompiler.transform.util;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
@@ -33,8 +37,11 @@ import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.model.XSDLibrary;
 import org.opentravel.schemacompiler.transform.SymbolResolver;
+import org.opentravel.schemacompiler.transform.SymbolTable;
+import org.opentravel.schemacompiler.transform.symbols.SymbolTableFactory;
 import org.opentravel.schemacompiler.validate.impl.TLModelSymbolResolver;
 import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
+import org.opentravel.schemacompiler.visitor.ModelNavigator;
 
 /**
  * Visitor that attempts to resolve contextual facet owner references discovered in a
@@ -42,24 +49,69 @@ import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
  */
 class ContextualFacetResolutionVisitor extends ModelElementVisitorAdapter {
 	
+	private List<TLContextualFacet> unresolvedFacets = new ArrayList<>();
+	private SymbolTable symbolTable;
     private SymbolResolver symbolResolver;
     
     /**
      * Constructor that assigns the model being navigated.
      * 
-     * @param model
-     *            the model from which all entity names will be obtained
+     * @param model  the model from which all entity names will be obtained
      */
-    public ContextualFacetResolutionVisitor(TLModel model) {
-        this.symbolResolver = new TLModelSymbolResolver(model);
+    private ContextualFacetResolutionVisitor(TLModel model) {
+    	this.symbolTable = SymbolTableFactory.newSymbolTableFromModel( model );
+        this.symbolResolver = new TLModelSymbolResolver( symbolTable );
     }
-
-	/**
-	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitContextualFacet(org.opentravel.schemacompiler.model.TLContextualFacet)
-	 */
-	@Override
-	public boolean visitContextualFacet(TLContextualFacet facet) {
+    
+    /**
+     * Visits and resolves the contextual facets owners within the given model.  This is
+     * necessary as a first-pass during model resolution since the qualified name of the
+     * contextual facets is composed of the owner name.  Therefore, it is necessary to
+     * resolve the facet owners and rebuid the symbol table prior to resolving other
+     * entity references.
+     * 
+     * @param model  the model for which to resolve contextual facet owners
+     */
+    public static void resolveReferences(TLModel model) {
+    	ContextualFacetResolutionVisitor visitor = new ContextualFacetResolutionVisitor( model );
+    	
+        ModelNavigator.navigate( model, visitor );
+        visitor.handleUnresolvedFacets();
+    }
+    
+    /**
+     * Attempts to resolve as many unresolved facet owner references as possible.
+     */
+    private void handleUnresolvedFacets() {
+    	int lastCount = 0;
+    	
+    	// Continue making passes through the list until no more entities can be resolved
+    	while (unresolvedFacets.size() != lastCount) {
+    		Iterator<TLContextualFacet> iterator = unresolvedFacets.iterator();
+    		lastCount = unresolvedFacets.size();
+    		
+    		while (iterator.hasNext()) {
+    			TLContextualFacet facet = iterator.next();
+    			
+    			if (resolveFacetOwner( facet )) {
+    				iterator.remove();
+    			}
+    		}
+    	}
+    }
+    
+    /**
+     * Attempts to resolve the given facet's owner reference.  If the reference
+     * was resolved successfully, this method will return true.
+     * 
+     * @param facet  the facet whose owner reference is to be resolved
+     * @return boolean
+     */
+    private boolean resolveFacetOwner(TLContextualFacet facet) {
+    	boolean isResolved = false;
+    	
         if ((facet.getOwningEntity() == null) && (facet.getOwningEntityName() != null)) {
+        	// Attempt to resolve the facet using its 'owningEntityName' field
             Object ref = symbolResolver.resolveEntity(facet.getOwningEntityName());
             TLFacetType facetType = facet.getFacetType();
             
@@ -84,7 +136,28 @@ class ContextualFacetResolutionVisitor extends ModelElementVisitorAdapter {
             } else if (ref instanceof TLContextualFacet) {
             	((TLContextualFacet) ref).addChildFacet( facet );
             }
+            
+            // If the facet was resolved successfully, add its name to the symbol table
+            if (facet.getOwningEntity() != null) {
+            	symbolTable.addEntity( facet.getNamespace(), facet.getLocalName(), facet );
+            	isResolved = true;
+            }
         }
+        return isResolved;
+    }
+
+	/**
+	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitContextualFacet(org.opentravel.schemacompiler.model.TLContextualFacet)
+	 */
+	@Override
+	public boolean visitContextualFacet(TLContextualFacet facet) {
+    	resolveFacetOwner( facet );
+    	
+    	// If we were unable to resolve the facet's owner reference on this first-pass,
+    	// save it so we can process it later
+        if ((facet.getOwningEntity() == null) && (facet.getOwningEntityName() != null)) {
+    		unresolvedFacets.add( facet );
+    	}
 		return true;
 	}
 

@@ -37,8 +37,7 @@ public class TLModelSymbolResolver extends AbstractSymbolResolver {
      *            the model from which to construct the internal symbol table
      */
     public TLModelSymbolResolver(TLModel model) {
-        this((model == null) ? new SymbolTable() : SymbolTableFactory
-                .newSymbolTableFromModel(model));
+        this((model == null) ? new SymbolTable() : SymbolTableFactory.newSymbolTableFromModel(model));
     }
 
     /**

@@ -79,12 +79,11 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
     @Override
     public FacetCodegenElements generateElements() {
     	boolean doDefaultElement = hasDefaultFacetElement();
-        FacetCodegenElements codegenElements;
+        FacetCodegenElements codegenElements = new FacetCodegenElements();
         
-        if (doDefaultElement) {
-            codegenElements = super.generateElements();
-        } else {
-            codegenElements = new FacetCodegenElements();
+        if (doDefaultElement && hasContent()) {
+            codegenElements.addFacetElement(
+            		FacetCodegenUtils.getTopLevelOwner(getSourceFacet()), createElement(null));
         }
         
         if (hasContent()) {
@@ -102,18 +101,19 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
             }
 
             for (TLAlias facetAlias : sourceFacet.getAliases()) {
+            	TLAlias topLevelOwnerAlias = AliasCodegenUtils.getTopLevelOwnerAlias(facetAlias);
                 TLAlias ownerAlias = AliasCodegenUtils.getOwnerAlias(facetAlias);
 
                 if (ownerAlias != null) {
                     if (doSubstitutionGroupElement) {
-                        codegenElements.addSubstitutionGroupElement(ownerAlias,
+                        codegenElements.addSubstitutionGroupElement(topLevelOwnerAlias,
                                 createSubstitutionGroupElement(ownerAlias));
                     }
                     if (doDefaultElement) {
-                        codegenElements.addFacetElement(ownerAlias, createElement(facetAlias));
+                        codegenElements.addFacetElement(topLevelOwnerAlias, createElement(facetAlias));
                     }
                     if (doNonSubstitutableElement) {
-                        codegenElements.addFacetElement(ownerAlias,
+                        codegenElements.addFacetElement(topLevelOwnerAlias,
                                 createNonSubstitutableElement(facetAlias));
                     }
                 }
@@ -122,7 +122,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
         return codegenElements;
     }
     
-    /**
+	/**
      * @see org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegate#hasContent()
      */
     @Override
@@ -371,11 +371,11 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
         QName subGrp = null;
         
         if (facetAlias != null) {
-            subGrp = XsdCodegenUtils.getSubstitutionGroupElementName(AliasCodegenUtils
-                    .getOwnerAlias(facetAlias));
+            subGrp = XsdCodegenUtils.getSubstitutionGroupElementName(
+            			AliasCodegenUtils.getTopLevelOwnerAlias(facetAlias));
         } else {
-            subGrp = XsdCodegenUtils.getSubstitutionGroupElementName(getSourceFacet()
-                    .getOwningEntity());
+            subGrp = XsdCodegenUtils.getSubstitutionGroupElementName(
+            			FacetCodegenUtils.getTopLevelOwner(getSourceFacet()));
         }
         return subGrp;
     }

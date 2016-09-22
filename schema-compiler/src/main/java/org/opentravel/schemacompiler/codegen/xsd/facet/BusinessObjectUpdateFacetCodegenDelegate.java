@@ -31,7 +31,7 @@ import org.opentravel.schemacompiler.model.TLFacetOwner;
  * 
  * @author S. Livezey
  */
-public class BusinessObjectQueryFacetCodegenDelegate extends BusinessObjectFacetCodegenDelegate {
+public class BusinessObjectUpdateFacetCodegenDelegate extends BusinessObjectFacetCodegenDelegate {
 
     /**
      * Constructor that specifies the source facet for which code artifacts are being generated.
@@ -39,19 +39,11 @@ public class BusinessObjectQueryFacetCodegenDelegate extends BusinessObjectFacet
      * @param sourceFacet
      *            the source facet
      */
-    public BusinessObjectQueryFacetCodegenDelegate(TLFacet sourceFacet) {
+    public BusinessObjectUpdateFacetCodegenDelegate(TLFacet sourceFacet) {
         super(sourceFacet);
     }
 
     /**
-	 * @see org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate#generateElements()
-	 */
-	@Override
-	public FacetCodegenElements generateElements() {
-		return super.generateElements();
-	}
-
-	/**
      * @see org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegate#hasContent()
      */
     @Override

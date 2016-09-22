@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_06"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_06 ../../../../main/resources/ota2-context/schemas/OTA2_LibraryModel_v1.6.0.xsd">
+    
+    <VersionScheme>OTA2</VersionScheme>
+    <Status>Draft</Status>
+    <Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-facets/base/v1</Namespace>
+    <Prefix>b</Prefix>
+    <Name>base_library</Name>
+    <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
+    <Import namespace="http://www.opentravel.org/OTM/Common/v0" prefix="ota"/>
+    <Context applicationContext="default-applicationContext" context="default"/>
+    <Comments>Base Facet Test Library</Comments>
+    
+    <ChoiceObject name="FacetTestChoice" notExtendable="false">
+        <Aliases>FacetTestChoiceAlias1 FacetTestChoiceAlias2</Aliases>
+        <Shared>
+            <Attribute name="sharedAttribute" type="xsd:string"/>
+            <Element name="sharedElement" repeat="0" type="xsd:string"/>
+            <Indicator name="sharedIndicator" publishAsElement="false"/>
+        </Shared>
+    </ChoiceObject>
+    
+	<ContextualFacet name="ChoiceF1" type="Choice" facetOwner="FacetTestChoice">
+        <Attribute name="attributeChoiceF1" type="xsd:string"/>
+        <Element name="elementChoiceF1" repeat="0" type="xsd:string"/>
+        <Indicator name="indicatorChoiceF1" publishAsElement="false"/>
+	</ContextualFacet>
+	
+	<ContextualFacet name="ChoiceF1A" type="Choice" facetOwner="FacetTestChoice_ChoiceF1">
+        <Attribute name="attributeChoiceF1A" type="xsd:string"/>
+        <Element name="elementChoiceF1A" repeat="0" type="xsd:string"/>
+        <Indicator name="indicatorChoiceF1A" publishAsElement="false"/>
+	</ContextualFacet>
+	
+    <ChoiceObject name="ExtFacetTestChoice" notExtendable="false">
+        <Extension extends="FacetTestChoice"/>
+        <Aliases>ExtFacetTestChoiceAlias1 ExtFacetTestChoiceAlias2</Aliases>
+        <Shared>
+            <Attribute name="sharedAttributeExt" type="xsd:string"/>
+            <Element name="sharedElementExt" repeat="0" type="xsd:string"/>
+            <Indicator name="sharedIndicatorExt" publishAsElement="false"/>
+        </Shared>
+    </ChoiceObject>
+    
+	<ContextualFacet name="ChoiceF2" type="Choice" facetOwner="ExtFacetTestChoice">
+        <Attribute name="attributeChoiceF2Ext" type="xsd:string"/>
+        <Element name="elementChoiceF2Ext" repeat="0" type="xsd:string"/>
+        <Indicator name="indicatorChoiceF2Ext" publishAsElement="false"/>
+	</ContextualFacet>
+	
+    <BusinessObject name="FacetTestBO" notExtendable="false">
+        <Aliases>FacetTestBOAlias1 FacetTestBOAlias2</Aliases>
+        <ID>
+            <Attribute name="uid" type="xsd:string"/>
+        </ID>
+        <Summary/>
+        <Detail/>
+    </BusinessObject>
+    
+	<ContextualFacet name="CustomF1" type="Custom" facetOwner="FacetTestBO">
+        <Attribute name="attributeCustomF1" type="xsd:string"/>
+        <Element name="elementCustomF1" repeat="0" type="xsd:string"/>
+        <Indicator name="indicatorCustomF1" publishAsElement="false"/>
+	</ContextualFacet>
+	
+	<ContextualFacet name="CustomF1A" type="Custom" facetOwner="FacetTestBO_CustomF1">
+        <Attribute name="attributeCustomF1A" type="xsd:string"/>
+        <Element name="elementCustomF1A" repeat="0" type="xsd:string"/>
+        <Indicator name="indicatorCustomF1A" publishAsElement="false"/>
+	</ContextualFacet>
+	
+	<ContextualFacet name="QueryF1" type="Query" facetOwner="FacetTestBO">
+        <Attribute name="attributeQueryF1" type="xsd:string"/>
+        <Element name="elementQueryF1" repeat="0" type="xsd:string"/>
+        <Indicator name="indicatorQueryF1" publishAsElement="false"/>
+	</ContextualFacet>
+	
+	<ContextualFacet name="QueryF1A" type="Query" facetOwner="FacetTestBO_Query_QueryF1">
+        <Attribute name="attributeQueryF1A" type="xsd:string"/>
+        <Element name="elementQueryF1A" repeat="0" type="xsd:string"/>
+        <Indicator name="indicatorQueryF1A" publishAsElement="false"/>
+	</ContextualFacet>
+	
+	<ContextualFacet name="UpdateF1" type="Update" facetOwner="FacetTestBO">
+        <Attribute name="attributeUpdateF1" type="xsd:string"/>
+        <Element name="elementUpdateF1" repeat="0" type="xsd:string"/>
+        <Indicator name="indicatorUpdateF1" publishAsElement="false"/>
+	</ContextualFacet>
+	
+	<ContextualFacet name="UpdateF1A" type="Update" facetOwner="FacetTestBO_Update_UpdateF1">
+        <Attribute name="attributeUpdateF1A" type="xsd:string"/>
+        <Element name="elementUpdateF1A" repeat="0" type="xsd:string"/>
+        <Indicator name="indicatorUpdateF1A" publishAsElement="false"/>
+	</ContextualFacet>
+	
+    <BusinessObject name="ExtFacetTestBO" notExtendable="false">
+        <Extension extends="FacetTestBO"/>
+        <Aliases>ExtFacetTestBOAlias1 ExtFacetTestBOAlias2</Aliases>
+        <ID/>
+        <Summary/>
+        <Detail/>
+    </BusinessObject>
+    
+	<ContextualFacet name="CustomF2" type="Custom" facetOwner="ExtFacetTestBO">
+        <Attribute name="attributeCustomF2Ext" type="xsd:string"/>
+        <Element name="elementCustomF2Ext" repeat="0" type="xsd:string"/>
+        <Indicator name="indicatorCustomF2Ext" publishAsElement="false"/>
+	</ContextualFacet>
+	
+	<ContextualFacet name="QueryF2" type="Query" facetOwner="ExtFacetTestBO">
+        <Attribute name="attributeQueryF2Ext" type="xsd:string"/>
+        <Element name="elementQueryF2Ext" repeat="0" type="xsd:string"/>
+        <Indicator name="indicatorQueryF2Ext" publishAsElement="false"/>
+	</ContextualFacet>
+	
+	<ContextualFacet name="UpdateF2" type="Update" facetOwner="ExtFacetTestBO">
+        <Attribute name="attributeUpdateF2Ext" type="xsd:string"/>
+        <Element name="elementUpdateF2Ext" repeat="0" type="xsd:string"/>
+        <Indicator name="indicatorUpdateF2Ext" publishAsElement="false"/>
+	</ContextualFacet>
+	
+    <Resource name="SampleResource" businessObjectRef="FacetTestBO" basePath="/services/SampleResource"
+    			abstract="false" firstClass="true">
+        <ParamGroup name="IDParameters" idGroup="true" facetName="FacetTestBO_CustomF1_CustomF1A">
+        	<Parameter fieldName="attributeCustomF1" location="Path" />
+        </ParamGroup>
+        <ActionFacet label="ObjectOnly" referenceType="Required" />
+        <ActionFacet label="ObjectList" referenceType="Required" referenceFacet="Query_QueryF1_QueryF1A" referenceRepeat="1000"/>
+    </Resource>
+    
+</Library>

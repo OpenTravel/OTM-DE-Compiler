@@ -38,10 +38,8 @@ public final class ModelReferenceResolver {
         boolean listenerFlag = model.isListenersEnabled();
         try {
         	model.setListenersEnabled(false);
-        	resolveContextualFacetOwners(model);
-        	
+        	ContextualFacetResolutionVisitor.resolveReferences(model);
         	EntityReferenceResolutionVisitor visitor = new EntityReferenceResolutionVisitor(model);
-        	
             ModelNavigator.navigate(model, visitor);
             resolveParameters(model, visitor);
             
@@ -50,19 +48,6 @@ public final class ModelReferenceResolver {
         }
 	}
 	
-    /**
-     * Visits and resolves the contextual facets owners within the given model.  This is
-     * necessary as a first-pass during model resolution since the qualified name of the
-     * contextual facets is composed of the owner name.  Therefore, it is necessary to
-     * resolve the facet owners and rebuid the symbol table prior to resolving other
-     * entity references.
-     * 
-     * @param model  the model for which to resolve contextual facet owners
-     */
-    private static void resolveContextualFacetOwners(TLModel model) {
-        ModelNavigator.navigate(model, new ContextualFacetResolutionVisitor(model));
-    }
-    
     /**
      * Visits and resolves the parameters of each library resource.  This covers
      * an edge case that causes some parameters not to be resolved on the initial

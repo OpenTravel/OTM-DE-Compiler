@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLAlias;
 import org.w3._2001.xmlschema.Element;
 
 /**
@@ -113,5 +114,26 @@ public class FacetCodegenElements {
         }
         return elementList;
     }
-
+    
+    /**
+     * Returns the list of all elements for all entities in this collection.
+     * 
+     * @return List<Element>
+     */
+    public List<Element> getAllFacetElements() {
+    	List<Element> elementList = new ArrayList<>();
+    	
+    	for (NamedEntity entity : facetElements.keySet()) {
+    		if (!(entity instanceof TLAlias)) {
+    			elementList.addAll( facetElements.get( entity ) );
+    		}
+    	}
+    	for (NamedEntity entity : facetElements.keySet()) {
+    		if (entity instanceof TLAlias) {
+    			elementList.addAll( facetElements.get( entity ) );
+    		}
+    	}
+    	return elementList;
+    }
+    
 }

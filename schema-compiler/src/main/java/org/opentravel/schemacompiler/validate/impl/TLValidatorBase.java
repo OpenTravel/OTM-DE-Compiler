@@ -29,6 +29,7 @@ import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAttributeType;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLExampleOwner;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLExtensionOwner;
@@ -422,6 +423,23 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
             setContextCacheEntry(SchemaNameValidationRegistry.class.getName(), schemaNameRegistry);
         }
         return schemaNameRegistry;
+    }
+    
+    /**
+     * Recursively validates all local facets in the given list.
+     * 
+     * @param facetList  the list of contextual facets to validate
+     * @param validator  the validator instance to use
+     * @param findings  the list of validation findings being compiled
+     */
+    protected void validateLocalContextualFacets(List<TLContextualFacet> facetList,
+    		Validator<TLContextualFacet> validator, ValidationFindings findings) {
+        for (TLContextualFacet facet : facetList) {
+        	if (facet.isLocalFacet()) {
+                findings.addAll(validator.validate(facet));
+                validateLocalContextualFacets(facet.getChildFacets(), validator, findings);
+        	}
+        }
     }
     
     /**

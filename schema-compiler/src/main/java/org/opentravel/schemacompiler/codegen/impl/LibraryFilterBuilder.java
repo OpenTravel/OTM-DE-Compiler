@@ -20,6 +20,7 @@ import java.util.List;
 import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
+import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
@@ -35,6 +36,7 @@ import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
@@ -131,7 +133,13 @@ public class LibraryFilterBuilder {
             navigator.navigateLegacySchemaLibrary((XSDLibrary) library);
 
         } else if (library instanceof TLLibrary) {
-            navigator.navigateUserDefinedLibrary((TLLibrary) library);
+        	TLLibrary tlLibrary = (TLLibrary) library;
+        	
+            navigator.navigateUserDefinedLibrary(tlLibrary);
+            
+            for (TLContextualFacet ghostFacet : FacetCodegenUtils.findNonLocalGhostFacets( tlLibrary )) {
+            	navigator.navigate( ghostFacet );
+            }
         }
         return visitor.getFilter();
     }
@@ -365,6 +373,15 @@ public class LibraryFilterBuilder {
         }
 
         /**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitContextualFacet(org.opentravel.schemacompiler.model.TLContextualFacet)
+		 */
+		@Override
+		public boolean visitContextualFacet(TLContextualFacet facet) {
+            visitLibraryElement(facet.getOwningEntity());
+			return super.visitContextualFacet(facet);
+		}
+
+		/**
          * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitClosedEnumeration(org.opentravel.schemacompiler.model.TLClosedEnumeration)
          */
         @Override

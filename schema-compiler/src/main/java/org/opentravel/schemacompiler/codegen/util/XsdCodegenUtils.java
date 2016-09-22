@@ -45,6 +45,7 @@ import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLEquivalent;
 import org.opentravel.schemacompiler.model.TLEquivalentOwner;
@@ -114,7 +115,14 @@ public class XsdCodegenUtils {
             }
             elementName = new QName(simpleCoreEntity.getNamespace(),
                     simpleCoreEntity.getLocalName());
-
+            
+        } else if (modelEntity instanceof TLContextualFacet) {
+        	TLContextualFacet facet = (TLContextualFacet) modelEntity;
+        	TLFacetOwner owner = FacetCodegenUtils.getTopLevelOwner(facet);
+        	String elementLocalName = owner.getLocalName() + getElementFacetSuffix(facet);
+        	
+            elementName = new QName(modelEntity.getNamespace(), elementLocalName);
+        	
         } else if ((modelEntity instanceof TLAbstractFacet)
                 && !(modelEntity instanceof TLSimpleFacet)) {
             TLAbstractFacet facet = (TLAbstractFacet) modelEntity;
@@ -138,7 +146,13 @@ public class XsdCodegenUtils {
             TLAlias alias = (TLAlias) modelEntity;
             String elementLocalName;
 
-            if (alias.getOwningEntity() instanceof TLFacet) {
+            if (alias.getOwningEntity() instanceof TLContextualFacet) {
+            	TLContextualFacet facet = (TLContextualFacet) alias.getOwningEntity();
+            	TLAlias ownerAlias = AliasCodegenUtils.getTopLevelOwnerAlias(alias);
+            	
+            	elementLocalName = ownerAlias.getLocalName() + getElementFacetSuffix(facet);
+            	
+            } else if (alias.getOwningEntity() instanceof TLFacet) {
                 TLFacet facet = (TLFacet) alias.getOwningEntity();
                 TLAlias ownerAlias = AliasCodegenUtils.getOwnerAlias(alias);
 
@@ -277,6 +291,11 @@ public class XsdCodegenUtils {
         if (modelEntity instanceof TLAlias) {
         	nonAliasEntity = ((TLAlias) modelEntity).getOwningEntity();
         }
+        
+        while (nonAliasEntity instanceof TLContextualFacet) {
+        	nonAliasEntity = ((TLContextualFacet) nonAliasEntity).getOwningEntity();
+        }
+        
         boolean isTopLevelFacetOwner =
         		(nonAliasEntity instanceof TLBusinessObject)
                 || (nonAliasEntity instanceof TLCoreObject)
@@ -484,6 +503,11 @@ public class XsdCodegenUtils {
                 }
             }
             
+        } else if ((facet instanceof TLFacet) && (facet.getOwningEntity() instanceof TLContextualFacet)) {
+        	TLFacetOwner owner = FacetCodegenUtils.getTopLevelOwner((TLFacet) facet);
+        	
+            typeName = owner.getLocalName() + getTypeFacetSuffix((TLContextualFacet) facet);
+        	
         } else if (facet.getOwningEntity() instanceof TLOperation) {
             typeName = ((TLOperation) facet.getOwningEntity()).getName() + getTypeFacetSuffix(facet);
         }
@@ -498,7 +522,14 @@ public class XsdCodegenUtils {
      * @return String
      */
     private static String getElementFacetSuffix(TLAbstractFacet facet) {
-        return getTypeFacetSuffix(facet).replaceAll("_", "");
+    	String typeSuffix;
+    	
+    	if (facet instanceof TLContextualFacet) {
+    		typeSuffix = getTypeFacetSuffix((TLContextualFacet)facet);
+    	} else {
+    		typeSuffix = getTypeFacetSuffix(facet);
+    	}
+        return typeSuffix.replaceAll("_", "");
     }
 
     /**
@@ -526,6 +557,30 @@ public class XsdCodegenUtils {
             suffix.append("_").append(facetType.getIdentityName());
         }
         return suffix.toString();
+    }
+    
+    /**
+     * Returns the type-name suffix to append for the given contextual facet.
+     * 
+     * @param facet  the contextual facet for which to compute the suffix
+     * @return String
+     */
+    protected static String getTypeFacetSuffix(TLContextualFacet facet) {
+        TLFacetType facetType = facet.getFacetType();
+    	StringBuilder suffix = new StringBuilder();
+    	
+    	while (facet instanceof TLContextualFacet) {
+        	TLFacetOwner owner = facet.getOwningEntity();
+        	
+        	if (facet instanceof TLContextualFacet) {
+        		suffix.insert(0, "_" + facet.getName());
+        	}
+        	facet = (owner instanceof TLContextualFacet) ? (TLContextualFacet) owner : null;
+    	}
+        if ((facetType != TLFacetType.CUSTOM) && (facetType != TLFacetType.CHOICE)) {
+            suffix.insert(0, "_" + facetType.getIdentityName());
+        }
+    	return suffix.toString();
     }
     
     /**
@@ -933,6 +988,7 @@ public class XsdCodegenUtils {
             typeNames.put(TLValueWithAttributes.class, "ValueWithAttributes");
             typeNames.put(TLCoreObject.class, "CoreObject");
             typeNames.put(TLChoiceObject.class, "ChoiceObject");
+            typeNames.put(TLContextualFacet.class, "ContextualFacet");
             typeNames.put(TLBusinessObject.class, "BusinessObject");
             typeNames.put(TLOpenEnumeration.class, "EnumerationOpen");
             typeNames.put(TLClosedEnumeration.class, "EnumerationClosed");

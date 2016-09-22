@@ -28,7 +28,7 @@ import org.opentravel.schemacompiler.validate.ValidationFindings;
  */
 public class SchemaCompilerTestUtils {
 
-    public static boolean DEBUG = false;
+    public static boolean DEBUG = true;
     public static FindingType PRINT_FINDINGS = FindingType.ERROR;
 
     /**

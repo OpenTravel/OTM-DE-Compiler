@@ -36,6 +36,7 @@ import org.opentravel.schemacompiler.model.TLAliasOwner;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
@@ -134,7 +135,7 @@ public class PropertyCodegenUtils {
         // Determine the correct method of calculating the element's default name
         if ((listFacet != null) || hasGlobalElement(propertyType)) {
 
-            if (XsdCodegenUtils.isSimpleCoreObject(propertyType)) {
+            if (XsdCodegenUtils.isSimpleCoreObject(propertyType) || (propertyType instanceof TLContextualFacet)) {
                 // Special case for simple cores that do not declare a substitution group element
                 elementName = XsdCodegenUtils.getGlobalElementName(propertyType);
             }

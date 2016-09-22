@@ -82,6 +82,9 @@
 	  EXTENSION_POINT_DETAIL  : Element definition for detail facet extension points
 	  EXTENSION_POINT_CUSTOM  : Element definition for custom facet extension points
 	  EXTENSION_POINT_QUERY   : Element definition for query facet extension points
+	  EXTENSION_POINT_UPDATE  : Element definition for update facet extension points
+	  EXTENSION_POINT_SHARED  : Element definition for shared facet extension points
+	  EXTENSION_POINT_CHOICE  : Element definition for choice facet extension points
 	  
 	  -->
 	<bean id="schemaDependencies" class="java.util.ArrayList" scope="singleton">
@@ -146,6 +149,11 @@
 					<property name="id" value="EXTENSION_POINT_QUERY" />
 					<property name="schemaDeclaration" ref="otmCommonSchema" />
 					<property name="localName" value="ExtensionPoint_Query" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaDependency">
+					<property name="id" value="EXTENSION_POINT_UPDATE" />
+					<property name="schemaDeclaration" ref="otmCommonSchema" />
+					<property name="localName" value="ExtensionPoint_Update" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.ioc.SchemaDependency">
 					<property name="id" value="EXTENSION_POINT_SHARED" />

@@ -17,6 +17,7 @@ package org.opentravel.schemacompiler.validate.base;
 
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLEquivalent;
 import org.opentravel.schemacompiler.model.TLExtension;
@@ -37,10 +38,9 @@ public class TLBusinessObjectBaseValidator extends TLValidatorBase<TLBusinessObj
      */
     @Override
     protected ValidationFindings validateChildren(TLBusinessObject target) {
-        Validator<TLAlias> aliasValidator = getValidatorFactory().getValidatorForClass(
-                TLAlias.class);
-        Validator<TLFacet> facetValidator = getValidatorFactory().getValidatorForClass(
-                TLFacet.class);
+        Validator<TLAlias> aliasValidator = getValidatorFactory().getValidatorForClass(TLAlias.class);
+        Validator<TLFacet> facetValidator = getValidatorFactory().getValidatorForClass(TLFacet.class);
+        Validator<TLContextualFacet> cFacetValidator = getValidatorFactory().getValidatorForClass(TLContextualFacet.class);
         ValidationFindings findings = new ValidationFindings();
 
         if (target.getExtension() != null) {
@@ -77,13 +77,10 @@ public class TLBusinessObjectBaseValidator extends TLValidatorBase<TLBusinessObj
         if (target.getDetailFacet() != null) {
             findings.addAll(facetValidator.validate(target.getDetailFacet()));
         }
-        for (TLFacet customFacet : target.getCustomFacets()) {
-            findings.addAll(facetValidator.validate(customFacet));
-        }
-        for (TLFacet queryFacet : target.getQueryFacets()) {
-            findings.addAll(facetValidator.validate(queryFacet));
-        }
+        validateLocalContextualFacets(target.getCustomFacets(), cFacetValidator, findings);
+        validateLocalContextualFacets(target.getQueryFacets(), cFacetValidator, findings);
+        validateLocalContextualFacets(target.getUpdateFacets(), cFacetValidator, findings);
         return findings;
     }
-
+    
 }

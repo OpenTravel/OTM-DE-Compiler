@@ -23,13 +23,11 @@ import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
-import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegate;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenElements;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLDocumentation;
-import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLRole;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.w3._2001.xmlschema.Annotation;
@@ -76,23 +74,6 @@ public class TLCoreObjectCodegenTransformer extends
             otherArtifacts.addArtifact(createRoleEnumerationSimpleType(source, true));
         }
         return buildCorrelatedArtifacts(source, elementArtifacts, otherArtifacts);
-    }
-
-    /**
-     * Utility method that generates both element and non-element schema content for the source
-     * facet of the given delegate.
-     * 
-     * @param facetDelegate
-     *            the facet code generation delegate
-     * @param elementArtifacts
-     *            the container for all generated schema elements
-     * @param otherArtifacts
-     *            the container for all generated non-element schema artifacts
-     */
-    private void generateFacetArtifacts(FacetCodegenDelegate<TLFacet> facetDelegate,
-            FacetCodegenElements elementArtifacts, CodegenArtifacts otherArtifacts) {
-        elementArtifacts.addAll(facetDelegate.generateElements());
-        otherArtifacts.addAllArtifacts(facetDelegate.generateArtifacts());
     }
 
     /**

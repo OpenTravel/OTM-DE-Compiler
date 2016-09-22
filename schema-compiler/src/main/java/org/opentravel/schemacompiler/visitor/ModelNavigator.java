@@ -854,6 +854,10 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
     public void navigateContextualFacet(TLContextualFacet facet) {
         if (canVisit(facet) && visitor.visitContextualFacet(facet)) {
         	navigateFacetMembers(facet);
+        	
+        	for (TLContextualFacet childFacet : facet.getChildFacets()) {
+        		navigateContextualFacet(childFacet);
+        	}
         }
         addVisitedNode(facet);
     }

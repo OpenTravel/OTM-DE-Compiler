@@ -25,8 +25,10 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
+import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
+import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 
@@ -67,6 +69,27 @@ public class TLLibraryJsonCodegenTransformer extends AbstractJsonSchemaTransform
                     }
                 }
             }
+        }
+        
+        // Generate output for non-local contextual "ghost" facets in this library
+        ObjectTransformer<TLContextualFacet, CodegenArtifacts, CodeGenerationTransformerContext> cfTransformer =
+        		getTransformerFactory().getTransformer(TLContextualFacet.class, CodegenArtifacts.class);
+        
+        for (TLContextualFacet facet : FacetCodegenUtils.findNonLocalGhostFacets( source )) {
+        	TLFacetOwner facetOwner = FacetCodegenUtils.getTopLevelOwner( facet );
+        	
+        	if ((filter == null) || filter.processEntity(facetOwner)) {
+                CodegenArtifacts artifacts = cfTransformer.transform(facet);
+
+                if (artifacts != null) {
+                    for (JsonSchemaNamedReference memberDef : artifacts.getArtifactsOfType(JsonSchemaNamedReference.class)) {
+                        schema.getDefinitions().add( memberDef );
+                    }
+                    for (JsonSchemaReference globalDef : artifacts.getArtifactsOfType(JsonSchemaReference.class)) {
+                    	globalDefs.add( globalDef );
+                    }
+                }
+        	}
         }
         
         // Add the list of global element definitions to the schema

@@ -59,9 +59,9 @@ public class XMLExampleCodeGenerator extends AbstractExampleCodeGenerator {
 	public void doGenerateOutput(TLModelElement source,
 			CodeGenerationContext context) throws CodeGenerationException {
 		File outputFile = getOutputFile(source, context);
+		
 		try (OutputStream out = new FileOutputStream(outputFile);) {
-			ExampleDocumentBuilder exampleBuilder = new ExampleDocumentBuilder(
-					getOptions(context));
+			ExampleDocumentBuilder exampleBuilder = new ExampleDocumentBuilder(getOptions(context));
 			exampleBuilder.setModelElement((NamedEntity) source);
 
 			// Register the schema location for each library in the model

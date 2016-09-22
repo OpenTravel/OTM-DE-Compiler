@@ -36,6 +36,7 @@
 	<xsd:element name="ExtensionPoint_Detail" type="ota2:ExtensionPoint" />
 	<xsd:element name="ExtensionPoint_Custom" type="ota2:ExtensionPoint" />
 	<xsd:element name="ExtensionPoint_Query" type="ota2:ExtensionPoint" />
+	<xsd:element name="ExtensionPoint_Update" type="ota2:ExtensionPoint" />
 	<xsd:element name="ExtensionPoint_Shared" type="ota2:ExtensionPoint" />
 	<xsd:element name="ExtensionPoint_Choice" type="ota2:ExtensionPoint" />
 	<xsd:complexType name="ExtensionPoint">

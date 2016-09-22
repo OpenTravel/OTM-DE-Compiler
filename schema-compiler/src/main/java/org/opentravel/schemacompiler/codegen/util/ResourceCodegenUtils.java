@@ -39,6 +39,7 @@ import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLFacet;
@@ -571,7 +572,19 @@ public class ResourceCodegenUtils {
 	 * @return String
 	 */
 	public static String getActionFacetReferenceName(TLFacet facet) {
-		return facet.getFacetType().getIdentityName( FacetCodegenUtils.getFacetName(facet) );
+		String refName;
+		
+		if (facet instanceof TLContextualFacet) {
+			refName = XsdCodegenUtils.getTypeFacetSuffix( (TLContextualFacet) facet );
+			
+			if (refName.startsWith("_")) {
+				refName = refName.substring( 1 );
+			}
+			
+		} else {
+			refName = facet.getFacetType().getIdentityName( FacetCodegenUtils.getFacetName(facet) );
+		}
+		return refName;
 	}
 	
 	/**
@@ -590,8 +603,9 @@ public class ResourceCodegenUtils {
 		boFacets.add( businessObject.getIdFacet() );
 		boFacets.add( businessObject.getSummaryFacet() );
 		boFacets.add( businessObject.getDetailFacet() );
-		boFacets.addAll( businessObject.getCustomFacets() );
-		boFacets.addAll( businessObject.getQueryFacets() );
+		addContextualFacets( businessObject.getCustomFacets(), boFacets );
+		addContextualFacets( businessObject.getQueryFacets(), boFacets );
+		addContextualFacets( businessObject.getUpdateFacets(), boFacets );
 		
 		for (TLFacet boFacet : boFacets) {
 			String boFacetReferenceName = getActionFacetReferenceName( boFacet );
@@ -602,6 +616,19 @@ public class ResourceCodegenUtils {
 			}
 		}
 		return referencedFacet;
+	}
+	
+	/**
+	 * Recursively adds all contextual facets to the list provided.
+	 * 
+	 * @param ctxFacets  the list of contextual facets to add
+	 * @param facetList
+	 */
+	private static void addContextualFacets(List<TLContextualFacet> ctxFacets, List<TLFacet> facetList) {
+		for (TLContextualFacet facet : ctxFacets) {
+			addContextualFacets( facet.getChildFacets(), facetList );
+			facetList.add( facet );
+		}
 	}
 	
 	/**

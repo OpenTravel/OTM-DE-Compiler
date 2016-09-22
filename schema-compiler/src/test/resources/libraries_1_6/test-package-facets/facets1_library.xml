@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_06"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_06 ../../../../main/resources/ota2-context/schemas/OTA2_LibraryModel_v1.6.0.xsd">
+    
+    <VersionScheme>OTA2</VersionScheme>
+    <Status>Draft</Status>
+    <Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-facets/facets1/v1</Namespace>
+    <Prefix>f1</Prefix>
+    <Name>facets1_library</Name>
+    <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
+    <Import namespace="http://www.opentravel.org/OTM/Common/v0" prefix="ota"/>
+    <Import fileHints="base_library.xml"
+        namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-facets/base/v1" prefix="b"/>
+    <Context applicationContext="default-applicationContext" context="default"/>
+    <Comments>Facet-1 Test Library</Comments>
+    
+	<ContextualFacet name="ChoiceF2" type="Choice" facetOwner="b:FacetTestChoice">
+        <Attribute name="attributeChoiceF2" type="xsd:string"/>
+        <Element name="elementChoiceF2" repeat="0" type="xsd:string"/>
+        <Indicator name="indicatorChoiceF2" publishAsElement="false"/>
+	</ContextualFacet>
+	
+	<ContextualFacet name="ChoiceF2A" type="Choice" facetOwner="FacetTestChoice_ChoiceF2">
+        <Attribute name="attributeChoiceF2A" type="xsd:string"/>
+        <Element name="elementChoiceF2A" repeat="0" type="xsd:string"/>
+        <Indicator name="indicatorChoiceF2A" publishAsElement="false"/>
+	</ContextualFacet>
+	
+	
+	
+	<ContextualFacet name="CustomF2" type="Custom" facetOwner="b:FacetTestBO">
+        <Attribute name="attributeCustomF2" type="xsd:string"/>
+        <Element name="elementCustomF2" repeat="0" type="xsd:string"/>
+        <Indicator name="indicatorCustomF2" publishAsElement="false"/>
+	</ContextualFacet>
+	
+	<ContextualFacet name="CustomF2A" type="Custom" facetOwner="FacetTestBO_CustomF2">
+        <Attribute name="attributeChoiceF2A" type="xsd:string"/>
+        <Element name="elementChoiceF2A" repeat="0" type="xsd:string"/>
+        <Indicator name="indicatorChoiceF2A" publishAsElement="false"/>
+	</ContextualFacet>
+	
+	<ContextualFacet name="QueryF2" type="Query" facetOwner="b:FacetTestBO">
+        <Attribute name="attributeQueryF2" type="xsd:string"/>
+        <Element name="elementQueryF2" repeat="0" type="xsd:string"/>
+        <Indicator name="indicatorQueryF2" publishAsElement="false"/>
+	</ContextualFacet>
+	
+	<ContextualFacet name="QueryF2A" type="Query" facetOwner="FacetTestBO_Query_QueryF2">
+        <Attribute name="attributeQueryF2A" type="xsd:string"/>
+        <Element name="elementQueryF2A" repeat="0" type="xsd:string"/>
+        <Indicator name="indicatorQueryF2A" publishAsElement="false"/>
+	</ContextualFacet>
+	
+	<ContextualFacet name="UpdateF2" type="Update" facetOwner="b:FacetTestBO">
+        <Attribute name="attributeUpdateF2" type="xsd:string"/>
+        <Element name="elementUpdateF2" repeat="0" type="xsd:string"/>
+        <Indicator name="indicatorUpdateF2" publishAsElement="false"/>
+	</ContextualFacet>
+	
+	<ContextualFacet name="UpdateF2A" type="Update" facetOwner="FacetTestBO_Update_UpdateF2">
+        <Attribute name="attributeUpdateF2A" type="xsd:string"/>
+        <Element name="elementUpdateF2A" repeat="0" type="xsd:string"/>
+        <Indicator name="indicatorUpdateF2A" publishAsElement="false"/>
+	</ContextualFacet>
+	
+	
+</Library>

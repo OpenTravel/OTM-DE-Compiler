@@ -20,10 +20,12 @@ import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.LibraryFilterBuilder;
+import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
+import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.w3._2001.xmlschema.Annotation;
@@ -56,8 +58,8 @@ public class TLLibraryCodegenTransformer extends AbstractXsdTransformer<TLLibrar
 
         // Add entries for each non-service term declaration
         for (LibraryMember member : source.getNamedMembers()) {
-            ObjectTransformer<LibraryMember, CodegenArtifacts, CodeGenerationTransformerContext> transformer = getTransformerFactory()
-                    .getTransformer(member, CodegenArtifacts.class);
+            ObjectTransformer<LibraryMember, CodegenArtifacts, CodeGenerationTransformerContext> transformer =
+            		getTransformerFactory().getTransformer(member, CodegenArtifacts.class);
             boolean isLocalFacet = (member instanceof TLContextualFacet) && ((TLContextualFacet) member).isLocalFacet();
             
             if ((transformer != null) && !isLocalFacet && ((filter == null) || filter.processEntity(member))) {
@@ -70,7 +72,25 @@ public class TLLibraryCodegenTransformer extends AbstractXsdTransformer<TLLibrar
                 }
             }
         }
+        
+        // Generate output for non-local contextual "ghost" facets in this library
+        ObjectTransformer<TLContextualFacet, CodegenArtifacts, CodeGenerationTransformerContext> cfTransformer =
+        		getTransformerFactory().getTransformer(TLContextualFacet.class, CodegenArtifacts.class);
+        
+        for (TLContextualFacet facet : FacetCodegenUtils.findNonLocalGhostFacets( source )) {
+        	TLFacetOwner facetOwner = FacetCodegenUtils.getTopLevelOwner( facet );
+        	
+        	if ((filter == null) || filter.processEntity(facetOwner)) {
+                CodegenArtifacts artifacts = cfTransformer.transform(facet);
 
+                if (artifacts != null) {
+                    for (OpenAttrs artifact : artifacts.getArtifactsOfType(OpenAttrs.class)) {
+                        schema.getSimpleTypeOrComplexTypeOrGroup().add(artifact);
+                    }
+                }
+        	}
+        }
+        
         // Add entries for all imports and includes
         CodeGenerationFilenameBuilder<AbstractLibrary> filenameBuilder = (CodeGenerationFilenameBuilder<AbstractLibrary>) context
                 .getCodeGenerator().getFilenameBuilder();

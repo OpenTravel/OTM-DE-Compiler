@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_06"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_06 ../../../../main/resources/ota2-context/schemas/OTA2_LibraryModel_v1.6.0.xsd">
+    
+    <VersionScheme>OTA2</VersionScheme>
+    <Status>Draft</Status>
+    <Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-facets/facets2/v1</Namespace>
+    <Prefix>f2</Prefix>
+    <Name>facets2_library</Name>
+    <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
+    <Import namespace="http://www.opentravel.org/OTM/Common/v0" prefix="ota"/>
+    <Import fileHints="facets1_library.xml"
+        namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-facets/facets1/v1" prefix="f1"/>
+    <Context applicationContext="default-applicationContext" context="default"/>
+    <Comments>Facet-2 Test Library</Comments>
+    
+	<ContextualFacet name="ChoiceF2B" type="Choice" facetOwner="f1:FacetTestChoice_ChoiceF2">
+        <Attribute name="attributeChoiceF2B" type="xsd:string"/>
+        <Element name="elementChoiceF2B" repeat="0" type="xsd:string"/>
+        <Indicator name="indicatorChoiceF2B" publishAsElement="false"/>
+	</ContextualFacet>
+	
+	<ContextualFacet name="CustomF2B" type="Custom" facetOwner="f1:FacetTestBO_CustomF2">
+        <Attribute name="attributeCustomF2B" type="xsd:string"/>
+        <Element name="elementCustomF2B" repeat="0" type="xsd:string"/>
+        <Indicator name="indicatorCustomF2B" publishAsElement="false"/>
+	</ContextualFacet>
+	
+	<ContextualFacet name="QueryF2B" type="Query" facetOwner="f1:FacetTestBO_Query_QueryF2">
+        <Attribute name="attributeQueryF2B" type="xsd:string"/>
+        <Element name="elementQueryF2B" repeat="0" type="xsd:string"/>
+        <Indicator name="indicatorQueryF2B" publishAsElement="false"/>
+	</ContextualFacet>
+	
+	<ContextualFacet name="UpdateF2B" type="Update" facetOwner="f1:FacetTestBO_Update_UpdateF2">
+        <Attribute name="attributeUpdateF2B" type="xsd:string"/>
+        <Element name="elementUpdateF2B" repeat="0" type="xsd:string"/>
+        <Indicator name="indicatorUpdateF2B" publishAsElement="false"/>
+	</ContextualFacet>
+	
+</Library>

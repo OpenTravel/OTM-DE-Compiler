@@ -17,7 +17,9 @@ package org.opentravel.schemacompiler.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.event.ModelEventBuilder;
@@ -73,10 +75,19 @@ public class TLContextualFacet extends TLFacet implements LibraryMember, TLFacet
 	 * @return boolean
 	 */
 	public boolean isLocalFacet() {
-		TLFacetOwner owningEntity = getOwningEntity();
-		AbstractLibrary owningEntityLibrary = (owningEntity == null) ? null : owningEntity.getOwningLibrary();
-		
-		return (owningLibrary == owningEntityLibrary);
+		Set<TLFacetOwner> visitedOwners = new HashSet<>();
+		TLFacetOwner owner = getOwningEntity();
+    	
+		while (owner instanceof TLContextualFacet) {
+			if (visitedOwners.contains( owner )) {
+				owner = null; // circular references are not considered "local" facets
+				
+			} else {
+				visitedOwners.add( owner );
+				owner = ((TLContextualFacet) owner).getOwningEntity();
+			}
+		}
+		return (owner != null) && (owner.getOwningLibrary() == owningLibrary);
 	}
 
     /**
@@ -88,12 +99,18 @@ public class TLContextualFacet extends TLFacet implements LibraryMember, TLFacet
         TLFacetType facetType = getFacetType();
         StringBuilder localName = new StringBuilder();
         
-        // TODO: Make sure this works for nested contextual facets
         if (owningEntity != null) {
             localName.append(owningEntity.getLocalName()).append('_');
+        	
+        } else {
+        	localName.append("UNKNOWN_");
         }
-        if (facetType != null) {
+        if (owningEntity instanceof TLContextualFacet) {
+            localName.append(name);
+        	
+        } else if (facetType != null) {
             localName.append(facetType.getIdentityName(name));
+            
         } else {
             localName.append("Unnamed_Facet");
         }

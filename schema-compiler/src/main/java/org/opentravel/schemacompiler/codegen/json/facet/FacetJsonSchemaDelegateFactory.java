@@ -19,6 +19,7 @@ import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerConte
 import org.opentravel.schemacompiler.model.TLAbstractFacet;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
@@ -101,6 +102,9 @@ public class FacetJsonSchemaDelegateFactory {
                 }
             }
         } else if (facetOwner instanceof TLChoiceObject) {
+        	delegate = (FacetJsonSchemaDelegate<F>) new TLFacetJsonSchemaDelegate( (TLFacet) facetInstance );
+        	
+        } else if (facetOwner instanceof TLContextualFacet) {
         	delegate = (FacetJsonSchemaDelegate<F>) new TLFacetJsonSchemaDelegate( (TLFacet) facetInstance );
         	
         } else if (facetOwner instanceof TLOperation) {

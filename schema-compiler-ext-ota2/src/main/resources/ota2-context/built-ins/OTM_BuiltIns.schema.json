@@ -20,6 +20,7 @@
 		"ExtensionPoint_Detail" : {},
 		"ExtensionPoint_Custom" : {},
 		"ExtensionPoint_Query" : {},
+		"ExtensionPoint_Update" : {},
 		"ExtensionPoint_Shared" : {},
 		"ExtensionPoint_Choice" : {}
 	}

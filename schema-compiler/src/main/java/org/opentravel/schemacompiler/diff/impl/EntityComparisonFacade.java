@@ -226,6 +226,7 @@ public class EntityComparisonFacade {
 				this.memberFields.addAll( facet.getMemberFields() );
 			}
 		}
+		// TODO: Add support for nested local contextual facets
 		// TODO: Add diff support for update facet comparisons
 	}
 	

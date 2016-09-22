@@ -17,10 +17,13 @@ package org.opentravel.schemacompiler.visitor;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
+import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAction;
 import org.opentravel.schemacompiler.model.TLActionFacet;
@@ -125,7 +128,9 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
      *            the library whose dependencies should be navigated
      */
     public void navigateLibrary(AbstractLibrary library) {
-        for (NamedEntity libraryMember : library.getNamedMembers()) {
+    	List<LibraryMember> libraryMembers = new ArrayList<>( library.getNamedMembers() );
+    	
+        for (NamedEntity libraryMember : libraryMembers) {
             if (library instanceof TLLibrary) {
                 visitor.visitUserDefinedLibrary((TLLibrary) library);
 

@@ -16,8 +16,10 @@
 package org.opentravel.schemacompiler.codegen.util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
@@ -33,8 +35,13 @@ import org.opentravel.schemacompiler.model.TLExtensionOwner;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLFacetType;
+import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.visitor.ModelElementVisitor;
+import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
+import org.opentravel.schemacompiler.visitor.ModelNavigator;
 
 /**
  * Static utility methods used during the generation of code output for facets.
@@ -281,6 +288,27 @@ public class FacetCodegenUtils {
         }
         return result;
     }
+    
+    /**
+     * Returns the top-level facet owner that is not a <code>TLContextualFacet</code>.
+     * 
+     * @param facet  the facet for which to return the top-level owner
+     * @return TLFacetOwner
+     */
+    public static TLFacetOwner getTopLevelOwner(TLFacet facet) {
+    	Set<TLFacetOwner> visitedOwners = new HashSet<>();
+    	TLFacetOwner owner = facet.getOwningEntity();
+    	
+    	while (owner instanceof TLContextualFacet) {
+    		if (visitedOwners.contains( owner )) {
+    			owner = null;
+    			break;
+    		}
+    		visitedOwners.add( owner );
+    		owner = ((TLContextualFacet) owner).getOwningEntity();
+    	}
+    	return owner;
+    }
 
     /**
      * Returns the <code>TLFacetOwner</code> instance that is extended by the facet owner that is
@@ -450,6 +478,7 @@ public class FacetCodegenUtils {
 
                 ghostFacet.setFacetType(facetType);
                 ghostFacet.setName(inheritedFacet.getName());
+                ghostFacet.setOwningLibrary(inheritedFacet.getOwningLibrary());
                 ghostFacet.setOwningEntity(facetOwner);
                 ghostFacets.add(ghostFacet);
             }
@@ -518,6 +547,149 @@ public class FacetCodegenUtils {
             }
         }
         return ghostFacets;
+    }
+    
+    /**
+     * Returns the list of all non-local ghost facets that should be included in the code
+     * generation output for the given library.  The list of facets returned by this method
+     * includes any nested ghost facets that might exist in the facet hierarchy.
+     * 
+     * @param library  the library for which to return non-local ghost-facets
+     * @return List<TLContextualFacet>
+     */
+    public static List<TLContextualFacet> findNonLocalGhostFacets(TLLibrary library) {
+    	List<TLContextualFacet> nonLocalFacets = new ArrayList<>();
+    	List<TLFacetOwner> topLevelOwners = new ArrayList<>();
+    	Map<TLFacetOwner,List<TLFacetOwner>> extensionRegistry;
+    	
+    	// Construct the collection top-level facet owners
+    	for (TLContextualFacet facet : library.getContextualFacetTypes()) {
+    		if (!facet.isLocalFacet()) {
+    			TLFacetOwner owner = getTopLevelOwner( facet );
+    			
+    			if (!topLevelOwners.contains( owner )) {
+    				topLevelOwners.add( owner );
+    			}
+    		}
+    	}
+    	extensionRegistry = buildExtensionRegistry( library.getOwningModel() );
+    	
+    	// Navigate through all of the extending entities to search for ghost facets
+    	// that should be generated in our starting library
+    	for (TLFacetOwner originalOwner : topLevelOwners) {
+    		findNonLocalGhostFacets( originalOwner, library, nonLocalFacets,
+    				extensionRegistry, new HashSet<TLFacetOwner>() );
+    	}
+    	return nonLocalFacets;
+    }
+    
+    /**
+     * Recursive routine that navigate through all of the extending entities to search
+     * for ghost facets that should be generated in our starting library.
+     * 
+     * @param owner  the facet owner for which to navigate the extension hierarchy
+     * @param originalLibrary  the original library for which non-local ghost facets should be identified
+     * @param nonLocalFacets  the list of non-local facets that have been collected
+     * @param extensionRegistry  the registry of extended-to-extending entities
+     * @param visitedOwners  the list of visited owners (protection against circular references)
+     */
+    private static void findNonLocalGhostFacets(TLFacetOwner owner, TLLibrary originalLibrary,
+    		List<TLContextualFacet> nonLocalFacets, Map<TLFacetOwner,List<TLFacetOwner>> extensionRegistry,
+    		Set<TLFacetOwner> visitedOwners) {
+    	if (!visitedOwners.contains( owner )) {
+    		List<TLFacetOwner> extendingOwners = extensionRegistry.get( owner );
+    		
+    		visitedOwners.add( owner );
+    		
+    		if (extendingOwners != null) {
+        		for (TLFacetOwner extendingOwner : extendingOwners) {
+                	findNonLocalGhostFacets( extendingOwner, originalLibrary, nonLocalFacets );
+                	findNonLocalGhostFacets( extendingOwner, originalLibrary, nonLocalFacets, extensionRegistry, visitedOwners );
+        		}
+    		}
+    	}
+    }
+    
+    /**
+     * Recursively collects all non-local ghost facets for the given owner that should be generated
+     * in the original library.
+     * 
+     * @param owner  the owner for which to collect non-local contextual facets
+     * @param originalLibrary  the original library for which non-local ghost facets should be identified
+     * @param nonLocalFacets  the list of non-local facets that have been collected
+     */
+    private static void findNonLocalGhostFacets(TLFacetOwner owner, TLLibrary originalLibrary,
+    		List<TLContextualFacet> nonLocalFacets) {
+    	for (TLFacetType facetType : getFacetTypes( owner )) {
+        	List<TLContextualFacet> ghostFacets = findGhostFacets( owner, facetType );
+    		
+        	for (TLFacet realFacet : getAllFacetsOfType( owner, facetType )) {
+        		if (realFacet instanceof TLContextualFacet) {
+            		findNonLocalGhostFacets( (TLContextualFacet) realFacet, originalLibrary, nonLocalFacets );
+        		}
+        	}
+        	for (TLContextualFacet ghostFacet : ghostFacets) {
+        		if (ghostFacet.getOwningLibrary() == originalLibrary) {
+        			nonLocalFacets.add( ghostFacet );
+        		}
+        		findNonLocalGhostFacets( ghostFacet, originalLibrary, nonLocalFacets );
+        	}
+    	}
+    }
+    
+    /**
+     * Returns the list of facet types that are applicable to the given owner.
+     * 
+     * @param owner  the owner for which to return a list of facet types
+     * @return TLFacetType[]
+     */
+    private static TLFacetType[] getFacetTypes(TLFacetOwner owner) {
+    	TLFacetType[] typeList;
+    	
+    	if (owner instanceof TLBusinessObject) {
+    		typeList = new TLFacetType[] { TLFacetType.CUSTOM, TLFacetType.QUERY, TLFacetType.UPDATE };
+    		
+    	} else if (owner instanceof TLChoiceObject) {
+    		typeList = new TLFacetType[] { TLFacetType.CHOICE };
+    		
+    	} else if (owner instanceof TLContextualFacet) {
+    		typeList = new TLFacetType[] { ((TLContextualFacet) owner).getFacetType() };
+    		
+    	} else {
+    		typeList = new TLFacetType[] { TLFacetType.CUSTOM, TLFacetType.QUERY, TLFacetType.UPDATE };
+    	}
+    	return typeList;
+    }
+    
+    /**
+     * Constructs a map of all extension relationships within the given OTM model.  The
+     * values in the resulting map represent all entities which extend the facet-owner key.
+     * 
+     * @param model  the model for which to build the extension registry
+     * @return Map<TLFacetOwner,List<TLFacetOwner>>
+     */
+    private static Map<TLFacetOwner,List<TLFacetOwner>> buildExtensionRegistry(TLModel model) {
+    	final Map<TLFacetOwner,List<TLFacetOwner>> registry = new HashMap<>();
+    	ModelElementVisitor visitor = new ModelElementVisitorAdapter() {
+			public boolean visitExtension(TLExtension extension) {
+				TLExtensionOwner extendingEntity = extension.getOwner();
+				NamedEntity extendedEntity = extension.getExtendsEntity();
+				
+				if ((extendingEntity instanceof TLFacetOwner) && (extendedEntity instanceof TLFacetOwner)) {
+					List<TLFacetOwner> extendingList = registry.get( extendedEntity );
+					
+					if (extendingList == null) {
+						extendingList = new ArrayList<>();
+						registry.put( (TLFacetOwner) extendedEntity, extendingList );
+					}
+					extendingList.add( (TLFacetOwner) extendingEntity );
+				}
+				return true;
+			}
+		};
+		
+		ModelNavigator.navigate( model, visitor );
+    	return registry;
     }
     
     /**

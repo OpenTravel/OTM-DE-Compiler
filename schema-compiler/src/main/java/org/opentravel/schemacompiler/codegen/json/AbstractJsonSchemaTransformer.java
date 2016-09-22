@@ -17,17 +17,22 @@ package org.opentravel.schemacompiler.codegen.json;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerator;
 import org.opentravel.schemacompiler.codegen.impl.AbstractCodegenTransformer;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
+import org.opentravel.schemacompiler.codegen.impl.CorrelatedCodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
+import org.opentravel.schemacompiler.codegen.json.facet.FacetJsonSchemaDelegateFactory;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentationOwner;
+import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.JsonSchemaNamingUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDeclaration;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
@@ -89,6 +94,26 @@ public abstract class AbstractJsonSchemaTransformer<S, T> extends AbstractCodege
 		}
 	}
 	
+    /**
+     * Recursively generates schema artifacts for all contextual facets in the given list.
+     * 
+     * @param facetList  the list of contextual facets
+     * @param delegateFactory  the facet code generation delegate factory
+     * @param artifacts  the container for all generated schema artifacts
+     */
+    protected void generateContextualFacetArtifacts(List<TLContextualFacet> facetList,
+    		FacetJsonSchemaDelegateFactory delegateFactory, CorrelatedCodegenArtifacts artifacts) {
+    	for (TLContextualFacet facet : facetList) {
+    		if (facet.isLocalFacet()) {
+    			List<TLContextualFacet> ghostFacets = FacetCodegenUtils.findGhostFacets(facet, facet.getFacetType());
+    			
+            	artifacts.addAllArtifacts( delegateFactory.getDelegate( facet ).generateArtifacts() );
+                generateContextualFacetArtifacts(facet.getChildFacets(), delegateFactory, artifacts);
+                generateContextualFacetArtifacts(ghostFacets, delegateFactory, artifacts);
+    		}
+    	}
+    }
+
     /**
      * Adds the schemas associated with the given compile-time dependency to the current list of
      * dependencies maintained by the orchestrating code generator.

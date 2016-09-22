@@ -148,10 +148,14 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
         	definition.setSchema( new JsonSchemaReference( localFacetSchema ) );
         	facetSchema = localFacetSchema;
         }
+        
+		if (sourceFacet.getOwningEntity() instanceof TLEquivalentOwner) {
+			facetSchema.getEquivalentItems().addAll( jsonUtils.getEquivalentInfo(
+					(TLEquivalentOwner) sourceFacet.getOwningEntity() ) );
+		}
+		
         facetSchema.setDocumentation( createJsonDocumentation( sourceFacet ) );
 		facetSchema.setEntityInfo( jsonUtils.getEntityInfo( sourceFacet.getOwningEntity() ) );
-		facetSchema.getEquivalentItems().addAll( jsonUtils.getEquivalentInfo(
-				(TLEquivalentOwner) sourceFacet.getOwningEntity() ) );
         definition.setSchema( new JsonSchemaReference( facetSchema ) );
         
 		localFacetSchema.getProperties().addAll( createDefinitions() );

@@ -204,20 +204,6 @@ public class TLActionFacetCodegenTransformer extends AbstractXsdTransformer<TLAc
         return delegate;
 	}
 	
-    /**
-     * Utility method that generates both element and non-element schema content for the source
-     * facet of the given delegate.
-     * 
-     * @param facetDelegate  the facet code generation delegate
-     * @param elementArtifacts  the container for all generated schema elements
-     * @param otherArtifacts  the container for all generated non-element schema artifacts
-     */
-    private void generateFacetArtifacts(FacetCodegenDelegate<TLFacet> facetDelegate,
-            FacetCodegenElements elementArtifacts, CodegenArtifacts otherArtifacts) {
-        elementArtifacts.addAll(facetDelegate.generateElements());
-        otherArtifacts.addAllArtifacts(facetDelegate.generateArtifacts());
-    }
-
 	/**
 	 * Delegate used to generate wrapper class elements for core object summary facets.
 	 */

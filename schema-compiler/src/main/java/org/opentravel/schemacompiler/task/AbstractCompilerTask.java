@@ -111,9 +111,8 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
         if (isProjectFile(libraryOrProjectUrl)) {
             findings = new ValidationFindings();
             ProjectManager projectManager = new ProjectManager(false);
-            Project project = projectManager.loadProject(URLUtils.toFile(libraryOrProjectUrl),
-                    findings);
-
+            Project project = projectManager.loadProject(URLUtils.toFile(libraryOrProjectUrl), findings);
+            
             for (ProjectItem item : project.getProjectItems()) {
                 AbstractLibrary itemContent = item.getContent();
 

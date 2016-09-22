@@ -131,8 +131,8 @@ public abstract class FacetCodegenDelegate<F extends TLAbstractFacet> {
         FacetCodegenElements codegenElements = new FacetCodegenElements();
 
         if (hasContent()) {
-            codegenElements
-                    .addFacetElement(getSourceFacet().getOwningEntity(), createElement(null));
+            codegenElements.addFacetElement(
+            		getSourceFacet().getOwningEntity(), createElement(null));
         }
         return codegenElements;
     }

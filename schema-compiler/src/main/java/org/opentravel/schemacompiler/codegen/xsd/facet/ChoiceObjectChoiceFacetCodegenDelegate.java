@@ -19,7 +19,9 @@ import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
+import org.opentravel.schemacompiler.model.TLFacetOwner;
 
 /**
  * Code generation delegate for <code>TLFacet</code> instances with a facet type of
@@ -44,13 +46,23 @@ public class ChoiceObjectChoiceFacetCodegenDelegate extends ChoiceObjectFacetCod
      */
     @Override
     public TLFacet getLocalBaseFacet() {
+        FacetCodegenDelegateFactory factory = new FacetCodegenDelegateFactory(transformerContext);
         TLFacet sourceFacet = getSourceFacet();
+        TLFacetOwner facetOwner = sourceFacet.getOwningEntity();
         TLFacet baseFacet = null;
-
-        if (sourceFacet.getOwningEntity() instanceof TLChoiceObject) {
-            TLChoiceObject choiceObject = (TLChoiceObject) sourceFacet.getOwningEntity();
-            
-            baseFacet = choiceObject.getSharedFacet();
+        
+        while ((baseFacet == null) && (facetOwner instanceof TLContextualFacet)) {
+        	TLContextualFacet owningFacet = (TLContextualFacet) facetOwner;
+        	
+        	if (factory.getDelegate(owningFacet).hasContent()) {
+        		baseFacet = owningFacet;
+        		
+        	} else {
+        		facetOwner = owningFacet.getOwningEntity();
+        	}
+        }
+        if ((baseFacet == null) && (facetOwner instanceof TLChoiceObject)) {
+            baseFacet = ((TLChoiceObject) facetOwner).getSharedFacet();
         }
         return baseFacet;
     }
@@ -60,10 +72,18 @@ public class ChoiceObjectChoiceFacetCodegenDelegate extends ChoiceObjectFacetCod
      */
     @Override
     public QName getExtensionPointElement() {
-        SchemaDependency extensionPoint = SchemaDependency.getExtensionPointElement();
-        QName extensionPointQName = extensionPoint.toQName();
-        
-        addCompileTimeDependency(extensionPoint);
+    	TLFacetOwner facetOwner = getSourceFacet().getOwningEntity();
+        QName extensionPointQName;
+    	
+        if (facetOwner instanceof TLChoiceObject) {
+            SchemaDependency extensionPoint = SchemaDependency.getExtensionPointElement();
+            
+            extensionPointQName = extensionPoint.toQName();
+            addCompileTimeDependency(extensionPoint);
+            
+        } else {
+        	extensionPointQName = null;
+        }
         return extensionPointQName;
     }
 

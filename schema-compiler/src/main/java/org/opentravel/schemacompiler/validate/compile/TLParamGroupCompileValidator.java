@@ -15,9 +15,12 @@
  */
 package org.opentravel.schemacompiler.validate.compile;
 
+import java.util.List;
+
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLFacetType;
@@ -65,7 +68,7 @@ public class TLParamGroupCompileValidator extends TLParamGroupBaseValidator{
     	if ((facetRef != null) && (target.getOwner() != null) &&
     			((boRef = target.getOwner().getBusinessObjectRef()) != null)) {
     		
-    		if (!isDeclaredOrInheritedFacet(facetRef, boRef)) {
+    		if (!isDeclaredOrInheritedFacet(boRef, facetRef, boRef)) {
             	builder.addFinding( FindingType.ERROR, "facetRef", ERROR_INVALID_FACET_REF, boRef.getLocalName() );
     		}
     	}
@@ -85,28 +88,33 @@ public class TLParamGroupCompileValidator extends TLParamGroupBaseValidator{
 	 * Returns true if the given facet reference is declared or inherited by the
 	 * business object provided.
 	 * 
+	 * @param facetOwner  the candidate facet owner to check for the 'facetRef'
 	 * @param facetRef  the facet reference of the parameter group being validated
 	 * @param boRef  the business object reference from the owning resource
 	 * @return boolean
 	 */
-	private boolean isDeclaredOrInheritedFacet(TLFacet facetRef, TLBusinessObject boRef) {
-		TLBusinessObject bo = boRef;
+	private boolean isDeclaredOrInheritedFacet(TLFacetOwner facetOwner, TLFacet facetRef, TLBusinessObject boRef) {
 		boolean isValid = false;
 		
-		while (!isValid && (bo != null)) {
-			String facetName = FacetCodegenUtils.getFacetName(facetRef);
-			TLFacet boFacet = FacetCodegenUtils.getFacetOfType( bo, facetRef.getFacetType(), facetName );
+		while (!isValid && (facetOwner != null)) {
+			List<TLFacet> boFacets = FacetCodegenUtils.getAllFacetsOfType( facetOwner, facetRef.getFacetType() );
 			
-			if (facetRef == boFacet) {
-				isValid = true;
+			for (TLFacet boFacet : boFacets) {
+				if (facetRef == boFacet) {
+					isValid = true;
+					
+				} else if (boFacet instanceof TLContextualFacet){
+					isValid = isDeclaredOrInheritedFacet( (TLContextualFacet) boFacet, facetRef, boRef );
+				}
+				if (isValid) break;
+			}
+			if (!isValid) {
+				TLFacetOwner ownerExtension = FacetCodegenUtils.getFacetOwnerExtension( facetOwner );
 				
-			} else {
-				TLFacetOwner boExtension = FacetCodegenUtils.getFacetOwnerExtension( bo );
-				
-				if (boExtension instanceof TLBusinessObject) {
-					bo = (TLBusinessObject) boExtension;
+				if (ownerExtension instanceof TLBusinessObject) {
+					facetOwner = ownerExtension;
 				} else {
-					bo = null;
+					facetOwner = null;
 				}
 			}
 		}

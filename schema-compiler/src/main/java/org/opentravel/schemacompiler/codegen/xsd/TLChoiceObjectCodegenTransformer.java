@@ -17,12 +17,9 @@ package org.opentravel.schemacompiler.codegen.xsd;
 
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
-import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegate;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenElements;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
-import org.opentravel.schemacompiler.model.TLContextualFacet;
-import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetType;
 
 /**
@@ -45,32 +42,11 @@ public class TLChoiceObjectCodegenTransformer extends
 
         generateFacetArtifacts(delegateFactory.getDelegate(source.getSharedFacet()), elementArtifacts, otherArtifacts);
         
-        for (TLContextualFacet choiceFacet : source.getChoiceFacets()) {
-        	if (choiceFacet.isLocalFacet()) {
-                generateFacetArtifacts(delegateFactory.getDelegate(choiceFacet), elementArtifacts, otherArtifacts);
-        	}
-        }
-        for (TLContextualFacet ghostFacet : FacetCodegenUtils.findGhostFacets(source, TLFacetType.CHOICE)) {
-        	if (ghostFacet.isLocalFacet()) {
-                generateFacetArtifacts(delegateFactory.getDelegate(ghostFacet), elementArtifacts, otherArtifacts);
-        	}
-        }
-
+        generateContextualFacetArtifacts(source.getChoiceFacets(), delegateFactory, elementArtifacts, otherArtifacts);
+        generateContextualFacetArtifacts(FacetCodegenUtils.findGhostFacets(source, TLFacetType.CHOICE),
+        		delegateFactory, elementArtifacts, otherArtifacts);
+        
         return buildCorrelatedArtifacts(source, elementArtifacts, otherArtifacts);
 	}
 	
-    /**
-     * Utility method that generates both element and non-element schema content for the source
-     * facet of the given delegate.
-     * 
-     * @param facetDelegate  the facet code generation delegate
-     * @param elementArtifacts  the container for all generated schema elements
-     * @param otherArtifacts  the container for all generated non-element schema artifacts
-     */
-    private void generateFacetArtifacts(FacetCodegenDelegate<? extends TLFacet> facetDelegate,
-            FacetCodegenElements elementArtifacts, CodegenArtifacts otherArtifacts) {
-        elementArtifacts.addAll(facetDelegate.generateElements());
-        otherArtifacts.addAllArtifacts(facetDelegate.generateArtifacts());
-    }
-
 }

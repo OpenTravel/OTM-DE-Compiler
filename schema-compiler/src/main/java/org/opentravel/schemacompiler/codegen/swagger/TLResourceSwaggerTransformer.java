@@ -220,6 +220,7 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
 		definitions.add( new JsonSchemaNamedReference( "ExtensionPoint_Detail", new JsonSchemaReference( extensionPointSchema ) ) );
 		definitions.add( new JsonSchemaNamedReference( "ExtensionPoint_Custom", new JsonSchemaReference( extensionPointSchema ) ) );
 		definitions.add( new JsonSchemaNamedReference( "ExtensionPoint_Query", new JsonSchemaReference( extensionPointSchema ) ) );
+		definitions.add( new JsonSchemaNamedReference( "ExtensionPoint_Update", new JsonSchemaReference( extensionPointSchema ) ) );
 		definitions.add( new JsonSchemaNamedReference( "ExtensionPoint_Shared", new JsonSchemaReference( extensionPointSchema ) ) );
 		definitions.add( new JsonSchemaNamedReference( "ExtensionPoint_Choice", new JsonSchemaReference( extensionPointSchema ) ) );
 		

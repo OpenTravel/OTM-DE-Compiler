@@ -18,30 +18,23 @@ package org.opentravel.schemacompiler.codegen.json;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.CorrelatedCodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.json.facet.FacetJsonSchemaDelegateFactory;
-import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
-import org.opentravel.schemacompiler.model.TLChoiceObject;
-import org.opentravel.schemacompiler.model.TLFacetType;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 
 /**
- * Performs the translation from <code>TLChoiceObject</code> objects to the JSON schema elements
+ * Performs the translation from <code>TLContextualFacet</code> objects to the JSON schema elements
  * used to produce the output.
  */
-public class TLChoiceObjectJsonCodegenTransformer extends AbstractJsonSchemaTransformer<TLChoiceObject, CodegenArtifacts> {
+public class TLContextualFacetJsonCodegenTransformer extends AbstractJsonSchemaTransformer<TLContextualFacet, CodegenArtifacts> {
 	
 	/**
 	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
 	 */
 	@Override
-	public CodegenArtifacts transform(TLChoiceObject source) {
+	public CodegenArtifacts transform(TLContextualFacet source) {
 		FacetJsonSchemaDelegateFactory delegateFactory = new FacetJsonSchemaDelegateFactory( context );
         CorrelatedCodegenArtifacts artifacts = new CorrelatedCodegenArtifacts();
 
-        artifacts.addAllArtifacts( delegateFactory.getDelegate( source.getSharedFacet() ).generateArtifacts() );
-        
-        generateContextualFacetArtifacts(source.getChoiceFacets(), delegateFactory, artifacts);
-        generateContextualFacetArtifacts(FacetCodegenUtils.findGhostFacets(source, TLFacetType.CHOICE),
-        		delegateFactory, artifacts);
-        
+        artifacts.addAllArtifacts( delegateFactory.getDelegate( source ).generateArtifacts() );
         return artifacts.getConsolidatedArtifacts();
 	}
 	

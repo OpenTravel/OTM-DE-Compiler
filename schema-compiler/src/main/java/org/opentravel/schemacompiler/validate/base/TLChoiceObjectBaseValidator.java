@@ -17,6 +17,7 @@ package org.opentravel.schemacompiler.validate.base;
 
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLEquivalent;
 import org.opentravel.schemacompiler.model.TLExtension;
@@ -39,6 +40,7 @@ public class TLChoiceObjectBaseValidator extends TLValidatorBase<TLChoiceObject>
     protected ValidationFindings validateChildren(TLChoiceObject target) {
         Validator<TLAlias> aliasValidator = getValidatorFactory().getValidatorForClass(TLAlias.class);
         Validator<TLFacet> facetValidator = getValidatorFactory().getValidatorForClass(TLFacet.class);
+        Validator<TLContextualFacet> cFacetValidator = getValidatorFactory().getValidatorForClass(TLContextualFacet.class);
         ValidationFindings findings = new ValidationFindings();
 
         if (target.getExtension() != null) {
@@ -66,9 +68,8 @@ public class TLChoiceObjectBaseValidator extends TLValidatorBase<TLChoiceObject>
         if (target.getSharedFacet() != null) {
             findings.addAll(facetValidator.validate(target.getSharedFacet()));
         }
-        for (TLFacet choiceFacet : target.getChoiceFacets()) {
-            findings.addAll(facetValidator.validate(choiceFacet));
-        }
+        validateLocalContextualFacets(target.getChoiceFacets(), cFacetValidator, findings);
+        
         return findings;
     }
 

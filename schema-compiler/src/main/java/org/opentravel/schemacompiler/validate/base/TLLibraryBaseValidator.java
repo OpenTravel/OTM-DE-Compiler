@@ -17,6 +17,7 @@ package org.opentravel.schemacompiler.validate.base;
 
 import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.TLContext;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLInclude;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
@@ -48,10 +49,8 @@ public class TLLibraryBaseValidator extends TLValidatorBase<TLLibrary> {
      */
     @Override
     protected ValidationFindings validateChildren(TLLibrary target) {
-        Validator<TLContext> contextValidator = getValidatorFactory().getValidatorForClass(
-                TLContext.class);
-        Validator<TLInclude> includeValidator = getValidatorFactory().getValidatorForClass(
-                TLInclude.class);
+        Validator<TLContext> contextValidator = getValidatorFactory().getValidatorForClass(TLContext.class);
+        Validator<TLInclude> includeValidator = getValidatorFactory().getValidatorForClass(TLInclude.class);
         TLValidationBuilder builder = newValidationBuilder(target);
 
         for (TLContext context : target.getContexts()) {
@@ -64,8 +63,8 @@ public class TLLibraryBaseValidator extends TLValidatorBase<TLLibrary> {
 
         // Now validate each individual member with its own validator
         for (LibraryMember member : target.getNamedMembers()) {
-            Validator<LibraryMember> childValidator = getValidatorFactory().getValidatorForTarget(
-                    member);
+        	if (isLocalContextualFacet(member)) continue;
+            Validator<LibraryMember> childValidator = getValidatorFactory().getValidatorForTarget(member);
 
             if (childValidator != null) {
                 builder.addFindings(childValidator.validate(member));
@@ -73,5 +72,16 @@ public class TLLibraryBaseValidator extends TLValidatorBase<TLLibrary> {
         }
         return builder.getFindings();
     }
-
+    
+    /**
+     * Returns true if the given library member is a contextual facet that is local
+     * to its owning entity; and that owning entity is not another contextual facet.
+     *  
+     * @param member  the library member to check
+     * @return boolean
+     */
+    private boolean isLocalContextualFacet(LibraryMember member) {
+    	return (member instanceof TLContextualFacet) && ((TLContextualFacet) member).isLocalFacet();
+    }
+    
 }

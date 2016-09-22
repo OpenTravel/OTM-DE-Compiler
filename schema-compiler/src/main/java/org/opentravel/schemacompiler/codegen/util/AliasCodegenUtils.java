@@ -15,6 +15,9 @@
  */
 package org.opentravel.schemacompiler.codegen.util;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAliasOwner;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
@@ -83,6 +86,29 @@ public class AliasCodegenUtils {
             }
         }
         return ownerAlias;
+    }
+    
+    /**
+     * Returns the top-level alias whose owner is not a <code>TLContextualFacet</code>.
+     * 
+     * @param facetAlias  the facet alias for which to return the top-level owner
+     * @return TLAlias
+     */
+    public static TLAlias getTopLevelOwnerAlias(TLAlias facetAlias) {
+    	Set<TLAliasOwner> visitedOwners = new HashSet<>();
+    	TLAlias ownerAlias = getOwnerAlias( facetAlias );
+		TLAliasOwner owner = (ownerAlias == null) ? null : ownerAlias.getOwningEntity();
+    	
+    	while ((ownerAlias != null) && (owner instanceof TLContextualFacet)) {
+    		if (visitedOwners.contains(owner)) {
+    			ownerAlias = null;
+    			break;
+    		}
+    		visitedOwners.add( owner );
+    		ownerAlias = getOwnerAlias( ownerAlias );
+    		owner = (ownerAlias == null) ? null : ownerAlias.getOwningEntity();
+    	}
+    	return ownerAlias;
     }
 
     /**

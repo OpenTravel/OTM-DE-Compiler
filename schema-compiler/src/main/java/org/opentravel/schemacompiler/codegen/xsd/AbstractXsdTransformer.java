@@ -36,7 +36,10 @@ import org.opentravel.schemacompiler.codegen.impl.AbstractCodegenTransformer;
 import org.opentravel.schemacompiler.codegen.impl.AbstractJaxbCodeGenerator;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.LegacySchemaExtensionFilenameBuilder;
+import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
+import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegate;
+import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenElements;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.ioc.SchemaDeclaration;
@@ -46,6 +49,8 @@ import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAliasOwner;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
+import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLInclude;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.XSDLibrary;
@@ -497,6 +502,41 @@ public abstract class AbstractXsdTransformer<S, T> extends AbstractCodegenTransf
         }
         correlatedArtifacts.addAllArtifacts(codegenArtifacts);
         return correlatedArtifacts;
+    }
+
+    /**
+     * Recursively generates schema artifacts for all contextual facets in the given list.
+     * 
+     * @param facetList  the list of contextual facets
+     * @param delegateFactory  the facet code generation delegate factory
+     * @param elementArtifacts  the container for all generated schema elements
+     * @param otherArtifacts  the container for all generated non-element schema artifacts
+     */
+    protected void generateContextualFacetArtifacts(List<TLContextualFacet> facetList, FacetCodegenDelegateFactory delegateFactory,
+            FacetCodegenElements elementArtifacts, CodegenArtifacts otherArtifacts) {
+    	for (TLContextualFacet facet : facetList) {
+    		if (facet.isLocalFacet()) {
+    			List<TLContextualFacet> ghostFacets = FacetCodegenUtils.findGhostFacets(facet, facet.getFacetType());
+    			
+                generateFacetArtifacts(delegateFactory.getDelegate(facet), elementArtifacts, otherArtifacts);
+                generateContextualFacetArtifacts(facet.getChildFacets(), delegateFactory, elementArtifacts, otherArtifacts);
+                generateContextualFacetArtifacts(ghostFacets, delegateFactory, elementArtifacts, otherArtifacts);
+    		}
+    	}
+    }
+
+    /**
+     * Utility method that generates both element and non-element schema content for the source
+     * facet of the given delegate.
+     * 
+     * @param facetDelegate  the facet code generation delegate
+     * @param elementArtifacts  the container for all generated schema elements
+     * @param otherArtifacts  the container for all generated non-element schema artifacts
+     */
+    protected void generateFacetArtifacts(FacetCodegenDelegate<? extends TLFacet> facetDelegate,
+            FacetCodegenElements elementArtifacts, CodegenArtifacts otherArtifacts) {
+        elementArtifacts.addAll(facetDelegate.generateElements());
+        otherArtifacts.addAllArtifacts(facetDelegate.generateArtifacts());
     }
 
 }

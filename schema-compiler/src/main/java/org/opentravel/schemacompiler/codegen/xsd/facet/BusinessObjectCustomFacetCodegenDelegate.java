@@ -19,7 +19,9 @@ import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
+import org.opentravel.schemacompiler.model.TLFacetOwner;
 
 /**
  * Code generation delegate for <code>TLFacet</code> instances with a facet type of
@@ -44,12 +46,22 @@ public class BusinessObjectCustomFacetCodegenDelegate extends BusinessObjectFace
      */
     @Override
     public TLFacet getLocalBaseFacet() {
+        FacetCodegenDelegateFactory factory = new FacetCodegenDelegateFactory(transformerContext);
         TLFacet sourceFacet = getSourceFacet();
+        TLFacetOwner facetOwner = sourceFacet.getOwningEntity();
         TLFacet baseFacet = null;
 
-        if (sourceFacet.getOwningEntity() instanceof TLBusinessObject) {
-            FacetCodegenDelegateFactory factory = new FacetCodegenDelegateFactory(
-                    transformerContext);
+        while ((baseFacet == null) && (facetOwner instanceof TLContextualFacet)) {
+        	TLContextualFacet owningFacet = (TLContextualFacet) facetOwner;
+        	
+        	if (factory.getDelegate(owningFacet).hasContent()) {
+        		baseFacet = owningFacet;
+        		
+        	} else {
+        		facetOwner = owningFacet.getOwningEntity();
+        	}
+        }
+        if ((baseFacet == null) && (sourceFacet.getOwningEntity() instanceof TLBusinessObject)) {
             TLBusinessObject businessObject = (TLBusinessObject) sourceFacet.getOwningEntity();
             TLFacet parentFacet = businessObject.getSummaryFacet();
 
@@ -68,18 +80,25 @@ public class BusinessObjectCustomFacetCodegenDelegate extends BusinessObjectFace
      */
     @Override
     public QName getExtensionPointElement() {
-    	TLBusinessObject bo = (TLBusinessObject) getSourceFacet().getOwningEntity();
-        SchemaDependency extensionPoint;
+    	TLFacetOwner facetOwner = getSourceFacet().getOwningEntity();
         QName extensionPointQName;
-        
-        if (declaresOrInheritsFacetContent( bo.getSummaryFacet() )) {
-        	extensionPoint = SchemaDependency.getExtensionPointCustomElement();
-        	
+    	
+        if (facetOwner instanceof TLBusinessObject) {
+        	TLBusinessObject bo = (TLBusinessObject) facetOwner;
+            SchemaDependency extensionPoint;
+            
+            if (declaresOrInheritsFacetContent( bo.getSummaryFacet() )) {
+            	extensionPoint = SchemaDependency.getExtensionPointCustomElement();
+            	
+            } else {
+            	extensionPoint = SchemaDependency.getExtensionPointElement();
+            }
+            extensionPointQName = extensionPoint.toQName();
+            addCompileTimeDependency(extensionPoint);
+            
         } else {
-        	extensionPoint = SchemaDependency.getExtensionPointElement();
+        	extensionPointQName = null;
         }
-        extensionPointQName = extensionPoint.toQName();
-        addCompileTimeDependency(extensionPoint);
         return extensionPointQName;
     }
 

@@ -65,7 +65,7 @@ public class TLContextualFacetCompileValidator extends TLContextualFacetBaseVali
             builder.addFinding(FindingType.ERROR, "owningEntity", ERROR_INVALID_CIRCULAR_REFERENCE);
         }
 
-        builder.setProperty("facetName", target.getFacetType()).setFindingType(FindingType.ERROR)
+        builder.setProperty("facetName", target.getName()).setFindingType(FindingType.ERROR)
         		.assertNotNull().assertPatternMatch(NAME_XML_PATTERN);
 
         builder.setProperty("facetType", target.getFacetType()).setFindingType(FindingType.ERROR)
