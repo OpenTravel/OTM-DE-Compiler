@@ -26,7 +26,7 @@ import org.w3._2001.xmlschema.TopLevelElement;
  * 
  * @author S. Livezey
  */
-public class XSDElement extends LibraryMemberImpl implements TLPropertyType {
+public class XSDElement extends TLLibraryMember implements TLPropertyType {
 
     private String name;
     private TopLevelElement jaxbElement;

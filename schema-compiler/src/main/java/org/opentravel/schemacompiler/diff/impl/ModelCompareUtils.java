@@ -17,6 +17,7 @@
 package org.opentravel.schemacompiler.diff.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -26,6 +27,7 @@ import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
+import org.opentravel.schemacompiler.event.ModelElementListener;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.LibraryElement;
@@ -392,6 +394,28 @@ public class ModelCompareUtils {
 		@Override
 		public boolean isLaterVersion(Versioned otherVersionedItem) {
 			return false;
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.model.ModelElement#addListener(org.opentravel.schemacompiler.event.ModelElementListener)
+		 */
+		@Override
+		public void addListener(ModelElementListener listener) {
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.model.ModelElement#removeListener(org.opentravel.schemacompiler.event.ModelElementListener)
+		 */
+		@Override
+		public void removeListener(ModelElementListener listener) {
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.model.ModelElement#getListeners()
+		 */
+		@Override
+		public Collection<ModelElementListener> getListeners() {
+			return Collections.emptyList();
 		}
 		
 	}

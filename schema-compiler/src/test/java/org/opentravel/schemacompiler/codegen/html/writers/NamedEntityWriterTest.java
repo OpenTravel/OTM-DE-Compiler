@@ -17,6 +17,9 @@ package org.opentravel.schemacompiler.codegen.html.writers;
 
 import static org.junit.Assert.*;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,6 +33,7 @@ import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.codegen.html.Content;
 import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder.DocumentationBuilderType;
 import org.opentravel.schemacompiler.codegen.html.builders.NamedEntityDocumentationBuilder;
+import org.opentravel.schemacompiler.event.ModelElementListener;
 
 /**
  * @author Eric.Bronson
@@ -144,6 +148,28 @@ public class NamedEntityWriterTest extends WriterTest {
 		@Override
 		public String getLocalName() {
 			return "TestLocalName";
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.model.ModelElement#addListener(org.opentravel.schemacompiler.event.ModelElementListener)
+		 */
+		@Override
+		public void addListener(ModelElementListener listener) {
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.model.ModelElement#removeListener(org.opentravel.schemacompiler.event.ModelElementListener)
+		 */
+		@Override
+		public void removeListener(ModelElementListener listener) {
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.model.ModelElement#getListeners()
+		 */
+		@Override
+		public Collection<ModelElementListener> getListeners() {
+			return Collections.emptyList();
 		}
 		
 	}

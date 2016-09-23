@@ -15,6 +15,10 @@
  */
 package org.opentravel.schemacompiler.ioc;
 
+import java.util.Collection;
+import java.util.Collections;
+
+import org.opentravel.schemacompiler.event.ModelElementListener;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.NamedEntity;
@@ -82,5 +86,27 @@ public class SchemaDependencyNamedEntityAdapter implements NamedEntity {
     public LibraryElement cloneElement(AbstractLibrary namingContext) {
         return null;
     }
+
+	/**
+	 * @see org.opentravel.schemacompiler.model.ModelElement#addListener(org.opentravel.schemacompiler.event.ModelElementListener)
+	 */
+	@Override
+	public void addListener(ModelElementListener listener) {
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.model.ModelElement#removeListener(org.opentravel.schemacompiler.event.ModelElementListener)
+	 */
+	@Override
+	public void removeListener(ModelElementListener listener) {
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.model.ModelElement#getListeners()
+	 */
+	@Override
+	public Collection<ModelElementListener> getListeners() {
+		return Collections.emptyList();
+	}
 
 }

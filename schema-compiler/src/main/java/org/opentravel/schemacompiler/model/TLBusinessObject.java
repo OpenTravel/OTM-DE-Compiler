@@ -326,19 +326,31 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
     }
 
     /**
-	 * @see org.opentravel.schemacompiler.model.LibraryMemberImpl#setOwningLibrary(org.opentravel.schemacompiler.model.AbstractLibrary)
+	 * @see org.opentravel.schemacompiler.model.TLLibraryMember#setOwningLibrary(org.opentravel.schemacompiler.model.AbstractLibrary)
 	 */
 	@Override
 	public void setOwningLibrary(AbstractLibrary owningLibrary) {
     	if (!OTM16Upgrade.otm16Enabled) {
     		for (TLContextualFacet facet : getCustomFacets()) {
-    			owningLibrary.addNamedMember( facet );
+    			if (owningLibrary != null) {
+        			owningLibrary.addNamedMember( facet );
+    			} else {
+    				this.getOwningLibrary().removeNamedMember( facet );
+    			}
     		}
     		for (TLContextualFacet facet : getQueryFacets()) {
-    			owningLibrary.addNamedMember( facet );
+    			if (owningLibrary != null) {
+        			owningLibrary.addNamedMember( facet );
+    			} else {
+    				this.getOwningLibrary().removeNamedMember( facet );
+    			}
     		}
     		for (TLContextualFacet facet : getUpdateFacets()) {
-    			owningLibrary.addNamedMember( facet );
+    			if (owningLibrary != null) {
+        			owningLibrary.addNamedMember( facet );
+    			} else {
+    				this.getOwningLibrary().removeNamedMember( facet );
+    			}
     		}
     	}
 		super.setOwningLibrary(owningLibrary);

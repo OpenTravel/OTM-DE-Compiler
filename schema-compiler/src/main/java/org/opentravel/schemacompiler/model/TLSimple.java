@@ -31,7 +31,7 @@ import org.opentravel.schemacompiler.version.Versioned;
  * 
  * @author S. Livezey
  */
-public class TLSimple extends LibraryMemberImpl implements Versioned, TLAttributeType,
+public class TLSimple extends TLLibraryMember implements Versioned, TLAttributeType,
         TLDocumentationOwner, TLEquivalentOwner, TLExampleOwner {
 
     private String name;

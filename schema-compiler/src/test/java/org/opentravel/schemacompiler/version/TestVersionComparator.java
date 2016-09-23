@@ -18,10 +18,12 @@ package org.opentravel.schemacompiler.version;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
+import org.opentravel.schemacompiler.event.ModelElementListener;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.TLModel;
@@ -150,6 +152,19 @@ public class TestVersionComparator {
         public LibraryElement cloneElement(AbstractLibrary namingContext) {
             return null;
         }
+
+		@Override
+		public void addListener(ModelElementListener listener) {
+		}
+
+		@Override
+		public void removeListener(ModelElementListener listener) {
+		}
+
+		@Override
+		public Collection<ModelElementListener> getListeners() {
+			return Collections.emptyList();
+		}
 
     }
 

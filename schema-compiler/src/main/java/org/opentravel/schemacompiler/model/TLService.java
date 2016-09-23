@@ -29,7 +29,7 @@ import org.opentravel.schemacompiler.model.TLOperation.OperationListManager;
  * 
  * @author S. Livezey
  */
-public class TLService extends LibraryMemberImpl implements NamedEntity, TLDocumentationOwner,
+public class TLService extends TLLibraryMember implements NamedEntity, TLDocumentationOwner,
         TLEquivalentOwner {
 
     private String name;

@@ -238,13 +238,17 @@ public class TLChoiceObject extends TLComplexTypeBase implements TLFacetOwner, T
     }
 
     /**
-	 * @see org.opentravel.schemacompiler.model.LibraryMemberImpl#setOwningLibrary(org.opentravel.schemacompiler.model.AbstractLibrary)
+	 * @see org.opentravel.schemacompiler.model.TLLibraryMember#setOwningLibrary(org.opentravel.schemacompiler.model.AbstractLibrary)
 	 */
 	@Override
 	public void setOwningLibrary(AbstractLibrary owningLibrary) {
     	if (!OTM16Upgrade.otm16Enabled) {
     		for (TLContextualFacet facet : getChoiceFacets()) {
-    			owningLibrary.addNamedMember( facet );
+    			if (owningLibrary != null) {
+        			owningLibrary.addNamedMember( facet );
+    			} else {
+    				this.getOwningLibrary().removeNamedMember( facet );
+    			}
     		}
     	}
 		super.setOwningLibrary(owningLibrary);

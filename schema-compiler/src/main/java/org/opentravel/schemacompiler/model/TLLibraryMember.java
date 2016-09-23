@@ -18,7 +18,7 @@ package org.opentravel.schemacompiler.model;
 /**
  * Default implementation of the <code>LibraryMember</code> interface.
  */
-public abstract class LibraryMemberImpl extends TLModelElement implements LibraryMember {
+public abstract class TLLibraryMember extends TLModelElement implements LibraryMember {
 	
     private AbstractLibrary owningLibrary;
 

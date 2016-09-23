@@ -27,7 +27,7 @@ import org.w3._2001.xmlschema.TopLevelSimpleType;
  * 
  * @author S. Livezey
  */
-public class XSDSimpleType extends LibraryMemberImpl implements TLAttributeType {
+public class XSDSimpleType extends TLLibraryMember implements TLAttributeType {
 
     private String name;
     private TopLevelSimpleType jaxbType;

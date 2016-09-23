@@ -23,11 +23,14 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Test;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.loader.LibraryModelLoader;
 import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
+import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.util.SchemaCompilerTestUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
@@ -164,6 +167,32 @@ public class TestModelUnits {
         assertEquals(destinationBO, doc.getOwner());
     }
     
+	@Test
+	public void testLibraryMemberRemoval() throws Exception {
+        LibraryInputSource<InputStream> libraryInput = new LibraryStreamInputSource(new File(
+                SchemaCompilerTestUtils.getBaseLibraryLocation()
+                        + "/test-package_v2/library_1_p2.xml"));
+        LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>();
+        ValidationFindings findings = modelLoader.loadLibraryModel(libraryInput);
+		
+        SchemaCompilerTestUtils.printFindings( findings );
+		assertFalse(findings.hasFinding(FindingType.ERROR));
+		
+        TLModel model = modelLoader.getLibraryModel();
+		
+        for (TLLibrary library : model.getUserDefinedLibraries()) {
+        	List<LibraryMember> memberList = new ArrayList<>( library.getNamedMembers() );
+        	
+        	for (LibraryMember member : memberList) {
+        		if (!OTM16Upgrade.otm16Enabled && (member instanceof TLContextualFacet)) {
+        			continue; // skip contextual facet removal for pre-1.6 cutover
+        		}
+        		library.removeNamedMember( member );
+        	}
+        	assertEquals(0, library.getNamedMembers().size());
+        }
+	}
+	
     private TLBusinessObject getTestBusinessObject() {
     	TLBusinessObject bo = new TLBusinessObject();
     	TLContextualFacet cfa = new TLContextualFacet();

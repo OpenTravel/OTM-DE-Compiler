@@ -30,7 +30,7 @@ import org.opentravel.schemacompiler.util.OTM16Upgrade;
  * 
  * @author S. Livezey
  */
-public abstract class TLComplexTypeBase extends LibraryMemberImpl implements TLPropertyType,
+public abstract class TLComplexTypeBase extends TLLibraryMember implements TLPropertyType,
         TLVersionedExtensionOwner, TLDocumentationOwner, TLEquivalentOwner {
 
     private String name;

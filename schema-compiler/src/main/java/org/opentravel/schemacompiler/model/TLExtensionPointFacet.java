@@ -39,7 +39,7 @@ import org.opentravel.schemacompiler.model.TLProperty.PropertyListManager;
  * 
  * @author S. Livezey
  */
-public class TLExtensionPointFacet extends LibraryMemberImpl implements LibraryElement,
+public class TLExtensionPointFacet extends TLLibraryMember implements LibraryElement,
         TLExtensionOwner, TLAttributeOwner, TLPropertyOwner, TLIndicatorOwner, TLDocumentationOwner {
 
     private TLExtension extension;

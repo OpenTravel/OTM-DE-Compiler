@@ -69,8 +69,10 @@ public class TestContextualFacetCompilation {
 	
 	@Test
 	public void testFacetCompilation_baseLibrary() throws Exception {
-        File projectFile = new File( SchemaCompilerTestUtils.getBaseLibraryLocation() + "/test-package-facets/project_base.otp" );
-        File targetFolder = new File( System.getProperty("user.dir") + "/target/codegen-output/testFacetCompilation_baseLibrary");
+        File projectFile = new File( SchemaCompilerTestUtils.getBaseLibraryLocation()
+        		+ "/test-package-facets/project_base.otp" );
+        File targetFolder = new File( System.getProperty("user.dir")
+        		+ "/target/codegen-output/testFacetCompilation_baseLibrary");
         CompileAllCompilerTask compilerTask = TaskFactory.getTask( CompileAllCompilerTask.class );
         ValidationFindings findings;
         
@@ -84,8 +86,10 @@ public class TestContextualFacetCompilation {
 	
 	@Test
 	public void testFacetCompilation_facets1() throws Exception {
-        File projectFile = new File( SchemaCompilerTestUtils.getBaseLibraryLocation() + "/test-package-facets/project_facets1.otp" );
-        File targetFolder = new File( System.getProperty("user.dir") + "/target/codegen-output/testFacetCompilation_facets1");
+        File projectFile = new File( SchemaCompilerTestUtils.getBaseLibraryLocation()
+        		+ "/test-package-facets/project_facets1.otp" );
+        File targetFolder = new File( System.getProperty("user.dir")
+        		+ "/target/codegen-output/testFacetCompilation_facets1");
         CompileAllCompilerTask compilerTask = TaskFactory.getTask( CompileAllCompilerTask.class );
         ValidationFindings findings;
         
@@ -99,8 +103,10 @@ public class TestContextualFacetCompilation {
 	
 	@Test
 	public void testFacetCompilation_facets_all() throws Exception {
-        File projectFile = new File( SchemaCompilerTestUtils.getBaseLibraryLocation() + "/test-package-facets/project_facets_all.otp" );
-        File targetFolder = new File( System.getProperty("user.dir") + "/target/codegen-output/testFacetCompilation_facets_all");
+        File projectFile = new File( SchemaCompilerTestUtils.getBaseLibraryLocation()
+        		+ "/test-package-facets/project_facets_all.otp" );
+        File targetFolder = new File( System.getProperty("user.dir")
+        		+ "/target/codegen-output/testFacetCompilation_facets_all");
         CompileAllCompilerTask compilerTask = TaskFactory.getTask( CompileAllCompilerTask.class );
         ValidationFindings findings;
         
@@ -114,7 +120,8 @@ public class TestContextualFacetCompilation {
 	
 	@Test
 	public void testGhostFacets() throws Exception {
-        File projectFile = new File( SchemaCompilerTestUtils.getBaseLibraryLocation() + "/test-package-facets/project_base.otp" );
+        File projectFile = new File( SchemaCompilerTestUtils.getBaseLibraryLocation()
+        		+ "/test-package-facets/project_base.otp" );
 		ProjectManager projectManager = new ProjectManager();
         ValidationFindings findings = new ValidationFindings();
 		
@@ -139,7 +146,8 @@ public class TestContextualFacetCompilation {
 	
 	@Test
 	public void testNonLocalGhostFacets() throws Exception {
-        File projectFile = new File( SchemaCompilerTestUtils.getBaseLibraryLocation() + "/test-package-facets/project_facets_all.otp" );
+        File projectFile = new File( SchemaCompilerTestUtils.getBaseLibraryLocation()
+        		+ "/test-package-facets/project_facets_all.otp" );
 		ProjectManager projectManager = new ProjectManager();
         ValidationFindings findings = new ValidationFindings();
 		

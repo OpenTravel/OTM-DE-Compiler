@@ -18,11 +18,13 @@ package org.opentravel.schemacompiler.version;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
+import org.opentravel.schemacompiler.event.ModelElementListener;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.LibraryMember;
@@ -1201,6 +1203,28 @@ public abstract class AbstractVersionHelper {
         }
 
         /**
+		 * @see org.opentravel.schemacompiler.model.ModelElement#addListener(org.opentravel.schemacompiler.event.ModelElementListener)
+		 */
+		@Override
+		public void addListener(ModelElementListener listener) {
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.model.ModelElement#removeListener(org.opentravel.schemacompiler.event.ModelElementListener)
+		 */
+		@Override
+		public void removeListener(ModelElementListener listener) {
+		}
+
+		/**
+		 * @see org.opentravel.schemacompiler.model.ModelElement#getListeners()
+		 */
+		@Override
+		public Collection<ModelElementListener> getListeners() {
+			return Collections.emptyList();
+		}
+
+		/**
          * @see org.opentravel.schemacompiler.model.LibraryElement#cloneElement()
          */
         @Override

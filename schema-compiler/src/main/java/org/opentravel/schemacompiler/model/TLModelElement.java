@@ -36,15 +36,7 @@ public abstract class TLModelElement implements ModelElement {
 	private List<ModelElementListener> listeners = new ArrayList<>();
 	
     /**
-     * Default constructor.
-     */
-    public TLModelElement() {
-    }
-    
-    /**
-     * Registers a listener for this model element.
-     * 
-     * @param listener  the listener instance to register
+     * @see org.opentravel.schemacompiler.model.ModelElement#addListener(org.opentravel.schemacompiler.event.ModelElementListener)
      */
     public void addListener(ModelElementListener listener) {
     	if ((listener != null) && !listeners.contains( listener )) {
@@ -53,9 +45,7 @@ public abstract class TLModelElement implements ModelElement {
     }
     
     /**
-     * Unregisteres a listener from this model element.
-     * 
-     * @param listener  the lister instance to unregister
+     * @see org.opentravel.schemacompiler.model.ModelElement#removeListener(org.opentravel.schemacompiler.event.ModelElementListener)
      */
     public void removeListener(ModelElementListener listener) {
     	if (listener != null) {
@@ -64,10 +54,7 @@ public abstract class TLModelElement implements ModelElement {
     }
     
     /**
-     * Returns an unmodifiable collections of all listeners that have been registered
-     * with this model element.
-     * 
-     * @return Collection<ModelElementListener>
+     * @see org.opentravel.schemacompiler.model.ModelElement#getListeners()
      */
     public Collection<ModelElementListener> getListeners() {
     	return Collections.unmodifiableCollection( listeners );
@@ -77,8 +64,7 @@ public abstract class TLModelElement implements ModelElement {
      * Publishes the given event to all registered listeners of the owning model that are capable of
      * processing it.
      * 
-     * @param event
-     *            the event to publish
+     * @param event  the event to publish
      */
     protected void publishEvent(ModelEvent<?> event) {
         TLModel owningModel = getOwningModel();
@@ -100,12 +86,7 @@ public abstract class TLModelElement implements ModelElement {
     }
 
     /**
-     * Creates a deep-copy of this model element. The only difference between this one and the new
-     * copy is that the new copy will not yet be assigned to an owning library.
-     * 
-     * @return TLModelElement
-     * @throws IllegalArgumentException
-     *             thrown if this model element cannot be cloned
+     * @see org.opentravel.schemacompiler.model.ModelElement#cloneElement()
      */
     public LibraryElement cloneElement() {
         return cloneElement((this instanceof LibraryElement) ? ((LibraryElement) this)
@@ -113,16 +94,7 @@ public abstract class TLModelElement implements ModelElement {
     }
 
     /**
-     * Creates a deep-copy of this model element. The only difference between this one and the new
-     * copy is that the new copy will not yet be assigned to an owning library.
-     * 
-     * @param namingContext
-     *            the library whose owning that should be used for reference lookups when resolving
-     *            names in the cloned entity; the library itself is used to resolve namespace prefix
-     *            references during reference lookups
-     * @return LibraryElement
-     * @throws IllegalArgumentException
-     *             thrown if this model element cannot be cloned
+     * @see org.opentravel.schemacompiler.model.ModelElement#cloneElement(org.opentravel.schemacompiler.model.AbstractLibrary)
      */
     public LibraryElement cloneElement(AbstractLibrary namingContext) {
         return (LibraryElement) new ModelElementCloner((namingContext == null) ? null
