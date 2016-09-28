@@ -240,6 +240,22 @@ public class DefaultRepositorySecurityManager implements RepositorySecurityManag
 	}
 
 	/**
+	 * @see org.opentravel.schemacompiler.security.RepositorySecurityManager#isPromoteAuthorized(org.opentravel.schemacompiler.security.UserPrincipal, org.opentravel.schemacompiler.repository.RepositoryItem)
+	 */
+	@Override
+	public boolean isPromoteAuthorized(UserPrincipal user, RepositoryItem item) throws RepositorySecurityException {
+		boolean isAuthorized;
+		
+		if (item.getStatus() != TLLibraryStatus.OBSOLETE) {
+			isAuthorized = isAuthorized(user, item.getNamespace(), RepositoryPermission.WRITE);
+			
+		} else { // no promote authorization for obsolete items
+			isAuthorized = false;
+		}
+		return isAuthorized;
+	}
+
+	/**
      * @see org.opentravel.schemacompiler.security.RepositorySecurityManager#isAdministrator(org.opentravel.schemacompiler.security.UserPrincipal)
      */
     @Override

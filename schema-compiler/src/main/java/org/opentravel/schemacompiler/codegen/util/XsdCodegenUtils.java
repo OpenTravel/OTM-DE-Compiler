@@ -475,7 +475,9 @@ public class XsdCodegenUtils {
      * @return String
      */
     private static String getFacetTypeName(TLAbstractFacet facet) {
-        String typeName = facet.getOwningEntity().getLocalName() + getTypeFacetSuffix(facet);
+    	TLFacetOwner facetOwner = facet.getOwningEntity();
+    	String ownerName = (facetOwner == null) ? "UNKNOWN" : facetOwner.getLocalName();
+        String typeName = ownerName + getTypeFacetSuffix(facet);
 
         if (facet.getOwningEntity() instanceof TLCoreObject) {
             if (facet.getFacetType() == TLFacetType.SUMMARY) {

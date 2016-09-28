@@ -113,6 +113,7 @@ public class PropertyCodegenUtils {
      */
     public static QName getDefaultSchemaElementName(NamedEntity propertyType,
             boolean isReferenceProperty) {
+    	boolean isContextualFacet = (propertyType instanceof TLContextualFacet);
         TLListFacet listFacet = null;
         QName elementName = null;
 
@@ -123,10 +124,12 @@ public class PropertyCodegenUtils {
 
         } else if (propertyType instanceof TLAlias) {
             TLAlias alias = (TLAlias) propertyType;
-
-            if (alias.getOwningEntity() instanceof TLListFacet) {
-                listFacet = (TLListFacet) alias.getOwningEntity();
+            TLAliasOwner aliasOwner = alias.getOwningEntity();
+            
+            if (aliasOwner instanceof TLListFacet) {
+                listFacet = (TLListFacet) aliasOwner;
             }
+            isContextualFacet = (aliasOwner instanceof TLContextualFacet);
         }
         if ((listFacet != null) && (listFacet.getFacetType() == TLFacetType.SIMPLE)) {
             listFacet = null; // Do not process simple list facets
@@ -135,14 +138,15 @@ public class PropertyCodegenUtils {
         // Determine the correct method of calculating the element's default name
         if ((listFacet != null) || hasGlobalElement(propertyType)) {
 
-            if (XsdCodegenUtils.isSimpleCoreObject(propertyType) || (propertyType instanceof TLContextualFacet)) {
-                // Special case for simple cores that do not declare a substitution group element
+            if (XsdCodegenUtils.isSimpleCoreObject(propertyType) || isContextualFacet) {
+                // Special cases for simple cores that do not declare a substitution group element,
+            	// and contextual facets which will never be rendered as substitution groups when
+            	// referenced directly.
                 elementName = XsdCodegenUtils.getGlobalElementName(propertyType);
             }
             if (elementName == null) {
                 // If the property type is a non-simple core or business object, this method call
-                // will return
-                // the QName of the substitution group element (or the substitutable summary
+                // will return the QName of the substitution group element (or the substitutable summary
                 // element).
                 if (!isReferenceProperty) {
                     elementName = XsdCodegenUtils.getSubstitutionGroupElementName(propertyType);

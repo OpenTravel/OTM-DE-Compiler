@@ -84,8 +84,7 @@ public class TLPropertyCodegenTransformer extends
 
         if (!PropertyCodegenUtils.hasGlobalElement(propertyType)) {
             // If the property references a type that does not define a global element, assign the
-            // name/type fields
-            // of the JAXB element
+            // name/type fields of the JAXB element
             String propertyTypeNS = propertyType.getNamespace();
 
             if ((propertyTypeNS == null)

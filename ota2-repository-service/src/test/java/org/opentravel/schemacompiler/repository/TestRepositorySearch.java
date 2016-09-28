@@ -26,6 +26,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opentravel.schemacompiler.repository.Repository;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
+import org.opentravel.schemacompiler.util.OTM16Upgrade;
 
 /**
  * Verifies the operation of the repository's search functions.
@@ -116,6 +117,12 @@ public class TestRepositorySearch extends RepositoryTestBase {
             testRepository.promote(item100);
             testRepository.promote(item110);
 
+            // If OTM 1.6 is enabled, promote again to get into FINAL status
+            if (OTM16Upgrade.otm16Enabled) {
+                testRepository.promote(item100);
+                testRepository.promote(item110);
+            }
+
             items = testRepository.listItems(
                     "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test", false, false);
             itemFilenames = getFilenames(items);
@@ -127,6 +134,12 @@ public class TestRepositorySearch extends RepositoryTestBase {
         } finally {
             testRepository.demote(item110);
             testRepository.demote(item100);
+
+            // If OTM 1.6 is enabled, demote again to get back into DRAFT status
+            if (OTM16Upgrade.otm16Enabled) {
+                testRepository.demote(item100);
+                testRepository.demote(item110);
+            }
         }
     }
 
@@ -155,6 +168,12 @@ public class TestRepositorySearch extends RepositoryTestBase {
         try {
             testRepository.promote(item100);
             testRepository.promote(item110);
+            
+            // If OTM 1.6 is enabled, promote again to get into FINAL status
+            if (OTM16Upgrade.otm16Enabled) {
+                testRepository.promote(item100);
+                testRepository.promote(item110);
+            }
 
             items = testRepository.listItems(
                     "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test", true, false);
@@ -166,6 +185,12 @@ public class TestRepositorySearch extends RepositoryTestBase {
         } finally {
             testRepository.demote(item110);
             testRepository.demote(item100);
+
+            // If OTM 1.6 is enabled, demote again to get back into DRAFT status
+            if (OTM16Upgrade.otm16Enabled) {
+                testRepository.demote(item100);
+                testRepository.demote(item110);
+            }
         }
     }
 
@@ -244,6 +269,12 @@ public class TestRepositorySearch extends RepositoryTestBase {
             testRepository.promote(item100);
             testRepository.promote(item110);
 
+            // If OTM 1.6 is enabled, promote again to get into FINAL status
+            if (OTM16Upgrade.otm16Enabled) {
+                testRepository.promote(item100);
+                testRepository.promote(item110);
+            }
+
             // Search for a keyword in all three libraries
             itemFilenames = getFilenames(repositoryManager.get().search("red", false, false));
 
@@ -265,6 +296,12 @@ public class TestRepositorySearch extends RepositoryTestBase {
         } finally {
             testRepository.demote(item110);
             testRepository.demote(item100);
+
+            // If OTM 1.6 is enabled, demote again to get back into DRAFT status
+            if (OTM16Upgrade.otm16Enabled) {
+                testRepository.demote(item100);
+                testRepository.demote(item110);
+            }
         }
     }
 
@@ -304,6 +341,12 @@ public class TestRepositorySearch extends RepositoryTestBase {
             testRepository.promote(item100);
             testRepository.promote(item110);
 
+            // If OTM 1.6 is enabled, promote again to get into FINAL status
+            if (OTM16Upgrade.otm16Enabled) {
+                testRepository.promote(item100);
+                testRepository.promote(item110);
+            }
+
             // Search for a keyword in all three libraries
             itemFilenames = getFilenames(repositoryManager.get().search("red", true, false));
 
@@ -324,6 +367,12 @@ public class TestRepositorySearch extends RepositoryTestBase {
         } finally {
             testRepository.demote(item110);
             testRepository.demote(item100);
+
+            // If OTM 1.6 is enabled, demote again to get back into DRAFT status
+            if (OTM16Upgrade.otm16Enabled) {
+                testRepository.demote(item100);
+                testRepository.demote(item110);
+            }
         }
     }
 

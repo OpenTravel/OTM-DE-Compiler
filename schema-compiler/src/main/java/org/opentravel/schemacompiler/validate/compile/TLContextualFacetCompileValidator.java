@@ -66,7 +66,7 @@ public class TLContextualFacetCompileValidator extends TLContextualFacetBaseVali
         }
 
         builder.setProperty("facetName", target.getName()).setFindingType(FindingType.ERROR)
-        		.assertNotNull().assertPatternMatch(NAME_XML_PATTERN);
+        		.assertNotNullOrBlank().assertPatternMatch(NAME_XML_PATTERN);
 
         builder.setProperty("facetType", target.getFacetType()).setFindingType(FindingType.ERROR)
         		.assertNotNull();

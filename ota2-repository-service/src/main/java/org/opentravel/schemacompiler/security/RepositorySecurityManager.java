@@ -152,6 +152,20 @@ public interface RepositorySecurityManager {
     public boolean isWriteAuthorized(UserPrincipal user, RepositoryItem item) throws RepositorySecurityException;
 
     /**
+     * Returns true if the user is authorized to promote the given repository item to the next-level
+     * status.
+     * 
+     * @param user
+     *            the user for which authorization is being requested
+     * @param item
+     *            the repository item to check for promote permission
+     * @return boolean
+     * @throws RepositorySecurityException
+     *             thrown if the user's authorizations cannot be resolved
+     */
+    public boolean isPromoteAuthorized(UserPrincipal user, RepositoryItem item) throws RepositorySecurityException;
+
+    /**
      * Returns true if the user is assigned to the 'Administrators' group.
      * 
      * @param user

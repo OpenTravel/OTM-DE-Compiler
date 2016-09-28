@@ -25,10 +25,10 @@ import java.io.InputStream;
 import java.util.List;
 
 import org.junit.Test;
-import org.opentravel.schemacompiler.loader.LibraryModuleInfo;
-import org.opentravel.schemacompiler.loader.LibraryModuleLoader;
 import org.opentravel.schemacompiler.loader.impl.LibrarySchema1_5_ModuleLoader;
+import org.opentravel.schemacompiler.loader.impl.LibrarySchema1_6_ModuleLoader;
 import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
+import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.util.SchemaCompilerTestUtils;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingMessageFormat;
@@ -46,7 +46,8 @@ public class TestLibraryModuleLoader {
     public void testLoadLibrariesByInputSource() throws Exception {
         File libraryFile = new File(SchemaCompilerTestUtils.getBaseLibraryLocation()
                 + "/test-package_v1/library_1_p1.xml");
-        LibraryModuleLoader<InputStream> moduleLoader = new LibrarySchema1_5_ModuleLoader();
+        LibraryModuleLoader<InputStream> moduleLoader = OTM16Upgrade.otm16Enabled ?
+        		new LibrarySchema1_6_ModuleLoader() : new LibrarySchema1_5_ModuleLoader();
         ValidationFindings findings = new ValidationFindings();
 
         LibraryModuleInfo<Object> libraryInfo = moduleLoader.loadLibrary(

@@ -154,7 +154,12 @@ public class JsonExampleBuilderTest extends AbstractTestTransformers {
 		JsonNode node = exampleBuilder.buildTree();
 		assertNotNull(node.findValue("value"));
 		for (TLAttribute att : vwa.getAttributes()) {
-			assertNotNull(node.findValue(att.getName()));
+			String attrName = att.getName();
+			
+			if (att.isReference() && !attrName.endsWith("Ref")) {
+				attrName += "Ref";
+			}
+			assertNotNull(node.findValue(attrName));
 		}
 	}
 

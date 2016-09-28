@@ -91,7 +91,7 @@ public class LibrarySchema1_6_ModuleLoader extends AbstractLibraryModuleLoader {
                     }
                 } catch (ClassCastException cce) {
                     JAXBException je = new JAXBException(
-                            "The library file does not contain OTM v1.5 content.", cce);
+                            "The library file does not contain OTM v1.6 content.", cce);
 
                     je.setLinkedException(cce);
                     throw je;

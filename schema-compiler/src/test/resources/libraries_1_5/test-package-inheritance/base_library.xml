@@ -29,7 +29,7 @@
 			<Attribute name="detailBaseAttr" type="xsd:string" />
 			<Element name="detailBase" type="xsd:string" />
 		</Detail>
-		<Query context="">
+		<Query context="" label="Label">
 			<Attribute name="defaultQueryBaseAttr" type="xsd:string" />
 			<Element name="defaultQueryBase" type="xsd:string" />
 		</Query>
@@ -66,7 +66,7 @@
 			<Attribute name="detailExtendedAttr" type="xsd:string" />
 			<Element name="detailExtended" type="xsd:string" />
 		</Detail>
-		<Query context="">
+		<Query context="" label="Label">
 			<Attribute name="defaultQueryExtendedAttr" type="xsd:string" />
 			<Element name="defaultQueryExtended" type="xsd:string" />
 		</Query>

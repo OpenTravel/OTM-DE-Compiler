@@ -1008,7 +1008,7 @@ public class RepositoryContentResource {
             RepositoryItemImpl item = RepositoryUtils.createRepositoryItem(repositoryManager, itemMetadata);
             UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
 
-            if (securityManager.isWriteAuthorized(user, item)) {
+            if (securityManager.isPromoteAuthorized(user, item)) {
                 repositoryManager.getFileManager().setCurrentUserId(user.getUserId());
 
                 // Promote the item in the local repository
