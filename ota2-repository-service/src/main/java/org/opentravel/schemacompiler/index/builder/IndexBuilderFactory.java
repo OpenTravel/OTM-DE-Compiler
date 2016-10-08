@@ -32,6 +32,7 @@ public class IndexBuilderFactory {
 
     private RepositoryManager repositoryManager;
 	private IndexWriter indexWriter;
+	private FacetIndexingService facetService;
 	private ValidationIndexingService validationService;
 	
 	/**
@@ -50,6 +51,7 @@ public class IndexBuilderFactory {
 			this.repositoryManager = repositoryManager;
 		}
 		this.indexWriter = indexWriter;
+		this.facetService = new FacetIndexingService( this.indexWriter );
 		this.validationService = new ValidationIndexingService( this.repositoryManager, this.indexWriter );
 	}
 	
@@ -109,6 +111,15 @@ public class IndexBuilderFactory {
 		builder.setIndexWriter( indexWriter );
 		builder.setCreateIndex( createIndex );
 		return builder;
+	}
+
+	/**
+	 * Returns the service that handles post-process indexing of contextual facet owners.
+	 *
+	 * @return FacetIndexingService
+	 */
+	public FacetIndexingService getFacetService() {
+		return facetService;
 	}
 
 	/**

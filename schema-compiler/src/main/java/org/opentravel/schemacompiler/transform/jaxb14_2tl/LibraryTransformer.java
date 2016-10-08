@@ -121,8 +121,7 @@ public class LibraryTransformer extends
             target.setService(serviceTransformer.transform(source.getService()));
         }
 
-        // Handle special case for assigning contextual facets to this owning library
-        // if the OTM16 Upgrade flag is enabled.
+        // Handle special case for assigning contextual facets to this owning library.
         if (OTM16Upgrade.otm16Enabled) {
         	for (TLBusinessObject bo : target.getBusinessObjectTypes()) {
         		for (TLContextualFacet facet : bo.getCustomFacets()) {

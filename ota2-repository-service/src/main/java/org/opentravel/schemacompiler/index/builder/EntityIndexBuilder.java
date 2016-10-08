@@ -28,9 +28,11 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
+import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.util.BytesRef;
 import org.opentravel.schemacompiler.index.IndexingTerms;
+import org.opentravel.schemacompiler.index.IndexingUtils;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAction;
 import org.opentravel.schemacompiler.model.TLActionFacet;
@@ -50,6 +52,7 @@ import org.opentravel.schemacompiler.model.TLEquivalent;
 import org.opentravel.schemacompiler.model.TLExample;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLFacet;
+import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLListFacet;
@@ -87,6 +90,7 @@ public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> i
     private Set<String> referenceIdentityKeys = new HashSet<>();
     private Set<String> referencedEntityKeys = new HashSet<>();
     private String extendsEntityKey;
+    private String facetOwnerKey;
     
 	/**
 	 * @see org.opentravel.schemacompiler.index.builder.IndexBuilder#createIndex()
@@ -103,24 +107,25 @@ public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> i
 			ModelNavigator.navigate( sourceObject, new KeywordAndReferenceVisitor() );
 			
 			// Build and store the index document for the entity
-			String identityKey = IndexContentHelper.getIdentityKey( sourceObject );
-			String owningLibraryIdentity = IndexContentHelper.getIdentityKey( owningLibrary );
+			Boolean searchIndexInd = isSearchIndexEntity( sourceObject );
+			String identityKey = IndexingUtils.getIdentityKey( sourceObject, searchIndexInd );
+			String owningLibraryIdentity = IndexingUtils.getIdentityKey( owningLibrary );
 			String entityContent = IndexContentHelper.marshallEntity( sourceObject );
-			String entityName = (sourceObject instanceof TLOperation) ?
-					((TLOperation) sourceObject).getName() : sourceObject.getLocalName();
+			Field.Store nonStoreField = searchIndexInd ? Field.Store.NO : Field.Store.YES;
 			Document indexDoc = new Document();
 			
 			indexDoc.add( new StringField( IDENTITY_FIELD, identityKey, Field.Store.YES ) );
+			indexDoc.add( new StringField( SEARCH_INDEX_FIELD, searchIndexInd + "", Field.Store.NO ) );
 			indexDoc.add( new StringField( OWNING_LIBRARY_FIELD, owningLibraryIdentity, Field.Store.YES ) );
 			indexDoc.add( new StringField( ENTITY_TYPE_FIELD, sourceObject.getClass().getName(), Field.Store.YES ) );
-			indexDoc.add( new StringField( ENTITY_NAME_FIELD, entityName, Field.Store.YES ) );
+			indexDoc.add( new StringField( ENTITY_NAME_FIELD, getEntityName( sourceObject ), Field.Store.YES ) );
 			indexDoc.add( new StringField( ENTITY_NAMESPACE_FIELD, sourceObject.getNamespace(), Field.Store.YES ) );
 			indexDoc.add( new StringField( VERSION_FIELD, owningLibrary.getVersion(), Field.Store.YES ) );
-			indexDoc.add( new StringField( LATEST_VERSION_FIELD, latestVersion + "", Field.Store.NO ) );
-			indexDoc.add( new StringField( LATEST_VERSION_AT_UNDER_REVIEW_FIELD, latestVersionAtUnderReview + "", Field.Store.NO ) );
-			indexDoc.add( new StringField( LATEST_VERSION_AT_FINAL_FIELD, latestVersionAtFinal + "", Field.Store.NO ) );
-			indexDoc.add( new StringField( LATEST_VERSION_AT_OBSOLETE_FIELD, latestVersionAtObsolete + "", Field.Store.NO ) );
-			indexDoc.add( new TextField( KEYWORDS_FIELD, getFreeTextSearchContent(), Field.Store.NO ) );
+			indexDoc.add( new StringField( LATEST_VERSION_FIELD, latestVersion + "", nonStoreField ) );
+			indexDoc.add( new StringField( LATEST_VERSION_AT_UNDER_REVIEW_FIELD, latestVersionAtUnderReview + "", nonStoreField ) );
+			indexDoc.add( new StringField( LATEST_VERSION_AT_FINAL_FIELD, latestVersionAtFinal + "", nonStoreField ) );
+			indexDoc.add( new StringField( LATEST_VERSION_AT_OBSOLETE_FIELD, latestVersionAtObsolete + "", nonStoreField ) );
+			indexDoc.add( new TextField( KEYWORDS_FIELD, getFreeTextSearchContent(), nonStoreField ) );
 			
 			if (owningLibrary.getStatus() != null) {
 				indexDoc.add( new StringField( STATUS_FIELD, owningLibrary.getStatus().toString(), Field.Store.YES ) );
@@ -131,6 +136,9 @@ public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> i
 			if (extendsEntityKey != null) {
 				indexDoc.add( new StringField( EXTENDS_ENTITY_FIELD, extendsEntityKey, Field.Store.YES ) );
 			}
+			if (facetOwnerKey != null) {
+				indexDoc.add( new StringField( FACET_OWNER_FIELD, facetOwnerKey, Field.Store.YES ) );
+			}
 			if (entityContent != null) {
 				indexDoc.add( new StoredField( CONTENT_DATA_FIELD, new BytesRef( entityContent ) ) );
 			}
@@ -138,10 +146,15 @@ public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> i
 				indexDoc.add( new StringField( REFERENCE_IDENTITY_FIELD, key, Field.Store.YES ) );
 			}
 			for (String key : referencedEntityKeys) {
-				indexDoc.add( new StringField( REFERENCED_ENTITY_FIELD, key, Field.Store.NO ) );
+				indexDoc.add( new StringField( REFERENCED_ENTITY_FIELD, key, nonStoreField ) );
 			}
-			getIndexWriter().updateDocument( new Term(
-					IDENTITY_FIELD, IndexContentHelper.getIdentityKey( sourceObject ) ), indexDoc );
+			getIndexWriter().updateDocument( new Term( IDENTITY_FIELD, identityKey ), indexDoc );
+			
+			// If the entity is a Choice or Business Object, add it to the list of facet
+			// owners to be post-processed for their contextual facet content
+			if ((sourceObject instanceof TLBusinessObject) || (sourceObject instanceof TLChoiceObject)) {
+				getFactory().getFacetService().addFacetOwnerID( identityKey );
+			}
 			
 		} catch (IOException | RepositoryException e) {
             log.warn("Error indexing model entity: " + sourceObject.getLocalName(), e);
@@ -152,8 +165,15 @@ public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> i
 	public void deleteIndex() {
 		NamedEntity sourceObject = getSourceObject();
 		try {
-			getIndexWriter().deleteDocuments(
-					new Term( IDENTITY_FIELD, IndexContentHelper.getIdentityKey( sourceObject ) ) );
+			IndexWriter indexWriter = getIndexWriter();
+			
+			indexWriter.deleteDocuments(
+					new Term( IDENTITY_FIELD, IndexingUtils.getIdentityKey( sourceObject ) ) );
+			
+			if (!isSearchIndexEntity( sourceObject )) {
+				indexWriter.deleteDocuments(
+						new Term( IDENTITY_FIELD, IndexingUtils.getIdentityKey( sourceObject, false ) ) );
+			}
 			
 		} catch (IOException e) {
             log.warn("Error indexing model entity: " + sourceObject.getLocalName(), e);
@@ -180,6 +200,46 @@ public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> i
 	}
 	
 	/**
+	 * Returns the local name of the given entity as it is to be saved in the search index.
+	 * 
+	 * @param entity  the source object for which to return the local name
+	 * @return String
+	 */
+	private String getEntityName(NamedEntity entity) {
+		String entityName;
+		
+		if (entity instanceof TLOperation) {
+			entityName = ((TLOperation) entity).getName();
+			
+		} else if (entity instanceof TLContextualFacet) {
+			TLContextualFacet facet = (TLContextualFacet) entity;
+			TLFacetType facetType = facet.getFacetType();
+			
+			entityName = (facetType == null) ? facet.getName() : facetType.getIdentityName( facet.getName() );
+			
+			if (entityName == null) {
+				entityName = "UNKNOWN";
+			}
+			
+		} else {
+			entityName = entity.getLocalName();
+		}
+		return entityName;
+	}
+	
+	/**
+	 * Returns a boolean value indicating whether the entity's document should be saved directly
+	 * to the main search index or to the contextual facet meta-data index.
+	 * 
+	 * @param entity  the entity for which to return the searchIndexInd flag
+	 * @return Boolean
+	 */
+	private Boolean isSearchIndexEntity(NamedEntity entity) {
+		return !((entity instanceof TLContextualFacet) || (entity instanceof TLBusinessObject)
+				|| (entity instanceof TLChoiceObject));
+	}
+	
+	/**
 	 * Adds a reference identity that may be either the source object itself or one of its
 	 * <code>NamedEntity</code> child objects such as a facet or alias.
 	 * 
@@ -200,7 +260,7 @@ public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> i
 		
 		// Normal case...
 		if (identityKey == null) {
-			identityKey = IndexContentHelper.getIdentityKey( referencableEntity );
+			identityKey = IndexingUtils.getIdentityKey( referencableEntity );
 		}
 		referenceIdentityKeys.add( identityKey );
 	}
@@ -555,7 +615,6 @@ public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> i
 		@Override
 		public boolean visitFacet(TLFacet facet) {
 			addReferenceIdentity( facet );
-			addEntityReference( facet.getFacetType().getIdentityName() );
 			return true;
 		}
 
@@ -566,7 +625,17 @@ public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> i
 		public boolean visitContextualFacet(TLContextualFacet facet) {
 			addReferenceIdentity( facet );
 			addFreeTextKeywords( facet.getName() );
-			addEntityReference( facet.getFacetType().getIdentityName( facet.getName() ) );
+			
+			// If the source object being indexed is this contextual facet, we need to capture the owning
+			// entity's name to include it in the searchable terms of the index document.  We will also
+			// change the owning entity name to that of the owner's search index ID; this will help us to
+			// reassemble the contextual facet structure(s) when the owner's content is retrieved from the
+			// search index.
+			if (facet == getSourceObject()) {
+				facetOwnerKey = resolveTypeReference( facet.getOwningEntityName() );
+				facet.setOwningEntityName( facetOwnerKey );
+				facet.setFacetNamespace( facet.getOwningLibrary().getNamespace() );
+			}
 			return true;
 		}
 

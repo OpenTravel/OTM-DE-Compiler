@@ -72,7 +72,8 @@ public class TLPropertyTransformer extends
         if (source.getType() != null) {
             property.setType(context.getSymbolResolver().buildEntityName(
                     propertyType.getNamespace(), propertyType.getLocalName()));
-        } else {
+        }
+        if (property.getType() == null) {
             property.setType(trimString(source.getTypeName(), false));
         }
         return property;

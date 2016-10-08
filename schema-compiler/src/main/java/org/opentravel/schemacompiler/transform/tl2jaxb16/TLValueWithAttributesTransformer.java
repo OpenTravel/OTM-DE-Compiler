@@ -73,7 +73,8 @@ public class TLValueWithAttributesTransformer extends
         if (parentType != null) {
             simpleType.setType(context.getSymbolResolver().buildEntityName(
                     parentType.getNamespace(), parentType.getLocalName()));
-        } else {
+        }
+        if (simpleType.getType() == null) {
             simpleType.setType(trimString(source.getParentTypeName(), false));
         }
         return simpleType;

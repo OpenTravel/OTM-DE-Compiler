@@ -49,7 +49,8 @@ public class TLParamGroupTransformer extends TLComplexTypeTransformer<TLParamGro
         if (sourceFacetRef != null) {
         	paramGroup.setFacetName(context.getSymbolResolver().buildEntityName(
         			sourceFacetRef.getNamespace(), sourceFacetRef.getLocalName()));
-        } else {
+        }
+        if (paramGroup.getFacetName() == null) {
         	paramGroup.setFacetName(trimString(source.getFacetRefName(), false));
         }
 		

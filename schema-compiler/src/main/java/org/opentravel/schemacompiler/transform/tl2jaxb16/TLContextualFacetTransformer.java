@@ -53,14 +53,15 @@ public class TLContextualFacetTransformer extends
 
             facet.setFacetOwner(context.getSymbolResolver().buildEntityName(
             		owningEntity.getNamespace(), owningEntity.getLocalName()));
-
-        } else {
+        }
+        if (facet.getFacetOwner() == null) {
         	facet.setFacetOwner(source.getOwningEntityName());
         }
 
         facet.setName(trimString(source.getName(), false));
         facet.setType(getTargetType(source.getFacetType()));
         facet.setNotExtendable(source.isNotExtendable());
+        facet.setFacetNamespace(trimString(source.getFacetNamespace(), false));
         facet.getAttribute().addAll(transformAttributes(source.getAttributes()));
         facet.getElement().addAll(transformElements(source.getElements()));
         facet.getIndicator().addAll(transformIndicators(source.getIndicators()));

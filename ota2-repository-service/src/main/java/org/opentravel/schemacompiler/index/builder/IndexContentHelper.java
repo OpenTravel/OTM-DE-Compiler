@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
@@ -34,37 +35,19 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.validation.SchemaFactory;
 
-import org.opentravel.ns.ota2.librarymodel_v01_05.BusinessObject;
-import org.opentravel.ns.ota2.librarymodel_v01_05.ChoiceObject;
-import org.opentravel.ns.ota2.librarymodel_v01_05.CoreObject;
-import org.opentravel.ns.ota2.librarymodel_v01_05.EnumerationClosed;
-import org.opentravel.ns.ota2.librarymodel_v01_05.EnumerationOpen;
-import org.opentravel.ns.ota2.librarymodel_v01_05.ExtensionPointFacet;
-import org.opentravel.ns.ota2.librarymodel_v01_05.Library;
-import org.opentravel.ns.ota2.librarymodel_v01_05.ObjectFactory;
-import org.opentravel.ns.ota2.librarymodel_v01_05.Operation;
-import org.opentravel.ns.ota2.librarymodel_v01_05.Resource;
-import org.opentravel.ns.ota2.librarymodel_v01_05.Simple;
-import org.opentravel.ns.ota2.librarymodel_v01_05.ValueWithAttributes;
+import org.opentravel.ns.ota2.librarymodel_v01_06.Library;
+import org.opentravel.ns.ota2.librarymodel_v01_06.ObjectFactory;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.model.NamedEntity;
-import org.opentravel.schemacompiler.model.TLBusinessObject;
-import org.opentravel.schemacompiler.model.TLChoiceObject;
-import org.opentravel.schemacompiler.model.TLClosedEnumeration;
-import org.opentravel.schemacompiler.model.TLCoreObject;
-import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
-import org.opentravel.schemacompiler.model.TLOpenEnumeration;
-import org.opentravel.schemacompiler.model.TLOperation;
-import org.opentravel.schemacompiler.model.TLResource;
-import org.opentravel.schemacompiler.model.TLSimple;
-import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.repository.RepositoryException;
-import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
+import org.opentravel.schemacompiler.transform.SymbolTable;
 import org.opentravel.schemacompiler.transform.TransformerFactory;
 import org.opentravel.schemacompiler.transform.symbols.DefaultTransformerContext;
+import org.opentravel.schemacompiler.transform.symbols.SymbolResolverTransformerContext;
 import org.opentravel.schemacompiler.util.ClasspathResourceResolver;
+import org.opentravel.schemacompiler.validate.impl.TLModelSymbolResolver;
 
 /**
  * Helper class that provides static utility methods for marshalling, unmarshalling, and
@@ -72,8 +55,9 @@ import org.opentravel.schemacompiler.util.ClasspathResourceResolver;
  */
 public class IndexContentHelper {
 	
-    private static final String SCHEMA_CONTEXT = ":org.w3._2001.xmlschema:"
-    		+ "org.opentravel.ns.ota2.librarymodel_v01_04:org.opentravel.ns.ota2.librarymodel_v01_05";
+    private static final String SCHEMA_CONTEXT = ":org.w3._2001.xmlschema:org.opentravel.ns.ota2.librarymodel_v01_04:"
+    		+ "org.opentravel.ns.ota2.librarymodel_v01_05:org.opentravel.ns.ota2.librarymodel_v01_06";
+    private static final String LATEST_VERSION_PACKAGE = "org.opentravel.ns.ota2.librarymodel_v01_06";
     
     private static Map<Class<?>,JaxbLibraryVersionConverter<?>> libraryVersionConverters;
     private static Map<Class<?>,Class<?>> entityClassMappings;
@@ -83,48 +67,6 @@ public class IndexContentHelper {
     private static ObjectFactory objectFactory = new ObjectFactory();
     private static JAXBContext jaxbContext;
     
-	/**
-	 * Returns the qualified identity key for the search index term.
-	 * 
-	 * @return String
-	 */
-	public static String getIdentityKey(RepositoryItem item) {
-		StringBuilder identityKey = new StringBuilder();
-		
-		identityKey.append("LIB:");
-		identityKey.append( item.getNamespace() ).append(":");
-		identityKey.append( item.getLibraryName() );
-		return identityKey.toString();
-	}
-	
-	/**
-	 * Returns the qualified identity key for the given library.
-	 * 
-	 * @return String
-	 */
-	public static String getIdentityKey(TLLibrary library) {
-		StringBuilder identityKey = new StringBuilder();
-		
-		identityKey.append("LIB:");
-		identityKey.append( library.getNamespace() ).append(":");
-		identityKey.append( library.getName() );
-		return identityKey.toString();
-	}
-	
-	/**
-	 * Returns the qualified identity key for the given OTM model entity.
-	 * 
-	 * @param entity  the named entity for which to return an identity key
-	 * @return String
-	 */
-	public static String getIdentityKey(NamedEntity entity) {
-		StringBuilder identityKey = new StringBuilder();
-		
-		identityKey.append( entity.getNamespace() ).append(":");
-		identityKey.append( entity.getLocalName() );
-		return identityKey.toString();
-	}
-	
 	/**
 	 * Unmarshalls the contents of the given file as a JAXB library.
 	 * 
@@ -358,30 +300,9 @@ public class IndexContentHelper {
             		new JaxbLibraryVersionConverter<>( org.opentravel.ns.ota2.librarymodel_v01_04.Library.class ) );
             versionConverters.put( org.opentravel.ns.ota2.librarymodel_v01_05.Library.class,
             		new JaxbLibraryVersionConverter<>( org.opentravel.ns.ota2.librarymodel_v01_05.Library.class ) );
+            versionConverters.put( org.opentravel.ns.ota2.librarymodel_v01_06.Library.class,
+            		new JaxbLibraryVersionConverter<>( org.opentravel.ns.ota2.librarymodel_v01_06.Library.class ) );
             libraryVersionConverters = Collections.unmodifiableMap( versionConverters );
-            
-            // Initialize entity class mappings for transformer target lookups
-            classMappings.put( TLSimple.class, Simple.class );
-            classMappings.put( Simple.class, TLSimple.class );
-            classMappings.put( EnumerationClosed.class, TLClosedEnumeration.class );
-            classMappings.put( TLClosedEnumeration.class, EnumerationClosed.class );
-            classMappings.put( EnumerationOpen.class, TLOpenEnumeration.class );
-            classMappings.put( TLOpenEnumeration.class, EnumerationOpen.class );
-            classMappings.put( TLValueWithAttributes.class, ValueWithAttributes.class );
-            classMappings.put( ValueWithAttributes.class, TLValueWithAttributes.class );
-            classMappings.put( TLCoreObject.class, CoreObject.class );
-            classMappings.put( CoreObject.class, TLCoreObject.class );
-            classMappings.put( TLChoiceObject.class, ChoiceObject.class );
-            classMappings.put( ChoiceObject.class, TLChoiceObject.class );
-            classMappings.put( TLBusinessObject.class, BusinessObject.class );
-            classMappings.put( BusinessObject.class, TLBusinessObject.class );
-            classMappings.put( TLOperation.class, Operation.class );
-            classMappings.put( Operation.class, TLOperation.class );
-            classMappings.put( TLResource.class, Resource.class );
-            classMappings.put( Resource.class, TLResource.class );
-            classMappings.put( TLExtensionPointFacet.class, ExtensionPointFacet.class );
-            classMappings.put( ExtensionPointFacet.class, TLExtensionPointFacet.class );
-            entityClassMappings = Collections.unmodifiableMap( classMappings );
             
             // Initialize the JAXB object factory method mappings
             for (Method m : ObjectFactory.class.getDeclaredMethods()) {
@@ -394,16 +315,49 @@ public class IndexContentHelper {
             objectFactoryMethods = Collections.unmodifiableMap( methodMappings );
             
             // Initialize the transformer factories and the JAXB context
+            SymbolResolverTransformerContext saverContext = new SymbolResolverTransformerContext();
+            
+            saverContext.setSymbolResolver( new TLModelSymbolResolver( new SymbolTable() ) );
+            saverTransformFactory = TransformerFactory.getInstance(
+            		SchemaCompilerApplicationContext.SAVER_TRANSFORMER_FACTORY, saverContext );
             loaderTransformFactory = TransformerFactory.getInstance(
             		SchemaCompilerApplicationContext.LOADER_TRANSFORMER_FACTORY, new DefaultTransformerContext() );
-            saverTransformFactory = TransformerFactory.getInstance(
-            		SchemaCompilerApplicationContext.SAVER_TRANSFORMER_FACTORY, new DefaultTransformerContext() );
             schemaFactory.setResourceResolver( new ClasspathResourceResolver() );
             jaxbContext = JAXBContext.newInstance( SCHEMA_CONTEXT );
+            
+            // Initialize entity class mappings for transformer target lookups
+            initializeTypeMappings( loaderTransformFactory, classMappings );
+            initializeTypeMappings( saverTransformFactory, classMappings );
+            entityClassMappings = Collections.unmodifiableMap( classMappings );
             
         } catch (Throwable t) {
             throw new ExceptionInInitializerError(t);
         }
     }
 
+	/**
+	 * Initializes the entity type mappings using the non-ambiguous (1:1) mappings from the given
+	 * transformer factory.
+	 * 
+	 * @param factory  the transformer factory from which to obtain the type mappings
+	 * @param typeMappings  the type mappings to be populated
+	 */
+	private static void initializeTypeMappings(TransformerFactory<?> factory, Map<Class<?>,Class<?>> typeMappings) {
+        Map<Class<?>,Set<Class<?>>> factoryMappings = factory.getTypeMappings();
+		
+        for (Class<?> sourceType : factoryMappings.keySet()) {
+        	Set<Class<?>> targetTypes = factoryMappings.get( sourceType );
+        	
+        	if (targetTypes.size() == 1) {
+        		typeMappings.put( sourceType, targetTypes.iterator().next() );
+        	} else {
+        		for (Class<?> targetType : targetTypes) {
+        			if (targetType.getPackage().getName().equals( LATEST_VERSION_PACKAGE )) {
+                		typeMappings.put( sourceType, targetType );
+        			}
+        		}
+        	}
+        }
+	}
+	
 }

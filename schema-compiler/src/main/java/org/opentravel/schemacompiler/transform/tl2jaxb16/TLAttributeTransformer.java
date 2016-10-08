@@ -72,7 +72,8 @@ public class TLAttributeTransformer extends
         if (source.getType() != null) {
             attribute.setType(context.getSymbolResolver().buildEntityName(
                     attributeType.getNamespace(), attributeType.getLocalName()));
-        } else {
+        }
+        if (attribute.getType() == null) {
             attribute.setType(trimString(source.getTypeName(), false));
         }
         return attribute;

@@ -65,7 +65,8 @@ public class TLResourceTransformer extends TLComplexTypeTransformer<TLResource,R
 		if (boRef != null) {
 			resource.setBusinessObjectRef(context.getSymbolResolver().buildEntityName(
 					boRef.getNamespace(), boRef.getLocalName()));
-		} else {
+        }
+        if (resource.getBusinessObjectRef() == null) {
 			resource.setBusinessObjectRef(trimString(source.getBusinessObjectRefName(), false));
 		}
 		

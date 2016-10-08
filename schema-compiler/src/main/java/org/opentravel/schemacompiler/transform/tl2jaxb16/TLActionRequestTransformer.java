@@ -54,7 +54,8 @@ public class TLActionRequestTransformer extends TLComplexTypeTransformer<TLActio
 		if (sourcePayloadType != null) {
 			request.setPayloadType(context.getSymbolResolver().buildEntityName(
 					sourcePayloadType.getNamespace(), sourcePayloadType.getLocalName()));
-		} else {
+        }
+        if (request.getPayloadType() == null) {
 			request.setPayloadType(source.getPayloadTypeName());
 		}
 		

@@ -46,7 +46,8 @@ public class TLResourceParentRefTransformer extends TLComplexTypeTransformer<TLR
         if (sourceParentResource != null) {
         	parentRef.setParent(context.getSymbolResolver().buildEntityName(
         			sourceParentResource.getNamespace(), sourceParentResource.getLocalName()));
-        } else {
+        }
+        if (parentRef.getParent() == null) {
         	parentRef.setParent(trimString(source.getParentResourceName(), false));
         }
 		

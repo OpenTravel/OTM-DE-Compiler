@@ -104,6 +104,24 @@ public class TransformerFactory<C extends ObjectTransformerContext> {
             targetTypeMappings.put(mapping.getTarget(), mapping.getTransformer());
         }
     }
+    
+    /**
+     * Returns the list of all source-to-target type mappings registered for this factory.
+     * 
+     * @return Map<Class<?>,Set<Class<?>>>
+     */
+    public Map<Class<?>,Set<Class<?>>> getTypeMappings() {
+    	Map<Class<?>,Set<Class<?>>> mappings = new HashMap<>();
+    	
+    	for (Class<?> sourceType : sourceTypeMappings.keySet()) {
+    		Map<Class<?>,Class<?>> targetTypes = sourceTypeMappings.get( sourceType );
+    		
+    		if (targetTypes != null) {
+        		mappings.put( sourceType, new HashSet<>( targetTypes.keySet() ) );
+    		}
+    	}
+    	return Collections.unmodifiableMap( mappings );
+    }
 
     /**
      * Returns a target type that is mapped to the specified source object type. If multiple targets

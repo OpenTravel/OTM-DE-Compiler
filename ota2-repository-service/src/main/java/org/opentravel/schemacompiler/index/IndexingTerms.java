@@ -32,6 +32,7 @@ public interface IndexingTerms {
 	public static final String LOCKED_BY_USER_FIELD   = "lockedBy";
 	public static final String KEYWORDS_FIELD         = "keywords";
 	public static final String CONTENT_DATA_FIELD     = "contentData";
+	public static final String SEARCH_INDEX_FIELD     = "searchIndexInd";
     
 	// Common fields used to exclude library/entity versions from search results
 	
@@ -54,6 +55,8 @@ public interface IndexingTerms {
 	public static final String REFERENCE_IDENTITY_FIELD = "referenceIdentity";
 	public static final String REFERENCED_ENTITY_FIELD  = "referencedEntity";
 	public static final String EXTENDS_ENTITY_FIELD     = "extendsEntity";
+	public static final String FACET_OWNER_FIELD        = "facetOwner";
+	public static final String FACET_CONTENT_FIELD      = "facetContent";
 	
 	// Fields used exclusively by validation findings
 	

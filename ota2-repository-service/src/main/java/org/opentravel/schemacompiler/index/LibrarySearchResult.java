@@ -94,25 +94,23 @@ public class LibrarySearchResult extends SearchResult<TLLibrary> {
 			}
 		}
 		
-		try {
-			BytesRef xmlContent = doc.getBinaryValue( CONTENT_DATA_FIELD );
-			
-			if (xmlContent != null) {
-				setItemContent( IndexContentHelper.unmarshallLibrary( xmlContent.utf8ToString() ) );
-			}
-			
-		} catch (RepositoryException e) {
-			log.error("Error initializing library content.", e);
+		if (doc.getBinaryValue( CONTENT_DATA_FIELD ) != null) {
+			initializeItemContent( doc );
 		}
 	}
 	
 	/**
-	 * @see org.opentravel.schemacompiler.index.SearchResult#initializeItemContent()
+	 * @see org.opentravel.schemacompiler.index.SearchResult#initializeItemContent(org.apache.lucene.document.Document)
 	 */
 	@Override
-	protected void initializeItemContent() {
+	protected void initializeItemContent(Document itemDoc) {
 		try {
-			setItemContent( getSearchService().getLibraryContent( getSearchIndexId() ) );
+			BytesRef binaryContent = (itemDoc == null) ? null : itemDoc.getBinaryValue( CONTENT_DATA_FIELD );
+			String content = (binaryContent == null) ? null : binaryContent.utf8ToString();
+			
+			if (content != null) {
+				setItemContent( IndexContentHelper.unmarshallLibrary( content ) );
+			}
 			
 		} catch (RepositoryException e) {
 			log.error("Error initializing library content.", e);

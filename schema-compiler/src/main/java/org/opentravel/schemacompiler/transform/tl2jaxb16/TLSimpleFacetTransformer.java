@@ -67,7 +67,8 @@ public class TLSimpleFacetTransformer extends
         if (simpleType != null) {
             facet.setType(context.getSymbolResolver().buildEntityName(simpleType.getNamespace(),
                     simpleType.getLocalName()));
-        } else {
+        }
+        if (facet.getType() == null) {
             facet.setType(trimString(source.getSimpleTypeName(), false));
         }
         return facet;

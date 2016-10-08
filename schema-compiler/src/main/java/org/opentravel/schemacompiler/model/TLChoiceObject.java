@@ -117,6 +117,23 @@ public class TLChoiceObject extends TLComplexTypeBase implements TLFacetOwner, T
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.model.TLLibraryMember#setOwningLibrary(org.opentravel.schemacompiler.model.AbstractLibrary)
+	 */
+	@Override
+	public void setOwningLibrary(AbstractLibrary owningLibrary) {
+    	if (!OTM16Upgrade.otm16Enabled) {
+    		for (TLContextualFacet facet : getChoiceFacets()) {
+    			if (owningLibrary != null) {
+        			owningLibrary.addNamedMember( facet );
+    			} else {
+    				this.getOwningLibrary().removeNamedMember( facet );
+    			}
+    		}
+    	}
+		super.setOwningLibrary(owningLibrary);
+	}
+
+    /**
      * @see org.opentravel.schemacompiler.model.TLAliasOwner#getAliases()
      */
     public List<TLAlias> getAliases() {
@@ -236,23 +253,6 @@ public class TLChoiceObject extends TLComplexTypeBase implements TLFacetOwner, T
             this.sharedFacet = sharedFacet;
         }
     }
-
-    /**
-	 * @see org.opentravel.schemacompiler.model.TLLibraryMember#setOwningLibrary(org.opentravel.schemacompiler.model.AbstractLibrary)
-	 */
-	@Override
-	public void setOwningLibrary(AbstractLibrary owningLibrary) {
-    	if (!OTM16Upgrade.otm16Enabled) {
-    		for (TLContextualFacet facet : getChoiceFacets()) {
-    			if (owningLibrary != null) {
-        			owningLibrary.addNamedMember( facet );
-    			} else {
-    				this.getOwningLibrary().removeNamedMember( facet );
-    			}
-    		}
-    	}
-		super.setOwningLibrary(owningLibrary);
-	}
 
     /**
      * Returns the list of choice facets for this choice object.

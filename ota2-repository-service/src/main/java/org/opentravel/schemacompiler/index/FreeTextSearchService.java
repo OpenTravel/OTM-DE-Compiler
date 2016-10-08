@@ -48,11 +48,8 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.util.BytesRef;
 import org.opentravel.schemacompiler.index.builder.IndexBuilder;
 import org.opentravel.schemacompiler.index.builder.IndexBuilderFactory;
-import org.opentravel.schemacompiler.index.builder.IndexContentHelper;
-import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.RepositoryException;
@@ -71,7 +68,8 @@ public class FreeTextSearchService implements IndexingTerms {
 			IDENTITY_FIELD, ENTITY_TYPE_FIELD, ENTITY_NAME_FIELD, ENTITY_NAMESPACE_FIELD,
 			BASE_NAMESPACE_FIELD, FILENAME_FIELD, VERSION_FIELD, VERSION_SCHEME_FIELD,
 			STATUS_FIELD, LOCKED_BY_USER_FIELD, REFERENCED_LIBRARY_FIELD, PREFIX_MAPPING_FIELD,
-			OWNING_LIBRARY_FIELD, EXTENDS_ENTITY_FIELD, REFERENCE_IDENTITY_FIELD
+			OWNING_LIBRARY_FIELD, EXTENDS_ENTITY_FIELD, REFERENCE_IDENTITY_FIELD,
+			FACET_OWNER_FIELD
 		) );
 	private static final Set<String> contentAttr = new HashSet<>( Arrays.asList( CONTENT_DATA_FIELD ) );
 	
@@ -315,6 +313,7 @@ public class FreeTextSearchService implements IndexingTerms {
             	processIndex( factory.newCreateIndexBuilder( item ) );
             }
         }
+        processIndex( factory.getFacetService().getIndexBuilder() );
         processIndex( factory.getValidationService().getIndexBuilder() );
     }
 
@@ -336,6 +335,9 @@ public class FreeTextSearchService implements IndexingTerms {
             	processIndex( factory.newCreateIndexBuilder( candidateItem ) );
             }
         }
+        
+        // Perform index post-processing for contextual facet owners
+        processIndex( factory.getFacetService().getIndexBuilder() );
         
         // Re-index all libraries that directly reference this repository item to ensure
         // that the validation results are accurate
@@ -389,7 +391,7 @@ public class FreeTextSearchService implements IndexingTerms {
      * @throws RepositoryException  thrown if an error occurs during the indexing operation
      */
     private void indexWhereUsedLibraries(RepositoryItem item, IndexBuilderFactory factory) throws RepositoryException {
-        String libraryIndexId = IndexContentHelper.getIdentityKey( item );
+        String libraryIndexId = IndexingUtils.getIdentityKey( item );
         LibrarySearchResult libraryIndex = getLibrary( libraryIndexId, false );
         
         if (libraryIndex != null) {
@@ -464,7 +466,6 @@ public class FreeTextSearchService implements IndexingTerms {
 			Query keywordQuery = new QueryParser( KEYWORDS_FIELD, new StandardAnalyzer()).parse( freeText );
 			BooleanQuery statusQuery = null;
 			Query latestVersionQuery = null;
-			Query masterQuery;
 			
 			// Construct the search query...
 			if (!latestVersionsOnly && (includeStatus != null) && (includeStatus != TLLibraryStatus.DRAFT)) {
@@ -508,21 +509,16 @@ public class FreeTextSearchService implements IndexingTerms {
 				latestVersionQuery = new TermQuery( new Term( fieldName, "true" ) );
 			}
 			
-			if ((latestVersionQuery == null) && (statusQuery == null)) {
-				masterQuery = keywordQuery; // simple case
-				
-			} else {
-				BooleanQuery query = new BooleanQuery();
-				
-				query.add( new BooleanClause( keywordQuery, Occur.MUST ) );
-				
-				if (statusQuery != null) {
-					query.add( new BooleanClause( statusQuery, Occur.MUST ) );
-				}
-				if (latestVersionQuery != null) {
-					query.add( new BooleanClause( latestVersionQuery, Occur.MUST ) );
-				}
-				masterQuery = query;
+			// Assemble the master search query
+			BooleanQuery masterQuery = newSearchIndexQuery();
+			
+			masterQuery.add( new BooleanClause( keywordQuery, Occur.MUST ) );
+			
+			if (statusQuery != null) {
+				masterQuery.add( new BooleanClause( statusQuery, Occur.MUST ) );
+			}
+			if (latestVersionQuery != null) {
+				masterQuery.add( new BooleanClause( latestVersionQuery, Occur.MUST ) );
 			}
 			
 			// Execute the query and assemble the search results
@@ -569,7 +565,7 @@ public class FreeTextSearchService implements IndexingTerms {
      */
     public LibrarySearchResult getLibrary(RepositoryItem item, boolean resolveContent) throws RepositoryException {
     	LibrarySearchResult searchResult = null;
-    	BooleanQuery query = new BooleanQuery();
+    	BooleanQuery query = newSearchIndexQuery();
     	
 		query.add( new BooleanClause( new TermQuery(
 				new Term( ENTITY_TYPE_FIELD, TLLibrary.class.getName() ) ), Occur.MUST ));
@@ -601,7 +597,7 @@ public class FreeTextSearchService implements IndexingTerms {
     	
     	if ((searchIndexIds != null) && (searchIndexIds.size() > 0)) {
         	BooleanQuery identityQuery = new BooleanQuery();
-        	BooleanQuery masterQuery = new BooleanQuery();
+        	BooleanQuery masterQuery = newSearchIndexQuery();
         	List<Document> queryResults;
         	
         	for (String searchIndexId : searchIndexIds) {
@@ -632,7 +628,7 @@ public class FreeTextSearchService implements IndexingTerms {
      */
     public List<LibrarySearchResult> getLockedLibraries(String userId, boolean resolveContent) throws RepositoryException {
     	List<LibrarySearchResult> searchResults = new ArrayList<>();
-    	BooleanQuery query = new BooleanQuery();
+    	BooleanQuery query = newSearchIndexQuery();
     	List<Document> queryResults;
     	
     	if ((userId == null) || (userId.length() == 0)) {
@@ -736,7 +732,7 @@ public class FreeTextSearchService implements IndexingTerms {
     private List<LibrarySearchResult> getDirectLibraryWhereUsed(IndexSearcher searcher, LibrarySearchResult libraryIndex,
     		boolean resolveContent) throws RepositoryException {
     	List<LibrarySearchResult> searchResults = new ArrayList<>();
-    	BooleanQuery query = new BooleanQuery();
+    	BooleanQuery query = newSearchIndexQuery();
     	List<Document> queryResults;
     	
     	query.add( new BooleanClause( new TermQuery(
@@ -781,7 +777,7 @@ public class FreeTextSearchService implements IndexingTerms {
     	EntitySearchResult searchResult = null;
     	
     	if (libraryIndexId != null) {
-        	BooleanQuery query = new BooleanQuery();
+        	BooleanQuery query = newSearchIndexQuery();
         	List<Document> queryResults;
         	
         	query.add( new BooleanClause( new TermQuery(
@@ -812,7 +808,7 @@ public class FreeTextSearchService implements IndexingTerms {
     	List<EntitySearchResult> searchResults = new ArrayList<>();
     	
     	if (libraryIndexId != null) {
-        	BooleanQuery query = new BooleanQuery();
+        	BooleanQuery query = newSearchIndexQuery();
         	List<Document> queryResults;
         	
         	query.add( new BooleanClause( new TermQuery(
@@ -842,7 +838,7 @@ public class FreeTextSearchService implements IndexingTerms {
     	
     	if ((searchIndexIds != null) && (searchIndexIds.size() > 0)) {
         	BooleanQuery identityQuery = new BooleanQuery();
-        	BooleanQuery masterQuery = new BooleanQuery();
+        	BooleanQuery masterQuery = newSearchIndexQuery();
         	List<Document> queryResults;
         	
         	for (String searchIndexId : searchIndexIds) {
@@ -875,7 +871,7 @@ public class FreeTextSearchService implements IndexingTerms {
     	
     	if (searchIndexIds.length > 0) {
         	BooleanQuery identityQuery = new BooleanQuery();
-        	BooleanQuery masterQuery = new BooleanQuery();
+        	BooleanQuery masterQuery = newSearchIndexQuery();
         	List<Document> queryResults;
         	
         	for (String searchIndexId : searchIndexIds) {
@@ -1006,7 +1002,7 @@ public class FreeTextSearchService implements IndexingTerms {
     		boolean resolveContent) throws RepositoryException {
     	List<EntitySearchResult> searchResults = new ArrayList<>();
     	BooleanQuery masterQuery = new BooleanQuery();
-    	BooleanQuery identityQuery = new BooleanQuery();
+    	BooleanQuery identityQuery = newSearchIndexQuery();
     	List<Document> queryResults;
     	
     	for (String referenceIdentityId : entityIndex.getReferenceIdentityIds()) {
@@ -1137,54 +1133,25 @@ public class FreeTextSearchService implements IndexingTerms {
     }
     
     /**
-     * Retrieves the library content from the search index with the specified ID.  It should be
-     * noted that the library returned from this method is based on the last-indexed version of
-     * the library -- not necessarily its current state as maintained by the repository manager.
-     * 
-     * @param searchIndexId  the search index ID of the library to retrieve
-     * @return TLLibrary
-     * @throws RepositoryException  thrown if an error occurs while retrieving the library content
-     */
-    public TLLibrary getLibraryContent(String searchIndexId) throws RepositoryException {
-    	return IndexContentHelper.unmarshallLibrary( getRawContent( searchIndexId ) );
-    }
-    
-    /**
-     * Retrieves the entity content from the search index with the specified ID.  It should be
-     * noted that the entity returned from this method is based on the last-indexed version of
-     * the entity -- not necessarily its current state as maintained by the repository manager.
-     * 
-     * @param searchIndexId  the search index ID of the library to retrieve
-     * @return NamedEntity
-     * @throws RepositoryException  thrown if an error occurs while retrieving the entity content
-     */
-    public NamedEntity getEntityContent(String searchIndexId) throws RepositoryException {
-    	return IndexContentHelper.unmarshallEntity( getRawContent( searchIndexId ) );
-    }
-    
-    /**
-     * Returns the raw XML content from the search index document from which a library or
-     * entity can be unmarshalled.
+     * Returns the raw search index document for an OTM library or entity.
      * 
      * @param searchIndexId  the search index ID of the document to retrieve
      * @return Document
      * @throws RepositoryException  thrown if an error occurs while retrieving the document
      */
-    private String getRawContent(String searchIndexId) throws RepositoryException {
+    protected Document getSearchIndexDocument(String searchIndexId) throws RepositoryException {
         IndexSearcher searcher = null;
         try {
     		Query query = new TermQuery( new Term( IDENTITY_FIELD, searchIndexId ) );
     		TopDocs queryResults;
+    		Document doc = null;
     		
     		searchManager.maybeRefreshBlocking();
             searcher = searchManager.acquire();
             queryResults = searcher.search( query, 1 );
             
             if (queryResults.scoreDocs.length == 1) {
-            	Document doc = searcher.doc( queryResults.scoreDocs[0].doc, contentAttr );
-    			BytesRef rawContent = doc.getBinaryValue( CONTENT_DATA_FIELD );
-    			
-            	return (rawContent == null) ? null : rawContent.utf8ToString();
+            	doc = searcher.doc( queryResults.scoreDocs[0].doc, contentAttr );
             			
             } else if (queryResults.scoreDocs.length == 1) {
             	throw new RepositoryException("Item not found in search index: " + searchIndexId);
@@ -1192,6 +1159,7 @@ public class FreeTextSearchService implements IndexingTerms {
             } else {
             	throw new RepositoryException("Abmiguous results.  Multiple entities found in search index with ID: " + searchIndexId);
             }
+            return doc;
             
         } catch (Exception e) {
             throw new RepositoryException(
@@ -1205,6 +1173,19 @@ public class FreeTextSearchService implements IndexingTerms {
             	log.error("Error releasing free-text searcher.", e);
             }
         }
+    }
+    
+    /**
+     * Constructs a new <code>BooleanQuery</code> to be used for retrieving search index terms.
+     * 
+     * @return BooleanQuery
+     */
+    private BooleanQuery newSearchIndexQuery() {
+    	BooleanQuery query = new BooleanQuery();
+    	
+		query.add( new BooleanClause( new TermQuery(
+				new Term( SEARCH_INDEX_FIELD, Boolean.TRUE.toString() ) ), Occur.MUST ));
+    	return query;
     }
     
     /**

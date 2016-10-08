@@ -37,6 +37,7 @@ public class TLContextualFacet extends TLFacet implements LibraryMember, TLFacet
     private AbstractLibrary owningLibrary;
     private String owningEntityName;
     private String name;
+    private String facetNamespace;
     
 	/**
 	 * @see org.opentravel.schemacompiler.model.TLAbstractFacet#getOwningModel()
@@ -53,7 +54,7 @@ public class TLContextualFacet extends TLFacet implements LibraryMember, TLFacet
 	public AbstractLibrary getOwningLibrary() {
 		AbstractLibrary library = owningLibrary;
 		
-    	if (!OTM16Upgrade.otm16Enabled) {
+    	if ((library == null) && !OTM16Upgrade.otm16Enabled) {
     		TLFacetOwner owner = getOwningEntity();
     		library = (owner == null) ? null : owner.getOwningLibrary();
     	}
@@ -231,6 +232,34 @@ public class TLContextualFacet extends TLFacet implements LibraryMember, TLFacet
 		setName(label);
 	}
 	
+	/**
+	 * Returns the assigned namespace of the contextual facet.
+	 * <p>
+	 * NOTE: This field is intended for internal use by the OTM compiler and should not
+	 * be used by external applications.  Normally, the namespace of a contextual facet
+	 * is provided by its owning library; this field is only used when the contextual
+	 * facet is stored as a standalone XML document in the OTM repository search index.
+	 * 
+	 * @return String
+	 */
+	public String getFacetNamespace() {
+		return facetNamespace;
+	}
+
+	/**
+	 * Assigns the assigned namespace of the contextual facet.
+	 * <p>
+	 * NOTE: This field is intended for internal use by the OTM compiler and should not
+	 * be used by external applications.  Normally, the namespace of a contextual facet
+	 * is provided by its owning library; this field is only used when the contextual
+	 * facet is stored as a standalone XML document in the OTM repository search index.
+	 *
+	 * @param facetNamespace  the facet namespace URI to assign
+	 */
+	public void setFacetNamespace(String facetNamespace) {
+		this.facetNamespace = facetNamespace;
+	}
+
 	/**
 	 * @see org.opentravel.schemacompiler.model.TLFacetOwner#getAllFacets()
 	 */

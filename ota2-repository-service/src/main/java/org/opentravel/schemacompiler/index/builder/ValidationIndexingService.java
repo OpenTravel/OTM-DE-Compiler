@@ -48,6 +48,7 @@ import org.apache.lucene.search.SearcherManager;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.opentravel.schemacompiler.index.IndexingTerms;
+import org.opentravel.schemacompiler.index.IndexingUtils;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.loader.LibraryModelLoader;
@@ -143,7 +144,7 @@ public class ValidationIndexingService implements IndexingTerms {
 	public void validateLibrary(RepositoryItem item) {
 		File projectFile = null;
 		try {
-			String targetIndexId = IndexContentHelper.getIdentityKey( item );
+			String targetIndexId = IndexingUtils.getIdentityKey( item );
 			
 			if (!processedLibraryIds.contains( targetIndexId )) {
 				ProjectManager manager = new ProjectManager( loadValidationModel(), false, repositoryManager );
@@ -175,7 +176,7 @@ public class ValidationIndexingService implements IndexingTerms {
 					}
 					
 					if (library != null) {
-						String libraryIndexId = IndexContentHelper.getIdentityKey( library );
+						String libraryIndexId = IndexingUtils.getIdentityKey( library );
 						List<ValidationFinding> libraryFindings = findingsByLibrary.get( libraryIndexId );
 						
 						if (libraryFindings == null) {
@@ -185,8 +186,8 @@ public class ValidationIndexingService implements IndexingTerms {
 						libraryFindings.add( finding );
 					}
 					if (entity != null) {
-						String libraryIndexId = IndexContentHelper.getIdentityKey( (TLLibrary) entity.getOwningLibrary() );
-						String entityIndexId = IndexContentHelper.getIdentityKey( entity );
+						String libraryIndexId = IndexingUtils.getIdentityKey( (TLLibrary) entity.getOwningLibrary() );
+						String entityIndexId = IndexingUtils.getIdentityKey( entity );
 						List<ValidationFinding> entityFindings = findingsByEntity.get( entityIndexId );
 						
 						if (entityFindings == null) {
@@ -207,7 +208,7 @@ public class ValidationIndexingService implements IndexingTerms {
 						case MANAGED_LOCKED:
 						case MANAGED_UNLOCKED:
 						case MANAGED_WIP:
-							processedLibraryIds.add( IndexContentHelper.getIdentityKey( pItem ) );
+							processedLibraryIds.add( IndexingUtils.getIdentityKey( pItem ) );
 							break;
 						default:
 							break;

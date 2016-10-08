@@ -64,10 +64,10 @@ public class ValidationResult extends SearchResult<ValidationFinding> {
 	}
 	
 	/**
-	 * @see org.opentravel.schemacompiler.index.SearchResult#initializeItemContent()
+	 * @see org.opentravel.schemacompiler.index.SearchResult#initializeItemContent(org.apache.lucene.document.Document)
 	 */
 	@Override
-	protected void initializeItemContent() {
+	protected void initializeItemContent(Document itemDoc) {
 		// No action required
 	}
 

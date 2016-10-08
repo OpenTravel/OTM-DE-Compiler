@@ -793,6 +793,15 @@
                   </xsd:documentation>
                </xsd:annotation>
             </xsd:attribute>
+            <xsd:attribute name="facetNamespace" type="Name_XML" use="optional">
+               <xsd:annotation>
+                  <xsd:documentation>The assigned namespace for the contextual facet.
+                     Normally, this is provided by the owning library; this field is
+                     only used when the contextual facet is stored as a standalone
+                     XML document in the OTM repository search index.
+                  </xsd:documentation>
+               </xsd:annotation>
+            </xsd:attribute>
          </xsd:extension>
       </xsd:complexContent>
    </xsd:complexType>

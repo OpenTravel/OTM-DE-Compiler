@@ -45,7 +45,8 @@ public class TLActionResponseTransformer extends TLComplexTypeTransformer<TLActi
 		if (sourcePayloadType != null) {
 			response.setPayloadType(context.getSymbolResolver().buildEntityName(
 					sourcePayloadType.getNamespace(), sourcePayloadType.getLocalName()));
-		} else {
+        }
+        if (response.getPayloadType() == null) {
 			response.setPayloadType(source.getPayloadTypeName());
 		}
 		

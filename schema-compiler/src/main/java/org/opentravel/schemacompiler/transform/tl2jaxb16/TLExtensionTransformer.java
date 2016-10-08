@@ -45,8 +45,8 @@ public class TLExtensionTransformer extends
 
             extension.setExtends(context.getSymbolResolver().buildEntityName(
                     extendsEntity.getNamespace(), extendsEntity.getLocalName()));
-
-        } else {
+        }
+        if (extension.getExtends() == null) {
             extension.setExtends(source.getExtendsEntityName());
         }
 

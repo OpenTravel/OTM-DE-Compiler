@@ -49,7 +49,8 @@ public class TLActionFacetTransformer extends TLComplexTypeTransformer<TLActionF
         if (basePayload != null) {
         	facet.setBasePayload(context.getSymbolResolver().buildEntityName(
         			basePayload.getNamespace(), basePayload.getLocalName()));
-        } else {
+        }
+        if (facet.getBasePayload() == null) {
         	facet.setBasePayload(trimString(source.getBasePayloadName(), true));
         }
         

@@ -47,8 +47,9 @@ import org.apache.lucene.search.SearcherFactory;
 import org.apache.lucene.search.SearcherManager;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.util.BytesRef;
-import org.opentravel.ns.ota2.librarymodel_v01_05.Library;
+import org.opentravel.ns.ota2.librarymodel_v01_06.Library;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoType;
+import org.opentravel.schemacompiler.index.IndexingUtils;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLInclude;
@@ -127,11 +128,6 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
 					entityList.add( entity );
 				}
 			}
-			if (library.getService() != null) {
-				for (NamedEntity op : library.getService().getOperations()) {
-					entityList.add( op );
-				}
-			}
 			
 			// Create an index for each entity; keywords for this library include the keywords
 			// for each child entity.
@@ -157,10 +153,11 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
 			
 			// Finish up by creating an index document for the library itself
 			String libraryContent = IndexContentHelper.marshallLibrary( jaxbLibrary );
-			String identityKey = IndexContentHelper.getIdentityKey( sourceObject );
+			String identityKey = IndexingUtils.getIdentityKey( sourceObject );
 			Document indexDoc = new Document();
 			
 			indexDoc.add( new StringField( IDENTITY_FIELD, identityKey, Field.Store.YES ) );
+			indexDoc.add( new StringField( SEARCH_INDEX_FIELD, Boolean.TRUE + "", Field.Store.NO ) );
 			indexDoc.add( new StringField( ENTITY_TYPE_FIELD, TLLibrary.class.getName(), Field.Store.YES ) );
 			indexDoc.add( new StringField( ENTITY_NAME_FIELD, library.getName(), Field.Store.YES ) );
 			indexDoc.add( new StringField( ENTITY_NAMESPACE_FIELD, library.getNamespace(), Field.Store.YES ) );
@@ -239,13 +236,13 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
 	@Override
 	public void deleteIndex() {
 		RepositoryItem sourceObject = getSourceObject();
-		String sourceObjectIdentity = IndexContentHelper.getIdentityKey( sourceObject );
+		String sourceObjectIdentity = IndexingUtils.getIdentityKey( sourceObject );
 		SearcherManager searchManager = null;
         IndexSearcher searcher = null;
         
 		try {
 			QueryParser parser = new QueryParser( OWNING_LIBRARY_FIELD, new StandardAnalyzer() );
-			Query entityQuery = parser.parse( "\"" + IndexContentHelper.getIdentityKey( sourceObject ) + "\"" );
+			Query entityQuery = parser.parse( "\"" + IndexingUtils.getIdentityKey( sourceObject ) + "\"" );
 			IndexWriter indexWriter = getIndexWriter();
 			
 			searchManager = new SearcherManager( indexWriter, true, new SearcherFactory() );
@@ -306,7 +303,7 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
 							getRepositoryManager().getRepositoryItem( fileHint, libraryNamespace );
 					
 					if (importItem != null) {
-						identityKey = IndexContentHelper.getIdentityKey( importItem );
+						identityKey = IndexingUtils.getIdentityKey( importItem );
 					}
 					
 				} catch (RepositoryException | URISyntaxException e) {
@@ -336,7 +333,7 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
 								getRepositoryManager().getRepositoryItem( fileHint, namespace );
 						
 						if (importItem != null) {
-							identityKeys.add( IndexContentHelper.getIdentityKey( importItem ) );
+							identityKeys.add( IndexingUtils.getIdentityKey( importItem ) );
 						}
 						
 					} catch (RepositoryException | URISyntaxException e) {

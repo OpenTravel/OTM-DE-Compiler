@@ -107,6 +107,37 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.model.TLLibraryMember#setOwningLibrary(org.opentravel.schemacompiler.model.AbstractLibrary)
+	 */
+	@Override
+	public void setOwningLibrary(AbstractLibrary owningLibrary) {
+    	if (!OTM16Upgrade.otm16Enabled) {
+    		for (TLContextualFacet facet : getCustomFacets()) {
+    			if (owningLibrary != null) {
+        			owningLibrary.addNamedMember( facet );
+    			} else {
+    				this.getOwningLibrary().removeNamedMember( facet );
+    			}
+    		}
+    		for (TLContextualFacet facet : getQueryFacets()) {
+    			if (owningLibrary != null) {
+        			owningLibrary.addNamedMember( facet );
+    			} else {
+    				this.getOwningLibrary().removeNamedMember( facet );
+    			}
+    		}
+    		for (TLContextualFacet facet : getUpdateFacets()) {
+    			if (owningLibrary != null) {
+        			owningLibrary.addNamedMember( facet );
+    			} else {
+    				this.getOwningLibrary().removeNamedMember( facet );
+    			}
+    		}
+    	}
+		super.setOwningLibrary(owningLibrary);
+	}
+
+    /**
      * @see org.opentravel.schemacompiler.version.Versioned#isLaterVersion(org.opentravel.schemacompiler.version.Versioned)
      */
     @Override
@@ -324,37 +355,6 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
             this.detailFacet = detailFacet;
         }
     }
-
-    /**
-	 * @see org.opentravel.schemacompiler.model.TLLibraryMember#setOwningLibrary(org.opentravel.schemacompiler.model.AbstractLibrary)
-	 */
-	@Override
-	public void setOwningLibrary(AbstractLibrary owningLibrary) {
-    	if (!OTM16Upgrade.otm16Enabled) {
-    		for (TLContextualFacet facet : getCustomFacets()) {
-    			if (owningLibrary != null) {
-        			owningLibrary.addNamedMember( facet );
-    			} else {
-    				this.getOwningLibrary().removeNamedMember( facet );
-    			}
-    		}
-    		for (TLContextualFacet facet : getQueryFacets()) {
-    			if (owningLibrary != null) {
-        			owningLibrary.addNamedMember( facet );
-    			} else {
-    				this.getOwningLibrary().removeNamedMember( facet );
-    			}
-    		}
-    		for (TLContextualFacet facet : getUpdateFacets()) {
-    			if (owningLibrary != null) {
-        			owningLibrary.addNamedMember( facet );
-    			} else {
-    				this.getOwningLibrary().removeNamedMember( facet );
-    			}
-    		}
-    	}
-		super.setOwningLibrary(owningLibrary);
-	}
 
     /**
      * Returns the list of custom facets for this business object.

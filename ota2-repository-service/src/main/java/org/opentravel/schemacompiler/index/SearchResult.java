@@ -18,6 +18,7 @@ package org.opentravel.schemacompiler.index;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.document.Document;
+import org.opentravel.schemacompiler.repository.RepositoryException;
 
 /**
  * Abstract base class for all search results returned by the <code>FreeTextSearchService</code>.
@@ -111,7 +112,13 @@ public abstract class SearchResult<T> implements IndexingTerms {
 	 */
 	public synchronized T getItemContent() {
 		if (!contentInitialized) {
-			initializeItemContent();
+			try {
+				Document doc = searchService.getSearchIndexDocument( searchIndexId );
+				initializeItemContent( doc );
+				
+			} catch (RepositoryException e) {
+				log.error("Unable to initialize content from search index: " + searchIndexId);
+			}
 		}
 		return itemContent;
 	}
@@ -128,8 +135,10 @@ public abstract class SearchResult<T> implements IndexingTerms {
 	}
 	
 	/**
-	 * Called to dynamically initialize the item content from persistent storage.
+	 * Called to dynamically initialize the item content from search index document provided.
+	 * 
+	 * @param itemDoc  the search index document from which to initialize the item
 	 */
-	protected abstract void initializeItemContent();
+	protected abstract void initializeItemContent(Document itemDoc);
 	
 }
