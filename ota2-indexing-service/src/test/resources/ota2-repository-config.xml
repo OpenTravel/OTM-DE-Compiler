@@ -1,4 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2014 OpenTravel Alliance (info@opentravel.org)
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
 
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
@@ -8,13 +25,12 @@
 	</bean>
 	
 	<bean id="repositoryLocation" class="java.io.File" scope="singleton">
-		<constructor-arg value="#{systemProperties['user.dir']}" />
-		<constructor-arg value="/target/test-workspace/#{systemProperties['test.class']}/test-repository" />
+		<constructor-arg value="C:/Software/temp/svn-test/tvp-repository-export" />
+		<!--constructor-arg value="#{systemProperties['user.home']}/ota2/repository" /-->
 	</bean>
 	
 	<bean id="searchIndexLocation" class="java.io.File" scope="singleton">
-		<constructor-arg value="#{systemProperties['user.dir']}" />
-		<constructor-arg value="/target/test-workspace/#{systemProperties['test.class']}/search-index" />
+		<constructor-arg value="#{systemProperties['user.dir']}/target/test-output/search-index" />
 	</bean>
 	
 	<!--
@@ -39,6 +55,7 @@
 			<bean class="org.opentravel.schemacompiler.repository.SVNRepositoryFileManager">
 				<constructor-arg ref="repositoryLocation" />
 				<constructor-arg ref="svnConfigFolder" />
+				<constructor-arg ref="svnCredentialsFile" />
 			</bean>
 		</constructor-arg>
 		-->
@@ -81,6 +98,7 @@
 	-->
 	<!--
 	<bean id="authenticationProvider" class="org.opentravel.schemacompiler.security.impl.JNDIAuthenticationProvider">
+		<property name="repositoryManager" ref="repositoryManager" />
 		<property name="connectionUrl" value="ldap://localhost:389/dc=opentravel,dc=com" />
 		<property name="securityAuthentication" value="simple" />
 		<property name="connectionPrincipal" value="cn=Manager,dc=opentravel,dc=com" />
@@ -100,6 +118,7 @@
 	-->
 	<!--
 	<bean id="authenticationProvider" class="org.opentravel.schemacompiler.security.impl.JNDIAuthenticationProvider">
+		<property name="repositoryManager" ref="repositoryManager" />
 		<property name="connectionUrl" value="ldap://localhost:389/dc=opentravel,dc=com" />
 		<property name="securityAuthentication" value="simple" />
 		<property name="connectionPrincipal" value="cn=Manager,dc=opentravel,dc=com" />
@@ -114,19 +133,18 @@
 		
 		Authentication provider that implements JNDI authentication using user searches.  This mode of operation
 		establishes remote connections using a single authenticated user account.  User accounts are located by
-		searches within the directory using one or more configurable query strings.  Once user accounts are
-		located by a search, the user's encrypted password credentials are retrieved from the directory and
-		compared with the credentials provided by the remote user of the repository.
+		searches within the directory using one or more configurable query strings.  Once user accounts are located
+		by a search, the user's credentials are verified by attempting a login to the directory.
 	-->
 	<!--
 	<bean id="authenticationProvider" class="org.opentravel.schemacompiler.security.impl.JNDIAuthenticationProvider">
+		<property name="repositoryManager" ref="repositoryManager" />
 		<property name="connectionUrl" value="ldap://localhost:389/dc=opentravel,dc=com" />
 		<property name="securityAuthentication" value="simple" />
 		<property name="connectionPrincipal" value="cn=Manager,dc=opentravel,dc=com" />
 		<property name="connectionPassword" value="password" />
 		<property name="userSearchBase" value="ou=users" />
 		<property name="userSearchPatterns" value="(uid={0})" />
-		<property name="digestAlgorithm" value="SHA-1" />
 	</bean>
 	-->
 	
@@ -149,7 +167,20 @@
 	-->
 	<bean id="svnConfigFolder" class="java.io.File" scope="singleton">
 		<constructor-arg value="#{systemProperties['user.home']}" />
-		<constructor-arg value="/.subversion_ota" />
+		<constructor-arg value="/.subversion" />
+	</bean>
+	
+	<!--
+		SVN Credentials File:
+		
+		Optional property file location for the credentials of the SVN user's account. The user ID is specified with
+		the property key 'svn.userid', and the password is specified with 'svn.password'.  If this file location is
+		not provided for the SVN file manager, authentication will be performed using the last known repository
+		credentials found in the SVN configuration folder.
+	-->
+	<bean id="svnCredentialsFile" class="java.io.File" scope="singleton">
+		<constructor-arg value="#{systemProperties['catalina.base']}" />
+		<constructor-arg value="/conf/svnCredentials.properties" />
 	</bean>
 	
 	<!--

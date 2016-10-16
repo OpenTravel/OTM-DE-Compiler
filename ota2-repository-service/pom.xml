@@ -15,7 +15,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.opentravel.otm</groupId>
-			<artifactId>schema-compiler</artifactId>
+			<artifactId>ota2-repository-common</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -35,22 +35,6 @@
 			<artifactId>jersey-media-multipart</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-analyzers-common</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-queryparser</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-backward-codecs</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.tmatesoft.svnkit</groupId>
-			<artifactId>svnkit</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
 		</dependency>
@@ -63,8 +47,8 @@
 			<artifactId>jstl</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>commons-codec</groupId>
-			<artifactId>commons-codec</artifactId>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>activemq-client</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -95,25 +79,6 @@
 
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.jvnet.jaxb2.maven2</groupId>
-				<artifactId>maven-jaxb2-plugin</artifactId>
-				<version>${jaxb2.plugin.version}</version>
-				<executions>
-					<execution>
-						<id>jaxb-generate</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<schemaDirectory>${basedir}/src/main/resources/schemas</schemaDirectory>
-					<strict>true</strict>
-					<verbose>false</verbose>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>

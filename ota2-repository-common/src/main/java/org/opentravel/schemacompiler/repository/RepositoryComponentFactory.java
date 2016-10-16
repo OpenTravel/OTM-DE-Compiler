@@ -17,12 +17,12 @@ package org.opentravel.schemacompiler.repository;
 
 import java.io.File;
 
-import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.security.AuthenticationProvider;
 import org.opentravel.schemacompiler.security.RepositorySecurityManager;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
+import org.springframework.jms.core.JmsTemplate;
 
 /**
  * Handles the creation of key repository components using a Spring application context file.
@@ -39,6 +39,7 @@ public class RepositoryComponentFactory {
     private static final String SECURITY_MANAGER_KEY = "securityManager";
     private static final String AUTHENTICATION_PROVIDER_KEY = "authenticationProvider";
     private static final String DEVELOPMENT_REPOSITORY_KEY = "developmentRepository";
+    private static final String INDEXING_JMS_SERVICE_KEY = "indexingJmsService";
 
     private static RepositoryComponentFactory defaultInstance;
     private static final Object defaultInstanceLock = new Object();
@@ -160,7 +161,17 @@ public class RepositoryComponentFactory {
     public AuthenticationProvider getAuthenticationProvider() {
         return (AuthenticationProvider) appContext.getBean(AUTHENTICATION_PROVIDER_KEY);
     }
-
+    
+    /**
+     * Returns the <code>JmsTemplate</code> that will serve as the indexing service to publish
+     * indexing jobs to a remote server.
+     * 
+     * @return JmsTemplate
+     */
+    public JmsTemplate getIndexingJmsService() {
+        return (JmsTemplate) appContext.getBean(INDEXING_JMS_SERVICE_KEY);
+    }
+    
     /**
      * Returns true if the managed repository has been designated as a development instance.
      * 

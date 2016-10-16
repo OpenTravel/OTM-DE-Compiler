@@ -26,6 +26,7 @@ import java.util.List;
 import org.junit.Test;
 import org.opentravel.schemacompiler.index.FreeTextSearchService;
 import org.opentravel.schemacompiler.index.LibrarySearchResult;
+import org.opentravel.schemacompiler.index.RealTimeFreeTextSearchService;
 import org.opentravel.schemacompiler.index.SearchResult;
 import org.opentravel.schemacompiler.util.RepositoryTestUtils;
 
@@ -122,8 +123,7 @@ public class TestFreeTextSearchService {
         RepositoryTestUtils.deleteContents(testRepository);
         RepositoryTestUtils.copyContents(repositorySnapshot, testRepository);
 
-        service = new FreeTextSearchService(indexFolder, new RepositoryManager(testRepository));
-        service.setRealTimeIndexing(true);
+        service = new RealTimeFreeTextSearchService(indexFolder, new RepositoryManager(testRepository));
         service.startService();
         service.indexAllRepositoryItems();
         return service;

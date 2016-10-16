@@ -13,27 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.providers;
 
-import javax.ws.rs.ext.ContextResolver;
-import javax.ws.rs.ext.Provider;
-import javax.xml.bind.JAXBContext;
-
-import org.opentravel.schemacompiler.util.RepositoryJaxbContext;
+package org.opentravel.schemacompiler.index;
 
 /**
- * Resolves the JAXB context to the one that includes the required packages for all JAXB classes.
- * 
- * @author S. Livezey
+ * Constant definitions used for various aspects of the indexing service.
  */
-@Provider
-public final class JAXBContextResolver implements ContextResolver<JAXBContext> {
-
-    /**
-     * @see javax.ws.rs.ext.ContextResolver#getContext(java.lang.Class)
-     */
-    public JAXBContext getContext(Class<?> type) {
-        return RepositoryJaxbContext.getContext();
-    }
-
+public interface IndexingConstants {
+	
+	public static final String JNDI_CONNECTION_FACTORY = "java:comp/env/jms/ConnectionFactory";
+	public static final String JNDI_INDEXING_QUEUE     = "jms/queue/Queue";
+	
+	public static final String MSGPROP_JOB_TYPE = "jobType";
+	
+	public static final String JOB_TYPE_CREATE_INDEX = "create-index";
+	public static final String JOB_TYPE_DELETE_INDEX = "delete-index";
+	public static final String JOB_TYPE_DELETE_ALL   = "delete-all";
+	
 }

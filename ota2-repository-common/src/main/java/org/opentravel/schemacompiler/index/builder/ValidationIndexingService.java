@@ -26,7 +26,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,44 +53,9 @@ import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.loader.LibraryModelLoader;
 import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
 import org.opentravel.schemacompiler.model.NamedEntity;
-import org.opentravel.schemacompiler.model.TLAction;
-import org.opentravel.schemacompiler.model.TLActionFacet;
-import org.opentravel.schemacompiler.model.TLActionRequest;
-import org.opentravel.schemacompiler.model.TLActionResponse;
-import org.opentravel.schemacompiler.model.TLAlias;
-import org.opentravel.schemacompiler.model.TLAttribute;
-import org.opentravel.schemacompiler.model.TLBusinessObject;
-import org.opentravel.schemacompiler.model.TLChoiceObject;
-import org.opentravel.schemacompiler.model.TLClosedEnumeration;
-import org.opentravel.schemacompiler.model.TLContext;
-import org.opentravel.schemacompiler.model.TLCoreObject;
-import org.opentravel.schemacompiler.model.TLDocumentation;
-import org.opentravel.schemacompiler.model.TLEnumValue;
-import org.opentravel.schemacompiler.model.TLEquivalent;
-import org.opentravel.schemacompiler.model.TLExample;
-import org.opentravel.schemacompiler.model.TLExtension;
-import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
-import org.opentravel.schemacompiler.model.TLFacet;
-import org.opentravel.schemacompiler.model.TLInclude;
-import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLLibrary;
-import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLModelElement;
-import org.opentravel.schemacompiler.model.TLNamespaceImport;
-import org.opentravel.schemacompiler.model.TLOpenEnumeration;
-import org.opentravel.schemacompiler.model.TLOperation;
-import org.opentravel.schemacompiler.model.TLParamGroup;
-import org.opentravel.schemacompiler.model.TLParameter;
-import org.opentravel.schemacompiler.model.TLProperty;
-import org.opentravel.schemacompiler.model.TLResource;
-import org.opentravel.schemacompiler.model.TLResourceParentRef;
-import org.opentravel.schemacompiler.model.TLRole;
-import org.opentravel.schemacompiler.model.TLRoleEnumeration;
-import org.opentravel.schemacompiler.model.TLService;
-import org.opentravel.schemacompiler.model.TLSimple;
-import org.opentravel.schemacompiler.model.TLSimpleFacet;
-import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.repository.Project;
 import org.opentravel.schemacompiler.repository.ProjectItem;
 import org.opentravel.schemacompiler.repository.ProjectManager;
@@ -159,7 +123,7 @@ public class ValidationIndexingService implements IndexingTerms {
 				
 				// Save each of the findings that were discovered; cross-reference by library and entity
 				for (ValidationFinding finding : findings.getAllFindingsAsList()) {
-					TLModelElement targetEntity = getTargetEntity( finding.getSource() );
+					TLModelElement targetEntity = IndexingUtils.getTargetEntity( finding.getSource() );
 					NamedEntity entity = (targetEntity instanceof NamedEntity) ? (NamedEntity) targetEntity : null;
 					TLLibrary library = (targetEntity instanceof TLLibrary) ? (TLLibrary) targetEntity : null;
 					
@@ -287,9 +251,9 @@ public class ValidationIndexingService implements IndexingTerms {
 	 */
 	private void saveValidationFinding(ValidationFinding finding, String libraryIndexId, String entityIndexId) {
 		try {
-			QName sourceObjectName = getSourceObjectQName( finding.getSource() );
+			QName sourceObjectName = IndexingUtils.getQualifiedName( finding.getSource() );
 			String findingSource = finding.getSource().getValidationIdentity();
-			String identityKey = UUID.randomUUID().toString();
+			String identityKey = IndexingUtils.getIdentityKey( finding );
 			Document indexDoc = new Document();
 			Matcher m;
 			
@@ -315,28 +279,6 @@ public class ValidationIndexingService implements IndexingTerms {
 		} catch (IOException e) {
             log.warn("Error indexing validation result for library: " + libraryIndexId, e);
 		}
-	}
-	
-	/**
-	 * Returns the qualified name of the library or named entity that is the target of
-	 * a validation finding.
-	 * 
-	 * @param sourceObject  the source object for which to return a qualified name
-	 * @return QName
-	 */
-	private QName getSourceObjectQName(Object sourceObject) {
-		TLModelElement targetObject = getTargetEntity( sourceObject );
-		QName objName;
-		
-		if (targetObject instanceof TLLibrary) {
-			TLLibrary library = (TLLibrary) targetObject;
-			objName = new QName( library.getNamespace(), library.getName() );
-			
-		} else {
-			NamedEntity entity = (NamedEntity) targetObject;
-			objName = new QName( entity.getNamespace(), entity.getLocalName() );
-		}
-		return objName;
 	}
 	
 	/**
@@ -382,128 +324,6 @@ public class ValidationIndexingService implements IndexingTerms {
 				if (searchManager != null) searchManager.close();
 			} catch (Throwable t) {}
 		}
-	}
-	
-	/**
-	 * Returns the entity or library that will be the indexing target for the source
-	 * object of a validation finding.  For example, the owning entity of an attribute
-	 * finding would be the core object that declared the attribute.
-	 * 
-	 * @param findingSource  the object that is the source of a validation finding
-	 * @return TLModelElement
-	 */
-	private TLModelElement getTargetEntity(Object findingSource) {
-		TLModelElement targetEntity = null;
-		
-		if (findingSource instanceof TLLibrary) {
-        	targetEntity = (TLLibrary) findingSource;
-			
-        } else if (findingSource instanceof TLContext) {
-        	targetEntity = ((TLContext) findingSource).getOwningLibrary();
-
-        } else if (findingSource instanceof TLInclude) {
-        	targetEntity = ((TLInclude) findingSource).getOwningLibrary();
-
-        } else if (findingSource instanceof TLNamespaceImport) {
-        	targetEntity = ((TLNamespaceImport) findingSource).getOwningLibrary();
-
-        } else if (findingSource instanceof TLService) {
-        	targetEntity = ((TLService) findingSource).getOwningLibrary();
-
-		} else if (findingSource instanceof TLSimple) {
-        	targetEntity = (TLSimple) findingSource;
-
-        } else if (findingSource instanceof TLValueWithAttributes) {
-        	targetEntity = (TLValueWithAttributes) findingSource;
-
-        } else if (findingSource instanceof TLClosedEnumeration) {
-        	targetEntity = (TLClosedEnumeration) findingSource;
-
-        } else if (findingSource instanceof TLOpenEnumeration) {
-        	targetEntity = (TLOpenEnumeration) findingSource;
-
-        } else if (findingSource instanceof TLChoiceObject) {
-        	targetEntity = (TLChoiceObject) findingSource;
-
-        } else if (findingSource instanceof TLCoreObject) {
-        	targetEntity = (TLCoreObject) findingSource;
-
-        } else if (findingSource instanceof TLBusinessObject) {
-        	targetEntity = (TLBusinessObject) findingSource;
-
-        } else if (findingSource instanceof TLResource) {
-        	targetEntity = (TLResource) findingSource;
-
-        } else if (findingSource instanceof TLOperation) {
-        	targetEntity = (TLOperation) findingSource;
-
-        } else if (findingSource instanceof TLExtensionPointFacet) {
-        	targetEntity = (TLExtensionPointFacet) findingSource;
-
-        } else if (findingSource instanceof TLFacet) {
-        	targetEntity = getTargetEntity( ((TLFacet) findingSource).getOwningEntity() );
-
-        } else if (findingSource instanceof TLActionFacet) {
-        	targetEntity = getTargetEntity( ((TLActionFacet) findingSource).getOwningResource() );
-
-        } else if (findingSource instanceof TLSimpleFacet) {
-        	targetEntity = getTargetEntity( ((TLSimpleFacet) findingSource).getOwningEntity() );
-
-        } else if (findingSource instanceof TLListFacet) {
-        	targetEntity = getTargetEntity( ((TLListFacet) findingSource).getOwningEntity() );
-
-        } else if (findingSource instanceof TLAlias) {
-        	targetEntity = getTargetEntity( ((TLAlias) findingSource).getOwningEntity() );
-
-        } else if (findingSource instanceof TLParamGroup) {
-        	targetEntity = getTargetEntity( ((TLParamGroup) findingSource).getOwner() );
-
-        } else if (findingSource instanceof TLParameter) {
-        	targetEntity = getTargetEntity( ((TLParameter) findingSource).getOwner() );
-
-        } else if (findingSource instanceof TLResourceParentRef) {
-        	targetEntity = getTargetEntity( ((TLResourceParentRef) findingSource).getOwner() );
-
-        } else if (findingSource instanceof TLAction) {
-        	targetEntity = getTargetEntity( ((TLAction) findingSource).getOwner() );
-
-        } else if (findingSource instanceof TLActionRequest) {
-        	targetEntity = getTargetEntity( ((TLActionRequest) findingSource).getOwner() );
-
-        } else if (findingSource instanceof TLActionResponse) {
-        	targetEntity = getTargetEntity( ((TLActionResponse) findingSource).getOwner() );
-
-        } else if (findingSource instanceof TLExtension) {
-        	targetEntity = getTargetEntity( ((TLExtension) findingSource).getOwner() );
-
-        } else if (findingSource instanceof TLDocumentation) {
-        	targetEntity = getTargetEntity( ((TLDocumentation) findingSource).getOwner() );
-
-        } else if (findingSource instanceof TLEquivalent) {
-        	targetEntity = getTargetEntity( ((TLEquivalent) findingSource).getOwningEntity() );
-
-        } else if (findingSource instanceof TLExample) {
-        	targetEntity = getTargetEntity( ((TLExample) findingSource).getOwningEntity() );
-
-        } else if (findingSource instanceof TLAttribute) {
-        	targetEntity = getTargetEntity( ((TLAttribute) findingSource).getOwner() );
-
-        } else if (findingSource instanceof TLProperty) {
-        	targetEntity = getTargetEntity( ((TLProperty) findingSource).getOwner() );
-
-        } else if (findingSource instanceof TLIndicator) {
-        	targetEntity = getTargetEntity( ((TLIndicator) findingSource).getOwner() );
-
-        } else if (findingSource instanceof TLEnumValue) {
-        	targetEntity = getTargetEntity( ((TLEnumValue) findingSource).getOwningEnum() );
-
-        } else if (findingSource instanceof TLRoleEnumeration) {
-        	targetEntity = getTargetEntity( ((TLRoleEnumeration) findingSource).getOwningEntity() );
-
-        } else if (findingSource instanceof TLRole) {
-        	targetEntity = getTargetEntity( ((TLRole) findingSource).getRoleEnumeration() );
-        }
-        return targetEntity;
 	}
 	
 	/**

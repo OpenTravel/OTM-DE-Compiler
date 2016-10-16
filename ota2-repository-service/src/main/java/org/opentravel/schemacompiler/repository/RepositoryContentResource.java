@@ -59,6 +59,7 @@ import org.opentravel.ns.ota2.repositoryinfo_v01_00.SearchResultsListType;
 import org.opentravel.ns.ota2.security_v01_00.RepositoryPermission;
 import org.opentravel.schemacompiler.index.EntitySearchResult;
 import org.opentravel.schemacompiler.index.FreeTextSearchService;
+import org.opentravel.schemacompiler.index.FreeTextSearchServiceFactory;
 import org.opentravel.schemacompiler.index.LibrarySearchResult;
 import org.opentravel.schemacompiler.index.SearchResult;
 import org.opentravel.schemacompiler.lock.LockableResource;
@@ -105,8 +106,8 @@ public class RepositoryContentResource {
         this.securityManager = componentFactory.getSecurityManager();
 
         try {
-            FreeTextSearchService.initializeSingleton(componentFactory.getSearchIndexLocation(),
-                    repositoryManager);
+            FreeTextSearchServiceFactory.initializeSingleton(
+            		componentFactory.getSearchIndexLocation(), repositoryManager);
 
         } catch (IOException e) {
             throw new RepositoryException("Error initializing the free-text search service.", e);
@@ -319,7 +320,7 @@ public class RepositoryContentResource {
 
         Map<String, Map<TLLibraryStatus, Boolean>> accessibleItemCache = new HashMap<String, Map<TLLibraryStatus, Boolean>>();
         TLLibraryStatus searchStatus = includeDraftVersions ? null : TLLibraryStatus.FINAL;
-        List<SearchResult<?>> searchResults = FreeTextSearchService.getInstance().search(
+        List<SearchResult<?>> searchResults = FreeTextSearchServiceFactory.getInstance().search(
                 freeTextQuery, searchStatus, latestVersionsOnly, false );
         UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
         LibraryInfoListType metadataList = new LibraryInfoListType();
@@ -364,7 +365,7 @@ public class RepositoryContentResource {
 
         Map<String, Map<TLLibraryStatus, Boolean>> accessibleItemCache = new HashMap<String, Map<TLLibraryStatus, Boolean>>();
         TLLibraryStatus searchStatus = getStatus( includeStatusStr );
-        List<SearchResult<?>> searchResults = FreeTextSearchService.getInstance().search(
+        List<SearchResult<?>> searchResults = FreeTextSearchServiceFactory.getInstance().search(
                 freeTextQuery, searchStatus, latestVersionsOnly, false );
         UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
         SearchResultsListType resultsList = new SearchResultsListType();
@@ -382,7 +383,7 @@ public class RepositoryContentResource {
         }
         
         // Build a map of all referenced libraries
-        List<LibrarySearchResult> referencedLibraries = FreeTextSearchService.getInstance()
+        List<LibrarySearchResult> referencedLibraries = FreeTextSearchServiceFactory.getInstance()
         		.getLibraries( referencedLibraryIds, false );
         Map<String,LibrarySearchResult> referencedLibrariesById = new HashMap<>();
         
@@ -484,7 +485,7 @@ public class RepositoryContentResource {
     	
         Map<String, Map<TLLibraryStatus, Boolean>> accessibleItemCache = new HashMap<String, Map<TLLibraryStatus, Boolean>>();
         UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
-    	FreeTextSearchService searchService = FreeTextSearchService.getInstance();
+    	FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
     	RepositoryItem searchItem = RepositoryUtils.createRepositoryItem(repositoryManager, itemMetadata.getValue());
     	LibrarySearchResult library = searchService.getLibrary(searchItem, false);
         LibraryInfoListType metadataList = new LibraryInfoListType();
@@ -531,7 +532,7 @@ public class RepositoryContentResource {
         EntityInfoType entityMetadata = entityMetadataElement.getValue();
         Map<String, Map<TLLibraryStatus, Boolean>> accessibleItemCache = new HashMap<String, Map<TLLibraryStatus, Boolean>>();
         UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
-    	FreeTextSearchService searchService = FreeTextSearchService.getInstance();
+    	FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
     	RepositoryItem searchItem = RepositoryUtils.createRepositoryItem(repositoryManager, entityMetadata);
     	LibrarySearchResult library = searchService.getLibrary(searchItem, false);
         EntityInfoListType metadataList = new EntityInfoListType();
@@ -591,7 +592,7 @@ public class RepositoryContentResource {
         EntityInfoType entityMetadata = entityMetadataElement.getValue();
         Map<String, Map<TLLibraryStatus, Boolean>> accessibleItemCache = new HashMap<String, Map<TLLibraryStatus, Boolean>>();
         UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
-    	FreeTextSearchService searchService = FreeTextSearchService.getInstance();
+    	FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
     	RepositoryItem searchItem = RepositoryUtils.createRepositoryItem(repositoryManager, entityMetadata);
     	LibrarySearchResult library = searchService.getLibrary(searchItem, false);
         EntityInfoListType metadataList = new EntityInfoListType();
@@ -1392,7 +1393,7 @@ public class RepositoryContentResource {
             Map<String, Map<TLLibraryStatus, Boolean>> accessibleItemCache =
             		new HashMap<String, Map<TLLibraryStatus, Boolean>>();
         	List<LibrarySearchResult> lockedLibraries =
-        			FreeTextSearchService.getInstance().getLockedLibraries( user.getUserId(), false );
+        			FreeTextSearchServiceFactory.getInstance().getLockedLibraries( user.getUserId(), false );
         	
         	for (LibrarySearchResult searchItem : lockedLibraries) {
         		RepositoryItem item = searchItem.getRepositoryItem();
@@ -1493,7 +1494,7 @@ public class RepositoryContentResource {
      *            flag indicating whether the item's search index is to be deleted
      */
     private void indexRepositoryItem(RepositoryItem item, boolean deleteIndex) {
-        FreeTextSearchService service = FreeTextSearchService.getInstance();
+        FreeTextSearchService service = FreeTextSearchServiceFactory.getInstance();
 
         if ((service != null) && (item != null)) {
             try {

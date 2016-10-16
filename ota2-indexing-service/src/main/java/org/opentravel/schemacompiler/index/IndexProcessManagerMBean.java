@@ -13,27 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.providers;
 
-import javax.ws.rs.ext.ContextResolver;
-import javax.ws.rs.ext.Provider;
-import javax.xml.bind.JAXBContext;
-
-import org.opentravel.schemacompiler.util.RepositoryJaxbContext;
+package org.opentravel.schemacompiler.index;
 
 /**
- * Resolves the JAXB context to the one that includes the required packages for all JAXB classes.
+ * MBean interface for the <code>IndexProcessManager</code>.
  * 
  * @author S. Livezey
  */
-@Provider
-public final class JAXBContextResolver implements ContextResolver<JAXBContext> {
-
-    /**
-     * @see javax.ws.rs.ext.ContextResolver#getContext(java.lang.Class)
-     */
-    public JAXBContext getContext(Class<?> type) {
-        return RepositoryJaxbContext.getContext();
-    }
-
+public interface IndexProcessManagerMBean {
+	
+	public static final int JMX_PORT = 8080;
+	public static final String JMX_SERVER_URL = "service:jmx:rmi:///jndi/rmi://localhost:" + JMX_PORT + "/jmxrmi";
+	public static final String MBEAN_NAME = "org.opentravel.mbeans:type=IndexProcessManagerMBean";
+	
+	/**
+	 * JMX hook to shutdown the <code>IndexProcessManager</code> and any
+	 * associated indexing agent child processes.
+	 */
+	public void shutdown();
+	
 }

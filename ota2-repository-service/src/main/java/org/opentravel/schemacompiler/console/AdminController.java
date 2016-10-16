@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.opentravel.ns.ota2.security_v01_00.NamespaceAuthorizations;
 import org.opentravel.ns.ota2.security_v01_00.RepositoryPermission;
 import org.opentravel.schemacompiler.index.FreeTextSearchService;
+import org.opentravel.schemacompiler.index.FreeTextSearchServiceFactory;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.RepositoryComponentFactory;
 import org.opentravel.schemacompiler.repository.RepositoryException;
@@ -69,9 +70,9 @@ public class AdminController extends BaseController {
      */
     public AdminController() {
         try {
-        	FreeTextSearchService.initializeSingleton(RepositoryComponentFactory.getDefault()
+        	FreeTextSearchServiceFactory.initializeSingleton(RepositoryComponentFactory.getDefault()
                     .getSearchIndexLocation(), getRepositoryManager());
-            searchService = FreeTextSearchService.getInstance();
+            searchService = FreeTextSearchServiceFactory.getInstance();
 
         } catch (Throwable t) {
             log.error("Error initializing the free-text search service.", t);
