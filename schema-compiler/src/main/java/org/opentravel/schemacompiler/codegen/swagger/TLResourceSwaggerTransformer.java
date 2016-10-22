@@ -185,10 +185,9 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
 			if (!filter.processLibrary( library )) continue;
 			
 	        for (LibraryMember member : library.getNamedMembers()) {
-	        	if (member instanceof TLResource) continue;
-	            ObjectTransformer<LibraryMember, CodegenArtifacts, CodeGenerationTransformerContext> transformer = getTransformerFactory()
-	                    .getTransformer(member, CodegenArtifacts.class);
-
+	            ObjectTransformer<LibraryMember, CodegenArtifacts, CodeGenerationTransformerContext> transformer =
+	            		getTransformerFactory().getTransformer(member, CodegenArtifacts.class);
+	            
 	            if ((transformer != null) && ((filter == null) || filter.processEntity(member))) {
 	                CodegenArtifacts artifacts = transformer.transform(member);
 
@@ -204,6 +203,7 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
 		// Add hard-coded built-in definitions (not a great solution, but expedient for now)
 		JsonSchema emptySchema = new JsonSchema();
 		JsonSchema enumExtensionSchema = new JsonSchema();
+		JsonSchema localDateTimeSchema = new JsonSchema();
 		JsonSchema extensionPointSchema = new JsonSchema();
 		
 		emptySchema.setType( JsonType.jsonString );
@@ -214,6 +214,10 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
 		enumExtensionSchema.setMinLength( 1 );
 		enumExtensionSchema.setMaxLength( 128 );
 		definitions.add( new JsonSchemaNamedReference( "String_EnumExtension", new JsonSchemaReference( enumExtensionSchema ) ) );
+		
+		localDateTimeSchema.setType( JsonType.jsonDateTime );
+		localDateTimeSchema.setPattern( ".+T[^Z+\\-]+" );
+		definitions.add( new JsonSchemaNamedReference( "LocalDateTime", new JsonSchemaReference( localDateTimeSchema ) ) );
 		
 		definitions.add( new JsonSchemaNamedReference( "ExtensionPoint", new JsonSchemaReference( extensionPointSchema ) ) );
 		definitions.add( new JsonSchemaNamedReference( "ExtensionPoint_Summary", new JsonSchemaReference( extensionPointSchema ) ) );

@@ -31,6 +31,20 @@
 		</xsd:restriction>
 	</xsd:simpleType>
 
+	<xsd:simpleType name="LocalDateTime">
+		<xsd:annotation>
+			<xsd:documentation source="Description">ISO date time type without UTC offset or Z for Zulu restriction indicating it
+				is representing Local Time.  Example: 2010-12-31T11:55:00</xsd:documentation>
+			<xsd:documentation source="Implementer">Assigned XSD Type: {http://www.w3.org/2001/XMLSchema}dateTime</xsd:documentation>
+			<xsd:appinfo>
+				<otm:OTA2Entity type="Simple">LocalDateTime</otm:OTA2Entity>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:dateTime">
+			<xsd:pattern value=".+T[^Z+\-]+" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
 	<xsd:element name="ExtensionPoint" type="ota2:ExtensionPoint" />
 	<xsd:element name="ExtensionPoint_Summary" type="ota2:ExtensionPoint" />
 	<xsd:element name="ExtensionPoint_Detail" type="ota2:ExtensionPoint" />

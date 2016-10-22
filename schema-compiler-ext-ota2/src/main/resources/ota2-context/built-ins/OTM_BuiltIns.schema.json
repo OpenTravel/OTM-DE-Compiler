@@ -15,6 +15,12 @@
 			"minLength" : 1,
 			"maxLength" : 128
 		},
+		"LocalDateType" : {
+			"description" : "ISO date time type without UTC offset or Z for Zulu restriction indicating it is representing Local Time Example: 2010-12-31T11:55:00",
+			"type" : "string",
+			"format" : "date-time",
+			"pattern" : ".+T[^Z+\\-]+"
+		},
 		"ExtensionPoint" : {},
 		"ExtensionPoint_Summary" : {},
 		"ExtensionPoint_Detail" : {},

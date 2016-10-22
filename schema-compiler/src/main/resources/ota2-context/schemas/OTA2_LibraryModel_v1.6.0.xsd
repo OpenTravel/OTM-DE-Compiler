@@ -1772,7 +1772,7 @@
 	        </xsd:restriction>
     	 </xsd:simpleType>
       </xsd:attribute>
-      <xsd:attribute name="basePayload" type="Name_XML" use="optional">
+      <xsd:attribute name="basePayload" type="Name_Type" use="optional">
          <xsd:annotation>
             <xsd:documentation>Optional reference to a core or choice object that indicates
                 the basic structure of the message payload.  If the 'referenceType' value is

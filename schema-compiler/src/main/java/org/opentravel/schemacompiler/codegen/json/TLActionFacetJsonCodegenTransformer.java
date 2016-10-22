@@ -25,7 +25,6 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
-import org.opentravel.schemacompiler.codegen.util.JsonSchemaNamingUtils;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLActionFacet;
@@ -188,22 +187,20 @@ public class TLActionFacetJsonCodegenTransformer extends AbstractJsonSchemaTrans
 		 */
 		@Override
 		protected JsonSchemaNamedReference createDefinition() {
+			String baseDefinitionName = TLActionFacetJsonCodegenTransformer.this.getDefinitionName( actionFacet );
 			JsonSchemaNamedReference definition = super.createDefinition();
 			
 			switch (getSourceFacet().getFacetType()) {
 				case SUMMARY:
 				case SHARED:
-					definition.setName(
-							JsonSchemaNamingUtils.getGlobalDefinitionName( actionFacet ) );
+					definition.setName( baseDefinitionName );
 					break;
 				case DETAIL:
-					definition.setName(
-							JsonSchemaNamingUtils.getGlobalDefinitionName( actionFacet ) + "_Detail" );
+					definition.setName( baseDefinitionName + "_Detail" );
 					break;
 				case CHOICE:
-					definition.setName(
-							JsonSchemaNamingUtils.getGlobalDefinitionName( actionFacet ) + "_" +
-									FacetCodegenUtils.getFacetName( getSourceFacet() ) );
+					definition.setName( baseDefinitionName +
+							"_" + FacetCodegenUtils.getFacetName( getSourceFacet() ) );
 					break;
 				default:
 					break;

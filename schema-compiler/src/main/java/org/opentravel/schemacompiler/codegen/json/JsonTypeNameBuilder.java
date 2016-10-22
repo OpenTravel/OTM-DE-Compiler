@@ -33,6 +33,8 @@ import org.opentravel.schemacompiler.model.TLModel;
  */
 public class JsonTypeNameBuilder {
 	
+	private static String counterChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	
 	private Map<QName,String> prefixRegistry = new HashMap<>();
 	
 	/**
@@ -45,11 +47,11 @@ public class JsonTypeNameBuilder {
 		for (AbstractLibrary library : model.getAllLibraries()) {
 			QName libName = getLibraryQName( library );
 			String prefix = library.getPrefix();
-			int counter = 1;
+			int counter = 0;
 			
 			// Compute a unique prefix for every library in the model
 			while (prefixRegistry.containsValue( prefix )) {
-				prefix = library.getPrefix() + counter;
+				prefix = library.getPrefix() + counterChars.charAt( counter );
 				counter++;
 			}
 			prefixRegistry.put( libName,  prefix );

@@ -27,9 +27,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
@@ -377,11 +379,46 @@ public class CodeGeneratorTestAssertions {
     				System.out.println("ERROR COUNT: " + errors.size());
     			}
     		}
-    		Assert.assertEquals( 0, errors.size() );
+    		Assert.assertEquals( "Validation errors exist in swagger document.", 0, errors.size() );
     		
     		// Run Swagger parser to ensure semantic correctness
     		if (errors.size() == 0) {
         		new SwaggerParser().read( swaggerNode, true );
+    		}
+    		
+    		// If we are working on the file that includes the JSON schema definitions, we need to
+    		// validate that all of the parameter and RQ/RS references are present in the definitions
+    		// section of the document.  For some reason, the swagger parser misses this aspect of the
+    		// validation.
+    		if (swaggerFile.getName().endsWith(".defs.swagger")) {
+    			Set<String> definitions = getSwaggerDefinitions( swaggerNode );
+    			Set<String> paramRefs = new HashSet<>();
+    			Set<String> responseRefs = new HashSet<>();
+    			boolean isMissingReference = false;
+    			
+    			getSwaggerParameterRefs( swaggerNode, paramRefs );
+    			getSwaggerResponseRefs( swaggerNode, responseRefs );
+    			
+    			for (String paramRef : paramRefs) {
+    				if (!definitions.contains( paramRef )) {
+    					if (DEBUG) {
+    	    				System.out.println("Missing parameter reference: " + paramRef +
+    	    						" in swagger definitions [" + swaggerFile.getAbsolutePath() + "]");
+    					}
+    					isMissingReference = true;
+    				}
+    			}
+    			
+    			for (String responseRef : responseRefs) {
+    				if (!definitions.contains( responseRef )) {
+    					if (DEBUG) {
+    	    				System.out.println("Missing response reference: " + responseRef +
+    	    						" in swagger definitions [" + swaggerFile.getAbsolutePath() + "]");
+    					}
+    					isMissingReference = true;
+    				}
+    			}
+    			Assert.assertFalse( "One or more swagger type definitions are missing.", isMissingReference );
     		}
     		
     	} catch (ProcessingException | IOException e) {
@@ -391,6 +428,117 @@ public class CodeGeneratorTestAssertions {
     		}
             throw new AssertionFailedError( "Error validating Swagger document: " + swaggerFile.getName() );
     	}
+    }
+    
+    /**
+     * Returns the names of all type definitions in the given Swagger document.
+     * 
+     * @param swagger  the swagger document to search
+     * @return Set<String>
+     */
+    private static Set<String> getSwaggerDefinitions(JsonNode swagger) {
+    	Set<String> definitions = new HashSet<>();
+    	
+    	if (swagger instanceof ObjectNode) {
+    		JsonNode defsNode = ((ObjectNode) swagger).get( "definitions" );
+    		
+    		if (defsNode instanceof ObjectNode) {
+    			Iterator<String> iterator = ((ObjectNode) defsNode).fieldNames();
+    			
+    			while (iterator.hasNext()) {
+    				definitions.add( iterator.next() );
+    			}
+    		}
+    	}
+    	return definitions;
+    }
+    
+    /**
+     * Recursive method used to discover all non-simple JSON parameter references in the given
+     * swagger document.
+     * 
+     * @param swagger  the swagger document to search
+     * @param paramRefs  the list of parameter references being constructed
+     */
+    private static void getSwaggerParameterRefs(JsonNode swagger, Set<String> paramRefs) {
+    	JsonNode parameters = swagger.get( "parameters" );
+    	
+    	if (parameters instanceof ArrayNode) {
+    		for (JsonNode param : (ArrayNode) parameters) {
+    			String schemaRef = getSchemaReference( param );
+    			
+    			if (schemaRef != null) {
+    				paramRefs.add( schemaRef );
+    			}
+    		}
+    		
+    	} else if (swagger instanceof ObjectNode) {
+    		ObjectNode jsonObj = (ObjectNode) swagger;
+    		Iterator<String> iterator = jsonObj.fieldNames();
+    		
+    		while (iterator.hasNext()) {
+    			String fieldName = iterator.next();
+    			getSwaggerParameterRefs( jsonObj.get( fieldName ), paramRefs );
+    		}
+    	}
+    }
+    
+    /**
+     * Recursive method used to discover all non-simple JSON response references in the given
+     * swagger document.
+     * 
+     * @param swagger  the swagger document to search
+     * @param responseRefs  the list of response references being constructed
+     */
+    private static void getSwaggerResponseRefs(JsonNode swagger, Set<String> responseRefs) {
+    	JsonNode responses = swagger.get( "responses" );
+    	
+    	if (responses instanceof ObjectNode) {
+    		for (JsonNode responseNode : (ObjectNode) responses) {
+    			String schemaRef = getSchemaReference( responseNode );
+    			
+    			if (schemaRef != null) {
+    				responseRefs.add( schemaRef );
+    			}
+    		}
+    		
+    	} else if (swagger instanceof ObjectNode) {
+    		ObjectNode jsonObj = (ObjectNode) swagger;
+    		Iterator<String> iterator = jsonObj.fieldNames();
+    		
+    		while (iterator.hasNext()) {
+    			String fieldName = iterator.next();
+    			getSwaggerResponseRefs( jsonObj.get( fieldName ), responseRefs );
+    		}
+    	}
+    }
+    
+    /**
+     * Returns the name of the JSON type reference in the given reference owner.  The
+     * owner can be a Swagger parameter or response construct.
+     * 
+     * @param refOwner  the Swagger parameter or response object
+     * @return String
+     */
+    private static String getSchemaReference(JsonNode refOwner) {
+    	String schemaRef = null;
+    	
+		if (refOwner instanceof ObjectNode) {
+			ObjectNode ownerObj = (ObjectNode) refOwner;
+			JsonNode schemaNode = ownerObj.get( "schema" );
+			
+			if (schemaNode instanceof ObjectNode) {
+				JsonNode qualifiedRefNode = ((ObjectNode) schemaNode).get( "$ref" );
+				String qualifiedRef = (qualifiedRefNode == null) ? null : qualifiedRefNode.asText();
+				
+				if ((qualifiedRef != null) && (qualifiedRef.length() > 0)) {
+					int slashIdx = qualifiedRef.lastIndexOf('/');
+					schemaRef = (slashIdx < 0) ? qualifiedRef : qualifiedRef.substring( slashIdx + 1 );
+				}
+			}
+		}
+		return schemaRef;
+    	
     }
     
 	/**
