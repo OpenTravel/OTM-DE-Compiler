@@ -183,11 +183,6 @@ public class IndexProcessManager {
 		command.add( classpath );
 		command.add( mainClass.getName() );
 		
-		for (String cmd : command) {
-			System.out.print( cmd + " ");
-		}
-		System.out.println();
-		
 		log.info("Starting indexing agent process...");
 		return new ProcessBuilder()
 			.command( command )

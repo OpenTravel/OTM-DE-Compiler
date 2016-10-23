@@ -27,6 +27,7 @@ import java.util.List;
 import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -52,6 +53,7 @@ import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
 import org.opentravel.schemacompiler.util.RepositoryJaxbContext;
 import org.springframework.jms.JmsException;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.core.MessageCreator;
 
 /**
  * Main entry point for the agent that handles indexing requests in response to messages
@@ -88,6 +90,10 @@ public class IndexingAgent implements IndexingConstants {
         this.writerConfig.setOpenMode(OpenMode.CREATE_OR_APPEND);
         this.indexWriter = new IndexWriter(indexDirectory, writerConfig);
         
+        // Run an empty commit of the index writer; this will initialize the search index directory
+        // if it was not already setup prior to launching this agent.
+        indexWriter.commit();
+        
     	repositoryManager = RepositoryComponentFactory.getDefault().getRepositoryManager();
     }
     
@@ -101,6 +107,8 @@ public class IndexingAgent implements IndexingConstants {
 		JmsTemplate indexingService = RepositoryComponentFactory.getDefault().getIndexingJmsService();
 		Connection jmsConnection = null;
 		
+		// Make sure the JMS provider is available; if not, throw a fatal exception before
+		// we start listening for messages.
 		try {
 			jmsConnection = indexingService.getConnectionFactory().createConnection();
 			
@@ -114,7 +122,7 @@ public class IndexingAgent implements IndexingConstants {
 		
 		while (!shutdownRequested) {
 			try {
-				Message msg = indexingService.receive();
+				Message msg = indexingService.receiveSelected( SELECTOR_JOBMSG );
 				
 				if (msg instanceof TextMessage) {
 					TextMessage message = (TextMessage) msg;
@@ -180,6 +188,7 @@ public class IndexingAgent implements IndexingConstants {
 			factory.getValidationService().getIndexBuilder().performIndexingAction();
 		}
 		indexWriter.commit();
+		sendCommitNotifiation();
     }
     
 	/**
@@ -190,6 +199,7 @@ public class IndexingAgent implements IndexingConstants {
 	private void processDeleteAll() throws IOException {
     	log.info("Deleting search index.");
 		indexWriter.deleteAll();
+		sendCommitNotifiation();
 	}
 	
 	/**
@@ -232,6 +242,23 @@ public class IndexingAgent implements IndexingConstants {
 			}
 		}
 		return isCE;
+	}
+	
+	/**
+	 * Sends a JMS message to the OTM repository as notification that an indexing job has
+	 * been committed.
+	 */
+	private void sendCommitNotifiation() {
+		JmsTemplate indexingService = RepositoryComponentFactory.getDefault().getIndexingJmsService();
+		
+		indexingService.send(new MessageCreator() {
+			public Message createMessage(Session session) throws JMSException {
+				TextMessage msg = session.createTextMessage();
+				
+				msg.setIntProperty( MSGPROP_SELECTOR, SELECTOR_VALUE_COMMITMSG );
+				return msg;
+			}
+		});
 	}
 	
 	/**

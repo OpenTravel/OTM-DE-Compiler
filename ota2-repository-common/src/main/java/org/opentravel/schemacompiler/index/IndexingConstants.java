@@ -21,13 +21,15 @@ package org.opentravel.schemacompiler.index;
  */
 public interface IndexingConstants {
 	
-	public static final String JNDI_CONNECTION_FACTORY = "java:comp/env/jms/ConnectionFactory";
-	public static final String JNDI_INDEXING_QUEUE     = "jms/queue/Queue";
-	
-	public static final String MSGPROP_JOB_TYPE = "jobType";
-	
+	public static final String MSGPROP_JOB_TYPE      = "jobType";
 	public static final String JOB_TYPE_CREATE_INDEX = "create-index";
 	public static final String JOB_TYPE_DELETE_INDEX = "delete-index";
 	public static final String JOB_TYPE_DELETE_ALL   = "delete-all";
+	
+	public static final String MSGPROP_SELECTOR      = "indexSelector";
+	public static final int SELECTOR_VALUE_JOBMSG    = 0;
+	public static final int SELECTOR_VALUE_COMMITMSG = 1;
+	public static final String SELECTOR_JOBMSG       = MSGPROP_SELECTOR + " = " + SELECTOR_VALUE_JOBMSG;
+	public static final String SELECTOR_COMMITMSG    = MSGPROP_SELECTOR + " = " + SELECTOR_VALUE_COMMITMSG;
 	
 }

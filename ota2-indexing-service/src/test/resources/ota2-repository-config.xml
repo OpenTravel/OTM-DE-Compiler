@@ -205,6 +205,7 @@
 	<bean id="indexingJmsService" class="org.springframework.jms.core.JmsTemplate">
 		<property name="connectionFactory" ref="connectionFactory" />
 		<property name="defaultDestination" ref="indexingJobQueue" />
+		<property name="receiveTimeout" value="500" />
 	</bean>
 	
 </beans>

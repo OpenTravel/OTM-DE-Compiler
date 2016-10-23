@@ -22,7 +22,12 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.IndexWriterConfig.OpenMode;
+import org.apache.lucene.store.Directory;
 import org.opentravel.schemacompiler.index.builder.IndexBuilder;
 import org.opentravel.schemacompiler.index.builder.IndexBuilderFactory;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
@@ -39,7 +44,41 @@ public class RealTimeFreeTextSearchService extends FreeTextSearchService {
 
     private static Log log = LogFactory.getLog(RealTimeFreeTextSearchService.class);
 
+    private IndexWriterConfig writerConfig;
+    private IndexWriter indexWriter;
+    
     /**
+	 * @see org.opentravel.schemacompiler.index.FreeTextSearchService#onStartup(org.apache.lucene.store.Directory)
+	 */
+	@Override
+	protected void onStartup(Directory indexDirectory) throws IOException {
+		this.writerConfig = new IndexWriterConfig( new StandardAnalyzer() );
+		this.writerConfig.setOpenMode( OpenMode.CREATE_OR_APPEND );
+		this.indexWriter = new IndexWriter( indexDirectory, writerConfig );
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.index.FreeTextSearchService#onShutdown()
+	 */
+	@Override
+	protected void onShutdown() throws IOException {
+		try {
+			indexWriter.close();
+			
+		} finally {
+			indexWriter = null;
+		}
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.index.FreeTextSearchService#newIndexReader(org.apache.lucene.store.Directory)
+	 */
+	@Override
+	protected DirectoryReader newIndexReader(Directory indexDirectory) throws IOException {
+		return DirectoryReader.open( indexWriter, false );
+	}
+
+	/**
      * Constructor that specifies the folder location of the index and the repository
      * manager used to access the content to be indexed and searched for.
      * 
@@ -57,7 +96,6 @@ public class RealTimeFreeTextSearchService extends FreeTextSearchService {
 	@Override
 	protected void submitIndexingJob(List<RepositoryItem> itemsToIndex, boolean deleteIndex) {
 		try {
-			IndexWriter indexWriter = getIndexWriter();
 	    	IndexBuilderFactory factory = new IndexBuilderFactory( getRepositoryManager(), indexWriter );
 			
 			for (RepositoryItem item : itemsToIndex) {
@@ -78,6 +116,7 @@ public class RealTimeFreeTextSearchService extends FreeTextSearchService {
 				factory.getValidationService().getIndexBuilder().performIndexingAction();
 			}
 			indexWriter.commit();
+			refreshIndexReader();
 			
 		} catch (IOException e) {
 			log.error("Error committing search index document(s).", e);
@@ -91,9 +130,8 @@ public class RealTimeFreeTextSearchService extends FreeTextSearchService {
 	protected void deleteSearchIndex() {
 		try {
 	    	log.info("Deleting search index.");
-			IndexWriter writer = getIndexWriter();
-			
-			writer.deleteAll();
+			indexWriter.deleteAll();
+			refreshIndexReader();
 			
 		} catch (IOException e) {
 			log.error("Error purging search index.", e);

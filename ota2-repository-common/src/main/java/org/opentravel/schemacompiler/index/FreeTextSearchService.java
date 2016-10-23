@@ -23,14 +23,14 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.index.IndexWriterConfig.OpenMode;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
@@ -47,7 +47,6 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.opentravel.schemacompiler.index.builder.IndexBuilderFactory;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.RepositoryException;
@@ -79,9 +78,9 @@ public abstract class FreeTextSearchService implements IndexingTerms {
     private RepositoryManager repositoryManager;
     private boolean isRunning = false;
     private Directory indexDirectory;
-    private IndexWriterConfig writerConfig;
-    private IndexWriter indexWriter;
+    private DirectoryReader indexReader;
     private SearcherManager searchManager;
+    private ReadWriteLock searchLock = new ReentrantReadWriteLock();
 
     /**
      * Constructor that specifies the folder location of the index and the repository
@@ -113,17 +112,28 @@ public abstract class FreeTextSearchService implements IndexingTerms {
             throw new IllegalStateException(
                     "Unable to start - the indexing service is already running.");
         }
-
-        // Check to make sure the index was properly closed, and release any lock that might exist
-        this.indexDirectory = FSDirectory.open(indexLocation.toPath());
-
-        // Configure the indexing and search components
-        this.writerConfig = new IndexWriterConfig(new StandardAnalyzer());
-        this.writerConfig.setOpenMode(OpenMode.CREATE_OR_APPEND);
-        this.indexWriter = new IndexWriter(indexDirectory, writerConfig);
-        this.searchManager = new SearcherManager(indexWriter, true, new SearcherFactory());
-        this.isRunning = true;
+        try {
+        	searchLock.writeLock().lock();
+            this.indexDirectory = FSDirectory.open(indexLocation.toPath());
+            onStartup(this.indexDirectory);
+            
+            this.indexReader = newIndexReader(this.indexDirectory);
+            this.searchManager = new SearcherManager(indexReader, new SearcherFactory());
+            this.isRunning = true;
+        	
+        } finally {
+        	searchLock.writeLock().unlock();
+        }
     }
+    
+    /**
+     * Called during service startup to facilitate any initialization functions required for
+     * sub-classes.  Unless overridden, this method returns with no action.
+     * 
+     * @param indexDirectory  the search index directory
+     * @throws IOException  thrown if an error occurs during service initialization
+     */
+    protected void onStartup(Directory indexDirectory) throws IOException {}
 
     /**
      * Stops the indexing service. This method halts processing of the indexing tasks that have been
@@ -142,18 +152,29 @@ public abstract class FreeTextSearchService implements IndexingTerms {
 
         // Close all of the indexing resources that were allocated during service startup
         try {
+        	searchLock.writeLock().lock();
             searchManager.close();
-            indexWriter.close();
+            indexReader.close();
+        	onShutdown();
             indexDirectory.close();
 
         } finally {
             searchManager = null;
-            indexWriter = null;
+            indexReader = null;
             indexDirectory = null;
+            isRunning = false;
+        	searchLock.writeLock().unlock();
         }
-        isRunning = false;
     }
-
+    
+    /**
+     * Called during service shutdown to facilitate any functions required for sub-classes.
+     * Unless overridden, this method returns with no action.
+     * 
+     * @throws IOException  thrown if an error occurs during service shutdown
+     */
+    protected void onShutdown() throws IOException {}
+    
     /**
      * Returns true if the service is running.
      * 
@@ -164,14 +185,38 @@ public abstract class FreeTextSearchService implements IndexingTerms {
     }
 
     /**
-	 * Returns the index writer for the search service (null if the service is not running).
-	 *
-	 * @return IndexWriter
-	 */
-	public IndexWriter getIndexWriter() {
-		return indexWriter;
-	}
-
+     * Constructs a new <code>DirectoryReader</code> for handling read-only queries to the
+     * search index.
+     * 
+     * @param indexDirectory  the search index directory
+     * @return DirectoryReader
+     * @throws IOException  thrown if the index reader cannot be created
+     */
+    protected abstract DirectoryReader newIndexReader(Directory indexDirectory) throws IOException;
+    
+    /**
+     * Constructs a new <code>DirectoryReader</code> instance and closes the old one.
+     * 
+     * @throws IOException  thrown if the new index reader instance cannot be initialized
+     */
+    protected void refreshIndexReader() throws IOException {
+    	DirectoryReader oldReader = indexReader;
+    	boolean success = false;
+    	
+    	try {
+    		searchLock.writeLock().lock();
+    		this.indexReader = newIndexReader(indexDirectory);
+            this.searchManager = new SearcherManager(indexReader, new SearcherFactory());
+    		success = true;
+    		
+    	} finally {
+    		searchLock.writeLock().unlock();
+    		try {
+    			if (success) oldReader.close();
+    		} catch (Throwable t) {}
+    	}
+    }
+    
 	/**
 	 * Returns the manager instance used to access the repository content.
 	 *
@@ -187,7 +232,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * @throws RepositoryException  thrown if an error occurs during the indexing operation
      */
     public void indexAllRepositoryItems() throws RepositoryException {
-        if (indexWriter == null) {
+        if (!isRunning) {
             throw new IllegalStateException(
                     "Unable to perform indexing task - the service is not currently running.");
         }
@@ -214,7 +259,6 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * @throws RepositoryException  thrown if an error occurs during the indexing operation
      */
     public void indexRepositoryItem(RepositoryItem item) throws RepositoryException {
-    	IndexBuilderFactory factory = new IndexBuilderFactory( repositoryManager, indexWriter );
     	List<RepositoryItem> itemsToIndex = new ArrayList<>();
     	String baseNamespace = item.getBaseNamespace();
     	String libraryName = item.getLibraryName();
@@ -229,7 +273,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
         
         // Re-index all libraries that directly reference this repository item to ensure
         // that the validation results are accurate
-        indexWhereUsedLibraries( item, factory );
+        indexWhereUsedLibraries( item );
     }
     
     /**
@@ -241,7 +285,6 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * @throws RepositoryException  thrown if an error occurs during the indexing operation
      */
     public void deleteRepositoryItemIndex(RepositoryItem item) throws RepositoryException {
-    	IndexBuilderFactory factory = new IndexBuilderFactory( repositoryManager, indexWriter );
     	List<RepositoryItem> itemsToIndex = new ArrayList<>();
     	String baseNamespace = item.getBaseNamespace();
     	String libraryName = item.getLibraryName();
@@ -261,7 +304,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
         
         // Re-index all libraries that directly reference this repository item to ensure
         // that the validation results are accurate
-        indexWhereUsedLibraries( item, factory );
+        indexWhereUsedLibraries( item );
     }
     
     /**
@@ -269,10 +312,9 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * item.
      * 
      * @param item  the repository item for which to re-index all where-used libraries
-     * @param factory  the index builder factory to use when creating new index builders
      * @throws RepositoryException  thrown if an error occurs during the indexing operation
      */
-    private void indexWhereUsedLibraries(RepositoryItem item, IndexBuilderFactory factory) throws RepositoryException {
+    private void indexWhereUsedLibraries(RepositoryItem item) throws RepositoryException {
         String libraryIndexId = IndexingUtils.getIdentityKey( item );
         LibrarySearchResult libraryIndex = getLibrary( libraryIndexId, false );
         
@@ -518,8 +560,9 @@ public abstract class FreeTextSearchService implements IndexingTerms {
     		boolean resolveContent) throws RepositoryException {
         IndexSearcher searcher = null;
         try {
+        	searchLock.readLock().lock();
         	List<LibrarySearchResult> searchResults = new ArrayList<>();
-    		searchManager.maybeRefreshBlocking();
+        	
             searcher = searchManager.acquire();
             
             if (includeIndirectReferences) {
@@ -538,9 +581,10 @@ public abstract class FreeTextSearchService implements IndexingTerms {
             try {
                 if (searcher != null) searchManager.release(searcher);
 
-            } catch (IOException e) {
-                log.error("Error releasing index searcher.", e);
+            } catch (Throwable t) {
+                log.error("Error releasing index searcher.", t);
             }
+        	searchLock.readLock().unlock();
         }
     }
     
@@ -787,8 +831,9 @@ public abstract class FreeTextSearchService implements IndexingTerms {
     		boolean resolveContent) throws RepositoryException {
         IndexSearcher searcher = null;
         try {
+        	searchLock.readLock().lock();
         	List<EntitySearchResult> searchResults = new ArrayList<>();
-    		searchManager.maybeRefreshBlocking();
+        	
             searcher = searchManager.acquire();
             
             if (includeIndirectReferences) {
@@ -807,9 +852,10 @@ public abstract class FreeTextSearchService implements IndexingTerms {
             try {
                 if (searcher != null) searchManager.release(searcher);
 
-            } catch (IOException e) {
-                log.error("Error releasing index searcher.", e);
+            } catch (Throwable t) {
+                log.error("Error releasing index searcher.", t);
             }
+        	searchLock.readLock().unlock();
         }
     }
     
@@ -932,10 +978,11 @@ public abstract class FreeTextSearchService implements IndexingTerms {
     protected List<Document> executeQuery(Query query, Set<String> fieldSet) throws RepositoryException {
         IndexSearcher searcher = null;
         try {
-    		searchManager.maybeRefreshBlocking();
+        	searchLock.readLock().lock();
             searcher = searchManager.acquire();
             
             return executeQuery( searcher, query, fieldSet );
+            
         } catch (Exception e) {
             throw new RepositoryException(
             		"Error executing search index query: \"" + query.toString() + "\"", e);
@@ -944,9 +991,10 @@ public abstract class FreeTextSearchService implements IndexingTerms {
             try {
                 if (searcher != null) searchManager.release(searcher);
 
-            } catch (IOException e) {
-                log.error("Error releasing index searcher.", e);
+            } catch (Throwable t) {
+                log.error("Error releasing index searcher.", t);
             }
+        	searchLock.readLock().unlock();
         }
     }
     
@@ -967,8 +1015,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
     		if (log.isDebugEnabled()) {
     			log.debug("Executing Query - " + query.toString());
     		}
-    		searchManager.maybeRefreshBlocking();
-            searcher = searchManager.acquire();
+    		
             queryResults = searcher.search( query, Integer.MAX_VALUE );
         	
             for (ScoreDoc queryDoc : queryResults.scoreDocs) {
@@ -995,11 +1042,11 @@ public abstract class FreeTextSearchService implements IndexingTerms {
     protected Document getSearchIndexDocument(String searchIndexId) throws RepositoryException {
         IndexSearcher searcher = null;
         try {
+        	searchLock.readLock().lock();
     		Query query = new TermQuery( new Term( IDENTITY_FIELD, searchIndexId ) );
     		TopDocs queryResults;
     		Document doc = null;
     		
-    		searchManager.maybeRefreshBlocking();
             searcher = searchManager.acquire();
             queryResults = searcher.search( query, 1 );
             
@@ -1022,9 +1069,10 @@ public abstract class FreeTextSearchService implements IndexingTerms {
             try {
                 if (searcher != null) searchManager.release(searcher);
 
-            } catch (IOException e) {
-            	log.error("Error releasing free-text searcher.", e);
+            } catch (Throwable t) {
+            	log.error("Error releasing free-text searcher.", t);
             }
+        	searchLock.readLock().unlock();
         }
     }
     
