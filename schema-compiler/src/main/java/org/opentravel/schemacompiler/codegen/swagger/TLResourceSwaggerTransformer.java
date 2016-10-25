@@ -85,6 +85,7 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
 		info.setTitle( source.getName() );
 		info.setLibraryInfo( libraryInfo );
 		info.setVersion( libraryInfo.getLibraryVersion() );
+		transformDocumentation( source, info );
 		swaggerDoc.setInfo( info );
 		
 		// Construct a map of operations indexed by path template and HTTP method

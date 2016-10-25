@@ -52,6 +52,8 @@ public class TLContextualFacetCompileValidator extends TLContextualFacetBaseVali
 	 */
 	@Override
 	protected ValidationFindings validateFields(TLContextualFacet target) {
+		boolean specialCaseQueryFacet = (target.getFacetType() == TLFacetType.QUERY)
+				&& !(target.getOwningEntity() instanceof TLContextualFacet);
         TLValidationBuilder builder = newValidationBuilder(target);
         TLFacetType impliedType = getImpliedFacetType( target );
         TLFacetOwner owningEntity = target.getOwningEntity();
@@ -65,8 +67,10 @@ public class TLContextualFacetCompileValidator extends TLContextualFacetBaseVali
             builder.addFinding(FindingType.ERROR, "owningEntity", ERROR_INVALID_CIRCULAR_REFERENCE);
         }
 
-        builder.setProperty("facetName", target.getName()).setFindingType(FindingType.ERROR)
-        		.assertNotNullOrBlank().assertPatternMatch(NAME_XML_PATTERN);
+        if (!specialCaseQueryFacet) {
+            builder.setProperty("facetName", target.getName()).setFindingType(FindingType.ERROR)
+            		.assertNotNullOrBlank().assertPatternMatch(NAME_XML_PATTERN);
+        }
 
         builder.setProperty("facetType", target.getFacetType()).setFindingType(FindingType.ERROR)
         		.assertNotNull();
@@ -115,7 +119,7 @@ public class TLContextualFacetCompileValidator extends TLContextualFacetBaseVali
             		TLFacetCompileValidator.ERROR_MULTIPLE_ID_MEMBERS);
         }
 
-        builder.setProperty("members", ValidatorUtils.getInheritedMembers(target))
+        builder.setProperty("members", ValidatorUtils.getMembers(target))
         		.setFindingType(FindingType.WARNING)
                 .assertMinimumSize(1);
         

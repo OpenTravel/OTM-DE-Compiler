@@ -778,7 +778,7 @@
                   </xsd:documentation>
                </xsd:annotation>
             </xsd:attribute>
-            <xsd:attribute name="facetOwner" type="Name_XML" use="required">
+            <xsd:attribute name="facetOwner" type="Name_Type" use="required">
                <xsd:annotation>
                   <xsd:documentation>Specifies the name of the business object, core,
                   	choice, or contextual facet that owns this facet.

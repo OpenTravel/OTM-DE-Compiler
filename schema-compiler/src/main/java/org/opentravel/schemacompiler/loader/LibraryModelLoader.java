@@ -839,6 +839,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
                         .validateModelElement(library, false));
 
             } catch (Throwable t) {
+            	t.printStackTrace(System.out);
                 addLoaderFinding(FindingType.ERROR, library,
                         ERROR_UNKNOWN_EXCEPTION_DURING_VALIDATION, library.getName(),
                         ExceptionUtils.getExceptionClass(t).getSimpleName(),

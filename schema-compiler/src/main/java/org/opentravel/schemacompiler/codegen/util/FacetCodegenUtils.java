@@ -332,6 +332,7 @@ public class FacetCodegenUtils {
             
         } else if (owner instanceof TLContextualFacet) {
         	TLContextualFacet cfOwner = (TLContextualFacet) owner;
+        	Set<TLContextualFacet> visitedFacets = new HashSet<>();
         	TLFacetType facetType = cfOwner.getFacetType();
         	List<String> cfNamePath = new ArrayList<>();
         	TLFacetOwner baseOwner = null;
@@ -340,7 +341,14 @@ public class FacetCodegenUtils {
         		cfNamePath.add(0, cfOwner.getName());
         		
         		if (cfOwner.getOwningEntity() instanceof TLContextualFacet) {
-        			cfOwner = (TLContextualFacet) cfOwner.getOwningEntity();
+        			TLContextualFacet owningFacet = (TLContextualFacet) cfOwner.getOwningEntity();
+        			
+        			if (!visitedFacets.contains( owningFacet )) {
+        				visitedFacets.add( owningFacet );
+            			cfOwner = owningFacet;
+        			} else {
+        				cfOwner = null;
+        			}
         			
         		} else {
             		baseOwner = cfOwner.getOwningEntity();
@@ -390,37 +398,57 @@ public class FacetCodegenUtils {
      */
     public static List<TLFacet> getLocalFacetHierarchy(TLFacet facet) {
         List<TLFacet> localHierarchy = new ArrayList<TLFacet>();
-        TLFacetOwner facetOwner = facet.getOwningEntity();
-
-        localHierarchy.add(facet); // start by including the facet that was passed to this method
-
-        if (facetOwner instanceof TLBusinessObject) {
-            switch (facet.getFacetType()) {
-                case DETAIL:
-                case CUSTOM:
-                    localHierarchy.add(0, getFacetOfType(facetOwner, TLFacetType.SUMMARY));
-                case SUMMARY:
-                    localHierarchy.add(0, getFacetOfType(facetOwner, TLFacetType.ID));
-				default:
-					break;
-            }
-        } else if (facetOwner instanceof TLCoreObject) {
-            if (facet.getFacetType() == TLFacetType.DETAIL) {
-                localHierarchy.add(0, getFacetOfType(facetOwner, TLFacetType.SUMMARY));
-            }
-        } else if (facetOwner instanceof TLChoiceObject) {
-            if (facet.getFacetType() == TLFacetType.CHOICE) {
-                localHierarchy.add(0, getFacetOfType(facetOwner, TLFacetType.SHARED));
-            }
-        } else if (facetOwner instanceof TLContextualFacet) {
-        	localHierarchy.addAll(0, getLocalFacetHierarchy((TLContextualFacet) facetOwner));
-        	
-        } else if (facetOwner instanceof TLOperation) {
-            // No detail hierarchy within an operation's facets
-        }
+        
+        getLocalFacetHierarchy( facet, localHierarchy, new HashSet<TLFacet>() );
         return localHierarchy;
     }
 
+    /**
+     * Recursive companion method that protects against infinite loops due to circular references.
+     * 
+     * @param facet  the facet instance for which to return the hierarchy
+     * @param localHierarchy  the local facet hierarchy being constructed
+     * @param visitedFacets  the collection of facets that have already been visited
+     * @return List<TLFacet>
+     */
+    public static void getLocalFacetHierarchy(TLFacet facet, List<TLFacet> localHierarchy, Set<TLFacet> visitedFacets) {
+    	if (!visitedFacets.contains( facet )) {
+    		visitedFacets.add( facet );
+    		
+            TLFacetOwner facetOwner = facet.getOwningEntity();
+
+            localHierarchy.add(facet); // start by including the facet that was passed to this method
+
+            if (facetOwner instanceof TLBusinessObject) {
+                switch (facet.getFacetType()) {
+                    case DETAIL:
+                    case CUSTOM:
+                        localHierarchy.add(0, getFacetOfType(facetOwner, TLFacetType.SUMMARY));
+                    case SUMMARY:
+                        localHierarchy.add(0, getFacetOfType(facetOwner, TLFacetType.ID));
+    				default:
+    					break;
+                }
+            } else if (facetOwner instanceof TLCoreObject) {
+                if (facet.getFacetType() == TLFacetType.DETAIL) {
+                    localHierarchy.add(0, getFacetOfType(facetOwner, TLFacetType.SUMMARY));
+                }
+            } else if (facetOwner instanceof TLChoiceObject) {
+                if (facet.getFacetType() == TLFacetType.CHOICE) {
+                    localHierarchy.add(0, getFacetOfType(facetOwner, TLFacetType.SHARED));
+                }
+            } else if (facetOwner instanceof TLContextualFacet) {
+            	List<TLFacet> nestedHierarchy = new ArrayList<>();
+            	
+            	getLocalFacetHierarchy( (TLContextualFacet) facetOwner, nestedHierarchy, visitedFacets );
+            	localHierarchy.addAll( 0, nestedHierarchy );
+            	
+            } else if (facetOwner instanceof TLOperation) {
+                // No detail hierarchy within an operation's facets
+            }
+    	}
+    }
+    
     /**
      * Returns a list of "ghost facets" for the given owner. A ghost facet occurs when a contextual
      * facet (e.g. custom or query) with a certain context/label combination is declared on an

@@ -573,8 +573,10 @@ public class XsdCodegenUtils {
     	
     	while (facet instanceof TLContextualFacet) {
         	TLFacetOwner owner = facet.getOwningEntity();
+        	String facetName = facet.getName();
         	
-        	if (facet instanceof TLContextualFacet) {
+        	if ((facetName != null) && (facetName.length() > 0)
+        			&& (facet instanceof TLContextualFacet)) {
         		suffix.insert(0, "_" + facet.getName());
         	}
         	facet = (owner instanceof TLContextualFacet) ? (TLContextualFacet) owner : null;

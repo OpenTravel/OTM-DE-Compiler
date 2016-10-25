@@ -96,26 +96,46 @@ public class TLContextualFacet extends TLFacet implements LibraryMember, TLFacet
      */
     @Override
     public String getLocalName() {
-        TLFacetOwner owningEntity = getOwningEntity();
-        TLFacetType facetType = getFacetType();
         StringBuilder localName = new StringBuilder();
         
-        if (owningEntity != null) {
-            localName.append(owningEntity.getLocalName()).append('_');
-        	
-        } else {
-        	localName.append("UNKNOWN_");
-        }
-        if (owningEntity instanceof TLContextualFacet) {
-            localName.append(name);
-        	
-        } else if (facetType != null) {
-            localName.append(facetType.getIdentityName(name));
-            
-        } else {
-            localName.append("Unnamed_Facet");
-        }
+        buildLocalName( localName, new HashSet<TLContextualFacet>() );
         return localName.toString();
+    }
+    
+    /**
+     * Recursive method that calculates the local name of a facet while avoiding infinite
+     * loops caused by circular references.
+     * 
+     * @param localName  the local name of the facet being constructed
+     * @param visitedFacets  the list of contextual facets already included in the local name
+     */
+    private void buildLocalName(StringBuilder localName, Set<TLContextualFacet> visitedFacets) {
+    	if (!visitedFacets.contains( this )) {
+    		visitedFacets.add( this );
+            TLFacetOwner owningEntity = getOwningEntity();
+            
+            if (owningEntity instanceof TLContextualFacet) {
+            	((TLContextualFacet) owningEntity).buildLocalName( localName, visitedFacets );
+                localName.append("_").append(name);
+                
+            } else {
+                TLFacetType facetType = getFacetType();
+            	
+                if (owningEntity != null) {
+                    localName.append(owningEntity.getLocalName()).append('_');
+                } else {
+                	localName.append("UNKNOWN_");
+                }
+                if (facetType != null) {
+                    localName.append(facetType.getIdentityName(name));
+                } else {
+                    localName.append(name);
+                }
+            }
+            
+    	} else { // Assume unknown top-level owner in the case of circular references
+        	localName.append("UNKNOWN");
+    	}
     }
 
 	/**
@@ -123,24 +143,12 @@ public class TLContextualFacet extends TLFacet implements LibraryMember, TLFacet
 	 */
 	@Override
 	public String getValidationIdentity() {
-        TLFacetOwner owningEntity = getOwningEntity();
-        TLFacetType facetType = getFacetType();
         StringBuilder identity = new StringBuilder();
 
-    	if (OTM16Upgrade.otm16Enabled) {
-            if (owningLibrary != null) {
-                identity.append(owningLibrary.getValidationIdentity()).append(" : ");
-            }
-    	}
-    	
-        if (owningEntity != null) {
-            identity.append(owningEntity.getValidationIdentity()).append("/");
+        if (owningLibrary != null) {
+            identity.append(owningLibrary.getValidationIdentity()).append(" : ");
         }
-        if (facetType == null) {
-            identity.append("[Unnamed Facet]");
-        } else {
-            identity.append(facetType.getIdentityName(name));
-        }
+        buildLocalName( identity, new HashSet<TLContextualFacet>() );
         return identity.toString();
 	}
 	
