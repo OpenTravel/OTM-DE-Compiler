@@ -18,9 +18,8 @@
 
 set "SCRIPTDIR=%~dp0"
 
-set "REPOSITORY_CONFIG=%SCRIPTDIR%conf\ota2-repository-config.xml"
+set "MANAGER_CONFIG=%SCRIPTDIR%conf\indexing-manager.xml"
+set "AGENT_CONFIG=%SCRIPTDIR%conf\indexing-agent.xml"
 set "LOG4J_CONFIG=%SCRIPTDIR%conf\log4j-manager.properties"
 
-set "JAVA_OPTS=-Dota2.repository.config=%REPOSITORY_CONFIG% -Dlog4j.configuration=file:/%LOG4J_CONFIG%"
-
-start /b javaw.exe %JAVA_OPTS% -cp ./lib/* org.opentravel.schemacompiler.index.IndexProcessManager %*
+start /b javaw.exe -Dota2.index.manager.config="%MANAGER_CONFIG%" -Dota2.index.agent.config="%AGENT_CONFIG%" -Dlog4j.configuration="file:/%LOG4J_CONFIG%" -cp ./lib/* org.opentravel.schemacompiler.index.IndexProcessManager %*

@@ -183,6 +183,15 @@ public abstract class FreeTextSearchService implements IndexingTerms {
     public boolean isRunning() {
         return isRunning;
     }
+    
+    /**
+     * Returns true if indexing jobs can be processed by this service.  Even if the service
+     * is running, the processing of indexing jobs (as opposed to searches) may be impaired
+     * in some situations.
+     * 
+     * @return boolean
+     */
+    public abstract boolean isIndexingServiceAvailable();
 
     /**
      * Constructs a new <code>DirectoryReader</code> for handling read-only queries to the
@@ -235,6 +244,10 @@ public abstract class FreeTextSearchService implements IndexingTerms {
         if (!isRunning) {
             throw new IllegalStateException(
                     "Unable to perform indexing task - the service is not currently running.");
+        }
+        
+        if (!isIndexingServiceAvailable()) {
+        	throw new RepositoryException("Indexing service unavailable - unable to perform repository re-indexing.");
         }
 
         // First, clear the contents of the entire index

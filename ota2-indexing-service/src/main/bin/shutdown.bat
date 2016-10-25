@@ -17,10 +17,6 @@
 @echo off
 
 set "SCRIPTDIR=%~dp0"
-
-set "REPOSITORY_CONFIG=%SCRIPTDIR%conf\ota2-repository-config.xml"
 set "LOG4J_CONFIG=%SCRIPTDIR%conf\log4j-manager.properties"
 
-set "JAVA_OPTS=-Dota2.repository.config=%REPOSITORY_CONFIG% -Dlog4j.configuration=file:/%LOG4J_CONFIG%"
-
-java.exe %JAVA_OPTS% -cp ./lib/* org.opentravel.schemacompiler.index.ShutdownIndexingService %*
+java.exe -Dlog4j.configuration="file:/%LOG4J_CONFIG%" -cp ./lib/* org.opentravel.schemacompiler.index.ShutdownIndexingService %*

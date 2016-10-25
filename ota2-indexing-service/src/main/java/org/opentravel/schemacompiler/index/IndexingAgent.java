@@ -17,6 +17,7 @@
 package org.opentravel.schemacompiler.index;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -46,11 +47,13 @@ import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoListType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoType;
 import org.opentravel.schemacompiler.index.builder.IndexBuilder;
 import org.opentravel.schemacompiler.index.builder.IndexBuilderFactory;
-import org.opentravel.schemacompiler.repository.RepositoryComponentFactory;
+import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
 import org.opentravel.schemacompiler.util.RepositoryJaxbContext;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.FileSystemXmlApplicationContext;
 import org.springframework.jms.JmsException;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
@@ -65,38 +68,93 @@ public class IndexingAgent implements IndexingConstants {
 	
     private static Log log = LogFactory.getLog(IndexingAgent.class);
     
+	public static final String JMS_TEMPLATE_BEANID          = "indexingJmsService";
+	public static final String REPOSITORY_LOCATION_BEANID   = "repositoryLocation";
+	public static final String SEARCH_INDEX_LOCATION_BEANID = "searchIndexLocation";
+	
     private static boolean shutdownRequested = false;
     
-    private File indexLocation;
+    private File repositoryLocation;
+    private File searchIndexLocation;
     private RepositoryManager repositoryManager;
     private Directory indexDirectory;
     private IndexWriterConfig writerConfig;
     private IndexWriter indexWriter;
+    private JmsTemplate jmsTemplate;
     
     /**
      * Default constructor.
      * 
+     * @throws RepositoryException  thrown if the repository manager cannot be initialized
      * @throws IOException  thrown if the search index writer cannot be initialized
      */
-    public IndexingAgent() throws IOException {
-    	indexLocation = RepositoryComponentFactory.getDefault().getSearchIndexLocation();
-        if (!indexLocation.exists()) indexLocation.mkdirs();
+    public IndexingAgent() throws RepositoryException, IOException {
+        initializeContext();
         
         // Check to make sure the index was properly closed, and release any lock that might exist
-        this.indexDirectory = FSDirectory.open(indexLocation.toPath());
+        if (!searchIndexLocation.exists()) searchIndexLocation.mkdirs();
+        this.indexDirectory = FSDirectory.open( searchIndexLocation.toPath() );
 
         // Configure the indexing and search components
-        this.writerConfig = new IndexWriterConfig(new StandardAnalyzer());
-        this.writerConfig.setOpenMode(OpenMode.CREATE_OR_APPEND);
-        this.indexWriter = new IndexWriter(indexDirectory, writerConfig);
+        this.writerConfig = new IndexWriterConfig( new StandardAnalyzer() );
+        this.writerConfig.setOpenMode( OpenMode.CREATE_OR_APPEND );
+        this.indexWriter = new IndexWriter( indexDirectory, writerConfig );
         
         // Run an empty commit of the index writer; this will initialize the search index directory
         // if it was not already setup prior to launching this agent.
         indexWriter.commit();
         
-    	repositoryManager = RepositoryComponentFactory.getDefault().getRepositoryManager();
+    	repositoryManager = new RepositoryManager( repositoryLocation );
     }
     
+	/**
+	 * Initializes the Spring application context and all of the properties that
+	 * are obtained from it.
+	 * 
+	 * @throws RepositoryException  thrown if errors are detected in the agent configuration settings
+	 * @throws FileNotFoundException  thrown if the indexing agent configuration file does not
+	 *								  exist in the specified location
+	 */
+	@SuppressWarnings("resource")
+	private void initializeContext() throws RepositoryException, FileNotFoundException {
+		String configFileLocation = System.getProperty( IndexProcessManager.AGENT_CONFIG_SYSPROP );
+		File configFile;
+		
+		// Verify the existence of the configuration file and initialize the context
+		if (configFileLocation == null) {
+			throw new FileNotFoundException("The location of the agent configuration file has not be specified "
+					+ "(use the 'ota2.index.agent.config' system property).");
+		}
+		configFile = new File( configFileLocation );
+		
+		if (!configFile.exists() || !configFile.isFile()) {
+			throw new FileNotFoundException("Index agent configuration file not found: " + configFileLocation);
+		}
+		ApplicationContext context = new FileSystemXmlApplicationContext( configFileLocation );
+		
+		// Initialize the agent settings from the application context
+		this.jmsTemplate = (JmsTemplate) context.getBean( JMS_TEMPLATE_BEANID );
+		String repositoryLocationPath = (String) context.getBean( REPOSITORY_LOCATION_BEANID );
+		String searchIndexLocationPath = (String) context.getBean( SEARCH_INDEX_LOCATION_BEANID );
+		
+		// Perform some preliminary error checking on the agent's configuration settings
+		if (jmsTemplate == null) {
+			throw new RepositoryException("JMS configuration not specified in the agent configuration settings.");
+		}
+		if (repositoryLocationPath == null) {
+			throw new FileNotFoundException("OTM repository location not specified in the agent configuration settings.");
+		}
+		if (searchIndexLocationPath == null) {
+			throw new FileNotFoundException("Search index location not specified in the agent configuration settings.");
+		}
+		repositoryLocation = new File( repositoryLocationPath );
+		searchIndexLocation = new File( searchIndexLocationPath );
+		
+		if (!repositoryLocation.exists() || !repositoryLocation.isDirectory()) {
+			throw new FileNotFoundException("Invalid OTM repository location specified: " + repositoryLocationPath);
+		}
+	}
+	
 	/**
 	 * Starts listening for JMS messages and performs the appropriate indexing action when
 	 * one is received.
@@ -104,13 +162,12 @@ public class IndexingAgent implements IndexingConstants {
 	 * @throws JMSException  thrown if a fatal error occurs because the JMS connection is not available
 	 */
 	public void startListening() throws JMSException {
-		JmsTemplate indexingService = RepositoryComponentFactory.getDefault().getIndexingJmsService();
 		Connection jmsConnection = null;
 		
 		// Make sure the JMS provider is available; if not, throw a fatal exception before
 		// we start listening for messages.
 		try {
-			jmsConnection = indexingService.getConnectionFactory().createConnection();
+			jmsConnection = jmsTemplate.getConnectionFactory().createConnection();
 			
 		} finally {
 			if (jmsConnection != null) {
@@ -118,11 +175,11 @@ public class IndexingAgent implements IndexingConstants {
 			}
 		}
 		
-		log.info("Indexing agent started for location: " + indexLocation.getAbsolutePath());
+		log.info("Indexing agent started for location: " + searchIndexLocation.getAbsolutePath());
 		
 		while (!shutdownRequested) {
 			try {
-				Message msg = indexingService.receiveSelected( SELECTOR_JOBMSG );
+				Message msg = jmsTemplate.receiveSelected( SELECTOR_JOBMSG );
 				
 				if (msg instanceof TextMessage) {
 					TextMessage message = (TextMessage) msg;
@@ -131,10 +188,10 @@ public class IndexingAgent implements IndexingConstants {
 					
 					if (messageType != null) {
 						if (messageType.equals( JOB_TYPE_CREATE_INDEX )) {
-							submitIndexingJob( unmarshallRepositoryItems( messageContent ), false );
+							processIndexingJob( unmarshallRepositoryItems( messageContent ), false );
 							
 						} else if (messageType.equals( JOB_TYPE_DELETE_INDEX )) {
-							submitIndexingJob( unmarshallRepositoryItems( messageContent ), true );
+							processIndexingJob( unmarshallRepositoryItems( messageContent ), true );
 							
 						} else if (messageType.equals( JOB_TYPE_DELETE_ALL )) {
 							processDeleteAll();
@@ -162,13 +219,13 @@ public class IndexingAgent implements IndexingConstants {
 	}
 	
     /**
-     * Submits the given index builder for processing.
+     * Processes the given indexing job for the given list of items.
      * 
      * @param itemsToIndex  the list of repository items to be indexed
      * @param deleteIndex  flag indicating whether the index is to be created or deleted
      * @throws IOException  thrown if an error occurs while processing the indexing job
      */
-    protected void submitIndexingJob(List<RepositoryItem> itemsToIndex, boolean deleteIndex) throws IOException {
+    protected void processIndexingJob(List<RepositoryItem> itemsToIndex, boolean deleteIndex) throws IOException {
     	IndexBuilderFactory factory = new IndexBuilderFactory( repositoryManager, indexWriter );
     	
     	for (RepositoryItem item : itemsToIndex) {
@@ -199,6 +256,7 @@ public class IndexingAgent implements IndexingConstants {
 	private void processDeleteAll() throws IOException {
     	log.info("Deleting search index.");
 		indexWriter.deleteAll();
+		indexWriter.commit();
 		sendCommitNotifiation();
 	}
 	
@@ -249,9 +307,7 @@ public class IndexingAgent implements IndexingConstants {
 	 * been committed.
 	 */
 	private void sendCommitNotifiation() {
-		JmsTemplate indexingService = RepositoryComponentFactory.getDefault().getIndexingJmsService();
-		
-		indexingService.send(new MessageCreator() {
+		jmsTemplate.send(new MessageCreator() {
 			public Message createMessage(Session session) throws JMSException {
 				TextMessage msg = session.createTextMessage();
 				

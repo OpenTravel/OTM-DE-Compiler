@@ -19,8 +19,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.namespace.QName;
 
@@ -804,6 +806,51 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
 			}
 		}
 		return result;
+	}
+	
+	/**
+	 * Validates that all of the facets in the given list are assigned to an owning
+	 * library.  Normally, this check would be done in the <code>TLContextualFacet</code>
+	 * validator, but that is not possible since contextual facets are normally reached
+	 * from the owning library (i.e. if the owning-library of a facet is not initialized,
+	 * the facet will likely not be validated at all).
+	 * 
+	 * @param facetList  the list of contextual facets to validate
+	 * @return ValidationFindings
+	 */
+	protected ValidationFindings validateContextualFacetLibraryOwnership(List<TLContextualFacet> facetList) {
+		ValidationFindings findings = new ValidationFindings();
+		
+		if (facetList != null) {
+			for (TLContextualFacet facet : facetList) {
+				validateContextualFacetLibraryOwnership( facet, findings, new HashSet<TLContextualFacet>() );
+			}
+		}
+		return findings;
+	}
+	
+	/**
+	 * Recursive method that validates library ownership for the given contextual facet and all of its
+	 * children.
+	 * 
+	 * @param facet  the contextual facet to validate
+	 * @param findings  the validation findings where any errors should be reported
+	 * @param visitedFacets  collection of visited facets (used to avoid circular reference loops)
+	 */
+	private void validateContextualFacetLibraryOwnership(TLContextualFacet facet, ValidationFindings findings,
+			Set<TLContextualFacet> visitedFacets) {
+		if (!visitedFacets.contains( facet )) {
+			visitedFacets.add( facet );
+			
+			if (facet.getOwningLibrary() == null) {
+		        findings.addFinding( FindingType.ERROR, facet,
+		        		"org.opentravel.schemacompiler.TLContextualFacet.owningLibrary." +
+		        				ValidationBuilder.ERROR_NULL_VALUE );
+			}
+			for (TLContextualFacet childFacet : facet.getChildFacets()) {
+				validateContextualFacetLibraryOwnership( childFacet, findings, visitedFacets );
+			}
+		}
 	}
 	
 }

@@ -48,7 +48,6 @@ import org.opentravel.schemacompiler.repository.RepositoryComponentFactory;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
-import org.springframework.jms.JmsException;
 import org.springframework.jms.connection.CachingConnectionFactory;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
@@ -66,6 +65,7 @@ public class JMSFreeTextSearchService extends FreeTextSearchService implements I
     private static Log log = LogFactory.getLog(JMSFreeTextSearchService.class);
     
     private boolean shutdownRequested = false;
+    private boolean jmsConnectionAvailable = false;
     private Thread commitListenerThread;
     
     /**
@@ -123,6 +123,14 @@ public class JMSFreeTextSearchService extends FreeTextSearchService implements I
 	}
 
 	/**
+	 * @see org.opentravel.schemacompiler.index.FreeTextSearchService#isIndexingServiceAvailable()
+	 */
+	@Override
+	public boolean isIndexingServiceAvailable() {
+		return isRunning() && jmsConnectionAvailable;
+	}
+
+	/**
 	 * @see org.opentravel.schemacompiler.index.FreeTextSearchService#newIndexReader(org.apache.lucene.store.Directory)
 	 */
 	@Override
@@ -151,21 +159,22 @@ public class JMSFreeTextSearchService extends FreeTextSearchService implements I
 	@Override
 	protected void submitIndexingJob(List<RepositoryItem> itemsToIndex, boolean deleteIndex) {
 		try {
-			JAXBContext jaxbContext = new JAXBContextResolver().getContext( null );
-			LibraryInfoListType metadataList = new LibraryInfoListType();
-			Marshaller m = jaxbContext.createMarshaller();
-			StringWriter writer = new StringWriter();
-			
-			for (RepositoryItem item : itemsToIndex) {
-	   	    	if (deleteIndex) {
-	   	        	log.info("Submitted delete index job for library: " + item.getFilename());
-	   	    	} else {
-	   	        	log.info("Submitted indexing job for library: " + item.getFilename());
-	   	    	}
-	   	    	metadataList.getLibraryInfo().add( RepositoryUtils.createItemMetadata( item ) );
+			if (isIndexingServiceAvailable()) {
+				JAXBContext jaxbContext = new JAXBContextResolver().getContext( null );
+				LibraryInfoListType metadataList = new LibraryInfoListType();
+				Marshaller m = jaxbContext.createMarshaller();
+				StringWriter writer = new StringWriter();
+				
+				for (RepositoryItem item : itemsToIndex) {
+		   	    	metadataList.getLibraryInfo().add( RepositoryUtils.createItemMetadata( item ) );
+				}
+				m.marshal( new ObjectFactory().createLibraryInfoList( metadataList ), writer );
+				sendIndexingJob( deleteIndex ? JOB_TYPE_DELETE_INDEX : JOB_TYPE_CREATE_INDEX, writer.toString() );
+				log.info("Submitted processing request for remote indexing job (" + itemsToIndex.size() + " entries).");
+				
+			} else {
+				log.info("Unable to submit indexing job for processing - service unavailable.");
 			}
-			m.marshal( new ObjectFactory().createLibraryInfoList( metadataList ), writer );
-			sendIndexingJob( deleteIndex ? JOB_TYPE_DELETE_INDEX : JOB_TYPE_CREATE_INDEX, writer.toString() );
 			
 		} catch (JAXBException e) {
 			log.error("Error submitting indexing job.", e);
@@ -177,8 +186,13 @@ public class JMSFreeTextSearchService extends FreeTextSearchService implements I
 	 */
 	@Override
 	protected void deleteSearchIndex() {
-    	log.info("Submitted index deletion job.");
-		sendIndexingJob( JOB_TYPE_DELETE_ALL, null );
+		if (isIndexingServiceAvailable()) {
+			sendIndexingJob( JOB_TYPE_DELETE_ALL, null );
+	    	log.info("Submitted index deletion job.");
+			
+		} else {
+			log.info("Unable to submit indexing job for processing - service unavailable.");
+		}
 	}
 	
 	/**
@@ -214,24 +228,30 @@ public class JMSFreeTextSearchService extends FreeTextSearchService implements I
 		 */
 		@Override
 		public void run() {
+			boolean initialStartup = true;
+			
 			while (!shutdownRequested) {
 				JmsTemplate indexingService = RepositoryComponentFactory.getDefault().getIndexingJmsService();
 				Connection jmsConnection = null;
-				boolean connectError = true;
 				
 				// Make sure the JMS provider is available; if not, continue to attempt a connection
 				// periodically before we start listening for messages.
-				while (!shutdownRequested && connectError) {
+				while (!shutdownRequested && !jmsConnectionAvailable) {
 					try {
 						jmsConnection = indexingService.getConnectionFactory().createConnection();
-						connectError = false;
+						jmsConnectionAvailable = true;
 						
-					} catch (JMSException e) {
+					} catch (Throwable t) {
 						try {
-							log.warn("Unable to establish JMS connection - waiting to retry...");
+							if (initialStartup) {
+								log.info("Unable to establish connection to indexing agent - waiting to reconnect...");
+								initialStartup = false;
+							} else {
+								log.debug("Unable to establish connection to indexing agent - waiting to reconnect...");
+							}
 							Thread.sleep( JMS_LISTENER_RETRY_INTERVAL );
 							
-						} catch (Throwable t) {}
+						} catch (Throwable t2) {}
 						
 					} finally {
 						if (jmsConnection != null) {
@@ -242,23 +262,25 @@ public class JMSFreeTextSearchService extends FreeTextSearchService implements I
 					}
 				}
 				log.info("Indexing commit listener started.");
+				initialStartup = false;
 				
-				while (!shutdownRequested && !connectError) {
+				while (!shutdownRequested && jmsConnectionAvailable) {
 					try {
 						Message msg = indexingService.receiveSelected( SELECTOR_COMMITMSG );
 						
 						if (msg != null) {
+							log.info("Commit notification received from indexing agent.");
 							refreshIndexReader();
 						}
 						
-					} catch (JmsException e) {
-						if (isConnectException( e )) {
-							connectError = true;
-						} else {
-							log.error("Error receiving indexing job.", e);
-						}
 					} catch (Throwable t) {
-						log.error("Error receiving indexing job.", t);
+						if (isConnectException( t )) {
+							log.warn("Indexing agent connection appears to be down - waiting to reconnect...");
+							jmsConnectionAvailable = false;
+							
+						} else {
+							log.error("Error receiving indexing job.", t);
+						}
 					}
 				}
 			}

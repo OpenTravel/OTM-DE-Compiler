@@ -15,6 +15,9 @@
  */
 package org.opentravel.schemacompiler.transform.symbols;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.transform.SymbolTable;
@@ -28,14 +31,14 @@ import org.opentravel.schemacompiler.transform.SymbolTable;
 public class TLModelSymbolTablePopulator extends AbstractTLSymbolTablePopulator<TLModel> {
 
     /**
-     * @see org.opentravel.schemacompiler.transform.symbols.SymbolTablePopulator#populateSymbols(java.lang.Object,
-     *      org.opentravel.schemacompiler.transform.SymbolTable)
+     * @see org.opentravel.schemacompiler.transform.symbols.SymbolTablePopulator#populateSymbols(java.lang.Object,org.opentravel.schemacompiler.transform.SymbolTable)
      */
     @Override
     public void populateSymbols(TLModel sourceEntity, SymbolTable symbols) {
+    	List<AbstractLibrary> modelLibraries = new ArrayList<>( sourceEntity.getAllLibraries() );
         configureSymbolTable(symbols);
 
-        for (AbstractLibrary library : sourceEntity.getAllLibraries()) {
+        for (AbstractLibrary library : modelLibraries) {
             populateLibrarySymbols(library, symbols);
         }
     }

@@ -47,6 +47,18 @@ public class RealTimeFreeTextSearchService extends FreeTextSearchService {
     private IndexWriterConfig writerConfig;
     private IndexWriter indexWriter;
     
+	/**
+     * Constructor that specifies the folder location of the index and the repository
+     * manager used to access the content to be indexed and searched for.
+     * 
+     * @param indexLocation  the folder location of the index directory
+     * @param repositoryManager  the repository that owns all content to be indexed
+     * @throws IOException  thrown if a low-level error occurs while initializing the search index
+     */
+	public RealTimeFreeTextSearchService(File indexLocation, RepositoryManager repositoryManager) throws IOException {
+		super(indexLocation, repositoryManager);
+	}
+
     /**
 	 * @see org.opentravel.schemacompiler.index.FreeTextSearchService#onStartup(org.apache.lucene.store.Directory)
 	 */
@@ -71,23 +83,19 @@ public class RealTimeFreeTextSearchService extends FreeTextSearchService {
 	}
 
 	/**
+	 * @see org.opentravel.schemacompiler.index.FreeTextSearchService#isIndexingServiceAvailable()
+	 */
+	@Override
+	public boolean isIndexingServiceAvailable() {
+		return isRunning();
+	}
+
+	/**
 	 * @see org.opentravel.schemacompiler.index.FreeTextSearchService#newIndexReader(org.apache.lucene.store.Directory)
 	 */
 	@Override
 	protected DirectoryReader newIndexReader(Directory indexDirectory) throws IOException {
 		return DirectoryReader.open( indexWriter, false );
-	}
-
-	/**
-     * Constructor that specifies the folder location of the index and the repository
-     * manager used to access the content to be indexed and searched for.
-     * 
-     * @param indexLocation  the folder location of the index directory
-     * @param repositoryManager  the repository that owns all content to be indexed
-     * @throws IOException  thrown if a low-level error occurs while initializing the search index
-     */
-	public RealTimeFreeTextSearchService(File indexLocation, RepositoryManager repositoryManager) throws IOException {
-		super(indexLocation, repositoryManager);
 	}
 
 	/**

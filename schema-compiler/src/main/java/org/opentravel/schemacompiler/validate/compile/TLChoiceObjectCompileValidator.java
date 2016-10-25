@@ -34,6 +34,7 @@ public class TLChoiceObjectCompileValidator extends TLChoiceObjectBaseValidator 
     @Override
     protected ValidationFindings validateFields(TLChoiceObject target) {
         TLValidationBuilder builder = newValidationBuilder(target);
+        ValidationFindings findings;
         
         builder.setProperty("name", target.getName()).setFindingType(FindingType.ERROR)
                 .assertNotNullOrBlank().assertPatternMatch(NAME_XML_PATTERN);
@@ -50,7 +51,10 @@ public class TLChoiceObjectCompileValidator extends TLChoiceObjectBaseValidator 
         checkSchemaNamingConflicts(target, builder);
         validateVersioningRules(target, builder);
         
-        return builder.getFindings();
+        findings = builder.getFindings();
+        findings.addAll( validateContextualFacetLibraryOwnership( target.getChoiceFacets() ) );
+        
+        return findings;
     }
 
 }

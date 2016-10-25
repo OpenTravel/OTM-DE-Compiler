@@ -910,7 +910,7 @@ public class AdminController extends BaseController {
                 searchService.indexAllRepositoryItems();
 
             } catch (RepositoryException e) {
-                log.error("Error displaying or updating group assignments.", e);
+                log.error("Error processing repository re-indexing request.", e);
                 setErrorMessage(e.getMessage(), model);
 
             } finally {

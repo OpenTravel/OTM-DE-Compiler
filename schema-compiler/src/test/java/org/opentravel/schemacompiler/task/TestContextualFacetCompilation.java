@@ -122,7 +122,7 @@ public class TestContextualFacetCompilation {
 	public void testGhostFacets() throws Exception {
         File projectFile = new File( SchemaCompilerTestUtils.getBaseLibraryLocation()
         		+ "/test-package-facets/project_base.otp" );
-		ProjectManager projectManager = new ProjectManager();
+		ProjectManager projectManager = new ProjectManager( false );
         ValidationFindings findings = new ValidationFindings();
 		
         projectManager.loadProject( projectFile, findings );
@@ -148,7 +148,7 @@ public class TestContextualFacetCompilation {
 	public void testNonLocalGhostFacets() throws Exception {
         File projectFile = new File( SchemaCompilerTestUtils.getBaseLibraryLocation()
         		+ "/test-package-facets/project_facets_all.otp" );
-		ProjectManager projectManager = new ProjectManager();
+		ProjectManager projectManager = new ProjectManager( false );
         ValidationFindings findings = new ValidationFindings();
 		
         projectManager.loadProject( projectFile, findings );

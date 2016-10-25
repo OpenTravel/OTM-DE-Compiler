@@ -34,7 +34,8 @@ public class TLBusinessObjectCompileValidator extends TLBusinessObjectBaseValida
     @Override
     protected ValidationFindings validateFields(TLBusinessObject target) {
         TLValidationBuilder builder = newValidationBuilder(target);
-
+        ValidationFindings findings;
+        
         builder.setProperty("name", target.getName()).setFindingType(FindingType.ERROR)
                 .assertNotNullOrBlank().assertPatternMatch(NAME_XML_PATTERN);
 
@@ -50,7 +51,12 @@ public class TLBusinessObjectCompileValidator extends TLBusinessObjectBaseValida
         checkSchemaNamingConflicts(target, builder);
         validateVersioningRules(target, builder);
 
-        return builder.getFindings();
+        findings = builder.getFindings();
+        findings.addAll( validateContextualFacetLibraryOwnership( target.getCustomFacets() ) );
+        findings.addAll( validateContextualFacetLibraryOwnership( target.getQueryFacets() ) );
+        findings.addAll( validateContextualFacetLibraryOwnership( target.getUpdateFacets() ) );
+        
+        return findings;
     }
 
 }

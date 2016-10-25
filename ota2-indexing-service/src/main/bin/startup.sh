@@ -16,9 +16,8 @@
 #
 SCRIPTDIR="$( cd "$( dirname "$0" )" && pwd )"
 
-REPOSITORY_CONFIG=$SCRIPTDIR/conf/ota2-repository-config.xml
+MANAGER_CONFIG=$SCRIPTDIR/conf/indexing-manager.xml
+AGENT_CONFIG=$SCRIPTDIR/conf/indexing-agent.xml
 LOG4J_CONFIG=$SCRIPTDIR/conf/log4j-manager.properties
 
-JAVA_OPTS=-Dota2.repository.config=$REPOSITORY_CONFIG -Dlog4j.configuration=file:/$LOG4J_CONFIG
-
-javaw $JAVA_OPTS -cp $SCRIPTDIR/lib/* org.opentravel.schemacompiler.index.IndexProcessManager "$@" &
+javaw -Dota2.index.manager.config=$MANAGER_CONFIG -Dota2.index.agent.config=$AGENT_CONFIG -Dlog4j.configuration=file:/$LOG4J_CONFIG -cp $SCRIPTDIR/lib/* org.opentravel.schemacompiler.index.IndexProcessManager "$@" &

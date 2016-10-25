@@ -17,9 +17,8 @@
 package org.opentravel.schemacompiler.index;
 
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.ProcessBuilder.Redirect;
@@ -28,7 +27,6 @@ import java.rmi.registry.LocateRegistry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanRegistrationException;
@@ -43,11 +41,14 @@ import javax.management.remote.JMXServiceURL;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 
 /**
  * Process manager that ensures an <code>IndexAgent</code> is running at all times until
- * the manager is shut down.
+ * the manager is shut down.  The process manager is also responsible for launching the
+ * embedded ActiveMQ broker used by the agent and the OTM repository.
  * 
  * @author S. Livezey
  */
@@ -55,9 +56,9 @@ public class IndexProcessManager {
 	
 	public static final int FATAL_EXIT_CODE = 69; // service unavailable exit code
 	
-	private static final String AGENT_CONFIG_SYSPROP = "ota2.index.agent.config";
-	private static final String AGENT_CONFIG_FILE    = "indexing-agent.properties";
-	private static final String AGENT_CONFIG_JVMOPTS = "agent.jvmOptions";
+	public static final String MANAGER_CONFIG_SYSPROP = "ota2.index.manager.config";
+	public static final String AGENT_CONFIG_SYSPROP   = "ota2.index.agent.config";
+	public static final String AGENT_JVMOPTS_BEANID   = "agentJvmOpts";
 	
     private static final boolean DEBUG = false;
     
@@ -67,6 +68,7 @@ public class IndexProcessManager {
 	private static boolean shutdownRequested = false;
 	private static Thread launcherThread;
 	private static Process agentProcess;
+	private static String agentJvmOpts;
 	
 	/**
 	 * Main method invoked from the command-line.
@@ -75,8 +77,10 @@ public class IndexProcessManager {
 	 */
 	public static void main(String[] args) {
 		try {
+			initializeContext();
 			startJMXServer();
 			log.info("Indexing process manager started.");
+			
 			launcherThread = new Thread( new AgentLauncher() );
 			shutdownRequested = false;
 			launcherThread.start();
@@ -115,6 +119,33 @@ public class IndexProcessManager {
 	}
 	
 	/**
+	 * Initializes the Spring application context and all of the properties that
+	 * are obtained from it.  This also has the side-effect of launching the ActiveMQ
+	 * broker that is configured within the context.
+	 * 
+	 * @throws FileNotFoundException  thrown if the indexing manager configuration file does not
+	 *								  exist in the specified location
+	 */
+	@SuppressWarnings("resource")
+	private static void initializeContext() throws FileNotFoundException {
+		String configFileLocation = System.getProperty( MANAGER_CONFIG_SYSPROP );
+		File configFile;
+		
+		if (configFileLocation == null) {
+			throw new FileNotFoundException("The location of the manager configuration file has not be specified "
+					+ "(use the 'ota2.index.manager.config' system property).");
+		}
+		configFile = new File( configFileLocation );
+		
+		if (!configFile.exists() || !configFile.isFile()) {
+			throw new FileNotFoundException("Index manager configuration file not found: " + configFileLocation);
+		}
+		ApplicationContext context = new FileSystemXmlApplicationContext( configFileLocation );
+		
+		agentJvmOpts = (String) context.getBean( AGENT_JVMOPTS_BEANID );
+	}
+	
+	/**
 	 * Starts the JMX server that will expose the shutdown hook for this manager.
 	 * 
 	 * @throws IOException  thrown if the JMX service cannot be launched
@@ -147,26 +178,25 @@ public class IndexProcessManager {
 	private static Process launchJavaProcess(Class<?> mainClass) throws IOException {
 		String javaCmd = System.getProperty("java.home") + File.separatorChar +
 				"bin" + File.separatorChar + "java.exe";
-		String repoConfigLocation = System.getProperty("ota2.repository.config");
+		String agentConfigLocation = System.getProperty( AGENT_CONFIG_SYSPROP );
 		String log4jConfig = "-Dlog4j.configuration=file:/" +
 				System.getProperty("user.dir") + "/conf/log4j-agent.properties";
-		Properties agentConfig = getAgentConfigurationSettings();
-		String jvmOpts = agentConfig.getProperty( AGENT_CONFIG_JVMOPTS );
 		String oomeOption = getJvmOptionForOutOfMemoryErrors();
 		String classpath = System.getProperty("java.class.path");
 		boolean isWindows = SystemUtils.isWindows();
 		
-		if (repoConfigLocation == null) {
-			repoConfigLocation = System.getProperty("user.dir") + "/conf/ota2-repository-config.xml";
+		if (agentConfigLocation == null) {
+			throw new FileNotFoundException("The location of the agent configuration file has not be specified "
+					+ "(use the 'ota2.index.agent.config' system property).");
 		}
-		repoConfigLocation = "-Dota2.repository.config=" + repoConfigLocation;
+		agentConfigLocation = "-D" + AGENT_CONFIG_SYSPROP + "=" + agentConfigLocation;
 		
 		// For windows, we must wrap all of the path arguments in double quotes in case
 		// they contain spaces.
 		if (isWindows) {
 			javaCmd = "\"" + javaCmd + "\"";
 			oomeOption = "\"" + oomeOption + "\"";
-			repoConfigLocation = "\"" + repoConfigLocation + "\"";
+			agentConfigLocation = "\"" + agentConfigLocation + "\"";
 			log4jConfig = "\"" + log4jConfig + "\"";
 			classpath = "\"" + classpath + "\"";
 		}
@@ -175,9 +205,9 @@ public class IndexProcessManager {
 		List<String> command = new ArrayList<>();
 		
 		command.add( javaCmd );
-		if (jvmOpts != null) command.addAll( Arrays.asList( jvmOpts.split("\\s+") ) );
+		if (agentJvmOpts != null) command.addAll( Arrays.asList( agentJvmOpts.split("\\s+") ) );
 		if (oomeOption != null) command.add( oomeOption );
-		command.add( repoConfigLocation );
+		command.add( agentConfigLocation );
 		command.add( log4jConfig );
 		command.add( "-cp" );
 		command.add( classpath );
@@ -226,35 +256,6 @@ public class IndexProcessManager {
 		return jvmOption;
 	}
 	
-	/**
-	 * Loads the command-line configuration settings for the indexing agent JVM.
-	 * 
-	 * @return Properties
-	 */
-	private static Properties getAgentConfigurationSettings() {
-		Properties configSettings = new Properties();
-		File configFile = null;
-		
-		if (System.getProperties().containsKey( AGENT_CONFIG_SYSPROP )) {
-			configFile = new File( System.getProperty( AGENT_CONFIG_SYSPROP ) );
-			if (!configFile.exists()) configFile = null;
-		}
-		if (configFile == null) {
-			configFile = new File( System.getProperty("user.dir") + "/conf/" + AGENT_CONFIG_FILE );
-			if (!configFile.exists()) configFile = null;
-		}
-		
-		if (configFile != null) {
-			try (InputStream is = new FileInputStream( configFile )) {
-				configSettings.load( is );
-				
-			} catch (IOException e) {
-				log.warn("Error reading indexing agent configuration settings.", e);
-			}
-		}
-		return configSettings;
-	}
-
 	/**
 	 * Runner that handles the launching of agent processes.
 	 */
