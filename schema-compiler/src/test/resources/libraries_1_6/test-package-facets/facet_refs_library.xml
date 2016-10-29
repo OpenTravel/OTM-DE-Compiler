@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_06"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_06 ../../../../main/resources/ota2-context/schemas/OTA2_LibraryModel_v1.6.0.xsd">
+    
+    <VersionScheme>OTA2</VersionScheme>
+    <Status>Draft</Status>
+    <Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-facets/refs/v1</Namespace>
+    <Prefix>ref</Prefix>
+    <Name>facet_refs_library</Name>
+    <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
+    <Import namespace="http://www.opentravel.org/OTM/Common/v0" prefix="ota"/>
+    <Import fileHints="base_library.xml"
+        namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-facets/base/v1" prefix="b"/>
+    <Import fileHints="facets1_library.xml"
+        namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-facets/facets1/v1" prefix="f1"/>
+    <Import fileHints="facets2_library.xml"
+        namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-facets/facets2/v1" prefix="f2"/>
+    <Context applicationContext="default-applicationContext" context="default"/>
+    <Comments>Facet References Test Library</Comments>
+    
+    <CoreObject name="RefCore_FacetTestChoice_ChoiceF1" notExtendable="true">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="FacetTestChoice_ChoiceF1" repeat="0" type="b:FacetTestChoice_ChoiceF1"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <CoreObject name="RefCore_FacetTestChoice_ChoiceF1_ChoiceF1A" notExtendable="true">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="FacetTestChoice_ChoiceF1_ChoiceF1A" repeat="0" type="b:FacetTestChoice_ChoiceF1_ChoiceF1A"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <CoreObject name="RefCore_FacetTestChoice_ChoiceF2" notExtendable="true">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="FacetTestChoice_ChoiceF2" repeat="0" type="f1:FacetTestChoice_ChoiceF2"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <CoreObject name="RefCore_FacetTestChoice_ChoiceF2_ChoiceF2A" notExtendable="true">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="FacetTestChoice_ChoiceF2_ChoiceF2A" repeat="0" type="f1:FacetTestChoice_ChoiceF2_ChoiceF2A"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <CoreObject name="RefCore_FacetTestChoice_ChoiceF2_ChoiceF2B" notExtendable="true">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="FacetTestChoice_ChoiceF2_ChoiceF2B" repeat="0" type="f2:FacetTestChoice_ChoiceF2_ChoiceF2B"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <CoreObject name="RefCore_ExtFacetTestChoice_ChoiceF2" notExtendable="true">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="ExtFacetTestChoice_ChoiceF2" repeat="0" type="b:ExtFacetTestChoice_ChoiceF2"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <CoreObject name="RefCore_FacetTestBO_CustomF1" notExtendable="true">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="FacetTestBO_CustomF1" repeat="0" type="b:FacetTestBO_CustomF1"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <CoreObject name="RefCore_FacetTestBO_CustomF1_CustomF1A" notExtendable="true">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="FacetTestBO_CustomF1_CustomF1A" repeat="0" type="b:FacetTestBO_CustomF1_CustomF1A"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <CoreObject name="RefCore_FacetTestBO_CustomF2" notExtendable="true">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="FacetTestBO_CustomF2" repeat="0" type="f1:FacetTestBO_CustomF2"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <CoreObject name="RefCore_FacetTestBO_CustomF2_CustomF2A" notExtendable="true">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="FacetTestBO_CustomF2_CustomF2A" repeat="0" type="f1:FacetTestBO_CustomF2_CustomF2A"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <CoreObject name="RefCore_FacetTestBO_CustomF2_CustomF2B" notExtendable="true">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="FacetTestBO_CustomF2_CustomF2B" repeat="0" type="f2:FacetTestBO_CustomF2_CustomF2B"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <CoreObject name="RefCore_FacetTestBO_QueryF1" notExtendable="true">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="FacetTestBO_Query_QueryF1" repeat="0" type="b:FacetTestBO_Query_QueryF1"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <CoreObject name="RefCore_FacetTestBO_QueryF1_QueryF1A" notExtendable="true">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="FacetTestBO_Query_QueryF1_QueryF1A" repeat="0" type="b:FacetTestBO_Query_QueryF1_QueryF1A"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <CoreObject name="RefCore_FacetTestBO_QueryF2" notExtendable="true">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="FacetTestBO_Query_QueryF2" repeat="0" type="f1:FacetTestBO_Query_QueryF2"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <CoreObject name="RefCore_FacetTestBO_QueryF2_QueryF2A" notExtendable="true">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="FacetTestBO_Query_QueryF2_QueryF2A" repeat="0" type="f1:FacetTestBO_Query_QueryF2_QueryF2A"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <CoreObject name="RefCore_FacetTestBO_QueryF2_QueryF2B" notExtendable="true">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="FacetTestBO_Query_QueryF2_QueryF2B" repeat="0" type="f2:FacetTestBO_Query_QueryF2_QueryF2B"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <CoreObject name="RefCore_FacetTestBO_UpdateF1" notExtendable="true">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="FacetTestBO_Update_UpdateF1" repeat="0" type="b:FacetTestBO_Update_UpdateF1"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <CoreObject name="RefCore_FacetTestBO_UpdateF1_UpdateF1A" notExtendable="true">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="FacetTestBO_Update_UpdateF1_UpdateF1A" repeat="0" type="b:FacetTestBO_Update_UpdateF1_UpdateF1A"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <CoreObject name="RefCore_FacetTestBO_UpdateF2" notExtendable="true">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="FacetTestBO_Update_UpdateF2" repeat="0" type="f1:FacetTestBO_Update_UpdateF2"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <CoreObject name="RefCore_FacetTestBO_UpdateF2_UpdateF2A" notExtendable="true">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="FacetTestBO_Update_UpdateF2_UpdateF2A" repeat="0" type="f1:FacetTestBO_Update_UpdateF2_UpdateF2A"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <CoreObject name="RefCore_FacetTestBO_UpdateF2_UpdateF2B" notExtendable="true">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="FacetTestBO_Update_UpdateF2_UpdateF2B" repeat="0" type="f2:FacetTestBO_Update_UpdateF2_UpdateF2B"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <CoreObject name="RefCore_ExtFacetTestBO_CustomF2" notExtendable="true">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="ExtFacetTestBO_CustomF2" repeat="0" type="b:ExtFacetTestBO_CustomF2"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <CoreObject name="RefCore_ExtFacetTestBO_QueryF2" notExtendable="true">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="ExtFacetTestBO_Query_QueryF2" repeat="0" type="b:ExtFacetTestBO_Query_QueryF2"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <CoreObject name="RefCore_ExtFacetTestBO_UpdateF2" notExtendable="true">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="ExtFacetTestBO_Update_UpdateF2" repeat="0" type="b:ExtFacetTestBO_Update_UpdateF2"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+</Library>

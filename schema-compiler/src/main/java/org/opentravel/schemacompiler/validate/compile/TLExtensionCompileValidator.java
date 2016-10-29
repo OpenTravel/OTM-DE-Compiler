@@ -20,6 +20,7 @@ import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLComplexTypeBase;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLExtensionOwner;
@@ -43,6 +44,7 @@ public class TLExtensionCompileValidator extends TLValidatorBase<TLExtension> {
 
     public static final String ERROR_INVALID_CIRCULAR_EXTENSION = "INVALID_CIRCULAR_EXTENSION";
     public static final String ERROR_INVALID_LOCAL_FACET_EXTENSION = "INVALID_LOCAL_FACET_EXTENSION";
+    public static final String ERROR_NESTED_FACET_EXTENSION = "NESTED_FACET_EXTENSION";
     public static final String ERROR_ILLEGAL_EXTENSION = "ILLEGAL_EXTENSION";
     public static final String WARNING_MUST_BE_EXTENSIBLE = "MUST_BE_EXTENSIBLE";
 
@@ -59,7 +61,7 @@ public class TLExtensionCompileValidator extends TLValidatorBase<TLExtension> {
                 target.getExtendsEntityName()).setFindingType(FindingType.ERROR).assertNotNull()
                 .setFindingType(FindingType.WARNING).assertNotDeprecated().assertNotObsolete();
 
-        if (target.getExtendsEntity() != null) {
+        if (extendsEntity != null) {
             // Assert the correct type of entity reference based on the extension owner's type
             if (extensionOwner instanceof TLBusinessObject) {
                 builder.setFindingType(FindingType.ERROR).assertValidEntityReference(
@@ -92,6 +94,15 @@ public class TLExtensionCompileValidator extends TLValidatorBase<TLExtension> {
                         && localNamespace.equals(extendsEntityNamespace)) {
                     builder.addFinding(FindingType.ERROR, "extendsEntity",
                             ERROR_INVALID_LOCAL_FACET_EXTENSION);
+                }
+                
+                // Extension point facets cannot extend nested contextual facets
+                if (extendsEntity instanceof TLContextualFacet) {
+                	TLFacetOwner extendsEntityFacetOwner = ((TLContextualFacet) extendsEntity).getOwningEntity();
+                	
+                	if (extendsEntityFacetOwner instanceof TLContextualFacet) {
+                        builder.addFinding(FindingType.ERROR, "extendsEntity", ERROR_NESTED_FACET_EXTENSION);
+                	}
                 }
             }
 

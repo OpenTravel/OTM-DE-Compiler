@@ -44,6 +44,7 @@ import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
@@ -641,7 +642,7 @@ public class ExampleNavigator {
     protected void navigateFacetMembers(TLFacet facet) {
         Map<TLFacetType, List<TLExtensionPointFacet>> facetExtensionsByType = getExtensionPoints(facet);
         Set<TLFacetType> processedExtensionPointTypes = new HashSet<TLFacetType>();
-        TLFacetType previousFacetType = null;
+        String previousFacetIdentity = null;
 
         // Start by navigating attributes and indicators for this facet
         for (TLAttribute attribute : PropertyCodegenUtils.getInheritedAttributes(facet)) {
@@ -657,18 +658,16 @@ public class ExampleNavigator {
         for (TLModelElement elementItem : PropertyCodegenUtils.getElementSequence(facet)) {
         	if (elementItem instanceof TLProperty) {
         		TLProperty element = (TLProperty) elementItem;
-        		
                 TLFacet currentFacet = (TLFacet) element.getOwner();
-
+                String currentFacetIdentity = getFacetIdentity( currentFacet );
+                
                 // Before navigating the element itself, check to see if we need to insert any extension
                 // point facets
-                if (currentFacet.getFacetType() != previousFacetType) {
-                    List<TLFacet> facetHierarchy = FacetCodegenUtils
-                            .getLocalFacetHierarchy(currentFacet);
+                if (!currentFacetIdentity.equals( previousFacetIdentity )) {
+                    List<TLFacet> facetHierarchy = FacetCodegenUtils.getLocalFacetHierarchy(currentFacet);
 
                     // Ignore the last element in the facet hierarchy list since it is always the
-                    // current
-                    // facet we are processing
+                    // current facet we are processing
                     for (int i = 0; i < (facetHierarchy.size() - 1); i++) {
                         TLFacet hFacet = facetHierarchy.get(i);
 
@@ -679,7 +678,7 @@ public class ExampleNavigator {
                             processedExtensionPointTypes.add(hFacet.getFacetType());
                         }
                     }
-                    previousFacetType = currentFacet.getFacetType();
+                    previousFacetIdentity = currentFacetIdentity;
                 }
 
                 // Navigate the example content for the current element
@@ -702,6 +701,29 @@ public class ExampleNavigator {
             	}
             }
         }
+    }
+    
+    /**
+     * Returns an identity string for the given facet, based on the facet's type and name.
+     * 
+     * @param facet  the facet for which to return an identity string
+     * @return
+     */
+    private String getFacetIdentity(TLFacet facet) {
+    	TLFacetType facetType = facet.getFacetType();
+    	String identity;
+    	
+    	if (facetType != null) {
+        	if (facet instanceof TLContextualFacet) {
+        		identity = facetType.getIdentityName( ((TLContextualFacet) facet).getName() );
+        	} else {
+        		identity = facetType.getIdentityName();
+        	}
+    		
+    	} else {
+    		identity = "UNKNOWN";
+    	}
+    	return identity;
     }
     
     /**

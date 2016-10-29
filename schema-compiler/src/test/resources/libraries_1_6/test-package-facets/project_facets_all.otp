@@ -12,4 +12,7 @@
     <otp:UnmanagedProjectItem>
         <otp:FileLocation>facets2_library.xml</otp:FileLocation>
     </otp:UnmanagedProjectItem>
+    <otp:UnmanagedProjectItem>
+        <otp:FileLocation>facet_refs_library.xml</otp:FileLocation>
+    </otp:UnmanagedProjectItem>
 </otp:Project>

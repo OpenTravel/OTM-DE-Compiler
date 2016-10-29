@@ -28,8 +28,6 @@
         <Indicator name="indicatorChoiceF2A" publishAsElement="false"/>
 	</ContextualFacet>
 	
-	
-	
 	<ContextualFacet name="CustomF2" type="Custom" facetOwner="b:FacetTestBO">
         <Attribute name="attributeCustomF2" type="xsd:string"/>
         <Element name="elementCustomF2" repeat="0" type="xsd:string"/>
@@ -66,5 +64,10 @@
         <Indicator name="indicatorUpdateF2A" publishAsElement="false"/>
 	</ContextualFacet>
 	
-	
+    <ExtensionPointFacet>
+        <Attribute name="extAttr1" type="xsd:string"/>
+        <Attribute name="extAttr2" type="xsd:int"/>
+        <Extension extends="b:FacetTestChoice_ChoiceF1"/>
+    </ExtensionPointFacet>
+    
 </Library>
