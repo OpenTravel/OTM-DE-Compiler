@@ -15,4 +15,6 @@
 @REM
 
 @echo off
-java -jar ota2-example-helper.jar %*
+set JVM_OPTS=-Xms512m -Xmx4g
+
+java %JVM_OPTS% -jar ota2-example-helper.jar %*

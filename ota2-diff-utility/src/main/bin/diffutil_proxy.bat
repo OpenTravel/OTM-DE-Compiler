@@ -19,6 +19,7 @@ set PROXY_HOST=myproxy.example.com
 set PROXY_PORT=8080
 set NON_PROXY_HOSTS="localhost|127.0.0.1|*.example.com"
 
+set JVM_OPTS=-Xms512m -Xmx4g
 set JAVA_OPTS=-Dhttp.proxyHost=%PROXY_HOST% -Dhttp.proxyPort=%PROXY_PORT% -Dhttp.nonProxyHosts=%NON_PROXY_HOSTS%
 
-java %JAVA_OPTS% -jar ota2-diff-utility.jar %*
+java %JVM_OPTS% %JAVA_OPTS% -jar ota2-diff-utility.jar %*
