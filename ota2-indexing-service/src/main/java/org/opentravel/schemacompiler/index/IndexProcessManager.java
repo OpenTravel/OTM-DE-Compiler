@@ -176,14 +176,14 @@ public class IndexProcessManager {
 	 * @throws IOException  thrown if the external process cannot be launched
 	 */
 	private static Process launchJavaProcess(Class<?> mainClass) throws IOException {
+		boolean isWindows = SystemUtils.isWindows();
 		String javaCmd = System.getProperty("java.home") + File.separatorChar +
-				"bin" + File.separatorChar + "java.exe";
+				"bin" + File.separatorChar + "java";
 		String agentConfigLocation = System.getProperty( AGENT_CONFIG_SYSPROP );
-		String log4jConfig = "-Dlog4j.configuration=file:/" +
-				System.getProperty("user.dir") + "/conf/log4j-agent.properties";
+		String log4jConfig = "-Dlog4j.configuration=" + (isWindows ? "file:/" : "file://")
+				+ System.getProperty("user.dir") + "/conf/log4j-agent.properties";
 		String oomeOption = getJvmOptionForOutOfMemoryErrors();
 		String classpath = System.getProperty("java.class.path");
-		boolean isWindows = SystemUtils.isWindows();
 		
 		if (agentConfigLocation == null) {
 			throw new FileNotFoundException("The location of the agent configuration file has not be specified "
@@ -194,7 +194,7 @@ public class IndexProcessManager {
 		// For windows, we must wrap all of the path arguments in double quotes in case
 		// they contain spaces.
 		if (isWindows) {
-			javaCmd = "\"" + javaCmd + "\"";
+			javaCmd = "\"" + javaCmd + ".exe\"";
 			oomeOption = "\"" + oomeOption + "\"";
 			agentConfigLocation = "\"" + agentConfigLocation + "\"";
 			log4jConfig = "\"" + log4jConfig + "\"";

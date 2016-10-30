@@ -16,6 +16,8 @@
 #
 SCRIPTDIR="$( cd "$( dirname "$0" )" && pwd )"
 
-REPOSITORY_CONFIG=$SCRIPTDIR/conf/ota2-repository-config.xml
+JAVA_HOME=/opt/java
+JAVA_CLASSPATH=$(echo $SCRIPTDIR/lib/*.jar | tr ' ' ':')
+LOG4J_CONFIG=$SCRIPTDIR/conf/log4j-manager.properties
 
-javaw -Dlog4j.configuration=file:/$LOG4J_CONFIG -cp $SCRIPTDIR/lib/* org.opentravel.schemacompiler.index.ShutdownIndexingService "$@"
+$JAVA_HOME/bin/java -Dlog4j.configuration=file://$LOG4J_CONFIG -cp $JAVA_CLASSPATH org.opentravel.schemacompiler.index.ShutdownIndexingService "$@"
