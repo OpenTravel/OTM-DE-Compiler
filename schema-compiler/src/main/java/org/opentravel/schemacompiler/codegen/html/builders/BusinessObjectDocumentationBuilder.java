@@ -15,14 +15,10 @@
  */
 package org.opentravel.schemacompiler.codegen.html.builders;
 
-import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
-import org.opentravel.schemacompiler.model.TLBusinessObject;
-import org.opentravel.schemacompiler.model.TLExtension;
-import org.opentravel.schemacompiler.model.TLFacet;
-import org.opentravel.schemacompiler.model.TLFacetType;
-
 import org.opentravel.schemacompiler.codegen.html.Content;
 import org.opentravel.schemacompiler.codegen.html.writers.BusinessObjectWriter;
+import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLExtension;
 
 /**
  * @author Eric.Bronson
@@ -42,34 +38,12 @@ public class BusinessObjectDocumentationBuilder extends
 
 	@Override
 	protected void initializeFacets(TLBusinessObject t) {
-		for (TLFacet facet : FacetCodegenUtils.getAllFacetsOfType(element,
-				TLFacetType.ID)) {
-			addFacet(facet);
-		}
-
-		for (TLFacet facet : FacetCodegenUtils.getAllFacetsOfType(element,
-				TLFacetType.SUMMARY)) {
-			if (shouldAddFacet(facet)) {
-				addFacet(facet);
-			}
-		}
-
-		for (TLFacet facet : FacetCodegenUtils.getAllFacetsOfType(element,
-				TLFacetType.DETAIL)) {
-			if (shouldAddFacet(facet)) {
-				addFacet(facet);
-			}
-		}
-
-		for (TLFacet facet : FacetCodegenUtils.getAllFacetsOfType(element,
-				TLFacetType.CUSTOM)) {
-			addFacet(facet);
-		}
-
-		for (TLFacet facet : FacetCodegenUtils.getAllFacetsOfType(element,
-				TLFacetType.QUERY)) {
-			addFacet(facet);
-		}
+		addFacet( t.getIdFacet() );
+		addFacet( t.getSummaryFacet() );
+		addFacet( t.getDetailFacet() );
+		addContextualFacets( t.getCustomFacets() );
+		addContextualFacets( t.getQueryFacets() );
+		addContextualFacets( t.getUpdateFacets() );
 	}
 
 	@Override

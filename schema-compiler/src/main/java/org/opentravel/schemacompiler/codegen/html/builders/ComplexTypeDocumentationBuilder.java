@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAliasOwner;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
@@ -56,7 +57,13 @@ public abstract class ComplexTypeDocumentationBuilder<T extends TLFacetOwner & T
 				.getInstance().getDocumentationBuilder(facet);
 		facets.add(facetBuilder);
 		facetBuilder.setOwner(this);
-
 	}
-
+	
+	protected void addContextualFacets(List<TLContextualFacet> facetList) {
+		for (TLContextualFacet facet : facetList) {
+			addFacet( facet );
+			addContextualFacets( facet.getChildFacets() );
+		}
+	}
+	
 }

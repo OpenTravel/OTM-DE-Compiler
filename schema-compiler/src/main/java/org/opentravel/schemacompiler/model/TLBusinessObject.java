@@ -239,6 +239,9 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
 		for (TLFacet facet : getQueryFacets()) {
 			facetList.add( facet );
 		}
+		for (TLFacet facet : getUpdateFacets()) {
+			facetList.add( facet );
+		}
 		return facetList;
 	}
 

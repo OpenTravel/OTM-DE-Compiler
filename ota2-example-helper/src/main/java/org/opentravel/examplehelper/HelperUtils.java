@@ -17,7 +17,9 @@
 package org.opentravel.examplehelper;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.namespace.QName;
 
@@ -27,6 +29,7 @@ import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFacto
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetType;
@@ -53,13 +56,9 @@ public class HelperUtils {
 		addIfContentExists(businessObject.getSummaryFacet(), facetList);
 		addIfContentExists(businessObject.getDetailFacet(), facetList);
 		
-		for (TLFacet facet : businessObject.getCustomFacets()) {
-			addIfContentExists(facet, facetList);
-		}
-        for (TLFacet ghostFacet :
-        	FacetCodegenUtils.findGhostFacets(businessObject, TLFacetType.CUSTOM)) {
-			addIfContentExists(ghostFacet, facetList);
-        }
+		addContextualFacets( businessObject.getCustomFacets(), facetList, new HashSet<TLContextualFacet>() );
+		addContextualFacets( FacetCodegenUtils.findGhostFacets( businessObject, TLFacetType.CUSTOM ),
+				facetList, new HashSet<TLContextualFacet>() );
 		return facetList;
 	}
 	
@@ -86,13 +85,9 @@ public class HelperUtils {
 	public static List<TLFacet> getAvailableFacets(TLChoiceObject choiceObject) {
 		List<TLFacet> facetList = new ArrayList<>();
 
-		for (TLFacet facet : choiceObject.getChoiceFacets()) {
-			addIfContentExists(facet, facetList);
-		}
-        for (TLFacet ghostFacet :
-        	FacetCodegenUtils.findGhostFacets(choiceObject, TLFacetType.CHOICE)) {
-			addIfContentExists(ghostFacet, facetList);
-        }
+		addContextualFacets( choiceObject.getChoiceFacets(), facetList, new HashSet<TLContextualFacet>() );
+		addContextualFacets( FacetCodegenUtils.findGhostFacets( choiceObject, TLFacetType.CHOICE ),
+				facetList, new HashSet<TLContextualFacet>() );
 		return facetList;
 	}
 	
@@ -109,6 +104,26 @@ public class HelperUtils {
 		addIfContentExists(operation.getResponse(), facetList);
 		addIfContentExists(operation.getNotification(), facetList);
 		return facetList;
+	}
+	
+	/**
+	 * Recursive method that adds the list of child facets to the list of contextual facets.
+	 * 
+	 * @param facetsToAdd  the list of facets to add
+	 * @param contextualFacets  the final list of contextual facets being assembled
+	 * @param visitedFacets  collection of facets already visited (prevents infinite loops)
+	 */
+	private static void addContextualFacets(List<TLContextualFacet> facetsToAdd,
+			List<TLFacet> contextualFacets, Set<TLContextualFacet> visitedFacets) {
+		for (TLContextualFacet facet : facetsToAdd) {
+			if (!visitedFacets.contains( facet )) {
+				visitedFacets.add( facet );
+				addIfContentExists( facet, contextualFacets );
+				addContextualFacets( facet.getChildFacets(), contextualFacets, visitedFacets );
+				addContextualFacets( FacetCodegenUtils.findGhostFacets( facet, facet.getFacetType() ),
+						contextualFacets, visitedFacets );
+			}
+		}
 	}
 	
 	/**

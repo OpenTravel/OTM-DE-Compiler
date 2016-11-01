@@ -26,19 +26,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opentravel.schemacompiler.diff.ModelComparator;
-import org.opentravel.schemacompiler.model.NamedEntity;
-import org.opentravel.schemacompiler.model.TLLibrary;
-import org.opentravel.schemacompiler.model.TLModel;
-import org.opentravel.schemacompiler.model.TLOperation;
-import org.opentravel.schemacompiler.model.TLService;
-import org.opentravel.schemacompiler.repository.Project;
-import org.opentravel.schemacompiler.repository.ProjectItem;
-import org.opentravel.schemacompiler.repository.ProjectManager;
-import org.opentravel.schemacompiler.repository.RepositoryItem;
-import org.opentravel.schemacompiler.saver.LibrarySaveException;
-import org.opentravel.schemacompiler.util.SchemaCompilerException;
-
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -57,6 +44,23 @@ import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
+import org.opentravel.schemacompiler.diff.ModelComparator;
+import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
+import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLModel;
+import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.model.TLService;
+import org.opentravel.schemacompiler.repository.Project;
+import org.opentravel.schemacompiler.repository.ProjectItem;
+import org.opentravel.schemacompiler.repository.ProjectManager;
+import org.opentravel.schemacompiler.repository.RepositoryItem;
+import org.opentravel.schemacompiler.saver.LibrarySaveException;
+import org.opentravel.schemacompiler.util.SchemaCompilerException;
+import org.opentravel.schemacompiler.validate.FindingMessageFormat;
+import org.opentravel.schemacompiler.validate.FindingType;
+import org.opentravel.schemacompiler.validate.ValidationFindings;
 
 /**
  * JavaFX controller class for the OTM-Diff application.
@@ -546,6 +550,10 @@ public class DiffUtilityController {
 		newItems.add( defaultItem );
 		
 		for (NamedEntity entity : library.getNamedMembers()) {
+			if ((entity instanceof TLContextualFacet)
+					&& ((TLContextualFacet) entity).isLocalFacet()) {
+				continue; // skip local contextual facets
+			}
 			if (entity instanceof TLService) {
 				for (TLOperation operation : ((TLService) entity).getOperations()) {
 					newItems.add( new ChoiceItem("Operation: " + operation.getName() ) );
@@ -651,16 +659,36 @@ public class DiffUtilityController {
 			public void execute() throws Throwable {
 				try {
 					showReport( null );
-					Project oldProject = oldProjectManager.loadProject( oldProjectFile );
-					Project newProject = newProjectManager.loadProject( newProjectFile );
-					File reportFile = File.createTempFile( "otmDiff", ".html" );
+					ValidationFindings oldFindings = new ValidationFindings();
+					ValidationFindings newFindings = new ValidationFindings();
+					Project oldProject = oldProjectManager.loadProject( oldProjectFile, oldFindings );
+					Project newProject = newProjectManager.loadProject( newProjectFile, newFindings );
 					
-					try (OutputStream out = new FileOutputStream( reportFile )) {
-						new ModelComparator( userSettings.getCompareOptions() )
-								.compareProjects( oldProject, newProject, out );
+					if (!oldFindings.hasFinding( FindingType.ERROR ) && !newFindings.hasFinding( FindingType.ERROR )) {
+						File reportFile = File.createTempFile( "otmDiff", ".html" );
+						
+						try (OutputStream out = new FileOutputStream( reportFile )) {
+							new ModelComparator( userSettings.getCompareOptions() )
+									.compareProjects( oldProject, newProject, out );
+						}
+						showReport( reportFile );
+						reportFile.deleteOnExit();
+						
+					} else {
+						if (oldFindings.hasFinding()) {
+							System.out.println("\nErrors/Warnings: " + oldProjectFile.getName());
+							for (String message : oldFindings.getAllValidationMessages( FindingMessageFormat.IDENTIFIED_FORMAT )) {
+								System.out.println("  " + message);
+							}
+						}
+						if (newFindings.hasFinding()) {
+							System.out.println("\nErrors/Warnings: " + newProjectFile.getName());
+							for (String message : newFindings.getAllValidationMessages( FindingMessageFormat.IDENTIFIED_FORMAT )) {
+								System.out.println("  " + message);
+							}
+						}
+						throw new RuntimeException("Validation error(s) detected in one or both projects.");
 					}
-					showReport( reportFile );
-					reportFile.deleteOnExit();
 					
 				} finally {
 					closeAllProjects( oldProjectManager );

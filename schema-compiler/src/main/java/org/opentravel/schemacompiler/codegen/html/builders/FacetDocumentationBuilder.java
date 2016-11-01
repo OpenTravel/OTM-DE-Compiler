@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.model.TLAlias;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLFacetType;
@@ -66,59 +67,94 @@ public class FacetDocumentationBuilder extends
 	private TLFacet getSuperFacet(TLFacet t) {
 		TLFacet superFacet = null;
 		TLFacetOwner owner = t.getOwningEntity();
-		switch (t.getFacetType()) {
-		case CUSTOM:
-			superFacet = FacetCodegenUtils.getFacetOfType(owner,
-					TLFacetType.SUMMARY);
-			if (!superFacet.declaresContent()) {
-				TLFacetOwner ext = FacetCodegenUtils
-						.getFacetOwnerExtension(owner);
-				while (ext != null) {
-					TLFacet extFacet = FacetCodegenUtils.getFacetOfType(ext,
-							TLFacetType.SUMMARY);
-					if (extFacet.declaresContent()) {
-						superFacet = extFacet;
-						ext = null;
-					} else {
-						ext = FacetCodegenUtils.getFacetOwnerExtension(ext);
-					}
-				}
+		
+		// First, look for a contextual facet owner that declares content
+		while (owner instanceof TLContextualFacet) {
+			TLContextualFacet owningFacet = (TLContextualFacet) owner;
+			
+			if (owningFacet.declaresContent()) {
+				break;
+				
+			} else {
+				t = owningFacet;
+				owner = t.getOwningEntity();
+			}
+		}
+		if (owner instanceof TLContextualFacet) {
+			superFacet = (TLContextualFacet) owner;
+		}
+		
+		if (superFacet == null) {
+			switch (t.getFacetType()) {
+				case CUSTOM:
+					superFacet = FacetCodegenUtils.getFacetOfType(owner, TLFacetType.SUMMARY);
+					
+					if (!superFacet.declaresContent()) {
+						TLFacetOwner ext = FacetCodegenUtils.getFacetOwnerExtension(owner);
+						
+						while (ext != null) {
+							TLFacet extFacet = FacetCodegenUtils.getFacetOfType(ext, TLFacetType.SUMMARY);
+							
+							if (extFacet.declaresContent()) {
+								superFacet = extFacet;
+								ext = null;
+							} else {
+								ext = FacetCodegenUtils.getFacetOwnerExtension(ext);
+							}
+						}
 
-			}
-			if (!superFacet.declaresContent()) {
-				superFacet = FacetCodegenUtils.getFacetOfType(owner,
-						TLFacetType.ID);
-			}
-			break;
-		case DETAIL:
-			superFacet = FacetCodegenUtils.getFacetOfType(owner,
-					TLFacetType.SUMMARY);
-			if (!superFacet.declaresContent()) {
-				TLFacetOwner ext = FacetCodegenUtils
-						.getFacetOwnerExtension(owner);
-				while (ext != null) {
-					TLFacet extFacet = FacetCodegenUtils.getFacetOfType(ext,
-							TLFacetType.SUMMARY);
-					if (extFacet.declaresContent()) {
-						superFacet = extFacet;
-						ext = null;
-					} else {
-						ext = FacetCodegenUtils.getFacetOwnerExtension(ext);
 					}
-				}
+					if (!superFacet.declaresContent()) {
+						superFacet = FacetCodegenUtils.getFacetOfType(owner, TLFacetType.ID);
+					}
+					break;
+				case CHOICE:
+					superFacet = FacetCodegenUtils.getFacetOfType(owner, TLFacetType.SHARED);
+					
+					if (!superFacet.declaresContent()) {
+						TLFacetOwner ext = FacetCodegenUtils.getFacetOwnerExtension(owner);
+						
+						while (ext != null) {
+							TLFacet extFacet = FacetCodegenUtils.getFacetOfType(ext, TLFacetType.SUMMARY);
+							
+							if (extFacet.declaresContent()) {
+								superFacet = extFacet;
+								ext = null;
+							} else {
+								ext = FacetCodegenUtils.getFacetOwnerExtension(ext);
+							}
+						}
 
+					}
+					break;
+				case DETAIL:
+					superFacet = FacetCodegenUtils.getFacetOfType(owner, TLFacetType.SUMMARY);
+					
+					if (!superFacet.declaresContent()) {
+						TLFacetOwner ext = FacetCodegenUtils.getFacetOwnerExtension(owner);
+						
+						while (ext != null) {
+							TLFacet extFacet = FacetCodegenUtils.getFacetOfType(ext, TLFacetType.SUMMARY);
+							
+							if (extFacet.declaresContent()) {
+								superFacet = extFacet;
+								ext = null;
+							} else {
+								ext = FacetCodegenUtils.getFacetOwnerExtension(ext);
+							}
+						}
+
+					}
+					if (!superFacet.declaresContent()) {
+						superFacet = FacetCodegenUtils.getFacetOfType(owner, TLFacetType.ID);
+					}
+					break;
+				case SUMMARY:
+					superFacet = FacetCodegenUtils.getFacetOfType(owner, TLFacetType.ID);
+					break;
+				default:
+					break;
 			}
-			if (!superFacet.declaresContent()) {
-				superFacet = FacetCodegenUtils.getFacetOfType(owner,
-						TLFacetType.ID);
-			}
-			break;
-		case SUMMARY:
-			superFacet = FacetCodegenUtils
-					.getFacetOfType(owner, TLFacetType.ID);
-			break;
-		default:
-			break;
 		}
 		return superFacet;
 	}

@@ -57,6 +57,7 @@ public class IndexProcessManager {
 	public static final int FATAL_EXIT_CODE = 69; // service unavailable exit code
 	
 	public static final String MANAGER_CONFIG_SYSPROP = "ota2.index.manager.config";
+	public static final String MANAGER_JMXPORT_BEANID = "jmxPort";
 	public static final String AGENT_CONFIG_SYSPROP   = "ota2.index.agent.config";
 	public static final String AGENT_JVMOPTS_BEANID   = "agentJvmOpts";
 	
@@ -64,6 +65,7 @@ public class IndexProcessManager {
     
     private static Log log = LogFactory.getLog(IndexProcessManager.class);
     
+    private static int jmxPort = -1;
     private static JMXConnectorServer jmxServer;
 	private static boolean shutdownRequested = false;
 	private static Thread launcherThread;
@@ -95,6 +97,33 @@ public class IndexProcessManager {
 		} catch (Throwable t) {
 			t.printStackTrace( System.out );
 		}
+	}
+	
+	/**
+	 * Returns the port number where the local host JMX server is running.
+	 *  
+	 * @return int
+	 */
+	public static synchronized int getJmxPort() {
+		if (jmxPort < 0) {
+			try {
+				initializeContext();
+				
+			} catch (FileNotFoundException e) {
+				log.error("Error initializing application context (using default JMX port 1099)", e);
+				jmxPort = 1099;
+			}
+		}
+		return jmxPort;
+	}
+	
+	/**
+	 * Returns the local host URL where the JMX server can be accessed.
+	 * 
+	 * @return String
+	 */
+	public static String getJmxServerUrl() {
+		return "service:jmx:rmi:///jndi/rmi://localhost:" + getJmxPort() + "/jmxrmi";
 	}
 	
 	/**
@@ -143,6 +172,7 @@ public class IndexProcessManager {
 		ApplicationContext context = new FileSystemXmlApplicationContext( configFileLocation );
 		
 		agentJvmOpts = (String) context.getBean( AGENT_JVMOPTS_BEANID );
+		jmxPort = (Integer) context.getBean( MANAGER_JMXPORT_BEANID );
 	}
 	
 	/**
@@ -152,12 +182,12 @@ public class IndexProcessManager {
 	 */
 	private static void startJMXServer() throws IOException {
 		try {
-			JMXServiceURL jmxUrl = new JMXServiceURL( IndexProcessManagerMBean.JMX_SERVER_URL );
+			JMXServiceURL jmxUrl = new JMXServiceURL( getJmxServerUrl() );
 			MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 			ObjectName name = new ObjectName( IndexProcessManagerMBean.MBEAN_NAME );
 	        
 	        mbs.registerMBean( new ShutdownHook(), name );
-	        LocateRegistry.createRegistry( IndexProcessManagerMBean.JMX_PORT );
+	        LocateRegistry.createRegistry( getJmxPort() );
 			jmxServer = JMXConnectorServerFactory.newJMXConnectorServer( jmxUrl, null, mbs );
 			jmxServer.start();
 			

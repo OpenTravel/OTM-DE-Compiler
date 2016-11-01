@@ -23,8 +23,6 @@ package org.opentravel.schemacompiler.index;
  */
 public interface IndexProcessManagerMBean {
 	
-	public static final int JMX_PORT = 8080;
-	public static final String JMX_SERVER_URL = "service:jmx:rmi:///jndi/rmi://localhost:" + JMX_PORT + "/jmxrmi";
 	public static final String MBEAN_NAME = "org.opentravel.mbeans:type=IndexProcessManagerMBean";
 	
 	/**

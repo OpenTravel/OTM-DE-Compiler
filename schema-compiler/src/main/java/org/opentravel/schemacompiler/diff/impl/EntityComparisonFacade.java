@@ -17,7 +17,9 @@
 package org.opentravel.schemacompiler.diff.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAbstractEnumeration;
@@ -94,6 +96,9 @@ public class EntityComparisonFacade {
 			
 		} else if (entity instanceof TLOperation) {
 			init( (TLOperation) entity );
+			
+		} else if (entity instanceof TLContextualFacet) {
+			init( (TLContextualFacet) entity );
 			
 		} else if (entity instanceof TLExtensionPointFacet) {
 			init( (TLExtensionPointFacet) entity );
@@ -191,11 +196,7 @@ public class EntityComparisonFacade {
 		this.documentation = entity.getDocumentation();
 		this.memberFields.addAll( entity.getSharedFacet().getMemberFields() );
 		
-		for (TLContextualFacet facet : entity.getChoiceFacets()) {
-			if (facet.isLocalFacet()) {
-				this.memberFields.addAll( facet.getMemberFields() );
-			}
-		}
+		addContextualFacetFields( entity.getChoiceFacets(), new HashSet<TLContextualFacet>() );
 	}
 	
 	/**
@@ -216,18 +217,9 @@ public class EntityComparisonFacade {
 		this.memberFields.addAll( entity.getSummaryFacet().getMemberFields() );
 		this.memberFields.addAll( entity.getDetailFacet().getMemberFields() );
 		
-		for (TLContextualFacet facet : entity.getCustomFacets()) {
-			if (facet.isLocalFacet()) {
-				this.memberFields.addAll( facet.getMemberFields() );
-			}
-		}
-		for (TLContextualFacet facet : entity.getQueryFacets()) {
-			if (facet.isLocalFacet()) {
-				this.memberFields.addAll( facet.getMemberFields() );
-			}
-		}
-		// TODO: Add support for nested local contextual facets
-		// TODO: Add diff support for update facet comparisons
+		addContextualFacetFields( entity.getCustomFacets(), new HashSet<TLContextualFacet>() );
+		addContextualFacetFields( entity.getQueryFacets(), new HashSet<TLContextualFacet>() );
+		addContextualFacetFields( entity.getUpdateFacets(), new HashSet<TLContextualFacet>() );
 	}
 	
 	/**
@@ -249,6 +241,24 @@ public class EntityComparisonFacade {
 	}
 
 	/**
+	 * Initializes this comparison facade using the given contextual facet entity type.
+	 * 
+	 * @param entity  the entity from which to create the facade
+	 */
+	private void init(TLContextualFacet entity) {
+		this.entityType = entity.getClass();
+		this.owningLibrary = (TLLibrary) entity.getOwningLibrary();
+		this.name = entity.getName();
+		this.facetNames = ModelCompareUtils.getFacetNames( entity );
+		this.documentation = entity.getDocumentation();
+		
+		// NOTE: Not including member fields here since this is only called in the event
+		//       of non-local contextual facets.  The member fields will be compared under
+		//       the comparisons for the owning choice/business object.
+		
+	}
+	
+	/**
 	 * Initializes this comparison facade using the given extension point facet type.
 	 * 
 	 * @param entity  the entity from which to create the facade
@@ -259,6 +269,23 @@ public class EntityComparisonFacade {
 		this.extendsType = ModelCompareUtils.getExtendedEntity( entity );
 		this.documentation = entity.getDocumentation();
 		this.memberFields.addAll( entity.getMemberFields() );
+	}
+	
+	/**
+	 * Recursive method that adds all fields for the given contextual facet and all of its
+	 * children to the list of member fields for this facade.
+	 * 
+	 * @param facetList  the list of contextual facets to process
+	 * @param visitedFacets  the collection of facets already visited (prevents infinite loops)
+	 */
+	private void addContextualFacetFields(List<TLContextualFacet> facetList, Set<TLContextualFacet> visitedFacets) {
+		for (TLContextualFacet facet : facetList) {
+			if (!visitedFacets.contains( facet )) {
+				visitedFacets.add( facet );
+				this.memberFields.addAll( facet.getMemberFields() );
+				addContextualFacetFields( facet.getChildFacets(), visitedFacets );
+			}
+		}
 	}
 	
 	/**

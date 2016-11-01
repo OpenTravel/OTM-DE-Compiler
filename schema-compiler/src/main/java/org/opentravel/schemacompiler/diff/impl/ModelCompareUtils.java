@@ -19,6 +19,7 @@ package org.opentravel.schemacompiler.diff.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -35,6 +36,7 @@ import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAbstractEnumeration;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAliasOwner;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLEnumValue;
 import org.opentravel.schemacompiler.model.TLEquivalent;
@@ -150,16 +152,37 @@ public class ModelCompareUtils {
 	 * @return List<String>
 	 */
 	public static List<String> getFacetNames(TLFacetOwner entity) {
-		FacetCodegenDelegateFactory factory = new FacetCodegenDelegateFactory( null );
 		List<String> facetNames = new ArrayList<>();
 		
-		for (TLFacet facet : entity.getAllFacets()) {
-			if (factory.getDelegate( facet ).hasContent()) {
-				facetNames.add( facet.getFacetType().getIdentityName(
-						FacetCodegenUtils.getFacetName( facet ) ) );
+		buildFacetNames( entity.getAllFacets(), facetNames,
+				new FacetCodegenDelegateFactory( null ), new HashSet<TLFacet>() );
+		return facetNames;
+	}
+	
+	/**
+	 * Recursive method that constructs the list of all facet names.
+	 * 
+	 * @param facets  the list of facets from which to collect names
+	 * @param facetNames  the list of facet names being assembled
+	 * @param factory  the facet delegate factory to use for facet analysis
+	 * @param visitedFacets  the list of facets already visited (prevents infinite loops)
+	 */
+	private static void buildFacetNames(List<? extends TLFacet> facets, List<String> facetNames,
+			FacetCodegenDelegateFactory factory, Set<TLFacet> visitedFacets) {
+		for (TLFacet facet : facets) {
+			if (!visitedFacets.contains( facet )) {
+				visitedFacets.add( facet );
+				
+				if (factory.getDelegate( facet ).hasContent()) {
+					facetNames.add( facet.getFacetType().getIdentityName(
+							FacetCodegenUtils.getFacetName( facet ) ) );
+				}
+				if (facet instanceof TLContextualFacet) {
+					buildFacetNames( ((TLContextualFacet) facet).getChildFacets(),
+							facetNames, factory, visitedFacets );
+				}
 			}
 		}
-		return facetNames;
 	}
 	
 	/**

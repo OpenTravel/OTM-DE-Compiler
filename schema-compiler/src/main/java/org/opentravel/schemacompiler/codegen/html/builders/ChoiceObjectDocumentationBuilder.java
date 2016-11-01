@@ -17,11 +17,8 @@ package org.opentravel.schemacompiler.codegen.html.builders;
 
 import org.opentravel.schemacompiler.codegen.html.Content;
 import org.opentravel.schemacompiler.codegen.html.writers.ChoiceObjectWriter;
-import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLExtension;
-import org.opentravel.schemacompiler.model.TLFacet;
-import org.opentravel.schemacompiler.model.TLFacetType;
 
 
 /**
@@ -43,15 +40,8 @@ public class ChoiceObjectDocumentationBuilder extends
 
 	@Override
 	protected void initializeFacets(TLChoiceObject t) {
-		for (TLFacet facet : FacetCodegenUtils.getAllFacetsOfType(element,
-				TLFacetType.CHOICE)) {
-			addFacet(facet);
-		}
-
-		for (TLFacet facet : FacetCodegenUtils.getAllFacetsOfType(element,
-				TLFacetType.SHARED)) {
-			addFacet(facet);
-		}
+		addFacet( t.getSharedFacet() );
+		addContextualFacets( t.getChoiceFacets() );
 	}
 
 	@Override
