@@ -15,8 +15,9 @@
     limitations under the License.
 
 --%>
+<%@taglib prefix="tiles" uri="http://tiles.apache.org/tags-tiles"%>
 <%@taglib prefix="spring" uri="http://www.springframework.org/tags" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <c:url var="namespaceUrl" value="/console/browse.html">
 	<c:param name="baseNamespace" value="${item.baseNamespace}" />
 </c:url>
@@ -24,10 +25,14 @@
 	<c:param name="baseNamespace" value="${item.baseNamespace}" />
 	<c:param name="filename" value="${item.filename}" />
 </c:url>
-<table id="browsetable">
+
+<c:set var="currentTab" value="INFO"/>
+<%@include file="libraryTabs.jsp" %>
+
+<table id="itemtable">
 	<tr class="d0">
-		<td>Library Name:</td>
-		<td><a href="${allVersionsUrl}">${item.libraryName}</a></td>
+		<td width="1%">Library Name:</td>
+		<td>${item.libraryName}</td>
 	</tr>
 	<tr class="d1">
 		<td>Namespace:</td>
@@ -35,13 +40,17 @@
 	</tr>
 	<tr class="d0">
 		<td>Version:</td>
-		<td>${item.version}</td>
+		<td>${item.version} <small>(<a href="${allVersionsUrl}">all versions</a>)</small></td>
 	</tr>
 	<tr class="d1">
+		<td>Description:</td>
+		<td><c:if test="${indexItem != null}">${indexItem.itemDescription}</c:if></td>
+	</tr>
+	<tr class="d0">
 		<td>Filename:</td>
 		<td>${item.filename}</td>
 	</tr>
-	<tr class="d0">
+	<tr class="d1">
 		<td>Status:</td>
 		<td><spring:message code="${item.status.toString()}" />
 			<c:if test="${sessionScope.isAdminAuthorized}">
@@ -96,11 +105,30 @@
 			</c:if>
 		</td>
 	</tr>
-	<tr class="d1">
-		<td>Repository State:</td>
+	<tr class="d0">
+		<td>Repository&nbsp;State:</td>
 		<td><spring:message code="${item.state.toString()}" />
-			<c:if test="${sessionScope.isAdminAuthorized}">
-				<c:if test="${item.state.toString()=='MANAGED_LOCKED'}">
+			<c:if test="${item.state.toString()=='MANAGED_LOCKED'}">
+				<c:if test="${item.lockedByUser != null}">
+					<small>(Locked by
+					<c:choose>
+						<c:when test="${lockedByUser != null}">
+							<c:choose>
+								<c:when test="${lockedByUser.emailAddress != null}">
+									<a href="mailto:${lockedByUser.emailAddress}">${lockedByUser.firstName} ${lockedByUser.lastName}</a>
+								</c:when>
+								<c:otherwise>
+									${lockedByUser.firstName} ${lockedByUser.lastName}
+								</c:otherwise>
+							</c:choose>
+						</c:when>
+						<c:otherwise>
+							${item.lockedByUser}
+						</c:otherwise>
+					</c:choose>
+					)</small>
+				</c:if>
+				<c:if test="${sessionScope.isAdminAuthorized}">
 					<c:url var="unlockItemUrl" value="/console/adminUnlockItem.html">
 						<c:param name="baseNamespace" value="${item.baseNamespace}" />
 						<c:param name="filename" value="${item.filename}" />
@@ -111,20 +139,15 @@
 			</c:if>
 		</td>
 	</tr>
-	<c:if test="${item.lockedByUser != null}">
-		<tr class="d0">
-			<td>Locked By:</td>
-			<td>${item.lockedByUser}</td>
-		</tr>
-	</c:if>
 	<c:if test="${sessionScope.isAdminAuthorized}">
 		<c:url var="deleteItemUrl" value="/console/adminDeleteItem.html">
 			<c:param name="baseNamespace" value="${item.baseNamespace}" />
 			<c:param name="filename" value="${item.filename}" />
 			<c:param name="version" value="${item.version}" />
 		</c:url>
-		<tr class="d0">
-			<td colspan="2"><br/>[ <a href="${deleteItemUrl}">Delete this Item</a> ]</td>
+		<tr class="d1">
+			<td>Action(s):</td>
+			<td>[ <a href="${deleteItemUrl}">Delete this Item</a> ]</td>
 		</tr>
 	</c:if>
 </table>

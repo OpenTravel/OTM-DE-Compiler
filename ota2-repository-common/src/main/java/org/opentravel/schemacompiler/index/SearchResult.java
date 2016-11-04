@@ -32,6 +32,7 @@ public abstract class SearchResult<T> implements IndexingTerms {
     private Class<?> entityType;
     private String itemNamespace;
     private String itemName;
+    private String itemDescription;
     private T itemContent;
     private boolean contentInitialized = false;
     
@@ -48,6 +49,7 @@ public abstract class SearchResult<T> implements IndexingTerms {
 		this.searchIndexId = doc.get( IDENTITY_FIELD );
 		this.itemNamespace = doc.get( ENTITY_NAMESPACE_FIELD );
 		this.itemName = doc.get( ENTITY_NAME_FIELD );
+		this.itemDescription = doc.get( ENTITY_DESCRIPTION_FIELD );
 		this.searchService = searchService;
 		
 		try {
@@ -101,6 +103,15 @@ public abstract class SearchResult<T> implements IndexingTerms {
 	 */
 	public String getItemName() {
 		return itemName;
+	}
+
+	/**
+	 * Returns the description of the OTM item.
+	 *
+	 * @return String
+	 */
+	public String getItemDescription() {
+		return itemDescription;
 	}
 
 	/**

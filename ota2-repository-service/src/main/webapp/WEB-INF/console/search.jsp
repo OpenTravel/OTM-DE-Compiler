@@ -17,6 +17,7 @@
 --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <c:if test="${latestVersions}"><c:set var="latestVersionsCheckState" value="checked" /></c:if>
 <c:if test="${finalVersions}"><c:set var="finalVersionsCheckState" value="checked" /></c:if>
 <form id="searchForm" action="${pageContext.request.contextPath}/console/search.html" method="GET">
@@ -45,15 +46,25 @@
 	</c:if>
 	<c:set var="rowStyle" value="d0" />
 	<c:forEach var="item" items="${searchResults}">
-		<c:url var="itemUrl" value="/console/itemDetails.html">
+		<c:url var="itemUrl" value="/console/libraryDictionary.html">
 			<c:param name="baseNamespace" value="${item.baseNamespace}" />
 			<c:param name="filename" value="${item.filename}" />
 			<c:param name="version" value="${item.version}" />
 		</c:url>
+		<c:url var="allVersionsUrl" value="/console/browse.html">
+			<c:param name="baseNamespace" value="${item.baseNamespace}" />
+			<c:param name="filename" value="${item.filename}" />
+		</c:url>
 		<tr class="${rowStyle}">
-			<td><a href="${itemUrl}">${item.label}</a></td>
-			<td><c:if test="${item.version != null}"><a href="${itemUrl}">${item.version}</a></c:if></td>
-			<td><c:if test="${item.status != null}">${item.status}</c:if></td>
+			<td>
+				<img src="${pageContext.request.contextPath}/images/library.png" />
+				<a href="${itemUrl}">${item.label}</a>
+			</td>
+			<td>
+				<c:if test="${item.version != null}">${item.version}</c:if>
+				<c:if test="${allVersionsUrl != null}"><small>(<a href="${allVersionsUrl}">all versions</a>)</small></c:if>
+			</td>
+			<td><c:if test="${item.status != null}"><spring:message code="${item.status.toString()}" /></c:if></td>
 			<td><c:if test="${item.lastModified != null}"><fmt:formatDate value="${item.lastModified}" type="date" pattern="dd-MMM-yyyy" /></c:if></td>
 		</tr>
 		<c:choose>

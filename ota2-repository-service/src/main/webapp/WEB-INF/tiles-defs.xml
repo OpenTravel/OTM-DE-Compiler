@@ -26,6 +26,11 @@
 		<put-attribute name="headerMenu" value="/WEB-INF/tiles/headerMenu.jsp" />
 		<put-attribute name="footer" value="/WEB-INF/tiles/footer.jsp" />
 	</definition>
+	<definition name="baseLayoutNoTitle" template="/WEB-INF/tiles/baseLayoutNoTitle.jsp">
+		<put-attribute name="headerTitle" value="/WEB-INF/tiles/headerTitle.jsp" />
+		<put-attribute name="headerMenu" value="/WEB-INF/tiles/headerMenu.jsp" />
+		<put-attribute name="footer" value="/WEB-INF/tiles/footer.jsp" />
+	</definition>
 	<definition name="homePage" extends="search" />
 	<definition name="browse" extends="baseLayout">
 		<put-attribute name="title" value="OTA2.0 Repository - Browse" />
@@ -37,10 +42,26 @@
 		<put-attribute name="pageTitle" value="Search Repository" />
 		<put-attribute name="body" value="/WEB-INF/console/search.jsp" />
 	</definition>
-	<definition name="itemDetails" extends="baseLayout">
-		<put-attribute name="title" value="OTA2.0 Repository - Item Details" />
-		<put-attribute name="pageTitle" value="Item Details" />
-		<put-attribute name="body" value="/WEB-INF/console/itemDetails.jsp" />
+	<definition name="lockedLibraries" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Locked Libraries" />
+		<put-attribute name="pageTitle" value="My Locked Libraries" />
+		<put-attribute name="body" value="/WEB-INF/console/lockedLibraries.jsp" />
+	</definition>
+	<definition name="libraryDictionary" extends="baseLayoutNoTitle">
+		<put-attribute name="title" value="OTA2.0 Repository - Library Dictionary" />
+		<put-attribute name="body" value="/WEB-INF/console/libraryDictionary.jsp" />
+	</definition>
+	<definition name="libraryUsage" extends="baseLayoutNoTitle">
+		<put-attribute name="title" value="OTA2.0 Repository - Library Usage" />
+		<put-attribute name="body" value="/WEB-INF/console/libraryUsage.jsp" />
+	</definition>
+	<definition name="libraryValidation" extends="baseLayoutNoTitle">
+		<put-attribute name="title" value="OTA2.0 Repository - Library Errors &amp; Warnings" />
+		<put-attribute name="body" value="/WEB-INF/console/libraryValidation.jsp" />
+	</definition>
+	<definition name="libraryInfo" extends="baseLayoutNoTitle">
+		<put-attribute name="title" value="OTA2.0 Repository - Library Info" />
+		<put-attribute name="body" value="/WEB-INF/console/libraryInfo.jsp" />
 	</definition>
 	<definition name="createNamespace" extends="baseLayout">
 		<put-attribute name="title" value="OTA2.0 Repository - Create Namespace" />

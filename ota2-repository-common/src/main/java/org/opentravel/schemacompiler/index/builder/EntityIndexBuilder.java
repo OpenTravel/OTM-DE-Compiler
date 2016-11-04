@@ -31,6 +31,7 @@ import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.util.BytesRef;
+import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
 import org.opentravel.schemacompiler.index.IndexingTerms;
 import org.opentravel.schemacompiler.index.IndexingUtils;
 import org.opentravel.schemacompiler.model.NamedEntity;
@@ -47,6 +48,7 @@ import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLDocumentationItem;
+import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 import org.opentravel.schemacompiler.model.TLEnumValue;
 import org.opentravel.schemacompiler.model.TLEquivalent;
 import org.opentravel.schemacompiler.model.TLExample;
@@ -110,6 +112,7 @@ public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> i
 			Boolean searchIndexInd = isSearchIndexEntity( sourceObject );
 			String identityKey = IndexingUtils.getIdentityKey( sourceObject, searchIndexInd );
 			String owningLibraryIdentity = IndexingUtils.getIdentityKey( owningLibrary );
+			String entityDescription = getEntityDescription( sourceObject );
 			String entityContent = IndexContentHelper.marshallEntity( sourceObject );
 			Field.Store nonStoreField = searchIndexInd ? Field.Store.NO : Field.Store.YES;
 			Document indexDoc = new Document();
@@ -127,6 +130,9 @@ public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> i
 			indexDoc.add( new StringField( LATEST_VERSION_AT_OBSOLETE_FIELD, latestVersionAtObsolete + "", nonStoreField ) );
 			indexDoc.add( new TextField( KEYWORDS_FIELD, getFreeTextSearchContent(), nonStoreField ) );
 			
+			if (entityDescription != null) {
+				indexDoc.add( new StringField( ENTITY_DESCRIPTION_FIELD, entityDescription, Field.Store.YES ) );
+			}
 			if (owningLibrary.getStatus() != null) {
 				indexDoc.add( new StringField( STATUS_FIELD, owningLibrary.getStatus().toString(), Field.Store.YES ) );
 			}
@@ -225,6 +231,26 @@ public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> i
 			entityName = entity.getLocalName();
 		}
 		return entityName;
+	}
+	
+	/**
+	 * Returns the free-text description of the entity or null if a description
+	 * has not been provided.
+	 * 
+	 * @param entity
+	 * @return
+	 */
+	private String getEntityDescription(NamedEntity entity) {
+		String description = null;
+		
+		if (entity instanceof TLDocumentationOwner) {
+            TLDocumentation doc = DocumentationFinder.getDocumentation( (TLDocumentationOwner) entity );
+			
+            if (doc != null) {
+            	description = doc.getDescription();
+            }
+		}
+		return description;
 	}
 	
 	/**

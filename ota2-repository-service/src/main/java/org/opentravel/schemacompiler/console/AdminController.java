@@ -962,7 +962,7 @@ public class AdminController extends BaseController {
 
                 } else {
                     setErrorMessage("You do not have permission to delete the repository item.", model);
-                    targetPage = new ViewItemController().itemDetails(baseNamespace, filename, version, session, model);
+                    targetPage = new ViewItemController().libraryInfo(baseNamespace, filename, version, session, model);
                 }
             } catch (Exception e) {
                 log.error("Unable to delete the repository item.", e);
@@ -1038,7 +1038,7 @@ public class AdminController extends BaseController {
                 setErrorMessage("Unable to promote the repository item (see server log for details).", model);
 
             } finally {
-                targetPage = new ViewItemController().itemDetails(baseNamespace, filename, version, session, model);
+                targetPage = new ViewItemController().libraryInfo(baseNamespace, filename, version, session, model);
             }
         }
         if (targetPage == null) {
@@ -1110,8 +1110,8 @@ public class AdminController extends BaseController {
                         "Unable to demote the repository item (see server log for details).", model);
 
             } finally {
-                targetPage = new ViewItemController().itemDetails(baseNamespace, filename, version,
-                        session, model);
+                targetPage = new ViewItemController().libraryInfo(
+                		baseNamespace, filename, version, session, model);
             }
         }
         if (targetPage == null) {
@@ -1181,14 +1181,14 @@ public class AdminController extends BaseController {
                 setErrorMessage("Unable to unlock the repository item (see server log for details).", model);
 
             } finally {
-                targetPage = new ViewItemController().itemDetails(baseNamespace, filename, version,
-                        session, model);
+                targetPage = new ViewItemController().libraryInfo(
+                		baseNamespace, filename, version, session, model);
             }
         }
         if (targetPage == null) {
             try {
-                RepositoryItem item = getRepositoryManager().getRepositoryItem(baseNamespace,
-                        filename, version);
+                RepositoryItem item = getRepositoryManager().getRepositoryItem(
+                		baseNamespace, filename, version);
 
                 model.addAttribute("item", item);
                 targetPage = applyCommonValues(session, model, "adminUnlockItem");
@@ -1248,14 +1248,14 @@ public class AdminController extends BaseController {
 
                         setStatusMessage("Repository item CRC recalculated successfully: " + filename, model);
                     }
-                    targetPage = new ViewItemController().itemDetails(baseNamespace, filename,
-                            version, session, model);
+                    targetPage = new ViewItemController().libraryInfo(
+                    		baseNamespace, filename, version, session, model);
 
                 } else {
                     setErrorMessage(
                             "You do not have permission to recalculate the repository item's CRC.", model);
-                    targetPage = new ViewItemController().itemDetails(baseNamespace, filename,
-                            version, session, model);
+                    targetPage = new ViewItemController().libraryInfo(
+                    		baseNamespace, filename, version, session, model);
                 }
             } catch (Exception e) {
                 log.error("Unable to recalculate the repository item's CRC.", e);

@@ -46,6 +46,10 @@
 <a href="${pageContext.request.contextPath}/console/browse.html">BROWSE</a>
 &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
 <a href="${pageContext.request.contextPath}/console/search.html">SEARCH</a>
+<c:if test="${sessionScope.user != null}">
+&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+<a href="${pageContext.request.contextPath}/console/lockedLibraries.html">LOCKED LIBRARIES</a>
+</c:if>
 <c:if test="${sessionScope.isAdminAuthorized}">
 	&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
 	<a href="${pageContext.request.contextPath}/console/adminHome.html">ADMINISTRATION</a>

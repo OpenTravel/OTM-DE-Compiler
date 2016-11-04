@@ -18,6 +18,7 @@ package org.opentravel.schemacompiler.console;
 import java.io.File;
 import java.util.Date;
 
+import org.opentravel.schemacompiler.index.LibrarySearchResult;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryItemState;
@@ -35,6 +36,7 @@ public class NamespaceItem {
     private String filename;
     private String label;
     private String version;
+    private String description;
     private TLLibraryStatus status;
     private RepositoryItemState state;
     private Date lastModified;
@@ -64,10 +66,9 @@ public class NamespaceItem {
     }
 
     /**
-     * Constructor that represents a child namespace of the one currently being displayed.
+     * Constructor for a namespace item that is a managed repository item.
      * 
-     * @param itemUrl
-     *            the relative URL of the namespace item
+     * @param item  the managed repository item
      */
     public NamespaceItem(RepositoryItem item) {
         this.baseNamespace = item.getBaseNamespace();
@@ -77,6 +78,25 @@ public class NamespaceItem {
         this.status = item.getStatus();
         this.state = item.getState();
         this.lastModified = getLastModified(item);
+    }
+
+    /**
+     * Constructor for a namespace item that is a managed repository item obtained
+     * from the free-text search index.
+     * 
+     * @param searchIndexItem  the repository item record retreived from the search index
+     */
+    public NamespaceItem(LibrarySearchResult searchIndexItem) {
+    	RepositoryItem item = searchIndexItem.getRepositoryItem();
+    	
+        this.baseNamespace = item.getBaseNamespace();
+        this.filename = item.getFilename();
+        this.label = item.getLibraryName();
+        this.version = item.getVersion();
+        this.status = item.getStatus();
+        this.state = item.getState();
+        this.lastModified = getLastModified(item);
+        this.description = searchIndexItem.getItemDescription();
     }
 
     /**
@@ -116,6 +136,15 @@ public class NamespaceItem {
     }
 
     /**
+	 * Returns the value of the 'description' field.
+	 *
+	 * @return String
+	 */
+	public String getDescription() {
+		return description;
+	}
+
+	/**
      * Returns the value of the 'status' field.
      * 
      * @return TLLibraryStatus

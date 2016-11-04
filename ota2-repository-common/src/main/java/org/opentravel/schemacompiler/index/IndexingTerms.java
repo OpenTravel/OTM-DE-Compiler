@@ -23,16 +23,17 @@ public interface IndexingTerms {
 	
 	// Common fields used for all indexed entities
 	
-	public static final String IDENTITY_FIELD         = "identity";
-	public static final String ENTITY_TYPE_FIELD      = "entityType";
-	public static final String ENTITY_NAME_FIELD      = "entityName";
-	public static final String ENTITY_NAMESPACE_FIELD = "entityNamespace";
-	public static final String VERSION_FIELD          = "version";
-	public static final String STATUS_FIELD           = "status";
-	public static final String LOCKED_BY_USER_FIELD   = "lockedBy";
-	public static final String KEYWORDS_FIELD         = "keywords";
-	public static final String CONTENT_DATA_FIELD     = "contentData";
-	public static final String SEARCH_INDEX_FIELD     = "searchIndexInd";
+	public static final String IDENTITY_FIELD           = "identity";
+	public static final String ENTITY_TYPE_FIELD        = "entityType";
+	public static final String ENTITY_NAME_FIELD        = "entityName";
+	public static final String ENTITY_NAMESPACE_FIELD   = "entityNamespace";
+	public static final String ENTITY_DESCRIPTION_FIELD = "entityDescription";
+	public static final String VERSION_FIELD            = "version";
+	public static final String STATUS_FIELD             = "status";
+	public static final String LOCKED_BY_USER_FIELD     = "lockedBy";
+	public static final String KEYWORDS_FIELD           = "keywords";
+	public static final String CONTENT_DATA_FIELD       = "contentData";
+	public static final String SEARCH_INDEX_FIELD       = "searchIndexInd";
     
 	// Common fields used to exclude library/entity versions from search results
 	

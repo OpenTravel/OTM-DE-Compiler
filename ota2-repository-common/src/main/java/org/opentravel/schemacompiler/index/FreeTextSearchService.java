@@ -64,9 +64,9 @@ public abstract class FreeTextSearchService implements IndexingTerms {
 	private static final Set<String> nonContentAttrs = new HashSet<>( Arrays.asList(
 			IDENTITY_FIELD, ENTITY_TYPE_FIELD, ENTITY_NAME_FIELD, ENTITY_NAMESPACE_FIELD,
 			BASE_NAMESPACE_FIELD, FILENAME_FIELD, VERSION_FIELD, VERSION_SCHEME_FIELD,
-			STATUS_FIELD, LOCKED_BY_USER_FIELD, REFERENCED_LIBRARY_FIELD, PREFIX_MAPPING_FIELD,
-			OWNING_LIBRARY_FIELD, EXTENDS_ENTITY_FIELD, REFERENCE_IDENTITY_FIELD,
-			FACET_OWNER_FIELD
+			ENTITY_DESCRIPTION_FIELD, STATUS_FIELD, LOCKED_BY_USER_FIELD,
+			REFERENCED_LIBRARY_FIELD, PREFIX_MAPPING_FIELD, OWNING_LIBRARY_FIELD,
+			EXTENDS_ENTITY_FIELD, REFERENCE_IDENTITY_FIELD, FACET_OWNER_FIELD
 		) );
 	private static final Set<String> contentAttr = new HashSet<>( Arrays.asList( CONTENT_DATA_FIELD ) );
 	
@@ -963,7 +963,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * @return List<ValidationResult>
      * @throws RepositoryException  thrown if an error occurs while performing the search
      */
-    public List<ValidationResult> getValidationFindings(String searchIndexId, String searchField) throws RepositoryException {
+    private List<ValidationResult> getValidationFindings(String searchIndexId, String searchField) throws RepositoryException {
         try {
     		Query query = new TermQuery( new Term( searchField, searchIndexId ) );
         	List<Document> queryResults = executeQuery( query, null );

@@ -171,6 +171,9 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
 			indexDoc.add( new StringField( LATEST_VERSION_AT_OBSOLETE_FIELD, latestVersionAtObsolete + "", Field.Store.NO ) );
 			indexDoc.add( new TextField( KEYWORDS_FIELD, getFreeTextSearchContent(), Field.Store.NO ) );
 			
+			if (library.getComments() != null) {
+				indexDoc.add( new StringField( ENTITY_DESCRIPTION_FIELD, library.getComments(), Field.Store.YES ) );
+			}
 			if (library.getStatus() != null) {
 				indexDoc.add( new StringField( STATUS_FIELD, library.getStatus().toString(), Field.Store.YES ) );
 			}

@@ -220,6 +220,7 @@ public class FacetIndexingService implements IndexingTerms {
 		String libraryStatus = facetOwner.get( STATUS_FIELD );
 		String lockedByUser = facetOwner.get( LOCKED_BY_USER_FIELD );
 		String extendsEntityKey = facetOwner.get( EXTENDS_ENTITY_FIELD );
+		String entityDescription = facetOwner.get( ENTITY_DESCRIPTION_FIELD );
 		BytesRef facetOwnerContent = facetOwner.getBinaryValue( CONTENT_DATA_FIELD );
 		String[] referenceIdentityKeys = facetOwner.getValues( REFERENCE_IDENTITY_FIELD );
 		String[] referencedEntityKeys = facetOwner.getValues( REFERENCED_ENTITY_FIELD );
@@ -237,6 +238,9 @@ public class FacetIndexingService implements IndexingTerms {
 		indexDoc.add( new StringField( LATEST_VERSION_AT_FINAL_FIELD, facetOwner.get( LATEST_VERSION_AT_FINAL_FIELD ), Field.Store.NO ) );
 		indexDoc.add( new StringField( LATEST_VERSION_AT_OBSOLETE_FIELD, facetOwner.get( LATEST_VERSION_AT_OBSOLETE_FIELD ), Field.Store.NO ) );
 		
+		if (entityDescription != null) {
+			indexDoc.add( new StringField( ENTITY_DESCRIPTION_FIELD, entityDescription, Field.Store.YES ) );
+		}
 		if (libraryStatus != null) {
 			indexDoc.add( new StringField( STATUS_FIELD, libraryStatus, Field.Store.YES ) );
 		}

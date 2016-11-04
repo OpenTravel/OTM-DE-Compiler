@@ -77,6 +77,27 @@ h3 a {text-decoration: none;}
 #browsetable td.number {text-align: right; width: 80px;}
 #browsetable th.number {text-align: right;}
 
+ul.tab {list-style-type: none; margin: 0; padding: 0; overflow: hidden; border: 1px solid #ccc; background-color: #f1f1f1;}
+ul.tab li {float: left; border-right: 1px solid #ccc;}
+ul.tab li a {display: inline-block; color: black; text-align: center; padding: 7px 8px; text-decoration: none; transition: 0.3s; font-size: 17px;}
+ul.tab li a:hover {background-color: #ddd;}
+ul.tab li a:focus {background-color: #ccc;}
+.activeTab {background-color: #ccc; font-weight:bold;}
+
+#itemtable {font-family: arial, helvetica, sans serif; width:100%; margin:auto; border: 1px solid #ccc; border-collapse:collapse;}
+#itemtable td, table th {font-size:1em; border:none; padding:3px 7px 2px 7px;}
+#itemtable th {font-size:14px; line-height:18px; height:20px; text-align:left; padding-top:5px; padding-bottom:4px; background-color:#006699; color:#ffffff;}
+#itemtable tr.d0 {background-color:#fff; line-height:22px;}
+#itemtable tr.d1 {background:#eaeaea; line-height:22px;}
+#itemtable tr.h0 td {padding-top: 5px; padding-bottom:10px; color:#333;}
+#itemtable tr.h0 em {color:#333; text-decoration: none; padding: 1px 2px; background: #fff799;}
+#itemtable tr.h0 em:hover {color:#666; text-decoration: none; background: none;}
+#itemtable tr.h1 td {padding-top: 5px; padding-bottom:10px; color:#333; background: #eaeaea;}
+#itemtable tr.h1 em {color:#333; text-decoration: none; padding: 1px 2px; background: #fff799;}
+#itemtable tr.h1 em:hover {color:#666; text-decoration: none; background: none;}
+#itemtable td.number {text-align: right; width: 80px;}
+#itemtable th.number {text-align: right;}
+
 #changeNameTable {font-family: arial, helvetica, sans serif; color:#666666; float:left; border-collapse:collapse; width:1%;}
 #changeNameTable td {text-align:left; white-space:nowrap; padding-top:5px; padding-bottom:5px;}
 

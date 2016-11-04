@@ -25,6 +25,10 @@
 
 	<context:property-placeholder location="file:${user.dir}/src/test/resources/indexing-service.properties" />
 	
+	<bean id="jmxPort" class="java.lang.Integer">
+		<constructor-arg index="0" value="${org.opentravel.index.manager.jmx.port}" />
+	</bean>
+	
 	<bean id="agentJvmOpts" class="java.lang.String">
 		<constructor-arg index="0" value="${org.opentravel.index.agent.jvmOpts}" />
 	</bean>

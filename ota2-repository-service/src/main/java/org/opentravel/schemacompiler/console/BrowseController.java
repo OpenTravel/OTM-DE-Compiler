@@ -23,6 +23,10 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opentravel.ns.ota2.security_v01_00.RepositoryPermission;
+import org.opentravel.schemacompiler.index.FreeTextSearchService;
+import org.opentravel.schemacompiler.index.FreeTextSearchServiceFactory;
+import org.opentravel.schemacompiler.index.IndexingUtils;
+import org.opentravel.schemacompiler.index.LibrarySearchResult;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
@@ -47,16 +51,11 @@ public class BrowseController extends BaseController {
     /**
      * Called by the Spring MVC controller to display the application browse page.
      * 
-     * @param baseNamespace
-     *            the root namespace parameter from the URL
-     * @param path
-     *            the sub-namespace path relative to the base namespace
-     * @param filename
-     *            the filename of the selected library
-     * @param session
-     *            the HTTP session that contains information about an authenticated user
-     * @param model
-     *            the model context to be used when rendering the page view
+     * @param baseNamespace  the root namespace parameter from the URL
+     * @param path  the sub-namespace path relative to the base namespace
+     * @param filename  the filename of the selected library
+     * @param session  the HTTP session that contains information about an authenticated user
+     * @param model  the model context to be used when rendering the page view
      * @return String
      */
     @RequestMapping({ "/browse.html", "/browse.htm" })
@@ -83,17 +82,15 @@ public class BrowseController extends BaseController {
                     }
                 }
             } else if (filename != null) { // display all versions of the selected library
-                List<RepositoryItem> allItems = repositoryManager.listItems(baseNamespace, false,
-                        true);
+                List<RepositoryItem> allItems = repositoryManager.listItems(baseNamespace, false, true);
 
                 for (RepositoryItem item : allItems) {
                     if (item.getFilename().equals(filename)) {
-                        List<RepositoryItem> versionHistory = repositoryManager
-                                .getVersionHistory(item);
+                        List<RepositoryItem> versionHistory = repositoryManager.getVersionHistory(item);
 
                         for (RepositoryItem itemVersion : versionHistory) {
                             if (securityManager.isReadAuthorized(user, itemVersion)) {
-                                browseItems.add(new NamespaceItem(itemVersion));
+                            	browseItems.add( createNamespaceItem( itemVersion ) );
                             }
                         }
                         model.addAttribute("libraryName", item.getLibraryName());
@@ -102,22 +99,20 @@ public class BrowseController extends BaseController {
 
             } else { // display sub-namespaces and latest version of each library
                 List<String> nsChildren = repositoryManager.listNamespaceChildren(baseNamespace);
-                List<RepositoryItem> itemList = repositoryManager.listItems(baseNamespace, true,
-                        true);
+                List<RepositoryItem> itemList = repositoryManager.listItems(baseNamespace, true, true);
 
                 for (String childPath : nsChildren) {
                     String childNS = RepositoryNamespaceUtils.appendChildPath(baseNamespace,
                             childPath);
 
-                    if (securityManager
-                            .isAuthorized(user, childNS, RepositoryPermission.READ_FINAL)) {
+                    if (securityManager.isAuthorized(user, childNS, RepositoryPermission.READ_FINAL)) {
                         browseItems.add(new NamespaceItem(childNS, childPath));
                     }
                 }
 
                 for (RepositoryItem item : itemList) {
                     if (securityManager.isReadAuthorized(user, item)) {
-                        browseItems.add(new NamespaceItem(item));
+                    	browseItems.add( createNamespaceItem( item ) );
                     }
                 }
             }
@@ -151,16 +146,45 @@ public class BrowseController extends BaseController {
     }
 
     /**
+     * Called by the Spring MVC controller to display the application browse page.
+     * 
+     * @param baseNamespace  the root namespace parameter from the URL
+     * @param path  the sub-namespace path relative to the base namespace
+     * @param filename  the filename of the selected library
+     * @param session  the HTTP session that contains information about an authenticated user
+     * @param model  the model context to be used when rendering the page view
+     * @return String
+     */
+    @RequestMapping({ "/lockedLibraries.html", "/lockedLibraries.htm" })
+    public String lockedLibraries(HttpSession session, Model model) {
+        try {
+            UserPrincipal user = getCurrentUser(session);
+        	List<LibrarySearchResult> lockedLibraries;
+        	
+            if (user != null) {
+            	FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
+            	lockedLibraries = searchService.getLockedLibraries( user.getUserId(), false );
+            } else {
+            	lockedLibraries = new ArrayList<>();
+            }
+            model.addAttribute("lockedLibraries", lockedLibraries);
+            
+        } catch (Throwable t) {
+            log.error("An error occured while displaying the locked libraries page.", t);
+            setErrorMessage(
+                    "An error occured while displaying the page (see server log for details).",
+                    model);
+        }
+        return applyCommonValues(model, "lockedLibraries");
+    }
+
+    /**
      * Called by the Spring MVC controller to create a new child namespace URI for the repository.
      * 
-     * @param baseNamespace
-     *            the base namespace from which the extension should be created
-     * @param nsExtension
-     *            the child namespace extension to create from the base
-     * @param session
-     *            the HTTP session that contains information about an authenticated user
-     * @param model
-     *            the model context to be used when rendering the page view
+     * @param baseNamespace  the base namespace from which the extension should be created
+     * @param nsExtension  the child namespace extension to create from the base
+     * @param session  the HTTP session that contains information about an authenticated user
+     * @param model  the model context to be used when rendering the page view
      * @return String
      */
     @RequestMapping({ "/createNamespace.html", "/createNamespace.htm" })
@@ -194,14 +218,10 @@ public class BrowseController extends BaseController {
     /**
      * Called by the Spring MVC controller to create a new child namespace URI for the repository.
      * 
-     * @param baseNamespace
-     *            the base namespace from which the extension should be created
-     * @param nsExtension
-     *            the child namespace extension to create from the base
-     * @param session
-     *            the HTTP session that contains information about an authenticated user
-     * @param model
-     *            the model context to be used when rendering the page view
+     * @param baseNamespace  the base namespace from which the extension should be created
+     * @param nsExtension  the child namespace extension to create from the base
+     * @param session  the HTTP session that contains information about an authenticated user
+     * @param model  the model context to be used when rendering the page view
      * @return String
      */
     @RequestMapping({ "/deleteNamespace.html", "/deleteNamespace.htm" })
@@ -238,8 +258,7 @@ public class BrowseController extends BaseController {
      * specified. The list of items is sorted from the root namespace to the lowest level child
      * above the one provided.
      * 
-     * @param ns
-     *            the namespace URI for which to construct parent namespace items
+     * @param ns  the namespace URI for which to construct parent namespace items
      * @return List<NamespaceItem>
      * @throws RepositoryException
      *             thrown if the repository's root namespaces cannot be accessed or the given
@@ -269,5 +288,28 @@ public class BrowseController extends BaseController {
             throw new RepositoryException(e.getMessage(), e);
         }
     }
-
+    
+    /**
+     * Attempts to create a <code>NamespaceItem</code> using an index document returned from the
+     * free-text search service.  If no search index document can be located, the item will be constructed
+     * directly from the <code>RepositoryItem</code> provided.
+     * 
+     * @param item  the repository item from which to construct the namespace item
+     * @return NamespaceItem
+     */
+    private NamespaceItem createNamespaceItem(RepositoryItem item) throws RepositoryException {
+        FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
+    	String itemIndexId = IndexingUtils.getIdentityKey( item );
+    	LibrarySearchResult indexItem = searchService.getLibrary( itemIndexId, false );
+    	NamespaceItem nsItem;
+    	
+    	if (indexItem != null) {
+            nsItem = new NamespaceItem( indexItem );
+    	} else {
+    		// fallback if not returned from the search index
+    		nsItem = new NamespaceItem( item );
+    	}
+    	return nsItem;
+    }
+    
 }
