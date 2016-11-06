@@ -45,36 +45,51 @@
 		</tr>
 	</c:if>
 	<c:set var="rowStyle" value="d0" />
-	<c:forEach var="item" items="${searchResults}">
-		<c:url var="itemUrl" value="/console/libraryDictionary.html">
-			<c:param name="baseNamespace" value="${item.baseNamespace}" />
-			<c:param name="filename" value="${item.filename}" />
-			<c:param name="version" value="${item.version}" />
-		</c:url>
-		<c:url var="allVersionsUrl" value="/console/browse.html">
-			<c:param name="baseNamespace" value="${item.baseNamespace}" />
-			<c:param name="filename" value="${item.filename}" />
-		</c:url>
-		<tr class="${rowStyle}">
-			<td>
-				<img src="${pageContext.request.contextPath}/images/library.png" />
-				<a href="${itemUrl}">${item.label}</a>
-			</td>
-			<td>
-				<c:if test="${item.version != null}">${item.version}</c:if>
-				<c:if test="${allVersionsUrl != null}"><small>(<a href="${allVersionsUrl}">all versions</a>)</small></c:if>
-			</td>
-			<td><c:if test="${item.status != null}"><spring:message code="${item.status.toString()}" /></c:if></td>
-			<td><c:if test="${item.lastModified != null}"><fmt:formatDate value="${item.lastModified}" type="date" pattern="dd-MMM-yyyy" /></c:if></td>
-		</tr>
+	<c:forEach var="resultItem" items="${searchResults}">
 		<c:choose>
-			<c:when test="${rowStyle=='d0'}">
-				<c:set var="rowStyle" value="d1" />
+			<c:when test="${resultItem.entityType.simpleName == 'TLLibrary'}">
+				<c:url var="itemUrl" value="/console/libraryDictionary.html">
+					<c:param name="baseNamespace" value="${resultItem.repositoryItem.baseNamespace}" />
+					<c:param name="filename" value="${resultItem.repositoryItem.filename}" />
+					<c:param name="version" value="${resultItem.repositoryItem.version}" />
+				</c:url>
+				<c:url var="allVersionsUrl" value="/console/browse.html">
+					<c:param name="baseNamespace" value="${resultItem.repositoryItem.baseNamespace}" />
+					<c:param name="filename" value="${resultItem.repositoryItem.filename}" />
+				</c:url>
 			</c:when>
 			<c:otherwise>
-				<c:set var="rowStyle" value="d0" />
+				<c:url var="itemUrl" value="/console/entityDictionary.html">
+					<c:param name="namespace" value="${resultItem.itemNamespace}" />
+					<c:param name="localName" value="${pageUtils.getEntityLocalName( resultItem )}" />
+				</c:url>
 			</c:otherwise>
 		</c:choose>
+		<tr class="${rowStyle}">
+			<td>
+				<img src="${pageContext.request.contextPath}/images/${imageResolver.getIconImage( resultItem )}" />&nbsp;<a href="${itemUrl}">${resultItem.itemName}</a>
+			</td>
+			<td>
+				<c:if test="${resultItem.entityType.simpleName == 'TLLibrary'}">
+					${resultItem.repositoryItem.version} <small>(<a href="${allVersionsUrl}">all versions</a>)</small>
+				</c:if>
+			</td>
+			<td>
+				<c:if test="${resultItem.status != null}">
+					<spring:message code="${resultItem.status.toString()}" />
+				</c:if>
+			</td>
+			<td>
+				<c:if test="${resultItem.entityType.simpleName == 'TLLibrary'}">
+					<c:set var="lastModified" value="${pageUtils.getLastModified( resultItem.repositoryItem )}"/>
+					
+					<c:if test="${lastModified != null}">
+						<fmt:formatDate value="${lastModified}" type="date" pattern="dd-MMM-yyyy" />
+					</c:if>
+				</c:if>
+			</td>
+		</tr>
+		<c:set var="rowStyle" value="${pageUtils.swapValue( rowStyle, 'd0', 'd1')}" />
 	</c:forEach>
 </table>
 

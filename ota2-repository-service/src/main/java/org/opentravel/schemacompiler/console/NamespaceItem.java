@@ -193,11 +193,10 @@ public class NamespaceItem {
     /**
      * Returns the last modified timestamp of the metadata file for the specified repository item.
      * 
-     * @param item
-     *            the repository item for which to return a timestamp
+     * @param item  the repository item for which to return a timestamp
      * @return Date
      */
-    private Date getLastModified(RepositoryItem item) {
+    public static Date getLastModified(RepositoryItem item) {
         Date lastModified = null;
 
         if (item != null) {

@@ -56,8 +56,7 @@
 <br/>
 <table id="itemtable">
 	<tr>
-		<th>Direct Where Used <small>(Libraries that directly reference ${item.libraryName})</small></th>
-		<th></th>
+		<th>Direct Where-Used <small>(Libraries that directly reference ${item.libraryName})</small></th>
 	</tr>
 	<c:if test="${directWhereUsed.isEmpty()}">
 		<tr class="d0">
@@ -82,8 +81,7 @@
 <br/>
 <table id="itemtable">
 	<tr>
-		<th>Indirect Where Used <small>(Libraries that indirectly reference ${item.libraryName})</small></th>
-		<th></th>
+		<th>Indirect Where-Used <small>(Libraries that indirectly reference ${item.libraryName})</small></th>
 	</tr>
 	<c:if test="${indirectWhereUsed.isEmpty()}">
 		<tr class="d0">

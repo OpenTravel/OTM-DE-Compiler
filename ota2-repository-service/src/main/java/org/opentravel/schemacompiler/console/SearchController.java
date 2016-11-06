@@ -22,6 +22,8 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.opentravel.ns.ota2.security_v01_00.RepositoryPermission;
+import org.opentravel.schemacompiler.index.EntitySearchResult;
 import org.opentravel.schemacompiler.index.FreeTextSearchService;
 import org.opentravel.schemacompiler.index.FreeTextSearchServiceFactory;
 import org.opentravel.schemacompiler.index.LibrarySearchResult;
@@ -32,6 +34,7 @@ import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.security.RepositorySecurityManager;
 import org.opentravel.schemacompiler.security.UserPrincipal;
+import org.opentravel.schemacompiler.util.PageUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -66,18 +69,13 @@ public class SearchController extends BaseController {
     /**
      * Called by the Spring MVC controller to display the application search page.
      * 
-     * @param keywords
-     *            the keywords for the free-text search query
-     * @param latestVersions
-     *            flag indicating whether only latest versions should be returned in the search
-     *            results
-     * @param finalVersions
-     *            flag indicating whether only final (non-draft) versions should be returned in the
-     *            search results
-     * @param model
-     *            the model context to be used when rendering the page view
-     * @param session
-     *            the HTTP session that contains information about an authenticated user
+     * @param keywords  the keywords for the free-text search query
+     * @param latestVersions  flag indicating whether only latest versions should be returned
+     *						  in the search results
+     * @param finalVersions  flag indicating whether only final (non-draft) versions should be
+     *						 returned in the search results
+     * @param model  the model context to be used when rendering the page view
+     * @param session  the HTTP session that contains information about an authenticated user
      * @return String
      */
     @RequestMapping({ "/", "/index.html", "/index.htm", "/search.html", "/search.htm" })
@@ -86,7 +84,7 @@ public class SearchController extends BaseController {
             @RequestParam(value = "finalVersions", required = false) boolean finalVersions,
             HttpSession session, Model model) {
         if ((keywords != null) && (keywords.length() > 0)) {
-            List<NamespaceItem> searchResults = new ArrayList<NamespaceItem>();
+            List<SearchResult<?>> searchResults = new ArrayList<SearchResult<?>>();
 
             if (searchService != null) {
                 try {
@@ -100,10 +98,20 @@ public class SearchController extends BaseController {
                     		RepositoryItem item = ((LibrarySearchResult) result).getRepositoryItem();
 
                             if (securityManager.isReadAuthorized(user, item)) {
-                                searchResults.add(new NamespaceItem(item));
+                                searchResults.add( result );
+                            }
+                    	} else if (result instanceof EntitySearchResult) {
+                    		EntitySearchResult indexEntity = (EntitySearchResult) result;
+                    		RepositoryPermission checkPermission = ((indexEntity.getStatus() == TLLibraryStatus.FINAL) 
+                    				|| (indexEntity.getStatus() == TLLibraryStatus.OBSOLETE)) ?
+                    						RepositoryPermission.READ_FINAL : RepositoryPermission.READ_DRAFT;
+                    		
+                            if (securityManager.isAuthorized(user, indexEntity.getItemNamespace(), checkPermission)) {
+                                searchResults.add( result );
                             }
                     	}
                     }
+                    
                 } catch (RepositoryException e) {
                     log.error("An error occured while performing the requested search.", e);
                     setErrorMessage(
@@ -117,6 +125,8 @@ public class SearchController extends BaseController {
             }
             model.addAttribute("keywords", keywords);
             model.addAttribute("searchResults", searchResults);
+            model.addAttribute("pageUtils", new PageUtils());
+            model.addAttribute("imageResolver", new SearchResultImageResolver());
         }
         return applyCommonValues(model, "search");
     }

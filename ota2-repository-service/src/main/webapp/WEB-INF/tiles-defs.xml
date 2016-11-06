@@ -63,6 +63,18 @@
 		<put-attribute name="title" value="OTA2.0 Repository - Library Info" />
 		<put-attribute name="body" value="/WEB-INF/console/libraryInfo.jsp" />
 	</definition>
+	<definition name="entityDictionary" extends="baseLayoutNoTitle">
+		<put-attribute name="title" value="OTA2.0 Repository - Entity Dictionary" />
+		<put-attribute name="body" value="/WEB-INF/console/entityDictionary.jsp" />
+	</definition>
+	<definition name="entityUsage" extends="baseLayoutNoTitle">
+		<put-attribute name="title" value="OTA2.0 Repository - Entity Usage" />
+		<put-attribute name="body" value="/WEB-INF/console/entityUsage.jsp" />
+	</definition>
+	<definition name="entityValidation" extends="baseLayoutNoTitle">
+		<put-attribute name="title" value="OTA2.0 Repository - Entity Errors &amp; Warnings" />
+		<put-attribute name="body" value="/WEB-INF/console/entityValidation.jsp" />
+	</definition>
 	<definition name="createNamespace" extends="baseLayout">
 		<put-attribute name="title" value="OTA2.0 Repository - Create Namespace" />
 		<put-attribute name="pageTitle" value="Create Namespace" />

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016 OpenTravel Alliance (info@opentravel.org)
+ * Copyright (C) 2014 OpenTravel Alliance (info@opentravel.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.opentravel.schemacompiler.index.SearchResult;
+import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAction;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLActionRequest;
@@ -30,6 +31,7 @@ import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
+import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
@@ -58,7 +60,27 @@ public class SearchResultImageResolver {
 	 * @return String
 	 */
 	public String getIconImage(SearchResult<?> resultItem) {
-		String imageFilename = imageMap.get( resultItem.getEntityType() );
+		return getIconImage( resultItem.getEntityType() );
+	}
+	
+	/**
+	 * Returns the filename of the image for the given OTM entity.
+	 * 
+	 * @param entity  the OTM entity for which to return an icon image
+	 * @return String
+	 */
+	public String getIconImage(NamedEntity entity) {
+		return getIconImage( entity.getClass() );
+	}
+	
+	/**
+	 * Returns the filename of the image for the given OTM entity type.
+	 * 
+	 * @param entityType  the OTM entity type for which to return an icon image
+	 * @return String
+	 */
+	private String getIconImage(Class<?> entityType) {
+		String imageFilename = imageMap.get( entityType );
 		
 		if (imageFilename == null) {
 			imageFilename = UNKNOWN_IMAGE;
@@ -83,6 +105,7 @@ public class SearchResultImageResolver {
 			_imageMap.put( TLBusinessObject.class, "business_object.png" );
 			_imageMap.put( TLFacet.class, "facet.gif" );
 			_imageMap.put( TLContextualFacet.class, "facet_contextual.gif" );
+			_imageMap.put( TLExtensionPointFacet.class, "facet_contextual.gif" );
 			_imageMap.put( TLService.class, "service.gif" );
 			_imageMap.put( TLOperation.class, "operation.gif" );
 			_imageMap.put( TLResource.class, "resource.gif" );

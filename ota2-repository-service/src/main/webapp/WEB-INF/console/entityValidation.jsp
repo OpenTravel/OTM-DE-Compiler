@@ -18,40 +18,35 @@
 <%@taglib prefix="tiles" uri="http://tiles.apache.org/tags-tiles"%>
 <%@taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<c:url var="namespaceUrl" value="/console/browse.html">
-	<c:param name="baseNamespace" value="${item.baseNamespace}" />
-</c:url>
-<c:url var="allVersionsUrl" value="/console/browse.html">
-	<c:param name="baseNamespace" value="${item.baseNamespace}" />
-	<c:param name="filename" value="${item.filename}" />
-</c:url>
 
-<c:set var="currentTab" value="DICTIONARY"/>
-<%@include file="libraryTabs.jsp" %>
+<c:set var="currentTab" value="VALIDATION"/>
+<%@include file="entityTabs.jsp" %>
 
 <table id="itemtable">
 	<tr>
-		<th width="20%">Name</th>
-		<th width="20%">Type</th>
-		<th width="60%">Description</th>
+		<th width="30%">Validation Source</th>
+		<th width="70%">Message</th>
 	</tr>
-	<c:if test="${entityList.isEmpty()}">
+	<c:if test="${findings.isEmpty()}">
 		<tr class="d0">
-			<td>No entities defined for this library.</td>
+			<td>No errors or warnings for this library.</td>
 		</tr>
 	</c:if>
 	<c:set var="rowStyle" value="d0" />
-	<c:forEach var="entity" items="${entityList}">
-		<c:url var="entityUrl" value="/console/entityDictionary.html">
-			<c:param name="namespace" value="${entity.itemNamespace}" />
-			<c:param name="localName" value="${pageUtils.getEntityLocalName( entity )}" />
-		</c:url>
+	<c:forEach var="finding" items="${findings}">
 		<tr class="${rowStyle}">
 			<td>
-				<img src="${pageContext.request.contextPath}/images/${imageResolver.getIconImage( entity )}" />&nbsp;<a href="${entityUrl}">${entity.itemName}</a>
+				<c:choose>
+					<c:when test="${finding.findingType == 'WARNING'}">
+						<c:set var="findingImage" value="warning.png"/>
+					</c:when>
+					<c:otherwise>
+						<c:set var="findingImage" value="error.png"/>
+					</c:otherwise>
+				</c:choose>
+				<img src="${pageContext.request.contextPath}/images/${findingImage}" />&nbsp;${finding.findingSource}
 			</td>
-			<td><spring:message code="${entity.entityType.simpleName}" /></td>
-			<td>${entity.itemDescription}</td>
+			<td>${finding.findingMessage}</td>
 		</tr>
 		<c:choose>
 			<c:when test="${rowStyle=='d0'}">

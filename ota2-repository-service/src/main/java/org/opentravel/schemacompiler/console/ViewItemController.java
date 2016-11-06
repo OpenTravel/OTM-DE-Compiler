@@ -15,11 +15,13 @@
  */
 package org.opentravel.schemacompiler.console;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpSession;
@@ -31,11 +33,22 @@ import org.opentravel.schemacompiler.index.FreeTextSearchService;
 import org.opentravel.schemacompiler.index.FreeTextSearchServiceFactory;
 import org.opentravel.schemacompiler.index.IndexingUtils;
 import org.opentravel.schemacompiler.index.LibrarySearchResult;
+import org.opentravel.schemacompiler.index.SearchResult;
 import org.opentravel.schemacompiler.index.ValidationResult;
+import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
+import org.opentravel.schemacompiler.model.TLCoreObject;
+import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
 import org.opentravel.schemacompiler.security.RepositorySecurityManager;
 import org.opentravel.schemacompiler.security.UserPrincipal;
+import org.opentravel.schemacompiler.util.DocumentationHelper;
+import org.opentravel.schemacompiler.util.FacetIdentityWrapper;
+import org.opentravel.schemacompiler.util.PageUtils;
+import org.opentravel.schemacompiler.util.ReferenceFinder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -84,9 +97,9 @@ public class ViewItemController extends BaseController {
 					}
             	});
                 model.addAttribute("imageResolver", new SearchResultImageResolver());
+                model.addAttribute("pageUtils", new PageUtils());
                 model.addAttribute("entityList", entityList);
                 model.addAttribute("item", item);
-            	
             	
             } else {
                 setErrorMessage("You are not authorized to view the requested library.", model);
@@ -265,25 +278,261 @@ public class ViewItemController extends BaseController {
     }
 
     /**
+     * Called by the Spring MVC controller to display the general-information library
+     * page.
+     * 
+     * @param rootNamespace  the root namespace of the selected library
+     * @param path  the sub-namespace path relative to the base namespace
+     * @param filename  the filename of the selected library to view
+     * @param version  the version of the selected library to view
+     * @param session  the HTTP session that contains information about an authenticated user
+     * @param model  the model context to be used when rendering the page view
+     * @return String
+     */
+    @RequestMapping({ "/entityDictionary.html", "/entityDictionary.htm" })
+    public String entityDictionary(@RequestParam(value = "namespace") String namespace,
+            @RequestParam(value = "localName") String localName, HttpSession session, Model model) {
+        String targetPage = null;
+        try {
+        	FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
+            RepositorySecurityManager securityManager = getSecurityManager();
+            String identityKey = IndexingUtils.getIdentityKey( namespace, localName, true );
+            EntitySearchResult indexEntity = searchService.getEntity( identityKey, true );
+        	LibrarySearchResult indexLibrary = (indexEntity == null) ? null :
+        			searchService.getLibrary( indexEntity.getOwningLibraryId(), false );
+            
+            if (indexLibrary != null) {
+                UserPrincipal user = getCurrentUser(session);
+            	
+                if (securityManager.isReadAuthorized( user, indexLibrary.getRepositoryItem() )) {
+                	ReferenceFinder refFinder = new ReferenceFinder( indexEntity.getItemContent(), indexLibrary );
+                	Map<String,EntitySearchResult> entitiesByReference = refFinder.buildEntityReferenceMap( searchService );
+                	List<FacetIdentityWrapper> entityFacets = buildFacetList( indexEntity.getItemContent() );
+                	
+                	model.addAttribute( "entity", indexEntity );
+                	model.addAttribute( "library", indexLibrary );
+                	model.addAttribute( "pageUtils", new PageUtils() );
+                	model.addAttribute( "entityFacets", entityFacets );
+                	model.addAttribute( "entitiesByReference", entitiesByReference );
+                	model.addAttribute( "docHelper", new DocumentationHelper( indexEntity ) );
+                    model.addAttribute( "imageResolver", new SearchResultImageResolver() );
+                	
+                } else {
+                    setErrorMessage("You are not authorized to view the requested entity.", model);
+                    targetPage = new SearchController().searchPage(null, false, false, session, model);
+                }
+            } else {
+                setErrorMessage("The requested entity could not be found.", model);
+                targetPage = new SearchController().searchPage(null, false, false, session, model);
+            }
+            
+        } catch (Throwable t) {
+            log.error("An error occured while displaying the library.", t);
+            setErrorMessage(
+                    "An error occured while displaying the library (see server log for details).",
+                    model);
+        }
+
+        if (targetPage == null) {
+            targetPage = applyCommonValues(model, "entityDictionary");
+        }
+        return targetPage;
+    }
+    
+    /**
+     * Called by the Spring MVC controller to display the general-information library
+     * page.
+     * 
+     * @param rootNamespace  the root namespace of the selected library
+     * @param path  the sub-namespace path relative to the base namespace
+     * @param filename  the filename of the selected library to view
+     * @param version  the version of the selected library to view
+     * @param session  the HTTP session that contains information about an authenticated user
+     * @param model  the model context to be used when rendering the page view
+     * @return String
+     */
+    @RequestMapping({ "/entityUsage.html", "/entityUsage.htm" })
+    public String entityUsage(@RequestParam(value = "namespace") String namespace,
+            @RequestParam(value = "localName") String localName, HttpSession session, Model model) {
+        String targetPage = null;
+        try {
+        	FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
+            RepositorySecurityManager securityManager = getSecurityManager();
+            String identityKey = IndexingUtils.getIdentityKey( namespace, localName, true );
+            EntitySearchResult indexEntity = searchService.getEntity( identityKey, true );
+        	LibrarySearchResult indexLibrary = (indexEntity == null) ? null :
+        			searchService.getLibrary( indexEntity.getOwningLibraryId(), false );
+            
+            if (indexLibrary != null) {
+                UserPrincipal user = getCurrentUser(session);
+            	
+                if (securityManager.isReadAuthorized( user, indexLibrary.getRepositoryItem() )) {
+                    List<EntitySearchResult> directWhereUsed = searchService.getEntityWhereUsed( indexEntity, false, false );
+                    List<EntitySearchResult> indirectWhereUsed = searchService.getEntityWhereUsed( indexEntity, true, false );
+                    
+                    purgeDirectWhereUsed( indirectWhereUsed, directWhereUsed );
+                    
+                	model.addAttribute( "entity", indexEntity );
+                	model.addAttribute( "library", indexLibrary );
+                    model.addAttribute("directWhereUsed", directWhereUsed);
+                    model.addAttribute("indirectWhereUsed", indirectWhereUsed);
+                    model.addAttribute("imageResolver", new SearchResultImageResolver());
+                	
+                } else {
+                    setErrorMessage("You are not authorized to view the requested entity.", model);
+                    targetPage = new SearchController().searchPage(null, false, false, session, model);
+                }
+            } else {
+                setErrorMessage("The requested entity could not be found.", model);
+                targetPage = new SearchController().searchPage(null, false, false, session, model);
+            }
+            
+        } catch (Throwable t) {
+            log.error("An error occured while displaying the library.", t);
+            setErrorMessage(
+                    "An error occured while displaying the library (see server log for details).",
+                    model);
+        }
+
+        if (targetPage == null) {
+            targetPage = applyCommonValues(model, "entityUsage");
+        }
+        return targetPage;
+    }
+    
+    /**
+     * Called by the Spring MVC controller to display the general-information library
+     * page.
+     * 
+     * @param rootNamespace  the root namespace of the selected library
+     * @param path  the sub-namespace path relative to the base namespace
+     * @param filename  the filename of the selected library to view
+     * @param version  the version of the selected library to view
+     * @param session  the HTTP session that contains information about an authenticated user
+     * @param model  the model context to be used when rendering the page view
+     * @return String
+     */
+    @RequestMapping({ "/entityValidation.html", "/entityValidation.htm" })
+    public String entityValidation(@RequestParam(value = "namespace") String namespace,
+            @RequestParam(value = "localName") String localName, HttpSession session, Model model) {
+        String targetPage = null;
+        try {
+        	FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
+            RepositorySecurityManager securityManager = getSecurityManager();
+            String identityKey = IndexingUtils.getIdentityKey( namespace, localName, true );
+            EntitySearchResult indexEntity = searchService.getEntity( identityKey, true );
+        	LibrarySearchResult indexLibrary = (indexEntity == null) ? null :
+        			searchService.getLibrary( indexEntity.getOwningLibraryId(), false );
+            
+            if (indexLibrary != null) {
+                UserPrincipal user = getCurrentUser(session);
+            	
+                if (securityManager.isReadAuthorized( user, indexLibrary.getRepositoryItem() )) {
+                    List<ValidationResult> findings = searchService.getEntityFindings( identityKey );
+                    
+                    model.addAttribute( "findings", findings );
+                	model.addAttribute( "entity", indexEntity );
+                	model.addAttribute( "library", indexLibrary );
+                	
+                } else {
+                    setErrorMessage("You are not authorized to view the requested entity.", model);
+                    targetPage = new SearchController().searchPage(null, false, false, session, model);
+                }
+            } else {
+                setErrorMessage("The requested entity could not be found.", model);
+                targetPage = new SearchController().searchPage(null, false, false, session, model);
+            }
+            
+        } catch (Throwable t) {
+            log.error("An error occured while displaying the library.", t);
+            setErrorMessage(
+                    "An error occured while displaying the library (see server log for details).",
+                    model);
+        }
+
+        if (targetPage == null) {
+            targetPage = applyCommonValues(model, "entityValidation");
+        }
+        return targetPage;
+    }
+    
+    /**
      * Iterates through the indirect where-used list of libraries and removes all entries
      * that are members of the direct where-used list.
      * 
      * @param indirectWhereUsed  the list of indirect where-used libraries to process
      * @param directWhereUsed  the list of direct where-used libraries
      */
-    private void purgeDirectWhereUsed(List<LibrarySearchResult> indirectWhereUsed, List<LibrarySearchResult> directWhereUsed) {
-    	Iterator<LibrarySearchResult> iterator = indirectWhereUsed.iterator();
+    private void purgeDirectWhereUsed(List<? extends SearchResult<?>> indirectWhereUsed,
+    		List<? extends SearchResult<?>> directWhereUsed) {
+    	Iterator<? extends SearchResult<?>> iterator = indirectWhereUsed.iterator();
     	Set<String> directWhereUsedIds = new HashSet<>();
     	
-    	for (LibrarySearchResult lsr : directWhereUsed) {
-    		directWhereUsedIds.add( lsr.getSearchIndexId() );
+    	for (SearchResult<?> sr : directWhereUsed) {
+    		directWhereUsedIds.add( sr.getSearchIndexId() );
     	}
     	while (iterator.hasNext()) {
-    		LibrarySearchResult lsr = iterator.next();
+    		SearchResult<?> sr = iterator.next();
     		
-    		if (directWhereUsedIds.contains( lsr.getSearchIndexId() )) {
+    		if (directWhereUsedIds.contains( sr.getSearchIndexId() )) {
     			iterator.remove();
     		}
+    	}
+    }
+    
+    /**
+     * Constructs the list of facets for the given <code>NamedEntity</code>.  If the
+     * entity is not a facet owner, an empty list will be returned.
+     * 
+     * @param entity  the entity from which to construct the facet list
+     * @return List<FacetIdentityWrapper>
+     */
+    private List<FacetIdentityWrapper> buildFacetList(NamedEntity entity) {
+    	List<FacetIdentityWrapper> facetList = new ArrayList<>();
+    	
+    	if (entity instanceof TLBusinessObject) {
+    		TLBusinessObject facetOwner = (TLBusinessObject) entity;
+    		
+    		facetList.add( new FacetIdentityWrapper( facetOwner.getIdFacet() ) );
+    		facetList.add( new FacetIdentityWrapper( facetOwner.getSummaryFacet() ) );
+    		facetList.add( new FacetIdentityWrapper( facetOwner.getDetailFacet() ) );
+    		addContextualFacets( facetOwner.getCustomFacets(), facetList );
+    		addContextualFacets( facetOwner.getQueryFacets(), facetList );
+    		addContextualFacets( facetOwner.getUpdateFacets(), facetList );
+    		
+    	} else if (entity instanceof TLChoiceObject) {
+    		TLChoiceObject facetOwner = (TLChoiceObject) entity;
+    		
+    		facetList.add( new FacetIdentityWrapper( facetOwner.getSharedFacet() ) );
+    		addContextualFacets( facetOwner.getChoiceFacets(), facetList );
+    		
+    	} else if (entity instanceof TLCoreObject) {
+    		TLCoreObject facetOwner = (TLCoreObject) entity;
+    		
+    		facetList.add( new FacetIdentityWrapper( facetOwner.getSummaryFacet() ) );
+    		facetList.add( new FacetIdentityWrapper( facetOwner.getDetailFacet() ) );
+    		
+    	} else if (entity instanceof TLOperation) {
+    		TLOperation facetOwner = (TLOperation) entity;
+    		
+    		facetList.add( new FacetIdentityWrapper( facetOwner.getRequest() ) );
+    		facetList.add( new FacetIdentityWrapper( facetOwner.getResponse() ) );
+    		facetList.add( new FacetIdentityWrapper( facetOwner.getNotification() ) );
+    	}
+    	return facetList;
+    }
+    
+    /**
+     * Recursive method that adds all contextual facets and their children to the list
+     * provided.
+     * 
+     * @param contextualFacets  the list of contextual facets to add
+     * @param facetList  the facet list being constructed
+     */
+    private void addContextualFacets(List<TLContextualFacet> contextualFacets, List<FacetIdentityWrapper> facetList) {
+    	for (TLContextualFacet facet : contextualFacets) {
+    		facetList.add( new FacetIdentityWrapper( facet ) );
+    		addContextualFacets( facet.getChildFacets(), facetList );
     	}
     }
     

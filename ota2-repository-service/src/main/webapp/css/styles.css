@@ -135,3 +135,34 @@ ul.tab li a:focus {background-color: #ccc;}
 #errorMessage {border:solid 1px #CC0000; color:#CC0000; text-align:center; padding:5px; margin-bottom:10px;}
 #statusMessage {border:solid 1px green; color:green; text-align:center; padding:5px; margin-bottom:10px;}
 .loginError {color:red;font-size:11px;text-align:left;}
+
+.contentContainer {clear: both; position: relative;}
+.contentContainer .description dl dt, .contentContainer .details dl dt {font-size: 1.1em; font-weight: bold; margin: 10px 0 0 0; color: #4E4E4E; width: 100%;}
+.contentContainer .description dl dd, .contentContainer .details dl dd {margin: 10px 0 10px 20px;}
+.contentContainer table {border-bottom: 1px solid #9eadc0; width: 100%;}
+.contentContainer ul li table {width: 100%;}
+.contentContainer .description table, .contentContainer .details table {border-bottom: none;}
+.contentContainer ul li table th.colOne, .contentContainer ul li table th.colFirst,
+	.contentContainer ul li table th.colLast, .contentContainer ul li table td.colOne,
+	.contentContainer ul li table td.colFirst, .contentContainer ul li table td.colLast {vertical-align: top; padding-right: 20px;}
+.contentContainer ul li table th.colLast, .contentContainer ul li table td.colLast,
+	.classUseContainer ul li table td.colLast, .contentContainer ul li table th.colOne,
+	.contentContainer ul li table td.colOne {padding-right: 3px;}
+.altColor {background-color: #eeeeef;}
+ul.blockList ul.blockList li.blockList table {margin: 0 0 12px 0px;	width: 100%;}
+th.colFirst, th.colLast {background:#dee3e9; border-top:1px solid #9eadc0; border-bottom:1px solid #9eadc0; text-align:left; padding:3px 3px 3px 7px;}
+td.colFirst, th.colFirst {border-left: 1px solid #9eadc0; white-space: nowrap;}
+td.colLast, th.colLast {border-right: 1px solid #9eadc0;}
+table.overviewSummary {padding: 0px; margin-left: 0px; border:0; border-bottom:1px solid #9eadc0; border-collapse:collapse;}
+table.overviewSummary td.colFirst, table.overviewSummary th.colFirst, table.overviewSummary td.colOne, table.overviewSummary th.colOne {width: 25%; vertical-align: middle;}
+ul.blockList, ul.blockListLast {margin: 10px 0 10px 0;padding: 0;}
+ul.blockList li.blockList, ul.blockListLast li.blockList {list-style: none; margin-bottom: 25px;}
+ul.blockList ul.blockList li.blockList, ul.blockList ul.blockListLast li.blockList {padding: 0px 20px 5px 10px; border: 1px solid #9eadc0; background-color: #f9f9f9;}
+ul.blockList ul.blockList ul.blockList li.blockList, ul.blockList ul.blockList ul.blockListLast li.blockList {padding: 0 0 5px 8px; background-color: #ffffff; border: 1px solid #9eadc0; border-top: none;}
+ul.blockList ul.blockList ul.blockList ul.blockList li.blockList {margin-left: 0; padding-left: 0; padding-bottom: 15px; border: none; border-bottom: 1px solid #9eadc0;}
+ul.blockList ul.blockList ul.blockList ul.blockList li.blockListLast {list-style: none; border-bottom: none; padding-bottom: 0;}
+table tr td dl, table tr td dl dt, table tr td dl dd {margin-top: 0; margin-bottom: 1px;}
+.overviewSummary caption span, .contentContainer ul.blockList li.blockList caption span {
+	font-size:0.9em; font-weight:bold; white-space:nowrap; margin-top:12px; padding-top:4px; padding-bottom:4px; padding-left:8px;
+    padding-right:8px; display:block; float:left; height:18px; border: 1px solid #9eadc0; border-bottom:0px; background-color: #dee3e9;}
+pre {white-space: pre-wrap;}

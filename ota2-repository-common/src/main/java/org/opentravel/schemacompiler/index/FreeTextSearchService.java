@@ -913,8 +913,8 @@ public abstract class FreeTextSearchService implements IndexingTerms {
     private List<EntitySearchResult> getDirectEntityWhereUsed(IndexSearcher searcher, EntitySearchResult entityIndex,
     		boolean resolveContent) throws RepositoryException {
     	List<EntitySearchResult> searchResults = new ArrayList<>();
-    	BooleanQuery masterQuery = new BooleanQuery();
-    	BooleanQuery identityQuery = newSearchIndexQuery();
+    	BooleanQuery masterQuery = newSearchIndexQuery();
+    	BooleanQuery identityQuery = new BooleanQuery();
     	List<Document> queryResults;
     	
     	for (String referenceIdentityId : entityIndex.getReferenceIdentityIds()) {

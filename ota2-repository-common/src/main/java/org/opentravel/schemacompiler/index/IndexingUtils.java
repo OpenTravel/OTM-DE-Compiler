@@ -84,16 +84,29 @@ public class IndexingUtils {
 	 * @return String
 	 */
 	public static String getIdentityKey(NamedEntity entity, boolean isSearchable) {
+		return getIdentityKey( entity.getNamespace(), entity.getLocalName(), isSearchable );
+	}
+	
+	/**
+	 * Returns the qualified identity key for the OTM model entity with the given namespace
+	 * and local name.
+	 * 
+	 * @param entityNS  the namespace of the OTM entity
+	 * @param entityLocalName  the local name of the OTM entity
+	 * @param isSearchable  flag indicating whether the resulting index document should be searchable
+	 * @return String
+	 */
+	public static String getIdentityKey(String entityNS, String entityLocalName, boolean isSearchable) {
 		StringBuilder identityKey = new StringBuilder();
 		
-		identityKey.append( entity.getNamespace() ).append(":");
-		identityKey.append( entity.getLocalName() );
+		identityKey.append( entityNS ).append(":");
+		identityKey.append( entityLocalName );
 		if (!isSearchable) {
 			identityKey.append(":meta-data");
 		}
 		return identityKey.toString();
 	}
-	
+
 	/**
 	 * Returns the searchable variant of the given identity key.  If the key is already
 	 * searchable, the original string is returned.
