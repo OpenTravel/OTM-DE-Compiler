@@ -1777,7 +1777,7 @@
             </xsd:documentation>
          </xsd:annotation>
       </xsd:attribute>
-      <xsd:attribute name="facetName" type="Name_XML" use="required">
+      <xsd:attribute name="facetName" type="Name_Type" use="required">
          <xsd:annotation>
             <xsd:documentation>Name of the business object facet from which all parameters
             	in this group will be referenced.

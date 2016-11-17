@@ -40,7 +40,7 @@ public class FacetIdentityWrapper {
 		if (facet instanceof TLContextualFacet) {
 			this.identity = facet.getFacetType().getIdentityName( ((TLContextualFacet) facet).getName() );
 			
-		} if (facet.getOwningEntity() instanceof TLOperation) {
+		} else if (facet.getOwningEntity() instanceof TLOperation) {
 			switch (facet.getFacetType()) {
 				case REQUEST:
 					this.identity = "Request";

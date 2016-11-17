@@ -100,9 +100,6 @@ public class TLAttributeCompileValidator extends TLAttributeBaseValidator {
             builder.addFinding(FindingType.ERROR, "mandatory", ERROR_ILLEGAL_REQUIRED_ATTRIBUTE);
         }
         
-        if (target.getName().equals("businessObjectRef")) {
-        	System.out.println("BREAKPOINT");
-        }
         // Validate the characteristics of the attribute type
         builder.setEntityReferenceProperty("type", target.getType(), target.getTypeName())
                 .setFindingType(FindingType.ERROR)

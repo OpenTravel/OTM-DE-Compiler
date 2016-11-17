@@ -68,6 +68,9 @@ import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.model.XSDComplexType;
 import org.opentravel.schemacompiler.model.XSDElement;
 import org.opentravel.schemacompiler.model.XSDSimpleType;
+import org.opentravel.schemacompiler.version.MinorVersionHelper;
+import org.opentravel.schemacompiler.version.VersionSchemeException;
+import org.opentravel.schemacompiler.version.Versioned;
 
 /**
  * Navigator that traverses model elements in order to produce visitor events that will allow the
@@ -1185,6 +1188,7 @@ public class ExampleNavigator {
     private Map<TLFacetType, List<TLExtensionPointFacet>> getExtensionPoints(TLPatchableFacet facet) {
         Map<TLFacetType, List<TLExtensionPointFacet>> result = new HashMap<TLFacetType, List<TLExtensionPointFacet>>();
         TLModel model = (facet == null) ? null : facet.getOwningModel();
+        MinorVersionHelper versionHelper = new MinorVersionHelper();
 
         // Initialize the registry of extension point facets if not already done
         if ((extensionPointRegistry == null) && (model != null)) {
@@ -1225,12 +1229,10 @@ public class ExampleNavigator {
                 TLFacetOwner facetOwner = hFacet.getOwningEntity();
 
                 while ((hFacet != null) && (facetOwner != null)) {
-                    List<TLExtensionPointFacet> hExtensionPoints = extensionPointRegistry
-                            .get(hFacet);
+                    List<TLExtensionPointFacet> hExtensionPoints = extensionPointRegistry.get(hFacet);
 
                     if (hExtensionPoints != null) {
-                        List<TLExtensionPointFacet> extensionPoints = result.get(hFacet
-                                .getFacetType());
+                        List<TLExtensionPointFacet> extensionPoints = result.get(hFacet.getFacetType());
 
                         if (extensionPoints == null) {
                             extensionPoints = new ArrayList<TLExtensionPointFacet>();
@@ -1240,8 +1242,31 @@ public class ExampleNavigator {
                             extensionPoints.add(0, xpFacet); // add to beginning of list
                         }
                     }
-                    facetOwner = FacetCodegenUtils.getFacetOwnerExtension(facetOwner);
                     
+                    // If the new facet owner is a minor version extension of the previous facet owner,
+                    // we need to break out of the loop.  This is based on an assumption that minor versions
+                    // arleady have the patches from previous minor versions rolled up into them; therefore,
+                    // the extension point is no longer relevant.
+                    TLFacetOwner origFacetOwner = facetOwner;
+                    TLFacetOwner facetOwnerExtension;
+                    
+                    facetOwner = facetOwnerExtension = FacetCodegenUtils.getFacetOwnerExtension(facetOwner);
+                    
+                    if (facetOwner instanceof Versioned) {
+                    	Versioned priorMinorVersion;
+						try {
+							priorMinorVersion = versionHelper.getVersionExtension( (Versioned) origFacetOwner );
+	                    	
+	                    	if (facetOwnerExtension == priorMinorVersion) {
+	                            facetOwner = null;
+	                    	}
+	                    	
+						} catch (VersionSchemeException e) {
+							// Ignore error and use the extension
+						}
+                    }
+                    
+                    // Use the facet owner to identify the facet for our next cycle through the loop
                     if (facetOwner == null) {
                     	hFacet = null;
                     } else {
@@ -1257,5 +1282,5 @@ public class ExampleNavigator {
         }
         return result;
     }
-
+    
 }

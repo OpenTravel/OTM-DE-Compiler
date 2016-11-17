@@ -965,8 +965,10 @@ public class AdminController extends BaseController {
                     targetPage = new ViewItemController().libraryInfo(baseNamespace, filename, version, session, model);
                 }
             } catch (Exception e) {
+            	String message = getErrorMessage( e );
+            	
                 log.error("Unable to delete the repository item.", e);
-                setErrorMessage("Unable to delete the repository item (see server log for details).", model);
+                setErrorMessage("Unable to delete the repository item " + message, model);
 
             } finally {
                 if (targetPage == null) {
@@ -1034,8 +1036,10 @@ public class AdminController extends BaseController {
                     setErrorMessage("You do not have permission to promote the repository item.", model);
                 }
             } catch (Exception e) {
+            	String message = getErrorMessage( e );
+            	
                 log.error("Unable to promote the repository item.", e);
-                setErrorMessage("Unable to promote the repository item (see server log for details).", model);
+                setErrorMessage("Unable to promote the repository item" + message, model);
 
             } finally {
                 targetPage = new ViewItemController().libraryInfo(baseNamespace, filename, version, session, model);
@@ -1105,9 +1109,10 @@ public class AdminController extends BaseController {
                 }
 
             } catch (Exception e) {
+            	String message = getErrorMessage( e );
+            	
                 log.error("Unable to demote the repository item.", e);
-                setErrorMessage(
-                        "Unable to demote the repository item (see server log for details).", model);
+                setErrorMessage("Unable to demote the repository item" + message, model);
 
             } finally {
                 targetPage = new ViewItemController().libraryInfo(
@@ -1177,8 +1182,10 @@ public class AdminController extends BaseController {
                             model);
                 }
             } catch (Exception e) {
+            	String message = getErrorMessage( e );
+            	
                 log.error("Unable to unlock the repository item.", e);
-                setErrorMessage("Unable to unlock the repository item (see server log for details).", model);
+                setErrorMessage("Unable to unlock the repository item" + message, model);
 
             } finally {
                 targetPage = new ViewItemController().libraryInfo(
@@ -1258,10 +1265,10 @@ public class AdminController extends BaseController {
                     		baseNamespace, filename, version, session, model);
                 }
             } catch (Exception e) {
+            	String message = getErrorMessage( e );
+            	
                 log.error("Unable to recalculate the repository item's CRC.", e);
-                setErrorMessage(
-                        "Unable to recalculate the repository item's CRC (see server log for details).",
-                        model);
+                setErrorMessage("Unable to recalculate the repository item's CRC" + message, model);
 
             } finally {
                 if (targetPage == null) {
@@ -1364,5 +1371,27 @@ public class AdminController extends BaseController {
             }
         }
     }
-
+    
+    /**
+     * Returns an error message for the given throwable.
+     * 
+     * @param t  the exception/error for which to return a message
+     * @return String
+     */
+    private String getErrorMessage(Throwable t) {
+    	String message = null;
+    	
+    	while ((message == null) && (t != null)) {
+    		message = t.getMessage();
+    		t = t.getCause();
+    	}
+    	
+    	if (message == null) {
+    		message = " (see server log for details)";
+    	} else {
+    		message = "<br><pre>" + message + "</pre>";
+    	}
+    	return message;
+    }
+    
 }

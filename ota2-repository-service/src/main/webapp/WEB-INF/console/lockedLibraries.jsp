@@ -40,7 +40,7 @@
 		<tr class="${rowStyle}">
 			<td>
 				<img src="${pageContext.request.contextPath}/images/library.png" />
-				<a href="${itemUrl}">${item.itemName}</a>
+				<a href="${itemUrl}">${item.itemName}</a>&nbsp;<small>(${item.itemNamespace})</small>
 			</td>
 			<td><c:if test="${item.repositoryItem.version != null}">${item.repositoryItem.version}</c:if></td>
 			<td><c:if test="${item.repositoryItem.status != null}"><spring:message code="${item.repositoryItem.status.toString()}" /></c:if></td>

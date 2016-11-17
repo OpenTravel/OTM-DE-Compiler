@@ -150,7 +150,11 @@ public class XsdCodegenUtils {
             	TLContextualFacet facet = (TLContextualFacet) alias.getOwningEntity();
             	TLAlias ownerAlias = AliasCodegenUtils.getTopLevelOwnerAlias(alias);
             	
-            	elementLocalName = ownerAlias.getLocalName() + getElementFacetSuffix(facet);
+            	if (ownerAlias != null) {
+                	elementLocalName = ownerAlias.getLocalName() + getElementFacetSuffix(facet);
+                } else {
+                    elementLocalName = "ERROR" + getElementFacetSuffix(facet);
+            	}
             	
             } else if (alias.getOwningEntity() instanceof TLFacet) {
                 TLFacet facet = (TLFacet) alias.getOwningEntity();

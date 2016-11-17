@@ -207,7 +207,9 @@ public class AliasCodegenUtils {
                         + facetType.getIdentityName(facetName);
 
                 for (TLAlias alias : facet.getAliases()) {
-                    if (alias.getName().equals(derivedAlias)) {
+                	String aliasName = alias.getName();
+                	
+                    if ((aliasName != null) && aliasName.equals(derivedAlias)) {
                         facetAlias = alias;
                         break;
                     }
