@@ -64,6 +64,7 @@ import org.w3._2001.xmlschema.SimpleType;
 public class ExampleValueGenerator {
 
     private static final String SCHEMA_FOR_SCHEMA_EXAMPLES = "/ota2-context/built-ins/s4s-examples.properties";
+    private static final String OTA_BUILT_INS_EXAMPLES     = "/ota2-context/built-ins/ota-examples.properties";
     private static final String UNKNOWN_EXAMPLE_VALUE = "???";
 
     private static enum ExampleSearchMode {
@@ -887,11 +888,12 @@ public class ExampleValueGenerator {
      * is seeded with the examples required by the schema-for-schemas simple types.
      */
     private void initExampleProviders() {
-        LegacyTypeExampleProvider s4sExampleProvider = new LegacyTypeExampleProvider(
-                SCHEMA_FOR_SCHEMA_EXAMPLES);
+        LegacyTypeExampleProvider s4sExampleProvider = new LegacyTypeExampleProvider(SCHEMA_FOR_SCHEMA_EXAMPLES);
+        LegacyTypeExampleProvider otaExampleProvider = new LegacyTypeExampleProvider(OTA_BUILT_INS_EXAMPLES);
 
         legacyExampleProviders = new HashMap<String, LegacyTypeExampleProvider>();
         legacyExampleProviders.put(s4sExampleProvider.getNamespace(), s4sExampleProvider);
+        legacyExampleProviders.put(otaExampleProvider.getNamespace(), otaExampleProvider);
     }
 
 }

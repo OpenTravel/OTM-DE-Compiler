@@ -215,6 +215,9 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
             }
         }
 
+        // Warn if a deprecated XSD date/time type is being referenced
+        validateDeprecatedDateTimeUsage( propertyType, builder );
+        
         // List facets can only be referenced if the core object defines one or more roles
         boolean isListFacet = (propertyType instanceof TLListFacet)
                 || ((propertyType instanceof TLAlias) && (((TLAlias) propertyType)

@@ -212,6 +212,8 @@ public class TLAttributeCompileValidator extends TLAttributeBaseValidator {
         		.setFindingType(FindingType.WARNING)
         		.assertEquals(0);
         
+        // Warn if a deprecated XSD date/time type is being referenced
+        validateDeprecatedDateTimeUsage( attributeType, builder );
     }
     
     /**

@@ -81,7 +81,7 @@ import com.github.fge.jsonschema.main.JsonSchemaFactory;
  */
 public class CodeGeneratorTestAssertions {
 	
-	private static final boolean DEBUG = false;
+	private static final boolean DEBUG = true;
 	
     private static final String WSDL_SCHEMA_CONTEXT = ":org.xmlsoap.schemas.wsdl"
             + ":org.xmlsoap.schemas.wsdl.soap" + ":org.w3._2001.xmlschema"

@@ -56,6 +56,12 @@
         <Summary>
             <Element name="AttributeVwa" repeat="0" type="AttributeVwa"/>
             <Element name="BaseVwa" repeat="0" type="BaseVwa"/>
+            <Element name="UTCDateTime" repeat="0" type="ota:UTCDateTime"/>
+            <Element name="UTCDate" repeat="0" type="ota:UTCDate"/>
+            <Element name="UTCTime" repeat="0" type="ota:UTCTime"/>
+            <Element name="LocalDateTime" repeat="0" type="ota:LocalDateTime"/>
+            <Element name="LocalDate" repeat="0" type="ota:LocalDate"/>
+            <Element name="LocalTime" repeat="0" type="ota:LocalTime"/>
         </Summary>
         <Detail/>
     </CoreObject>

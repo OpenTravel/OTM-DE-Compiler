@@ -17,12 +17,17 @@ package org.opentravel.schemacompiler.codegen.swagger;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.Writer;
 import java.net.URL;
+import java.util.Map.Entry;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder;
+import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.ResourceFilenameBuilder;
@@ -30,6 +35,7 @@ import org.opentravel.schemacompiler.codegen.json.JsonTypeNameBuilder;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerDocument;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
+import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
@@ -37,6 +43,9 @@ import org.opentravel.schemacompiler.transform.TransformerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 /**
  * Code generator implementation used to generate Swagger documents from <code>TLResource</code>
@@ -73,9 +82,15 @@ public class SwaggerCodeGenerator extends AbstractCodeGenerator<TLResource> {
         Writer out = null;
         try {
             SwaggerDocument swaggerDoc = transformSourceObjectToSwaggerDocument(source, context);
+            JsonObject swaggerJson = swaggerDoc.toJson();
             File outputFile = getOutputFile( source, context );
             out = new FileWriter( outputFile );
-            gson.toJson( swaggerDoc.toJson(), out );
+            
+			if (isSingleFileEnabled( context )) {
+				addBuiltInDefinitions( swaggerJson );
+			}
+			
+            gson.toJson( swaggerJson, out );
             out.close();
             out = null;
 
@@ -120,6 +135,30 @@ public class SwaggerCodeGenerator extends AbstractCodeGenerator<TLResource> {
 			String sourceType = (source == null) ? "UNKNOWN" : source.getClass().getSimpleName();
 			throw new CodeGenerationException(
 					"No object transformer available for model element of type " + sourceType);
+		}
+    }
+    
+    /**
+     * Adds all of the built-in type definitions to the given Swagger.  This should only be done
+     * when single-file Swagger generation is enabled.
+     * 
+     * @param swaggerJson  the JSON content of the Swagger document
+     * @throws CodeGenerationException  thrown if an error occurs while processing the built-in types
+     */
+    private void addBuiltInDefinitions(JsonObject swaggerJson) throws CodeGenerationException {
+		try (Reader reader = new InputStreamReader(
+				SchemaDeclarations.OTM_COMMON_SCHEMA.getContent(
+						CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT ) )) {
+			JsonObject swaggerDefs = swaggerJson.get( "definitions" ).getAsJsonObject();
+    		JsonObject builtInSchema = new JsonParser().parse( reader ).getAsJsonObject();
+			JsonObject builtInDefs = builtInSchema.get( "definitions" ).getAsJsonObject();
+    		
+			for (Entry<String,JsonElement> builtInDef : builtInDefs.entrySet()) {
+				swaggerDefs.add( builtInDef.getKey(), builtInDef.getValue() );
+			}
+			
+		} catch (IOException e) {
+			throw new CodeGenerationException("Error loading JSON built-in definitons.", e);
 		}
     }
     

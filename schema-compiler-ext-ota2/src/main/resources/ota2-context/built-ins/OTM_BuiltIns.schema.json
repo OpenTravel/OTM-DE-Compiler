@@ -15,11 +15,37 @@
 			"minLength" : 1,
 			"maxLength" : 128
 		},
-		"LocalDateType" : {
-			"description" : "ISO date time type without UTC offset or Z for Zulu restriction indicating it is representing Local Time Example: 2010-12-31T11:55:00",
+		"UTCDateTime" : {
+			"description" : "ISO date time type without UTC offset or Z for Zulu restriction indicating it is representing Local Time.  Example: 2010-12-31T11:55:00-06:00",
+			"type" : "string",
+			"format" : "date-time"
+		},
+		"UTCDate" : {
+			"description" : "ISO date type without UTC offset or Z for Zulu restriction indicating it is representing Local Time.  Example: 2010-12-31",
+			"type" : "string",
+			"format" : "date"
+		},
+		"UTCTime" : {
+			"description" : "ISO time type without UTC offset or Z for Zulu restriction indicating it is representing Local Time.  Example: 11:55:00-06:00",
+			"type" : "string",
+			"pattern" : "(([01]\\d|2[0-3])((:?)[0-5]\\d)?|24\\:?00)((:?)[0-5]\\d)?([\\.,]\\d+(?!:))?([zZ]|([\\+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?"
+		},
+		"LocalDateTime" : {
+			"description" : "ISO date time type without UTC offset or Z for Zulu restriction indicating it is representing Local Time.  Example: 2010-12-31T11:55:00",
 			"type" : "string",
 			"format" : "date-time",
 			"pattern" : ".+T[^Z+\\-]+"
+		},
+		"LocalDate" : {
+			"description" : "ISO date type without UTC offset or Z for Zulu restriction indicating it is representing Local Time.  Example: 2010-12-31",
+			"type" : "string",
+			"format" : "date",
+			"pattern" : "[^:Z]*"
+		},
+		"LocalTime" : {
+			"description" : "ISO time type without UTC offset or Z for Zulu restriction indicating it is representing Local Time.  Example: 11:55:00",
+			"type" : "string",
+			"pattern" : "(([01]\\d|2[0-3])((:?)[0-5]\\d)?|24\\:?00)((:?)[0-5]\\d)?([\\.,]\\d+(?!:))?"
 		},
 		"ExtensionPoint" : {},
 		"ExtensionPoint_Summary" : {},

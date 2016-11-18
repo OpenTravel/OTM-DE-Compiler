@@ -29,10 +29,7 @@ import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerConte
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.QualifiedAction;
 import org.opentravel.schemacompiler.codegen.json.model.JsonLibraryInfo;
-import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
-import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
-import org.opentravel.schemacompiler.codegen.json.model.JsonType;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerDocument;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerInfo;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerOperation;
@@ -200,35 +197,6 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
 	            }
 	        }
 		}
-		
-		// Add hard-coded built-in definitions (not a great solution, but expedient for now)
-		JsonSchema emptySchema = new JsonSchema();
-		JsonSchema enumExtensionSchema = new JsonSchema();
-		JsonSchema localDateTimeSchema = new JsonSchema();
-		JsonSchema extensionPointSchema = new JsonSchema();
-		
-		emptySchema.setType( JsonType.jsonString );
-		emptySchema.setMaxLength( 0 );
-		definitions.add( new JsonSchemaNamedReference( "Empty", new JsonSchemaReference( emptySchema ) ) );
-		
-		enumExtensionSchema.setType( JsonType.jsonString );
-		enumExtensionSchema.setMinLength( 1 );
-		enumExtensionSchema.setMaxLength( 128 );
-		definitions.add( new JsonSchemaNamedReference( "String_EnumExtension", new JsonSchemaReference( enumExtensionSchema ) ) );
-		
-		localDateTimeSchema.setType( JsonType.jsonDateTime );
-		localDateTimeSchema.setPattern( ".+T[^Z+\\-]+" );
-		definitions.add( new JsonSchemaNamedReference( "LocalDateTime", new JsonSchemaReference( localDateTimeSchema ) ) );
-		
-		definitions.add( new JsonSchemaNamedReference( "ExtensionPoint", new JsonSchemaReference( extensionPointSchema ) ) );
-		definitions.add( new JsonSchemaNamedReference( "ExtensionPoint_Summary", new JsonSchemaReference( extensionPointSchema ) ) );
-		definitions.add( new JsonSchemaNamedReference( "ExtensionPoint_Detail", new JsonSchemaReference( extensionPointSchema ) ) );
-		definitions.add( new JsonSchemaNamedReference( "ExtensionPoint_Custom", new JsonSchemaReference( extensionPointSchema ) ) );
-		definitions.add( new JsonSchemaNamedReference( "ExtensionPoint_Query", new JsonSchemaReference( extensionPointSchema ) ) );
-		definitions.add( new JsonSchemaNamedReference( "ExtensionPoint_Update", new JsonSchemaReference( extensionPointSchema ) ) );
-		definitions.add( new JsonSchemaNamedReference( "ExtensionPoint_Shared", new JsonSchemaReference( extensionPointSchema ) ) );
-		definitions.add( new JsonSchemaNamedReference( "ExtensionPoint_Choice", new JsonSchemaReference( extensionPointSchema ) ) );
-		
 		return definitions;
 	}
 	
