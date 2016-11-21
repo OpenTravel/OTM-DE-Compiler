@@ -59,6 +59,10 @@
 		<put-attribute name="title" value="OTA2.0 Repository - Library Errors &amp; Warnings" />
 		<put-attribute name="body" value="/WEB-INF/console/libraryValidation.jsp" />
 	</definition>
+	<definition name="libraryHistory" extends="baseLayoutNoTitle">
+		<put-attribute name="title" value="OTA2.0 Repository - Library History" />
+		<put-attribute name="body" value="/WEB-INF/console/libraryHistory.jsp" />
+	</definition>
 	<definition name="libraryInfo" extends="baseLayoutNoTitle">
 		<put-attribute name="title" value="OTA2.0 Repository - Library Info" />
 		<put-attribute name="body" value="/WEB-INF/console/libraryInfo.jsp" />

@@ -18,7 +18,9 @@ package org.opentravel.schemacompiler.repository;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -46,6 +48,7 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.EntityInfoListType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.EntityInfoType;
+import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryHistoryType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoListType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.ListItems2RQType;
@@ -460,6 +463,43 @@ public class RepositoryContentResource {
     }
 
     /**
+     * Returns the commit history for the specified repository item.
+     * 
+     * @param itemMetadata
+     *            meta-data for the repository item for which to return the commit history
+     * @param authorizationHeader
+     *            the value of the HTTP "Authorization" header
+     * @return JAXBElement<LibraryInfoListType>
+     * @throws RepositoryException
+     *             thrown if the request cannot be processed
+     */
+    @POST
+    @Path("history")
+    @Consumes(MediaType.TEXT_XML)
+    @Produces(MediaType.TEXT_XML)
+    public JAXBElement<LibraryHistoryType> getHistory(
+            JAXBElement<LibraryInfoType> itemMetadata,
+            @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
+    	
+        Map<String, Map<TLLibraryStatus, Boolean>> accessibleItemCache = new HashMap<String, Map<TLLibraryStatus, Boolean>>();
+        UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
+    	RepositoryItem item = RepositoryUtils.createRepositoryItem(repositoryManager, itemMetadata.getValue());
+    	
+    	if (isReadable( item, user, accessibleItemCache)) {
+    		LibraryHistoryType libraryHistory = repositoryManager.getHistoryManager().getHistory( item );
+    		
+    		if (libraryHistory == null) {
+    			throw new RepositoryException("Commit history not found for " + item.getFilename());
+    		}
+    		return objectFactory.createLibraryHistory( libraryHistory );
+    		
+    	} else {
+            throw new RepositorySecurityException(
+                    "The user does not have permission to access the requested resource.");
+    	}
+    }
+    
+    /**
      * Returns a list of meta-data records for the repository items which reference the item
      * specified in the request payload.
      * 
@@ -842,6 +882,7 @@ public class RepositoryContentResource {
     public Response commitContent(
     		@FormDataParam("item") JAXBElement<RepositoryItemIdentityType> identityElement,
     		@FormDataParam("fileContent") InputStream contentStream,
+    		@FormDataParam("remarks") String remarks,
             @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
 
         RepositoryItemIdentityType itemIdentity = identityElement.getValue();
@@ -857,7 +898,7 @@ public class RepositoryContentResource {
             if (securityManager.isWriteAuthorized(user, item)) {
                 repositoryManager.getFileManager().setCurrentUserId(user.getUserId());
 
-                repositoryManager.commit(item, contentStream);
+                repositoryManager.commit(item, contentStream, remarks);
                 indexRepositoryItem(item);
                 return Response.status(200).build();
 
@@ -944,6 +985,7 @@ public class RepositoryContentResource {
     public JAXBElement<LibraryInfoType> unlockRepositoryItem(
     		@FormDataParam("item") JAXBElement<RepositoryItemIdentityType> identityElement,
     		@FormDataParam("fileContent") InputStream contentStream,
+    		@FormDataParam("remarks") String remarks,
             @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
 
         RepositoryItemIdentityType itemIdentity = identityElement.getValue();
@@ -961,7 +1003,7 @@ public class RepositoryContentResource {
 
                 // Release the lock in the local repository
                 item.setLockedByUser(user.getUserId());
-                repositoryManager.unlock(item, contentStream);
+                repositoryManager.unlock(item, contentStream, remarks);
                 indexRepositoryItem(item);
 
                 // Refresh the item's meta-data and return it to the caller
@@ -1323,8 +1365,7 @@ public class RepositoryContentResource {
                         itemIdentity.getVersion());
                 ResponseBuilder response = Response.ok(contentFile);
 
-                response.header("Content-Disposition",
-                        "attachment; filename=" + contentFile.getName());
+                response.header("Content-Disposition", "attachment; filename=" + contentFile.getName());
                 return response.build();
 
             } else {
@@ -1337,6 +1378,63 @@ public class RepositoryContentResource {
         }
     }
 
+    /**
+     * Called by remote clients to download library/schema content from the OTA2.0 repository.
+     * 
+     * @param identityElement
+     *            the XML element that identifies the repository item to download
+     * @param authorizationHeader
+     *            the value of the HTTP "Authorization" header
+     * @return Response
+     * @throws RepositoryException
+     *             thrown if the request cannot be processed
+     */
+    @POST
+    @Path("historicalContent")
+    @Consumes(MediaType.TEXT_XML)
+    @Produces(MediaType.TEXT_XML)
+    public Response downloadHistoricalContent(JAXBElement<RepositoryItemIdentityType> identityElement,
+    		@QueryParam("commitNumber") Integer commitNumber,
+    		@QueryParam("effectiveDate") String effectiveDateStr,
+            @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
+
+        RepositoryItemIdentityType itemIdentity = identityElement.getValue();
+        LibraryInfoType itemMetadata = repositoryManager.getFileManager().loadLibraryMetadata(
+                itemIdentity.getBaseNamespace(), itemIdentity.getFilename(),
+                itemIdentity.getVersion());
+        RepositoryItemImpl item = RepositoryUtils.createRepositoryItem(repositoryManager, itemMetadata);
+        UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
+        Date effectiveDate = null;
+        
+        if ((commitNumber == null) && (effectiveDateStr != null)) {
+        	try {
+        		effectiveDate = RepositoryUtils.utcDateTimeFormat.parse( effectiveDateStr );
+        		
+        	} catch (ParseException e) {
+        		throw new RepositoryException("Invalid date/time format (expecting UTC): " + effectiveDateStr, e);
+        	}
+        }
+        
+        if (securityManager.isReadAuthorized(user, item)) {
+            ResponseBuilder response;
+            File contentFile;
+            
+            if (commitNumber != null) {
+                contentFile = repositoryManager.getHistoryManager().getHistoricalContent( item, commitNumber );
+            	
+            } else { // effective date
+                contentFile = repositoryManager.getHistoryManager().getHistoricalContent( item, effectiveDate );
+            }
+            response = Response.ok(contentFile);
+            response.header("Content-Disposition", "attachment; filename=" + item.getFilename());
+            return response.build();
+        	
+        } else {
+            throw new RepositorySecurityException(
+                    "The user does not have permission to access the requested resource.");
+        }
+    }
+    
     /**
      * Returns the permission that the registered user is authorized to perform on the specified
      * namespace.

@@ -1732,16 +1732,30 @@ public final class ProjectManager {
      * true, the conent of the WIP file will be committed to the remote repository before the
      * existing lock is released. If false, any changes in the the WIP content will be discarded.
      * 
-     * @param item
-     *            the repository item to unlock
-     * @param commitWIP
-     *            flag indicating whether to commit the existing work-in-process content for the
-     *            item
+     * @param item  the repository item to unlock
+     * @param commitWIP  flag indicating whether to commit the existing work-in-process content for the item
+     * @throws IllegalStateException  thrown if the project item's state is not <code>MANAGED_WIP</code>
+     * @throws RepositoryException
+     * @deprecated  use {@link #unlock(ProjectItem, boolean, String)} instead
+     */
+    @Deprecated
+    public void unlock(ProjectItem item, boolean commitWIP) throws RepositoryException {
+    	unlock(item, commitWIP, null);
+    }
+    
+    /**
+     * Unlocks the given work-in-process (WIP) <code>ProjectItem</code>. If the 'commitWIP' flag is
+     * true, the conent of the WIP file will be committed to the remote repository before the
+     * existing lock is released. If false, any changes in the the WIP content will be discarded.
+     * 
+     * @param item  the repository item to unlock
+     * @param commitWIP  flag indicating whether to commit the existing work-in-process content for the item
+	 * @param remarks  remarks provided by the user to describe the nature of the commit (ignored if 'commitWIP' is false)
      * @throws IllegalStateException
      *             thrown if the project item's state is not <code>MANAGED_WIP</code>
      * @throws RepositoryException
      */
-    public void unlock(ProjectItem item, boolean commitWIP) throws RepositoryException {
+    public void unlock(ProjectItem item, boolean commitWIP, String remarks) throws RepositoryException {
         // Refresh the content from the remote repository to make sure we are working with the most
         // current data
         if (item.getRepository() instanceof RemoteRepository) {
@@ -1758,7 +1772,7 @@ public final class ProjectManager {
         ProjectItemImpl managedItem = (ProjectItemImpl) item;
 
         repositoryManager.resetDownloadCache();
-        repositoryManager.unlock(managedItem, commitWIP);
+        repositoryManager.unlock(managedItem, commitWIP, remarks);
 
         // Update the project item and its library to reference the managed repository item instead
         // of the WIP file.
@@ -1776,13 +1790,28 @@ public final class ProjectManager {
      * Commits the content of the given work-in-process (WIP) <code>ProjectItem</code> to the remote
      * repository, but retains the local user's lock.
      * 
-     * @param item
-     *            the repository item whose content is to be committed
+     * @param item  the repository item whose content is to be committed
+     * @throws IllegalStateException
+     *             thrown if the project item's state is not <code>MANAGED_WIP</code>
+     * @throws RepositoryException
+     * @Deprecated  use {@link #commit(ProjectItem, String)} instead
+     */
+    @Deprecated
+    public void commit(ProjectItem item) throws RepositoryException {
+    	commit( item, null );
+    }
+    
+    /**
+     * Commits the content of the given work-in-process (WIP) <code>ProjectItem</code> to the remote
+     * repository, but retains the local user's lock.
+     * 
+     * @param item  the repository item whose content is to be committed
+	 * @param remarks  remarks provided by the user to describe the nature of the commit
      * @throws IllegalStateException
      *             thrown if the project item's state is not <code>MANAGED_WIP</code>
      * @throws RepositoryException
      */
-    public void commit(ProjectItem item) throws RepositoryException {
+    public void commit(ProjectItem item, String remarks) throws RepositoryException {
         if (item.getState() != RepositoryItemState.MANAGED_WIP) {
             throw new RepositoryException(
                     "Unable to commit - the item is not a work-in-process copy.");
@@ -1801,7 +1830,7 @@ public final class ProjectManager {
             }
         }
         repositoryManager.resetDownloadCache();
-        repositoryManager.commit(item);
+        repositoryManager.commit(item, remarks);
     }
 
     /**

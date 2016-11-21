@@ -25,17 +25,20 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryHistoryType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryStatus;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RefreshPolicy;
@@ -82,11 +85,17 @@ public class RepositoryManager implements Repository {
     private static final String ENCRYPTED_PASSWORD_PREFIX = "enc:";
     private static final int MAX_DISPLAY_NAME_LENGTH = 256;
     private static final Pattern REPOSITORY_ID_PATTERN = Pattern.compile("([A-Za-z0-9\\-._~!$&'()*+,;=]|%[0-9A-Fa-f]{2})*");
+    
+    private static final String REMARK_PUBLISH = "Initial publication.";
+    private static final String REMARK_PROMOTE = "Promoted to \"{0}\" status.";
+    private static final String REMARK_DEMOTE  = "Demoted to \"{0}\" status.";
+    private static final String REMARK_CRC     = "Recalculated library CRC.";
 
     private static RepositoryManager defaultInstance;
     private static Log log = LogFactory.getLog(RepositoryManager.class);
 
     private RepositoryFileManager fileManager;
+    private RepositoryHistoryManager historyManager = new RepositoryHistoryManager( this );
     private String localRepositoryId;
     private String localRepositoryDisplayName;
     private Date lastUpdatedDate;
@@ -174,6 +183,15 @@ public class RepositoryManager implements Repository {
      */
     public RepositoryFileManager getFileManager() {
         return fileManager;
+    }
+
+    /**
+     * Returns the history manager used by this repository manager instance.
+     * 
+     * @return RepositoryHistoryManager
+     */
+    public RepositoryHistoryManager getHistoryManager() {
+        return historyManager;
     }
 
     /**
@@ -868,8 +886,7 @@ public class RepositoryManager implements Repository {
     }
 
     /**
-     * @see org.opentravel.schemacompiler.repository.Repository#getRepositoryItem(java.lang.String,
-     *      java.lang.String)
+     * @see org.opentravel.schemacompiler.repository.Repository#getRepositoryItem(java.lang.String,java.lang.String)
      */
     @Override
     public RepositoryItem getRepositoryItem(String itemUri, String itemNamespace)
@@ -921,8 +938,29 @@ public class RepositoryManager implements Repository {
         }
         return item;
     }
-
+    
     /**
+	 * @see org.opentravel.schemacompiler.repository.Repository#getHistory(org.opentravel.schemacompiler.repository.RepositoryItem)
+	 */
+	@Override
+	public RepositoryItemHistory getHistory(RepositoryItem item) throws RepositoryException {
+		RepositoryItemHistory history;
+		
+        if (item.getRepository() == this) {
+        	LibraryHistoryType libraryHistory = historyManager.getHistory( item );
+        	
+        	if (libraryHistory == null) {
+        		throw new RepositoryException("Commit history not found for " + item.getFilename());
+        	}
+        	history = RepositoryUtils.createItemHistory( libraryHistory, this );
+        	
+        } else {
+        	history = item.getRepository().getHistory( item );
+        }
+        return history;
+	}
+
+	/**
      * Always returns write permissions for the local repository.
      * 
      * @see org.opentravel.schemacompiler.repository.RemoteRepository#getUserAuthorization(java.lang.String)
@@ -1207,10 +1245,12 @@ public class RepositoryManager implements Repository {
             // Save the library content
             fileManager.saveFile(contentFile, unmanagedContent);
             log.info("Library content saved: " + contentFile.getAbsolutePath());
-
+            
             // Build and return the repository item to represent the content we just published
-            RepositoryItem publishedItem = RepositoryUtils.createRepositoryItem(this,
-                    libraryMetadata);
+            RepositoryItem publishedItem = RepositoryUtils.createRepositoryItem(this, libraryMetadata);
+
+            // Create the history entry
+            historyManager.addToHistory( publishedItem, new Date(), REMARK_PUBLISH );
 
             success = true;
             log.info("Content '" + filename + "' published successfully to namespace '"
@@ -1243,21 +1283,30 @@ public class RepositoryManager implements Repository {
 
     /**
      * @see org.opentravel.schemacompiler.repository.Repository#commit(org.opentravel.schemacompiler.repository.RepositoryItem)
+     * @deprecated  use {@link #commit(RepositoryItem, String)} instead
      */
     @Override
+    @Deprecated
     public void commit(RepositoryItem item) throws RepositoryException {
+    	commit(item, (String) null);
+    }
+
+    /**
+	 * @see org.opentravel.schemacompiler.repository.Repository#commit(org.opentravel.schemacompiler.repository.RepositoryItem, java.lang.String)
+	 */
+	@Override
+	public void commit(RepositoryItem item, String remarks) throws RepositoryException {
         if (item.getRepository() == this) {
             InputStream wipContent = null;
             try {
-                File wipFile = fileManager.getLibraryWIPContentLocation(item.getBaseNamespace(),
-                        item.getFilename());
+                File wipFile = fileManager.getLibraryWIPContentLocation(item.getBaseNamespace(), item.getFilename());
 
                 if (!wipFile.exists()) {
                     throw new RepositoryException("The work-in-process file does not exist: "
                             + item.getFilename());
                 }
                 wipContent = new FileInputStream(wipFile);
-                commit(item, wipContent);
+                commit(item, wipContent, remarks);
 
             } catch (IOException e) {
                 throw new RepositoryException("The work-in-process file cannot be accessed: "
@@ -1265,25 +1314,40 @@ public class RepositoryManager implements Repository {
             }
 
         } else {
-            ((RemoteRepository) item.getRepository()).commit(item);
+            ((RemoteRepository) item.getRepository()).commit(item, remarks);
         }
-    }
+	}
 
+	/**
+     * Commits the content of the specified <code>RepositoryItem</code> by updating its repository
+     * contents to match the data obtained from the input stream for the work-in-process content
+     * provided.
+     * 
+     * @param item  the repository item to commit
+     * @param wipContent  the work-in-process content that will replace the current content of the
+     *					  repository item
+     * @throws RepositoryException  thrown if the file content cannot be committed or is not yet
+     *								locked by the current user
+     * @deprecated  use {@link #commit(RepositoryItem, InputStream, String)} instead
+     */
+	@Deprecated
+    public void commit(RepositoryItem item, InputStream wipContent) throws RepositoryException {
+    	commit( item, wipContent, null );
+    }
+    
     /**
      * Commits the content of the specified <code>RepositoryItem</code> by updating its repository
      * contents to match the data obtained from the input stream for the work-in-process content
      * provided.
      * 
-     * @param item
-     *            the repository item to commit
-     * @param wipContent
-     *            the work-in-process content that will replace the current content of the
-     *            repository item
-     * @throws RepositoryException
-     *             thrown if the file content cannot be committed or is not yet locked by the
-     *             current user
+     * @param item  the repository item to commit
+     * @param wipContent  the work-in-process content that will replace the current content of the
+     *					  repository item
+     * @param remarks  free-text remarks that describe the nature of the change being committed
+     * @throws RepositoryException  thrown if the file content cannot be committed or is not yet
+     *								locked by the current user
      */
-    public void commit(RepositoryItem item, InputStream wipContent) throws RepositoryException {
+    public void commit(RepositoryItem item, InputStream wipContent, String remarks) throws RepositoryException {
         String baseNS = RepositoryNamespaceUtils.normalizeUri(item.getBaseNamespace());
         LibraryInfoType libraryMetadata = fileManager.loadLibraryMetadata(baseNS,
                 item.getFilename(), item.getVersion());
@@ -1306,6 +1370,9 @@ public class RepositoryManager implements Repository {
                     item.getFilename(), item.getVersion());
 
             fileManager.saveFile(contentFile, wipContent);
+
+            // Create the history entry for this update
+            historyManager.addToHistory( item, new Date(), remarks );
 
             // Update the library's meta-data with the current date
             libraryMetadata.setLastUpdated(XMLGregorianCalendarConverter
@@ -1448,11 +1515,20 @@ public class RepositoryManager implements Repository {
     }
 
     /**
-     * @see org.opentravel.schemacompiler.repository.Repository#unlock(org.opentravel.schemacompiler.repository.RepositoryItem,
-     *      boolean)
+     * @see org.opentravel.schemacompiler.repository.Repository#unlock(org.opentravel.schemacompiler.repository.RepositoryItem,boolean)
+     * @deprecated use {@link #unlock(RepositoryItem, boolean, String)} instead
      */
     @Override
+    @Deprecated
     public void unlock(RepositoryItem item, boolean commitWIP) throws RepositoryException {
+    	unlock(item, commitWIP, null);
+    }
+
+    /**
+	 * @see org.opentravel.schemacompiler.repository.Repository#unlock(org.opentravel.schemacompiler.repository.RepositoryItem, boolean, java.lang.String)
+	 */
+	@Override
+	public void unlock(RepositoryItem item, boolean commitWIP, String remarks) throws RepositoryException {
         File wipFile = fileManager.getLibraryWIPContentLocation(item.getBaseNamespace(),
                 item.getFilename());
 
@@ -1467,7 +1543,7 @@ public class RepositoryManager implements Repository {
                     }
                     wipContent = new FileInputStream(wipFile);
                 }
-                unlock(item, wipContent);
+                unlock(item, wipContent, remarks);
 
             } catch (IOException e) {
                 throw new RepositoryException("The work-in-process file cannot be accessed: "
@@ -1482,7 +1558,7 @@ public class RepositoryManager implements Repository {
             }
 
         } else {
-            ((RemoteRepository) item.getRepository()).unlock(item, commitWIP);
+            ((RemoteRepository) item.getRepository()).unlock(item, commitWIP, remarks);
         }
 
         // Rename WIP file to ".bak" since the 'real' content is now managed by the repository.
@@ -1493,9 +1569,9 @@ public class RepositoryManager implements Repository {
             backupFile.delete();
         }
         wipFile.renameTo(backupFile);
-    }
+	}
 
-    /**
+	/**
      * Locks the specified repository item using the credentials for its owning repository. If the
      * 'wipContent' stream is provided, the work-in-process conent of the will be committed to the
      * remote repository before the existing lock is released. If the stream parameter is null, any
@@ -1509,8 +1585,31 @@ public class RepositoryManager implements Repository {
      * @throws RepositoryException
      *             thrown if the file content cannot be unlocked or is not yet locked by the current
      *             user
+     * @deprecated  use {@link #unlock(RepositoryItem, InputStream, String)} instead
      */
+	@Deprecated
     public void unlock(RepositoryItem item, InputStream wipContent) throws RepositoryException {
+		unlock(item, wipContent, null);
+	}
+	
+	/**
+     * Locks the specified repository item using the credentials for its owning repository. If the
+     * 'wipContent' stream is provided, the work-in-process conent of the will be committed to the
+     * remote repository before the existing lock is released. If the stream parameter is null, any
+     * changes in the item's WIP content will be discarded.
+     * 
+     * @param item
+     *            the repository item to lock
+     * @param wipContent
+     *            stream for content that should be committed before the item's lock is released
+     *            (may be null)
+	 * @param remarks
+	 *            remarks provided by the user to describe the nature of the commit (ignored if wipContent is null)
+     * @throws RepositoryException
+     *             thrown if the file content cannot be unlocked or is not yet locked by the current
+     *             user
+     */
+    public void unlock(RepositoryItem item, InputStream wipContent, String remarks) throws RepositoryException {
         String baseNS = RepositoryNamespaceUtils.normalizeUri(item.getBaseNamespace());
         LibraryInfoType libraryMetadata = fileManager.loadLibraryMetadata(baseNS,
                 item.getFilename(), item.getVersion());
@@ -1528,7 +1627,7 @@ public class RepositoryManager implements Repository {
 
             // Commit the existing WIP content if requested by the caller
             if (wipContent != null) {
-                commit(item, wipContent);
+                commit(item, wipContent, remarks);
             }
             fileManager.startChangeSet();
 
@@ -1607,8 +1706,7 @@ public class RepositoryManager implements Repository {
                     libraryContent.setStatus(targetStatus);
                 }
                 libraryMetadata.setStatus(targetStatus.toRepositoryStatus());
-                libraryMetadata.setLastUpdated(XMLGregorianCalendarConverter
-                        .toXMLGregorianCalendar(new Date()));
+                libraryMetadata.setLastUpdated(XMLGregorianCalendarConverter.toXMLGregorianCalendar(new Date()));
 
                 // Save the changes and update the repository item sent for this method call
                 if (libraryContent != null) {
@@ -1619,6 +1717,10 @@ public class RepositoryManager implements Repository {
                     modelSaver.saveLibrary(libraryContent);
                 }
                 fileManager.saveLibraryMetadata(libraryMetadata);
+
+                // Create the history entry for this update
+                historyManager.addToHistory( item, new Date(), MessageFormat.format( REMARK_PROMOTE,
+                		SchemaCompilerApplicationContext.getContext().getMessage( targetStatus.toString(), null, Locale.getDefault() ) ) );
 
                 if (!(item instanceof ProjectItem)) {
                     // Only required for non-ProjectItems; ProjectItem derives the status value from
@@ -1710,6 +1812,10 @@ public class RepositoryManager implements Repository {
                     modelSaver.saveLibrary(libraryContent);
                 }
                 fileManager.saveLibraryMetadata(libraryMetadata);
+
+                // Create the history entry for this update
+                historyManager.addToHistory( item, new Date(), MessageFormat.format( REMARK_DEMOTE,
+                		SchemaCompilerApplicationContext.getContext().getMessage( targetStatus.toString(), null, Locale.getDefault() ) ) );
 
                 if (!(item instanceof ProjectItem)) {
                     // Only required for non-ProjectItems; ProjectItem derives the status value from
@@ -1856,6 +1962,9 @@ public class RepositoryManager implements Repository {
                         .toXMLGregorianCalendar(new Date()));
                 fileManager.saveLibraryMetadata(libraryMetadata);
 
+                // Create the history entry
+                historyManager.addToHistory( item, new Date(), REMARK_CRC );
+
                 log.info("Successfully recalculated CRC for item '" + item.getFilename() + "' by "
                         + fileManager.getCurrentUserId());
                 success = true;
@@ -1909,6 +2018,9 @@ public class RepositoryManager implements Repository {
                     throw new RepositoryException("Unable to delete library content file: "
                             + contentFile.getAbsolutePath());
                 }
+                
+                historyManager.deleteHistory( item );
+                
                 log.info("Successfully deleted managed item '" + item.getFilename() + "', by "
                         + fileManager.getCurrentUserId());
                 success = true;
@@ -1959,6 +2071,69 @@ public class RepositoryManager implements Repository {
             contentLocation = URLUtils.toURL( itemFile );
         }
         return contentLocation;
+    }
+    
+    /**
+     * Returns the URL that can be used to download the historical library content from
+     * its repository.
+     * 
+     * @param item  the repository item for which historical content will be retrieved
+     * @param commitNumber  the commit number of the historical content to be retrieved
+     * @return URL
+     * @throws RepositoryException  thrown if the owning repository for the item cannot be identified
+     */
+    public URL getHistoricalContentLocation(RepositoryItem item, int commitNumber) throws RepositoryException {
+    	URL contentUrl;
+    	
+    	if (item.getRepository() == this) {
+    		contentUrl = URLUtils.toURL( historyManager.getHistoricalContent( item, commitNumber ) );
+    		
+    	} else {
+    		StringBuilder url = new StringBuilder();
+    		
+    		try {
+    			url.append( ((RemoteRepositoryClient) item.getRepository()).getEndpointUrl() )
+    				.append( "/historicalContent?commitNumber=" ).append( commitNumber );
+    			
+				contentUrl = new URL( url.toString() );
+				
+			} catch (MalformedURLException e) {
+				throw new RepositoryException("Error constructing download URL.", e);
+			}
+    	}
+    	return contentUrl;
+    }
+
+    /**
+     * Returns the URL that can be used to download the historical library content from
+     * its repository.
+     * 
+     * @param item  the repository item for which historical content will be retrieved
+     * @param effectiveDate  the effective date/time of the historical content to be retrieved
+     * @return URL
+     * @throws RepositoryException  thrown if the owning repository for the item cannot be identified
+     */
+    public URL getHistoricalContentLocation(RepositoryItem item, Date effectiveDate) throws RepositoryException {
+    	URL contentUrl;
+    	
+    	if (item.getRepository() == this) {
+    		contentUrl = URLUtils.toURL( historyManager.getHistoricalContent( item, effectiveDate ) );
+    		
+    	} else {
+    		StringBuilder url = new StringBuilder();
+    		
+    		try {
+    			url.append( ((RemoteRepositoryClient) item.getRepository()).getEndpointUrl() )
+    				.append( "/historicalContent?effectiveDate=" )
+    				.append( RepositoryUtils.utcDateTimeFormat.format( effectiveDate ) );
+    			
+				contentUrl = new URL( url.toString() );
+				
+			} catch (MalformedURLException e) {
+				throw new RepositoryException("Error constructing download URL.", e);
+			}
+    	}
+    	return contentUrl;
     }
 
     /**

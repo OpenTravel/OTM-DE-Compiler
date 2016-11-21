@@ -1083,7 +1083,7 @@ public abstract class RepositoryFileManager {
             throw new RepositoryException("Unrecognized file format.", e);
 
         } catch (Throwable t) {
-            throw new RepositoryException("Unknown error while repository file.", t);
+            throw new RepositoryException("Unknown error while reading repository file.", t);
         }
     }
 

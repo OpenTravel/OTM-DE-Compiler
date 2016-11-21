@@ -16,7 +16,10 @@
 
 package org.opentravel.schemacompiler.util;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 import org.opentravel.schemacompiler.console.NamespaceItem;
 import org.opentravel.schemacompiler.index.EntitySearchResult;
@@ -33,6 +36,10 @@ import org.opentravel.schemacompiler.repository.RepositoryItem;
  * @author S. Livezey
  */
 public class PageUtils {
+	
+	private static final String DATETIME_FORMAT = "dd-MMM-yyyy hh:mm a";
+	
+	private static DateFormat dateTimeFormat;
 	
 	/**
 	 * Returns true if the given string is null or empty.
@@ -129,6 +136,16 @@ public class PageUtils {
     	return NamespaceItem.getLastModified( item );
     }
     
+    /**
+     * Formats the given date-time value for display.
+     * 
+     * @param dateTime  the date-time value to be displayed
+     * @return String
+     */
+    public String formatDateTime(Date dateTime) {
+    	return (dateTime == null) ? "&nbsp;" : dateTimeFormat.format( dateTime ).replaceAll( "\\s+", "\\&nbsp\\;");
+    }
+    
 	/**
 	 * Trims the given string value and returns null if the resulting string length is zero.
 	 * 
@@ -146,6 +163,22 @@ public class PageUtils {
 			}
 		}
 		return trimmedStr;
+	}
+	
+	/**
+	 * Initializes the date-time formatter with the correct time zone.
+	 */
+	static {
+		try {
+			String timeZoneId = System.getProperty("user.timezone", "EST");
+			TimeZone timeZone = TimeZone.getTimeZone( timeZoneId );
+			
+			dateTimeFormat = new SimpleDateFormat( DATETIME_FORMAT );
+			dateTimeFormat.setTimeZone( timeZone );
+			
+		} catch (Throwable t) {
+			throw new ExceptionInInitializerError( t );
+		}
 	}
 	
 }

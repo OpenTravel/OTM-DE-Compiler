@@ -95,6 +95,26 @@
 		</xsd:sequence>
 	</xsd:complexType>
 	
+	<xsd:element name="LibraryHistory" type="LibraryHistoryType" />
+	<xsd:complexType name="LibraryHistoryType">
+		<xsd:sequence>
+			<xsd:element ref="RepositoryItemIdentity" minOccurs="1" maxOccurs="1" />
+			<xsd:element ref="LibraryHistoryItem" minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:element name="LibraryHistoryItem" type="LibraryHistoryItemType" />
+	<xsd:complexType name="LibraryHistoryItemType">
+		<xsd:simpleContent>
+			<xsd:extension base="String_Medium">
+				<xsd:attribute name="commitNumber" type="xsd:int" use="required"/>
+				<xsd:attribute name="effectiveOn" type="xsd:dateTime" use="required"/>
+				<xsd:attribute name="user" type="UserID" use="required"/>
+				<xsd:attribute name="filename" type="Filename" use="required"/>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	
 	<xsd:element name="NamespaceList" type="NamespaceListType" />
 	<xsd:complexType name="NamespaceListType">
 		<xsd:sequence>
@@ -226,6 +246,12 @@
 	<xsd:simpleType name="String_Short">
 		<xsd:restriction base="xsd:string">
 			<xsd:maxLength value="256" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="String_Medium">
+		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="1000" />
 		</xsd:restriction>
 	</xsd:simpleType>
 

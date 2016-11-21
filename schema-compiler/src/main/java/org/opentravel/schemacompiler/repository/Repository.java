@@ -269,6 +269,15 @@ public interface Repository {
      */
     public RepositoryItem getRepositoryItem(String itemUri, String itemNamespace)
             throws RepositoryException, URISyntaxException;
+    
+    /**
+     * Returns the commit history for the given repository item.
+     * 
+     * @param item  the repository item for which to return the commit history
+     * @return RepositoryItemHistory
+     * @throws RepositoryException  thrown if the commit history cannot be retrieved
+     */
+    public RepositoryItemHistory getHistory(RepositoryItem item) throws RepositoryException;
 
     /**
      * Returns the permission that the registered user is authorized to perform on the specified
@@ -402,8 +411,22 @@ public interface Repository {
      * @throws RepositoryException
      *             thrown if the file content cannot be committed or is not yet locked by the
      *             current user
+     * @deprecated  use {@link #commit(RepositoryItem, String)} instead
      */
+    @Deprecated
     public void commit(RepositoryItem item) throws RepositoryException;
+
+    /**
+     * Commits the content of the specified <code>RepositoryItem</code> by updating its repository
+     * contents to match the data obtained from the input stream for the work-in-process content.
+     * 
+     * @param item  the repository item to commit
+     * @param remarks  free-text remarks that describe the nature of the change being committed
+     * @throws RepositoryException
+     *             thrown if the file content cannot be committed or is not yet locked by the
+     *             current user
+     */
+    public void commit(RepositoryItem item, String remarks) throws RepositoryException;
 
     /**
      * Locks the specified repository item using the credentials for its owning repository.
@@ -416,7 +439,7 @@ public interface Repository {
     public void lock(RepositoryItem item) throws RepositoryException;
 
     /**
-     * Locks the specified repository item using the credentials for its owning repository. If the
+     * Unlocks the specified repository item using the credentials for its owning repository. If the
      * 'commitWIP' parameter is true, the work-in-process conent of the will be committed to the
      * remote repository before the existing lock is released. If the flag is false, any changes in
      * the item's WIP content will be discarded.
@@ -429,8 +452,29 @@ public interface Repository {
      * @throws RepositoryException
      *             thrown if the file content cannot be unlocked or is not yet locked by the current
      *             user
+     * @deprecated use {@link #unlock(RepositoryItem, boolean, String)} instead
      */
+    @Deprecated
     public void unlock(RepositoryItem item, boolean commitWIP) throws RepositoryException;
+
+    /**
+     * Unlocks the specified repository item using the credentials for its owning repository. If the
+     * 'commitWIP' parameter is true, the work-in-process conent of the will be committed to the
+     * remote repository before the existing lock is released. If the flag is false, any changes in
+     * the item's WIP content will be discarded.
+     * 
+     * @param item
+     *            the repository item to lock
+     * @param commitWIP
+     *            flag indicating that the current WIP content changes should be committed prior to
+     *            releasing the lock
+	 * @param remarks
+	 *            remarks provided by the user to describe the nature of the commit (ignored if 'commitWIP' is false)
+     * @throws RepositoryException
+     *             thrown if the file content cannot be unlocked or is not yet locked by the current
+     *             user
+     */
+    public void unlock(RepositoryItem item, boolean commitWIP, String remarks) throws RepositoryException;
 
     /**
      * Promotes a <code>RepositoryItem</code> from its current lifecycle status to the next

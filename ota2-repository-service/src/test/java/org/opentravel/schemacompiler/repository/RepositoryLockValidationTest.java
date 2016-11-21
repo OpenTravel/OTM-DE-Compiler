@@ -66,7 +66,7 @@ public class RepositoryLockValidationTest extends RepositoryMultiUserTestBase {
 		// Update the library, save the project, and commit/unlock
 		library.setComments( TEST_DESCRIPTION1 );
         projectManager.get().saveProject( project.get() );
-		projectManager.get().unlock( item, true );
+		projectManager.get().unlock( item, true, "User 1: Updating library and committing changes" );
 	}
 	
 	public void user2_task2_lockLibraryAndUpdate() throws Exception {
@@ -93,7 +93,7 @@ public class RepositoryLockValidationTest extends RepositoryMultiUserTestBase {
 		// Update the library, save the project, and commit/unlock
 		simpleType.getDocumentation().setDescription( TEST_DESCRIPTION2 );
         projectManager.get().saveProject( project.get() );
-		projectManager.get().unlock( item, true );
+		projectManager.get().unlock( item, true, "User 2: Updating library and committing changes" );
 	}
 	
 	public void user1_task3_refreshModel() throws Exception {

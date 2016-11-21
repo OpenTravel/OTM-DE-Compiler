@@ -18,6 +18,7 @@ package org.opentravel.schemacompiler.console;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -41,7 +42,10 @@ import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
+import org.opentravel.schemacompiler.repository.RepositoryItemCommit;
+import org.opentravel.schemacompiler.repository.RepositoryItemHistory;
 import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
 import org.opentravel.schemacompiler.security.RepositorySecurityManager;
 import org.opentravel.schemacompiler.security.UserPrincipal;
@@ -222,6 +226,74 @@ public class ViewItemController extends BaseController {
         return targetPage;
     }
     
+    /**
+     * Called by the Spring MVC controller to display the commit-history library
+     * page.
+     * 
+     * @param rootNamespace  the root namespace of the selected library
+     * @param path  the sub-namespace path relative to the base namespace
+     * @param filename  the filename of the selected library to view
+     * @param version  the version of the selected library to view
+     * @param session  the HTTP session that contains information about an authenticated user
+     * @param model  the model context to be used when rendering the page view
+     * @return String
+     */
+    @RequestMapping({ "/libraryHistory.html", "/libraryHistory.htm" })
+    public String libraryHistory(@RequestParam(value = "baseNamespace") String baseNamespace,
+            @RequestParam(value = "filename") String filename,
+            @RequestParam(value = "version") String version, HttpSession session, Model model) {
+        String targetPage = null;
+        try {
+            RepositorySecurityManager securityManager = getSecurityManager();
+            UserPrincipal user = getCurrentUser(session);
+            RepositoryItem item = getRepositoryManager().getRepositoryItem(baseNamespace, filename, version);
+
+            if (securityManager.isReadAuthorized(user, item)) {
+            	RepositoryItemHistory history = null;
+            	Map<String,UserPrincipal> commitUsers = new HashMap<>();
+            	
+            	try {
+                	history = getRepositoryManager().getHistory( item );
+                	
+                	// Build a map of all users that have contributed commits to this repository item
+                	for (RepositoryItemCommit commitItem : history.getCommitHistory()) {
+                		String userId = commitItem.getUser();
+                		
+                		if (!commitUsers.containsKey( userId )) {
+                			UserPrincipal commitUser = securityManager.getUser( userId );
+                			
+                			if (commitUser != null) {
+                				commitUsers.put( userId, commitUser );
+                			}
+                		}
+                	}
+            		
+            	} catch (RepositoryException e) {
+            		// Ignore exception if history does not yet exist
+            	}
+            	
+                model.addAttribute("history", history);
+                model.addAttribute("commitUsers", commitUsers);
+                model.addAttribute("pageUtils", new PageUtils());
+                model.addAttribute("item", item);
+            	
+            } else {
+                setErrorMessage("You are not authorized to view the requested library.", model);
+                targetPage = new SearchController().searchPage(null, false, false, session, model);
+            }
+
+        } catch (Throwable t) {
+            log.error("An error occured while displaying the library.", t);
+            setErrorMessage(
+                    "An error occured while displaying the library (see server log for details).", model);
+        }
+
+        if (targetPage == null) {
+            targetPage = applyCommonValues(model, "libraryHistory");
+        }
+        return targetPage;
+    }
+
     /**
      * Called by the Spring MVC controller to display the general-information library
      * page.

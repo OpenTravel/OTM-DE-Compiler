@@ -57,6 +57,7 @@ import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.EntityInfoListType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.EntityInfoType;
+import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryHistoryType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoListType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryStatus;
@@ -78,6 +79,7 @@ import org.opentravel.schemacompiler.repository.RemoteRepository;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryFileManager;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
+import org.opentravel.schemacompiler.repository.RepositoryItemHistory;
 import org.opentravel.schemacompiler.repository.RepositoryItemState;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.repository.RepositoryNamespaceUtils;
@@ -121,6 +123,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
     private static final String RECALCULATE_CRC_ENDPOINT = SERVICE_CONTEXT + "/recalculate-crc";
     private static final String DELETE_ENDPOINT = SERVICE_CONTEXT + "/delete";
     private static final String REPOSITORY_ITEM_METADATA_ENDPOINT = SERVICE_CONTEXT + "/metadata";
+    private static final String REPOSITORY_ITEM_HISTORY_ENDPOINT = SERVICE_CONTEXT + "/history";
     private static final String REPOSITORY_ITEM_CONTENT_ENDPOINT = SERVICE_CONTEXT + "/content";
     private static final String USER_AUTHORIZATION_ENDPOINT = SERVICE_CONTEXT + "/user-authorization";
     private static final String LOCKED_ITEMS_ENDPOINT = SERVICE_CONTEXT + "/locked-items";
@@ -752,6 +755,39 @@ public class RemoteRepositoryClient implements RemoteRepository {
     }
 
 	/**
+	 * @see org.opentravel.schemacompiler.repository.Repository#getHistory(org.opentravel.schemacompiler.repository.RepositoryItem)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public RepositoryItemHistory getHistory(RepositoryItem item) throws RepositoryException {
+        try {
+            HttpPost request = newPostRequest(REPOSITORY_ITEM_HISTORY_ENDPOINT);
+            Marshaller marshaller = RepositoryFileManager.getSharedJaxbContext().createMarshaller();
+            LibraryInfoType itemMetadata = RepositoryUtils.createItemMetadata( item );
+            StringWriter xmlWriter = new StringWriter();
+            marshaller.marshal(objectFactory.createLibraryInfo(itemMetadata), xmlWriter);
+            request.setEntity(new StringEntity(xmlWriter.toString(), ContentType.TEXT_XML));
+
+            HttpResponse response = executeWithAuthentication(request);
+
+            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
+                throw new RepositoryException(getResponseErrorMessage(response));
+            }
+            Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
+            JAXBElement<LibraryHistoryType> jaxbElement = (JAXBElement<LibraryHistoryType>) unmarshaller
+                    .unmarshal(response.getEntity().getContent());
+            
+            return RepositoryUtils.createItemHistory( jaxbElement.getValue(), manager );
+
+        } catch (JAXBException e) {
+            throw new RepositoryException("The format of the library meta-data is unreadable.", e);
+
+        } catch (IOException e) {
+            throw new RepositoryException("The remote repository is unavailable.", e);
+        }
+	}
+
+	/**
 	 * @see org.opentravel.schemacompiler.repository.RemoteRepository#getItemWhereUsed(org.opentravel.schemacompiler.repository.RepositoryItem, boolean)
 	 */
 	@SuppressWarnings("unchecked")
@@ -1104,11 +1140,21 @@ public class RemoteRepositoryClient implements RemoteRepository {
         }
     }
 
-    /**
+	/**
      * @see org.opentravel.schemacompiler.repository.Repository#commit(org.opentravel.schemacompiler.repository.RepositoryItem)
+     * @deprecated  use {@link #commit(RepositoryItem, String)} instead
      */
     @Override
+    @Deprecated
     public void commit(RepositoryItem item) throws RepositoryException {
+    	commit( item, null );
+	}
+
+    /**
+     * @see org.opentravel.schemacompiler.repository.Repository#commit(org.opentravel.schemacompiler.repository.RepositoryItem, java.lang.String)
+     */
+    @Override
+    public void commit(RepositoryItem item, String remarks) throws RepositoryException {
         InputStream wipContent = null;
         try {
             validateRepositoryItem(item);
@@ -1134,9 +1180,9 @@ public class RemoteRepositoryClient implements RemoteRepository {
             mpEntity.addTextBody("item", xmlWriter.toString(), ContentType.TEXT_XML);
             mpEntity.addBinaryBody("fileContent", toByteArray(wipContent),
                     ContentType.DEFAULT_BINARY, item.getFilename());
-
-            // mpEntity.addPart( "fileContent", new InputStreamBody(wipContent, item.getFilename())
-            // );
+            if (remarks != null) {
+            	mpEntity.addTextBody("remarks", remarks, ContentType.TEXT_PLAIN);
+            }
 
             request.setEntity(mpEntity.build());
 
@@ -1237,12 +1283,21 @@ public class RemoteRepositoryClient implements RemoteRepository {
     }
 
     /**
-     * @see org.opentravel.schemacompiler.repository.Repository#unlock(org.opentravel.schemacompiler.repository.RepositoryItem,
-     *      boolean)
+     * @see org.opentravel.schemacompiler.repository.Repository#unlock(org.opentravel.schemacompiler.repository.RepositoryItem,boolean)
+     * @deprecated use {@link #unlock(RepositoryItem, boolean, String)} instead
      */
-    @SuppressWarnings("unchecked")
     @Override
+    @Deprecated
     public void unlock(RepositoryItem item, boolean commitWIP) throws RepositoryException {
+    	unlock(item, commitWIP, null);
+    }
+
+    /**
+	 * @see org.opentravel.schemacompiler.repository.Repository#unlock(org.opentravel.schemacompiler.repository.RepositoryItem, boolean, java.lang.String)
+	 */
+    @SuppressWarnings("unchecked")
+	@Override
+	public void unlock(RepositoryItem item, boolean commitWIP, String remarks) throws RepositoryException {
         InputStream wipContent = null;
         boolean success = false;
         try {
@@ -1268,8 +1323,10 @@ public class RemoteRepositoryClient implements RemoteRepository {
                 wipContent = new FileInputStream(wipFile);
                 mpEntity.addBinaryBody("fileContent", toByteArray(wipContent),
                         ContentType.DEFAULT_BINARY, item.getFilename());
-                // mpEntity.addPart( "fileContent", new InputStreamBody(wipContent,
-                // item.getFilename()) );
+                
+                if (remarks != null) {
+                	mpEntity.addTextBody("remarks", remarks, ContentType.TEXT_PLAIN);
+                }
             }
             marshaller.marshal(objectFactory.createRepositoryItemIdentity(itemIdentity), xmlWriter);
             mpEntity.addTextBody("item", xmlWriter.toString(), ContentType.TEXT_XML);
@@ -1328,9 +1385,9 @@ public class RemoteRepositoryClient implements RemoteRepository {
                 }
             }
         }
-    }
+	}
 
-    /**
+	/**
      * @see org.opentravel.schemacompiler.repository.Repository#promote(org.opentravel.schemacompiler.repository.RepositoryItem)
      */
     @Override

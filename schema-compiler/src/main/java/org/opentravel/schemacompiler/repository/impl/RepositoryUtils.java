@@ -21,10 +21,17 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.EntityInfoType;
+import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryHistoryItemType;
+import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryHistoryType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryStatus;
+import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryItemIdentityType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryState;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
@@ -33,6 +40,8 @@ import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.ProjectItem;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
+import org.opentravel.schemacompiler.repository.RepositoryItemCommit;
+import org.opentravel.schemacompiler.repository.RepositoryItemHistory;
 import org.opentravel.schemacompiler.repository.RepositoryItemState;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.util.OTM16Upgrade;
@@ -47,7 +56,9 @@ import org.opentravel.schemacompiler.version.VersionSchemeFactory;
  * @author S. Livezey
  */
 public class RepositoryUtils {
-
+	
+	public static final DateFormat utcDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+	
     /**
      * Creates a new repository item instance using information from the meta-data record provided.
      * 
@@ -133,6 +144,27 @@ public class RepositoryUtils {
 			throw new RepositoryException("Unknown version scheme for entity: " + owningLibrary.getVersionScheme());
 		}
     	
+    }
+    
+    /**
+     * Constructs a user-consumable instance of the given <code>LibraryHistoryType</code> instance.
+     * 
+     * @param libraryHistory  the persistent representation of the repository item's history
+     * @param manager  the repository manager for the local environment
+     * @return RepositoryItemHistory
+     * @throws RepositoryException  thrown if the item's identity cannot be resolved by the repository manager
+     */
+    public static RepositoryItemHistory createItemHistory(LibraryHistoryType libraryHistory, RepositoryManager manager) throws RepositoryException {
+    	RepositoryItemIdentityType itemIdentity = libraryHistory.getRepositoryItemIdentity();
+		RepositoryItem item = manager.getRepositoryItem( itemIdentity.getBaseNamespace(), itemIdentity.getFilename(), itemIdentity.getVersion() );
+		RepositoryItemHistory itemHistory = new RepositoryItemHistory( item );
+		List<RepositoryItemCommit> commitItems = new ArrayList<>();
+		
+		for (LibraryHistoryItemType libraryHistoryItem : libraryHistory.getLibraryHistoryItem()) {
+			commitItems.add( new RepositoryItemCommit( libraryHistoryItem ) );
+		}
+		itemHistory.setCommitHistory( commitItems );
+		return itemHistory;
     }
 
     /**

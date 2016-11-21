@@ -1172,7 +1172,7 @@ public class AdminController extends BaseController {
                     RepositoryManager repositoryManager = getRepositoryManager();
                     RepositoryItem item = repositoryManager.getRepositoryItem(baseNamespace, filename, version);
 
-                    repositoryManager.unlock(item, false);
+                    repositoryManager.unlock(item, false, null);
                     searchService.indexRepositoryItem(item);
 
                     setStatusMessage("Repository item unlocked successfully: " + filename, model);

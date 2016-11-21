@@ -60,7 +60,7 @@ public class RepositoryRefreshTest extends RepositoryMultiUserTestBase {
 		// Update the library, save the project, and commit/unlock
 		library.setComments( TEST_COMMENTS );
         projectManager.get().saveProject( project.get() );
-		projectManager.get().unlock( item, true );
+		projectManager.get().unlock( item, true, "User 2: Updating model and committing changes" );
 	}
 	
 	private void user1_task2_refreshModel() throws Exception {
