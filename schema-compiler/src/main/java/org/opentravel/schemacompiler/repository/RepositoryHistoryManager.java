@@ -106,9 +106,6 @@ public class RepositoryHistoryManager {
 				item.getBaseNamespace(), item.getFilename(), item.getVersion() );
 		
 		try (OutputStream contentOut = new FileOutputStream( hContentFile )) {
-			
-			manager.getFileManager().addToChangeSet( hContentFile );
-			
 			try (InputStream contentIn = new FileInputStream( contentFile )) {
 				byte[] buffer = new byte[1024];
 				int bytesRead;
@@ -121,6 +118,7 @@ public class RepositoryHistoryManager {
 		} catch (IOException e) {
 			throw new RepositoryException("Error saving historical content file.", e);
 		}
+		manager.getFileManager().addToChangeSet( hContentFile );
 	}
 	
 	/**

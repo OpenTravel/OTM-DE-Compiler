@@ -363,11 +363,10 @@ public class SVNRepositoryFileManager extends RepositoryFileManager {
                 log.info("Adding New File to SVN Change Set: " + file.getAbsolutePath());
                 svnChangeSet.get().add(file);
 
-            } else if (status.getContentsStatus() == SVNStatusType.STATUS_UNVERSIONED) {
-                // File will be added to the change set by the
-                // RepositorySVNEventHandler.handleEvent() callback
-                svnClient.getWCClient().doAdd(file, false, false, false, SVNDepth.FILES, false,
-                        true);
+            } else if ((status.getContentsStatus() == SVNStatusType.STATUS_UNVERSIONED) ||
+            		(status.getContentsStatus() == SVNStatusType.STATUS_NONE)) {
+                // File will be added to the change set by the RepositorySVNEventHandler.handleEvent() callback
+                svnClient.getWCClient().doAdd(file, false, false, false, SVNDepth.FILES, false, true);
 
             } else if (status.getNodeStatus() == SVNStatusType.STATUS_MISSING) {
                 // File will be deleted from the change set by the
