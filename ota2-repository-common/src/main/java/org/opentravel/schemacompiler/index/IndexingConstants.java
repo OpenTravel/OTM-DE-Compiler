@@ -24,6 +24,7 @@ public interface IndexingConstants {
 	public static final String MSGPROP_JOB_TYPE      = "jobType";
 	public static final String JOB_TYPE_CREATE_INDEX = "create-index";
 	public static final String JOB_TYPE_DELETE_INDEX = "delete-index";
+	public static final String JOB_TYPE_SUBSCRIPTION = "subscription-index";
 	public static final String JOB_TYPE_DELETE_ALL   = "delete-all";
 	
 	public static final String MSGPROP_SELECTOR      = "indexSelector";

@@ -15,6 +15,7 @@
  */
 package org.opentravel.schemacompiler.validate.compile;
 
+import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.TLAbstractFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttribute;
@@ -213,7 +214,10 @@ public class TLAttributeCompileValidator extends TLAttributeBaseValidator {
         		.assertEquals(0);
         
         // Warn if a deprecated XSD date/time type is being referenced
-        validateDeprecatedDateTimeUsage( attributeType, builder );
+        TLAttributeOwner attrOwner = target.getOwner();
+        AbstractLibrary owningLibrary = (attrOwner == null) ? null : attrOwner.getOwningLibrary();
+        
+        validateDeprecatedDateTimeUsage( attributeType, owningLibrary, builder );
     }
     
     /**

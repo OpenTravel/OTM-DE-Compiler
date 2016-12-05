@@ -21,37 +21,40 @@
 	<xsd:element name="SubscriptionList" type="SubscriptionList" />
 	<xsd:complexType name="SubscriptionList">
 		<xsd:sequence>
-			<xsd:element ref="Subscription" maxOccurs="unbounded" />
+			<xsd:element ref="SubscriptionTarget" minOccurs="1" maxOccurs="1" />
+			<xsd:element ref="Subscription" minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:element name="SubscriptionTarget" type="SubscriptionTarget" />
+	<xsd:complexType name="SubscriptionTarget">
+		<xsd:sequence>
+			<xsd:element name="BaseNamespace" type="xsd:anyURI" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="LibraryName" type="Library_Name" minOccurs="0" maxOccurs="1" />
+			<xsd:element name="Version" type="String_Short" minOccurs="0" maxOccurs="1" />
 		</xsd:sequence>
 	</xsd:complexType>
 	
 	<xsd:element name="Subscription" type="Subscription" />
 	<xsd:complexType name="Subscription">
-		<xsd:attribute name="userId" type="xsd:string" use="required" />
-		<xsd:attribute name="onLock" type="xsd:boolean" use="required" />
-		<xsd:attribute name="onUnlock" type="xsd:boolean" use="required" />
-		<xsd:attribute name="onCommit" type="xsd:boolean" use="required" />
-		<xsd:attribute name="onStatusChange" type="xsd:boolean" use="required" />
-		<xsd:attribute name="onDelete" type="xsd:boolean" use="required" />
-	</xsd:complexType>
-	
-	<xsd:element name="CommitHistory" type="CommitHistory" />
-	<xsd:complexType name="CommitHistory">
 		<xsd:sequence>
-			<xsd:element ref="Commit" maxOccurs="unbounded" />
+			<xsd:element name="User" type="UserID" minOccurs="0" maxOccurs="unbounded" />
 		</xsd:sequence>
+		<xsd:attribute name="eventType" type="SubscriptionEventType" use="required" />
 	</xsd:complexType>
 	
-	<xsd:element name="Commit" type="CommitHistoryItem" />
-	<xsd:complexType name="CommitHistoryItem">
-		<xsd:simpleContent>
-			<xsd:extension base="CommitRemarks">
-				<xsd:attribute name="committedBy" type="xsd:string" use="required" />
-				<xsd:attribute name="snapshotFile" type="xsd:string" use="required" />
-			</xsd:extension>
-		</xsd:simpleContent>
-	</xsd:complexType>
-	
+	<xsd:simpleType name="SubscriptionEventType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="LibraryPublish" />
+			<xsd:enumeration value="LibraryNewVersion" />
+			<xsd:enumeration value="LibraryStatusChange" />
+			<xsd:enumeration value="LibraryStateChange" />
+			<xsd:enumeration value="LibraryCommit" />
+			<xsd:enumeration value="LibraryMoveOrRename" />
+			<xsd:enumeration value="NamespaceAction" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
 	<!-- # RFC-3986 URI component:  segment with ':'-->
 	<xsd:simpleType name="UserID">
 		<xsd:restriction base="xsd:string">
@@ -77,10 +80,16 @@
 		</xsd:restriction>
 	</xsd:simpleType>
 	
-	<xsd:simpleType name="CommitRemarks">
+   <xsd:simpleType name="Library_Name">
+      <xsd:restriction base="xsd:string">
+         <xsd:pattern value="[A-Za-z][A-Za-z0-9/\.\-\|:_\s]*" />
+      </xsd:restriction>
+   </xsd:simpleType>
+
+	<xsd:simpleType name="String_Short">
 		<xsd:restriction base="xsd:string">
-			<xsd:maxLength value="2000" />
+			<xsd:maxLength value="256" />
 		</xsd:restriction>
 	</xsd:simpleType>
-	
+
 </xsd:schema>

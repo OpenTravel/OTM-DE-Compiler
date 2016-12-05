@@ -18,9 +18,12 @@ package org.opentravel.schemacompiler.index;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 
 /**
@@ -30,6 +33,10 @@ import org.opentravel.schemacompiler.repository.RepositoryManager;
  */
 public class FreeTextSearchServiceFactory {
 	
+	private static final String JMS_SEARCH_SERVICE_IMPL = "org.opentravel.schemacompiler.index.JMSFreeTextSearchService";
+	
+    private static Log log = LogFactory.getLog(FreeTextSearchServiceFactory.class);
+    
     private static FreeTextSearchService defaultInstance;
     private static Set<Object> serviceOwners = new HashSet<Object>();
     private static boolean realTimeIndexing = false;
@@ -55,13 +62,27 @@ public class FreeTextSearchServiceFactory {
      * @throws IOException
      *             thrown if a low-level error occurs while initializing the search index
      */
-    public static synchronized void initializeSingleton(File indexLocation,
+    @SuppressWarnings("unchecked")
+	public static synchronized void initializeSingleton(File indexLocation,
             RepositoryManager repositoryManager) throws IOException {
         if (defaultInstance == null) {
         	if (realTimeIndexing) {
                 defaultInstance = new RealTimeFreeTextSearchService(indexLocation, repositoryManager);
+                
         	} else {
-                defaultInstance = new JMSFreeTextSearchService(indexLocation, repositoryManager);
+        		// This is a messy way of initializing the JMS implementation, but necessary for now to break
+        		// the compile-time dependency on JMS components.
+        		try {
+        			Class<?> clazz = Class.forName(JMS_SEARCH_SERVICE_IMPL);
+        			Constructor<FreeTextSearchService> c =
+        					(Constructor<FreeTextSearchService>) clazz.getConstructor( File.class, RepositoryManager.class );
+        			
+        			defaultInstance = (FreeTextSearchService) c.newInstance( indexLocation, repositoryManager );
+        			
+        		} catch (Throwable t) {
+        			log.error("Error initializing JMS Free-Text Search - Using real-time indexing.");
+                    defaultInstance = new RealTimeFreeTextSearchService(indexLocation, repositoryManager);
+        		}
         	}
             defaultInstance.startService();
         }

@@ -42,12 +42,12 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.store.Directory;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoListType;
-import org.opentravel.ns.ota2.repositoryinfo_v01_00.ObjectFactory;
-import org.opentravel.schemacompiler.providers.JAXBContextResolver;
+import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionTarget;
 import org.opentravel.schemacompiler.repository.RepositoryComponentFactory;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
+import org.opentravel.schemacompiler.util.RepositoryJaxbContext;
 import org.springframework.jms.connection.CachingConnectionFactory;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
@@ -63,6 +63,10 @@ public class JMSFreeTextSearchService extends FreeTextSearchService implements I
 	private static final long JMS_LISTENER_RETRY_INTERVAL = 10000;
 	
     private static Log log = LogFactory.getLog(JMSFreeTextSearchService.class);
+    private static org.opentravel.ns.ota2.repositoryinfo_v01_00.ObjectFactory objectFactory =
+    		new org.opentravel.ns.ota2.repositoryinfo_v01_00.ObjectFactory();
+    private static org.opentravel.ns.ota2.repositoryinfoext_v01_00.ObjectFactory extObjectFactory =
+    		new org.opentravel.ns.ota2.repositoryinfoext_v01_00.ObjectFactory();
     
     private boolean shutdownRequested = false;
     private boolean jmsConnectionAvailable = false;
@@ -160,7 +164,7 @@ public class JMSFreeTextSearchService extends FreeTextSearchService implements I
 	protected void submitIndexingJob(List<RepositoryItem> itemsToIndex, boolean deleteIndex) {
 		try {
 			if (isIndexingServiceAvailable()) {
-				JAXBContext jaxbContext = new JAXBContextResolver().getContext( null );
+				JAXBContext jaxbContext = RepositoryJaxbContext.getContext();
 				LibraryInfoListType metadataList = new LibraryInfoListType();
 				Marshaller m = jaxbContext.createMarshaller();
 				StringWriter writer = new StringWriter();
@@ -168,7 +172,7 @@ public class JMSFreeTextSearchService extends FreeTextSearchService implements I
 				for (RepositoryItem item : itemsToIndex) {
 		   	    	metadataList.getLibraryInfo().add( RepositoryUtils.createItemMetadata( item ) );
 				}
-				m.marshal( new ObjectFactory().createLibraryInfoList( metadataList ), writer );
+				m.marshal( objectFactory.createLibraryInfoList( metadataList ), writer );
 				sendIndexingJob( deleteIndex ? JOB_TYPE_DELETE_INDEX : JOB_TYPE_CREATE_INDEX, writer.toString() );
 				log.info("Submitted processing request for remote indexing job (" + itemsToIndex.size() + " entries).");
 				
@@ -195,6 +199,30 @@ public class JMSFreeTextSearchService extends FreeTextSearchService implements I
 		}
 	}
 	
+	/**
+	 * @see org.opentravel.schemacompiler.index.FreeTextSearchService#submitIndexingJob(org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionTarget)
+	 */
+	@Override
+	protected void submitIndexingJob(SubscriptionTarget subscriptionTarget) {
+		try {
+			if (isIndexingServiceAvailable()) {
+				JAXBContext jaxbContext = RepositoryJaxbContext.getExtContext();
+				Marshaller m = jaxbContext.createMarshaller();
+				StringWriter writer = new StringWriter();
+				
+				m.marshal( extObjectFactory.createSubscriptionTarget( subscriptionTarget ), writer );
+				sendIndexingJob( JOB_TYPE_SUBSCRIPTION, writer.toString() );
+				log.info("Submitted processing request for subscription indexing job.");
+				
+			} else {
+				log.info("Unable to submit indexing job for processing - service unavailable.");
+			}
+			
+		} catch (JAXBException e) {
+			log.error("Error submitting indexing job.", e);
+		}
+	}
+
 	/**
 	 * Sends an indexing job to the remote indexing process.
 	 * 

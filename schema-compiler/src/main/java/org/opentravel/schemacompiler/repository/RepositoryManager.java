@@ -101,6 +101,8 @@ public class RepositoryManager implements Repository {
     private Date lastUpdatedDate;
     private List<RemoteRepositoryClient> remoteRepositories = new ArrayList<RemoteRepositoryClient>();
     private List<String> rootNamespaces;
+    private List<RepositoryListener> listeners = new ArrayList<>();
+    
 
     /**
      * Constructor that specifies the root location of the repository to manage.
@@ -201,6 +203,27 @@ public class RepositoryManager implements Repository {
     	for (RemoteRepositoryClient remoteRepo : remoteRepositories) {
     		remoteRepo.resetDownloadCache();
     	}
+    }
+    
+    /**
+     * Adds a listener that will be notified of stateful actions that are performed by
+     * this <code>RepositoryManager</code>.
+     * 
+     * @param listener  the listener to add
+     */
+    public void addListener(RepositoryListener listener) {
+    	if (listener != null) {
+    		listeners.add( listener );
+    	}
+    }
+    
+    /**
+     * Removes the given listener from this <code>RepositoryManager</code>.
+     * 
+     * @param listener  the listener to remove
+     */
+    public void removeListener(RepositoryListener listener) {
+		listeners.remove( listener );
     }
     
     /**
@@ -1064,6 +1087,17 @@ public class RepositoryManager implements Repository {
             // Commit or roll back the changes based on the result of the operation
             if (success) {
                 fileManager.commitChangeSet();
+                
+                // Notify listeners
+                for (RepositoryListener listener : listeners) {
+                	try {
+                		listener.onCreateRootNamespace( rootNamespace );
+                		
+                	} catch (Throwable t) {
+                		log.warn("Unexpected error during listener invocation.", t);
+                	}
+                }
+                
             } else {
                 try {
                     fileManager.rollbackChangeSet();
@@ -1104,6 +1138,17 @@ public class RepositoryManager implements Repository {
             // Commit or roll back the changes based on the result of the operation
             if (success) {
                 fileManager.commitChangeSet();
+                
+                // Notify listeners
+                for (RepositoryListener listener : listeners) {
+                	try {
+                		listener.onDeleteRootNamespace( rootNamespace );
+                		
+                	} catch (Throwable t) {
+                		log.warn("Unexpected error during listener invocation.", t);
+                	}
+                }
+                
             } else {
                 try {
                     fileManager.rollbackChangeSet();
@@ -1139,6 +1184,17 @@ public class RepositoryManager implements Repository {
             // Commit or roll back the changes based on the result of the operation
             if (success) {
                 fileManager.commitChangeSet();
+                
+                // Notify listeners
+                for (RepositoryListener listener : listeners) {
+                	try {
+                		listener.onCreateNamespace( baseNamespace );
+                		
+                	} catch (Throwable t) {
+                		log.warn("Unexpected error during listener invocation.", t);
+                	}
+                }
+                
             } else {
                 try {
                     fileManager.rollbackChangeSet();
@@ -1167,6 +1223,17 @@ public class RepositoryManager implements Repository {
             // Commit or roll back the changes based on the result of the operation
             if (success) {
                 fileManager.commitChangeSet();
+                
+                // Notify listeners
+                for (RepositoryListener listener : listeners) {
+                	try {
+                		listener.onDeleteNamespace( baseNamespace );
+                		
+                	} catch (Throwable t) {
+                		log.warn("Unexpected error during listener invocation.", t);
+                	}
+                }
+                
             } else {
                 try {
                     fileManager.rollbackChangeSet();
@@ -1187,6 +1254,7 @@ public class RepositoryManager implements Repository {
             String libraryName, String namespace, String versionIdentifier, String versionScheme,
             TLLibraryStatus initialStatus) throws RepositoryException {
         String targetNS = RepositoryNamespaceUtils.normalizeUri(namespace);
+        RepositoryItem publishedItem = null;
         boolean success = false;
         try {
             log.info("Publishing '" + filename + "' to namespace '" + targetNS + "'");
@@ -1247,7 +1315,7 @@ public class RepositoryManager implements Repository {
             log.info("Library content saved: " + contentFile.getAbsolutePath());
             
             // Build and return the repository item to represent the content we just published
-            RepositoryItem publishedItem = RepositoryUtils.createRepositoryItem(this, libraryMetadata);
+            publishedItem = RepositoryUtils.createRepositoryItem(this, libraryMetadata);
 
             // Create the history entry
             historyManager.addToHistory( publishedItem, new Date(), REMARK_PUBLISH );
@@ -1271,6 +1339,17 @@ public class RepositoryManager implements Repository {
             // Commit or roll back the changes based on the result of the operation
             if (success) {
                 fileManager.commitChangeSet();
+                
+                // Notify listeners
+                for (RepositoryListener listener : listeners) {
+                	try {
+                		listener.onPublish( publishedItem );
+                		
+                	} catch (Throwable t) {
+                		log.warn("Unexpected error during listener invocation.", t);
+                	}
+                }
+                
             } else {
                 try {
                     fileManager.rollbackChangeSet();
@@ -1348,6 +1427,23 @@ public class RepositoryManager implements Repository {
      *								locked by the current user
      */
     public void commit(RepositoryItem item, InputStream wipContent, String remarks) throws RepositoryException {
+    	commit( item, wipContent, remarks, true );
+    }
+    
+    /**
+     * Commits the content of the specified <code>RepositoryItem</code> by updating its repository
+     * contents to match the data obtained from the input stream for the work-in-process content
+     * provided.
+     * 
+     * @param item  the repository item to commit
+     * @param wipContent  the work-in-process content that will replace the current content of the
+     *					  repository item
+     * @param remarks  free-text remarks that describe the nature of the change being committed
+     * @throws RepositoryException  thrown if the file content cannot be committed or is not yet
+     *								locked by the current user
+     */
+    private void commit(RepositoryItem item, InputStream wipContent, String remarks, boolean notifyListeners)
+    		throws RepositoryException {
         String baseNS = RepositoryNamespaceUtils.normalizeUri(item.getBaseNamespace());
         LibraryInfoType libraryMetadata = fileManager.loadLibraryMetadata(baseNS,
                 item.getFilename(), item.getVersion());
@@ -1393,6 +1489,19 @@ public class RepositoryManager implements Repository {
             // Commit or roll back the changes based on the result of the operation
             if (success) {
                 fileManager.commitChangeSet();
+                
+                // Notify listeners (if required)
+                if (notifyListeners) {
+                    for (RepositoryListener listener : listeners) {
+                    	try {
+                    		listener.onCommit( item, remarks );
+                    		
+                    	} catch (Throwable t) {
+                    		log.warn("Unexpected error during listener invocation.", t);
+                    	}
+                    }
+                }
+                
             } else {
                 try {
                     fileManager.rollbackChangeSet();
@@ -1452,6 +1561,7 @@ public class RepositoryManager implements Repository {
             // Commit or roll back the changes based on the result of the operation
             if (success) {
                 fileManager.commitChangeSet();
+                
             } else {
                 try {
                     fileManager.rollbackChangeSet();
@@ -1500,6 +1610,17 @@ public class RepositoryManager implements Repository {
                 // Commit or roll back the changes based on the result of the operation
                 if (success) {
                     fileManager.commitChangeSet();
+                    
+                    // Notify listeners
+                    for (RepositoryListener listener : listeners) {
+                    	try {
+                    		listener.onLock( item );
+                    		
+                    	} catch (Throwable t) {
+                    		log.warn("Unexpected error during listener invocation.", t);
+                    	}
+                    }
+                    
                 } else {
                     try {
                         fileManager.rollbackChangeSet();
@@ -1627,7 +1748,7 @@ public class RepositoryManager implements Repository {
 
             // Commit the existing WIP content if requested by the caller
             if (wipContent != null) {
-                commit(item, wipContent, remarks);
+                commit(item, wipContent, remarks, false);
             }
             fileManager.startChangeSet();
 
@@ -1648,6 +1769,17 @@ public class RepositoryManager implements Repository {
             // Commit or roll back the changes based on the result of the operation
             if (success) {
                 fileManager.commitChangeSet();
+                
+                // Notify listeners
+                for (RepositoryListener listener : listeners) {
+                	try {
+                		listener.onUnlock( item, (wipContent != null), remarks );
+                		
+                	} catch (Throwable t) {
+                		log.warn("Unexpected error during listener invocation.", t);
+                	}
+                }
+                
             } else {
                 try {
                     fileManager.rollbackChangeSet();
@@ -1669,6 +1801,7 @@ public class RepositoryManager implements Repository {
         File contentFile = fileManager.getLibraryContentLocation(baseNS, item.getFilename(),
                 item.getVersion());
         boolean otm16Enabled = RepositoryUtils.isOTM16LifecycleEnabled( libraryMetadata.getStatus() );
+        TLLibraryStatus targetStatus = null;
         
         if (libraryMetadata.getState() != RepositoryState.MANAGED_UNLOCKED) {
             throw new RepositoryException(
@@ -1700,7 +1833,8 @@ public class RepositoryManager implements Repository {
                 // Change the status of the library metadata and content
                 TLLibrary libraryContent = loadOtmLibraryContent(contentFile);
                 TLLibraryStatus currentStatus = TLLibraryStatus.fromRepositoryStatus( libraryMetadata.getStatus() );
-                TLLibraryStatus targetStatus = otm16Enabled ? currentStatus.nextStatus() : TLLibraryStatus.FINAL;
+                
+                targetStatus = otm16Enabled ? currentStatus.nextStatus() : TLLibraryStatus.FINAL;
 
                 if (libraryContent != null) {
                     libraryContent.setStatus(targetStatus);
@@ -1739,6 +1873,17 @@ public class RepositoryManager implements Repository {
                 // Commit or roll back the changes based on the result of the operation
                 if (success) {
                     fileManager.commitChangeSet();
+                    
+                    // Notify listeners
+                    for (RepositoryListener listener : listeners) {
+                    	try {
+                    		listener.onPromote( item, targetStatus );
+                    		
+                    	} catch (Throwable t) {
+                    		log.warn("Unexpected error during listener invocation.", t);
+                    	}
+                    }
+                    
                 } else {
                     try {
                         fileManager.rollbackChangeSet();
@@ -1764,6 +1909,7 @@ public class RepositoryManager implements Repository {
         File contentFile = fileManager.getLibraryContentLocation(baseNS, item.getFilename(),
                 item.getVersion());
         boolean otm16Enabled = RepositoryUtils.isOTM16LifecycleEnabled( libraryMetadata.getStatus() );
+        TLLibraryStatus targetStatus = null;
 
         if (libraryMetadata.getState() != RepositoryState.MANAGED_UNLOCKED) {
             throw new RepositoryException(
@@ -1795,7 +1941,8 @@ public class RepositoryManager implements Repository {
                 // Change the status of the library metadata and content
                 TLLibrary libraryContent = loadOtmLibraryContent(contentFile);
                 TLLibraryStatus currentStatus = TLLibraryStatus.fromRepositoryStatus( libraryMetadata.getStatus() );
-                TLLibraryStatus targetStatus = otm16Enabled ? currentStatus.previousStatus() : TLLibraryStatus.DRAFT;
+                
+                targetStatus = otm16Enabled ? currentStatus.previousStatus() : TLLibraryStatus.DRAFT;
 
                 if (libraryContent != null) {
                     libraryContent.setStatus(targetStatus);
@@ -1815,7 +1962,8 @@ public class RepositoryManager implements Repository {
 
                 // Create the history entry for this update
                 historyManager.addToHistory( item, new Date(), MessageFormat.format( REMARK_DEMOTE,
-                		SchemaCompilerApplicationContext.getContext().getMessage( targetStatus.toString(), null, Locale.getDefault() ) ) );
+                		SchemaCompilerApplicationContext.getContext().getMessage(
+                				targetStatus.toString(), null, Locale.getDefault() ) ) );
 
                 if (!(item instanceof ProjectItem)) {
                     // Only required for non-ProjectItems; ProjectItem derives the status value from
@@ -1834,6 +1982,17 @@ public class RepositoryManager implements Repository {
                 // Commit or roll back the changes based on the result of the operation
                 if (success) {
                     fileManager.commitChangeSet();
+                    
+                    // Notify listeners
+                    for (RepositoryListener listener : listeners) {
+                    	try {
+                    		listener.onDemote( item, targetStatus );
+                    		
+                    	} catch (Throwable t) {
+                    		log.warn("Unexpected error during listener invocation.", t);
+                    	}
+                    }
+                    
                 } else {
                     try {
                         fileManager.rollbackChangeSet();
@@ -1909,6 +2068,17 @@ public class RepositoryManager implements Repository {
                 // Commit or roll back the changes based on the result of the operation
                 if (success) {
                     fileManager.commitChangeSet();
+                    
+                    // Notify listeners
+                    for (RepositoryListener listener : listeners) {
+                    	try {
+                    		listener.onUpdateStatus( item, newStatus );
+                    		
+                    	} catch (Throwable t) {
+                    		log.warn("Unexpected error during listener invocation.", t);
+                    	}
+                    }
+                    
                 } else {
                     try {
                         fileManager.rollbackChangeSet();
@@ -1977,6 +2147,17 @@ public class RepositoryManager implements Repository {
                 // Commit or roll back the changes based on the result of the operation
                 if (success) {
                     fileManager.commitChangeSet();
+                    
+                    // Notify listeners
+                    for (RepositoryListener listener : listeners) {
+                    	try {
+                    		listener.onRecalculateCrc( item );
+                    		
+                    	} catch (Throwable t) {
+                    		log.warn("Unexpected error during listener invocation.", t);
+                    	}
+                    }
+                    
                 } else {
                     try {
                         fileManager.rollbackChangeSet();
@@ -2029,6 +2210,17 @@ public class RepositoryManager implements Repository {
                 // Commit or roll back the changes based on the result of the operation
                 if (success) {
                     fileManager.commitChangeSet();
+                    
+                    // Notify listeners
+                    for (RepositoryListener listener : listeners) {
+                    	try {
+                    		listener.onDelete( item );
+                    		
+                    	} catch (Throwable t) {
+                    		log.warn("Unexpected error during listener invocation.", t);
+                    	}
+                    }
+                    
                 } else {
                     try {
                         fileManager.rollbackChangeSet();

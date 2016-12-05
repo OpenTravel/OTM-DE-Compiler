@@ -45,12 +45,16 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoListType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoType;
+import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionList;
+import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionTarget;
 import org.opentravel.schemacompiler.index.builder.IndexBuilder;
 import org.opentravel.schemacompiler.index.builder.IndexBuilderFactory;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
+import org.opentravel.schemacompiler.subscription.SubscriptionNavigator;
+import org.opentravel.schemacompiler.subscription.SubscriptionVisitor;
 import org.opentravel.schemacompiler.util.RepositoryJaxbContext;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
@@ -193,6 +197,9 @@ public class IndexingAgent implements IndexingConstants {
 						} else if (messageType.equals( JOB_TYPE_DELETE_INDEX )) {
 							processIndexingJob( unmarshallRepositoryItems( messageContent ), true );
 							
+						} else if (messageType.equals( JOB_TYPE_SUBSCRIPTION )) {
+							processIndexingJob( unmarshallSubscriptionTarget( messageContent ), true );
+							
 						} else if (messageType.equals( JOB_TYPE_DELETE_ALL )) {
 							processDeleteAll();
 							
@@ -248,14 +255,50 @@ public class IndexingAgent implements IndexingConstants {
 		sendCommitNotifiation();
     }
     
+    /**
+     * Processes the given indexing job for the subscription target provided.
+     * 
+     * @param subscriptionTarget  the subscription target to be indexed
+     * @param commitUpdates  commits updates to the search index before returning
+     * @throws IOException  thrown if an error occurs while processing the indexing job
+     */
+    protected void processIndexingJob(SubscriptionTarget subscriptionTarget, boolean commitUpdates) throws IOException {
+    	IndexBuilderFactory factory = new IndexBuilderFactory( repositoryManager, indexWriter );
+    	IndexBuilder<SubscriptionTarget> indexBuilder = factory.newSubscriptionIndexBuilder( subscriptionTarget );
+    	
+    	indexBuilder.performIndexingAction();
+    	
+    	if (commitUpdates) {
+            indexWriter.commit();
+    		sendCommitNotifiation();
+    	}
+    }
+    
 	/**
-	 * Deletes the entire persistent search index.
+	 * Deletes the entire persistent search index.  Before committing the index, this routine
+	 * automatically reindexes all subscription lists in the repository.
 	 * 
 	 * @throws IOException  thrown if the search index cannot be deleted
 	 */
 	private void processDeleteAll() throws IOException {
     	log.info("Deleting search index.");
 		indexWriter.deleteAll();
+		
+		try {
+			new SubscriptionNavigator( repositoryManager ).navigateSubscriptions( new SubscriptionVisitor() {
+				public void visitSubscriptionList(SubscriptionList subscriptionList) {
+					try {
+						processIndexingJob( subscriptionList.getSubscriptionTarget(), false );
+						
+					} catch (IOException e) {
+						log.warn("Error indexing subscription list.", e);
+					}
+				}
+			});
+			
+		} catch (RepositoryException e) {
+			log.warn("Error during reindexing of repository subscriptions.", e);
+		}
 		indexWriter.commit();
 		sendCommitNotifiation();
 	}
@@ -280,6 +323,25 @@ public class IndexingAgent implements IndexingConstants {
 				itemList.add( RepositoryUtils.createRepositoryItem( repositoryManager, msgItem ) );
 			}
 			return itemList;
+		}
+	}
+	
+	/**
+	 * Unmarshalls and returns the <code>SubscriptionTarget</code>s from the given message.
+	 * 
+	 * @param messageContent  the raw message content to unmarshall
+	 * @return SubscriptionTarget
+	 * @throws JAXBException  thrown if an error occurs during unmarshalling
+	 * @throws IOException  thrown if the message content is unreadable
+	 */
+	@SuppressWarnings("unchecked")
+	private SubscriptionTarget unmarshallSubscriptionTarget(String messageContent) throws JAXBException, IOException {
+		try (Reader reader = new StringReader( messageContent )) {
+			JAXBContext jaxbContext = RepositoryJaxbContext.getExtContext();
+			Unmarshaller u = jaxbContext.createUnmarshaller();
+			JAXBElement<SubscriptionTarget> msgElement = (JAXBElement<SubscriptionTarget>) u.unmarshal( reader );
+			
+			return msgElement.getValue();
 		}
 	}
 	

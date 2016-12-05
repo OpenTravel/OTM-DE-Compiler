@@ -18,6 +18,7 @@ package org.opentravel.schemacompiler.index.builder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.index.IndexWriter;
+import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionTarget;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
@@ -84,6 +85,18 @@ public class IndexBuilderFactory {
 	 * for the given source object.
 	 * 
 	 * @param <T>  the type of the repository artifact to be indexed
+	 * @param indexSource  the source object for the search index document
+	 * @return IndexDocumentBuilder<T>
+	 */
+	public IndexBuilder<SubscriptionTarget> newSubscriptionIndexBuilder(SubscriptionTarget indexSource) {
+		return newIndexBuilder( indexSource, true );
+	}
+	
+	/**
+	 * Returns a new <code>IndexBuilder</code> that will construct search index document(s)
+	 * for the given source object.
+	 * 
+	 * @param <T>  the type of the repository artifact to be indexed
 	 * @param sourceObject  the source object for the search index document
 	 * @param createIndex  flag indicating whether the index for the source item is to be created or deleted
 	 * @return IndexDocumentBuilder<T>
@@ -100,6 +113,9 @@ public class IndexBuilderFactory {
 			
 		} else if (sourceObject instanceof NamedEntity) {
 			builder = (IndexBuilder<T>) new EntityIndexBuilder<>();
+			
+		} else if (sourceObject instanceof SubscriptionTarget) {
+			builder = (IndexBuilder<T>) new SubscriptionIndexBuilder();
 			
 		} else {
 			throw new IllegalArgumentException("No index builder defined for objects of type: "

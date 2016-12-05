@@ -26,16 +26,27 @@ import javax.xml.bind.JAXBContext;
 public class RepositoryJaxbContext {
 	
     private static final String SCHEMA_CONTEXT = ":org.w3._2001.xmlschema:org.opentravel.ns.ota2.repositoryinfo_v01_00";
+    private static final String EXT_SCHEMA_CONTEXT = ":org.opentravel.ns.ota2.repositoryinfoext_v01_00";
 
 	private static final JAXBContext jaxbContext;
+	private static final JAXBContext extJaxbContext;
 	
 	/**
-	 * Returns the static JAXB context for all OTM repository messages.
+	 * Returns the static JAXB context for standard OTM repository messages.
 	 * 
 	 * @return JAXBContext
 	 */
 	public static JAXBContext getContext() {
 		return jaxbContext;
+	}
+	
+	/**
+	 * Returns the static JAXB context for extended OTM repository messages.
+	 * 
+	 * @return JAXBContext
+	 */
+	public static JAXBContext getExtContext() {
+		return extJaxbContext;
 	}
 	
     /**
@@ -44,6 +55,7 @@ public class RepositoryJaxbContext {
     static {
         try {
             jaxbContext = JAXBContext.newInstance(SCHEMA_CONTEXT);
+            extJaxbContext = JAXBContext.newInstance(EXT_SCHEMA_CONTEXT);
 
         } catch (Throwable t) {
             throw new ExceptionInInitializerError(t);

@@ -47,6 +47,7 @@ body table {width:98%; margin:auto;}
 .formButtonSmall {background:#006699; font-size:10px; font-weight:bold; color:#FFFFFF; height:24px;}
 .formButtonSmall[disabled] {background:#AAAAAA;color:#666666;}
 .imageLink {padding-top:5px; padding-top:10px;}
+.actionList {list-style:none outside none; padding-left:0px;}
 
 #footer {text-align:center; font-size:11px; border-top:3px solid #AAAAAA;padding-bottom:10px}
 #footer a {color:#006699; text-decoration:none; padding:0;}

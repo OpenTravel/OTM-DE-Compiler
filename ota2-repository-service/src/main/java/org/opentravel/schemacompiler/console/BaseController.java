@@ -129,5 +129,22 @@ public abstract class BaseController {
     protected void setErrorMessage(String errorMessage, Model model) {
         model.addAttribute("errorMessage", errorMessage);
     }
+    
+    /**
+     * Trims the given string.  If the resulting string length is zero, null will be returned.
+     * 
+     * @param str  the string value to be trimmed
+     * @return String
+     */
+    protected String trimString(String str) {
+    	String result = null;
+    	
+    	if (str != null) {
+    		result = str.trim();
+    		if (result.length() == 0) result = null;
+    	}
+    	return result;
+    }
+    
 
 }

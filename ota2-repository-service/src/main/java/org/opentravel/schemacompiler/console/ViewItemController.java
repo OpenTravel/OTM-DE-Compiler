@@ -29,6 +29,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionTarget;
 import org.opentravel.schemacompiler.index.EntitySearchResult;
 import org.opentravel.schemacompiler.index.FreeTextSearchService;
 import org.opentravel.schemacompiler.index.FreeTextSearchServiceFactory;
@@ -42,6 +43,7 @@ import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.repository.RepositoryComponentFactory;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryItemCommit;
@@ -49,6 +51,7 @@ import org.opentravel.schemacompiler.repository.RepositoryItemHistory;
 import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
 import org.opentravel.schemacompiler.security.RepositorySecurityManager;
 import org.opentravel.schemacompiler.security.UserPrincipal;
+import org.opentravel.schemacompiler.subscription.SubscriptionManager;
 import org.opentravel.schemacompiler.util.DocumentationHelper;
 import org.opentravel.schemacompiler.util.FacetIdentityWrapper;
 import org.opentravel.schemacompiler.util.PageUtils;
@@ -315,10 +318,14 @@ public class ViewItemController extends BaseController {
             RepositorySecurityManager securityManager = getSecurityManager();
             UserPrincipal user = getCurrentUser(session);
             RepositoryItem item = getRepositoryManager().getRepositoryItem(baseNamespace, filename, version);
-
+            SubscriptionTarget sTarget = SubscriptionManager.getSubscriptionTarget( item );
+            
             if (securityManager.isReadAuthorized(user, item)) {
-                boolean otm16Enabled = RepositoryUtils.isOTM16LifecycleEnabled( item.getStatus().toRepositoryStatus() );
+            	SubscriptionManager subscriptionManager = RepositoryComponentFactory.getDefault().getSubscriptionManager();
                 FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
+                boolean otm16Enabled = RepositoryUtils.isOTM16LifecycleEnabled( item.getStatus().toRepositoryStatus() );
+                boolean hasAllVersionsSubscription = !subscriptionManager.getAllVersionsSubscriptions(sTarget, user.getUserId()).isEmpty();
+                boolean hasSingleVersionSubscription = !subscriptionManager.getSingleVersionSubscriptions(sTarget, user.getUserId()).isEmpty();
                 String indexItemId = IndexingUtils.getIdentityKey( item );
                 LibrarySearchResult indexItem = searchService.getLibrary( indexItemId, false );
                 UserPrincipal lockedByUser = null;
@@ -329,6 +336,9 @@ public class ViewItemController extends BaseController {
                 model.addAttribute("otm16Enabled", otm16Enabled);
                 model.addAttribute("lockedByUser", lockedByUser);
                 model.addAttribute("indexItem", indexItem);
+                model.addAttribute("canEditSubscription", (user != UserPrincipal.ANONYMOUS_USER));
+                model.addAttribute("hasAllVersionsSubscription", hasAllVersionsSubscription);
+                model.addAttribute("hasSingleVersionSubscription", hasSingleVersionSubscription);
                 model.addAttribute("item", item);
                 
             } else {

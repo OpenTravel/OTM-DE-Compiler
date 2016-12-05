@@ -34,6 +34,12 @@
 				</c:url>
 				&nbsp; [ <a href="${deleteNamespaceUrl}">Delete This Namespace</a> ]
 			</c:if>
+			<c:if test="${canEditSubscription}">
+				<c:url var="subscriptionUrl" value="/console/namespaceSubscription.html">
+					<c:param name="baseNamespace" value="${baseNamespace}" />
+				</c:url>
+				&nbsp; [ <a href="${subscriptionUrl}">${hasSubscription ? 'Edit Subscription' : 'Subscribe'}</a> ]
+			</c:if>
 		</small>
 		<h3>Namespace: &nbsp;
 			<c:forEach var="item" items="${parentItems}">

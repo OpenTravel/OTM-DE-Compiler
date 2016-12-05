@@ -47,6 +47,11 @@
 		<put-attribute name="pageTitle" value="My Locked Libraries" />
 		<put-attribute name="body" value="/WEB-INF/console/lockedLibraries.jsp" />
 	</definition>
+	<definition name="subscriptions" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Subscriptions" />
+		<put-attribute name="pageTitle" value="Subscriptions" />
+		<put-attribute name="body" value="/WEB-INF/console/subscriptions.jsp" />
+	</definition>
 	<definition name="libraryDictionary" extends="baseLayoutNoTitle">
 		<put-attribute name="title" value="OTA2.0 Repository - Library Dictionary" />
 		<put-attribute name="body" value="/WEB-INF/console/libraryDictionary.jsp" />
@@ -213,5 +218,15 @@
 		<put-attribute name="title" value="OTA2.0 Repository - Edit Profile" />
 		<put-attribute name="pageTitle" value="Edit Profile" />
 		<put-attribute name="body" value="/WEB-INF/console/editUserProfile.jsp" />
+	</definition>
+	<definition name="namespaceSubscription" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Namespace Subscription" />
+		<put-attribute name="pageTitle" value="Namespace Subscription" />
+		<put-attribute name="body" value="/WEB-INF/console/namespaceSubscription.jsp" />
+	</definition>
+	<definition name="librarySubscription" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Library Subscription" />
+		<put-attribute name="pageTitle" value="Library Subscription" />
+		<put-attribute name="body" value="/WEB-INF/console/librarySubscription.jsp" />
 	</definition>
 </tiles-definitions>

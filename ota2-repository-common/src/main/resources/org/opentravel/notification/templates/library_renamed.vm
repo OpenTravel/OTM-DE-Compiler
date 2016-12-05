@@ -1,0 +1,74 @@
+#parse( "org/opentravel/notification/templates/email_header.vm" )
+<tr>
+	<td style='border-top: none; border-left: solid #CCCCCC 1.0pt; border-bottom: none; border-right: solid #CCCCCC 1.0pt; background: white; padding: 3.75pt 11.25pt 3.75pt 12.0pt'>
+		<table style='border-collapse: collapse'>
+			<tr>
+				<td valign=top style='padding: 1.5pt 0in 1.5pt 0in'>
+					<p style='line-height: 15.0pt'><b><span style='font-size: 10.5pt; font-family: "Arial", sans-serif; color: #707070'>
+					Renamed By:
+					</span></b></p>
+				</td>
+				<td valign=top style='padding: 1.5pt 0in 1.5pt 3.75pt'>
+					#parse( "org/opentravel/notification/templates/user_info.vm" )
+				</td>
+			</tr>
+			<tr>
+				<td valign=top style='padding: 1.5pt 0in 1.5pt 0in'>
+					<p style='line-height: 15.0pt'><b><span style='font-size: 10.5pt; font-family: "Arial", sans-serif; color: #707070'>
+					Original Name:
+					</span></b></p>
+				</td>
+				<td valign=top style='padding: 1.5pt 0in 1.5pt 3.75pt'>
+					<p style='line-height: 15.0pt'><span style='font-size: 10.5pt; font-family: "Arial", sans-serif'>
+					$remarks
+					</span></p>
+				</td>
+			</tr>
+			<tr>
+				<td valign=top style='padding: 1.5pt 0in 1.5pt 0in'>
+					<p style='line-height: 15.0pt'><b><span style='font-size: 10.5pt; font-family: "Arial", sans-serif; color: #707070'>
+					New Name:
+					</span></b></p>
+				</td>
+				<td valign=top style='padding: 1.5pt 0in 1.5pt 3.75pt'>
+					<p style='line-height: 15.0pt'><span style='font-size: 10.5pt; font-family: "Arial", sans-serif'>
+					#if ($baseRepositoryUrl)
+						<a href="$baseRepositoryUrl/console/libraryDictionary.html?baseNamespace=$utils.urlEncode($item.baseNamespace)&filename=$item.filename&version=$item.version">$item.libraryName</a>
+					#else
+						$item.libraryName
+					#end
+					</span></p>
+				</td>
+			</tr>
+			<tr>
+				<td valign=top style='padding: 1.5pt 0in 1.5pt 0in'>
+					<p style='line-height: 15.0pt'><b><span style='font-size: 10.5pt; font-family: "Arial", sans-serif; color: #707070'>
+					Namespace:
+					</span></b></p>
+				</td>
+				<td valign=top style='padding: 1.5pt 0in 1.5pt 3.75pt'>
+					<p style='line-height: 15.0pt'><span style='font-size: 10.5pt; font-family: "Arial", sans-serif'>
+					#if ($baseRepositoryUrl)
+						<a href="$baseRepositoryUrl/console/browse.html?baseNamespace=$utils.urlEncode($item.baseNamespace)">$item.namespace</a>
+					#else
+						$item.namespace
+					#end
+					</span></p>
+				</td>
+			</tr>
+			<tr>
+				<td valign=top style='padding: 1.5pt 0in 1.5pt 0in'>
+					<p style='line-height: 15.0pt'><b><span style='font-size: 10.5pt; font-family: "Arial", sans-serif; color: #707070'>
+					Version:
+					</span></b></p>
+				</td>
+				<td valign=top style='padding: 1.5pt 0in 1.5pt 3.75pt'>
+					<p style='line-height: 15.0pt'><span style='font-size: 10.5pt; font-family: "Arial", sans-serif'>
+					$item.version
+					</span></p>
+				</td>
+			</tr>
+		</table>
+	</td>
+</tr>
+#parse( "org/opentravel/notification/templates/email_footer.vm" )

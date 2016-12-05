@@ -45,6 +45,10 @@
 			<groupId>javax.jms</groupId>
 			<artifactId>jms</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>javax.mail</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

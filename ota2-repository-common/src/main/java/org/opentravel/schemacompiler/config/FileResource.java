@@ -45,11 +45,7 @@ public abstract class FileResource<R> {
      */
     public FileResource(File dataFile) {
         this.dataFile = dataFile;
-        refreshResource(dataFile);
-
-        if (resource == null) {
-            resource = getDefaultResourceValue();
-        }
+        initResource();
     }
 
     /**
@@ -70,6 +66,17 @@ public abstract class FileResource<R> {
     public R getResource() {
         refreshResource(dataFile);
         return resource;
+    }
+    
+    /**
+     * Initializes the value of the resource.
+     */
+    protected void initResource() {
+        refreshResource(dataFile);
+
+        if (resource == null) {
+            resource = getDefaultResourceValue();
+        }
     }
 
     /**

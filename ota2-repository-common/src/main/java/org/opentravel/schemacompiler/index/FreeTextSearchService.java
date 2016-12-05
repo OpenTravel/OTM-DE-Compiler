@@ -20,8 +20,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -47,6 +50,9 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.opentravel.ns.ota2.repositoryinfoext_v01_00.Subscription;
+import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionEventType;
+import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionTarget;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.RepositoryException;
@@ -321,6 +327,16 @@ public abstract class FreeTextSearchService implements IndexingTerms {
     }
     
     /**
+     * Submits the given subscription target for indexing.
+     * 
+     * @param subscriptionTarget  the subscription target to be indexed
+     * @throws RepositoryException  thrown if an error occurs during the indexing operation
+     */
+    public void indexSubscriptionTarget(SubscriptionTarget subscriptionTarget) throws RepositoryException {
+    	submitIndexingJob( subscriptionTarget );
+    }
+    
+    /**
      * Updates the indexes for all libraries that directly reference the given repository
      * item.
      * 
@@ -343,12 +359,19 @@ public abstract class FreeTextSearchService implements IndexingTerms {
     }
     
     /**
-     * Submits the given index builder for processing.
+     * Submits the given the list of repository items for processing.
      * 
      * @param itemsToIndex  the list of repository items to be indexed
      * @param deleteIndex  flag indicating whether the item's index is to be created or deleted
      */
     protected abstract void submitIndexingJob(List<RepositoryItem> itemsToIndex, boolean deleteIndex);
+
+    /**
+     * Submits the given subscription target for processing.
+     * 
+     * @param itemsToIndex  the list of repository items to be indexed
+     */
+    protected abstract void submitIndexingJob(SubscriptionTarget subscriptionTarget);
 
     /**
      * Deletes the contents of the entire search index.
@@ -930,6 +953,42 @@ public abstract class FreeTextSearchService implements IndexingTerms {
     	for (Document doc : queryResults) {
     		searchResults.add( new EntitySearchResult( doc, this ) );
     	}
+    	return searchResults;
+    }
+    
+    public List<SubscriptionSearchResult> getSubscriptions(String userId) throws RepositoryException {
+    	List<SubscriptionSearchResult> searchResults = new ArrayList<>();
+    	Map<String,SubscriptionSearchResult> resultMap = new HashMap<>();
+    	BooleanQuery query = new BooleanQuery();
+    	List<Document> queryResults;
+    	
+    	query.add( new BooleanClause( new TermQuery(
+				new Term( ENTITY_TYPE_FIELD, Subscription.class.getName() ) ), Occur.MUST ));
+    	query.add( new BooleanClause( new TermQuery(
+				new Term( USERID_FIELD, userId ) ), Occur.MUST ));
+    	queryResults = executeQuery( query, null );
+    	
+    	for (Document doc : queryResults) {
+    		SubscriptionEventType eventType = SubscriptionEventType.valueOf( doc.get( EVENT_TYPE_FIELD ) );
+    		String baseNamespace = doc.get( BASE_NAMESPACE_FIELD );
+    		String libraryName = doc.get( LIBRARY_NAME_FIELD );
+    		String version = doc.get( VERSION_FIELD );
+    		String resultKey = baseNamespace + ":" + libraryName + ":" + version;
+    		SubscriptionSearchResult searchResult = resultMap.get( resultKey );
+    		
+    		if (searchResult == null) {
+    			SubscriptionTarget subscriptionTarget = new SubscriptionTarget();
+    			
+        		subscriptionTarget.setBaseNamespace( doc.get( BASE_NAMESPACE_FIELD ) );
+        		subscriptionTarget.setLibraryName( doc.get( LIBRARY_NAME_FIELD ) );
+        		subscriptionTarget.setVersion( doc.get( VERSION_FIELD ) );
+        		searchResult = new SubscriptionSearchResult( subscriptionTarget, userId );
+        		resultMap.put( resultKey, searchResult );
+    		}
+    		searchResult.getEventTypes().add( eventType );
+    	}
+    	searchResults.addAll( resultMap.values() );
+    	Collections.sort( searchResults );
     	return searchResults;
     }
     

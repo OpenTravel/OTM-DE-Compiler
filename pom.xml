@@ -45,6 +45,7 @@
 		<svnkit.version>1.8.7</svnkit.version>
 		<jms.version>1.1</jms.version>
 		<activemq.version>5.14.1</activemq.version>
+		<javax.mail.version>1.5.5</javax.mail.version>
 		<tiles.version>3.0.5</tiles.version>
 		<jstl.version>1.2</jstl.version>
 		<jetty.version>9.2.10.v20150310</jetty.version>
@@ -267,6 +268,11 @@
 				<groupId>org.apache.activemq</groupId>
 				<artifactId>activemq-kahadb-store</artifactId>
 				<version>${activemq.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.sun.mail</groupId>
+				<artifactId>javax.mail</artifactId>
+				<version>${javax.mail.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.tiles</groupId>

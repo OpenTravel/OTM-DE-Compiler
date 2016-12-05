@@ -29,6 +29,7 @@ import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
+import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAttributeType;
@@ -37,6 +38,7 @@ import org.opentravel.schemacompiler.model.TLExampleOwner;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLExtensionOwner;
 import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLParamGroup;
@@ -451,10 +453,18 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
      * deprecated XSD <code>date</code>, <code>time</code>, or <code>dateTime</code> type.
      * 
      * @param fieldType  the attribute/element type to validate
+     * @param fieldOwner  the library within which the field is declared
      * @param builder  the validation builder that will receive any validation warnings that are detected
      */
-    protected void validateDeprecatedDateTimeUsage(NamedEntity fieldType, ValidationBuilder<?> builder) {
-    	if ((fieldType != null) && XMLConstants.W3C_XML_SCHEMA_NS_URI.equals( fieldType.getNamespace() )) {
+    protected void validateDeprecatedDateTimeUsage(NamedEntity fieldType, AbstractLibrary fieldOwner,
+    		ValidationBuilder<?> builder) {
+    	boolean doValidation = false;
+    	
+    	if (fieldOwner instanceof TLLibrary) {
+    		doValidation = (((TLLibrary) fieldOwner).getStatus() == TLLibraryStatus.DRAFT);
+    	}
+    	
+    	if (doValidation && (fieldType != null) && XMLConstants.W3C_XML_SCHEMA_NS_URI.equals( fieldType.getNamespace() )) {
     		String otaType = null;
     		
     		if (fieldType.getLocalName().equals( "dateTime" )) {

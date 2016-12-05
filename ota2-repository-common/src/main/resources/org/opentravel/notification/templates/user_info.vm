@@ -1,0 +1,13 @@
+<p style='line-height: 15.0pt'><span style='font-size: 10.5pt; font-family: "Arial", sans-serif'>
+	#if ($user)
+		#if ($user.emailAddress)
+			<a href="mailto:$user.emailAddress">
+				<span style='color: #3B73AF; text-decoration: none; text-underline: none'>#if ($user.firstName) $user.firstName #end$user.lastName</span>
+			</a>
+		#else
+			<span style='color: #3B73AF; text-decoration: none; text-underline: none'>#if ($user.firstName) $user.firstName #end$user.lastName</span>
+		#end
+	#else
+		Unknown User
+	#end
+</span></p>

@@ -28,6 +28,7 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.store.Directory;
+import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionTarget;
 import org.opentravel.schemacompiler.index.builder.IndexBuilder;
 import org.opentravel.schemacompiler.index.builder.IndexBuilderFactory;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
@@ -144,6 +145,14 @@ public class RealTimeFreeTextSearchService extends FreeTextSearchService {
 		} catch (IOException e) {
 			log.error("Error purging search index.", e);
 		}
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.index.FreeTextSearchService#submitIndexingJob(org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionTarget)
+	 */
+	@Override
+	protected void submitIndexingJob(SubscriptionTarget subscriptionTarget) {
+		// TODO: Implement the 'submitIndexingJob(SubscriptionTarget)' method
 	}
 	
 }

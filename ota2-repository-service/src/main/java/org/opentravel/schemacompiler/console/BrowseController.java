@@ -27,12 +27,14 @@ import org.opentravel.schemacompiler.index.FreeTextSearchService;
 import org.opentravel.schemacompiler.index.FreeTextSearchServiceFactory;
 import org.opentravel.schemacompiler.index.IndexingUtils;
 import org.opentravel.schemacompiler.index.LibrarySearchResult;
+import org.opentravel.schemacompiler.repository.RepositoryComponentFactory;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.repository.RepositoryNamespaceUtils;
 import org.opentravel.schemacompiler.security.RepositorySecurityManager;
 import org.opentravel.schemacompiler.security.UserPrincipal;
+import org.opentravel.schemacompiler.subscription.SubscriptionManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,7 +49,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class BrowseController extends BaseController {
 
     private static Log log = LogFactory.getLog(BrowseController.class);
-
+    
     /**
      * Called by the Spring MVC controller to display the application browse page.
      * 
@@ -118,15 +120,19 @@ public class BrowseController extends BaseController {
             }
 
             if (baseNamespace != null) {
+            	SubscriptionManager subscriptionManager = RepositoryComponentFactory.getDefault().getSubscriptionManager();
+            	
                 model.addAttribute("parentItems", getParentNamespaceItems(baseNamespace));
                 model.addAttribute("canCreateNamespaceExtension",
                 		securityManager.isAuthorized( user, baseNamespace, RepositoryPermission.WRITE));
+                model.addAttribute("canEditSubscription", (user != UserPrincipal.ANONYMOUS_USER));
+                model.addAttribute("hasSubscription",
+                		!subscriptionManager.getNamespaceSubscriptions(baseNamespace, user.getUserId()).isEmpty() );
 
                 if (!repositoryManager.listRootNamespaces().contains(baseNamespace)
                         && repositoryManager.listNamespaceChildren(baseNamespace).isEmpty()
                         && repositoryManager.listItems(baseNamespace, false, false).isEmpty()) {
-                    String parentNS = RepositoryNamespaceUtils.getParentNamespace(baseNamespace,
-                            repositoryManager);
+                    String parentNS = RepositoryNamespaceUtils.getParentNamespace(baseNamespace, repositoryManager);
 
                     model.addAttribute("canDeleteNamespace",
                     		securityManager.isAuthorized(user, parentNS, RepositoryPermission.WRITE));
@@ -138,9 +144,7 @@ public class BrowseController extends BaseController {
 
         } catch (Throwable t) {
             log.error("An error occured while displaying the browse page.", t);
-            setErrorMessage(
-                    "An error occured while displaying the page (see server log for details).",
-                    model);
+            setErrorMessage("An error occured while displaying the page (see server log for details).", model);
         }
         return applyCommonValues(model, "browse");
     }
@@ -171,9 +175,7 @@ public class BrowseController extends BaseController {
             
         } catch (Throwable t) {
             log.error("An error occured while displaying the locked libraries page.", t);
-            setErrorMessage(
-                    "An error occured while displaying the page (see server log for details).",
-                    model);
+            setErrorMessage("An error occured while displaying the page (see server log for details).", model);
         }
         return applyCommonValues(model, "lockedLibraries");
     }

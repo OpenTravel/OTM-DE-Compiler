@@ -43,14 +43,18 @@
 	</c:otherwise>
 </c:choose>
 <br>
-<a href="${pageContext.request.contextPath}/console/browse.html">BROWSE</a>
-&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-<a href="${pageContext.request.contextPath}/console/search.html">SEARCH</a>
+<a href="${pageContext.request.contextPath}/console/browse.html">Browse</a>
+&nbsp;|&nbsp;
+<a href="${pageContext.request.contextPath}/console/search.html">Search</a>
 <c:if test="${sessionScope.user != null}">
-&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-<a href="${pageContext.request.contextPath}/console/lockedLibraries.html">LOCKED LIBRARIES</a>
+&nbsp;|&nbsp;
+<a href="${pageContext.request.contextPath}/console/lockedLibraries.html">Locked Libraries</a>
+</c:if>
+<c:if test="${sessionScope.user != null}">
+&nbsp;|&nbsp;
+<a href="${pageContext.request.contextPath}/console/subscriptions.html">Subscriptions</a>
 </c:if>
 <c:if test="${sessionScope.isAdminAuthorized}">
-	&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-	<a href="${pageContext.request.contextPath}/console/adminHome.html">ADMINISTRATION</a>
+	&nbsp;|&nbsp;
+	<a href="${pageContext.request.contextPath}/console/adminHome.html">Administration</a>
 </c:if>

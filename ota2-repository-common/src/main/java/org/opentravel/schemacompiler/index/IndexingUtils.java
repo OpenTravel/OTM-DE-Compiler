@@ -17,6 +17,8 @@ package org.opentravel.schemacompiler.index;
 
 import javax.xml.namespace.QName;
 
+import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionEventType;
+import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionTarget;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAction;
 import org.opentravel.schemacompiler.model.TLActionFacet;
@@ -184,6 +186,29 @@ public class IndexingUtils {
 		return identityKey.toString();
 	}
 	
+	/**
+	 * Returns the qualified identity key for the subscription target.
+	 * 
+	 * @param subscriptionTarget  the subscription target for which to return an identity key
+	 * @param eventType  the type of the subscription event to which the identity key will apply
+	 * @return String
+	 */
+	public static String getIdentityKey(SubscriptionTarget subscriptionTarget, SubscriptionEventType eventType) {
+		StringBuilder identityKey = new StringBuilder();
+		
+		identityKey.append( "S:" );
+		identityKey.append( subscriptionTarget.getBaseNamespace() );
+		
+		if (subscriptionTarget.getLibraryName() != null) {
+			identityKey.append( ":" ).append( subscriptionTarget.getLibraryName() );
+		}
+		if (subscriptionTarget.getVersion() != null) {
+			identityKey.append( ":" ).append( subscriptionTarget.getVersion() );
+		}
+		identityKey.append( ":" ).append( eventType.toString() );
+		return identityKey.toString();
+	}
+
 	/**
 	 * Returns the qualified name of the library or named entity that is the target of
 	 * a validation finding.

@@ -15,15 +15,24 @@
  */
 package org.opentravel.schemacompiler.console;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionEventType;
+import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionTarget;
+import org.opentravel.schemacompiler.index.FreeTextSearchService;
+import org.opentravel.schemacompiler.index.FreeTextSearchServiceFactory;
+import org.opentravel.schemacompiler.index.SubscriptionSearchResult;
 import org.opentravel.schemacompiler.repository.RepositoryComponentFactory;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.security.RepositorySecurityException;
 import org.opentravel.schemacompiler.security.RepositorySecurityManager;
 import org.opentravel.schemacompiler.security.UserPrincipal;
+import org.opentravel.schemacompiler.subscription.SubscriptionManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -132,6 +141,8 @@ public class LoginController extends BaseController {
         try {
             UserPrincipal currentUser = (UserPrincipal) session.getAttribute("user");
             String userId = (currentUser == null) ? null : currentUser.getUserId();
+            
+            emailAddress = trimString( emailAddress );
             
         	if (currentUser == null) {
                 setErrorMessage("You must be logged in to edit your profile.", model);
@@ -249,5 +260,227 @@ public class LoginController extends BaseController {
         }
         return applyCommonValues(model, success ? "homePage" : "changePassword");
     }
+    
+    /**
+     * Called by the Spring MVC controller to display a consolidated list of subscriptions
+     * for the current user.
+     * 
+     * @param session  the HTTP session that contains information about an authenticated user
+     * @param model  the model context to be used when rendering the page view
+     * @return String
+     */
+    @RequestMapping({ "/subscriptions.html", "/subscriptions.htm" })
+    public String viewSubscriptions(HttpSession session, Model model) {
+        try {
+            UserPrincipal user = getCurrentUser(session);
+        	List<SubscriptionSearchResult> subscriptions;
+        	
+            if (user != null) {
+            	FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
+            	subscriptions = searchService.getSubscriptions( user.getUserId() );
+            } else {
+            	subscriptions = new ArrayList<>();
+            }
+            model.addAttribute("user", user);
+            model.addAttribute("subscriptions", subscriptions);
+            
+        } catch (Throwable t) {
+            log.error("An error occured while displaying the subscriptions page.", t);
+            setErrorMessage("An error occured while displaying the page (see server log for details).", model);
+        }
+        return applyCommonValues(model, "subscriptions");
+    }
 
+    /**
+     * Called by the Spring MVC controller to display the page used to edit a user's subscription
+     * to namespace events.
+     * 
+     * @param ns  the namespace for which to edit the user's subscription
+     * @param session  the HTTP session that contains information about an authenticated user
+     * @param model  the model context to be used when rendering the page view
+     * @return String
+     */
+    @RequestMapping(value = { "/namespaceSubscription.html", "/namespaceSubscription.htm" })
+    public String namespaceSubscription(
+            @RequestParam(value = "baseNamespace", required = false) String baseNamespace,
+            @RequestParam(value = "cts", required = false) boolean cancelToSubscriptionPage,
+            @RequestParam(value = "etLibraryPublish", required = false) boolean etLibraryPublish,
+            @RequestParam(value = "etLibraryNewVersion", required = false) boolean etLibraryNewVersion,
+            @RequestParam(value = "etLibraryStatusChange", required = false) boolean etLibraryStatusChange,
+            @RequestParam(value = "etLibraryStateChange", required = false) boolean etLibraryStateChange,
+            @RequestParam(value = "etLibraryCommit", required = false) boolean etLibraryCommit,
+            @RequestParam(value = "etLibraryMoveOrRename", required = false) boolean etLibraryMoveOrRename,
+            @RequestParam(value = "etNamespaceAction", required = false) boolean etNamespaceAction,
+            @RequestParam(value = "updateSubscription", required = false) boolean updateSubscription,
+            HttpSession session, Model model) {
+    	String targetPage = "namespaceSubscription";
+        boolean success = false;
+        try {
+        	SubscriptionManager subscriptionManager = RepositoryComponentFactory.getDefault().getSubscriptionManager();
+            UserPrincipal currentUser = (UserPrincipal) session.getAttribute("user");
+            
+            if (currentUser == null) {
+                setErrorMessage("You must be logged in to edit your subscription settings.", model);
+                
+            } else if (baseNamespace == null) {
+                setErrorMessage("Unable to edit subscription settings - namespace not specified.", model);
+                targetPage = new BrowseController().browsePage(null, null, session, model);
+                
+            } else if (updateSubscription) {
+            	List<SubscriptionEventType> eventTypes = new ArrayList<>();
+            	
+                if (etLibraryPublish) eventTypes.add( SubscriptionEventType.LIBRARY_PUBLISH );
+                if (etLibraryNewVersion) eventTypes.add( SubscriptionEventType.LIBRARY_NEW_VERSION );
+                if (etLibraryStatusChange) eventTypes.add( SubscriptionEventType.LIBRARY_STATUS_CHANGE );
+                if (etLibraryStateChange) eventTypes.add( SubscriptionEventType.LIBRARY_STATE_CHANGE );
+                if (etLibraryCommit) eventTypes.add( SubscriptionEventType.LIBRARY_COMMIT );
+                if (etLibraryMoveOrRename) eventTypes.add( SubscriptionEventType.LIBRARY_MOVE_OR_RENAME );
+                if (etNamespaceAction) eventTypes.add( SubscriptionEventType.NAMESPACE_ACTION );
+                subscriptionManager.updateNamespaceSubscriptions(
+                		baseNamespace, currentUser.getUserId(), eventTypes );
+            	success = true;
+            	
+            } else {
+            	List<SubscriptionEventType> eventTypes =
+            			subscriptionManager.getNamespaceSubscriptions( baseNamespace, currentUser.getUserId() );
+            	
+                etLibraryPublish = eventTypes.contains( SubscriptionEventType.LIBRARY_PUBLISH );
+                etLibraryNewVersion = eventTypes.contains( SubscriptionEventType.LIBRARY_NEW_VERSION );
+                etLibraryStatusChange = eventTypes.contains( SubscriptionEventType.LIBRARY_STATUS_CHANGE );
+                etLibraryStateChange = eventTypes.contains( SubscriptionEventType.LIBRARY_STATE_CHANGE );
+                etLibraryCommit = eventTypes.contains( SubscriptionEventType.LIBRARY_COMMIT );
+                etLibraryMoveOrRename = eventTypes.contains( SubscriptionEventType.LIBRARY_MOVE_OR_RENAME );
+                etNamespaceAction = eventTypes.contains( SubscriptionEventType.NAMESPACE_ACTION );
+            }
+            model.addAttribute("baseNamespace", baseNamespace);
+            model.addAttribute("cts", cancelToSubscriptionPage);
+            model.addAttribute("etLibraryPublish", etLibraryPublish);
+            model.addAttribute("etLibraryNewVersion", etLibraryNewVersion);
+            model.addAttribute("etLibraryStatusChange", etLibraryStatusChange);
+            model.addAttribute("etLibraryStateChange", etLibraryStateChange);
+            model.addAttribute("etLibraryCommit", etLibraryCommit);
+            model.addAttribute("etLibraryMoveOrRename", etLibraryMoveOrRename);
+            model.addAttribute("etNamespaceAction", etNamespaceAction);
+            
+        } catch (RepositoryException e) {
+            setErrorMessage("Error updating namespace subscription settings - please contact your system administrator.", model);
+            log.error("Error updating namespace subscription settings.", e);
+        }
+        if (success) {
+        	setStatusMessage("Subscription settings updated successfully.", model);
+        	
+        	if (cancelToSubscriptionPage) {
+        		// Wait for changes to propagage through the indexing process before redisplaying
+        		// the subscriptions page.  This is a hack, but good enough for now.
+        		try {
+        			Thread.sleep(1000);
+        		} catch (InterruptedException e) {}
+                targetPage = viewSubscriptions(session, model);
+        	} else {
+                targetPage = new BrowseController().browsePage(baseNamespace, null, session, model);
+        	}
+        }
+        return applyCommonValues(model, targetPage);
+    }
+    
+    /**
+     * Called by the Spring MVC controller to display the page used to edit a user's subscription
+     * to namespace events.
+     * 
+     * @param ns  the namespace for which to edit the user's subscription
+     * @param session  the HTTP session that contains information about an authenticated user
+     * @param model  the model context to be used when rendering the page view
+     * @return String
+     */
+    @RequestMapping(value = { "/librarySubscription.html", "/librarySubscription.htm" })
+    public String librarySubscription(
+            @RequestParam(value = "baseNamespace", required = false) String baseNamespace,
+            @RequestParam(value = "libraryName", required = false) String libraryName,
+            @RequestParam(value = "version", required = false) String version,
+            @RequestParam(value = "filename", required = false) String filename,
+            @RequestParam(value = "allVersions", required = false) boolean allVersions,
+            @RequestParam(value = "etLibraryPublish", required = false) boolean etLibraryPublish,
+            @RequestParam(value = "etLibraryNewVersion", required = false) boolean etLibraryNewVersion,
+            @RequestParam(value = "etLibraryStatusChange", required = false) boolean etLibraryStatusChange,
+            @RequestParam(value = "etLibraryStateChange", required = false) boolean etLibraryStateChange,
+            @RequestParam(value = "etLibraryCommit", required = false) boolean etLibraryCommit,
+            @RequestParam(value = "etLibraryMoveOrRename", required = false) boolean etLibraryMoveOrRename,
+            @RequestParam(value = "updateSubscription", required = false) boolean updateSubscription,
+            HttpSession session, Model model) {
+    	String targetPage = "librarySubscription";
+        boolean success = false;
+        try {
+        	SubscriptionManager subscriptionManager = RepositoryComponentFactory.getDefault().getSubscriptionManager();
+        	SubscriptionTarget sTarget = SubscriptionManager.getSubscriptionTarget( baseNamespace, libraryName, version );
+            UserPrincipal currentUser = (UserPrincipal) session.getAttribute("user");
+        	
+        	sTarget.setBaseNamespace( baseNamespace );
+        	sTarget.setLibraryName( libraryName );
+        	sTarget.setVersion( version );
+            
+            if (currentUser == null) {
+                setErrorMessage("You must be logged in to edit your subscription settings.", model);
+                
+            } else if ((baseNamespace == null) || (libraryName == null)) {
+                setErrorMessage("Unable to edit subscription settings - library information not specified.", model);
+                targetPage = new BrowseController().browsePage(null, null, session, model);
+                
+            } else if (updateSubscription) {
+            	List<SubscriptionEventType> eventTypes = new ArrayList<>();
+            	
+                if (etLibraryPublish) eventTypes.add( SubscriptionEventType.LIBRARY_PUBLISH );
+                if (etLibraryNewVersion) eventTypes.add( SubscriptionEventType.LIBRARY_NEW_VERSION );
+                if (etLibraryStatusChange) eventTypes.add( SubscriptionEventType.LIBRARY_STATUS_CHANGE );
+                if (etLibraryStateChange) eventTypes.add( SubscriptionEventType.LIBRARY_STATE_CHANGE );
+                if (etLibraryCommit) eventTypes.add( SubscriptionEventType.LIBRARY_COMMIT );
+                if (etLibraryMoveOrRename) eventTypes.add( SubscriptionEventType.LIBRARY_MOVE_OR_RENAME );
+                
+                if (allVersions) {
+                    subscriptionManager.updateAllVersionsSubscriptions( sTarget, currentUser.getUserId(), eventTypes );
+                	
+                } else {
+                    subscriptionManager.updateSingleVersionSubscriptions( sTarget, currentUser.getUserId(), eventTypes );
+                }
+            	success = true;
+            	
+            } else {
+            	List<SubscriptionEventType> eventTypes;
+            	
+            	if (allVersions) {
+                	eventTypes = subscriptionManager.getAllVersionsSubscriptions( sTarget, currentUser.getUserId() );
+                	
+            	} else {
+                	eventTypes = subscriptionManager.getSingleVersionSubscriptions( sTarget, currentUser.getUserId() );
+            	}
+            	
+                etLibraryPublish = eventTypes.contains( SubscriptionEventType.LIBRARY_PUBLISH );
+                etLibraryNewVersion = eventTypes.contains( SubscriptionEventType.LIBRARY_NEW_VERSION );
+                etLibraryStatusChange = eventTypes.contains( SubscriptionEventType.LIBRARY_STATUS_CHANGE );
+                etLibraryStateChange = eventTypes.contains( SubscriptionEventType.LIBRARY_STATE_CHANGE );
+                etLibraryCommit = eventTypes.contains( SubscriptionEventType.LIBRARY_COMMIT );
+                etLibraryMoveOrRename = eventTypes.contains( SubscriptionEventType.LIBRARY_MOVE_OR_RENAME );
+            }
+            model.addAttribute("baseNamespace", baseNamespace);
+            model.addAttribute("libraryName", libraryName);
+            model.addAttribute("version", version);
+            model.addAttribute("filename", filename);
+            model.addAttribute("allVersions", allVersions);
+            model.addAttribute("etLibraryPublish", etLibraryPublish);
+            model.addAttribute("etLibraryNewVersion", etLibraryNewVersion);
+            model.addAttribute("etLibraryStatusChange", etLibraryStatusChange);
+            model.addAttribute("etLibraryStateChange", etLibraryStateChange);
+            model.addAttribute("etLibraryCommit", etLibraryCommit);
+            model.addAttribute("etLibraryMoveOrRename", etLibraryMoveOrRename);
+            
+        } catch (RepositoryException e) {
+            setErrorMessage("Error updating namespace subscription settings - please contact your system administrator.", model);
+            log.error("Error updating namespace subscription settings.", e);
+        }
+        if (success) {
+        	setStatusMessage("Subscription settings updated successfully.", model);
+        	targetPage = new ViewItemController().libraryInfo(baseNamespace, filename, version, session, model);
+        }
+        return applyCommonValues(model, targetPage);
+    }
+    
 }

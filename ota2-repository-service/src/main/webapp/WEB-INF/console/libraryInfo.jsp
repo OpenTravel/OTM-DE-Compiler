@@ -139,15 +139,64 @@
 			</c:if>
 		</td>
 	</tr>
+	
+	<c:set var="showActions" value="${false}"/>
 	<c:if test="${sessionScope.isAdminAuthorized}">
 		<c:url var="deleteItemUrl" value="/console/adminDeleteItem.html">
 			<c:param name="baseNamespace" value="${item.baseNamespace}" />
 			<c:param name="filename" value="${item.filename}" />
 			<c:param name="version" value="${item.version}" />
 		</c:url>
-		<tr class="d1">
-			<td>Action(s):</td>
-			<td>[ <a href="${deleteItemUrl}">Delete this Item</a> ]</td>
-		</tr>
+		<c:set var="showActions" value="${true}"/>
+	</c:if>
+	<c:if test="${canEditSubscription}">
+		<c:url var="subscribeAllVersionsUrl" value="/console/librarySubscription.html">
+			<c:param name="baseNamespace" value="${item.baseNamespace}" />
+			<c:param name="libraryName" value="${item.libraryName}" />
+			<c:param name="filename" value="${item.filename}" />
+			<c:param name="version" value="${item.version}" />
+			<c:param name="allVersions" value="true" />
+		</c:url>
+		<c:url var="subscribeSingleVersionUrl" value="/console/librarySubscription.html">
+			<c:param name="baseNamespace" value="${item.baseNamespace}" />
+			<c:param name="libraryName" value="${item.libraryName}" />
+			<c:param name="filename" value="${item.filename}" />
+			<c:param name="version" value="${item.version}" />
+			<c:param name="allVersions" value="false" />
+		</c:url>
+		<c:choose>
+			<c:when test="${hasAllVersionsSubscription}">
+				<c:set var="subscribeAllVersionsLabel" value="Edit Subscriptions"/>
+			</c:when>
+			<c:otherwise>
+				<c:set var="subscribeAllVersionsLabel" value="Subscribe"/>
+			</c:otherwise>
+		</c:choose>
+		<c:choose>
+			<c:when test="${hasSingleVersionSubscription}">
+				<c:set var="subscribeSingleVersionLabel" value="Edit Subscriptions"/>
+			</c:when>
+			<c:otherwise>
+				<c:set var="subscribeSingleVersionLabel" value="Subscribe"/>
+			</c:otherwise>
+		</c:choose>
+		<c:set var="showActions" value="${true}"/>
+	</c:if>
+	
+	<c:if test="${showActions}">
+	<tr class="d1">
+		<td>Action(s):</td>
+		<td><ul class="actionList">
+			<c:if test="${deleteItemUrl != null}">
+				<li>[ <a href="${deleteItemUrl}">Delete this Item</a> ]</li>
+			</c:if>
+			<c:if test="${subscribeAllVersionsUrl != null}">
+				<li>[ <a href="${subscribeAllVersionsUrl}">${subscribeAllVersionsLabel}</a> ] <small>(all versions)</small></li>
+			</c:if>
+			<c:if test="${subscribeSingleVersionUrl != null}">
+				<li>[ <a href="${subscribeSingleVersionUrl}">${subscribeSingleVersionLabel}</a> ] <small>(version ${item.version} only)</small></li>
+			</c:if>
+		</ul></td>
+	</tr>
 	</c:if>
 </table>

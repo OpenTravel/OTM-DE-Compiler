@@ -19,6 +19,8 @@ import java.io.File;
 
 import org.opentravel.schemacompiler.security.AuthenticationProvider;
 import org.opentravel.schemacompiler.security.RepositorySecurityManager;
+import org.opentravel.schemacompiler.subscription.SubscriptionManager;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
@@ -37,6 +39,7 @@ public class RepositoryComponentFactory {
     private static final String SEARCH_INDEX_LOCATION_KEY = "searchIndexLocation";
     private static final String REPOSITORY_MANAGER_KEY = "repositoryManager";
     private static final String SECURITY_MANAGER_KEY = "securityManager";
+    private static final String SUBSCRIPTION_MANAGER_KEY = "subscriptionManager";
     private static final String AUTHENTICATION_PROVIDER_KEY = "authenticationProvider";
     private static final String DEVELOPMENT_REPOSITORY_KEY = "developmentRepository";
     private static final String INDEXING_JMS_SERVICE_KEY = "indexingJmsService";
@@ -172,6 +175,24 @@ public class RepositoryComponentFactory {
         return (JmsTemplate) appContext.getBean(INDEXING_JMS_SERVICE_KEY);
     }
     
+    /**
+     * Returns the <code>SubscriptionManager</code> as defined in the service configuration
+     * file.
+     * 
+     * @return SubscriptionManager
+     */
+    public SubscriptionManager getSubscriptionManager() {
+    	SubscriptionManager manager = null;
+    	
+    	try {
+    		manager = (SubscriptionManager) appContext.getBean(SUBSCRIPTION_MANAGER_KEY);
+    		
+    	} catch (NoSuchBeanDefinitionException e) {
+    		// Ignore - subscription manager is an optional component
+    	}
+    	return manager;
+    }
+
     /**
      * Returns true if the managed repository has been designated as a development instance.
      * 

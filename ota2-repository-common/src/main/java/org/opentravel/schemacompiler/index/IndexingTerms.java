@@ -44,7 +44,7 @@ public interface IndexingTerms {
 	
 	// Fields used exclusively by OTM libraries and/or repository items
 	
-	public static final String BASE_NAMESPACE_FIELD     = "baseNamespace";
+	public static final String BASE_NAMESPACE_FIELD     = "baseNamespace"; // also used by subscriptions
 	public static final String FILENAME_FIELD           = "filename";
 	public static final String VERSION_SCHEME_FIELD     = "versionScheme";
 	public static final String REFERENCED_LIBRARY_FIELD = "referencedLibrary";
@@ -58,6 +58,11 @@ public interface IndexingTerms {
 	public static final String EXTENDS_ENTITY_FIELD     = "extendsEntity";
 	public static final String FACET_OWNER_FIELD        = "facetOwner";
 	public static final String FACET_CONTENT_FIELD      = "facetContent";
+	
+	// Fields used exclusively by subscriptions
+	public static final String EVENT_TYPE_FIELD         = "eventType";
+	public static final String LIBRARY_NAME_FIELD       = "libraryName";
+	public static final String USERID_FIELD             = "userId";
 	
 	// Fields used exclusively by validation findings
 	

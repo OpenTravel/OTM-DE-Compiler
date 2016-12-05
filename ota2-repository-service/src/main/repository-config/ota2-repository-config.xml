@@ -207,4 +207,40 @@
 		<property name="receiveTimeout" value="500" />
 	</bean>
 	
+	<!--
+		Subscription Manager Configuration:
+		
+		Configuration settings used for subscriptions and email notifications.
+	-->
+	<bean id="subscriptionManager" class="org.opentravel.schemacompiler.subscription.SubscriptionManager">
+		<constructor-arg index="0" ref="repositoryManager" />
+		<property name="baseRepositoryUrl" value="http://www.repohostname.com:8181/ota2-repository-service" />
+		<property name="notificationDelay" value="1000" />
+		<property name="smtpConfig">
+			<bean class="org.opentravel.schemacompiler.subscription.SMTPConfig">
+				<property name="smtpHost" value="smtp.example.com" />
+				<property name="smtpPort" value="587" />
+				<property name="smtpUser" value="user1" />
+				<property name="smtpPassword" value="user1passwd" />
+				<property name="timeout" value="5000" />
+				<property name="sslEnable" value="false" />
+				<property name="authEnable" value="false" />
+				<property name="startTlsEnable" value="true" />
+				<property name="senderAddress" value="user1@example.com" />
+				<property name="senderName" value="User Smith" />
+				<!--
+				<property name="replyToAddress" value="replyToUser@example.com" />
+				<property name="replyToName" value="Reply To User" />
+				<property name="ccRecipients">
+					<list>
+						<value>user1@example.com</value>
+						<value>user2@example.com</value>
+						<value>user3@example.com</value>
+					</list>
+				</property>
+				-->
+			</bean>
+		</property>
+	</bean>
+	
 </beans>

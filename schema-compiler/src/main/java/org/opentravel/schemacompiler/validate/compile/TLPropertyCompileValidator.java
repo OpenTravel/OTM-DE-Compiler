@@ -20,6 +20,7 @@ import javax.xml.XMLConstants;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegate;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
+import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAbstractFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
@@ -216,7 +217,10 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
         }
 
         // Warn if a deprecated XSD date/time type is being referenced
-        validateDeprecatedDateTimeUsage( propertyType, builder );
+        TLPropertyOwner elementOwner = target.getOwner();
+        AbstractLibrary owningLibrary = (elementOwner == null) ? null : elementOwner.getOwningLibrary();
+        
+        validateDeprecatedDateTimeUsage( propertyType, owningLibrary, builder );
         
         // List facets can only be referenced if the core object defines one or more roles
         boolean isListFacet = (propertyType instanceof TLListFacet)

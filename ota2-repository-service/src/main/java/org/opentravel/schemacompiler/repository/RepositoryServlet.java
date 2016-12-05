@@ -25,6 +25,7 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.opentravel.schemacompiler.index.FreeTextSearchServiceFactory;
+import org.opentravel.schemacompiler.subscription.SubscriptionManager;
 
 /**
  * Servlet class that extends the Jersey JAX-RS servlet, adding a function to gracefully release the
@@ -62,6 +63,11 @@ public class RepositoryServlet extends ServletContainer {
     public void init() throws ServletException {
         super.init();
         FreeTextSearchServiceFactory.registerServiceOwner(this);
+        SubscriptionManager sManager = RepositoryComponentFactory.getDefault().getSubscriptionManager();
+        
+        if (sManager != null) {
+            sManager.startNotificationListener();
+        }
     }
 
     /**
@@ -70,10 +76,16 @@ public class RepositoryServlet extends ServletContainer {
     @Override
     public void destroy() {
         super.destroy();
-        FreeTextSearchServiceFactory.unregisterServiceOwner(this);
-
+        SubscriptionManager sManager = RepositoryComponentFactory.getDefault().getSubscriptionManager();
+        
+        if (sManager != null) {
+        	sManager.shutdownNotificationListener();
+        }
+        
         // Attempt to shut down the singleton instance of the service. If this servlet is not the
         // last remaining instance for the container, this method will have no effect.
+        FreeTextSearchServiceFactory.unregisterServiceOwner(this);
+
         try {
         	FreeTextSearchServiceFactory.destroySingleton();
 
