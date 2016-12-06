@@ -419,7 +419,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
         if (!attributeName.endsWith("Ind")) {
             attributeName += "Ind";
         }
-		context.getNode().setAttribute(attributeName, "true");
+		context.getNode().setAttribute(attributeName.intern(), "true");
     }
 
     /**
@@ -645,12 +645,12 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
 			
 			if (context.getModelAttribute().isReference()) {
 				context.getNode().setAttribute(
-						getAttributeName(context.getModelAttribute()),
+						getAttributeName(context.getModelAttribute()).intern(),
 	                    generateExampleValue(elementType));
 				
 			} else {
 				context.getNode().setAttribute(
-						getAttributeName(context.getModelAttribute()),
+						getAttributeName(context.getModelAttribute()).intern(),
 	                    generateExampleValue(context.getModelAttribute()));
 			}
 
@@ -886,8 +886,12 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
      */
 	private Element createXmlElement(String namespace, String localName,
 			NamedEntity prefixEntity) {
-		return createXmlElement(namespace, localName, prefixEntity
-				.getOwningLibrary().getPrefix());
+		String ns = (namespace == null) ? null : namespace.intern();
+		String ln = (localName == null) ? null : localName.intern();
+		String prefix = prefixEntity.getOwningLibrary().getPrefix();
+		String p = (prefix == null) ? null : prefix;
+		
+		return createXmlElement(ns, ln, p);
     }
 
     /**
@@ -905,7 +909,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
      */
 	private Element createXmlElement(String namespace, String localName,
 			String preferredPrefix) {
-        Element element = domDocument.createElementNS(namespace, localName);
+        Element element = domDocument.createElementNS(namespace.intern(), localName.intern());
         String prefix = namespaceMappings.get(namespace);
 
         if (prefix == null) {
@@ -954,7 +958,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
 				String attrName = (extendedCore == null) ? "role" : coreObject
 						.getLocalName() + "Role";
 
-				context.getNode().setAttribute(attrName,
+				context.getNode().setAttribute(attrName.intern(),
                         exampleValueGenerator.getExampleRoleValue(coreObject));
             }
 			coreObject = (TLCoreObject) FacetCodegenUtils

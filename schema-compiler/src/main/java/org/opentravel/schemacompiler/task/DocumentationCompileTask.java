@@ -18,6 +18,7 @@ package org.opentravel.schemacompiler.task;
 import java.io.File;
 import java.util.Collection;
 
+import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerator;
 import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.model.TLLibrary;
@@ -31,10 +32,15 @@ import org.opentravel.schemacompiler.validate.ValidationFindings;
  * @author Eric.Bronson
  *
  */
-public class DocumentationCompileTask extends AbstractCompilerTask {
+public class DocumentationCompileTask extends AbstractCompilerTask implements ExampleCompilerTaskOptions {
 
 	private static final String HTML = "HTML";
 
+    private boolean generateMaxDetailsForExamples = true;
+    private String exampleContext;
+    private Integer exampleMaxRepeat;
+    private Integer exampleMaxDepth;
+    
 	/**
 	 * Default Constructor
 	 */
@@ -104,6 +110,84 @@ public class DocumentationCompileTask extends AbstractCompilerTask {
 			TLModel model = userDefinedLibraries.iterator().next().getOwningModel();
 			compileOutput(model);
 		}
+	}
+
+    /**
+     * @see org.opentravel.schemacompiler.task.AbstractCompilerTask#createContext()
+     */
+    protected CodeGenerationContext createContext() {
+        CodeGenerationContext context = super.createContext();
+
+        if (!generateMaxDetailsForExamples) {
+            context.setValue(CodeGenerationContext.CK_EXAMPLE_DETAIL_LEVEL, "MINIMUM");
+        }
+        if (exampleContext != null) {
+            context.setValue(CodeGenerationContext.CK_EXAMPLE_CONTEXT, exampleContext);
+        }
+        if (exampleMaxRepeat != null) {
+            context.setValue(CodeGenerationContext.CK_EXAMPLE_MAX_REPEAT, exampleMaxRepeat.toString());
+        }
+        if (exampleMaxDepth != null) {
+            context.setValue(CodeGenerationContext.CK_EXAMPLE_MAX_DEPTH, exampleMaxDepth.toString());
+        }
+        return context;
+    }
+
+	/**
+	 * @see org.opentravel.schemacompiler.task.AbstractCompilerTask#applyTaskOptions(org.opentravel.schemacompiler.task.CommonCompilerTaskOptions)
+	 */
+	@Override
+	public void applyTaskOptions(CommonCompilerTaskOptions taskOptions) {
+		super.applyTaskOptions(taskOptions);
+		
+        if (taskOptions instanceof ExampleCompilerTaskOptions) {
+            ExampleCompilerTaskOptions exampleOptions = (ExampleCompilerTaskOptions) taskOptions;
+
+            generateMaxDetailsForExamples = exampleOptions.isGenerateMaxDetailsForExamples();
+            exampleContext = exampleOptions.getExampleContext();
+            exampleMaxRepeat = exampleOptions.getExampleMaxRepeat();
+            exampleMaxDepth = exampleOptions.getExampleMaxDepth();
+        }
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.task.ExampleCompilerTaskOptions#isGenerateExamples()
+	 */
+	@Override
+	public boolean isGenerateExamples() {
+		return true; // always generate examples for HTML documentation
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.task.ExampleCompilerTaskOptions#isGenerateMaxDetailsForExamples()
+	 */
+	@Override
+	public boolean isGenerateMaxDetailsForExamples() {
+		return generateMaxDetailsForExamples;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.task.ExampleCompilerTaskOptions#getExampleContext()
+	 */
+	@Override
+	public String getExampleContext() {
+		return exampleContext;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.task.ExampleCompilerTaskOptions#getExampleMaxRepeat()
+	 */
+	@Override
+	public Integer getExampleMaxRepeat() {
+		return exampleMaxRepeat;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.task.ExampleCompilerTaskOptions#getExampleMaxDepth()
+	 */
+	@Override
+	public Integer getExampleMaxDepth() {
+		return exampleMaxDepth;
 	}
 
 }

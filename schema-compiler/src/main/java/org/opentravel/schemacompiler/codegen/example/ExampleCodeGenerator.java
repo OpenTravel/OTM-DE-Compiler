@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.Collection;
 
 import javax.xml.namespace.QName;
 
@@ -35,6 +36,7 @@ import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLModelElement;
 import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLService;
+import org.opentravel.schemacompiler.validate.ValidationException;
 import org.opentravel.schemacompiler.xml.XMLPrettyPrinter;
 import org.w3c.dom.Document;
 
@@ -47,6 +49,21 @@ import org.w3c.dom.Document;
 public class ExampleCodeGenerator extends AbstractCodeGenerator<TLModelElement> {
 
     /**
+	 * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#generateOutput(org.opentravel.schemacompiler.model.ModelElement, org.opentravel.schemacompiler.codegen.CodeGenerationContext)
+	 */
+	@Override
+	public Collection<File> generateOutput(TLModelElement source, CodeGenerationContext context)
+			throws ValidationException, CodeGenerationException {
+		try {
+			return super.generateOutput(source, context);
+			
+		} finally {
+			System.runFinalization();
+			System.gc();
+		}
+	}
+
+	/**
      * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#doGenerateOutput(org.opentravel.schemacompiler.model.TLModelElement,
      *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
      */
@@ -90,7 +107,7 @@ public class ExampleCodeGenerator extends AbstractCodeGenerator<TLModelElement> 
      *            the code generation context
      * @return ExampleGeneratorOptions
      */
-    private ExampleGeneratorOptions getOptions(CodeGenerationContext context) {
+    public static ExampleGeneratorOptions getOptions(CodeGenerationContext context) {
         ExampleGeneratorOptions options = new ExampleGeneratorOptions();
         String detailLevel = context.getValue(CodeGenerationContext.CK_EXAMPLE_DETAIL_LEVEL);
         String exampleContext = context.getValue(CodeGenerationContext.CK_EXAMPLE_CONTEXT);

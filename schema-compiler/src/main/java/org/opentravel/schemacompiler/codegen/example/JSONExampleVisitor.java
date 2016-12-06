@@ -493,7 +493,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 		if (!attributeName.endsWith("Ind")) {
 			attributeName += "Ind";
 		}
-		((ObjectNode) context.getNode()).put(attributeName, Boolean.TRUE);
+		((ObjectNode) context.getNode()).put(attributeName.intern(), Boolean.TRUE);
 	}
 
 	/**
@@ -507,7 +507,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 		if (!elementName.endsWith("Ind")) {
 			elementName += "Ind";
 		}
-		((ObjectNode) context.getNode()).put(elementName, Boolean.TRUE);
+		((ObjectNode) context.getNode()).put(elementName.intern(), Boolean.TRUE);
 	}
 
 	/**
@@ -582,7 +582,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 			context = new ExampleContext(null);
 			ObjectNode objectNode = nodeFactory.objectNode();
 			context.setNode(objectNode);
-			owningNode.set(extensionElementName.getLocalPart(), objectNode);
+			owningNode.set(extensionElementName.getLocalPart().intern(), objectNode);
 		}
 	}
 
@@ -670,7 +670,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 			throw new IllegalStateException(
 					"A complex element has already been defined for the current context.");
 		}
-		String nodeName = getElementName(elementType);
+		String nodeName = getElementName(elementType).intern();
 
 		context.setNode(newElement);
 
@@ -708,7 +708,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 			} else {
 				typeName = JsonSchemaNamingUtils.getGlobalDefinitionName( facet );
 			}
-			jsonNode.put("@type", typeName);
+			jsonNode.put("@type", typeName.intern());
 		}
 	}
 
@@ -781,7 +781,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 					getAttributeName(context.getModelAttribute()), node);
 
 		} else {
-			String nodeName = getElementName(elementType);
+			String nodeName = getElementName(elementType).intern();
 			
 			if (contextStack.isEmpty() && (context.getNode() == null)) {
 				JsonNode jn = getSimpleTypeNode(elementType);
@@ -867,6 +867,8 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
     private ValueNode getExampleValueNode(Object entity, String exampleStr) {
     	Class<?> literalType = getLiteralType( entity );
     	ValueNode exampleNode = null;
+    	
+    	exampleStr = (exampleStr == null) ? null : exampleStr.intern();
     	
     	if (literalType == null) {
     		exampleNode = nodeFactory.textNode( exampleStr ); // unknown types as text nodes

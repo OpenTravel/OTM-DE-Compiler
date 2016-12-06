@@ -42,16 +42,14 @@ package org.opentravel.schemacompiler.codegen.html;
 import java.util.List;
 import java.util.Locale;
 
+import org.opentravel.schemacompiler.codegen.example.ExampleGeneratorOptions;
+import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
+import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilderFactory;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
-
-import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
-import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilderFactory;
-import org.opentravel.schemacompiler.codegen.html.MessageRetriever;
-import org.opentravel.schemacompiler.codegen.html.Messager;
 
 /**
  * Configure the output based on the command line options.
@@ -205,9 +203,10 @@ public class Configuration {
 
 	private DocumentationBuilderFactory builderFactory;
 
-
 	private boolean isGenerateBuiltins = false;
-
+	
+	private ExampleGeneratorOptions exampleOptions;
+	
 	/**
 	 * Constructor. Initializes resource for the
 	 * {@link com.sun.tools.doclets.MessageRetriever}.
@@ -473,6 +472,24 @@ public class Configuration {
 	 */
 	public void setWindowtitle(String windowtitle) {
 		this.windowtitle = windowtitle;
+	}
+
+	/**
+	 * Returns the value of the 'exampleOptions' field.
+	 *
+	 * @return ExampleGeneratorOptions
+	 */
+	public ExampleGeneratorOptions getExampleOptions() {
+		return exampleOptions;
+	}
+
+	/**
+	 * Assigns the value of the 'exampleOptions' field.
+	 *
+	 * @param exampleOptions  the field value to assign
+	 */
+	public void setExampleOptions(ExampleGeneratorOptions exampleOptions) {
+		this.exampleOptions = exampleOptions;
 	}
 
 }

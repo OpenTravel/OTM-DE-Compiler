@@ -21,7 +21,9 @@ import java.util.List;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.codegen.example.ExampleDocumentBuilder;
+import org.opentravel.schemacompiler.codegen.example.ExampleGeneratorOptions;
 import org.opentravel.schemacompiler.codegen.example.ExampleJsonBuilder;
+import org.opentravel.schemacompiler.codegen.html.Configuration;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLAttributeOwner;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
@@ -66,10 +68,9 @@ public abstract class AttributeOwnerDocumentationBuilder<T extends TLDocumentati
 	}
 	
 	protected void buildExamples(T t){
-//		OTMExampleDocumentBuilder exampleBuilder = new OTMExampleDocumentBuilder();
-//		exampleBuilder.setModelElement(t);
+		ExampleGeneratorOptions options = Configuration.getInstance().getExampleOptions();
 		try {
-			ExampleDocumentBuilder exampleBuilder = new ExampleDocumentBuilder(null);
+			ExampleDocumentBuilder exampleBuilder = new ExampleDocumentBuilder(options);
 			exampleBuilder.setModelElement(t);
 			exampleXML = exampleBuilder.buildString();	
 		} catch (ValidationException | CodeGenerationException e) {
@@ -77,7 +78,7 @@ public abstract class AttributeOwnerDocumentationBuilder<T extends TLDocumentati
 		}
 		
 		try {
-			ExampleJsonBuilder exampleBuilder = new ExampleJsonBuilder(null);
+			ExampleJsonBuilder exampleBuilder = new ExampleJsonBuilder(options);
 			exampleBuilder.setModelElement(t);
 			
 			exampleJSON = exampleBuilder.buildString();

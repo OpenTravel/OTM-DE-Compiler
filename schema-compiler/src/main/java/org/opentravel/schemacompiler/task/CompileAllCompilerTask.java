@@ -101,6 +101,8 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
         
         if(compileHtml){
         	DocumentationCompileTask docTask = new DocumentationCompileTask();
+        	
+        	docTask.applyTaskOptions(this);
 			docTask.setOutputFolder(getOutputFolder() + "/documentation");
 			docTask.generateOutput(userDefinedLibraries, legacySchemas);
 			addGeneratedFiles(docTask.getGeneratedFiles());
@@ -141,10 +143,10 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
             context.setValue(CodeGenerationContext.CK_EXAMPLE_CONTEXT, exampleContext);
         }
         if (exampleMaxRepeat != null) {
-            context.setValue(CodeGenerationContext.CK_EXAMPLE_CONTEXT, exampleMaxRepeat.toString());
+            context.setValue(CodeGenerationContext.CK_EXAMPLE_MAX_REPEAT, exampleMaxRepeat.toString());
         }
         if (exampleMaxDepth != null) {
-            context.setValue(CodeGenerationContext.CK_EXAMPLE_CONTEXT, exampleMaxDepth.toString());
+            context.setValue(CodeGenerationContext.CK_EXAMPLE_MAX_DEPTH, exampleMaxDepth.toString());
         }
         return context;
     }

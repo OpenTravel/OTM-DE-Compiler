@@ -155,7 +155,7 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
                 exampleValue = exampleValueGenerator.getExampleValue((TLProperty) entity, owner);
         	}
         }
-        lastExampleValue = exampleValue;
+        lastExampleValue = (exampleValue == null) ? null : exampleValue.intern();
 		return lastExampleValue;
     }
     

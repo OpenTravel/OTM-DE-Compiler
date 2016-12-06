@@ -23,6 +23,8 @@ import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
 import org.opentravel.schemacompiler.codegen.CodeGenerator;
+import org.opentravel.schemacompiler.codegen.example.ExampleCodeGenerator;
+import org.opentravel.schemacompiler.codegen.example.ExampleGeneratorOptions;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.validate.ValidationException;
 import org.slf4j.Logger;
@@ -56,6 +58,8 @@ public class DocumentationGenerator implements CodeGenerator<TLModel> {
 			config.setWindowtitle(title);
 			config.doctitle = title;
 		}
+		ExampleGeneratorOptions exampleOptions = ExampleCodeGenerator.getOptions(context);
+		config.setExampleOptions(exampleOptions);
 		config.setModel(model);
 		HtmlDoclet.start(model);
 		return null;
