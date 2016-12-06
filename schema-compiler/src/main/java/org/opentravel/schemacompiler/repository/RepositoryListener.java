@@ -89,26 +89,26 @@ public interface RepositoryListener {
      * available one.
      * 
      * @param item  the repository item that was promoted
-     * @param newStatus  the new status of the repository item
+     * @param originalStatus  the original status of the repository item
      */
-    public void onPromote(RepositoryItem item, TLLibraryStatus newStatus);
+    public void onPromote(RepositoryItem item, TLLibraryStatus originalStatus);
 
     /**
      * Called when a repository item has been demoted from its current lifecycle status to the
      * previous available one.
      * 
      * @param item  the repository item that was demoted
-     * @param newStatus  the new status of the repository item
+     * @param originalStatus  the original status of the repository item
      */
-    public void onDemote(RepositoryItem item, TLLibraryStatus newStatus);
+    public void onDemote(RepositoryItem item, TLLibraryStatus originalStatus);
     
     /**
      * Called when the status of a repository item has been modified.
      * 
      * @param item  the repository item whose status is to be updated
-     * @param newStatus  the new status of the repository item
+     * @param originalStatus  the original status of the repository item
      */
-    public void onUpdateStatus(RepositoryItem item, TLLibraryStatus newStatus);
+    public void onUpdateStatus(RepositoryItem item, TLLibraryStatus originalStatus);
 
     /**
      * Called when the CRC of a repository item has been recalculated.

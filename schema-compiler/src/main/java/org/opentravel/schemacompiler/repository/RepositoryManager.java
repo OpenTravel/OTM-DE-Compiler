@@ -1801,6 +1801,7 @@ public class RepositoryManager implements Repository {
         File contentFile = fileManager.getLibraryContentLocation(baseNS, item.getFilename(),
                 item.getVersion());
         boolean otm16Enabled = RepositoryUtils.isOTM16LifecycleEnabled( libraryMetadata.getStatus() );
+        TLLibraryStatus originalStatus = item.getStatus();
         TLLibraryStatus targetStatus = null;
         
         if (libraryMetadata.getState() != RepositoryState.MANAGED_UNLOCKED) {
@@ -1877,7 +1878,7 @@ public class RepositoryManager implements Repository {
                     // Notify listeners
                     for (RepositoryListener listener : listeners) {
                     	try {
-                    		listener.onPromote( item, targetStatus );
+                    		listener.onPromote( item, originalStatus );
                     		
                     	} catch (Throwable t) {
                     		log.warn("Unexpected error during listener invocation.", t);
@@ -1909,6 +1910,7 @@ public class RepositoryManager implements Repository {
         File contentFile = fileManager.getLibraryContentLocation(baseNS, item.getFilename(),
                 item.getVersion());
         boolean otm16Enabled = RepositoryUtils.isOTM16LifecycleEnabled( libraryMetadata.getStatus() );
+        TLLibraryStatus originalStatus = item.getStatus();
         TLLibraryStatus targetStatus = null;
 
         if (libraryMetadata.getState() != RepositoryState.MANAGED_UNLOCKED) {
@@ -1986,7 +1988,7 @@ public class RepositoryManager implements Repository {
                     // Notify listeners
                     for (RepositoryListener listener : listeners) {
                     	try {
-                    		listener.onDemote( item, targetStatus );
+                    		listener.onDemote( item, originalStatus );
                     		
                     	} catch (Throwable t) {
                     		log.warn("Unexpected error during listener invocation.", t);
@@ -2017,6 +2019,7 @@ public class RepositoryManager implements Repository {
                 item.getFilename(), item.getVersion());
         File contentFile = fileManager.getLibraryContentLocation(baseNS, item.getFilename(),
                 item.getVersion());
+        TLLibraryStatus originalStatus = item.getStatus();
 
         if (libraryMetadata.getState() != RepositoryState.MANAGED_UNLOCKED) {
             throw new RepositoryException(
@@ -2072,7 +2075,7 @@ public class RepositoryManager implements Repository {
                     // Notify listeners
                     for (RepositoryListener listener : listeners) {
                     	try {
-                    		listener.onUpdateStatus( item, newStatus );
+                    		listener.onUpdateStatus( item, originalStatus );
                     		
                     	} catch (Throwable t) {
                     		log.warn("Unexpected error during listener invocation.", t);

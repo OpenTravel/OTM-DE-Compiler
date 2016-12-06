@@ -21,7 +21,7 @@
 				</td>
 				<td valign=top style='padding: 1.5pt 0in 1.5pt 3.75pt'>
 					<p style='line-height: 15.0pt'><span style='font-size: 10.5pt; font-family: "Arial", sans-serif'>
-					$utils.getDisplayValue( $item.status.toString() )
+					$utils.getDisplayValue( $remarks )
 					</span></p>
 				</td>
 			</tr>
@@ -33,7 +33,7 @@
 				</td>
 				<td valign=top style='padding: 1.5pt 0in 1.5pt 3.75pt'>
 					<p style='line-height: 15.0pt'><span style='font-size: 10.5pt; font-family: "Arial", sans-serif'>
-					$utils.getDisplayValue( $remarks )
+					$utils.getDisplayValue( $item.status.toString() )
 					</span></p>
 				</td>
 			</tr>

@@ -74,10 +74,10 @@ public class SubscriptionManager {
     private static final String TEMPLATE_LOCATION = "/org/opentravel/notification/templates/";
     private static final String SUBJECT_FORMAT = "{1} - {0}";
     private static final int MAX_RETRIES = 3;
-	private static final boolean DEBUG_MODE;
 	
     private static Log log = LogFactory.getLog( SubscriptionManager.class );
     private static VelocityEngine velocityEngine;
+	public static boolean debugMode = false;
     
 	private Map<String,SubscriptionResource> namespaceCache = new HashMap<>();
 	private Map<String,SubscriptionResource> allVersionsCache = new HashMap<>();
@@ -400,7 +400,7 @@ public class SubscriptionManager {
 			}
 			String userId = manager.getFileManager().getCurrentUserId();
 			
-			if (DEBUG_MODE) {
+			if (debugMode) {
 				processNotificationJob( new NotificationJob( action, userId, affectedNamespace, null ) );
 				
 			} else {
@@ -433,7 +433,7 @@ public class SubscriptionManager {
 			}
 			String userId = manager.getFileManager().getCurrentUserId();
 			
-			if (DEBUG_MODE) {
+			if (debugMode) {
 				processNotificationJob( new NotificationJob( action, userId, item, remarks ) );
 				
 			} else {
@@ -641,7 +641,7 @@ public class SubscriptionManager {
 						successInd = true;
 						
 					} catch (Throwable e) {
-						log.error( "Error sending email notification (attempt " + retryCount + ") - " + e.getMessage() );
+						log.error( "Error sending email notification (attempt " + retryCount + ") - " + e.getMessage(), e );
 						retryCount++;
 					}
 				}
@@ -957,8 +957,6 @@ public class SubscriptionManager {
 			ve.setProperty( RuntimeConstants.RESOURCE_LOADER, "classpath" );
 			ve.setProperty( "classpath.resource.loader.class", ClasspathResourceLoader.class.getName() );
 			velocityEngine = ve;
-			
-			DEBUG_MODE = Boolean.valueOf( System.getProperty("SubscriptionManager.DEBUG_MODE", "false") );
 			
 		} catch (Throwable t) {
 			throw new ExceptionInInitializerError( t );

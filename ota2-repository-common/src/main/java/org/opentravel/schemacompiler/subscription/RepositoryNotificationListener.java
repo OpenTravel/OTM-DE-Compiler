@@ -165,11 +165,10 @@ public class RepositoryNotificationListener implements RepositoryListener {
 	 * @see org.opentravel.schemacompiler.repository.RepositoryListener#onPromote(org.opentravel.schemacompiler.repository.RepositoryItem, org.opentravel.schemacompiler.model.TLLibraryStatus)
 	 */
 	@Override
-	public void onPromote(RepositoryItem item, TLLibraryStatus newStatus) {
+	public void onPromote(RepositoryItem item, TLLibraryStatus originalStatus) {
 		try {
-			// TODO: Fix bug that passes same value for old/new status
 			subscriptionManager.notifySubscribedUsers(
-					item, RepositoryActionType.PROMOTE, newStatus.toString() );
+					item, RepositoryActionType.PROMOTE, originalStatus.toString() );
 			
 		} catch (Throwable t) {
 			log.warn("Error during subscriber notification.", t);
@@ -180,11 +179,10 @@ public class RepositoryNotificationListener implements RepositoryListener {
 	 * @see org.opentravel.schemacompiler.repository.RepositoryListener#onDemote(org.opentravel.schemacompiler.repository.RepositoryItem, org.opentravel.schemacompiler.model.TLLibraryStatus)
 	 */
 	@Override
-	public void onDemote(RepositoryItem item, TLLibraryStatus newStatus) {
+	public void onDemote(RepositoryItem item, TLLibraryStatus originalStatus) {
 		try {
-			// TODO: Fix bug that passes same value for old/new status
 			subscriptionManager.notifySubscribedUsers(
-					item, RepositoryActionType.DEMOTE, newStatus.toString() );
+					item, RepositoryActionType.DEMOTE, originalStatus.toString() );
 			
 		} catch (Throwable t) {
 			log.warn("Error during subscriber notification.", t);
@@ -195,13 +193,12 @@ public class RepositoryNotificationListener implements RepositoryListener {
 	 * @see org.opentravel.schemacompiler.repository.RepositoryListener#onUpdateStatus(org.opentravel.schemacompiler.repository.RepositoryItem, org.opentravel.schemacompiler.model.TLLibraryStatus)
 	 */
 	@Override
-	public void onUpdateStatus(RepositoryItem item, TLLibraryStatus newStatus) {
+	public void onUpdateStatus(RepositoryItem item, TLLibraryStatus originalStatus) {
 		try {
-			// TODO: Fix bug that passes same value for old/new status
-			TLLibraryStatus origStatus = item.getStatus();
+			TLLibraryStatus newStatus = item.getStatus();
 			
-			if ((origStatus != null) && (newStatus != null)) {
-				boolean isPromote = origStatus.getRank() < newStatus.getRank();
+			if ((originalStatus != null) && (newStatus != null)) {
+				boolean isPromote = originalStatus.getRank() < newStatus.getRank();
 				
 				subscriptionManager.notifySubscribedUsers( item, isPromote ?
 						RepositoryActionType.PROMOTE : RepositoryActionType.DEMOTE,
