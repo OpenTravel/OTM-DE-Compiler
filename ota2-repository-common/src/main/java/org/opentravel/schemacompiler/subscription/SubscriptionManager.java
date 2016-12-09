@@ -31,8 +31,11 @@ import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
 import javax.mail.Address;
+import javax.mail.AuthenticationFailedException;
 import javax.mail.Message;
 import javax.mail.Message.RecipientType;
+import javax.mail.PasswordAuthentication;
+import javax.mail.SendFailedException;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
@@ -606,13 +609,23 @@ public class SubscriptionManager {
 					" (" + recipients.size() + " recipients)");
 			
 			if (!recipients.isEmpty()) {
-				Session mailSession = Session.getInstance( smtpConfig.getSmtpProps() );
-				String smtpUser = smtpConfig.getSmtpUser();
-				String smtpPassword = smtpConfig.getSmtpPassword();
+//				Session mailSession = Session.getInstance( smtpConfig.getSmtpProps() );
+				final String smtpUser = smtpConfig.getSmtpUser();
+				final String smtpPassword = smtpConfig.getSmtpPassword();
+				Session mailSession = smtpConfig.isAuthEnable() ?
+						Session.getInstance( smtpConfig.getSmtpProps(),
+								 new javax.mail.Authenticator() {
+									protected PasswordAuthentication getPasswordAuthentication() {
+										return new PasswordAuthentication( smtpUser, smtpPassword );
+									}
+								 }) :
+						Session.getInstance( smtpConfig.getSmtpProps() );
+									 
 				InternetAddress fromAddress = new InternetAddress(
 						smtpConfig.getSenderAddress(), smtpConfig.getSenderName() );
 				Message message = new MimeMessage( mailSession );
 				boolean successInd = false;
+				boolean abortInd = false;
 				int retryCount = 1;
 				
 				for (InternetAddress recipient : recipients) {
@@ -629,10 +642,9 @@ public class SubscriptionManager {
 				message.setSubject( buildMessageSubject( job ) );
 				message.setContent( buildMessageBody( job ), "text/html" );
 				
-				while (!successInd && (retryCount <= MAX_RETRIES)) {
+				while (!successInd && !abortInd && (retryCount <= MAX_RETRIES)) {
 					try {
-						
-						if ((smtpUser != null) && (smtpPassword != null)) {
+						if (!smtpConfig.isAuthEnable() && (smtpUser != null) && (smtpPassword != null)) {
 							Transport.send( message, smtpUser, smtpPassword );
 							
 						} else {
@@ -640,8 +652,16 @@ public class SubscriptionManager {
 						}
 						successInd = true;
 						
+					} catch (SendFailedException | AuthenticationFailedException e) {
+						String errorMessage = e.getMessage();
+						if (errorMessage == null) errorMessage = e.getClass().getSimpleName();
+						log.error( "Fatal error sending email notification - " + errorMessage );
+						abortInd = true;
+						
 					} catch (Throwable e) {
-						log.error( "Error sending email notification (attempt " + retryCount + ") - " + e.getMessage(), e );
+						String errorMessage = e.getMessage();
+						if (errorMessage == null) errorMessage = e.getClass().getSimpleName();
+						log.error( "Error sending email notification (attempt " + retryCount + ") - " + errorMessage );
 						retryCount++;
 					}
 				}
