@@ -54,6 +54,7 @@ import org.opentravel.schemacompiler.ic.LibraryRemovedIntegrityChecker;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.loader.LibraryModelLoader;
 import org.opentravel.schemacompiler.loader.LibraryNamespaceResolver;
+import org.opentravel.schemacompiler.loader.LoaderProgressMonitor;
 import org.opentravel.schemacompiler.loader.LoaderValidationMessageKeys;
 import org.opentravel.schemacompiler.loader.impl.DefaultLibraryNamespaceResolver;
 import org.opentravel.schemacompiler.loader.impl.FileValidationSource;
@@ -279,7 +280,7 @@ public final class ProjectManager {
      *             thrown if one or more managed repository items cannot be accessed
      */
     public Project loadProject(File projectFile) throws LibraryLoaderException, RepositoryException {
-        return loadProject(projectFile, null);
+        return loadProject(projectFile, null, null);
     }
 
     /**
@@ -299,6 +300,29 @@ public final class ProjectManager {
      *             thrown if one or more managed repository items cannot be accessed
      */
     public Project loadProject(File projectFile, ValidationFindings findings)
+            throws LibraryLoaderException, RepositoryException {
+        return loadProject(projectFile, findings, null);
+    }
+    
+    /**
+     * Loads the specified project file and incorporates its content into the shared model instance.
+     * 
+     * @param projectFile
+     *            the file location of the project to be loaded
+     * @param findings
+     *            validation findings where errors/warnings from the loading operation will be
+     *            reported
+     * @param monitor
+     *            the progress monitor for the load (may be null)
+     * @return Project
+     * @throws LibraryLoaderException
+     *             thrown if the contents of the project cannot be loaded
+     * @throws IllegalArgumentException
+     *             thrown if the file and/or ID of the project are already in use
+     * @throws RepositoryException
+     *             thrown if one or more managed repository items cannot be accessed
+     */
+    public Project loadProject(File projectFile, ValidationFindings findings, LoaderProgressMonitor monitor)
             throws LibraryLoaderException, RepositoryException {
         ProjectType jaxbProject = ProjectFileUtils.loadJaxbProjectFile(projectFile, findings);
         Project project = null;
@@ -408,7 +432,7 @@ public final class ProjectManager {
             // Attempt to load the project and its items into the current project manager session
             boolean success = false;
             try {
-                loadAllProjectItems(unmanagedItemFiles, managedItems, project, loaderFindings);
+                loadAllProjectItems(unmanagedItemFiles, managedItems, project, loaderFindings, monitor);
                 success = true;
 
             } finally {
@@ -911,7 +935,7 @@ public final class ProjectManager {
      */
     public List<ProjectItem> addManagedProjectItems(List<RepositoryItem> items, Project project)
             throws LibraryLoaderException, RepositoryException {
-        return addManagedProjectItems(items, project, null);
+        return addManagedProjectItems(items, project, null, null);
     }
 
     /**
@@ -933,10 +957,35 @@ public final class ProjectManager {
      */
     public List<ProjectItem> addManagedProjectItems(List<RepositoryItem> items, Project project,
             ValidationFindings findings) throws LibraryLoaderException, RepositoryException {
+    	return addManagedProjectItems(items, project, findings, null);
+    }
+    
+    /**
+     * Adds the managed repository items as <code>ProjectItems</code> and assigns each of them to
+     * the specified model project.
+     * 
+     * @param item
+     *            the managed repository items to add
+     * @param project
+     *            the project to which the repository item should be added
+     * @param findings
+     *            validation findings where errors/warnings from the loading operation will be
+     *            reported
+     * @param monitor
+     *            the progress monitor for the load (may be null)
+     * @return List<ProjectItem>
+     * @throws LibraryLoaderException
+     *             thrown if a problem occurs during the library loading process
+     * @throws RepositoryException
+     *             thrown if one or more managed repository items cannot be accessed
+     */
+    public List<ProjectItem> addManagedProjectItems(List<RepositoryItem> items, Project project,
+            ValidationFindings findings, LoaderProgressMonitor monitor)
+            		throws LibraryLoaderException, RepositoryException {
         repositoryManager.resetDownloadCache();
         ValidationFindings loaderFindings = new ValidationFindings();
         List<ProjectItem> projectItems = loadAllProjectItems(new ArrayList<File>(), items, project,
-                loaderFindings);
+                loaderFindings, monitor);
 
         // Validate for errors/warnings if requested by the caller
         if (findings != null) {
@@ -1048,7 +1097,7 @@ public final class ProjectManager {
      */
     public List<ProjectItem> addUnmanagedProjectItems(List<File> libraryFiles, Project project)
             throws LibraryLoaderException, RepositoryException {
-        return addUnmanagedProjectItems(libraryFiles, project, null);
+        return addUnmanagedProjectItems(libraryFiles, project, null, null);
     }
 
     /**
@@ -1071,9 +1120,35 @@ public final class ProjectManager {
      */
     public List<ProjectItem> addUnmanagedProjectItems(List<File> libraryFiles, Project project,
             ValidationFindings findings) throws LibraryLoaderException, RepositoryException {
+    	return addUnmanagedProjectItems(libraryFiles, project, findings, null);
+    }
+    
+    /**
+     * Creates new <code>ProjectItems</code> to represent each of the given library files (.otm or
+     * .xsd), and adds them to the contents of the project as <code>UNMANAGED</code> repository
+     * items.
+     * 
+     * @param libraryFiles
+     *            the file content for the unmanaged libraries (and/or legacy schemas) to add
+     * @param project
+     *            the project to which the unmanaged project item will be added
+     * @param findings
+     *            validation findings where errors/warnings from the loading operation will be
+     *            reported
+     * @param monitor
+     *            the progress monitor for the load (may be null)
+     * @return List<ProjectItem>
+     * @throws LibraryLoaderException
+     *             thrown if a problem occurs during the library loading process
+     * @throws RepositoryException
+     *             thrown if one or more managed repository items cannot be accessed
+     */
+    public List<ProjectItem> addUnmanagedProjectItems(List<File> libraryFiles, Project project,
+            ValidationFindings findings, LoaderProgressMonitor monitor)
+            		throws LibraryLoaderException, RepositoryException {
         ValidationFindings loaderFindings = new ValidationFindings();
         List<ProjectItem> projectItems = loadAllProjectItems(libraryFiles,
-                new ArrayList<RepositoryItem>(), project, loaderFindings);
+                new ArrayList<RepositoryItem>(), project, loaderFindings, monitor);
 
         // Validate for errors/warnings if requested by the caller
         if (findings != null) {
@@ -1097,6 +1172,8 @@ public final class ProjectManager {
      * @param loaderFindings
      *            validation findings where errors/warnings from the loading operation will be
      *            reported
+     * @param monitor
+     *            the progress monitor for the load (may be null)
      * @return List<ProjectItem>
      * @throws LibraryLoaderException
      *             thrown if a problem occurs during the library loading process
@@ -1104,13 +1181,16 @@ public final class ProjectManager {
      *             thrown if one or more managed repository items cannot be accessed
      */
     private List<ProjectItem> loadAllProjectItems(List<File> libraryFiles,
-            List<RepositoryItem> managedItems, Project project, ValidationFindings loaderFindings)
+            List<RepositoryItem> managedItems, Project project, ValidationFindings loaderFindings,
+            LoaderProgressMonitor monitor)
             throws LibraryLoaderException, RepositoryException {
         LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>(model);
         List<ProjectItem> newItems = new ArrayList<ProjectItem>();
 
         // Initialize the loader and validation findings
+        if (monitor != null) monitor.beginLoad( libraryFiles.size() + managedItems.size() );
         modelLoader.setResolveModelReferences(false);
+        modelLoader.setProgressMonitor(monitor);
         
     	// Optimization that will pre-process the repository URL's for each library.  This will
     	// allow the loader to bypass multiple downloads of the libraries from the remote repository.
@@ -1259,6 +1339,8 @@ public final class ProjectManager {
         if (autoSaveProjects) {
             saveAffectedProjects(newItems);
         }
+        if (monitor != null) monitor.done();
+        
         return newItems;
     }
 

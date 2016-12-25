@@ -92,6 +92,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
 
     private LibraryNamespaceResolver namespaceResolver = new DefaultLibraryNamespaceResolver();
     private LibraryModuleLoader<C> moduleLoader;
+    private LoaderProgressMonitor progressMonitor;
     private boolean resolveModelReferences = true;
     private TLModel libraryModel;
 
@@ -182,6 +183,26 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
     }
 
     /**
+	 * Returns the progress monitor that will be notified when a library or schema
+	 * is loaded.
+	 *
+	 * @return LoaderProgressMonitor
+	 */
+	public LoaderProgressMonitor getProgressMonitor() {
+		return progressMonitor;
+	}
+
+	/**
+	 * Assigns the progress monitor that will be notified when a library or schema
+	 * is loaded.
+	 *
+	 * @param progressMonitor  the progress monitor instance to assign (may be null)
+	 */
+	public void setProgressMonitor(LoaderProgressMonitor progressMonitor) {
+		this.progressMonitor = progressMonitor;
+	}
+
+	/**
      * Returns the flag indicating whether inter-library model references should be resolved upon
      * completion of a library loading operation.
      * 
@@ -399,10 +420,12 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
     private void loadLibraryAndDependencies(LibraryInputSource<C> inputSource,
             String expectedNamespace, OperationType operationType, JAXBModelArtifacts jaxbArtifacts)
             throws LibraryLoaderException {
+    	notifyLoadStarting(inputSource);
         ValidationFindings moduleFindings = new ValidationFindings();
         LibraryModuleInfo<Object> libraryInfo = moduleLoader.loadLibrary(inputSource, moduleFindings);
 
         addLoaderFindings(moduleFindings);
+        if (progressMonitor != null) progressMonitor.libraryLoaded();
 
         if (libraryInfo != null) {
             Object library = libraryInfo.getJaxbArtifact();
@@ -591,10 +614,12 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
     private void loadSchemaAndDependencies(LibraryInputSource<C> inputSource,
             String expectedNamespace, OperationType operationType, JAXBModelArtifacts jaxbArtifacts)
             throws LibraryLoaderException {
+    	notifyLoadStarting(inputSource);
         ValidationFindings moduleFindings = new ValidationFindings();
         LibraryModuleInfo<Schema> schemaInfo = moduleLoader.loadSchema(inputSource, moduleFindings);
 
         addLoaderFindings(moduleFindings);
+        if (progressMonitor != null) progressMonitor.libraryLoaded();
 
         if (schemaInfo != null) {
             Schema schema = schemaInfo.getJaxbArtifact();
@@ -1082,6 +1107,19 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
      */
     private boolean isImportValidationMessageKey(String messageKey) {
         return (messageKey != null) && messageKey.equals(WARNING_LIBRARY_NOT_FOUND);
+    }
+    
+    /**
+     * Notifies the progress monitor (if one has been assigned) that a load operation
+     * is beginning for the given input source.
+     * 
+     * @param inputSource  the input source for the library or schema about to be loaded
+     */
+    private void notifyLoadStarting(LibraryInputSource<?> inputSource) {
+    	if ((progressMonitor != null) && (inputSource != null)) {
+    		String filename = URLUtils.getUrlFilename( inputSource.getLibraryURL() );
+    		progressMonitor.loadingLibrary( filename );
+    	}
     }
 
     /**
