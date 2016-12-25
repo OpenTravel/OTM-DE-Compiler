@@ -15,8 +15,10 @@
  */
 package org.opentravel.schemacompiler.util;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.opentravel.ns.ota2.librarymodel_v01_06.Action;
@@ -53,6 +55,7 @@ import org.opentravel.ns.ota2.librarymodel_v01_06.ValueWithAttributes;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryElement;
+import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.ModelElement;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAction;
@@ -75,6 +78,7 @@ import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLIndicator;
+import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLModelElement;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
@@ -120,8 +124,8 @@ public class ModelElementCloner {
     private TypeMappingTransformerFactory<DefaultTransformerContext> targetTransformerFactory;
 
     /**
-     * that can be cloned. Constructor that provides access to the global model that owns all
-     * possible entities
+     * Constructor that provides access to the global model that owns all
+     * possible entities that can be cloned.
      * 
      * @param model
      *            the owning model instance for all clonable entities
@@ -207,14 +211,130 @@ public class ModelElementCloner {
             }
             intermediateObject = sourceTransformer.transform(source);
             clonedObject = targetTransformer.transform(intermediateObject);
-
+            
+            // Handle special cases for contextual facet owners since contextual facets are
+            // managed externally to their business/choice object owner
+            if (source instanceof TLChoiceObject) {
+            	cloneContextualFacets( (TLChoiceObject) source, (TLChoiceObject) clonedObject );
+            	
+            } else if (source instanceof TLBusinessObject) {
+            	cloneContextualFacets( (TLBusinessObject) source, (TLBusinessObject) clonedObject );
+            }
+            
         } else if (source != null) {
             throw new IllegalArgumentException("Unable to clone object of type: "
                     + source.getClass().getName());
         }
         return clonedObject;
     }
+    
+    /**
+     * Clones the local contextual facets of the given choice object.
+     *  
+     * @param choice  the choice object whose contextual facets are to be cloned
+     * @param target  the choice object that will received the cloned facets
+     */
+    private void cloneContextualFacets(TLChoiceObject source, TLChoiceObject target) {
+    	List<TLContextualFacet> clonedChoiceFacets = cloneContextualFacets( source.getChoiceFacets() );
+    	
+    	for (TLContextualFacet clonedFacet : clonedChoiceFacets) {
+    		target.addChoiceFacet( clonedFacet );
+    	}
+    }
 
+    /**
+     * Clones the local contextual facets of the given business object.
+     *  
+     * @param source  the business object whose contextual facets are to be cloned
+     * @param target  the business object that will received the cloned facets
+     */
+    private void cloneContextualFacets(TLBusinessObject source, TLBusinessObject target) {
+    	List<TLContextualFacet> clonedCustomFacets = cloneContextualFacets( source.getCustomFacets() );
+    	List<TLContextualFacet> clonedQueryFacets = cloneContextualFacets( source.getQueryFacets() );
+    	List<TLContextualFacet> clonedUpdateFacets = cloneContextualFacets( source.getUpdateFacets() );
+    	
+    	for (TLContextualFacet clonedFacet : clonedCustomFacets) {
+    		target.addCustomFacet( clonedFacet );
+    	}
+    	for (TLContextualFacet clonedFacet : clonedQueryFacets) {
+    		target.addQueryFacet( clonedFacet );
+    	}
+    	for (TLContextualFacet clonedFacet : clonedUpdateFacets) {
+    		target.addUpdateFacet( clonedFacet );
+    	}
+    }
+    
+    /**
+     * Recursively clones the given list of contextual facets (only local facets will
+     * be cloned).
+     * 
+     * @param facetList  the list of contextual facets to clone
+     * @return List<TLContextualFacet>
+     */
+    private List<TLContextualFacet> cloneContextualFacets(List<TLContextualFacet> facetList) {
+        ObjectTransformer<TLContextualFacet, FacetContextual, SymbolResolverTransformerContext> sourceTransformer =
+        		sourceTransformerFactory.getTransformer(TLContextualFacet.class, FacetContextual.class);
+        ObjectTransformer<FacetContextual, TLContextualFacet, DefaultTransformerContext> targetTransformer =
+        		targetTransformerFactory.getTransformer(FacetContextual.class, TLContextualFacet.class);
+    	List<TLContextualFacet> clonedFacets = new ArrayList<>();
+    	
+    	for (TLContextualFacet sourceFacet : facetList) {
+    		if (sourceFacet.isLocalFacet()) {
+                FacetContextual intermediateFacet = sourceTransformer.transform( sourceFacet );
+                TLContextualFacet clonedFacet = targetTransformer.transform( intermediateFacet );
+        		List<TLContextualFacet> clonedChildren = cloneContextualFacets( sourceFacet.getChildFacets() );
+                
+        		for (TLContextualFacet clonedChild : clonedChildren) {
+        			clonedFacet.addChildFacet( clonedChild );
+        		}
+        		clonedFacets.add( clonedFacet );
+    		}
+    	}
+        return clonedFacets;
+    }
+
+    /**
+     * Utility method that adds the given cloned entity to the specified target library.  In most
+     * cases, this is a simple call to <code>targetLibrary.addNamedMember()</code>.  For entities
+     * that include contextual facets, however, the facets must also be added to the library as
+     * separate entities.  Since only local facets are cloned, this method assumes that any facet
+     * not already assigned a library owner should be added to the same target library as the cloned
+     * entity.
+     * 
+     * @param clonedEntity  the entity that was cloned
+     * @param targetLibrary  the target library to which the entity should be added
+     */
+    public static void addToLibrary(LibraryMember clonedEntity, TLLibrary targetLibrary) {
+    	targetLibrary.addNamedMember( clonedEntity );
+    	
+    	if (clonedEntity instanceof TLChoiceObject) {
+    		addToLibrary( ((TLChoiceObject) clonedEntity).getChoiceFacets(), targetLibrary );
+    		
+    	} else if (clonedEntity instanceof TLBusinessObject) {
+    		TLBusinessObject clonedBO = (TLBusinessObject) clonedEntity;
+    		
+    		addToLibrary( clonedBO.getCustomFacets(), targetLibrary );
+    		addToLibrary( clonedBO.getQueryFacets(), targetLibrary );
+    		addToLibrary( clonedBO.getUpdateFacets(), targetLibrary );
+    	}
+    }
+    
+    /**
+     * Recursively adds any contextual facets to the specified target library that have not already
+     * been assigned a library owner.
+     * 
+     * @param facetList  the list of facets to add
+     * @param targetLibrary  the library to which the contextual facets will be added
+     */
+    private static void addToLibrary(List<TLContextualFacet> facetList, TLLibrary targetLibrary) {
+    	for (TLContextualFacet facet : facetList) {
+    		if (facet.getOwningLibrary() == null) {
+    			targetLibrary.addNamedMember( facet );
+    		}
+    		addToLibrary( facet.getChildFacets(), targetLibrary );
+    	}
+    }
+    
     /**
      * Transformer factory that wraps each of the <code>ObjectTransformer</code> instances produced
      * with either a <code>TypeMappingTransformer</code> or <code>TypeAssignmentTransformer</code>,

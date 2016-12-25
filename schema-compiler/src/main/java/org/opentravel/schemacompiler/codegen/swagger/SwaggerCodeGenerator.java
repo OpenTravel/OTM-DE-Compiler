@@ -149,7 +149,15 @@ public class SwaggerCodeGenerator extends AbstractCodeGenerator<TLResource> {
 		try (Reader reader = new InputStreamReader(
 				SchemaDeclarations.OTM_COMMON_SCHEMA.getContent(
 						CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT ) )) {
-			JsonObject swaggerDefs = swaggerJson.get( "definitions" ).getAsJsonObject();
+			JsonObject swaggerDefs;
+			
+			if (swaggerJson.has( "definitions" )) {
+				swaggerDefs = swaggerJson.get( "definitions" ).getAsJsonObject();
+				
+			} else {
+				swaggerDefs = new JsonObject();
+				swaggerJson.add( "definitions", swaggerDefs );
+			}
     		JsonObject builtInSchema = new JsonParser().parse( reader ).getAsJsonObject();
 			JsonObject builtInDefs = builtInSchema.get( "definitions" ).getAsJsonObject();
     		

@@ -18,6 +18,7 @@ package org.opentravel.schemacompiler.codegen.util;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.opentravel.schemacompiler.model.TLAbstractFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAliasOwner;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
@@ -239,4 +240,29 @@ public class AliasCodegenUtils {
     	return getFacetAlias(ownerAlias, facetType, facetLabel);
     }
 
+    /**
+     * Returns the corresponding alias from the list facet's item facet.
+     * 
+     * @param facetAlias  the source list-facet alias
+     * @return TLAlias
+     */
+    public static TLAlias getItemFacetAlias(TLAlias listFacetAlias) {
+    	TLAliasOwner aliasOwner = listFacetAlias.getOwningEntity();
+    	String listFacetAliasName = listFacetAlias.getName();
+    	TLAlias itemFacetAlias = null;
+    	
+    	if (aliasOwner instanceof TLListFacet) {
+    		TLAbstractFacet _itemFacet = ((TLListFacet) aliasOwner).getItemFacet();
+    		
+    		if ((_itemFacet instanceof TLAliasOwner) &&
+    				(listFacetAliasName != null) && listFacetAliasName.endsWith("_List")) {
+    			TLAliasOwner itemFacet = (TLAliasOwner) _itemFacet;
+    			String itemFacetAliasName = listFacetAliasName.substring( 0, listFacetAliasName.length() - 5 );
+    			
+    			itemFacetAlias = itemFacet.getAlias( itemFacetAliasName );
+    		}
+    	}
+    	return itemFacetAlias;
+    }
+    
 }

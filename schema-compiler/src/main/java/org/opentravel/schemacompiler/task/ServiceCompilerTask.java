@@ -68,7 +68,8 @@ public class ServiceCompilerTask extends AbstractSchemaCompilerTask
             TLService service = library.getService();
 
             if ((service != null) && isLatestServiceVersion(service)) {
-                CodeGenerationFilter filter = new DependencyFilterBuilder(service).buildFilter();
+                CodeGenerationFilter filter = new DependencyFilterBuilder()
+                		.setIncludeExtendedLegacySchemas(true).addLibraryMember(service).buildFilter();
                 serviceContext.setValue(CodeGenerationContext.CK_OUTPUT_FOLDER,
                         getServiceOutputFolder(service, modelContext));
 

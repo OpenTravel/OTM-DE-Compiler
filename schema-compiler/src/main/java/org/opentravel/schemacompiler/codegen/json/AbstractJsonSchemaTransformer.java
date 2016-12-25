@@ -19,11 +19,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
 import org.opentravel.schemacompiler.codegen.CodeGenerator;
 import org.opentravel.schemacompiler.codegen.impl.AbstractCodegenTransformer;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CorrelatedCodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
+import org.opentravel.schemacompiler.codegen.json.facet.FacetJsonSchemaDelegate;
 import org.opentravel.schemacompiler.codegen.json.facet.FacetJsonSchemaDelegateFactory;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentationOwner;
@@ -35,7 +37,9 @@ import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
+import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
+import org.opentravel.schemacompiler.transform.TransformerFactory;
 
 /**
  * Base class for all <code>ObjectTransformer</code> implementations that are part of the JSON schema
@@ -107,13 +111,45 @@ public abstract class AbstractJsonSchemaTransformer<S, T> extends AbstractCodege
     		if (facet.isLocalFacet()) {
     			List<TLContextualFacet> ghostFacets = FacetCodegenUtils.findGhostFacets(facet, facet.getFacetType());
     			
-            	artifacts.addAllArtifacts( delegateFactory.getDelegate( facet ).generateArtifacts() );
+    			generateFacetArtifacts( delegateFactory.getDelegate( facet ), artifacts, false );
                 generateContextualFacetArtifacts(facet.getChildFacets(), delegateFactory, artifacts);
                 generateContextualFacetArtifacts(ghostFacets, delegateFactory, artifacts);
     		}
     	}
     }
 
+    /**
+     * Utility method that generates both element and non-element schema content for the source
+     * facet of the given delegate.
+     * 
+     * @param facetDelegate  the facet code generation delegate
+     * @param artifacts  the container for all generated schema artifacts
+     * @param forceGeneration  flag indicating whether the artifacts should generated regardless
+     *						   of the code generation filter status
+     */
+    protected void generateFacetArtifacts(FacetJsonSchemaDelegate<? extends TLFacet> facetDelegate,
+            CorrelatedCodegenArtifacts artifacts, boolean forceGeneration) {
+    	CodeGenerationFilter filter = forceGeneration ? null : getCodegenFilter();
+    	
+    	if ((filter == null) || filter.processEntity( facetDelegate.getSourceFacet() )) {
+        	artifacts.addAllArtifacts( facetDelegate.generateArtifacts() );
+    	}
+    }
+    
+    /**
+     * Returns the code generation filter (if any) that is associated with the current
+     * transformation context.
+     * 
+     * @return CodeGenerationFilter
+     */
+    protected CodeGenerationFilter getCodegenFilter() {
+    	TransformerFactory<CodeGenerationTransformerContext> factory = getTransformerFactory();
+    	CodeGenerationTransformerContext context = (factory == null) ? null : factory.getContext();
+    	CodeGenerator<?> codeGenerator = (context == null) ? null : context.getCodeGenerator();
+    	
+    	return (codeGenerator == null) ? null : codeGenerator.getFilter();
+    }
+    
     /**
      * Adds the schemas associated with the given compile-time dependency to the current list of
      * dependencies maintained by the orchestrating code generator.

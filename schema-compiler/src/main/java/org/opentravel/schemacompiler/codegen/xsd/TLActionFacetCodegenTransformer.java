@@ -35,6 +35,7 @@ import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLFacet;
@@ -93,8 +94,8 @@ public class TLActionFacetCodegenTransformer extends AbstractXsdTransformer<TLAc
         FacetCodegenElements elementArtifacts = new FacetCodegenElements();
         CodegenArtifacts otherArtifacts = new CodegenArtifacts();
 		
-        generateFacetArtifacts(getDelegate(source, wrapper.getSummaryFacet()), elementArtifacts, otherArtifacts);
-        generateFacetArtifacts(getDelegate(source, wrapper.getDetailFacet()), elementArtifacts, otherArtifacts);
+        generateFacetArtifacts(getDelegate(source, wrapper.getSummaryFacet()), elementArtifacts, otherArtifacts, true);
+        generateFacetArtifacts(getDelegate(source, wrapper.getDetailFacet()), elementArtifacts, otherArtifacts, true);
         return buildCorrelatedArtifacts(wrapper, elementArtifacts, otherArtifacts);
 	}
 	
@@ -110,17 +111,35 @@ public class TLActionFacetCodegenTransformer extends AbstractXsdTransformer<TLAc
         FacetCodegenElements elementArtifacts = new FacetCodegenElements();
         CodegenArtifacts otherArtifacts = new CodegenArtifacts();
 		
-        generateFacetArtifacts(getDelegate(source, wrapper.getSharedFacet()), elementArtifacts, otherArtifacts);
+        generateFacetArtifacts(getDelegate(source, wrapper.getSharedFacet()), elementArtifacts, otherArtifacts, true);
+        generateContextualFacetArtifacts(source, wrapper.getChoiceFacets(), elementArtifacts, otherArtifacts);
+        generateContextualFacetArtifacts(source, FacetCodegenUtils.findGhostFacets(wrapper, TLFacetType.CHOICE),
+        		elementArtifacts, otherArtifacts);
         
-        for (TLFacet choiceFacet : wrapper.getChoiceFacets()) {
-            generateFacetArtifacts(getDelegate(source, choiceFacet), elementArtifacts, otherArtifacts);
-        }
-        for (TLFacet ghostFacet : FacetCodegenUtils.findGhostFacets(wrapper, TLFacetType.CHOICE)) {
-            generateFacetArtifacts(getDelegate(source, ghostFacet), elementArtifacts, otherArtifacts);
-        }
         return buildCorrelatedArtifacts(wrapper, elementArtifacts, otherArtifacts);
 	}
 	
+    /**
+     * Recursively generates schema artifacts for all contextual facets in the given list.
+     * 
+	 * @param source  the source action facet for which artifacts are being generated
+     * @param facetList  the list of contextual facets
+     * @param elementArtifacts  the container for all generated schema elements
+     * @param otherArtifacts  the container for all generated non-element schema artifacts
+     */
+    protected void generateContextualFacetArtifacts(TLActionFacet source, List<TLContextualFacet> facetList,
+            FacetCodegenElements elementArtifacts, CodegenArtifacts otherArtifacts) {
+    	for (TLContextualFacet facet : facetList) {
+    		if (facet.isLocalFacet()) {
+    			List<TLContextualFacet> ghostFacets = FacetCodegenUtils.findGhostFacets(facet, facet.getFacetType());
+    			
+                generateFacetArtifacts(getDelegate(source, facet), elementArtifacts, otherArtifacts, true);
+                generateContextualFacetArtifacts(source, facet.getChildFacets(), elementArtifacts, otherArtifacts);
+                generateContextualFacetArtifacts(source, ghostFacets, elementArtifacts, otherArtifacts);
+    		}
+    	}
+    }
+
 	/**
 	 * Generates artifacts for an action facet wrapper class that that only includes a
 	 * repeating business object element.

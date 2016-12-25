@@ -146,6 +146,22 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.visitor.AbstractNavigator#navigateLibrary(org.opentravel.schemacompiler.model.AbstractLibrary)
+	 */
+	@Override
+	public void navigateLibrary(AbstractLibrary library) {
+		if (library instanceof BuiltInLibrary) {
+            navigateBuiltInLibrary((BuiltInLibrary) library);
+			
+		} else if (library instanceof XSDLibrary) {
+            navigateLegacySchemaLibrary((XSDLibrary) library);
+			
+		} else if (library instanceof TLLibrary) {
+            navigateUserDefinedLibrary((TLLibrary) library);
+		}
+	}
+
+	/**
      * Called when a <code>LibraryElement</code> instance is encountered during model navigation.
      * 
      * @param libraryElement

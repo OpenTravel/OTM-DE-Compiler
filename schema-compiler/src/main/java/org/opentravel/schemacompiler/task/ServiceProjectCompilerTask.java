@@ -70,7 +70,7 @@ public class ServiceProjectCompilerTask extends AbstractSchemaCompilerTask imple
     protected void generateOutput(Collection<TLLibrary> userDefinedLibraries,
             Collection<XSDLibrary> legacySchemas) throws SchemaCompilerException {
         Map<String, Boolean> duplicateServiceNameIndicators = new HashMap<String, Boolean>();
-        DependencyFilterBuilder filterBuilder = new DependencyFilterBuilder();
+        DependencyFilterBuilder filterBuilder = new DependencyFilterBuilder().setIncludeExtendedLegacySchemas( true );
         List<TLService> serviceList = new ArrayList<TLService>();
 
         // Collect the list of services to generate and identify the services that will require

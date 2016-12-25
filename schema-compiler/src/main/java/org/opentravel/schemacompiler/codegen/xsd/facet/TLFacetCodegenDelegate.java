@@ -22,6 +22,8 @@ import java.util.Stack;
 
 import javax.xml.namespace.QName;
 
+import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
+import org.opentravel.schemacompiler.codegen.CodeGenerator;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
@@ -89,6 +91,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
         if (hasContent()) {
             TLFacet sourceFacet = getSourceFacet();
             TLFacetOwner facetOwner = sourceFacet.getOwningEntity();
+            CodeGenerationFilter filter = getCodegenFilter();
             boolean doSubstitutionGroupElement = hasSubstitutionGroupElement();
             boolean doNonSubstitutableElement = hasNonSubstitutableElement();
 
@@ -101,6 +104,9 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
             }
 
             for (TLAlias facetAlias : sourceFacet.getAliases()) {
+            	if ((filter != null) && !filter.processEntity( facetAlias )) {
+            		continue; // Skip aliases that are not found in the code generation filter
+            	}
             	TLAlias topLevelOwnerAlias = AliasCodegenUtils.getTopLevelOwnerAlias(facetAlias);
                 TLAlias ownerAlias = AliasCodegenUtils.getOwnerAlias(facetAlias);
 
@@ -616,6 +622,19 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
     		}
     	}
     	return hasElement;
+    }
+    
+    /**
+     * Returns the code generation filter (if any) that is associated with the transformation
+     * context.
+     * 
+     * @return CodeGenerationFilter
+     */
+    private CodeGenerationFilter getCodegenFilter() {
+    	CodeGenerator<?> codeGenerator = (transformerContext == null) ? null : transformerContext.getCodeGenerator();
+    	CodeGenerationFilter filter = (codeGenerator == null) ? null : codeGenerator.getFilter();
+    	
+    	return filter;
     }
 
     /**

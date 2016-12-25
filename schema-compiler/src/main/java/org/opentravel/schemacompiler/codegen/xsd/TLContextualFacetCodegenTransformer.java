@@ -15,6 +15,7 @@
  */
 package org.opentravel.schemacompiler.codegen.xsd;
 
+import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegate;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
@@ -34,13 +35,16 @@ public class TLContextualFacetCodegenTransformer extends
      */
     @Override
     public CodegenArtifacts transform(TLContextualFacet source) {
-        FacetCodegenDelegateFactory delegateFactory = new FacetCodegenDelegateFactory( context );
-        FacetCodegenDelegate<TLContextualFacet> facetDelegate = delegateFactory.getDelegate( source );
+    	CodeGenerationFilter filter = getCodegenFilter();
         CodegenArtifacts artifacts = new CodegenArtifacts();
-        
-        artifacts.addAllArtifacts( facetDelegate.generateElements().getAllFacetElements() );
-        artifacts.addAllArtifacts( facetDelegate.generateArtifacts() );
-        
+    	
+    	if ((filter == null) || filter.processEntity( source )) {
+            FacetCodegenDelegateFactory delegateFactory = new FacetCodegenDelegateFactory( context );
+            FacetCodegenDelegate<TLContextualFacet> facetDelegate = delegateFactory.getDelegate( source );
+            
+            artifacts.addAllArtifacts( facetDelegate.generateElements().getAllFacetElements() );
+            artifacts.addAllArtifacts( facetDelegate.generateArtifacts() );
+    	}
         return artifacts;
     }
     

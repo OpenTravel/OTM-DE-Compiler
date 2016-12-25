@@ -41,11 +41,11 @@ public class TLBusinessObjectCodegenTransformer extends
         CodegenArtifacts otherArtifacts = new CodegenArtifacts();
 
         generateFacetArtifacts(delegateFactory.getDelegate(source.getIdFacet()), elementArtifacts,
-                otherArtifacts);
+                otherArtifacts, false);
         generateFacetArtifacts(delegateFactory.getDelegate(source.getSummaryFacet()),
-                elementArtifacts, otherArtifacts);
+                elementArtifacts, otherArtifacts, false);
         generateFacetArtifacts(delegateFactory.getDelegate(source.getDetailFacet()),
-                elementArtifacts, otherArtifacts);
+                elementArtifacts, otherArtifacts, false);
 
         generateContextualFacetArtifacts(source.getCustomFacets(), delegateFactory, elementArtifacts, otherArtifacts);
         generateContextualFacetArtifacts(FacetCodegenUtils.findGhostFacets(source, TLFacetType.CUSTOM),

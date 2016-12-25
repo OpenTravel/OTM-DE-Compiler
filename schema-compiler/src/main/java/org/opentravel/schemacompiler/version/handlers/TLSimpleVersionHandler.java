@@ -110,7 +110,7 @@ public class TLSimpleVersionHandler extends VersionHandler<TLSimple> {
         if (majorVersion == null) {
         	majorVersion = getCloner( minorVersion ).clone( minorVersion );
         	majorVersion.setParentType( (TLAttributeType) getBaseExtension( minorVersion ) );
-            majorVersionLibrary.addNamedMember( majorVersion );
+            ModelElementCloner.addToLibrary( majorVersion, majorVersionLibrary );
             referenceHandler.captureRollupReferences( majorVersion );
         	
         } else if (majorVersion instanceof TLSimple) {

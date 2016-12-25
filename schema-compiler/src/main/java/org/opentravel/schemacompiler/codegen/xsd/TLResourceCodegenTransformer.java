@@ -15,6 +15,7 @@
  */
 package org.opentravel.schemacompiler.codegen.xsd;
 
+import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
@@ -35,11 +36,15 @@ public class TLResourceCodegenTransformer extends AbstractXsdTransformer<TLResou
 	public CodegenArtifacts transform(TLResource source) {
         ObjectTransformer<TLActionFacet, CodegenArtifacts, CodeGenerationTransformerContext> afTransformer = getTransformerFactory()
                 .getTransformer(TLActionFacet.class, CodegenArtifacts.class);
+    	CodeGenerationFilter filter = getCodegenFilter();
         CodegenArtifacts artifacts = new CodegenArtifacts();
-        
+    	
         // The only TLResource artifacts that need to be represented in the XML schema are the
         // action facets.
     	for (TLActionFacet actionFacet : source.getActionFacets()) {
+    		if ((filter != null) && !filter.processEntity( actionFacet )) {
+    			continue;
+    		}
     		if (!ResourceCodegenUtils.isTemplateActionFacet( actionFacet )) {
         		artifacts.addAllArtifacts( afTransformer.transform( actionFacet ) );
     		}

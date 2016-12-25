@@ -67,7 +67,7 @@ public class TLCoreObjectVersionHandler extends TLExtensionOwnerVersionHandler<T
         if (majorVersion == null) {
         	majorVersion = getCloner( minorVersion ).clone( minorVersion );
             assignBaseExtension( majorVersion, minorVersion );
-            majorVersionLibrary.addNamedMember( majorVersion );
+            ModelElementCloner.addToLibrary( majorVersion, majorVersionLibrary );
             referenceHandler.captureRollupReferences( majorVersion );
         	
         } else if (majorVersion instanceof TLCoreObject) {

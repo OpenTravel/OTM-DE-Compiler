@@ -48,6 +48,8 @@ public class TestSchemaCompilerTask {
         compilerTask.setCompileSchemas(true);
         compilerTask.setCompileJsonSchemas(true);
         compilerTask.setCompileServices(true);
+        compilerTask.setCompileSwagger(true);
+        compilerTask.setCompileHtml(true);
         compilerTask.setGenerateExamples(true);
         compilerTask.setExampleMaxRepeat( 3 );
         compilerTask.setServiceEndpointUrl("http://www.OpenTravel.org/services");
@@ -72,6 +74,8 @@ public class TestSchemaCompilerTask {
         compilerTask.setCompileSchemas(true);
         compilerTask.setCompileJsonSchemas(true);
         compilerTask.setCompileServices(true);
+        compilerTask.setCompileSwagger(true);
+        compilerTask.setCompileHtml(true);
         compilerTask.setGenerateExamples(true);
         compilerTask.setServiceEndpointUrl("http://www.OpenTravel.org/services");
         compilerTask.setResourceBaseUrl("http://www.OpenTravel.org/resources");
@@ -95,6 +99,8 @@ public class TestSchemaCompilerTask {
         compilerTask.setCompileSchemas(true);
         compilerTask.setCompileJsonSchemas(true);
         compilerTask.setCompileServices(true);
+        compilerTask.setCompileSwagger(true);
+        compilerTask.setCompileHtml(true);
         compilerTask.setGenerateExamples(true);
         compilerTask.setServiceEndpointUrl("http://www.OpenTravel.org/services");
         compilerTask.setResourceBaseUrl("http://www.OpenTravel.org/resources");
@@ -121,6 +127,8 @@ public class TestSchemaCompilerTask {
         compilerTask.setCompileSchemas(true);
         compilerTask.setCompileJsonSchemas(true);
         compilerTask.setCompileServices(true);
+        compilerTask.setCompileSwagger(true);
+        compilerTask.setCompileHtml(true);
         compilerTask.setGenerateExamples(true);
         compilerTask.setServiceEndpointUrl("http://www.OpenTravel.org/services");
         compilerTask.setResourceBaseUrl("http://www.OpenTravel.org/resources");

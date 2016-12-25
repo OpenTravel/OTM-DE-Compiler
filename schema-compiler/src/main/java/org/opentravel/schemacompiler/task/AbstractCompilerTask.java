@@ -73,6 +73,7 @@ import org.opentravel.schemacompiler.validate.impl.TLModelValidator;
 public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions {
 
     private Map<String, File> generatedFiles = new TreeMap<String, File>();
+    private AbstractLibrary primaryLibrary;
     private String validationRuleSetId;
     private String catalogLocation;
     private String outputFolder;
@@ -116,6 +117,9 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
             for (ProjectItem item : project.getProjectItems()) {
                 AbstractLibrary itemContent = item.getContent();
 
+                if (project.getDefaultItem() == item) {
+                	primaryLibrary = itemContent;
+                }
                 if (itemContent instanceof TLLibrary) {
                     userDefinedLibraries.add((TLLibrary) itemContent);
 
@@ -130,14 +134,17 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
                     libraryOrProjectUrl);
             LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>();
             String catalogLocation = getCatalogLocation();
-
+            TLModel model;
+            
             if (catalogLocation != null) {
                 modelLoader.setNamespaceResolver(new CatalogLibraryNamespaceResolver(TaskUtils
                         .getPathFromOptionValue(catalogLocation)));
             }
             findings = modelLoader.loadLibraryModel(libraryInput);
-            userDefinedLibraries.addAll(modelLoader.getLibraryModel().getUserDefinedLibraries());
-            legacySchemas.addAll(modelLoader.getLibraryModel().getLegacySchemaLibraries());
+            model = modelLoader.getLibraryModel();
+            userDefinedLibraries.addAll(model.getUserDefinedLibraries());
+            legacySchemas.addAll(model.getLegacySchemaLibraries());
+            primaryLibrary = model.getLibrary(libraryOrProjectUrl);
         }
 
         // Proceed with compilation if no errors were detected during the load
@@ -164,6 +171,9 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
         for (ProjectItem item : project.getProjectItems()) {
             AbstractLibrary itemContent = item.getContent();
 
+            if (project.getDefaultItem() == item) {
+            	primaryLibrary = itemContent;
+            }
             if (itemContent instanceof TLLibrary) {
                 userDefinedLibraries.add((TLLibrary) itemContent);
 
@@ -537,6 +547,28 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
     }
 
     /**
+	 * Returns the library that is the primary focus of the compilation effort.  If this
+	 * library is present, all others will be trimmed to only those dependencies that are
+	 * required by the primary.
+	 *
+	 * @return AbstractLibrary
+	 */
+	public AbstractLibrary getPrimaryLibrary() {
+		return primaryLibrary;
+	}
+
+	/**
+	 * Assigns the library that is the primary focus of the compilation effort.  If this
+	 * library is present, all others will be trimmed to only those dependencies that are
+	 * required by the primary.
+	 *
+	 * @param primaryLibrary  the primary library to assign (may be null)
+	 */
+	public void setPrimaryLibrary(AbstractLibrary primaryLibrary) {
+		this.primaryLibrary = primaryLibrary;
+	}
+
+	/**
      * Returns application context ID of the rule set to use when validating models prior to code
      * generation.
      * 

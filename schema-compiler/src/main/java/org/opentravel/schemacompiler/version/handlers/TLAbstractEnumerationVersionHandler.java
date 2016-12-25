@@ -17,6 +17,7 @@ package org.opentravel.schemacompiler.version.handlers;
 
 import org.opentravel.schemacompiler.model.TLAbstractEnumeration;
 import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.util.ModelElementCloner;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 
 /**
@@ -38,7 +39,7 @@ public abstract class TLAbstractEnumerationVersionHandler<V extends TLAbstractEn
         if (majorVersion == null) {
         	majorVersion = getCloner( minorVersion ).clone( minorVersion );
             assignBaseExtension( majorVersion, minorVersion );
-            majorVersionLibrary.addNamedMember( majorVersion );
+            ModelElementCloner.addToLibrary( majorVersion, majorVersionLibrary );
             referenceHandler.captureRollupReferences( majorVersion );
         	
         } else if (majorVersion instanceof TLAbstractEnumeration) {

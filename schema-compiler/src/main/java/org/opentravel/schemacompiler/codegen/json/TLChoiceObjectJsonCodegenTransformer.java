@@ -36,7 +36,7 @@ public class TLChoiceObjectJsonCodegenTransformer extends AbstractJsonSchemaTran
 		FacetJsonSchemaDelegateFactory delegateFactory = new FacetJsonSchemaDelegateFactory( context );
         CorrelatedCodegenArtifacts artifacts = new CorrelatedCodegenArtifacts();
 
-        artifacts.addAllArtifacts( delegateFactory.getDelegate( source.getSharedFacet() ).generateArtifacts() );
+        generateFacetArtifacts( delegateFactory.getDelegate( source.getSharedFacet() ), artifacts, false );
         
         generateContextualFacetArtifacts(source.getChoiceFacets(), delegateFactory, artifacts);
         generateContextualFacetArtifacts(FacetCodegenUtils.findGhostFacets(source, TLFacetType.CHOICE),

@@ -40,7 +40,7 @@ public class TLChoiceObjectCodegenTransformer extends
         FacetCodegenElements elementArtifacts = new FacetCodegenElements();
         CodegenArtifacts otherArtifacts = new CodegenArtifacts();
 
-        generateFacetArtifacts(delegateFactory.getDelegate(source.getSharedFacet()), elementArtifacts, otherArtifacts);
+        generateFacetArtifacts(delegateFactory.getDelegate(source.getSharedFacet()), elementArtifacts, otherArtifacts, false);
         
         generateContextualFacetArtifacts(source.getChoiceFacets(), delegateFactory, elementArtifacts, otherArtifacts);
         generateContextualFacetArtifacts(FacetCodegenUtils.findGhostFacets(source, TLFacetType.CHOICE),

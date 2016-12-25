@@ -18,6 +18,8 @@ package org.opentravel.schemacompiler.visitor;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.opentravel.schemacompiler.model.AbstractLibrary;
+
 /**
  * Base navigator class that provides common methods for navigation and duplicate node avoidance
  * during the traversal process.
@@ -60,6 +62,14 @@ public abstract class AbstractNavigator<T> {
      */
     public abstract void navigate(T target);
 
+    /**
+     * Called when a top-level library is encountered during navigation.
+     * 
+     * @param library
+     *            the library whose dependencies should be navigated
+     */
+    public abstract void navigateLibrary(AbstractLibrary library);
+    
     /**
      * Assigns the visitor to be used by this navigator instance.
      * 

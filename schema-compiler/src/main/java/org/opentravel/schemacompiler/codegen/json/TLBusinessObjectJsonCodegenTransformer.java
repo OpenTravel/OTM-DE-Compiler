@@ -35,10 +35,10 @@ public class TLBusinessObjectJsonCodegenTransformer extends AbstractJsonSchemaTr
 	public CodegenArtifacts transform(TLBusinessObject source) {
 		FacetJsonSchemaDelegateFactory delegateFactory = new FacetJsonSchemaDelegateFactory( context );
         CorrelatedCodegenArtifacts artifacts = new CorrelatedCodegenArtifacts();
-
-        artifacts.addAllArtifacts( delegateFactory.getDelegate( source.getIdFacet() ).generateArtifacts() );
-        artifacts.addAllArtifacts( delegateFactory.getDelegate( source.getSummaryFacet() ).generateArtifacts() );
-        artifacts.addAllArtifacts( delegateFactory.getDelegate( source.getDetailFacet() ).generateArtifacts() );
+        
+        generateFacetArtifacts( delegateFactory.getDelegate( source.getIdFacet() ), artifacts, false );
+        generateFacetArtifacts( delegateFactory.getDelegate( source.getSummaryFacet() ), artifacts, false );
+        generateFacetArtifacts( delegateFactory.getDelegate( source.getDetailFacet() ), artifacts, false );
         
         generateContextualFacetArtifacts(source.getCustomFacets(), delegateFactory, artifacts);
         generateContextualFacetArtifacts(FacetCodegenUtils.findGhostFacets(source, TLFacetType.CUSTOM),

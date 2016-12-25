@@ -46,8 +46,8 @@ public class TLCoreObjectJsonCodegenTransformer extends AbstractJsonSchemaTransf
 		
 		artifacts.addAllArtifacts( delegateFactory.getDelegate( source.getSimpleFacet() ).generateArtifacts() );
 		artifacts.addAllArtifacts( delegateFactory.getDelegate( source.getSimpleListFacet() ).generateArtifacts() );
-		artifacts.addAllArtifacts( delegateFactory.getDelegate( source.getSummaryFacet() ).generateArtifacts() );
-		artifacts.addAllArtifacts( delegateFactory.getDelegate( source.getDetailFacet() ).generateArtifacts() );
+        generateFacetArtifacts( delegateFactory.getDelegate( source.getSummaryFacet() ), artifacts, false );
+        generateFacetArtifacts( delegateFactory.getDelegate( source.getDetailFacet() ), artifacts, false );
 		
         if (source.getRoleEnumeration().getRoles().size() > 0) {
         	artifacts.addArtifact( roleEnum, createRoleEnumerationComplexType( source ) );

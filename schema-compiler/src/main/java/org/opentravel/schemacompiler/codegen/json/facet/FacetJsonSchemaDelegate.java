@@ -66,7 +66,7 @@ public abstract class FacetJsonSchemaDelegate<F extends TLAbstractFacet> {
      * 
      * @return F
      */
-    protected F getSourceFacet() {
+    public F getSourceFacet() {
         return sourceFacet;
     }
 

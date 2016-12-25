@@ -68,16 +68,11 @@ public class TLChoiceObjectVersionHandler extends TLExtensionOwnerVersionHandler
 		
         if (majorVersion == null) {
         	ModelElementCloner cloner = getCloner( minorVersion );
-        	List<TLContextualFacet> targetChoiceFacets = cloneLocalContextualFacets(
-        			minorVersion.getChoiceFacets(), majorVersionLibrary, cloner );
         	
         	majorVersion = cloner.clone( minorVersion );
             assignBaseExtension( majorVersion, minorVersion );
             
-            for (TLContextualFacet facet : targetChoiceFacets) {
-            	majorVersion.addChoiceFacet( facet );
-            }
-            majorVersionLibrary.addNamedMember( majorVersion );
+            ModelElementCloner.addToLibrary( majorVersion, majorVersionLibrary );
             referenceHandler.captureRollupReferences( majorVersion );
         	
         } else if (majorVersion instanceof TLChoiceObject) {

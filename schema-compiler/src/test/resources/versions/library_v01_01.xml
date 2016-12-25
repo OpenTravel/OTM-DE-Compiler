@@ -131,8 +131,8 @@
         <ParamGroup name="LookupParameters11" idGroup="true" facetName="LookupBO_ID">
         	<Parameter fieldName="uid" location="Path" />
         </ParamGroup>
-        <ActionFacet label="LookupFacetShared" referenceType="None" />
-        <ActionFacet label="LookupFacet11" referenceType="None" />
+        <ActionFacet label="LookupFacetShared" referenceType="Required" />
+        <ActionFacet label="LookupFacet11" referenceType="Required" />
         <Action actionId="LookupAction11" common="false">
         	<ActionRequest httpMethod="GET" pathTemplate="/Lookup11/{uid}" paramGroup="LookupParameters11" />
         	<ActionResponse statusCodes="200" payloadType="LookupResource_LookupFacet11" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
@@ -144,7 +144,7 @@
         <ParamGroup name="MinorVersionTestParameters" idGroup="true" facetName="MinorVersionTestBO_Summary">
         	<Parameter fieldName="uid" location="Path" />
         </ParamGroup>
-        <ActionFacet label="MinorVersionTestFacet" referenceType="None" />
+        <ActionFacet label="MinorVersionTestFacet" referenceType="Required" />
         <Action actionId="MinorVersionTestAction" common="false">
         	<ActionRequest httpMethod="GET" pathTemplate="/MVT/{uid}" paramGroup="MinorVersionTestParameters" />
         	<ActionResponse statusCodes="200" payloadType="MinorVersionTestResource_MinorVersionTestFacet" mimeTypes="APPLICATION_XML APPLICATION_JSON" />

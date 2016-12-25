@@ -68,26 +68,11 @@ public class TLBusinessObjectVersionHandler extends TLExtensionOwnerVersionHandl
 		
         if (majorVersion == null) {
         	ModelElementCloner cloner = getCloner( minorVersion );
-        	List<TLContextualFacet> targetCustomFacets = cloneLocalContextualFacets(
-        			minorVersion.getCustomFacets(), majorVersionLibrary, cloner );
-        	List<TLContextualFacet> targetQueryFacets = cloneLocalContextualFacets(
-        			minorVersion.getQueryFacets(), majorVersionLibrary, cloner );
-        	List<TLContextualFacet> targetUpdateFacets = cloneLocalContextualFacets(
-        			minorVersion.getUpdateFacets(), majorVersionLibrary, cloner );
         	
         	majorVersion = cloner.clone( minorVersion );
             assignBaseExtension( majorVersion, minorVersion );
             
-            for (TLContextualFacet facet : targetCustomFacets) {
-            	majorVersion.addCustomFacet( facet );
-            }
-            for (TLContextualFacet facet : targetQueryFacets) {
-            	majorVersion.addQueryFacet( facet );
-            }
-            for (TLContextualFacet facet : targetUpdateFacets) {
-            	majorVersion.addUpdateFacet( facet );
-            }
-            majorVersionLibrary.addNamedMember( majorVersion );
+            ModelElementCloner.addToLibrary( majorVersion, majorVersionLibrary );
             referenceHandler.captureRollupReferences( majorVersion );
         	
         } else if (majorVersion instanceof TLBusinessObject) {

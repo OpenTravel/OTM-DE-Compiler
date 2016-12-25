@@ -30,6 +30,7 @@ import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetType;
@@ -100,18 +101,33 @@ public class TLActionFacetJsonCodegenTransformer extends AbstractJsonSchemaTrans
 		
         artifacts.addAllArtifacts( getDelegate(source, wrapper.getSharedFacet())
         		.generateArtifacts().getConsolidatedArtifacts() );
-        
-        for (TLFacet choiceFacet : wrapper.getChoiceFacets()) {
-        	artifacts.addAllArtifacts( getDelegate(source, choiceFacet)
-        			.generateArtifacts().getConsolidatedArtifacts() );
-        }
-        for (TLFacet ghostFacet : FacetCodegenUtils.findGhostFacets(wrapper, TLFacetType.CHOICE)) {
-        	artifacts.addAllArtifacts( getDelegate(source, ghostFacet)
-        			.generateArtifacts().getConsolidatedArtifacts() );
-        }
+        generateContextualFacetArtifacts( source, wrapper.getChoiceFacets(), artifacts );
+        generateContextualFacetArtifacts( source, FacetCodegenUtils.findGhostFacets(
+        		wrapper, TLFacetType.CHOICE), artifacts );
         return artifacts;
 	}
 	
+    /**
+     * Recursively generates schema artifacts for all contextual facets in the given list.
+     * 
+	 * @param source  the source action facet for which artifacts are being generated
+     * @param facetList  the list of contextual facets
+     * @param elementArtifacts  the container for all generated schema elements
+     * @param artifacts  the container for all generated schema artifacts
+     */
+    protected void generateContextualFacetArtifacts(TLActionFacet source, List<TLContextualFacet> facetList,
+            CodegenArtifacts artifacts) {
+    	for (TLContextualFacet facet : facetList) {
+    		if (facet.isLocalFacet()) {
+    			List<TLContextualFacet> ghostFacets = FacetCodegenUtils.findGhostFacets(facet, facet.getFacetType());
+    			
+    	        artifacts.addAllArtifacts( getDelegate(source, facet).generateArtifacts().getConsolidatedArtifacts() );
+                generateContextualFacetArtifacts(source, facet.getChildFacets(), artifacts);
+                generateContextualFacetArtifacts(source, ghostFacets, artifacts);
+    		}
+    	}
+    }
+
 	/**
 	 * Generates artifacts for an action facet wrapper class that that only includes a
 	 * repeating business object element.

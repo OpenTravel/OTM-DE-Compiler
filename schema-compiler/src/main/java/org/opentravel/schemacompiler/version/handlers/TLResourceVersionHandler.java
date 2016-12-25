@@ -75,7 +75,7 @@ public class TLResourceVersionHandler extends TLExtensionOwnerVersionHandler<TLR
         	majorVersion = getCloner( minorVersion ).clone( minorVersion );
         	majorVersion.setBusinessObjectRef( minorVersion.getBusinessObjectRef() );
             assignBaseExtension( majorVersion, minorVersion );
-            majorVersionLibrary.addNamedMember( majorVersion );
+            ModelElementCloner.addToLibrary( majorVersion, majorVersionLibrary );
             resolveParameterReferences( majorVersion );
             referenceHandler.captureRollupReferences( majorVersion );
         	

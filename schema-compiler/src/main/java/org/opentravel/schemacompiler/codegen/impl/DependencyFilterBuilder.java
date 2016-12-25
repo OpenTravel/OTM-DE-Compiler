@@ -35,6 +35,7 @@ import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
@@ -56,8 +57,10 @@ import org.opentravel.schemacompiler.model.XSDComplexType;
 import org.opentravel.schemacompiler.model.XSDElement;
 import org.opentravel.schemacompiler.model.XSDLibrary;
 import org.opentravel.schemacompiler.model.XSDSimpleType;
+import org.opentravel.schemacompiler.visitor.AbstractNavigator;
 import org.opentravel.schemacompiler.visitor.DependencyNavigator;
 import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
+import org.opentravel.schemacompiler.visitor.SchemaDependencyNavigator;
 import org.springframework.context.ApplicationContext;
 
 /**
@@ -70,7 +73,7 @@ import org.springframework.context.ApplicationContext;
 public class DependencyFilterBuilder {
 
     private DependencyVisitor visitor = new DependencyVisitor();
-    private DependencyNavigator navigator = new DependencyNavigator(visitor);
+    private AbstractNavigator<NamedEntity> navigator = new SchemaDependencyNavigator(visitor);
     private boolean includeExtendedLegacySchemas = false;
     private boolean includeEntityExtensions = false;
 
@@ -87,7 +90,7 @@ public class DependencyFilterBuilder {
      * @param libraryMember
      *            the library member for which filters will be generated
      */
-    public DependencyFilterBuilder(LibraryMember libraryMember) {
+    public DependencyFilterBuilder(NamedEntity libraryMember) {
         addLibraryMember(libraryMember);
     }
 
@@ -517,15 +520,20 @@ public class DependencyFilterBuilder {
         }
 
 		/**
+		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitContextualFacet(org.opentravel.schemacompiler.model.TLContextualFacet)
+		 */
+		@Override
+		public boolean visitContextualFacet(TLContextualFacet facet) {
+			return visitFacet(facet);
+		}
+
+		/**
 		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionFacet(org.opentravel.schemacompiler.model.TLActionFacet)
 		 */
 		@Override
 		public boolean visitActionFacet(TLActionFacet facet) {
             visitLibraryElement(facet.getOwningResource());
-            
-            if (facet.getBasePayload() != null) {
-                visitLibraryElement(facet.getBasePayload());
-            }
+            visitLibraryElement(facet);
             return true;
 		}
 

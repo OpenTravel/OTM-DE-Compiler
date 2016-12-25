@@ -18,7 +18,9 @@ package org.opentravel.schemacompiler.task;
 import java.util.Collection;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
+import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
 import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
+import org.opentravel.schemacompiler.codegen.impl.DependencyFilterBuilder;
 import org.opentravel.schemacompiler.codegen.impl.LibraryFilenameBuilder;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.TLLibrary;
@@ -50,15 +52,22 @@ public class XmlSchemaCompilerTask extends AbstractSchemaCompilerTask {
     protected void generateOutput(Collection<TLLibrary> userDefinedLibraries,
             Collection<XSDLibrary> legacySchemas) throws SchemaCompilerException {
         CodeGenerationContext context = createContext();
+        AbstractLibrary primaryLibrary = getPrimaryLibrary();
+        CodeGenerationFilter filter = null;
 
         // Generate schemas for all of the user-defined libraries
-        compileXmlSchemas(userDefinedLibraries, legacySchemas, context, null, null);
+        if (primaryLibrary != null) {
+        	filter = new DependencyFilterBuilder()
+        			.setIncludeExtendedLegacySchemas( true )
+        			.addLibrary( primaryLibrary ).buildFilter();
+        }
+        compileXmlSchemas(userDefinedLibraries, legacySchemas, context, null, filter);
 
         // Generate example files if required
         if (isGenerateExamples()) {
             generateExampleArtifacts(
             		userDefinedLibraries, context, new LibraryFilenameBuilder<AbstractLibrary>(),
-            		null, CodeGeneratorFactory.XML_TARGET_FORMAT);
+            		filter, CodeGeneratorFactory.XML_TARGET_FORMAT);
         }
     }
 

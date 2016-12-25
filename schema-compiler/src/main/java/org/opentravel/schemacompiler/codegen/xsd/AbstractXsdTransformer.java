@@ -34,6 +34,7 @@ import org.opentravel.schemacompiler.codegen.CodeGenerator;
 import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.codegen.impl.AbstractCodegenTransformer;
 import org.opentravel.schemacompiler.codegen.impl.AbstractJaxbCodeGenerator;
+import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.LegacySchemaExtensionFilenameBuilder;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
@@ -55,6 +56,7 @@ import org.opentravel.schemacompiler.model.TLInclude;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.XSDLibrary;
 import org.opentravel.schemacompiler.transform.AnonymousEntityFilter;
+import org.opentravel.schemacompiler.transform.TransformerFactory;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.springframework.context.ApplicationContext;
 import org.w3._2001.xmlschema.FormChoice;
@@ -514,11 +516,16 @@ public abstract class AbstractXsdTransformer<S, T> extends AbstractCodegenTransf
      */
     protected void generateContextualFacetArtifacts(List<TLContextualFacet> facetList, FacetCodegenDelegateFactory delegateFactory,
             FacetCodegenElements elementArtifacts, CodegenArtifacts otherArtifacts) {
+    	CodeGenerationFilter filter = getCodegenFilter();
+    	
     	for (TLContextualFacet facet : facetList) {
+    		if ((filter != null) && !filter.processEntity( facet )) {
+    			continue;
+    		}
     		if (facet.isLocalFacet()) {
     			List<TLContextualFacet> ghostFacets = FacetCodegenUtils.findGhostFacets(facet, facet.getFacetType());
     			
-                generateFacetArtifacts(delegateFactory.getDelegate(facet), elementArtifacts, otherArtifacts);
+                generateFacetArtifacts(delegateFactory.getDelegate(facet), elementArtifacts, otherArtifacts, false);
                 generateContextualFacetArtifacts(facet.getChildFacets(), delegateFactory, elementArtifacts, otherArtifacts);
                 generateContextualFacetArtifacts(ghostFacets, delegateFactory, elementArtifacts, otherArtifacts);
     		}
@@ -532,11 +539,31 @@ public abstract class AbstractXsdTransformer<S, T> extends AbstractCodegenTransf
      * @param facetDelegate  the facet code generation delegate
      * @param elementArtifacts  the container for all generated schema elements
      * @param otherArtifacts  the container for all generated non-element schema artifacts
+     * @param forceGeneration  flag indicating whether the artifacts should generated regardless
+     *						   of the code generation filter status
      */
     protected void generateFacetArtifacts(FacetCodegenDelegate<? extends TLFacet> facetDelegate,
-            FacetCodegenElements elementArtifacts, CodegenArtifacts otherArtifacts) {
-        elementArtifacts.addAll(facetDelegate.generateElements());
-        otherArtifacts.addAllArtifacts(facetDelegate.generateArtifacts());
+            FacetCodegenElements elementArtifacts, CodegenArtifacts otherArtifacts, boolean forceGeneration) {
+    	CodeGenerationFilter filter = forceGeneration ? null : getCodegenFilter();
+    	
+    	if ((filter == null) || filter.processEntity( facetDelegate.getSourceFacet() )) {
+            elementArtifacts.addAll(facetDelegate.generateElements());
+            otherArtifacts.addAllArtifacts(facetDelegate.generateArtifacts());
+    	}
     }
-
+    
+    /**
+     * Returns the code generation filter (if any) that is associated with the current
+     * transformation context.
+     * 
+     * @return CodeGenerationFilter
+     */
+    protected CodeGenerationFilter getCodegenFilter() {
+    	TransformerFactory<CodeGenerationTransformerContext> factory = getTransformerFactory();
+    	CodeGenerationTransformerContext context = (factory == null) ? null : factory.getContext();
+    	CodeGenerator<?> codeGenerator = (context == null) ? null : context.getCodeGenerator();
+    	
+    	return (codeGenerator == null) ? null : codeGenerator.getFilter();
+    }
+    
 }

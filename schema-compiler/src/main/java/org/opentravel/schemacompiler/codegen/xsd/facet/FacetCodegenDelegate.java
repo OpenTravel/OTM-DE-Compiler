@@ -60,7 +60,7 @@ public abstract class FacetCodegenDelegate<F extends TLAbstractFacet> {
      * 
      * @return F
      */
-    protected F getSourceFacet() {
+    public F getSourceFacet() {
         return sourceFacet;
     }
 

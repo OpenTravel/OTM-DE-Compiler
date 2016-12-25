@@ -59,6 +59,7 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
             XmlSchemaCompilerTask schemaTask = new XmlSchemaCompilerTask(projectFilename);
 
             schemaTask.applyTaskOptions(this);
+            schemaTask.setPrimaryLibrary( getPrimaryLibrary() );
             schemaTask.setOutputFolder(getSubtaskOutputFolder(compileAllContext, "schemas"));
             schemaTask.generateOutput(userDefinedLibraries, legacySchemas);
             addGeneratedFiles(schemaTask.getGeneratedFiles());
@@ -67,16 +68,17 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
             JsonSchemaCompilerTask jsonSchemaTask = new JsonSchemaCompilerTask(projectFilename);
 
             jsonSchemaTask.applyTaskOptions(this);
+            jsonSchemaTask.setPrimaryLibrary( getPrimaryLibrary() );
             jsonSchemaTask.setOutputFolder(getSubtaskOutputFolder(compileAllContext, "json"));
             jsonSchemaTask.generateOutput(userDefinedLibraries, legacySchemas);
             addGeneratedFiles(jsonSchemaTask.getGeneratedFiles());
         }
         if (compileServices) {
             if (projectFilename != null) {
-                ServiceProjectCompilerTask serviceTask = new ServiceProjectCompilerTask(
-                        projectFilename);
+                ServiceProjectCompilerTask serviceTask = new ServiceProjectCompilerTask(projectFilename);
 
                 serviceTask.applyTaskOptions(this);
+                serviceTask.setPrimaryLibrary( getPrimaryLibrary() );
                 serviceTask.setOutputFolder(getSubtaskOutputFolder(compileAllContext, "services"));
                 serviceTask.generateOutput(userDefinedLibraries, legacySchemas);
                 addGeneratedFiles(serviceTask.getGeneratedFiles());
@@ -85,6 +87,7 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
                 ServiceCompilerTask serviceTask = new ServiceCompilerTask();
 
                 serviceTask.applyTaskOptions(this);
+                serviceTask.setPrimaryLibrary( getPrimaryLibrary() );
                 serviceTask.setOutputFolder(getSubtaskOutputFolder(compileAllContext, "services"));
                 serviceTask.generateOutput(userDefinedLibraries, legacySchemas);
                 addGeneratedFiles(serviceTask.getGeneratedFiles());
@@ -94,15 +97,17 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
             SwaggerCompilerTask swaggerTask = new SwaggerCompilerTask();
 
             swaggerTask.applyTaskOptions(this);
+            swaggerTask.setPrimaryLibrary( getPrimaryLibrary() );
             swaggerTask.setOutputFolder(getSubtaskOutputFolder(compileAllContext, "swagger"));
             swaggerTask.generateOutput(userDefinedLibraries, legacySchemas);
             addGeneratedFiles(swaggerTask.getGeneratedFiles());
         }
         
-        if(compileHtml){
+        if (compileHtml) {
         	DocumentationCompileTask docTask = new DocumentationCompileTask();
         	
         	docTask.applyTaskOptions(this);
+        	docTask.setPrimaryLibrary( getPrimaryLibrary() );
 			docTask.setOutputFolder(getOutputFolder() + "/documentation");
 			docTask.generateOutput(userDefinedLibraries, legacySchemas);
 			addGeneratedFiles(docTask.getGeneratedFiles());

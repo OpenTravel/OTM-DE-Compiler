@@ -64,9 +64,9 @@ public class TLCoreObjectCodegenTransformer extends
         otherArtifacts.addAllArtifacts(delegateFactory.getDelegate(source.getSimpleListFacet())
                 .generateArtifacts());
         generateFacetArtifacts(delegateFactory.getDelegate(source.getSummaryFacet()),
-                elementArtifacts, otherArtifacts);
+                elementArtifacts, otherArtifacts, false);
         generateFacetArtifacts(delegateFactory.getDelegate(source.getDetailFacet()),
-                elementArtifacts, otherArtifacts);
+                elementArtifacts, otherArtifacts, false);
 
         if (source.getRoleEnumeration().getRoles().size() > 0) {
             otherArtifacts.addArtifact(createRoleEnumerationComplexType(source));

@@ -181,8 +181,8 @@
         <ParamGroup name="LookupParameters12" idGroup="true" facetName="LookupBO_ID">
         	<Parameter fieldName="uid" location="Path" />
         </ParamGroup>
-        <ActionFacet label="LookupFacetShared" referenceType="None" />
-        <ActionFacet label="LookupFacet12" referenceType="None" />
+        <ActionFacet label="LookupFacetShared" referenceType="Required" />
+        <ActionFacet label="LookupFacet12" referenceType="Required" />
         <Action actionId="LookupAction12" common="false">
         	<ActionRequest httpMethod="GET" pathTemplate="/Lookup12/{uid}" paramGroup="LookupParameters12" />
         	<ActionResponse statusCodes="200" payloadType="LookupResource_LookupFacet12" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
@@ -194,7 +194,7 @@
         <ParamGroup name="PatchTestParameters" idGroup="false" facetName="PatchTestBO_Summary">
         	<Parameter fieldName="Element12" location="Path" />
         </ParamGroup>
-        <ActionFacet label="PatchTestFacet" referenceType="None" />
+        <ActionFacet label="PatchTestFacet" referenceType="Required" />
         <Action actionId="PatchTestAction" common="false">
         	<ActionRequest httpMethod="GET" pathTemplate="/{Element12}" paramGroup="PatchTestParameters" />
         	<ActionResponse statusCodes="200" payloadType="PatchTestResource_PatchTestFacet" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
@@ -211,8 +211,8 @@
         <ParamGroup name="LaterMinorVersionParameters12" idGroup="true" facetName="LaterMinorVersionBO_ID">
         	<Parameter fieldName="uid" location="Path" />
         </ParamGroup>
-        <ActionFacet label="LaterMinorVersionFacetShared" referenceType="None" />
-        <ActionFacet label="LaterMinorVersionFacet12" referenceType="None" />
+        <ActionFacet label="LaterMinorVersionFacetShared" referenceType="Required" />
+        <ActionFacet label="LaterMinorVersionFacet12" referenceType="Required" />
         <Action actionId="LaterMinorVersionAction12" common="false">
         	<ActionRequest httpMethod="GET" pathTemplate="/LMV/{uid}" paramGroup="LaterMinorVersionParameters12" />
         	<ActionResponse statusCodes="200" payloadType="LaterMinorVersionResource_LaterMinorVersionFacet12" mimeTypes="APPLICATION_XML APPLICATION_JSON" />

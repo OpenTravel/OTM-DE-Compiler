@@ -164,7 +164,7 @@ public class SwaggerCompilerTask extends AbstractSchemaCompilerTask
 	 * @return CodeGenerationFilter
 	 */
     protected CodeGenerationFilter createSchemaFilter(TLResource resource, TLMimeType... contentTypes) {
-    	DependencyFilterBuilder builder = new DependencyFilterBuilder();
+    	DependencyFilterBuilder builder = new DependencyFilterBuilder().setIncludeExtendedLegacySchemas( true );
     	
     	for (TLAction action : ResourceCodegenUtils.getInheritedActions( resource )) {
     		if (action.isCommonAction()) continue;
