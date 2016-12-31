@@ -696,6 +696,27 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
     }
 
     /**
+     * Returns the documentation patch type with the specified name.
+     * 
+     * @param localName
+     *            the local name of the documentation patch type to return
+     * @return TLDocumentationPatch
+     */
+    public TLDocumentationPatch getDocumentationPatchType(String localName) {
+    	NamedEntity member = getNamedMember(localName);
+        return (member instanceof TLDocumentationPatch) ? (TLDocumentationPatch) member : null;
+    }
+
+    /**
+     * Returns the list of documentation patch member types.
+     * 
+     * @return List<TLDocumentationPatch>
+     */
+    public List<TLDocumentationPatch> getDocumentationPatchTypes() {
+        return buildMemberList(TLDocumentationPatch.class);
+    }
+
+    /**
      * Returns the value of the 'service' field.
      * 
      * @return TLService
@@ -842,6 +863,7 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
             validTypes.add(TLResource.class);
             validTypes.add(TLExtensionPointFacet.class);
             validTypes.add(TLContextualFacet.class);
+            validTypes.add(TLDocumentationPatch.class);
             validMemberTypes = Collections.unmodifiableSet(validTypes);
 
         } catch (Throwable t) {

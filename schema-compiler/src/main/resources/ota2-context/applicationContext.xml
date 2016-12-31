@@ -283,6 +283,10 @@
 					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.compile.TLDocumentationCompileValidator" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLDocumentationPatch" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.compile.TLDocumentationPatchCompileValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
 					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLEnumValue" />
 					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.compile.TLEnumValueCompileValidator" />
 				</bean>
@@ -433,6 +437,10 @@
 				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
 					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLDocumentation" />
 					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.save.TLDocumentationSaveValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLDocumentationPatch" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.save.TLDocumentationPatchSaveValidator" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
 					<property name="targetClass" value="org.opentravel.schemacompiler.model.TLEnumValue" />
@@ -883,6 +891,11 @@
 					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb16_2tl.DocumentationTransformer" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_06.DocumentationPatch" />
+					<property name="target" value="org.opentravel.schemacompiler.model.TLDocumentationPatch" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb16_2tl.DocumentationPatchTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
 					<property name="source" value="org.opentravel.ns.ota2.librarymodel_v01_06.EnumValue" />
 					<property name="target" value="org.opentravel.schemacompiler.model.TLEnumValue" />
 					<property name="transformer" value="org.opentravel.schemacompiler.transform.jaxb16_2tl.EnumValueTransformer" />
@@ -1247,6 +1260,11 @@
 					<property name="source" value="org.opentravel.schemacompiler.model.TLDocumentation" />
 					<property name="target" value="org.opentravel.ns.ota2.librarymodel_v01_06.Documentation" />
 					<property name="transformer" value="org.opentravel.schemacompiler.transform.tl2jaxb16.TLDocumentationTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLDocumentationPatch" />
+					<property name="target" value="org.opentravel.ns.ota2.librarymodel_v01_06.DocumentationPatch" />
+					<property name="transformer" value="org.opentravel.schemacompiler.transform.tl2jaxb16.TLDocumentationPatchTransformer" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
 					<property name="source" value="org.opentravel.schemacompiler.model.TLEnumValue" />

@@ -27,4 +27,10 @@
         <Extension extends="pkg2:CompoundBusinessObject_Summary"/>
     </ExtensionPointFacet>
     
+    <DocumentationPatch patchedVersion="2.0.0" docPath="ExampleBusinessObject">
+        <Documentation>
+            <Description>ExampleBusinessObject-documentation-line_1-patched</Description>
+        </Documentation>
+    </DocumentationPatch>
+    
 </Library>

@@ -430,6 +430,44 @@
       </xsd:sequence>
    </xsd:complexType>
 
+   <xsd:element name="DocumentationPatch" type="DocumentationPatch">
+      <xsd:annotation>
+         <xsd:documentation>Documentation patches allow model designers to replace
+            the documentation of entities in prior versions without actually modifying
+            those versions.  To accomplish this a documentation patch references a
+            model elemenet in a previous library version, and specifies the documentation
+            that should replace its original version during code generation.
+         </xsd:documentation>
+      </xsd:annotation>
+   </xsd:element>
+   <xsd:complexType name="DocumentationPatch">
+      <xsd:annotation>
+         <xsd:documentation>Documentation patches allow model designers to replace
+            the documentation of entities in prior versions without actually modifying
+            those versions.  To accomplish this a documentation patch references a
+            model elemenet in a previous library version, and specifies the documentation
+            that should replace its original version during code generation.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:sequence>
+         <xsd:element ref="Documentation" minOccurs="0" />
+      </xsd:sequence>
+      <xsd:attribute name="patchedVersion" type="Version_XML" use="required">
+         <xsd:annotation>
+            <xsd:documentation>Version of the OTM library that contains the model element
+               being patched.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="docPath" type="xsd:string" use="required">
+         <xsd:annotation>
+            <xsd:documentation>Path to the documentation owner in the patched library to
+               which this documentation patch applies.
+            </xsd:documentation>
+         </xsd:annotation>
+      </xsd:attribute>
+   </xsd:complexType>
+   
    <xsd:element name="Element" type="Property">
       <xsd:annotation>
          <xsd:documentation>A complexType that contains all the parameters
@@ -1122,6 +1160,15 @@
       </xsd:annotation>
       <xsd:list itemType="Name_XML" />
    </xsd:simpleType>
+   <xsd:simpleType name="Version_XML">
+      <xsd:annotation>
+         <xsd:documentation>A 2.0 Model version identifier with a string base and a constraining pattern.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:restriction base="xsd:string">
+         <xsd:pattern value="([A-Za-z0-9\.\-_]+)?" />
+      </xsd:restriction>
+   </xsd:simpleType>
    <xsd:complexType name="NamespaceImport">
       <xsd:annotation>
          <xsd:documentation source="Description">A 2.0 Model complexType
@@ -1546,6 +1593,7 @@
          <xsd:element ref="ContextualFacet" minOccurs="0" maxOccurs="unbounded" />
          <xsd:element ref="Resource" minOccurs="0" maxOccurs="unbounded" />
          <xsd:element ref="ExtensionPointFacet" minOccurs="0" maxOccurs="unbounded" />
+         <xsd:element ref="DocumentationPatch" minOccurs="0" maxOccurs="unbounded" />
       </xsd:choice>
    </xsd:group>
    
