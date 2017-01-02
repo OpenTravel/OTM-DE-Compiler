@@ -17,8 +17,6 @@ package org.opentravel.schemacompiler.index.builder;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -48,10 +46,7 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.opentravel.schemacompiler.index.IndexingTerms;
 import org.opentravel.schemacompiler.index.IndexingUtils;
-import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
-import org.opentravel.schemacompiler.loader.LibraryModelLoader;
-import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
@@ -63,7 +58,7 @@ import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.saver.LibrarySaveException;
-import org.opentravel.schemacompiler.util.URLUtils;
+import org.opentravel.schemacompiler.transform.util.ModelReferenceResolver;
 import org.opentravel.schemacompiler.validate.FindingMessageFormat;
 import org.opentravel.schemacompiler.validate.ValidationFinding;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
@@ -94,6 +89,7 @@ public class ValidationIndexingService implements IndexingTerms {
 	 * @param indexWriter  the index writer to use for creating the search index document(s)
 	 */
 	public ValidationIndexingService(RepositoryManager repositoryManager, IndexWriter indexWriter) {
+		ModelReferenceResolver.setObsoleteBuiltInVisitorType( ObsoleteBuiltInValidationVisitor.class );
 		this.repositoryManager = repositoryManager;
 		this.indexWriter = indexWriter;
 	}
@@ -111,7 +107,7 @@ public class ValidationIndexingService implements IndexingTerms {
 			String targetIndexId = IndexingUtils.getIdentityKey( item );
 			
 			if (!processedLibraryIds.contains( targetIndexId )) {
-				ProjectManager manager = new ProjectManager( loadValidationModel(), false, repositoryManager );
+				ProjectManager manager = new ProjectManager( new TLModel(), false, repositoryManager );
 				projectFile = File.createTempFile( "project", ".otp" );
 				Project project = manager.newProject( projectFile,
 						"http://www.OpenTravel.org/repository/index", "IndexValidation", null );
@@ -323,27 +319,6 @@ public class ValidationIndexingService implements IndexingTerms {
 			try {
 				if (searchManager != null) searchManager.close();
 			} catch (Throwable t) {}
-		}
-	}
-	
-	/**
-	 * Returns a <code>TLModel</code> instance that has the 'OTA_SimpleTypes' library pre-loaded.
-	 */
-	private TLModel loadValidationModel() {
-		try {
-			LibraryModelLoader<InputStream> loader = new LibraryModelLoader<>();
-			URL ota2SimpleTypesUrl = LibraryIndexBuilder.class.getResource( "/otm-models/OTA_SimpleTypes_0_0_0.otm" );
-			LibraryInputSource<InputStream> ota2SimpleTypesSource = new LibraryStreamInputSource( ota2SimpleTypesUrl );
-			loader.loadLibraryModel( ota2SimpleTypesSource );
-			TLModel model = loader.getLibraryModel();
-			TLLibrary ota2Simples = (TLLibrary) model.getLibrary( "http://www.opentravel.org/OTM/Common/v0", "OTA_SimpleTypes" );
-			ota2Simples.setLibraryUrl( URLUtils.toURL( new File( repositoryManager.getFileManager().getRepositoryLocation(),
-					"/http/org/opentravel/www/otm/common/0.0.0/OTA_SimpleTypes_0_0_0.otm" ) ) );
-			return model;
-			
-		} catch (LibraryLoaderException e) {
-			log.error("Error loading static validation model.", e);
-			return new TLModel();
 		}
 	}
 	

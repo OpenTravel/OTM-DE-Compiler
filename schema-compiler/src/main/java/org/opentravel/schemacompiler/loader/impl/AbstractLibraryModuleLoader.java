@@ -17,7 +17,6 @@ package org.opentravel.schemacompiler.loader.impl;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,10 +64,6 @@ public abstract class AbstractLibraryModuleLoader implements LibraryModuleLoader
 
     private static final String SCHEMA_CONTEXT = ":org.w3._2001.xmlschema";
     
-    private static final String OBSOLETE_BUILTIN_NS   = "http://opentravel.org/common/v02";
-    private static final String CURRENT_BUILTIN_NS    = "http://www.opentravel.org/OTM/Common/v0";
-    private static final String MIGRATED_BUILTIN_HINT = "otm://Opentravel/OTA_SimpleTypes_0_0_0.otm";
-
     private static javax.xml.validation.Schema schemaValidationSchema;
     private static JAXBContext jaxbContext;
 
@@ -254,40 +249,6 @@ public abstract class AbstractLibraryModuleLoader implements LibraryModuleLoader
 
     }
 
-    /**
-     * Adjusts the current list of imports as necessary to account for the removal of
-     * the obsolete types from the OTA2 built-ins.
-     * 
-     * @param importList  the list of imports to be processed
-     * @return boolean (true if the mapping was processed; false otherwise)
-     */
-    protected void handleObsoleteBuiltIn(List<LibraryModuleImport> importList) {
-    	boolean fileHintAdded = false;
-    	
-    	for (LibraryModuleImport nsImport : importList) {
-    		if (OBSOLETE_BUILTIN_NS.equals( nsImport.getNamespace() )) {
-    			nsImport.setNamespace( CURRENT_BUILTIN_NS );
-    			
-    			if (nsImport.getFileHints() == null) {
-    				nsImport.setFileHints( new ArrayList<String>() );
-    			}
-    			if (!nsImport.getFileHints().contains( MIGRATED_BUILTIN_HINT )) {
-    				nsImport.getFileHints().add( MIGRATED_BUILTIN_HINT );
-    			}
-    			fileHintAdded = true;
-    			
-    		} else if (!fileHintAdded && CURRENT_BUILTIN_NS.equals( nsImport.getNamespace() )) {
-    			if (nsImport.getFileHints() == null) {
-    				nsImport.setFileHints( new ArrayList<String>() );
-    			}
-    			if (!nsImport.getFileHints().contains( MIGRATED_BUILTIN_HINT )) {
-    				nsImport.getFileHints().add( MIGRATED_BUILTIN_HINT );
-    			}
-    			fileHintAdded = true;
-    		}
-    	}
-    }
-    
     /**
      * Initializes the validation schema and shared JAXB context.
      */

@@ -30,8 +30,7 @@ import org.opentravel.schemacompiler.transform.SymbolTable;
  */
 public abstract class AbstractSymbolResolver implements SymbolResolver {
 
-    protected static final Pattern prefixedNamePattern = Pattern
-            .compile("([A-Za-z0-9\\.\\-_]+):([A-Za-z0-9\\.\\-_#]+)");
+    protected static final Pattern prefixedNamePattern = Pattern.compile("([A-Za-z0-9\\.\\-_]+):([A-Za-z0-9\\.\\-_#]+)");
 
     protected PrefixResolver prefixResolver = null;
     private AnonymousEntityFilter anonymousEntityFilter = null;
@@ -167,7 +166,7 @@ public abstract class AbstractSymbolResolver implements SymbolResolver {
      *            the entity name to parse
      * @return String[]
      */
-    protected String[] parseEntityName(String entityName) {
+    public static String[] parseEntityName(String entityName) {
         String[] nameComponents = new String[2];
 
         if (entityName != null) {

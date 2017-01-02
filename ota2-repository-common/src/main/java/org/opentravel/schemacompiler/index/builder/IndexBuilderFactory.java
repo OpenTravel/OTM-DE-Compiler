@@ -15,12 +15,9 @@
  */
 package org.opentravel.schemacompiler.index.builder;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.index.IndexWriter;
 import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionTarget;
 import org.opentravel.schemacompiler.model.NamedEntity;
-import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 
@@ -29,8 +26,6 @@ import org.opentravel.schemacompiler.repository.RepositoryManager;
  */
 public class IndexBuilderFactory {
 	
-    private static Log log = LogFactory.getLog( IndexBuilderFactory.class );
-
     private RepositoryManager repositoryManager;
 	private IndexWriter indexWriter;
 	private FacetIndexingService facetService;
@@ -44,13 +39,7 @@ public class IndexBuilderFactory {
 	 * @param indexWriter  the index writer to use for creating or deleting the search index document(s)
 	 */
 	public IndexBuilderFactory(RepositoryManager repositoryManager, IndexWriter indexWriter) {
-		try {
-			this.repositoryManager = new IndexingRepositoryManager( repositoryManager.getFileManager() );
-			
-		} catch (RepositoryException e) {
-			log.error("Error configuring the IndexRepositoryManager (using default)", e);
-			this.repositoryManager = repositoryManager;
-		}
+		this.repositoryManager = repositoryManager;
 		this.indexWriter = indexWriter;
 		this.facetService = new FacetIndexingService( this.indexWriter );
 		this.validationService = new ValidationIndexingService( this.repositoryManager, this.indexWriter );

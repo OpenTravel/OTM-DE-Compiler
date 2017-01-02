@@ -137,7 +137,6 @@ public class LibrarySchema1_4_ModuleLoader extends AbstractLibraryModuleLoader {
             imports.add(new LibraryModuleImport(nsImport.getNamespace(), nsImport.getPrefix(),
                     FileHintUtils.resolveHints(nsImport.getFileHints(), libraryUrl)));
         }
-        handleObsoleteBuiltIn( imports );
         
         return new LibraryModuleInfo<Object>(library, library.getName(), library.getNamespace(),
                 library.getVersionScheme(), includes, imports);
