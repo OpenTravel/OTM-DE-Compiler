@@ -1220,7 +1220,7 @@ public class PropertyCodegenUtils {
         }
         return attributeType;
     }
-
+    
     /**
      * Scans the given model and returns the model entity used to represent the empty element type.
      * If no such entity is defined, this method will return null.

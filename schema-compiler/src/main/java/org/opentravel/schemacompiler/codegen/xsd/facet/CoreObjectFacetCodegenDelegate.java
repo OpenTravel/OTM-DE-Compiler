@@ -21,8 +21,10 @@ import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
+import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLFacet;
+import org.opentravel.schemacompiler.model.TLIndicator;
 import org.w3._2001.xmlschema.Annotated;
 import org.w3._2001.xmlschema.Attribute;
 
@@ -72,11 +74,11 @@ public abstract class CoreObjectFacetCodegenDelegate extends TLFacetCodegenDeleg
     }
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate#createJaxbAttributes()
-     */
-    @Override
-    protected List<Annotated> createJaxbAttributes() {
-        List<Annotated> jaxbAttributes = super.createJaxbAttributes();
+	 * @see org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate#createJaxbAttributes(java.util.List, java.util.List)
+	 */
+	@Override
+	protected List<Annotated> createJaxbAttributes(List<TLAttribute> attributeList, List<TLIndicator> indicatorList) {
+        List<Annotated> jaxbAttributes = super.createJaxbAttributes(attributeList, indicatorList);
 
         if (createRoleAttributes() && (getLocalBaseFacet() == null)) {
             TLCoreObject owner = (TLCoreObject) getSourceFacet().getOwningEntity();

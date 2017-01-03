@@ -41,6 +41,7 @@ import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLActionRequest;
 import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAlias;
+import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
@@ -591,6 +592,65 @@ public class XsdCodegenUtils {
     	return suffix.toString();
     }
     
+    /**
+     * Returns the name of the update indicator to be included in an update facet for the
+     * given optional attribute.
+     * 
+     * @param attribute  the attribute for which to return the update indicator name
+     * @return String
+     */
+    public static String getUpdateIndicatorName(TLAttribute attribute) {
+		String fieldName = attribute.getName();
+		
+		if (attribute.isReference()) {
+			QName elementName = XsdCodegenUtils.getGlobalElementName( attribute.getType() );
+			
+			if (elementName != null) {
+				fieldName = elementName.getLocalPart();
+			}
+		}
+		return getUpdateIndicatorName( fieldName );
+    }
+
+    /**
+     * Returns the name of the update indicator to be included in an update facet for the
+     * given optional element.
+     * 
+     * @param element  the element for which to return the update indicator name
+     * @return String
+     */
+    public static String getUpdateIndicatorName(TLProperty element) {
+		QName elementName = XsdCodegenUtils.getGlobalElementName( element.getType() );
+		String fieldName = (elementName != null) ? elementName.getLocalPart() : element.getName();
+		
+		return getUpdateIndicatorName( fieldName );
+    }
+    
+    /**
+     * Returns the name of the update indicator for a field with the given name.
+     * 
+     * @param fieldName  the field name for which to return a corresponding update indicator name
+     * @return String
+     */
+    private static String getUpdateIndicatorName(String fieldName) {
+		String indicatorName = "update";
+		
+        if (Character.isLowerCase( fieldName.charAt( 0 ) )) {
+        	indicatorName += Character.toUpperCase( fieldName.charAt( 0 ) );
+        	
+        	if (fieldName.length() > 1) {
+        		indicatorName += fieldName.substring( 1 );
+        	}
+        	
+        } else {
+        	indicatorName += fieldName;
+        }
+        if (!indicatorName.endsWith("Ind")) {
+        	indicatorName += "Ind";
+        }
+        return indicatorName;
+    }
+
     /**
      * Returns the base output folder specified by the code generation context provided.
      * 

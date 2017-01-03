@@ -292,6 +292,12 @@
 		<Indicator name="queryIndicator" publishAsElement="false" />
 	</ContextualFacet>
 
+	<ContextualFacet name="UpdateAge" type="Update" facetOwner="SampleBusinessObject">
+		<Attribute name="updateAttribute" type="xsd:int" />
+		<Element name="age" repeat="0" type="xsd:int" />
+		<Indicator name="updateIndicator" publishAsElement="false" />
+	</ContextualFacet>
+
 	<ContextualFacet name="Test1" type="Custom" facetOwner="SampleBusinessObject">
 		<Attribute name="attr1" type="xsd:int" />
 		<Element name="element1" repeat="0" type="xsd:string" />

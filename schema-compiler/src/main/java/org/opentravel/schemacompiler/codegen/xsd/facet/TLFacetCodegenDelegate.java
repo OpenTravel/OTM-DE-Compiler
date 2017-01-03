@@ -432,6 +432,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
         QName baseType = getLocalBaseFacetTypeName();
         QName globalExtensionPointElement = hasExtensionPoint() ? getExtensionPointElement() : null;
 
+        List<TLAttribute> attributeList = getAttributes();
         List<TLProperty> elementList = getElements();
         List<TLIndicator> indicatorList = getIndicators();
         boolean hasSequence = (globalExtensionPointElement != null) ||
@@ -460,23 +461,13 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
 
         // Generate elements for the sequence (if required)
         if (hasSequence) {
-            ObjectTransformer<TLProperty, TopLevelElement, CodeGenerationTransformerContext> elementTransformer = getTransformerFactory()
-                    .getTransformer(TLProperty.class, TopLevelElement.class);
-            ObjectTransformer<TLIndicator, Annotated, CodeGenerationTransformerContext> indicatorTransformer = getTransformerFactory()
-                    .getTransformer(TLIndicator.class, Annotated.class);
-
-            for (TLProperty element : elementList) {
-                sequence.getParticle().add(
-                        jaxbObjectFactory.createElement(elementTransformer.transform(element)));
-            }
-            for (TLIndicator indicator : indicatorList) {
-                if (indicator.isPublishAsElement()) {
-                    sequence.getParticle().add(
-                            jaxbObjectFactory.createElement((TopLevelElement) indicatorTransformer
-                                    .transform(indicator)));
-                }
-            }
-
+        	List<TopLevelElement> jaxbElements = createJaxbElements( elementList, indicatorList );
+        	
+        	//jaxbObjectFactory.createElement(
+        	for (TopLevelElement jaxbElement : jaxbElements) {
+            	sequence.getParticle().add( jaxbObjectFactory.createElement( jaxbElement ) );
+        	}
+        	
             if (globalExtensionPointElement != null) {
                 TopLevelElement extensionPointElement = new TopLevelElement();
 
@@ -487,7 +478,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
         }
 
         // Generate attributes and indicators
-        jaxbAttributeList.addAll(createJaxbAttributes());
+        jaxbAttributeList.addAll(createJaxbAttributes(attributeList, indicatorList));
 
         // Generate the documentation block (if required)
         type.setAnnotation(createJaxbDocumentation(sourceFacet));
@@ -502,9 +493,11 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
      * Common method used to populate a list of the facet's JAXB attributes using the attributes and
      * indicators of the source facet.
      * 
+     * @param attributeList  the list of OTM attributes to convert to JAXB
+     * @param indicatorList  the list of OTM indicators to convert to JAXB
      * @return List<Annotated>
      */
-    protected List<Annotated> createJaxbAttributes() {
+    protected List<Annotated> createJaxbAttributes(List<TLAttribute> attributeList, List<TLIndicator> indicatorList) {
         ObjectTransformer<TLAttribute, CodegenArtifacts, CodeGenerationTransformerContext> attributeTransformer = getTransformerFactory()
                 .getTransformer(TLAttribute.class, CodegenArtifacts.class);
         ObjectTransformer<TLIndicator, Annotated, CodeGenerationTransformerContext> indicatorTransformer = getTransformerFactory()
@@ -523,6 +516,32 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
         return jaxbAttributes;
     }
 
+    /**
+     * Common method used to populate a list of the facet's JAXB elements using the properties and
+     * indicators of the source facet.
+     * 
+     * @param elementList  the list of OTM elements to convert to JAXB
+     * @param indicatorList  the list of OTM indicators to convert to JAXB
+     * @return List<TopLevelElement>
+     */
+    protected List<TopLevelElement> createJaxbElements(List<TLProperty> elementList, List<TLIndicator> indicatorList) {
+        ObjectTransformer<TLProperty, TopLevelElement, CodeGenerationTransformerContext> elementTransformer = getTransformerFactory()
+                .getTransformer(TLProperty.class, TopLevelElement.class);
+        ObjectTransformer<TLIndicator, Annotated, CodeGenerationTransformerContext> indicatorTransformer = getTransformerFactory()
+                .getTransformer(TLIndicator.class, Annotated.class);
+        List<TopLevelElement> jaxbElements = new ArrayList<>();
+
+        for (TLProperty element : elementList) {
+        	jaxbElements.add( elementTransformer.transform(element) );
+        }
+        for (TLIndicator indicator : indicatorList) {
+            if (indicator.isPublishAsElement()) {
+            	jaxbElements.add( (TopLevelElement) indicatorTransformer.transform(indicator) );
+            }
+        }
+        return jaxbElements;
+    }
+    
     /**
      * Constructs the XSD annotation using the OTM documentation for the given model element.
      * 

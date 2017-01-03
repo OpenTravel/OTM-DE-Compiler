@@ -147,8 +147,8 @@
         <ParamGroup name="LookupParameters10" idGroup="true" facetName="LookupBO_ID">
         	<Parameter fieldName="uid" location="Path" />
         </ParamGroup>
-        <ActionFacet label="LookupFacetShared" referenceType="None" />
-        <ActionFacet label="LookupFacet10" referenceType="None" />
+        <ActionFacet label="LookupFacetShared" referenceType="Optional" />
+        <ActionFacet label="LookupFacet10" referenceType="Optional" />
         <Action actionId="LookupAction10" common="false">
         	<ActionRequest httpMethod="GET" pathTemplate="/Lookup10/{uid}" paramGroup="LookupParameters10" />
         	<ActionResponse statusCodes="200" payloadType="LookupResource_LookupFacet10" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
@@ -164,8 +164,8 @@
         <ParamGroup name="LaterMinorVersionParameters10" idGroup="true" facetName="LaterMinorVersionBO_ID">
         	<Parameter fieldName="uid" location="Path" />
         </ParamGroup>
-        <ActionFacet label="LaterMinorVersionFacetShared" referenceType="None" />
-        <ActionFacet label="LaterMinorVersionFacet10" referenceType="None" />
+        <ActionFacet label="LaterMinorVersionFacetShared" referenceType="Optional" />
+        <ActionFacet label="LaterMinorVersionFacet10" referenceType="Optional" />
         <Action actionId="LaterMinorVersionAction10" common="false">
         	<ActionRequest httpMethod="GET" pathTemplate="/LMV10/{uid}" paramGroup="LaterMinorVersionParameters10" />
         	<ActionResponse statusCodes="200" payloadType="LaterMinorVersionResource_LaterMinorVersionFacet10" mimeTypes="APPLICATION_XML APPLICATION_JSON" />

@@ -60,7 +60,14 @@ public class FacetJsonSchemaDelegateFactory {
         FacetJsonSchemaDelegate<F> delegate = null;
 
         if (facetOwner instanceof TLBusinessObject) {
-        	delegate = (FacetJsonSchemaDelegate<F>) new TLFacetJsonSchemaDelegate( (TLFacet) facetInstance );
+            switch (facetInstance.getFacetType()) {
+                case UPDATE:
+                    delegate = (FacetJsonSchemaDelegate<F>) new BusinessObjectUpdateFacetJsonSchemaDelegate( (TLFacet) facetInstance );
+                    break;
+				default:
+		        	delegate = (FacetJsonSchemaDelegate<F>) new TLFacetJsonSchemaDelegate( (TLFacet) facetInstance );
+					break;
+            }
         	
         } else if (facetOwner instanceof TLCoreObject) {
             if (facetInstance instanceof TLFacet) {

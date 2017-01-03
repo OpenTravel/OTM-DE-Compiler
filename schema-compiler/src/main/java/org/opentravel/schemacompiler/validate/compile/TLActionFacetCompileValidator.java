@@ -36,6 +36,7 @@ import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
 public class TLActionFacetCompileValidator extends TLActionFacetBaseValidator{
 
     public static final String ERROR_NOT_ALLOWED_FOR_ABSTRACT = "NOT_ALLOWED_FOR_ABSTRACT";
+    public static final String ERROR_INVALID_REFERENCE_TYPE   = "INVALID_REFERENCE_TYPE";
     public static final String ERROR_INVALID_FACET_REFERENCE  = "INVALID_FACET_REFERENCE";
     
 	/**
@@ -76,6 +77,10 @@ public class TLActionFacetCompileValidator extends TLActionFacetBaseValidator{
 			builder.setProperty("referenceRepeat", target.getReferenceRepeat())
 					.setFindingType(FindingType.WARNING)
 					.assertLessThanOrEqual(1);
+			
+			if (target.getBasePayload() == null) {
+	        	builder.addFinding( FindingType.ERROR, "referenceType", ERROR_INVALID_REFERENCE_TYPE );
+			}
 			
 		} else if (target.getReferenceType() != null) {
 			if (!owner.isAbstract() && (owner.getBusinessObjectRef() != null)

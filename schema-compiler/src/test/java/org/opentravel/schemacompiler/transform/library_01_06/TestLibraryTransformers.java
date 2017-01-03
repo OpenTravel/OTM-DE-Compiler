@@ -92,7 +92,7 @@ public class TestLibraryTransformers extends Abstract_1_6_TestTransformers {
         assertEquals(1, testImport.getFileHints().size());
         assertTrue(testImport.getFileHints().contains("library_3_ext.xml"));
 
-        assertEquals(27, library.getNamedMembers().size());
+        assertEquals(28, library.getNamedMembers().size());
         assertEquals(2, library.getSimpleTypes().size());
         assertEquals(0, library.getClosedEnumerationTypes().size());
         assertEquals(2, library.getOpenEnumerationTypes().size());
@@ -100,7 +100,7 @@ public class TestLibraryTransformers extends Abstract_1_6_TestTransformers {
         assertEquals(2, library.getChoiceObjectTypes().size());
         assertEquals(4, library.getCoreObjectTypes().size());
         assertEquals(3, library.getBusinessObjectTypes().size());
-        assertEquals(8, library.getContextualFacetTypes().size());
+        assertEquals(9, library.getContextualFacetTypes().size());
         assertEquals(3, library.getResourceTypes().size());
         assertNotNull(library.getService());
     }
