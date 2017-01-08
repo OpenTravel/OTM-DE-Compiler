@@ -26,7 +26,6 @@
 			&nbsp;
 			Password <input name="password" type="password" width="8" />
 			&nbsp;
-			<input name="currentPage" type="hidden" value="${currentPage}" />
 			<input value="Login" type="submit" class="loginButton" />
 		</form>
 	</c:when>
@@ -36,8 +35,8 @@
 			User: <span id="userid"><c:if test="${(user.firstName!=null)&&(user.firstName!='')}">${user.firstName} </c:if>${user.lastName}</span>
 			[ <a href="${pageContext.request.contextPath}/console/logout.html">Logout</a> ]
 			<c:if test="${isLocalUserManagement}">
-				[ <a href="${pageContext.request.contextPath}/console/editUserProfile.html?currentPage=${currentPage}">Edit Profile</a> ]
-				[ <a href="${pageContext.request.contextPath}/console/changePassword.html?currentPage=${currentPage}">Change Password</a> ]
+				[ <a href="${pageContext.request.contextPath}/console/editUserProfile.html">Edit Profile</a> ]
+				[ <a href="${pageContext.request.contextPath}/console/changePassword.html">Change Password</a> ]
 			</c:if>
 		</div>
 	</c:otherwise>
@@ -54,7 +53,7 @@
 &nbsp;|&nbsp;
 <a href="${pageContext.request.contextPath}/console/subscriptions.html">Subscriptions</a>
 </c:if>
-<c:if test="${sessionScope.isAdminAuthorized}">
+<c:if test="${(sessionScope.user != null) && sessionScope.isAdminAuthorized}">
 	&nbsp;|&nbsp;
 	<a href="${pageContext.request.contextPath}/console/adminHome.html">Administration</a>
 </c:if>

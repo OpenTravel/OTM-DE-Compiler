@@ -20,6 +20,7 @@ import java.util.List;
 import org.opentravel.schemacompiler.codegen.impl.QualifiedParameter;
 import org.opentravel.schemacompiler.codegen.json.TLSimpleJsonCodegenTransformer;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonType;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerParamType;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerParameter;
@@ -98,11 +99,13 @@ public class TLParameterSwaggerTransformer extends AbstractSwaggerCodegenTransfo
 			
 			if (fieldType != null) {
 				JsonType jsonType = JsonType.valueOf( fieldType );
+				boolean isListType = false;
 				schema = new JsonSchema();
 				
 				while ((fieldType != null) && (jsonType == null)) {
 					if (fieldType instanceof TLSimple) {
 						TLSimpleJsonCodegenTransformer.applyRestrictions( (TLSimple) fieldType, schema );
+						isListType |= ((TLSimple) fieldType).isListTypeInd();
 						
 					} else if (fieldType instanceof TLClosedEnumeration) {
 						applyEnumeration( (TLClosedEnumeration) fieldType, schema );
@@ -112,6 +115,14 @@ public class TLParameterSwaggerTransformer extends AbstractSwaggerCodegenTransfo
 					jsonType = JsonType.valueOf( fieldType );
 				}
 				schema.setType( jsonType );
+				
+				if (isListType) {
+					JsonSchema arraySchema = new JsonSchema();
+					
+					arraySchema.setType( JsonType.jsonArray );
+					arraySchema.setItems( new JsonSchemaReference( schema ) );
+					schema = arraySchema;
+				}
 			}
 		}
 		

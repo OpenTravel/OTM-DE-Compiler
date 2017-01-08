@@ -15,6 +15,7 @@
  */
 package org.opentravel.schemacompiler.console;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.opentravel.schemacompiler.repository.RepositoryComponentFactory;
@@ -22,6 +23,7 @@ import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.security.RepositorySecurityManager;
 import org.opentravel.schemacompiler.security.UserPrincipal;
 import org.opentravel.schemacompiler.security.impl.FileAuthenticationProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
 
 /**
@@ -34,7 +36,8 @@ public abstract class BaseController {
 
     private RepositoryManager repositoryManager;
     private RepositorySecurityManager securityManager;
-
+    @Autowired private HttpServletRequest servletRequest;
+    
     /**
      * Default constructor.
      */
@@ -68,19 +71,16 @@ public abstract class BaseController {
      * application. If 'targetPage' value will always be returned by this method if a non-null value
      * is provided. If null, a default value of "homePage" will be returned.
      * 
-     * @param model
-     *            the model to which the common values should be applied
-     * @param targetPage
-     *            the target navigation page for the controller
+     * @param model  the model to which the common values should be applied
+     * @param targetPage  the target navigation page for the controller
      * @return String
      */
     protected String applyCommonValues(Model model, String targetPage) {
-        boolean isDevelopmentRepository = RepositoryComponentFactory.getDefault()
-                .isDevelopmentRepository();
-
+        if (servletRequest != null) {
+        	model.addAttribute( "errorMessage", servletRequest.getParameter( "errorMessage" ) );
+        	model.addAttribute( "statusMessage", servletRequest.getParameter( "statusMessage" ) );
+        }
         model.addAttribute("isLocalUserManagement", isLocalUserManagement());
-        model.addAttribute("isDevelopmentRepository", isDevelopmentRepository);
-        model.addAttribute("currentPage", targetPage);
         return (targetPage == null) ? "homePage" : targetPage;
     }
 
@@ -97,8 +97,7 @@ public abstract class BaseController {
      * Returns the current user associated with the given HTTP session. If an authenticated user is
      * not associated with the session, the anonymous user instance will be returned.
      * 
-     * @param session
-     *            the HTTP session that contains information about an authenticated user
+     * @param session  the HTTP session that contains information about an authenticated user
      * @return UserPrincipal
      */
     protected UserPrincipal getCurrentUser(HttpSession session) {
@@ -109,10 +108,8 @@ public abstract class BaseController {
     /**
      * Assigns the status message for the console page that will be displayed.
      * 
-     * @param statusMessage
-     *            the status message text
-     * @param model
-     *            the model to which the status message should be applied
+     * @param statusMessage  the status message text
+     * @param model  the model to which the status message should be applied
      */
     protected void setStatusMessage(String statusMessage, Model model) {
         model.addAttribute("statusMessage", statusMessage);
@@ -121,10 +118,8 @@ public abstract class BaseController {
     /**
      * Assigns the error message for the console page that will be displayed.
      * 
-     * @param errorMessage
-     *            the error message text
-     * @param model
-     *            the model to which the error message should be applied
+     * @param errorMessage  the error message text
+     * @param model  the model to which the error message should be applied
      */
     protected void setErrorMessage(String errorMessage, Model model) {
         model.addAttribute("errorMessage", errorMessage);

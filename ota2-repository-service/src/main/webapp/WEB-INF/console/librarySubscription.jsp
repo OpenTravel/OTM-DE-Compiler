@@ -24,7 +24,7 @@
 <input name="filename" type="hidden" value="${filename}" />
 <input name="version" type="hidden" value="${version}" />
 <input name="allVersions" type="hidden" value="${allVersions}" />
-<b>Library: </b>${item.libraryName} <small>(${item.version})</small>
+<b>Library: </b>${item.libraryName} <small>(<c:if test="${allVersions}">All Versions</c:if><c:if test="${!allVersions}">${item.version}</c:if>)</small>
 <br/><b>Namespace: </b>${item.namespace}
 <p><br/>
 <span>From the table below, select the events for which you wish to receive email notifications for

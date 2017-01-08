@@ -771,7 +771,8 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 				}
 				
 			} else if ((elementType instanceof TLListFacet)
-					|| XsdCodegenUtils.isIdRefsType((TLPropertyType) elementType)) {
+					|| XsdCodegenUtils.isIdRefsType((TLPropertyType) elementType)
+					|| isSimpleList( elementType )) {
 				node = generateExampleValueArrayNode(context.getModelAttribute());
 			
 			} else {
@@ -1203,6 +1204,24 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 			}
 		}
 		return (elementName != null) ? elementName : elementType.getLocalName();
+	}
+	
+	/**
+	 * Returns true if the given attribute type or its parent type(s) is a simple list.
+	 * 
+	 * @param type  the attribute type to check
+	 * @return boolean
+	 */
+	private boolean isSimpleList(NamedEntity type) {
+		boolean isList = false;
+		
+		while (!isList && (type instanceof TLSimple)) {
+			TLSimple simpleType = (TLSimple) type;
+			
+			isList = simpleType.isListTypeInd();
+			type = simpleType.getParentType();
+		}
+		return isList;
 	}
 
 	/**

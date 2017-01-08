@@ -45,11 +45,7 @@
 		<c:url var="editUrl" value="/console/adminPermissionsEdit.html">
 			<c:param name="namespace" value="${baseNamespace}" />
 		</c:url>
-		<c:url var="testUrl" value="/console/adminPermissionsTest.html">
-			<c:param name="namespace" value="${baseNamespace}" />
-		</c:url>
 		&nbsp; <input type="button" value="Edit" class="formButtonSmall" onclick="location.href='${editUrl}';" />
-		&nbsp; <input type="button" value="Test" class="formButtonSmall" onclick="location.href='${testUrl}';" />
 	</h3>
 	
 	<table id="permissionsTable">

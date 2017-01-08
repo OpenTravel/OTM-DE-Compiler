@@ -34,8 +34,3 @@
 <ul>
 	<li><h3><a href="${pageContext.request.contextPath}/console/adminSearchIndex.html">Refresh Free-Text Search Index</a></h3></li>
 </ul>
-<c:if test="${isDevelopmentRepository}">
-<ul>
-	<li><h3><a href="${pageContext.request.contextPath}/console/adminDeleteRepository.html">Delete Repository Contents (Development Only)</a></h3></li>
-</ul>
-</c:if>

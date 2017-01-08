@@ -15,29 +15,21 @@
  */
 package org.opentravel.schemacompiler.console;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionEventType;
-import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionTarget;
-import org.opentravel.schemacompiler.index.FreeTextSearchService;
-import org.opentravel.schemacompiler.index.FreeTextSearchServiceFactory;
-import org.opentravel.schemacompiler.index.SubscriptionSearchResult;
 import org.opentravel.schemacompiler.repository.RepositoryComponentFactory;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.security.RepositorySecurityException;
 import org.opentravel.schemacompiler.security.RepositorySecurityManager;
 import org.opentravel.schemacompiler.security.UserPrincipal;
-import org.opentravel.schemacompiler.subscription.SubscriptionManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * Controller that handles user interactions for login and logout operations.
@@ -52,24 +44,19 @@ public class LoginController extends BaseController {
     /**
      * Called by the Spring MVC controller to process a login request from a user.
      * 
-     * @param userId
-     *            the ID of the user to be authenticated
-     * @param password
-     *            the password credentials to be authenticated
-     * @param currentPageId
-     *            the current page being displayed at the time of the login request
-     * @param session
-     *            the HTTP session that contains information about an authenticated user
-     * @param model
-     *            the model context to be used when rendering the page view
+     * @param userId  the ID of the user to be authenticated
+     * @param password  the password credentials to be authenticated
+     * @param currentPageId  the current page being displayed at the time of the login request
+     * @param session  the HTTP session that contains information about an authenticated user
+     * @param model  the model context to be used when rendering the page view
+     * @param redirectAttrs  request attributes for the redirect in the case of a successful operation
      * @return String
      */
     @RequestMapping(method = RequestMethod.POST, value = { "/", "/login.html", "/login.htm" })
     public String login(@RequestParam("userid") String userId,
             @RequestParam("password") String password,
-            @RequestParam("currentPage") String currentPageId, HttpSession session, Model model) {
-        RepositorySecurityManager securityManager = RepositoryComponentFactory.getDefault()
-                .getSecurityManager();
+            HttpSession session, Model model, RedirectAttributes redirectAttrs) {
+        RepositorySecurityManager securityManager = RepositoryComponentFactory.getDefault().getSecurityManager();
         UserPrincipal user = null;
 
         if ((userId != null) && (userId.length() > 0) && (password != null)
@@ -85,49 +72,42 @@ public class LoginController extends BaseController {
         if ((user != null) && !user.getUserId().equals(UserPrincipal.ANONYMOUS_USER_ID)) {
             session.setAttribute("user", user);
             session.setAttribute("isAdminAuthorized", securityManager.isAdministrator(user));
-
+            return "redirect:/console/index.html";
+            
         } else { // authentication failed
             model.addAttribute("loginError", true);
             model.addAttribute("userId", userId);
+            return new SearchController().searchPage(null, false, false, session, model);
         }
-        new BrowseController().browsePage(null, null, session, model);
-        return applyCommonValues(model, ((currentPageId == null) ? "homePage" : currentPageId));
     }
 
     /**
      * Called by the Spring MVC controller to process a logout request from a user. This method
      * simply clears all user-related information from the current HTTP session.
      * 
-     * @param session
-     *            the HTTP session that contains information about an authenticated user
-     * @param model
-     *            the model context to be used when rendering the page view
+     * @param session  the HTTP session that contains information about an authenticated user
+     * @param model  the model context to be used when rendering the page view
+     * @param redirectAttrs  request attributes for the redirect in the case of a successful operation
      * @return String
      */
     @RequestMapping(method = RequestMethod.GET, value = { "/", "/logout.html", "/logout.htm" })
     public String logout(HttpSession session, Model model) {
         session.removeAttribute("user");
         session.removeAttribute("isAdminAuthorized");
-        new BrowseController().browsePage(null, null, session, model);
-        return applyCommonValues(model, "homePage");
+        return "redirect:/console/index.html";
     }
 
     /**
      * Called by the Spring MVC controller to display the application administration page used to
      * manage local user accounts.
      * 
-     * @param userId
-     *            the ID of the user account to add
-     * @param lastName
-     *            the last name for the user account to add
-     * @param firstName
-     *            the first name for the user account to add
-     * @param emailAddress
-     *            the email address for the user account to add
-     * @param session
-     *            the HTTP session that contains information about an authenticated user
-     * @param model
-     *            the model context to be used when rendering the page view
+     * @param userId  the ID of the user account to add
+     * @param lastName  the last name for the user account to add
+     * @param firstName  the first name for the user account to add
+     * @param emailAddress  the email address for the user account to add
+     * @param session  the HTTP session that contains information about an authenticated user
+     * @param model  the model context to be used when rendering the page view
+     * @param redirectAttrs  request attributes for the redirect in the case of a successful operation
      * @return String
      */
     @RequestMapping(value = { "/editUserProfile.html", "/editUserProfile.htm" })
@@ -136,7 +116,7 @@ public class LoginController extends BaseController {
             @RequestParam(value = "firstName", required = false) String firstName,
             @RequestParam(value = "emailAddress", required = false) String emailAddress,
             @RequestParam(value = "updateUser", required = false) boolean updateUser,
-            HttpSession session, Model model) {
+            HttpSession session, Model model, RedirectAttributes redirectAttrs) {
         boolean success = false;
         try {
             UserPrincipal currentUser = (UserPrincipal) session.getAttribute("user");
@@ -164,7 +144,7 @@ public class LoginController extends BaseController {
                 	currentUser.setEmailAddress( emailAddress );
                 	
                 	securityManager.updateUser( currentUser );
-                    setStatusMessage("User '" + userId + "' updated successfully.", model);
+                    setStatusMessage("User '" + userId + "' updated successfully.", redirectAttrs);
                     success = true;
                 }
                 if (!success) {
@@ -186,23 +166,19 @@ public class LoginController extends BaseController {
             setErrorMessage("Unable to update user profile.", model);
             log.error("Unable to update user profile.", e);
         }
-        return applyCommonValues(model, success ? "homePage" : "editUserProfile");
+        return success ? "redirect:/console/index.html" : applyCommonValues(model, "editUserProfile");
     }
 
     /**
      * Called by the Spring MVC controller to display the application administration page used to
      * manage local user accounts.
      * 
-     * @param oldPassword
-     *            the old password for the user
-     * @param newPassword
-     *            the new password for the user
-     * @param newPasswordConfirm
-     *            the confirmation of the new password for the user
-     * @param session
-     *            the HTTP session that contains information about an authenticated user
-     * @param model
-     *            the model context to be used when rendering the page view
+     * @param oldPassword  the old password for the user
+     * @param newPassword  the new password for the user
+     * @param newPasswordConfirm  the confirmation of the new password for the user
+     * @param session  the HTTP session that contains information about an authenticated user
+     * @param model  the model context to be used when rendering the page view
+     * @param redirectAttrs  request attributes for the redirect in the case of a successful operation
      * @return String
      */
     @RequestMapping(value = { "/changePassword.html", "/changePassword.htm" })
@@ -210,7 +186,7 @@ public class LoginController extends BaseController {
             @RequestParam(value = "oldPassword", required = false) String oldPassword,
             @RequestParam(value = "newPassword", required = false) String newPassword,
             @RequestParam(value = "newPasswordConfirm", required = false) String newPasswordConfirm,
-            HttpSession session, Model model) {
+            HttpSession session, Model model, RedirectAttributes redirectAttrs) {
         boolean success = false;
         try {
             UserPrincipal currentUser = (UserPrincipal) session.getAttribute("user");
@@ -242,7 +218,7 @@ public class LoginController extends BaseController {
                         // throws an exception if the old password is not valid
                         securityManager.authenticateUser(currentUser.getUserId(), oldPassword);
                         securityManager.setUserPassword(currentUser.getUserId(), newPassword);
-                        setStatusMessage("Your password has been changed.", model);
+                        setStatusMessage("Your password has been changed.", redirectAttrs);
                         success = true;
 
                     } catch (RepositorySecurityException e) {
@@ -258,229 +234,7 @@ public class LoginController extends BaseController {
         if (success) {
             new BrowseController().browsePage(null, null, session, model);
         }
-        return applyCommonValues(model, success ? "homePage" : "changePassword");
-    }
-    
-    /**
-     * Called by the Spring MVC controller to display a consolidated list of subscriptions
-     * for the current user.
-     * 
-     * @param session  the HTTP session that contains information about an authenticated user
-     * @param model  the model context to be used when rendering the page view
-     * @return String
-     */
-    @RequestMapping({ "/subscriptions.html", "/subscriptions.htm" })
-    public String viewSubscriptions(HttpSession session, Model model) {
-        try {
-            UserPrincipal user = getCurrentUser(session);
-        	List<SubscriptionSearchResult> subscriptions;
-        	
-            if (user != null) {
-            	FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
-            	subscriptions = searchService.getSubscriptions( user.getUserId() );
-            } else {
-            	subscriptions = new ArrayList<>();
-            }
-            model.addAttribute("user", user);
-            model.addAttribute("subscriptions", subscriptions);
-            
-        } catch (Throwable t) {
-            log.error("An error occured while displaying the subscriptions page.", t);
-            setErrorMessage("An error occured while displaying the page (see server log for details).", model);
-        }
-        return applyCommonValues(model, "subscriptions");
-    }
-
-    /**
-     * Called by the Spring MVC controller to display the page used to edit a user's subscription
-     * to namespace events.
-     * 
-     * @param ns  the namespace for which to edit the user's subscription
-     * @param session  the HTTP session that contains information about an authenticated user
-     * @param model  the model context to be used when rendering the page view
-     * @return String
-     */
-    @RequestMapping(value = { "/namespaceSubscription.html", "/namespaceSubscription.htm" })
-    public String namespaceSubscription(
-            @RequestParam(value = "baseNamespace", required = false) String baseNamespace,
-            @RequestParam(value = "cts", required = false) boolean cancelToSubscriptionPage,
-            @RequestParam(value = "etLibraryPublish", required = false) boolean etLibraryPublish,
-            @RequestParam(value = "etLibraryNewVersion", required = false) boolean etLibraryNewVersion,
-            @RequestParam(value = "etLibraryStatusChange", required = false) boolean etLibraryStatusChange,
-            @RequestParam(value = "etLibraryStateChange", required = false) boolean etLibraryStateChange,
-            @RequestParam(value = "etLibraryCommit", required = false) boolean etLibraryCommit,
-            @RequestParam(value = "etLibraryMoveOrRename", required = false) boolean etLibraryMoveOrRename,
-            @RequestParam(value = "etNamespaceAction", required = false) boolean etNamespaceAction,
-            @RequestParam(value = "updateSubscription", required = false) boolean updateSubscription,
-            HttpSession session, Model model) {
-    	String targetPage = "namespaceSubscription";
-        boolean success = false;
-        try {
-        	SubscriptionManager subscriptionManager = RepositoryComponentFactory.getDefault().getSubscriptionManager();
-            UserPrincipal currentUser = (UserPrincipal) session.getAttribute("user");
-            
-            if (currentUser == null) {
-                setErrorMessage("You must be logged in to edit your subscription settings.", model);
-                
-            } else if (baseNamespace == null) {
-                setErrorMessage("Unable to edit subscription settings - namespace not specified.", model);
-                targetPage = new BrowseController().browsePage(null, null, session, model);
-                
-            } else if (updateSubscription) {
-            	List<SubscriptionEventType> eventTypes = new ArrayList<>();
-            	
-                if (etLibraryPublish) eventTypes.add( SubscriptionEventType.LIBRARY_PUBLISH );
-                if (etLibraryNewVersion) eventTypes.add( SubscriptionEventType.LIBRARY_NEW_VERSION );
-                if (etLibraryStatusChange) eventTypes.add( SubscriptionEventType.LIBRARY_STATUS_CHANGE );
-                if (etLibraryStateChange) eventTypes.add( SubscriptionEventType.LIBRARY_STATE_CHANGE );
-                if (etLibraryCommit) eventTypes.add( SubscriptionEventType.LIBRARY_COMMIT );
-                if (etLibraryMoveOrRename) eventTypes.add( SubscriptionEventType.LIBRARY_MOVE_OR_RENAME );
-                if (etNamespaceAction) eventTypes.add( SubscriptionEventType.NAMESPACE_ACTION );
-                subscriptionManager.updateNamespaceSubscriptions(
-                		baseNamespace, currentUser.getUserId(), eventTypes );
-            	success = true;
-            	
-            } else {
-            	List<SubscriptionEventType> eventTypes =
-            			subscriptionManager.getNamespaceSubscriptions( baseNamespace, currentUser.getUserId() );
-            	
-                etLibraryPublish = eventTypes.contains( SubscriptionEventType.LIBRARY_PUBLISH );
-                etLibraryNewVersion = eventTypes.contains( SubscriptionEventType.LIBRARY_NEW_VERSION );
-                etLibraryStatusChange = eventTypes.contains( SubscriptionEventType.LIBRARY_STATUS_CHANGE );
-                etLibraryStateChange = eventTypes.contains( SubscriptionEventType.LIBRARY_STATE_CHANGE );
-                etLibraryCommit = eventTypes.contains( SubscriptionEventType.LIBRARY_COMMIT );
-                etLibraryMoveOrRename = eventTypes.contains( SubscriptionEventType.LIBRARY_MOVE_OR_RENAME );
-                etNamespaceAction = eventTypes.contains( SubscriptionEventType.NAMESPACE_ACTION );
-            }
-            model.addAttribute("baseNamespace", baseNamespace);
-            model.addAttribute("cts", cancelToSubscriptionPage);
-            model.addAttribute("etLibraryPublish", etLibraryPublish);
-            model.addAttribute("etLibraryNewVersion", etLibraryNewVersion);
-            model.addAttribute("etLibraryStatusChange", etLibraryStatusChange);
-            model.addAttribute("etLibraryStateChange", etLibraryStateChange);
-            model.addAttribute("etLibraryCommit", etLibraryCommit);
-            model.addAttribute("etLibraryMoveOrRename", etLibraryMoveOrRename);
-            model.addAttribute("etNamespaceAction", etNamespaceAction);
-            
-        } catch (RepositoryException e) {
-            setErrorMessage("Error updating namespace subscription settings - please contact your system administrator.", model);
-            log.error("Error updating namespace subscription settings.", e);
-        }
-        if (success) {
-        	setStatusMessage("Subscription settings updated successfully.", model);
-        	
-        	if (cancelToSubscriptionPage) {
-        		// Wait for changes to propagage through the indexing process before redisplaying
-        		// the subscriptions page.  This is a hack, but good enough for now.
-        		try {
-        			Thread.sleep(1000);
-        		} catch (InterruptedException e) {}
-                targetPage = viewSubscriptions(session, model);
-        	} else {
-                targetPage = new BrowseController().browsePage(baseNamespace, null, session, model);
-        	}
-        }
-        return applyCommonValues(model, targetPage);
-    }
-    
-    /**
-     * Called by the Spring MVC controller to display the page used to edit a user's subscription
-     * to namespace events.
-     * 
-     * @param ns  the namespace for which to edit the user's subscription
-     * @param session  the HTTP session that contains information about an authenticated user
-     * @param model  the model context to be used when rendering the page view
-     * @return String
-     */
-    @RequestMapping(value = { "/librarySubscription.html", "/librarySubscription.htm" })
-    public String librarySubscription(
-            @RequestParam(value = "baseNamespace", required = false) String baseNamespace,
-            @RequestParam(value = "libraryName", required = false) String libraryName,
-            @RequestParam(value = "version", required = false) String version,
-            @RequestParam(value = "filename", required = false) String filename,
-            @RequestParam(value = "allVersions", required = false) boolean allVersions,
-            @RequestParam(value = "etLibraryPublish", required = false) boolean etLibraryPublish,
-            @RequestParam(value = "etLibraryNewVersion", required = false) boolean etLibraryNewVersion,
-            @RequestParam(value = "etLibraryStatusChange", required = false) boolean etLibraryStatusChange,
-            @RequestParam(value = "etLibraryStateChange", required = false) boolean etLibraryStateChange,
-            @RequestParam(value = "etLibraryCommit", required = false) boolean etLibraryCommit,
-            @RequestParam(value = "etLibraryMoveOrRename", required = false) boolean etLibraryMoveOrRename,
-            @RequestParam(value = "updateSubscription", required = false) boolean updateSubscription,
-            HttpSession session, Model model) {
-    	String targetPage = "librarySubscription";
-        boolean success = false;
-        try {
-        	SubscriptionManager subscriptionManager = RepositoryComponentFactory.getDefault().getSubscriptionManager();
-        	SubscriptionTarget sTarget = SubscriptionManager.getSubscriptionTarget( baseNamespace, libraryName, version );
-            UserPrincipal currentUser = (UserPrincipal) session.getAttribute("user");
-        	
-        	sTarget.setBaseNamespace( baseNamespace );
-        	sTarget.setLibraryName( libraryName );
-        	sTarget.setVersion( version );
-            
-            if (currentUser == null) {
-                setErrorMessage("You must be logged in to edit your subscription settings.", model);
-                
-            } else if ((baseNamespace == null) || (libraryName == null)) {
-                setErrorMessage("Unable to edit subscription settings - library information not specified.", model);
-                targetPage = new BrowseController().browsePage(null, null, session, model);
-                
-            } else if (updateSubscription) {
-            	List<SubscriptionEventType> eventTypes = new ArrayList<>();
-            	
-                if (etLibraryPublish) eventTypes.add( SubscriptionEventType.LIBRARY_PUBLISH );
-                if (etLibraryNewVersion) eventTypes.add( SubscriptionEventType.LIBRARY_NEW_VERSION );
-                if (etLibraryStatusChange) eventTypes.add( SubscriptionEventType.LIBRARY_STATUS_CHANGE );
-                if (etLibraryStateChange) eventTypes.add( SubscriptionEventType.LIBRARY_STATE_CHANGE );
-                if (etLibraryCommit) eventTypes.add( SubscriptionEventType.LIBRARY_COMMIT );
-                if (etLibraryMoveOrRename) eventTypes.add( SubscriptionEventType.LIBRARY_MOVE_OR_RENAME );
-                
-                if (allVersions) {
-                    subscriptionManager.updateAllVersionsSubscriptions( sTarget, currentUser.getUserId(), eventTypes );
-                	
-                } else {
-                    subscriptionManager.updateSingleVersionSubscriptions( sTarget, currentUser.getUserId(), eventTypes );
-                }
-            	success = true;
-            	
-            } else {
-            	List<SubscriptionEventType> eventTypes;
-            	
-            	if (allVersions) {
-                	eventTypes = subscriptionManager.getAllVersionsSubscriptions( sTarget, currentUser.getUserId() );
-                	
-            	} else {
-                	eventTypes = subscriptionManager.getSingleVersionSubscriptions( sTarget, currentUser.getUserId() );
-            	}
-            	
-                etLibraryPublish = eventTypes.contains( SubscriptionEventType.LIBRARY_PUBLISH );
-                etLibraryNewVersion = eventTypes.contains( SubscriptionEventType.LIBRARY_NEW_VERSION );
-                etLibraryStatusChange = eventTypes.contains( SubscriptionEventType.LIBRARY_STATUS_CHANGE );
-                etLibraryStateChange = eventTypes.contains( SubscriptionEventType.LIBRARY_STATE_CHANGE );
-                etLibraryCommit = eventTypes.contains( SubscriptionEventType.LIBRARY_COMMIT );
-                etLibraryMoveOrRename = eventTypes.contains( SubscriptionEventType.LIBRARY_MOVE_OR_RENAME );
-            }
-            model.addAttribute("baseNamespace", baseNamespace);
-            model.addAttribute("libraryName", libraryName);
-            model.addAttribute("version", version);
-            model.addAttribute("filename", filename);
-            model.addAttribute("allVersions", allVersions);
-            model.addAttribute("etLibraryPublish", etLibraryPublish);
-            model.addAttribute("etLibraryNewVersion", etLibraryNewVersion);
-            model.addAttribute("etLibraryStatusChange", etLibraryStatusChange);
-            model.addAttribute("etLibraryStateChange", etLibraryStateChange);
-            model.addAttribute("etLibraryCommit", etLibraryCommit);
-            model.addAttribute("etLibraryMoveOrRename", etLibraryMoveOrRename);
-            
-        } catch (RepositoryException e) {
-            setErrorMessage("Error updating namespace subscription settings - please contact your system administrator.", model);
-            log.error("Error updating namespace subscription settings.", e);
-        }
-        if (success) {
-        	setStatusMessage("Subscription settings updated successfully.", model);
-        	targetPage = new ViewItemController().libraryInfo(baseNamespace, filename, version, session, model);
-        }
-        return applyCommonValues(model, targetPage);
+        return success ? "redirect:/console/index.html" : applyCommonValues(model, "changePassword");
     }
     
 }

@@ -526,8 +526,15 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
 					if (context == null) {
 						context = openConnection( connectionPrincipal, connectionPassword );
 					}
-					refreshUserInfo( userInfo, context );
-					profileCacheTimeouts.put( userId, System.currentTimeMillis() + authenticationCacheTimeout );
+					try {
+						refreshUserInfo( userInfo, context );
+						
+					} catch (NamingException e) {
+						log.warn( "Error refreshing user information from directory.", e );
+						
+					} finally {
+						profileCacheTimeouts.put( userId, System.currentTimeMillis() + authenticationCacheTimeout );
+					}
 				}
 			}
 			
@@ -560,7 +567,7 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
 			}
 			
 			if (userDn == null) {
-				throw new NamingException( "User account does not exist in the directory: " + userId );
+				log.warn( "User account does not exist in the directory: " + userId );
 				
 			} else { // Make sure the account profile fields are populated from the directory
 				String contextDnSuffix = "," + context.getNameInNamespace();

@@ -179,11 +179,6 @@
 		<put-attribute name="pageTitle" value="Refresh Free-Text Search Index" />
 		<put-attribute name="body" value="/WEB-INF/console/adminSearchIndex.jsp" />
 	</definition>
-	<definition name="adminDeleteRepository" extends="baseLayout">
-		<put-attribute name="title" value="OTA2.0 Repository - Delete Repository (DEVELOPMENT)" />
-		<put-attribute name="pageTitle" value="Delete Repository Contents (Development Only)" />
-		<put-attribute name="body" value="/WEB-INF/console/adminDeleteRepository.jsp" />
-	</definition>
 	<definition name="adminDeleteItem" extends="baseLayout">
 		<put-attribute name="title" value="OTA2.0 Repository - Delete Repository Item" />
 		<put-attribute name="pageTitle" value="Delete Repository Item" />

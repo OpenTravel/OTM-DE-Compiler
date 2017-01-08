@@ -41,7 +41,6 @@ public class RepositoryComponentFactory {
     private static final String SECURITY_MANAGER_KEY = "securityManager";
     private static final String SUBSCRIPTION_MANAGER_KEY = "subscriptionManager";
     private static final String AUTHENTICATION_PROVIDER_KEY = "authenticationProvider";
-    private static final String DEVELOPMENT_REPOSITORY_KEY = "developmentRepository";
     private static final String INDEXING_JMS_SERVICE_KEY = "indexingJmsService";
 
     private static RepositoryComponentFactory defaultInstance;
@@ -191,16 +190,6 @@ public class RepositoryComponentFactory {
     		// Ignore - subscription manager is an optional component
     	}
     	return manager;
-    }
-
-    /**
-     * Returns true if the managed repository has been designated as a development instance.
-     * 
-     * @return boolean
-     */
-    public boolean isDevelopmentRepository() {
-        return appContext.containsBean(DEVELOPMENT_REPOSITORY_KEY) ? (Boolean) appContext
-                .getBean(DEVELOPMENT_REPOSITORY_KEY) : false;
     }
 
     /**
