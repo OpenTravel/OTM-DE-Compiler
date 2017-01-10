@@ -82,7 +82,7 @@ public class ProjectItemDependencyNavigator extends DependencyNavigator {
         for (AbstractLibrary previousLibraryVersion : previousLibraryVersions) {
             if ((!visitedLibraries.contains(previousLibraryVersion))
                     && (previousLibraryVersion instanceof TLLibrary)) {
-                visitor.visitUserDefinedLibrary((TLLibrary) previousLibraryVersion);
+            	super.navigateLibrary((TLLibrary) previousLibraryVersion);
             }
         }
         super.navigateLibrary(library);
