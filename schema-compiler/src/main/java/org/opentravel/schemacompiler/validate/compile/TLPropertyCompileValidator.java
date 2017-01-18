@@ -15,8 +15,11 @@
  */
 package org.opentravel.schemacompiler.validate.compile;
 
+import java.util.List;
+
 import javax.xml.XMLConstants;
 
+import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegate;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
@@ -29,6 +32,7 @@ import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
@@ -54,6 +58,8 @@ import org.opentravel.schemacompiler.validate.impl.DuplicateFieldChecker;
 import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
 import org.opentravel.schemacompiler.validate.impl.UPAViolationChecker;
 import org.opentravel.schemacompiler.validate.impl.ValidatorUtils;
+import org.opentravel.schemacompiler.version.MinorVersionHelper;
+import org.opentravel.schemacompiler.version.VersionSchemeException;
 import org.opentravel.schemacompiler.version.Versioned;
 
 /**
@@ -77,6 +83,7 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
     public static final String WARNING_INVALID_REFERENCE_NAME = "INVALID_REFERENCE_NAME";
     public static final String WARNING_ILLEGAL_BUSINESS_OBJECT_ID = "ILLEGAL_BUSINESS_OBJECT_ID";
     public static final String WARNING_ILLEGAL_CORE_OBJECT_ID = "ILLEGAL_CORE_OBJECT_ID";
+    public static final String WARNING_ILLEGAL_CHOICE_OBJECT_ID = "ILLEGAL_CHOICE_OBJECT_ID";
 
     /**
      * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateFields(org.opentravel.schemacompiler.validate.Validatable)
@@ -117,6 +124,10 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
         		if (facet.getFacetType() != TLFacetType.SUMMARY) {
                     builder.addFinding(FindingType.WARNING, "type", WARNING_ILLEGAL_CORE_OBJECT_ID);
         		}
+        	} else if (facetOwner instanceof TLChoiceObject) {
+        		if (facet.getFacetType() != TLFacetType.SHARED) {
+                    builder.addFinding(FindingType.WARNING, "type", WARNING_ILLEGAL_CHOICE_OBJECT_ID);
+        		}
         	}
         }
 
@@ -154,11 +165,31 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
             }
         }
 
-        // Verify that properties of minor version extension are optional
+        // Verify that properties of minor version extension are optional (with one exception - see below)
         if (target.isMandatory() && isVersionExtension(getVersionedOwner(target))) {
-            builder.addFinding(FindingType.ERROR, "mandatory", ERROR_ILLEGAL_REQUIRED_ELEMENT);
+    		TLProperty eclipsedProperty = getEclipsedProperty( target );
+    		boolean isSpecialCase = false;
+    		
+    		// Mandatory elements are allowed on minor version extensions if the only change was to a
+    		// later version of the element's type.
+    		if ((eclipsedProperty != null) && (eclipsedProperty.getType() instanceof Versioned)) {
+    			try {
+        			Versioned priorVersionType = (Versioned) eclipsedProperty.getType();
+    				List<Versioned> laterMinorVersions =
+    						new MinorVersionHelper().getLaterMinorVersions( priorVersionType );
+        			
+    				isSpecialCase = laterMinorVersions.contains( propertyType );
+    				
+    			} catch (VersionSchemeException e) {
+    				// No error - assume not a special case and move on
+    			}
+    		}
+    		
+    		if (!isSpecialCase) {
+                builder.addFinding(FindingType.ERROR, "mandatory", ERROR_ILLEGAL_REQUIRED_ELEMENT);
+    		}
         }
-
+        
         // A warning will be issued for boolean properties (should be indicators)
         if (ValidatorUtils.isBooleanType(propertyType)) {
             builder.addFinding(FindingType.WARNING, "type", WARNING_BOOLEAN_TYPE_REFERENCE);
@@ -385,5 +416,36 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
         }
         return owner;
     }
-
+    
+    /**
+     * Returns the property that is eclipsed by the given target element.  If the property's
+     * owner is not a version extension or the target property does not eclipse an inherited
+     * element, this method will return null.
+     * 
+     * @param target  the target element for which to return the eclipsed property
+     * @return TLProperty
+     */
+    private TLProperty getEclipsedProperty(TLProperty target) {
+    	TLProperty eclipsedProperty = null;
+    	
+    	if (target.getOwner() instanceof TLFacet) {
+    		TLFacet targetFacet = (TLFacet) target.getOwner();
+			String facetName = (targetFacet instanceof TLContextualFacet) ?
+					((TLContextualFacet) targetFacet).getName() : null;
+    		TLFacetOwner targetOwner = targetFacet.getOwningEntity();
+    		TLFacetOwner extendedOwner = FacetCodegenUtils.getFacetOwnerExtension( targetOwner );
+    		
+    		while ((eclipsedProperty == null) && (extendedOwner != null)) {
+        		TLFacet priorVersionFacet = FacetCodegenUtils.getFacetOfType(
+        				extendedOwner, targetFacet.getFacetType(), facetName );
+        		
+        		if (priorVersionFacet != null) {
+        			eclipsedProperty = priorVersionFacet.getElement( target.getName() );
+        		}
+        		extendedOwner = FacetCodegenUtils.getFacetOwnerExtension( extendedOwner );
+    		}
+    	}
+    	return eclipsedProperty;
+    }
+    
 }

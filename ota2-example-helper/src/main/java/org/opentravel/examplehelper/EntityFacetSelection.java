@@ -59,13 +59,20 @@ public class EntityFacetSelection {
 		List<TLFacet> facetList = null;
 		
 		this.entityType = entityType;
+		this.facetNames = new ArrayList<>();
 		
 		if (realEntityType instanceof TLAlias) {
 			realEntityType = ((TLAlias) realEntityType).getOwningEntity();
 		}
 		
-		if (realEntityType instanceof TLFacetOwner) {
-			this.facetOwner = (TLFacetOwner) realEntityType;
+		if (realEntityType instanceof TLFacet) {
+			// If the entity is a facet, then it will be the only member of the facet list
+			TLFacet facet = (TLFacet) realEntityType;
+			String facetName = HelperUtils.getDisplayName( facet, false );
+			
+			facetList = Arrays.asList( facet );
+			facetNames = Arrays.asList( facetName );
+			facetsByName.put( facetName, facet );
 			
 		} else if (realEntityType instanceof TLActionFacet) {
 			NamedEntity basePayload = ((TLActionFacet) realEntityType).getBasePayload();
@@ -74,14 +81,8 @@ public class EntityFacetSelection {
 				this.facetOwner = (TLFacetOwner) basePayload;
 			}
 			
-		} else if (realEntityType instanceof TLFacet) {
-			// If the entity is a facet, then it will be the only member of the facet list
-			TLFacet facet = (TLFacet) realEntityType;
-			String facetName = HelperUtils.getDisplayName( facet, false );
-			
-			facetList = Arrays.asList( facet );
-			facetNames = Arrays.asList( facetName );
-			facetsByName.put( facetName, facet );
+		} else if (realEntityType instanceof TLFacetOwner) {
+			this.facetOwner = (TLFacetOwner) realEntityType;
 		}
 		
 		// Retrieve the facet list based upon the entity type
@@ -100,8 +101,6 @@ public class EntityFacetSelection {
 		
 		// If facets were found, add them to the configuration for this selection instance
 		if ((facetOwner != null) && (facetList != null) && (facetList.size() > 0)) {
-			this.facetNames = new ArrayList<>();
-			
 			for (TLFacet facet : facetList) {
 				String facetName = HelperUtils.getDisplayName( facet, false );
 				
@@ -198,9 +197,6 @@ public class EntityFacetSelection {
 	public String getFacetName(TLFacet facet) {
 		String facetName = null;
 		
-		if (facetNames == null) {
-			System.out.println("BREAKPOINT");
-		}
 		for (String fn : facetNames) {
 			if (facet == facetsByName.get( fn )) {
 				facetName = fn;
