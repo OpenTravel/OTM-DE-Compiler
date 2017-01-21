@@ -20,6 +20,7 @@ import java.util.List;
 import org.opentravel.ns.ota2.security_v01_00.RepositoryPermission;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
+import org.opentravel.schemacompiler.repository.RepositorySecurityException;
 
 /**
  * Provides all authentication and authorization services required for secure operation of the

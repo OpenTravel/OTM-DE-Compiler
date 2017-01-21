@@ -30,9 +30,9 @@ import org.opentravel.ns.ota2.security_v01_00.AuthorizationSpec;
 import org.opentravel.ns.ota2.security_v01_00.NamespaceAuthorizations;
 import org.opentravel.ns.ota2.security_v01_00.RepositoryPermission;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
+import org.opentravel.schemacompiler.repository.RepositorySecurityException;
 import org.opentravel.schemacompiler.security.AuthorizationProvider;
 import org.opentravel.schemacompiler.security.AuthorizationResource;
-import org.opentravel.schemacompiler.security.RepositorySecurityException;
 import org.opentravel.schemacompiler.security.UserPrincipal;
 
 /**

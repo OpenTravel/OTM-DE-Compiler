@@ -70,7 +70,6 @@ import org.opentravel.schemacompiler.lock.RepositoryLockManager;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.impl.RepositoryItemImpl;
 import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
-import org.opentravel.schemacompiler.security.RepositorySecurityException;
 import org.opentravel.schemacompiler.security.RepositorySecurityManager;
 import org.opentravel.schemacompiler.security.UserPrincipal;
 import org.opentravel.schemacompiler.version.VersionScheme;

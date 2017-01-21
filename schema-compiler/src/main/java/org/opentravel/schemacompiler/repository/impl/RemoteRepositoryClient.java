@@ -85,6 +85,7 @@ import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.repository.RepositoryNamespaceUtils;
 import org.opentravel.schemacompiler.repository.RepositoryOutOfSyncException;
 import org.opentravel.schemacompiler.repository.RepositorySearchResult;
+import org.opentravel.schemacompiler.repository.RepositorySecurityException;
 import org.opentravel.schemacompiler.repository.RepositoryUnavailableException;
 import org.opentravel.schemacompiler.security.PasswordHelper;
 import org.opentravel.schemacompiler.version.VersionScheme;
@@ -131,8 +132,6 @@ public class RemoteRepositoryClient implements RemoteRepository {
     private static final String ENTITY_WHERE_USED_ENDPOINT = SERVICE_CONTEXT + "/entity-where-used";
     private static final String ENTITY_WHERE_EXTENDED_ENDPOINT = SERVICE_CONTEXT + "/entity-where-extended";
 
-    private static final int HTTP_RESPONSE_STATUS_OK = 200;
-
     private static final DateFormat dateOnlyFormat = new SimpleDateFormat("dd-MM-yyyy");
 
     private static Log log = LogFactory.getLog(RemoteRepositoryClient.class);
@@ -171,16 +170,29 @@ public class RemoteRepositoryClient implements RemoteRepository {
 
     /**
      * Applies the user's credentials to the given request and sends the request to
-     * the remote repository.
+     * the remote repository.  If the response is returned from this method, the caller
+     * can assume that the remote operation did not result in an error.
      * 
      * @param request  the request to send to the remote repository
      * @return HttpResponse
+     * @throws RepositoryException  thrown if an error response is received from the remote server
      * @throws ClientProtocolException  thrown if an error occurs in the HTTP protocol
      * @throws IOException  thrown if an error occurs during request execution
      */
     private HttpResponse executeWithAuthentication(HttpUriRequest request)
-            throws ClientProtocolException, IOException {
-        return createHttpClient().execute(request, createHttpContext());
+            throws RepositoryException, ClientProtocolException, IOException {
+    	HttpResponse response = createHttpClient().execute(request, createHttpContext());
+    	int statusCode = response.getStatusLine().getStatusCode();
+    	
+        if ((statusCode < 200) || (statusCode > 299)) {
+        	if (statusCode == 401) {
+                throw new RepositorySecurityException(
+                		"User is not authorized to perform the requested action (check for out of date credentials).");
+        	} else {
+                throw new RepositoryException(getResponseErrorMessage(response));
+        	}
+        }
+    	return response;
     }
 
     /**
@@ -366,10 +378,6 @@ public class RemoteRepositoryClient implements RemoteRepository {
             HttpGet request = newGetRequest(NAMESPACE_CHILDREN_ENDPOINT, new HttpGetParam(
                     "baseNamespace", baseNS));
             HttpResponse response = executeWithAuthentication(request);
-
-            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                throw new RepositoryException(getResponseErrorMessage(response));
-            }
             Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext()
                     .createUnmarshaller();
             JAXBElement<NamespaceListType> jaxbElement = (JAXBElement<NamespaceListType>) unmarshaller
@@ -396,10 +404,6 @@ public class RemoteRepositoryClient implements RemoteRepository {
         try {
             HttpGet request = newGetRequest(BASE_NAMSPACES_ENDPOINT);
             HttpResponse response = executeWithAuthentication(request);
-
-            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                throw new RepositoryException(getResponseErrorMessage(response));
-            }
             Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext()
                     .createUnmarshaller();
             JAXBElement<NamespaceListType> jaxbElement = (JAXBElement<NamespaceListType>) unmarshaller
@@ -426,10 +430,6 @@ public class RemoteRepositoryClient implements RemoteRepository {
         try {
             HttpGet request = newGetRequest(ALL_NAMSPACES_ENDPOINT);
             HttpResponse response = executeWithAuthentication(request);
-
-            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                throw new RepositoryException(getResponseErrorMessage(response));
-            }
             Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext()
                     .createUnmarshaller();
             JAXBElement<NamespaceListType> jaxbElement = (JAXBElement<NamespaceListType>) unmarshaller
@@ -469,10 +469,6 @@ public class RemoteRepositoryClient implements RemoteRepository {
             request.setEntity(new StringEntity(xmlWriter.toString(), ContentType.TEXT_XML));
 
             HttpResponse response = executeWithAuthentication(request);
-
-            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                throw new RepositoryException(getResponseErrorMessage(response));
-            }
             Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext()
                     .createUnmarshaller();
             JAXBElement<LibraryInfoListType> jaxbElement = (JAXBElement<LibraryInfoListType>) unmarshaller
@@ -517,10 +513,6 @@ public class RemoteRepositoryClient implements RemoteRepository {
             request.setEntity(new StringEntity(xmlWriter.toString(), ContentType.TEXT_XML));
 
             HttpResponse response = executeWithAuthentication(request);
-
-            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                throw new RepositoryException(getResponseErrorMessage(response));
-            }
             Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
             JAXBElement<LibraryInfoListType> jaxbElement = (JAXBElement<LibraryInfoListType>)
             		unmarshaller.unmarshal(response.getEntity().getContent());
@@ -555,10 +547,6 @@ public class RemoteRepositoryClient implements RemoteRepository {
                     freeTextQuery), new HttpGetParam("latestVersion", latestVersionsOnly + ""),
                     new HttpGetParam("includeDraft", includeDraftVersions + ""));
             HttpResponse response = executeWithAuthentication(request);
-
-            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                throw new RepositoryException(getResponseErrorMessage(response));
-            }
             Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
             JAXBElement<LibraryInfoListType> jaxbElement = (JAXBElement<LibraryInfoListType>) unmarshaller
                     .unmarshal(response.getEntity().getContent());
@@ -600,10 +588,6 @@ public class RemoteRepositoryClient implements RemoteRepository {
         	
             HttpGet request = newGetRequest( SEARCH2_ENDPOINT, paramList.toArray( new HttpGetParam[ paramList.size() ] ) );
             HttpResponse response = executeWithAuthentication( request );
-
-            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                throw new RepositoryException( getResponseErrorMessage( response ) );
-            }
             Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
             JAXBElement<SearchResultsListType> jaxbElement = (JAXBElement<SearchResultsListType>) unmarshaller
                     .unmarshal( response.getEntity().getContent() );
@@ -651,10 +635,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
             // Send the web service request and unmarshall the updated meta-data from the response
             log.info("Sending version history request to HTTP endpoint: " + endpointUrl);
             HttpResponse response = executeWithAuthentication(request);
-
-            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                throw new RepositoryException(getResponseErrorMessage(response));
-            }
+            
             log.info("Version history response received - Status OK");
 
             Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext()
@@ -769,10 +750,6 @@ public class RemoteRepositoryClient implements RemoteRepository {
             request.setEntity(new StringEntity(xmlWriter.toString(), ContentType.TEXT_XML));
 
             HttpResponse response = executeWithAuthentication(request);
-
-            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                throw new RepositoryException(getResponseErrorMessage(response));
-            }
             Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
             JAXBElement<LibraryHistoryType> jaxbElement = (JAXBElement<LibraryHistoryType>) unmarshaller
                     .unmarshal(response.getEntity().getContent());
@@ -803,10 +780,6 @@ public class RemoteRepositoryClient implements RemoteRepository {
             request.setEntity(new StringEntity(xmlWriter.toString(), ContentType.TEXT_XML));
 
             HttpResponse response = executeWithAuthentication(request);
-
-            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                throw new RepositoryException(getResponseErrorMessage(response));
-            }
             Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
             JAXBElement<LibraryInfoListType> jaxbElement = (JAXBElement<LibraryInfoListType>) unmarshaller
                     .unmarshal(response.getEntity().getContent());
@@ -845,10 +818,6 @@ public class RemoteRepositoryClient implements RemoteRepository {
             request.setEntity(new StringEntity(xmlWriter.toString(), ContentType.TEXT_XML));
 
             HttpResponse response = executeWithAuthentication(request);
-
-            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                throw new RepositoryException(getResponseErrorMessage(response));
-            }
             Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
             JAXBElement<EntityInfoListType> jaxbElement = (JAXBElement<EntityInfoListType>) unmarshaller
                     .unmarshal(response.getEntity().getContent());
@@ -883,10 +852,6 @@ public class RemoteRepositoryClient implements RemoteRepository {
             request.setEntity(new StringEntity(xmlWriter.toString(), ContentType.TEXT_XML));
 
             HttpResponse response = executeWithAuthentication(request);
-
-            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                throw new RepositoryException(getResponseErrorMessage(response));
-            }
             Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
             JAXBElement<EntityInfoListType> jaxbElement = (JAXBElement<EntityInfoListType>) unmarshaller
                     .unmarshal(response.getEntity().getContent());
@@ -920,10 +885,6 @@ public class RemoteRepositoryClient implements RemoteRepository {
             // Send the web service request and check the response
             log.info("Sending user-authorization request to HTTP endpoint: " + endpointUrl);
             HttpResponse response = executeWithAuthentication(request);
-
-            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                throw new RepositoryException(getResponseErrorMessage(response));
-            }
             Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext()
                     .createUnmarshaller();
             JAXBElement<RepositoryPermissionType> jaxbElement = (JAXBElement<RepositoryPermissionType>) unmarshaller
@@ -949,10 +910,6 @@ public class RemoteRepositoryClient implements RemoteRepository {
         try {
             HttpGet request = newGetRequest(LOCKED_ITEMS_ENDPOINT);
             HttpResponse response = executeWithAuthentication(request);
-
-            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                throw new RepositoryException(getResponseErrorMessage(response));
-            }
             Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
             JAXBElement<LibraryInfoListType> jaxbElement = (JAXBElement<LibraryInfoListType>) unmarshaller
                     .unmarshal(response.getEntity().getContent());
@@ -986,11 +943,8 @@ public class RemoteRepositoryClient implements RemoteRepository {
 
             // Send the web service request and check the response
             log.info("Sending create-root-namespace request to HTTP endpoint: " + endpointUrl);
-            HttpResponse response = executeWithAuthentication(request);
+            executeWithAuthentication(request);
 
-            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                throw new RepositoryException(getResponseErrorMessage(response));
-            }
             refreshRepositoryMetadata();
             log.info("Create-root-namespace response received - Status OK");
 
@@ -1011,11 +965,8 @@ public class RemoteRepositoryClient implements RemoteRepository {
 
             // Send the web service request and check the response
             log.info("Sending delete-root-namespace request to HTTP endpoint: " + endpointUrl);
-            HttpResponse response = executeWithAuthentication(request);
+            executeWithAuthentication(request);
 
-            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                throw new RepositoryException(getResponseErrorMessage(response));
-            }
             refreshRepositoryMetadata();
             log.info("Delete-root-namespace response received - Status OK");
 
@@ -1036,11 +987,8 @@ public class RemoteRepositoryClient implements RemoteRepository {
 
             // Send the web service request and check the response
             log.info("Sending create-namespace request to HTTP endpoint: " + endpointUrl);
-            HttpResponse response = executeWithAuthentication(request);
+            executeWithAuthentication(request);
 
-            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                throw new RepositoryException(getResponseErrorMessage(response));
-            }
             log.info("Create-namespace response received - Status OK");
 
         } catch (IOException e) {
@@ -1060,11 +1008,8 @@ public class RemoteRepositoryClient implements RemoteRepository {
 
             // Send the web service request and check the response
             log.info("Sending delete-namespace request to HTTP endpoint: " + endpointUrl);
-            HttpResponse response = executeWithAuthentication(request);
+            executeWithAuthentication(request);
 
-            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                throw new RepositoryException(getResponseErrorMessage(response));
-            }
             log.info("Delete-namespace response received - Status OK");
 
         } catch (IOException e) {
@@ -1117,11 +1062,8 @@ public class RemoteRepositoryClient implements RemoteRepository {
             postRequest.setEntity(mpEntity.build());
 
             log.info("Sending publish request to HTTP endpoint: " + endpointUrl);
-            HttpResponse response = executeWithAuthentication(postRequest);
+            executeWithAuthentication(postRequest);
 
-            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                throw new RepositoryException(getResponseErrorMessage(response));
-            }
             log.info("Publish response received - Status OK");
             return item;
 
@@ -1188,11 +1130,8 @@ public class RemoteRepositoryClient implements RemoteRepository {
 
             // Send the web service request and check the response
             log.info("Sending commit request to HTTP endpoint: " + endpointUrl);
-            HttpResponse response = executeWithAuthentication(request);
+            executeWithAuthentication(request);
 
-            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                throw new RepositoryException(getResponseErrorMessage(response));
-            }
             log.info("Commit response received - Status OK");
 
             // Update the local cache with the content we just sent to the remote web service
@@ -1244,9 +1183,6 @@ public class RemoteRepositoryClient implements RemoteRepository {
             log.info("Sending lock request to HTTP endpoint: " + endpointUrl);
             HttpResponse response = executeWithAuthentication(request);
 
-            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                throw new RepositoryException(getResponseErrorMessage(response));
-            }
             log.info("Lock response received - Status OK");
 
             Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext()
@@ -1336,9 +1272,6 @@ public class RemoteRepositoryClient implements RemoteRepository {
             log.info("Sending lock request to HTTP endpoint: " + endpointUrl);
             HttpResponse response = executeWithAuthentication(request);
 
-            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                throw new RepositoryException(getResponseErrorMessage(response));
-            }
             log.info("Lock response received - Status OK");
 
             Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext()
@@ -1406,11 +1339,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
 
             // Send the web service request and check the response
             log.info("Sending promote request to HTTP endpoint: " + endpointUrl);
-            HttpResponse response = executeWithAuthentication(request);
-
-            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                throw new RepositoryException(getResponseErrorMessage(response));
-            }
+            executeWithAuthentication(request);
             log.info("Promote response received - Status OK");
 
             // Update the local cache with the content that was just modified in the remote
@@ -1444,11 +1373,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
 
             // Send the web service request and check the response
             log.info("Sending promote request to HTTP endpoint: " + endpointUrl);
-            HttpResponse response = executeWithAuthentication(request);
-
-            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                throw new RepositoryException(getResponseErrorMessage(response));
-            }
+            executeWithAuthentication(request);
             log.info("Demote response received - Status OK");
 
             // Update the local cache by deleting the local copy of the item
@@ -1482,11 +1407,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
 
             // Send the web service request and check the response
             log.info("Sending update-status request to HTTP endpoint: " + endpointUrl);
-            HttpResponse response = executeWithAuthentication(request);
-
-            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                throw new RepositoryException(getResponseErrorMessage(response));
-            }
+            executeWithAuthentication(request);
             log.info("Update-Status response received - Status OK");
 
             // Update the local cache by deleting the local copy of the item
@@ -1519,11 +1440,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
 
             // Send the web service request and check the response
             log.info("Sending recalculate-crc request to HTTP endpoint: " + endpointUrl);
-            HttpResponse response = executeWithAuthentication(request);
-
-            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                throw new RepositoryException(getResponseErrorMessage(response));
-            }
+            executeWithAuthentication(request);
             log.info("Recalculate-crc response received - Status OK");
 
             // Update the local cache by deleting the local copy of the item
@@ -1556,11 +1473,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
 
             // Send the web service request and check the response
             log.info("Sending delete request to HTTP endpoint: " + endpointUrl);
-            HttpResponse response = executeWithAuthentication(request);
-
-            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                throw new RepositoryException(getResponseErrorMessage(response));
-            }
+            executeWithAuthentication(request);
             log.info("Delete response received - Status OK");
 
             // Update the local cache with the content that was just modified in the remote
@@ -1689,13 +1602,6 @@ public class RemoteRepositoryClient implements RemoteRepository {
                 HttpResponse metadataResponse = executeWithAuthentication(metadataRequest);
                 HttpResponse contentResponse = executeWithAuthentication(contentRequest);
 
-                if (metadataResponse.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                    throw new RepositoryException(getResponseErrorMessage(metadataResponse));
-                }
-                if (contentResponse.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                    throw new RepositoryException(getResponseErrorMessage(contentResponse));
-                }
-
                 // Update the local cache with the content we just received from the remote web
                 // service
                 Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
@@ -1779,10 +1685,6 @@ public class RemoteRepositoryClient implements RemoteRepository {
 
             // Send the request for meta-data to the remote web service
             HttpResponse metadataResponse = executeWithAuthentication(metadataRequest);
-
-            if (metadataResponse.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                throw new RepositoryException(getResponseErrorMessage(metadataResponse));
-            }
             Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
             JAXBElement<LibraryInfoType> jaxbElement = (JAXBElement<LibraryInfoType>) unmarshaller
                     .unmarshal( metadataResponse.getEntity().getContent() );
@@ -1820,10 +1722,6 @@ public class RemoteRepositoryClient implements RemoteRepository {
         try {
             HttpGet getRequest = new HttpGet(endpointUrl + REPOSITORY_METADATA_ENDPOINT);
             HttpResponse response = execute(getRequest);
-
-            if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
-                throw new RepositoryException(getResponseErrorMessage(response));
-            }
             Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext()
                     .createUnmarshaller();
             JAXBElement<RepositoryInfoType> jaxbElement = (JAXBElement<RepositoryInfoType>) unmarshaller
@@ -1976,9 +1874,10 @@ public class RemoteRepositoryClient implements RemoteRepository {
      * @return String
      */
     private static String getResponseErrorMessage(HttpResponse response) {
+        int statusCode = response.getStatusLine().getStatusCode();
         String errorMessage = null;
-
-        if (response.getStatusLine().getStatusCode() != HTTP_RESPONSE_STATUS_OK) {
+        
+        if ((statusCode < 200) || (statusCode > 299)) {
             try {
                 InputStream responseStream = response.getEntity().getContent();
                 ByteArrayOutputStream byteStream = new ByteArrayOutputStream();

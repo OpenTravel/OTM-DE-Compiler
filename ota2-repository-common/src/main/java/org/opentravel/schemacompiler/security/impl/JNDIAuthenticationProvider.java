@@ -43,9 +43,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opentravel.ns.ota2.repositoryinfoext_v01_00.UserInfo;
 import org.opentravel.schemacompiler.repository.RepositoryException;
+import org.opentravel.schemacompiler.repository.RepositorySecurityException;
 import org.opentravel.schemacompiler.security.PasswordHelper;
 import org.opentravel.schemacompiler.security.PasswordValidator;
-import org.opentravel.schemacompiler.security.RepositorySecurityException;
 import org.opentravel.schemacompiler.security.UserPrincipal;
 
 /**

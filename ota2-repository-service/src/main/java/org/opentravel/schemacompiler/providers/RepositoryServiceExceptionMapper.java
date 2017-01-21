@@ -25,7 +25,7 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opentravel.schemacompiler.repository.RepositoryException;
-import org.opentravel.schemacompiler.security.RepositorySecurityException;
+import org.opentravel.schemacompiler.repository.RepositorySecurityException;
 
 /**
  * Handles the mapping of common exception to HTTP responses.
@@ -34,7 +34,7 @@ import org.opentravel.schemacompiler.security.RepositorySecurityException;
  */
 public abstract class RepositoryServiceExceptionMapper {
 
-    private static Log log = LogFactory.getLog(RepositorySecurityExceptionMapper.class);
+    private static Log log = LogFactory.getLog(RepositoryServiceExceptionMapper.class);
 
     /**
      * Converts the given exception into an HTTP response that can be transmitted back to the web
@@ -45,14 +45,14 @@ public abstract class RepositoryServiceExceptionMapper {
      * @return Response
      */
     private static Response mapException(Throwable t) {
+    	System.out.println("EXCEPTION: " + t.getClass().getName());
         Response r;
 
         if (t instanceof RepositorySecurityException) {
             r = Response.status(Response.Status.UNAUTHORIZED).entity(t.getMessage()).build();
 
         } else {
-            r = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(t.getMessage())
-                    .build();
+            r = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(t.getMessage()).build();
         }
         log.error("Unexpected exception during service request processing.", t);
         return r;

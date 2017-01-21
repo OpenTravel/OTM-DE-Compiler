@@ -16,6 +16,7 @@
 package org.opentravel.schemacompiler.security;
 
 import org.opentravel.ns.ota2.security_v01_00.RepositoryPermission;
+import org.opentravel.schemacompiler.repository.RepositorySecurityException;
 
 /**
  * Provides information about which operations a particular user is authorized to perform on a

@@ -26,6 +26,7 @@ import org.opentravel.ns.ota2.security_v01_00.RepositoryPermission;
 import org.opentravel.schemacompiler.config.FileResource;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryFileManager;
+import org.opentravel.schemacompiler.repository.RepositorySecurityException;
 import org.opentravel.schemacompiler.security.impl.SecurityFileUtils;
 
 /**

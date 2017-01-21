@@ -33,7 +33,7 @@ import org.opentravel.ns.ota2.security_v01_00.NamespaceAuthorizations;
 import org.opentravel.ns.ota2.security_v01_00.ObjectFactory;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
-import org.opentravel.schemacompiler.security.RepositorySecurityException;
+import org.opentravel.schemacompiler.repository.RepositorySecurityException;
 import org.opentravel.schemacompiler.util.ClasspathResourceResolver;
 
 import com.sun.xml.bind.marshaller.NamespacePrefixMapper;

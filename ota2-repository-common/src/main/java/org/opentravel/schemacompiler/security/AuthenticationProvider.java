@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.opentravel.ns.ota2.repositoryinfoext_v01_00.UserInfo;
 import org.opentravel.schemacompiler.repository.RepositoryException;
+import org.opentravel.schemacompiler.repository.RepositorySecurityException;
 
 /**
  * Handles the verification of user ID and password credentials submitted by a web service client

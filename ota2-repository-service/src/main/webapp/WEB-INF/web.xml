@@ -28,7 +28,10 @@
 			<param-value>
 				org.opentravel.schemacompiler.repository.RepositoryContentResource,
 				org.opentravel.schemacompiler.providers.JAXBContextResolver,
-				org.opentravel.schemacompiler.providers.RepositoryServiceExceptionMapper,
+				org.opentravel.schemacompiler.providers.RepositoryServiceExceptionMapper$RepositoryExceptionMapper,
+				org.opentravel.schemacompiler.providers.RepositoryServiceExceptionMapper$RepositorySecurityExceptionMapper,
+				org.opentravel.schemacompiler.providers.RepositoryServiceExceptionMapper$IOExceptionMapper,
+				org.opentravel.schemacompiler.providers.RepositoryServiceExceptionMapper$JAXBExceptionMapper,
 				org.glassfish.jersey.media.multipart.MultiPartFeature
 			</param-value>
 		</init-param>
