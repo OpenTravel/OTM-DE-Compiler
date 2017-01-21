@@ -45,7 +45,6 @@ public abstract class RepositoryServiceExceptionMapper {
      * @return Response
      */
     private static Response mapException(Throwable t) {
-    	System.out.println("EXCEPTION: " + t.getClass().getName());
         Response r;
 
         if (t instanceof RepositorySecurityException) {

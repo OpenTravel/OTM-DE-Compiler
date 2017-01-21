@@ -44,6 +44,7 @@ import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAction;
 import org.opentravel.schemacompiler.model.TLActionRequest;
 import org.opentravel.schemacompiler.model.TLActionResponse;
+import org.opentravel.schemacompiler.model.TLDocumentationPatch;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLModelElement;
@@ -439,6 +440,10 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
                 if ((filter != null) && !filter.processEntity(member)) {
                     continue;
                 }
+                if (member instanceof TLDocumentationPatch) {
+                	continue;
+                }
+                
                 exampleContext.setValue(CodeGenerationContext.CK_OUTPUT_FOLDER,
                         getExampleOutputFolder(member, context));
                 exampleContext.setValue(CodeGenerationContext.CK_EXAMPLE_SCHEMA_RELATIVE_PATH,

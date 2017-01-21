@@ -200,12 +200,24 @@ public class RemoteRepositoryClient implements RemoteRepository {
      * 
      * @param request  the request to send to the remote repository
      * @return HttpResponse
+     * @throws RepositoryException  thrown if an error response is received from the remote server
      * @throws ClientProtocolException  thrown if an error occurs in the HTTP protocol
      * @throws IOException  thrown if an error occurs during request execution
      */
-    private static HttpResponse execute(HttpUriRequest request) throws ClientProtocolException,
-            IOException {
-        return createHttpClient().execute(request);
+    private static HttpResponse execute(HttpUriRequest request) throws RepositoryException,
+    		ClientProtocolException, IOException {
+    	HttpResponse response = createHttpClient().execute(request);
+    	int statusCode = response.getStatusLine().getStatusCode();
+    	
+        if ((statusCode < 200) || (statusCode > 299)) {
+        	if (statusCode == 401) {
+                throw new RepositorySecurityException(
+                		"User is not authorized to perform the requested action.");
+        	} else {
+                throw new RepositoryException(getResponseErrorMessage(response));
+        	}
+        }
+    	return response;
     }
 
     /**
@@ -1722,8 +1734,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
         try {
             HttpGet getRequest = new HttpGet(endpointUrl + REPOSITORY_METADATA_ENDPOINT);
             HttpResponse response = execute(getRequest);
-            Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext()
-                    .createUnmarshaller();
+            Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
             JAXBElement<RepositoryInfoType> jaxbElement = (JAXBElement<RepositoryInfoType>) unmarshaller
                     .unmarshal(response.getEntity().getContent());
 

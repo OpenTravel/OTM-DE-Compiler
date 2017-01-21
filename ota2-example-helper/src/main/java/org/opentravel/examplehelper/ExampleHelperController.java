@@ -81,7 +81,6 @@ import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLOperation;
-import org.opentravel.schemacompiler.model.TLReferenceType;
 import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.repository.ProjectManager;
 import org.opentravel.schemacompiler.validate.FindingMessageFormat;
@@ -245,7 +244,9 @@ public class ExampleHelperController {
 				}
 				for (TLResource resource : library.getResourceTypes()) {
 					for (TLActionFacet actionFacet : resource.getActionFacets()) {
-						if ((actionFacet.getReferenceType() != TLReferenceType.NONE)
+						NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( actionFacet );
+						
+						if ((payloadType instanceof TLActionFacet)
 								&& !ResourceCodegenUtils.isTemplateActionFacet( actionFacet )) {
 							selectableObjects.add( new OTMObjectChoice( actionFacet ) );
 						}
