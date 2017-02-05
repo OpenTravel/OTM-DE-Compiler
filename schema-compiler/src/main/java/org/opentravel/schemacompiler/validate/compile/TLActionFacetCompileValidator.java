@@ -110,7 +110,7 @@ public class TLActionFacetCompileValidator extends TLActionFacetBaseValidator{
 		} else {
 			String basePayloadName = target.getBasePayloadName();
 			
-			if ((basePayloadName != null) && basePayloadName.equals("")) {
+			if ((basePayloadName != null) && !basePayloadName.equals("")) {
 				builder.addFinding( FindingType.ERROR, "basePayload",
 						TLValidationBuilder.UNRESOLVED_NAMED_ENTITY_REFERENCE, basePayloadName );
 			}

@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.impl.QualifiedAction;
@@ -77,6 +78,7 @@ public class ResourceCodegenUtils {
     private static final int QUERY_GROUP     = 7;
     
 	private static final Set<Class<?>> eligibleParamTypes;
+	private static final Set<String> idRefTypeNames;
 	
 	/**
 	 * Returns the resource from which the given one extends.  If the given resource
@@ -292,7 +294,17 @@ public class ResourceCodegenUtils {
 	 * @return boolean
 	 */
 	public static boolean isEligibleParameterType(NamedEntity entityType) {
-		return (entityType != null) && eligibleParamTypes.contains(entityType.getClass());
+		boolean isEligible = false;
+		
+		if (entityType != null) {
+			boolean isIDorIDREF = false;
+			
+			if (XMLConstants.W3C_XML_SCHEMA_NS_URI.equals( entityType.getNamespace() )) {
+				isIDorIDREF = idRefTypeNames.contains( entityType.getLocalName() );
+			}
+			isEligible = !isIDorIDREF && eligibleParamTypes.contains(entityType.getClass());
+		}
+		return isEligible;
 	}
 	
 	/**
@@ -800,6 +812,7 @@ public class ResourceCodegenUtils {
 	static {
 		try {
 			Set<Class<?>> paramTypes = new HashSet<>();
+			Set<String> idrefNames = new HashSet<>();
 			
 			paramTypes.add( TLSimple.class );
 			paramTypes.add( TLSimpleFacet.class );
@@ -807,6 +820,11 @@ public class ResourceCodegenUtils {
 			paramTypes.add( TLRoleEnumeration.class );
 			paramTypes.add( XSDSimpleType.class );
 			eligibleParamTypes = Collections.unmodifiableSet(paramTypes);
+			
+			idrefNames.add( "ID" );
+			idrefNames.add( "IDREF" );
+			idrefNames.add( "IDREFS" );
+			idRefTypeNames = Collections.unmodifiableSet( idrefNames );
 			
 		} catch (Throwable t) {
 			throw new ExceptionInInitializerError(t);

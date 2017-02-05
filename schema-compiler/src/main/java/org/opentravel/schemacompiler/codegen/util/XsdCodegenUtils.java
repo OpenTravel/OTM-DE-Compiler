@@ -120,9 +120,11 @@ public class XsdCodegenUtils {
         } else if (modelEntity instanceof TLContextualFacet) {
         	TLContextualFacet facet = (TLContextualFacet) modelEntity;
         	TLFacetOwner owner = FacetCodegenUtils.getTopLevelOwner(facet);
-        	String elementLocalName = owner.getLocalName() + getElementFacetSuffix(facet);
         	
-            elementName = new QName(modelEntity.getNamespace(), elementLocalName);
+        	if (owner != null) {
+            	String elementLocalName = owner.getLocalName() + getElementFacetSuffix(facet);
+                elementName = new QName(modelEntity.getNamespace(), elementLocalName);
+        	}
         	
         } else if ((modelEntity instanceof TLAbstractFacet)
                 && !(modelEntity instanceof TLSimpleFacet)) {
@@ -513,7 +515,9 @@ public class XsdCodegenUtils {
         } else if ((facet instanceof TLFacet) && (facet.getOwningEntity() instanceof TLContextualFacet)) {
         	TLFacetOwner owner = FacetCodegenUtils.getTopLevelOwner((TLFacet) facet);
         	
-            typeName = owner.getLocalName() + getTypeFacetSuffix((TLContextualFacet) facet);
+        	if (owner != null) {
+                typeName = owner.getLocalName() + getTypeFacetSuffix((TLContextualFacet) facet);
+        	}
         	
         } else if (facet.getOwningEntity() instanceof TLOperation) {
             typeName = ((TLOperation) facet.getOwningEntity()).getName() + getTypeFacetSuffix(facet);
