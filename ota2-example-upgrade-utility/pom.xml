@@ -1,11 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
+	
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>ota2-diff-utility</artifactId>
-	<packaging>jar</packaging>
-	<name>OTA2 Diff Utility Application</name>
-
+	<artifactId>ota2-example-upgrade-utility</artifactId>
+	<name>Example Upgrade Utility</name>
+	
 	<parent>
 		<groupId>org.opentravel.otm</groupId>
 		<artifactId>ota-parent-pom</artifactId>
@@ -14,7 +13,6 @@
 
 	<properties>
 		<java.version>1.8</java.version>
-		<test>${project.build.directory}</test>
 	</properties>
 
 	<dependencies>
@@ -22,6 +20,15 @@
 			<groupId>org.opentravel.otm</groupId>
 			<artifactId>schema-compiler</artifactId>
 			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.fxmisc.richtext</groupId>
+			<artifactId>richtextfx</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
@@ -45,7 +52,7 @@
 							<goal>jar</goal>
 						</goals>
 						<configuration>
-							<mainClass>org.opentravel.diffutil.OTMDiffApplication</mainClass>
+							<mainClass>org.opentravel.exampleupgrade.ExampleUpgradeApplication</mainClass>
 							<jfxMainAppJarName>${project.artifactId}.jar</jfxMainAppJarName>
 							<nativeInstallers />
 						</configuration>

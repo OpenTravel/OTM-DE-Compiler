@@ -17,6 +17,7 @@
 package org.opentravel.schemacompiler.diff.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -34,6 +35,9 @@ import org.opentravel.schemacompiler.model.TLMemberField;
 import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
+import org.opentravel.schemacompiler.version.MinorVersionHelper;
+import org.opentravel.schemacompiler.version.VersionSchemeException;
+import org.opentravel.schemacompiler.version.Versioned;
 
 /**
  * Facade used to compare the contents of two entities even though the two entities
@@ -41,6 +45,8 @@ import org.opentravel.schemacompiler.model.TLValueWithAttributes;
  * etc.).
  */
 public class EntityComparisonFacade {
+	
+	private static MinorVersionHelper versionHelper = new MinorVersionHelper();
 	
 	private NamedEntity entity;
 	private Class<?> entityType;
@@ -136,11 +142,18 @@ public class EntityComparisonFacade {
 	 * @param entity  the entity from which to create the facade
 	 */
 	private void init(TLAbstractEnumeration entity) {
+		List<TLAbstractEnumeration> versionChain = getMinorVersions( entity );
+		List<String> enumValues = new ArrayList<>();
+		
+		for (TLAbstractEnumeration entityVersion : versionChain) {
+			enumValues.addAll( ModelCompareUtils.getEnumValues( entityVersion ) );
+		}
+		
 		this.entityType = entity.getClass();
 		this.owningLibrary = (TLLibrary) entity.getOwningLibrary();
 		this.name = entity.getName();
 		this.extendsType = ModelCompareUtils.getExtendedEntity( entity );
-		this.enumValues = ModelCompareUtils.getEnumValues( entity );
+		this.enumValues = enumValues;
 		this.documentation = entity.getDocumentation();
 	}
 	
@@ -150,14 +163,19 @@ public class EntityComparisonFacade {
 	 * @param entity  the entity from which to create the facade
 	 */
 	private void init(TLValueWithAttributes entity) {
+		List<TLValueWithAttributes> versionChain = getMinorVersions( entity );
+		
 		this.entityType = entity.getClass();
 		this.owningLibrary = (TLLibrary) entity.getOwningLibrary();
 		this.name = entity.getName();
-		this.parentType = entity.getParentType();
+		this.parentType = versionChain.get( 0 ).getParentType();
 		this.examples = ModelCompareUtils.getExamples( entity );
 		this.equivalents = ModelCompareUtils.getEquivalents( entity );
-		this.memberFields.addAll( entity.getMemberFields() );
 		this.documentation = entity.getDocumentation();
+		
+		for (TLValueWithAttributes entityVersion : versionChain) {
+			this.memberFields.addAll( entityVersion.getMemberFields() );
+		}
 	}
 	
 	/**
@@ -166,6 +184,8 @@ public class EntityComparisonFacade {
 	 * @param entity  the entity from which to create the facade
 	 */
 	private void init(TLCoreObject entity) {
+		List<TLCoreObject> versionChain = getMinorVersions( entity );
+		
 		this.entityType = entity.getClass();
 		this.owningLibrary = (TLLibrary) entity.getOwningLibrary();
 		this.name = entity.getName();
@@ -175,9 +195,14 @@ public class EntityComparisonFacade {
 		this.facetNames = ModelCompareUtils.getFacetNames( entity );
 		this.roleNames = ModelCompareUtils.getRoleNames( entity );
 		this.equivalents = ModelCompareUtils.getEquivalents( entity );
-		this.memberFields.addAll( entity.getSummaryFacet().getMemberFields() );
-		this.memberFields.addAll( entity.getDetailFacet().getMemberFields() );
 		this.documentation = entity.getDocumentation();
+		
+		for (TLCoreObject entityVersion : versionChain) {
+			this.memberFields.addAll( entityVersion.getSummaryFacet().getMemberFields() );
+		}
+		for (TLCoreObject entityVersion : versionChain) {
+			this.memberFields.addAll( entityVersion.getDetailFacet().getMemberFields() );
+		}
 	}
 	
 	/**
@@ -186,6 +211,8 @@ public class EntityComparisonFacade {
 	 * @param entity  the entity from which to create the facade
 	 */
 	private void init(TLChoiceObject entity) {
+		List<TLChoiceObject> versionChain = getMinorVersions( entity );
+		
 		this.entityType = entity.getClass();
 		this.owningLibrary = (TLLibrary) entity.getOwningLibrary();
 		this.name = entity.getName();
@@ -194,9 +221,13 @@ public class EntityComparisonFacade {
 		this.facetNames = ModelCompareUtils.getFacetNames( entity );
 		this.equivalents = ModelCompareUtils.getEquivalents( entity );
 		this.documentation = entity.getDocumentation();
-		this.memberFields.addAll( entity.getSharedFacet().getMemberFields() );
 		
-		addContextualFacetFields( entity.getChoiceFacets(), new HashSet<TLContextualFacet>() );
+		for (TLChoiceObject entityVersion : versionChain) {
+			this.memberFields.addAll( entityVersion.getSharedFacet().getMemberFields() );
+		}
+		for (TLChoiceObject entityVersion : versionChain) {
+			addContextualFacetFields( entityVersion.getChoiceFacets(), new HashSet<TLContextualFacet>() );
+		}
 	}
 	
 	/**
@@ -205,6 +236,8 @@ public class EntityComparisonFacade {
 	 * @param entity  the entity from which to create the facade
 	 */
 	private void init(TLBusinessObject entity) {
+		List<TLBusinessObject> versionChain = getMinorVersions( entity );
+		
 		this.entityType = entity.getClass();
 		this.owningLibrary = (TLLibrary) entity.getOwningLibrary();
 		this.name = entity.getName();
@@ -213,13 +246,26 @@ public class EntityComparisonFacade {
 		this.facetNames = ModelCompareUtils.getFacetNames( entity );
 		this.equivalents = ModelCompareUtils.getEquivalents( entity );
 		this.documentation = entity.getDocumentation();
-		this.memberFields.addAll( entity.getIdFacet().getMemberFields() );
-		this.memberFields.addAll( entity.getSummaryFacet().getMemberFields() );
-		this.memberFields.addAll( entity.getDetailFacet().getMemberFields() );
 		
-		addContextualFacetFields( entity.getCustomFacets(), new HashSet<TLContextualFacet>() );
-		addContextualFacetFields( entity.getQueryFacets(), new HashSet<TLContextualFacet>() );
-		addContextualFacetFields( entity.getUpdateFacets(), new HashSet<TLContextualFacet>() );
+		for (TLBusinessObject entityVersion : versionChain) {
+			this.memberFields.addAll( entityVersion.getIdFacet().getMemberFields() );
+		}
+		for (TLBusinessObject entityVersion : versionChain) {
+			this.memberFields.addAll( entityVersion.getSummaryFacet().getMemberFields() );
+		}
+		for (TLBusinessObject entityVersion : versionChain) {
+			this.memberFields.addAll( entityVersion.getDetailFacet().getMemberFields() );
+		}
+		
+		for (TLBusinessObject entityVersion : versionChain) {
+			addContextualFacetFields( entityVersion.getCustomFacets(), new HashSet<TLContextualFacet>() );
+		}
+		for (TLBusinessObject entityVersion : versionChain) {
+			addContextualFacetFields( entityVersion.getQueryFacets(), new HashSet<TLContextualFacet>() );
+		}
+		for (TLBusinessObject entityVersion : versionChain) {
+			addContextualFacetFields( entityVersion.getUpdateFacets(), new HashSet<TLContextualFacet>() );
+		}
 	}
 	
 	/**
@@ -228,6 +274,8 @@ public class EntityComparisonFacade {
 	 * @param entity  the entity from which to create the facade
 	 */
 	private void init(TLOperation entity) {
+		List<TLOperation> versionChain = getMinorVersions( entity );
+		
 		this.entityType = entity.getClass();
 		this.owningLibrary = (TLLibrary) entity.getOwningLibrary();
 		this.name = entity.getName();
@@ -235,9 +283,16 @@ public class EntityComparisonFacade {
 		this.facetNames = ModelCompareUtils.getFacetNames( entity );
 		this.equivalents = ModelCompareUtils.getEquivalents( entity );
 		this.documentation = entity.getDocumentation();
-		this.memberFields.addAll( entity.getRequest().getMemberFields() );
-		this.memberFields.addAll( entity.getResponse().getMemberFields() );
-		this.memberFields.addAll( entity.getNotification().getMemberFields() );
+		
+		for (TLOperation entityVersion : versionChain) {
+			this.memberFields.addAll( entityVersion.getRequest().getMemberFields() );
+		}
+		for (TLOperation entityVersion : versionChain) {
+			this.memberFields.addAll( entityVersion.getResponse().getMemberFields() );
+		}
+		for (TLOperation entityVersion : versionChain) {
+			this.memberFields.addAll( entityVersion.getNotification().getMemberFields() );
+		}
 	}
 
 	/**
@@ -286,6 +341,26 @@ public class EntityComparisonFacade {
 				addContextualFacetFields( facet.getChildFacets(), visitedFacets );
 			}
 		}
+	}
+	
+	/**
+	 * Returns the given entity along with all of its prior minor versions.  At a minimum,
+	 * the resulting list will contain the entity that is passed to this method.
+	 * 
+	 * @param entity  the entity for which to return the minor version chain
+	 * @return List<V>
+	 */
+	private <V extends Versioned> List<V> getMinorVersions(V entity) {
+		List<V> versions = new ArrayList<>();
+		try {
+			versions.addAll( versionHelper.getAllVersionExtensions( entity ) );
+			Collections.reverse( versions );
+			
+		} catch (VersionSchemeException e) {
+			// Ignore and return only the given entity (should never happen)
+		}
+		versions.add( entity );
+		return versions;
 	}
 	
 	/**

@@ -15,13 +15,10 @@
  */
 package org.opentravel.schemacompiler.codegen.impl;
 
-import java.util.List;
-
 import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
-import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
@@ -59,9 +56,8 @@ import org.opentravel.schemacompiler.model.XSDComplexType;
 import org.opentravel.schemacompiler.model.XSDElement;
 import org.opentravel.schemacompiler.model.XSDLibrary;
 import org.opentravel.schemacompiler.model.XSDSimpleType;
-import org.opentravel.schemacompiler.visitor.ModelElementVisitor;
 import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
-import org.opentravel.schemacompiler.visitor.ModelNavigator;
+import org.opentravel.schemacompiler.visitor.SchemaDependencyNavigator;
 
 /**
  * Builder used to construct a <code>CodeGenerationFilter</code> that can be used to identify
@@ -124,94 +120,18 @@ public class LibraryFilterBuilder {
      */
     public CodeGenerationFilter buildFilter() {
         DependencyVisitor visitor = new DependencyVisitor();
-        DependencyModelNavigator navigator = new DependencyModelNavigator(visitor);
+        SchemaDependencyNavigator navigator = new SchemaDependencyNavigator(visitor);
 
-        if (library instanceof BuiltInLibrary) {
-            navigator.navigateBuiltInLibrary((BuiltInLibrary) library);
-
-        } else if (library instanceof XSDLibrary) {
-            navigator.navigateLegacySchemaLibrary((XSDLibrary) library);
-
-        } else if (library instanceof TLLibrary) {
+    	navigator.navigateLibrary(library);
+    	
+        if (library instanceof TLLibrary) {
         	TLLibrary tlLibrary = (TLLibrary) library;
         	
-            navigator.navigateUserDefinedLibrary(tlLibrary);
-            
             for (TLContextualFacet ghostFacet : FacetCodegenUtils.findNonLocalGhostFacets( tlLibrary )) {
             	navigator.navigate( ghostFacet );
             }
         }
         return visitor.getFilter();
-    }
-
-    /**
-     * Extends the navigation logic of the <code>ModelNavigator</code> to include the navigation of
-     * inherited attributes and elements.
-     * 
-     * @author S. Livezey
-     */
-    private class DependencyModelNavigator extends ModelNavigator {
-
-        /**
-         * Constructor that initializes the visitor to be notified when model elements are
-         * encountered during navigation.
-         * 
-         * @param visitor
-         *            the visitor to be notified when model elements are encountered
-         */
-        private DependencyModelNavigator(ModelElementVisitor visitor) {
-            super(visitor);
-        }
-
-        /**
-         * @see org.opentravel.schemacompiler.visitor.ModelNavigator#navigateFacet(org.opentravel.schemacompiler.model.TLFacet)
-         */
-        @Override
-        public void navigateFacet(TLFacet facet) {
-            if (canVisit(facet) && visitor.visitFacet(facet)) {
-                List<TLAttribute> attributeList = PropertyCodegenUtils.getInheritedAttributes(facet);
-                List<TLProperty> propertyList = PropertyCodegenUtils.getInheritedProperties(facet);
-
-                for (TLAlias alias : facet.getAliases()) {
-                    navigateAlias(alias);
-                }
-                for (TLAttribute attribute : attributeList) {
-                    navigateAttribute(attribute);
-                }
-                for (TLProperty element : propertyList) {
-                    navigateElement(element);
-                }
-            }
-            addVisitedNode(facet);
-        }
-
-        /**
-		 * @see org.opentravel.schemacompiler.visitor.ModelNavigator#navigateActionFacet(org.opentravel.schemacompiler.model.TLActionFacet)
-		 */
-		@Override
-		public void navigateActionFacet(TLActionFacet actionFacet) {
-            if (canVisit(actionFacet) && visitor.visitActionFacet(actionFacet)) {
-                navigate(actionFacet.getBasePayload());
-            }
-            addVisitedNode(actionFacet);
-		}
-
-		/**
-         * @see org.opentravel.schemacompiler.visitor.ModelNavigator#navigateValueWithAttributes(org.opentravel.schemacompiler.model.TLValueWithAttributes)
-         */
-        @Override
-        public void navigateValueWithAttributes(TLValueWithAttributes valueWithAttributes) {
-            if (canVisit(valueWithAttributes)
-                    && visitor.visitValueWithAttributes(valueWithAttributes)) {
-                List<TLAttribute> attributeList = PropertyCodegenUtils.getInheritedAttributes(valueWithAttributes);
-
-                for (TLAttribute attribute : attributeList) {
-                    navigateAttribute(attribute);
-                }
-            }
-            addVisitedNode(valueWithAttributes);
-        }
-
     }
 
     /**
