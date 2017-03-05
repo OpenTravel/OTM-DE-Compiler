@@ -60,11 +60,24 @@ public class QNameCandidateVisitor extends ModelElementVisitorAdapter {
 	 *
 	 * @return Map<QName,List<OTMObjectChoice>>
 	 */
-	public Map<QName, List<OTMObjectChoice>> getBaseFamilyMatches() {
-		baseFamilyMatches.values().forEach( (list) ->
-			Collections.sort( list,
-					(w1, w2) -> qnComparator.compare( w1.getOtmObjectName(), w2.getOtmObjectName() ) ) );
-		return baseFamilyMatches;
+	public Map<QName, List<OTMObjectChoice>> getFamilyMatches() {
+		Map<QName, List<OTMObjectChoice>> familyMatches = new HashMap<>();
+		
+		for (QName baseFamilyName : baseFamilyMatches.keySet()) {
+			List<OTMObjectChoice> familyChoices = baseFamilyMatches.get( baseFamilyName );
+			
+			Collections.sort( familyChoices,
+					(w1, w2) -> qnComparator.compare( w1.getOtmObjectName(), w2.getOtmObjectName() ) );
+			
+			for (OTMObjectChoice familyChoice : familyChoices) {
+				QName choiceName = familyChoice.getOtmObjectName();
+				String choiceBaseNS = HelperUtils.getBaseNamespace( choiceName.getNamespaceURI() );
+				QName choiceBaseName = new QName( choiceBaseNS, choiceName.getLocalPart() );
+				
+				familyMatches.put( choiceBaseName, familyChoices );
+			}
+		}
+		return familyMatches;
 	}
 
 	/**

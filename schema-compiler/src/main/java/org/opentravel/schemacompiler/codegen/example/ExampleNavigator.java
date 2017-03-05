@@ -32,7 +32,6 @@ import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegate;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
-import org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAbstractFacet;
@@ -44,20 +43,16 @@ import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
-import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
-import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLIndicator;
-import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLModelElement;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
-import org.opentravel.schemacompiler.model.TLPatchableFacet;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLPropertyType;
 import org.opentravel.schemacompiler.model.TLRole;
@@ -68,9 +63,6 @@ import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.model.XSDComplexType;
 import org.opentravel.schemacompiler.model.XSDElement;
 import org.opentravel.schemacompiler.model.XSDSimpleType;
-import org.opentravel.schemacompiler.version.MinorVersionHelper;
-import org.opentravel.schemacompiler.version.VersionSchemeException;
-import org.opentravel.schemacompiler.version.Versioned;
 
 /**
  * Navigator that traverses model elements in order to produce visitor events that will allow the
@@ -82,9 +74,8 @@ public class ExampleNavigator {
 	
 	private static FacetCodegenDelegateFactory facetDelegateFactory = new FacetCodegenDelegateFactory(null);
 
-
     private Stack<Object> entityStack = new Stack<Object>();
-    private Map<TLPatchableFacet, List<TLExtensionPointFacet>> extensionPointRegistry;
+    private ExtensionPointRegistry extensionPointRegistry;
     private Map<TLChoiceObject,List<TLFacet>> choiceFacetRotation = new HashMap<>();
     private ExampleGeneratorOptions options;
     private ExampleVisitor visitor;
@@ -97,10 +88,13 @@ public class ExampleNavigator {
      *            the visitor to be notified when model elements are encountered
      * @param options
      *            the options to use during example navigation
+     * @param model
+     *            the model which contains all of the entities to be navigated
      */
-    public ExampleNavigator(ExampleVisitor visitor, ExampleGeneratorOptions options) {
+    public ExampleNavigator(ExampleVisitor visitor, ExampleGeneratorOptions options, TLModel model) {
         this.options = (options != null) ? options : new ExampleGeneratorOptions();
         this.visitor = visitor;
+        this.extensionPointRegistry = new ExtensionPointRegistry( model );
     }
 
     /**
@@ -116,7 +110,7 @@ public class ExampleNavigator {
      */
     public static void navigate(NamedEntity target, ExampleVisitor visitor,
             ExampleGeneratorOptions options) {
-        new ExampleNavigator(visitor, options).navigateEntity(target);
+        new ExampleNavigator(visitor, options, target.getOwningModel()).navigateEntity(target);
     }
 
     /**
@@ -643,7 +637,8 @@ public class ExampleNavigator {
      *            the facet whose members are to be navigated
      */
     protected void navigateFacetMembers(TLFacet facet) {
-        Map<TLFacetType, List<TLExtensionPointFacet>> facetExtensionsByType = getExtensionPoints(facet);
+        Map<TLFacetType, List<TLExtensionPointFacet>> facetExtensionsByType =
+        		extensionPointRegistry.getExtensionPoints( facet );
         Set<TLFacetType> processedExtensionPointTypes = new HashSet<TLFacetType>();
         String previousFacetIdentity = null;
 
@@ -662,7 +657,7 @@ public class ExampleNavigator {
         	if (elementItem instanceof TLProperty) {
         		TLProperty element = (TLProperty) elementItem;
                 TLFacet currentFacet = (TLFacet) element.getOwner();
-                String currentFacetIdentity = getFacetIdentity( currentFacet );
+                String currentFacetIdentity = extensionPointRegistry.getFacetIdentity( currentFacet );
                 
                 // Before navigating the element itself, check to see if we need to insert any extension
                 // point facets
@@ -675,7 +670,7 @@ public class ExampleNavigator {
                         TLFacet hFacet = facetHierarchy.get(i);
 
                         if (!processedExtensionPointTypes.contains(hFacet.getFacetType())) {
-                        	if (hasExtensionPoint( hFacet )) {
+                        	if (extensionPointRegistry.hasExtensionPoint( hFacet )) {
                                 navigateExtensionPoint(hFacet, facetExtensionsByType.get(hFacet.getFacetType()));
                         	}
                             processedExtensionPointTypes.add(hFacet.getFacetType());
@@ -699,34 +694,11 @@ public class ExampleNavigator {
 
         for (TLFacet hFacet : facetHierarchy) {
             if (!processedExtensionPointTypes.contains(hFacet.getFacetType())) {
-            	if (hasExtensionPoint( hFacet )) {
+            	if (extensionPointRegistry.hasExtensionPoint( hFacet )) {
             		navigateExtensionPoint(hFacet, facetExtensionsByType.get(hFacet.getFacetType()));
             	}
             }
         }
-    }
-    
-    /**
-     * Returns an identity string for the given facet, based on the facet's type and name.
-     * 
-     * @param facet  the facet for which to return an identity string
-     * @return
-     */
-    private String getFacetIdentity(TLFacet facet) {
-    	TLFacetType facetType = facet.getFacetType();
-    	String identity;
-    	
-    	if (facetType != null) {
-        	if (facet instanceof TLContextualFacet) {
-        		identity = facetType.getIdentityName( ((TLContextualFacet) facet).getName() );
-        	} else {
-        		identity = facetType.getIdentityName();
-        	}
-    		
-    	} else {
-    		identity = "UNKNOWN";
-    	}
-    	return identity;
     }
     
     /**
@@ -745,17 +717,6 @@ public class ExampleNavigator {
         if (payloadFacet != null) {
             navigateFacetMembers(payloadFacet);
         }
-    }
-    
-    /**
-     * Returns true if the given facet should declare an extension point.
-     * 
-     * @param facet  the facet for which an extension point element could be declared
-     * @return boolean
-     */
-    private boolean hasExtensionPoint(TLFacet facet) {
-    	return (((TLFacetCodegenDelegate) facetDelegateFactory.getDelegate( facet ))
-    			.getExtensionPointElement() != null);
     }
     
     /**
@@ -1175,112 +1136,4 @@ public class ExampleNavigator {
         return xsdEntity;
     }
 
-    /**
-     * Returns the extension points from the model that reference the given entity facet. The
-     * resulting map is indexed by the facet-type to which each <code>TLExtensionPointFacet</code>
-     * is associated. The lists of extension point facets include those items that reference
-     * extended entities of the facet's owner.
-     * 
-     * @param facet
-     *            the facet for which to return extension points
-     * @return Map<TLFacetType,List<TLExtensionPointFacet>>
-     */
-    private Map<TLFacetType, List<TLExtensionPointFacet>> getExtensionPoints(TLPatchableFacet facet) {
-        Map<TLFacetType, List<TLExtensionPointFacet>> result = new HashMap<TLFacetType, List<TLExtensionPointFacet>>();
-        TLModel model = (facet == null) ? null : facet.getOwningModel();
-        MinorVersionHelper versionHelper = new MinorVersionHelper();
-
-        // Initialize the registry of extension point facets if not already done
-        if ((extensionPointRegistry == null) && (model != null)) {
-            extensionPointRegistry = new HashMap<TLPatchableFacet, List<TLExtensionPointFacet>>();
-
-            for (TLLibrary library : model.getUserDefinedLibraries()) {
-                for (TLExtensionPointFacet xpFacet : library.getExtensionPointFacetTypes()) {
-                    TLExtension extension = xpFacet.getExtension();
-                    NamedEntity extendedEntity = (extension == null) ? null : extension
-                            .getExtendsEntity();
-
-                    if (extendedEntity instanceof TLPatchableFacet) {
-                    	TLPatchableFacet extendedFacet = (TLPatchableFacet) extendedEntity;
-                        List<TLExtensionPointFacet> extensionPoints = extensionPointRegistry
-                                .get(extendedFacet);
-
-                        if (extensionPoints == null) {
-                            extensionPoints = new ArrayList<TLExtensionPointFacet>();
-                            extensionPointRegistry.put(extendedFacet, extensionPoints);
-                        }
-                        extensionPoints.add(xpFacet);
-                    }
-                }
-            }
-        }
-
-        // Lookup the extension point facets that reference the given entity facet
-        if (extensionPointRegistry != null) {
-            List<TLPatchableFacet> facetHierarchy = new ArrayList<>();
-            
-            if (facet instanceof TLFacet) {
-            	facetHierarchy.addAll( FacetCodegenUtils.getLocalFacetHierarchy((TLFacet) facet) );
-            } else {
-            	facetHierarchy.add( facet );
-            }
-
-            for (TLPatchableFacet hFacet : facetHierarchy) {
-                TLFacetOwner facetOwner = hFacet.getOwningEntity();
-
-                while ((hFacet != null) && (facetOwner != null)) {
-                    List<TLExtensionPointFacet> hExtensionPoints = extensionPointRegistry.get(hFacet);
-
-                    if (hExtensionPoints != null) {
-                        List<TLExtensionPointFacet> extensionPoints = result.get(hFacet.getFacetType());
-
-                        if (extensionPoints == null) {
-                            extensionPoints = new ArrayList<TLExtensionPointFacet>();
-                            result.put(hFacet.getFacetType(), extensionPoints);
-                        }
-                        for (TLExtensionPointFacet xpFacet : hExtensionPoints) {
-                            extensionPoints.add(0, xpFacet); // add to beginning of list
-                        }
-                    }
-                    
-                    // If the new facet owner is a minor version extension of the previous facet owner,
-                    // we need to break out of the loop.  This is based on an assumption that minor versions
-                    // arleady have the patches from previous minor versions rolled up into them; therefore,
-                    // the extension point is no longer relevant.
-                    TLFacetOwner origFacetOwner = facetOwner;
-                    TLFacetOwner facetOwnerExtension;
-                    
-                    facetOwner = facetOwnerExtension = FacetCodegenUtils.getFacetOwnerExtension(facetOwner);
-                    
-                    if (facetOwner instanceof Versioned) {
-                    	Versioned priorMinorVersion;
-						try {
-							priorMinorVersion = versionHelper.getVersionExtension( (Versioned) origFacetOwner );
-	                    	
-	                    	if (facetOwnerExtension == priorMinorVersion) {
-	                            facetOwner = null;
-	                    	}
-	                    	
-						} catch (VersionSchemeException e) {
-							// Ignore error and use the extension
-						}
-                    }
-                    
-                    // Use the facet owner to identify the facet for our next cycle through the loop
-                    if (facetOwner == null) {
-                    	hFacet = null;
-                    } else {
-                        if (hFacet instanceof TLFacet) {
-                            hFacet = FacetCodegenUtils.getFacetOfType( facetOwner, hFacet.getFacetType(),
-                            		FacetCodegenUtils.getFacetName((TLFacet) hFacet));
-                        } else {
-                            hFacet = FacetCodegenUtils.getFacetOfType( facetOwner, hFacet.getFacetType());
-                        }
-                    }
-                }
-            }
-        }
-        return result;
-    }
-    
 }

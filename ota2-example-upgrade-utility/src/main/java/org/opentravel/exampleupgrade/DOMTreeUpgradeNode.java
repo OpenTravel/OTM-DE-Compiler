@@ -21,20 +21,79 @@ import org.opentravel.schemacompiler.model.TLMemberField;
 import org.w3c.dom.Node;
 
 /**
- * Tree node that encapsulates a single node in the upgraded a DOM tree structure.
+ * Tree node that encapsulates a single node in the upgraded DOM tree structure.
  */
-public class DOMTreeUpgradeNode extends DOMTreeNode {
+public class DOMTreeUpgradeNode extends AbstractDOMTreeNode {
 	
 	private NamedEntity otmEntity;
 	private TLMemberField<?> otmField;
+	private ExampleMatchType matchType;
 	
 	/**
-	 * Constructor that specifies the DOM node and all required configuration information.
+	 * Constructor used to create a node representing an OTM entity.  The entity
+	 * can be presumed to be an element that is a complex type with child elements
+	 * and/or attributes.
 	 * 
+	 * @param otmEntity  the OTM complex entity type associated with this node
 	 * @param domNode  the DOM node instance
+	 * @param matchType  indicates the match type of the OTM entity with the original example
 	 */
-	public DOMTreeUpgradeNode(Node domNode) {
+	public DOMTreeUpgradeNode(NamedEntity otmEntity, Node domNode, ExampleMatchType matchType) {
 		super(domNode);
+		this.otmEntity = otmEntity;
+		this.matchType = matchType;
+	}
+	
+	/**
+	 * Constructor used to create a node representing an OTM field (attribute, element,
+	 * or indicator) with a simple example value.
+	 * 
+	 * @param otmField  the OTM field associated with this node
+	 * @param domNode  the DOM node instance
+	 * @param matchType  indicates the match type of the OTM field with the original example
+	 */
+	public DOMTreeUpgradeNode(TLMemberField<?> otmField, Node domNode, ExampleMatchType matchType) {
+		super(domNode);
+		this.otmField = otmField;
+		this.matchType = matchType;
+	}
+
+	/**
+	 * Returns the OTM complex entity type associated with this node.
+	 *
+	 * @return NamedEntity
+	 */
+	public NamedEntity getOtmEntity() {
+		return otmEntity;
+	}
+
+	/**
+	 * Returns the OTM field associated with this node.
+	 *
+	 * @return TLMemberField<?>
+	 */
+	public TLMemberField<?> getOtmField() {
+		return otmField;
+	}
+
+	/**
+	 * Returns the flag indicating the match type of the OTM entity or field
+	 * with the original example.
+	 *
+	 * @return ExampleMatchType
+	 */
+	public ExampleMatchType getMatchType() {
+		return matchType;
+	}
+	
+	/**
+	 * Returns true if this node is associated with an OTM entity, false if
+	 * it is associated with a field.
+	 * 
+	 * @return boolean
+	 */
+	public boolean isEntityNode() {
+		return (otmEntity != null);
 	}
 	
 }

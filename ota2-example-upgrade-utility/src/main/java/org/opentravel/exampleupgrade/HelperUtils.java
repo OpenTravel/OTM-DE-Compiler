@@ -35,6 +35,8 @@ import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.version.VersionScheme;
 import org.opentravel.schemacompiler.version.VersionSchemeFactory;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.Text;
 
 /**
  * Static utility methods for the Example Helper application.
@@ -161,6 +163,27 @@ public class HelperUtils {
 	 */
 	public static String getBaseNamespace(String ns) {
 		return otaVersionScheme.getBaseNamespace( ns );
+	}
+	
+	/**
+	 * Returns the simple text value of the given DOM element.
+	 * 
+	 * @param domElement  the DOM element for which to return the text value
+	 * @return String
+	 */
+	public static String getElementTextValue(Element domElement) {
+		Node textNode = domElement.getFirstChild();
+		String nodeValue = null;
+		
+		while ((textNode != null) && !(textNode instanceof Text)) {
+			textNode = textNode.getNextSibling();
+		}
+		nodeValue = (textNode == null) ? null : ((Text) textNode).getData();
+		
+		if ((nodeValue != null) && (nodeValue.trim().length() == 0)) {
+			nodeValue = null;
+		}
+		return nodeValue;
 	}
 	
 	/**

@@ -25,6 +25,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.fxmisc.flowless.VirtualizedScrollPane;
+import org.fxmisc.richtext.CodeArea;
+import org.opentravel.schemacompiler.codegen.example.ExampleGeneratorOptions;
+import org.opentravel.schemacompiler.ioc.CompilerExtensionRegistry;
+import org.opentravel.schemacompiler.loader.LibraryInputSource;
+import org.opentravel.schemacompiler.loader.LibraryLoaderException;
+import org.opentravel.schemacompiler.loader.LibraryModelLoader;
+import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
+import org.opentravel.schemacompiler.model.TLModel;
+import org.opentravel.schemacompiler.repository.ProjectManager;
+import org.opentravel.schemacompiler.validate.FindingMessageFormat;
+import org.opentravel.schemacompiler.validate.FindingType;
+import org.opentravel.schemacompiler.validate.ValidationFindings;
+import org.opentravel.schemacompiler.visitor.ModelNavigator;
+import org.w3c.dom.Document;
+
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -42,31 +62,13 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
-import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.fxmisc.flowless.VirtualizedScrollPane;
-import org.fxmisc.richtext.CodeArea;
-import org.opentravel.schemacompiler.ioc.CompilerExtensionRegistry;
-import org.opentravel.schemacompiler.loader.LibraryInputSource;
-import org.opentravel.schemacompiler.loader.LibraryLoaderException;
-import org.opentravel.schemacompiler.loader.LibraryModelLoader;
-import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
-import org.opentravel.schemacompiler.model.TLModel;
-import org.opentravel.schemacompiler.repository.ProjectManager;
-import org.opentravel.schemacompiler.validate.FindingMessageFormat;
-import org.opentravel.schemacompiler.validate.FindingType;
-import org.opentravel.schemacompiler.validate.ValidationFindings;
-import org.opentravel.schemacompiler.visitor.ModelNavigator;
-import org.w3c.dom.Document;
 
 
 /**
@@ -89,8 +91,8 @@ public class ExampleUpgradeController {
     @FXML private ChoiceBox<OTMObjectChoice> entityChoice;
     @FXML private Button strategyButton;
     @FXML private Button resetButton;
-    @FXML private TreeView<DOMTreeNode> originalTreeView;
-    @FXML private TreeView<?> upgradedTreeView;
+    @FXML private TreeView<DOMTreeOriginalNode> originalTreeView;
+    @FXML private TreeView<DOMTreeUpgradeNode> upgradedTreeView;
     @FXML private TabPane tabPane;
     @FXML private AnchorPane previewTab;
     @FXML private AnchorPane originalTab;
@@ -111,8 +113,9 @@ public class ExampleUpgradeController {
 	private TLModel model;
 	private SelectionStrategy selectionStrategy = SelectionStrategy.getDefault();
 	private Document originalDocument;
+	private Document upgradeDocument;
 	
-	private Map<QName,List<OTMObjectChoice>> baseFamilyMatches = new HashMap<>();
+	private Map<QName,List<OTMObjectChoice>> familyMatches = new HashMap<>();
 	private Map<String,List<OTMObjectChoice>> allElementsByBaseNS = new HashMap<>();
 	
 	/**
@@ -161,7 +164,7 @@ public class ExampleUpgradeController {
 							// Scan the model to pre-populate tables with lists of potential entity
 							// selections for the example root element.
 							new ModelNavigator( visitor ).navigate( model );
-							baseFamilyMatches = visitor.getBaseFamilyMatches();
+							familyMatches = visitor.getFamilyMatches();
 							allElementsByBaseNS = visitor.getAllElementsByBaseNS();
 							
 							rebuildEntityChoices();
@@ -262,7 +265,7 @@ public class ExampleUpgradeController {
 		switch (selectionStrategy.getStrategyType()) {
 			case BASE_FAMILY:
 				QName baseQName = new QName( rootBaseNS, rootName.getLocalPart() );
-				candidates = baseFamilyMatches.get( baseQName );
+				candidates = familyMatches.get( baseQName );
 				break;
 			case EXAMPLE_NAMESPACE:
 				candidates = allElementsByBaseNS.get( rootBaseNS );
@@ -327,9 +330,22 @@ public class ExampleUpgradeController {
 	private void populateExampleContent() {
 		rebuildEntityChoices();
 		Platform.runLater( () -> {
+			OTMObjectChoice selectedEntity = entityChoice.getValue();
+			
 			rootElementPrefixText.setText( originalDocument.getDocumentElement().getNodeName() );
 			rootElementNSText.setText( HelperUtils.getElementName( originalDocument.getDocumentElement() ).toString() );
-			originalTreeView.setRoot( DOMTreeNode.createTree( originalDocument.getDocumentElement() ) );
+			originalTreeView.setRoot( DOMTreeOriginalNode.createTree( originalDocument.getDocumentElement() ) );
+			
+			if (selectedEntity != null) {
+				TreeItem<DOMTreeUpgradeNode> upgradeTree = new UpgradeTreeBuilder( getExampleOptions() )
+						.buildUpgradeDOMTree( selectedEntity.getOtmObject(), originalDocument.getDocumentElement() );
+				
+				upgradedTreeView.setRoot( upgradeTree );
+				upgradeDocument = upgradeTree.getValue().getDomNode().getOwnerDocument();
+				
+			} else {
+				upgradedTreeView.setRoot( null );
+			}
 		});
 	}
 	
@@ -509,6 +525,19 @@ public class ExampleUpgradeController {
 			settings.setLastExampleFolder( exampleFolder );
 		}
 		settings.setRepeatCount( repeatCountSpinner.getValue() );
+	}
+	
+	/**
+	 * Returns the set of options that should be used when generating unmatched sections
+	 * of the upgraded example tree.
+	 * 
+	 * @return ExampleGeneratorOptions
+	 */
+	private ExampleGeneratorOptions getExampleOptions() {
+		ExampleGeneratorOptions options = new ExampleGeneratorOptions();
+		
+		options.setMaxRepeat( repeatCountSpinner.getValue() );
+		return options;
 	}
 	
 	/**
