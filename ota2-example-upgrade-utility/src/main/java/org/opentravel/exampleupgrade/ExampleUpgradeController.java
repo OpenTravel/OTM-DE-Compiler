@@ -303,7 +303,7 @@ public class ExampleUpgradeController {
 							DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 							
 							originalDocument = dBuilder.parse( selectedFile );
-							populateExampleContent();
+							rebuildEntityChoices();
 							
 						} else if (selectedFile.getName().endsWith(".json")) {
 							throw new Exception("JSON documents not yet supported.");
@@ -328,7 +328,6 @@ public class ExampleUpgradeController {
 	 * Populates the contents of the visual controls associated with example content.
 	 */
 	private void populateExampleContent() {
-		rebuildEntityChoices();
 		Platform.runLater( () -> {
 			OTMObjectChoice selectedEntity = entityChoice.getValue();
 			
@@ -503,11 +502,30 @@ public class ExampleUpgradeController {
 		repeatCountSpinner.setValueFactory(
 				new IntegerSpinnerValueFactory( 1, 3, settings.getRepeatCount(), 1 ) );
 		
+		entityChoice.valueProperty().addListener( ( observable, oldValue, newValue ) -> {
+			if (oldValue != newValue) {
+				populateExampleContent();
+			}
+		});
+		
+		upgradedTreeView.setCellFactory( tv -> new StyledTreeCell<DOMTreeUpgradeNode>() {
+			protected List<String> getConditionalStyleClasses() {
+				return ExampleMatchType.getAllStyleClasses();
+			}
+			protected String getConditionalStyleClass() {
+				TreeItem<DOMTreeUpgradeNode> item = getTreeItem();
+				return (item == null) ? null : item.getValue().getMatchType().getStyleClass();
+			}
+		});
+		
 		this.primaryStage = primaryStage;
 		this.primaryStage.getScene().getStylesheets().add(
 				ExampleUpgradeController.class.getResource( "/styles/xml-highlighting.css" ).toExternalForm() );
 		this.primaryStage.getScene().getStylesheets().add(
 				ExampleUpgradeController.class.getResource( "/styles/json-highlighting.css" ).toExternalForm() );
+		this.primaryStage.getScene().getStylesheets().add(
+				ExampleUpgradeController.class.getResource( "/styles/tree-styles.css" ).toExternalForm() );
+		
 		updateControlStates();
 	}
 	

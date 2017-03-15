@@ -22,6 +22,7 @@ import java.util.Set;
 
 import javax.xml.namespace.QName;
 
+import org.opentravel.schemacompiler.codegen.example.ExampleGeneratorOptions;
 import org.opentravel.schemacompiler.codegen.example.ExtensionPointRegistry;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
@@ -38,15 +39,18 @@ import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLComplexTypeBase;
 import org.opentravel.schemacompiler.model.TLCoreObject;
+import org.opentravel.schemacompiler.model.TLExample;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
+import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLModelElement;
+import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLProperty;
-import org.opentravel.schemacompiler.model.TLPropertyType;
+import org.opentravel.schemacompiler.model.TLRoleEnumeration;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.visitor.AbstractNavigator;
 
@@ -59,6 +63,7 @@ import org.opentravel.schemacompiler.visitor.AbstractNavigator;
 public class UpgradeModelNavigator extends AbstractNavigator<NamedEntity>{
 	
 	private ExtensionPointRegistry extensionPointRegistry;
+    private ExampleGeneratorOptions exampleOptions;
 	private UpgradeModelVisitor visitor;
 	
     /**
@@ -67,10 +72,13 @@ public class UpgradeModelNavigator extends AbstractNavigator<NamedEntity>{
      * 
      * @param visitor  the visitor to be notified when model elements are encountered
      * @param model  the model containing all of the entities to be visited
+	 * @param exampleOptions  the example generation options
      */
-	public UpgradeModelNavigator(UpgradeModelVisitor visitor, TLModel model) {
+	public UpgradeModelNavigator(UpgradeModelVisitor visitor, TLModel model,
+			ExampleGeneratorOptions exampleOptions) {
 		super(visitor);
 		this.visitor = visitor;
+		this.exampleOptions = (exampleOptions == null) ? new ExampleGeneratorOptions() : exampleOptions;
 		extensionPointRegistry = new ExtensionPointRegistry( model );
 	}
 
@@ -112,15 +120,18 @@ public class UpgradeModelNavigator extends AbstractNavigator<NamedEntity>{
      * Called when a <code>TLValueWithAttributes</code> instance is encountered during model
      * navigation.
      * 
-     * @param valueWithAttributes  the simple entity to visit and navigate
+     * @param vwa  the simple entity to visit and navigate
      */
-    public void navigateValueWithAttributes(TLValueWithAttributes valueWithAttributes) {
-        if (canVisit(valueWithAttributes) && visitor.visitValueWithAttributes(valueWithAttributes)) {
-            for (TLAttribute attribute : valueWithAttributes.getAttributes()) {
+    public void navigateValueWithAttributes(TLValueWithAttributes vwa) {
+        if (visitor.visitValueWithAttributes(vwa)) {
+        	
+            for (TLAttribute attribute : PropertyCodegenUtils.getInheritedAttributes(vwa)) {
                 navigateAttribute(attribute);
             }
+            for (TLIndicator indicator :PropertyCodegenUtils.getInheritedIndicators(vwa)) {
+                navigateIndicator(indicator);
+            }
         }
-        addVisitedNode(valueWithAttributes);
     }
 
     /**
@@ -130,16 +141,16 @@ public class UpgradeModelNavigator extends AbstractNavigator<NamedEntity>{
      * @param extensionPointFacet  the extension point facet entity to visit and navigate
      */
     public void navigateExtensionPointFacet(TLExtensionPointFacet extensionPointFacet) {
-        if (canVisit(extensionPointFacet) && visitor.visitExtensionPointFacet(extensionPointFacet)) {
+        if (visitor.visitExtensionPointFacet(extensionPointFacet)) {
 
             for (TLAttribute attribute : extensionPointFacet.getAttributes()) {
                 navigateAttribute(attribute);
             }
-            for (TLProperty element : extensionPointFacet.getElements()) {
-                navigateElement(element);
-            }
             for (TLIndicator indicator : extensionPointFacet.getIndicators()) {
                 navigateIndicator(indicator);
+            }
+            for (TLProperty element : extensionPointFacet.getElements()) {
+                navigateElement(element);
             }
             visitor.visitExtensionPointEnd(extensionPointFacet);
         }
@@ -151,10 +162,9 @@ public class UpgradeModelNavigator extends AbstractNavigator<NamedEntity>{
      * @param facet  the facet entity to visit and navigate
      */
     public void navigateFacet(TLFacet facet) {
-        if (canVisit(facet) && visitor.visitFacet(facet)) {
+        if (visitor.visitFacet(facet)) {
         	navigateFacetMembers(facet);
         }
-        addVisitedNode(facet);
     }
 
     /**
@@ -163,15 +173,13 @@ public class UpgradeModelNavigator extends AbstractNavigator<NamedEntity>{
      * @param listFacet  the list facet entity to visit and navigate
      */
     public void navigateListFacet(TLListFacet listFacet) {
-        if (canVisit(listFacet) && visitor.visitListFacet(listFacet)) {
+        if (visitor.visitListFacet(listFacet)) {
 			TLAbstractFacet itemFacet = listFacet.getItemFacet();
 			
 			if (itemFacet instanceof TLFacet) {
 				navigateFacetMembers( (TLFacet) itemFacet );
 			}
-			// TODO: What about the role attribute?
         }
-        addVisitedNode(listFacet);
     }
 
     /**
@@ -180,11 +188,9 @@ public class UpgradeModelNavigator extends AbstractNavigator<NamedEntity>{
      * @param alias  the alias entity to visit and navigate
      */
     public void navigateAlias(TLAlias alias) {
-        if (canVisit(alias)) {
+        if (visitor.visitAlias(alias)) {
 			TLAliasOwner aliasOwner = alias.getOwningEntity();
 			
-            visitor.visitAlias(alias);
-            
 			if (aliasOwner instanceof TLFacet) {
 				navigateFacetMembers( (TLFacet) aliasOwner );
 				
@@ -202,7 +208,6 @@ public class UpgradeModelNavigator extends AbstractNavigator<NamedEntity>{
 				throw new IllegalArgumentException("Unexpected alias owner type.");
 			}
         }
-        addVisitedNode(alias);
     }
 
     /**
@@ -254,12 +259,14 @@ public class UpgradeModelNavigator extends AbstractNavigator<NamedEntity>{
         for (TLAttribute attribute : PropertyCodegenUtils.getInheritedAttributes(facet)) {
             navigateAttribute(attribute);
         }
+        navigateRoleAttribute( facet );
+        
         for (TLIndicator indicator : PropertyCodegenUtils.getInheritedIndicators(facet)) {
         	if (!indicator.isPublishAsElement()) {
                 navigateIndicator(indicator);
         	}
         }
-
+        
         // Navigate the elements (properties) and extension points for this facet
         for (TLModelElement elementItem : PropertyCodegenUtils.getElementSequence(facet)) {
         	if (elementItem instanceof TLProperty) {
@@ -319,9 +326,12 @@ public class UpgradeModelNavigator extends AbstractNavigator<NamedEntity>{
      */
     private void navigateExtensionPoint(TLFacet facet, List<TLExtensionPointFacet> facetExtensions) {
         if ((facetExtensions != null) && !facetExtensions.isEmpty()) {
-            for (TLExtensionPointFacet xpFacet : facetExtensions) {
-                navigateExtensionPointFacet(xpFacet);
-            }
+        	if (visitor.visitExtensionPointGroupStart( facet.getFacetType() )) {
+                for (TLExtensionPointFacet xpFacet : facetExtensions) {
+                    navigateExtensionPointFacet(xpFacet);
+                }
+                visitor.visitExtensionPointGroupEnd( facet.getFacetType() );
+        	}
         }
     }
 
@@ -331,10 +341,9 @@ public class UpgradeModelNavigator extends AbstractNavigator<NamedEntity>{
      * @param attribute  the attribute entity to visit and navigate
      */
     public void navigateAttribute(TLAttribute attribute) {
-        if (canVisit(attribute) && visitor.visitAttribute(attribute)) {
+        if (visitor.visitAttribute(attribute)) {
         	// No further navigation required
         }
-        addVisitedNode(attribute);
     }
 
     /**
@@ -343,33 +352,46 @@ public class UpgradeModelNavigator extends AbstractNavigator<NamedEntity>{
      * @param element  the element entity to visit and navigate
      */
     public void navigateElement(TLProperty element) {
-        if (canVisit(element) && visitor.visitElement(element)) {
-        	TLPropertyType elementType = element.getType();
-        	QName elementName = XsdCodegenUtils.getGlobalElementName( elementType );
-        	
-        	if (elementName != null) {
-        		if (elementType instanceof TLFacet) {
-        			navigateFacet( (TLFacet) elementType );
-        			
-        		} else if (elementType instanceof TLListFacet) {
-        			navigateListFacet( (TLListFacet) elementType );
-        			
-        		} else if (elementType instanceof TLAlias) {
-        			navigateAlias( (TLAlias) elementType );
-        			
-        		} else if (elementType instanceof TLComplexTypeBase) {
-        			navigateFacetMembers( getPreferredFacet( (TLComplexTypeBase) elementType ) );
-        			
-        		} else {
-        			throw new IllegalArgumentException("Unexpected OTM element type");
-        		}
-        		
-        	} else if (elementType instanceof TLValueWithAttributes) {
-    			navigateValueWithAttributes( (TLValueWithAttributes) elementType );
-        	}
-        	visitor.visitElementEnd(element);
-        }
-        addVisitedNode(element);
+    	int maxRepeat = getMaxRepeat( element );
+    	boolean canContinue = true;
+    	boolean canRepeat = true;
+    	int repeatCount = 0;
+    	
+    	// Now we can process the element; repeat as long as there is content in the
+    	// original DOM document or until the max repeat count is reached.
+    	while ((repeatCount < maxRepeat) && canContinue && canRepeat) {
+            if (canContinue = visitor.visitElement(element)) {
+            	NamedEntity elementType = visitor.getResolvedElementType();
+            	QName elementName = XsdCodegenUtils.getGlobalElementName( elementType );
+            	
+            	if (!element.isReference()) {
+                	if (elementName != null) {
+                		if (elementType instanceof TLFacet) {
+                			navigateFacet( (TLFacet) elementType );
+                			
+                		} else if (elementType instanceof TLListFacet) {
+                			navigateListFacet( (TLListFacet) elementType );
+                			
+                		} else if (elementType instanceof TLAlias) {
+                			navigateAlias( (TLAlias) elementType );
+                			
+                		} else if (elementType instanceof TLComplexTypeBase) {
+                			navigateFacetMembers( getPreferredFacet( (TLComplexTypeBase) elementType ) );
+                			
+                		} else {
+                			throw new IllegalArgumentException("Unexpected OTM element type");
+                		}
+                		
+                	} else if (elementType instanceof TLValueWithAttributes) {
+            			navigateValueWithAttributes( (TLValueWithAttributes) elementType );
+                	}
+                	handleExtensionAttribute( elementType );
+            	}
+            	visitor.visitElementEnd(element);
+            	canRepeat = visitor.canRepeat( element, elementType );
+            }
+            repeatCount++;
+    	}
     }
     
     /**
@@ -380,38 +402,116 @@ public class UpgradeModelNavigator extends AbstractNavigator<NamedEntity>{
      * @return TLFacet
      */
     private TLFacet getPreferredFacet(TLComplexTypeBase otmEntity) {
+    	NamedEntity resolvedElementType = visitor.getResolvedElementType();
     	TLFacet preferredFacet;
     	
-    	// TODO: Rework preferred facet logic
-		// In these cases, we will need to do some sort of lookahead on the DOM tree to find
-		// out which facet should be chosen.  This will probably need to be delegated to the
-		// listener since the navigator has no visibility to the DOM tree.
-    	
-    	if (otmEntity instanceof TLBusinessObject) {
-    		preferredFacet = ((TLBusinessObject) otmEntity).getSummaryFacet();
+    	if (resolvedElementType instanceof TLAlias) {
+    		resolvedElementType = ((TLAlias) resolvedElementType).getOwningEntity();
+    	}
+    	if (resolvedElementType instanceof TLFacet) {
+    		preferredFacet = (TLFacet) resolvedElementType;
     		
-    	} else if (otmEntity instanceof TLChoiceObject) {
-    		preferredFacet = ((TLChoiceObject) otmEntity).getSharedFacet();
-    		
-    	} else if (otmEntity instanceof TLCoreObject) {
-    		preferredFacet = ((TLCoreObject) otmEntity).getSummaryFacet();
-    		
-    	} else {
-    		throw new IllegalArgumentException("Unrecognized complex entity type.");
+    	} else { // Default lookups if visitor did not resolve the element type for some reason
+        	if (otmEntity instanceof TLBusinessObject) {
+        		preferredFacet = ((TLBusinessObject) otmEntity).getSummaryFacet();
+        		
+        	} else if (otmEntity instanceof TLChoiceObject) {
+        		preferredFacet = ((TLChoiceObject) otmEntity).getSharedFacet();
+        		
+        	} else if (otmEntity instanceof TLCoreObject) {
+        		preferredFacet = ((TLCoreObject) otmEntity).getSummaryFacet();
+        		
+        	} else {
+        		throw new IllegalArgumentException("Unrecognized complex entity type.");
+        	}
     	}
     	return preferredFacet;
     }
-
+    
+    /**
+     * Returns the max repeat count for the given OTM element.
+     * 
+     * @param element  the OTM element for which to calculate the repeat count
+     * @return int
+     */
+    private int getMaxRepeat(TLProperty element) {
+    	int maxRepeat = (element.getRepeat() < 0) ? Integer.MAX_VALUE : Math.max( 1, element.getRepeat() );
+    	
+    	maxRepeat = Math.min( exampleOptions.getMaxRepeat(), maxRepeat );
+    	
+    	// Special case for list facets (and aliases): Max repeat is equal to the number of roles,
+    	// regardless of the repeat count on the element itself.
+    	NamedEntity repeatCheckType = element.getType();
+    	
+    	if (repeatCheckType instanceof TLAlias) {
+    		repeatCheckType = ((TLAlias) repeatCheckType).getOwningEntity();
+    	}
+    	if (repeatCheckType instanceof TLListFacet) {
+    		TLFacetOwner facetOwner = ((TLListFacet) repeatCheckType).getOwningEntity();
+    		
+    		if (facetOwner instanceof TLCoreObject) {
+    			maxRepeat = Math.max( 1, ((TLCoreObject) facetOwner).getRoleEnumeration().getRoles().size() );
+    		}
+    	}
+    	return maxRepeat;
+    }
+    
+    /**
+     * Navigates the 'role' attribute for the given facet if it defines one (special case).
+     * 
+     * @param facet  the facet for which to navigate the role attribute
+     */
+    private void navigateRoleAttribute(TLFacet facet) {
+        if (facet.getOwningEntity() instanceof TLCoreObject) {
+        	TLCoreObject core = (TLCoreObject) facet.getOwningEntity();
+        	
+        	if (core.getRoleEnumeration().getRoles().size() > 0) {
+        		TLAttribute roleAttr = new TLAttribute();
+        		
+        		roleAttr.setName("role");
+        		roleAttr.setOwner( facet );
+        		roleAttr.setType(core.getRoleEnumeration());
+        		roleAttr.setMandatory(false);
+        		navigateAttribute(roleAttr);
+        	}
+        }
+    }
+    
+	/**
+	 * Handles processing for the implied 'extension' attribute if the given element
+	 * type declares one.  This is needed for role enumerations and open enumerations.
+	 * 
+	 * @param elementType  the type of the element being processed
+	 */
+	private void handleExtensionAttribute(NamedEntity elementType) {
+		NamedEntity actualType = elementType;
+		
+		while (actualType instanceof TLValueWithAttributes) {
+			actualType = ((TLValueWithAttributes) actualType).getParentType();
+		}
+		
+		if ((actualType instanceof TLRoleEnumeration) || (actualType instanceof TLOpenEnumeration)) {
+			TLAttribute extAttribute = new TLAttribute();
+			TLExample example = new TLExample();
+			
+			example.setContext("default");
+			example.setValue("Other_Value");
+			extAttribute.setName("extension");
+			extAttribute.setMandatory(false);
+			extAttribute.addExample(example);
+			navigateAttribute(extAttribute);
+		}
+	}
+	
     /**
      * Called when a <code>TLIndicator</code> instance is encountered during model navigation.
      * 
      * @param indicator  the indicator entity to visit and navigate
      */
     public void navigateIndicator(TLIndicator indicator) {
-        if (canVisit(indicator) && visitor.visitIndicator(indicator)) {
+        if (visitor.visitIndicator(indicator)) {
         	// No further navigation required
         }
-        addVisitedNode(indicator);
     }
 
 	/**

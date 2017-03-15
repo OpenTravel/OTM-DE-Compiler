@@ -22,12 +22,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
-import org.opentravel.schemacompiler.model.TLBusinessObject;
-import org.opentravel.schemacompiler.model.TLChoiceObject;
-import org.opentravel.schemacompiler.model.TLCoreObject;
+import org.opentravel.schemacompiler.model.TLComplexTypeBase;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLFacetType;
@@ -86,17 +85,11 @@ public class EntityFacetSelection {
 		}
 		
 		// Retrieve the facet list based upon the entity type
-		if (facetOwner instanceof TLBusinessObject) {
-			facetList = HelperUtils.getAvailableFacets( (TLBusinessObject) facetOwner );
-			
-		} else if (facetOwner instanceof TLCoreObject) {
-			facetList = HelperUtils.getAvailableFacets( (TLCoreObject) facetOwner );
-			
-		} else if (facetOwner instanceof TLChoiceObject) {
-			facetList = HelperUtils.getAvailableFacets( (TLChoiceObject) facetOwner );
+		if (facetOwner instanceof TLComplexTypeBase) {
+			facetList = FacetCodegenUtils.getAvailableFacets( (TLComplexTypeBase) facetOwner );
 			
 		} else if (facetOwner instanceof TLOperation) {
-			facetList = HelperUtils.getAvailableFacets( (TLOperation) facetOwner );
+			facetList = FacetCodegenUtils.getAvailableFacets( (TLOperation) facetOwner );
 		}
 		
 		// If facets were found, add them to the configuration for this selection instance

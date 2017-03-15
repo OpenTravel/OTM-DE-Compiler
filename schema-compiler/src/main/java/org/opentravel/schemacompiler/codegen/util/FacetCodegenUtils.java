@@ -26,8 +26,10 @@ import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFacto
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.OperationType;
 import org.opentravel.schemacompiler.model.TLActionFacet;
+import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
+import org.opentravel.schemacompiler.model.TLComplexTypeBase;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtension;
@@ -411,7 +413,7 @@ public class FacetCodegenUtils {
      * @param visitedFacets  the collection of facets that have already been visited
      * @return List<TLFacet>
      */
-    public static void getLocalFacetHierarchy(TLFacet facet, List<TLFacet> localHierarchy, Set<TLFacet> visitedFacets) {
+    private static void getLocalFacetHierarchy(TLFacet facet, List<TLFacet> localHierarchy, Set<TLFacet> visitedFacets) {
     	if (!visitedFacets.contains( facet )) {
     		visitedFacets.add( facet );
     		
@@ -449,6 +451,125 @@ public class FacetCodegenUtils {
     	}
     }
     
+	/**
+	 * Returns the list of available facets for the substitution group.
+	 * 
+	 * @param businessObject  the business object for which to return available facets
+	 * @return List<TLFacet>
+	 */
+	public static List<TLFacet> getAvailableFacets(TLComplexTypeBase entity) {
+		List<TLFacet> facetList = new ArrayList<>();
+		
+		if (entity instanceof TLBusinessObject) {
+			TLBusinessObject businessObject = (TLBusinessObject) entity;
+			
+			addIfContentExists( businessObject.getIdFacet(), facetList );
+			addIfContentExists( businessObject.getSummaryFacet(), facetList );
+			addIfContentExists( businessObject.getDetailFacet(), facetList );
+			
+			addContextualFacets( businessObject.getCustomFacets(), facetList, new HashSet<TLContextualFacet>() );
+			addContextualFacets( findGhostFacets( businessObject, TLFacetType.CUSTOM ),
+					facetList, new HashSet<TLContextualFacet>() );
+			
+		} else if (entity instanceof TLChoiceObject) {
+			TLChoiceObject choiceObject = (TLChoiceObject) entity;
+			
+			addContextualFacets( choiceObject.getChoiceFacets(), facetList, new HashSet<TLContextualFacet>() );
+			addContextualFacets( findGhostFacets( choiceObject, TLFacetType.CHOICE ),
+					facetList, new HashSet<TLContextualFacet>() );
+			
+		} else if (entity instanceof TLCoreObject) {
+			TLCoreObject coreObject = (TLCoreObject) entity;
+			
+			addIfContentExists( coreObject.getSummaryFacet(), facetList );
+			addIfContentExists( coreObject.getDetailFacet(), facetList );
+		}
+		return facetList;
+	}
+	
+	/**
+	 * Returns the available facet aliases for the given parent object alias.  The alias
+	 * passed to this method must be a direct alias of a core, choice, or business object
+	 * (i.e. not a facet alias).
+	 * 
+	 * @param alias  the alias for which to return all available facet aliases
+	 * @return List<TLAlias>
+	 */
+	public static List<TLAlias> getAvailableFacetAliases(TLAlias alias) {
+		if (alias.getOwningEntity() instanceof TLComplexTypeBase) {
+			List<TLFacet> availableFacets = getAvailableFacets( (TLComplexTypeBase) alias.getOwningEntity() );
+			List<TLAlias> availableAliases = new ArrayList<>();
+			
+			for (TLFacet facet : availableFacets) {
+				TLAlias facetAlias;
+				
+				if (facet instanceof TLContextualFacet) {
+					facetAlias = AliasCodegenUtils.getFacetAlias( alias, facet.getFacetType(),
+							((TLContextualFacet) facet).getName() );
+					
+				} else {
+					facetAlias = AliasCodegenUtils.getFacetAlias( alias, facet.getFacetType() );
+				}
+				
+				if (facetAlias != null) {
+					availableAliases.add( facetAlias );
+				}
+			}
+			return availableAliases;
+			
+		} else {
+			throw new IllegalArgumentException("Invalid alias type (must be a parent object alias).");
+		}
+	}
+	
+	/**
+	 * Returns the list of available facets for the operation.
+	 * 
+	 * @param operation  the operation for which to return available facets
+	 * @return List<TLFacet>
+	 */
+	public static List<TLFacet> getAvailableFacets(TLOperation operation) {
+		List<TLFacet> facetList = new ArrayList<>();
+		
+		addIfContentExists(operation.getRequest(), facetList);
+		addIfContentExists(operation.getResponse(), facetList);
+		addIfContentExists(operation.getNotification(), facetList);
+		return facetList;
+	}
+	
+	/**
+	 * Recursive method that adds the list of child facets to the list of contextual facets.
+	 * 
+	 * @param facetsToAdd  the list of facets to add
+	 * @param contextualFacets  the final list of contextual facets being assembled
+	 * @param visitedFacets  collection of facets already visited (prevents infinite loops)
+	 */
+	private static void addContextualFacets(List<TLContextualFacet> facetsToAdd,
+			List<TLFacet> contextualFacets, Set<TLContextualFacet> visitedFacets) {
+		for (TLContextualFacet facet : facetsToAdd) {
+			if (!visitedFacets.contains( facet )) {
+				visitedFacets.add( facet );
+				addIfContentExists( facet, contextualFacets );
+				addContextualFacets( facet.getChildFacets(), contextualFacets, visitedFacets );
+				addContextualFacets( FacetCodegenUtils.findGhostFacets( facet, facet.getFacetType() ),
+						contextualFacets, visitedFacets );
+			}
+		}
+	}
+	
+	/**
+	 * If the given facet declares or inherits fields, this method will add
+	 * it to the list provided.
+	 * 
+	 * @param facet  the facet to verify and add
+	 * @param facetList  the list of facets to which the given one may be appended
+	 */
+	private static void addIfContentExists(TLFacet facet, List<TLFacet> facetList) {
+		if (new FacetCodegenDelegateFactory(null).getDelegate(facet).hasContent()) {
+			facetList.add(facet);
+		}
+	}
+	
     /**
      * Returns a list of "ghost facets" for the given owner. A ghost facet occurs when a contextual
      * facet (e.g. custom or query) with a certain context/label combination is declared on an

@@ -39,7 +39,7 @@ public class DOMTreeOriginalNode extends AbstractDOMTreeNode {
 	}
 	
 	/**
-	 * Constructs a new tree of <code>DOMTreeNode</code> objects based on the
+	 * Constructs a new tree of <code>DOMTreeOriginalNode</code> objects based on the
 	 * DOM node provided.
 	 * 
 	 * @param domNode  the DOM node instance for which to create a tree

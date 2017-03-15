@@ -16,6 +16,9 @@
 
 package org.opentravel.exampleupgrade;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Used to specify the type of match between an existing example DOM element
  * and an associated OTM model entity or field.
@@ -32,7 +35,12 @@ public enum ExampleMatchType {
 	 *   <li>XML/JSON Attributes &amp; Indicators - the name of the attribute or indicator matches that of the OTM model.</li>
 	 * </ul>
 	 */
-	EXACT,
+	EXACT( 0 ),
+	
+	/**
+	 * Same as the <code>EXACT</code> match, but for the substitutable element of an OTM facet.
+	 */
+	EXACT_SUBSTITUTABLE( 0 ),
 	
 	/**
 	 * Indicates that an partial match was found between the OTM entity/field and the
@@ -44,12 +52,47 @@ public enum ExampleMatchType {
 	 *   <li>XML/JSON Attributes &amp; Indicators - the name of the attribute or indicator matches that of the OTM model.</li>
 	 * </ul>
 	 */
-	PARTIAL,
+	PARTIAL( 1 ),
+	
+	/**
+	 * Same as the <code>PARTIAL</code> match, but for the substitutable element of an OTM facet.
+	 */
+	PARTIAL_SUBSTITUTABLE( 1 ),
 	
 	/**
 	 * Indicates that no associated DOM element could be identified for the OTM model
 	 * element/field. 
 	 */
-	NONE
+	NONE( 2 );
+	
+	private static List<String> styleClasses = Arrays.asList( "exact-match", "partial-match", "no-match" );
+	
+	private int styleIdx;
+	
+	/**
+	 * Returns the index of the CSS style that corresponds to the match type.
+	 * @param styleIdx
+	 */
+	private ExampleMatchType(int styleIdx) {
+		this.styleIdx = styleIdx;
+	}
+	
+	/**
+	 * Returns the list of all possible style classes associated with this enumeration.
+	 * 
+	 * @return List<String>
+	 */
+	public static List<String> getAllStyleClasses() {
+		return styleClasses;
+	}
+	
+	/**
+	 * Returns the CSS style that corresponds to the match type.
+	 * 
+	 * @return String
+	 */
+	public String getStyleClass() {
+		return styleClasses.get( styleIdx );
+	}
 	
 }
