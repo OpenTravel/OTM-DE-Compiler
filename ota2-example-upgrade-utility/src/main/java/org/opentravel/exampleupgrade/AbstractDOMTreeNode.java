@@ -37,8 +37,9 @@ public abstract class AbstractDOMTreeNode {
 	 * Constructor that supplies the DOM attribute or element to be displayed.
 	 * 
 	 * @param domNode  the DOM node instance
+	 * @param label  the label for the node (if not specified, a default label will be assigned)
 	 */
-	public AbstractDOMTreeNode(Node domNode) {
+	public AbstractDOMTreeNode(Node domNode, String label) {
 		String nodeValue;
 		
 		if (domNode instanceof Attr) {
@@ -48,7 +49,8 @@ public abstract class AbstractDOMTreeNode {
 			nodeValue = HelperUtils.getElementTextValue( (Element) domNode );
 		}
 		this.domNode = domNode;
-		this.label = domNode.getNodeName() + ((nodeValue == null) ? "" : (" = " + nodeValue));
+		this.label = (label != null) ? label :
+			(domNode.getNodeName() + ((nodeValue == null) ? "" : (" = " + nodeValue)));
 	}
 	
 	/**

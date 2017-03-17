@@ -39,7 +39,7 @@ public class DOMTreeUpgradeNode extends AbstractDOMTreeNode {
 	 * @param matchType  indicates the match type of the OTM entity with the original example
 	 */
 	public DOMTreeUpgradeNode(NamedEntity otmEntity, Node domNode, ExampleMatchType matchType) {
-		super(domNode);
+		super(domNode, (matchType == ExampleMatchType.MISSING) ? (domNode.getNodeName() + " [MISSING]") : null);
 		this.otmEntity = otmEntity;
 		this.matchType = matchType;
 	}
@@ -53,11 +53,11 @@ public class DOMTreeUpgradeNode extends AbstractDOMTreeNode {
 	 * @param matchType  indicates the match type of the OTM field with the original example
 	 */
 	public DOMTreeUpgradeNode(TLMemberField<?> otmField, Node domNode, ExampleMatchType matchType) {
-		super(domNode);
+		super(domNode, (matchType == ExampleMatchType.MISSING) ? (domNode.getNodeName() + " [MISSING]") : null);
 		this.otmField = otmField;
 		this.matchType = matchType;
 	}
-
+	
 	/**
 	 * Returns the OTM complex entity type associated with this node.
 	 *

@@ -16,6 +16,7 @@
 
 package org.opentravel.exampleupgrade;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,6 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
@@ -43,18 +45,22 @@ import org.opentravel.schemacompiler.validate.FindingMessageFormat;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.visitor.ModelNavigator;
+import org.opentravel.schemacompiler.xml.XMLPrettyPrinter;
 import org.w3c.dom.Document;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.scene.control.TabPane;
@@ -64,6 +70,13 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.effect.Lighting;
+import javafx.scene.input.DataFormat;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
@@ -77,6 +90,8 @@ import javafx.stage.Stage;
 public class ExampleUpgradeController {
 	
 	public static final String FXML_FILE = "/ota2-example-upgrade.fxml";
+	
+	private static final DataFormat DRAG_FORMAT = new DataFormat("application/ota2-original-dom-node");
 	
 	private Stage primaryStage;
 	
@@ -106,6 +121,7 @@ public class ExampleUpgradeController {
     @FXML private Label statusBarLabel;
 	private VirtualizedScrollPane<?> previewScrollPane;
 	private CodeArea previewPane;
+	private ContextMenu upgradeContextMenu;
 	
 	private File modelFile;
 	private File exampleFile;
@@ -117,6 +133,9 @@ public class ExampleUpgradeController {
 	
 	private Map<QName,List<OTMObjectChoice>> familyMatches = new HashMap<>();
 	private Map<String,List<OTMObjectChoice>> allElementsByBaseNS = new HashMap<>();
+	
+	private String dragId;
+	private TreeItem<DOMTreeOriginalNode> dragItem;
 	
 	/**
 	 * Called when the user clicks the button to load a new project or library file.
@@ -326,24 +345,67 @@ public class ExampleUpgradeController {
 	
 	/**
 	 * Populates the contents of the visual controls associated with example content.
+	 * 
+	 * @param newObjectSelected  flag indicating whether the OTM object is a new selection by the user
 	 */
-	private void populateExampleContent() {
+	private void populateExampleContent(boolean newObjectSelected) {
 		Platform.runLater( () -> {
-			OTMObjectChoice selectedEntity = entityChoice.getValue();
-			
-			rootElementPrefixText.setText( originalDocument.getDocumentElement().getNodeName() );
-			rootElementNSText.setText( HelperUtils.getElementName( originalDocument.getDocumentElement() ).toString() );
-			originalTreeView.setRoot( DOMTreeOriginalNode.createTree( originalDocument.getDocumentElement() ) );
-			
-			if (selectedEntity != null) {
-				TreeItem<DOMTreeUpgradeNode> upgradeTree = new UpgradeTreeBuilder( getExampleOptions() )
-						.buildUpgradeDOMTree( selectedEntity.getOtmObject(), originalDocument.getDocumentElement() );
+			try {
+				OTMObjectChoice selectedEntity = entityChoice.getValue();
 				
-				upgradedTreeView.setRoot( upgradeTree );
-				upgradeDocument = upgradeTree.getValue().getDomNode().getOwnerDocument();
+				rootElementPrefixText.setText( originalDocument.getDocumentElement().getNodeName() );
+				rootElementNSText.setText( HelperUtils.getElementName( originalDocument.getDocumentElement() ).toString() );
+				originalTreeView.setRoot( DOMTreeOriginalNode.createTree( originalDocument.getDocumentElement() ) );
 				
-			} else {
-				upgradedTreeView.setRoot( null );
+				if (selectedEntity != null) {
+					TreeItem<DOMTreeUpgradeNode> upgradeTree = new UpgradeTreeBuilder( getExampleOptions() )
+							.buildUpgradeDOMTree( selectedEntity.getOtmObject(), originalDocument.getDocumentElement() );
+					
+					upgradedTreeView.setRoot( upgradeTree );
+					upgradeDocument = upgradeTree.getValue().getDomNode().getOwnerDocument();
+					setUpgradeExpandedStates( upgradeTree );
+					setOriginalExpandedStates( originalTreeView.getRoot() );
+					
+				} else {
+					upgradedTreeView.setRoot( null );
+				}
+				updatePreviewPane( newObjectSelected );
+				
+			} catch (Exception e) {
+				previewPane.replaceText( "-- Error Generating Example Output --");
+				e.printStackTrace( System.out );
+			}
+		});
+	}
+	
+	/**
+	 * Updates the contents of the preview pane.
+	 * 
+	 * @param newObjectSelected  flag indicating whether the OTM object is a new selection by the user
+	 */
+	private void updatePreviewPane(boolean newObjectSelected) {
+		Platform.runLater( () -> {
+			try {
+				double yScroll = newObjectSelected ? 0.0 : previewScrollPane.estimatedScrollYProperty().getValue();
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
+				OTMObjectChoice selectedEntity = entityChoice.getValue();
+				SyntaxHighlightBuilder highlightingBuilder;
+				
+				if (selectedEntity != null) {
+					highlightingBuilder = new XmlHighlightBuilder();
+					new XMLPrettyPrinter().formatDocument( upgradeDocument, out );
+					
+				} else {
+					highlightingBuilder = new XmlHighlightBuilder();
+				}
+				
+				previewPane.replaceText( new String( out.toByteArray(), "UTF-8" ) );
+				previewPane.setStyleSpans( 0, highlightingBuilder.computeHighlighting( previewPane.getText() ) );
+				previewScrollPane.estimatedScrollYProperty().setValue( yScroll );
+				
+			} catch (Exception e) {
+				previewPane.replaceText( "-- Error Generating Example Output --");
+				e.printStackTrace( System.out );
 			}
 		});
 	}
@@ -416,6 +478,63 @@ public class ExampleUpgradeController {
 	}
 	
 	/**
+	 * Handles a drag-n-drop event in which a node from the original DOM tree is dropped
+	 * onto the upgrade tree.
+	 * 
+	 * @param originalItem  the tree item from the original DOM document
+	 * @param upgradeItem  the tree item from the upgrade DOM document
+	 */
+	private void handleDragDropEvent(TreeItem<DOMTreeOriginalNode> originalItem,
+			TreeItem<DOMTreeUpgradeNode> upgradeItem) {
+		System.out.println("DRAG/DROP: " + originalItem.getValue().getLabel() +
+				" / " + upgradeItem.getValue().getLabel());
+	}
+	
+	/**
+	 * Displays the context menu, allowing the user to select different options
+	 * depending upon the state of the selected item.
+	 * 
+	 * @param selectedItem  the tree item for which to display the context menu
+	 * @param screenX  the screen X coordinate where the context menu should be displayed
+	 * @param screenY  the screen Y coordinate where the context menu should be displayed
+	 */
+	@SuppressWarnings("unchecked")
+	private void displayContextMenu(TreeItem<DOMTreeUpgradeNode> selectedItem,
+			double screenX, double screenY) {
+		DOMTreeUpgradeNode selectedNode = selectedItem.getValue();
+		MenuItem menuItem = null;
+		
+		if (selectedNode.getMatchType() == ExampleMatchType.MISSING) {
+			MenuItem mItem = new MenuItem( "Auto-Generate Content" );
+			mItem.setUserData( selectedItem );
+			mItem.setOnAction( e -> {
+				handleAutoGenerateContent( (TreeItem<DOMTreeUpgradeNode>) mItem.getUserData() );
+			});
+			menuItem = mItem;
+		}
+		
+		if (menuItem != null) {
+			upgradeContextMenu = new ContextMenu();
+			
+			upgradeContextMenu.getItems().add( menuItem );
+			upgradeContextMenu.show( upgradedTreeView, screenX, screenY );
+			upgradeContextMenu.setOnAction( e -> {
+				upgradeContextMenu = null;
+			});
+		}
+	}
+	
+	/**
+	 * Called when the user has elected to auto-generate content for a missing
+	 * node in the upgrade tree.
+	 * 
+	 * @param upgradeItem  the upgrade tree item from which to start auto-generating content
+	 */
+	private void handleAutoGenerateContent(TreeItem<DOMTreeUpgradeNode> upgradeItem) {
+		System.out.println("handleAutoGenerateContent()");
+	}
+	
+	/**
 	 * Updates the enabled/disables states of the visual controls based on the current
 	 * state of user selections.
 	 */
@@ -440,6 +559,42 @@ public class ExampleUpgradeController {
 			upgradedTreeView.disableProperty().set( exControlsDisabled );
 			previewPane.disableProperty().set( exControlsDisabled );
 		} );
+	}
+	
+	/**
+	 * Traverses the given tree and sets the expanded states such that the parents
+	 * of any non-matching items are expanded.
+	 * 
+	 * @param treeItem  the tree item to configure
+	 * @return boolean
+	 */
+	private boolean setUpgradeExpandedStates(TreeItem<DOMTreeUpgradeNode> treeItem) {
+		boolean expandParent = false;
+		
+		for (TreeItem<DOMTreeUpgradeNode> childItem : treeItem.getChildren()) {
+			boolean childResult = setUpgradeExpandedStates( childItem );
+			expandParent |= childResult;
+		}
+		treeItem.setExpanded( expandParent ); // Expand this nodes if any children requested it
+		return expandParent | !ExampleMatchType.isMatch( treeItem.getValue().getMatchType() );
+	}
+	
+	/**
+	 * Traverses the given tree and sets the expanded states such that the parents
+	 * of any unreferenced items are expanded.
+	 * 
+	 * @param treeItem  the tree item to configure
+	 * @return boolean
+	 */
+	private boolean setOriginalExpandedStates(TreeItem<DOMTreeOriginalNode> treeItem) {
+		boolean expandParent = false;
+		
+		for (TreeItem<DOMTreeOriginalNode> childItem : treeItem.getChildren()) {
+			boolean childResult = setOriginalExpandedStates( childItem );
+			expandParent |= childResult;
+		}
+		treeItem.setExpanded( expandParent ); // Expand this nodes if any children requested it
+		return expandParent | (treeItem.getValue().getReferenceStatus() == ReferenceStatus.NOT_REFERENCED);
 	}
 	
 	/**
@@ -504,11 +659,86 @@ public class ExampleUpgradeController {
 		
 		entityChoice.valueProperty().addListener( ( observable, oldValue, newValue ) -> {
 			if (oldValue != newValue) {
-				populateExampleContent();
+				populateExampleContent( true );
+			}
+		});
+		
+		originalTreeView.setCellFactory( tv -> new StyledTreeCell<DOMTreeOriginalNode>() {
+			{
+				setOnDragDetected(new EventHandler<MouseEvent>() {
+	                public void handle(MouseEvent mouseEvent) {
+	    				TreeItem<DOMTreeOriginalNode> item = getTreeItem();
+	    				
+	    				if ((item != null) && (item.getValue() != null)) {
+		    				Dragboard dragboard = startDragAndDrop( TransferMode.COPY );
+	    					Map<DataFormat,Object> dbContent = new HashMap<>();
+	    					
+	    					dragItem = item;
+	    					dragId = UUID.randomUUID().toString();
+	    					dbContent.put( DRAG_FORMAT, dragId );
+	    					dragboard.setContent( dbContent );
+	    				}
+	                }
+	            });
+			}
+			protected List<String> getConditionalStyleClasses() {
+				return ReferenceStatus.getAllStyleClasses();
+			}
+			protected String getConditionalStyleClass() {
+				TreeItem<DOMTreeOriginalNode> item = getTreeItem();
+				return (item == null) ? null : item.getValue().getReferenceStatus().getStyleClass();
 			}
 		});
 		
 		upgradedTreeView.setCellFactory( tv -> new StyledTreeCell<DOMTreeUpgradeNode>() {
+			{
+				setOnDragOver( dragEvent -> {
+					if (getItem() != null) {
+	                	dragEvent.acceptTransferModes( TransferMode.COPY );
+	                	setEffect( new Lighting() );
+					}
+	            });
+				setOnDragExited( dragEvent -> {
+					Platform.runLater( () -> {
+						setEffect( null );
+					});
+				});
+				setOnDragDropped(new EventHandler<DragEvent>() {
+	                public void handle(DragEvent dragEvent) {
+	                	Dragboard dragboard = dragEvent.getDragboard();
+	                	TreeItem<DOMTreeOriginalNode> dragItem = ExampleUpgradeController.this.dragItem;
+	                	TreeItem<DOMTreeUpgradeNode> dropItem = getTreeItem();
+	                	
+	                	if ((dropItem != null) && (dropItem.getValue() != null)
+	                			&& dragboard.hasContent( DRAG_FORMAT )) {
+	                		Object dropId = dragboard.getContent( DRAG_FORMAT );
+	                		
+	                		if (dropId.equals( dragId )) {
+	                			ExampleUpgradeController.this.dragItem = null;
+	                			handleDragDropEvent( dragItem, dropItem );
+		                		dragEvent.setDropCompleted( true );
+	                		}
+	                	}
+	                }
+	            });
+				setOnMouseReleased(new EventHandler<MouseEvent>() {
+					public void handle(MouseEvent event) {
+						if (event.getButton() == MouseButton.SECONDARY) {
+							TreeItem<DOMTreeUpgradeNode> selectedItem = getTreeItem();
+							
+							if (selectedItem != null) {
+								displayContextMenu( selectedItem, event.getScreenX(), event.getScreenY() );
+							}
+						}
+					}
+				});
+				setOnMousePressed( event -> {
+					if (upgradeContextMenu != null) {
+						upgradeContextMenu.hide();
+						upgradeContextMenu = null;
+					}
+				});
+			}
 			protected List<String> getConditionalStyleClasses() {
 				return ExampleMatchType.getAllStyleClasses();
 			}

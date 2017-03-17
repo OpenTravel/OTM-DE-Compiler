@@ -29,13 +29,15 @@ import javafx.scene.image.ImageView;
  */
 public class DOMTreeOriginalNode extends AbstractDOMTreeNode {
 	
+	protected static final String IS_REFERENCED_KEY = "isReferenced";
+	
 	/**
 	 * Constructor that specifies the DOM node and all required configuration information.
 	 * 
 	 * @param domNode  the DOM node instance
 	 */
 	public DOMTreeOriginalNode(Node domNode) {
-		super(domNode);
+		super(domNode, null);
 	}
 	
 	/**
@@ -77,6 +79,25 @@ public class DOMTreeOriginalNode extends AbstractDOMTreeNode {
 			domChild = domChild.getNextSibling();
 		}
 		return treeItem;
+	}
+	
+	/**
+	 * Returns the reference status for this node.
+	 * 
+	 * @return ReferenceStatus
+	 */
+	public ReferenceStatus getReferenceStatus() {
+		Node domNode = getDomNode();
+		Boolean refFlag = (domNode == null) ?
+				null : (Boolean) domNode.getUserData( IS_REFERENCED_KEY );
+		ReferenceStatus result;
+		
+		if ((refFlag != null) && refFlag) {
+			result = ReferenceStatus.REFERENCED;
+		} else {
+			result = ReferenceStatus.NOT_REFERENCED;
+		}
+		return result;
 	}
 	
 }

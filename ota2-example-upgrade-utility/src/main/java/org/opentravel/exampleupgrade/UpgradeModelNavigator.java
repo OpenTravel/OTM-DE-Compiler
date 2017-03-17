@@ -352,15 +352,17 @@ public class UpgradeModelNavigator extends AbstractNavigator<NamedEntity>{
      * @param element  the element entity to visit and navigate
      */
     public void navigateElement(TLProperty element) {
-    	int maxRepeat = getMaxRepeat( element );
-    	boolean canContinue = true;
+    	int autogenMaxRepeat = exampleOptions.getMaxRepeat();
+    	int modelMaxRepeat = getMaxRepeat( element );
+    	boolean isAutogenEnabled = false;
     	boolean canRepeat = true;
     	int repeatCount = 0;
     	
     	// Now we can process the element; repeat as long as there is content in the
     	// original DOM document or until the max repeat count is reached.
-    	while ((repeatCount < maxRepeat) && canContinue && canRepeat) {
-            if (canContinue = visitor.visitElement(element)) {
+    	while ((isAutogenEnabled && (repeatCount < autogenMaxRepeat))
+    			|| (!isAutogenEnabled && canRepeat && (repeatCount < modelMaxRepeat))) {
+            if (visitor.visitElement(element)) {
             	NamedEntity elementType = visitor.getResolvedElementType();
             	QName elementName = XsdCodegenUtils.getGlobalElementName( elementType );
             	
@@ -389,6 +391,10 @@ public class UpgradeModelNavigator extends AbstractNavigator<NamedEntity>{
             	}
             	visitor.visitElementEnd(element);
             	canRepeat = visitor.canRepeat( element, elementType );
+            	isAutogenEnabled = visitor.isAutoGenerationEnabled();
+            	
+            } else { // visitor says we cannot continue
+            	break;
             }
             repeatCount++;
     	}
@@ -436,8 +442,6 @@ public class UpgradeModelNavigator extends AbstractNavigator<NamedEntity>{
      */
     private int getMaxRepeat(TLProperty element) {
     	int maxRepeat = (element.getRepeat() < 0) ? Integer.MAX_VALUE : Math.max( 1, element.getRepeat() );
-    	
-    	maxRepeat = Math.min( exampleOptions.getMaxRepeat(), maxRepeat );
     	
     	// Special case for list facets (and aliases): Max repeat is equal to the number of roles,
     	// regardless of the repeat count on the element itself.

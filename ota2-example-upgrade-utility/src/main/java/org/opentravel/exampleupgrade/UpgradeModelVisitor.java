@@ -74,12 +74,20 @@ public abstract class UpgradeModelVisitor extends ModelElementVisitorAdapter {
 	public abstract NamedEntity getResolvedElementType();
 	
 	/**
-	 * Returns true if the most recently navigated element can be repeated.
+	 * Returns true if the most recently navigated element can be repeated in
+	 * order to accept more content from the original document.
 	 * 
 	 * @param otmElement  the OTM element to check for repeat
 	 * @param resolvedElementType  the resolved type of the OTM element
 	 * @return boolean
 	 */
 	public abstract boolean canRepeat(TLProperty otmElement, NamedEntity resolvedElementType);
+	
+	/**
+	 * Returns true if the visitor has enabled auto-generation mode.
+	 * 
+	 * @return boolean
+	 */
+	public abstract boolean isAutoGenerationEnabled();
 	
 }

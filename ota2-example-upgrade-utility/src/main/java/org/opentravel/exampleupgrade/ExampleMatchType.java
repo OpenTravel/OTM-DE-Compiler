@@ -61,17 +61,24 @@ public enum ExampleMatchType {
 	
 	/**
 	 * Indicates that no associated DOM element could be identified for the OTM model
-	 * element/field. 
+	 * element/field, and that example content has been generated automatically.
 	 */
-	NONE( 2 );
+	NONE( 2 ),
 	
-	private static List<String> styleClasses = Arrays.asList( "exact-match", "partial-match", "no-match" );
+	/**
+	 * Indicates that no associated DOM element could be identified for the OTM model
+	 * element/field, and no example content was generated.
+	 */
+	MISSING( 3 );
+	
+	private static List<String> styleClasses = Arrays.asList( "exact-match", "partial-match", "no-match", "missing-match" );
 	
 	private int styleIdx;
 	
 	/**
 	 * Returns the index of the CSS style that corresponds to the match type.
-	 * @param styleIdx
+	 * 
+	 * @param styleIdx  the list index of the style class for this value
 	 */
 	private ExampleMatchType(int styleIdx) {
 		this.styleIdx = styleIdx;
@@ -93,6 +100,17 @@ public enum ExampleMatchType {
 	 */
 	public String getStyleClass() {
 		return styleClasses.get( styleIdx );
+	}
+	
+	/**
+	 * Returns true as long as the given match type is not null, <code>NONE</code>,
+	 * or <code>MISSING</code>.
+	 * 
+	 * @param matchType  the match type to analyze
+	 * @return boolean
+	 */
+	public static boolean isMatch(ExampleMatchType matchType) {
+		return (matchType != null) && (matchType != NONE) && (matchType != MISSING);
 	}
 	
 }

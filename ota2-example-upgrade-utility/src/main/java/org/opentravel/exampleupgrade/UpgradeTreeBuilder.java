@@ -16,7 +16,11 @@
 package org.opentravel.exampleupgrade;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 
 import javax.xml.namespace.QName;
@@ -29,6 +33,7 @@ import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
+import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttribute;
@@ -38,10 +43,12 @@ import org.opentravel.schemacompiler.model.TLComplexTypeBase;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
+import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLMemberField;
+import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.slf4j.Logger;
@@ -49,6 +56,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 import javafx.scene.control.TreeItem;
@@ -62,8 +70,10 @@ import javafx.scene.image.ImageView;
 public class UpgradeTreeBuilder {
 	
     private static final Logger log = LoggerFactory.getLogger(UpgradeTreeBuilder.class);
-
+    
     private Document upgradeDocument;
+    private String defaultNamespace;
+    private Map<String,String> namespaceMappings;
     private ExampleValueGenerator exampleValueGenerator;
     private ExampleGeneratorOptions exampleOptions;
 	private Stack<UpgradeNodeContext> elementStack = new Stack<>();
@@ -93,17 +103,26 @@ public class UpgradeTreeBuilder {
 	 */
 	public TreeItem<DOMTreeUpgradeNode> buildUpgradeDOMTree(NamedEntity otmEntity, Element originalRoot) {
 		ExampleMatchType matchType = getMatchType( otmEntity, originalRoot );
-		DOMTreeUpgradeNode node = new DOMTreeUpgradeNode( otmEntity, createDomElement( otmEntity ), matchType );
+		boolean foundMatch = ExampleMatchType.isMatch( matchType );
+		
+		initNamespaceMappings( otmEntity );
+		clearReferenceFlags( originalRoot );
+		
+		if (ExampleMatchType.isMatch( matchType )) {
+			markReferenced( originalRoot );
+		}
+		
+		Element rootElement = createDomElement( otmEntity );
+		DOMTreeUpgradeNode node = new DOMTreeUpgradeNode( otmEntity, rootElement, matchType );
 		TreeItem<DOMTreeUpgradeNode> treeItem = new TreeItem<>( node );
 		UpgradeModelVisitor visitor = new UMVisitor();
 		UpgradeModelNavigator navigator = new UpgradeModelNavigator( visitor, otmEntity.getOwningModel(), exampleOptions );
-		boolean foundMatch = (matchType != ExampleMatchType.NONE);
 		
+		upgradeDocument.appendChild( rootElement );
+		treeItem.setGraphic( new ImageView( AbstractDOMTreeNode.elementIcon ) );
 		elementStack.push( new UpgradeNodeContext( treeItem,  originalRoot, otmEntity, !foundMatch ) );
 		navigator.navigate( otmEntity );
-		
-		// TODO: Ensure all namespace declarations exist on the root element
-		treeItem.setGraphic( new ImageView( AbstractDOMTreeNode.elementIcon ) );
+		configureNamespaceDeclarations();
 		
 		return treeItem;
 	}
@@ -121,25 +140,31 @@ public class UpgradeTreeBuilder {
 		Attr originalAttr = (originalElement == null) ?
 				null : originalElement.getAttributeNode( otmAttribute.getName() );
 		ExampleMatchType matchType = null;
+		Attr upgradeAttr;
 		
 		if (originalAttr != null) {
+			markReferenced( originalAttr );
 			upgradeElement.setAttribute( otmAttribute.getName(), originalAttr.getValue() );
+			upgradeAttr = upgradeElement.getAttributeNode( otmAttribute.getName() );
 			matchType = ExampleMatchType.EXACT;
 			
 		} else if (otmAttribute.isMandatory() || elementStack.peek().isAutogenNode()) {
 			upgradeElement.setAttribute( otmAttribute.getName(),
 					exampleValueGenerator.getExampleValue( otmAttribute,
 							currentElementItem.getValue().getOtmEntity() ) );
+			upgradeAttr = upgradeElement.getAttributeNode( otmAttribute.getName() );
 			matchType = ExampleMatchType.NONE;
+			
+		} else {
+			matchType = ExampleMatchType.MISSING;
+			upgradeAttr = upgradeDocument.createAttribute( otmAttribute.getName() );
 		}
 		
-		if (matchType != null) {
-			Attr upgradeAttr = upgradeElement.getAttributeNode( otmAttribute.getName() );
-			TreeItem<DOMTreeUpgradeNode> attributeItem = new TreeItem<DOMTreeUpgradeNode>(
-					new DOMTreeUpgradeNode( otmAttribute, upgradeAttr, matchType ) );
-			attributeItem.setGraphic( new ImageView( AbstractDOMTreeNode.attributeIcon ) );
-			currentElementItem.getChildren().add( attributeItem );
-		}
+		TreeItem<DOMTreeUpgradeNode> attributeItem = new TreeItem<DOMTreeUpgradeNode>(
+				new DOMTreeUpgradeNode( otmAttribute, upgradeAttr, matchType ) );
+		
+		attributeItem.setGraphic( new ImageView( AbstractDOMTreeNode.attributeIcon ) );
+		currentElementItem.getChildren().add( attributeItem );
 	}
 	
 	/**
@@ -155,40 +180,56 @@ public class UpgradeTreeBuilder {
 		Element upgradeElement = (Element) currentElementItem.getValue().getDomNode();
 		
 		if (otmIndicator.isPublishAsElement()) {
+			String ns = otmIndicator.getOwningLibrary().getNamespace();
 			Element indicatorUpgradeElement = upgradeDocument.createElementNS(
-					otmIndicator.getOwningLibrary().getNamespace(), indicatorName );
+					ns, qualifiedElementName( ns, indicatorName ) );
 			Element originalIndicatorElement = elementStack.peek().findNextOriginalChild( indicatorUpgradeElement );
+			TreeItem<DOMTreeUpgradeNode> elementItem;
+			ExampleMatchType matchType;
 			
 			if ((originalIndicatorElement != null) || elementStack.peek().isAutogenNode())  {
 				String indicatorValue = HelperUtils.getElementTextValue( originalIndicatorElement );
-				TreeItem<DOMTreeUpgradeNode> elementItem;
 				
 				if (indicatorValue == null) {
 					indicatorValue = "false";
 				}
+				markReferenced( originalIndicatorElement );
 				indicatorUpgradeElement.appendChild( upgradeDocument.createTextNode( indicatorValue ) );
 				upgradeElement.appendChild( indicatorUpgradeElement );
-				elementItem = new TreeItem<DOMTreeUpgradeNode>(
-						new DOMTreeUpgradeNode( otmIndicator, indicatorUpgradeElement, ExampleMatchType.EXACT ) );
-				elementItem.setGraphic( new ImageView( AbstractDOMTreeNode.elementIcon ) );
-				currentElementItem.getChildren().add( elementItem );
+				matchType = ExampleMatchType.EXACT;
+				
+			} else {
+				matchType = ExampleMatchType.MISSING;
 			}
+			
+			elementItem = new TreeItem<DOMTreeUpgradeNode>(
+					new DOMTreeUpgradeNode( otmIndicator, indicatorUpgradeElement, matchType ) );
+			elementItem.setGraphic( new ImageView( AbstractDOMTreeNode.elementIcon ) );
+			currentElementItem.getChildren().add( elementItem );
 			
 		} else { // publish as attribute
 			Attr originalAttr = (originalElement == null) ?
 					null : originalElement.getAttributeNode( indicatorName );
 			TreeItem<DOMTreeUpgradeNode> attributeItem;
+			ExampleMatchType matchType;
 			Attr upgradeAttr;
 			
 			if ((originalAttr != null) || elementStack.peek().isAutogenNode()) {
-				upgradeElement.setAttribute( indicatorName, originalAttr.getValue() );
-				
+				markReferenced( originalAttr );
+				upgradeElement.setAttribute( indicatorName,
+						(originalAttr == null) ? "true" : originalAttr.getValue() );
 				upgradeAttr = upgradeElement.getAttributeNode( indicatorName );
-				attributeItem = new TreeItem<DOMTreeUpgradeNode>(
-						new DOMTreeUpgradeNode( otmIndicator, upgradeAttr, ExampleMatchType.EXACT ) );
-				attributeItem.setGraphic( new ImageView( AbstractDOMTreeNode.attributeIcon ) );
-				currentElementItem.getChildren().add( attributeItem );
+				matchType = ExampleMatchType.EXACT;
+				
+			} else {
+				upgradeAttr = upgradeDocument.createAttribute( indicatorName );
+				matchType = ExampleMatchType.MISSING;
 			}
+			
+			attributeItem = new TreeItem<DOMTreeUpgradeNode>(
+					new DOMTreeUpgradeNode( otmIndicator, upgradeAttr, matchType ) );
+			attributeItem.setGraphic( new ImageView( AbstractDOMTreeNode.attributeIcon ) );
+			currentElementItem.getChildren().add( attributeItem );
 		}
 	}
 	
@@ -203,8 +244,9 @@ public class UpgradeTreeBuilder {
 		log.debug("buildElementTreeItem() : " + otmElement.getName());
 		TreeItem<DOMTreeUpgradeNode> currentElementItem = elementStack.peek().getUpgradeItem();
 		Element upgradeElement = (Element) currentElementItem.getValue().getDomNode();
+		String upgradeElementNS = otmElement.getOwningLibrary().getNamespace();
 		Element simpleChildUpgradeElement = upgradeDocument.createElementNS(
-				otmElement.getOwningLibrary().getNamespace(), otmElement.getName() );
+				upgradeElementNS, qualifiedElementName( upgradeElementNS, otmElement.getName() ) );
 		Element originalChildElement = elementStack.peek().findNextOriginalChild( simpleChildUpgradeElement );
 		boolean navigateChildren = true;
 		boolean isAutoGen = false;
@@ -249,11 +291,12 @@ public class UpgradeTreeBuilder {
 				(((TLListFacet) elementType).getItemFacet() instanceof TLSimpleFacet))) {
 			// Type is a simple value, simple list facet, open/closed enumeration, or VWA
 			ExampleMatchType matchType;
-			String elementValue;
+			String elementValue = null;
 			
 			if (originalChildElement != null) {
 				matchType = getMatchType( otmElement, originalChildElement );
 				elementValue = HelperUtils.getElementTextValue( originalChildElement );
+				markReferenced( originalChildElement );
 				
 				if (elementValue == null) {
 					elementValue = exampleValueGenerator.getExampleValue(
@@ -268,8 +311,11 @@ public class UpgradeTreeBuilder {
 				isAutoGen = true;
 				
 			} else {
-				matchType = null;
-				elementValue = null;
+				matchType = ExampleMatchType.MISSING;
+				childElementItem = new TreeItem<DOMTreeUpgradeNode>(
+						new DOMTreeUpgradeNode( otmElement, simpleChildUpgradeElement, matchType ) );
+				childElementItem.setGraphic( new ImageView( AbstractDOMTreeNode.elementIcon ) );
+				currentElementItem.getChildren().add( childElementItem );
 				navigateChildren = false;
 			}
 			
@@ -289,7 +335,7 @@ public class UpgradeTreeBuilder {
 			ExampleMatchType matchType = getMatchType( elementType, originalChildElement );
 			Element childUpgradeElement;
 			
-			if (matchType != ExampleMatchType.NONE) { // Found a match in the original document
+			if (ExampleMatchType.isMatch( matchType )) { // Found a match in the original document
 				if ((matchType == ExampleMatchType.EXACT_SUBSTITUTABLE) ||
 						(matchType == ExampleMatchType.PARTIAL_SUBSTITUTABLE)) {
 					// Handle special case for substitutable element matches
@@ -297,35 +343,46 @@ public class UpgradeTreeBuilder {
 						QName substitutableName = XsdCodegenUtils.getSubstitutableElementName( (TLFacet) elementType );
 						
 						childUpgradeElement = upgradeDocument.createElementNS(
-								substitutableName.getNamespaceURI(), substitutableName.getLocalPart() );
+								substitutableName.getNamespaceURI(), qualifiedElementName(
+										substitutableName.getNamespaceURI(), substitutableName.getLocalPart() ) );
 						
 					} else if (isFacetAlias( elementType )) {
 						QName substitutableName = XsdCodegenUtils.getSubstitutableElementName( (TLAlias) elementType );
 						
 						childUpgradeElement = upgradeDocument.createElementNS(
-								substitutableName.getNamespaceURI(), substitutableName.getLocalPart() );
+								substitutableName.getNamespaceURI(), qualifiedElementName(
+										substitutableName.getNamespaceURI(), substitutableName.getLocalPart() ) );
 						
 					} else {
 						childUpgradeElement = upgradeDocument.createElementNS(
-								elementName.getNamespaceURI(), elementName.getLocalPart() );
+								elementName.getNamespaceURI(), qualifiedElementName(
+										elementName.getNamespaceURI(), elementName.getLocalPart() ) );
 					}
 					
 				} else {
 					childUpgradeElement = upgradeDocument.createElementNS(
-							elementName.getNamespaceURI(), elementName.getLocalPart() );
+							elementName.getNamespaceURI(), qualifiedElementName(
+									elementName.getNamespaceURI(), elementName.getLocalPart() ) );
 				}
 				upgradeElement.appendChild( childUpgradeElement );
+				markReferenced( originalChildElement );
 				
-			} else if (otmElement.isMandatory() || elementStack.peek().isAutogenNode()) {
+			} else {
+				// Find out if the match type is NONE or MISSING
+				if (!otmElement.isMandatory() && !elementStack.peek().isAutogenNode()) {
+					matchType = ExampleMatchType.MISSING;
+					navigateChildren = false;
+				}
+				
 				// No match from original document, so we must auto-generate the element
-				System.out.println("MIS-MATCH: " + elementName);
 				if (elementType instanceof TLComplexTypeBase) {
 					QName substitutableName;
 					
 					elementType = getPreferredFacet( elementType );
 					substitutableName = XsdCodegenUtils.getSubstitutableElementName( (TLFacet) elementType );
 					childUpgradeElement = upgradeDocument.createElementNS(
-							substitutableName.getNamespaceURI(), substitutableName.getLocalPart() );
+							substitutableName.getNamespaceURI(), qualifiedElementName(
+									substitutableName.getNamespaceURI(), substitutableName.getLocalPart() ) );
 					
 				} else if (isFacetOwnerAlias( elementType )) {
 					QName substitutableName;
@@ -333,28 +390,35 @@ public class UpgradeTreeBuilder {
 					elementType = getPreferredFacet( elementType );
 					substitutableName = XsdCodegenUtils.getSubstitutableElementName( (TLAlias) elementType );
 					childUpgradeElement = upgradeDocument.createElementNS(
-							substitutableName.getNamespaceURI(), substitutableName.getLocalPart() );
+							substitutableName.getNamespaceURI(), qualifiedElementName(
+									substitutableName.getNamespaceURI(), substitutableName.getLocalPart() ) );
 					
 				} else {
 					childUpgradeElement = upgradeDocument.createElementNS(
-							elementName.getNamespaceURI(), elementName.getLocalPart() );
+							elementName.getNamespaceURI(), qualifiedElementName(
+									elementName.getNamespaceURI(), elementName.getLocalPart() ) );
 				}
-				upgradeElement.appendChild( childUpgradeElement );
-				isAutoGen = true;
 				
-			} else {
-				childUpgradeElement = null;
-				navigateChildren = false;
+				if (matchType == ExampleMatchType.NONE) {
+					upgradeElement.appendChild( childUpgradeElement );
+				}
+				isAutoGen = true;
 			}
 			
-			if (childUpgradeElement != null) {
-				childElementItem = new TreeItem<DOMTreeUpgradeNode>(
-						new DOMTreeUpgradeNode( elementType, childUpgradeElement, matchType ) );
-				currentElementItem.getChildren().add( childElementItem );
-				childElementItem.setGraphic( new ImageView( AbstractDOMTreeNode.elementIcon ) );
+			childElementItem = new TreeItem<DOMTreeUpgradeNode>(
+					new DOMTreeUpgradeNode( elementType, childUpgradeElement, matchType ) );
+			childElementItem.setGraphic( new ImageView( AbstractDOMTreeNode.elementIcon ) );
+			currentElementItem.getChildren().add( childElementItem );
+			
+			if (ExampleMatchType.isMatch( matchType )) {
 				elementStack.peek().nextOriginalChild();
-				elementStack.push( new UpgradeNodeContext( childElementItem, originalChildElement, elementType, isAutoGen ) );
 			}
+			
+			if (navigateChildren) {
+				elementStack.push( new UpgradeNodeContext(
+						childElementItem, originalChildElement, elementType, isAutoGen ) );
+			}
+			
 			return navigateChildren;
 		}
 	}
@@ -375,7 +439,7 @@ public class UpgradeTreeBuilder {
 	 * @param extensionPointType  the facet type of the extension point group
 	 */
 	public boolean buildExtensionPointGroupTreeItemStart(TLFacetType extensionPointType) {
-		System.out.println("buildExtensionPointGroupTreeItemStart() : " + extensionPointType);
+		log.debug("buildExtensionPointGroupTreeItemStart() : " + extensionPointType);
 		boolean processChildren = false;
 		QName elementName;
 		
@@ -391,7 +455,8 @@ public class UpgradeTreeBuilder {
 				break;
 		}
 		Element childUpgradeElement = upgradeDocument.createElementNS(
-				elementName.getNamespaceURI(), elementName.getLocalPart() );
+				elementName.getNamespaceURI(), qualifiedElementName(
+						elementName.getNamespaceURI(), elementName.getLocalPart() ) );
 		Element originalChildElement = elementStack.peek().findNextOriginalChild( childUpgradeElement );
 		
 		if (originalChildElement != null) {
@@ -400,6 +465,7 @@ public class UpgradeTreeBuilder {
 			
 			childElementItem.setGraphic( new ImageView( AbstractDOMTreeNode.elementIcon ) );
 			elementStack.push( new UpgradeNodeContext( childElementItem, originalChildElement, null, false ) );
+			markReferenced( originalChildElement );
 			processChildren = true;
 		}
 		return processChildren;
@@ -439,7 +505,8 @@ public class UpgradeTreeBuilder {
 		TreeItem<DOMTreeUpgradeNode> extensionPointElementItem = elementStack.peek().getUpgradeItem();
 		QName elementName = XsdCodegenUtils.getGlobalElementName( otmExtensionPoint );
 		Element childUpgradeElement = upgradeDocument.createElementNS(
-				elementName.getNamespaceURI(), elementName.getLocalPart() );
+				elementName.getNamespaceURI(), qualifiedElementName(
+						elementName.getNamespaceURI(), elementName.getLocalPart() ) );
 		Node originalChildNode = elementStack.peek().getOriginalElement().getFirstChild();
 		boolean isAutoGen = elementStack.peek().isAutogenNode();
 		ExampleMatchType matchType = null;
@@ -453,7 +520,7 @@ public class UpgradeTreeBuilder {
 			if (originalChildNode.getNodeType() == Node.ELEMENT_NODE) {
 				matchType = getMatchType( childUpgradeElement, (Element) originalChildNode );
 				
-				if (matchType != ExampleMatchType.NONE) {
+				if (ExampleMatchType.isMatch( matchType )) {
 					originalChild = (Element) originalChildNode;
 					break;
 				}
@@ -471,6 +538,7 @@ public class UpgradeTreeBuilder {
 			extensionPointElementItem.getValue().getDomNode().appendChild( childUpgradeElement );
 			extensionPointElementItem.getChildren().add( childElementItem );
 			elementStack.push( new UpgradeNodeContext( childElementItem, originalChild, otmExtensionPoint, isAutoGen ) );
+			markReferenced( originalChild );
 			processChildren = true;
 		}
 		return processChildren;
@@ -504,7 +572,7 @@ public class UpgradeTreeBuilder {
 			}
 			
 			// If no match was found yet, check the non-substitutable element name (if one exists for the entity)
-			if (matchType == ExampleMatchType.NONE) {
+			if (!ExampleMatchType.isMatch( matchType )) {
 				QName substitutableName = null;
 				
 				if (otmEntity instanceof TLFacet) {
@@ -602,7 +670,8 @@ public class UpgradeTreeBuilder {
 		
 		if (entityName != null) {
 			domElement = upgradeDocument.createElementNS(
-					entityName.getNamespaceURI(), entityName.getLocalPart() );
+					entityName.getNamespaceURI(), qualifiedElementName(
+							entityName.getNamespaceURI(), entityName.getLocalPart() ) );
 			
 		} else {
 			throw new IllegalArgumentException("The OTM entity does not define a global XML element.");
@@ -653,21 +722,25 @@ public class UpgradeTreeBuilder {
 			throw new IllegalArgumentException("Entity must be an OTM complex type or an alias of one.");
 		}
 		
-		// TODO: Replace default lookups with preferred facet selections by user
-		if (owner instanceof TLBusinessObject) {
-			preferredFacet = ((TLBusinessObject) owner).getSummaryFacet();
-			
-		} else if (owner instanceof TLChoiceObject) {
-			TLChoiceObject choice = (TLChoiceObject) owner;
-			
-			preferredFacet = (choice.getChoiceFacets().size() == 0) ?
-					choice.getSharedFacet() : choice.getChoiceFacets().get( 0 );
-					
-		} else if (owner instanceof TLCoreObject) {
-			preferredFacet = ((TLCoreObject) owner).getSummaryFacet();
-			
-		} else {
-			throw new IllegalArgumentException("Unknown complex type: " + owner.getClass().getSimpleName());
+		preferredFacet = exampleOptions.getPreferredFacet( (TLFacetOwner) owner );
+		
+		// Apply default lookups if no preferred facet selection is specified by the user
+		if (preferredFacet == null) {
+			if (owner instanceof TLBusinessObject) {
+				preferredFacet = ((TLBusinessObject) owner).getSummaryFacet();
+				
+			} else if (owner instanceof TLChoiceObject) {
+				TLChoiceObject choice = (TLChoiceObject) owner;
+				
+				preferredFacet = (choice.getChoiceFacets().size() == 0) ?
+						choice.getSharedFacet() : choice.getChoiceFacets().get( 0 );
+						
+			} else if (owner instanceof TLCoreObject) {
+				preferredFacet = ((TLCoreObject) owner).getSummaryFacet();
+				
+			} else {
+				throw new IllegalArgumentException("Unknown complex type: " + owner.getClass().getSimpleName());
+			}
 		}
 		
 		if (ownerAlias != null) {
@@ -675,6 +748,139 @@ public class UpgradeTreeBuilder {
 			
 		} else {
 			return preferredFacet;
+		}
+	}
+	
+	/**
+	 * Initializes the namespace mappings that will be used throughout the upgraded
+	 * XML document.
+	 * 
+	 * @param otmEntity  the OTM entity that will serve as the root of the XML document
+	 */
+	private void initNamespaceMappings(NamedEntity otmEntity) {
+		TLModel model = otmEntity.getOwningModel();
+		
+		this.defaultNamespace = otmEntity.getNamespace();
+		this.namespaceMappings = new HashMap<>();
+		
+		for (AbstractLibrary library : model.getAllLibraries()) {
+			String ns = library.getNamespace();
+			
+			if (!namespaceMappings.containsKey( ns )) {
+				String prefix = library.getPrefix();
+				int count = 0;
+				
+				// Make sure this prefix is unique to the entire model
+				while (namespaceMappings.containsValue( prefix )) {
+					prefix = library.getPrefix() + (++count);
+				}
+				namespaceMappings.put( ns, prefix );
+			}
+		}
+	}
+	
+	/**
+	 * Returns the qualified name of a DOM element with the given namespace and
+	 * local name.
+	 * 
+	 * @param namespace  the namespace URI of the element
+	 * @param localName  the local name of the element
+	 * @return
+	 */
+	private String qualifiedElementName(String namespace, String localName) {
+		String prefix = defaultNamespace.equals( namespace ) ? null : namespaceMappings.get( namespace );
+		String qName;
+		
+		if (prefix != null) {
+			qName = prefix + ":" + localName;
+		} else {
+			qName = localName;
+		}
+		return qName;
+	}
+	
+	/**
+	 * Adds the necessary namespace declarations to the root element of the upgrade
+	 * DOM document tree.
+	 */
+	private void configureNamespaceDeclarations() {
+		Element rootElement = upgradeDocument.getDocumentElement();
+		Set<String> usedNamespaces = new HashSet<>();
+		
+		// Start by deleting all existing namespace declarations
+		NamedNodeMap attrs = rootElement.getAttributes();
+		int attrCount = attrs.getLength();
+		
+		for (int i = 0; i < attrCount; i++) {
+			Attr domAttr = (Attr) attrs.item( i );
+			
+			if (domAttr.getNodeName().equals("xmlns")
+					|| domAttr.getNodeName().contains(":")) {
+				rootElement.removeAttributeNode( domAttr );
+			}
+		}
+		
+		// Now create namespace declarations for every namespace used in the document
+		findNamespaceURIs( rootElement, usedNamespaces );
+		
+		for (String ns : usedNamespaces) {
+			if (!ns.equals( defaultNamespace )) {
+				rootElement.setAttribute( "xmlns:" + namespaceMappings.get( ns ), ns );
+			}
+		}
+	}
+	
+	/**
+	 * Recursively searches the given element, recording all namespace URI's that are
+	 * encountered.
+	 * 
+	 * @param element  the DOM element to search
+	 * @param usedNamespaces  the list of namespace URI's being assembled
+	 */
+	private void findNamespaceURIs(Element element, Set<String> usedNamespaces) {
+		Node domChild = element.getFirstChild();
+		String ns = element.getNamespaceURI();
+		
+		if (ns != null) {
+			usedNamespaces.add( ns );
+		}
+		
+		while (domChild != null) {
+			if (domChild.getNodeType() == Node.ELEMENT_NODE) {
+				findNamespaceURIs( (Element) domChild, usedNamespaces );
+			}
+			domChild = domChild.getNextSibling();
+		}
+	}
+	
+	/**
+	 * Clears all of the 'isReferenced' flags from the elements and attributes
+	 * of the original DOM tree.
+	 * 
+	 * @param originalDomNode  the root of the DOM tree for which to clear all flags
+	 */
+	private void clearReferenceFlags(Node originalDomNode) {
+		Node domChild = originalDomNode.getFirstChild();
+		
+		originalDomNode.setUserData( DOMTreeOriginalNode.IS_REFERENCED_KEY, null, null );
+		
+		while (domChild != null) {
+			if ((domChild.getNodeType() == Node.ELEMENT_NODE)
+					|| (domChild.getNodeType() == Node.ATTRIBUTE_NODE)) {
+				clearReferenceFlags( domChild );
+			}
+			domChild = domChild.getNextSibling();
+		}
+	}
+	
+	/**
+	 * Marks the given original DOM node as referenced by the upgrade tree.
+	 * 
+	 * @param originalDomNode  the original DOM node to mark as referenced
+	 */
+	private void markReferenced(Node originalDomNode) {
+		if (originalDomNode != null) {
+			originalDomNode.setUserData( DOMTreeOriginalNode.IS_REFERENCED_KEY, Boolean.TRUE, null );
 		}
 	}
 	
@@ -784,7 +990,7 @@ public class UpgradeTreeBuilder {
 			while (nextChild != null) {
 				Node nextChildNode = nextChild;
 				
-				if (getMatchType( nextChild, upgradeElement ) != ExampleMatchType.NONE) {
+				if (ExampleMatchType.isMatch( getMatchType( nextChild, upgradeElement ) )) {
 					nextOriginalChild = nextChild;
 					break;
 				}
@@ -818,7 +1024,7 @@ public class UpgradeTreeBuilder {
 			while (nextChild != null) {
 				Node nextChildNode = nextChild;
 				
-				if (getMatchType( otmEntity, nextChild ) != ExampleMatchType.NONE) {
+				if (ExampleMatchType.isMatch( getMatchType( otmEntity, nextChild ) )) {
 					nextOriginalChild = nextChild;
 					break;
 				}
@@ -879,15 +1085,25 @@ public class UpgradeTreeBuilder {
 			
 			if (nextOriginalChild != null) {
 				boolean hasGlobalElement = (XsdCodegenUtils.getGlobalElementName( resolvedElementType ) != null);
+				ExampleMatchType matchType;
 				
 				if (hasGlobalElement) {
-					repeatAllowed = (getMatchType( resolvedElementType, nextOriginalChild) != ExampleMatchType.NONE);
+					matchType = getMatchType( resolvedElementType, nextOriginalChild );
 					
 				} else { // check for same element name
-					repeatAllowed = (getMatchType( otmElement, nextOriginalChild) != ExampleMatchType.NONE);
+					matchType = getMatchType( otmElement, nextOriginalChild );
 				}
+				repeatAllowed = ExampleMatchType.isMatch( matchType );
 			}
 			return repeatAllowed;
+		}
+
+		/**
+		 * @see org.opentravel.exampleupgrade.UpgradeModelVisitor#isAutoGenerationEnabled()
+		 */
+		@Override
+		public boolean isAutoGenerationEnabled() {
+			return elementStack.peek().isAutogenNode();
 		}
 
 		/**
