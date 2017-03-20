@@ -34,6 +34,7 @@ import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
+import org.opentravel.schemacompiler.model.ModelElement;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttribute;
@@ -83,14 +84,17 @@ public class UpgradeTreeBuilder {
 	 * of the upgraded example tree.
 	 */
 	public UpgradeTreeBuilder(ExampleGeneratorOptions exampleOptions) {
-		try {
-			upgradeDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-	        this.exampleValueGenerator = ExampleValueGenerator.getInstance( null );
-			this.exampleOptions = exampleOptions;
-			
-		} catch (ParserConfigurationException e) {
-			throw new Error("Unable to create DOM document instance.");
-		}
+		this( newDocument(), exampleOptions );
+	}
+	
+	/**
+	 * Constructor that specifies the options to use when generating unmatched sections
+	 * of the upgraded example tree.
+	 */
+	public UpgradeTreeBuilder(Document upgradeDocument, ExampleGeneratorOptions exampleOptions) {
+		this.upgradeDocument = upgradeDocument;
+        this.exampleValueGenerator = ExampleValueGenerator.getInstance( null );
+		this.exampleOptions = exampleOptions;
 	}
 	
 	/**
@@ -103,7 +107,6 @@ public class UpgradeTreeBuilder {
 	 */
 	public TreeItem<DOMTreeUpgradeNode> buildUpgradeDOMTree(NamedEntity otmEntity, Element originalRoot) {
 		ExampleMatchType matchType = getMatchType( otmEntity, originalRoot );
-		boolean foundMatch = ExampleMatchType.isMatch( matchType );
 		
 		initNamespaceMappings( otmEntity );
 		clearReferenceFlags( originalRoot );
@@ -116,15 +119,151 @@ public class UpgradeTreeBuilder {
 		DOMTreeUpgradeNode node = new DOMTreeUpgradeNode( otmEntity, rootElement, matchType );
 		TreeItem<DOMTreeUpgradeNode> treeItem = new TreeItem<>( node );
 		UpgradeModelVisitor visitor = new UMVisitor();
-		UpgradeModelNavigator navigator = new UpgradeModelNavigator( visitor, otmEntity.getOwningModel(), exampleOptions );
+		UpgradeModelNavigator navigator = new UpgradeModelNavigator(
+				visitor, otmEntity.getOwningModel(), exampleOptions );
 		
 		upgradeDocument.appendChild( rootElement );
 		treeItem.setGraphic( new ImageView( AbstractDOMTreeNode.elementIcon ) );
-		elementStack.push( new UpgradeNodeContext( treeItem,  originalRoot, otmEntity, !foundMatch ) );
+		elementStack.push( new UpgradeNodeContext( treeItem,  originalRoot,
+				otmEntity, !ExampleMatchType.isMatch( matchType ) ) );
 		navigator.navigate( otmEntity );
 		configureNamespaceDeclarations();
 		
 		return treeItem;
+	}
+	
+	/**
+	 * Replaces the given original tree item with new content by building a branch
+	 * from the original DOM node provided.
+	 * 
+	 * @param origTreeItem  the upgrade tree item to be replaced
+	 * @param originalNode  the original DOM tree node from which to build new upgrade content
+	 * @return TreeItem<DOMTreeUpgradeNode>
+	 * @throws ExampleUpgradeException  thrown if an error occurs during the example generation process
+	 */
+	public TreeItem<DOMTreeUpgradeNode> replaceUpgradeDOMBranch(
+			TreeItem<DOMTreeUpgradeNode> origTreeItem, Node originalNode)
+					throws ExampleUpgradeException {
+		TreeItem<DOMTreeUpgradeNode> rootTreeItem = origTreeItem;
+		TreeItem<DOMTreeUpgradeNode> parentTreeItem = origTreeItem.getParent();
+		TreeItem<DOMTreeUpgradeNode> upgradeTreeItem;
+		
+		while (rootTreeItem.getParent() != null) {
+			rootTreeItem = rootTreeItem.getParent();
+		}
+		initNamespaceMappings( rootTreeItem.getValue().getOtmEntity() );
+		clearReferenceFlags( originalNode );
+		
+		if (origTreeItem.getValue().getOtmEntity() != null) { // Complex OTM type
+			NamedEntity otmEntity = origTreeItem.getValue().getOtmEntity();
+			boolean isAutoGen = (originalNode == null);
+			
+			if (isAutoGen || (originalNode instanceof Element)) {
+				Element upgradeElement = createDomElement( otmEntity );
+				ExampleMatchType matchType = isAutoGen ?
+						ExampleMatchType.NONE : getMatchType( otmEntity, (Element) originalNode );
+				DOMTreeUpgradeNode node = new DOMTreeUpgradeNode( otmEntity, upgradeElement, matchType );
+				UpgradeModelVisitor visitor = new UMVisitor();
+				UpgradeModelNavigator navigator = new UpgradeModelNavigator(
+						visitor, otmEntity.getOwningModel(), exampleOptions );
+				
+				upgradeTreeItem = new TreeItem<>( node );
+				upgradeTreeItem.setGraphic( new ImageView( AbstractDOMTreeNode.elementIcon ) );
+				elementStack.push( new UpgradeNodeContext( upgradeTreeItem,  (Element) originalNode,
+						otmEntity, isAutoGen ) );
+				navigator.navigate( otmEntity );
+				
+				if (!isAutoGen) {
+					node.setMatchType( ExampleMatchType.MANUAL );
+				}
+				
+			} else {
+				throw new ExampleUpgradeException(
+						"Cannot process complex content using an attribute from the original document");
+			}
+			
+		} else { // Simple OTM type (or complex with simple content)
+			TLMemberField<?> otmField = origTreeItem.getValue().getOtmField();
+			NamedEntity otmEntity = (NamedEntity) otmField.getOwner();
+			Element dummyElement = createDummyElement( otmEntity );
+			DOMTreeUpgradeNode dummyNode = new DOMTreeUpgradeNode(
+					otmEntity, dummyElement, ExampleMatchType.MANUAL );
+			TreeItem<DOMTreeUpgradeNode> dummyItem =
+					new TreeItem<DOMTreeUpgradeNode>( dummyNode );
+			UpgradeModelVisitor visitor = new UMVisitor();
+			UpgradeModelNavigator navigator = new UpgradeModelNavigator(
+					visitor, ((ModelElement) otmField).getOwningModel(), exampleOptions );
+			Element parentElement = (originalNode == null) ? null : (Element) originalNode.getParentNode();
+			
+			elementStack.push( new UpgradeNodeContext( dummyItem, parentElement, otmEntity, true ) );
+			
+			// Assign the manual value from the original node
+			if (originalNode instanceof Attr) {
+				elementStack.peek().setManualValue( ((Attr) originalNode).getValue() );
+				
+			} else if (originalNode != null) {
+				elementStack.peek().setManualValue(
+						HelperUtils.getElementTextValue( (Element) originalNode ) );
+			}
+			
+			if (otmField instanceof TLAttribute) {
+				navigator.navigateAttribute( (TLAttribute) otmField );
+				
+			} else if (otmField instanceof TLIndicator) {
+				navigator.navigateIndicator( (TLIndicator) otmField );
+				
+			} else { // must be an element
+				navigator.navigateElement( (TLProperty) otmField );
+			}
+			
+			if (!dummyItem.getChildren().isEmpty()) {
+				upgradeTreeItem = dummyItem.getChildren().get( 0 );
+				upgradeTreeItem.getValue().setMatchType( ExampleMatchType.MANUAL );
+				
+			} else {
+				throw new ExampleUpgradeException(
+						"An unknown error occurred while attempting to process content from original document.");
+			}
+		}
+		
+		// If this is not the root, we need to replace the old original tree item (and
+		// DOM node) with the one we just generated.
+		if (parentTreeItem != null) {
+			Node origNode = origTreeItem.getValue().getDomNode();
+			Node parentNode = parentTreeItem.getValue().getDomNode();
+			Node upgradeNode = upgradeTreeItem.getValue().getDomNode();
+			int childTreeIdx = parentTreeItem.getChildren().indexOf( origTreeItem );
+			
+			parentTreeItem.getChildren().remove( origTreeItem );
+			parentTreeItem.getChildren().add( childTreeIdx, upgradeTreeItem );
+			
+			if (upgradeNode instanceof Element) {
+				if (origNode.getParentNode() == parentNode) { // Simple replacement of the old node
+					parentNode.replaceChild( upgradeNode, origNode );
+					
+				} else { // New DOM node for the document
+					// In this case, we need to insert the node into the proper position within
+					// its parent.
+					Node nextSiblingNode = null;
+					
+					for (int i = childTreeIdx + 1; i < parentTreeItem.getChildren().size(); i++) {
+						TreeItem<DOMTreeUpgradeNode> siblingItem = parentTreeItem.getChildren().get( i );
+						
+						if (siblingItem.getValue().getDomNode().getParentNode() != null) {
+							nextSiblingNode = siblingItem.getValue().getDomNode();
+							break;
+						}
+					}
+					parentNode.insertBefore( upgradeNode, nextSiblingNode );
+				}
+				
+			} else { // must be an attribute node
+				((Element) parentNode).setAttribute( upgradeNode.getNodeName(), upgradeNode.getNodeValue() );
+			}
+		}
+		configureNamespaceDeclarations();
+		
+		return upgradeTreeItem;
 	}
 	
 	/**
@@ -141,6 +280,10 @@ public class UpgradeTreeBuilder {
 				null : originalElement.getAttributeNode( otmAttribute.getName() );
 		ExampleMatchType matchType = null;
 		Attr upgradeAttr;
+		
+		if (originalAttr == null) {
+			originalAttr = findManualAttributeMatch();
+		}
 		
 		if (originalAttr != null) {
 			markReferenced( originalAttr );
@@ -187,6 +330,10 @@ public class UpgradeTreeBuilder {
 			TreeItem<DOMTreeUpgradeNode> elementItem;
 			ExampleMatchType matchType;
 			
+			if (originalIndicatorElement == null) {
+				originalIndicatorElement = findManualElementMatch();
+			}
+			
 			if ((originalIndicatorElement != null) || elementStack.peek().isAutogenNode())  {
 				String indicatorValue = HelperUtils.getElementTextValue( originalIndicatorElement );
 				
@@ -213,6 +360,10 @@ public class UpgradeTreeBuilder {
 			TreeItem<DOMTreeUpgradeNode> attributeItem;
 			ExampleMatchType matchType;
 			Attr upgradeAttr;
+			
+			if (originalAttr == null) {
+				originalAttr = findManualAttributeMatch();
+			}
 			
 			if ((originalAttr != null) || elementStack.peek().isAutogenNode()) {
 				markReferenced( originalAttr );
@@ -293,6 +444,10 @@ public class UpgradeTreeBuilder {
 			ExampleMatchType matchType;
 			String elementValue = null;
 			
+			if (originalChildElement == null) {
+				originalChildElement = findManualElementMatch();
+			}
+			
 			if (originalChildElement != null) {
 				matchType = getMatchType( otmElement, originalChildElement );
 				elementValue = HelperUtils.getElementTextValue( originalChildElement );
@@ -339,16 +494,9 @@ public class UpgradeTreeBuilder {
 				if ((matchType == ExampleMatchType.EXACT_SUBSTITUTABLE) ||
 						(matchType == ExampleMatchType.PARTIAL_SUBSTITUTABLE)) {
 					// Handle special case for substitutable element matches
-					if (elementType instanceof TLFacet) {
-						QName substitutableName = XsdCodegenUtils.getSubstitutableElementName( (TLFacet) elementType );
-						
-						childUpgradeElement = upgradeDocument.createElementNS(
-								substitutableName.getNamespaceURI(), qualifiedElementName(
-										substitutableName.getNamespaceURI(), substitutableName.getLocalPart() ) );
-						
-					} else if (isFacetAlias( elementType )) {
-						QName substitutableName = XsdCodegenUtils.getSubstitutableElementName( (TLAlias) elementType );
-						
+					QName substitutableName = getSubstitutableElementName( elementType );
+					
+					if (substitutableName != null) {
 						childUpgradeElement = upgradeDocument.createElementNS(
 								substitutableName.getNamespaceURI(), qualifiedElementName(
 										substitutableName.getNamespaceURI(), substitutableName.getLocalPart() ) );
@@ -438,7 +586,7 @@ public class UpgradeTreeBuilder {
 	 * 
 	 * @param extensionPointType  the facet type of the extension point group
 	 */
-	public boolean buildExtensionPointGroupTreeItemStart(TLFacetType extensionPointType) {
+	private boolean buildExtensionPointGroupTreeItemStart(TLFacetType extensionPointType) {
 		log.debug("buildExtensionPointGroupTreeItemStart() : " + extensionPointType);
 		boolean processChildren = false;
 		QName elementName;
@@ -478,7 +626,7 @@ public class UpgradeTreeBuilder {
 	 * 
 	 * @param extensionPointType  the facet type of the extension point group
 	 */
-	public void buildExtensionPointGroupTreeItemEnd(TLFacetType extensionPointType) {
+	private void buildExtensionPointGroupTreeItemEnd(TLFacetType extensionPointType) {
 		log.debug("buildExtensionPointGroupTreeItemEnd() : " + extensionPointType);
 		TreeItem<DOMTreeUpgradeNode> extensionPointElementItem = elementStack.pop().getUpgradeItem();
 		TreeItem<DOMTreeUpgradeNode> parentElementItem = elementStack.peek().getUpgradeItem();
@@ -573,14 +721,7 @@ public class UpgradeTreeBuilder {
 			
 			// If no match was found yet, check the non-substitutable element name (if one exists for the entity)
 			if (!ExampleMatchType.isMatch( matchType )) {
-				QName substitutableName = null;
-				
-				if (otmEntity instanceof TLFacet) {
-					substitutableName = XsdCodegenUtils.getSubstitutableElementName( (TLFacet) otmEntity );
-					
-				} else if (isFacetAlias( otmEntity )) {
-					substitutableName = XsdCodegenUtils.getSubstitutableElementName( (TLAlias) otmEntity );
-				}
+				QName substitutableName = getSubstitutableElementName( otmEntity );
 				
 				if ((substitutableName != null) &&
 						(substitutableName.getLocalPart().equals( domElement.getLocalName() ) ) ) {
@@ -665,8 +806,12 @@ public class UpgradeTreeBuilder {
 	 * @return Element
 	 */
 	private Element createDomElement(NamedEntity entity) {
-		QName entityName = XsdCodegenUtils.getGlobalElementName( entity );
+		QName entityName = getSubstitutableElementName( entity );
 		Element domElement;
+		
+		if (entityName == null) {
+			entityName = XsdCodegenUtils.getGlobalElementName( entity );
+		}
 		
 		if (entityName != null) {
 			domElement = upgradeDocument.createElementNS(
@@ -677,6 +822,79 @@ public class UpgradeTreeBuilder {
 			throw new IllegalArgumentException("The OTM entity does not define a global XML element.");
 		}
 		return domElement;
+	}
+	
+	/**
+	 * Creates a DOM element for the given entity or a dummy element if the OTM entity
+	 * is null or invalid.
+	 * 
+	 * @param entity  the OTM entity for which to create a dummy element
+	 * @return Element
+	 */
+	private Element createDummyElement(NamedEntity entity) {
+		Element dummyElement;
+		try {
+			dummyElement = createDomElement( entity );
+			
+		} catch (Throwable t) {
+			dummyElement = upgradeDocument.createElementNS( "http://otm.dummy.com", "Dummy" );
+		}
+		return dummyElement;
+	}
+	
+	/**
+	 * Returns a dummy attribute that will provide the manually-assigned value
+	 * or null if no manual value was assigned.
+	 * 
+	 * @return Attr
+	 */
+	private Attr findManualAttributeMatch() {
+		String manualValue = elementStack.peek().getManualValue();
+		Attr manualAttr = null;
+		
+		if (manualValue != null) {
+			manualAttr = upgradeDocument.createAttribute( "dummy" );
+			manualAttr.setValue( manualValue );
+			elementStack.peek().setManualValue( null );
+		}
+		return manualAttr;
+	}
+	
+	/**
+	 * Returns a dummy simple element that will provide the manually-assigned value
+	 * or null if no manual value was assigned.
+	 * 
+	 * @return Element
+	 */
+	private Element findManualElementMatch() {
+		String manualValue = elementStack.peek().getManualValue();
+		Element manualElement = null;
+		
+		if (manualValue != null) {
+			manualElement = upgradeDocument.createElement( "dummy" );
+			manualElement.appendChild( upgradeDocument.createTextNode( manualValue ) );
+			elementStack.peek().setManualValue( null );
+		}
+		return manualElement;
+	}
+	
+	/**
+	 * Returns the substitutable element name for the entity or null if one
+	 * does not exist.
+	 * 
+	 * @param otmEntity  the entity for which to return the substitutable element name
+	 * @return QName
+	 */
+	private QName getSubstitutableElementName(NamedEntity otmEntity) {
+		QName substitutableName = null;
+		
+		if (otmEntity instanceof TLFacet) {
+			substitutableName = XsdCodegenUtils.getSubstitutableElementName( (TLFacet) otmEntity );
+			
+		} else if (isFacetAlias( otmEntity )) {
+			substitutableName = XsdCodegenUtils.getSubstitutableElementName( (TLAlias) otmEntity );
+		}
+		return substitutableName;
 	}
 	
 	/**
@@ -809,6 +1027,7 @@ public class UpgradeTreeBuilder {
 		
 		// Start by deleting all existing namespace declarations
 		NamedNodeMap attrs = rootElement.getAttributes();
+		Set<String> existingAttrs = new HashSet<>();
 		int attrCount = attrs.getLength();
 		
 		for (int i = 0; i < attrCount; i++) {
@@ -816,8 +1035,11 @@ public class UpgradeTreeBuilder {
 			
 			if (domAttr.getNodeName().equals("xmlns")
 					|| domAttr.getNodeName().contains(":")) {
-				rootElement.removeAttributeNode( domAttr );
+				existingAttrs.add( domAttr.getNodeName() );
 			}
+		}
+		for (String nsAttr : existingAttrs) {
+			rootElement.removeAttribute( nsAttr );
 		}
 		
 		// Now create namespace declarations for every namespace used in the document
@@ -860,16 +1082,18 @@ public class UpgradeTreeBuilder {
 	 * @param originalDomNode  the root of the DOM tree for which to clear all flags
 	 */
 	private void clearReferenceFlags(Node originalDomNode) {
-		Node domChild = originalDomNode.getFirstChild();
-		
-		originalDomNode.setUserData( DOMTreeOriginalNode.IS_REFERENCED_KEY, null, null );
-		
-		while (domChild != null) {
-			if ((domChild.getNodeType() == Node.ELEMENT_NODE)
-					|| (domChild.getNodeType() == Node.ATTRIBUTE_NODE)) {
-				clearReferenceFlags( domChild );
+		if (originalDomNode != null) {
+			Node domChild = originalDomNode.getFirstChild();
+			
+			originalDomNode.setUserData( DOMTreeOriginalNode.IS_REFERENCED_KEY, null, null );
+			
+			while (domChild != null) {
+				if ((domChild.getNodeType() == Node.ELEMENT_NODE)
+						|| (domChild.getNodeType() == Node.ATTRIBUTE_NODE)) {
+					clearReferenceFlags( domChild );
+				}
+				domChild = domChild.getNextSibling();
 			}
-			domChild = domChild.getNextSibling();
 		}
 	}
 	
@@ -885,6 +1109,20 @@ public class UpgradeTreeBuilder {
 	}
 	
 	/**
+	 * Returns a new DOM document instance.
+	 * 
+	 * @return Document
+	 */
+	private static Document newDocument() {
+		try {
+			return DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+			
+		} catch (ParserConfigurationException e) {
+			throw new Error("Unable to create DOM document instance.");
+		}
+	}
+	
+	/**
 	 * Context that captures the pairing between the upgrade tree node and the original
 	 * DOM element (if any).
 	 */
@@ -895,6 +1133,7 @@ public class UpgradeTreeBuilder {
 		private Node nextOriginalChild;
 		private NamedEntity otmElementType;
 		private boolean autogenNode = false;
+		private String manualValue;
 		
 		/**
 		 * Full constructor.
@@ -951,6 +1190,24 @@ public class UpgradeTreeBuilder {
 		 */
 		public boolean isAutogenNode() {
 			return autogenNode;
+		}
+
+		/**
+		 * Returns the manually-assigned value for the next attribute or simple element.
+		 *
+		 * @return String
+		 */
+		public String getManualValue() {
+			return manualValue;
+		}
+
+		/**
+		 * Assigns the manually-assigned value for the next attribute or simple element.
+		 *
+		 * @param manualValue  the element/attribute value to assign
+		 */
+		public void setManualValue(String manualValue) {
+			this.manualValue = manualValue;
 		}
 
 		/**

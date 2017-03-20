@@ -18,8 +18,10 @@ package org.opentravel.exampleupgrade;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,6 +41,13 @@ import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.loader.LibraryModelLoader;
 import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
+import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLAlias;
+import org.opentravel.schemacompiler.model.TLBusinessObject;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
+import org.opentravel.schemacompiler.model.TLCoreObject;
+import org.opentravel.schemacompiler.model.TLFacet;
+import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.repository.ProjectManager;
 import org.opentravel.schemacompiler.validate.FindingMessageFormat;
@@ -49,14 +58,19 @@ import org.opentravel.schemacompiler.xml.XMLPrettyPrinter;
 import org.w3c.dom.Document;
 
 import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
@@ -70,6 +84,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.control.cell.ChoiceBoxTableCell;
 import javafx.scene.effect.Lighting;
 import javafx.scene.input.DataFormat;
 import javafx.scene.input.DragEvent;
@@ -112,9 +127,9 @@ public class ExampleUpgradeController {
     @FXML private AnchorPane previewTab;
     @FXML private AnchorPane originalTab;
     @FXML private AnchorPane autogenTab;
-    @FXML private TableView<?> facetSelectionTableView;
-    @FXML private TableColumn<?, ?> otmObjectColumn;
-    @FXML private TableColumn<?, ?> facetSelectionColumn;
+    @FXML private TableView<EntityFacetSelection> facetSelectionTableView;
+    @FXML private TableColumn<EntityFacetSelection, String> otmObjectColumn;
+    @FXML private TableColumn<EntityFacetSelection, String> facetSelectionColumn;
     @FXML private ChoiceBox<String> bindingStyleChoice;
     @FXML private Spinner<Integer> repeatCountSpinner;
     @FXML private Button saveButton;
@@ -133,6 +148,7 @@ public class ExampleUpgradeController {
 	
 	private Map<QName,List<OTMObjectChoice>> familyMatches = new HashMap<>();
 	private Map<String,List<OTMObjectChoice>> allElementsByBaseNS = new HashMap<>();
+	private FacetSelections facetSelections;
 	
 	private String dragId;
 	private TreeItem<DOMTreeOriginalNode> dragItem;
@@ -186,6 +202,7 @@ public class ExampleUpgradeController {
 							familyMatches = visitor.getFamilyMatches();
 							allElementsByBaseNS = visitor.getAllElementsByBaseNS();
 							
+							populateFacetSelections();
 							rebuildEntityChoices();
 							
 						} else {
@@ -268,6 +285,31 @@ public class ExampleUpgradeController {
 				}
 			});
 		}
+	}
+	
+	/**
+	 * Constructs the list of facet selections for the Auto-Gen tab.
+	 */
+	private void populateFacetSelections() {
+		this.facetSelections = new FacetSelections();
+		
+		// Build the facet selections for each facet owner type in the model
+		for (TLLibrary library : model.getUserDefinedLibraries()) {
+			for (TLBusinessObject entity : library.getBusinessObjectTypes()) {
+				facetSelections.addFacetSelection( new EntityFacetSelection( entity ) );
+			}
+			for (TLChoiceObject entity : library.getChoiceObjectTypes()) {
+				facetSelections.addFacetSelection( new EntityFacetSelection( entity ) );
+			}
+			for (TLCoreObject entity : library.getCoreObjectTypes()) {
+				facetSelections.addFacetSelection( new EntityFacetSelection( entity ) );
+			}
+		}
+		
+		Platform.runLater( () -> {
+			facetSelectionTableView.setItems(
+					FXCollections.observableArrayList( facetSelections.getAllFacetSelections() ) );
+		});
 	}
 	
 	/**
@@ -453,7 +495,16 @@ public class ExampleUpgradeController {
 	 * @param event  the action event that triggered this method call
 	 */
 	@FXML public void resetContent(ActionEvent event) {
-		System.out.println("ExampleUpgradeController.resetContent()");
+		Alert confirmDialog = new Alert( AlertType.CONFIRMATION );
+		
+		confirmDialog.setTitle( "Reset Example Content" );
+		confirmDialog.setHeaderText( null );
+		confirmDialog.setContentText("Are you sure you want to reset all content to its original state?");
+		confirmDialog.showAndWait();
+		
+		if (confirmDialog.getResult() == ButtonType.OK) {
+			populateExampleContent( true );
+		}
 	}
 	
 	/**
@@ -462,7 +513,30 @@ public class ExampleUpgradeController {
 	 * @param event  the action event that triggered this method call
 	 */
 	@FXML public void saveExampleOutput(ActionEvent event) {
-		System.out.println("ExampleUpgradeController.saveExampleOutput()");
+		boolean xmlSelected = true;
+		UserSettings userSettings = UserSettings.load();
+		FileChooser chooser = newFileChooser( "Save Example Output", userSettings.getLastExampleFolder(),
+				xmlSelected ? new FileChooser.ExtensionFilter( "XML Files", "*.xml" )
+							: new FileChooser.ExtensionFilter( "JSON Files", "*.json" ) );
+		File targetFile = chooser.showSaveDialog( primaryStage );
+		
+		if (targetFile != null) {
+			Runnable r = new BackgroundTask( "Saving Report" ) {
+				protected void execute() throws Throwable {
+					try {
+						try (Writer out = new FileWriter( targetFile )) {
+							out.write( previewPane.getText() );
+						}
+						
+					} finally {
+						userSettings.setLastExampleFolder( targetFile.getParentFile() );
+						userSettings.save();
+					}
+				}
+			};
+			
+			new Thread( r ).start();
+		}
 	}
 	
 	/**
@@ -475,19 +549,6 @@ public class ExampleUpgradeController {
 		if ((selectedStyle != null) && !selectedStyle.equals(currentStyle)) {
 			CompilerExtensionRegistry.setActiveExtension(selectedStyle);
 		}
-	}
-	
-	/**
-	 * Handles a drag-n-drop event in which a node from the original DOM tree is dropped
-	 * onto the upgrade tree.
-	 * 
-	 * @param originalItem  the tree item from the original DOM document
-	 * @param upgradeItem  the tree item from the upgrade DOM document
-	 */
-	private void handleDragDropEvent(TreeItem<DOMTreeOriginalNode> originalItem,
-			TreeItem<DOMTreeUpgradeNode> upgradeItem) {
-		System.out.println("DRAG/DROP: " + originalItem.getValue().getLabel() +
-				" / " + upgradeItem.getValue().getLabel());
 	}
 	
 	/**
@@ -525,13 +586,51 @@ public class ExampleUpgradeController {
 	}
 	
 	/**
+	 * Handles a drag-n-drop event in which a node from the original DOM tree is dropped
+	 * onto the upgrade tree.
+	 * 
+	 * @param originalItem  the tree item from the original DOM document
+	 * @param upgradeItem  the tree item from the upgrade DOM document
+	 */
+	private void handleDragDropEvent(TreeItem<DOMTreeOriginalNode> originalItem,
+			TreeItem<DOMTreeUpgradeNode> upgradeItem) {
+		try {
+			new UpgradeTreeBuilder( upgradeDocument, getExampleOptions() )
+					.replaceUpgradeDOMBranch( upgradeItem, originalItem.getValue().getDomNode() );
+			updatePreviewPane( false );
+			
+		} catch (Exception e) {
+			Alert errorDialog = new Alert( AlertType.ERROR );
+			
+			e.printStackTrace( System.out );
+			errorDialog.setTitle( "Error" );
+			errorDialog.setHeaderText( null );
+			errorDialog.setContentText( HelperUtils.getErrorMessage( e ) );
+			errorDialog.showAndWait();
+		}
+	}
+	
+	/**
 	 * Called when the user has elected to auto-generate content for a missing
 	 * node in the upgrade tree.
 	 * 
 	 * @param upgradeItem  the upgrade tree item from which to start auto-generating content
 	 */
 	private void handleAutoGenerateContent(TreeItem<DOMTreeUpgradeNode> upgradeItem) {
-		System.out.println("handleAutoGenerateContent()");
+		try {
+			new UpgradeTreeBuilder( upgradeDocument, getExampleOptions() )
+					.replaceUpgradeDOMBranch( upgradeItem, null );
+			updatePreviewPane( false );
+			
+		} catch (Exception e) {
+			Alert errorDialog = new Alert( AlertType.ERROR );
+			
+			e.printStackTrace( System.out );
+			errorDialog.setTitle( "Error" );
+			errorDialog.setHeaderText( null );
+			errorDialog.setContentText( HelperUtils.getErrorMessage( e ) );
+			errorDialog.showAndWait();
+		}
 	}
 	
 	/**
@@ -657,6 +756,21 @@ public class ExampleUpgradeController {
 		repeatCountSpinner.setValueFactory(
 				new IntegerSpinnerValueFactory( 1, 3, settings.getRepeatCount(), 1 ) );
 		
+		otmObjectColumn.setCellValueFactory( cellData -> {
+			return new ReadOnlyObjectWrapper<String>(
+					HelperUtils.getDisplayName( cellData.getValue().getEntityType(), true ) );
+		});
+		otmObjectColumn.prefWidthProperty().bind( facetSelectionTableView.widthProperty().divide(2) );
+		
+		facetSelectionColumn.setCellValueFactory( cellData -> {
+			String cellValue = cellData.getValue().getSelectedFacetName();
+			return (cellValue == null) ? null : new ReadOnlyObjectWrapper<String>( cellValue );
+		});
+		facetSelectionColumn.setCellFactory( cellData -> {
+			return new FacetSelectCell();
+		});
+		facetSelectionColumn.prefWidthProperty().bind( facetSelectionTableView.widthProperty().divide(2) );
+		
 		entityChoice.valueProperty().addListener( ( observable, oldValue, newValue ) -> {
 			if (oldValue != newValue) {
 				populateExampleContent( true );
@@ -693,7 +807,9 @@ public class ExampleUpgradeController {
 		upgradedTreeView.setCellFactory( tv -> new StyledTreeCell<DOMTreeUpgradeNode>() {
 			{
 				setOnDragOver( dragEvent -> {
-					if (getItem() != null) {
+					DOMTreeUpgradeNode value = getItem();
+					
+					if ((value != null) && !ExampleMatchType.isMatch( value.getMatchType() )) {
 	                	dragEvent.acceptTransferModes( TransferMode.COPY );
 	                	setEffect( new Lighting() );
 					}
@@ -748,6 +864,25 @@ public class ExampleUpgradeController {
 			}
 		});
 		
+		upgradedTreeView.getSelectionModel().selectedItemProperty().addListener(
+				(observable, oldValue, newValue) -> {
+					NamedEntity selectedEntity = newValue.getValue().getOtmEntity();
+					EntityFacetSelection facetSelection;
+					
+					if (selectedEntity instanceof TLAlias) {
+						selectedEntity = ((TLAlias) selectedEntity).getOwningEntity();
+					}
+					if (selectedEntity instanceof TLFacet) {
+						selectedEntity = ((TLFacet) selectedEntity).getOwningEntity();
+					}
+					facetSelection = (selectedEntity == null) ?
+							null : facetSelections.getFacetSelection( selectedEntity );
+					
+					if (facetSelection != null) {
+						facetSelectionTableView.getSelectionModel().select( facetSelection );
+					}
+				});
+		
 		this.primaryStage = primaryStage;
 		this.primaryStage.getScene().getStylesheets().add(
 				ExampleUpgradeController.class.getResource( "/styles/xml-highlighting.css" ).toExternalForm() );
@@ -785,6 +920,7 @@ public class ExampleUpgradeController {
 		ExampleGeneratorOptions options = new ExampleGeneratorOptions();
 		
 		options.setMaxRepeat( repeatCountSpinner.getValue() );
+		facetSelections.configureExampleOptions( options );
 		return options;
 	}
 	
@@ -835,6 +971,79 @@ public class ExampleUpgradeController {
 				setStatusMessage( null, false );
 				updateControlStates();
 			}
+		}
+		
+	}
+	
+	/**
+	 * Table cell that allows the user to select a facet from the available list
+	 * for substitutable OTM entities.
+	 */
+	private class FacetSelectCell extends ChoiceBoxTableCell<EntityFacetSelection,String> {
+		
+		/**
+		 * Default constructor.
+		 */
+		public FacetSelectCell() {
+			setOnMouseEntered( new EventHandler<MouseEvent>() {
+			    public void handle(MouseEvent me) {
+			    	boolean isEditable = FacetSelectCell.this.isEditable();
+			    	FacetSelectCell.this.getScene().setCursor( isEditable ? Cursor.HAND : Cursor.DEFAULT );
+			    }
+			} );
+			setOnMouseExited( new EventHandler<MouseEvent>() {
+			    public void handle(MouseEvent me) {
+			    	FacetSelectCell.this.getScene().setCursor( Cursor.DEFAULT );
+			    }
+			} );
+		}
+
+		/**
+		 * @see javafx.scene.control.cell.ChoiceBoxTableCell#startEdit()
+		 */
+		@Override
+		public void startEdit() {
+			EntityFacetSelection facetSelection = (EntityFacetSelection) getTableRow().getItem();
+			List<String> facetNames = (facetSelection == null) ? FXCollections.emptyObservableList()
+					: FXCollections.observableArrayList( facetSelection.getFacetNames() );
+			
+			if (facetNames.size() > 1) {
+				getItems().setAll( facetNames );
+			} else {
+				getItems().clear();
+			}
+			super.startEdit();
+		}
+
+		/**
+		 * @see javafx.scene.control.TreeTableCell#commitEdit(java.lang.Object)
+		 */
+		@Override
+		public void commitEdit(String value) {
+			EntityFacetSelection facetSelection = (EntityFacetSelection) getTableRow().getItem();
+			
+			facetSelection.setSelectedFacet( value );
+			super.commitEdit( value );
+		}
+		
+		/**
+		 * @see javafx.scene.control.cell.ChoiceBoxTreeTableCell#updateItem(java.lang.Object, boolean)
+		 */
+		@Override
+		public void updateItem(String value, boolean empty) {
+			List<String> itemList = null;
+			boolean editable = false;
+			
+			if (!empty) {
+				EntityFacetSelection facetSelection = (EntityFacetSelection) getTableRow().getItem();
+				itemList = (facetSelection == null) ? null : facetSelection.getFacetNames(); 
+				
+				editable = (itemList != null) && (itemList.size() > 1);
+				if (!editable) itemList = null;
+			}
+			setEditable( editable );
+			setStyle( editable ? "-fx-font-weight:bold;" : null );
+			super.updateItem( value, empty );
 		}
 		
 	}

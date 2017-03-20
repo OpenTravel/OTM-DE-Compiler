@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.example.ExampleGeneratorOptions;
@@ -35,6 +36,7 @@ import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAliasOwner;
 import org.opentravel.schemacompiler.model.TLAttribute;
+import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLComplexTypeBase;
@@ -79,7 +81,7 @@ public class UpgradeModelNavigator extends AbstractNavigator<NamedEntity>{
 		super(visitor);
 		this.visitor = visitor;
 		this.exampleOptions = (exampleOptions == null) ? new ExampleGeneratorOptions() : exampleOptions;
-		extensionPointRegistry = new ExtensionPointRegistry( model );
+		extensionPointRegistry = (model == null) ? null : new ExtensionPointRegistry( model );
 	}
 
 	/**
@@ -347,13 +349,24 @@ public class UpgradeModelNavigator extends AbstractNavigator<NamedEntity>{
     }
 
     /**
+     * Called when a <code>TLIndicator</code> instance is encountered during model navigation.
+     * 
+     * @param indicator  the indicator entity to visit and navigate
+     */
+    public void navigateIndicator(TLIndicator indicator) {
+        if (visitor.visitIndicator(indicator)) {
+        	// No further navigation required
+        }
+    }
+
+    /**
      * Called when a <code>TLProperty</code> instance is encountered during model navigation.
      * 
      * @param element  the element entity to visit and navigate
      */
     public void navigateElement(TLProperty element) {
-    	int autogenMaxRepeat = exampleOptions.getMaxRepeat();
     	int modelMaxRepeat = getMaxRepeat( element );
+    	int autogenMaxRepeat = Math.min( modelMaxRepeat, exampleOptions.getMaxRepeat() );
     	boolean isAutogenEnabled = false;
     	boolean canRepeat = true;
     	int repeatCount = 0;
@@ -495,29 +508,21 @@ public class UpgradeModelNavigator extends AbstractNavigator<NamedEntity>{
 		}
 		
 		if ((actualType instanceof TLRoleEnumeration) || (actualType instanceof TLOpenEnumeration)) {
+			NamedEntity xsdStringType = HelperUtils.findOTMEntity( elementType.getOwningModel(),
+					XMLConstants.W3C_XML_SCHEMA_NS_URI, "string" );
 			TLAttribute extAttribute = new TLAttribute();
 			TLExample example = new TLExample();
 			
 			example.setContext("default");
 			example.setValue("Other_Value");
 			extAttribute.setName("extension");
+			extAttribute.setType( (TLAttributeType) xsdStringType );
 			extAttribute.setMandatory(false);
 			extAttribute.addExample(example);
 			navigateAttribute(extAttribute);
 		}
 	}
 	
-    /**
-     * Called when a <code>TLIndicator</code> instance is encountered during model navigation.
-     * 
-     * @param indicator  the indicator entity to visit and navigate
-     */
-    public void navigateIndicator(TLIndicator indicator) {
-        if (visitor.visitIndicator(indicator)) {
-        	// No further navigation required
-        }
-    }
-
 	/**
 	 * @see org.opentravel.schemacompiler.visitor.AbstractNavigator#navigateLibrary(org.opentravel.schemacompiler.model.AbstractLibrary)
 	 */

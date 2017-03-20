@@ -11,6 +11,9 @@
 .missing-match {
 	-fx-text-fill: darkgrey;
 }
+.manual-match {
+	-fx-text-fill: brown;
+}
 .is-referenced {
 }
 .not-referenced {

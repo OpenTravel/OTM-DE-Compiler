@@ -69,9 +69,16 @@ public enum ExampleMatchType {
 	 * Indicates that no associated DOM element could be identified for the OTM model
 	 * element/field, and no example content was generated.
 	 */
-	MISSING( 3 );
+	MISSING( 3 ),
 	
-	private static List<String> styleClasses = Arrays.asList( "exact-match", "partial-match", "no-match", "missing-match" );
+	/**
+	 * Indicates that the associated DOM element is only considered a match because the
+	 * user explicitly selected it.
+	 */
+	MANUAL( 4 );
+	
+	private static List<String> styleClasses = Arrays.asList(
+			"exact-match", "partial-match", "no-match", "missing-match", "manual-match" );
 	
 	private int styleIdx;
 	

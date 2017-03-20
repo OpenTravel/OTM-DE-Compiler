@@ -16,8 +16,15 @@
 
 package org.opentravel.exampleupgrade;
 
+import java.util.List;
+
 import javax.xml.namespace.QName;
 
+import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
+import org.opentravel.schemacompiler.model.AbstractLibrary;
+import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.version.VersionScheme;
 import org.opentravel.schemacompiler.version.VersionSchemeFactory;
 import org.w3c.dom.Element;
@@ -73,6 +80,71 @@ public class HelperUtils {
 			nodeValue = null;
 		}
 		return nodeValue;
+	}
+	
+	/**
+	 * Returns the message associated with the given throwable or a default
+	 * message if none is defined.
+	 * 
+	 * @param t  the throwable for which to return an error message
+	 * @return String
+	 */
+	public static String getErrorMessage(Throwable t) {
+		Class<?> errorType = t.getClass();
+		String errorMessage = t.getMessage();
+		
+		while (((errorMessage == null) || (errorMessage.trim().length() == 0))
+				&& (t.getCause() != null)) {
+			t = t.getCause();
+			errorMessage = t.getMessage();
+		}
+		
+		if (errorMessage == null) {
+			errorMessage = "An unknown error occurred: " + errorType.getSimpleName()
+						 + " (see log for details).";
+		}
+		return errorMessage;
+	}
+	
+	/**
+	 * Returns the specified OTM entity from the model provided.
+	 * 
+	 * @param model  the model that owns the OTM entity to be returned
+	 * @param namespace  the namespace of the OTM entity to return
+	 * @param localName  the local name of the OTM entity to return
+	 * @return NamedEntity
+	 */
+	public static NamedEntity findOTMEntity(TLModel model, String namespace, String localName) {
+		List<AbstractLibrary> libraryList = model.getLibrariesForNamespace( namespace );
+		NamedEntity builtInType = null;
+		
+		for (AbstractLibrary library : libraryList ) {
+			if ((builtInType = library.getNamedMember( localName ) ) != null) {
+				break;
+			}
+		}
+		return builtInType;
+	}
+	
+	/**
+	 * Returns a display name label for the given OTM entity.
+	 * 
+	 * @param entity  the entity for which to return a display name
+	 * @param showPrefix  flag indicating whether the owning library's prefix should be included in the label
+	 * @return String
+	 */
+	public static String getDisplayName(NamedEntity entity, boolean showPrefix) {
+		TLLibrary library = (TLLibrary) entity.getOwningLibrary();
+		QName elementName = XsdCodegenUtils.getGlobalElementName(entity);
+		String localName = (elementName != null) ? elementName.getLocalPart() : entity.getLocalName();
+		StringBuilder displayName = new StringBuilder();
+		
+		if (showPrefix && (library.getPrefix() != null)) {
+			displayName.append( library.getPrefix() ).append( ":" );
+		}
+		displayName.append( localName );
+		
+		return displayName.toString();
 	}
 	
 	/**

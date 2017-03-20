@@ -87,6 +87,16 @@ public class DOMTreeUpgradeNode extends AbstractDOMTreeNode {
 	}
 	
 	/**
+	 * Assigns the flag indicating the match type of the OTM entity or field
+	 * with the original example.
+	 *
+	 * @param matchType  the match type value to assign
+	 */
+	public void setMatchType(ExampleMatchType matchType) {
+		this.matchType = matchType;
+	}
+
+	/**
 	 * Returns true if this node is associated with an OTM entity, false if
 	 * it is associated with a field.
 	 * 

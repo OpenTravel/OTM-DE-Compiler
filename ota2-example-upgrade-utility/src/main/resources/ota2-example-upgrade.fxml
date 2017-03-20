@@ -21,7 +21,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.opentravel.exampleupgrade.ExampleUpgradeController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.opentravel.exampleupgrade.ExampleUpgradeController">
    <center>
       <SplitPane dividerPositions="0.4866220735785953" prefHeight="160.0" prefWidth="200.0" BorderPane.alignment="CENTER">
         <items>
@@ -159,11 +159,6 @@
                <children>
                   <TabPane fx:id="tabPane" layoutX="6.0" layoutY="14.0" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <tabs>
-                      <Tab text="Preview">
-                        <content>
-                          <AnchorPane fx:id="previewTab" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                        </content>
-                      </Tab>
                       <Tab text="Original Example">
                         <content>
                           <AnchorPane fx:id="originalTab" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
@@ -171,6 +166,11 @@
                                     <TreeView fx:id="originalTreeView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                  </children>
                               </AnchorPane>
+                        </content>
+                      </Tab>
+                      <Tab text="Preview">
+                        <content>
+                          <AnchorPane fx:id="previewTab" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
                         </content>
                       </Tab>
                         <Tab text="Auto-Gen Options">
@@ -213,9 +213,9 @@
                                                 <Insets bottom="2.0" left="2.0" right="2.0" top="12.0" />
                                              </GridPane.margin>
                                           </Label>
-                                          <TableView fx:id="facetSelectionTableView" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="2147483647" GridPane.rowIndex="3">
+                                          <TableView fx:id="facetSelectionTableView" editable="true" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="2147483647" GridPane.rowIndex="3">
                                             <columns>
-                                              <TableColumn fx:id="otmObjectColumn" prefWidth="150.0" text="OTM Object" />
+                                              <TableColumn fx:id="otmObjectColumn" editable="false" prefWidth="150.0" text="OTM Object" />
                                               <TableColumn fx:id="facetSelectionColumn" minWidth="0.0" prefWidth="153.0" text="Facet Selection" />
                                             </columns>
                                              <GridPane.margin>
