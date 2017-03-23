@@ -26,6 +26,7 @@ import org.w3c.dom.Node;
 public class DOMTreeUpgradeNode extends AbstractDOMTreeNode {
 	
 	private NamedEntity otmEntity;
+	private NamedEntity declaredEntity;
 	private TLMemberField<?> otmField;
 	private ExampleMatchType matchType;
 	
@@ -35,12 +36,14 @@ public class DOMTreeUpgradeNode extends AbstractDOMTreeNode {
 	 * and/or attributes.
 	 * 
 	 * @param otmEntity  the OTM complex entity type associated with this node
+	 * @param declaredEntity  the entity type originally declared in the owning OTM element
 	 * @param domNode  the DOM node instance
 	 * @param matchType  indicates the match type of the OTM entity with the original example
 	 */
-	public DOMTreeUpgradeNode(NamedEntity otmEntity, Node domNode, ExampleMatchType matchType) {
+	public DOMTreeUpgradeNode(NamedEntity otmEntity, NamedEntity declaredEntity, Node domNode, ExampleMatchType matchType) {
 		super(domNode, (matchType == ExampleMatchType.MISSING) ? (domNode.getNodeName() + " [MISSING]") : null);
 		this.otmEntity = otmEntity;
+		this.declaredEntity = declaredEntity;
 		this.matchType = matchType;
 	}
 	
@@ -65,6 +68,15 @@ public class DOMTreeUpgradeNode extends AbstractDOMTreeNode {
 	 */
 	public NamedEntity getOtmEntity() {
 		return otmEntity;
+	}
+
+	/**
+	 * Returns the entity type originally declared in the owning OTM element.
+	 *
+	 * @return NamedEntity
+	 */
+	public NamedEntity getDeclaredEntity() {
+		return declaredEntity;
 	}
 
 	/**

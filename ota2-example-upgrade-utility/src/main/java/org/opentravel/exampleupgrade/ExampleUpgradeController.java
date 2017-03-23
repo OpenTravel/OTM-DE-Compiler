@@ -61,6 +61,7 @@ import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -83,6 +84,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeItem.TreeModificationEvent;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.ChoiceBoxTableCell;
 import javafx.scene.effect.Lighting;
@@ -93,10 +95,12 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 
 /**
@@ -145,6 +149,7 @@ public class ExampleUpgradeController {
 	private SelectionStrategy selectionStrategy = SelectionStrategy.getDefault();
 	private Document originalDocument;
 	private Document upgradeDocument;
+	private boolean upgradeDocumentDirty = false;
 	
 	private Map<QName,List<OTMObjectChoice>> familyMatches = new HashMap<>();
 	private Map<String,List<OTMObjectChoice>> allElementsByBaseNS = new HashMap<>();
@@ -405,11 +410,13 @@ public class ExampleUpgradeController {
 					
 					upgradedTreeView.setRoot( upgradeTree );
 					upgradeDocument = upgradeTree.getValue().getDomNode().getOwnerDocument();
+					upgradeDocumentDirty = true;
 					setUpgradeExpandedStates( upgradeTree );
 					setOriginalExpandedStates( originalTreeView.getRoot() );
 					
 				} else {
 					upgradedTreeView.setRoot( null );
+					upgradeDocumentDirty = false;
 				}
 				updatePreviewPane( newObjectSelected );
 				
@@ -527,6 +534,7 @@ public class ExampleUpgradeController {
 						try (Writer out = new FileWriter( targetFile )) {
 							out.write( previewPane.getText() );
 						}
+						upgradeDocumentDirty = false;
 						
 					} finally {
 						userSettings.setLastExampleFolder( targetFile.getParentFile() );
@@ -539,6 +547,56 @@ public class ExampleUpgradeController {
 		}
 	}
 	
+	/**
+	 * Called when the user clicks the 'Show Legend' link to display the legend
+	 * for the upgrade tree view.
+	 * 
+	 * @param event  the action event that triggered this method call
+	 */
+	@FXML public void showOriginalLegend(ActionEvent event) {
+		showLegend( "Original Document Legend", ExampleUpgradeController.class.getResource(
+				"/html/original-legend.html" ).toExternalForm() );
+	}
+	
+	/**
+	 * Called when the user clicks the 'Show Legend' link to display the legend
+	 * for the upgrade tree view.
+	 * 
+	 * @param event  the action event that triggered this method call
+	 */
+	@FXML public void showUpgradeLegend(ActionEvent event) {
+		showLegend( "Upgraded Document Legend", ExampleUpgradeController.class.getResource(
+				"/html/upgrade-legend.html" ).toExternalForm() );
+	}
+	
+	/**
+	 * Displays the specified legend documentation.
+	 * 
+	 * @param title  the title of the dialog box
+	 * @param legendUrl  the URL of the legend documentation to display
+	 */
+	private void showLegend(String title, String legendUrl) {
+		try {
+			FXMLLoader loader = new FXMLLoader( ExampleUpgradeController.class.getResource(
+					LegendController.FXML_FILE ) );
+			LegendController controller;
+			BorderPane page = loader.load();
+			Stage dialogStage = new Stage();
+			Scene scene = new Scene( page );
+			
+			dialogStage.setTitle( title );
+			dialogStage.initModality( Modality.WINDOW_MODAL );
+			dialogStage.initOwner( primaryStage );
+			dialogStage.setScene( scene );
+			
+			controller = loader.getController();
+			controller.initialize( dialogStage, legendUrl );
+			controller.showAndWait();
+			
+		} catch (IOException e) {
+			e.printStackTrace( System.out );
+		}
+	}
 	/**
 	 * Called when the user changes the default binding style.
 	 */
@@ -559,25 +617,42 @@ public class ExampleUpgradeController {
 	 * @param screenX  the screen X coordinate where the context menu should be displayed
 	 * @param screenY  the screen Y coordinate where the context menu should be displayed
 	 */
-	@SuppressWarnings("unchecked")
 	private void displayContextMenu(TreeItem<DOMTreeUpgradeNode> selectedItem,
 			double screenX, double screenY) {
 		DOMTreeUpgradeNode selectedNode = selectedItem.getValue();
-		MenuItem menuItem = null;
+		List<MenuItem> menuItems = new ArrayList<>();
+		MenuItem menuItem;
 		
-		if (selectedNode.getMatchType() == ExampleMatchType.MISSING) {
-			MenuItem mItem = new MenuItem( "Auto-Generate Content" );
-			mItem.setUserData( selectedItem );
-			mItem.setOnAction( e -> {
-				handleAutoGenerateContent( (TreeItem<DOMTreeUpgradeNode>) mItem.getUserData() );
-			});
-			menuItem = mItem;
+		switch (selectedNode.getMatchType()) {
+			case MISSING:
+				menuItem = new MenuItem( "Auto-Generate Content" );
+				menuItem.setOnAction( e -> {
+					handleAutoGenerateContent( selectedItem );
+				});
+				menuItems.add( menuItem );
+				break;
+			case NONE:
+				menuItem = new MenuItem( "Re-Generate Content" );
+				menuItem.setOnAction( e -> {
+					handleAutoGenerateContent( selectedItem );
+				});
+				menuItems.add( menuItem );
+			case MANUAL:
+				menuItem = new MenuItem( "Clear Content" );
+				menuItem.setOnAction( e -> {
+					handleClearContent( selectedItem );
+				});
+				menuItems.add( menuItem );
+				break;
+			default:
+				menuItem = null;
+				break;
 		}
 		
-		if (menuItem != null) {
+		if (!menuItems.isEmpty()) {
 			upgradeContextMenu = new ContextMenu();
 			
-			upgradeContextMenu.getItems().add( menuItem );
+			upgradeContextMenu.getItems().addAll( menuItems );
 			upgradeContextMenu.show( upgradedTreeView, screenX, screenY );
 			upgradeContextMenu.setOnAction( e -> {
 				upgradeContextMenu = null;
@@ -595,9 +670,16 @@ public class ExampleUpgradeController {
 	private void handleDragDropEvent(TreeItem<DOMTreeOriginalNode> originalItem,
 			TreeItem<DOMTreeUpgradeNode> upgradeItem) {
 		try {
-			new UpgradeTreeBuilder( upgradeDocument, getExampleOptions() )
-					.replaceUpgradeDOMBranch( upgradeItem, originalItem.getValue().getDomNode() );
+			TreeItem<DOMTreeUpgradeNode> newUpgradeItem =
+					new UpgradeTreeBuilder( upgradeDocument, getExampleOptions() )
+							.replaceUpgradeDOMBranch( upgradeItem, originalItem.getValue().getDomNode() );
+			
+			if (newUpgradeItem.getParent() == null) {
+				upgradedTreeView.setRoot( newUpgradeItem );
+			}
 			updatePreviewPane( false );
+			refreshBranch( originalItem );
+			upgradeDocumentDirty = true;
 			
 		} catch (Exception e) {
 			Alert errorDialog = new Alert( AlertType.ERROR );
@@ -618,9 +700,15 @@ public class ExampleUpgradeController {
 	 */
 	private void handleAutoGenerateContent(TreeItem<DOMTreeUpgradeNode> upgradeItem) {
 		try {
-			new UpgradeTreeBuilder( upgradeDocument, getExampleOptions() )
-					.replaceUpgradeDOMBranch( upgradeItem, null );
+			TreeItem<DOMTreeUpgradeNode> newUpgradeItem =
+					new UpgradeTreeBuilder( upgradeDocument, getExampleOptions() )
+							.replaceUpgradeDOMBranch( upgradeItem, null );
+			
+			if (newUpgradeItem.getParent() == null) {
+				upgradedTreeView.setRoot( newUpgradeItem );
+			}
 			updatePreviewPane( false );
+			upgradeDocumentDirty = true;
 			
 		} catch (Exception e) {
 			Alert errorDialog = new Alert( AlertType.ERROR );
@@ -631,6 +719,24 @@ public class ExampleUpgradeController {
 			errorDialog.setContentText( HelperUtils.getErrorMessage( e ) );
 			errorDialog.showAndWait();
 		}
+	}
+	
+	/**
+	 * Called when the user has elected to clear the content of a node in
+	 * the upgrade tree.
+	 * 
+	 * @param upgradeItem  the upgrade tree item from which to start auto-generating content
+	 */
+	private void handleClearContent(TreeItem<DOMTreeUpgradeNode> upgradeItem) {
+		TreeItem<DOMTreeUpgradeNode> newUpgradeItem =
+				new UpgradeTreeBuilder( upgradeDocument, getExampleOptions() )
+						.clearUpgradeDOMBranch( upgradeItem );
+		
+		if (newUpgradeItem.getParent() == null) {
+			upgradedTreeView.setRoot( newUpgradeItem );
+		}
+		updatePreviewPane( false );
+		upgradeDocumentDirty = true;
 	}
 	
 	/**
@@ -694,6 +800,22 @@ public class ExampleUpgradeController {
 		}
 		treeItem.setExpanded( expandParent ); // Expand this nodes if any children requested it
 		return expandParent | (treeItem.getValue().getReferenceStatus() == ReferenceStatus.NOT_REFERENCED);
+	}
+	
+	/**
+	 * Forces an update of the visual representation of the given tree item and all of its
+	 * children.
+	 * 
+	 * @param treeItem  the tree item to be refreshed
+	 */
+	private void refreshBranch(TreeItem<?> treeItem) {
+		if (treeItem.isLeaf()) {
+		    Event.fireEvent( treeItem,
+		    		new TreeModificationEvent<>( TreeItem.valueChangedEvent(), treeItem ) );
+		}
+		for (TreeItem<?> child : treeItem.getChildren()) {
+			refreshBranch( child );
+		}
 	}
 	
 	/**
@@ -809,7 +931,8 @@ public class ExampleUpgradeController {
 				setOnDragOver( dragEvent -> {
 					DOMTreeUpgradeNode value = getItem();
 					
-					if ((value != null) && !ExampleMatchType.isMatch( value.getMatchType() )) {
+					if ((value != null) && (!ExampleMatchType.isMatch( value.getMatchType() )
+							|| (value.getMatchType() == ExampleMatchType.MANUAL))) {
 	                	dragEvent.acceptTransferModes( TransferMode.COPY );
 	                	setEffect( new Lighting() );
 					}
@@ -866,7 +989,8 @@ public class ExampleUpgradeController {
 		
 		upgradedTreeView.getSelectionModel().selectedItemProperty().addListener(
 				(observable, oldValue, newValue) -> {
-					NamedEntity selectedEntity = newValue.getValue().getOtmEntity();
+					DOMTreeUpgradeNode treeNode = (newValue == null) ? null : newValue.getValue();
+					NamedEntity selectedEntity = (treeNode == null) ? null : treeNode.getOtmEntity();
 					EntityFacetSelection facetSelection;
 					
 					if (selectedEntity instanceof TLAlias) {
@@ -880,6 +1004,7 @@ public class ExampleUpgradeController {
 					
 					if (facetSelection != null) {
 						facetSelectionTableView.getSelectionModel().select( facetSelection );
+						facetSelectionTableView.scrollTo( facetSelection );
 					}
 				});
 		
@@ -890,7 +1015,24 @@ public class ExampleUpgradeController {
 				ExampleUpgradeController.class.getResource( "/styles/json-highlighting.css" ).toExternalForm() );
 		this.primaryStage.getScene().getStylesheets().add(
 				ExampleUpgradeController.class.getResource( "/styles/tree-styles.css" ).toExternalForm() );
-		
+		this.primaryStage.setOnCloseRequest( new EventHandler<WindowEvent>() {
+			public void handle(WindowEvent event) {
+				if ((upgradeDocument != null) && upgradeDocumentDirty) {
+					Alert confirmDialog = new Alert( AlertType.CONFIRMATION );
+					
+					confirmDialog.setTitle( "Unsaved Changes" );
+					confirmDialog.setHeaderText( null );
+					confirmDialog.setContentText(
+							"Your upgraded example document has unsaved changes.  "
+							+ "Click 'Ok' to save now or 'Cancel' to exit without saving.");
+					confirmDialog.showAndWait();
+					
+					if (confirmDialog.getResult() == ButtonType.OK) {
+						saveExampleOutput( null );
+					}
+				}
+			}
+		});
 		updateControlStates();
 	}
 	
