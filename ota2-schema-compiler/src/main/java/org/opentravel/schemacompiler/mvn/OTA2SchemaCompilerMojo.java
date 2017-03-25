@@ -33,6 +33,7 @@ import org.opentravel.schemacompiler.task.CommonCompilerTaskOptions;
 import org.opentravel.schemacompiler.task.CompileAllCompilerTask;
 import org.opentravel.schemacompiler.task.CompileAllTaskOptions;
 import org.opentravel.schemacompiler.task.TaskFactory;
+import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingMessageFormat;
 import org.opentravel.schemacompiler.validate.FindingType;
@@ -384,4 +385,12 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
         }
     }
 
+	/**
+	 * Since this is a read-only application, enable the OTM 1.6 file format for
+	 * all operations.
+	 */
+	static {
+		OTM16Upgrade.otm16Enabled = true;
+	}
+	
 }

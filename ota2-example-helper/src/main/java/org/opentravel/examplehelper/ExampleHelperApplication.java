@@ -21,6 +21,8 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.io.IOException;
 
+import org.opentravel.schemacompiler.util.OTM16Upgrade;
+
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
@@ -118,6 +120,14 @@ public class ExampleHelperApplication extends javafx.application.Application {
 			userSettings.setWindowPosition( new Point( 0, 0 ) );
 			userSettings.setWindowSize( UserSettings.getDefaultSettings().getWindowSize() );
 		}
+	}
+	
+	/**
+	 * Since this is a read-only application, enable the OTM 1.6 file format for
+	 * all operations.
+	 */
+	static {
+		OTM16Upgrade.otm16Enabled = true;
 	}
 	
 }

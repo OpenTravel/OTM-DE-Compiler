@@ -34,6 +34,7 @@ import org.opentravel.schemacompiler.repository.ProjectManager;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.saver.LibraryModelSaver;
 import org.opentravel.schemacompiler.saver.LibrarySaveException;
+import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingMessageFormat;
 import org.opentravel.schemacompiler.validate.FindingType;
@@ -314,6 +315,14 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 		}
 		snapshotFilename += "-snapshot";
 		return snapshotFilename;
+	}
+	
+	/**
+	 * Since this is a read-only application, enable the OTM 1.6 file format for
+	 * all operations.
+	 */
+	static {
+		OTM16Upgrade.otm16Enabled = true;
 	}
 	
 }

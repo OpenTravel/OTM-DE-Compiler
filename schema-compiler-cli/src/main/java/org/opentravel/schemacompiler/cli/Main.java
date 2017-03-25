@@ -28,6 +28,7 @@ import org.apache.commons.cli.Options;
 import org.opentravel.schemacompiler.ioc.CompilerExtensionRegistry;
 import org.opentravel.schemacompiler.task.CompileAllCompilerTask;
 import org.opentravel.schemacompiler.task.TaskFactory;
+import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.validate.FindingMessageFormat;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 
@@ -215,4 +216,12 @@ public class Main {
         }
     }
 
+	/**
+	 * Since this is a read-only application, enable the OTM 1.6 file format for
+	 * all operations.
+	 */
+	static {
+		OTM16Upgrade.otm16Enabled = true;
+	}
+	
 }

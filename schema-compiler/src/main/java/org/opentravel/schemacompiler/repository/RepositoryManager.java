@@ -61,6 +61,8 @@ import org.opentravel.schemacompiler.repository.impl.RepositoryItemImpl;
 import org.opentravel.schemacompiler.repository.impl.RepositoryItemVersionedWrapper;
 import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
 import org.opentravel.schemacompiler.saver.LibraryModelSaver;
+import org.opentravel.schemacompiler.saver.LibrarySaveException;
+import org.opentravel.schemacompiler.saver.impl.Library16FileSaveHandler;
 import org.opentravel.schemacompiler.security.PasswordHelper;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.TransformerFactory;
@@ -1832,24 +1834,20 @@ public class RepositoryManager implements Repository {
                 fileManager.startChangeSet();
 
                 // Change the status of the library metadata and content
-                TLLibrary libraryContent = loadOtmLibraryContent(contentFile);
+                LibraryContentWrapper libraryContent = loadOtmLibraryContent(contentFile);
                 TLLibraryStatus currentStatus = TLLibraryStatus.fromRepositoryStatus( libraryMetadata.getStatus() );
                 
                 targetStatus = otm16Enabled ? currentStatus.nextStatus() : TLLibraryStatus.FINAL;
 
                 if (libraryContent != null) {
-                    libraryContent.setStatus(targetStatus);
+                    libraryContent.content.setStatus(targetStatus);
                 }
                 libraryMetadata.setStatus(targetStatus.toRepositoryStatus());
                 libraryMetadata.setLastUpdated(XMLGregorianCalendarConverter.toXMLGregorianCalendar(new Date()));
 
                 // Save the changes and update the repository item sent for this method call
                 if (libraryContent != null) {
-                    LibraryModelSaver modelSaver = new LibraryModelSaver();
-
-                    fileManager.addToChangeSet(contentFile);
-                    modelSaver.getSaveHandler().setCreateBackupFile(false);
-                    modelSaver.saveLibrary(libraryContent);
+                	saveOtmLibraryContent( libraryContent );
                 }
                 fileManager.saveLibraryMetadata(libraryMetadata);
 
@@ -1941,24 +1939,20 @@ public class RepositoryManager implements Repository {
                 fileManager.startChangeSet();
 
                 // Change the status of the library metadata and content
-                TLLibrary libraryContent = loadOtmLibraryContent(contentFile);
+                LibraryContentWrapper libraryContent = loadOtmLibraryContent(contentFile);
                 TLLibraryStatus currentStatus = TLLibraryStatus.fromRepositoryStatus( libraryMetadata.getStatus() );
                 
                 targetStatus = otm16Enabled ? currentStatus.previousStatus() : TLLibraryStatus.DRAFT;
 
                 if (libraryContent != null) {
-                    libraryContent.setStatus(targetStatus);
+                    libraryContent.content.setStatus(targetStatus);
                 }
                 libraryMetadata.setStatus(targetStatus.toRepositoryStatus());
                 libraryMetadata.setLastUpdated(XMLGregorianCalendarConverter
                         .toXMLGregorianCalendar(new Date()));
 
                 if (libraryContent != null) {
-                    LibraryModelSaver modelSaver = new LibraryModelSaver();
-
-                    fileManager.addToChangeSet(contentFile);
-                    modelSaver.getSaveHandler().setCreateBackupFile(false);
-                    modelSaver.saveLibrary(libraryContent);
+                	saveOtmLibraryContent( libraryContent );
                 }
                 fileManager.saveLibraryMetadata(libraryMetadata);
 
@@ -1977,7 +1971,7 @@ public class RepositoryManager implements Repository {
                 success = true;
 
             } catch (Exception e) {
-                throw new RepositoryException("Unable to promote the repository item: "
+                throw new RepositoryException("Unable to demote the repository item: "
                         + item.getFilename(), e);
 
             } finally {
@@ -2036,21 +2030,17 @@ public class RepositoryManager implements Repository {
                 fileManager.startChangeSet();
 
                 // Change the status of the library metadata and content
-                TLLibrary libraryContent = loadOtmLibraryContent(contentFile);
+                LibraryContentWrapper libraryContent = loadOtmLibraryContent(contentFile);
 
                 if (libraryContent != null) {
-                    libraryContent.setStatus(newStatus);
+                    libraryContent.content.setStatus(newStatus);
                 }
                 libraryMetadata.setStatus(newStatus.toRepositoryStatus());
                 libraryMetadata.setLastUpdated(XMLGregorianCalendarConverter
                         .toXMLGregorianCalendar(new Date()));
 
                 if (libraryContent != null) {
-                    LibraryModelSaver modelSaver = new LibraryModelSaver();
-
-                    fileManager.addToChangeSet(contentFile);
-                    modelSaver.getSaveHandler().setCreateBackupFile(false);
-                    modelSaver.saveLibrary(libraryContent);
+                	saveOtmLibraryContent( libraryContent );
                 }
                 fileManager.saveLibraryMetadata(libraryMetadata);
 
@@ -2118,17 +2108,12 @@ public class RepositoryManager implements Repository {
                 fileManager.startChangeSet();
 
                 // Re-save the library content; this will force a recalculation of the CRC value
-                TLLibrary libraryContent = loadOtmLibraryContent(contentFile);
+                LibraryContentWrapper libraryContent = loadOtmLibraryContent(contentFile);
 
                 if (libraryContent != null) {
-                    LibraryModelSaver modelSaver = new LibraryModelSaver();
-
                     // Set the library's status - just in case it is out of sync with the meta-data record
-                    libraryContent.setStatus(TLLibraryStatus.fromRepositoryStatus(libraryMetadata.getStatus()));
-                    
-                    fileManager.addToChangeSet(contentFile);
-                    modelSaver.getSaveHandler().setCreateBackupFile(false);
-                    modelSaver.saveLibrary(libraryContent);
+                    libraryContent.content.setStatus(TLLibraryStatus.fromRepositoryStatus(libraryMetadata.getStatus()));
+                	saveOtmLibraryContent( libraryContent );
                 }
 
                 libraryMetadata.setLastUpdated(XMLGregorianCalendarConverter
@@ -2580,11 +2565,11 @@ public class RepositoryManager implements Repository {
      * exceptions occur during the load, the file will be assumed to be a non-OTM file. In such,
      * cases this method will return null instead of throwing an exception.
      * 
-     * @param libraryFile
-     *            the library file load
-     * @return TLLibrary
+     * @param libraryFile  the library file load
+     * @return LibraryContentWrapper
      */
-    private TLLibrary loadOtmLibraryContent(File libraryFile) {
+    private LibraryContentWrapper loadOtmLibraryContent(File libraryFile) {
+    	boolean is16Library = false;
         TLLibrary library = null;
 
         try {
@@ -2594,7 +2579,7 @@ public class RepositoryManager implements Repository {
                 LibraryModuleInfo<Object> moduleInfo = loader.loadLibrary(
                         new LibraryStreamInputSource(libraryFile), new ValidationFindings());
                 Object jaxbLibrary = moduleInfo.getJaxbArtifact();
-
+                
                 if (jaxbLibrary != null) {
                     TransformerFactory<DefaultTransformerContext> transformerFactory = TransformerFactory
                             .getInstance(
@@ -2605,12 +2590,57 @@ public class RepositoryManager implements Repository {
 
                     library = transformer.transform(jaxbLibrary);
                     library.setLibraryUrl(URLUtils.toURL(libraryFile));
+                    is16Library = (jaxbLibrary instanceof org.opentravel.ns.ota2.librarymodel_v01_06.Library);
                 }
             }
         } catch (Exception e) {
             // No action - method will return null
         }
-        return library;
+        return new LibraryContentWrapper( library, libraryFile, is16Library );
     }
-
+    
+    /**
+     * Saves the OTM library content using the original file format from which it was loaded.
+     * 
+     * @param libraryContent  the library content to be saved
+     * @throws RepositoryException  thrown if the library file cannot be added to the current change set
+     * @throws LibrarySaveException  thrown if an error occurs during the save operation
+     */
+    private void saveOtmLibraryContent(LibraryContentWrapper libraryContent)
+    			throws RepositoryException, LibrarySaveException {
+        LibraryModelSaver modelSaver = new LibraryModelSaver();
+        
+        if (libraryContent.is16Library) {
+        	modelSaver.setSaveHandler( new Library16FileSaveHandler() );
+        }
+        fileManager.addToChangeSet( libraryContent.contentFile );
+        modelSaver.getSaveHandler().setCreateBackupFile( false );
+        modelSaver.saveLibrary( libraryContent.content );
+    }
+    
+    /**
+     * Wrapper class that contains the <code>TLLibrary</code> content as well as an
+     * indicator of whether the library was originally saved in the 1.6 format.
+     */
+    private class LibraryContentWrapper {
+    	
+    	public TLLibrary content;
+    	public File contentFile;
+    	public boolean is16Library;
+    	
+    	/**
+    	 * Full constructor.
+    	 * 
+    	 * @param content  the OTM library content
+    	 * @param contentFile  the original file from which the library content was loaded
+    	 * @param is16Library  flag indicating whether the library was originally saved in the 1.6 format
+    	 */
+    	public LibraryContentWrapper(TLLibrary content, File contentFile, boolean is16Library) {
+    		this.content = content;
+    		this.contentFile = contentFile;
+    		this.is16Library = is16Library;
+    	}
+    	
+    }
+    
 }
