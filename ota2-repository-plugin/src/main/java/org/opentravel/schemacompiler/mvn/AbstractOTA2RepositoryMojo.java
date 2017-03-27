@@ -322,7 +322,7 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 	 * all operations.
 	 */
 	static {
-		OTM16Upgrade.otm16Enabled = true;
+//		OTM16Upgrade.otm16Enabled = true;
 	}
 	
 }
