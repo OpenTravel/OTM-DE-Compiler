@@ -16,8 +16,12 @@
 package org.opentravel.schemacompiler.mvn;
 
 import java.io.File;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -26,6 +30,10 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.opentravel.schemacompiler.ic.ImportManagementIntegrityChecker;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
+import org.opentravel.schemacompiler.loader.LibraryModuleInfo;
+import org.opentravel.schemacompiler.loader.LibraryModuleLoader;
+import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
+import org.opentravel.schemacompiler.loader.impl.MultiVersionLibraryModuleLoader;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.TLLibrary;
@@ -34,6 +42,8 @@ import org.opentravel.schemacompiler.repository.ProjectManager;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.saver.LibraryModelSaver;
 import org.opentravel.schemacompiler.saver.LibrarySaveException;
+import org.opentravel.schemacompiler.saver.impl.Library15FileSaveHandler;
+import org.opentravel.schemacompiler.saver.impl.Library16FileSaveHandler;
 import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingMessageFormat;
@@ -104,6 +114,7 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 			log.info("Building snapshot project: " + snapshotProjectFile.getName());
 			Project snapshotProject = createSnapshotProject( originalProject, snapshotProjectFile, snapshotFolder );
 			List<File> snapshotLibraryFiles = new ArrayList<>();
+			Map<String,Boolean> otm16Registry = new HashMap<>();
 			
 			for (AbstractLibrary library : projectManager.getModel().getAllLibraries()) {
 				if (library instanceof BuiltInLibrary) {
@@ -111,9 +122,11 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 				}
 				File libraryFile = URLUtils.toFile( library.getLibraryUrl() );
 				File snapshotFile = new File( snapshotFolder, libraryFile.getName() );
+				URL snapshotUrl = URLUtils.toURL( snapshotFile );
 				
 				snapshotLibraryFiles.add( snapshotFile );
-				library.setLibraryUrl( URLUtils.toURL( snapshotFile ) );
+				library.setLibraryUrl( snapshotUrl );
+				otm16Registry.put( snapshotUrl.toExternalForm(), is16Library( libraryFile ) );
 			}
 			
 			// Update the imports and includes to the new snapshot folder location
@@ -122,8 +135,21 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 					ImportManagementIntegrityChecker.verifyReferencedLibraries( (TLLibrary) library );
 				}
 			}
-			new LibraryModelSaver().saveAllLibraries( projectManager.getModel() );
 			
+			// Save each library in its original format
+	        LibraryModelSaver modelSaver = new LibraryModelSaver();
+	        
+			for (TLLibrary library : projectManager.getModel().getUserDefinedLibraries()) {
+				boolean is16Library = otm16Registry.get( library.getLibraryUrl().toExternalForm() );
+				
+		        if (is16Library) {
+		        	modelSaver.setSaveHandler( new Library16FileSaveHandler() );
+		        } else {
+		        	modelSaver.setSaveHandler( new Library15FileSaveHandler() );
+		        }
+		        modelSaver.saveLibrary( library );
+			}
+	        
 			// Populate the snapshot project with the newly-saved libraries in the snapshot folder
 			projectManager.closeProject( originalProject );
 			projectManager.addUnmanagedProjectItems( snapshotLibraryFiles, snapshotProject );
@@ -318,11 +344,38 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 	}
 	
 	/**
+	 * Returns true if the given library was originally saved in the OTM 1.6 file format.
+	 * 
+	 * @param libraryFile  the library file to be analyzed
+	 * @return boolean
+	 */
+	private boolean is16Library(File libraryFile) {
+    	boolean is16Library = false;
+
+        try {
+            if ((libraryFile != null) && libraryFile.exists()
+                    && !libraryFile.getName().toLowerCase().endsWith(".xsd")) {
+                LibraryModuleLoader<InputStream> loader = new MultiVersionLibraryModuleLoader();
+                LibraryModuleInfo<Object> moduleInfo = loader.loadLibrary(
+                        new LibraryStreamInputSource(libraryFile), new ValidationFindings());
+                Object jaxbLibrary = moduleInfo.getJaxbArtifact();
+                
+                if (jaxbLibrary != null) {
+                    is16Library = (jaxbLibrary instanceof org.opentravel.ns.ota2.librarymodel_v01_06.Library);
+                }
+            }
+        } catch (Exception e) {
+            // No action - method will return false
+        }
+        return is16Library;
+	}
+	
+	/**
 	 * Since this is a read-only application, enable the OTM 1.6 file format for
 	 * all operations.
 	 */
 	static {
-//		OTM16Upgrade.otm16Enabled = true;
+		OTM16Upgrade.otm16Enabled = true;
 	}
 	
 }
