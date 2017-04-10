@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
@@ -38,7 +37,6 @@ import org.opentravel.schemacompiler.model.TLExampleOwner;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLExtensionOwner;
 import org.opentravel.schemacompiler.model.TLLibrary;
-import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLParamGroup;
@@ -458,6 +456,8 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
      */
     protected void validateDeprecatedDateTimeUsage(NamedEntity fieldType, AbstractLibrary fieldOwner,
     		ValidationBuilder<?> builder) {
+    	// TODO: Temporarily disabled validation check for deprecated date/time usage
+    	/*
     	boolean doValidation = false;
     	
     	if (fieldOwner instanceof TLLibrary) {
@@ -482,6 +482,7 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
                 		"xsd:" + fieldType.getLocalName(), "ota:" + otaType);
     		}
     	}
+    	*/
     }
     
     /**

@@ -26,6 +26,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.opentravel.schemacompiler.index.FreeTextSearchServiceFactory;
 import org.opentravel.schemacompiler.subscription.SubscriptionManager;
+import org.opentravel.schemacompiler.util.OTM16Upgrade;
 
 /**
  * Servlet class that extends the Jersey JAX-RS servlet, adding a function to gracefully release the
@@ -62,6 +63,7 @@ public class RepositoryServlet extends ServletContainer {
     @Override
     public void init() throws ServletException {
         super.init();
+        OTM16Upgrade.otm16Enabled = true;
         FreeTextSearchServiceFactory.registerServiceOwner(this);
         SubscriptionManager sManager = RepositoryComponentFactory.getDefault().getSubscriptionManager();
         
