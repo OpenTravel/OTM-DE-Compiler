@@ -26,6 +26,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opentravel.schemacompiler.repository.Repository;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
+import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
 import org.opentravel.schemacompiler.util.OTM16Upgrade;
 
 /**
@@ -117,9 +118,11 @@ public class TestRepositorySearch extends RepositoryTestBase {
             testRepository.promote(item100);
             testRepository.promote(item110);
 
-            // If OTM 1.6 is enabled, promote again to get into FINAL status
-            if (OTM16Upgrade.otm16Enabled) {
+            // If OTM 1.6 is enabled for these libraries, promote again to get into FINAL status
+            if (RepositoryUtils.isOTM16Library( item100, repositoryManager.get() )) {
                 testRepository.promote(item100);
+            }
+            if (RepositoryUtils.isOTM16Library( item110, repositoryManager.get() )) {
                 testRepository.promote(item110);
             }
 
@@ -135,10 +138,12 @@ public class TestRepositorySearch extends RepositoryTestBase {
             testRepository.demote(item110);
             testRepository.demote(item100);
 
-            // If OTM 1.6 is enabled, demote again to get back into DRAFT status
-            if (OTM16Upgrade.otm16Enabled) {
-                testRepository.demote(item100);
-                testRepository.demote(item110);
+            // If OTM 1.6 is enabled for these libraries, demote again to get back into DRAFT status
+            if (RepositoryUtils.isOTM16Library( item110, repositoryManager.get() )) {
+            	testRepository.demote(item110);
+            }
+            if (RepositoryUtils.isOTM16Library( item100, repositoryManager.get() )) {
+            	testRepository.demote(item100);
             }
         }
     }
@@ -169,9 +174,11 @@ public class TestRepositorySearch extends RepositoryTestBase {
             testRepository.promote(item100);
             testRepository.promote(item110);
             
-            // If OTM 1.6 is enabled, promote again to get into FINAL status
-            if (OTM16Upgrade.otm16Enabled) {
+            // If OTM 1.6 is enabled for these libraries, promote again to get into FINAL status
+            if (RepositoryUtils.isOTM16Library( item100, repositoryManager.get() )) {
                 testRepository.promote(item100);
+            }
+            if (RepositoryUtils.isOTM16Library( item110, repositoryManager.get() )) {
                 testRepository.promote(item110);
             }
 
@@ -186,10 +193,12 @@ public class TestRepositorySearch extends RepositoryTestBase {
             testRepository.demote(item110);
             testRepository.demote(item100);
 
-            // If OTM 1.6 is enabled, demote again to get back into DRAFT status
-            if (OTM16Upgrade.otm16Enabled) {
-                testRepository.demote(item100);
-                testRepository.demote(item110);
+            // If OTM 1.6 is enabled for these libraries, demote again to get back into DRAFT status
+            if (RepositoryUtils.isOTM16Library( item110, repositoryManager.get() )) {
+            	testRepository.demote(item110);
+            }
+            if (RepositoryUtils.isOTM16Library( item100, repositoryManager.get() )) {
+            	testRepository.demote(item100);
             }
         }
     }
@@ -269,9 +278,11 @@ public class TestRepositorySearch extends RepositoryTestBase {
             testRepository.promote(item100);
             testRepository.promote(item110);
 
-            // If OTM 1.6 is enabled, promote again to get into FINAL status
-            if (OTM16Upgrade.otm16Enabled) {
+            // If OTM 1.6 is enabled for these libraries, promote again to get into FINAL status
+            if (RepositoryUtils.isOTM16Library( item100, repositoryManager.get() )) {
                 testRepository.promote(item100);
+            }
+            if (RepositoryUtils.isOTM16Library( item110, repositoryManager.get() )) {
                 testRepository.promote(item110);
             }
 
@@ -297,10 +308,12 @@ public class TestRepositorySearch extends RepositoryTestBase {
             testRepository.demote(item110);
             testRepository.demote(item100);
 
-            // If OTM 1.6 is enabled, demote again to get back into DRAFT status
-            if (OTM16Upgrade.otm16Enabled) {
-                testRepository.demote(item100);
-                testRepository.demote(item110);
+            // If OTM 1.6 is enabled for these libraries, demote again to get back into DRAFT status
+            if (RepositoryUtils.isOTM16Library( item110, repositoryManager.get() )) {
+            	testRepository.demote(item110);
+            }
+            if (RepositoryUtils.isOTM16Library( item100, repositoryManager.get() )) {
+            	testRepository.demote(item100);
             }
         }
     }
@@ -341,9 +354,11 @@ public class TestRepositorySearch extends RepositoryTestBase {
             testRepository.promote(item100);
             testRepository.promote(item110);
 
-            // If OTM 1.6 is enabled, promote again to get into FINAL status
-            if (OTM16Upgrade.otm16Enabled) {
+            // If OTM 1.6 is enabled for these libraries, promote again to get into FINAL status
+            if (RepositoryUtils.isOTM16Library( item100, repositoryManager.get() )) {
                 testRepository.promote(item100);
+            }
+            if (RepositoryUtils.isOTM16Library( item110, repositoryManager.get() )) {
                 testRepository.promote(item110);
             }
 
@@ -368,10 +383,12 @@ public class TestRepositorySearch extends RepositoryTestBase {
             testRepository.demote(item110);
             testRepository.demote(item100);
 
-            // If OTM 1.6 is enabled, demote again to get back into DRAFT status
-            if (OTM16Upgrade.otm16Enabled) {
-                testRepository.demote(item100);
-                testRepository.demote(item110);
+            // If OTM 1.6 is enabled for these libraries, demote again to get back into DRAFT status
+            if (RepositoryUtils.isOTM16Library( item110, repositoryManager.get() )) {
+            	testRepository.demote(item110);
+            }
+            if (RepositoryUtils.isOTM16Library( item100, repositoryManager.get() )) {
+            	testRepository.demote(item100);
             }
         }
     }

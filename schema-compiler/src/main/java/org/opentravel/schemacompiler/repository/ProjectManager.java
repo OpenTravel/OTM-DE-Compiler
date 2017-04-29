@@ -1964,7 +1964,7 @@ public final class ProjectManager {
      * @throws RepositoryException
      */
     public void promote(ProjectItem item) throws RepositoryException {
-        boolean otm16Enabled = RepositoryUtils.isOTM16LifecycleEnabled( item.getStatus().toRepositoryStatus() );
+        boolean otm16Enabled = RepositoryUtils.isOTM16Library( item.getContent() );
         TLLibraryStatus currentStatus = TLLibraryStatus.FINAL;
 
         if (item.getContent() instanceof TLLibrary) {
@@ -1974,7 +1974,7 @@ public final class ProjectManager {
             throw new RepositoryException(
                     "Unable to promote - the item must be a managed resource that not locked for editing.");
         }
-        if (RepositoryUtils.isOTM16LifecycleEnabled( currentStatus.toRepositoryStatus() )) {
+        if (otm16Enabled) {
             if (currentStatus == TLLibraryStatus.OBSOLETE) {
                 throw new RepositoryException(
                         "Unable to promote - only user-defined libraries not in OBSOLETE status can be promoted.");
@@ -2008,7 +2008,7 @@ public final class ProjectManager {
      * @throws RepositoryException
      */
     public void demote(ProjectItem item) throws RepositoryException {
-        boolean otm16Enabled = RepositoryUtils.isOTM16LifecycleEnabled( item.getStatus().toRepositoryStatus() );
+        boolean otm16Enabled = RepositoryUtils.isOTM16Library( item.getContent() );
         TLLibraryStatus currentStatus = TLLibraryStatus.FINAL;
 
         if (item.getContent() instanceof TLLibrary) {
@@ -2018,7 +2018,7 @@ public final class ProjectManager {
             throw new RepositoryException(
                     "Unable to demote - the item must be a managed resource that is not locked for editing.");
         }
-        if (RepositoryUtils.isOTM16LifecycleEnabled( currentStatus.toRepositoryStatus() )) {
+        if (otm16Enabled) {
             if (currentStatus == TLLibraryStatus.DRAFT) {
                 throw new RepositoryException(
                         "Unable to demote - only user-defined libraries that are not in DRAFT status can be demoted.");

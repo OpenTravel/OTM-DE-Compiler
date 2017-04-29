@@ -1043,7 +1043,7 @@ public class AdminController extends BaseController {
         if (targetPage == null) {
             try {
                 RepositoryItem item = getRepositoryManager().getRepositoryItem(baseNamespace, filename, version);
-                boolean otm16Enabled = RepositoryUtils.isOTM16LifecycleEnabled( item.getStatus().toRepositoryStatus() );
+                boolean otm16Enabled = RepositoryUtils.isOTM16Library( item, getRepositoryManager() );
                 
                 model.addAttribute("item", item);
                 model.addAttribute("otm16Enabled", otm16Enabled);
@@ -1115,7 +1115,7 @@ public class AdminController extends BaseController {
         if (targetPage == null) {
             try {
                 RepositoryItem item = getRepositoryManager().getRepositoryItem(baseNamespace, filename, version);
-                boolean otm16Enabled = RepositoryUtils.isOTM16LifecycleEnabled( item.getStatus().toRepositoryStatus() );
+                boolean otm16Enabled = RepositoryUtils.isOTM16Library( item, getRepositoryManager() );
                 
                 model.addAttribute("item", item);
                 model.addAttribute("otm16Enabled", otm16Enabled);

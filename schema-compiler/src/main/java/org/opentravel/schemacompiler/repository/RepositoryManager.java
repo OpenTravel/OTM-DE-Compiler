@@ -62,6 +62,7 @@ import org.opentravel.schemacompiler.repository.impl.RepositoryItemVersionedWrap
 import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
 import org.opentravel.schemacompiler.saver.LibraryModelSaver;
 import org.opentravel.schemacompiler.saver.LibrarySaveException;
+import org.opentravel.schemacompiler.saver.impl.Library15FileSaveHandler;
 import org.opentravel.schemacompiler.saver.impl.Library16FileSaveHandler;
 import org.opentravel.schemacompiler.security.PasswordHelper;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
@@ -1802,7 +1803,7 @@ public class RepositoryManager implements Repository {
                 item.getFilename(), item.getVersion());
         File contentFile = fileManager.getLibraryContentLocation(baseNS, item.getFilename(),
                 item.getVersion());
-        boolean otm16Enabled = RepositoryUtils.isOTM16LifecycleEnabled( libraryMetadata.getStatus() );
+        LibraryContentWrapper libraryContent = loadOtmLibraryContent(contentFile);
         TLLibraryStatus originalStatus = item.getStatus();
         TLLibraryStatus targetStatus = null;
         
@@ -1815,7 +1816,7 @@ public class RepositoryManager implements Repository {
                     "Unable to promote - the item's status is not yet assigned.");
         }
         
-        if (otm16Enabled) {
+        if (libraryContent.is16Library) {
             if (libraryMetadata.getStatus() == LibraryStatus.OBSOLETE) {
                 throw new RepositoryException(
                         "Unable to promote - only user-defined libraries that are not in OBSOLETE status can be promoted.");
@@ -1834,10 +1835,9 @@ public class RepositoryManager implements Repository {
                 fileManager.startChangeSet();
 
                 // Change the status of the library metadata and content
-                LibraryContentWrapper libraryContent = loadOtmLibraryContent(contentFile);
                 TLLibraryStatus currentStatus = TLLibraryStatus.fromRepositoryStatus( libraryMetadata.getStatus() );
                 
-                targetStatus = otm16Enabled ? currentStatus.nextStatus() : TLLibraryStatus.FINAL;
+                targetStatus = libraryContent.is16Library ? currentStatus.nextStatus() : TLLibraryStatus.FINAL;
 
                 if (libraryContent != null) {
                     libraryContent.content.setStatus(targetStatus);
@@ -1907,7 +1907,7 @@ public class RepositoryManager implements Repository {
                 item.getFilename(), item.getVersion());
         File contentFile = fileManager.getLibraryContentLocation(baseNS, item.getFilename(),
                 item.getVersion());
-        boolean otm16Enabled = RepositoryUtils.isOTM16LifecycleEnabled( libraryMetadata.getStatus() );
+        LibraryContentWrapper libraryContent = loadOtmLibraryContent(contentFile);
         TLLibraryStatus originalStatus = item.getStatus();
         TLLibraryStatus targetStatus = null;
 
@@ -1920,7 +1920,7 @@ public class RepositoryManager implements Repository {
                     "Unable to demote - the item's status is not yet assigned.");
         }
         
-        if (otm16Enabled) {
+        if (libraryContent.is16Library) {
             if (libraryMetadata.getStatus() == LibraryStatus.DRAFT) {
                 throw new RepositoryException(
                         "Unable to demote - only user-defined libraries that are not in DRAFT status can be demoted.");
@@ -1939,10 +1939,9 @@ public class RepositoryManager implements Repository {
                 fileManager.startChangeSet();
 
                 // Change the status of the library metadata and content
-                LibraryContentWrapper libraryContent = loadOtmLibraryContent(contentFile);
                 TLLibraryStatus currentStatus = TLLibraryStatus.fromRepositoryStatus( libraryMetadata.getStatus() );
                 
-                targetStatus = otm16Enabled ? currentStatus.previousStatus() : TLLibraryStatus.DRAFT;
+                targetStatus = libraryContent.is16Library ? currentStatus.previousStatus() : TLLibraryStatus.DRAFT;
 
                 if (libraryContent != null) {
                     libraryContent.content.setStatus(targetStatus);
@@ -2356,10 +2355,8 @@ public class RepositoryManager implements Repository {
         boolean success = false;
 
         // Get the list of root namespaces from the existing file if the list has not yet been
-        // initialized. They
-        // are not accessible from local repository fields because a default namespace is always
-        // published for the
-        // local repository.
+        // initialized. They are not accessible from local repository fields because a default
+        // namespace is always published for the local repository.
         if (rootNamespaces == null) {
             try {
                 RepositoryInfoType fileMetadata = fileManager.loadRepositoryMetadata();
@@ -2398,8 +2395,7 @@ public class RepositoryManager implements Repository {
 
         } finally {
             // If an error occurred, refresh all local settings to make sure we are still in-sync
-            // with the
-            // local file system
+            // with the local file system
             try {
                 if (!success) {
                     refreshLocalRepositoryInfo(true);
@@ -2594,7 +2590,7 @@ public class RepositoryManager implements Repository {
                 }
             }
         } catch (Exception e) {
-            // No action - method will return null
+            // No action - method will return a null library
         }
         return new LibraryContentWrapper( library, libraryFile, is16Library );
     }
@@ -2612,6 +2608,8 @@ public class RepositoryManager implements Repository {
         
         if (libraryContent.is16Library) {
         	modelSaver.setSaveHandler( new Library16FileSaveHandler() );
+        } else {
+        	modelSaver.setSaveHandler( new Library15FileSaveHandler() );
         }
         fileManager.addToChangeSet( libraryContent.contentFile );
         modelSaver.getSaveHandler().setCreateBackupFile( false );

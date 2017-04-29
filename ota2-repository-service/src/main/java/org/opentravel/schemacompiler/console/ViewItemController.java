@@ -323,7 +323,7 @@ public class ViewItemController extends BaseController {
             if (securityManager.isReadAuthorized(user, item)) {
             	SubscriptionManager subscriptionManager = RepositoryComponentFactory.getDefault().getSubscriptionManager();
                 FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
-                boolean otm16Enabled = RepositoryUtils.isOTM16LifecycleEnabled( item.getStatus().toRepositoryStatus() );
+                boolean otm16Enabled = RepositoryUtils.isOTM16Library( item, getRepositoryManager() );
                 boolean hasAllVersionsSubscription = !subscriptionManager.getAllVersionsSubscriptions(sTarget, user.getUserId()).isEmpty();
                 boolean hasSingleVersionSubscription = !subscriptionManager.getSingleVersionSubscriptions(sTarget, user.getUserId()).isEmpty();
                 String indexItemId = IndexingUtils.getIdentityKey( item );

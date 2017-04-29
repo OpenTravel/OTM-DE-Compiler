@@ -106,9 +106,12 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
                         XSDComplexType.class, XSDElement.class)
                 .setFindingType(FindingType.WARNING).assertNotDeprecated().assertNotObsolete();
 
+        /*
+         * Disabled warning for use of legacy IDREF(S)
         if (ValidatorUtils.isLegacyIDREF(propertyType)) {
             builder.addFinding(FindingType.WARNING, "type", WARNING_LEGACY_IDREF);
         }
+        */
 
         // For xsd:ID elements, make sure they are contained in the top-level facet
         // if the owner is a core or business object

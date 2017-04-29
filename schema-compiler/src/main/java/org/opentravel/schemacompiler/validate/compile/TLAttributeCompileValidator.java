@@ -37,7 +37,6 @@ import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.model.XSDComplexType;
 import org.opentravel.schemacompiler.model.XSDElement;
 import org.opentravel.schemacompiler.model.XSDSimpleType;
-import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationBuilder;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
@@ -185,11 +184,14 @@ public class TLAttributeCompileValidator extends TLAttributeBaseValidator {
             }
         }
 
+        /*
+         * Disabled warning for use of legacy IDREF(S)
         if (ValidatorUtils.isLegacyIDREF(attributeType)) {
         	if (OTM16Upgrade.otm16Enabled) {
                 builder.addFinding(FindingType.WARNING, "type", WARNING_LEGACY_IDREF);
         	}
         }
+         */
         
         // For xsd:ID attributes, make sure they are contained in the top-level facet
         // if the owner is a core or business object

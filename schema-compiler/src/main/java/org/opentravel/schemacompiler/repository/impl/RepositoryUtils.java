@@ -16,6 +16,7 @@
 package org.opentravel.schemacompiler.repository.impl;
 
 import java.io.File;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -33,6 +34,10 @@ import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryStatus;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryItemIdentityType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryState;
+import org.opentravel.schemacompiler.loader.LibraryModuleInfo;
+import org.opentravel.schemacompiler.loader.LibraryModuleLoader;
+import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
+import org.opentravel.schemacompiler.loader.impl.MultiVersionLibraryModuleLoader;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLLibrary;
@@ -44,8 +49,8 @@ import org.opentravel.schemacompiler.repository.RepositoryItemCommit;
 import org.opentravel.schemacompiler.repository.RepositoryItemHistory;
 import org.opentravel.schemacompiler.repository.RepositoryItemState;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
-import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.util.URLUtils;
+import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.version.VersionScheme;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 import org.opentravel.schemacompiler.version.VersionSchemeFactory;
@@ -386,16 +391,70 @@ public class RepositoryUtils {
     }
     
     /**
-     * Returns true if the OTM 1.6 features are enabled AND the given repository status
-     * is DRAFT or FINAL.  Other statuses that are part of the 1.6 lifecycle will always
-     * behave as if 1.6 features are enabled.
-     * 
-     * @param status  the repository status to check
+	 * Returns true if the given library was originally saved in the OTM 1.6 file format.
+	 * 
+     * @param library  the library to be analyzed
      * @return boolean
      */
-    public static boolean isOTM16LifecycleEnabled(LibraryStatus status) {
-    	return OTM16Upgrade.otm16Enabled || (status == LibraryStatus.UNDER_REVIEW)
-    			  || (status == LibraryStatus.OBSOLETE);
+    public static boolean isOTM16Library(AbstractLibrary library) {
+    	boolean is16Library = false;
+    	
+    	if ((library != null) && (library.getLibraryUrl() != null)) {
+    		is16Library = isOTM16Library( URLUtils.toFile( library.getLibraryUrl() ) );
+    	}
+    	return is16Library;
     }
+    
+    /**
+	 * Returns true if the given repository item is a library that was originally saved
+	 * in the OTM 1.6 file format.
+     * 
+     * @param item  the repository item to be analyzed
+     * @return boolean
+     */
+    public static boolean isOTM16Library(RepositoryItem item, RepositoryManager repositoryManager) {
+    	boolean is16Library = false;
+    	
+    	if ((item != null) && (repositoryManager != null)) {
+        	try {
+				File libraryFile = repositoryManager.getFileManager().getLibraryContentLocation(
+						item.getBaseNamespace(), item.getFilename(), item.getVersion() );
+				
+				is16Library = isOTM16Library( libraryFile );
+				
+			} catch (RepositoryException e) {
+				// Ignore error - method will return false
+			}
+    	}
+    	
+    	return is16Library;
+    }
+    
+	/**
+	 * Returns true if the given library was originally saved in the OTM 1.6 file format.
+	 * 
+	 * @param libraryFile  the library file to be analyzed
+	 * @return boolean
+	 */
+	private static boolean isOTM16Library(File libraryFile) {
+    	boolean is16Library = false;
 
+        try {
+            if ((libraryFile != null) && libraryFile.exists()
+                    && !libraryFile.getName().toLowerCase().endsWith(".xsd")) {
+                LibraryModuleLoader<InputStream> loader = new MultiVersionLibraryModuleLoader();
+                LibraryModuleInfo<Object> moduleInfo = loader.loadLibrary(
+                        new LibraryStreamInputSource(libraryFile), new ValidationFindings());
+                Object jaxbLibrary = moduleInfo.getJaxbArtifact();
+                
+                if (jaxbLibrary != null) {
+                    is16Library = (jaxbLibrary instanceof org.opentravel.ns.ota2.librarymodel_v01_06.Library);
+                }
+            }
+        } catch (Exception e) {
+            // No action - method will return false
+        }
+        return is16Library;
+	}
+	
 }
