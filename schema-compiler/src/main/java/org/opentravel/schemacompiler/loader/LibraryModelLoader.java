@@ -805,6 +805,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
                 Long libraryCrcValue = LibraryCrcCalculator.getLibraryCrcValue(libraryInfo.getJaxbArtifact());
                 boolean isValidCrc = true;
 
+                /*
                 if ((libraryCrcValue != null) || LibraryCrcCalculator.isCrcRequired(modelLibrary)) {
                     if (libraryCrcValue == null) {
                         addLoaderFinding(FindingType.ERROR, new URLValidationSource(libraryUrl),
@@ -822,6 +823,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
                         }
                     }
                 }
+                */
 
                 if (isValidCrc) {
                     // Only add the library to the model if a duplicate does not already exist
