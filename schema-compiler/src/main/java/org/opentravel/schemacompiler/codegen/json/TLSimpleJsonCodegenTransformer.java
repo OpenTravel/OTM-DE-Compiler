@@ -39,14 +39,23 @@ public class TLSimpleJsonCodegenTransformer extends AbstractJsonSchemaTransforme
 		simple.setName( getDefinitionName( source ) );
 		
 		if (source.isListTypeInd()) {
+			JsonType itemsSimpleType = JsonType.valueOf( source.getParentType() );
 			JsonSchema schema = new JsonSchema();
-			
 			transformDocumentation( source, schema );
 	        schema.setEntityInfo( jsonUtils.getEntityInfo( source ) );
 	        
 			schema.setType( JsonType.jsonArray );
-			schema.setItems( new JsonSchemaReference(
-					jsonUtils.getSchemaReferencePath( source.getParentType(), source ) ) );
+			
+			if (itemsSimpleType != null) {
+				JsonSchema itemsSchema = new JsonSchema();
+				
+				itemsSchema.setType( itemsSimpleType );
+				schema.setItems( new JsonSchemaReference( itemsSchema ) );
+				
+			} else {
+				schema.setItems( new JsonSchemaReference(
+						jsonUtils.getSchemaReferencePath( source.getParentType(), source ) ) );
+			}
 			simple.setSchema( new JsonSchemaReference( schema ) );
 			
 		} else {

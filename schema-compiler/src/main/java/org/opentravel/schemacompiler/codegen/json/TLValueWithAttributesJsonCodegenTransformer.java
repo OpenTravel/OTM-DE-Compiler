@@ -92,6 +92,8 @@ public class TLValueWithAttributesJsonCodegenTransformer extends AbstractJsonSch
         }
 
         // Transform the attributes and indicators of the target type
+        setMemberFieldOwner( source );
+        
         for (TLAttribute modelAttribute : PropertyCodegenUtils.getInheritedAttributes(source)) {
         	vwaSchema.getProperties().addAll( attributeTransformer.transform( modelAttribute )
         			.getArtifactsOfType( JsonSchemaNamedReference.class ) );
@@ -99,6 +101,7 @@ public class TLValueWithAttributesJsonCodegenTransformer extends AbstractJsonSch
         for (TLIndicator modelIndicator : PropertyCodegenUtils.getInheritedIndicators(source)) {
         	vwaSchema.getProperties().add( indicatorTransformer.transform( modelIndicator ) );
         }
+        setMemberFieldOwner( null );
 
         artifacts.addArtifact( targetVwa );
         return artifacts;

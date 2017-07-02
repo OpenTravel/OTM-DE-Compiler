@@ -26,6 +26,7 @@ import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerConte
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.CorrelatedCodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
+import org.opentravel.schemacompiler.codegen.json.AbstractJsonSchemaTransformer;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
@@ -245,6 +246,9 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
         ObjectTransformer<TLIndicator, JsonSchemaNamedReference, CodeGenerationTransformerContext> indicatorTransformer = getTransformerFactory()
                 .getTransformer(TLIndicator.class, JsonSchemaNamedReference.class);
         List<JsonSchemaNamedReference> definitions = new ArrayList<JsonSchemaNamedReference>();
+		CodeGenerationTransformerContext transformContext = getTransformerFactory().getContext();
+		
+		transformContext.setContextCacheEntry( AbstractJsonSchemaTransformer.MEMBER_FIELD_OWNER_KEY, getSourceFacet() );
 		
         for (TLMemberField<?> field : getMemberFields()) {
         	if (field instanceof TLAttribute) {
@@ -258,6 +262,9 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
         		definitions.add( indicatorTransformer.transform( (TLIndicator) field ) );
         	}
         }
+        
+		transformContext.setContextCacheEntry( AbstractJsonSchemaTransformer.MEMBER_FIELD_OWNER_KEY, null );
+		
         return definitions;
 	}
 	

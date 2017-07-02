@@ -22,6 +22,7 @@ import java.util.Map;
 import javax.xml.XMLConstants;
 
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.XSDSimpleType;
 
 /**
@@ -90,7 +91,7 @@ public enum JsonType {
 	public static JsonType valueOf(NamedEntity entity) {
 		JsonType type = null;
 		
-		if ((entity instanceof XSDSimpleType) &&
+		if (((entity instanceof XSDSimpleType) || (entity instanceof TLSimple)) &&
 				entity.getNamespace().equals(XMLConstants.W3C_XML_SCHEMA_NS_URI)) {
 			type = xsdSimpleMap.get( entity.getLocalName() );
 		}

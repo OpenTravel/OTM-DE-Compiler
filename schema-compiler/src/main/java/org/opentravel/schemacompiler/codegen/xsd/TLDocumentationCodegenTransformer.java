@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.opentravel.schemacompiler.model.TLAdditionalDocumentationItem;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLDocumentationItem;
@@ -57,7 +58,7 @@ public class TLDocumentationCodegenTransformer extends
             Documentation desc = new Documentation();
 
             desc.setSource(DESCRIPTION_SOURCE);
-            desc.getContent().add(source.getDescription());
+            desc.getContent().add( StringEscapeUtils.escapeXml10( source.getDescription() ) );
             annotation.getAppinfoOrDocumentation().add(desc);
         }
         for (TLDocumentationItem item : source.getDeprecations()) {
@@ -148,7 +149,7 @@ public class TLDocumentationCodegenTransformer extends
         if ((item != null) && (item.getText() != null)) {
             doc = new Documentation();
             doc.setSource(source);
-            doc.getContent().add(item.getText());
+            doc.getContent().add( StringEscapeUtils.escapeXml10( item.getText() ) );
         }
         return doc;
     }

@@ -38,6 +38,7 @@ import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 import org.opentravel.schemacompiler.model.TLFacet;
+import org.opentravel.schemacompiler.model.TLMemberFieldOwner;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.TransformerFactory;
 
@@ -50,6 +51,8 @@ import org.opentravel.schemacompiler.transform.TransformerFactory;
  */
 public abstract class AbstractJsonSchemaTransformer<S, T> extends AbstractCodegenTransformer<S, T> {
 	
+	public static final String MEMBER_FIELD_OWNER_KEY = TLMemberFieldOwner.class.getSimpleName();
+	
 	protected JsonSchemaCodegenUtils jsonUtils;
 	
 	/**
@@ -59,6 +62,24 @@ public abstract class AbstractJsonSchemaTransformer<S, T> extends AbstractCodege
 	public void setContext(CodeGenerationTransformerContext context) {
 		super.setContext(context);
 		jsonUtils = new JsonSchemaCodegenUtils( context );
+	}
+	
+	/**
+	 * Returns the member field owner currently assigned to the transform context.
+	 * 
+	 * @return NamedEntity
+	 */
+	protected NamedEntity getMemberFieldOwner() {
+		return (NamedEntity) context.getContextCacheEntry( MEMBER_FIELD_OWNER_KEY );
+	}
+	
+	/**
+	 * Assigns the given member field owner to the transform context.
+	 * 
+	 * @param fieldOwner  the member field owner to assign
+	 */
+	protected void setMemberFieldOwner(NamedEntity fieldOwner) {
+		context.setContextCacheEntry( MEMBER_FIELD_OWNER_KEY, fieldOwner );
 	}
 	
 	/**

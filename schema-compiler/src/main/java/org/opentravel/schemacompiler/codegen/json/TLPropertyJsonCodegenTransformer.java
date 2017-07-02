@@ -249,9 +249,9 @@ public class TLPropertyJsonCodegenTransformer extends AbstractJsonSchemaTransfor
         	}
         	
         	if (alias != null) {
-        		typeRef.setSchemaPath( jsonUtils.getSchemaReferencePath( alias, source.getOwner() ) );
+        		typeRef.setSchemaPath( jsonUtils.getSchemaReferencePath( alias, getMemberFieldOwner() ) );
         	} else {
-        		typeRef.setSchemaPath( jsonUtils.getSchemaReferencePath( baseType, source.getOwner() ) );
+        		typeRef.setSchemaPath( jsonUtils.getSchemaReferencePath( baseType, getMemberFieldOwner() ) );
         	}
         }
         

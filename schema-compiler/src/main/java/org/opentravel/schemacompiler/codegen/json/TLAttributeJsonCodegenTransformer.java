@@ -154,7 +154,7 @@ public class TLAttributeJsonCodegenTransformer extends AbstractJsonSchemaTransfo
     		transformDocumentation( source, attrSchemaRef );
     		attrSchemaRef.getExampleItems().addAll( jsonUtils.getExampleInfo( source ) );
     		attrSchemaRef.getEquivalentItems().addAll( jsonUtils.getEquivalentInfo( source ) );
-        	attrSchemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath( attributeType, source.getOwner() ) );
+        	attrSchemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath( attributeType, getMemberFieldOwner() ) );
         }
 	}
 	

@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.text.StringEscapeUtils;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
@@ -207,7 +209,7 @@ public class JsonDocumentation {
 				String trimmedDesc = (description == null) ? null : description.trim();
 				
 				if ((trimmedDesc != null) && (trimmedDesc.length() > 0)) {
-					nonEmptyDescriptions.add( trimmedDesc );
+					nonEmptyDescriptions.add( StringEscapeUtils.escapeJson( trimmedDesc ) );
 				}
 			}
 			
@@ -264,7 +266,7 @@ public class JsonDocumentation {
 			
 			for (String docItem : docItems) {
 				if ((docItem != null) && (docItem.length() > 0)) {
-					jsonDocItems.add( docItem );
+					jsonDocItems.add( StringEscapeUtils.escapeJson( docItem ) );
 					itemsAdded = true;
 				}
 			}

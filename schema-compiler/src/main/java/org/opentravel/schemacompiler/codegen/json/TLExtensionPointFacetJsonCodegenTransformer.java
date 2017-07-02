@@ -56,6 +56,8 @@ public class TLExtensionPointFacetJsonCodegenTransformer extends AbstractJsonSch
         definition.setSchema( new JsonSchemaReference( defSchema ) );
         transformDocumentation( source, defSchema );
         
+        setMemberFieldOwner( source );
+        
         for (TLProperty element : elementList) {
         	defSchema.getProperties().add( elementTransformer.transform( element ) );
         }
@@ -73,6 +75,7 @@ public class TLExtensionPointFacetJsonCodegenTransformer extends AbstractJsonSch
             	defSchema.getProperties().add( indicatorTransformer.transform( indicator ) );
             }
         }
+        setMemberFieldOwner( null );
         artifacts.addArtifact( definition );
 		return artifacts;
 	}
