@@ -72,6 +72,8 @@ import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.saver.LibraryModelSaver;
 import org.opentravel.schemacompiler.saver.LibrarySaveException;
+import org.opentravel.schemacompiler.saver.impl.Library15FileSaveHandler;
+import org.opentravel.schemacompiler.saver.impl.Library16FileSaveHandler;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.TransformerFactory;
 import org.opentravel.schemacompiler.transform.symbols.DefaultTransformerContext;
@@ -149,6 +151,7 @@ public class LibraryCrcCalculator {
             throw new FileNotFoundException("The specified library file does not exist: "
                     + libraryFile.getAbsolutePath());
         }
+        System.out.println("RECALCULATING CRC: " + libraryFile.getAbsolutePath());
 
         // Load the library as a JAXB data structure
         LibraryModuleLoader<InputStream> loader = new MultiVersionLibraryModuleLoader();
@@ -172,7 +175,16 @@ public class LibraryCrcCalculator {
         library.setLibraryUrl(URLUtils.toURL(libraryFile));
 
         // Re-save the file (forces re-calculation of the CRC)
-        new LibraryModelSaver().saveLibrary(library);
+        boolean is16Library = (jaxbLibrary instanceof org.opentravel.ns.ota2.librarymodel_v01_06.Library);
+        LibraryModelSaver saver = new LibraryModelSaver();
+        
+        if (is16Library) {
+        	saver.setSaveHandler( new Library16FileSaveHandler() );
+        	
+        } else {
+        	saver.setSaveHandler( new Library15FileSaveHandler() );
+        }
+        saver.saveLibrary(library);
     }
 
     /**

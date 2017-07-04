@@ -16,6 +16,7 @@
 package org.opentravel.schemacompiler.mvn;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ import org.opentravel.schemacompiler.loader.impl.MultiVersionLibraryModuleLoader
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.Project;
 import org.opentravel.schemacompiler.repository.ProjectManager;
 import org.opentravel.schemacompiler.repository.RepositoryException;
@@ -44,6 +46,7 @@ import org.opentravel.schemacompiler.saver.LibraryModelSaver;
 import org.opentravel.schemacompiler.saver.LibrarySaveException;
 import org.opentravel.schemacompiler.saver.impl.Library15FileSaveHandler;
 import org.opentravel.schemacompiler.saver.impl.Library16FileSaveHandler;
+import org.opentravel.schemacompiler.security.LibraryCrcCalculator;
 import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingMessageFormat;
@@ -148,8 +151,26 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 		        	modelSaver.setSaveHandler( new Library15FileSaveHandler() );
 		        }
 		        modelSaver.saveLibrary( library );
+		        
+		        if (library.getStatus() != TLLibraryStatus.DRAFT) {
+					File libraryFile = URLUtils.toFile( library.getLibraryUrl() );
+					
+		        	try {
+						LibraryCrcCalculator.recalculateLibraryCrc( libraryFile );
+						
+					} catch (IOException e) {
+						log.warn("Error recalculating library CRC.", e);
+					}
+		        }
 			}
 	        
+			// Delete any .bak files that might exist in the snapshot folder
+			for (File ssFile : snapshotFolder.listFiles()) {
+				if (ssFile.getName().endsWith(".bak")) {
+					ssFile.delete();
+				}
+			}
+			
 			// Populate the snapshot project with the newly-saved libraries in the snapshot folder
 			projectManager.closeProject( originalProject );
 			projectManager.addUnmanagedProjectItems( snapshotLibraryFiles, snapshotProject );
