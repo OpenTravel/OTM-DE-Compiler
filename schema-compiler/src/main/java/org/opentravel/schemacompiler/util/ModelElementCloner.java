@@ -508,7 +508,7 @@ public class ModelElementCloner {
                         .setParentType((TLAttributeType) typeAssignments.get(source));
 
             } else if (targetObject instanceof TLAttribute) {
-                ((TLAttribute) targetObject).setType((TLAttributeType) typeAssignments.get(source));
+                ((TLAttribute) targetObject).setType((TLPropertyType) typeAssignments.get(source));
 
             } else if (targetObject instanceof TLProperty) {
                 ((TLProperty) targetObject).setType((TLPropertyType) typeAssignments.get(source));

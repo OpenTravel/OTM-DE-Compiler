@@ -572,8 +572,8 @@ public class RollupReferenceHandler {
         @Override
         public boolean visitAttribute(TLAttribute attribute) {
             if (rollupReferences.hasReference( attribute )) {
-            	TLAttributeType sameNameEntity = findSameNameEntity(
-                		rollupReferences.getReference( attribute, TLAttributeType.class ),
+            	TLPropertyType sameNameEntity = findSameNameEntity(
+                		rollupReferences.getReference( attribute, TLPropertyType.class ),
                 		(TLLibrary) attribute.getOwningLibrary() );
 
                 if (sameNameEntity != null) {
