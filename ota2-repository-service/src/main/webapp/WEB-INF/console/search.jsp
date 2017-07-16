@@ -63,11 +63,13 @@
 					<c:param name="namespace" value="${resultItem.itemNamespace}" />
 					<c:param name="localName" value="${pageUtils.getEntityLocalName( resultItem )}" />
 				</c:url>
+				<c:set var="allVersionsUrl" value="${null}" />
 			</c:otherwise>
 		</c:choose>
 		<tr class="${rowStyle}">
 			<td>
 				<img src="${pageContext.request.contextPath}/images/${imageResolver.getIconImage( resultItem )}" />&nbsp;<a href="${itemUrl}">${resultItem.itemName}</a>
+				<br><small>${resultItem.itemNamespace}</small>
 			</td>
 			<td>
 				<c:if test="${resultItem.entityType.simpleName == 'TLLibrary'}">

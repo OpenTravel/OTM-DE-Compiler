@@ -30,6 +30,7 @@ import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLContext;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLEnumValue;
@@ -351,6 +352,23 @@ public class IndexingUtils {
         	targetEntity = getTargetEntity( ((TLRole) validatable).getRoleEnumeration() );
         }
         return targetEntity;
+	}
+	
+	/**
+	 * Returns the qualified name of the given facets owning entity.
+	 * 
+	 * @param facet  the contextual facet for which to return the owner's qualified name
+	 * @return QName
+	 */
+	public static QName getContextualFacetOwnerQName(TLContextualFacet facet) {
+		String ownerIndexId = facet.getOwningEntityName();
+		int delimIdx = ownerIndexId.lastIndexOf(":");
+		QName ownerName = null;
+		
+		if (delimIdx >= 0) {
+			ownerName = new QName( ownerIndexId.substring( 0, delimIdx), ownerIndexId.substring( delimIdx + 1 ) );
+		}
+		return ownerName;
 	}
 	
 }

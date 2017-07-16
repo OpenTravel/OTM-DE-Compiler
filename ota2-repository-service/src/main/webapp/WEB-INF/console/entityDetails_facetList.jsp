@@ -26,6 +26,9 @@
 	<c:forEach var="facetItem" items="${entityFacets}">
 		<c:if test="${!firstRow}"><br/></c:if>
 		<img src="${pageContext.request.contextPath}/images/${imageResolver.getIconImage( facetItem.facet )}" />&nbsp;<a href="#facet_${facetItem.identity}">${facetItem.identity}</a>
+		<c:if test="${facetItem.contributedFrom != null}">
+			<small>(contributed from ${facetItem.contributedFrom})</small>
+		</c:if>
 		<c:set var="firstRow" value="false" />
 	</c:forEach>
 	</td>

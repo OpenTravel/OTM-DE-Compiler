@@ -16,6 +16,9 @@
 
 package org.opentravel.schemacompiler.util;
 
+import javax.xml.namespace.QName;
+
+import org.opentravel.schemacompiler.index.IndexingUtils;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLOperation;
@@ -30,6 +33,7 @@ public class FacetIdentityWrapper {
 	
 	private String identity;
 	private TLFacet facet;
+	private String contributedFrom;
 	
 	/**
 	 * Constructor that specifies the facet to be wrapped.
@@ -38,7 +42,14 @@ public class FacetIdentityWrapper {
 	 */
 	public FacetIdentityWrapper(TLFacet facet) {
 		if (facet instanceof TLContextualFacet) {
-			this.identity = facet.getFacetType().getIdentityName( ((TLContextualFacet) facet).getName() );
+			TLContextualFacet cFacet = (TLContextualFacet) facet;
+			QName ownerName = IndexingUtils.getContextualFacetOwnerQName( cFacet );
+			
+			if ((ownerName != null) &&
+					!ownerName.getNamespaceURI().equals( cFacet.getFacetNamespace() )) {
+				this.contributedFrom = cFacet.getFacetNamespace();
+			}
+			this.identity = facet.getFacetType().getIdentityName( cFacet.getName() );
 			
 		} else if (facet.getOwningEntity() instanceof TLOperation) {
 			switch (facet.getFacetType()) {
@@ -75,6 +86,16 @@ public class FacetIdentityWrapper {
 	 */
 	public TLFacet getFacet() {
 		return facet;
+	}
+
+	/**
+	 * Returns the namespace in which the facet was declared if different from the
+	 * owning entity's namespace.
+	 *
+	 * @return String
+	 */
+	public String getContributedFrom() {
+		return contributedFrom;
 	}
 	
 }

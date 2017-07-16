@@ -143,7 +143,7 @@ public class EntitySearchResult extends SearchResult<NamedEntity> {
 			
 			while (iterator.hasNext()) {
 				TLContextualFacet facet = iterator.next();
-				QName ownerName = getOwnerQName( facet );
+				QName ownerName = IndexingUtils.getContextualFacetOwnerQName( facet );
 				TLFacetOwner owner = facetOwnerMap.get( ownerName );
 				
 				if (owner != null) {
@@ -153,23 +153,6 @@ public class EntitySearchResult extends SearchResult<NamedEntity> {
 				}
 			}
 		}
-	}
-	
-	/**
-	 * Returns the qualified name of the given facets owning entity.
-	 * 
-	 * @param facet  the contextual facet for which to return the owner's qualified name
-	 * @return QName
-	 */
-	private QName getOwnerQName(TLContextualFacet facet) {
-		String ownerIndexId = facet.getOwningEntityName();
-		int delimIdx = ownerIndexId.lastIndexOf(":");
-		QName ownerName = null;
-		
-		if (delimIdx >= 0) {
-			ownerName = new QName( ownerIndexId.substring( 0, delimIdx), ownerIndexId.substring( delimIdx + 1 ) );
-		}
-		return ownerName;
 	}
 	
 	/**
