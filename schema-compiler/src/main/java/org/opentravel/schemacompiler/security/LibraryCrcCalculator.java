@@ -151,7 +151,6 @@ public class LibraryCrcCalculator {
             throw new FileNotFoundException("The specified library file does not exist: "
                     + libraryFile.getAbsolutePath());
         }
-        System.out.println("RECALCULATING CRC: " + libraryFile.getAbsolutePath());
 
         // Load the library as a JAXB data structure
         LibraryModuleLoader<InputStream> loader = new MultiVersionLibraryModuleLoader();

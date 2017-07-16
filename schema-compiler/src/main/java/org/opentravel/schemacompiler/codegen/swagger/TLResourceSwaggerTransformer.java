@@ -24,7 +24,6 @@ import java.util.Map.Entry;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
-import org.opentravel.schemacompiler.codegen.CodeGenerator;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.QualifiedAction;
@@ -39,6 +38,8 @@ import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerScheme;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils.URLComponents;
 import org.opentravel.schemacompiler.model.LibraryMember;
+import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLActionRequest;
 import org.opentravel.schemacompiler.model.TLHttpMethod;
 import org.opentravel.schemacompiler.model.TLLibrary;
@@ -174,8 +175,7 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
 	 */
 	private List<JsonSchemaNamedReference> buildJsonDefinitions(TLModel model) {
 		List<JsonSchemaNamedReference> definitions = new ArrayList<>();
-		CodeGenerator<?> codeGenerator = context.getCodeGenerator();
-		CodeGenerationFilter filter = codeGenerator.getFilter();
+		CodeGenerationFilter filter = context.getCodeGenerator().getFilter();
 		
 		// Add definitions for all of the OTM entities that are within the
 		// scope of the current filter
@@ -183,21 +183,39 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
 			if (!filter.processLibrary( library )) continue;
 			
 	        for (LibraryMember member : library.getNamedMembers()) {
-	            ObjectTransformer<LibraryMember, CodegenArtifacts, CodeGenerationTransformerContext> transformer =
-	            		getTransformerFactory().getTransformer(member, CodegenArtifacts.class);
-	            
-	            if ((transformer != null) && ((filter == null) || filter.processEntity(member))) {
-	                CodegenArtifacts artifacts = transformer.transform(member);
-
-	                if (artifacts != null) {
-	                    for (JsonSchemaNamedReference memberDef : artifacts.getArtifactsOfType(JsonSchemaNamedReference.class)) {
-	                    	definitions.add( memberDef );
-	                    }
-	                }
-	            }
+	        	if (member instanceof TLResource) {
+	        		for (TLActionFacet actionFacet : ((TLResource) member).getActionFacets()) {
+			        	transformEntity( actionFacet, definitions );
+	        		}
+	        		
+	        	} else {
+		        	transformEntity( member, definitions );
+	        	}
 	        }
 		}
 		return definitions;
+	}
+	
+	/**
+	 * Transforms the given OTM entity and adds it JSON definition(s) the the list provided.
+	 * 
+	 * @param entity  the OTM entity to be transformed
+	 * @param definitions  the list of JSON definitions being constructed
+	 */
+	private void transformEntity(NamedEntity entity, List<JsonSchemaNamedReference> definitions) {
+        ObjectTransformer<NamedEntity, CodegenArtifacts, CodeGenerationTransformerContext> transformer =
+        		getTransformerFactory().getTransformer(entity, CodegenArtifacts.class);
+		CodeGenerationFilter filter = context.getCodeGenerator().getFilter();
+        
+        if ((transformer != null) && ((filter == null) || filter.processEntity(entity))) {
+            CodegenArtifacts artifacts = transformer.transform(entity);
+
+            if (artifacts != null) {
+                for (JsonSchemaNamedReference memberDef : artifacts.getArtifactsOfType(JsonSchemaNamedReference.class)) {
+                	definitions.add( memberDef );
+                }
+            }
+        }
 	}
 	
 	/**

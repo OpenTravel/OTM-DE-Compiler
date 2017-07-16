@@ -673,22 +673,32 @@ public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
         		if (basePayload instanceof TLCoreObject) {
         			TLCoreObject corePayload = (TLCoreObject) basePayload;
         			
-        			navigateFacetMembers( corePayload.getSummaryFacet() );
-        			navigateFacetMembers( corePayload.getDetailFacet() );
+        			if (actionFacet.getReferenceType() == TLReferenceType.NONE) {
+        				navigateCoreObject( corePayload, null );
+        				
+        			} else {
+            			navigateFacetMembers( corePayload.getSummaryFacet() );
+            			navigateFacetMembers( corePayload.getDetailFacet() );
+        			}
         			
         		} else if (basePayload instanceof TLChoiceObject) {
         			TLChoiceObject choicePayload = (TLChoiceObject) basePayload;
         			
-        			navigateFacetMembers( choicePayload.getSharedFacet() );
-        			
-        			for (TLContextualFacet choiceFacet : choicePayload.getChoiceFacets()) {
-        				do {
-        					TLFacetOwner facetOwner = choiceFacet.getOwningEntity();
-        					
-        					navigateFacetMembers( choiceFacet );
-        					choiceFacet = (facetOwner instanceof TLContextualFacet) ? (TLContextualFacet) facetOwner : null;
-        					
-        				} while (choiceFacet != null);
+        			if (actionFacet.getReferenceType() == TLReferenceType.NONE) {
+        				navigateChoiceObject( choicePayload, null );
+        				
+        			} else {
+            			navigateFacetMembers( choicePayload.getSharedFacet() );
+            			
+            			for (TLContextualFacet choiceFacet : choicePayload.getChoiceFacets()) {
+            				do {
+            					TLFacetOwner facetOwner = choiceFacet.getOwningEntity();
+            					
+            					navigateFacetMembers( choiceFacet );
+            					choiceFacet = (facetOwner instanceof TLContextualFacet) ? (TLContextualFacet) facetOwner : null;
+            					
+            				} while (choiceFacet != null);
+            			}
         			}
         		}
         	}

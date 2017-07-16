@@ -64,7 +64,7 @@ public class TLOpenEnumerationJsonCodegenTransformer extends AbstractJsonSchemaT
         schema.setEntityInfo( jsonUtils.getEntityInfo( source ) );
         
         schema.getProperties().add( new JsonSchemaNamedReference(
-        		"value", new JsonSchemaReference( "#/definitions/" + source.getName() + "_Base" ) ) );
+        		"value", new JsonSchemaReference( jsonUtils.getSchemaReferencePath( source, source ) + "_Base" ) ) );
         schema.getProperties().add( new JsonSchemaNamedReference(
         		"extension", new JsonSchemaReference( jsonUtils.getSchemaReferencePath( enumExtension, source ) ) ) );
         addCompileTimeDependency( enumExtension );
