@@ -15,6 +15,8 @@
  */
 package org.opentravel.schemacompiler.codegen.example;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -109,12 +111,15 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     protected String generateExampleValue(Object entity) {
         String exampleValue = null;
+    	int fractionDigits = -1;
 
         if (entity instanceof TLSimple) {
             exampleValue = exampleValueGenerator.getExampleValue((TLSimple) entity);
+            fractionDigits = getFractionDigits( entity );
 
         } else if (entity instanceof TLSimpleFacet) {
             exampleValue = exampleValueGenerator.getExampleValue((TLSimpleFacet) entity);
+            fractionDigits = getFractionDigits( entity );
 
         } else if (entity instanceof XSDSimpleType) {
             exampleValue = exampleValueGenerator.getExampleValue((XSDSimpleType) entity);
@@ -130,10 +135,10 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
 
         } else if (entity instanceof TLValueWithAttributes) {
             exampleValue = exampleValueGenerator.getExampleValue((TLValueWithAttributes) entity);
-
+            fractionDigits = getFractionDigits( entity );
+            
         } else if (entity instanceof TLCoreObject) {
-            exampleValue = exampleValueGenerator.getExampleValue(((TLCoreObject) entity)
-                    .getSimpleFacet());
+            exampleValue = exampleValueGenerator.getExampleValue(((TLCoreObject) entity).getSimpleFacet());
 
         } else if (entity instanceof TLAttribute) {
         	TLAttributeOwner owner = ((TLAttribute) entity).getOwner();
@@ -144,6 +149,7 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
         	} else {
                 exampleValue = exampleValueGenerator.getExampleValue((TLAttribute) entity, owner);
         	}
+            fractionDigits = getFractionDigits( entity );
 
         } else if (entity instanceof TLProperty) {
         	TLPropertyOwner owner = ((TLProperty) entity).getOwner();
@@ -154,7 +160,21 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
         	} else {
                 exampleValue = exampleValueGenerator.getExampleValue((TLProperty) entity, owner);
         	}
+            fractionDigits = getFractionDigits( entity );
         }
+        
+        // For decimal values that specify a fraction-digits constraint, adjust the string
+        // to be compliant with that constraint
+        if (fractionDigits >= 0) {
+        	try {
+            	exampleValue = new BigDecimal( exampleValue ).setScale(
+            			fractionDigits, RoundingMode.HALF_UP ).toString();
+        		
+        	} catch (NumberFormatException e) {
+        		// Ignore error - example string will remain unchanged
+        	}
+        }
+        
         lastExampleValue = (exampleValue == null) ? null : exampleValue.intern();
 		return lastExampleValue;
     }
@@ -645,6 +665,41 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
  		return refRepeat;
  	}
 
+    /**
+     * Returns the number of fraction digits for the given entity or -1 if no
+     * fraction digits constraint is specified.
+     * 
+     * @param entity  the entity type to analyze
+     * @return int
+     */
+    private int getFractionDigits(Object entity) {
+    	int fractionDigits = -1;
+    	
+    	while (entity != null) {
+    		if (entity instanceof TLSimple) {
+    			TLSimple simpleEntity = (TLSimple) entity;
+    			
+    			if (simpleEntity.getFractionDigits() >= 0) {
+    				fractionDigits = simpleEntity.getFractionDigits();
+    				break;
+    				
+    			} else {
+        			entity = simpleEntity.getParentType();
+    			}
+    			
+    		} else if (entity instanceof TLAttribute) {
+    			entity = ((TLAttribute) entity).getType();
+    			
+    		} else if (entity instanceof TLProperty) {
+    			entity = ((TLProperty) entity).getType();
+    			
+    		} else {
+    			entity = null;
+    		}
+    	}
+    	return fractionDigits;
+    }
+    
  	/**
  	 * Handles the deferred assignment of 'IDREF' and 'IDREFS' values as a
  	 * post-processing step of the example generation process.

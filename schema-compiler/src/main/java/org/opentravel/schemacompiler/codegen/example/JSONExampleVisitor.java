@@ -15,6 +15,7 @@
  */
 package org.opentravel.schemacompiler.codegen.example;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -74,7 +75,7 @@ import com.fasterxml.jackson.databind.node.ValueNode;
  */
 public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 
-	private JsonNodeFactory nodeFactory = JsonNodeFactory.instance;
+	private JsonNodeFactory nodeFactory = JsonNodeFactory.withExactBigDecimals( true );
 	private ObjectNode node;
 	private List<JsonIdReferenceAssignment> referenceAssignments = new ArrayList<JsonIdReferenceAssignment>();
 
@@ -893,6 +894,9 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
     	    		
     	    	} else if (literalType.equals( Double.class )) {
     	    		exampleNode = nodeFactory.numberNode( Double.parseDouble( exampleStr ) );
+    	    		
+    	    	} else if (literalType.equals( BigDecimal.class )) {
+    	    		exampleNode = nodeFactory.numberNode( new BigDecimal( exampleStr ) );
     	    	}
     		} catch (NumberFormatException e) {
     			exampleNode = nodeFactory.numberNode( 0 ); // assign zero on error
@@ -957,6 +961,8 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 		    				literalType = Float.class;
 							break;
 						case DECIMAL:
+		    				literalType = BigDecimal.class;
+							break;
 						case DOUBLE:
 		    				literalType = Double.class;
 							break;
