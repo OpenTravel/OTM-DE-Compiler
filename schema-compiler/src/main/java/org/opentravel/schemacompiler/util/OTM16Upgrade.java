@@ -20,6 +20,6 @@ package org.opentravel.schemacompiler.util;
  */
 public class OTM16Upgrade {
 	
-	public static boolean otm16Enabled = false;
+	public static boolean otm16Enabled = true;
 	
 }

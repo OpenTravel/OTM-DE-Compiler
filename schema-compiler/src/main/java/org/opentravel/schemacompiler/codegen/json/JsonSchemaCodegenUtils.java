@@ -17,7 +17,9 @@ package org.opentravel.schemacompiler.codegen.json;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 
 import javax.xml.namespace.QName;
 
@@ -369,6 +371,37 @@ public class JsonSchemaCodegenUtils {
 			}
 			if (hasOtmAnnotation) {
 				targetJson.add( "x-otm-annotations", otmAnnotations );
+			}
+		}
+	}
+	
+	/**
+	 * Recursively processes the given JSON document, removing all properties whose names
+	 * begin with 'x-otm-'.
+	 * 
+	 * @param jsonDocument  the JSON document to be processed
+	 */
+	public static void stripOtmExtensions(JsonElement jsonDocument) {
+		if (jsonDocument instanceof JsonArray) {
+			JsonArray jArray = (JsonArray) jsonDocument;
+			
+			for (JsonElement arrayMember : jArray) {
+				stripOtmExtensions( arrayMember );
+			}
+			
+		} else if (jsonDocument instanceof JsonObject) {
+			JsonObject jObject = (JsonObject) jsonDocument;
+			Iterator<Entry<String,JsonElement>> iterator = jObject.entrySet().iterator();
+			
+			while (iterator.hasNext()) {
+				Entry<String,JsonElement> jProperty = iterator.next();
+				
+				if (jProperty.getKey().startsWith( "x-otm-" )) {
+					iterator.remove();
+					
+				} else {
+					stripOtmExtensions( jProperty.getValue() );
+				}
 			}
 		}
 	}

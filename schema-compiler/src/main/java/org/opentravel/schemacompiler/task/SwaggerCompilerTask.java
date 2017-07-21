@@ -264,6 +264,7 @@ public class SwaggerCompilerTask extends AbstractSchemaCompilerTask
         if (resourceBaseUrl != null) {
             context.setValue(CodeGenerationContext.CK_RESOURCE_BASE_URL, resourceBaseUrl);
         }
+        context.setValue(CodeGenerationContext.CK_SUPRESS_OTM_EXTENSIONS, isSuppressOtmExtensions() + "");
         return context;
 	}
 
@@ -274,6 +275,7 @@ public class SwaggerCompilerTask extends AbstractSchemaCompilerTask
     public void applyTaskOptions(CommonCompilerTaskOptions taskOptions) {
         if (taskOptions instanceof ResourceCompilerTaskOptions) {
             setResourceBaseUrl(((ResourceCompilerTaskOptions) taskOptions).getResourceBaseUrl());
+            setSuppressOtmExtensions(((ResourceCompilerTaskOptions) taskOptions).isSuppressOtmExtensions());
         }
         super.applyTaskOptions(taskOptions);
     }

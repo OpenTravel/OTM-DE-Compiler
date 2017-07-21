@@ -17,14 +17,18 @@
 package org.opentravel.schemacompiler.codegen.json;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
-import javax.xml.namespace.QName;
-
+import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
 import org.opentravel.schemacompiler.codegen.util.JsonSchemaNamingUtils;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
+import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLModel;
+import org.opentravel.schemacompiler.transform.SymbolTable;
+import org.opentravel.schemacompiler.transform.symbols.SymbolTableFactory;
 
 /**
  * Handles the construction of qualified type names for JSON schemas.  This is useful
@@ -35,26 +39,49 @@ public class JsonTypeNameBuilder {
 	
 	private static String counterChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 	
-	private Map<QName,String> prefixRegistry = new HashMap<>();
+	private Map<String,String> prefixRegistry = new HashMap<>();
+	private Set<String> localNameCollisions = new HashSet<>();
 	
 	/**
 	 * Constructor that builds the registry of unique prefixes for all libararies in the
 	 * given model.
 	 * 
 	 * @param model  the model from which to construct a prefix registry
+	 * @param filter  the code generation filter (may be null)
 	 */
-	public JsonTypeNameBuilder(TLModel model) {
+	public JsonTypeNameBuilder(TLModel model, CodeGenerationFilter filter) {
+		// Compute a unique prefix for every library in the model
 		for (AbstractLibrary library : model.getAllLibraries()) {
-			QName libName = getLibraryQName( library );
-			String prefix = library.getPrefix();
-			int counter = 0;
+			String libNS = library.getNamespace();
 			
-			// Compute a unique prefix for every library in the model
-			while (prefixRegistry.containsValue( prefix )) {
-				prefix = library.getPrefix() + counterChars.charAt( counter );
-				counter++;
+			if (!prefixRegistry.containsKey( libNS )) {
+				String basePrefix = library.getPrefix().replaceAll("-", "").toUpperCase();
+				String prefix = basePrefix;
+				int counter = 0;
+				
+				while (prefixRegistry.containsValue( prefix )) {
+					prefix = basePrefix + counterChars.charAt( counter );
+					counter++;
+				}
+				prefixRegistry.put( libNS,  prefix );
 			}
-			prefixRegistry.put( libName,  prefix );
+		}
+		
+		// Search for local name collisions in the generated schemas
+		SymbolTable symbolTable = SymbolTableFactory.newSymbolTableFromModel( model );
+		Set<String> allLocalNames = new HashSet<>();
+		
+		for (String ns : symbolTable.getNamespaces()) {
+			for (String localName : symbolTable.getLocalNames( ns )) {
+				LibraryElement entity = (LibraryElement) symbolTable.getEntity( ns, localName );
+				
+				if ((filter == null) || filter.processEntity( entity )) {
+					if (allLocalNames.contains( localName )) {
+						localNameCollisions.add( localName );
+					}
+					allLocalNames.add( localName );
+				}
+			}
 		}
 	}
 	
@@ -65,22 +92,17 @@ public class JsonTypeNameBuilder {
 	 * @return String
 	 */
 	public String getJsonTypeName(NamedEntity entity) {
-		String prefix = prefixRegistry.get( getLibraryQName( entity.getOwningLibrary() ) );
+		String typeName = JsonSchemaNamingUtils.getGlobalDefinitionName( entity );
 		
-		if (prefix == null) {
-			prefix = "unknown";
+		if (localNameCollisions.contains( typeName )) {
+			String suffix = prefixRegistry.get( entity.getNamespace() );
+			
+			if (suffix == null) {
+				suffix = "unknown";
+			}
+			typeName += "_" + suffix;
 		}
-		return prefix + "_" + JsonSchemaNamingUtils.getGlobalDefinitionName( entity );
-	}
-	
-	/**
-	 * Returns a qualified name for the given library.
-	 * 
-	 * @param library  the library for which to return a qualified name
-	 * @return QName
-	 */
-	private QName getLibraryQName(AbstractLibrary library) {
-		return new QName( library.getNamespace(), library.getName() );
+		return typeName;
 	}
 	
 }

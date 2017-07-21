@@ -50,6 +50,7 @@ import org.springframework.context.ApplicationContext;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 
 /**
  * <code>CodeGenerator</code> base class that handles schema output generation using the
@@ -84,9 +85,14 @@ public abstract class AbstractJsonSchemaCodeGenerator<S extends TLModelElement> 
         Writer out = null;
         try {
             JsonSchema jsonSchema = transformSourceObjectToJsonSchema(source, context);
+            JsonObject jsonDocument = jsonSchema.toJson();
             File outputFile = getOutputFile(source, context);
+            
+            if (context.getBooleanValue( CodeGenerationContext.CK_SUPRESS_OTM_EXTENSIONS )) {
+            	JsonSchemaCodegenUtils.stripOtmExtensions( jsonDocument );
+            }
             out = new FileWriter(outputFile);
-            gson.toJson( jsonSchema.toJson(), out );
+            gson.toJson( jsonDocument, out );
             out.close();
             out = null;
 

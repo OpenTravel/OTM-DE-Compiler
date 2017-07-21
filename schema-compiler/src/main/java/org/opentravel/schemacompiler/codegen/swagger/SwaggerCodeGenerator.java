@@ -27,10 +27,12 @@ import java.util.Map.Entry;
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder;
+import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
 import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.ResourceFilenameBuilder;
+import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
 import org.opentravel.schemacompiler.codegen.json.JsonTypeNameBuilder;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerDocument;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
@@ -89,6 +91,9 @@ public class SwaggerCodeGenerator extends AbstractCodeGenerator<TLResource> {
 			if (isSingleFileEnabled( context )) {
 				addBuiltInDefinitions( swaggerJson );
 			}
+            if (context.getBooleanValue( CodeGenerationContext.CK_SUPRESS_OTM_EXTENSIONS )) {
+            	JsonSchemaCodegenUtils.stripOtmExtensions( swaggerJson );
+            }
 			
             gson.toJson( swaggerJson, out );
             out.close();
@@ -126,8 +131,11 @@ public class SwaggerCodeGenerator extends AbstractCodeGenerator<TLResource> {
 			if (isSingleFileEnabled( context )) {
 				// If single-file swagger generation is enabled, we need to create a JSON Type
 				// Name Builder and add it to the transform context
+				CodeGenerationFilter filter = transformerFactory.getContext().getCodeGenerator().getFilter();
+				
 				transformerFactory.getContext().setContextCacheEntry(
-						JsonTypeNameBuilder.class.getSimpleName(), new JsonTypeNameBuilder( source.getOwningModel() ) );
+						JsonTypeNameBuilder.class.getSimpleName(),
+						new JsonTypeNameBuilder( source.getOwningModel(), filter ) );
 			}
 			return transformer.transform(source);
 			

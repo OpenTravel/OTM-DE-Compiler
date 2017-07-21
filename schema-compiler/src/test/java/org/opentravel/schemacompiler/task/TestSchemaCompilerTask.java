@@ -54,6 +54,7 @@ public class TestSchemaCompilerTask {
         compilerTask.setExampleMaxRepeat( 3 );
         compilerTask.setServiceEndpointUrl("http://www.OpenTravel.org/services");
         compilerTask.setResourceBaseUrl("http://www.OpenTravel.org/resources");
+        compilerTask.setSuppressOtmExtensions(false);
 
         ValidationFindings findings = compilerTask.compileOutput(sourceFile);
 

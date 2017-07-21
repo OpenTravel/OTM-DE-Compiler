@@ -121,6 +121,13 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
      */
 	@Parameter
     protected String resourceBaseUrl;
+	
+	/**
+	 * Boolean flag indicating whether the compiler should supress all 'x-otm-' extensions in the
+	 * generated swagger document(s).
+	 */
+	@Parameter( defaultValue = "false" )
+	protected boolean suppressOtmExtensions;
 
     /**
      * Boolean flag indicating that the maximum amount of detail is to be included in generated
@@ -324,6 +331,14 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
 	}
 
     /**
+	 * @see org.opentravel.schemacompiler.task.ResourceCompilerTaskOptions#isSuppressOtmExtensions()
+	 */
+	@Override
+	public boolean isSuppressOtmExtensions() {
+		return suppressOtmExtensions;
+	}
+
+	/**
      * @see org.opentravel.schemacompiler.task.ExampleCompilerTaskOptions#isGenerateExamples()
      */
     @Override

@@ -55,6 +55,7 @@ import org.springframework.context.ApplicationContext;
 public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask implements
         SchemaCompilerTaskOptions {
 
+    private boolean suppressOtmExtensions = false;
     private boolean generateExamples = true;
     private boolean generateMaxDetailsForExamples = true;
     private String exampleContext;
@@ -377,7 +378,7 @@ public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask im
      */
     protected CodeGenerationContext createContext() {
         CodeGenerationContext context = super.createContext();
-
+        
         if (!generateMaxDetailsForExamples) {
             context.setValue(CodeGenerationContext.CK_EXAMPLE_DETAIL_LEVEL, "MINIMUM");
         }
@@ -390,6 +391,7 @@ public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask im
         if (exampleMaxDepth != null) {
             context.setValue(CodeGenerationContext.CK_EXAMPLE_MAX_DEPTH, exampleMaxDepth.toString());
         }
+        context.setValue(CodeGenerationContext.CK_SUPRESS_OTM_EXTENSIONS, suppressOtmExtensions + "");
         return context;
     }
 
@@ -399,7 +401,7 @@ public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask im
     @Override
     public void applyTaskOptions(CommonCompilerTaskOptions taskOptions) {
         if (taskOptions instanceof SchemaCompilerTaskOptions) {
-            // No explicit options currently implemented
+        	setSuppressOtmExtensions( ((SchemaCompilerTaskOptions) taskOptions).isSuppressOtmExtensions() );
         }
         if (taskOptions instanceof ExampleCompilerTaskOptions) {
             ExampleCompilerTaskOptions exampleOptions = (ExampleCompilerTaskOptions) taskOptions;
@@ -411,6 +413,25 @@ public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask im
             setExampleMaxDepth(exampleOptions.getExampleMaxDepth());
         }
         super.applyTaskOptions(taskOptions);
+    }
+
+	/**
+	 * @see org.opentravel.schemacompiler.task.ResourceCompilerTaskOptions#isSuppressOtmExtensions()
+	 */
+	@Override
+	public boolean isSuppressOtmExtensions() {
+		return suppressOtmExtensions;
+	}
+
+    /**
+     * Assigns the option flag indicating that all 'x-otm-' extensions should be
+     * suppressed in the generated swagger document(s)
+     * 
+     * @param suppressOtmExtensions
+     *            the task option value to assign
+     */
+    public void setSuppressOtmExtensions(boolean suppressOtmExtensions) {
+        this.suppressOtmExtensions = suppressOtmExtensions;
     }
 
     /**

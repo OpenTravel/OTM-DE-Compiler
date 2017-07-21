@@ -87,6 +87,9 @@ public class CodeGenerationContext {
 
     /** Context key indicating that single-file Swagger document generation is enabled. */
     public static final String CK_ENABLE_SINGLE_FILE_SWAGGER = "schemacompiler.swagger.singleFile";
+    
+    /** Context key indicating that OTM extensions should be suppressed in the generated swagger documents. */
+    public static final String CK_SUPRESS_OTM_EXTENSIONS = "schemacompiler.swagger.supressOtmExtensions";
 
     private Map<String, String> contents = new HashMap<String, String>();
 

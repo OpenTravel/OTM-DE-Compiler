@@ -22,5 +22,13 @@ package org.opentravel.schemacompiler.task;
  */
 public interface SchemaCompilerTaskOptions extends CommonCompilerTaskOptions,
         ExampleCompilerTaskOptions {
-
+	
+	/**
+	 * Returns true if the compiler should suppress all 'x-otm-' extensions in the
+	 * generated swagger document(s) and JSON schemas.
+	 * 
+	 * @return boolean
+	 */
+	public boolean isSuppressOtmExtensions();
+	
 }

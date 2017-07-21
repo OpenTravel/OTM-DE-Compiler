@@ -40,6 +40,7 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
     private URL serviceLibraryUrl;
     private String serviceEndpointUrl;
     private String resourceBaseUrl;
+    private boolean suppressOtmExtensions = false;
     private boolean generateExamples = true;
     private boolean generateMaxDetailsForExamples = true;
     private String exampleContext;
@@ -321,6 +322,25 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
 	}
 
 	/**
+	 * @see org.opentravel.schemacompiler.task.ResourceCompilerTaskOptions#isSuppressOtmExtensions()
+	 */
+	@Override
+	public boolean isSuppressOtmExtensions() {
+		return suppressOtmExtensions;
+	}
+
+    /**
+     * Assigns the option flag indicating that all 'x-otm-' extensions should be
+     * suppressed in the generated swagger document(s)
+     * 
+     * @param suppressOtmExtensions
+     *            the task option value to assign
+     */
+    public void setSuppressOtmExtensions(boolean suppressOtmExtensions) {
+        this.suppressOtmExtensions = suppressOtmExtensions;
+    }
+
+	/**
      * @see org.opentravel.schemacompiler.task.CommonCompilerTaskOptions#isGenerateExamples()
      */
     @Override
@@ -331,7 +351,7 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
     /**
      * Assigns the option flag indicating that example XML documents should be generated.
      * 
-     * @param compileRAS
+     * @param generateExamples
      *            the task option value to assign
      */
     public void setGenerateExamples(boolean generateExamples) {

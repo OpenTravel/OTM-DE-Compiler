@@ -88,6 +88,14 @@ public class CommandLineCompilerTaskOptions implements CompileAllTaskOptions {
 	}
 
 	/**
+	 * @see org.opentravel.schemacompiler.task.SchemaCompilerTaskOptions#isSuppressOtmExtensions()
+	 */
+	@Override
+	public boolean isSuppressOtmExtensions() {
+        return commandLineArgs.hasOption("e");
+	}
+
+	/**
      * @see org.opentravel.schemacompiler.task.CommonCompilerTaskOptions#getOutputFolder()
      */
     @Override

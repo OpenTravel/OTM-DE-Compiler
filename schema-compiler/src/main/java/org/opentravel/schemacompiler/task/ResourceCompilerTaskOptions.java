@@ -22,6 +22,14 @@ package org.opentravel.schemacompiler.task;
 public interface ResourceCompilerTaskOptions extends CommonCompilerTaskOptions, ExampleCompilerTaskOptions {
 	
 	/**
+	 * Returns true if the compiler should suppress all 'x-otm-' extensions in the
+	 * generated swagger document(s) and JSON schemas.
+	 * 
+	 * @return boolean
+	 */
+	public boolean isSuppressOtmExtensions();
+	
+	/**
 	 * Returns the base URL path for all generated REST resource endpoints.
 	 * 
 	 * @return String
