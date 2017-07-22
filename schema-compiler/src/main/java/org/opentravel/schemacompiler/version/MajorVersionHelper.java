@@ -52,6 +52,8 @@ import org.opentravel.schemacompiler.version.handlers.RollupReferenceHandler;
 import org.opentravel.schemacompiler.version.handlers.VersionHandler;
 import org.opentravel.schemacompiler.version.handlers.VersionHandlerFactory;
 import org.opentravel.schemacompiler.version.handlers.VersionHandlerMergeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Helper methods used to construct new major versions of <code>TLLibrary</code> instances.
@@ -60,6 +62,8 @@ import org.opentravel.schemacompiler.version.handlers.VersionHandlerMergeUtils;
  */
 public final class MajorVersionHelper extends AbstractVersionHelper {
 
+    private static final Logger log = LoggerFactory.getLogger( MajorVersionHelper.class );
+    
     /**
      * Default constructor. NOTE: When working in an environment where a <code>ProjectManager</code>
      * is being used, the other constructor should be used to assign the active project for the
@@ -414,11 +418,20 @@ public final class MajorVersionHelper extends AbstractVersionHelper {
         copyLibraryFolders(minorVersionLibrary, majorVersionLibrary);
         
         // Collect the list of all versioned entities from the minor version library
+        List<TLContextualFacet> nonLocalFacets = new ArrayList<>();
         List<Versioned> minorVersionList = new ArrayList<>();
         
         for (LibraryMember member : minorVersionLibrary.getNamedMembers()) {
         	if (member instanceof Versioned) {
             	minorVersionList.add( (Versioned) member );
+            	
+        	} else if (member instanceof TLContextualFacet) {
+        		TLContextualFacet ctxFacet = (TLContextualFacet) member;
+        		
+        		if (!ctxFacet.isLocalFacet()) {
+        			nonLocalFacets.add( ctxFacet );
+        		}
+        		
         	}
         }
         if (minorVersionLibrary.getService() != null) {
@@ -426,6 +439,7 @@ public final class MajorVersionHelper extends AbstractVersionHelper {
             	minorVersionList.add( operation );
             }
         }
+        rollupNonLocalFacets( nonLocalFacets, majorVersionLibrary, referenceHandler );
         
         // Roll up all of the entities we just collected to the major version library
         for (Versioned minorVersion : minorVersionList) {
@@ -489,8 +503,15 @@ public final class MajorVersionHelper extends AbstractVersionHelper {
 		}
 	}
 	
-	public List<TLContextualFacet> rollupNonLocalFacets(List<TLContextualFacet> sourceFacets, Map<TLLibrary,TLLibrary> sourceToTargetLibraryMap) {
-		RollupReferenceHandler referenceHandler = new RollupReferenceHandler( new ArrayList<TLLibrary>( sourceToTargetLibraryMap.keySet() ) );
+	/**
+	 * Rolls up the given list of non-local contextual facets.
+	 * 
+	 * @param sourceFacets  the source facets to be rolled up
+	 * @param targetLibrary  the target owning library for the contextual facet
+	 * @return List<TLContextualFacet>
+	 */
+	private List<TLContextualFacet> rollupNonLocalFacets(List<TLContextualFacet> sourceFacets,
+			TLLibrary targetLibrary, RollupReferenceHandler referenceHandler) {
 		List<TLContextualFacet> targetFacets = new ArrayList<>();
 		List<TLContextualFacet> remainingFacets = new ArrayList<>( sourceFacets );
 		int originalFacetCount = -1;
@@ -504,22 +525,11 @@ public final class MajorVersionHelper extends AbstractVersionHelper {
 			
 			for (TLContextualFacet sourceFacet : sourceFacets) {
 				TLFacetOwner sourceFacetOwner = sourceFacet.getOwningEntity();
-				TLLibrary targetOwnerLibrary = (sourceFacetOwner == null) ?
-						null : sourceToTargetLibraryMap.get( sourceFacetOwner.getOwningLibrary() );
-				TLLibrary targetLibrary = sourceToTargetLibraryMap.get( sourceFacet.getOwningLibrary() );
+				TLContextualFacet targetFacet = rollupNonLocalFacet(
+						sourceFacet, sourceFacetOwner, targetLibrary, referenceHandler );
 				
-				if ((targetOwnerLibrary != null) && (targetLibrary != null)) {
-					NamedEntity targetEntity = targetOwnerLibrary.getNamedMember( sourceFacetOwner.getLocalName() );
-					TLFacetOwner targetOwner = (targetEntity instanceof TLFacetOwner) ? ((TLFacetOwner) targetEntity) : null;
-					
-					if (targetOwner != null) {
-						TLContextualFacet targetFacet = rollupNonLocalFacet(
-								sourceFacet, targetOwner, targetLibrary, referenceHandler );
-						
-						targetFacets.add( targetFacet );
-						remainingFacets.remove( sourceFacet );
-					}
-				}
+				targetFacets.add( targetFacet );
+				remainingFacets.remove( sourceFacet );
 			}
 		}
 		return targetFacets;
@@ -540,17 +550,66 @@ public final class MajorVersionHelper extends AbstractVersionHelper {
 		VersionHandlerMergeUtils mergeUtils = new VersionHandlerMergeUtils( new VersionHandlerFactory() );
         Map<String, TLFacet> targetFacets = new HashMap<String, TLFacet>();
         Map<String, TLFacet> sourceFacets = new HashMap<String, TLFacet>();
-		TLContextualFacet targetFacet = new TLContextualFacet();
+		TLContextualFacet targetFacet = targetLibrary.getContextualFacetType( sourceFacet.getLocalName() );
 		
-		targetFacet.setName( sourceFacet.getName() );
-		targetFacet.setFacetType( sourceFacet.getFacetType() );
-		targetFacet.setOwningEntity( targetOwner );
-		targetLibrary.addNamedMember( targetFacet );
-		
+		if (targetFacet == null) {
+			targetFacet = new TLContextualFacet();
+			targetFacet.setName( sourceFacet.getName() );
+			targetFacet.setFacetType( sourceFacet.getFacetType() );
+			addFacetToOwner( targetOwner, targetFacet );
+			targetLibrary.addNamedMember( targetFacet );
+		}
         mergeUtils.addToIdentityFacetMap( targetFacet, targetFacets );
         mergeUtils.addToIdentityFacetMap( sourceFacet, sourceFacets );
         mergeUtils.mergeFacets( targetFacets, sourceFacets, referenceHandler );
         return targetFacet;
+	}
+	
+	/**
+	 * Adds the given facet to its owner based on the owner's class and the facet
+	 * type.
+	 * 
+	 * @param owner  the owner to which the facet will be added
+	 * @param facet  the facet to be added
+	 */
+	private void addFacetToOwner(TLFacetOwner owner, TLContextualFacet facet) {
+		boolean facetAdded = true;
+		
+		if (owner instanceof TLBusinessObject) {
+			TLBusinessObject bo = (TLBusinessObject) owner;
+			
+			switch (facet.getFacetType()) {
+				case CUSTOM:
+					bo.addCustomFacet( facet );
+					break;
+				case QUERY:
+					bo.addQueryFacet( facet );
+					break;
+				case UPDATE:
+					bo.addUpdateFacet( facet );
+					break;
+				default:
+					facetAdded = false;
+			}
+			
+		} else if (owner instanceof TLChoiceObject) {
+			if (facet.getFacetType() == TLFacetType.CHOICE) {
+				((TLChoiceObject) owner).addChoiceFacet( facet );
+				
+			} else {
+				facetAdded = false;
+			}
+			
+		} else if (owner instanceof TLContextualFacet) {
+			((TLContextualFacet) owner).addChildFacet( facet );
+			
+		} else {
+			facetAdded = false;
+		}
+		
+		if (!facetAdded) {
+			log.warn("Unable to add: Incompatible facet owner for the contextual facet type.");
+		}
 	}
 	
 }

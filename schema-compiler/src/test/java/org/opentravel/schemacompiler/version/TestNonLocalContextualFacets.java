@@ -20,18 +20,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.util.OTM16Upgrade;
-import org.opentravel.schemacompiler.util.URLUtils;
 
 /**
  * Verifies the versioning features for non-local contextual facet rollups.
@@ -59,71 +56,66 @@ public class TestNonLocalContextualFacets extends AbstractVersionHelperTests {
         TLLibrary origFacet2Library = (TLLibrary) model.getLibrary(NS_FACET2_VERSION_1, FACET2_LIBRARY_NAME);
         File newVersionLibraryFile = purgeExistingFile(new File(System.getProperty("user.dir"),
                 "/target/test-save-location/library_v02_00.otm"));
+        File newVersionFacet1LibraryFile = purgeExistingFile(new File(System.getProperty("user.dir"),
+                "/target/test-save-location/facets1_v02_00.otm"));
+        File newVersionFacet2LibraryFile = purgeExistingFile(new File(System.getProperty("user.dir"),
+                "/target/test-save-location/facets2_v02_00.otm"));
         MajorVersionHelper helper = new MajorVersionHelper();
 
         assertNotNull(majorVersionLibrary);
         assertNotNull(origFacet1Library);
         assertNotNull(origFacet2Library);
         
-        List<TLContextualFacet> nonLocalFacets = helper.getNonLocalEntityFacets( majorVersionLibrary );
         TLLibrary newMajorVersionLibrary = helper.createNewMajorVersion(majorVersionLibrary, newVersionLibraryFile);
+        TLLibrary newVersionFacet1Library = helper.createNewMajorVersion(origFacet1Library, newVersionFacet1LibraryFile);
+        TLLibrary newVersionFacet2Library = helper.createNewMajorVersion(origFacet2Library, newVersionFacet2LibraryFile);
         
         assertNotNull(newMajorVersionLibrary);
-        assertEquals(4, nonLocalFacets.size());
+        assertNotNull(newVersionFacet1Library);
+        assertNotNull(newVersionFacet2Library);
         
-        // The map holds the association between each of the original library versions
-        // and the new version that was created from it.
-        Map<TLLibrary,TLLibrary> sourceToTargetLibraryMap = new HashMap<>();
+        TLChoiceObject origChoice = majorVersionLibrary.getChoiceObjectType("LookupChoice");
+        TLContextualFacet origChoiceA = origChoice.getChoiceFacet("ChoiceA");
+        TLContextualFacet origChoiceB = origChoice.getChoiceFacet("ChoiceB");
+        TLContextualFacet origChoiceANonLocal1 = getChildFacet( origChoiceA, "LookupChoice_ChoiceA_NonLocal1", origFacet1Library );
+        TLContextualFacet origChoiceBNonLocal2 = getChildFacet( origChoiceB, "LookupChoice_ChoiceB_NonLocal2", origFacet1Library );
+        TLContextualFacet newChoiceANonLocal1 = getChildFacet( origChoiceA, "LookupChoice_ChoiceA_NonLocal1", newVersionFacet1Library );
+        TLContextualFacet newChoiceBNonLocal2 = getChildFacet( origChoiceB, "LookupChoice_ChoiceB_NonLocal2", newVersionFacet1Library );
         
-        sourceToTargetLibraryMap.put( majorVersionLibrary, newMajorVersionLibrary );
+        assertNotNull(origChoiceANonLocal1);
+        assertNotNull(origChoiceBNonLocal2);
+        assertNotNull(newChoiceANonLocal1);
+        assertNotNull(newChoiceBNonLocal2);
+        assertEquals(origChoiceANonLocal1.getOwningEntity(), origChoiceA);
+        assertEquals(origChoiceBNonLocal2.getOwningEntity(), origChoiceB);
+        assertEquals(newChoiceANonLocal1.getOwningEntity(), origChoiceA);
+        assertEquals(newChoiceBNonLocal2.getOwningEntity(), origChoiceB);
         
-        // In this case, we are creating a new version of each library required for
-        // our non-local facets.  When running against a repository, you will probably
-        // need to check on whether a later (editable) version already exists.  If so,
-        // we can just add that to the map instead of creating a new version.
-        for (TLContextualFacet facet : nonLocalFacets) {
-        	TLLibrary sourceLibrary = (TLLibrary) facet.getOwningLibrary();
-        	TLLibrary targetLibrary = sourceToTargetLibraryMap.get( sourceLibrary );
-        	
-        	if (targetLibrary == null) {
-        		File newVersionFile = getNewVersionLibraryFile( sourceLibrary );
-        		
-        		targetLibrary = helper.createNewMajorVersion(sourceLibrary, newVersionFile);
-        		sourceToTargetLibraryMap.put( sourceLibrary, targetLibrary );
-        		
-        		// Double-check that the library is empty
-                assertEquals(0, targetLibrary.getContextualFacetTypes().size());
-        	}
-        }
+        TLContextualFacet origChoiceANonLocal1a = getChildFacet( origChoiceANonLocal1, "LookupChoice_ChoiceA_NonLocal1_NonLocal1a", origFacet2Library );
+        TLContextualFacet origChoiceBNonLocal2a = getChildFacet( origChoiceBNonLocal2, "LookupChoice_ChoiceB_NonLocal2_NonLocal2a", origFacet2Library );
+        TLContextualFacet newChoiceANonLocal1a = getChildFacet( origChoiceANonLocal1, "LookupChoice_ChoiceA_NonLocal1_NonLocal1a", newVersionFacet2Library );
+        TLContextualFacet newChoiceBNonLocal2a = getChildFacet( origChoiceBNonLocal2, "LookupChoice_ChoiceB_NonLocal2_NonLocal2a", newVersionFacet2Library );
         
-        // Perform the rollup of the non-local facets
-        helper.rollupNonLocalFacets( nonLocalFacets, sourceToTargetLibraryMap );
-        
-        // Now validate the number of contextual facets that were just created
-        int contextualFacetCount = 0;
-        
-        for (TLLibrary library : sourceToTargetLibraryMap.values()) {
-        	if (library == newMajorVersionLibrary) continue;
-        	contextualFacetCount += library.getContextualFacetTypes().size();
-        }
-        assertEquals(4, contextualFacetCount);
+        assertNotNull(origChoiceANonLocal1a);
+        assertNotNull(origChoiceBNonLocal2a);
+        assertNotNull(newChoiceANonLocal1a);
+        assertNotNull(newChoiceBNonLocal2a);
+        assertEquals(origChoiceANonLocal1a.getOwningEntity(), origChoiceANonLocal1);
+        assertEquals(origChoiceBNonLocal2a.getOwningEntity(), origChoiceBNonLocal2);
+        assertEquals(newChoiceANonLocal1a.getOwningEntity(), origChoiceANonLocal1);
+        assertEquals(newChoiceBNonLocal2a.getOwningEntity(), origChoiceBNonLocal2);
 	}
 	
-	/**
-	 * Returns the filename of the new version.  This is not necessary when running against
-	 * a repository since the library names are pre-determined by the name/version of the
-	 * original library version.
-	 * 
-	 * @param sourceLibrary  the source library for which a new version is being created
-	 * @return File
-	 */
-	private File getNewVersionLibraryFile(TLLibrary sourceLibrary) {
-		String sourceFilename = URLUtils.getUrlFilename( sourceLibrary.getLibraryUrl() );
-		int versionIdx = sourceFilename.indexOf("_v");
-		String targetFilename = sourceFilename.substring(0, versionIdx) + "_v20_00.otm";
+	private TLContextualFacet getChildFacet(TLContextualFacet owner, String facetName, TLLibrary facetLibrary) {
+		TLContextualFacet childFacet = null;
 		
-		return purgeExistingFile(new File(System.getProperty("user.dir"),
-				"/target/test-save-location/" + targetFilename));
+		for (TLContextualFacet facet : owner.getChildFacets()) {
+			if (facetName.equals( facet.getLocalName() ) && (facet.getOwningLibrary() == facetLibrary)) {
+				childFacet = facet;
+				break;
+			}
+		}
+		return childFacet;
 	}
 	
 }

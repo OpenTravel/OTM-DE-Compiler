@@ -304,6 +304,30 @@ public class TLChoiceObject extends TLComplexTypeBase implements TLFacetOwner, T
     }
 
     /**
+     * In cases where multiple choice facets of the same name are defined for
+     * a choice object, this method provides a means of retrieving based on the
+     * name and owning library of the facet.
+     * 
+     * <p>NOTE: Under normal circumstances, this situation only arises after a new
+     * library version has been created which contains non-local contextual facets.
+     * 
+     * @param facetName  the name of the facet to retrieve
+     * @param facetLibrary  the owning library of the facet
+     * @return TLContextualFacet
+     */
+	public TLContextualFacet getChoiceFacet(String facetName, AbstractLibrary facetLibrary) {
+		TLContextualFacet childFacet = null;
+		
+		for (TLContextualFacet facet : getChoiceFacets()) {
+			if (facetName.equals( facet.getName() ) && (facet.getOwningLibrary() == facetLibrary)) {
+				childFacet = facet;
+				break;
+			}
+		}
+		return childFacet;
+	}
+	
+    /**
      * Adds a choice <code>TLContextualFacet</code> element to the current list.
      * 
      * @param index  the index at which the given choice facet should be added

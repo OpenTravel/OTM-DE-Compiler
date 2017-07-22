@@ -390,7 +390,31 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
     public TLContextualFacet getCustomFacet(String context, String label) {
     	return getCustomFacet(label);
     }
-
+    
+    /**
+     * In cases where multiple custom facets of the same name are defined for
+     * a business object, this method provides a means of retrieving based on the
+     * name and owning library of the facet.
+     * 
+     * <p>NOTE: Under normal circumstances, this situation only arises after a new
+     * library version has been created which contains non-local contextual facets.
+     * 
+     * @param facetName  the name of the facet to retrieve
+     * @param facetLibrary  the owning library of the facet
+     * @return TLContextualFacet
+     */
+	public TLContextualFacet getCustomFacet(String facetName, AbstractLibrary facetLibrary) {
+		TLContextualFacet childFacet = null;
+		
+		for (TLContextualFacet facet : getCustomFacets()) {
+			if (facetName.equals( facet.getName() ) && (facet.getOwningLibrary() == facetLibrary)) {
+				childFacet = facet;
+				break;
+			}
+		}
+		return childFacet;
+	}
+	
     /**
      * Adds a custom <code>TLContextualFacet</code> element to the current list.
      * 
@@ -493,6 +517,30 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
     }
 
     /**
+     * In cases where multiple query facets of the same name are defined for
+     * a business object, this method provides a means of retrieving based on the
+     * name and owning library of the facet.
+     * 
+     * <p>NOTE: Under normal circumstances, this situation only arises after a new
+     * library version has been created which contains non-local contextual facets.
+     * 
+     * @param facetName  the name of the facet to retrieve
+     * @param facetLibrary  the owning library of the facet
+     * @return TLContextualFacet
+     */
+	public TLContextualFacet getQueryFacet(String facetName, AbstractLibrary facetLibrary) {
+		TLContextualFacet childFacet = null;
+		
+		for (TLContextualFacet facet : getQueryFacets()) {
+			if (facetName.equals( facet.getName() ) && (facet.getOwningLibrary() == facetLibrary)) {
+				childFacet = facet;
+				break;
+			}
+		}
+		return childFacet;
+	}
+	
+    /**
      * Adds a query <code>TLContextualFacet</code> element to the current list.
      * 
      * @param queryFacet  the query facet value to add
@@ -593,6 +641,30 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
         return updateFacetManager.getChild(contextualName.toString());
     }
 
+    /**
+     * In cases where multiple update facets of the same name are defined for
+     * a business object, this method provides a means of retrieving based on the
+     * name and owning library of the facet.
+     * 
+     * <p>NOTE: Under normal circumstances, this situation only arises after a new
+     * library version has been created which contains non-local contextual facets.
+     * 
+     * @param facetName  the name of the facet to retrieve
+     * @param facetLibrary  the owning library of the facet
+     * @return TLContextualFacet
+     */
+	public TLContextualFacet getUpdateFacet(String facetName, AbstractLibrary facetLibrary) {
+		TLContextualFacet childFacet = null;
+		
+		for (TLContextualFacet facet : getUpdateFacets()) {
+			if (facetName.equals( facet.getName() ) && (facet.getOwningLibrary() == facetLibrary)) {
+				childFacet = facet;
+				break;
+			}
+		}
+		return childFacet;
+	}
+	
     /**
      * Adds an update <code>TLContextualFacet</code> element to the current list.
      * 

@@ -15,11 +15,15 @@
     <Comments>Contextual Facet Library 2</Comments>
     
 	<ContextualFacet name="NonLocal1a" type="Choice" facetOwner="f1-01:LookupChoice_ChoiceA_NonLocal1">
+        <Attribute name="nonLocal1aAttribute1" repeat="0" type="xsd:string"/>
         <Element name="nonLocal1aElement1" repeat="0" type="xsd:string"/>
+        <Indicator name="nonLocal1aIndicator1" />
 	</ContextualFacet>
 	
 	<ContextualFacet name="NonLocal2a" type="Choice" facetOwner="f1-01:LookupChoice_ChoiceB_NonLocal2">
+        <Attribute name="nonLocal2aAttribute1" repeat="0" type="xsd:string"/>
         <Element name="nonLocal2aElement1" repeat="0" type="xsd:string"/>
+        <Indicator name="nonLocal2aIndicator1" />
 	</ContextualFacet>
 	
 </Library>

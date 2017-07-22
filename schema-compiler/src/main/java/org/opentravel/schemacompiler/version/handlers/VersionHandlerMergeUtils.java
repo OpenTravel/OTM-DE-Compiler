@@ -175,7 +175,7 @@ public class VersionHandlerMergeUtils {
             }
         }
     }
-
+    
     /**
      * Merges the contents of each source facet into the corresponding target facet.
      * 

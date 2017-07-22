@@ -299,6 +299,30 @@ public class TLContextualFacet extends TLFacet implements LibraryMember, TLFacet
     }
 
     /**
+     * In cases where multiple child facets of the same name are defined for
+     * a contextual facet, this method provides a means of retrieving based on the
+     * name and owning library of the child facet.
+     * 
+     * <p>NOTE: Under normal circumstances, this situation only arises after a new
+     * library version has been created which contains non-local contextual facets.
+     * 
+     * @param facetName  the name of the facet to retrieve
+     * @param facetLibrary  the owning library of the facet
+     * @return TLContextualFacet
+     */
+	public TLContextualFacet getChildFacet(String facetName, AbstractLibrary facetLibrary) {
+		TLContextualFacet childFacet = null;
+		
+		for (TLContextualFacet facet : getChildFacets()) {
+			if (facetName.equals( facet.getName() ) && (facet.getOwningLibrary() == facetLibrary)) {
+				childFacet = facet;
+				break;
+			}
+		}
+		return childFacet;
+	}
+	
+    /**
      * Adds a child <code>TLContextualFacet</code> element to the current list.
      * 
      * @param childFacet  the child contextual facet to add

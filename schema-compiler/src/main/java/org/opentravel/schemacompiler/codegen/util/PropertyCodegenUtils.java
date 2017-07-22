@@ -391,13 +391,13 @@ public class PropertyCodegenUtils {
         Collection<TLFacetOwner> visitedOwners = new HashSet<TLFacetOwner>();
         List<TLAttribute> attributeList = new ArrayList<TLAttribute>();
         TLFacetOwner facetOwner = facet.getOwningEntity();
+        TLFacet aFacet = facet;
 
         while (facetOwner != null) {
             if (visitedOwners.contains(facetOwner)) {
                 break;
             }
             String facetName = FacetCodegenUtils.getFacetName(facet);
-            TLFacet aFacet = FacetCodegenUtils.getFacetOfType(facetOwner, facet.getFacetType(), facetName);
 
             if (aFacet != null) {
                 List<TLAttribute> localAttributes = new ArrayList<TLAttribute>(
@@ -414,6 +414,8 @@ public class PropertyCodegenUtils {
             }
             visitedOwners.add(facetOwner);
             facetOwner = FacetCodegenUtils.getFacetOwnerExtension(facetOwner);
+            aFacet = (facetOwner == null) ? null :
+            	FacetCodegenUtils.getFacetOfType(facetOwner, facet.getFacetType(), facetName);
         }
         return attributeList;
     }
@@ -450,13 +452,13 @@ public class PropertyCodegenUtils {
         Collection<TLFacetOwner> visitedOwners = new HashSet<TLFacetOwner>();
         List<TLIndicator> indicatorList = new ArrayList<TLIndicator>();
         TLFacetOwner facetOwner = facet.getOwningEntity();
+        TLFacet aFacet = facet;
 
         while (facetOwner != null) {
             if (visitedOwners.contains(facetOwner)) {
                 break;
             }
             String facetName = FacetCodegenUtils.getFacetName(facet);
-            TLFacet aFacet = FacetCodegenUtils.getFacetOfType(facetOwner, facet.getFacetType(), facetName);
 
             if (aFacet != null) {
                 List<TLIndicator> localIndicators = new ArrayList<TLIndicator>(
@@ -473,6 +475,8 @@ public class PropertyCodegenUtils {
             }
             visitedOwners.add(facetOwner);
             facetOwner = FacetCodegenUtils.getFacetOwnerExtension(facetOwner);
+            aFacet = (facetOwner == null) ? null :
+            	FacetCodegenUtils.getFacetOfType(facetOwner, facet.getFacetType(), facetName);
         }
         return indicatorList;
     }
@@ -510,13 +514,13 @@ public class PropertyCodegenUtils {
         Set<NamedEntity> inheritanceRoots = new HashSet<NamedEntity>();
         List<TLProperty> propertyList = new ArrayList<TLProperty>();
         TLFacetOwner facetOwner = facet.getOwningEntity();
+        TLFacet aFacet = facet;
 
         while (facetOwner != null) {
             if (visitedOwners.contains(facetOwner)) {
                 break;
             }
             String facetName = FacetCodegenUtils.getFacetName(facet);
-            TLFacet aFacet = FacetCodegenUtils.getFacetOfType(facetOwner, facet.getFacetType(), facetName);
 
             if (aFacet != null) {
                 List<TLProperty> localProperties = new ArrayList<TLProperty>(aFacet.getElements());
@@ -548,6 +552,8 @@ public class PropertyCodegenUtils {
             }
             visitedOwners.add(facetOwner);
             facetOwner = FacetCodegenUtils.getFacetOwnerExtension(facetOwner);
+            aFacet = (facetOwner == null) ? null :
+            	FacetCodegenUtils.getFacetOfType(facetOwner, facet.getFacetType(), facetName);
         }
         return propertyList;
     }
