@@ -172,7 +172,7 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
             setCompileHtml(compileAllOptions.isCompileHtml());
         }
         if (taskOptions instanceof SchemaCompilerTaskOptions) {
-            // No explicit options currently implemented
+        	setSuppressOtmExtensions( ((SchemaCompilerTaskOptions) taskOptions).isSuppressOtmExtensions() );
         }
         if (taskOptions instanceof ExampleCompilerTaskOptions) {
             ExampleCompilerTaskOptions exampleOptions = (ExampleCompilerTaskOptions) taskOptions;
