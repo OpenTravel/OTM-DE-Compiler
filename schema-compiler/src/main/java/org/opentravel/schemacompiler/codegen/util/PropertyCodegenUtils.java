@@ -25,6 +25,7 @@ import java.util.Set;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 
+import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegate;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
@@ -865,9 +866,10 @@ public class PropertyCodegenUtils {
     public static TLAbstractFacet findNonEmptyFacet(TLPropertyOwner originatingFacet,
             TLAbstractFacet referencedFacet) {
         FacetCodegenDelegateFactory factory = new FacetCodegenDelegateFactory(null);
+        FacetCodegenDelegate<TLAbstractFacet> facetDelegate = factory.getDelegate(referencedFacet);
         TLAbstractFacet result = referencedFacet;
 
-        if ((referencedFacet != null) && !factory.getDelegate(referencedFacet).hasContent()) {
+        if ((referencedFacet != null) && (facetDelegate != null) && !facetDelegate.hasContent()) {
             TLAbstractFacet[] alternateFacets = getAlternateFacets(originatingFacet,
                     referencedFacet);
 

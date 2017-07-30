@@ -15,6 +15,9 @@
  */
 package org.opentravel.schemacompiler.visitor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.LibraryElement;
@@ -133,13 +136,17 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigate(TLModel model) {
         if (model != null) {
-            for (BuiltInLibrary library : model.getBuiltInLibraries()) {
+        	List<BuiltInLibrary> builtInLibraries = new ArrayList<>( model.getBuiltInLibraries() );
+        	List<XSDLibrary> xsdLibraries = new ArrayList<>( model.getLegacySchemaLibraries() );
+        	List<TLLibrary> userLibraries = new ArrayList<>( model.getUserDefinedLibraries() );
+        	
+            for (BuiltInLibrary library : builtInLibraries) {
                 navigateBuiltInLibrary(library);
             }
-            for (XSDLibrary library : model.getLegacySchemaLibraries()) {
+            for (XSDLibrary library : xsdLibraries) {
                 navigateLegacySchemaLibrary(library);
             }
-            for (TLLibrary library : model.getUserDefinedLibraries()) {
+            for (TLLibrary library : userLibraries) {
                 navigateUserDefinedLibrary(library);
             }
         }
@@ -264,10 +271,13 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateBuiltInLibrary(BuiltInLibrary library) {
         if (canVisit(library) && visitor.visitBuiltInLibrary(library)) {
-            for (TLNamespaceImport nsImport : library.getNamespaceImports()) {
+        	List<TLNamespaceImport> nsImports = new ArrayList<>( library.getNamespaceImports() );
+        	List<LibraryMember> libMembers = new ArrayList<>( library.getNamedMembers() );
+        	
+            for (TLNamespaceImport nsImport : nsImports) {
                 navigateNamespaceImport(nsImport);
             }
-            for (LibraryMember builtInType : library.getNamedMembers()) {
+            for (LibraryMember builtInType : libMembers) {
                 if (builtInType instanceof TLSimple) {
                     navigateSimple((TLSimple) builtInType);
 
@@ -322,19 +332,17 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateLegacySchemaLibrary(XSDLibrary library) {
         if (canVisit(library) && visitor.visitLegacySchemaLibrary(library)) {
-            for (TLNamespaceImport nsImport : library.getNamespaceImports()) {
+        	List<TLNamespaceImport> nsImports = new ArrayList<>( library.getNamespaceImports() );
+        	List<TLInclude> includes = new ArrayList<>( library.getIncludes() );
+        	List<LibraryMember> libMembers = new ArrayList<>( library.getNamedMembers() );
+        	
+            for (TLNamespaceImport nsImport : nsImports) {
                 navigateNamespaceImport(nsImport);
             }
-            for (TLInclude include : library.getIncludes()) {
+            for (TLInclude include : includes) {
                 navigateInclude(include);
             }
-            for (LibraryMember builtInType : library.getNamedMembers()) {
-                for (TLNamespaceImport nsImport : library.getNamespaceImports()) {
-                    navigateNamespaceImport(nsImport);
-                }
-                for (TLInclude include : library.getIncludes()) {
-                    navigateInclude(include);
-                }
+            for (LibraryMember builtInType : libMembers) {
                 if (builtInType instanceof XSDSimpleType) {
                     navigateXSDSimpleType((XSDSimpleType) builtInType);
 
@@ -357,45 +365,58 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateUserDefinedLibrary(TLLibrary library) {
         if (canVisit(library) && visitor.visitUserDefinedLibrary(library)) {
-            for (TLNamespaceImport nsImport : library.getNamespaceImports()) {
+        	List<TLNamespaceImport> nsImports = new ArrayList<>( library.getNamespaceImports() );
+        	List<TLInclude> includes = new ArrayList<>( library.getIncludes() );
+        	List<TLSimple> simpleTypes = new ArrayList<>( library.getSimpleTypes() );
+        	List<TLValueWithAttributes> vwaTypes = new ArrayList<>( library.getValueWithAttributesTypes() );
+        	List<TLClosedEnumeration> closedEnumTypes = new ArrayList<>( library.getClosedEnumerationTypes() );
+        	List<TLOpenEnumeration> openEnumTypes = new ArrayList<>( library.getOpenEnumerationTypes() );
+        	List<TLChoiceObject> choiceTypes = new ArrayList<>( library.getChoiceObjectTypes() );
+        	List<TLCoreObject> coreTypes = new ArrayList<>( library.getCoreObjectTypes() );
+        	List<TLBusinessObject> businessObjTypes = new ArrayList<>( library.getBusinessObjectTypes() );
+        	List<TLContextualFacet> ctxFacetTypes = new ArrayList<>( library.getContextualFacetTypes() );
+        	List<TLResource> resourceTypes = new ArrayList<>( library.getResourceTypes() );
+        	List<TLExtensionPointFacet> epfTypes = new ArrayList<>( library.getExtensionPointFacetTypes() );
+        	
+            for (TLNamespaceImport nsImport : nsImports) {
                 navigateNamespaceImport(nsImport);
             }
-            for (TLInclude include : library.getIncludes()) {
+            for (TLInclude include : includes) {
                 navigateInclude(include);
             }
-            for (TLSimple entity : library.getSimpleTypes()) {
+            for (TLSimple entity : simpleTypes) {
                 navigateSimple(entity);
             }
-            for (TLValueWithAttributes entity : library.getValueWithAttributesTypes()) {
+            for (TLValueWithAttributes entity : vwaTypes) {
                 navigateValueWithAttributes(entity);
             }
-            for (TLClosedEnumeration entity : library.getClosedEnumerationTypes()) {
+            for (TLClosedEnumeration entity : closedEnumTypes) {
                 navigateClosedEnumeration(entity);
             }
-            for (TLOpenEnumeration entity : library.getOpenEnumerationTypes()) {
+            for (TLOpenEnumeration entity : openEnumTypes) {
                 navigateOpenEnumeration(entity);
             }
-            for (TLChoiceObject entity : library.getChoiceObjectTypes()) {
+            for (TLChoiceObject entity : choiceTypes) {
                 navigateChoiceObject(entity);
             }
-            for (TLCoreObject entity : library.getCoreObjectTypes()) {
+            for (TLCoreObject entity : coreTypes) {
                 navigateCoreObject(entity);
             }
-            for (TLBusinessObject entity : library.getBusinessObjectTypes()) {
+            for (TLBusinessObject entity : businessObjTypes) {
                 navigateBusinessObject(entity);
             }
-    		for (TLContextualFacet entity : library.getContextualFacetTypes()) {
+    		for (TLContextualFacet entity : ctxFacetTypes) {
     			if (!entity.isLocalFacet()) {
                     navigateContextualFacet(entity);
     			}
         	}
-            for (TLResource entity : library.getResourceTypes()) {
+            for (TLResource entity : resourceTypes) {
                 navigateResource(entity);
             }
             if (library.getService() != null) {
                 navigateService(library.getService());
             }
-            for (TLExtensionPointFacet entity : library.getExtensionPointFacetTypes()) {
+            for (TLExtensionPointFacet entity : epfTypes) {
                 navigateExtensionPointFacet(entity);
             }
         }
@@ -422,10 +443,13 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateSimple(TLSimple simple) {
         if (canVisit(simple) && visitor.visitSimple(simple)) {
-            for (TLEquivalent equivalent : simple.getEquivalents()) {
+        	List<TLEquivalent> equivalents = new ArrayList<>( simple.getEquivalents() );
+        	List<TLExample> examples = new ArrayList<>( simple.getExamples() );
+        	
+            for (TLEquivalent equivalent : equivalents) {
                 navigateEquivalent(equivalent);
             }
-            for (TLExample example : simple.getExamples()) {
+            for (TLExample example : examples) {
                 navigateExample(example);
             }
             navigateDocumentation(simple.getDocumentation());
@@ -442,13 +466,17 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateValueWithAttributes(TLValueWithAttributes valueWithAttributes) {
         if (canVisit(valueWithAttributes) && visitor.visitValueWithAttributes(valueWithAttributes)) {
-            for (TLAttribute attribute : valueWithAttributes.getAttributes()) {
+        	List<TLAttribute> attributes = new ArrayList<>( valueWithAttributes.getAttributes() );
+        	List<TLEquivalent> equivalents = new ArrayList<>( valueWithAttributes.getEquivalents() );
+        	List<TLExample> examples = new ArrayList<>( valueWithAttributes.getExamples() );
+        	
+            for (TLAttribute attribute : attributes) {
                 navigateAttribute(attribute);
             }
-            for (TLEquivalent equivalent : valueWithAttributes.getEquivalents()) {
+            for (TLEquivalent equivalent : equivalents) {
                 navigateEquivalent(equivalent);
             }
-            for (TLExample example : valueWithAttributes.getExamples()) {
+            for (TLExample example : examples) {
                 navigateExample(example);
             }
             navigateDocumentation(valueWithAttributes.getDocumentation());
@@ -466,7 +494,9 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateClosedEnumeration(TLClosedEnumeration enumeration) {
         if (canVisit(enumeration) && visitor.visitClosedEnumeration(enumeration)) {
-            for (TLEnumValue enumValue : enumeration.getValues()) {
+        	List<TLEnumValue> enumValues = new ArrayList<>( enumeration.getValues() );
+        	
+            for (TLEnumValue enumValue : enumValues) {
                 navigateEnumValue(enumValue);
             }
             navigateExtension(enumeration.getExtension());
@@ -483,7 +513,9 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateOpenEnumeration(TLOpenEnumeration enumeration) {
         if (canVisit(enumeration) && visitor.visitOpenEnumeration(enumeration)) {
-            for (TLEnumValue enumValue : enumeration.getValues()) {
+        	List<TLEnumValue> enumValues = new ArrayList<>( enumeration.getValues() );
+        	
+            for (TLEnumValue enumValue : enumValues) {
                 navigateEnumValue(enumValue);
             }
             navigateExtension(enumeration.getExtension());
@@ -500,7 +532,9 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateEnumValue(TLEnumValue enumValue) {
         if (canVisit(enumValue) && visitor.visitEnumValue(enumValue)) {
-            for (TLEquivalent equivalent : enumValue.getEquivalents()) {
+        	List<TLEquivalent> equivalents = new ArrayList<>( enumValue.getEquivalents() );
+        	
+            for (TLEquivalent equivalent : equivalents) {
                 navigateEquivalent(equivalent);
             }
             navigateDocumentation(enumValue.getDocumentation());
@@ -516,18 +550,22 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateChoiceObject(TLChoiceObject choiceObject) {
         if (canVisit(choiceObject) && visitor.visitChoiceObject(choiceObject)) {
+        	List<TLAlias> aliases = new ArrayList<>( choiceObject.getAliases() );
+        	List<TLContextualFacet> choiceFacets = new ArrayList<>( choiceObject.getChoiceFacets() );
+        	List<TLEquivalent> equivalents = new ArrayList<>( choiceObject.getEquivalents() );
+        	
             navigateFacet(choiceObject.getSharedFacet());
             navigateExtension(choiceObject.getExtension());
 
-            for (TLAlias alias : choiceObject.getAliases()) {
+            for (TLAlias alias : aliases) {
                 navigateAlias(alias);
             }
-            for (TLContextualFacet choiceFacet : choiceObject.getChoiceFacets()) {
+            for (TLContextualFacet choiceFacet : choiceFacets) {
             	if (choiceFacet.isLocalFacet()) {
                     navigateContextualFacet(choiceFacet);
             	}
             }
-            for (TLEquivalent equivalent : choiceObject.getEquivalents()) {
+            for (TLEquivalent equivalent : equivalents) {
                 navigateEquivalent(equivalent);
             }
             navigateDocumentation(choiceObject.getDocumentation());
@@ -543,18 +581,22 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateCoreObject(TLCoreObject coreObject) {
         if (canVisit(coreObject) && visitor.visitCoreObject(coreObject)) {
+        	List<TLAlias> aliases = new ArrayList<>( coreObject.getAliases() );
+        	List<TLRole> roles = new ArrayList<>( coreObject.getRoleEnumeration().getRoles() );
+        	List<TLEquivalent> equivalents = new ArrayList<>( coreObject.getEquivalents() );
+        	
             navigateSimpleFacet(coreObject.getSimpleFacet());
             navigateFacet(coreObject.getSummaryFacet());
             navigateFacet(coreObject.getDetailFacet());
             navigateExtension(coreObject.getExtension());
 
-            for (TLAlias alias : coreObject.getAliases()) {
+            for (TLAlias alias : aliases) {
                 navigateAlias(alias);
             }
-            for (TLRole role : coreObject.getRoleEnumeration().getRoles()) {
+            for (TLRole role : roles) {
                 navigateRole(role);
             }
-            for (TLEquivalent equivalent : coreObject.getEquivalents()) {
+            for (TLEquivalent equivalent : equivalents) {
                 navigateEquivalent(equivalent);
             }
             navigateDocumentation(coreObject.getDocumentation());
@@ -582,30 +624,36 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateBusinessObject(TLBusinessObject businessObject) {
         if (canVisit(businessObject) && visitor.visitBusinessObject(businessObject)) {
+        	List<TLAlias> aliases = new ArrayList<>( businessObject.getAliases() );
+        	List<TLContextualFacet> customFacets = new ArrayList<>( businessObject.getCustomFacets() );
+        	List<TLContextualFacet> queryFacets = new ArrayList<>( businessObject.getQueryFacets() );
+        	List<TLContextualFacet> updateFacets = new ArrayList<>( businessObject.getUpdateFacets() );
+        	List<TLEquivalent> equivalents = new ArrayList<>( businessObject.getEquivalents() );
+        	
             navigateFacet(businessObject.getIdFacet());
             navigateFacet(businessObject.getSummaryFacet());
             navigateFacet(businessObject.getDetailFacet());
             navigateExtension(businessObject.getExtension());
 
-            for (TLAlias alias : businessObject.getAliases()) {
+            for (TLAlias alias : aliases) {
                 navigateAlias(alias);
             }
-            for (TLContextualFacet customFacet : businessObject.getCustomFacets()) {
+            for (TLContextualFacet customFacet : customFacets) {
             	if (customFacet.isLocalFacet()) {
                     navigateContextualFacet(customFacet);
             	}
             }
-            for (TLContextualFacet queryFacet : businessObject.getQueryFacets()) {
+            for (TLContextualFacet queryFacet : queryFacets) {
             	if (queryFacet.isLocalFacet()) {
                     navigateContextualFacet(queryFacet);
             	}
             }
-            for (TLContextualFacet updateFacet : businessObject.getUpdateFacets()) {
+            for (TLContextualFacet updateFacet : updateFacets) {
             	if (updateFacet.isLocalFacet()) {
                     navigateContextualFacet(updateFacet);
             	}
             }
-            for (TLEquivalent equivalent : businessObject.getEquivalents()) {
+            for (TLEquivalent equivalent : equivalents) {
                 navigateEquivalent(equivalent);
             }
             navigateDocumentation(businessObject.getDocumentation());
@@ -621,10 +669,13 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateService(TLService service) {
         if (canVisit(service) && visitor.visitService(service)) {
-            for (TLOperation operation : service.getOperations()) {
+        	List<TLOperation> operations = new ArrayList<>( service.getOperations() );
+        	List<TLEquivalent> equivalents = new ArrayList<>( service.getEquivalents() );
+        	
+            for (TLOperation operation : operations) {
                 navigateOperation(operation);
             }
-            for (TLEquivalent equivalent : service.getEquivalents()) {
+            for (TLEquivalent equivalent : equivalents) {
                 navigateEquivalent(equivalent);
             }
             navigateDocumentation(service.getDocumentation());
@@ -640,12 +691,14 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateOperation(TLOperation operation) {
         if (canVisit(operation) && visitor.visitOperation(operation)) {
+        	List<TLEquivalent> equivalents = new ArrayList<>( operation.getEquivalents() );
+        	
             navigateFacet(operation.getRequest());
             navigateFacet(operation.getResponse());
             navigateFacet(operation.getNotification());
             navigateExtension(operation.getExtension());
 
-            for (TLEquivalent equivalent : operation.getEquivalents()) {
+            for (TLEquivalent equivalent : equivalents) {
                 navigateEquivalent(equivalent);
             }
             navigateDocumentation(operation.getDocumentation());
@@ -661,19 +714,24 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateResource(TLResource resource) {
         if (canVisit(resource) && visitor.visitResource(resource)) {
+        	List<TLResourceParentRef> parentRefs = new ArrayList<>( resource.getParentRefs() );
+        	List<TLParamGroup> paramGroups = new ArrayList<>( resource.getParamGroups() );
+        	List<TLActionFacet> actionFacets = new ArrayList<>( resource.getActionFacets() );
+        	List<TLAction> actions = new ArrayList<>( resource.getActions() );
+        	
             navigateDocumentation(resource.getDocumentation());
             navigateExtension(resource.getExtension());
             
-            for (TLResourceParentRef parentRef : resource.getParentRefs()) {
+            for (TLResourceParentRef parentRef : parentRefs) {
             	navigateResourceParentRef(parentRef);
             }
-            for (TLParamGroup paramGroup : resource.getParamGroups()) {
+            for (TLParamGroup paramGroup : paramGroups) {
             	navigateParamGroup(paramGroup);
             }
-            for (TLActionFacet actionFacet : resource.getActionFacets()) {
+            for (TLActionFacet actionFacet : actionFacets) {
             	navigateActionFacet(actionFacet);
             }
-            for (TLAction action : resource.getActions()) {
+            for (TLAction action : actions) {
             	navigateAction(action);	
             }
         }
@@ -701,9 +759,11 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateParamGroup(TLParamGroup paramGroup) {
         if (canVisit(paramGroup) && visitor.visitParamGroup(paramGroup)) {
+        	List<TLParameter> parameters = new ArrayList<>( paramGroup.getParameters() );
+        	
             navigateDocumentation(paramGroup.getDocumentation());
             
-            for (TLParameter parameter : paramGroup.getParameters()) {
+            for (TLParameter parameter : parameters) {
             	navigateParameter(parameter);
             }
         }
@@ -718,10 +778,13 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateParameter(TLParameter parameter) {
         if (canVisit(parameter) && visitor.visitParameter(parameter)) {
-            for (TLEquivalent equivalent : parameter.getEquivalents()) {
+        	List<TLEquivalent> equivalents = new ArrayList<>( parameter.getEquivalents() );
+        	List<TLExample> examples = new ArrayList<>( parameter.getExamples() );
+        	
+            for (TLEquivalent equivalent : equivalents) {
                 navigateEquivalent(equivalent);
             }
-            for (TLExample example : parameter.getExamples()) {
+            for (TLExample example : examples) {
                 navigateExample(example);
             }
             navigateDocumentation(parameter.getDocumentation());
@@ -737,10 +800,12 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateAction(TLAction action) {
         if (canVisit(action) && visitor.visitAction(action)) {
+        	List<TLActionResponse> responses = new ArrayList<>( action.getResponses() );
+        	
             navigateDocumentation(action.getDocumentation());
             navigateActionRequest(action.getRequest());
             
-            for (TLActionResponse response : action.getResponses()) {
+            for (TLActionResponse response : responses) {
             	navigateActionResponse(response);
             }
         }
@@ -782,15 +847,19 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateExtensionPointFacet(TLExtensionPointFacet extensionPointFacet) {
         if (canVisit(extensionPointFacet) && visitor.visitExtensionPointFacet(extensionPointFacet)) {
+        	List<TLAttribute> attributes = new ArrayList<>( extensionPointFacet.getAttributes() );
+        	List<TLProperty> elements = new ArrayList<>( extensionPointFacet.getElements() );
+        	List<TLIndicator> indicators = new ArrayList<>( extensionPointFacet.getIndicators() );
+        	
             navigateExtension(extensionPointFacet.getExtension());
 
-            for (TLAttribute attribute : extensionPointFacet.getAttributes()) {
+            for (TLAttribute attribute : attributes) {
                 navigateAttribute(attribute);
             }
-            for (TLProperty element : extensionPointFacet.getElements()) {
+            for (TLProperty element : elements) {
                 navigateElement(element);
             }
-            for (TLIndicator indicator : extensionPointFacet.getIndicators()) {
+            for (TLIndicator indicator : indicators) {
                 navigateIndicator(indicator);
             }
             navigateDocumentation(extensionPointFacet.getDocumentation());
@@ -869,9 +938,11 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateContextualFacet(TLContextualFacet facet) {
         if (canVisit(facet) && visitor.visitContextualFacet(facet)) {
+        	List<TLContextualFacet> childFacets = new ArrayList<>( facet.getChildFacets() );
+        	
         	navigateFacetMembers(facet);
         	
-        	for (TLContextualFacet childFacet : facet.getChildFacets()) {
+        	for (TLContextualFacet childFacet : childFacets) {
         		navigateContextualFacet(childFacet);
         	}
         }
@@ -884,16 +955,21 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      * @param facet  the facet whose members are to be navigated
      */
     private void navigateFacetMembers(TLFacet facet) {
-        for (TLAlias alias : facet.getAliases()) {
+    	List<TLAlias> aliases = new ArrayList<>( facet.getAliases() );
+    	List<TLAttribute> attributes = new ArrayList<>( facet.getAttributes() );
+    	List<TLProperty> elements = new ArrayList<>( facet.getElements() );
+    	List<TLIndicator> indicators = new ArrayList<>( facet.getIndicators() );
+    	
+        for (TLAlias alias : aliases) {
             navigateAlias(alias);
         }
-        for (TLAttribute attribute : facet.getAttributes()) {
+        for (TLAttribute attribute : attributes) {
             navigateAttribute(attribute);
         }
-        for (TLProperty element : facet.getElements()) {
+        for (TLProperty element : elements) {
             navigateElement(element);
         }
-        for (TLIndicator indicator : facet.getIndicators()) {
+        for (TLIndicator indicator : indicators) {
             navigateIndicator(indicator);
         }
         navigateDocumentation(facet.getDocumentation());
@@ -920,10 +996,13 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateSimpleFacet(TLSimpleFacet simpleFacet) {
         if (canVisit(simpleFacet) && visitor.visitSimpleFacet(simpleFacet)) {
-            for (TLEquivalent equivalent : simpleFacet.getEquivalents()) {
+        	List<TLEquivalent> equivalents = new ArrayList<>( simpleFacet.getEquivalents() );
+        	List<TLExample> examples = new ArrayList<>( simpleFacet.getExamples() );
+        	
+            for (TLEquivalent equivalent : equivalents) {
                 navigateEquivalent(equivalent);
             }
-            for (TLExample example : simpleFacet.getExamples()) {
+            for (TLExample example : examples) {
                 navigateExample(example);
             }
             navigateDocumentation(simpleFacet.getDocumentation());
@@ -939,7 +1018,9 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateListFacet(TLListFacet listFacet) {
         if (canVisit(listFacet) && visitor.visitListFacet(listFacet)) {
-            for (TLAlias alias : listFacet.getAliases()) {
+        	List<TLAlias> aliases = new ArrayList<>( listFacet.getAliases() );
+        	
+            for (TLAlias alias : aliases) {
                 navigateAlias(alias);
             }
         }
@@ -967,10 +1048,13 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateAttribute(TLAttribute attribute) {
         if (canVisit(attribute) && visitor.visitAttribute(attribute)) {
-            for (TLEquivalent equivalent : attribute.getEquivalents()) {
+        	List<TLEquivalent> equivalents = new ArrayList<>( attribute.getEquivalents() );
+        	List<TLExample> examples = new ArrayList<>( attribute.getExamples() );
+        	
+            for (TLEquivalent equivalent : equivalents) {
                 navigateEquivalent(equivalent);
             }
-            for (TLExample example : attribute.getExamples()) {
+            for (TLExample example : examples) {
                 navigateExample(example);
             }
             navigateDocumentation(attribute.getDocumentation());
@@ -986,10 +1070,13 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateElement(TLProperty element) {
         if (canVisit(element) && visitor.visitElement(element)) {
-            for (TLEquivalent equivalent : element.getEquivalents()) {
+        	List<TLEquivalent> equivalents = new ArrayList<>( element.getEquivalents() );
+        	List<TLExample> examples = new ArrayList<>( element.getExamples() );
+        	
+            for (TLEquivalent equivalent : equivalents) {
                 navigateEquivalent(equivalent);
             }
-            for (TLExample example : element.getExamples()) {
+            for (TLExample example : examples) {
                 navigateExample(example);
             }
             navigateDocumentation(element.getDocumentation());
@@ -1005,7 +1092,9 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
      */
     public void navigateIndicator(TLIndicator indicator) {
         if (canVisit(indicator) && visitor.visitIndicator(indicator)) {
-            for (TLEquivalent equivalent : indicator.getEquivalents()) {
+        	List<TLEquivalent> equivalents = new ArrayList<>( indicator.getEquivalents() );
+        	
+            for (TLEquivalent equivalent : equivalents) {
                 navigateEquivalent(equivalent);
             }
             navigateDocumentation(indicator.getDocumentation());
