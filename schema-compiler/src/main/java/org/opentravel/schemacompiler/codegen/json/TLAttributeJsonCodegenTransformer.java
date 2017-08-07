@@ -24,6 +24,7 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonType;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.TLAttribute;
+import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLPropertyType;
@@ -31,6 +32,7 @@ import org.opentravel.schemacompiler.model.TLRole;
 import org.opentravel.schemacompiler.model.TLRoleEnumeration;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.XSDSimpleType;
+import org.opentravel.schemacompiler.util.SimpleTypeInfo;
 
 /**
  * Performs the translation from <code>TLAttribute</code> objects to the JSON schema elements
@@ -111,12 +113,15 @@ public class TLAttributeJsonCodegenTransformer extends AbstractJsonSchemaTransfo
 	 * @param source  the source attribute from the OTM model
 	 */
 	private void setAttributeType(JsonSchemaReference attrSchemaRef, TLPropertyType attributeType, TLAttribute source) {
-        JsonType jsonType = JsonType.valueOf( attributeType );
+		SimpleTypeInfo simpleInfo = (attributeType instanceof TLAttributeType) ?
+				new SimpleTypeInfo( (TLAttributeType) attributeType ) : null;
+        JsonType jsonType = (simpleInfo == null) ? null : JsonType.valueOf( simpleInfo.getBaseSimpleType() );
         
         if (jsonType != null) {
-        	JsonSchema attrSchema = jsonUtils.buildSimpleTypeSchema( jsonType );
+        	JsonSchema attrSchema = jsonUtils.buildSimpleTypeSchema( simpleInfo, jsonType );
         	
     		transformDocumentation( source, attrSchema );
+    		jsonUtils.applySimpleTypeDocumentation( attrSchema, source.getType() );
     		attrSchema.getExampleItems().addAll( jsonUtils.getExampleInfo( source ) );
     		attrSchema.getEquivalentItems().addAll( jsonUtils.getEquivalentInfo( source ) );
     		attrSchemaRef.setSchema( attrSchema );

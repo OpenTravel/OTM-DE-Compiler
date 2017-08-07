@@ -27,15 +27,18 @@ import org.opentravel.schemacompiler.codegen.util.JsonSchemaNamingUtils;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.model.TLAbstractFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
+import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLPropertyType;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
+import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.model.XSDComplexType;
 import org.opentravel.schemacompiler.model.XSDElement;
 import org.opentravel.schemacompiler.model.XSDSimpleType;
+import org.opentravel.schemacompiler.util.SimpleTypeInfo;
 
 /**
  * Performs the translation from <code>TLProperty</code> objects to the JSON schema elements
@@ -160,7 +163,9 @@ public class TLPropertyJsonCodegenTransformer extends AbstractJsonSchemaTransfor
 	 * @param source  the source attribute from the OTM model
 	 */
 	private void setPropertyType(JsonSchemaReference schemaRef, TLPropertyType propertyType, TLProperty source) {
-        JsonType jsonType = JsonType.valueOf( propertyType );
+		SimpleTypeInfo simpleInfo = (propertyType instanceof TLAttributeType) ?
+				new SimpleTypeInfo( (TLAttributeType) propertyType ) : null;
+        JsonType jsonType = (simpleInfo == null) ? null : JsonType.valueOf( simpleInfo.getBaseSimpleType() );
         JsonSchemaReference typeRef = schemaRef;
         JsonSchemaReference docSchema = schemaRef;
     	String maxOccurs = null;
@@ -204,8 +209,8 @@ public class TLPropertyJsonCodegenTransformer extends AbstractJsonSchemaTransfor
 			}
 		}
         
-        if (jsonType != null) {
-        	JsonSchema propertySchema = jsonUtils.buildSimpleTypeSchema( jsonType );
+        if ((jsonType != null) && !(source.getType() instanceof TLValueWithAttributes)) {
+        	JsonSchema propertySchema = jsonUtils.buildSimpleTypeSchema( simpleInfo, jsonType );
         	
         	if (typeRef == schemaRef) { // not an array, so put the documentation here
         		transformDocumentation( source, propertySchema );
@@ -257,6 +262,7 @@ public class TLPropertyJsonCodegenTransformer extends AbstractJsonSchemaTransfor
         
         if (docSchema != null) {
     		transformDocumentation( source, docSchema );
+    		jsonUtils.applySimpleTypeDocumentation( docSchema, source.getType() );
     		docSchema.getEquivalentItems().addAll( jsonUtils.getEquivalentInfo( source ) );
     		docSchema.getExampleItems().addAll( jsonUtils.getExampleInfo( source ) );
         }

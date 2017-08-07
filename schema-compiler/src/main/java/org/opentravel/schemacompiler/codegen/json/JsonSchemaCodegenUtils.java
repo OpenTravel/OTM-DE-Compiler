@@ -16,11 +16,13 @@
 package org.opentravel.schemacompiler.codegen.json;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
+import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 
 import org.opentravel.ns.ota2.appinfo_v01_00.OTA2Entity;
@@ -51,10 +53,14 @@ import org.opentravel.schemacompiler.model.TLEquivalentOwner;
 import org.opentravel.schemacompiler.model.TLExample;
 import org.opentravel.schemacompiler.model.TLExampleOwner;
 import org.opentravel.schemacompiler.model.TLFacet;
+import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLPropertyType;
 import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.util.SchemaCompilerInfo;
+import org.opentravel.schemacompiler.util.SimpleTypeInfo;
 import org.opentravel.schemacompiler.util.URLUtils;
 
 import com.google.gson.JsonArray;
@@ -80,6 +86,101 @@ public class JsonSchemaCodegenUtils {
 	}
 	
 	/**
+	 * Constructs a JSON schema for the given simple field type.
+	 * 
+	 * @param simpleInfo  the pre-determined simple type info for the member field (must not be null)
+	 * @param jsonType  the pre-determined JSON type of the member field (must not be null)
+	 * @return JsonSchema
+	 */
+	public JsonSchema buildSimpleTypeSchema(SimpleTypeInfo simpleInfo, JsonType jsonType) {
+    	JsonSchema attrSchema = buildSimpleTypeSchema( jsonType );
+    	JsonSchema itemSchema = null;
+    	
+		applySimpleTypeConstraints( attrSchema, simpleInfo );
+		
+		// Identify special cases where the simple type is actually an array of simple types
+		if (simpleInfo.getOriginalSimpleType() instanceof TLSimple) {
+			TLSimple simpleType = (TLSimple) simpleInfo.getOriginalSimpleType();
+			
+			if (simpleType.isListTypeInd()) {
+				itemSchema = attrSchema;
+			}
+			
+		} else if (simpleInfo.getOriginalSimpleType() instanceof TLListFacet) {
+			TLListFacet listFacet = (TLListFacet) simpleInfo.getOriginalSimpleType();
+			
+			if (listFacet.getFacetType() == TLFacetType.SIMPLE) {
+				itemSchema = attrSchema;
+			}
+		}
+		
+		if (itemSchema != null) {
+			attrSchema = new JsonSchema();
+			attrSchema.setType( JsonType.jsonArray );
+			attrSchema.setItems( new JsonSchemaReference( itemSchema ) );
+		}
+		return attrSchema;
+	}
+	
+	/**
+	 * Adds documentation to the given schema that describes the original OTM type for an
+	 * element or attribute.
+	 * 
+	 * @param schema  the JSON schema to which documentation should be added
+	 * @param fieldType  the original type assigned to the attribute, element, or VWA value
+	 */
+	public void applySimpleTypeDocumentation(JsonSchema schema, NamedEntity fieldType) {
+		if ((fieldType != null) && !fieldType.getNamespace().equals( XMLConstants.W3C_XML_SCHEMA_NS_URI )) {
+			JsonDocumentation schemaDoc = schema.getDocumentation();
+			List<String> descriptions;
+			
+			if (schemaDoc == null) {
+				schemaDoc = new JsonDocumentation();
+				schema.setDocumentation( schemaDoc );
+			}
+			descriptions = new ArrayList<>( Arrays.asList( schemaDoc.getDescriptions() ) );
+			descriptions.add( 0, getAssignedTypeLabel( fieldType ) );
+			schemaDoc.setDescriptions( descriptions.toArray( new String[ descriptions.size() ] ) );
+		}
+	}
+	
+	/**
+	 * Adds documentation to the given schema reference that describes the original OTM type for an
+	 * element or attribute.
+	 * 
+	 * @param schemaRef  the JSON schema reference to which documentation should be added
+	 * @param fieldType  the original type assigned to the attribute, element, or VWA value
+	 */
+	public void applySimpleTypeDocumentation(JsonSchemaReference schemaRef, NamedEntity fieldType) {
+		if ((fieldType != null) && !fieldType.getNamespace().equals( XMLConstants.W3C_XML_SCHEMA_NS_URI )) {
+			JsonDocumentation schemaDoc = schemaRef.getDocumentation();
+			List<String> descriptions;
+			
+			if (schemaDoc == null) {
+				schemaDoc = new JsonDocumentation();
+				schemaRef.setDocumentation( schemaDoc );
+			}
+			descriptions = new ArrayList<>( Arrays.asList( schemaDoc.getDescriptions() ) );
+			descriptions.add( 0, getAssignedTypeLabel( fieldType ) );
+			schemaDoc.setDescriptions( descriptions.toArray( new String[ descriptions.size() ] ) );
+		}
+	}
+	
+	/**
+	 * Returns the assigned type label that should be included in the JSON documentation
+	 * for OTM simple types.
+	 * 
+	 * @param fieldType  the type assigned to the attribute, element, or VWA value
+	 * @return String
+	 */
+	private String getAssignedTypeLabel(NamedEntity fieldType) {
+		AbstractLibrary owningLibrary = fieldType.getOwningLibrary();
+		String prefix = (owningLibrary == null) ? "" : owningLibrary.getPrefix() + ":";
+		
+		return "Assigned Type: " + prefix + fieldType.getLocalName();
+	}
+	
+	/**
 	 * Returns a JSON schema for the given JSON simple type.
 	 * 
 	 * @param jsonType  the JSON simple type for which to return a schema
@@ -94,10 +195,46 @@ public class JsonSchemaCodegenUtils {
     	if (jsonType == JsonType.jsonRefs) {
         	JsonSchema itemSchema = new JsonSchema();
     		
+        	schema.setType( JsonType.jsonArray );
         	itemSchema.setType( JsonType.jsonString );
         	schema.setItems( new JsonSchemaReference( itemSchema ));
     	}
     	return schema;
+	}
+	
+	/**
+	 * Applies the OTM simple type constraints provided to the given JSON schema.
+	 * 
+	 * @param schema  the JSON schema to which the type constraints will be applied
+	 * @param simpleInfo  the simple type constraint information to apply
+	 * @return JsonSchema
+	 */
+	public void applySimpleTypeConstraints(JsonSchema schema, SimpleTypeInfo simpleInfo) {
+        if (simpleInfo.getMinLength() > 0) {
+        	schema.setMinLength( simpleInfo.getMinLength() );
+        }
+        if (simpleInfo.getMaxLength() > 0) {
+        	schema.setMaxLength( simpleInfo.getMaxLength() );
+        }
+        if ((simpleInfo.getPattern() != null) && (simpleInfo.getPattern().length() > 0)) {
+        	schema.setPattern( simpleInfo.getPattern() );
+        }
+        if ((simpleInfo.getMinInclusive() != null) && (simpleInfo.getMinInclusive().length() > 0)) {
+        	schema.setMinimum( parseNumber( simpleInfo.getMinInclusive() ) );
+        	schema.setExclusiveMinimum( false );
+        }
+        if ((simpleInfo.getMaxInclusive() != null) && (simpleInfo.getMaxInclusive().length() > 0)) {
+        	schema.setMaximum( parseNumber( simpleInfo.getMaxInclusive() ) );
+        	schema.setExclusiveMaximum( false );
+        }
+        if ((simpleInfo.getMinExclusive() != null) && (simpleInfo.getMinExclusive().length() > 0)) {
+        	schema.setMinimum( parseNumber( simpleInfo.getMinExclusive() ) );
+        	schema.setExclusiveMinimum( true );
+        }
+        if ((simpleInfo.getMaxExclusive() != null) && (simpleInfo.getMaxExclusive().length() > 0)) {
+        	schema.setMaximum( parseNumber( simpleInfo.getMaxExclusive() ) );
+        	schema.setExclusiveMaximum( true );
+        }
 	}
 	
     /**
@@ -373,6 +510,28 @@ public class JsonSchemaCodegenUtils {
 				targetJson.add( "x-otm-annotations", otmAnnotations );
 			}
 		}
+	}
+	
+	/**
+	 * Parses the given numeric string and returns a <code>Number</code>.
+	 * 
+	 * @param numStr  the numeric string to parse
+	 * @return Number
+	 */
+	public static Number parseNumber(String numStr) {
+		Number result = null;
+		
+		try {
+			result = Integer.parseInt( numStr );
+		} catch (NumberFormatException e) {}
+		
+		try {
+			if (result == null) {
+				result = Double.parseDouble( numStr );
+			}
+		} catch (NumberFormatException e) {}
+		
+		return result;
 	}
 	
 	/**

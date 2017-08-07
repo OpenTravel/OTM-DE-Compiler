@@ -30,6 +30,7 @@ import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 
 /**
@@ -56,7 +57,10 @@ public class TLLibraryJsonCodegenTransformer extends AbstractJsonSchemaTransform
             ObjectTransformer<LibraryMember, CodegenArtifacts, CodeGenerationTransformerContext> transformer = getTransformerFactory()
                     .getTransformer(member, CodegenArtifacts.class);
             boolean isLocalFacet = (member instanceof TLContextualFacet) && ((TLContextualFacet) member).isLocalFacet();
-
+            
+            // Do not generate JSON schema definitions for OTM simple types due to swagger tooling conflicts
+            if (member instanceof TLSimple) continue;
+            
             if ((transformer != null) && !isLocalFacet && ((filter == null) || filter.processEntity(member))) {
                 CodegenArtifacts artifacts = transformer.transform(member);
 

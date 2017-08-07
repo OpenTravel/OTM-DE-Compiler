@@ -31,7 +31,7 @@ import com.google.gson.JsonObject;
  */
 public class JsonDocumentation {
 	
-	private String[] descriptions;
+	private String[] descriptions = new String[0];
 	private List<String> deprecations = new ArrayList<>();
 	private List<String> references = new ArrayList<>();
 	private List<String> implementers = new ArrayList<>();

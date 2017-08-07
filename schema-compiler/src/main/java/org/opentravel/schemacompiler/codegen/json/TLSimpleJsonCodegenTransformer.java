@@ -146,55 +146,33 @@ public class TLSimpleJsonCodegenTransformer extends AbstractJsonSchemaTransforme
 		}
 		if (targetSchema.getExclusiveMinimum() == null) {
 	        if ((source.getMinInclusive() != null) && (source.getMinInclusive().length() > 0)) {
-	        	targetSchema.setMinimum( parseNumber( source.getMinInclusive() ) );
+	        	targetSchema.setMinimum( JsonSchemaCodegenUtils.parseNumber( source.getMinInclusive() ) );
 	        	targetSchema.setExclusiveMinimum( false );
 	        	hasRestrictions = true;
 	        }
 		}
 		if (targetSchema.getExclusiveMaximum() == null) {
 	        if ((source.getMaxInclusive() != null) && (source.getMaxInclusive().length() > 0)) {
-	        	targetSchema.setMaximum( parseNumber( source.getMaxInclusive() ) );
+	        	targetSchema.setMaximum( JsonSchemaCodegenUtils.parseNumber( source.getMaxInclusive() ) );
 	        	targetSchema.setExclusiveMaximum( false );
 	        	hasRestrictions = true;
 	        }
 		}
 		if (targetSchema.getExclusiveMinimum() == null) {
 	        if ((source.getMinExclusive() != null) && (source.getMinExclusive().length() > 0)) {
-	        	targetSchema.setMinimum( parseNumber( source.getMinExclusive() ) );
+	        	targetSchema.setMinimum( JsonSchemaCodegenUtils.parseNumber( source.getMinExclusive() ) );
 	        	targetSchema.setExclusiveMinimum( true );
 	        	hasRestrictions = true;
 	        }
 		}
 		if (targetSchema.getExclusiveMaximum() == null) {
 	        if ((source.getMaxExclusive() != null) && (source.getMaxExclusive().length() > 0)) {
-	        	targetSchema.setMaximum( parseNumber( source.getMaxExclusive() ) );
+	        	targetSchema.setMaximum( JsonSchemaCodegenUtils.parseNumber( source.getMaxExclusive() ) );
 	        	targetSchema.setExclusiveMaximum( true );
 	        	hasRestrictions = true;
 	        }
 		}
         return hasRestrictions;
-	}
-	
-	/**
-	 * Parses the given numeric string and returns a <code>Number</code>.
-	 * 
-	 * @param numStr  the numeric string to parse
-	 * @return Number
-	 */
-	private static Number parseNumber(String numStr) {
-		Number result = null;
-		
-		try {
-			result = Integer.parseInt( numStr );
-		} catch (NumberFormatException e) {}
-		
-		try {
-			if (result == null) {
-				result = Double.parseDouble( numStr );
-			}
-		} catch (NumberFormatException e) {}
-		
-		return result;
 	}
 	
 }

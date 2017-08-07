@@ -26,12 +26,14 @@ import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAttribute;
+import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLRoleEnumeration;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
+import org.opentravel.schemacompiler.util.SimpleTypeInfo;
 
 /**
  * Performs the translation from <code>TLValueWithAttributes</code> objects to the JSON schema elements
@@ -61,10 +63,13 @@ public class TLValueWithAttributesJsonCodegenTransformer extends AbstractJsonSch
         // Create the attribute(s) for the VWA parent type
         if ((vwaParentType != null) && !PropertyCodegenUtils.isEmptyStringType( vwaParentType )) {
         	JsonSchemaReference vwaValueSchemaRef = new JsonSchemaReference();
-            JsonType jsonValueType = JsonType.valueOf( vwaParentType );
+    		SimpleTypeInfo simpleInfo = (vwaParentType instanceof TLAttributeType) ?
+    				new SimpleTypeInfo( (TLAttributeType) vwaParentType ) : null;
+            JsonType jsonValueType = (simpleInfo == null) ? null : JsonType.valueOf( simpleInfo.getBaseSimpleType() );
             
             if (jsonValueType != null) {
-            	JsonSchema jsonValueSchema = jsonUtils.buildSimpleTypeSchema( jsonValueType );
+            	JsonSchema jsonValueSchema = jsonUtils.buildSimpleTypeSchema( simpleInfo, jsonValueType );
+            	
             	vwaValueSchemaRef.setSchema( jsonValueSchema );
             	
             } else {
@@ -89,6 +94,7 @@ public class TLValueWithAttributesJsonCodegenTransformer extends AbstractJsonSch
                 
                 vwaValueSchemaRef.setDocumentation( docTransformer.transform( source.getValueDocumentation() ) );
             }
+    		jsonUtils.applySimpleTypeDocumentation( vwaValueSchemaRef, source.getParentType() );
         }
 
         // Transform the attributes and indicators of the target type
