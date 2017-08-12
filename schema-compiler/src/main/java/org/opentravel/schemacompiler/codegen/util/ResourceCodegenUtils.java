@@ -369,6 +369,32 @@ public class ResourceCodegenUtils {
 	}
 	
 	/**
+	 * Returns the list of all action facets declared and inherited by the given
+	 * resource.
+	 * 
+	 * @param resource  the resource for which to return inherited parameter groups
+	 * @return List<TLActionFacet>
+	 */
+	public static List<TLActionFacet> getInheritedActionFacets(TLResource resource) {
+		List<TLActionFacet> actionFacets = new ArrayList<>();
+		Set<String> actionFacetNames = new HashSet<>();
+		
+		for (TLResource extendedResource : getInheritanceHierarchy(resource)) {
+			List<TLActionFacet> localActionFacets = new ArrayList<>();
+			
+			for (TLActionFacet actionFacet : extendedResource.getActionFacets()) {
+				if (!actionFacetNames.contains(actionFacet.getName())) {
+					localActionFacets.add(actionFacet);
+					actionFacetNames.add(actionFacet.getName());
+				}
+			}
+			actionFacets.addAll(0, localActionFacets);
+		}
+		Collections.reverse(actionFacets);
+		return actionFacets;
+	}
+	
+	/**
 	 * Returns the list of all actions declared and inherited by the given resource.
 	 * 
 	 * @param resource  the resource for which to return inherited actions

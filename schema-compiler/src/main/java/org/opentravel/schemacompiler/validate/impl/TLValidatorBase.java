@@ -831,9 +831,10 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
 	 * @return boolean
 	 */
 	protected boolean isDeclaredOrInheritedFacet(TLResource resource, TLActionFacet actionFacet) {
+		List<TLActionFacet> inheritedFacets = ResourceCodegenUtils.getInheritedActionFacets(resource);
 		boolean result = false;
 		
-		if (resource.getActionFacets().contains( actionFacet )) {
+		if (inheritedFacets.contains( actionFacet )) {
 			result = true;
 			
 		} else if (actionFacet.getName() != null) {
