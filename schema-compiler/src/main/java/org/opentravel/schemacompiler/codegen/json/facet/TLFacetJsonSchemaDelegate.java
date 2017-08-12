@@ -241,8 +241,8 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
 	protected List<JsonSchemaNamedReference> createDefinitions() {
         ObjectTransformer<TLAttribute, CodegenArtifacts, CodeGenerationTransformerContext> attributeTransformer = getTransformerFactory()
                 .getTransformer(TLAttribute.class, CodegenArtifacts.class);
-        ObjectTransformer<TLProperty, JsonSchemaNamedReference, CodeGenerationTransformerContext> elementTransformer = getTransformerFactory()
-                .getTransformer(TLProperty.class, JsonSchemaNamedReference.class);
+        ObjectTransformer<TLProperty, CodegenArtifacts, CodeGenerationTransformerContext> elementTransformer = getTransformerFactory()
+                .getTransformer(TLProperty.class, CodegenArtifacts.class);
         ObjectTransformer<TLIndicator, JsonSchemaNamedReference, CodeGenerationTransformerContext> indicatorTransformer = getTransformerFactory()
                 .getTransformer(TLIndicator.class, JsonSchemaNamedReference.class);
         List<JsonSchemaNamedReference> definitions = new ArrayList<JsonSchemaNamedReference>();
@@ -256,7 +256,8 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
         				.getArtifactsOfType( JsonSchemaNamedReference.class ) );
         		
         	} else if (field instanceof TLProperty) {
-        		definitions.add( elementTransformer.transform( (TLProperty) field ) );
+        		definitions.addAll( elementTransformer.transform( (TLProperty) field )
+        				.getArtifactsOfType( JsonSchemaNamedReference.class ) );
         		
         	} else if (field instanceof TLIndicator) {
         		definitions.add( indicatorTransformer.transform( (TLIndicator) field ) );

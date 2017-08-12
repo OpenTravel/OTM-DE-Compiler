@@ -802,18 +802,11 @@ public class PropertyCodegenUtils {
 
     /**
      * Resolves the assigned property type into the actual property type that should be used for
-     * code generation. This is typically the same type, but it differs if a business or core object
-     * is referenced. In those cases, the resolved facet will be at the top of the substitution
-     * group hierarchy for the referenced core or business object.
+     * code generation. This is typically the same type, but it may differ if a list facet or
+     * a facet with no declared or inherited content is referenced.
      * 
-     * <p>
-     * If the resolved type is a facet that does not have any defined content, this method will also
-     * attempt to locate an alternate facet to use for the property's XSD element type.
-     * 
-     * @param owner
-     *            the owning entity of the property being generated
-     * @param assignedType
-     *            the assigned type for the property
+     * @param owner  the owning entity of the property being generated
+     * @param assignedType  the assigned type for the property
      * @return TLPropertyType
      */
     public static TLPropertyType resolvePropertyType(TLPropertyOwner owner,

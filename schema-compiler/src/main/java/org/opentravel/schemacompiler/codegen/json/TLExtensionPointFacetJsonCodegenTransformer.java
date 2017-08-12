@@ -41,8 +41,8 @@ public class TLExtensionPointFacetJsonCodegenTransformer extends AbstractJsonSch
 	public CodegenArtifacts transform(TLExtensionPointFacet source) {
         ObjectTransformer<TLAttribute, CodegenArtifacts, CodeGenerationTransformerContext> attributeTransformer = getTransformerFactory()
                 .getTransformer(TLAttribute.class, CodegenArtifacts.class);
-        ObjectTransformer<TLProperty, JsonSchemaNamedReference, CodeGenerationTransformerContext> elementTransformer = getTransformerFactory()
-                .getTransformer(TLProperty.class, JsonSchemaNamedReference.class);
+        ObjectTransformer<TLProperty, CodegenArtifacts, CodeGenerationTransformerContext> elementTransformer = getTransformerFactory()
+                .getTransformer(TLProperty.class, CodegenArtifacts.class);
         ObjectTransformer<TLIndicator, JsonSchemaNamedReference, CodeGenerationTransformerContext> indicatorTransformer = getTransformerFactory()
                 .getTransformer(TLIndicator.class, JsonSchemaNamedReference.class);
         List<TLAttribute> attributeList = source.getAttributes();
@@ -59,7 +59,8 @@ public class TLExtensionPointFacetJsonCodegenTransformer extends AbstractJsonSch
         setMemberFieldOwner( source );
         
         for (TLProperty element : elementList) {
-        	defSchema.getProperties().add( elementTransformer.transform( element ) );
+        	defSchema.getProperties().addAll( elementTransformer.transform( element )
+        			.getArtifactsOfType( JsonSchemaNamedReference.class ) );
         }
         for (TLIndicator indicator : indicatorList) {
             if (indicator.isPublishAsElement()) {

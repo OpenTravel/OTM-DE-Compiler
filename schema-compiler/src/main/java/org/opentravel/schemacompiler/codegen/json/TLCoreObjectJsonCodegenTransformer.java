@@ -44,8 +44,6 @@ public class TLCoreObjectJsonCodegenTransformer extends AbstractJsonSchemaTransf
         FacetJsonSchemaDelegateFactory delegateFactory = new FacetJsonSchemaDelegateFactory( context );
 		CorrelatedCodegenArtifacts artifacts = new CorrelatedCodegenArtifacts();
 		
-		artifacts.addAllArtifacts( delegateFactory.getDelegate( source.getSimpleFacet() ).generateArtifacts() );
-		artifacts.addAllArtifacts( delegateFactory.getDelegate( source.getSimpleListFacet() ).generateArtifacts() );
         generateFacetArtifacts( delegateFactory.getDelegate( source.getSummaryFacet() ), artifacts, false );
         generateFacetArtifacts( delegateFactory.getDelegate( source.getDetailFacet() ), artifacts, false );
 		

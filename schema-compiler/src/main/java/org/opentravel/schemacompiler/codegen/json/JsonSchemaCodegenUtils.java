@@ -123,46 +123,15 @@ public class JsonSchemaCodegenUtils {
 	}
 	
 	/**
-	 * Adds documentation to the given schema that describes the original OTM type for an
+	 * Adds documentation to the given schema componnent that describes the original OTM type for an
 	 * element or attribute.
 	 * 
-	 * @param schema  the JSON schema to which documentation should be added
+	 * @param docOwner  the JSON schema component to which documentation should be added
 	 * @param fieldType  the original type assigned to the attribute, element, or VWA value
 	 */
-	public void applySimpleTypeDocumentation(JsonSchema schema, NamedEntity fieldType) {
+	public void applySimpleTypeDocumentation(JsonDocumentationOwner docOwner, NamedEntity fieldType) {
 		if ((fieldType != null) && !fieldType.getNamespace().equals( XMLConstants.W3C_XML_SCHEMA_NS_URI )) {
-			JsonDocumentation schemaDoc = schema.getDocumentation();
-			List<String> descriptions;
-			
-			if (schemaDoc == null) {
-				schemaDoc = new JsonDocumentation();
-				schema.setDocumentation( schemaDoc );
-			}
-			descriptions = new ArrayList<>( Arrays.asList( schemaDoc.getDescriptions() ) );
-			descriptions.add( 0, getAssignedTypeLabel( fieldType ) );
-			schemaDoc.setDescriptions( descriptions.toArray( new String[ descriptions.size() ] ) );
-		}
-	}
-	
-	/**
-	 * Adds documentation to the given schema reference that describes the original OTM type for an
-	 * element or attribute.
-	 * 
-	 * @param schemaRef  the JSON schema reference to which documentation should be added
-	 * @param fieldType  the original type assigned to the attribute, element, or VWA value
-	 */
-	public void applySimpleTypeDocumentation(JsonSchemaReference schemaRef, NamedEntity fieldType) {
-		if ((fieldType != null) && !fieldType.getNamespace().equals( XMLConstants.W3C_XML_SCHEMA_NS_URI )) {
-			JsonDocumentation schemaDoc = schemaRef.getDocumentation();
-			List<String> descriptions;
-			
-			if (schemaDoc == null) {
-				schemaDoc = new JsonDocumentation();
-				schemaRef.setDocumentation( schemaDoc );
-			}
-			descriptions = new ArrayList<>( Arrays.asList( schemaDoc.getDescriptions() ) );
-			descriptions.add( 0, getAssignedTypeLabel( fieldType ) );
-			schemaDoc.setDescriptions( descriptions.toArray( new String[ descriptions.size() ] ) );
+			applySupplementalDescription( docOwner, getAssignedTypeLabel( fieldType ) );
 		}
 	}
 	
@@ -235,6 +204,27 @@ public class JsonSchemaCodegenUtils {
         	schema.setMaximum( parseNumber( simpleInfo.getMaxExclusive() ) );
         	schema.setExclusiveMaximum( true );
         }
+	}
+	
+	/**
+	 * Applies an additional line of documentation to the given schema component's list of
+	 * descriptions.  If then given doc-owner does not yet contain any documentation, it will
+	 * be created automatically.
+	 * 
+	 * @param docOwner  the schema componnent to which the supplemental description will be applied
+	 * @param supplementalDescription  the text of the supplemental description
+	 */
+	public void applySupplementalDescription(JsonDocumentationOwner docOwner, String supplementalDescription) {
+		JsonDocumentation schemaDoc = docOwner.getDocumentation();
+		List<String> descriptions;
+		
+		if (schemaDoc == null) {
+			schemaDoc = new JsonDocumentation();
+			docOwner.setDocumentation( schemaDoc );
+		}
+		descriptions = new ArrayList<>( Arrays.asList( schemaDoc.getDescriptions() ) );
+		descriptions.add( 0, supplementalDescription );
+		schemaDoc.setDescriptions( descriptions.toArray( new String[ descriptions.size() ] ) );
 	}
 	
     /**

@@ -24,7 +24,6 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonType;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.TLAttribute;
-import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLPropertyType;
@@ -113,8 +112,7 @@ public class TLAttributeJsonCodegenTransformer extends AbstractJsonSchemaTransfo
 	 * @param source  the source attribute from the OTM model
 	 */
 	private void setAttributeType(JsonSchemaReference attrSchemaRef, TLPropertyType attributeType, TLAttribute source) {
-		SimpleTypeInfo simpleInfo = (attributeType instanceof TLAttributeType) ?
-				new SimpleTypeInfo( (TLAttributeType) attributeType ) : null;
+		SimpleTypeInfo simpleInfo = SimpleTypeInfo.newInstance( attributeType );
         JsonType jsonType = (simpleInfo == null) ? null : JsonType.valueOf( simpleInfo.getBaseSimpleType() );
         
         if (jsonType != null) {

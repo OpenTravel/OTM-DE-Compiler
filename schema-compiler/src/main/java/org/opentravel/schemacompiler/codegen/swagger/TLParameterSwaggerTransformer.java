@@ -18,9 +18,7 @@ package org.opentravel.schemacompiler.codegen.swagger;
 import java.util.List;
 
 import org.opentravel.schemacompiler.codegen.impl.QualifiedParameter;
-import org.opentravel.schemacompiler.codegen.json.TLSimpleJsonCodegenTransformer;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
-import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonType;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerParamType;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerParameter;
@@ -28,7 +26,6 @@ import org.opentravel.schemacompiler.codegen.util.EnumCodegenUtils;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
-import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 import org.opentravel.schemacompiler.model.TLEnumValue;
 import org.opentravel.schemacompiler.model.TLEquivalentOwner;
@@ -37,10 +34,7 @@ import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLMemberField;
 import org.opentravel.schemacompiler.model.TLParameter;
 import org.opentravel.schemacompiler.model.TLProperty;
-import org.opentravel.schemacompiler.model.TLRole;
-import org.opentravel.schemacompiler.model.TLSimple;
-import org.opentravel.schemacompiler.model.TLSimpleFacet;
-import org.opentravel.schemacompiler.model.TLValueWithAttributes;
+import org.opentravel.schemacompiler.util.SimpleTypeInfo;
 
 /**
  * Performs the translation from <code>QualifiedParameter</code> objects to the Swagger model
@@ -98,30 +92,24 @@ public class TLParameterSwaggerTransformer extends AbstractSwaggerCodegenTransfo
 			}
 			
 			if (fieldType != null) {
-				JsonType jsonType = JsonType.valueOf( fieldType );
-				boolean isListType = false;
-				schema = new JsonSchema();
+				SimpleTypeInfo simpleInfo = SimpleTypeInfo.newInstance( fieldType );
+		        JsonType jsonType = (simpleInfo == null) ? null : JsonType.valueOf( simpleInfo.getBaseSimpleType() );
 				
-				while ((fieldType != null) && (jsonType == null)) {
-					if (fieldType instanceof TLSimple) {
-						TLSimpleJsonCodegenTransformer.applyRestrictions( (TLSimple) fieldType, schema );
-						isListType |= ((TLSimple) fieldType).isListTypeInd();
-						
-					} else if (fieldType instanceof TLClosedEnumeration) {
-						applyEnumeration( (TLClosedEnumeration) fieldType, schema );
-						break; // nothing left to do
-					}
-					fieldType = getParentType( fieldType );
-					jsonType = JsonType.valueOf( fieldType );
-				}
-				schema.setType( jsonType );
-				
-				if (isListType) {
-					JsonSchema arraySchema = new JsonSchema();
+				if (jsonType != null) {
+					schema = jsonUtils.buildSimpleTypeSchema( simpleInfo, jsonType );
 					
-					arraySchema.setType( JsonType.jsonArray );
-					arraySchema.setItems( new JsonSchemaReference( schema ) );
-					schema = arraySchema;
+				} else {
+					schema = new JsonSchema(); // default to an empty schema
+					
+					if (fieldType instanceof TLClosedEnumeration) {
+						TLClosedEnumeration closedEnum = (TLClosedEnumeration) fieldType;
+						List<String> enumValues = schema.getEnumValues();
+						
+				        for (TLEnumValue modelEnum : EnumCodegenUtils.getInheritedValues( closedEnum )) {
+				        	enumValues.add( modelEnum.getLiteral() );
+				        }
+						schema.setType( JsonType.jsonString );
+					}	
 				}
 			}
 		}
@@ -131,52 +119,6 @@ public class TLParameterSwaggerTransformer extends AbstractSwaggerCodegenTransfo
 			schema.setType( JsonType.jsonString );
 		}
 		return schema;
-	}
-	
-	/**
-	 * Returns the parent type for the given entity type.
-	 * 
-	 * @param childType  the child type for which to return the parent
-	 * @return NamedEntity
-	 */
-	private NamedEntity getParentType(NamedEntity childType) {
-		NamedEntity parentType = null;
-		
-        if (childType instanceof TLCoreObject) {
-            // Special Case: For core objects, use the simple facet as the attribute type
-        	parentType = ((TLCoreObject) childType).getSimpleFacet().getSimpleType();
-
-        } else if (childType instanceof TLRole) {
-            // Special Case: For role assignments, use the core object's simple facet as the
-            // attribute type
-        	parentType = (((TLRole) childType).getRoleEnumeration().getOwningEntity())
-        			.getSimpleFacet().getSimpleType();
-        	
-        } else if (childType instanceof TLValueWithAttributes) {
-        	parentType = ((TLValueWithAttributes) childType).getParentType();
-        	
-        } else if (childType instanceof TLSimpleFacet) {
-        	parentType = ((TLSimpleFacet) childType).getSimpleType();
-        	
-        } else if (childType instanceof TLSimple) {
-        	parentType = ((TLSimple) childType).getParentType();
-        }
-        return parentType;
-	}
-	
-	/**
-	 * Applies the values from the given closed enumeration to the target schema.
-	 * 
-	 * @param closedEnum  the closed enumeration
-	 * @param targetSchema  the target schema that will receive the updates
-	 */
-	private void applyEnumeration(TLClosedEnumeration closedEnum, JsonSchema targetSchema) {
-		List<String> enumValues = targetSchema.getEnumValues();
-		
-        for (TLEnumValue modelEnum : EnumCodegenUtils.getInheritedValues( closedEnum )) {
-        	enumValues.add( modelEnum.getLiteral() );
-        }
-		targetSchema.setType( JsonType.jsonString );
 	}
 	
 	/**

@@ -136,8 +136,8 @@ public class TLActionFacetJsonCodegenTransformer extends AbstractJsonSchemaTrans
 	 * @return JsonSchemaNamedReference
 	 */
 	private JsonSchemaNamedReference generateEmptyWrapper(TLActionFacet source) {
-        ObjectTransformer<TLProperty, JsonSchemaNamedReference, CodeGenerationTransformerContext> elementTransformer =
-        		getTransformerFactory().getTransformer(TLProperty.class, JsonSchemaNamedReference.class);
+        ObjectTransformer<TLProperty, CodegenArtifacts, CodeGenerationTransformerContext> elementTransformer =
+        		getTransformerFactory().getTransformer(TLProperty.class, CodegenArtifacts.class);
         TLProperty boElement = ResourceCodegenUtils.createBusinessObjectElement( source, null );
         JsonSchemaNamedReference definition = new JsonSchemaNamedReference();
         JsonSchema schema = new JsonSchema();
@@ -146,7 +146,8 @@ public class TLActionFacetJsonCodegenTransformer extends AbstractJsonSchemaTrans
 		transformDocumentation( source, schema );
         schema.setEntityInfo( jsonUtils.getEntityInfo( source ) );
         definition.setSchema( new JsonSchemaReference( schema ) );
-        schema.getProperties().add( elementTransformer.transform( boElement ) );
+        schema.getProperties().addAll( elementTransformer.transform( boElement )
+				.getArtifactsOfType( JsonSchemaNamedReference.class ) );
         
         return definition;
 	}

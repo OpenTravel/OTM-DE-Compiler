@@ -53,10 +53,26 @@ public class SimpleTypeInfo {
 	 * 
 	 * @param simpleType  the simple type for which to discover constraints
 	 */
-	public SimpleTypeInfo(TLAttributeType simpleType) {
+	private SimpleTypeInfo(TLAttributeType simpleType) {
 		this.originalSimpleType = simpleType;
 		this.facetProfile = XSDFacetProfileLocator.getXSDFacetProfile( simpleType );
 		findConstraints( simpleType, new HashSet<String>() );
+	}
+	
+	/**
+	 * Returns a new <code>SimpleTypeInfo</code> instance for the given entity
+	 * or null if the entity is not a qualifying simple type.
+	 * 
+	 * @param entity  the entity for which to return the simple type information
+	 * @return SimpleTypeInfo
+	 */
+	public static SimpleTypeInfo newInstance(NamedEntity entity) {
+		SimpleTypeInfo simpleInfo = null;
+		
+		if (entity instanceof TLAttributeType) {
+			simpleInfo = new SimpleTypeInfo( (TLAttributeType) entity );
+		}
+		return simpleInfo;
 	}
 	
 	/**

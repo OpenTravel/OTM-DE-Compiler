@@ -17,8 +17,8 @@ package org.opentravel.schemacompiler.codegen.json;
 
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
-import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonType;
@@ -26,7 +26,6 @@ import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAttribute;
-import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
@@ -63,8 +62,7 @@ public class TLValueWithAttributesJsonCodegenTransformer extends AbstractJsonSch
         // Create the attribute(s) for the VWA parent type
         if ((vwaParentType != null) && !PropertyCodegenUtils.isEmptyStringType( vwaParentType )) {
         	JsonSchemaReference vwaValueSchemaRef = new JsonSchemaReference();
-    		SimpleTypeInfo simpleInfo = (vwaParentType instanceof TLAttributeType) ?
-    				new SimpleTypeInfo( (TLAttributeType) vwaParentType ) : null;
+    		SimpleTypeInfo simpleInfo = SimpleTypeInfo.newInstance( vwaParentType );
             JsonType jsonValueType = (simpleInfo == null) ? null : JsonType.valueOf( simpleInfo.getBaseSimpleType() );
             
             if (jsonValueType != null) {
