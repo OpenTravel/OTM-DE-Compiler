@@ -119,6 +119,11 @@ public class SimpleTypeInfo {
 					}
 					findConstraints( simple.getParentType(),  visitedEntities );
 					
+					// Work-around for OTM-DE since it represents XSDSimple types as TLSimples (reason unknown)
+					if (simple.getParentType() == null) {
+						baseSimpleType = simple;
+					}
+					
 				} else if (simpleType instanceof TLValueWithAttributes) {
 					findConstraints( ((TLValueWithAttributes) simpleType).getParentType(), visitedEntities );
 					

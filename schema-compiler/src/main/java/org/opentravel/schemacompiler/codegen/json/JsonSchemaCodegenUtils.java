@@ -545,7 +545,8 @@ public class JsonSchemaCodegenUtils {
 			while (iterator.hasNext()) {
 				Entry<String,JsonElement> jProperty = iterator.next();
 				
-				if (jProperty.getKey().startsWith( "x-otm-" )) {
+				if (jProperty.getKey().startsWith( "x-otm-" ) ||
+						jProperty.getKey().startsWith( "x-xml-" )) {
 					iterator.remove();
 					
 				} else {
