@@ -15,9 +15,12 @@
  */
 package org.opentravel.schemacompiler.repository;
 
+import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RefreshPolicy;
+import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.model.NamedEntity;
 
 /**
@@ -108,5 +111,20 @@ public interface RemoteRepository extends Repository {
      *             thrown if the remote repository cannot be accessed
      */
     public boolean downloadContent(RepositoryItem item, boolean forceUpdate) throws RepositoryException;
+    
+    /**
+     * Returns a <code>LibraryInputSource</code> that can be used to download a historical commit
+     * for the given repository item.  The content that is returned will be the latest commit that
+     * is on or before the effective date specified.  If the effective date provided is null, the
+     * latest commit for the item will be returned.
+     * 
+     * @param item  the reposited item whose content is to be downloaded
+     * @param effectiveDate  the effective date of the historical content to download
+     * @return LibraryInputSource<InputStream>
+     * @throws RepositoryException  thrown if the remote repository cannot be accessed or the effective
+     *								date is prior to the item's first commit
+     */
+    public LibraryInputSource<InputStream> getHistoricalContent(RepositoryItem item, Date effectiveDate)
+    		throws RepositoryException;
     
 }

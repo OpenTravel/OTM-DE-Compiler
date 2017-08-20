@@ -20,7 +20,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.http.auth.Credentials;
 import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.ioc.SchemaDeclaration;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
@@ -35,6 +38,7 @@ public class LibraryStreamInputSource implements LibraryInputSource<InputStream>
 
     private URL libraryUrl;
     private SchemaDeclaration schemaDeclaration;
+    private Credentials credentials;
 
     /**
      * Constructor that assigns the URL from which the library's content will be loaded.
@@ -80,6 +84,14 @@ public class LibraryStreamInputSource implements LibraryInputSource<InputStream>
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.loader.LibraryInputSource#setCredentials(org.apache.http.auth.Credentials)
+	 */
+	@Override
+	public void setCredentials(Credentials credentials) {
+		this.credentials = credentials;
+	}
+
+	/**
      * @see org.opentravel.schemacompiler.loader.LibraryInputSource#getLibraryContent()
      */
     public InputStream getLibraryContent() {
@@ -99,7 +111,16 @@ public class LibraryStreamInputSource implements LibraryInputSource<InputStream>
                     }
                 }
                 if (contentStream == null) {
-                    contentStream = libraryUrl.openStream();
+                	URLConnection urlConnection = libraryUrl.openConnection();
+                	
+                	if (credentials != null) {
+                		String authHeaderStr = credentials.getUserPrincipal().getName() + ":" + credentials.getPassword();
+                    	byte[] authHeaderBytes = Base64.encodeBase64( authHeaderStr.getBytes() );
+                    	String authHeader = "Basic " + new String( authHeaderBytes );
+                    	
+                    	urlConnection.setRequestProperty( "Authorization", authHeader );
+                	}
+                    contentStream = urlConnection.getInputStream();
                 }
             }
 

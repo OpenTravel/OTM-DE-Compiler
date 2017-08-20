@@ -22,8 +22,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
@@ -43,6 +45,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthState;
+import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -71,6 +74,8 @@ import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryItemIdentityType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryPermission;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryPermissionType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.SearchResultsListType;
+import org.opentravel.schemacompiler.loader.LibraryInputSource;
+import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.EntitySearchResult;
@@ -79,6 +84,7 @@ import org.opentravel.schemacompiler.repository.RemoteRepository;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryFileManager;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
+import org.opentravel.schemacompiler.repository.RepositoryItemCommit;
 import org.opentravel.schemacompiler.repository.RepositoryItemHistory;
 import org.opentravel.schemacompiler.repository.RepositoryItemState;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
@@ -131,6 +137,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
     private static final String ITEM_WHERE_USED_ENDPOINT = SERVICE_CONTEXT + "/item-where-used";
     private static final String ENTITY_WHERE_USED_ENDPOINT = SERVICE_CONTEXT + "/entity-where-used";
     private static final String ENTITY_WHERE_EXTENDED_ENDPOINT = SERVICE_CONTEXT + "/entity-where-extended";
+    private static final String HISTORICAL_CONTENT_ENDPOINT = SERVICE_CONTEXT + "/historical-content";
 
     private static final DateFormat dateOnlyFormat = new SimpleDateFormat("dd-MM-yyyy");
 
@@ -1719,6 +1726,36 @@ public class RemoteRepositoryClient implements RemoteRepository {
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.repository.RemoteRepository#getHistoricalContent(org.opentravel.schemacompiler.repository.RepositoryItem, java.util.Date)
+	 */
+	@Override
+	public LibraryInputSource<InputStream> getHistoricalContent(RepositoryItem item, Date effectiveDate)
+			throws RepositoryException {
+		try {
+			StringBuilder contentUrl = new StringBuilder( endpointUrl ).append( HISTORICAL_CONTENT_ENDPOINT );
+			RepositoryItemHistory history = getHistory( item );
+			LibraryStreamInputSource contentSource;
+			
+			contentUrl.append( "?basens=" ).append( URLEncoder.encode( item.getBaseNamespace(), "UTF-8" ) );
+			contentUrl.append( "&version=" ).append( URLEncoder.encode( item.getVersion(), "UTF-8" ) );
+			contentUrl.append( "&filename=" ).append( URLEncoder.encode( item.getFilename(), "UTF-8" ) );
+			
+			for (RepositoryItemCommit commit : history.getCommitHistory()) {
+				if ((effectiveDate == null) || effectiveDate.before( commit.getEffectiveOn() )) {
+					contentUrl.append( "&commit=" ).append( commit.getCommitNumber() );
+					break;
+				}
+			}
+			contentSource = new LibraryStreamInputSource( new URL( contentUrl.toString() ) );
+			contentSource.setCredentials( buildAuthorizationCredentials() );
+			return contentSource;
+			
+		} catch (MalformedURLException | UnsupportedEncodingException e) {
+			throw new RepositoryException("Error constructing historical content URL.", e);
+		}
+	}
+
+    /**
      * Contacts the repository web service at the specified endpoint URL, and returns the repository
      * meta-data information.
      * 
@@ -1749,7 +1786,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
         }
     }
 
-    /**
+	/**
      * Constructs a new repository item instance using values from the given meta-data record.
      * 
      * @param libraryInfo
@@ -1867,13 +1904,25 @@ public class RemoteRepositoryClient implements RemoteRepository {
 		
         if ((userId != null) && (encryptedPassword != null)) {
             AuthState target = new AuthState();
-            target.update(
-                    new BasicScheme(),
-                    new UsernamePasswordCredentials(userId, PasswordHelper
-                            .decrypt(encryptedPassword)));
+            target.update( new BasicScheme(), buildAuthorizationCredentials() );
             context.setAttribute(HttpClientContext.TARGET_AUTH_STATE, target);
         }
         return context;
+    }
+    
+    /**
+     * Returns the HTTP authorization credentials for an HTTP request.
+     * 
+     * @return Credentials
+     */
+    private Credentials buildAuthorizationCredentials() {
+    	Credentials credentials = null;
+    	
+    	if ((userId != null) && (encryptedPassword != null)) {
+        	credentials = new UsernamePasswordCredentials(userId,
+        			PasswordHelper.decrypt(encryptedPassword));
+    	}
+    	return credentials;
     }
 
     /**

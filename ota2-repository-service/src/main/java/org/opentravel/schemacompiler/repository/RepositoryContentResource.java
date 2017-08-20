@@ -18,9 +18,7 @@ package org.opentravel.schemacompiler.repository;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.ParseException;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1378,51 +1376,42 @@ public class RepositoryContentResource {
     }
 
     /**
-     * Called by remote clients to download library/schema content from the OTA2.0 repository.
+     * Called by remote clients to download historical library/schema content from
+     * the OTA2.0 repository.
      * 
-     * @param identityElement
-     *            the XML element that identifies the repository item to download
-     * @param authorizationHeader
-     *            the value of the HTTP "Authorization" header
+     * @param baseNS  the base namespace of the repository item to download
+     * @param filename  the filename of the repository item to download
+     * @param version  the version of the repository item to download
+     * @param commit  the commit number of the repository item to download (may be null)
+     * @param authorizationHeader  the value of the HTTP "Authorization" header
      * @return Response
-     * @throws RepositoryException
-     *             thrown if the request cannot be processed
+     * @throws RepositoryException  thrown if the request cannot be processed
      */
-    @POST
-    @Path("historicalContent")
-    @Consumes(MediaType.TEXT_XML)
-    @Produces(MediaType.TEXT_XML)
-    public Response downloadHistoricalContent(JAXBElement<RepositoryItemIdentityType> identityElement,
-    		@QueryParam("commitNumber") Integer commitNumber,
-    		@QueryParam("effectiveDate") String effectiveDateStr,
+    @GET
+    @Path("historical-content")
+    public Response downloadHistoricalContent(
+    		@QueryParam("basens") String baseNS,
+    		@QueryParam("filename") String filename,
+    		@QueryParam("version") String version,
+    		@QueryParam("commit") Integer commitNumber,
             @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
 
-        RepositoryItemIdentityType itemIdentity = identityElement.getValue();
-        LibraryInfoType itemMetadata = repositoryManager.getFileManager().loadLibraryMetadata(
-                itemIdentity.getBaseNamespace(), itemIdentity.getFilename(),
-                itemIdentity.getVersion());
+        LibraryInfoType itemMetadata = repositoryManager.getFileManager()
+        		.loadLibraryMetadata( baseNS, filename, version );
         RepositoryItemImpl item = RepositoryUtils.createRepositoryItem(repositoryManager, itemMetadata);
         UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
-        Date effectiveDate = null;
-        
-        if ((commitNumber == null) && (effectiveDateStr != null)) {
-        	try {
-        		effectiveDate = RepositoryUtils.utcDateTimeFormat.parse( effectiveDateStr );
-        		
-        	} catch (ParseException e) {
-        		throw new RepositoryException("Invalid date/time format (expecting UTC): " + effectiveDateStr, e);
-        	}
-        }
         
         if (securityManager.isReadAuthorized(user, item)) {
             ResponseBuilder response;
             File contentFile;
             
             if (commitNumber != null) {
-                contentFile = repositoryManager.getHistoryManager().getHistoricalContent( item, commitNumber );
-            	
-            } else { // effective date
-                contentFile = repositoryManager.getHistoryManager().getHistoricalContent( item, effectiveDate );
+                contentFile = repositoryManager.getHistoryManager()
+                		.getHistoricalContent( item, commitNumber );
+                
+            } else {
+            	contentFile = repositoryManager.getFileManager()
+            			.getLibraryContentLocation( baseNS, filename, version );
             }
             response = Response.ok(contentFile);
             response.header("Content-Disposition", "attachment; filename=" + item.getFilename());

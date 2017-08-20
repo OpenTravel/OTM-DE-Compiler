@@ -17,6 +17,8 @@ package org.opentravel.schemacompiler.loader;
 
 import java.net.URL;
 
+import org.apache.http.auth.Credentials;
+
 /**
  * Input source used to access the content of a file-based type library module.
  * 
@@ -34,6 +36,13 @@ public interface LibraryInputSource<C> {
     public URL getLibraryURL();
 
     /**
+     * Assigns the credentials to be used if the URL requires BASIC authentication.
+     * 
+     * @param credentials  the authorization credentials to use when accessing the library URL
+     */
+    public void setCredentials(Credentials credentials);
+
+    /**
      * Resolves the library module namespace provided and returns an input stream that can be used
      * to load the module's XML content. If the content of the module is not accessible, this method
      * will return null.
@@ -43,5 +52,5 @@ public interface LibraryInputSource<C> {
      * @return C
      */
     public C getLibraryContent();
-
+    
 }
