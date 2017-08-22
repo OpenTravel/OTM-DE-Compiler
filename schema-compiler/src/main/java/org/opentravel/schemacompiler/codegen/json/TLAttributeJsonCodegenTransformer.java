@@ -22,7 +22,6 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonType;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
-import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
@@ -87,8 +86,7 @@ public class TLAttributeJsonCodegenTransformer extends AbstractJsonSchemaTransfo
 	    		
 	    		extensionAttr.setName( attr.getName() + "Extension" );
 	    		extensionAttr.setSchema( extAttrSchemaRef );
-	    		extAttrSchemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath(
-	    				SchemaDependency.getEnumExtension(), source.getOwner() ) );
+	    		extAttrSchemaRef.setSchema( SimpleTypeInfo.ENUM_EXTENSION_SCHEMA );
 	            artifacts.addArtifact(extensionAttr);
 	        	attrSchemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath(
 	        			attributeType, source.getOwner() ) + "_Base" );

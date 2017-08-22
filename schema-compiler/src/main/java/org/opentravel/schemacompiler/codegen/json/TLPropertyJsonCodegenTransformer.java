@@ -15,12 +15,6 @@
  */
 package org.opentravel.schemacompiler.codegen.json;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.namespace.QName;
-
-import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonEntityInfo;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
@@ -31,14 +25,8 @@ import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.JsonSchemaNamingUtils;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
-import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
-import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegate;
-import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
 import org.opentravel.schemacompiler.model.TLAbstractFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
-import org.opentravel.schemacompiler.model.TLBusinessObject;
-import org.opentravel.schemacompiler.model.TLChoiceObject;
-import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLListFacet;
@@ -55,174 +43,46 @@ import org.opentravel.schemacompiler.util.SimpleTypeInfo;
  * Performs the translation from <code>TLProperty</code> objects to the JSON schema elements
  * used to produce the output.
  */
-public class TLPropertyJsonCodegenTransformer extends AbstractJsonSchemaTransformer<TLProperty, CodegenArtifacts> {
-	
-	private FacetCodegenDelegateFactory delegateFactory = new FacetCodegenDelegateFactory( null );
-	
+public class TLPropertyJsonCodegenTransformer extends AbstractJsonSchemaTransformer<TLProperty, JsonSchemaNamedReference> {
+
 	/**
 	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
 	 */
 	@Override
-	public CodegenArtifacts transform(TLProperty source) {
-    	CodegenArtifacts artifacts = new CodegenArtifacts();
-    	
-    	if (source.isReference()) {
-    		artifacts.addArtifact( transformReferenceProperty( source ) );
-    		
-    	} else {
-    		artifacts.addAllArtifacts( transformValueProperty( source ) );
-    	}
-    	return artifacts;
+	public JsonSchemaNamedReference transform(TLProperty source) {
+		return source.isReference() ?
+				transformReferenceProperty( source ) : transformValueProperty( source );
 	}
 	
     /**
      * Performs the transformation of the property as a standard value element.
      * 
      * @param source the source object being transformed
-     * @return List<JsonSchemaNamedReference>
+     * @return JsonSchemaNamedReference
      */
-    private List<JsonSchemaNamedReference> transformValueProperty(TLProperty source) {
-    	List<TLPropertyType> propertyTypes = getResolvedPropertyTypes( source );
-    	boolean isSubstitutableProperty = (propertyTypes.size() > 1);
-    	List<JsonSchemaNamedReference> jsonProperties = new ArrayList<>();
-    	StringBuilder subgrpDefinition = new StringBuilder();
-    	
-    	for (TLPropertyType propertyType : propertyTypes) {
-    		JsonSchemaNamedReference jsonProperty = new JsonSchemaNamedReference();
-        	JsonSchemaReference schemaRef = new JsonSchemaReference();
-
-            if (!PropertyCodegenUtils.hasGlobalElement(propertyType)) {
-                // If the element's name has not been specified, use the name of its assigned type
-                if ((source.getName() == null) || (source.getName().length() == 0)) {
-                	jsonProperty.setName( source.getType().getLocalName() );
-                } else {
-                	jsonProperty.setName( source.getName() );
-                }
-                
-            } else {
-                // If the property references a type that defines a global element, use that
-            	// element name for the JSON property name
-            	if (isSubstitutableProperty) {
-            		QName substitutableName = null;
-            		
-            		if (propertyType instanceof TLAlias) {
-                    	substitutableName = XsdCodegenUtils.getSubstitutableElementName( (TLAlias) propertyType );
-            			
-            		} else if (propertyType instanceof TLFacet) {
-                    	substitutableName = XsdCodegenUtils.getSubstitutableElementName( (TLFacet) propertyType );
-            		}
-            		
-            		if (substitutableName != null) {
-            			jsonProperty.setName( substitutableName.getLocalPart() );
-            		} else {
-                    	jsonProperty.setName( JsonSchemaNamingUtils.getGlobalPropertyName( propertyType, false) );
-            		}
-            		
-            	} else {
-                	jsonProperty.setName( JsonSchemaNamingUtils.getGlobalPropertyName( propertyType, false) );
-            	}
-            }
-            
-            // Begin building the label, just in case we have a substitutable element
-            if (subgrpDefinition.length() > 0) {
-            	subgrpDefinition.append(", ");
-            }
-            subgrpDefinition.append( jsonProperty.getName() );
-            
-        	setPropertyType( schemaRef, propertyType, source );
-        	jsonProperty.setSchema( schemaRef );
-        	jsonProperty.setRequired( source.isMandatory() );
-        	jsonProperties.add( jsonProperty );
-    	}
-    	
-    	// Add some supplemental documentation for substituable properties
-    	if (isSubstitutableProperty) {
-    		String docText = "Only one allowed of: " + subgrpDefinition.toString();
-    		
-    		for (JsonSchemaNamedReference jsonProperty : jsonProperties) {
-    			jsonUtils.applySupplementalDescription( jsonProperty.getSchema(), docText );
-    		}
-    	}
-    	
-		return jsonProperties;
-    }
-    
-    /**
-     * Returns a list of property types for which to render JSON schema properties.  If
-     * the assigned type of the given property is a top-level business, choice, or core
-     * object, the resulting list may contain multiple entries, one for each possible
-     * facet of the entity.  If the assigned type is not substitutable, a single-value
-     * list containing the original resolved property type will be returned.
-     * 
-     * @param source
-     * @return
-     */
-    private List<TLPropertyType> getResolvedPropertyTypes(TLProperty source) {
-        TLPropertyType assignedType = PropertyCodegenUtils.resolvePropertyType(
+    private JsonSchemaNamedReference transformValueProperty(TLProperty source) {
+		JsonSchemaNamedReference jsonProperty = new JsonSchemaNamedReference();
+    	JsonSchemaReference schemaRef = new JsonSchemaReference();
+        TLPropertyType propertyType = PropertyCodegenUtils.resolvePropertyType(
                 source.getOwner(), source.getType());
-        List<TLPropertyType> propertyTypes = new ArrayList<>();
-    	List<TLFacet> candidateFacets = new ArrayList<>();
-        TLAlias assignedAlias = null;
-    	
-        if (assignedType instanceof TLAlias) {
-        	assignedAlias = (TLAlias) assignedType;
-        	assignedType = (TLPropertyType) assignedAlias.getOwningEntity();
+
+        if (!PropertyCodegenUtils.hasGlobalElement(propertyType)) {
+            // If the element's name has not been specified, use the name of its assigned type
+            if ((source.getName() == null) || (source.getName().length() == 0)) {
+            	jsonProperty.setName( source.getType().getLocalName() );
+            } else {
+            	jsonProperty.setName( source.getName() );
+            }
+            
+        } else {
+            // If the property references a type that defines a global element, use that
+        	// element name for the JSON property name
+        	jsonProperty.setName( JsonSchemaNamingUtils.getGlobalPropertyName( propertyType, false) );
         }
-        
-    	if (assignedType instanceof TLBusinessObject) {
-    		TLBusinessObject entity = (TLBusinessObject) assignedType;
-    		
-    		candidateFacets.add( entity.getIdFacet() );
-    		candidateFacets.add( entity.getSummaryFacet() );
-    		addContextualFacets( entity.getCustomFacets(), candidateFacets );
-    		candidateFacets.add( entity.getDetailFacet() );
-    		
-    	} else if (assignedType instanceof TLChoiceObject) {
-    		TLChoiceObject entity = (TLChoiceObject) assignedType;
-    		
-    		candidateFacets.add( entity.getSharedFacet() );
-    		addContextualFacets( entity.getChoiceFacets(), candidateFacets );
-    		
-    	} else if (assignedType instanceof TLCoreObject) {
-    		TLCoreObject entity = (TLCoreObject) assignedType;
-    		
-    		candidateFacets.add( entity.getSummaryFacet() );
-    		candidateFacets.add( entity.getDetailFacet() );
-    	}
-    	
-    	if (!candidateFacets.isEmpty()) {
-    		for (TLFacet facet : candidateFacets) {
-    			FacetCodegenDelegate<TLFacet> facetDelegate = delegateFactory.getDelegate( facet );
-    			
-    			if ((facetDelegate != null) && facetDelegate.hasContent()) {
-    				if (assignedAlias != null) {
-    					AliasCodegenUtils.getFacetAlias( assignedAlias,
-    							facet.getFacetType(), FacetCodegenUtils.getFacetName( facet ) );
-    					
-    				} else {
-        				propertyTypes.add( facet );
-    				}
-    			}
-    		}
-    		
-    	} else {
-    		propertyTypes.add( assignedType ); // not a substitution group
-    	}
-    	return propertyTypes;
-    }
-    
-    /**
-     * Adds the given list of contextual facets and all of thier children to
-     * the given target list.
-     * 
-     * @param sourceList  the source list of contextual facets
-     * @param targetList  the list of facets being constructed
-     */
-    private void addContextualFacets(List<TLContextualFacet> sourceList, List<TLFacet> targetList) {
-    	for (TLContextualFacet facet : sourceList) {
-    		targetList.add( facet );
-    		addContextualFacets( facet.getChildFacets(), targetList );
-    	}
+    	setPropertyType( schemaRef, propertyType, source );
+    	jsonProperty.setSchema( schemaRef );
+    	jsonProperty.setRequired( source.isMandatory() );
+		return jsonProperty;
     }
     
     /**
@@ -347,7 +207,8 @@ public class TLPropertyJsonCodegenTransformer extends AbstractJsonSchemaTransfor
 			}
 		}
         
-        if ((jsonType != null) && !(source.getType() instanceof TLValueWithAttributes)) {
+        if ((jsonType != null) && !(source.getType() instanceof TLValueWithAttributes)
+        		 && !(source.getType() instanceof TLCoreObject)) { // VWA's and cores are special cases
         	JsonSchema propertySchema = jsonUtils.buildSimpleTypeSchema( simpleInfo, jsonType );
         	
         	if (typeRef == schemaRef) { // not an array, so put the documentation here
@@ -400,12 +261,9 @@ public class TLPropertyJsonCodegenTransformer extends AbstractJsonSchemaTransfor
         
         if (docSchema != null) {
     		transformDocumentation( source, docSchema );
+    		jsonUtils.applySimpleTypeDocumentation( docSchema, source.getType() );
     		docSchema.getEquivalentItems().addAll( jsonUtils.getEquivalentInfo( source ) );
     		docSchema.getExampleItems().addAll( jsonUtils.getExampleInfo( source ) );
-    		
-    		if (simpleInfo != null) {
-        		jsonUtils.applySimpleTypeDocumentation( docSchema, source.getType() );
-    		}
         }
 	}
 	

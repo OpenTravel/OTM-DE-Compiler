@@ -16,11 +16,20 @@
 
 package org.opentravel.schemacompiler.util;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
+import javax.xml.XMLConstants;
+
+import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
+import org.opentravel.schemacompiler.codegen.json.model.JsonType;
+import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAttributeType;
+import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLSimple;
@@ -34,6 +43,23 @@ import org.opentravel.schemacompiler.model.XSDSimpleType;
  * inherited from other base simple types.
  */
 public class SimpleTypeInfo {
+	
+	private static final String UTC_DATETIME_DESCRIPTION = "ISO date time type without UTC offset or Z for Zulu restriction indicating it is representing Local Time.  Example: 2010-12-31T11:55:00-06:00";
+	private static final String UTC_DATE_DESCRIPTION = "ISO date type without UTC offset or Z for Zulu restriction indicating it is representing Local Time.  Example: 2010-12-31";
+	private static final String UTC_TIME_DESCRIPTION = "ISO time type without UTC offset or Z for Zulu restriction indicating it is representing Local Time.  Example: 11:55:00-06:00";
+	private static final String LOCAL_DATETIME_DESCRIPTION = "ISO date time type without UTC offset or Z for Zulu restriction indicating it is representing Local Time.  Example: 2010-12-31T11:55:00";
+	private static final String LOCAL_DATE_DESCRIPTION = "ISO date type without UTC offset or Z for Zulu restriction indicating it is representing Local Time.  Example: 2010-12-31";
+	private static final String LOCAL_TIME_DESCRIPTION = "ISO time type without UTC offset or Z for Zulu restriction indicating it is representing Local Time.  Example: 11:55:00";
+	
+	public static final JsonSchema UTC_DATETIME_JSON_SCHEMA   = newSchema( JsonType.jsonDateTime, UTC_DATETIME_DESCRIPTION, null, -1, -1 );
+	public static final JsonSchema UTC_DATE_JSON_SCHEMA       = newSchema( JsonType.jsonDate, UTC_DATE_DESCRIPTION, null, -1, -1 );
+	public static final JsonSchema UTC_TIME_JSON_SCHEMA       = newSchema( JsonType.jsonString, UTC_TIME_DESCRIPTION, "(([01]\\d|2[0-3])((:?)[0-5]\\d)?|24\\:?00)((:?)[0-5]\\d)?([\\.,]\\d+(?!:))?([zZ]|([\\+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?", -1, -1 );
+	public static final JsonSchema LOCAL_DATETIME_JSON_SCHEMA = newSchema( JsonType.jsonString, LOCAL_DATETIME_DESCRIPTION, "(\\d{4}-\\d{2}-\\d{2})T(([01]\\d|2[0-3])((:?)[0-5]\\d)?|24\\:?00)((:?)[0-5]\\d)?([\\.,]\\d+(?!:))?([zZ]|([\\+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?", -1, -1 );
+	public static final JsonSchema LOCAL_DATE_JSON_SCHEMA     = newSchema( JsonType.jsonString, LOCAL_DATE_DESCRIPTION, "(\\d{4}-\\d{2}-\\d{2})", -1, -1 );
+	public static final JsonSchema LOCAL_TIME_JSON_SCHEMA     = newSchema( JsonType.jsonString, LOCAL_TIME_DESCRIPTION, "(([01]\\d|2[0-3])((:?)[0-5]\\d)?|24\\:?00)((:?)[0-5]\\d)?([\\.,]\\d+(?!:))?", -1, -1 );
+	public static final JsonSchema ENUM_EXTENSION_SCHEMA      = newSchema( JsonType.jsonString, null, null, 1, 128 );
+	
+	private static Map<String,JsonSchema> xsdSimplePrimitives;
 	
 	private XSDFacetProfile facetProfile;
 	private NamedEntity originalSimpleType;
@@ -127,6 +153,9 @@ public class SimpleTypeInfo {
 				} else if (simpleType instanceof TLValueWithAttributes) {
 					findConstraints( ((TLValueWithAttributes) simpleType).getParentType(), visitedEntities );
 					
+				} else if (simpleType instanceof TLCoreObject) {
+					findConstraints( ((TLCoreObject) simpleType).getSimpleFacet(), visitedEntities );
+					
 				} else if (simpleType instanceof TLSimpleFacet) {
 					findConstraints( ((TLSimpleFacet) simpleType).getSimpleType(), visitedEntities );
 					
@@ -138,7 +167,40 @@ public class SimpleTypeInfo {
 					}
 					
 				} else if (simpleType instanceof XSDSimpleType) {
-					baseSimpleType = simpleType;
+					JsonSchema simpleSchema = xsdSimplePrimitives.get( simpleType.getLocalName() );
+					
+					if (simpleSchema != null) {
+						AbstractLibrary xsdLibrary = simpleType.getOwningModel().getLibrariesForNamespace(
+								XMLConstants.W3C_XML_SCHEMA_NS_URI ).get( 0 );
+						
+						switch (simpleSchema.getType()) {
+							case jsonDateTime:
+								baseSimpleType = xsdLibrary.getNamedMember( "dateTime" );
+								break;
+							case jsonDate:
+								baseSimpleType = xsdLibrary.getNamedMember( "date" );
+								break;
+							case jsonString:
+								baseSimpleType = xsdLibrary.getNamedMember( "string" );
+								break;
+							default:
+								baseSimpleType = simpleType;
+								break;
+						}
+						
+						if (pattern == null) {
+							pattern = simpleSchema.getPattern();
+						}
+						if ((minLength < 0) && (simpleSchema.getMinLength() != null)) {
+							minLength = simpleSchema.getMinLength();
+						}
+						if ((maxLength < 0) && (simpleSchema.getMaxLength() != null)) {
+							maxLength = simpleSchema.getMaxLength();
+						}
+						
+					} else {
+						baseSimpleType = simpleType;
+					}
 				}
 				visitedEntities.add( simpleTypeKey );
 			}
@@ -251,6 +313,51 @@ public class SimpleTypeInfo {
 	 */
 	public String getMaxExclusive() {
 		return maxExclusive;
+	}
+	
+	/**
+	 * Constructs a new JSON type instance.
+	 * 
+	 * @param type  the JSON type assigned for the schema
+	 * @param description  the description of the schema
+	 * @param pattern  the regular expression pattern for the schema
+	 * @param minLength  the minimum string length for the schema
+	 * @param maxLength  the maximum string length for the schema
+	 * @return JsonSchema
+	 */
+	private static JsonSchema newSchema(JsonType type, String description, String pattern, int minLength, int maxLength) {
+		JsonSchema schema = new JsonSchema();
+		
+		if ((description != null) && (description.trim().length() > 0)) {
+			JsonDocumentation doc = new JsonDocumentation();
+			
+			doc.setDescriptions( description.trim() );
+			schema.setDocumentation( doc );
+		}
+		if ((pattern != null) && (pattern.trim().length() > 0)) {
+			schema.setPattern( pattern.trim() );
+		}
+		if (minLength >= 0) {
+			schema.setMinLength( minLength );
+		}
+		if (maxLength >= 0) {
+			schema.setMaxLength( maxLength );
+		}
+		schema.setType( type );
+		return schema;
+	}
+	
+	/**
+	 * Initializes the map of <code>XSDSimpleType</code> primitives.
+	 */
+	static {
+		xsdSimplePrimitives = new HashMap<>();
+		xsdSimplePrimitives.put( "UTCDateTime", UTC_DATETIME_JSON_SCHEMA );
+		xsdSimplePrimitives.put( "UTCDate", UTC_DATE_JSON_SCHEMA );
+		xsdSimplePrimitives.put( "UTCTime", UTC_TIME_JSON_SCHEMA );
+		xsdSimplePrimitives.put( "LocalDateTime", LOCAL_DATETIME_JSON_SCHEMA );
+		xsdSimplePrimitives.put( "LocalDate", LOCAL_DATE_JSON_SCHEMA );
+		xsdSimplePrimitives.put( "LocalTime", LOCAL_TIME_JSON_SCHEMA );
 	}
 	
 }

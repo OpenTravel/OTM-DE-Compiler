@@ -83,6 +83,12 @@
             <Equivalent context="test">attr4-equivalent</Equivalent>
         </Attribute>
         <Attribute mandatory="true" name="idrefAttr" type="xsd:IDREFS"/>
+        <Attribute name="utcDateTime" type="ota:UTCDateTime" />
+        <Attribute name="utcDate" type="ota:UTCDate" />
+        <Attribute name="utcTime" type="ota:UTCTime" />
+        <Attribute name="localDateTime" type="ota:LocalDateTime" />
+        <Attribute name="localDate" type="ota:LocalDate" />
+        <Attribute name="localTime" type="ota:LocalTime" />
         <Indicator name="indicator1" publishAsElement="false"/>
     </ValueWithAttrs>
     

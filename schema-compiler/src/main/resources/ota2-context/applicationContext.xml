@@ -1727,7 +1727,7 @@
 				</bean>
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
 					<property name="source" value="org.opentravel.schemacompiler.model.TLProperty" />
-					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference" />
 					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLPropertyJsonCodegenTransformer" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">

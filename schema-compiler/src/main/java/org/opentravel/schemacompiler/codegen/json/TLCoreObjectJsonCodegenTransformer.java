@@ -24,10 +24,10 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonType;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.xsd.TLBaseEnumerationCodegenTransformer;
-import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLRole;
 import org.opentravel.schemacompiler.model.TLRoleEnumeration;
+import org.opentravel.schemacompiler.util.SimpleTypeInfo;
 
 /**
  * Performs the translation from <code>TLCoreObject</code> objects to the JSON schema elements
@@ -62,7 +62,6 @@ public class TLCoreObjectJsonCodegenTransformer extends AbstractJsonSchemaTransf
      * @return JsonSchemaNamedReference
      */
     private JsonSchemaNamedReference createRoleEnumerationComplexType(TLCoreObject source) {
-        SchemaDependency enumExtension = SchemaDependency.getEnumExtension();
         JsonSchemaNamedReference roleEnum = new JsonSchemaNamedReference();
         String definitionName = getDefinitionName( source.getRoleEnumeration() );
         JsonSchema schema = new JsonSchema();
@@ -72,9 +71,7 @@ public class TLCoreObjectJsonCodegenTransformer extends AbstractJsonSchemaTransf
         schema.getProperties().add( new JsonSchemaNamedReference(
         		"value", new JsonSchemaReference( "#/definitions/" + definitionName + "_Open" ) ) );
         schema.getProperties().add( new JsonSchemaNamedReference( "extension",
-        		new JsonSchemaReference( jsonUtils.getSchemaReferencePath(
-        				enumExtension, source ) ) ) );
-        addCompileTimeDependency( enumExtension );
+        		new JsonSchemaReference( SimpleTypeInfo.ENUM_EXTENSION_SCHEMA ) ) );
         return roleEnum;
     }
 

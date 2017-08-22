@@ -23,7 +23,6 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonType;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
-import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLDocumentation;
@@ -77,8 +76,7 @@ public class TLValueWithAttributesJsonCodegenTransformer extends AbstractJsonSch
                         || (vwaParentType instanceof TLRoleEnumeration)) {
             		JsonSchemaReference extAttrSchemaRef = new JsonSchemaReference();
             		
-            		extAttrSchemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath(
-            				SchemaDependency.getEnumExtension(), source ) );
+            		extAttrSchemaRef.setSchema( SimpleTypeInfo.ENUM_EXTENSION_SCHEMA );
             		vwaSchema.getProperties().add( new JsonSchemaNamedReference( "extension", extAttrSchemaRef ) );
                 	referencePath += "_Base";
                 }

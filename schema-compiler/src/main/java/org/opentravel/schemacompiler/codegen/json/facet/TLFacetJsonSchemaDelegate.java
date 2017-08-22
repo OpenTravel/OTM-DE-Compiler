@@ -239,12 +239,12 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
 	 * @return List<JsonSchemaNamedReference>
 	 */
 	protected List<JsonSchemaNamedReference> createDefinitions() {
-        ObjectTransformer<TLAttribute, CodegenArtifacts, CodeGenerationTransformerContext> attributeTransformer = getTransformerFactory()
-                .getTransformer(TLAttribute.class, CodegenArtifacts.class);
-        ObjectTransformer<TLProperty, CodegenArtifacts, CodeGenerationTransformerContext> elementTransformer = getTransformerFactory()
-                .getTransformer(TLProperty.class, CodegenArtifacts.class);
-        ObjectTransformer<TLIndicator, JsonSchemaNamedReference, CodeGenerationTransformerContext> indicatorTransformer = getTransformerFactory()
-                .getTransformer(TLIndicator.class, JsonSchemaNamedReference.class);
+        ObjectTransformer<TLAttribute, CodegenArtifacts, CodeGenerationTransformerContext> attributeTransformer =
+        		getTransformerFactory().getTransformer(TLAttribute.class, CodegenArtifacts.class);
+        ObjectTransformer<TLProperty, JsonSchemaNamedReference, CodeGenerationTransformerContext> elementTransformer =
+        		getTransformerFactory().getTransformer(TLProperty.class, JsonSchemaNamedReference.class);
+        ObjectTransformer<TLIndicator, JsonSchemaNamedReference, CodeGenerationTransformerContext> indicatorTransformer =
+        		getTransformerFactory().getTransformer(TLIndicator.class, JsonSchemaNamedReference.class);
         List<JsonSchemaNamedReference> definitions = new ArrayList<JsonSchemaNamedReference>();
 		CodeGenerationTransformerContext transformContext = getTransformerFactory().getContext();
 		
@@ -256,8 +256,7 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
         				.getArtifactsOfType( JsonSchemaNamedReference.class ) );
         		
         	} else if (field instanceof TLProperty) {
-        		definitions.addAll( elementTransformer.transform( (TLProperty) field )
-        				.getArtifactsOfType( JsonSchemaNamedReference.class ) );
+        		definitions.add( elementTransformer.transform( (TLProperty) field ) );
         		
         	} else if (field instanceof TLIndicator) {
         		definitions.add( indicatorTransformer.transform( (TLIndicator) field ) );

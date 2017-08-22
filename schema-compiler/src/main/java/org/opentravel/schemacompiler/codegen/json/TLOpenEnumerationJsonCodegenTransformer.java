@@ -24,9 +24,9 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonType;
 import org.opentravel.schemacompiler.codegen.util.EnumCodegenUtils;
 import org.opentravel.schemacompiler.codegen.xsd.TLBaseEnumerationCodegenTransformer;
-import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.TLEnumValue;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
+import org.opentravel.schemacompiler.util.SimpleTypeInfo;
 
 /**
  * Performs the translation from <code>TLOpenEnumeration</code> objects to the JSON schema elements
@@ -53,7 +53,6 @@ public class TLOpenEnumerationJsonCodegenTransformer extends AbstractJsonSchemaT
      * @return JsonSchema
      */
     protected JsonSchemaNamedReference createComplexTypeSchema(TLOpenEnumeration source) {
-        SchemaDependency enumExtension = SchemaDependency.getEnumExtension();
 		JsonSchemaNamedReference complexEnum = new JsonSchemaNamedReference();
 		JsonSchema schema = new JsonSchema();
     	
@@ -66,8 +65,7 @@ public class TLOpenEnumerationJsonCodegenTransformer extends AbstractJsonSchemaT
         schema.getProperties().add( new JsonSchemaNamedReference(
         		"value", new JsonSchemaReference( jsonUtils.getSchemaReferencePath( source, source ) + "_Base" ) ) );
         schema.getProperties().add( new JsonSchemaNamedReference(
-        		"extension", new JsonSchemaReference( jsonUtils.getSchemaReferencePath( enumExtension, source ) ) ) );
-        addCompileTimeDependency( enumExtension );
+        		"extension", new JsonSchemaReference( SimpleTypeInfo.ENUM_EXTENSION_SCHEMA ) ) );
 		return complexEnum;
     }
     
