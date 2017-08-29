@@ -152,6 +152,20 @@
 		</property>
 	</bean>
 	
+	<bean id="ota2ReleaseSchema" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
+		<property name="namespace" value="http://www.OpenTravel.org/ns/OTA2/Release_v01_00" />
+		<property name="name" value="OTA2_Release_v1.0.0" />
+		<property name="defaultPrefix" value="otr" />
+		<property name="locations">
+			<list>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="XSD" />
+					<property name="location" value="classpath:/ota2-context/schemas/OTA2_Release_v1.0.0.xsd" />
+				</bean>
+			</list>
+		</property>
+	</bean>
+	
 	<bean id="ota2CatalogSchema" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
 		<property name="namespace" value="http://www.OpenTravel.org/ns/OTA2/LibraryCatalog_v01_00" />
 		<property name="name" value="OTA2_LibraryCatalog_v1.0.0" />

@@ -158,6 +158,16 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
     }
 
     /**
+	 * Returns the namespace resolver to be used for mapping library module namespaces to the
+     * resource locations where those libraries can be retrieved.
+	 *
+	 * @return LibraryNamespaceResolver
+	 */
+	public LibraryNamespaceResolver getNamespaceResolver() {
+		return namespaceResolver;
+	}
+
+    /**
      * Assigns the namespace resolver to be used for mapping library module namespaces to the
      * resource locations where those libraries can be retrieved.
      * 
@@ -172,7 +182,16 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
         this.namespaceResolver.setModel(libraryModel);
     }
 
-    /**
+	/**
+	 * Returns the library module loader for this model loader.
+	 *
+	 * @return LibraryModuleLoader<C>
+	 */
+	public LibraryModuleLoader<C> getModuleLoader() {
+		return moduleLoader;
+	}
+
+	/**
      * Assigns the library module loader for this model loader.
      * 
      * @param libraryModuleLoader
@@ -866,7 +885,6 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
                         .validateModelElement(library, false));
 
             } catch (Throwable t) {
-            	t.printStackTrace(System.out);
                 addLoaderFinding(FindingType.ERROR, library,
                         ERROR_UNKNOWN_EXCEPTION_DURING_VALIDATION, library.getName(),
                         ExceptionUtils.getExceptionClass(t).getSimpleName(),

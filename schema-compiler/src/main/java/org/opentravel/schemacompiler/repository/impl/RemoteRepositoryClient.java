@@ -1726,10 +1726,10 @@ public class RemoteRepositoryClient implements RemoteRepository {
     }
 
     /**
-	 * @see org.opentravel.schemacompiler.repository.RemoteRepository#getHistoricalContent(org.opentravel.schemacompiler.repository.RepositoryItem, java.util.Date)
+	 * @see org.opentravel.schemacompiler.repository.Repository#getHistoricalContentSource(org.opentravel.schemacompiler.repository.RepositoryItem, java.util.Date)
 	 */
 	@Override
-	public LibraryInputSource<InputStream> getHistoricalContent(RepositoryItem item, Date effectiveDate)
+	public LibraryInputSource<InputStream> getHistoricalContentSource(RepositoryItem item, Date effectiveDate)
 			throws RepositoryException {
 		try {
 			StringBuilder contentUrl = new StringBuilder( endpointUrl ).append( HISTORICAL_CONTENT_ENDPOINT );

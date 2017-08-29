@@ -512,7 +512,27 @@ public abstract class RepositoryFileManager {
     public File getProjectsFolder() {
         return new File(repositoryLocation, PROJECTS_FOLDER_LOCATION);
     }
-
+    
+    /**
+     * Returns true if the given file is located in this repository's directory structure.
+     * 
+     * @param file  the file to check
+     * @return boolean
+     */
+    public boolean isRepositoryFile(File file) {
+    	boolean result = false;
+    	
+    	if (file != null) {
+            File folder = file.getParentFile();
+            
+            while (!result && (folder != null)) {
+                result = folder.equals( repositoryLocation );
+                folder = folder.getParentFile();
+            }
+    	}
+    	return result;
+    }
+    
     /**
      * Searches the repository folders for the given list of root namespaces, returning a list of
      * all namespaces that have at least one repository item published.

@@ -51,6 +51,10 @@ public interface LoaderValidationMessageKeys {
             + "UNREADABLE_SCHEMA_CONTENT";
     public static final String ERROR_UNREADABLE_PROJECT_CONTENT = LOADER_VALIDATION_PREFIX
             + "UNREADABLE_PROJECT_CONTENT";
+    public static final String ERROR_UNREADABLE_RELEASE_CONTENT = LOADER_VALIDATION_PREFIX
+            + "UNREADABLE_RELEASE_CONTENT";
+    public static final String ERROR_RELEASE_NOT_FOUND = LOADER_VALIDATION_PREFIX
+            + "ERROR_RELEASE_NOT_FOUND";
     public static final String ERROR_INVALID_REPOSITORY_ITEM = LOADER_VALIDATION_PREFIX
             + "INVALID_REPOSITORY_ITEM";
     public static final String ERROR_MISSING_CRC = LOADER_VALIDATION_PREFIX + "MISSING_CRC";

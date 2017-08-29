@@ -69,15 +69,72 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         test_08_DemoteLibrary();
         test_09_UpdateLibraryStatus();
         test_10_GetLibraryHistory();
-        test_11_DeleteLibrary();
-        test_12_CreateNamespace();
-        test_12a_CreateNamespaceError();
-        test_13_ListNamespaceChildren();
-        test_14_DeleteNamespace();
-        test_15_CreateRootNamespace();
-        test_16_DeleteRootNamespace();
+    	test_11_createBetaAndFinalReleases();
+    	test_12_publishRelease();
+    	test_13_deleteRelease();
+        test_14_DeleteLibrary();
+        test_15_CreateNamespace();
+        test_15a_CreateNamespaceError();
+        test_16_ListNamespaceChildren();
+        test_17_DeleteNamespace();
+        test_18_CreateRootNamespace();
+        test_19_DeleteRootNamespace();
     }
 
+    public void test_11_createBetaAndFinalReleases() throws Exception {
+        if (DEBUG)
+            System.out.println("CREATE RELEASES - Creating beta and final releases. ["
+                    + getClass().getSimpleName() + "]");
+        
+        // Load the project that contains the library we have been making updates to
+        ProjectManager projectManager = new ProjectManager(new TLModel(), true,
+                repositoryManager.get());
+        File projectFile = new File(wipFolder.get(), "/projects/project_1.xml");
+
+        if (!projectFile.exists()) {
+            throw new FileNotFoundException("Test File Not Found: " + projectFile.getAbsolutePath());
+        }
+
+        ValidationFindings findings = new ValidationFindings();
+        Project project = projectManager.loadProject(projectFile, findings);
+        ProjectItem projectItem = findProjectItem(project, "library_1_p2_2_0_0.otm");
+        
+        // Verify that the project loaded correctly
+        if (findings.hasFinding(FindingType.ERROR)) {
+            RepositoryTestUtils.printFindings(findings);
+        }
+        assertFalse(findings.hasFinding(FindingType.ERROR));
+        assertNotNull(projectItem);
+        
+        // Create a release for the main project item
+        RepositoryItemHistory history = repositoryManager.get().getHistory( projectItem );
+    	ReleaseManager releaseManager = new ReleaseManager( repositoryManager.get() );
+    	ValidationFindings releaseFindings = new ValidationFindings();
+    	RepositoryItemCommit commit = history.getCommitHistory().get( 1 );
+    	
+    	releaseManager.createNewRelease(
+    			"http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package",
+    			"TestRelease", wipFolder.get() );
+    	releaseManager.setDefaultEffectiveDate( commit.getEffectiveOn() );
+    	releaseManager.addPrincipalItem( projectItem );
+    	releaseManager.loadReleaseModel( releaseFindings );
+    	releaseManager.saveRelease();
+    	
+        // Verify that the release loaded correctly
+        if (releaseFindings.hasFinding(FindingType.ERROR)) {
+            RepositoryTestUtils.printFindings(releaseFindings);
+        }
+        assertFalse(releaseFindings.hasFinding(FindingType.ERROR));
+    }
+    
+    public void test_12_publishRelease() throws Exception {
+    	
+    }
+    
+    public void test_13_deleteRelease() throws Exception {
+    	
+    }
+    
     public void test_01_PublishLibrary() throws Exception {
         if (DEBUG)
             System.out.println("PUBLISH - Publishing new content to the remote repository. ["
@@ -445,7 +502,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         }
     }
     
-    public void test_11_DeleteLibrary() throws Exception {
+    public void test_14_DeleteLibrary() throws Exception {
         if (DEBUG)
             System.out.println("DELETE - Delete a managed project item. ["
                     + getClass().getSimpleName() + "]");
@@ -482,7 +539,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
             System.out.println("DONE - Success.");
     }
 
-    public void test_12_CreateNamespace() throws Exception {
+    public void test_15_CreateNamespace() throws Exception {
         if (DEBUG)
             System.out.println("CREATE NAMESPACE - Create a managed namespace item. ["
                     + getClass().getSimpleName() + "]");
@@ -501,7 +558,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
             System.out.println("DONE - Success.");
     }
     
-    public void test_12a_CreateNamespaceError() throws Exception {
+    public void test_15a_CreateNamespaceError() throws Exception {
         if (DEBUG)
             System.out.println("CREATE NAMESPACE (Error Test) - Attempt to create conflicting namespace. ["
                     + getClass().getSimpleName() + "]");
@@ -526,7 +583,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
             System.out.println("DONE - Success.");
     }
 
-    public void test_13_ListNamespaceChildren() throws Exception {
+    public void test_16_ListNamespaceChildren() throws Exception {
         if (DEBUG)
             System.out
                     .println("LIST NAMESPACE CHILDREN - Find the children of a managed namespace. ["
@@ -542,7 +599,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
             System.out.println("DONE - Success.");
     }
 
-    public void test_14_DeleteNamespace() throws Exception {
+    public void test_17_DeleteNamespace() throws Exception {
         if (DEBUG)
             System.out.println("DELETE NAMESPACE - Delete a managed namespace item. ["
                     + getClass().getSimpleName() + "]");
@@ -561,7 +618,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
             System.out.println("DONE - Success.");
     }
 
-    public void test_15_CreateRootNamespace() throws Exception {
+    public void test_18_CreateRootNamespace() throws Exception {
         if (DEBUG)
             System.out.println("CREATE ROOT NAMESPACE - Create a managed namespace item. ["
                     + getClass().getSimpleName() + "]");
@@ -600,7 +657,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
             System.out.println("DONE - Success.");
     }
 
-    public void test_16_DeleteRootNamespace() throws Exception {
+    public void test_19_DeleteRootNamespace() throws Exception {
         if (DEBUG)
             System.out.println("DELETE ROOT NAMESPACE - Delete a managed namespace item. ["
                     + getClass().getSimpleName() + "]");

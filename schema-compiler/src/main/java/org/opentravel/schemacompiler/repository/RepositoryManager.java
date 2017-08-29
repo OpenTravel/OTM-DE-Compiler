@@ -48,6 +48,7 @@ import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryInfoType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryPermission;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryState;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
+import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.loader.LibraryModuleInfo;
 import org.opentravel.schemacompiler.loader.LibraryModuleLoader;
 import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
@@ -963,6 +964,32 @@ public class RepositoryManager implements Repository {
             item = repository.getRepositoryItem(itemUri, itemNamespace);
         }
         return item;
+    }
+    
+    /**
+     * Returns the corresponding repository item for the given library file if it is under
+     * the control of this local repository (whether it is managed or a remote copy).  If
+     * the specified file does not exist or is not under control of the local repository,
+     * this method will return null.
+     * 
+     * @param libraryFile  the library file for which to return a repository item
+     * @return RepositoryItem
+     * @throws RepositoryException  thrown if an error occurs while loading the library's metadata
+     */
+    public RepositoryItem getRepositoryItem(File libraryFile) throws RepositoryException {
+    	RepositoryItem item = null;
+    	
+    	if (fileManager.isRepositoryFile( libraryFile )) {
+    		String metadataFilename = fileManager.getLibraryMetadataFilename( libraryFile.getName() );
+    		File metadataFile = new File( libraryFile.getParentFile(), metadataFilename );
+    		
+    		if (metadataFile.exists()) {
+    			LibraryInfoType libraryMetadata = fileManager.loadLibraryMetadata( metadataFile );
+    			
+    			item = RepositoryUtils.createRepositoryItem( this, libraryMetadata );
+    		}
+    	}
+    	return item;
     }
     
     /**
@@ -2253,69 +2280,31 @@ public class RepositoryManager implements Repository {
     }
     
     /**
-     * Returns the URL that can be used to download the historical library content from
-     * its repository.
-     * 
-     * @param item  the repository item for which historical content will be retrieved
-     * @param commitNumber  the commit number of the historical content to be retrieved
-     * @return URL
-     * @throws RepositoryException  thrown if the owning repository for the item cannot be identified
-     */
-    public URL getHistoricalContentLocation(RepositoryItem item, int commitNumber) throws RepositoryException {
-    	URL contentUrl;
-    	
-    	if (item.getRepository() == this) {
-    		contentUrl = URLUtils.toURL( historyManager.getHistoricalContent( item, commitNumber ) );
-    		
-    	} else {
-    		StringBuilder url = new StringBuilder();
-    		
-    		try {
-    			url.append( ((RemoteRepositoryClient) item.getRepository()).getEndpointUrl() )
-    				.append( "/historicalContent?commitNumber=" ).append( commitNumber );
-    			
-				contentUrl = new URL( url.toString() );
+	 * @see org.opentravel.schemacompiler.repository.Repository#getHistoricalContentSource(org.opentravel.schemacompiler.repository.RepositoryItem, java.util.Date)
+	 */
+	@Override
+	public LibraryInputSource<InputStream> getHistoricalContentSource(RepositoryItem item, Date effectiveDate)
+			throws RepositoryException {
+		LibraryInputSource<InputStream> contentSource;
+		
+		if (effectiveDate == null) {
+			contentSource = new LibraryStreamInputSource( getContentLocation( item ) );
+			
+		} else {
+			Repository repository = item.getRepository();
+			
+			if (repository == this) {
+				contentSource = new LibraryStreamInputSource(
+						historyManager.getHistoricalContent( item, effectiveDate ) );
 				
-			} catch (MalformedURLException e) {
-				throw new RepositoryException("Error constructing download URL.", e);
+			} else {
+				contentSource = ((RemoteRepository) repository).getHistoricalContentSource( item, effectiveDate );
 			}
-    	}
-    	return contentUrl;
-    }
+		}
+		return contentSource;
+	}
 
-    /**
-     * Returns the URL that can be used to download the historical library content from
-     * its repository.
-     * 
-     * @param item  the repository item for which historical content will be retrieved
-     * @param effectiveDate  the effective date/time of the historical content to be retrieved
-     * @return URL
-     * @throws RepositoryException  thrown if the owning repository for the item cannot be identified
-     */
-    public URL getHistoricalContentLocation(RepositoryItem item, Date effectiveDate) throws RepositoryException {
-    	URL contentUrl;
-    	
-    	if (item.getRepository() == this) {
-    		contentUrl = URLUtils.toURL( historyManager.getHistoricalContent( item, effectiveDate ) );
-    		
-    	} else {
-    		StringBuilder url = new StringBuilder();
-    		
-    		try {
-    			url.append( ((RemoteRepositoryClient) item.getRepository()).getEndpointUrl() )
-    				.append( "/historicalContent?effectiveDate=" )
-    				.append( RepositoryUtils.utcDateTimeFormat.format( effectiveDate ) );
-    			
-				contentUrl = new URL( url.toString() );
-				
-			} catch (MalformedURLException e) {
-				throw new RepositoryException("Error constructing download URL.", e);
-			}
-    	}
-    	return contentUrl;
-    }
-
-    /**
+	/**
      * If the given <code>RepositoryItem</code> is owned by a remote repository, the local
      * repository's copy is updated with the latest available content. If the item is owned by the
      * local repository, this method has no effect. This update is performed regardless of the

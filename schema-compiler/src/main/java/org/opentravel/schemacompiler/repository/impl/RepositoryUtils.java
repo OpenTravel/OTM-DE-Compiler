@@ -111,6 +111,9 @@ public class RepositoryUtils {
      * @param itemMetadata  the library meta-data object to populate
      */
     public static void populateMetadata(RepositoryItem source, LibraryInfoType itemMetadata) {
+    	TLLibraryStatus libStatus = (source.getStatus() == null) ? TLLibraryStatus.DRAFT : source.getStatus();
+    	RepositoryItemState itemState = (source.getState() == null) ? RepositoryItemState.MANAGED_UNLOCKED : source.getState();
+    	
         itemMetadata.setOwningRepository(source.getRepository().getId());
         itemMetadata.setNamespace(source.getNamespace());
         itemMetadata.setBaseNamespace(source.getBaseNamespace());
@@ -118,8 +121,8 @@ public class RepositoryUtils {
         itemMetadata.setLibraryName(source.getLibraryName());
         itemMetadata.setVersion(source.getVersion());
         itemMetadata.setVersionScheme(source.getVersionScheme());
-        itemMetadata.setStatus(LibraryStatus.valueOf(source.getStatus().toString()));
-        itemMetadata.setState(RepositoryState.valueOf(source.getState().toString()));
+        itemMetadata.setStatus(LibraryStatus.valueOf(libStatus.toString()));
+        itemMetadata.setState(RepositoryState.valueOf(itemState.toString()));
         itemMetadata.setLockedBy(source.getLockedByUser());
     }
     
