@@ -23,6 +23,7 @@
 		<module>ota2-example-helper</module>
 		<module>ota2-example-upgrade-utility</module>
 		<module>ota2-diff-utility</module>
+		<module>ota2-message-validator</module>
 	</modules>
 
 	<properties>
