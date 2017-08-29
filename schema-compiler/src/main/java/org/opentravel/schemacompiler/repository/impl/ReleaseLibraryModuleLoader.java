@@ -107,7 +107,6 @@ public class ReleaseLibraryModuleLoader implements LibraryModuleLoader<InputStre
 		
 		if (URLUtils.isFileURL( libraryUrl )) {
 			File libraryFile = URLUtils.toFile( libraryUrl );
-			System.out.println("LIBRARY FILE: " + libraryFile);
 			
 			try {
 				RepositoryItem item = releaseManager.getRepositoryItem( libraryUrl );

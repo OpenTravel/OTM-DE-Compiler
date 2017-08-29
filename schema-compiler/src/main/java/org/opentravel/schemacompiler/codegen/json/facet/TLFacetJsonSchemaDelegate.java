@@ -98,14 +98,10 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
      * @return JsonSchemaNamedReference
      */
     protected JsonSchemaNamedReference createDefinition(TLAlias alias) {
-    	JsonSchemaNamedReference definition;
+    	JsonSchemaNamedReference definition = createDefinition();
     	
-    	if (alias == null) {
-    		definition = createDefinition();
-    		
-    	} else {
-    		definition = new JsonSchemaNamedReference( getDefinitionName( alias ),
-    				new JsonSchemaReference( jsonUtils.getSchemaReferencePath( getSourceFacet(), alias ) ) );
+    	if (alias != null) {
+    		definition.setName( getDefinitionName( alias ) );
     	}
     	return definition;
     }
@@ -196,7 +192,9 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
 			
 			globalDef.setName( globalElementName.getLocalPart() );
 			globalDef.setRequired( true );
-			globalDef.setSchema( new JsonSchemaReference( "#/definitions/" + typeName ) );
+			
+			globalDef.setSchema( new JsonSchemaReference(
+					jsonUtils.getSchemaReferencePath( getSourceFacet(), getSourceFacet() ) ) );
 			globalDefSchema.getProperties().add( globalDef );
 			globalElement = new JsonSchemaReference( globalDefSchema );
 		}
