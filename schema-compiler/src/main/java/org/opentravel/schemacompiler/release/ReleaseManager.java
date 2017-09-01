@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.repository;
+package org.opentravel.schemacompiler.release;
 
 import java.io.File;
 import java.io.InputStream;
@@ -22,23 +22,17 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.xml.datatype.XMLGregorianCalendar;
-
-import org.opentravel.ns.ota2.release_v01_00.PrincipalItemsType;
-import org.opentravel.ns.ota2.release_v01_00.ReferencedItemsType;
-import org.opentravel.ns.ota2.release_v01_00.ReleaseIdentityType;
-import org.opentravel.ns.ota2.release_v01_00.ReleaseItemType;
 import org.opentravel.ns.ota2.release_v01_00.ReleaseStatus;
-import org.opentravel.ns.ota2.release_v01_00.ReleaseType;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.loader.LibraryModelLoader;
 import org.opentravel.schemacompiler.loader.LoaderValidationMessageKeys;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
-import org.opentravel.schemacompiler.repository.impl.ReleaseFileUtils;
-import org.opentravel.schemacompiler.repository.impl.ReleaseLibraryModuleLoader;
-import org.opentravel.schemacompiler.repository.impl.RepositoryItemImpl;
+import org.opentravel.schemacompiler.repository.ProjectManager;
+import org.opentravel.schemacompiler.repository.RepositoryException;
+import org.opentravel.schemacompiler.repository.RepositoryItem;
+import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.saver.LibrarySaveException;
 import org.opentravel.schemacompiler.transform.util.ModelReferenceResolver;
 import org.opentravel.schemacompiler.util.ExceptionUtils;
@@ -46,7 +40,6 @@ import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.compile.TLModelCompileValidator;
-import org.opentravel.schemacompiler.xml.XMLGregorianCalendarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,10 +51,11 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 	
     private static final Logger log = LoggerFactory.getLogger( ReleaseManager.class );
     
-	private ReleaseType release;
-	private File releaseFile;
+	private Release release;
+	private File releaseFolder;
 	private TLModel model;
 	private RepositoryManager repositoryManager;
+	private ReleaseFileUtils fileUtils;
 	
 	/**
 	 * Default constructor.
@@ -79,6 +73,7 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 	 */
 	public ReleaseManager(RepositoryManager repositoryManager) {
 		this.repositoryManager = repositoryManager;
+		this.fileUtils = new ReleaseFileUtils( repositoryManager );
 		this.model = new TLModel();
 		new ProjectManager( model, false, repositoryManager );
 	}
@@ -98,21 +93,15 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 				|| baseNamespace.trim().equals("") || name.trim().equals("")) {
 			throw new IllegalArgumentException("The namespace and name of a new release cannot be null or blank.");
 		}
-		ReleaseIdentityType releaseId = new ReleaseIdentityType();
-		String releaseFilename = name.replaceAll( "\\s", "_" ) + "_1_0_0.otr";
-		
-		this.releaseFile = new File( folderLocation, releaseFilename );
 		this.model.clearModel();
-		this.release = new ReleaseType();
+		this.releaseFolder = folderLocation;
+		this.release = new Release();
 		
-		releaseId.setBaseNamespace( baseNamespace );
-		releaseId.setName( name );
-		releaseId.setFilename( releaseFilename );
-		releaseId.setVersion( "1.0.0" );
-		release.setReleaseIdentity( releaseId );
+		release.setBaseNamespace( baseNamespace );
+		release.setName( name );
+		release.setVersion( "1.0.0" );
 		release.setStatus( ReleaseStatus.DRAFT );
-		release.setPrincipalItems( new PrincipalItemsType() );
-		release.setReferencedItems( new ReferencedItemsType() );
+		
 		saveRelease();
 	}
 	
@@ -129,13 +118,13 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 			
 			// Clear any existing release & model info so we will not be left in an inconsistent
 			// state if something goes wrong during the load.
-			this.release = null;
-			this.releaseFile = null;
 			this.model = null;
+			this.release = null;
+			this.releaseFolder = null;
 			
-			this.release = ReleaseFileUtils.loadReleaseFile( releaseFile, findings );
+			this.release = fileUtils.loadReleaseFile( releaseFile, findings );
+			this.releaseFolder = releaseFile.getParentFile();
 			loadReleaseModel( findings );
-			this.releaseFile = releaseFile;
 			return findings;
 			
 		} catch (LibraryLoaderException e) {
@@ -154,18 +143,18 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 	 */
 	public void saveRelease() throws LibrarySaveException {
 		checkModificationAllowed();
-		ReleaseFileUtils.saveReleaseFile( release, releaseFile );
+		fileUtils.saveReleaseFile( release, releaseFolder );
 	}
 	
 	/**
-	 * Returns true if the given repository item is among the principal items
-	 * of the current release.
+	 * Returns the corresponding release item from the principal items of the release
+	 * or null if no corresponding item exists.
 	 * 
-	 * @param item  the repository item to check
-	 * @return boolean
+	 * @param item  the repository item for which to return a release item
+	 * @return ReleaseItem
 	 */
-	public boolean isPrincipalItem(RepositoryItem item) {
-		return (findReleaseItem( item, true, false ) != null);
+	public ReleaseItem getPrincipalItem(RepositoryItem item) {
+		return findReleaseItem( item, true, false );
 	}
 	
 	/**
@@ -175,17 +164,15 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 	 * principal members.
 	 * 
 	 * @param item  the repository item to be added
-	 * @return ReleaseItemType
+	 * @return ReleaseItem
 	 * @throws RepositoryException  thrown if the repository item cannot be located
 	 * @throws IllegalStateException  thrown if a release has not been created or loaded
 	 *								  for this manager
 	 * @throws UnsupportedOperationException  thrown if the release is remotely-managed
 	 *										  and therefore cannot be modified
 	 */
-	public ReleaseItemType addPrincipalItem(RepositoryItem item) {
-		return addPrincipalItem( item,
-				(release == null) ? null :
-					XMLGregorianCalendarConverter.toJavaDate( release.getDefaultEffectiveDate() ) );
+	public ReleaseItem addPrincipalItem(RepositoryItem item) {
+		return addPrincipalItem( item, release.getDefaultEffectiveDate() );
 	}
 	
 	/**
@@ -196,32 +183,29 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 	 * 
 	 * @param item  the repository item to be added
 	 * @param effectiveDate  the effective date to apply for the item (null for latest commit)
-	 * @return ReleaseItemType
+	 * @return ReleaseItem
 	 * @throws RepositoryException  thrown if the repository item cannot be located
 	 * @throws IllegalStateException  thrown if a release has not been created or loaded
 	 *								  for this manager
 	 * @throws UnsupportedOperationException  thrown if the release is remotely-managed
 	 *										  and therefore cannot be modified
 	 */
-	public ReleaseItemType addPrincipalItem(RepositoryItem item, Date effectiveDate) {
-		ReleaseItemType releaseItem = findReleaseItem( item, true, false );
+	public ReleaseItem addPrincipalItem(RepositoryItem item, Date effectiveDate) {
+		ReleaseItem releaseItem = findReleaseItem( item, true, false );
 		checkModificationAllowed();
 		
 		if (releaseItem == null) {
 			releaseItem = findReleaseItem( item, false, true );
 			
 			if (releaseItem != null) { // move from referenced to principal list
-				release.getReferencedItems().getReleaseItem().remove( releaseItem );
+				release.getReferencedItems().remove( releaseItem );
 				
 			} else { // brand new item for this release
-				releaseItem = new ReleaseItemType();
-				releaseItem.setRepositoryID( item.getRepository().getId() );
-				releaseItem.setBaseNamespace( item.getBaseNamespace() );
-				releaseItem.setFilename( item.getFilename() );
-				releaseItem.setVersion( item.getVersion() );
+				releaseItem = new ReleaseItem();
+				releaseItem.setRepositoryItem( item );
 			}
-			release.getPrincipalItems().getReleaseItem().add( releaseItem );
-			setEffectiveDate( releaseItem, effectiveDate );
+			release.getPrincipalItems().add( releaseItem );
+			releaseItem.setEffectiveDate( effectiveDate );
 		}
 		return releaseItem;
 	}
@@ -238,72 +222,23 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 	 *										  and therefore cannot be modified
 	 */
 	public void removePrincipalItem(RepositoryItem item) {
-		ReleaseItemType releaseItem = findReleaseItem( item, true, true );
+		ReleaseItem releaseItem = findReleaseItem( item, true, true );
 		
 		if (releaseItem != null) {
-			release.getPrincipalItems().getReleaseItem().remove( releaseItem );
-			release.getReferencedItems().getReleaseItem().remove( releaseItem );
+			release.getPrincipalItems().remove( releaseItem );
+			release.getReferencedItems().remove( releaseItem );
 		}
 	}
 	
 	/**
-	 * Returns true if the given repository item is among the referenced items
-	 * of the current release.
+	 * Returns the corresponding release item from the referenced items of the release
+	 * or null if no corresponding item exists.
 	 * 
-	 * @param item  the repository item to check
-	 * @return boolean
+	 * @param item  the repository item for which to return a release item
+	 * @return ReleaseItem
 	 */
-	public boolean isReferencedItem(RepositoryItem item) {
-		return (findReleaseItem( item, false, true ) != null);
-	}
-	
-	/**
-	 * Returns the effective date for the given repository item.  If the item is not
-	 * a member of the current release or no effective date is assigned, this method
-	 * will return null.
-	 * 
-	 * @param item  the repository item for which to return an effective date
-	 * @return Date
-	 */
-	public Date getEffectiveDate(RepositoryItem item) {
-		ReleaseItemType releaseItem = findReleaseItem( item, true, true );
-		
-		return getEffectiveDate( releaseItem );
-	}
-	
-	/**
-	 * Assigns the effective date of the given repository item in the current release.  The
-	 * item may be a principal or referenced item.
-	 * 
-	 * @param item  the repository item for which to set the effective date
-	 * @param effectiveDate  the effective date to assign to the item (null for latest commit)
-	 */
-	public void setEffectiveDate(RepositoryItem item, Date effectiveDate) {
-		setEffectiveDate( findReleaseItem( item, true, true ), effectiveDate );
-	}
-	
-	/**
-	 * Assigns the effective date of the given release item.
-	 * 
-	 * @param item  the release item for which to set the effective date
-	 * @param effectiveDate  the effective date to assign to the item
-	 */
-	public void setEffectiveDate(ReleaseItemType item, Date effectiveDate) {
-		if (item != null) {
-			item.setEffectiveDate(
-					XMLGregorianCalendarConverter.toXMLGregorianCalendar( effectiveDate ) );
-		}
-	}
-	
-	/**
-	 * Assigns the effective date that will be used for all new items (principal and
-	 * referenced) for which an effective date is not otherwise specified.
-	 * 
-	 * @param effectiveDate  the default effective date for the current release
-	 */
-	public void setDefaultEffectiveDate(Date effectiveDate) {
-		release.setDefaultEffectiveDate(
-				XMLGregorianCalendarConverter.toXMLGregorianCalendar( effectiveDate ) );
+	public ReleaseItem getReferencedItem(RepositoryItem item) {
+		return findReleaseItem( item, false, true );
 	}
 	
 	/**
@@ -327,9 +262,9 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 	/**
 	 * Returns the release that was loaded by this manager.
 	 * 
-	 * @return ReleaseType
+	 * @return Release
 	 */
-	public ReleaseType getRelease() {
+	public Release getRelease() {
 		return release;
 	}
 	
@@ -373,11 +308,10 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 		modelLoader.setResolveModelReferences( false );
 		
 		// Only force-load the principal items; referenced items will be refreshed
-		for (ReleaseItemType principalItem : release.getPrincipalItems().getReleaseItem()) {
-			RepositoryItem repoItem = getRepositoryItem( principalItem );
-			Date effectiveDate = getEffectiveDate( principalItem );
+		for (ReleaseItem principalItem : release.getPrincipalItems()) {
 			LibraryInputSource<InputStream> inputSource =
-					repositoryManager.getHistoricalContentSource( repoItem, effectiveDate );
+					repositoryManager.getHistoricalContentSource(
+							principalItem.getRepositoryItem(), principalItem.getEffectiveDate() );
 			
 			modelLoader.loadLibraryModel( inputSource );
 		}
@@ -419,28 +353,19 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 		if (release == null) {
 			throw new IllegalStateException("Unable to add - no release has been created or loaded.");
 		}
-		if ((releaseFile != null) && isRepositoryFile( releaseFile )) {
-			throw new UnsupportedOperationException("Releases published to an OTM repository cannot be modified.");
+		try {
+			File releaseFile = new File( releaseFolder, fileUtils.getReleaseFilename( release ) );
+			
+			if ((releaseFile != null) && isRepositoryFile( releaseFile )) {
+				throw new UnsupportedOperationException("Releases published to an OTM repository cannot be modified.");
+			}
+			
+		} catch (IllegalArgumentException e) {
+			throw new UnsupportedOperationException(
+					"The release is missing key information (member libraries cannot be modified).");
 		}
     }
 
-    /**
-     * Returns a repository item that matches all aspects of the given release
-     * item except for the effective date specification.
-     * 
-     * @param releaseItem  the release item from which to create the repository item
-     * @return RepositoryItem
-     */
-    private RepositoryItem getRepositoryItem(ReleaseItemType releaseItem) {
-    	RepositoryItemImpl repoItem = new RepositoryItemImpl();
-    	
-    	repoItem.setRepository( repositoryManager.getRepository( releaseItem.getRepositoryID() ) );
-    	repoItem.setBaseNamespace( releaseItem.getBaseNamespace() );
-    	repoItem.setFilename( releaseItem.getFilename() );
-    	repoItem.setVersion( releaseItem.getVersion() );
-    	return repoItem;
-    }
-    
     /**
      * Returns the release item from the current release that corresponds to the
      * given repository item.
@@ -448,23 +373,23 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
      * @param repoItem  the repository item for which to return the corresponding release item
      * @param includePrincipalItems  flag indicating whether principal items should be considered
      * @param includeReferencedItems  flag indicating whether referenced items should be considered
-     * @return ReleaseItemType
+     * @return ReleaseItem
      */
-    private ReleaseItemType findReleaseItem(RepositoryItem repoItem, boolean includePrincipalItems,
+    private ReleaseItem findReleaseItem(RepositoryItem repoItem, boolean includePrincipalItems,
     		boolean includeReferencedItems) {
-    	ReleaseItemType releaseItem = null;
+    	ReleaseItem releaseItem = null;
     	
     	if (release != null) {
-    		List<ReleaseItemType> allItems = new ArrayList<>();
+    		List<ReleaseItem> allItems = new ArrayList<>();
     		
     		if (includePrincipalItems) {
-        		allItems.addAll( release.getPrincipalItems().getReleaseItem() );
+        		allItems.addAll( release.getPrincipalItems() );
     		}
     		if (includeReferencedItems) {
-        		allItems.addAll( release.getReferencedItems().getReleaseItem() );
+        		allItems.addAll( release.getReferencedItems() );
     		}
     		
-    		for (ReleaseItemType item : allItems) {
+    		for (ReleaseItem item : allItems) {
     			if (isEquivalent( item, repoItem )) {
     				releaseItem = item;
     				break;
@@ -481,13 +406,13 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
      * @param repoItem  the repository item to compare
      * @return boolean
      */
-    private boolean isEquivalent(ReleaseItemType releaseItem, RepositoryItem repoItem) {
+    private boolean isEquivalent(ReleaseItem releaseItem, RepositoryItem repoItem) {
     	boolean result = false;
     	
-    	if ((releaseItem != null) && (repoItem != null)) {
-        	String releaseNS = releaseItem.getBaseNamespace();
-        	String releaseFilename = releaseItem.getFilename();
-        	String releaseVersion = releaseItem.getVersion();
+    	if ((releaseItem != null) && (releaseItem.getRepositoryItem() != null) && (repoItem != null)) {
+        	String releaseNS = releaseItem.getRepositoryItem().getBaseNamespace();
+        	String releaseFilename = releaseItem.getRepositoryItem().getFilename();
+        	String releaseVersion = releaseItem.getRepositoryItem().getVersion();
     		
         	result = (releaseNS != null) && (releaseFilename != null) && (releaseVersion != null)
         			&& releaseNS.equals( repoItem.getBaseNamespace() )
@@ -518,24 +443,6 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
             }
         }
         return result;
-    }
-    
-    /**
-     * Returns the effective date of the given release item as a Java date
-     * instance.  This is a convenience method for translating the
-     * <code>XMLGregorianCalendar</code> date value.
-     * 
-     * @param releaseItem  the release item for which to return an effective date
-     * @return Date
-     */
-    public static Date getEffectiveDate(ReleaseItemType releaseItem) {
-    	XMLGregorianCalendar jaxbDate = (releaseItem == null) ? null : releaseItem.getEffectiveDate();
-    	Date effectiveDate = null;
-    	
-    	if (jaxbDate != null) {
-    		effectiveDate = XMLGregorianCalendarConverter.toJavaDate( jaxbDate );
-    	}
-    	return effectiveDate;
     }
     
 }

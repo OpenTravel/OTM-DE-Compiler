@@ -62,9 +62,11 @@
 	<xsd:element name="PreferredFacet" type="PreferredFacetType" />
 	<xsd:complexType name="PreferredFacetType">
 		<xsd:simpleContent>
-			<xsd:extension base="String_Short">
-				<xsd:attribute name="namespace" type="String_Short" use="required"/>
-				<xsd:attribute name="localName" type="String_Short" use="required"/>
+			<xsd:extension base="Empty_String">
+				<xsd:attribute name="ownerNamespace" type="String_Short" use="required"/>
+				<xsd:attribute name="ownerName" type="String_Short" use="required"/>
+				<xsd:attribute name="facetNamespace" type="String_Short" use="required"/>
+				<xsd:attribute name="facetName" type="String_Short" use="required"/>
 			</xsd:extension>
 		</xsd:simpleContent>
 	</xsd:complexType>
@@ -92,6 +94,12 @@
 	<xsd:simpleType name="String_Short">
 		<xsd:restriction base="xsd:string">
 			<xsd:maxLength value="256" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="Empty_String">
+		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="0" />
 		</xsd:restriction>
 	</xsd:simpleType>
 

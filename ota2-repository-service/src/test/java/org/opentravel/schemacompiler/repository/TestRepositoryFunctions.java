@@ -31,6 +31,7 @@ import org.junit.Test;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.model.TLModel;
+import org.opentravel.schemacompiler.release.ReleaseManager;
 import org.opentravel.schemacompiler.repository.Project;
 import org.opentravel.schemacompiler.repository.ProjectItem;
 import org.opentravel.schemacompiler.repository.ProjectManager;
@@ -81,60 +82,6 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         test_19_DeleteRootNamespace();
     }
 
-    public void test_11_createBetaAndFinalReleases() throws Exception {
-        if (DEBUG)
-            System.out.println("CREATE RELEASES - Creating beta and final releases. ["
-                    + getClass().getSimpleName() + "]");
-        
-        // Load the project that contains the library we have been making updates to
-        ProjectManager projectManager = new ProjectManager(new TLModel(), true,
-                repositoryManager.get());
-        File projectFile = new File(wipFolder.get(), "/projects/project_1.xml");
-
-        if (!projectFile.exists()) {
-            throw new FileNotFoundException("Test File Not Found: " + projectFile.getAbsolutePath());
-        }
-
-        ValidationFindings findings = new ValidationFindings();
-        Project project = projectManager.loadProject(projectFile, findings);
-        ProjectItem projectItem = findProjectItem(project, "library_1_p2_2_0_0.otm");
-        
-        // Verify that the project loaded correctly
-        if (findings.hasFinding(FindingType.ERROR)) {
-            RepositoryTestUtils.printFindings(findings);
-        }
-        assertFalse(findings.hasFinding(FindingType.ERROR));
-        assertNotNull(projectItem);
-        
-        // Create a release for the main project item
-        RepositoryItemHistory history = repositoryManager.get().getHistory( projectItem );
-    	ReleaseManager releaseManager = new ReleaseManager( repositoryManager.get() );
-    	ValidationFindings releaseFindings = new ValidationFindings();
-    	RepositoryItemCommit commit = history.getCommitHistory().get( 1 );
-    	
-    	releaseManager.createNewRelease(
-    			"http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package",
-    			"TestRelease", wipFolder.get() );
-    	releaseManager.setDefaultEffectiveDate( commit.getEffectiveOn() );
-    	releaseManager.addPrincipalItem( projectItem );
-    	releaseManager.loadReleaseModel( releaseFindings );
-    	releaseManager.saveRelease();
-    	
-        // Verify that the release loaded correctly
-        if (releaseFindings.hasFinding(FindingType.ERROR)) {
-            RepositoryTestUtils.printFindings(releaseFindings);
-        }
-        assertFalse(releaseFindings.hasFinding(FindingType.ERROR));
-    }
-    
-    public void test_12_publishRelease() throws Exception {
-    	
-    }
-    
-    public void test_13_deleteRelease() throws Exception {
-    	
-    }
-    
     public void test_01_PublishLibrary() throws Exception {
         if (DEBUG)
             System.out.println("PUBLISH - Publishing new content to the remote repository. ["
@@ -500,6 +447,60 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         	assertNotNull(itemCommit.getEffectiveOn());
         	assertNotNull(itemCommit.getRemarks());
         }
+    }
+    
+    public void test_11_createBetaAndFinalReleases() throws Exception {
+        if (DEBUG)
+            System.out.println("CREATE RELEASES - Creating beta and final releases. ["
+                    + getClass().getSimpleName() + "]");
+        
+        // Load the project that contains the library we have been making updates to
+        ProjectManager projectManager = new ProjectManager(new TLModel(), true,
+                repositoryManager.get());
+        File projectFile = new File(wipFolder.get(), "/projects/project_1.xml");
+
+        if (!projectFile.exists()) {
+            throw new FileNotFoundException("Test File Not Found: " + projectFile.getAbsolutePath());
+        }
+
+        ValidationFindings findings = new ValidationFindings();
+        Project project = projectManager.loadProject(projectFile, findings);
+        ProjectItem projectItem = findProjectItem(project, "library_1_p2_2_0_0.otm");
+        
+        // Verify that the project loaded correctly
+        if (findings.hasFinding(FindingType.ERROR)) {
+            RepositoryTestUtils.printFindings(findings);
+        }
+        assertFalse(findings.hasFinding(FindingType.ERROR));
+        assertNotNull(projectItem);
+        
+        // Create a release for the main project item
+        RepositoryItemHistory history = repositoryManager.get().getHistory( projectItem );
+    	ReleaseManager releaseManager = new ReleaseManager( repositoryManager.get() );
+    	ValidationFindings releaseFindings = new ValidationFindings();
+    	RepositoryItemCommit commit = history.getCommitHistory().get( 1 );
+    	
+    	releaseManager.createNewRelease(
+    			"http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package",
+    			"TestRelease", wipFolder.get() );
+    	releaseManager.getRelease().setDefaultEffectiveDate( commit.getEffectiveOn() );
+    	releaseManager.addPrincipalItem( projectItem );
+    	releaseManager.loadReleaseModel( releaseFindings );
+    	releaseManager.saveRelease();
+    	
+        // Verify that the release loaded correctly
+        if (releaseFindings.hasFinding(FindingType.ERROR)) {
+            RepositoryTestUtils.printFindings(releaseFindings);
+        }
+        assertFalse(releaseFindings.hasFinding(FindingType.ERROR));
+    }
+    
+    public void test_12_publishRelease() throws Exception {
+    	// TODO: Implement the test_12_publishRelease() method
+    }
+    
+    public void test_13_deleteRelease() throws Exception {
+    	// TODO: Implement the test_13_deleteRelease() method
     }
     
     public void test_14_DeleteLibrary() throws Exception {

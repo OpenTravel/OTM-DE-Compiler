@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.repository.impl;
+package org.opentravel.schemacompiler.release;
 
 import java.io.File;
 import java.io.InputStream;
@@ -24,19 +24,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.opentravel.ns.ota2.release_v01_00.ReleaseItemType;
-import org.opentravel.ns.ota2.release_v01_00.ReleaseType;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.loader.LibraryModuleInfo;
 import org.opentravel.schemacompiler.loader.LibraryModuleLoader;
-import org.opentravel.schemacompiler.repository.ReleaseManager;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
-import org.opentravel.schemacompiler.xml.XMLGregorianCalendarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3._2001.xmlschema.Schema;
@@ -79,22 +75,18 @@ public class ReleaseLibraryModuleLoader implements LibraryModuleLoader<InputStre
 	 * 
 	 * @param release  the OTM release whose referenced items should be updated
 	 */
-	public void updateReferencedItems(ReleaseType release) {
+	public void updateReferencedItems(Release release) {
 		
-		release.getReferencedItems().getReleaseItem().clear();
+		release.getReferencedItems().clear();
 		
 		for (String itemKey : referencedItemKeys) {
 			RepositoryItem repoItem = referencedItems.get( itemKey );
 			Date effectiveDate = effectiveDates.get( itemKey );
-			ReleaseItemType releaseItem = new ReleaseItemType();
+			ReleaseItem releaseItem = new ReleaseItem();
 			
-			releaseItem.setRepositoryID( repoItem.getRepository().getId() );
-			releaseItem.setBaseNamespace( repoItem.getBaseNamespace() );
-			releaseItem.setFilename( repoItem.getFilename() );
-			releaseItem.setVersion( repoItem.getVersion() );
-			releaseItem.setEffectiveDate( XMLGregorianCalendarConverter.
-					toXMLGregorianCalendar( effectiveDate ) );
-			release.getReferencedItems().getReleaseItem().add( releaseItem );
+			releaseItem.setRepositoryItem( repoItem );
+			releaseItem.setEffectiveDate( effectiveDate );
+			release.getReferencedItems().add( releaseItem );
 		}
 	}
 
@@ -112,16 +104,18 @@ public class ReleaseLibraryModuleLoader implements LibraryModuleLoader<InputStre
 				RepositoryItem item = releaseManager.getRepositoryItem( libraryUrl );
 				
 				if (item != null) {
-					boolean isPrincipalItem = releaseManager.isPrincipalItem( item );
-					boolean isReferencedItem = releaseManager.isReferencedItem( item );
+					ReleaseItem principalItem = releaseManager.getPrincipalItem( item );
+					ReleaseItem referencedItem = releaseManager.getReferencedItem( item );
 					Date effectiveDate;
 					
-					if (isPrincipalItem || isReferencedItem) {
-						effectiveDate = releaseManager.getEffectiveDate( item );
+					if (principalItem != null) {
+						effectiveDate = principalItem.getEffectiveDate();
+						
+					} else if (referencedItem != null) {
+						effectiveDate = referencedItem.getEffectiveDate();
 						
 					} else {
-						effectiveDate = XMLGregorianCalendarConverter.toJavaDate(
-								releaseManager.getRelease().getDefaultEffectiveDate() );
+						effectiveDate = releaseManager.getRelease().getDefaultEffectiveDate();
 					}
 					
 					// Only need a date-effective input source if we have an effective date specified
@@ -131,7 +125,7 @@ public class ReleaseLibraryModuleLoader implements LibraryModuleLoader<InputStre
 						inputSource = repositoryManager.getHistoricalContentSource( item, effectiveDate );
 					}
 					
-					if (!isPrincipalItem) {
+					if (principalItem != null) {
 						String itemKey = item.toURI( true ).toString();
 						
 						if (!referencedItemKeys.contains( itemKey )) {
