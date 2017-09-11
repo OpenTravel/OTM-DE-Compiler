@@ -13,19 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.release;
+package org.opentravel.schemacompiler.repository;
 
 import java.util.Date;
 
-import org.opentravel.schemacompiler.repository.RepositoryItem;
-
 /**
- * Specifies a single library member of an OTM release.  All release items are
+ * Specifies a single library member of an OTM release.  All release members are
  * required to be managed in an OTM repository.  In addition to specifying the
- * library itself, each release item can specify an effective date based on that
- * item's commit history in the repository.
+ * library itself, each release member can specify an effective date based on the
+ * library's commit history in the repository.
  */
-public class ReleaseItem {
+public class ReleaseMember {
 	
 	private RepositoryItem repositoryItem;
 	private Date effectiveDate;

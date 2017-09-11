@@ -706,6 +706,15 @@ public class RepositoryManager implements Repository {
 	@Override
 	public List<RepositoryItem> listItems(String baseNamespace, TLLibraryStatus includeStatus,
 			boolean latestVersionsOnly) throws RepositoryException {
+		return listItems( baseNamespace, includeStatus, latestVersionsOnly, RepositoryItemType.LIBRARY );
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.repository.Repository#listItems(java.lang.String, org.opentravel.schemacompiler.model.TLLibraryStatus, boolean, org.opentravel.schemacompiler.repository.RepositoryItemType)
+	 */
+	@Override
+	public List<RepositoryItem> listItems(String baseNamespace, TLLibraryStatus includeStatus,
+			boolean latestVersionsOnly, RepositoryItemType itemType) throws RepositoryException {
         String baseNS = RepositoryNamespaceUtils.normalizeUri(baseNamespace);
         Map<String, List<RepositoryItemVersionedWrapper>> libraryVersionMap = new HashMap<String, List<RepositoryItemVersionedWrapper>>();
         List<LibraryInfoType> metadataList = fileManager.loadLibraryMetadataRecords(baseNS);
@@ -714,7 +723,11 @@ public class RepositoryManager implements Repository {
         for (LibraryInfoType itemMetadata : metadataList) {
         	TLLibraryStatus itemStatus = RepositoryUtils.getLibraryStatus( itemMetadata.getStatus() );
         	
-            // Create a map that groups each library's versions together
+        	// Skip items that do not match the required item type
+        	if ((itemType != null) && itemType.isItemType( itemMetadata.getFilename() )) {
+        	}
+        	
+            // Create a map that groups each item's versions together
             if (localRepositoryId.equals(itemMetadata.getOwningRepository())
                     && RepositoryUtils.isInclusiveStatus(itemStatus, includeStatus)) {
                 RepositoryItem item = RepositoryUtils.createRepositoryItem(this, itemMetadata);
@@ -729,7 +742,7 @@ public class RepositoryManager implements Repository {
             }
         }
         
-        // Sort the results by library name first, then by descending version number
+        // Sort the results by the item's name first, then by descending version number
         List<String> libraryNames = new ArrayList<String>();
 
         libraryNames.addAll(libraryVersionMap.keySet());
@@ -799,12 +812,21 @@ public class RepositoryManager implements Repository {
 	@Override
 	public List<RepositorySearchResult> search(String freeTextQuery, TLLibraryStatus includeStatus,
 			boolean latestVersionsOnly) throws RepositoryException {
+		return search( freeTextQuery, includeStatus, latestVersionsOnly, RepositoryItemType.LIBRARY );
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.repository.Repository#search(java.lang.String, org.opentravel.schemacompiler.model.TLLibraryStatus, boolean, org.opentravel.schemacompiler.repository.RepositoryItemType)
+	 */
+	@Override
+	public List<RepositorySearchResult> search(String freeTextQuery, TLLibraryStatus includeStatus,
+			boolean latestVersionsOnly, RepositoryItemType itemType) throws RepositoryException {
         List<RepositorySearchResult> searchResults = new ArrayList<>();
 
         for (RemoteRepository repository : remoteRepositories) {
             try {
                 List<RepositorySearchResult> resultList = repository.search(freeTextQuery,
-                        includeStatus, latestVersionsOnly);
+                        includeStatus, latestVersionsOnly, itemType);
                 
                 searchResults.addAll( resultList );
 

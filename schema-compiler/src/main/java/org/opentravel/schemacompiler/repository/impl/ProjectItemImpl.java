@@ -79,14 +79,12 @@ public class ProjectItemImpl extends RepositoryItemImpl implements ProjectItem {
     /**
      * Returns a new managed project item instance.
      * 
-     * @param libraryFile
-     *            the local file associated with the library content provided
+     * @param repositoryItem
+     *            the repository item for which to create a managed project item
      * @param libraryContent
      *            the content of the library
      * @param projectManager
      *            the project manager that owns the the item
-     * @param repositoryItem
-     *            the repository item for which to create a managed project item
      * @return ProjectItem
      */
     public static ProjectItem newManagedItem(RepositoryItem repositoryItem,

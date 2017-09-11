@@ -275,14 +275,17 @@ public class RepositoryContentResource {
     @Produces(MediaType.TEXT_XML)
     public JAXBElement<LibraryInfoListType> listItemsForNamespace2(
             JAXBElement<ListItems2RQType> listItemsRQ,
+            @QueryParam("itemType") String itemTypeStr,
             @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
 
         Map<String, Map<TLLibraryStatus, Boolean>> accessibleItemCache = new HashMap<String, Map<TLLibraryStatus, Boolean>>();
+        RepositoryItemType itemType = getItemType( itemTypeStr );
         List<RepositoryItem> namespaceItems = repositoryManager.listItems(
         		listItemsRQ.getValue().getNamespace(), getStatus( listItemsRQ.getValue().getIncludeStatus().toString() ),
-        		listItemsRQ.getValue().isLatestVersionOnly());
+        		listItemsRQ.getValue().isLatestVersionOnly(), itemType );
         UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
         LibraryInfoListType metadataList = new LibraryInfoListType();
+        
 
         for (RepositoryItem item : namespaceItems) {
             if (isReadable(item, user, accessibleItemCache)) {
@@ -361,15 +364,19 @@ public class RepositoryContentResource {
     public JAXBElement<SearchResultsListType> search(@QueryParam("query") String freeTextQuery,
             @QueryParam("latestVersion") boolean latestVersionsOnly,
             @QueryParam("includeStatus") String includeStatusStr,
+            @QueryParam("itemType") String itemTypeStr,
             @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
 
         Map<String, Map<TLLibraryStatus, Boolean>> accessibleItemCache = new HashMap<String, Map<TLLibraryStatus, Boolean>>();
         TLLibraryStatus searchStatus = getStatus( includeStatusStr );
+        RepositoryItemType itemType = getItemType( itemTypeStr );
         List<SearchResult<?>> searchResults = FreeTextSearchServiceFactory.getInstance().search(
                 freeTextQuery, searchStatus, latestVersionsOnly, false );
         UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
         SearchResultsListType resultsList = new SearchResultsListType();
         Set<String> referencedLibraryIds = new HashSet<>();
+        
+        // TODO: Filter search results based on itemType parameter
         
         // First pass to build the list of referenced libraries
         for (SearchResult<?> result : searchResults) {
@@ -1542,6 +1549,24 @@ public class RepositoryContentResource {
     		
     	} catch (IllegalArgumentException e) {
     		throw new RepositoryException("Unknown library status: " + statusStr);
+    	}
+    }
+    
+    /**
+     * Returns the item type enumeration from the given string value, or null if the string
+     * is null or empty.
+     * 
+     * @param itemTypeStr  the item type string for which to return the enumeration value
+     * @return RepositoryItemType
+     * @throws RepositoryException  thrown if the item type string value is not valid
+     */
+    private RepositoryItemType getItemType(String itemTypeStr) throws RepositoryException {
+    	try {
+    		return ((itemTypeStr == null) || (itemTypeStr.length() == 0)) ?
+    				null : RepositoryItemType.valueOf( itemTypeStr );
+    		
+    	} catch (IllegalArgumentException e) {
+    		throw new RepositoryException("Unknown repository item type: " + itemTypeStr);
     	}
     }
     

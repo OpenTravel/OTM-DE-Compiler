@@ -24,23 +24,19 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.opentravel.ns.ota2.release_v01_00.ReleaseStatus;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.model.TLModel;
-import org.opentravel.schemacompiler.release.ReleaseManager;
-import org.opentravel.schemacompiler.repository.Project;
-import org.opentravel.schemacompiler.repository.ProjectItem;
-import org.opentravel.schemacompiler.repository.ProjectManager;
-import org.opentravel.schemacompiler.repository.PublishWithLocalDependenciesException;
-import org.opentravel.schemacompiler.repository.RepositoryException;
-import org.opentravel.schemacompiler.repository.RepositoryItem;
-import org.opentravel.schemacompiler.repository.RepositoryItemState;
 import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.util.RepositoryTestUtils;
+import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 
@@ -70,16 +66,17 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         test_08_DemoteLibrary();
         test_09_UpdateLibraryStatus();
         test_10_GetLibraryHistory();
-    	test_11_createBetaAndFinalReleases();
+        test_11_createRelease();
     	test_12_publishRelease();
-    	test_13_deleteRelease();
-        test_14_DeleteLibrary();
-        test_15_CreateNamespace();
-        test_15a_CreateNamespaceError();
-        test_16_ListNamespaceChildren();
-        test_17_DeleteNamespace();
-        test_18_CreateRootNamespace();
-        test_19_DeleteRootNamespace();
+    	test_13_newReleaseVersion();
+    	test_14_unpublishRelease();
+        test_15_DeleteLibrary();
+        test_16_CreateNamespace();
+        test_16a_CreateNamespaceError();
+        test_17_ListNamespaceChildren();
+        test_18_DeleteNamespace();
+        test_19_CreateRootNamespace();
+        test_20_DeleteRootNamespace();
     }
 
     public void test_01_PublishLibrary() throws Exception {
@@ -447,11 +444,13 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         	assertNotNull(itemCommit.getEffectiveOn());
         	assertNotNull(itemCommit.getRemarks());
         }
+        if (DEBUG)
+            System.out.println("DONE - Success.");
     }
     
-    public void test_11_createBetaAndFinalReleases() throws Exception {
+    public void test_11_createRelease() throws Exception {
         if (DEBUG)
-            System.out.println("CREATE RELEASES - Creating beta and final releases. ["
+            System.out.println("CREATE RELEASE - Creating beta release. ["
                     + getClass().getSimpleName() + "]");
         
         // Load the project that contains the library we have been making updates to
@@ -467,7 +466,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         Project project = projectManager.loadProject(projectFile, findings);
         ProjectItem projectItem = findProjectItem(project, "library_1_p2_2_0_0.otm");
         
-        // Verify that the project loaded correctly
+        // Verify that the release loaded correctly
         if (findings.hasFinding(FindingType.ERROR)) {
             RepositoryTestUtils.printFindings(findings);
         }
@@ -484,7 +483,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
     			"http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package",
     			"TestRelease", wipFolder.get() );
     	releaseManager.getRelease().setDefaultEffectiveDate( commit.getEffectiveOn() );
-    	releaseManager.addPrincipalItem( projectItem );
+    	releaseManager.addPrincipalMember( projectItem );
     	releaseManager.loadReleaseModel( releaseFindings );
     	releaseManager.saveRelease();
     	
@@ -493,17 +492,156 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
             RepositoryTestUtils.printFindings(releaseFindings);
         }
         assertFalse(releaseFindings.hasFinding(FindingType.ERROR));
+        assertEquals(ReleaseStatus.DRAFT, releaseManager.getRelease().getStatus());
+        
+        // Verify that all principal and referenced libraries were identified
+        Release release = releaseManager.getRelease();
+        Set<String> principalFilenames = getReleaseItemFilenames( release.getPrincipalMembers() );
+        Set<String> referencedFilenames = getReleaseItemFilenames( release.getReferencedMembers() );
+        
+        assertEquals( 1, principalFilenames.size() );
+        assertEquals( 3, referencedFilenames.size() );
+        assertTrue( principalFilenames.contains( "library_1_p2_2_0_0.otm" ) );
+        assertTrue( referencedFilenames.contains( "library_2_p2_2_0_0.otm" ) );
+        assertTrue( referencedFilenames.contains( "library_2_p1_1_0_0.otm" ) );
+        assertTrue( referencedFilenames.contains( "library_1_p1_1_0_0.otm" ) );
+        if (DEBUG)
+            System.out.println("DONE - Success.");
     }
     
     public void test_12_publishRelease() throws Exception {
-    	// TODO: Implement the test_12_publishRelease() method
+        if (DEBUG)
+            System.out.println("PUBLISH RELEASE - Publishing release to repository. ["
+                    + getClass().getSimpleName() + "]");
+    	ReleaseManager releaseManager = new ReleaseManager( repositoryManager.get() );
+    	File releaseFile = new File( wipFolder.get(), "/TestRelease_1_0_0.otr" );
+    	ValidationFindings findings = new ValidationFindings();
+    	
+    	releaseManager.loadRelease( releaseFile, findings );
+    	
+        if (findings.hasFinding(FindingType.ERROR)) {
+            RepositoryTestUtils.printFindings(findings);
+        }
+        assertFalse(findings.hasFinding(FindingType.ERROR));
+        
+        ReleaseItem releaseItem = releaseManager.publishRelease( testRepository.get() );
+        
+        assertNotNull(releaseItem);
+        assertNotNull(releaseItem.getContent());
+        assertNotNull(releaseItem.getRepository());
+        assertEquals("TestRelease_1_0_0.otr", releaseItem.getFilename());
+        assertEquals(RepositoryItemState.MANAGED_UNLOCKED, releaseItem.getState());
+        assertEquals(TLLibraryStatus.FINAL, releaseItem.getStatus());
+        assertEquals(ReleaseStatus.BETA, releaseManager.getRelease().getStatus());
+        if (DEBUG)
+            System.out.println("DONE - Success.");
     }
     
-    public void test_13_deleteRelease() throws Exception {
-    	// TODO: Implement the test_13_deleteRelease() method
+    public void test_13_newReleaseVersion() throws Exception {
+        if (DEBUG)
+            System.out.println("NEW RELEASE VERSION - Creating new version of a release. ["
+                    + getClass().getSimpleName() + "]");
+        ValidationFindings findings = new ValidationFindings();
+    	ReleaseManager releaseManager = new ReleaseManager( repositoryManager.get() );
+    	ReleaseManager newVersionReleaseManager;
+    	
+    	loadManagedRelease( "TestRelease_1_0_0.otr", releaseManager );
+    	newVersionReleaseManager = releaseManager.newVersion( wipFolder.get(), findings );
+    	
+        if (findings.hasFinding(FindingType.ERROR)) {
+            RepositoryTestUtils.printFindings(findings);
+        }
+        assertFalse(findings.hasFinding(FindingType.ERROR));
+        
+        Set<String> principalFilenames = getReleaseItemFilenames(
+        		newVersionReleaseManager.getRelease().getPrincipalMembers() );
+        Set<String> referencedFilenames = getReleaseItemFilenames(
+        		newVersionReleaseManager.getRelease().getReferencedMembers() );
+        
+        assertNotNull( newVersionReleaseManager );
+        assertNotNull( newVersionReleaseManager.getRelease() );
+        assertEquals( releaseManager.getRelease().getBaseNamespace(),
+        		newVersionReleaseManager.getRelease().getBaseNamespace() );
+        assertEquals( releaseManager.getRelease().getName(),
+        		newVersionReleaseManager.getRelease().getName() );
+        assertEquals( releaseManager.getRelease().getDefaultEffectiveDate(),
+        		newVersionReleaseManager.getRelease().getDefaultEffectiveDate() );
+        assertEquals( "2.0.0", newVersionReleaseManager.getRelease().getVersion() );
+        assertEquals( ReleaseStatus.DRAFT, newVersionReleaseManager.getRelease().getStatus() );
+        
+        assertEquals( 1, principalFilenames.size() );
+        assertEquals( 3, referencedFilenames.size() );
+        assertTrue( principalFilenames.contains( "library_1_p2_2_0_0.otm" ) );
+        assertTrue( referencedFilenames.contains( "library_2_p2_2_0_0.otm" ) );
+        assertTrue( referencedFilenames.contains( "library_2_p1_1_0_0.otm" ) );
+        assertTrue( referencedFilenames.contains( "library_1_p1_1_0_0.otm" ) );
+        
+        if (DEBUG)
+            System.out.println("DONE - Success.");
     }
     
-    public void test_14_DeleteLibrary() throws Exception {
+    public void test_14_unpublishRelease() throws Exception {
+        if (DEBUG)
+            System.out.println("UNPUBLISH RELEASE - Unpublishing a release from the repository. ["
+                    + getClass().getSimpleName() + "]");
+    	ReleaseManager releaseManager = new ReleaseManager( repositoryManager.get() );
+    	ReleaseManager localReleaseManager;
+    	
+    	loadManagedRelease( "TestRelease_1_0_0.otr", releaseManager );
+    	localReleaseManager = releaseManager.unpublishRelease( wipFolder.get() );
+    	
+        assertNotNull( localReleaseManager );
+        assertNotNull( localReleaseManager.getRelease() );
+        assertNotNull( localReleaseManager.getRelease().getReleaseUrl() );
+        assertTrue( URLUtils.isFileURL( localReleaseManager.getRelease().getReleaseUrl() ) );
+        assertEquals( wipFolder.get(), URLUtils.toFile( localReleaseManager.getRelease().getReleaseUrl() ).getParentFile() );
+        assertEquals( "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package",
+        		localReleaseManager.getRelease().getBaseNamespace() );
+        assertEquals( "TestRelease", localReleaseManager.getRelease().getName() );
+        assertNotNull( localReleaseManager.getRelease().getDefaultEffectiveDate() );
+        assertEquals( "1.0.0", localReleaseManager.getRelease().getVersion() );
+        assertEquals( ReleaseStatus.DRAFT, localReleaseManager.getRelease().getStatus() );
+    }
+    
+    private Set<String> getReleaseItemFilenames(List<ReleaseMember> memberList) {
+    	Set<String> filenames = new HashSet<>();
+    	
+    	for (ReleaseMember member : memberList) {
+    		filenames.add( member.getRepositoryItem().getFilename() );
+    	}
+    	return filenames;
+    }
+    
+    private ReleaseItem loadManagedRelease(String releaseFilename, ReleaseManager releaseManager) throws Exception {
+        List<RepositoryItem> releaseItems = testRepository.get().listItems(
+        		"http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package",
+        		TLLibraryStatus.DRAFT, false, RepositoryItemType.RELEASE );
+    	ValidationFindings findings = new ValidationFindings();
+        RepositoryItem releaseRepoItem = null;
+        ReleaseItem releaseItem;
+        
+        for (RepositoryItem repoItem : releaseItems) {
+        	if (repoItem.getFilename().equals( releaseFilename )) {
+        		releaseRepoItem = repoItem;
+        		break;
+        	}
+        }
+        assertNotNull( releaseRepoItem );
+        releaseItem = releaseManager.loadRelease( releaseRepoItem, findings );
+        
+        if (findings.hasFinding(FindingType.ERROR)) {
+            RepositoryTestUtils.printFindings(findings);
+        }
+        assertFalse(findings.hasFinding(FindingType.ERROR));
+        assertNotNull( releaseManager.getRelease() );
+        assertNotNull( releaseManager.getModel() );
+        assertEquals( ReleaseStatus.BETA, releaseManager.getRelease().getStatus() );
+        assertEquals( 4, releaseManager.getModel().getUserDefinedLibraries().size() );
+        
+        return releaseItem;
+    }
+    
+    public void test_15_DeleteLibrary() throws Exception {
         if (DEBUG)
             System.out.println("DELETE - Delete a managed project item. ["
                     + getClass().getSimpleName() + "]");
@@ -540,7 +678,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
             System.out.println("DONE - Success.");
     }
 
-    public void test_15_CreateNamespace() throws Exception {
+    public void test_16_CreateNamespace() throws Exception {
         if (DEBUG)
             System.out.println("CREATE NAMESPACE - Create a managed namespace item. ["
                     + getClass().getSimpleName() + "]");
@@ -559,7 +697,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
             System.out.println("DONE - Success.");
     }
     
-    public void test_15a_CreateNamespaceError() throws Exception {
+    public void test_16a_CreateNamespaceError() throws Exception {
         if (DEBUG)
             System.out.println("CREATE NAMESPACE (Error Test) - Attempt to create conflicting namespace. ["
                     + getClass().getSimpleName() + "]");
@@ -584,7 +722,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
             System.out.println("DONE - Success.");
     }
 
-    public void test_16_ListNamespaceChildren() throws Exception {
+    public void test_17_ListNamespaceChildren() throws Exception {
         if (DEBUG)
             System.out
                     .println("LIST NAMESPACE CHILDREN - Find the children of a managed namespace. ["
@@ -600,7 +738,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
             System.out.println("DONE - Success.");
     }
 
-    public void test_17_DeleteNamespace() throws Exception {
+    public void test_18_DeleteNamespace() throws Exception {
         if (DEBUG)
             System.out.println("DELETE NAMESPACE - Delete a managed namespace item. ["
                     + getClass().getSimpleName() + "]");
@@ -619,7 +757,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
             System.out.println("DONE - Success.");
     }
 
-    public void test_18_CreateRootNamespace() throws Exception {
+    public void test_19_CreateRootNamespace() throws Exception {
         if (DEBUG)
             System.out.println("CREATE ROOT NAMESPACE - Create a managed namespace item. ["
                     + getClass().getSimpleName() + "]");
@@ -658,7 +796,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
             System.out.println("DONE - Success.");
     }
 
-    public void test_19_DeleteRootNamespace() throws Exception {
+    public void test_20_DeleteRootNamespace() throws Exception {
         if (DEBUG)
             System.out.println("DELETE ROOT NAMESPACE - Delete a managed namespace item. ["
                     + getClass().getSimpleName() + "]");

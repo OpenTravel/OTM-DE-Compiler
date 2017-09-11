@@ -131,6 +131,10 @@ public interface Repository {
      * non-null, only versions with the specified status or later will be considered durng the
      * search.
      * 
+     * <p>NOTE: Only repository items of type <code>LIBRARY</code> will be returned by this method.
+     * To filter on or include other types of repository items, use the
+     * {@link Repository#listItems(String, TLLibraryStatus, boolean, RepositoryItemType)} method.
+     * 
      * @param baseNamespace
      *            the base namespace that does not include the trailing version component of the URI
      *            path
@@ -145,6 +149,31 @@ public interface Repository {
      */
     public List<RepositoryItem> listItems(String baseNamespace, TLLibraryStatus includeStatus,
     		boolean latestVersionsOnly) throws RepositoryException;
+
+    /**
+     * Returns a list of each <code>RepositoryItem</code> of the specified type assigned to the
+     * specified base namespace.  If multiple versions of a <code>RepositoryItem</code> are present,
+     * only the latest version will be returned when the 'latestVersionsOnly' flag is true.  If the
+     * 'includeStatus' is non-null, only versions with the specified status or later will be
+     * considered durng the search.  If the 'itemType' parameter is null, all item types matching
+     * the other criteria will be returned.
+     * 
+     * @param baseNamespace
+     *            the base namespace that does not include the trailing version component of the URI
+     *            path
+     * @param includeStatus
+     *            indicates the latest library status to include in the results (null = all statuses)
+     * @param latestVersionsOnly
+     *            flag indicating whether the results should include all matching versions or just
+     *            the latest version of each library
+     * @param itemType
+     *			  the type of repository item to include in the resulting list
+     * @return List<RepositoryItem>
+     * @throws RepositoryException
+     *             thrown if the remote repository cannot be accessed
+     */
+    public List<RepositoryItem> listItems(String baseNamespace, TLLibraryStatus includeStatus,
+    		boolean latestVersionsOnly, RepositoryItemType itemType) throws RepositoryException;
 
     /**
      * Searches the contents of the repository using the free-text keywords provided. If multiple
@@ -175,6 +204,10 @@ public interface Repository {
      * returned when the 'latestVersionsOnly' flag is true. If the 'includeStatus' is non-null, only
      * versions with the specified status or later will be considered durng the search.
      * 
+     * <p>NOTE: Only repository items of type <code>LIBRARY</code> will be returned by this method.
+     * To filter on or include other types of repository items, use the
+     * {@link Repository#listItems(String, TLLibraryStatus, boolean, RepositoryItemType)} method.
+     * 
      * @param freeTextQuery
      *            the string containing space-separated keywords for the free-text search
      * @param includeStatus
@@ -188,6 +221,28 @@ public interface Repository {
      */
     public List<RepositorySearchResult> search(String freeTextQuery, TLLibraryStatus includeStatus,
     		boolean latestVersionsOnly) throws RepositoryException;
+
+    /**
+     * Searches the contents of the repository using the free-text keywords provided. If multiple
+     * versions of a <code>RepositoryItem</code> match the query, only the latest version will be
+     * returned when the 'latestVersionsOnly' flag is true. If the 'includeStatus' is non-null, only
+     * versions with the specified status or later will be considered durng the search.
+     * 
+     * @param freeTextQuery
+     *            the string containing space-separated keywords for the free-text search
+     * @param includeStatus
+     *            indicates the latest library status to include in the results (null = all statuses)
+     * @param latestVersionsOnly
+     *            flag indicating whether the results should include all matching versions or just
+     *            the latest version of each library
+     * @param itemType
+     *			  the type of repository item to include in the resulting list
+     * @return List<RepositorySearchResult>
+     * @throws RepositoryException
+     *             thrown if the remote repository cannot be accessed
+     */
+    public List<RepositorySearchResult> search(String freeTextQuery, TLLibraryStatus includeStatus,
+    		boolean latestVersionsOnly, RepositoryItemType itemType) throws RepositoryException;
 
     /**
      * Returns a list containing all versions of the given <code>RepositoryItem</code>.

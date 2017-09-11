@@ -87,6 +87,7 @@ import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryItemCommit;
 import org.opentravel.schemacompiler.repository.RepositoryItemHistory;
 import org.opentravel.schemacompiler.repository.RepositoryItemState;
+import org.opentravel.schemacompiler.repository.RepositoryItemType;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.repository.RepositoryNamespaceUtils;
 import org.opentravel.schemacompiler.repository.RepositoryOutOfSyncException;
@@ -514,20 +515,39 @@ public class RemoteRepositoryClient implements RemoteRepository {
     /**
 	 * @see org.opentravel.schemacompiler.repository.Repository#listItems(java.lang.String, org.opentravel.schemacompiler.model.TLLibraryStatus, boolean)
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<RepositoryItem> listItems(String baseNamespace, TLLibraryStatus includeStatus,
 			boolean latestVersionsOnly) throws RepositoryException {
+		return listItems( baseNamespace, includeStatus, latestVersionsOnly, RepositoryItemType.LIBRARY );
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.repository.Repository#listItems(java.lang.String, org.opentravel.schemacompiler.model.TLLibraryStatus, boolean, org.opentravel.schemacompiler.repository.RepositoryItemType)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<RepositoryItem> listItems(String baseNamespace, TLLibraryStatus includeStatus,
+			boolean latestVersionsOnly, RepositoryItemType itemType) throws RepositoryException {
         try {
+        	List<HttpGetParam> paramList = new ArrayList<>();
+        	
+        	if (itemType != null) {
+            	paramList.add( new HttpGetParam( "itemType", itemType.toString() ) );
+        	}
+            
             String baseNS = RepositoryNamespaceUtils.normalizeUri(baseNamespace);
-            HttpPost request = newPostRequest(LIST_ITEMS2_ENDPOINT);
+            HttpPost request = newPostRequest( LIST_ITEMS2_ENDPOINT, paramList.toArray( new HttpGetParam[ paramList.size() ] ) );
             Marshaller marshaller = RepositoryFileManager.getSharedJaxbContext().createMarshaller();
             ListItems2RQType listItemsRQ = new ListItems2RQType();
             StringWriter xmlWriter = new StringWriter();
 
+            if (includeStatus == null) {
+            	includeStatus = TLLibraryStatus.DRAFT;
+            }
             listItemsRQ.setNamespace(baseNS);
             listItemsRQ.setIncludeStatus(includeStatus.toRepositoryStatus());
             listItemsRQ.setLatestVersionOnly(latestVersionsOnly);
+            
             marshaller.marshal(objectFactory.createListItems2RQ(listItemsRQ), xmlWriter);
             request.setEntity(new StringEntity(xmlWriter.toString(), ContentType.TEXT_XML));
 
@@ -591,10 +611,19 @@ public class RemoteRepositoryClient implements RemoteRepository {
     /**
 	 * @see org.opentravel.schemacompiler.repository.Repository#search(java.lang.String, org.opentravel.schemacompiler.model.TLLibraryStatus, boolean)
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<RepositorySearchResult> search(String freeTextQuery, TLLibraryStatus includeStatus,
 			boolean latestVersionsOnly) throws RepositoryException {
+		return search( freeTextQuery, includeStatus, latestVersionsOnly, RepositoryItemType.LIBRARY );
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.repository.Repository#search(java.lang.String, org.opentravel.schemacompiler.model.TLLibraryStatus, boolean, org.opentravel.schemacompiler.repository.RepositoryItemType)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<RepositorySearchResult> search(String freeTextQuery, TLLibraryStatus includeStatus,
+			boolean latestVersionsOnly, RepositoryItemType itemType) throws RepositoryException {
         try {
         	List<HttpGetParam> paramList = new ArrayList<>();
         	
@@ -603,6 +632,9 @@ public class RemoteRepositoryClient implements RemoteRepository {
         	
         	if (includeStatus != null) {
             	paramList.add( new HttpGetParam( "includeStatus", includeStatus.toString() ) );
+        	}
+        	if (itemType != null) {
+            	paramList.add( new HttpGetParam( "itemType", itemType.toString() ) );
         	}
         	
             HttpGet request = newGetRequest( SEARCH2_ENDPOINT, paramList.toArray( new HttpGetParam[ paramList.size() ] ) );

@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.release;
+package org.opentravel.schemacompiler.repository;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -24,10 +25,12 @@ import java.util.Map;
 import javax.xml.namespace.QName;
 
 import org.opentravel.ns.ota2.release_v01_00.ReleaseStatus;
+import org.opentravel.schemacompiler.version.VersionScheme;
+import org.opentravel.schemacompiler.version.VersionSchemeFactory;
 
 /**
  * An OTM release forms a stable baseline of OTM library content.  Releases and
- * individual release items can be assigned to a specific effective date.  OTM
+ * individual release members can be assigned to a specific effective date.  OTM
  * libraries are divided into two categories - principal and referenced.  Principal
  * items are explicitly required for the release, and referenced items are those
  * libraries that must be included based on direct and indirect dependencies of
@@ -35,15 +38,36 @@ import org.opentravel.ns.ota2.release_v01_00.ReleaseStatus;
  */
 public class Release {
 	
+	private static VersionScheme versionScheme;
+	
+	private URL releaseUrl;
 	private String baseNamespace;
 	private String name;
 	private String version;
 	private ReleaseStatus status;
-	private List<ReleaseItem> principalItems = new ArrayList<>();
-	private List<ReleaseItem> referencedItems = new ArrayList<>();
+	private List<ReleaseMember> principalMembers = new ArrayList<>();
+	private List<ReleaseMember> referencedMembers = new ArrayList<>();
 	private Date defaultEffectiveDate;
 	private ReleaseCompileOptions compileOptions = new ReleaseCompileOptions();
 	private Map<QName,QName> preferredFacets = new HashMap<>();
+	
+	/**
+	 * Returns the URL location where this release's content is stored.
+	 *
+	 * @return URL
+	 */
+	public URL getReleaseUrl() {
+		return releaseUrl;
+	}
+	
+	/**
+	 * Assigns the URL location where this release's content is stored.
+	 *
+	 * @param releaseUrl  the URL location to assign
+	 */
+	public void setReleaseUrl(URL releaseUrl) {
+		this.releaseUrl = releaseUrl;
+	}
 	
 	/**
 	 * Returns the base namespace of the release.
@@ -61,6 +85,10 @@ public class Release {
 	 */
 	public void setBaseNamespace(String baseNamespace) {
 		this.baseNamespace = baseNamespace;
+	}
+	
+	public String getNamespace() {
+		return versionScheme.setVersionIdentifier( baseNamespace, version );
 	}
 
 	/**
@@ -118,21 +146,21 @@ public class Release {
 	}
 
 	/**
-	 * Returns the principle items of the release.
+	 * Returns the principle members of the release.
 	 *
-	 * @return List<ReleaseItem>
+	 * @return List<ReleaseMember>
 	 */
-	public List<ReleaseItem> getPrincipalItems() {
-		return principalItems;
+	public List<ReleaseMember> getPrincipalMembers() {
+		return principalMembers;
 	}
 
 	/**
-	 * Returns the referenced items of the release.
+	 * Returns the referenced members of the release.
 	 *
-	 * @return List<ReleaseItem>
+	 * @return List<ReleaseMember>
 	 */
-	public List<ReleaseItem> getReferencedItems() {
-		return referencedItems;
+	public List<ReleaseMember> getReferencedMembers() {
+		return referencedMembers;
 	}
 	
 	/**
@@ -189,6 +217,19 @@ public class Release {
 	 */
 	public void setPreferredFacets(Map<QName, QName> preferredFacets) {
 		this.preferredFacets = preferredFacets;
+	}
+	
+	/**
+	 * Initialize the default version scheme.
+	 */
+	static {
+		try {
+			VersionSchemeFactory factory = VersionSchemeFactory.getInstance();
+			versionScheme = factory.getVersionScheme( factory.getDefaultVersionScheme() );
+			
+		} catch (Throwable t) {
+			throw new ExceptionInInitializerError( t );
+		}
 	}
 	
 }

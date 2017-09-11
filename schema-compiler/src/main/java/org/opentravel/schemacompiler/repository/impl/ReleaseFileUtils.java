@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.release;
+package org.opentravel.schemacompiler.repository.impl;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,23 +35,25 @@ import javax.xml.validation.SchemaFactory;
 import org.opentravel.ns.ota2.release_v01_00.CompileOptionType;
 import org.opentravel.ns.ota2.release_v01_00.ObjectFactory;
 import org.opentravel.ns.ota2.release_v01_00.PreferredFacetType;
-import org.opentravel.ns.ota2.release_v01_00.PrincipalItemsType;
-import org.opentravel.ns.ota2.release_v01_00.ReferencedItemsType;
+import org.opentravel.ns.ota2.release_v01_00.PrincipalMembersType;
+import org.opentravel.ns.ota2.release_v01_00.ReferencedMembersType;
 import org.opentravel.ns.ota2.release_v01_00.ReleaseIdentityType;
-import org.opentravel.ns.ota2.release_v01_00.ReleaseItemType;
+import org.opentravel.ns.ota2.release_v01_00.ReleaseMemberType;
 import org.opentravel.ns.ota2.release_v01_00.ReleaseType;
 import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.loader.LoaderValidationMessageKeys;
 import org.opentravel.schemacompiler.loader.impl.FileValidationSource;
+import org.opentravel.schemacompiler.repository.Release;
+import org.opentravel.schemacompiler.repository.ReleaseCompileOptions;
+import org.opentravel.schemacompiler.repository.ReleaseMember;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
-import org.opentravel.schemacompiler.repository.impl.AbstractFileUtils;
-import org.opentravel.schemacompiler.repository.impl.RepositoryItemImpl;
 import org.opentravel.schemacompiler.saver.LibrarySaveException;
 import org.opentravel.schemacompiler.util.ClasspathResourceResolver;
 import org.opentravel.schemacompiler.util.ExceptionUtils;
+import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.xml.XMLGregorianCalendarConverter;
@@ -106,6 +108,7 @@ public class ReleaseFileUtils extends AbstractFileUtils {
             ReleaseType jaxbRelease = documentElement.getValue();
             
             release = transformToOtmRelease( jaxbRelease );
+            release.setReleaseUrl( URLUtils.toURL( releaseFile ) );
 
         } catch (JAXBException e) {
             String filename = (releaseFile == null) ? "[UNKNOWN FILE]" : releaseFile.getName();
@@ -138,18 +141,27 @@ public class ReleaseFileUtils extends AbstractFileUtils {
     }
 
     /**
-     * Saves the OTM release to the specified file location.
+     * Saves the OTM release to the local file system.
      * 
      * @param release  the OTM release to be saved
-     * @param releaseFolder  the folder to which the release contents should be saved
+     * @param createBackup  flag indicating whether to create a backup before saving
      * @throws LibrarySaveException  thrown if the release file cannot be saved
      */
-    public void saveReleaseFile(Release release, File releaseFolder) throws LibrarySaveException {
-    	File releaseFile = new File( releaseFolder, getReleaseFilename( release ) );
+    public void saveReleaseFile(Release release, boolean createBackup) throws LibrarySaveException {
+		File releaseFile = URLUtils.isFileURL( release.getReleaseUrl() ) ?
+				URLUtils.toFile( release.getReleaseUrl() ) : null;
         boolean success = false;
         File backupFile = null;
+        
+        if (releaseFile == null) {
+        	throw new LibrarySaveException(
+        			"Unable to save release because it is not stored on the local file system.");
+        }
+        
         try {
-            backupFile = createBackupFile( releaseFile );
+            if (createBackup) {
+            	backupFile = createBackupFile( releaseFile );
+            }
             
         } catch (IOException e) {
             // If we could not create the backup file, proceed without one
@@ -219,8 +231,8 @@ public class ReleaseFileUtils extends AbstractFileUtils {
      */
     private ReleaseType transformToJaxbRelease(Release release) {
     	ReleaseIdentityType releaseId = new ReleaseIdentityType();
-    	PrincipalItemsType principalItems = new PrincipalItemsType();
-    	ReferencedItemsType referencedItems = new ReferencedItemsType();
+    	PrincipalMembersType principalMembers = new PrincipalMembersType();
+    	ReferencedMembersType referencedMembers = new ReferencedMembersType();
     	ReleaseCompileOptions compilerOptions = release.getCompileOptions();
     	Map<String,String> optionProps = (compilerOptions == null) ? null : compilerOptions.toProperties();
     	ReleaseType jaxbRelease = new ReleaseType();
@@ -232,17 +244,17 @@ public class ReleaseFileUtils extends AbstractFileUtils {
     	
     	jaxbRelease.setReleaseIdentity( releaseId );
     	jaxbRelease.setStatus( release.getStatus() );
-    	jaxbRelease.setPrincipalItems( principalItems );
-    	jaxbRelease.setReferencedItems( referencedItems );
+    	jaxbRelease.setPrincipalMembers( principalMembers );
+    	jaxbRelease.setReferencedMembers( referencedMembers );
     	jaxbRelease.setDefaultEffectiveDate( XMLGregorianCalendarConverter.
     			toXMLGregorianCalendar( release.getDefaultEffectiveDate() ) );
     	
-    	for (ReleaseItem item : release.getPrincipalItems()) {
-    		principalItems.getReleaseItem().add( transformToJaxbReleaseItem( item ) );
+    	for (ReleaseMember member : release.getPrincipalMembers()) {
+    		principalMembers.getReleaseMember().add( transformToJaxbReleaseMember( member ) );
     	}
     	
-    	for (ReleaseItem item : release.getReferencedItems()) {
-    		referencedItems.getReleaseItem().add( transformToJaxbReleaseItem( item ) );
+    	for (ReleaseMember member : release.getReferencedMembers()) {
+    		referencedMembers.getReleaseMember().add( transformToJaxbReleaseMember( member ) );
     	}
     	
     	for (String optionKey : optionProps.keySet()) {
@@ -274,24 +286,24 @@ public class ReleaseFileUtils extends AbstractFileUtils {
     }
     
     /**
-     * Transforms the given OTM release item to its JAXB object representation.
+     * Transforms the given OTM release member to its JAXB object representation.
      * 
-     * @param item  the OTM release item to transform
-     * @return ReleaseItemType
+     * @param member  the OTM release member to transform
+     * @return ReleaseMemberType
      */
-    private ReleaseItemType transformToJaxbReleaseItem(ReleaseItem item) {
-    	RepositoryItem repoItem = item.getRepositoryItem();
-    	ReleaseItemType jaxbItem = new ReleaseItemType();
+    private ReleaseMemberType transformToJaxbReleaseMember(ReleaseMember member) {
+    	RepositoryItem repoItem = member.getRepositoryItem();
+    	ReleaseMemberType jaxbMember = new ReleaseMemberType();
     	
     	if (repoItem != null) {
-    		jaxbItem.setRepositoryID( repoItem.getRepository().getId() );
-        	jaxbItem.setBaseNamespace( item.getRepositoryItem().getBaseNamespace() );
-        	jaxbItem.setFilename( repoItem.getFilename() );
-        	jaxbItem.setVersion( repoItem.getVersion() );
+    		jaxbMember.setRepositoryID( repoItem.getRepository().getId() );
+    		jaxbMember.setBaseNamespace( repoItem.getBaseNamespace() );
+    		jaxbMember.setFilename( repoItem.getFilename() );
+    		jaxbMember.setVersion( repoItem.getVersion() );
     	}
-    	jaxbItem.setEffectiveDate( XMLGregorianCalendarConverter.
-    			toXMLGregorianCalendar( item.getEffectiveDate() ) );
-    	return jaxbItem;
+    	jaxbMember.setEffectiveDate( XMLGregorianCalendarConverter.
+    			toXMLGregorianCalendar( member.getEffectiveDate() ) );
+    	return jaxbMember;
     }
     
     /**
@@ -309,18 +321,19 @@ public class ReleaseFileUtils extends AbstractFileUtils {
     	release.setBaseNamespace( releaseId.getBaseNamespace() );
     	release.setName( releaseId.getName() );
     	release.setVersion( releaseId.getVersion() );
+    	release.setStatus( jaxbRelease.getStatus() );
     	release.setDefaultEffectiveDate( XMLGregorianCalendarConverter.
     			toJavaDate( jaxbRelease.getDefaultEffectiveDate() ) );
     	
-    	if (jaxbRelease.getPrincipalItems() != null) {
-    		for (ReleaseItemType jaxbItem : jaxbRelease.getPrincipalItems().getReleaseItem()) {
-    			release.getPrincipalItems().add( transformToOtmReleaseItem( jaxbItem ) );
+    	if (jaxbRelease.getPrincipalMembers() != null) {
+    		for (ReleaseMemberType jaxbMember : jaxbRelease.getPrincipalMembers().getReleaseMember()) {
+    			release.getPrincipalMembers().add( transformToOtmReleaseMember( jaxbMember ) );
     		}
     	}
     	
-    	if (jaxbRelease.getReferencedItems() != null) {
-    		for (ReleaseItemType jaxbItem : jaxbRelease.getReferencedItems().getReleaseItem()) {
-    			release.getReferencedItems().add( transformToOtmReleaseItem( jaxbItem ) );
+    	if (jaxbRelease.getReferencedMembers() != null) {
+    		for (ReleaseMemberType jaxbMember : jaxbRelease.getReferencedMembers().getReleaseMember()) {
+    			release.getReferencedMembers().add( transformToOtmReleaseMember( jaxbMember ) );
     		}
     	}
     	
@@ -343,22 +356,22 @@ public class ReleaseFileUtils extends AbstractFileUtils {
     }
     
     /**
-     * Transforms the given JAXB release item instance to an OTM release.
+     * Transforms the given JAXB release member instance to an OTM release member.
      * 
-     * @param jaxbItem  the JAXB release item instance to transform
-     * @return ReleaseItem
+     * @param jaxbItem  the JAXB release member instance to transform
+     * @return ReleaseMember
      */
-    private ReleaseItem transformToOtmReleaseItem(ReleaseItemType jaxbItem) {
+    private ReleaseMember transformToOtmReleaseMember(ReleaseMemberType jaxbMember) {
     	RepositoryItemImpl repoItem = new RepositoryItemImpl();
-    	ReleaseItem item = new ReleaseItem();
+    	ReleaseMember item = new ReleaseMember();
     	
-    	repoItem.setRepository( repositoryManager.getRepository( jaxbItem.getRepositoryID() ) );
-    	repoItem.setBaseNamespace( jaxbItem.getBaseNamespace() );
-    	repoItem.setFilename( jaxbItem.getFilename() );
-    	repoItem.setVersion( jaxbItem.getVersion() );
+    	repoItem.setRepository( repositoryManager.getRepository( jaxbMember.getRepositoryID() ) );
+    	repoItem.setBaseNamespace( jaxbMember.getBaseNamespace() );
+    	repoItem.setFilename( jaxbMember.getFilename() );
+    	repoItem.setVersion( jaxbMember.getVersion() );
     	item.setRepositoryItem( repoItem );
     	item.setEffectiveDate( XMLGregorianCalendarConverter.
-    			toJavaDate( jaxbItem.getEffectiveDate() ) );
+    			toJavaDate( jaxbMember.getEffectiveDate() ) );
     	return item;
     }
     

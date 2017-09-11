@@ -24,10 +24,7 @@ import java.util.List;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opentravel.schemacompiler.repository.Repository;
-import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
-import org.opentravel.schemacompiler.util.OTM16Upgrade;
 
 /**
  * Verifies the operation of the repository's search functions.

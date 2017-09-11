@@ -13,24 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.release;
+package org.opentravel.schemacompiler.repository.impl;
 
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.loader.LibraryModuleInfo;
 import org.opentravel.schemacompiler.loader.LibraryModuleLoader;
+import org.opentravel.schemacompiler.repository.Release;
+import org.opentravel.schemacompiler.repository.ReleaseManager;
+import org.opentravel.schemacompiler.repository.ReleaseMember;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
-import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.slf4j.Logger;
@@ -52,9 +53,8 @@ public class ReleaseLibraryModuleLoader implements LibraryModuleLoader<InputStre
     
 	private ReleaseManager releaseManager;
 	private LibraryModuleLoader<InputStream> delegate;
-	private List<String> referencedItemKeys = new ArrayList<>();
-	private Map<String,RepositoryItem> referencedItems = new HashMap<>();
-	private Map<String,Date> effectiveDates = new HashMap<>();
+	private List<ReleaseMember> referencedMembers = new ArrayList<>();
+	private Set<String> referenceUrls = new HashSet<>();
 	
 	/**
 	 * Constructor that specifies the OTM release, as well as the module loader delegate.
@@ -72,22 +72,12 @@ public class ReleaseLibraryModuleLoader implements LibraryModuleLoader<InputStre
 	 * Updates the list of referenced items and their associated effective dates
 	 * for the given release.  The new list of referenced items is obtained from the
 	 * non-principal dependencies that were loaded by this module loader.
-	 * 
-	 * @param release  the OTM release whose referenced items should be updated
 	 */
-	public void updateReferencedItems(Release release) {
+	public void updateReferencedItems() {
+		Release release = releaseManager.getRelease();
 		
-		release.getReferencedItems().clear();
-		
-		for (String itemKey : referencedItemKeys) {
-			RepositoryItem repoItem = referencedItems.get( itemKey );
-			Date effectiveDate = effectiveDates.get( itemKey );
-			ReleaseItem releaseItem = new ReleaseItem();
-			
-			releaseItem.setRepositoryItem( repoItem );
-			releaseItem.setEffectiveDate( effectiveDate );
-			release.getReferencedItems().add( releaseItem );
-		}
+		release.getReferencedMembers().clear();
+		release.getReferencedMembers().addAll( referencedMembers );
 	}
 
 	/**
@@ -104,35 +94,25 @@ public class ReleaseLibraryModuleLoader implements LibraryModuleLoader<InputStre
 				RepositoryItem item = releaseManager.getRepositoryItem( libraryUrl );
 				
 				if (item != null) {
-					ReleaseItem principalItem = releaseManager.getPrincipalItem( item );
-					ReleaseItem referencedItem = releaseManager.getReferencedItem( item );
-					Date effectiveDate;
+					ReleaseMember principalMember = releaseManager.getPrincipalMember( item );
+					ReleaseMember referencedMember = releaseManager.getReferencedMember( item );
+					ReleaseMember member = (principalMember != null) ? principalMember : referencedMember;
 					
-					if (principalItem != null) {
-						effectiveDate = principalItem.getEffectiveDate();
-						
-					} else if (referencedItem != null) {
-						effectiveDate = referencedItem.getEffectiveDate();
-						
-					} else {
-						effectiveDate = releaseManager.getRelease().getDefaultEffectiveDate();
+					if (member == null) { // New referenced member for the release
+						member = new ReleaseMember();
+						member.setRepositoryItem( item );
+						member.setEffectiveDate( releaseManager.getRelease().getDefaultEffectiveDate() );
 					}
 					
 					// Only need a date-effective input source if we have an effective date specified
 					// by the release
-					if (effectiveDate != null) {
-						RepositoryManager repositoryManager = releaseManager.getRepositoryManager();
-						inputSource = repositoryManager.getHistoricalContentSource( item, effectiveDate );
+					if (member.getEffectiveDate() != null) {
+						inputSource = releaseManager.getInputSource( member );
 					}
 					
-					if (principalItem != null) {
-						String itemKey = item.toURI( true ).toString();
-						
-						if (!referencedItemKeys.contains( itemKey )) {
-							referencedItemKeys.add( itemKey );
-							referencedItems.put( itemKey, item );
-							effectiveDates.put( itemKey, effectiveDate );
-						}
+					if ((principalMember == null) && !referenceUrls.contains( libraryUrl.toExternalForm() )) {
+						referenceUrls.add( libraryUrl.toExternalForm() );
+						referencedMembers.add( member );
 					}
 				}
 				

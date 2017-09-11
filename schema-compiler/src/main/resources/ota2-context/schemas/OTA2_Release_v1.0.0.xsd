@@ -7,8 +7,8 @@
 		<xsd:sequence>
 			<xsd:element ref="ReleaseIdentity" minOccurs="1" maxOccurs="1" />
 			<xsd:element name="Status" type="ReleaseStatus" minOccurs="1" maxOccurs="1" />
-			<xsd:element ref="PrincipalItems" minOccurs="1" maxOccurs="1" />
-			<xsd:element ref="ReferencedItems" minOccurs="1" maxOccurs="1" />
+			<xsd:element ref="PrincipalMembers" minOccurs="1" maxOccurs="1" />
+			<xsd:element ref="ReferencedMembers" minOccurs="1" maxOccurs="1" />
 			<xsd:element name="DefaultEffectiveDate" type="xsd:dateTime" minOccurs="0" maxOccurs="1"/>
 			<xsd:element ref="CompileOption" minOccurs="0" maxOccurs="1000" />
 			<xsd:element ref="PreferredFacet" minOccurs="0" maxOccurs="1000" />
@@ -25,22 +25,22 @@
 		</xsd:sequence>
 	</xsd:complexType>
 	
-	<xsd:element name="PrincipalItems" type="PrincipalItemsType" />
-	<xsd:complexType name="PrincipalItemsType">
+	<xsd:element name="PrincipalMembers" type="PrincipalMembersType" />
+	<xsd:complexType name="PrincipalMembersType">
 		<xsd:sequence>
-			<xsd:element ref="ReleaseItem" minOccurs="0" maxOccurs="1000" />
+			<xsd:element ref="ReleaseMember" minOccurs="0" maxOccurs="1000" />
 		</xsd:sequence>
 	</xsd:complexType>
 	
-	<xsd:element name="ReferencedItems" type="ReferencedItemsType" />
-	<xsd:complexType name="ReferencedItemsType">
+	<xsd:element name="ReferencedMembers" type="ReferencedMembersType" />
+	<xsd:complexType name="ReferencedMembersType">
 		<xsd:sequence>
-			<xsd:element ref="ReleaseItem" minOccurs="0" maxOccurs="1000" />
+			<xsd:element ref="ReleaseMember" minOccurs="0" maxOccurs="1000" />
 		</xsd:sequence>
 	</xsd:complexType>
 	
-	<xsd:element name="ReleaseItem" type="ReleaseItemType" />
-	<xsd:complexType name="ReleaseItemType">
+	<xsd:element name="ReleaseMember" type="ReleaseMemberType" />
+	<xsd:complexType name="ReleaseMemberType">
 		<xsd:sequence>
 			<xsd:element name="RepositoryID" type="RepositoryID" minOccurs="1" maxOccurs="1" />
 			<xsd:element name="BaseNamespace" type="xsd:anyURI" minOccurs="1" maxOccurs="1" />
