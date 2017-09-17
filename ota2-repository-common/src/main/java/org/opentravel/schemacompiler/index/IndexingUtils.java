@@ -148,9 +148,10 @@ public class IndexingUtils {
 	 * @return String
 	 */
 	public static String getIdentityKey(RepositoryItem item) {
+		boolean isLibrary = item.getFilename().toLowerCase().endsWith(".otm");
 		StringBuilder identityKey = new StringBuilder();
 		
-		identityKey.append("LIB:");
+		identityKey.append( isLibrary ? "LIB:" : "REL:" );
 		identityKey.append( item.getNamespace() ).append(":");
 		identityKey.append( item.getLibraryName() );
 		return identityKey.toString();

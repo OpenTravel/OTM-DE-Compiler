@@ -268,7 +268,7 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
             // Delete all of the documents from the search index
             for (String documentId : documentKeys) {
         		log.info("Deleting index: " + documentId);
-    			indexWriter.deleteDocuments( new Term( documentId ) );
+    			indexWriter.deleteDocuments( new Term( IDENTITY_FIELD, documentId ) );
             }
             
             // Delete any associated validation findings from the search index

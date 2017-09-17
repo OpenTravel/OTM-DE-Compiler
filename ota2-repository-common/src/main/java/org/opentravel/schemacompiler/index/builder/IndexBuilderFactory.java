@@ -19,6 +19,7 @@ import org.apache.lucene.index.IndexWriter;
 import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionTarget;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
+import org.opentravel.schemacompiler.repository.RepositoryItemType;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 
 /**
@@ -98,7 +99,14 @@ public class IndexBuilderFactory {
 		IndexBuilder<T> builder;
 		
 		if (sourceObject instanceof RepositoryItem) {
-			builder = (IndexBuilder<T>) new LibraryIndexBuilder();
+			RepositoryItem item = (RepositoryItem) sourceObject;
+			
+			if (RepositoryItemType.RELEASE.isItemType( item.getFilename() )) {
+				builder = (IndexBuilder<T>) new ReleaseIndexBuilder();
+				
+			} else {
+				builder = (IndexBuilder<T>) new LibraryIndexBuilder();
+			}
 			
 		} else if (sourceObject instanceof NamedEntity) {
 			builder = (IndexBuilder<T>) new EntityIndexBuilder<>();

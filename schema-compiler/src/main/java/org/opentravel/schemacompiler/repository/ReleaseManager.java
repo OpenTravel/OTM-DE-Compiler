@@ -100,7 +100,7 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
     	List<RepositoryItem>  releaseItems = new ArrayList<>();
     	
     	for (RepositoryItem item : allItems) {
-    		if (item.getFilename().toLowerCase().endsWith(".otr")) {
+    		if (RepositoryItemType.RELEASE.isItemType( item.getFilename() )) {
     			releaseItems.add( item );
     		}
     	}
@@ -788,6 +788,7 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
     		clone.setName( release.getName() );
     		clone.setVersion( release.getVersion() );
     		clone.setStatus( ReleaseStatus.DRAFT );
+    		clone.setDescription( release.getDescription() );
     		clone.setDefaultEffectiveDate( release.getDefaultEffectiveDate() );
     		
     		for (ReleaseMember member : release.getPrincipalMembers()) {

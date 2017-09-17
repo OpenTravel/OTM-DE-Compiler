@@ -16,9 +16,11 @@
 package org.opentravel.schemacompiler.repository;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -27,6 +29,7 @@ import org.junit.Test;
 import org.opentravel.schemacompiler.index.FreeTextSearchService;
 import org.opentravel.schemacompiler.index.LibrarySearchResult;
 import org.opentravel.schemacompiler.index.RealTimeFreeTextSearchService;
+import org.opentravel.schemacompiler.index.ReleaseSearchResult;
 import org.opentravel.schemacompiler.index.SearchResult;
 import org.opentravel.schemacompiler.util.RepositoryTestUtils;
 
@@ -47,10 +50,11 @@ public class TestFreeTextSearchService {
             List<SearchResult<?>> searchResults = service.search("version", null, false, false);
             Collection<String> filenames = getFilenames(searchResults);
 
-            assertEquals(3, searchResults.size());
+            assertEquals(4, searchResults.size());
             assertTrue(filenames.contains("Version_Test_1_0_0.otm"));
             assertTrue(filenames.contains("Version_Test_1_1_0.otm"));
             assertTrue(filenames.contains("Version_Test_1_1_1.otm"));
+            assertTrue(filenames.contains("Version_Release_1_0_0.otr"));
 
         } finally {
             service.stopService();
@@ -64,10 +68,26 @@ public class TestFreeTextSearchService {
             List<SearchResult<?>> searchResults = service.search("version", null, false, false);
             Collection<String> filenames = getFilenames(searchResults);
 
-            assertEquals(3, searchResults.size());
+            assertEquals(4, searchResults.size());
             assertTrue(filenames.contains("Version_Test_1_0_0.otm"));
             assertTrue(filenames.contains("Version_Test_1_1_0.otm"));
             assertTrue(filenames.contains("Version_Test_1_1_1.otm"));
+            assertTrue(filenames.contains("Version_Release_1_0_0.otr"));
+            
+            // Perform a where-used search for the release
+            for (LibrarySearchResult libResult : getLibraryResults( searchResults )) {
+            	List<ReleaseSearchResult> releases = service.getLibraryReleases( libResult, false );
+            	
+            	if (libResult.getRepositoryItem().getVersion().equals("1.1.1")) {
+            		// Version 1.1.1 is not part of the release
+            		assertEquals(0, releases.size());
+            		
+            	} else {
+                	assertEquals(1,releases.size());
+                	assertNotNull(releases.get(0).getItemContent());
+                	assertEquals("Version_Release_1_0_0.otr", releases.get(0).getFilename());
+            	}
+            }
 
         } finally {
             service.stopService();
@@ -135,9 +155,22 @@ public class TestFreeTextSearchService {
         for (SearchResult<?> result : searchResults) {
         	if (result instanceof LibrarySearchResult) {
                 filenames.add( ((LibrarySearchResult) result).getRepositoryItem().getFilename() );
+                
+        	} else if (result instanceof ReleaseSearchResult) {
+                filenames.add( ((ReleaseSearchResult) result).getFilename() );
         	}
         }
         return filenames;
     }
-
+    
+    private List<LibrarySearchResult> getLibraryResults(List<SearchResult<?>> fullResults) {
+    	List<LibrarySearchResult> libResults = new ArrayList<>();
+    	
+    	for (SearchResult<?> result : fullResults) {
+    		if (result instanceof LibrarySearchResult) {
+    			libResults.add( (LibrarySearchResult) result );
+    		}
+    	}
+    	return libResults;
+    }
 }

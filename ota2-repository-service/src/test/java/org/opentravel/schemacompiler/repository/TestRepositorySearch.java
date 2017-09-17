@@ -24,6 +24,7 @@ import java.util.List;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
 
 /**
@@ -198,6 +199,20 @@ public class TestRepositorySearch extends RepositoryTestBase {
             	testRepository.demote(item100);
             }
         }
+    }
+
+	@Test
+    public void testListNamespaceItems_allVersions_includeReleases() throws Exception {
+        Repository testRepository = repositoryManager.get().getRepository("test-repository");
+        List<RepositoryItem> items = testRepository.listItems(
+                "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test", TLLibraryStatus.DRAFT, false, null);
+        List<String> itemFilenames = getFilenames(items);
+
+        assertEquals(4, items.size());
+        assertTrue(itemFilenames.contains("Version_Test_1_0_0.otm"));
+        assertTrue(itemFilenames.contains("Version_Test_1_1_0.otm"));
+        assertTrue(itemFilenames.contains("Version_Test_1_1_1.otm"));
+        assertTrue(itemFilenames.contains("Version_Release_1_0_0.otr"));
     }
 
     @SuppressWarnings("deprecation")

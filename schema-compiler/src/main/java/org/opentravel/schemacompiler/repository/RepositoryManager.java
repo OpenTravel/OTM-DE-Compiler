@@ -724,7 +724,8 @@ public class RepositoryManager implements Repository {
         	TLLibraryStatus itemStatus = RepositoryUtils.getLibraryStatus( itemMetadata.getStatus() );
         	
         	// Skip items that do not match the required item type
-        	if ((itemType != null) && itemType.isItemType( itemMetadata.getFilename() )) {
+        	if ((itemType != null) && !itemType.isItemType( itemMetadata.getFilename() )) {
+        		continue;
         	}
         	
             // Create a map that groups each item's versions together

@@ -306,7 +306,7 @@ public class ValidationIndexingService implements IndexingTerms {
             // Delete all of the documents from the search index
             for (String documentId : documentKeys) {
         		log.info("Deleting index: " + documentId);
-    			indexWriter.deleteDocuments( new Term( documentId ) );
+    			indexWriter.deleteDocuments( new Term( IDENTITY_FIELD, documentId ) );
             }
 			
 		} catch (IOException e) {

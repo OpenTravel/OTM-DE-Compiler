@@ -45,6 +45,7 @@ public class Release {
 	private String name;
 	private String version;
 	private ReleaseStatus status;
+	private String description;
 	private List<ReleaseMember> principalMembers = new ArrayList<>();
 	private List<ReleaseMember> referencedMembers = new ArrayList<>();
 	private Date defaultEffectiveDate;
@@ -143,6 +144,24 @@ public class Release {
 	 */
 	public void setStatus(ReleaseStatus status) {
 		this.status = status;
+	}
+
+	/**
+	 * Returns the description of the release.
+	 *
+	 * @return String
+	 */
+	public String getDescription() {
+		return description;
+	}
+
+	/**
+	 * Assigns the description of the release.
+	 *
+	 * @param description  the description text to assign
+	 */
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	/**

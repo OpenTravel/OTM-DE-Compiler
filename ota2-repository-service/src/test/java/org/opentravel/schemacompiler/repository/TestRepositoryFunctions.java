@@ -66,10 +66,10 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         test_08_DemoteLibrary();
         test_09_UpdateLibraryStatus();
         test_10_GetLibraryHistory();
-        test_11_createRelease();
-    	test_12_publishRelease();
-    	test_13_newReleaseVersion();
-    	test_14_unpublishRelease();
+        test_11_CreateRelease();
+    	test_12_PublishRelease();
+    	test_13_NewReleaseVersion();
+    	test_14_UnpublishRelease();
         test_15_DeleteLibrary();
         test_16_CreateNamespace();
         test_16a_CreateNamespaceError();
@@ -448,7 +448,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
             System.out.println("DONE - Success.");
     }
     
-    public void test_11_createRelease() throws Exception {
+    public void test_11_CreateRelease() throws Exception {
         if (DEBUG)
             System.out.println("CREATE RELEASE - Creating beta release. ["
                     + getClass().getSimpleName() + "]");
@@ -509,7 +509,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
             System.out.println("DONE - Success.");
     }
     
-    public void test_12_publishRelease() throws Exception {
+    public void test_12_PublishRelease() throws Exception {
         if (DEBUG)
             System.out.println("PUBLISH RELEASE - Publishing release to repository. ["
                     + getClass().getSimpleName() + "]");
@@ -524,6 +524,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         }
         assertFalse(findings.hasFinding(FindingType.ERROR));
         
+        // Publish the release
         ReleaseItem releaseItem = releaseManager.publishRelease( testRepository.get() );
         
         assertNotNull(releaseItem);
@@ -533,11 +534,24 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         assertEquals(RepositoryItemState.MANAGED_UNLOCKED, releaseItem.getState());
         assertEquals(TLLibraryStatus.FINAL, releaseItem.getStatus());
         assertEquals(ReleaseStatus.BETA, releaseManager.getRelease().getStatus());
+        
+        // Attempt to delete the principal library from the repository (should fail)
+        if (this.getClass().getName().contains("Remote")) { // only test when running non-local
+        	try {
+                RepositoryItem principalLib = releaseItem.getContent().getPrincipalMembers().get(0).getRepositoryItem();
+                repositoryManager.get().delete( principalLib );
+                fail("Expected exception not thrown.");
+        		
+        	} catch (RepositoryException e) {
+        		// Expected exception - no action required
+        	}
+        }
+        
         if (DEBUG)
             System.out.println("DONE - Success.");
     }
     
-    public void test_13_newReleaseVersion() throws Exception {
+    public void test_13_NewReleaseVersion() throws Exception {
         if (DEBUG)
             System.out.println("NEW RELEASE VERSION - Creating new version of a release. ["
                     + getClass().getSimpleName() + "]");
@@ -580,7 +594,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
             System.out.println("DONE - Success.");
     }
     
-    public void test_14_unpublishRelease() throws Exception {
+    public void test_14_UnpublishRelease() throws Exception {
         if (DEBUG)
             System.out.println("UNPUBLISH RELEASE - Unpublishing a release from the repository. ["
                     + getClass().getSimpleName() + "]");
@@ -601,6 +615,12 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         assertNotNull( localReleaseManager.getRelease().getDefaultEffectiveDate() );
         assertEquals( "1.0.0", localReleaseManager.getRelease().getVersion() );
         assertEquals( ReleaseStatus.DRAFT, localReleaseManager.getRelease().getStatus() );
+        
+        // Attempt to search for the unpublished release (should return zero results)
+        List<RepositorySearchResult> searchResults = repositoryManager.get().search(
+        		"TestRelease", TLLibraryStatus.DRAFT, false, RepositoryItemType.RELEASE );
+        
+        assertEquals(0, searchResults.size());
     }
     
     private Set<String> getReleaseItemFilenames(List<ReleaseMember> memberList) {

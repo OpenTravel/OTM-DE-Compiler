@@ -16,9 +16,14 @@
 package org.opentravel.schemacompiler.repository.impl;
 
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -91,25 +96,17 @@ public class ReleaseFileUtils extends AbstractFileUtils {
      * @param releaseFile  the release file to load
      * @param findings  the validation findings encountered during the load process
      * @return Release
-     * @throws LibraryLoaderException  thrown if the project file cannot be loaded
+     * @throws LibraryLoaderException  thrown if the release file cannot be loaded
      */
-    @SuppressWarnings("unchecked")
     public Release loadReleaseFile(File releaseFile, ValidationFindings findings)
             throws LibraryLoaderException {
     	Release release = null;
-        InputStream is = null;
-        try {
-            is = new FileInputStream(releaseFile);
-
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            unmarshaller.setSchema( releaseValidationSchema );
-
-            JAXBElement<ReleaseType> documentElement = (JAXBElement<ReleaseType>) unmarshaller.unmarshal(is);
-            ReleaseType jaxbRelease = documentElement.getValue();
-            
-            release = transformToOtmRelease( jaxbRelease );
+    	
+        try (Reader reader = new FileReader( releaseFile )){
+        	release = loadRelease( reader );
             release.setReleaseUrl( URLUtils.toURL( releaseFile ) );
-
+            return release;
+            
         } catch (JAXBException e) {
             String filename = (releaseFile == null) ? "[UNKNOWN FILE]" : releaseFile.getName();
 
@@ -129,17 +126,47 @@ public class ReleaseFileUtils extends AbstractFileUtils {
 
         } catch (Throwable t) {
             throw new LibraryLoaderException("Unknown error while loading project.", t);
-
-        } finally {
-            try {
-                if (is != null)
-                    is.close();
-            } catch (Throwable t) {
-            }
         }
         return release;
     }
 
+    /**
+     * Loads the OTM release from the given content string.
+     * 
+     * @param contentString  the release content to unmarshal
+     * @param findings  the validation findings encountered during the load process
+     * @return Release
+     * @throws LibraryLoaderException  thrown if the content cannot be loaded
+     */
+    public Release loadReleaseContent(String contentString) throws LibraryLoaderException {
+    	try {
+    		return loadRelease( new StringReader( contentString ) );
+    		
+    	} catch (JAXBException | IOException e) {
+    		throw new LibraryLoaderException("Error loading OTM release content.", e);
+    	}
+    }
+    
+    /**
+     * Loads the OTM release from the given reader
+     * 
+     * @param reader  the reader from which to obtain the release content
+     * @return Release
+     * @throws JAXBException  thrown if the release content cannot be parsed
+     * @throws IOException  thrown if the release content cannot be accessed
+     */
+    @SuppressWarnings("unchecked")
+    private Release loadRelease(Reader reader) throws JAXBException, IOException {
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        unmarshaller.setSchema( releaseValidationSchema );
+
+        JAXBElement<ReleaseType> documentElement =
+        		(JAXBElement<ReleaseType>) unmarshaller.unmarshal( reader );
+        ReleaseType jaxbRelease = documentElement.getValue();
+        
+        return transformToOtmRelease( jaxbRelease );
+    }
+    
     /**
      * Saves the OTM release to the local file system.
      * 
@@ -167,29 +194,15 @@ public class ReleaseFileUtils extends AbstractFileUtils {
             // If we could not create the backup file, proceed without one
         }
 
-        try {
-        	ReleaseType jaxbRelease = transformToJaxbRelease( release );
-            Marshaller marshaller = jaxbContext.createMarshaller();
-
-            if (!releaseFile.exists()) {
-                releaseFile.getParentFile().mkdirs();
-            }
-            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper",
-                    new NamespacePrefixMapper() {
-                        public String getPreferredPrefix(String namespaceUri, String suggestion, boolean requirePrefix) {
-                            return RELEASE_FILE_NAMESPACE.equals(namespaceUri) ?
-                            		SchemaDeclarations.OTA2_RELEASE_SCHEMA.getDefaultPrefix() : suggestion;
-                        }
-                        public String[] getPreDeclaredNamespaceUris() {
-                            return new String[] { RELEASE_FILE_NAMESPACE };
-                        }
-                    });
-            marshaller.setSchema( releaseValidationSchema );
-            marshaller.marshal( objectFactory.createRelease( jaxbRelease ), releaseFile );
+        if (!releaseFile.exists()) {
+            releaseFile.getParentFile().mkdirs();
+        }
+        
+        try (Writer writer = new FileWriter( releaseFile ) ) {
+        	marshalRelease( release, writer );
             success = true;
 
-        } catch (JAXBException e) {
+        } catch (JAXBException | IOException e) {
             throw new LibrarySaveException("Unknown error while saving project.", e);
 
         } finally {
@@ -200,6 +213,51 @@ public class ReleaseFileUtils extends AbstractFileUtils {
                 } catch (Throwable t) {}
             }
         }
+    }
+    
+    /**
+     * Marshals the given OTM release and returns the string content.
+     * 
+     * @param release  the OTM release to be marshalled
+     * @throws LibrarySaveException  thrown if the release file cannot be marshalled
+     */
+    public String marshalReleaseContent(Release release) throws LibrarySaveException {
+    	try {
+        	StringWriter writer = new StringWriter();
+        	
+			marshalRelease( release, writer );
+	    	return writer.toString();
+	    	
+		} catch (JAXBException | IOException e) {
+    		throw new LibrarySaveException("Error marshalling OTM release content.", e);
+		}
+    }
+    
+    /**
+     * Marshals the given release content to the writer provided.
+     * 
+     * @param release  the release to be marshalled
+     * @param writer  the writer to which the marshalled content will be written
+     * @throws JAXBException  thrown if the release content cannot be marshalled
+     * @throws IOException  thrown if the writer is not able to process content
+     */
+    private void marshalRelease(Release release, Writer writer) throws JAXBException, IOException {
+    	ReleaseType jaxbRelease = transformToJaxbRelease( release );
+        Marshaller marshaller = jaxbContext.createMarshaller();
+
+        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+        marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper",
+                new NamespacePrefixMapper() {
+                    public String getPreferredPrefix(String namespaceUri, String suggestion, boolean requirePrefix) {
+                        return RELEASE_FILE_NAMESPACE.equals(namespaceUri) ?
+                        		SchemaDeclarations.OTA2_RELEASE_SCHEMA.getDefaultPrefix() : suggestion;
+                    }
+                    public String[] getPreDeclaredNamespaceUris() {
+                        return new String[] { RELEASE_FILE_NAMESPACE };
+                    }
+                });
+        marshaller.setSchema( releaseValidationSchema );
+        marshaller.marshal( objectFactory.createRelease( jaxbRelease ), writer );
     }
     
     /**
@@ -244,6 +302,7 @@ public class ReleaseFileUtils extends AbstractFileUtils {
     	
     	jaxbRelease.setReleaseIdentity( releaseId );
     	jaxbRelease.setStatus( release.getStatus() );
+    	jaxbRelease.setDescription( trimString( release.getDescription() ) );
     	jaxbRelease.setPrincipalMembers( principalMembers );
     	jaxbRelease.setReferencedMembers( referencedMembers );
     	jaxbRelease.setDefaultEffectiveDate( XMLGregorianCalendarConverter.
@@ -298,7 +357,9 @@ public class ReleaseFileUtils extends AbstractFileUtils {
     	if (repoItem != null) {
     		jaxbMember.setRepositoryID( repoItem.getRepository().getId() );
     		jaxbMember.setBaseNamespace( repoItem.getBaseNamespace() );
+    		jaxbMember.setNamespace( repoItem.getNamespace() );
     		jaxbMember.setFilename( repoItem.getFilename() );
+    		jaxbMember.setLibraryName( repoItem.getLibraryName() );
     		jaxbMember.setVersion( repoItem.getVersion() );
     	}
     	jaxbMember.setEffectiveDate( XMLGregorianCalendarConverter.
@@ -322,6 +383,7 @@ public class ReleaseFileUtils extends AbstractFileUtils {
     	release.setName( releaseId.getName() );
     	release.setVersion( releaseId.getVersion() );
     	release.setStatus( jaxbRelease.getStatus() );
+    	release.setDescription( trimString( jaxbRelease.getDescription() ) );
     	release.setDefaultEffectiveDate( XMLGregorianCalendarConverter.
     			toJavaDate( jaxbRelease.getDefaultEffectiveDate() ) );
     	
@@ -367,12 +429,31 @@ public class ReleaseFileUtils extends AbstractFileUtils {
     	
     	repoItem.setRepository( repositoryManager.getRepository( jaxbMember.getRepositoryID() ) );
     	repoItem.setBaseNamespace( jaxbMember.getBaseNamespace() );
+    	repoItem.setNamespace( jaxbMember.getNamespace() );
     	repoItem.setFilename( jaxbMember.getFilename() );
+    	repoItem.setLibraryName( jaxbMember.getLibraryName() );
     	repoItem.setVersion( jaxbMember.getVersion() );
     	item.setRepositoryItem( repoItem );
     	item.setEffectiveDate( XMLGregorianCalendarConverter.
     			toJavaDate( jaxbMember.getEffectiveDate() ) );
     	return item;
+    }
+    
+    /**
+     * Trims the given string.  If the resulting string is empty, null will be
+     * returned.
+     * 
+     * @param str  the string to be trimmed
+     * @return String
+     */
+    private String trimString(String str) {
+    	String resultStr = null;
+    	
+    	if (str != null) {
+    		resultStr = str.trim();
+    		if (resultStr.length() == 0) resultStr = null;
+    	}
+    	return resultStr;
     }
     
 	/**

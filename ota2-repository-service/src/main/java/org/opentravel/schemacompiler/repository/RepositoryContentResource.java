@@ -62,6 +62,7 @@ import org.opentravel.schemacompiler.index.EntitySearchResult;
 import org.opentravel.schemacompiler.index.FreeTextSearchService;
 import org.opentravel.schemacompiler.index.FreeTextSearchServiceFactory;
 import org.opentravel.schemacompiler.index.LibrarySearchResult;
+import org.opentravel.schemacompiler.index.ReleaseSearchResult;
 import org.opentravel.schemacompiler.index.SearchResult;
 import org.opentravel.schemacompiler.lock.LockableResource;
 import org.opentravel.schemacompiler.lock.RepositoryLockManager;
@@ -376,8 +377,6 @@ public class RepositoryContentResource {
         SearchResultsListType resultsList = new SearchResultsListType();
         Set<String> referencedLibraryIds = new HashSet<>();
         
-        // TODO: Filter search results based on itemType parameter
-        
         // First pass to build the list of referenced libraries
         for (SearchResult<?> result : searchResults) {
         	if (result instanceof EntitySearchResult) {
@@ -400,27 +399,44 @@ public class RepositoryContentResource {
         
         // Second pass to build the search results
         for (SearchResult<?> result : searchResults) {
-        	if (result instanceof LibrarySearchResult) {
-        		RepositoryItem item = ((LibrarySearchResult) result).getRepositoryItem();
-        		
-                if (isReadable(item, user, accessibleItemCache)) {
-                	resultsList.getSearchResult().add(
-                			objectFactory.createLibrarySearchResult(
-                					RepositoryUtils.createItemMetadata( item ) ) );
-                }
-                
-        	} else if (result instanceof EntitySearchResult) {
-        		EntitySearchResult entityResult = (EntitySearchResult) result;
-        		LibrarySearchResult referencedLib = referencedLibrariesById.get( entityResult.getOwningLibraryId() );
-        		
-        		if (referencedLib != null) {
-        			RepositoryItem item = referencedLib.getRepositoryItem();
-        			
+        	if (result instanceof ReleaseSearchResult) {
+        		if ((itemType == null) || (itemType == RepositoryItemType.RELEASE)) {
+            		ReleaseSearchResult rResult = (ReleaseSearchResult) result;
+            		RepositoryItem item = repositoryManager.getRepositoryItem(
+            				rResult.getBaseNamespace(), rResult.getFilename(), rResult.getVersion() );
+            		
                     if (isReadable(item, user, accessibleItemCache)) {
                     	resultsList.getSearchResult().add(
                     			objectFactory.createLibrarySearchResult(
-                    					createEntityMetadata( entityResult, item ) ) );
+                    					RepositoryUtils.createItemMetadata( item ) ) );
                     }
+        		}
+                
+        	} else if (result instanceof LibrarySearchResult) {
+        		if ((itemType == null) || (itemType == RepositoryItemType.LIBRARY)) {
+            		RepositoryItem item = ((LibrarySearchResult) result).getRepositoryItem();
+            		
+                    if (isReadable(item, user, accessibleItemCache)) {
+                    	resultsList.getSearchResult().add(
+                    			objectFactory.createLibrarySearchResult(
+                    					RepositoryUtils.createItemMetadata( item ) ) );
+                    }
+        		}
+                
+        	} else if (result instanceof EntitySearchResult) {
+        		if ((itemType == null) || (itemType == RepositoryItemType.LIBRARY)) {
+            		EntitySearchResult entityResult = (EntitySearchResult) result;
+            		LibrarySearchResult referencedLib = referencedLibrariesById.get( entityResult.getOwningLibraryId() );
+            		
+            		if (referencedLib != null) {
+            			RepositoryItem item = referencedLib.getRepositoryItem();
+            			
+                        if (isReadable(item, user, accessibleItemCache)) {
+                        	resultsList.getSearchResult().add(
+                        			objectFactory.createLibrarySearchResult(
+                        					createEntityMetadata( entityResult, item ) ) );
+                        }
+            		}
         		}
         	}
         }
@@ -1272,8 +1288,12 @@ public class RepositoryContentResource {
 
             if (securityManager.isAdministrator(user)) {
                 repositoryManager.getFileManager().setCurrentUserId(user.getUserId());
-                RepositoryItemImpl item = RepositoryUtils.createRepositoryItem(repositoryManager,
-                        itemMetadata);
+                RepositoryItemImpl item = RepositoryUtils.createRepositoryItem(repositoryManager, itemMetadata);
+                
+                if (isReleaseMember( item )) {
+                	throw new RepositoryException(
+                			"The library cannot be deleted because it is part of a managed release.");
+                }
 
                 // Delete the item in the local repository
                 repositoryManager.delete(item);
@@ -1533,7 +1553,27 @@ public class RepositoryContentResource {
         }
         return hasAccess;
     }
-
+    
+    /**
+     * Returns true if the given item represents an OTM library that is part of a
+     * managed release.
+     * 
+     * @param item  the repository item to check
+     * @return boolean
+     * @throws RepositoryException  thrown if the repository search service cannot be accessed
+     */
+    protected boolean isReleaseMember(RepositoryItem item) throws RepositoryException {
+    	FreeTextSearchService service = FreeTextSearchServiceFactory.getInstance();
+    	LibrarySearchResult library = service.getLibrary( item, false );
+    	boolean result = false;
+    	
+    	if (library != null) {
+    		List<ReleaseSearchResult> releaseList = service.getLibraryReleases( library, false );
+    		result = (releaseList.size() > 0);
+    	}
+    	return result;
+    }
+    
     /**
      * Returns the status enumeration from the given string value, or null if the string
      * is null or empty.
