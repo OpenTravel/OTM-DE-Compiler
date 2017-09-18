@@ -32,6 +32,7 @@ import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLService;
 import org.opentravel.schemacompiler.model.XSDLibrary;
+import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
 import org.opentravel.schemacompiler.version.MinorVersionHelper;
 import org.opentravel.schemacompiler.version.VersionScheme;
@@ -49,6 +50,20 @@ public class ServiceCompilerTask extends AbstractSchemaCompilerTask
 
     private URL serviceLibraryUrl;
     private String serviceEndpointUrl;
+
+    /**
+     * Default constructor.
+     */
+    public ServiceCompilerTask() {}
+    
+    /**
+     * Constructor that assigns the repository manager for this task instance.
+     * 
+     * @param repositoryManager  the repository manager to use when retrieving managed content
+     */
+    public ServiceCompilerTask(RepositoryManager repositoryManager) {
+    	super( repositoryManager );
+    }
 
     /**
      * @see org.opentravel.schemacompiler.task.AbstractCompilerTask#generateOutput(java.util.Collection,

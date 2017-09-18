@@ -38,6 +38,7 @@ import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLMimeType;
 import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.XSDLibrary;
+import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
 
 /**
@@ -49,6 +50,20 @@ public class SwaggerCompilerTask extends AbstractSchemaCompilerTask
 	
     private String resourceBaseUrl;
     
+    /**
+     * Default constructor.
+     */
+    public SwaggerCompilerTask() {}
+    
+    /**
+     * Constructor that assigns the repository manager for this task instance.
+     * 
+     * @param repositoryManager  the repository manager to use when retrieving managed content
+     */
+    public SwaggerCompilerTask(RepositoryManager repositoryManager) {
+    	super( repositoryManager );
+    }
+
 	/**
 	 * @see org.opentravel.schemacompiler.task.AbstractCompilerTask#generateOutput(java.util.Collection, java.util.Collection)
 	 */

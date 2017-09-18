@@ -24,6 +24,7 @@ import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.XSDLibrary;
+import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
@@ -41,12 +42,20 @@ public class DocumentationCompileTask extends AbstractCompilerTask implements Ex
     private Integer exampleMaxRepeat;
     private Integer exampleMaxDepth;
     
-	/**
-	 * Default Constructor
-	 */
-	public DocumentationCompileTask() {
-	}
-	
+    /**
+     * Default constructor.
+     */
+    public DocumentationCompileTask() {}
+    
+    /**
+     * Constructor that assigns the repository manager for this task instance.
+     * 
+     * @param repositoryManager  the repository manager to use when retrieving managed content
+     */
+    public DocumentationCompileTask(RepositoryManager repositoryManager) {
+    	super( repositoryManager );
+    }
+
 	/**
 	 * Static method that will compile HTML documentation to the specified output folder.  If
 	 * successful, the file handle that is returned will be the 'index.html' file for the documentation

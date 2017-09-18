@@ -30,6 +30,7 @@ import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.loader.LibraryModelLoader;
 import org.opentravel.schemacompiler.loader.LoaderValidationMessageKeys;
+import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.model.TLModel;
@@ -185,6 +186,7 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 			repositoryManager.refreshLocalCopy( releaseItem );
 			URL releaseUrl = repositoryManager.getContentLocation( releaseItem );
 			File releaseFile = URLUtils.toFile( releaseUrl );
+			ReleaseItem loadedItem = null;
 			
 			// Clear any existing release & model info so we will not be left in an inconsistent
 			// state if something goes wrong during the load.
@@ -192,8 +194,12 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 			this.release = null;
 			
 			this.release = fileUtils.loadReleaseFile( releaseFile, findings );
-			loadReleaseModel( findings );
-			return ReleaseItemImpl.newManagedItem( releaseItem, this );
+			
+			if (!findings.hasFinding( FindingType.ERROR )) {
+				loadReleaseModel( findings );
+				loadedItem = ReleaseItemImpl.newManagedItem( releaseItem, this );
+			}
+			return loadedItem;
 			
 		} catch (LibraryLoaderException e) {
 			throw new RepositoryException("Unexpected error loading release content.", e);
@@ -348,6 +354,27 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 	}
 	
 	/**
+	 * Returns the library associated with the given release member or null if no
+	 * such library exists in the model.
+	 * 
+	 * @param member  the release member for which to return a model library
+	 * @return AbstractLibrary
+	 */
+	public AbstractLibrary getLibrary(ReleaseMember member) {
+		RepositoryItem item = member.getRepositoryItem();
+		List<AbstractLibrary> candidateLibs = model.getLibrariesForNamespace( item.getNamespace() );
+		AbstractLibrary library = null;
+		
+		for (AbstractLibrary candidateLib : candidateLibs) {
+			if (candidateLib.getName().equals( item.getLibraryName() )) {
+				library = candidateLib;
+				break;
+			}
+		}
+		return library;
+	}
+	
+	/**
 	 * Loads or reloads the model to incorporate changes to effective dates and principal
 	 * release members.  During the re-load, the list of referenced libraries for the
 	 * release is updated.  Referenced members that are no longer required are removed
@@ -419,12 +446,7 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
         	ReleaseStatus newStatus = (release.getDefaultEffectiveDate() == null) ? ReleaseStatus.FULL : ReleaseStatus.BETA;
         	
         	if (newStatus != ReleaseStatus.BETA) {
-        		List<ReleaseMember> allMembers = new ArrayList<>();
-        		
-        		allMembers.addAll( release.getPrincipalMembers() );
-        		allMembers.addAll( release.getReferencedMembers() );
-        		
-        		for (ReleaseMember member : allMembers) {
+        		for (ReleaseMember member : release.getAllMembers()) {
         			if (member.getEffectiveDate() != null) {
         				newStatus = ReleaseStatus.BETA;
         				break;

@@ -17,6 +17,7 @@ package org.opentravel.schemacompiler.repository;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -180,6 +181,20 @@ public class Release {
 	 */
 	public List<ReleaseMember> getReferencedMembers() {
 		return referencedMembers;
+	}
+
+	/**
+	 * Returns an unmodifiable list of all principle and referenced members
+	 * of this release.
+	 *
+	 * @return List<ReleaseMember>
+	 */
+	public List<ReleaseMember> getAllMembers() {
+		List<ReleaseMember> allMembers = new ArrayList<>();
+		
+		allMembers.addAll( principalMembers );
+		allMembers.addAll( referencedMembers );
+		return Collections.unmodifiableList( allMembers );
 	}
 	
 	/**

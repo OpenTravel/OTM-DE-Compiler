@@ -22,6 +22,7 @@ import java.util.Collection;
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.XSDLibrary;
+import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
 
 /**
@@ -48,6 +49,20 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
     private Integer exampleMaxDepth;
 
     /**
+     * Default constructor.
+     */
+    public CompileAllCompilerTask() {}
+    
+    /**
+     * Constructor that assigns the repository manager for this task instance.
+     * 
+     * @param repositoryManager  the repository manager to use when retrieving managed content
+     */
+    public CompileAllCompilerTask(RepositoryManager repositoryManager) {
+    	super( repositoryManager );
+    }
+
+    /**
      * @see org.opentravel.schemacompiler.task.AbstractCompilerTask#generateOutput(java.util.Collection,
      *      java.util.Collection)
      */
@@ -57,58 +72,58 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
         CodeGenerationContext compileAllContext = createContext();
 
         if (compileSchemas) {
-            XmlSchemaCompilerTask schemaTask = new XmlSchemaCompilerTask(projectFilename);
+            XmlSchemaCompilerTask schemaTask = new XmlSchemaCompilerTask(projectFilename, repositoryManager);
 
             schemaTask.applyTaskOptions(this);
-            schemaTask.setPrimaryLibrary( getPrimaryLibrary() );
+            schemaTask.getPrimaryLibraries().addAll( getPrimaryLibraries() );
             schemaTask.setOutputFolder(getSubtaskOutputFolder(compileAllContext, "schemas"));
             schemaTask.generateOutput(userDefinedLibraries, legacySchemas);
             addGeneratedFiles(schemaTask.getGeneratedFiles());
         }
         if (compileJson) {
-            JsonSchemaCompilerTask jsonSchemaTask = new JsonSchemaCompilerTask(projectFilename);
+            JsonSchemaCompilerTask jsonSchemaTask = new JsonSchemaCompilerTask(projectFilename, repositoryManager);
 
             jsonSchemaTask.applyTaskOptions(this);
-            jsonSchemaTask.setPrimaryLibrary( getPrimaryLibrary() );
+            jsonSchemaTask.getPrimaryLibraries().addAll( getPrimaryLibraries() );
             jsonSchemaTask.setOutputFolder(getSubtaskOutputFolder(compileAllContext, "json"));
             jsonSchemaTask.generateOutput(userDefinedLibraries, legacySchemas);
             addGeneratedFiles(jsonSchemaTask.getGeneratedFiles());
         }
         if (compileServices) {
             if (projectFilename != null) {
-                ServiceProjectCompilerTask serviceTask = new ServiceProjectCompilerTask(projectFilename);
+                ServiceProjectCompilerTask serviceTask = new ServiceProjectCompilerTask(projectFilename, repositoryManager);
 
                 serviceTask.applyTaskOptions(this);
-                serviceTask.setPrimaryLibrary( getPrimaryLibrary() );
+                serviceTask.getPrimaryLibraries().addAll( getPrimaryLibraries() );
                 serviceTask.setOutputFolder(getSubtaskOutputFolder(compileAllContext, "services"));
                 serviceTask.generateOutput(userDefinedLibraries, legacySchemas);
                 addGeneratedFiles(serviceTask.getGeneratedFiles());
 
             } else { // non-project service compilation
-                ServiceCompilerTask serviceTask = new ServiceCompilerTask();
+                ServiceCompilerTask serviceTask = new ServiceCompilerTask(repositoryManager);
 
                 serviceTask.applyTaskOptions(this);
-                serviceTask.setPrimaryLibrary( getPrimaryLibrary() );
+                serviceTask.getPrimaryLibraries().addAll( getPrimaryLibraries() );
                 serviceTask.setOutputFolder(getSubtaskOutputFolder(compileAllContext, "services"));
                 serviceTask.generateOutput(userDefinedLibraries, legacySchemas);
                 addGeneratedFiles(serviceTask.getGeneratedFiles());
             }
         }
         if (compileSwagger) {
-            SwaggerCompilerTask swaggerTask = new SwaggerCompilerTask();
+            SwaggerCompilerTask swaggerTask = new SwaggerCompilerTask(repositoryManager);
 
             swaggerTask.applyTaskOptions(this);
-            swaggerTask.setPrimaryLibrary( getPrimaryLibrary() );
+            swaggerTask.getPrimaryLibraries().addAll( getPrimaryLibraries() );
             swaggerTask.setOutputFolder(getSubtaskOutputFolder(compileAllContext, "swagger"));
             swaggerTask.generateOutput(userDefinedLibraries, legacySchemas);
             addGeneratedFiles(swaggerTask.getGeneratedFiles());
         }
         
         if (compileHtml) {
-        	DocumentationCompileTask docTask = new DocumentationCompileTask();
+        	DocumentationCompileTask docTask = new DocumentationCompileTask(repositoryManager);
         	
         	docTask.applyTaskOptions(this);
-        	docTask.setPrimaryLibrary( getPrimaryLibrary() );
+        	docTask.getPrimaryLibraries().addAll( getPrimaryLibraries() );
 			docTask.setOutputFolder(getOutputFolder() + "/documentation");
 			docTask.generateOutput(userDefinedLibraries, legacySchemas);
 			addGeneratedFiles(docTask.getGeneratedFiles());

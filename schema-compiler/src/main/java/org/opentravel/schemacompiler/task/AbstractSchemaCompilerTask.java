@@ -43,6 +43,7 @@ import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.XSDLibrary;
+import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
 import org.springframework.context.ApplicationContext;
 
@@ -61,6 +62,20 @@ public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask im
     private String exampleContext;
     private Integer exampleMaxRepeat;
     private Integer exampleMaxDepth;
+
+    /**
+     * Default constructor.
+     */
+    public AbstractSchemaCompilerTask() {}
+    
+    /**
+     * Constructor that assigns the repository manager for this task instance.
+     * 
+     * @param repositoryManager  the repository manager to use when retrieving managed content
+     */
+    public AbstractSchemaCompilerTask(RepositoryManager repositoryManager) {
+    	super( repositoryManager );
+    }
 
     /**
      * Compiles the XML schema files for the given model using the context, filename builder, and

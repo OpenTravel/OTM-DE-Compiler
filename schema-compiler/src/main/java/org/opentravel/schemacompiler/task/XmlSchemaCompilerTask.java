@@ -24,6 +24,7 @@ import org.opentravel.schemacompiler.codegen.impl.LibraryFilenameBuilder;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.XSDLibrary;
+import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
 
 /**
@@ -36,10 +37,20 @@ public class XmlSchemaCompilerTask extends AbstractSchemaCompilerTask {
     /**
      * Constructor that specifies the filename of the project for which schemas are being compiled.
      * 
-     * @param projectFilename
-     *            the name of the project (.otp) file
+     * @param projectFilename  the name of the project (.otp) file
      */
     public XmlSchemaCompilerTask(String projectFilename) {
+        this.projectFilename = projectFilename;
+    }
+
+    /**
+     * Constructor that specifies the filename of the project for which schemas are being compiled.
+     * 
+     * @param projectFilename  the name of the project (.otp) file
+     * @param repositoryManager  the repository manager to use when retrieving managed content
+     */
+    public XmlSchemaCompilerTask(String projectFilename, RepositoryManager repositoryManager) {
+    	super( repositoryManager );
         this.projectFilename = projectFilename;
     }
 

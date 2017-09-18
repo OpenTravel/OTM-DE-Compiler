@@ -72,10 +72,7 @@ public class ReleaseIndexBuilder extends IndexBuilder<RepositoryItem> {
 			// Create the list of search ID's for referenced libraries
 			List<String> referencedLibraryIds = new ArrayList<>();
 			
-			for (ReleaseMember member : release.getPrincipalMembers()) {
-				referencedLibraryIds.add( IndexingUtils.getIdentityKey( member.getRepositoryItem() ) );
-			}
-			for (ReleaseMember member : release.getReferencedMembers()) {
+			for (ReleaseMember member : release.getAllMembers()) {
 				referencedLibraryIds.add( IndexingUtils.getIdentityKey( member.getRepositoryItem() ) );
 			}
 			

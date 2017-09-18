@@ -55,6 +55,11 @@ import org.opentravel.schemacompiler.model.XSDLibrary;
 import org.opentravel.schemacompiler.repository.Project;
 import org.opentravel.schemacompiler.repository.ProjectItem;
 import org.opentravel.schemacompiler.repository.ProjectManager;
+import org.opentravel.schemacompiler.repository.ReleaseManager;
+import org.opentravel.schemacompiler.repository.ReleaseMember;
+import org.opentravel.schemacompiler.repository.RepositoryException;
+import org.opentravel.schemacompiler.repository.RepositoryItem;
+import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
@@ -72,54 +77,77 @@ import org.opentravel.schemacompiler.validate.impl.TLModelValidator;
  * @author S. Livezey
  */
 public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions {
-
-    private Map<String, File> generatedFiles = new TreeMap<String, File>();
-    private AbstractLibrary primaryLibrary;
+	
+	protected RepositoryManager repositoryManager;
+    private Map<String,File> generatedFiles = new TreeMap<>();
+    private List<AbstractLibrary> primaryLibraries = new ArrayList<>();
     private String validationRuleSetId;
     private String catalogLocation;
     private String outputFolder;
     protected String projectFilename;
-
+    
     /**
-     * Loads a model using the content of the specified library (or project) file and compiles the
-     * output using the options assigned for this task.
-     * 
-     * @param libraryOrProjectFile
-     *            the location of the library/project file on the local file system
-     * @return ValidationFindings
-     * @throws SchemaCompilerException
-     *             thrown if an unexpected error occurs during the compilation process
+     * Default constructor.
      */
-    public ValidationFindings compileOutput(File libraryOrProjectFile)
-            throws SchemaCompilerException {
-        return compileOutput(URLUtils.toURL(libraryOrProjectFile));
+    public AbstractCompilerTask() {
+    	try {
+    		repositoryManager = RepositoryManager.getDefault();
+    		
+    	} catch (RepositoryException e) {
+    		// Ignore - should never happen, but proceed with null repo-manager if it does
+    	}
+    }
+    
+    /**
+     * Constructor that assigns the repository manager for this task instance.
+     * 
+     * @param repositoryManager  the repository manager to use when retrieving managed content
+     */
+    public AbstractCompilerTask(RepositoryManager repositoryManager) {
+    	this.repositoryManager = repositoryManager;
     }
 
     /**
      * Loads a model using the content of the specified library (or project) file and compiles the
      * output using the options assigned for this task.
      * 
-     * @param libraryOrProjectUrl
-     *            the URL location of the library/project file
+     * @param libraryOrProjectOrReleaseFile
+     *            the location of the library/project/release file on the local file system
      * @return ValidationFindings
      * @throws SchemaCompilerException
      *             thrown if an unexpected error occurs during the compilation process
      */
-    public ValidationFindings compileOutput(URL libraryOrProjectUrl) throws SchemaCompilerException {
+    public ValidationFindings compileOutput(File libraryOrProjectOrReleaseFile)
+            throws SchemaCompilerException {
+        return compileOutput(URLUtils.toURL(libraryOrProjectOrReleaseFile));
+    }
+
+    /**
+     * Loads a model using the content of the specified library (or project or release) file
+     * and compiles the output using the options assigned for this task.
+     * 
+     * @param libraryOrProjectOrReleaseUrl
+     *            the URL location of the library/project/release file
+     * @return ValidationFindings
+     * @throws SchemaCompilerException
+     *             thrown if an unexpected error occurs during the compilation process
+     */
+    public ValidationFindings compileOutput(URL libraryOrProjectOrReleaseUrl) throws SchemaCompilerException {
         Collection<TLLibrary> userDefinedLibraries = new ArrayList<TLLibrary>();
         Collection<XSDLibrary> legacySchemas = new ArrayList<XSDLibrary>();
         ValidationFindings findings;
 
-        if (isProjectFile(libraryOrProjectUrl)) {
+        if (isProjectFile(libraryOrProjectOrReleaseUrl)) {
             findings = new ValidationFindings();
             ProjectManager projectManager = new ProjectManager(false);
-            Project project = projectManager.loadProject(URLUtils.toFile(libraryOrProjectUrl), findings);
+            Project project = projectManager.loadProject(
+            		URLUtils.toFile(libraryOrProjectOrReleaseUrl), findings);
             
             for (ProjectItem item : project.getProjectItems()) {
                 AbstractLibrary itemContent = item.getContent();
 
                 if (project.getDefaultItem() == item) {
-                	primaryLibrary = itemContent;
+                	primaryLibraries.add( itemContent );
                 }
                 if (itemContent instanceof TLLibrary) {
                     userDefinedLibraries.add((TLLibrary) itemContent);
@@ -129,10 +157,42 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
                 }
             }
             projectFilename = project.getProjectFile().getName();
+            
+        } else if (isReleaseFile(libraryOrProjectOrReleaseUrl)) {
+            findings = new ValidationFindings();
+        	ReleaseManager releaseManager = new ReleaseManager( repositoryManager );
+        	
+        	releaseManager.loadRelease(
+        			URLUtils.toFile(libraryOrProjectOrReleaseUrl), findings );
+        	
+        	for (ReleaseMember member : releaseManager.getRelease().getPrincipalMembers()) {
+        		AbstractLibrary library = releaseManager.getLibrary( member );
+        		
+        		if (library != null) {
+        			primaryLibraries.add( library );
+        		}
+        	}
+        	
+        	for (ReleaseMember member : releaseManager.getRelease().getAllMembers()) {
+        		AbstractLibrary library = releaseManager.getLibrary( member );
+        		
+        		if (library != null) {
+                    if (library instanceof TLLibrary) {
+                        userDefinedLibraries.add((TLLibrary) library);
 
-        } else {
-            LibraryInputSource<InputStream> libraryInput = new LibraryStreamInputSource(
-                    libraryOrProjectUrl);
+                    } else if (library instanceof XSDLibrary) {
+                        legacySchemas.add((XSDLibrary) library);
+                    }
+        		}
+        	}
+        	
+        	// For a release, the release compiler options take precedence over any
+        	// other options assigned for this task.
+        	applyTaskOptions( releaseManager.getRelease().getCompileOptions() );
+        	
+        } else { // Must be an OTM file
+            LibraryInputSource<InputStream> libraryInput =
+            		new LibraryStreamInputSource(libraryOrProjectOrReleaseUrl);
             LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>();
             String catalogLocation = getCatalogLocation();
             TLModel model;
@@ -145,7 +205,7 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
             model = modelLoader.getLibraryModel();
             userDefinedLibraries.addAll(model.getUserDefinedLibraries());
             legacySchemas.addAll(model.getLegacySchemaLibraries());
-            primaryLibrary = model.getLibrary(libraryOrProjectUrl);
+            primaryLibraries.add( model.getLibrary(libraryOrProjectOrReleaseUrl) );
         }
 
         // Proceed with compilation if no errors were detected during the load
@@ -173,7 +233,7 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
             AbstractLibrary itemContent = item.getContent();
 
             if (project.getDefaultItem() == item) {
-            	primaryLibrary = itemContent;
+            	primaryLibraries.add( itemContent );
             }
             if (itemContent instanceof TLLibrary) {
                 userDefinedLibraries.add((TLLibrary) itemContent);
@@ -185,7 +245,66 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
         projectFilename = project.getProjectFile().getName();
         return compileOutput(userDefinedLibraries, legacySchemas);
     }
+    
+    /**
+     * Validates an existing <code>Release</code> instance and compiles the output using the options
+     * that have been pre-configured in the release.
+     * 
+     * @param releaseManager
+     *            the manager for a release that contains all of the libraries for which to compile output
+     * @return ValidationFindings
+     * @throws SchemaCompilerException
+     *             thrown if an unexpected error occurs during the compilation process
+     */
+    public ValidationFindings compileOutput(ReleaseManager releaseManager) throws SchemaCompilerException {
+        Collection<TLLibrary> userDefinedLibraries = new ArrayList<TLLibrary>();
+        Collection<XSDLibrary> legacySchemas = new ArrayList<XSDLibrary>();
+        
+    	for (ReleaseMember member : releaseManager.getRelease().getPrincipalMembers()) {
+    		AbstractLibrary library = releaseManager.getLibrary( member );
+    		
+    		if (library != null) {
+    			primaryLibraries.add( library );
+    		}
+    	}
+    	
+    	for (ReleaseMember member : releaseManager.getRelease().getAllMembers()) {
+    		AbstractLibrary library = releaseManager.getLibrary( member );
+    		
+    		if (library != null) {
+                if (library instanceof TLLibrary) {
+                    userDefinedLibraries.add((TLLibrary) library);
 
+                } else if (library instanceof XSDLibrary) {
+                    legacySchemas.add((XSDLibrary) library);
+                }
+    		}
+    	}
+        return compileOutput(userDefinedLibraries, legacySchemas);
+    }
+    
+    /**
+     * Loads the specified <code>Release</code> from an OTM repository and compiles the output using the options
+     * that have been pre-configured in the release.
+     * 
+     * @param releaseItem
+     *            the repository item for a release that contains all of the libraries for which to compile output
+     * @return ValidationFindings
+     * @throws SchemaCompilerException
+     *             thrown if an unexpected error occurs during the compilation process
+     */
+    public ValidationFindings compileOutput(RepositoryItem releaseItem) throws SchemaCompilerException {
+    	ReleaseManager releaseManager = new ReleaseManager( repositoryManager );
+    	ValidationFindings findings = new ValidationFindings();
+    	
+    	releaseManager.loadRelease( releaseItem, findings );
+    	
+    	if (!findings.hasFinding( FindingType.ERROR )) {
+        	findings.addAll( compileOutput( releaseManager ) );
+    	}
+    	return findings;
+    }
+    
     /**
      * Validates an existing <code>TLModel</code> instance and compiles the output using the options
      * assigned for this task.
@@ -322,14 +441,24 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
 
     /**
      * Returns true if the given file represents a project (.otp) file, or false if the URL should
-     * be interpreted as referring to an individual library.
+     * be interpreted as referring to a release or individual library.
      * 
-     * @param url
-     *            the URL to analyze
+     * @param url  the URL to analyze
      * @return boolean
      */
     protected boolean isProjectFile(URL url) {
         return url.getFile().toLowerCase().endsWith(".otp");
+    }
+
+    /**
+     * Returns true if the given file represents an OTM release (.otr) file, or false if
+     * the URL should be interpreted as referring to a project or individual library.
+     * 
+     * @param url  the URL to analyze
+     * @return boolean
+     */
+    protected boolean isReleaseFile(URL url) {
+        return url.getFile().toLowerCase().endsWith(".otr");
     }
 
     /**
@@ -552,25 +681,14 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
     }
 
     /**
-	 * Returns the library that is the primary focus of the compilation effort.  If this
-	 * library is present, all others will be trimmed to only those dependencies that are
+	 * Returns the libraries that are the primary focus of the compilation effort.  If these
+	 * libraries are present, all others will be trimmed to only those dependencies that are
 	 * required by the primary.
 	 *
-	 * @return AbstractLibrary
+	 * @return List<AbstractLibrary>
 	 */
-	public AbstractLibrary getPrimaryLibrary() {
-		return primaryLibrary;
-	}
-
-	/**
-	 * Assigns the library that is the primary focus of the compilation effort.  If this
-	 * library is present, all others will be trimmed to only those dependencies that are
-	 * required by the primary.
-	 *
-	 * @param primaryLibrary  the primary library to assign (may be null)
-	 */
-	public void setPrimaryLibrary(AbstractLibrary primaryLibrary) {
-		this.primaryLibrary = primaryLibrary;
+	public List<AbstractLibrary> getPrimaryLibraries() {
+		return primaryLibraries;
 	}
 
 	/**
