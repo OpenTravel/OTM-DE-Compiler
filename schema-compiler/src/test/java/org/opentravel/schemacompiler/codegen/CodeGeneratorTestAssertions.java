@@ -644,7 +644,9 @@ public class CodeGeneratorTestAssertions {
 				JsonNode reportsNode = messageNode.get( "reports" );
 				
 				if (reportsNode == null) {
-					errors.add( message );
+					if (!isMissingAtTypeError( message )) {
+						errors.add( message );
+					}
 					
 				} else {
 					Iterator<String> rnIterator = reportsNode.fieldNames();
@@ -653,7 +655,13 @@ public class CodeGeneratorTestAssertions {
 						ArrayNode reportJson = (ArrayNode) reportsNode.get( rnIterator.next() );
 						
 						if (!isSuperfluousReportNode( reportJson )) {
-							errors.addAll( getValidationErrors( buildReport( reportJson ) ) );
+							List<ProcessingMessage> reportMessages = getValidationErrors( buildReport( reportJson ) );
+							
+							for (ProcessingMessage reportMessage : reportMessages) {
+								if (!isMissingAtTypeError( reportMessage )) {
+									errors.add( reportMessage );
+								}
+							}
 						}
 					}
 				}
@@ -679,6 +687,31 @@ public class CodeGeneratorTestAssertions {
 			if (schemaJson != null) {
 				JsonNode pointerJson = schemaJson.get( "pointer" );
 				result = (pointerJson != null) && pointerJson.asText( "" ).startsWith( "/oneOf/" );
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * Returns true if the error message is a report of a missing <code>@type</code>
+	 * property.  These errors are suppressed because the property is required by the
+	 * Swagger spec, but not always provided by many popular industry technologies.
+	 * 
+	 * @param message  the processing message to analyze
+	 * @return boolean
+	 */
+	private static boolean isMissingAtTypeError(ProcessingMessage message) {
+		JsonNode messageNode = message.asJson();
+		JsonNode keywordJson = messageNode.get( "keyword" );
+		String keywordValue = (keywordJson == null) ? null : keywordJson.asText();
+		boolean result = false;
+		
+		if ((keywordValue != null) && keywordValue.equals( "required" )) {
+			JsonNode missingJson = messageNode.get( "missing" );
+			
+			if (missingJson instanceof ArrayNode) {
+				ArrayNode missingArray = (ArrayNode) missingJson;
+				result = (missingArray.size() == 1) && missingArray.get( 0 ).asText().equals("@type");
 			}
 		}
 		return result;

@@ -38,7 +38,7 @@ import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLAttributeOwner;
 import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
-import org.opentravel.schemacompiler.model.TLComplexTypeBase;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
@@ -701,7 +701,8 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 	private void addJsonFacetType(TLFacet facet, TLAlias alias) {
 		ObjectNode jsonNode = (ObjectNode) context.getNode();
 		
-		if ((jsonNode != null) && (jsonNode.get("@type") == null)) {
+		if (isSubstitutionGroupReference(context.getModelElement()) &&
+				(jsonNode != null) && (jsonNode.get("@type") == null)) {
 			String typeName;
 			
 			if (alias != null) {
@@ -711,6 +712,25 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 			}
 			jsonNode.put("@type", typeName.intern());
 		}
+	}
+	
+	/**
+	 * Returns true if the given property references the root of a substitution group.
+	 * 
+	 * @param element  the model element to check
+	 * @return boolean
+	 */
+	private boolean isSubstitutionGroupReference(TLProperty element) {
+		NamedEntity elementType = (element == null) ? null : element.getType();
+		boolean isSubstitutionGroup;
+		
+		if (elementType instanceof TLAlias) {
+			elementType = ((TLAlias) elementType).getOwningEntity();
+		}
+		isSubstitutionGroup = (elementType instanceof TLBusinessObject) ||
+				(elementType instanceof TLCoreObject) || (elementType instanceof TLChoiceObject);
+		
+		return isSubstitutionGroup;
 	}
 
 	/**
@@ -731,12 +751,21 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 			if (alias != null) {
 				elementType = alias;
 			}
-			nodeName = JsonSchemaNamingUtils.getGlobalPropertyName(elementType);
+			
+			if (isSubstitutionGroupReference( context.getModelElement() )) {
+				nodeName = getPropertyElementName(context.getModelElement(),
+						(TLPropertyType) elementType);
+				
+			} else {
+				nodeName = JsonSchemaNamingUtils.getGlobalPropertyName(elementType);
+			}
+			
 		} else if ((context.getModelElement() != null)
 				&& ((elementType instanceof TLAttributeType) || (elementType
 						.equals(context.getModelElement().getType())))) {
 			nodeName = getPropertyElementName(context.getModelElement(),
 					(TLPropertyType) elementType);
+			
 		} else {
 			nodeName = getContextElementName(elementType, false);
 		}
@@ -1132,11 +1161,10 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 				// suffix is appended
 				elementName += "Ref";
 			}
-
+		} else if (isSubstitutionGroupReference(property)) {
+			elementName = property.getType().getLocalName();
 		} else if (propertyType instanceof TLAlias) {
 			elementName = JsonSchemaNamingUtils.getGlobalPropertyName(propertyType);
-		} else if (propertyType instanceof TLComplexTypeBase) {
-			elementName = propertyType.getLocalName();
 		} else {
 			elementName = getContextElementName(propertyType,
 					property.isReference());

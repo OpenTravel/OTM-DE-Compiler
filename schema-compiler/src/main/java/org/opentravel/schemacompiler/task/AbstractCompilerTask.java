@@ -161,6 +161,7 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
         } else if (isReleaseFile(libraryOrProjectOrReleaseUrl)) {
             findings = new ValidationFindings();
         	ReleaseManager releaseManager = new ReleaseManager( repositoryManager );
+        	String outputFolder = getOutputFolder();
         	
         	releaseManager.loadRelease(
         			URLUtils.toFile(libraryOrProjectOrReleaseUrl), findings );
@@ -189,6 +190,7 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
         	// For a release, the release compiler options take precedence over any
         	// other options assigned for this task.
         	applyTaskOptions( releaseManager.getRelease().getCompileOptions() );
+        	setOutputFolder( outputFolder );
         	
         } else { // Must be an OTM file
             LibraryInputSource<InputStream> libraryInput =
@@ -259,6 +261,7 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
     public ValidationFindings compileOutput(ReleaseManager releaseManager) throws SchemaCompilerException {
         Collection<TLLibrary> userDefinedLibraries = new ArrayList<TLLibrary>();
         Collection<XSDLibrary> legacySchemas = new ArrayList<XSDLibrary>();
+        String outputFolder = getOutputFolder();
         
     	for (ReleaseMember member : releaseManager.getRelease().getPrincipalMembers()) {
     		AbstractLibrary library = releaseManager.getLibrary( member );
@@ -281,6 +284,7 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
     		}
     	}
     	applyTaskOptions( releaseManager.getRelease().getCompileOptions() );
+    	setOutputFolder( outputFolder );
         return compileOutput(userDefinedLibraries, legacySchemas);
     }
     
