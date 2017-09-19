@@ -280,6 +280,7 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
                 }
     		}
     	}
+    	applyTaskOptions( releaseManager.getRelease().getCompileOptions() );
         return compileOutput(userDefinedLibraries, legacySchemas);
     }
     

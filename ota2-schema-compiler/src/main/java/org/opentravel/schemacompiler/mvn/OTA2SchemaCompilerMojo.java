@@ -29,6 +29,10 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.opentravel.schemacompiler.ioc.CompilerExtensionRegistry;
+import org.opentravel.schemacompiler.repository.RepositoryException;
+import org.opentravel.schemacompiler.repository.RepositoryItem;
+import org.opentravel.schemacompiler.repository.RepositoryItemType;
+import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.task.CommonCompilerTaskOptions;
 import org.opentravel.schemacompiler.task.CompileAllCompilerTask;
 import org.opentravel.schemacompiler.task.CompileAllTaskOptions;
@@ -52,8 +56,14 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
     /**
      * The location of the library file to be compiled.
      */
-	@Parameter( required = true )
+	@Parameter
     protected File libraryFile;
+
+    /**
+     * The repository information for the OTM release to be compiled.
+     */
+	@Parameter
+    protected Release release;
 
     /**
      * The location of the library catalog file.
@@ -171,11 +181,38 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
                 if (debug)
                     displayOptions();
 
-                // Validate the source file and output folder
-                if (!libraryFile.exists()) {
-                    throw new FileNotFoundException("Source file not found: "
-                            + libraryFile.getAbsolutePath());
+                // Validate the source file or managed release and the output folder
+                RepositoryItem releaseItem = null;
+                
+                if (libraryFile != null) {
+                    if (!libraryFile.exists()) {
+                        throw new FileNotFoundException("Source file not found: "
+                                + libraryFile.getAbsolutePath());
+                    }
+                	
+                } else if (release != null) {
+                	try {
+                		releaseItem = RepositoryManager.getDefault().getRepositoryItem(
+                				release.getBaseNamespace(), release.getFilename(), release.getVersion() );
+                		
+                		if (!RepositoryItemType.RELEASE.isItemType( releaseItem.getFilename() )) {
+                			throw new RepositoryException(
+                					"The specified repository item is not an OTM release: " + releaseItem.getFilename());
+                		}
+                		
+                	} catch (RepositoryException e) {
+                		throw new MojoFailureException(
+                				"The specified repository item does not exist or is not an OTM release.", e);
+                		
+                	} catch (Throwable t) {
+                		throw new MojoExecutionException(
+                				"Unknown error while accessing the OTM repository", t);
+                	}
+                	
+                } else {
+                	throw new MojoFailureException("Either a libraryFile or a release must be specified.");
                 }
+                
                 if (!outputFolder.exists()) {
                     if (!outputFolder.mkdirs()) {
                         throw new IOException("Unable to create ouput folder: "
@@ -195,14 +232,20 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
                 }
 
                 // Execute the compilation and return
-                CompileAllCompilerTask compilerTask = TaskFactory
-                        .getTask(CompileAllCompilerTask.class);
+                CompileAllCompilerTask compilerTask = TaskFactory.getTask(CompileAllCompilerTask.class);
+                ValidationFindings findings;
                 Log log = getLog();
 
-                log.info("Compiling OTA2 Library: " + libraryFile.getName());
-                compilerTask.applyTaskOptions(this);
-
-                ValidationFindings findings = compilerTask.compileOutput(libraryFile);
+                
+                if (libraryFile !=  null) {
+                    log.info("Compiling OTA2 Library: " + libraryFile.getName());
+                    compilerTask.applyTaskOptions(this);
+                    findings = compilerTask.compileOutput(libraryFile);
+                	
+                } else {
+                    log.info("Compiling OTA2 Release: " + releaseItem.getFilename());
+                    findings = compilerTask.compileOutput(releaseItem);
+                }
 
                 if (findings.hasFinding()) {
                     String[] messages = findings

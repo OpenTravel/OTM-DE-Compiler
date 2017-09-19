@@ -39,9 +39,9 @@ public class InitRepositorySnapshotMojo extends AbstractOTA2RepositoryMojo {
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		validate();
 		File snapshotProjectFile = getSnapshotProjectFile();
-		File snapshotFolder = getSnapshotFolder();
+		File snapshotLibraryFolder = getSnapshotLibraryFolder();
 		
-		if (snapshotProjectFile.exists() && snapshotFolder.exists()) {
+		if (snapshotProjectFile.exists() && snapshotLibraryFolder.exists()) {
 			getLog().info("OTA2 repository snapshot already initialized.");
 			
 		} else {

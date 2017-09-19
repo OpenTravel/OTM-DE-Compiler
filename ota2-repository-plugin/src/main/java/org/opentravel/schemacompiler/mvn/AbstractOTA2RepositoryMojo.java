@@ -39,9 +39,14 @@ import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
+import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.repository.Project;
 import org.opentravel.schemacompiler.repository.ProjectManager;
+import org.opentravel.schemacompiler.repository.ReleaseManager;
 import org.opentravel.schemacompiler.repository.RepositoryException;
+import org.opentravel.schemacompiler.repository.RepositoryItem;
+import org.opentravel.schemacompiler.repository.RepositoryItemType;
+import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.saver.LibraryModelSaver;
 import org.opentravel.schemacompiler.saver.LibrarySaveException;
 import org.opentravel.schemacompiler.saver.impl.Library15FileSaveHandler;
@@ -71,14 +76,32 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 	 * The location of the OTM project file from which the repository snapshot is to be
 	 * taken (required).
 	 */
-	@Parameter( required=true )
+	@Parameter
 	protected File otmProject;
+	
+    /**
+     * The repository information for the OTM release to be compiled.
+     */
+	@Parameter
+    protected Release release;
+    private RepositoryItem releaseItem = null;
+    
+	/**
+	 * The folder location where the snapshot project will be created.  If not specified,
+	 * this will be the same folder as the original '.otp' file, or <code>/src/main/resources</code>
+	 * in the case of a managed OTM release.
+	 */
+	@Parameter
+	protected File snapshotProjectFolder;
 	
 	/**
 	 * Indicates whether execution of the 'ota2-repository' goals are enabled (default is true).
 	 */
 	@Parameter
 	protected boolean enabled = true;
+	
+	@Parameter(readonly = true, defaultValue = "${project.basedir}")
+	private File javaProjectFolder;
 	
 	/**
 	 * Creates or updates the OTA2 repository snapshot.
@@ -88,19 +111,38 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 	 */
 	protected void createOrUpdateSnapshot() throws MojoFailureException, MojoExecutionException {
 		File snapshotProjectFile = getSnapshotProjectFile();
-		File snapshotFolder = getSnapshotFolder();
+		File snapshotLibraryFolder = getSnapshotLibraryFolder();
 		File backupProject = backup( snapshotProjectFile );
-		File backupFolder = backup( snapshotFolder );
+		File backupFolder = backup( snapshotLibraryFolder );
 		boolean success = false;
 		Log log = getLog();
 		
 		try {
-			log.info("Loading OTM project: " + otmProject.getName());
-			ValidationFindings findings = new ValidationFindings();
+			ReleaseManager releaseManager = new ReleaseManager();
 			ProjectManager projectManager = new ProjectManager( false );
-			Project originalProject = projectManager.loadProject( otmProject, findings );
+			ValidationFindings findings = new ValidationFindings();
+			Project originalProject = null, snapshotProject = null;
+			TLModel model;
 			
-			// Ensure no errors exist in the OTM project before proceeding
+			if (otmProject != null) {
+				if (RepositoryItemType.RELEASE.isItemType( otmProject.getName() )) {
+					log.info("Loading OTM release: " + otmProject.getName());
+					releaseManager.loadRelease( otmProject, findings );
+					model = releaseManager.getModel();
+					
+				} else { // Load from an OTP file
+					log.info("Loading OTM project: " + otmProject.getName());
+					originalProject = projectManager.loadProject( otmProject, findings );
+					model = projectManager.getModel();
+				}
+				
+			} else { // Must be an OTM release
+				log.info("Loading OTM release: " + releaseItem.getFilename());
+				releaseManager.loadRelease( releaseItem, findings );
+				model = releaseManager.getModel();
+			}
+			
+			// Ensure no errors exist in the OTM project or release before proceeding
 			if (findings.hasFinding( FindingType.ERROR )) {
                 String[] messages = findings
                         .getAllValidationMessages(FindingMessageFormat.IDENTIFIED_FORMAT);
@@ -115,16 +157,25 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 			
 			// Create the new project and migrate all OTM files to the snapshot folder
 			log.info("Building snapshot project: " + snapshotProjectFile.getName());
-			Project snapshotProject = createSnapshotProject( originalProject, snapshotProjectFile, snapshotFolder );
+			
+			if (originalProject != null) {
+				snapshotProject = createSnapshotProject( originalProject, snapshotProjectFile,
+						snapshotLibraryFolder );
+				
+			} else { // Must be an OTM release
+				snapshotProject = createSnapshotProject( releaseManager.getRelease(),
+						projectManager, snapshotProjectFile, snapshotLibraryFolder );
+			}
+			
 			List<File> snapshotLibraryFiles = new ArrayList<>();
 			Map<String,Boolean> otm16Registry = new HashMap<>();
 			
-			for (AbstractLibrary library : projectManager.getModel().getAllLibraries()) {
+			for (AbstractLibrary library : model.getAllLibraries()) {
 				if (library instanceof BuiltInLibrary) {
 					continue;
 				}
 				File libraryFile = URLUtils.toFile( library.getLibraryUrl() );
-				File snapshotFile = new File( snapshotFolder, libraryFile.getName() );
+				File snapshotFile = new File( snapshotLibraryFolder, libraryFile.getName() );
 				URL snapshotUrl = URLUtils.toURL( snapshotFile );
 				
 				snapshotLibraryFiles.add( snapshotFile );
@@ -133,7 +184,7 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 			}
 			
 			// Update the imports and includes to the new snapshot folder location
-			for (AbstractLibrary library : projectManager.getModel().getAllLibraries()) {
+			for (AbstractLibrary library : model.getAllLibraries()) {
 				if (library instanceof TLLibrary) {
 					ImportManagementIntegrityChecker.verifyReferencedLibraries( (TLLibrary) library );
 				}
@@ -142,7 +193,7 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 			// Save each library in its original format
 	        LibraryModelSaver modelSaver = new LibraryModelSaver();
 	        
-			for (TLLibrary library : projectManager.getModel().getUserDefinedLibraries()) {
+			for (TLLibrary library : model.getUserDefinedLibraries()) {
 				boolean is16Library = otm16Registry.get( library.getLibraryUrl().toExternalForm() );
 				
 		        if (is16Library) {
@@ -165,14 +216,16 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 			}
 	        
 			// Delete any .bak files that might exist in the snapshot folder
-			for (File ssFile : snapshotFolder.listFiles()) {
+			for (File ssFile : snapshotLibraryFolder.listFiles()) {
 				if (ssFile.getName().endsWith(".bak")) {
 					ssFile.delete();
 				}
 			}
 			
 			// Populate the snapshot project with the newly-saved libraries in the snapshot folder
-			projectManager.closeProject( originalProject );
+			if (originalProject != null) {
+				projectManager.closeProject( originalProject );
+			}
 			projectManager.addUnmanagedProjectItems( snapshotLibraryFiles, snapshotProject );
 			projectManager.saveProject( snapshotProject, false, null );
 			deleteProjectBackup( snapshotProjectFile );
@@ -188,7 +241,7 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 				
 			} else { // restore backup on failure
 				restoreBackup( backupProject, snapshotProjectFile );
-				restoreBackup( backupFolder, snapshotFolder );
+				restoreBackup( backupFolder, snapshotLibraryFolder );
 			}
 		}
 	}
@@ -208,6 +261,27 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 		Project snapshotProject = projectManager.newProject(
 				snapshotProjectFile, originalProject.getProjectId() + "#snapshot",
 				originalProject.getName(), originalProject.getDescription() );
+		
+		snapshotFolder.mkdirs();
+		return snapshotProject;
+	}
+	
+	/**
+	 * Creates the snapshot project file and the snapshot folder where the OTM files will be stored.
+	 * 
+	 * @param release  the OTM release from which to create the snapshot project
+	 * @param projectManager  the project manager that should be used to create the new project
+	 * @param snapshotProjectFile  the file location of the repository snapshot project
+	 * @param snapshotFolder  the snapshot folder where the project's OTM files will be stored
+	 * @return Project
+	 * @throws LibrarySaveException  thrown if the new snapshot project cannot be created or saved
+	 */
+	protected Project createSnapshotProject(org.opentravel.schemacompiler.repository.Release release,
+			ProjectManager projectManager, File snapshotProjectFile, File snapshotFolder)
+					throws LibrarySaveException {
+		Project snapshotProject = projectManager.newProject(
+				snapshotProjectFile, release.getBaseNamespace() + "#snapshot",
+				release.getName(), release.getDescription() );
 		
 		snapshotFolder.mkdirs();
 		return snapshotProject;
@@ -309,13 +383,36 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 			log.info("OTA2 repository snapshot processing disabled (skipping).");
 			isValid = false;
 		}
-		if (otmProject == null) {
-			throw new MojoFailureException("OTM project file not specified.");
-		}
-		if (!otmProject.exists()) {
-			throw new MojoFailureException("The OTM project file does not exist: " + otmProject.getAbsolutePath());
-		}
-		File snapshotFolder = getSnapshotFolder();
+        if (otmProject != null) {
+            if (!otmProject.exists()) {
+                throw new MojoFailureException("Source file not found: "
+                        + otmProject.getAbsolutePath());
+            }
+        	
+        } else if (release != null) {
+        	try {
+        		releaseItem = RepositoryManager.getDefault().getRepositoryItem(
+        				release.getBaseNamespace(), release.getFilename(), release.getVersion() );
+        		
+        		if (!RepositoryItemType.RELEASE.isItemType( releaseItem.getFilename() )) {
+        			throw new MojoFailureException(
+        					"The specified repository item is not an OTM release: " + releaseItem.getFilename());
+        		}
+        		
+        	} catch (RepositoryException e) {
+        		throw new MojoFailureException(
+        				"The specified repository item does not exist or is not an OTM release.", e);
+        		
+        	} catch (Throwable t) {
+        		throw new MojoFailureException(
+        				"Unknown error while accessing the OTM repository", t);
+        	}
+        	
+        } else {
+        	throw new MojoFailureException("Either a libraryFile or a release must be specified.");
+        }
+        
+		File snapshotFolder = getSnapshotLibraryFolder();
 		
 		if (snapshotFolder.exists() && !snapshotFolder.isDirectory()) {
 			throw new MojoFailureException("The OTM snapshot folder exists, but is not a directory: "
@@ -330,7 +427,7 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 	 * @return File
 	 */
 	protected File getSnapshotProjectFile() {
-		return new File( otmProject.getParentFile(), getSnapshotFilename() + ".otp" );
+		return new File( getSnapshotProjectFolder(), getSnapshotFilename() + ".otp" );
 	}
 	
 	/**
@@ -339,8 +436,28 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 	 * 
 	 * @return File
 	 */
-	protected File getSnapshotFolder() {
-		return new File( otmProject.getParentFile(), getSnapshotFilename() );
+	protected File getSnapshotLibraryFolder() {
+		return new File( getSnapshotProjectFolder(), getSnapshotFilename() );
+	}
+	
+	/**
+	 * Returns the folder location where the snapshot project file will be stored.
+	 * 
+	 * @return File
+	 */
+	protected File getSnapshotProjectFolder() {
+		File projectFolder;
+		
+		if (snapshotProjectFolder != null) {
+			projectFolder = snapshotProjectFolder;
+			
+		} else if (otmProject != null) {
+			projectFolder = otmProject.getParentFile();
+			
+		} else {
+			projectFolder = new File( javaProjectFolder, "/src/main/resources" );
+		}
+		return projectFolder;
 	}
 	
 	/**
@@ -350,15 +467,21 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 	 * @return String
 	 */
 	private String getSnapshotFilename() {
-		String projectFilename = otmProject.getName();
-		int extIdx = projectFilename.lastIndexOf('.');
+		String sourceFilename;
 		String snapshotFilename;
 		
+		if (otmProject != null) {
+			sourceFilename = otmProject.getName();
+		} else {
+			sourceFilename = releaseItem.getFilename();
+		}
+		int extIdx = sourceFilename.lastIndexOf('.');
+		
 		if (extIdx < 0) {
-			snapshotFilename = projectFilename;
+			snapshotFilename = sourceFilename;
 			
 		} else {
-			snapshotFilename = projectFilename.substring( 0, extIdx );
+			snapshotFilename = sourceFilename.substring( 0, extIdx );
 		}
 		snapshotFilename += "-snapshot";
 		return snapshotFilename;
