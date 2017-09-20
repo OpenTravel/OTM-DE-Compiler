@@ -36,6 +36,11 @@
 	<c:param name="filename" value="${item.filename}" />
 	<c:param name="version" value="${item.version}" />
 </c:url>
+<c:url var="releasesUrl" value="/console/libraryReleases.html">
+	<c:param name="baseNamespace" value="${item.baseNamespace}" />
+	<c:param name="filename" value="${item.filename}" />
+	<c:param name="version" value="${item.version}" />
+</c:url>
 <c:url var="historyUrl" value="/console/libraryHistory.html">
 	<c:param name="baseNamespace" value="${item.baseNamespace}" />
 	<c:param name="filename" value="${item.filename}" />
@@ -62,6 +67,10 @@
 	<c:set var="tabStyle" value="tablinks" />
 	<c:if test="${currentTab == 'VALIDATION'}"><c:set var="tabStyle" value="tablinks activeTab" /></c:if>
 	<li><a href="${validationUrl}" class="${tabStyle}">Errors &amp; Warnings</a></li>
+	
+	<c:set var="tabStyle" value="tablinks" />
+	<c:if test="${currentTab == 'RELEASES'}"><c:set var="tabStyle" value="tablinks activeTab" /></c:if>
+	<li><a href="${releasesUrl}" class="${tabStyle}">Releases</a></li>
 	
 	<c:set var="tabStyle" value="tablinks" />
 	<c:if test="${currentTab == 'HISTORY'}"><c:set var="tabStyle" value="tablinks activeTab" /></c:if>

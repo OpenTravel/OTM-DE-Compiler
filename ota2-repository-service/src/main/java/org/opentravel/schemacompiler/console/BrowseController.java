@@ -30,6 +30,7 @@ import org.opentravel.schemacompiler.index.FreeTextSearchServiceFactory;
 import org.opentravel.schemacompiler.index.IndexingUtils;
 import org.opentravel.schemacompiler.index.LibrarySearchResult;
 import org.opentravel.schemacompiler.index.SubscriptionSearchResult;
+import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.RepositoryComponentFactory;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
@@ -38,6 +39,7 @@ import org.opentravel.schemacompiler.repository.RepositoryNamespaceUtils;
 import org.opentravel.schemacompiler.security.RepositorySecurityManager;
 import org.opentravel.schemacompiler.security.UserPrincipal;
 import org.opentravel.schemacompiler.subscription.SubscriptionManager;
+import org.opentravel.schemacompiler.util.PageUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -87,8 +89,8 @@ public class BrowseController extends BaseController {
                         log.warn("Error determining user access to root namespace: " + rootNS);
                     }
                 }
-            } else if (filename != null) { // display all versions of the selected library
-                List<RepositoryItem> allItems = repositoryManager.listItems(baseNamespace, false, true);
+            } else if (filename != null) { // display all versions of the selected library or release
+                List<RepositoryItem> allItems = repositoryManager.listItems(baseNamespace, TLLibraryStatus.DRAFT, false, null);
 
                 for (RepositoryItem item : allItems) {
                     if (item.getFilename().equals(filename)) {
@@ -105,7 +107,7 @@ public class BrowseController extends BaseController {
 
             } else { // display sub-namespaces and latest version of each library
                 List<String> nsChildren = repositoryManager.listNamespaceChildren(baseNamespace);
-                List<RepositoryItem> itemList = repositoryManager.listItems(baseNamespace, true, true);
+                List<RepositoryItem> itemList = repositoryManager.listItems(baseNamespace, TLLibraryStatus.DRAFT, true, null);
 
                 for (String childPath : nsChildren) {
                     String childNS = RepositoryNamespaceUtils.appendChildPath(baseNamespace,
@@ -142,6 +144,8 @@ public class BrowseController extends BaseController {
                     		securityManager.isAuthorized(user, parentNS, RepositoryPermission.WRITE));
                 }
             }
+            model.addAttribute("imageResolver", new SearchResultImageResolver());
+            model.addAttribute("pageUtils", new PageUtils());
             model.addAttribute("baseNamespace", baseNamespace);
             model.addAttribute("filename", filename);
             model.addAttribute("browseItems", browseItems);

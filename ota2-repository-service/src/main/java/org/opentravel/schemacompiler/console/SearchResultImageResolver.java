@@ -42,6 +42,8 @@ import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLService;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
+import org.opentravel.schemacompiler.repository.Release;
+import org.opentravel.schemacompiler.repository.RepositoryItemType;
 
 /**
  * Used to resolve the icon image for search results based on the entity type.
@@ -74,6 +76,21 @@ public class SearchResultImageResolver {
 	}
 	
 	/**
+	 * Returns the filename of the image for the given namespace item.
+	 * 
+	 * @param resultItem  the namespace item for which to return an icon image
+	 * @return String
+	 */
+	public String getIconImage(NamespaceItem item) {
+		Class<?> itemType = TLLibrary.class;
+		
+		if (RepositoryItemType.RELEASE.isItemType( item.getFilename() )) {
+			itemType = Release.class;
+		}
+		return getIconImage( itemType );
+	}
+	
+	/**
 	 * Returns the filename of the image for the given OTM entity type.
 	 * 
 	 * @param entityType  the OTM entity type for which to return an icon image
@@ -95,6 +112,7 @@ public class SearchResultImageResolver {
 		try {
 			Map<Class<?>,String> _imageMap = new HashMap<>();
 			
+			_imageMap.put( Release.class, "release.gif" );
 			_imageMap.put( TLLibrary.class, "library.png" );
 			_imageMap.put( TLSimple.class, "simple.gif" );
 			_imageMap.put( TLOpenEnumeration.class, "enum.gif" );

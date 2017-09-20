@@ -27,11 +27,13 @@ import org.opentravel.schemacompiler.index.EntitySearchResult;
 import org.opentravel.schemacompiler.index.FreeTextSearchService;
 import org.opentravel.schemacompiler.index.FreeTextSearchServiceFactory;
 import org.opentravel.schemacompiler.index.LibrarySearchResult;
+import org.opentravel.schemacompiler.index.ReleaseSearchResult;
 import org.opentravel.schemacompiler.index.SearchResult;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.RepositoryComponentFactory;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
+import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.security.RepositorySecurityManager;
 import org.opentravel.schemacompiler.security.UserPrincipal;
 import org.opentravel.schemacompiler.util.PageUtils;
@@ -94,12 +96,22 @@ public class SearchController extends BaseController {
                     UserPrincipal user = getCurrentUser(session);
 
                     for (SearchResult<?> result : results) {
-                    	if (result instanceof LibrarySearchResult) {
+                    	if (result instanceof ReleaseSearchResult) {
+                    		ReleaseSearchResult release = (ReleaseSearchResult) result;
+                    		RepositoryItem releaseItem = RepositoryManager.getDefault().getRepositoryItem(
+                    				release.getBaseNamespace(), release.getFilename(), release.getVersion() );
+
+                            if (securityManager.isReadAuthorized(user, releaseItem)) {
+                                searchResults.add( result );
+                            }
+                    		
+                    	} else if (result instanceof LibrarySearchResult) {
                     		RepositoryItem item = ((LibrarySearchResult) result).getRepositoryItem();
 
                             if (securityManager.isReadAuthorized(user, item)) {
                                 searchResults.add( result );
                             }
+                            
                     	} else if (result instanceof EntitySearchResult) {
                     		EntitySearchResult indexEntity = (EntitySearchResult) result;
                     		RepositoryPermission checkPermission = ((indexEntity.getStatus() == TLLibraryStatus.FINAL) 

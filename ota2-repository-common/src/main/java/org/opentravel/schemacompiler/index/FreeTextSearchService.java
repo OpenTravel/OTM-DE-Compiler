@@ -398,7 +398,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
     public List<SearchResult<?>> search(String freeText, TLLibraryStatus includeStatus,
     		boolean latestVersionsOnly, boolean resolveContent) throws RepositoryException {
     	try {
-			Query keywordQuery = new QueryParser( KEYWORDS_FIELD, new StandardAnalyzer()).parse( freeText );
+			Query keywordQuery = new QueryParser( KEYWORDS_FIELD, new StandardAnalyzer()).parse( freeText + "~" );
 			BooleanQuery statusQuery = null;
 			Query latestVersionQuery = null;
 			
@@ -565,7 +565,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
     public List<ReleaseSearchResult> getReleases(Collection<String> searchIndexIds, boolean resolveContent)
     		throws RepositoryException {
     	List<SearchResult<?>> rawResults = getLibrariesOrReleases(
-    			searchIndexIds, resolveContent, RepositoryItemType.LIBRARY );
+    			searchIndexIds, resolveContent, RepositoryItemType.RELEASE );
     	List<ReleaseSearchResult> results = new ArrayList<>();
     	
     	for (SearchResult<?> r : rawResults) {

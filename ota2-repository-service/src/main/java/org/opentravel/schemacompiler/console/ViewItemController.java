@@ -35,6 +35,7 @@ import org.opentravel.schemacompiler.index.FreeTextSearchService;
 import org.opentravel.schemacompiler.index.FreeTextSearchServiceFactory;
 import org.opentravel.schemacompiler.index.IndexingUtils;
 import org.opentravel.schemacompiler.index.LibrarySearchResult;
+import org.opentravel.schemacompiler.index.ReleaseSearchResult;
 import org.opentravel.schemacompiler.index.SearchResult;
 import org.opentravel.schemacompiler.index.ValidationResult;
 import org.opentravel.schemacompiler.model.NamedEntity;
@@ -43,11 +44,13 @@ import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.repository.ReleaseMember;
 import org.opentravel.schemacompiler.repository.RepositoryComponentFactory;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryItemCommit;
 import org.opentravel.schemacompiler.repository.RepositoryItemHistory;
+import org.opentravel.schemacompiler.repository.RepositoryItemType;
 import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
 import org.opentravel.schemacompiler.security.RepositorySecurityManager;
 import org.opentravel.schemacompiler.security.UserPrincipal;
@@ -72,6 +75,76 @@ public class ViewItemController extends BaseController {
     private static Log log = LogFactory.getLog(BrowseController.class);
 
     /**
+     * Called by the Spring MVC controller to display the release view page.
+     * 
+     * @param rootNamespace  the root namespace of the selected release
+     * @param filename  the filename of the selected release to view
+     * @param version  the version of the selected release to view
+     * @param session  the HTTP session that contains information about an authenticated user
+     * @param model  the model context to be used when rendering the page view
+     * @return String
+     */
+    @RequestMapping({ "/releaseView.html", "/releaseView.htm" })
+    public String viewRelease(@RequestParam(value = "baseNamespace") String baseNamespace,
+            @RequestParam(value = "filename") String filename,
+            @RequestParam(value = "version") String version, HttpSession session, Model model) {
+        String targetPage = null;
+        try {
+            RepositorySecurityManager securityManager = getSecurityManager();
+            UserPrincipal user = getCurrentUser(session);
+            RepositoryItem item = getRepositoryManager().getRepositoryItem(baseNamespace, filename, version);
+            
+            checkItemType( item, RepositoryItemType.RELEASE );
+
+            if (securityManager.isReadAuthorized(user, item)) {
+            	FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
+            	String releaseIndexId = IndexingUtils.getIdentityKey( item );
+            	ReleaseSearchResult release = searchService.getRelease( releaseIndexId, true );
+            	
+            	if (release == null) {
+            		throw new RepositoryException("The requested release cannot be displayed.");
+            	}
+            	List<ReleaseMemberItem> principalLibraries = getReleaseMembers(
+            			release.getItemContent().getPrincipalMembers(), searchService );
+            	List<ReleaseMemberItem> referencedLibraries = getReleaseMembers(
+            			release.getItemContent().getReferencedMembers(), searchService );
+            	
+            	Collections.sort( principalLibraries, new Comparator<ReleaseMemberItem>() {
+					public int compare(ReleaseMemberItem lib1, ReleaseMemberItem lib2) {
+						return lib1.getLibrary().getItemName().compareTo( lib2.getLibrary().getItemName() );
+					}
+            	});
+            	Collections.sort( referencedLibraries, new Comparator<ReleaseMemberItem>() {
+					public int compare(ReleaseMemberItem lib1, ReleaseMemberItem lib2) {
+						return lib1.getLibrary().getItemName().compareTo( lib2.getLibrary().getItemName() );
+					}
+            	});
+            	
+                model.addAttribute("imageResolver", new SearchResultImageResolver());
+                model.addAttribute("pageUtils", new PageUtils());
+                model.addAttribute("item", item);
+                model.addAttribute("release", release);
+                model.addAttribute("principalLibraries", principalLibraries);
+                model.addAttribute("referencedLibraries", referencedLibraries);
+            	
+            } else {
+                setErrorMessage("You are not authorized to view the requested release.", model);
+                targetPage = new SearchController().searchPage(null, false, false, session, model);
+            }
+
+        } catch (Throwable t) {
+            log.error("An error occured while displaying the release.", t);
+            setErrorMessage("An error occured while displaying the release (see server log for details).", model);
+            targetPage = new SearchController().searchPage(null, false, false, session, model);
+        }
+
+        if (targetPage == null) {
+            targetPage = applyCommonValues(model, "releaseView");
+        }
+        return targetPage;
+    }
+    
+    /**
      * Called by the Spring MVC controller to display the general-information library
      * page.
      * 
@@ -92,6 +165,8 @@ public class ViewItemController extends BaseController {
             RepositorySecurityManager securityManager = getSecurityManager();
             UserPrincipal user = getCurrentUser(session);
             RepositoryItem item = getRepositoryManager().getRepositoryItem(baseNamespace, filename, version);
+            
+            checkItemType( item, RepositoryItemType.LIBRARY );
 
             if (securityManager.isReadAuthorized(user, item)) {
             	FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
@@ -118,6 +193,7 @@ public class ViewItemController extends BaseController {
             setErrorMessage(
                     "An error occured while displaying the library (see server log for details).",
                     model);
+            targetPage = new SearchController().searchPage(null, false, false, session, model);
         }
 
         if (targetPage == null) {
@@ -148,6 +224,8 @@ public class ViewItemController extends BaseController {
             UserPrincipal user = getCurrentUser(session);
             RepositoryItem item = getRepositoryManager().getRepositoryItem(baseNamespace, filename, version);
 
+            checkItemType( item, RepositoryItemType.LIBRARY );
+
             if (securityManager.isReadAuthorized(user, item)) {
                 FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
                 String indexItemId = IndexingUtils.getIdentityKey( item );
@@ -173,6 +251,7 @@ public class ViewItemController extends BaseController {
             setErrorMessage(
                     "An error occured while displaying the library (see server log for details).",
                     model);
+            targetPage = new SearchController().searchPage(null, false, false, session, model);
         }
 
         if (targetPage == null) {
@@ -203,6 +282,8 @@ public class ViewItemController extends BaseController {
             UserPrincipal user = getCurrentUser(session);
             RepositoryItem item = getRepositoryManager().getRepositoryItem(baseNamespace, filename, version);
 
+            checkItemType( item, RepositoryItemType.LIBRARY );
+
             if (securityManager.isReadAuthorized(user, item)) {
                 FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
                 String indexItemId = IndexingUtils.getIdentityKey( item );
@@ -221,6 +302,7 @@ public class ViewItemController extends BaseController {
             setErrorMessage(
                     "An error occured while displaying the library (see server log for details).",
                     model);
+            targetPage = new SearchController().searchPage(null, false, false, session, model);
         }
 
         if (targetPage == null) {
@@ -229,6 +311,57 @@ public class ViewItemController extends BaseController {
         return targetPage;
     }
     
+    /**
+     * Called by the Spring MVC controller to display the library releases
+     * page.
+     * 
+     * @param rootNamespace  the root namespace of the selected library
+     * @param path  the sub-namespace path relative to the base namespace
+     * @param filename  the filename of the selected library to view
+     * @param version  the version of the selected library to view
+     * @param session  the HTTP session that contains information about an authenticated user
+     * @param model  the model context to be used when rendering the page view
+     * @return String
+     */
+    @RequestMapping({ "/libraryReleases.html", "/libraryReleases.htm" })
+    public String libraryReleases(@RequestParam(value = "baseNamespace") String baseNamespace,
+            @RequestParam(value = "filename") String filename,
+            @RequestParam(value = "version") String version, HttpSession session, Model model) {
+        String targetPage = null;
+        try {
+            RepositorySecurityManager securityManager = getSecurityManager();
+            UserPrincipal user = getCurrentUser(session);
+            RepositoryItem item = getRepositoryManager().getRepositoryItem(baseNamespace, filename, version);
+
+            checkItemType( item, RepositoryItemType.LIBRARY );
+
+            if (securityManager.isReadAuthorized(user, item)) {
+            	FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
+                LibrarySearchResult library = searchService.getLibrary( item, false );
+            	List<ReleaseSearchResult> releaseList = searchService.getLibraryReleases( library, false );
+            	
+                model.addAttribute("releaseList", releaseList);
+                model.addAttribute("pageUtils", new PageUtils());
+                model.addAttribute("item", item);
+            	
+            } else {
+                setErrorMessage("You are not authorized to view the requested library.", model);
+                targetPage = new SearchController().searchPage(null, false, false, session, model);
+            }
+
+        } catch (Throwable t) {
+            log.error("An error occured while displaying the library.", t);
+            setErrorMessage(
+                    "An error occured while displaying the library (see server log for details).", model);
+            targetPage = new SearchController().searchPage(null, false, false, session, model);
+        }
+
+        if (targetPage == null) {
+            targetPage = applyCommonValues(model, "libraryReleases");
+        }
+        return targetPage;
+    }
+
     /**
      * Called by the Spring MVC controller to display the commit-history library
      * page.
@@ -250,6 +383,8 @@ public class ViewItemController extends BaseController {
             RepositorySecurityManager securityManager = getSecurityManager();
             UserPrincipal user = getCurrentUser(session);
             RepositoryItem item = getRepositoryManager().getRepositoryItem(baseNamespace, filename, version);
+
+            checkItemType( item, RepositoryItemType.LIBRARY );
 
             if (securityManager.isReadAuthorized(user, item)) {
             	RepositoryItemHistory history = null;
@@ -289,6 +424,7 @@ public class ViewItemController extends BaseController {
             log.error("An error occured while displaying the library.", t);
             setErrorMessage(
                     "An error occured while displaying the library (see server log for details).", model);
+            targetPage = new SearchController().searchPage(null, false, false, session, model);
         }
 
         if (targetPage == null) {
@@ -320,6 +456,8 @@ public class ViewItemController extends BaseController {
             RepositoryItem item = getRepositoryManager().getRepositoryItem(baseNamespace, filename, version);
             SubscriptionTarget sTarget = SubscriptionManager.getSubscriptionTarget( item );
             
+            checkItemType( item, RepositoryItemType.LIBRARY );
+
             if (securityManager.isReadAuthorized(user, item)) {
             	SubscriptionManager subscriptionManager = RepositoryComponentFactory.getDefault().getSubscriptionManager();
                 FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
@@ -351,6 +489,7 @@ public class ViewItemController extends BaseController {
             setErrorMessage(
                     "An error occured while displaying the library (see server log for details).",
                     model);
+            targetPage = new SearchController().searchPage(null, false, false, session, model);
         }
 
         if (targetPage == null) {
@@ -615,6 +754,44 @@ public class ViewItemController extends BaseController {
     	for (TLContextualFacet facet : contextualFacets) {
     		facetList.add( new FacetIdentityWrapper( facet ) );
     		addContextualFacets( facet.getChildFacets(), facetList );
+    	}
+    }
+    
+    /**
+     * Returns the list of <code>ReleaseMemberItem</code> instances that correspond to
+     * the given list of release members.
+     * 
+     * @param memberList  the list of release members
+     * @param service  the search service to use when returning the search index results
+     * @return List<ReleaseMemberItem>
+     * @throws RepositoryException  thrown if the search index cannnot be accessed
+     */
+    private List<ReleaseMemberItem> getReleaseMembers(List<ReleaseMember> memberList,
+    		FreeTextSearchService service) throws RepositoryException {
+    	List<ReleaseMemberItem> memberItems = new ArrayList<>();
+    	
+    	for (ReleaseMember member : memberList) {
+    		String memberKey = IndexingUtils.getIdentityKey( member.getRepositoryItem() );
+    		LibrarySearchResult library = service.getLibrary( memberKey, false );
+    		
+    		if (library != null) {
+        		memberItems.add( new ReleaseMemberItem( library, member.getEffectiveDate() ) );
+    		}
+    	}
+    	return memberItems;
+    }
+    
+    /**
+     * Verifies that the given repository item matches the specified item type and throws an
+     * exception if it is not.
+     * 
+     * @param item  the repository item to check
+     * @param expectedType  the expected type of the repository item
+     * @throws RepositoryException  thrown if the repository item is not an OTM library
+     */
+    private void checkItemType(RepositoryItem item, RepositoryItemType expectedType) throws RepositoryException {
+    	if (!expectedType.isItemType( item.getFilename() )) {
+    		throw new RepositoryException("The specified repository item is not an OTM library.");
     	}
     }
     

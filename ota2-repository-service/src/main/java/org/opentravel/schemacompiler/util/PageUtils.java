@@ -29,6 +29,7 @@ import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLExtensionOwner;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
+import org.opentravel.schemacompiler.repository.RepositoryItemType;
 
 /**
  * Utility methods used to assist with the rendering of JSP pages.
@@ -49,6 +50,16 @@ public class PageUtils {
 	 */
 	public boolean isBlank(String docValue) {
 		return trimString( docValue ) == null;
+	}
+	
+	/**
+	 * Returns true if the given namespace item represents an OTM release.
+	 * 
+	 * @param item  the namespace item to check
+	 * @return boolean
+	 */
+	public boolean isRelease(NamespaceItem item) {
+		return (item != null) && RepositoryItemType.RELEASE.isItemType( item.getFilename() );
 	}
 	
 	/**

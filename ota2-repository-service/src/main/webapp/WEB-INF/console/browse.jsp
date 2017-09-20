@@ -74,6 +74,10 @@
 	</c:if>
 	<c:set var="rowStyle" value="d0" />
 	<c:forEach var="item" items="${browseItems}">
+		<c:set var="itemPage" value="libraryDictionary.html"/>
+		<c:if test="${pageUtils.isRelease( item )}">
+			<c:set var="itemPage" value="releaseView.html"/>
+		</c:if>
 		<c:choose>
 			<c:when test="${filename == null}">
 				<c:choose>
@@ -85,12 +89,12 @@
 						<c:set var="allVersionsUrl" value="${null}" />
 					</c:when>
 					<c:otherwise>
-						<c:url var="itemUrl" value="/console/libraryDictionary.html">
+						<c:url var="itemUrl" value="/console/${itemPage}">
 							<c:param name="baseNamespace" value="${item.baseNamespace}" />
 							<c:param name="filename" value="${item.filename}" />
 							<c:param name="version" value="${item.version}" />
 						</c:url>
-						<c:set var="itemIcon" value="library.png" />
+						<c:set var="itemIcon" value="${imageResolver.getIconImage( item )}" />
 						<c:url var="allVersionsUrl" value="/console/browse.html">
 							<c:param name="baseNamespace" value="${item.baseNamespace}" />
 							<c:param name="filename" value="${item.filename}" />
@@ -99,12 +103,12 @@
 				</c:choose>
 			</c:when>
 			<c:otherwise>
-				<c:url var="itemUrl" value="/console/libraryDictionary.html">
+				<c:url var="itemUrl" value="/console/${itemPage}">
 					<c:param name="baseNamespace" value="${item.baseNamespace}" />
 					<c:param name="filename" value="${item.filename}" />
 					<c:param name="version" value="${item.version}" />
 				</c:url>
-				<c:set var="itemIcon" value="library.png" />
+				<c:set var="itemIcon" value="${imageResolver.getIconImage( item )}" />
 				<c:set var="allVersionsUrl" value="${null}" />
 			</c:otherwise>
 		</c:choose>
