@@ -1430,16 +1430,17 @@ public class RepositoryContentResource {
         
         if (securityManager.isReadAuthorized(user, item)) {
             ResponseBuilder response;
-            File contentFile;
+            File contentFile = null;
             
             if (commitNumber != null) {
                 contentFile = repositoryManager.getHistoryManager()
                 		.getHistoricalContent( item, commitNumber );
-                
-            } else {
+            }
+            if (contentFile == null) {
             	contentFile = repositoryManager.getFileManager()
             			.getLibraryContentLocation( baseNS, filename, version );
             }
+            
             response = Response.ok(contentFile);
             response.header("Content-Disposition", "attachment; filename=" + item.getFilename());
             return response.build();

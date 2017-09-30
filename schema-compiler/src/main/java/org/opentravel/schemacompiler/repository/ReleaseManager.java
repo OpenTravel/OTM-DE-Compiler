@@ -222,6 +222,45 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 	}
 	
 	/**
+	 * Saves a copy of the content of the current release.
+	 * 
+	 * @param targetFolder  the target folder where the copy of the release is to be saved
+	 * @throws LibrarySaveException  thrown if an error occurs while saving the release file
+	 * @throws IllegalStateException  thrown if a release has not been created or loaded
+	 *								  for this manager
+	 * @throws UnsupportedOperationException  thrown if the release is remotely-managed
+	 *										  and therefore cannot be modified
+	 */
+	public void saveReleaseAs(File targetFolder) throws LibrarySaveException {
+		checkModificationAllowed();
+		
+		if (targetFolder == null) {
+			throw new LibrarySaveException("The folder location cannot be null.");
+			
+		} else if (targetFolder.exists() && !targetFolder.isDirectory()) {
+			throw new LibrarySaveException(
+					"The specified folder location is not a valid directory: " +
+							targetFolder.getAbsolutePath());
+		}
+		File saveAsFile = getSaveAsFile( targetFolder );
+		
+		release.setReleaseUrl( URLUtils.toURL( saveAsFile ) );
+		release.setStatus( ReleaseStatus.DRAFT ); // Force DRAFT state for locally-managed files
+		fileUtils.saveReleaseFile( release, true );
+	}
+	
+	/**
+	 * Returns the file handle for the location where this release will be saved
+	 * during the save-as operation.
+	 * 
+	 * @param targetFolder  the target folder where the copy of the release is to be saved
+	 * @return File
+	 */
+	public File getSaveAsFile(File targetFolder) {
+		return new File( targetFolder, fileUtils.getReleaseFilename( release ) );
+	}
+	
+	/**
 	 * Returns the corresponding release member from the principal items of the release
 	 * or null if no corresponding item exists.
 	 * 
@@ -240,13 +279,13 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 	 * 
 	 * @param item  the repository item to be added
 	 * @return ReleaseMember
-	 * @throws RepositoryException  thrown if the repository item cannot be located
+	 * @throws RepositoryException  thrown if the remote repository cannot be accessed
 	 * @throws IllegalStateException  thrown if a release has not been created or loaded
 	 *								  for this manager
 	 * @throws UnsupportedOperationException  thrown if the release is remotely-managed
 	 *										  and therefore cannot be modified
 	 */
-	public ReleaseMember addPrincipalMember(RepositoryItem item) {
+	public ReleaseMember addPrincipalMember(RepositoryItem item) throws RepositoryException {
 		checkModificationAllowed();
 		return addPrincipalMember( item, release.getDefaultEffectiveDate() );
 	}
@@ -260,13 +299,14 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 	 * @param item  the repository item to be added
 	 * @param effectiveDate  the effective date to apply for the item (null for latest commit)
 	 * @return ReleaseMember
-	 * @throws RepositoryException  thrown if the repository item cannot be located
+	 * @throws RepositoryException  thrown if the remote repository cannot be accessed
 	 * @throws IllegalStateException  thrown if a release has not been created or loaded
 	 *								  for this manager
 	 * @throws UnsupportedOperationException  thrown if the release is remotely-managed
 	 *										  and therefore cannot be modified
 	 */
-	public ReleaseMember addPrincipalMember(RepositoryItem item, Date effectiveDate) {
+	public ReleaseMember addPrincipalMember(RepositoryItem item, Date effectiveDate)
+			throws RepositoryException {
 		ReleaseMember releaseMember = findReleaseMember( item, true, false );
 		checkModificationAllowed();
 		
@@ -281,7 +321,7 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 				releaseMember.setRepositoryItem( item );
 			}
 			release.getPrincipalMembers().add( releaseMember );
-			releaseMember.setEffectiveDate( effectiveDate );
+			setEffectiveDate( releaseMember );
 		}
 		return releaseMember;
 	}
@@ -333,6 +373,23 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 			item = repositoryManager.getRepositoryItem( libraryFile );
 		}
 		return item;
+	}
+	
+	/**
+	 * Returns the commit history for the given release member.
+	 * 
+	 * @param member  the release member for which to retrieve the history
+	 * @return List<RepositoryItemCommit>
+	 * @throws RepositoryException  thrown if an error occurs while retrieving the item's history
+	 */
+	public List<RepositoryItemCommit> getCommitHistory(ReleaseMember member) throws RepositoryException {
+		RepositoryItemHistory history = repositoryManager.getHistory( member.getRepositoryItem() );
+		List<RepositoryItemCommit> commitHistory = null;
+		
+		if (history != null) {
+			commitHistory = history.getCommitHistory();
+		}
+		return commitHistory;
 	}
 	
 	/**
@@ -700,6 +757,36 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 		}
     }
     
+	/**
+	 * Assigns an appropriate effective date to the new release member.
+	 * 
+	 * @param member  the new release member whose effective date is to be configured
+	 * @throws RepositoryException  thrown if the remote repository cannot be accessed
+	 */
+	private void setEffectiveDate(ReleaseMember member) throws RepositoryException {
+		List<RepositoryItemCommit> commitHistory = getCommitHistory( member );
+		Date defaultEffectiveDate = release.getDefaultEffectiveDate();
+		
+		if (defaultEffectiveDate != null) {
+			Date latestCommitDate = null;
+			
+			for (RepositoryItemCommit commit : commitHistory) {
+				if ((latestCommitDate == null) || commit.getEffectiveOn().after( latestCommitDate )) {
+					latestCommitDate = commit.getEffectiveOn();
+				}
+			}
+			if (defaultEffectiveDate.after( latestCommitDate )) {
+				member.setEffectiveDate( latestCommitDate );
+				
+			} else {
+				member.setEffectiveDate( defaultEffectiveDate );
+			}
+			
+		} else {
+			member.setEffectiveDate( null );
+		}
+	}
+
     /**
      * Returns the local file system location of the release file or null if no
      * such file exists.

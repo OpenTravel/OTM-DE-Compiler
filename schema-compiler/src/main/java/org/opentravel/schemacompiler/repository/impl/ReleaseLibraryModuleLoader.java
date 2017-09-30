@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,6 +33,7 @@ import org.opentravel.schemacompiler.repository.ReleaseManager;
 import org.opentravel.schemacompiler.repository.ReleaseMember;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
+import org.opentravel.schemacompiler.repository.RepositoryItemCommit;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.slf4j.Logger;
@@ -101,7 +103,7 @@ public class ReleaseLibraryModuleLoader implements LibraryModuleLoader<InputStre
 					if (member == null) { // New referenced member for the release
 						member = new ReleaseMember();
 						member.setRepositoryItem( item );
-						member.setEffectiveDate( releaseManager.getRelease().getDefaultEffectiveDate() );
+						setEffectiveDate( member );
 					}
 					
 					// Only need a date-effective input source if we have an effective date specified
@@ -129,6 +131,36 @@ public class ReleaseLibraryModuleLoader implements LibraryModuleLoader<InputStre
 			inputSource = delegate.newInputSource( libraryUrl );
 		}
 		return inputSource;
+	}
+	
+	/**
+	 * Assigns an appropriate effective date to the new release member.
+	 * 
+	 * @param member  the new release member whose effective date is to be configured
+	 * @throws RepositoryException  thrown if the remote repository cannot be accessed
+	 */
+	private void setEffectiveDate(ReleaseMember member) throws RepositoryException {
+		List<RepositoryItemCommit> commitHistory = releaseManager.getCommitHistory( member );
+		Date defaultEffectiveDate = releaseManager.getRelease().getDefaultEffectiveDate();
+		
+		if (defaultEffectiveDate != null) {
+			Date latestCommitDate = null;
+			
+			for (RepositoryItemCommit commit : commitHistory) {
+				if ((latestCommitDate == null) || commit.getEffectiveOn().after( latestCommitDate )) {
+					latestCommitDate = commit.getEffectiveOn();
+				}
+			}
+			if (defaultEffectiveDate.after( latestCommitDate )) {
+				member.setEffectiveDate( latestCommitDate );
+				
+			} else {
+				member.setEffectiveDate( defaultEffectiveDate );
+			}
+			
+		} else {
+			member.setEffectiveDate( null );
+		}
 	}
 
 	/**

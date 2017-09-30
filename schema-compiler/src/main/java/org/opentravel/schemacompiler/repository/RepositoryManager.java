@@ -2308,7 +2308,7 @@ public class RepositoryManager implements Repository {
 	@Override
 	public LibraryInputSource<InputStream> getHistoricalContentSource(RepositoryItem item, Date effectiveDate)
 			throws RepositoryException {
-		LibraryInputSource<InputStream> contentSource;
+		LibraryInputSource<InputStream> contentSource = null;
 		
 		if (effectiveDate == null) {
 			contentSource = new LibraryStreamInputSource( getContentLocation( item ) );
@@ -2317,8 +2317,19 @@ public class RepositoryManager implements Repository {
 			Repository repository = item.getRepository();
 			
 			if (repository == this) {
-				contentSource = new LibraryStreamInputSource(
-						historyManager.getHistoricalContent( item, effectiveDate ) );
+				try {
+					contentSource = new LibraryStreamInputSource(
+							historyManager.getHistoricalContent( item, effectiveDate ) );
+					
+				} catch (RepositoryException e) {
+					// No error - use latest commit
+					
+				} finally {
+					if (contentSource == null) {
+						contentSource = new LibraryStreamInputSource( fileManager.getLibraryContentLocation(
+								item.getBaseNamespace(), item.getFilename(), item.getVersion() ) );
+					}
+				}
 				
 			} else {
 				contentSource = ((RemoteRepository) repository).getHistoricalContentSource( item, effectiveDate );

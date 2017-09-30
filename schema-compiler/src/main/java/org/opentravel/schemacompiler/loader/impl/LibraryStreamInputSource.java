@@ -17,10 +17,14 @@ package org.opentravel.schemacompiler.loader.impl;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.auth.Credentials;
@@ -39,6 +43,7 @@ public class LibraryStreamInputSource implements LibraryInputSource<InputStream>
     private URL libraryUrl;
     private SchemaDeclaration schemaDeclaration;
     private Credentials credentials;
+    private Map<String,File> urlCache = new HashMap<>();
 
     /**
      * Constructor that assigns the URL from which the library's content will be loaded.
@@ -111,16 +116,7 @@ public class LibraryStreamInputSource implements LibraryInputSource<InputStream>
                     }
                 }
                 if (contentStream == null) {
-                	URLConnection urlConnection = libraryUrl.openConnection();
-                	
-                	if (credentials != null) {
-                		String authHeaderStr = credentials.getUserPrincipal().getName() + ":" + credentials.getPassword();
-                    	byte[] authHeaderBytes = Base64.encodeBase64( authHeaderStr.getBytes() );
-                    	String authHeader = "Basic " + new String( authHeaderBytes );
-                    	
-                    	urlConnection.setRequestProperty( "Authorization", authHeader );
-                	}
-                    contentStream = urlConnection.getInputStream();
+                	contentStream = new FileInputStream( cacheRemoteFile( libraryUrl ) );
                 }
             }
 
@@ -129,5 +125,48 @@ public class LibraryStreamInputSource implements LibraryInputSource<InputStream>
         }
         return contentStream;
     }
-
+    
+    /**
+     * Downloads the contents of the given URL to a local file (if not done already)
+     * and returns a file handle to the locally-cached content.
+     * 
+     * @param libraryUrl  the library URL to be cached
+     * @return File
+     * @throws IOException  thrown if the URL cannot be read from or the cache file written to
+     */
+    private synchronized File cacheRemoteFile(URL libraryUrl) throws IOException {
+    	File cacheFile = urlCache.get( libraryUrl.toExternalForm() );
+    	
+    	if (cacheFile == null) {
+        	URLConnection urlConnection = libraryUrl.openConnection();
+        	File tempFolder = new File( System.getProperty("java.io.tmpdir"), "/.ota2" );
+        	tempFolder.mkdirs();
+        	File tempFile = File.createTempFile( "lib", ".otm", tempFolder );
+        	tempFile.deleteOnExit();
+        	
+        	if (credentials != null) {
+        		String authHeaderStr = credentials.getUserPrincipal().getName() + ":" + credentials.getPassword();
+            	byte[] authHeaderBytes = Base64.encodeBase64( authHeaderStr.getBytes() );
+            	String authHeader = "Basic " + new String( authHeaderBytes );
+            	
+            	urlConnection.setRequestProperty( "Authorization", authHeader );
+        	}
+        	
+        	try (OutputStream out = new FileOutputStream( tempFile )) {
+            	try (InputStream contentStream = urlConnection.getInputStream()) {
+            		byte[] buffer = new byte[ 1024 ];
+            		int bytesRead;
+            		
+            		while ((bytesRead = contentStream.read( buffer, 0, buffer.length )) >= 0) {
+            			out.write( buffer, 0, bytesRead );
+            		}
+            	}
+        	}
+        	urlCache.put( libraryUrl.toExternalForm(), tempFile );
+        	cacheFile = tempFile;
+    	}
+    	return cacheFile;
+    	
+    }
+    
 }

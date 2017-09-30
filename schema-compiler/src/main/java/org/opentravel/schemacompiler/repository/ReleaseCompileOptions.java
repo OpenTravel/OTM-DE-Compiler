@@ -19,6 +19,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.opentravel.schemacompiler.ioc.CompilerExtensionRegistry;
 import org.opentravel.schemacompiler.task.CommonCompilerTaskOptions;
 import org.opentravel.schemacompiler.task.CompileAllTaskOptions;
 import org.opentravel.schemacompiler.task.ExampleCompilerTaskOptions;
@@ -31,6 +32,7 @@ import org.opentravel.schemacompiler.task.ServiceCompilerTaskOptions;
  */
 public class ReleaseCompileOptions implements CompileAllTaskOptions {
 	
+	private static final String BINDING_STYLE_KEY       = "bindingStyle";
 	private static final String COMPILE_SCHEMAS_KEY     = "compileSchemas";
 	private static final String COMPILE_JSON_KEY        = "compileJson";
 	private static final String COMPILE_SERVICES_KEY    = "compileServices";
@@ -45,6 +47,7 @@ public class ReleaseCompileOptions implements CompileAllTaskOptions {
 	private static final String EXAMPLE_MAX_REPEAT_KEY  = "exampleMaxRepeat";
 	private static final String EXAMPLE_MAX_DEPTH_KEY   = "exampleMaxDepth";
 	
+	private String bindingStyle = CompilerExtensionRegistry.getActiveExtension();
     private boolean compileSchemas = true;
     private boolean compileJson = true;
     private boolean compileServices = true;
@@ -56,8 +59,8 @@ public class ReleaseCompileOptions implements CompileAllTaskOptions {
     private boolean generateExamples = true;
     private boolean generateMaxDetailsForExamples = true;
     private String exampleContext;
-    private Integer exampleMaxRepeat;
-    private Integer exampleMaxDepth;
+    private Integer exampleMaxRepeat = 3;
+    private Integer exampleMaxDepth = 3;
     
 	/**
 	 * Default constructor.
@@ -70,6 +73,7 @@ public class ReleaseCompileOptions implements CompileAllTaskOptions {
 	 * @param p  the key/value pairs from which to populate all compiler options
 	 */
 	public ReleaseCompileOptions(Map<String,String> p) {
+		this.bindingStyle = p.get( BINDING_STYLE_KEY );
 		this.compileSchemas = parseBoolean( p.get( COMPILE_SCHEMAS_KEY ) );
 		this.compileJson = parseBoolean( p.get( COMPILE_JSON_KEY ) );
 		this.compileServices = parseBoolean( p.get( COMPILE_SERVICES_KEY ) );
@@ -83,6 +87,29 @@ public class ReleaseCompileOptions implements CompileAllTaskOptions {
 		this.exampleContext = p.get( EXAMPLE_CONTEXT_KEY );
 		this.exampleMaxRepeat = parseInt( p.get( EXAMPLE_MAX_REPEAT_KEY ) );
 		this.exampleMaxDepth = parseInt( p.get( EXAMPLE_MAX_DEPTH_KEY ) );
+		
+		if ((bindingStyle == null) ||
+				!CompilerExtensionRegistry.getAvailableExtensionIds().contains( bindingStyle )) {
+			bindingStyle = CompilerExtensionRegistry.getActiveExtension();
+		}
+	}
+	
+	/**
+	 * Returns the binding style that should be used when compiling the OTM model.
+	 * 
+	 * @return String
+	 */
+	public String getBindingStyle() {
+		return bindingStyle;
+	}
+	
+	/**
+	 * Assigns the binding style that should be used when compiling the OTM model.
+	 * 
+	 * @param bindingStyle  the binding style value to assign
+	 */
+	public void setBindingStyle(String bindingStyle) {
+		this.bindingStyle = bindingStyle;
 	}
 	
 	/**
@@ -367,6 +394,9 @@ public class ReleaseCompileOptions implements CompileAllTaskOptions {
     	p.put( GENERATE_EXAMPLES_KEY, generateExamples + "" );
     	p.put( EXAMPLE_MAX_DETAILS_KEY, generateMaxDetailsForExamples + "" );
     	
+    	if (bindingStyle != null) {
+        	p.put( BINDING_STYLE_KEY, bindingStyle );
+    	}
     	if (serviceEndpointUrl != null) {
         	p.put( SERVICE_ENDPOINT_KEY, serviceEndpointUrl );
     	}

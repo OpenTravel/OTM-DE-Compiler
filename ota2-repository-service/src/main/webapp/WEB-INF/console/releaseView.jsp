@@ -26,7 +26,7 @@
 	<c:param name="filename" value="${item.filename}" />
 </c:url>
 
-<table style="border-collapse:collapse;width:75%;float:left;">
+<table style="border-collapse:collapse;width:100%;float:left;">
 	<tr>
 		<td>
 			<h2 style="padding-bottom: 0;">Release: ${item.libraryName} <small>(${item.version})</small></h2>
@@ -43,7 +43,13 @@
 					<c:param name="version" value="${item.version}" />
 				</c:url>
 				<br/>[ <a href="${deleteItemUrl}">Delete this Release</a> ]
-</c:if>
+			</c:if>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2" style="padding-top:10px;">
+			Release Type: <spring:message code="${release.itemContent.status}" />
+			<br/><br/>
 		</td>
 	</tr>
 </table>
@@ -64,10 +70,10 @@
 </div>
 </c:if>
 
-<br/>
-<table id="itemtable" style="width:75%;float:left;margin-top:25px;">
+<table id="itemtable" style="width:100%;float:left;">
 	<tr>
-		<th width="70%">Referenced Libraries</th>
+		<th width="40%">Referenced Libraries</th>
+		<th width="30%">Status</th>
 		<th width="30%">Effective Date</th>
 	</tr>
 	<c:if test="${principalLibraries.isEmpty()}">
@@ -86,6 +92,9 @@
 			<td>
 				<img src="${pageContext.request.contextPath}/images/library.png" />&nbsp;<a href="${libraryUrl}">${library.library.itemName}</a>
 				<br><small>${library.library.itemNamespace}</small>
+			</td>
+			<td>
+				<spring:message code="${library.library.status}" />
 			</td>
 			<td>
 				<c:choose>
@@ -110,9 +119,10 @@
 </table>
 
 
-<table id="itemtable" style="width:75%; float:left; margin-top:25px;">
+<table id="itemtable" style="width:100%; float:left; margin-top:25px;">
 	<tr>
-		<th width="70%">Referenced Libraries</th>
+		<th width="40%">Referenced Libraries</th>
+		<th width="30%">Status</th>
 		<th width="30%">Effective Date</th>
 	</tr>
 	<c:if test="${referencedLibraries.isEmpty()}">
@@ -131,6 +141,9 @@
 			<td>
 				<img src="${pageContext.request.contextPath}/images/library.png" />&nbsp;<a href="${libraryUrl}">${library.library.itemName}</a>
 				<br><small>${library.library.itemNamespace}</small>
+			</td>
+			<td>
+				<spring:message code="${library.library.status}" />
 			</td>
 			<td>
 				<c:choose>

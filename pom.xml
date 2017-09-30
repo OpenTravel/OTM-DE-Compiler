@@ -20,6 +20,7 @@
 		<module>ota2-repository-service</module>
 		<module>ota2-repository-plugin</module>
 		<module>ota2-indexing-service</module>
+		<module>ota2-release-editor</module>
 		<module>ota2-example-helper</module>
 		<module>ota2-example-upgrade-utility</module>
 		<module>ota2-diff-utility</module>
@@ -60,6 +61,7 @@
 		<swagger.parser.version>1.0.17</swagger.parser.version>
 		<richtextfx.version>0.7-M2</richtextfx.version>
 		<velocity.version>1.7</velocity.version>
+		<jfxtras.version>8.0-r5</jfxtras.version>
 		
 		<!-- Plugin Versions -->
 		<jaxb2.plugin.version>0.12.1</jaxb2.plugin.version>
@@ -341,6 +343,11 @@
 				<groupId>org.apache.velocity</groupId>
 				<artifactId>velocity</artifactId>
 				<version>${velocity.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jfxtras</groupId>
+				<artifactId>jfxtras-controls</artifactId>
+				<version>${jfxtras.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

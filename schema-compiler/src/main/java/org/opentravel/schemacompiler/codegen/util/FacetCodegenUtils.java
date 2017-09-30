@@ -16,6 +16,7 @@
 package org.opentravel.schemacompiler.codegen.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -534,6 +535,19 @@ public class FacetCodegenUtils {
 		addIfContentExists(operation.getRequest(), facetList);
 		addIfContentExists(operation.getResponse(), facetList);
 		addIfContentExists(operation.getNotification(), facetList);
+		return facetList;
+	}
+	
+	/**
+	 * Returns the list of all available child facets for the given contextual facet.
+	 * 
+	 * @param facet  the contextual facet for which to return available child facets
+	 * @return List<TLFacet>
+	 */
+	public static List<TLFacet> getAvailableFacets(TLContextualFacet facet) {
+		List<TLFacet> facetList = new ArrayList<>();
+		
+		addContextualFacets( Arrays.asList( facet ), facetList, new HashSet<TLContextualFacet>() );
 		return facetList;
 	}
 	
