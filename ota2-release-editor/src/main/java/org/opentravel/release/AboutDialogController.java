@@ -16,12 +16,17 @@
 
 package org.opentravel.release;
 
+import java.io.IOException;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 /**
@@ -36,6 +41,35 @@ public class AboutDialogController {
 	private Stage dialogStage;
 	
 	@FXML private Label buildNumberLabel;
+	
+	/**
+	 * Initializes the dialog stage and controller used to display the application-
+	 * about page.
+	 * 
+	 * @param stage  the stage that will own the new dialog
+	 * @return AboutDialogController
+	 */
+	public static AboutDialogController createAboutDialog(Stage stage) {
+		AboutDialogController controller = null;
+		try {
+			FXMLLoader loader = new FXMLLoader( AboutDialogController.class.getResource( FXML_FILE ) );
+			Parent page = loader.load();
+			Stage dialogStage = new Stage();
+			Scene scene = new Scene( page );
+			
+			dialogStage.setTitle( "About" );
+			dialogStage.initModality( Modality.WINDOW_MODAL );
+			dialogStage.initOwner( stage );
+			dialogStage.setScene( scene );
+			
+			controller = loader.getController();
+			controller.setDialogStage( dialogStage );
+			
+		} catch (IOException e) {
+			e.printStackTrace( System.out );
+		}
+		return controller;
+	}
 	
 	/**
 	 * Called when the user clicks the close button of the dialog.

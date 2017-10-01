@@ -16,19 +16,8 @@
 
 package org.opentravel.release;
 
+import java.io.IOException;
 import java.util.List;
-
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.stage.Stage;
 
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.RemoteRepository;
@@ -37,13 +26,29 @@ import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryItemType;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+
 /**
  * Controller for the dialog in which the user can select an OTM library from
  * a remote repository.
  */
 public class BrowseRepositoryDialogController {
 	
-	public static final String FXML_FILE = "/browse-repository.fxml";
+	private static final String FXML_FILE = "/browse-repository.fxml";
 	
 	private final Image rootIcon = new Image( getClass().getResourceAsStream( "/images/root.gif" ) );
 	private final Image repositoryIcon = new Image( getClass().getResourceAsStream( "/images/repository.gif" ) );
@@ -59,6 +64,40 @@ public class BrowseRepositoryDialogController {
 	
 	@FXML private TreeView<RepositoryTreeNode> repositoryTreeView;
 	@FXML private Button okButton;
+	
+	/**
+	 * Initializes the dialog stage and controller used to select an OTM library
+	 * or release from a remote repository.
+	 * 
+	 * @param title  the title of the dialog box
+	 * @param itemTypeFilter  the type filter to apply for repository items
+	 * @param stage  the stage that will own the new dialog
+	 * @return BrowseRepositoryDialogController
+	 */
+	public static BrowseRepositoryDialogController createBrowseRepositoryDialog(
+			String title, RepositoryItemType itemTypeFilter, Stage stage) {
+		BrowseRepositoryDialogController controller = null;
+		try {
+			FXMLLoader loader = new FXMLLoader( BrowseRepositoryDialogController.class.getResource( FXML_FILE ) );
+			Parent page = loader.load();
+			Stage dialogStage = new Stage();
+			Scene scene = new Scene( page );
+			
+			dialogStage.setTitle( title );
+			dialogStage.initModality( Modality.WINDOW_MODAL );
+			dialogStage.initOwner( stage );
+			dialogStage.setScene( scene );
+			
+			controller = loader.getController();
+			controller.setDialogStage( dialogStage );
+			controller.setItemTypeFilter( itemTypeFilter );
+			controller.initializeTreeView();
+			
+		} catch (IOException e) {
+			e.printStackTrace( System.out );
+		}
+		return controller;
+	}
 	
 	/**
 	 * Called when the user clicks the Ok button to confirm their library
@@ -132,7 +171,7 @@ public class BrowseRepositoryDialogController {
 	/**
 	 * Initializes the contents of the repository tree view.
 	 */
-	public void initializeTreeView() {
+	private void initializeTreeView() {
 		try {
 			RepositoryManager manager = RepositoryManager.getDefault();
 			List<RemoteRepository> remoteRepositories = manager.listRemoteRepositories();

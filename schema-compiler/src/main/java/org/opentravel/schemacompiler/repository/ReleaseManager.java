@@ -84,30 +84,6 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 		new ProjectManager( model, false, repositoryManager );
 	}
 	
-    /**
-     * Returns a list of the <code>RepositoryItem</code>s associated with OTM releases that are
-     * assigned to the specified base namespace.  If multiple versions of a release are present,
-     * only the latest version will be returned when the 'latestVersionsOnly' flag is true.
-     * 
-     * @param baseNamespace  the base namespace that does not include the trailing version component of the URI path
-     * @param latestVersionsOnly  flag indicating whether the results should include all matching versions or just
-     *							  the latest version of each release
-     * @return List<RepositoryItem>
-     * @throws RepositoryException  thrown if the remote repository cannot be accessed
-     */
-    public List<RepositoryItem> listItems(String baseNamespace, boolean latestVersionsOnly) throws RepositoryException {
-    	List<RepositoryItem> allItems = repositoryManager.listItems(
-    			baseNamespace, TLLibraryStatus.FINAL, latestVersionsOnly);
-    	List<RepositoryItem>  releaseItems = new ArrayList<>();
-    	
-    	for (RepositoryItem item : allItems) {
-    		if (RepositoryItemType.RELEASE.isItemType( item.getFilename() )) {
-    			releaseItems.add( item );
-    		}
-    	}
-    	return releaseItems;
-    }
-
 	/**
 	 * Creates a new release for this manager instance.  The version of the new release will
 	 * be automatically set to "1.0.0".
@@ -139,6 +115,23 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 		saveRelease();
 		
 		return ReleaseItemImpl.newUnmanagedItem( this );
+	}
+	
+	/**
+	 * Returns the file handle for the location where a new release will be saved
+	 * during the create operation.
+	 * 
+	 * @param name  the name of the new release
+	 * @param folderLocation  the folder location where the release file should be saved
+	 * @return File
+	 */
+	public File getNewReleaseFile(String name, File folderLocation) {
+		Release dummy = new Release();
+		
+		dummy.setBaseNamespace( "http://www.opentravel.org" );
+		dummy.setName( name );
+		dummy.setVersion( "1.0.0" );
+		return new File( folderLocation, fileUtils.getReleaseFilename( dummy ) );
 	}
 	
 	/**
@@ -253,11 +246,11 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 	 * Returns the file handle for the location where this release will be saved
 	 * during the save-as operation.
 	 * 
-	 * @param targetFolder  the target folder where the copy of the release is to be saved
+	 * @param folderLocation  the target folder where the copy of the release is to be saved
 	 * @return File
 	 */
-	public File getSaveAsFile(File targetFolder) {
-		return new File( targetFolder, fileUtils.getReleaseFilename( release ) );
+	public File getSaveAsFile(File folderLocation) {
+		return new File( folderLocation, fileUtils.getReleaseFilename( release ) );
 	}
 	
 	/**
@@ -466,6 +459,16 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 		validateModel( findings );
 	}
 	
+	/**
+	 * Returns true if the current release is a repository-managed item.
+	 * 
+	 * @return boolean
+	 */
+	public boolean isManagedRelease() {
+		File releaseFile = getReleaseFile();
+		return (releaseFile != null) && isRepositoryFile( releaseFile );
+	}
+	
     /**
      * Publishes the given release to the OTM repository.
      * 
@@ -652,6 +655,22 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 		return newManager;
     }
     
+	/**
+	 * Returns the file handle for the location where a new release will be saved
+	 * during the create operation.
+	 * 
+	 * @param folderLocation  the folder location where the release file should be saved
+	 * @return File
+	 */
+	public File getNewVersionFile(File folderLocation) {
+		Release dummy = new Release();
+		
+		dummy.setBaseNamespace( release.getBaseNamespace() );
+		dummy.setName( release.getName() );
+		dummy.setVersion( versionScheme.incrementMajorVersion( release.getVersion() ) );
+		return new File( folderLocation, fileUtils.getReleaseFilename( dummy ) );
+	}
+	
     /**
      * Creates a new copy of the current release and saves it as an unmanaged local
      * file in the specified folder location.  The members of the new release will be

@@ -498,11 +498,12 @@
           </Menu>
             <Menu mnemonicParsing="false" text="Repository">
               <items>
-                  <Menu fx:id="publishReleaseMenu" mnemonicParsing="false" text="Publish Release To">
-                    <items>
-                      <MenuItem mnemonicParsing="false" text="Action 1" />
-                    </items>
-                  </Menu>
+                  <MenuItem fx:id="openManagedMenu" mnemonicParsing="false" onAction="#openManagedRelease" text="Open Managed Release">
+                     <accelerator>
+                        <KeyCodeCombination alt="UP" code="M" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                     </accelerator>
+                  </MenuItem>
+                  <Menu fx:id="publishReleaseMenu" mnemonicParsing="false" text="Publish Release To" />
                   <MenuItem fx:id="newReleaseVersionMenu" mnemonicParsing="false" onAction="#newReleaseVersion" text="New Release Version..." />
                   <MenuItem fx:id="unpublishReleaseMenu" mnemonicParsing="false" onAction="#unpublishRelease" text="Unpublish Release..." />
               </items>

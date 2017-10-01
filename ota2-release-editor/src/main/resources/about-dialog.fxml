@@ -7,7 +7,6 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="136.0" prefWidth="349.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.opentravel.release.AboutDialogController">
    <bottom>
       <Button mnemonicParsing="false" onAction="#closeSelected" text="Close" BorderPane.alignment="CENTER">
@@ -24,7 +23,12 @@
                   <Font size="18.0" />
                </font>
                <VBox.margin>
-                  <Insets bottom="10.0" left="20.0" right="15.0" top="15.0" />
+                  <Insets left="20.0" right="15.0" top="15.0" />
+               </VBox.margin>
+            </Label>
+            <Label text="©  OpenTravel Alliance (info@opentravel.org)">
+               <VBox.margin>
+                  <Insets bottom="10.0" left="20.0" right="15.0" />
                </VBox.margin>
             </Label>
             <Label fx:id="buildNumberLabel" text="BUILD_NUMBER">

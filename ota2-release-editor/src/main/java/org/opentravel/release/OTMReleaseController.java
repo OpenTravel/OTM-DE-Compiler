@@ -19,7 +19,6 @@ package org.opentravel.release;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.io.File;
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -36,6 +35,7 @@ import java.util.Optional;
 
 import javax.xml.namespace.QName;
 
+import org.opentravel.release.NewReleaseDialogController.NewReleaseInfo;
 import org.opentravel.schemacompiler.ioc.CompilerExtensionRegistry;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
@@ -43,12 +43,16 @@ import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.Release;
 import org.opentravel.schemacompiler.repository.ReleaseCompileOptions;
+import org.opentravel.schemacompiler.repository.ReleaseItem;
 import org.opentravel.schemacompiler.repository.ReleaseManager;
 import org.opentravel.schemacompiler.repository.ReleaseMember;
+import org.opentravel.schemacompiler.repository.RemoteRepository;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryItemCommit;
 import org.opentravel.schemacompiler.repository.RepositoryItemType;
+import org.opentravel.schemacompiler.repository.RepositoryManager;
+import org.opentravel.schemacompiler.saver.LibrarySaveException;
 import org.opentravel.schemacompiler.task.CompileAllCompilerTask;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingMessageFormat;
@@ -64,7 +68,6 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
@@ -94,12 +97,9 @@ import javafx.scene.control.cell.ChoiceBoxTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import jfxtras.scene.control.LocalDateTimeTextField;
 
@@ -127,6 +127,7 @@ public class OTMReleaseController {
 	@FXML private MenuItem exitMenu;
 	@FXML private MenuItem addLibraryMenu;
 	@FXML private MenuItem reloadModelMenu;
+	@FXML private MenuItem openManagedMenu;
 	@FXML private Menu publishReleaseMenu;
 	@FXML private MenuItem newReleaseVersionMenu;
 	@FXML private MenuItem unpublishReleaseMenu;
@@ -184,6 +185,8 @@ public class OTMReleaseController {
 	private Label timeZoneLabel;
 	private Button applyToAllButton;
 	
+	private RepositoryManager repositoryManager;
+	private boolean managedRelease = false;
 	private boolean releaseDirty = false;
 	private boolean modelDirty = false;
 	private boolean hasError = false;
@@ -194,12 +197,66 @@ public class OTMReleaseController {
 	private UserSettings userSettings;
 	
 	/**
+	 * Default constructor.
+	 */
+	public OTMReleaseController() {
+		try {
+			repositoryManager = RepositoryManager.getDefault();
+			
+		} catch (RepositoryException e) {
+			e.printStackTrace( System.out );
+		}
+	}
+	
+	/**
 	 * Called when the user clicks the button to create a new release file.
 	 * 
 	 * @param event  the action event that triggered this method call
 	 */
 	@FXML public void newReleaseFile(ActionEvent event) {
-		System.out.println("ACTION - newReleaseFile()");
+		try {
+			NewReleaseDialogController controller = NewReleaseDialogController.createNewReleaseDialog(
+					userSettings.getReleaseFolder(), primaryStage );
+			NewReleaseInfo releaseInfo = controller.showDialog();
+			
+			if (releaseInfo != null) {
+				ReleaseManager newReleaseManager = new ReleaseManager();
+				File newReleaseFile = newReleaseManager.getNewReleaseFile(
+						releaseInfo.getReleaseName(), releaseInfo.getReleaseDirectory() );
+				
+				if (!newReleaseFile.exists() || confirmOverwriteFile( newReleaseFile )) {
+					Runnable r = new BackgroundTask( "Creating New Release...", StatusType.INFO ) {
+						public void execute() throws Throwable {
+							try {
+								newReleaseManager.createNewRelease( releaseInfo.getReleaseBaseNamespace(),
+										releaseInfo.getReleaseName(), releaseInfo.getReleaseDirectory() );
+								OTMReleaseController.this.releaseManager = newReleaseManager;
+								OTMReleaseController.this.releaseFile = URLUtils.toFile( newReleaseManager.getRelease().getReleaseUrl() );
+								OTMReleaseController.this.validationFindings = new ValidationFindings();
+								OTMReleaseController.this.managedRelease = false;
+								updateControlsForNewRelease();
+								
+							} finally {
+								userSettings.setReleaseFolder( releaseInfo.getReleaseDirectory() );
+								userSettings.save();
+							}
+						}
+					};
+					
+					new Thread( r ).start();
+				}
+			}
+			
+		} catch (RepositoryException | LibrarySaveException e) {
+			Runnable r = new BackgroundTask( "Error creating the new release", StatusType.ERROR ) {
+				public void execute() throws Throwable {
+					Thread.sleep( 5000 );
+				}
+			};
+			e.printStackTrace( System.out );
+			
+			new Thread( r ).start();
+		}
 	}
 	
 	/**
@@ -224,23 +281,8 @@ public class OTMReleaseController {
 						manager.loadRelease( selectedFile, validationFindings );
 						OTMReleaseController.this.releaseManager = manager;
 						OTMReleaseController.this.releaseFile = selectedFile;
-						
-						Platform.runLater( () -> {
-							updateReleaseFields();
-							updateCompilerOptions();
-							updateFacetSelections();
-							updateCommitHistories();
-							principalTableView.setItems(
-									FXCollections.observableList( releaseManager.getRelease().getPrincipalMembers() ) );
-							referencedTableView.setItems(
-									FXCollections.observableList( releaseManager.getRelease().getReferencedMembers() ) );
-							validationTableView.setItems(
-									FXCollections.observableList( validationFindings.getAllFindingsAsList() ) );
-							
-							releaseDirty = false;
-							modelDirty = false;
-							validateFields();
-						});
+						OTMReleaseController.this.managedRelease = false;
+						updateControlsForNewRelease();
 						
 					} finally {
 						userSettings.setReleaseFolder( selectedFile.getParentFile() );
@@ -250,6 +292,45 @@ public class OTMReleaseController {
 			};
 			
 			new Thread( r ).start();
+		}
+	}
+	
+	/**
+	 * Called when the user clicks the button to open a managed release from
+	 * the OTM repository.
+	 * 
+	 * @param event  the action event that triggered this method call
+	 */
+	@FXML public void openManagedRelease(ActionEvent event) {
+		if (confirmCloseRelease()) {
+			closeRelease();
+		}
+		BrowseRepositoryDialogController controller =
+				BrowseRepositoryDialogController.createBrowseRepositoryDialog(
+						"Open Managed Release", RepositoryItemType.RELEASE, primaryStage );
+		
+		controller.showAndWait();
+		
+		if (controller.isOkSelected()) {
+			RepositoryItem selectedItem = controller.getSelectedRepositoryItem();
+			
+			if (selectedItem != null) {
+				Runnable r = new BackgroundTask( "Loading Managed Release...", StatusType.INFO ) {
+					public void execute() throws Throwable {
+						ReleaseManager manager = new ReleaseManager();
+						
+						validationFindings = new ValidationFindings();
+						manager.loadRelease( selectedItem, validationFindings );
+						OTMReleaseController.this.releaseManager = manager;
+						OTMReleaseController.this.releaseFile = URLUtils.toFile(
+								releaseManager.getRelease().getReleaseUrl() );
+						OTMReleaseController.this.managedRelease = true;
+						updateControlsForNewRelease();
+					}
+				};
+				
+				new Thread( r ).start();
+			}
 		}
 	}
 	
@@ -279,41 +360,29 @@ public class OTMReleaseController {
 	 */
 	@FXML public void saveReleaseFileAs(ActionEvent event) {
 		if ((releaseManager != null) && confirmCloseRelease()) {
-			DirectoryChooser chooser = newDirectoryChooser( "Save As", userSettings.getReleaseFolder() );
+			DirectoryChooser chooser = newDirectoryChooser( "Save As Folder", userSettings.getReleaseFolder() );
 			File selectedFolder = chooser.showDialog( primaryStage );
 			
 			if (selectedFolder != null) {
 				File saveAsFile = releaseManager.getSaveAsFile( selectedFolder );
 				
-				if (saveAsFile.exists()) {
-					Alert alert = new Alert( AlertType.CONFIRMATION );
-					Optional<ButtonType> dialogResult;
-					
-					alert.setTitle( "Exit Application" );
-					alert.setHeaderText( null );
-					alert.setContentText( "A file for this release already exists in the selected folder.  Overwrite?" );
-
-					alert.getButtonTypes().setAll( ButtonType.YES, ButtonType.NO );
-					dialogResult = alert.showAndWait();
-					
-					if (dialogResult.get() == ButtonType.YES) {
-						Runnable r = new BackgroundTask( "Saving Release As...", StatusType.INFO ) {
-							public void execute() throws Throwable {
-								try {
-									releaseManager.saveReleaseAs( selectedFolder );
-									releaseFile = URLUtils.toFile( releaseManager.getRelease().getReleaseUrl() );
-									releaseDirty = false;
-									updateControlStates();
-									
-								} finally {
-									userSettings.setReleaseFolder( selectedFolder );
-									userSettings.save();
-								}
+				if (!saveAsFile.exists() || confirmOverwriteFile( saveAsFile )) {
+					Runnable r = new BackgroundTask( "Saving Release As...", StatusType.INFO ) {
+						public void execute() throws Throwable {
+							try {
+								releaseManager.saveReleaseAs( selectedFolder );
+								releaseFile = URLUtils.toFile( releaseManager.getRelease().getReleaseUrl() );
+								releaseDirty = false;
+								updateControlStates();
+								
+							} finally {
+								userSettings.setReleaseFolder( selectedFolder );
+								userSettings.save();
 							}
-						};
-						
-						new Thread( r ).start();
-					}
+						}
+					};
+					
+					new Thread( r ).start();
 				}
 			}
 		}
@@ -392,8 +461,9 @@ public class OTMReleaseController {
 	 */
 	@FXML public void addPrincipalLibrary(ActionEvent event) {
 		if (releaseManager != null) {
-			BrowseRepositoryDialogController controller = newBrowseRepositoryDialog(
-					"Add Principle Library", RepositoryItemType.LIBRARY );
+			BrowseRepositoryDialogController controller =
+					BrowseRepositoryDialogController.createBrowseRepositoryDialog(
+							"Add Principle Library", RepositoryItemType.LIBRARY, primaryStage );
 			
 			controller.showAndWait();
 			
@@ -496,8 +566,26 @@ public class OTMReleaseController {
 	 * 
 	 * @param event  the action event that triggered this method call
 	 */
-	@FXML public void publishRelease(ActionEvent event) {
-		System.out.println("ACTION - publishRelease()");
+	@FXML public void publishRelease(MenuItem repoMenu) {
+		if ((repoMenu != null) && (releaseManager != null) && !managedRelease) {
+			RemoteRepository repository = (RemoteRepository) repoMenu.getProperties().get( "repository" );
+			Runnable r = new BackgroundTask( "Publishing Release...", StatusType.INFO ) {
+				public void execute() throws Throwable {
+					ReleaseItem releaseItem = releaseManager.publishRelease( repository );
+					ReleaseManager manager = new ReleaseManager();
+					
+					validationFindings = new ValidationFindings();
+					manager.loadRelease( releaseItem, validationFindings );
+					OTMReleaseController.this.releaseManager = manager;
+					OTMReleaseController.this.releaseFile = URLUtils.toFile(
+							releaseManager.getRelease().getReleaseUrl() );
+					OTMReleaseController.this.managedRelease = true;
+					updateControlsForNewRelease();
+				}
+			};
+			
+			new Thread( r ).start();
+		}
 	}
 	
 	/**
@@ -507,7 +595,37 @@ public class OTMReleaseController {
 	 * @param event  the action event that triggered this method call
 	 */
 	@FXML public void newReleaseVersion(ActionEvent event) {
-		System.out.println("ACTION - newReleaseVersion()");
+		if ((releaseManager != null) && managedRelease) {
+			DirectoryChooser chooser = newDirectoryChooser( "New Version Folder", userSettings.getReleaseFolder() );
+			File selectedFolder = chooser.showDialog( primaryStage );
+			
+			if (selectedFolder != null) {
+				File newVersionFile = releaseManager.getNewVersionFile( selectedFolder );
+				
+				if (!newVersionFile.exists() || confirmOverwriteFile( newVersionFile )) {
+					Runnable r = new BackgroundTask( "Creating New Version...", StatusType.INFO ) {
+						public void execute() throws Throwable {
+							try {
+								validationFindings = new ValidationFindings();
+								ReleaseManager manager = releaseManager.newVersion( selectedFolder, validationFindings );
+								
+								OTMReleaseController.this.releaseManager = manager;
+								OTMReleaseController.this.releaseFile = URLUtils.toFile(
+										releaseManager.getRelease().getReleaseUrl() );
+								OTMReleaseController.this.managedRelease = false;
+								updateControlsForNewRelease();
+								
+							} finally {
+								userSettings.setReleaseFolder( selectedFolder );
+								userSettings.save();
+							}
+						}
+					};
+					
+					new Thread( r ).start();
+				}
+			}
+		}
 	}
 	
 	/**
@@ -516,7 +634,38 @@ public class OTMReleaseController {
 	 * @param event  the action event that triggered this method call
 	 */
 	@FXML public void unpublishRelease(ActionEvent event) {
-		System.out.println("ACTION - unpublishRelease()");
+		if ((releaseManager != null) && managedRelease) {
+			DirectoryChooser chooser = newDirectoryChooser( "Unpublish to Local Folder", userSettings.getReleaseFolder() );
+			File selectedFolder = chooser.showDialog( primaryStage );
+			
+			if (selectedFolder != null) {
+				File saveAsFile = releaseManager.getSaveAsFile( selectedFolder );
+				
+				if (!saveAsFile.exists() || confirmOverwriteFile( saveAsFile )) {
+					Runnable r = new BackgroundTask( "Unpublishing Release...", StatusType.INFO ) {
+						public void execute() throws Throwable {
+							try {
+								validationFindings = new ValidationFindings();
+								ReleaseManager manager = releaseManager.unpublishRelease( selectedFolder );
+								
+								manager.loadReleaseModel( validationFindings );
+								OTMReleaseController.this.releaseManager = manager;
+								OTMReleaseController.this.releaseFile = URLUtils.toFile(
+										releaseManager.getRelease().getReleaseUrl() );
+								OTMReleaseController.this.managedRelease = false;
+								updateControlsForNewRelease();
+								
+							} finally {
+								userSettings.setReleaseFolder( selectedFolder );
+								userSettings.save();
+							}
+						}
+					};
+					
+					new Thread( r ).start();
+				}
+			}
+		}
 	}
 	
 	/**
@@ -529,6 +678,26 @@ public class OTMReleaseController {
 	}
 	
 	/**
+	 * Prompts the user to confirm the overwrite of the specified file.
+	 * 
+	 * @param overwriteFile  the file that will be overwritten if the user confirms
+	 * @return boolean
+	 */
+	private boolean confirmOverwriteFile(File overwriteFile) {
+		Alert alert = new Alert( AlertType.CONFIRMATION );
+		Optional<ButtonType> dialogResult;
+		
+		alert.setTitle( "Confirm Overwrite" );
+		alert.setHeaderText( null );
+		alert.setContentText( "A file named '" + overwriteFile.getName() +
+				" already exists in the selected folder.  Overwrite?" );
+
+		alert.getButtonTypes().setAll( ButtonType.YES, ButtonType.NO );
+		dialogResult = alert.showAndWait();
+		return (dialogResult.get() == ButtonType.YES);
+	}
+	
+	/**
 	 * If a release is loaded and has been modified, the user is prompted to confirm
 	 * the close and allowed to save the release if desired.
 	 * 
@@ -537,7 +706,7 @@ public class OTMReleaseController {
 	private boolean confirmCloseRelease() {
 		boolean confirmClose = true;
 		
-		if ((releaseManager != null) && releaseDirty) {
+		if ((releaseManager != null) && !managedRelease && releaseDirty) {
 			Alert alert = new Alert( AlertType.CONFIRMATION );
 			Optional<ButtonType> dialogResult;
 			
@@ -608,26 +777,7 @@ public class OTMReleaseController {
 	 * @param event  the action event that triggered this method call
 	 */
 	@FXML public void aboutApplication(ActionEvent event) {
-		AboutDialogController controller = null;
-		try {
-			FXMLLoader loader = new FXMLLoader( OTMReleaseController.class.getResource(
-					AboutDialogController.FXML_FILE ) );
-			BorderPane page = (BorderPane) loader.load();
-			Stage dialogStage = new Stage();
-			Scene scene = new Scene( page );
-			
-			dialogStage.setTitle( "About" );
-			dialogStage.initModality( Modality.WINDOW_MODAL );
-			dialogStage.initOwner( primaryStage );
-			dialogStage.setScene( scene );
-			
-			controller = loader.getController();
-			controller.setDialogStage( dialogStage );
-			controller.showAndWait();
-			
-		} catch (IOException e) {
-			e.printStackTrace( System.out );
-		}
+		AboutDialogController.createAboutDialog( primaryStage ).showAndWait();
 	}
 	
 	/**
@@ -683,39 +833,6 @@ public class OTMReleaseController {
 	}
 	
 	/**
-	 * Initializes the dialog stage and controller used to select an OTM library
-	 * or release from a remote repository.
-	 * 
-	 * @param title  the title of the dialog box
-	 * @param itemTypeFilter  the type filter to apply for repository items
-	 * @return BrowseRepositoryDialogController
-	 */
-	private BrowseRepositoryDialogController newBrowseRepositoryDialog(String title, RepositoryItemType itemTypeFilter) {
-		BrowseRepositoryDialogController controller = null;
-		try {
-			FXMLLoader loader = new FXMLLoader( OTMReleaseController.class.getResource(
-					BrowseRepositoryDialogController.FXML_FILE ) );
-			AnchorPane page = (AnchorPane) loader.load();
-			Stage dialogStage = new Stage();
-			Scene scene = new Scene( page );
-			
-			dialogStage.setTitle( title );
-			dialogStage.initModality( Modality.WINDOW_MODAL );
-			dialogStage.initOwner( primaryStage );
-			dialogStage.setScene( scene );
-			
-			controller = loader.getController();
-			controller.setDialogStage( dialogStage );
-			controller.setItemTypeFilter( itemTypeFilter );
-			controller.initializeTreeView();
-			
-		} catch (IOException e) {
-			e.printStackTrace( System.out );
-		}
-		return controller;
-	}
-	
-	/**
 	 * Displays a message to the user in the status bar and optionally disables the
 	 * interactive controls on the display.
 	 * 
@@ -737,6 +854,7 @@ public class OTMReleaseController {
 				exitMenu.setDisable( true );
 				addLibraryMenu.setDisable( true );
 				reloadModelMenu.setDisable( true );
+				openManagedMenu.setDisable( true );
 				publishReleaseMenu.setDisable( true );
 				newReleaseVersionMenu.setDisable( true );
 				unpublishReleaseMenu.setDisable( true );
@@ -796,6 +914,7 @@ public class OTMReleaseController {
 				
 			} else if (updatedControl == releaseBaseNamespace) {
 				release.setBaseNamespace( releaseBaseNamespace.textProperty().getValue() );
+				updateActiveRepositories();
 				
 			} else if (updatedControl == releaseVersion) {
 				release.setVersion( releaseVersion.textProperty().getValue() );
@@ -902,16 +1021,19 @@ public class OTMReleaseController {
 		Platform.runLater( () -> {
 			boolean isReleaseLoaded = (releaseManager != null);
 			boolean isGenerateExamples = (isReleaseLoaded && generateExamplesCheckbox.isSelected());
-			boolean isSaveEnabled = (isReleaseLoaded && releaseDirty && !hasError);
-			boolean isSaveAsEnabled = (isReleaseLoaded && !hasError);
-			boolean isReloadModelEnabled = (isReleaseLoaded && modelDirty && !hasError);
+			boolean isSaveEnabled = (isReleaseLoaded && !managedRelease && releaseDirty && !hasError);
+			boolean isSaveAsEnabled = (isReleaseLoaded && !managedRelease && !hasError);
+			boolean isReloadModelEnabled = (isReleaseLoaded && !managedRelease && modelDirty && !hasError);
 			boolean isCompileEnabled = (isReleaseLoaded && !hasError
 					&& !validationFindings.hasFinding( FindingType.ERROR ));
-			boolean isPublishEnabled = (isReleaseLoaded && !releaseDirty && !hasError
+			boolean isPublishEnabled = (isReleaseLoaded && !releaseDirty && !managedRelease && !hasError
 					&& !validationFindings.hasFinding( FindingType.ERROR ));
-			boolean isRemoveEnabled = (isReleaseLoaded &&
+			boolean isUnpublishEnabled = (isReleaseLoaded && !releaseDirty && managedRelease && !hasError
+					&& !validationFindings.hasFinding( FindingType.ERROR ));
+			boolean isRemoveEnabled = (isReleaseLoaded && !managedRelease &&
 						!principalTableView.getSelectionModel().getSelectedItems().isEmpty());
 			
+			// Set the enable/disable status of all controls
 			newMenu.setDisable( false );
 			openMenu.setDisable( false );
 			saveMenu.setDisable( !isSaveEnabled );
@@ -919,11 +1041,12 @@ public class OTMReleaseController {
 			compileMenu.setDisable( !isCompileEnabled );
 			closeMenu.setDisable( !isReleaseLoaded );
 			exitMenu.setDisable( false );
-			addLibraryMenu.setDisable( !isReleaseLoaded );
+			addLibraryMenu.setDisable( !(isReleaseLoaded && !managedRelease) );
 			reloadModelMenu.setDisable( !isReloadModelEnabled );
+			openManagedMenu.setDisable( false );
 			publishReleaseMenu.setDisable( !isPublishEnabled );
-			newReleaseVersionMenu.setDisable( false );
-			unpublishReleaseMenu.setDisable( false );
+			newReleaseVersionMenu.setDisable( !isUnpublishEnabled );
+			unpublishReleaseMenu.setDisable( !isUnpublishEnabled );
 			aboutMenu.setDisable( false );
 			releaseFileButton.setDisable( false );
 			releaseFilename.setDisable( !isReleaseLoaded );
@@ -931,32 +1054,45 @@ public class OTMReleaseController {
 			releaseBaseNamespace.setDisable( !isReleaseLoaded );
 			releaseStatus.setDisable( !isReleaseLoaded );
 			releaseVersion.setDisable( !isReleaseLoaded );
-			defaultEffectiveDate.setDisable( !isReleaseLoaded );
+			defaultEffectiveDate.setDisable( !(isReleaseLoaded && !managedRelease) );
 			timeZoneLabel.setDisable( !isReleaseLoaded );
-			applyToAllButton.setDisable( !isReleaseLoaded );
+			applyToAllButton.setDisable( !(isReleaseLoaded && !managedRelease) );
 			releaseDescription.setDisable( !isReleaseLoaded );
-			addLibraryButton.setDisable( !isReleaseLoaded );
+			addLibraryButton.setDisable( !(isReleaseLoaded && !managedRelease) );
 			removeLibraryButton.setDisable( !isRemoveEnabled );
 			reloadModelButton.setDisable( !isReloadModelEnabled );
 			principalTableView.setDisable( !isReleaseLoaded );
 			referencedTableView.setDisable( !isReleaseLoaded );
-			bindingStyleChoice.setDisable( !isReleaseLoaded );
-			compileXmlSchemasCheckbox.setDisable( !isReleaseLoaded );
-			compileServicesCheckbox.setDisable( !isReleaseLoaded );
-			compileJsonSchemasCheckbox.setDisable( !isReleaseLoaded );
-			compileSwaggerCheckbox.setDisable( !isReleaseLoaded );
-			compileDocumentationCheckbox.setDisable( !isReleaseLoaded );
+			bindingStyleChoice.setDisable( !(isReleaseLoaded && !managedRelease) );
+			compileXmlSchemasCheckbox.setDisable( !(isReleaseLoaded && !managedRelease) );
+			compileServicesCheckbox.setDisable( !(isReleaseLoaded && !managedRelease) );
+			compileJsonSchemasCheckbox.setDisable( !(isReleaseLoaded && !managedRelease) );
+			compileSwaggerCheckbox.setDisable( !(isReleaseLoaded && !managedRelease) );
+			compileDocumentationCheckbox.setDisable( !(isReleaseLoaded && !managedRelease) );
 			serviceEndpointUrl.setDisable( !isReleaseLoaded );
 			baseResourceUrl.setDisable( !isReleaseLoaded );
-			suppressExtensionsCheckbox.setDisable( !isReleaseLoaded );
-			generateExamplesCheckbox.setDisable( !isReleaseLoaded );
-			exampleMaxDetailCheckbox.setDisable( !isGenerateExamples );
+			suppressExtensionsCheckbox.setDisable( !(isReleaseLoaded && !managedRelease) );
+			generateExamplesCheckbox.setDisable( !(isReleaseLoaded && !managedRelease) );
+			exampleMaxDetailCheckbox.setDisable( !(isGenerateExamples && !managedRelease) );
 			maxRepeatSpinner.setDisable( !isGenerateExamples );
 			maxRecursionDepthSpinner.setDisable( !isGenerateExamples );
 			facetSelectionTableView.setDisable( !isReleaseLoaded );
 			validationTableView.setDisable( !isReleaseLoaded );
 			libraryTreeView.setDisable( !isReleaseLoaded );
 			propertyTableView.setDisable( !isReleaseLoaded );
+			
+			// Set the editable status of all interactive controls
+			releaseName.setEditable( !managedRelease );
+			releaseBaseNamespace.setEditable( !managedRelease );
+			releaseVersion.setEditable( !managedRelease );
+			releaseDescription.setEditable( !managedRelease );
+			serviceEndpointUrl.setEditable( !managedRelease );
+			baseResourceUrl.setEditable( !managedRelease );
+			maxRepeatSpinner.setEditable( !managedRelease );
+			maxRecursionDepthSpinner.setEditable( !managedRelease );
+			principalTableView.setEditable( isReleaseLoaded && !managedRelease );
+			referencedTableView.setEditable( isReleaseLoaded && !managedRelease );
+			facetSelectionTableView.setEditable( isReleaseLoaded && !managedRelease );
 			
 			if (!isReleaseLoaded) {
 				principalTableView.setItems( null );
@@ -970,6 +1106,30 @@ public class OTMReleaseController {
 	}
 	
 	/**
+	 * Updates all visual controls for a newly-loaded or newly-created release.
+	 */
+	private void updateControlsForNewRelease() {
+		Platform.runLater( () -> {
+			updateReleaseFields();
+			updateCompilerOptions();
+			updateFacetSelections();
+			updateCommitHistories();
+			updateActiveRepositories();
+			
+			principalTableView.setItems(
+					FXCollections.observableList( releaseManager.getRelease().getPrincipalMembers() ) );
+			referencedTableView.setItems(
+					FXCollections.observableList( releaseManager.getRelease().getReferencedMembers() ) );
+			validationTableView.setItems(
+					FXCollections.observableList( validationFindings.getAllFindingsAsList() ) );
+			
+			releaseDirty = false;
+			modelDirty = false;
+			validateFields();
+		});
+	}
+	
+	/**
 	 * Updates the visual fields related to the release's identity and description.  This
 	 * method must be called from within the UI thread.
 	 */
@@ -979,7 +1139,8 @@ public class OTMReleaseController {
 		LocalDateTime effectiveDate = (effDate == null) ?
 				null : LocalDateTime.ofInstant( effDate.toInstant(), ZoneId.systemDefault() );
 		
-		releaseFilename.setText( (releaseFile == null) ? "" : releaseFile.getName() );
+		releaseFilename.setText( ((releaseFile == null) ? "" : releaseFile.getName()) +
+				(managedRelease ? " (Managed / Read-Only)" : "") );
 		releaseName.setText( (release == null) ? "" : release.getName() );
 		releaseBaseNamespace.setText( (release == null) ? "" : release.getBaseNamespace() );
 		releaseStatus.setText( (release == null) ? "" : release.getStatus().toString() );
@@ -1069,6 +1230,29 @@ public class OTMReleaseController {
 			}
 		} else {
 			commitHistoryMap.clear();
+		}
+	}
+	
+	/**
+	 * Updates the enabled state of the repository menu items based on the release's
+	 * base namespace value.
+	 */
+	@SuppressWarnings("unchecked")
+	private void updateActiveRepositories() {
+		String baseNS = releaseBaseNamespace.textProperty().getValue();
+		
+		for (MenuItem menuItem : publishReleaseMenu.getItems()) {
+			List<String> rootNamespaces = (List<String>)
+					menuItem.getProperties().get( "rootNamespaces" );
+			boolean isValidNS = false;
+			
+			for (String rootNS : rootNamespaces) {
+				if (baseNS.equals( rootNS ) || baseNS.startsWith( rootNS + "/" )) {
+					isValidNS = true;
+					break;
+				}
+			}
+			menuItem.setDisable( !isValidNS );
 		}
 	}
 	
@@ -1191,6 +1375,26 @@ public class OTMReleaseController {
 		bindingStyleChoice.setValue( defaultStyle );
 		maxRepeatSpinner.setValueFactory( new IntegerSpinnerValueFactory( 1, 3, 3, 1 ) );
 		maxRecursionDepthSpinner.setValueFactory( new IntegerSpinnerValueFactory( 1, 3, 3, 1 ) );
+		
+		// Initialize the list of repository menu items
+		List<RemoteRepository> repositories = repositoryManager.listRemoteRepositories();
+		
+		for (RemoteRepository repository : repositories) {
+			try {
+				MenuItem repoMenu = new MenuItem();
+				
+				repoMenu.setText( repository.getDisplayName() );
+				repoMenu.getProperties().put( "repository", repository );
+				repoMenu.getProperties().put( "rootNamespaces", repository.listRootNamespaces() );
+				repoMenu.setOnAction( event -> {
+					publishRelease( repoMenu );
+				});
+				publishReleaseMenu.getItems().add( repoMenu );
+				
+			} catch (RepositoryException e) {
+				// No error - skip and move on
+			}
+		}
 		
 		// Initialize the default effective date controls
 		defaultEffectiveDate = new LocalDateTimeTextField();
@@ -1319,10 +1523,10 @@ public class OTMReleaseController {
             }
         });
 		referencedNameColumn.setCellValueFactory( nodeFeatures -> {
-			AbstractLibrary library = releaseManager.getLibrary( nodeFeatures.getValue() );
-			StringBuilder nameValue = new StringBuilder( library.getName() );
+			RepositoryItem item = nodeFeatures.getValue().getRepositoryItem();
+			StringBuilder nameValue = new StringBuilder( item.getLibraryName() );
 			
-			nameValue.append(" (").append( library.getVersion() ).append(")");
+			nameValue.append(" (").append( item.getVersion() ).append(")");
 			return new ReadOnlyStringWrapper( nameValue.toString() );
 		});
 		referencedStatusColumn.setCellValueFactory( nodeFeatures -> {
