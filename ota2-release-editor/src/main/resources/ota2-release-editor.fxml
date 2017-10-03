@@ -411,8 +411,8 @@
                                     </Label>
                                     <TableView fx:id="propertyTableView" VBox.vgrow="ALWAYS">
                                       <columns>
-                                        <TableColumn fx:id="propertyNameColumn" editable="false" maxWidth="140.0" prefWidth="131.0" text="Name" />
-                                        <TableColumn fx:id="propertyValueColumn" editable="false" maxWidth="263.0" prefWidth="142.0" text="Value" />
+                                        <TableColumn fx:id="propertyNameColumn" editable="false" maxWidth="500.0" minWidth="50.0" prefWidth="131.0" text="Name" />
+                                        <TableColumn fx:id="propertyValueColumn" editable="false" maxWidth="500.0" minWidth="50.0" prefWidth="131.0" text="Value" />
                                       </columns>
                                        <VBox.margin>
                                           <Insets bottom="5.0" left="5.0" right="5.0" />

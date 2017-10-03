@@ -17,8 +17,6 @@
 package org.opentravel.release;
 
 import java.io.IOException;
-import java.util.Locale;
-import java.util.ResourceBundle;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -33,8 +31,6 @@ import javafx.stage.Stage;
  * Controller class for the About appication dialog.
  */
 public class AboutDialogController {
-	
-	private static final ResourceBundle messageBundle = ResourceBundle.getBundle( "ota2-release-messages", Locale.getDefault() );
 	
 	public static final String FXML_FILE = "/about-dialog.fxml";
 	
@@ -86,7 +82,7 @@ public class AboutDialogController {
 	 * @param dialogStage  the dialog stage to assign
 	 */
 	public void setDialogStage(Stage dialogStage) {
-		buildNumberLabel.setText( messageBundle.getString( "BUILD_NUMBER" ) );
+		buildNumberLabel.setText( MessageBuilder.formatMessage( "BUILD_NUMBER" ) );
 		this.dialogStage = dialogStage;
 	}
 	

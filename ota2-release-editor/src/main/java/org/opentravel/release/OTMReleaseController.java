@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +37,8 @@ import java.util.Optional;
 import javax.xml.namespace.QName;
 
 import org.opentravel.release.NewReleaseDialogController.NewReleaseInfo;
+import org.opentravel.release.navigate.TreeNode;
+import org.opentravel.release.navigate.TreeNodeFactory;
 import org.opentravel.schemacompiler.ioc.CompilerExtensionRegistry;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
@@ -92,6 +95,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
+import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.ChoiceBoxTableCell;
 import javafx.scene.image.Image;
@@ -175,9 +179,9 @@ public class OTMReleaseController {
 	@FXML private TableColumn<ValidationFinding,String> validationComponentColumn;
 	@FXML private TableColumn<ValidationFinding,String> validationDescriptionColumn;
 	@FXML private TreeView<TreeNode<?>> libraryTreeView;
-	@FXML private TableView<FacetSelection> propertyTableView;
-	@FXML private TableColumn<FacetSelection,String> propertyNameColumn;
-	@FXML private TableColumn<FacetSelection,String> propertyValueColumn;
+	@FXML private TableView<NodeProperty> propertyTableView;
+	@FXML private TableColumn<NodeProperty,String> propertyNameColumn;
+	@FXML private TableColumn<NodeProperty,String> propertyValueColumn;
 	@FXML private ImageView statusBarIcon;
 	@FXML private Label statusBarLabel;
 	
@@ -220,7 +224,7 @@ public class OTMReleaseController {
 			NewReleaseInfo releaseInfo = controller.showDialog();
 			
 			if (releaseInfo != null) {
-				ReleaseManager newReleaseManager = new ReleaseManager();
+				ReleaseManager newReleaseManager = new ReleaseManager( repositoryManager );
 				File newReleaseFile = newReleaseManager.getNewReleaseFile(
 						releaseInfo.getReleaseName(), releaseInfo.getReleaseDirectory() );
 				
@@ -275,7 +279,7 @@ public class OTMReleaseController {
 			Runnable r = new BackgroundTask( "Loading Release: " + selectedFile.getName(), StatusType.INFO ) {
 				public void execute() throws Throwable {
 					try {
-						ReleaseManager manager = new ReleaseManager();
+						ReleaseManager manager = new ReleaseManager( repositoryManager );
 						
 						validationFindings = new ValidationFindings();
 						manager.loadRelease( selectedFile, validationFindings );
@@ -317,7 +321,7 @@ public class OTMReleaseController {
 			if (selectedItem != null) {
 				Runnable r = new BackgroundTask( "Loading Managed Release...", StatusType.INFO ) {
 					public void execute() throws Throwable {
-						ReleaseManager manager = new ReleaseManager();
+						ReleaseManager manager = new ReleaseManager( repositoryManager );
 						
 						validationFindings = new ValidationFindings();
 						manager.loadRelease( selectedItem, validationFindings );
@@ -484,6 +488,7 @@ public class OTMReleaseController {
 							releaseDirty = true;
 							modelDirty = false;
 							updateControlStates();
+							updateModelTreeView();
 						}
 					};
 					
@@ -528,6 +533,7 @@ public class OTMReleaseController {
 							releaseDirty = true;
 							modelDirty = false;
 							updateControlStates();
+							updateModelTreeView();
 						}
 					};
 					
@@ -554,6 +560,7 @@ public class OTMReleaseController {
 							FXCollections.observableList( releaseManager.getRelease().getReferencedMembers() ) );
 					modelDirty = false;
 					updateControlStates();
+					updateModelTreeView();
 				}
 			};
 			
@@ -572,7 +579,7 @@ public class OTMReleaseController {
 			Runnable r = new BackgroundTask( "Publishing Release...", StatusType.INFO ) {
 				public void execute() throws Throwable {
 					ReleaseItem releaseItem = releaseManager.publishRelease( repository );
-					ReleaseManager manager = new ReleaseManager();
+					ReleaseManager manager = new ReleaseManager( repositoryManager );
 					
 					validationFindings = new ValidationFindings();
 					manager.loadRelease( releaseItem, validationFindings );
@@ -1114,6 +1121,7 @@ public class OTMReleaseController {
 			updateCompilerOptions();
 			updateFacetSelections();
 			updateCommitHistories();
+			updateModelTreeView();
 			updateActiveRepositories();
 			
 			principalTableView.setItems(
@@ -1207,6 +1215,27 @@ public class OTMReleaseController {
 		}
 		facetSelectionTableView.setItems(
 				(selectionList == null) ? null : FXCollections.observableList( selectionList ) );
+	}
+	
+	/**
+	 * Updates the tree view from which the user can visually browse the
+	 * OTM model.
+	 */
+	private void updateModelTreeView() {
+		Platform.runLater( () -> {
+			TreeItem<TreeNode<?>> rootItem = null;
+			
+			if (releaseManager != null) {
+				TreeNodeFactory nodeFactory = new TreeNodeFactory();
+				rootItem = new TreeItem<>();
+				
+				for (TLLibrary library : releaseManager.getModel().getUserDefinedLibraries()) {
+					rootItem.getChildren().add( nodeFactory.newTree( library ) );
+				}
+				Collections.sort( rootItem.getChildren(), nodeFactory.getComparator() );
+			}
+			libraryTreeView.setRoot( rootItem );
+		});
 	}
 	
 	/**
@@ -1472,6 +1501,12 @@ public class OTMReleaseController {
 		maxRecursionDepthSpinner.valueProperty().addListener( (observable, oldValue, newValue) -> {
 			handleCompileOptionModified( maxRecursionDepthSpinner );
 		});
+		libraryTreeView.getSelectionModel().selectedItemProperty().addListener( event -> {
+			TreeItem<TreeNode<?>> treeItem = libraryTreeView.getSelectionModel().getSelectedItem();
+			List<NodeProperty> nodeProps = treeItem.getValue().getProperties();
+			
+			propertyTableView.setItems( FXCollections.observableList( nodeProps ) );
+		});
 		
 		// Configure the display options for all tables
 		principalTableView.setEditable( true );
@@ -1572,6 +1607,13 @@ public class OTMReleaseController {
 				return new ReadOnlyStringWrapper( nodeFeatures.getValue().getFormattedMessage( FindingMessageFormat.BARE_FORMAT ) );
 		});
 		
+		propertyNameColumn.setCellValueFactory( nodeFeatures -> {
+			return new ReadOnlyStringWrapper( nodeFeatures.getValue().getName() );
+		});
+		propertyValueColumn.setCellValueFactory( nodeFeatures -> {
+			return new ReadOnlyStringWrapper( nodeFeatures.getValue().getValue() );
+		});
+		
 		// Configure placeholder labels for empty tables
 		principalTableView.setPlaceholder( new Label("") );
 		referencedTableView.setPlaceholder( new Label("") );
@@ -1581,6 +1623,7 @@ public class OTMReleaseController {
 		
 		// Complete initialization and update the control states
 		this.releaseAccordion.setExpandedPane( this.releaseMembersPane );
+		this.libraryTreeView.setShowRoot( false );
 		this.primaryStage = primaryStage;
 		this.userSettings = userSettings;
 		

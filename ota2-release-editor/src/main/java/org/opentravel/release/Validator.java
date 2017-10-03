@@ -18,9 +18,6 @@ package org.opentravel.release;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.MessageFormat;
-import java.util.Locale;
-import java.util.ResourceBundle;
 
 import org.opentravel.schemacompiler.version.VersionScheme;
 import org.opentravel.schemacompiler.version.VersionSchemeFactory;
@@ -34,7 +31,6 @@ import javafx.scene.control.Tooltip;
  */
 public class Validator {
 	
-	private static final ResourceBundle messageBundle = ResourceBundle.getBundle( "ota2-release-messages", Locale.getDefault() );
 	private static final VersionScheme versionScheme;
 	
 	private static final String MISSING_REQUIRED_VALUE = "MISSING_REQUIRED_VALUE";
@@ -57,10 +53,10 @@ public class Validator {
 		String errorMessage = null;
 		
 		if (requiredValue && (textValue.length() == 0)) {
-			errorMessage = getMessageText( MISSING_REQUIRED_VALUE, fieldName );
+			errorMessage = MessageBuilder.formatMessage( MISSING_REQUIRED_VALUE, fieldName );
 			
 		} else if ((maxLength > 0) && (textValue.length() > maxLength)) {
-			errorMessage = getMessageText( MAX_LENGTH_EXCEEDED, maxLength );
+			errorMessage = MessageBuilder.formatMessage( MAX_LENGTH_EXCEEDED, maxLength );
 		}
 		setErrorMessage( text, errorMessage );
 		return (errorMessage == null);
@@ -80,14 +76,14 @@ public class Validator {
 		String errorMessage = null;
 		
 		if (requiredValue && (textValue.length() == 0)) {
-			errorMessage = getMessageText( MISSING_REQUIRED_VALUE, fieldName );
+			errorMessage = MessageBuilder.formatMessage( MISSING_REQUIRED_VALUE, fieldName );
 			
 		} else if (textValue.length() > 0) {
 			try {
 				new URL( textValue );
 				
 			} catch (MalformedURLException e) {
-				errorMessage = getMessageText( INVALID_URI, fieldName );
+				errorMessage = MessageBuilder.formatMessage( INVALID_URI, fieldName );
 			}
 		}
 		setErrorMessage( text, errorMessage );
@@ -108,7 +104,7 @@ public class Validator {
 		String errorMessage = null;
 		
 		if (requiredValue && (textValue.length() == 0)) {
-			errorMessage = getMessageText( MISSING_REQUIRED_VALUE, fieldName );
+			errorMessage = MessageBuilder.formatMessage( MISSING_REQUIRED_VALUE, fieldName );
 			
 		} else if (textValue.length() > 0) {
 			boolean isValid = versionScheme.isValidVersionIdentifier( textValue );
@@ -128,7 +124,7 @@ public class Validator {
 				}
 			}
 			if (!isValid) {
-				errorMessage = getMessageText( INVALID_VERSION_ID );
+				errorMessage = MessageBuilder.formatMessage( INVALID_VERSION_ID );
 			}
 		}
 		setErrorMessage( text, errorMessage );
@@ -161,26 +157,6 @@ public class Validator {
 	public static void clearErrorMessage(Control control) {
 		control.setStyle( null );
 		control.setTooltip( null );
-	}
-	
-	/**
-	 * Returns the text for the given error or warning message.
-	 * 
-	 * @param messageKey  the message key for which to return the human-readable text
-	 * @param messageParams  substitution parameters for the message
-	 * @return String
-	 */
-	private static String getMessageText(String messageKey, Object... messageParams) {
-		String messageText = messageBundle.getString( messageKey );
-		String formattedMessage;
-		
-		if (messageText != null) {
-			formattedMessage = MessageFormat.format( messageText, messageParams );
-			
-		} else {
-			formattedMessage = messageKey;
-		}
-		return formattedMessage;
 	}
 	
 	/**
