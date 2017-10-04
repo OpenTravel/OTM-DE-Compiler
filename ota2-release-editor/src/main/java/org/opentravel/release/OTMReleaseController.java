@@ -175,6 +175,7 @@ public class OTMReleaseController {
 	@FXML private CheckBox exampleMaxDetailCheckbox;
 	@FXML private Spinner<Integer> maxRepeatSpinner;
 	@FXML private Spinner<Integer> maxRecursionDepthSpinner;
+	@FXML private CheckBox suppressOptionalFieldsCheckbox;
 	@FXML private TableView<ValidationFinding> validationTableView;
 	@FXML private TableColumn<ValidationFinding,ImageView> validationLevelColumn;
 	@FXML private TableColumn<ValidationFinding,String> validationComponentColumn;
@@ -903,6 +904,7 @@ public class OTMReleaseController {
 				exampleMaxDetailCheckbox.setDisable( true );
 				maxRepeatSpinner.setDisable( true );
 				maxRecursionDepthSpinner.setDisable( true );
+				suppressExtensionsCheckbox.setDisable( true );
 				facetSelectionTableView.setDisable( true );
 				validationTableView.setDisable( true );
 				libraryTreeView.setDisable( true );
@@ -1006,6 +1008,9 @@ public class OTMReleaseController {
 				
 			} else if (updatedControl == maxRecursionDepthSpinner) {
 				options.setExampleMaxDepth( maxRecursionDepthSpinner.getValue() );
+				
+			} else if (updatedControl == suppressOptionalFieldsCheckbox) {
+				options.setSuppressOptionalFields( suppressOptionalFieldsCheckbox.isSelected() );
 			}
 			releaseDirty = true;
 			if (!oldDirty) updateControlStates();
@@ -1092,6 +1097,7 @@ public class OTMReleaseController {
 			exampleMaxDetailCheckbox.setDisable( !(isGenerateExamples && !managedRelease) );
 			maxRepeatSpinner.setDisable( !isGenerateExamples );
 			maxRecursionDepthSpinner.setDisable( !isGenerateExamples );
+			suppressOptionalFieldsCheckbox.setDisable( !(isGenerateExamples && !managedRelease) );
 			facetSelectionTableView.setDisable( !isReleaseLoaded );
 			validationTableView.setDisable( !isReleaseLoaded );
 			libraryTreeView.setDisable( !isReleaseLoaded );
@@ -1193,6 +1199,7 @@ public class OTMReleaseController {
 			exampleMaxDetailCheckbox.setSelected( options.isGenerateMaxDetailsForExamples() );
 			maxRepeatSpinner.getValueFactory().setValue( (maxRepeat == null) ? 3 : maxRepeat );
 			maxRecursionDepthSpinner.getValueFactory().setValue( (maxDepth == null) ? 3 : maxDepth );
+			suppressOptionalFieldsCheckbox.setSelected( options.isSuppressOptionalFields() );
 			
 		} else {
 			bindingStyleChoice.setValue( CompilerExtensionRegistry.getActiveExtension() );
@@ -1208,6 +1215,7 @@ public class OTMReleaseController {
 			exampleMaxDetailCheckbox.setSelected( false );
 			maxRepeatSpinner.getValueFactory().setValue( 3 );
 			maxRecursionDepthSpinner.getValueFactory().setValue( 3 );
+			suppressOptionalFieldsCheckbox.setSelected( false );
 		}
 	}
 	
@@ -1510,6 +1518,9 @@ public class OTMReleaseController {
 		maxRecursionDepthSpinner.valueProperty().addListener( (observable, oldValue, newValue) -> {
 			handleCompileOptionModified( maxRecursionDepthSpinner );
 		});
+		suppressOptionalFieldsCheckbox.selectedProperty().addListener( (observable, oldValue, newValue) -> {
+			handleCompileOptionModified( suppressOptionalFieldsCheckbox );
+		} );
 		libraryTreeView.getSelectionModel().selectedItemProperty().addListener( event -> {
 			TreeItem<TreeNode<?>> treeItem = libraryTreeView.getSelectionModel().getSelectedItem();
 			List<NodeProperty> nodeProps = treeItem.getValue().getProperties();

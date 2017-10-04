@@ -173,7 +173,7 @@ public class RepositoryAvailabilityChecker {
 	 * @return boolean
 	 */
 	private boolean pingAllRepositories(Collection<String> repositoryIds, boolean failOnSingleFailure) {
-		ExecutorService executor = Executors.newFixedThreadPool( repositoryManager.listRemoteRepositories().size() );
+		ExecutorService executor = Executors.newFixedThreadPool( Math.max( repositoryManager.listRemoteRepositories().size(), 1 ) );
 		try {
 			List<Future<Boolean>> resultList = new ArrayList<>();
 			boolean someAvailable = false;

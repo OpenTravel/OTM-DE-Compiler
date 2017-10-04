@@ -41,6 +41,7 @@ public class DocumentationCompileTask extends AbstractCompilerTask implements Ex
     private String exampleContext;
     private Integer exampleMaxRepeat;
     private Integer exampleMaxDepth;
+    private boolean suppressOptionalFields = false;
     
     /**
      * Default constructor.
@@ -139,6 +140,7 @@ public class DocumentationCompileTask extends AbstractCompilerTask implements Ex
         if (exampleMaxDepth != null) {
             context.setValue(CodeGenerationContext.CK_EXAMPLE_MAX_DEPTH, exampleMaxDepth.toString());
         }
+        context.setValue(CodeGenerationContext.CK_SUPPRESS_OPTIONAL_FIELDS, suppressOptionalFields + "");
         return context;
     }
 
@@ -156,6 +158,7 @@ public class DocumentationCompileTask extends AbstractCompilerTask implements Ex
             exampleContext = exampleOptions.getExampleContext();
             exampleMaxRepeat = exampleOptions.getExampleMaxRepeat();
             exampleMaxDepth = exampleOptions.getExampleMaxDepth();
+            suppressOptionalFields = exampleOptions.isSuppressOptionalFields();
         }
 	}
 
@@ -197,6 +200,14 @@ public class DocumentationCompileTask extends AbstractCompilerTask implements Ex
 	@Override
 	public Integer getExampleMaxDepth() {
 		return exampleMaxDepth;
+	}
+
+    /**
+	 * @see org.opentravel.schemacompiler.task.ExampleCompilerTaskOptions#isSuppressOptionalFields()
+	 */
+	@Override
+	public boolean isSuppressOptionalFields() {
+		return suppressOptionalFields;
 	}
 
 }

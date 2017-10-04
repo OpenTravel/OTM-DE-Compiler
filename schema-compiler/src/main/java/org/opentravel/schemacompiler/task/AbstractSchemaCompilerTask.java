@@ -62,6 +62,7 @@ public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask im
     private String exampleContext;
     private Integer exampleMaxRepeat;
     private Integer exampleMaxDepth;
+    private boolean suppressOptionalFields = false;
 
     /**
      * Default constructor.
@@ -407,6 +408,7 @@ public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask im
             context.setValue(CodeGenerationContext.CK_EXAMPLE_MAX_DEPTH, exampleMaxDepth.toString());
         }
         context.setValue(CodeGenerationContext.CK_SUPRESS_OTM_EXTENSIONS, suppressOtmExtensions + "");
+        context.setValue(CodeGenerationContext.CK_SUPPRESS_OPTIONAL_FIELDS, suppressOptionalFields + "");
         return context;
     }
 
@@ -426,6 +428,7 @@ public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask im
             setExampleContext(exampleOptions.getExampleContext());
             setExampleMaxRepeat(exampleOptions.getExampleMaxRepeat());
             setExampleMaxDepth(exampleOptions.getExampleMaxDepth());
+            setSuppressOptionalFields(exampleOptions.isSuppressOptionalFields());
         }
         super.applyTaskOptions(taskOptions);
     }
@@ -540,6 +543,24 @@ public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask im
      */
     public void setExampleMaxDepth(Integer exampleMaxDepth) {
         this.exampleMaxDepth = exampleMaxDepth;
+    }
+
+    /**
+	 * @see org.opentravel.schemacompiler.task.ExampleCompilerTaskOptions#isSuppressOptionalFields()
+	 */
+	@Override
+	public boolean isSuppressOptionalFields() {
+		return suppressOptionalFields;
+	}
+
+    /**
+     * Assigns the flag indicating whether optional fields should be suppressed
+	 * during example generation.
+     * 
+     * @param generateExamples  the flag value to assign
+     */
+    public void setSuppressOptionalFields(boolean suppressOptionalFields) {
+        this.suppressOptionalFields = suppressOptionalFields;
     }
 
 }

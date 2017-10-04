@@ -42,6 +42,7 @@ public class ExampleGeneratorOptions {
     private String exampleContext;
     private int maxRepeat = 3;
     private int maxRecursionDepth = 2;
+    private boolean suppressOptionalFields = false;
 
     /**
      * Returns the amount of detail to include in the generated example.
@@ -152,5 +153,25 @@ public class ExampleGeneratorOptions {
     public void setMaxRecursionDepth(int maxRecursionDepth) {
         this.maxRecursionDepth = maxRecursionDepth;
     }
+
+	/**
+	 * Returns the flag indicating whether optional fields should be suppressed
+	 * during example generation.
+	 *
+	 * @return boolean
+	 */
+	public boolean isSuppressOptionalFields() {
+		return suppressOptionalFields;
+	}
+
+	/**
+	 * Assigns the flag indicating whether optional fields should be suppressed
+	 * during example generation.
+	 *
+	 * @param suppressOptionalFields  the field value to assign
+	 */
+	public void setSuppressOptionalFields(boolean suppressOptionalFields) {
+		this.suppressOptionalFields = suppressOptionalFields;
+	}
 
 }

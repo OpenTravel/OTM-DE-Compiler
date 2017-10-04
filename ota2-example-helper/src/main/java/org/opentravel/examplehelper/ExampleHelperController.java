@@ -26,40 +26,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import javafx.application.Platform;
-import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
-import javafx.event.Event;
-import javafx.event.EventHandler;
-import javafx.fxml.FXML;
-import javafx.scene.Cursor;
-import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
-import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleGroup;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeItem.TreeModificationEvent;
-import javafx.scene.control.TreeTableCell;
-import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.TreeTableColumn.CellDataFeatures;
-import javafx.scene.control.TreeTableView;
-import javafx.scene.control.cell.ChoiceBoxTreeTableCell;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
-import javafx.util.Callback;
-
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
 import org.opentravel.schemacompiler.codegen.example.ExampleBuilder;
@@ -93,6 +59,41 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
+import javafx.fxml.FXML;
+import javafx.scene.Cursor;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeItem.TreeModificationEvent;
+import javafx.scene.control.TreeTableCell;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableColumn.CellDataFeatures;
+import javafx.scene.control.TreeTableView;
+import javafx.scene.control.cell.ChoiceBoxTreeTableCell;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import javafx.util.Callback;
+
 /**
  * JavaFX controller class for the OTA2 Example Helper application.
  */
@@ -108,6 +109,7 @@ public class ExampleHelperController {
 	@FXML private ChoiceBox<String> bindingStyleChoice;
 	@FXML private ChoiceBox<OTMObjectChoice> entityChoice;
 	@FXML private Spinner<Integer> repeatCountSpinner;
+	@FXML private CheckBox suppressOptionalFields;
 	@FXML private ToggleGroup formatGroup;
 	@FXML private RadioButton xmlRadio;
 	@FXML private RadioButton jsonRadio;
@@ -332,6 +334,7 @@ public class ExampleHelperController {
 						
 						facetSelections.configureExampleOptions( options );
 						options.setMaxRepeat( repeatCountSpinner.getValue() );
+						options.setSuppressOptionalFields( suppressOptionalFields.isSelected() );
 						
 						if (xmlRadio.isSelected()) {
 							ExampleBuilder<Document> builder = new ExampleDocumentBuilder( options ).setModelElement( selectedObject );
@@ -471,6 +474,13 @@ public class ExampleHelperController {
 		repeatCountSpinner.valueProperty().addListener( new ChangeListener<Integer>() {
 			public void changed(ObservableValue<? extends Integer>
 						observable, Integer oldValue, Integer newValue) {
+				refreshExample();
+			}
+		} );
+		
+		suppressOptionalFields.selectedProperty().addListener( new ChangeListener<Boolean>() {
+			public void changed(ObservableValue<? extends Boolean>
+						observable, Boolean oldValue, Boolean newValue) {
 				refreshExample();
 			}
 		} );

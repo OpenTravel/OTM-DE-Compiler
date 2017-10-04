@@ -113,6 +113,7 @@ public class ExampleCodeGenerator extends AbstractCodeGenerator<TLModelElement> 
         String exampleContext = context.getValue(CodeGenerationContext.CK_EXAMPLE_CONTEXT);
         Integer maxRepeat = context.getIntValue(CodeGenerationContext.CK_EXAMPLE_MAX_REPEAT);
         Integer maxDepth = context.getIntValue(CodeGenerationContext.CK_EXAMPLE_MAX_DEPTH);
+        Boolean suppressOptionalFields = context.getBooleanValue(CodeGenerationContext.CK_SUPPRESS_OPTIONAL_FIELDS);
 
         if (detailLevel != null) {
             if (detailLevel.equalsIgnoreCase("MINIMUM")) {
@@ -127,6 +128,9 @@ public class ExampleCodeGenerator extends AbstractCodeGenerator<TLModelElement> 
         }
         if (maxDepth != null) {
             options.setMaxRecursionDepth(maxDepth.intValue());
+        }
+        if (suppressOptionalFields != null) {
+            options.setSuppressOptionalFields(suppressOptionalFields);
         }
         return options;
     }

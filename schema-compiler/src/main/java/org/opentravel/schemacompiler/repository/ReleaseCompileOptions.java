@@ -46,6 +46,7 @@ public class ReleaseCompileOptions implements CompileAllTaskOptions {
 	private static final String EXAMPLE_CONTEXT_KEY     = "exampleContext";
 	private static final String EXAMPLE_MAX_REPEAT_KEY  = "exampleMaxRepeat";
 	private static final String EXAMPLE_MAX_DEPTH_KEY   = "exampleMaxDepth";
+	private static final String SUPPRESS_OPTIONAL_FIELDS_KEY = "suppressOptionalFields";
 	
 	private String bindingStyle = CompilerExtensionRegistry.getActiveExtension();
     private boolean compileSchemas = true;
@@ -61,6 +62,7 @@ public class ReleaseCompileOptions implements CompileAllTaskOptions {
     private String exampleContext;
     private Integer exampleMaxRepeat = 3;
     private Integer exampleMaxDepth = 3;
+    private boolean suppressOptionalFields = false;
     
 	/**
 	 * Default constructor.
@@ -87,6 +89,7 @@ public class ReleaseCompileOptions implements CompileAllTaskOptions {
 		this.exampleContext = p.get( EXAMPLE_CONTEXT_KEY );
 		this.exampleMaxRepeat = parseInt( p.get( EXAMPLE_MAX_REPEAT_KEY ) );
 		this.exampleMaxDepth = parseInt( p.get( EXAMPLE_MAX_DEPTH_KEY ) );
+		this.suppressOptionalFields = parseBoolean( p.get( SUPPRESS_OPTIONAL_FIELDS_KEY ) );
 		
 		if ((bindingStyle == null) ||
 				!CompilerExtensionRegistry.getAvailableExtensionIds().contains( bindingStyle )) {
@@ -320,6 +323,24 @@ public class ReleaseCompileOptions implements CompileAllTaskOptions {
 		this.exampleMaxDepth = exampleMaxDepth;
 	}
 
+    /**
+	 * @see org.opentravel.schemacompiler.task.ExampleCompilerTaskOptions#isSuppressOptionalFields()
+	 */
+	@Override
+	public boolean isSuppressOptionalFields() {
+		return suppressOptionalFields;
+	}
+
+    /**
+     * Assigns the flag indicating whether optional fields should be suppressed
+	 * during example generation.
+     * 
+     * @param generateExamples  the flag value to assign
+     */
+    public void setSuppressOptionalFields(boolean suppressOptionalFields) {
+        this.suppressOptionalFields = suppressOptionalFields;
+    }
+
 	/**
 	 * @see org.opentravel.schemacompiler.task.CommonCompilerTaskOptions#applyTaskOptions(org.opentravel.schemacompiler.task.CommonCompilerTaskOptions)
 	 */
@@ -345,6 +366,7 @@ public class ReleaseCompileOptions implements CompileAllTaskOptions {
             setExampleContext(exampleOptions.getExampleContext());
             setExampleMaxRepeat(exampleOptions.getExampleMaxRepeat());
             setExampleMaxDepth(exampleOptions.getExampleMaxDepth());
+            setSuppressOtmExtensions(exampleOptions.isSuppressOptionalFields());
         }
         if (taskOptions instanceof ServiceCompilerTaskOptions) {
             setServiceEndpointUrl(((ServiceCompilerTaskOptions) taskOptions).getServiceEndpointUrl());
@@ -393,6 +415,7 @@ public class ReleaseCompileOptions implements CompileAllTaskOptions {
     	p.put( SUPPRESS_EXTENSIONS_KEY, suppressOtmExtensions + "" );
     	p.put( GENERATE_EXAMPLES_KEY, generateExamples + "" );
     	p.put( EXAMPLE_MAX_DETAILS_KEY, generateMaxDetailsForExamples + "" );
+    	p.put( SUPPRESS_OPTIONAL_FIELDS_KEY, suppressOptionalFields + "" );
     	
     	if (bindingStyle != null) {
         	p.put( BINDING_STYLE_KEY, bindingStyle );

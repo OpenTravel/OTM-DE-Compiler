@@ -47,6 +47,7 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
     private String exampleContext;
     private Integer exampleMaxRepeat;
     private Integer exampleMaxDepth;
+    private boolean suppressOptionalFields = false;
 
     /**
      * Default constructor.
@@ -169,6 +170,8 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
         if (exampleMaxDepth != null) {
             context.setValue(CodeGenerationContext.CK_EXAMPLE_MAX_DEPTH, exampleMaxDepth.toString());
         }
+        context.setValue(CodeGenerationContext.CK_SUPRESS_OTM_EXTENSIONS, suppressOtmExtensions + "");
+        context.setValue(CodeGenerationContext.CK_SUPPRESS_OPTIONAL_FIELDS, suppressOptionalFields + "");
         return context;
     }
 
@@ -197,6 +200,7 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
             setExampleContext(exampleOptions.getExampleContext());
             setExampleMaxRepeat(exampleOptions.getExampleMaxRepeat());
             setExampleMaxDepth(exampleOptions.getExampleMaxDepth());
+            setSuppressOptionalFields(exampleOptions.isSuppressOptionalFields());
         }
         if (taskOptions instanceof ServiceCompilerTaskOptions) {
             ServiceCompilerTaskOptions serviceOptions = (ServiceCompilerTaskOptions) taskOptions;
@@ -449,6 +453,24 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.task.ExampleCompilerTaskOptions#isSuppressOptionalFields()
+	 */
+	@Override
+	public boolean isSuppressOptionalFields() {
+		return suppressOptionalFields;
+	}
+
+    /**
+     * Assigns the flag indicating whether optional fields should be suppressed
+	 * during example generation.
+     * 
+     * @param generateExamples  the flag value to assign
+     */
+    public void setSuppressOptionalFields(boolean suppressOptionalFields) {
+        this.suppressOptionalFields = suppressOptionalFields;
+    }
+
+	/**
      * @see org.opentravel.schemacompiler.task.CommonCompilerTaskOptions#isCompileHtml()
      */
 	@Override

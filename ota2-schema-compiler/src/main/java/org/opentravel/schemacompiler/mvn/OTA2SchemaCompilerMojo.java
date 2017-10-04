@@ -166,6 +166,13 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
     protected Integer exampleMaxDepth;
 
     /**
+     * Boolean flag indicating whether optional fields should be suppressed
+	 * during example generation.
+     */
+	@Parameter( defaultValue = "true" )
+    protected boolean suppressOptionalFields;
+
+    /**
      * Flag used for debugging that causes this Mojo's configuration settings to be displayed prior
      * to execution.
      */
@@ -291,6 +298,7 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
         log.info("exampleContext                = " + exampleContext);
         log.info("exampleMaxRepeat              = " + exampleMaxRepeat);
         log.info("exampleMaxDepth               = " + exampleMaxDepth);
+        log.info("suppressOptionalFields        = " + suppressOptionalFields);
     }
 
     /**
@@ -420,6 +428,14 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
     public Integer getExampleMaxDepth() {
         return exampleMaxDepth;
     }
+
+    /**
+	 * @see org.opentravel.schemacompiler.task.ExampleCompilerTaskOptions#isSuppressOptionalFields()
+	 */
+	@Override
+	public boolean isSuppressOptionalFields() {
+		return suppressOptionalFields;
+	}
 
     /**
      * @see org.opentravel.schemacompiler.task.CommonCompilerTaskOptions#applyTaskOptions(org.opentravel.schemacompiler.task.CommonCompilerTaskOptions)

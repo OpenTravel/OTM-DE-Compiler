@@ -72,6 +72,12 @@ public class CodeGenerationContext {
     public static final String CK_EXAMPLE_MAX_DEPTH = "schemacompiler.example.maxDepth";
 
     /**
+     * Context key indicating the maximum depth that should be included for nested elements in
+     * generated example output.
+     */
+    public static final String CK_SUPPRESS_OPTIONAL_FIELDS = "schemacompiler.example.suppressOptionalFields";
+
+    /**
      * Context key indicating the relative path where schema files are located, relative to the
      * example XML document being generated.
      */

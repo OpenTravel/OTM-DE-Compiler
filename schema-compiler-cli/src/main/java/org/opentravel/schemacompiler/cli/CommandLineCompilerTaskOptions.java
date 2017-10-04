@@ -215,6 +215,14 @@ public class CommandLineCompilerTaskOptions implements CompileAllTaskOptions {
     }
 
     /**
+	 * @see org.opentravel.schemacompiler.task.ExampleCompilerTaskOptions#isSuppressOptionalFields()
+	 */
+	@Override
+	public boolean isSuppressOptionalFields() {
+		return false;
+	}
+
+	/**
      * @see org.opentravel.schemacompiler.task.CommonCompilerTaskOptions#applyTaskOptions(org.opentravel.schemacompiler.task.CommonCompilerTaskOptions)
      */
     @Override

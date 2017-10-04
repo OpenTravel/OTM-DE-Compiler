@@ -644,10 +644,12 @@ public class ExampleNavigator {
 
         // Start by navigating attributes and indicators for this facet
         for (TLAttribute attribute : PropertyCodegenUtils.getInheritedAttributes(facet)) {
-            navigateAttribute(attribute);
+        	if (attribute.isMandatory() || !options.isSuppressOptionalFields()) {
+                navigateAttribute(attribute);
+        	}
         }
         for (TLIndicator indicator : PropertyCodegenUtils.getInheritedIndicators(facet)) {
-        	if (!indicator.isPublishAsElement()) {
+        	if (!indicator.isPublishAsElement() && !options.isSuppressOptionalFields()) {
                 navigateIndicator(indicator);
         	}
         }
@@ -678,12 +680,16 @@ public class ExampleNavigator {
                     }
                     previousFacetIdentity = currentFacetIdentity;
                 }
-
+                
                 // Navigate the example content for the current element
-                navigateElement(element);
+        		if (element.isMandatory() || !options.isSuppressOptionalFields()) {
+                    navigateElement(element);
+        		}
                 
         	} else if (elementItem instanceof TLIndicator) {
-                navigateIndicator( (TLIndicator) elementItem );
+        		if (!options.isSuppressOptionalFields()) {
+                    navigateIndicator( (TLIndicator) elementItem );
+        		}
         	}
         }
         

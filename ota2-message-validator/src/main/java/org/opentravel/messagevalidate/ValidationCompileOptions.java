@@ -80,6 +80,10 @@ public class ValidationCompileOptions implements CompileAllTaskOptions {
 		return new Integer(2);
 	}
 	
+	public boolean isSuppressOptionalFields() {
+		return false;
+	}
+
 	public String getExampleContext() {
 		return null;
 	}

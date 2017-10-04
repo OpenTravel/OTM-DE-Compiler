@@ -297,6 +297,7 @@
                                                           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                           <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                                                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                             <RowConstraints maxHeight="5.0" minHeight="5.0" prefHeight="5.0" vgrow="SOMETIMES" />
                                                         </rowConstraints>
                                                          <VBox.margin>
@@ -318,9 +319,15 @@
                                                                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                                                </padding>
                                                             </Label>
+                                                            <Label text="Suppress Optional Fields" GridPane.halignment="RIGHT" GridPane.rowIndex="3">
+                                                               <padding>
+                                                                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                                               </padding>
+                                                            </Label>
                                                             <CheckBox fx:id="exampleMaxDetailCheckbox" mnemonicParsing="false" GridPane.columnIndex="1" />
                                                             <Spinner fx:id="maxRepeatSpinner" prefWidth="50.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                                             <Spinner fx:id="maxRecursionDepthSpinner" prefWidth="50.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                                            <CheckBox fx:id="suppressOptionalFieldsCheckbox" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                                                          </children>
                                                       </GridPane>
                                                    </children>
@@ -449,7 +456,7 @@
       </HBox>
    </bottom>
    <top>
-      <MenuBar BorderPane.alignment="CENTER">
+      <MenuBar prefWidth="800.0" BorderPane.alignment="CENTER">
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>

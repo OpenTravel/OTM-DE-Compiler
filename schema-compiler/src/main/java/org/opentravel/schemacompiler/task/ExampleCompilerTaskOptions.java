@@ -59,5 +59,13 @@ public interface ExampleCompilerTaskOptions {
      * @return Integer
      */
     public Integer getExampleMaxDepth();
-
+    
+    /**
+     * Returns the flag indicating whether optional fields should be suppressed
+	 * during example generation.
+	 * 
+     * @return boolean
+     */
+    public boolean isSuppressOptionalFields();
+    
 }
