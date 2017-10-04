@@ -19,7 +19,6 @@ package org.opentravel.release.navigate.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opentravel.release.MessageBuilder;
 import org.opentravel.release.NodeProperty;
 import org.opentravel.release.Utils;
 import org.opentravel.release.navigate.TreeNode;
@@ -67,9 +66,9 @@ public class OperationTreeNode extends TreeNode<TLOperation> {
 		List<NodeProperty> props = new ArrayList<>();
 		TLOperation operation = getEntity();
 		
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.name"), operation.getName() ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.description"), getDescription( operation ) ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.extends"), getExtensionName( operation ) ) );
+		props.add( new NodeProperty( "name", () -> { return operation.getName(); } ) );
+		props.add( new NodeProperty( "description", () -> { return getDescription( operation ); } ) );
+		props.add( new NodeProperty( "extends", () -> { return getExtensionName( operation ); } ) );
 		return props;
 	}
 

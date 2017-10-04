@@ -69,9 +69,9 @@ public class ParameterTreeNode extends TreeNode<TLParameter> {
 		List<NodeProperty> props = new ArrayList<>();
 		TLParameter param = getEntity();
 		
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.name"), getLabel() ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.description"), getDescription( param ) ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.location"), MessageBuilder.formatMessage( param.getLocation().toString() ) ) );
+		props.add( new NodeProperty( "name", () -> { return getLabel(); } ) );
+		props.add( new NodeProperty( "description", () -> { return getDescription( param ); } ) );
+		props.add( new NodeProperty( "location", () -> { return MessageBuilder.formatMessage( param.getLocation().toString() ); } ) );
 		return props;
 	}
 

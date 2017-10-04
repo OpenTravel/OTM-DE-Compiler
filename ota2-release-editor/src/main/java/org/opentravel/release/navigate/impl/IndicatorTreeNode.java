@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.opentravel.release.MessageBuilder;
 import org.opentravel.release.NodeProperty;
 import org.opentravel.release.Utils;
 import org.opentravel.release.navigate.TreeNode;
@@ -68,9 +67,9 @@ public class IndicatorTreeNode extends TreeNode<TLIndicator> {
 		List<NodeProperty> props = new ArrayList<>();
 		TLIndicator indicator = getEntity();
 		
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.name"), indicator.getName() ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.description"), getDescription( indicator ) ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.publishAsElement"), indicator.isPublishAsElement() + "" ) );
+		props.add( new NodeProperty( "name", () -> { return indicator.getName(); } ) );
+		props.add( new NodeProperty( "description", () -> { return getDescription( indicator ); } ) );
+		props.add( new NodeProperty( "publishAsElement", () -> { return indicator.isPublishAsElement() + ""; } ) );
 		return props;
 	}
 	

@@ -33,6 +33,11 @@ import javafx.scene.image.Image;
  */
 public class Utils {
 	
+	public static final Image rootIcon = new Image( Utils.class.getResourceAsStream( "/images/root.gif" ) );
+	public static final Image repositoryIcon = new Image( Utils.class.getResourceAsStream( "/images/repository.gif" ) );
+	public static final Image rootNSIcon = new Image( Utils.class.getResourceAsStream( "/images/rootNS.gif" ) );
+	public static final Image baseNSIcon = new Image( Utils.class.getResourceAsStream( "/images/baseNS.gif" ) );
+	public static final Image releaseIcon = new Image( Utils.class.getResourceAsStream( "/images/release.gif" ) );
 	public static final Image libraryIcon = new Image( Utils.class.getResourceAsStream( "/images/library.png" ) );
 	public static final Image folderIcon = new Image( Utils.class.getResourceAsStream( "/images/folder.gif" ) );
 	public static final Image businessObjectIcon = new Image( Utils.class.getResourceAsStream( "/images/business-object.png" ) );

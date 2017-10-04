@@ -68,11 +68,11 @@ public class ActionFacetTreeNode extends TreeNode<TLActionFacet> {
 		List<NodeProperty> props = new ArrayList<>();
 		TLActionFacet facet = getEntity();
 		
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.name"), facet.getName() ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.description"), getDescription( facet ) ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.referenceType"), MessageBuilder.formatMessage( facet.getReferenceType().toString() ) ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.repeat"), facet.getReferenceRepeat() + "" ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.businessObject"), getEntityDisplayName( facet.getBasePayload() ) ) );
+		props.add( new NodeProperty( "name", () -> { return facet.getName(); } ) );
+		props.add( new NodeProperty( "description", () -> { return getDescription( facet ); } ) );
+		props.add( new NodeProperty( "referenceType", () -> { return MessageBuilder.formatMessage( facet.getReferenceType().toString() ); } ) );
+		props.add( new NodeProperty( "repeat", () -> { return facet.getReferenceRepeat() + ""; } ) );
+		props.add( new NodeProperty( "businessObject", () -> { return getEntityDisplayName( facet.getBasePayload() ); } ) );
 		return props;
 	}
 

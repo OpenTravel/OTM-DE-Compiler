@@ -19,7 +19,6 @@ package org.opentravel.release.navigate.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opentravel.release.MessageBuilder;
 import org.opentravel.release.NodeProperty;
 import org.opentravel.release.Utils;
 import org.opentravel.release.navigate.TreeNode;
@@ -68,8 +67,8 @@ public class ServiceTreeNode extends TreeNode<TLService> {
 		List<NodeProperty> props = new ArrayList<>();
 		TLService service = getEntity();
 		
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.name"), service.getName() ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.description"), getDescription( service ) ) );
+		props.add( new NodeProperty( "name", () -> { return service.getName(); } ) );
+		props.add( new NodeProperty( "description", () -> { return getDescription( service ); } ) );
 		return props;
 	}
 

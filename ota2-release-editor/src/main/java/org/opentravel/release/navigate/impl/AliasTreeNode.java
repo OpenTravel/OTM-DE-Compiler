@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.opentravel.release.MessageBuilder;
 import org.opentravel.release.NodeProperty;
 import org.opentravel.release.Utils;
 import org.opentravel.release.navigate.TreeNode;
@@ -67,7 +66,7 @@ public class AliasTreeNode extends TreeNode<TLAlias> {
 	public List<NodeProperty> getProperties() {
 		List<NodeProperty> props = new ArrayList<>();
 		
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.name"), getEntity().getName() ) );
+		props.add( new NodeProperty( "name", () -> { return getEntity().getName(); } ) );
 		return props;
 	}
 	

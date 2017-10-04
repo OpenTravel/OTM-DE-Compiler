@@ -70,10 +70,10 @@ public class ActionRequestTreeNode extends TreeNode<TLActionRequest> {
 		TLActionRequest request = getEntity();
 		TLParamGroup paramGroup = request.getParamGroup();
 		
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.method"), MessageBuilder.formatMessage( request.getHttpMethod().toString() ) ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.description"), getDescription( request ) ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.paramGroup"), (paramGroup == null) ? "" : paramGroup.getName() ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.payloadType"), getEntityDisplayName( request.getPayloadType() ) ) );
+		props.add( new NodeProperty( "method", () -> { return MessageBuilder.formatMessage( request.getHttpMethod().toString() ); } ) );
+		props.add( new NodeProperty( "description", () -> { return getDescription( request ); } ) );
+		props.add( new NodeProperty( "paramGroup", () -> { return (paramGroup == null) ? "" : paramGroup.getName(); } ) );
+		props.add( new NodeProperty( "payloadType", () -> { return getEntityDisplayName( request.getPayloadType() ); } ) );
 		return props;
 	}
 

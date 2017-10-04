@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.opentravel.release.MessageBuilder;
 import org.opentravel.release.NodeProperty;
 import org.opentravel.release.Utils;
 import org.opentravel.release.navigate.TreeNode;
@@ -70,10 +69,10 @@ public class ParentRefTreeNode extends TreeNode<TLResourceParentRef> {
 		TLResourceParentRef parentRef = getEntity();
 		TLParamGroup parentParamGroup = parentRef.getParentParamGroup();
 		
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.parentName"), getEntityDisplayName( parentRef.getParentResource() ) ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.parentParamGroup"), (parentParamGroup == null) ? "" : parentParamGroup.getName() ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.description"), getDescription( parentRef ) ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.pathTemplate"), parentRef.getPathTemplate() ) );
+		props.add( new NodeProperty( "parentName", () -> { return getEntityDisplayName( parentRef.getParentResource() ); } ) );
+		props.add( new NodeProperty( "parentParamGroup", () -> { return (parentParamGroup == null) ? "" : parentParamGroup.getName(); } ) );
+		props.add( new NodeProperty( "description", () -> { return getDescription( parentRef ); } ) );
+		props.add( new NodeProperty( "pathTemplate", () -> { return parentRef.getPathTemplate(); } ) );
 		return props;
 	}
 

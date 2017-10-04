@@ -19,7 +19,6 @@ package org.opentravel.release.navigate.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opentravel.release.MessageBuilder;
 import org.opentravel.release.NodeProperty;
 import org.opentravel.release.Utils;
 import org.opentravel.release.navigate.TreeNode;
@@ -69,10 +68,10 @@ public class BusinessObjectTreeNode extends TreeNode<TLBusinessObject> {
 		List<NodeProperty> props = new ArrayList<>();
 		TLBusinessObject bo = getEntity();
 		
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.name"), bo.getName() ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.description"), getDescription( bo ) ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.extends"), getExtensionName( bo ) ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.notExtendable"), bo.isNotExtendable() + "" ) );
+		props.add( new NodeProperty( "name", () -> { return bo.getName(); } ) );
+		props.add( new NodeProperty( "description", () -> { return getDescription( bo ); } ) );
+		props.add( new NodeProperty( "extends", () -> { return getExtensionName( bo ); } ) );
+		props.add( new NodeProperty( "notExtendable", () -> { return bo.isNotExtendable() + ""; } ) );
 		return props;
 	}
 

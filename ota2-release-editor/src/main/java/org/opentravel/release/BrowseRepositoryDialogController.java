@@ -17,6 +17,7 @@
 package org.opentravel.release;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
@@ -49,13 +50,6 @@ import javafx.stage.Stage;
 public class BrowseRepositoryDialogController {
 	
 	private static final String FXML_FILE = "/browse-repository.fxml";
-	
-	private final Image rootIcon = new Image( getClass().getResourceAsStream( "/images/root.gif" ) );
-	private final Image repositoryIcon = new Image( getClass().getResourceAsStream( "/images/repository.gif" ) );
-	private final Image rootNSIcon = new Image( getClass().getResourceAsStream( "/images/rootNS.gif" ) );
-	private final Image baseNSIcon = new Image( getClass().getResourceAsStream( "/images/baseNS.gif" ) );
-	private final Image libraryIcon = new Image( getClass().getResourceAsStream( "/images/library.png" ) );
-	private final Image releaseIcon = new Image( getClass().getResourceAsStream( "/images/release.gif" ) );
 	
 	private Stage dialogStage;
 	private boolean okSelected = false;
@@ -141,7 +135,7 @@ public class BrowseRepositoryDialogController {
 					
 					for (RepositoryItem repoItem : repoItemList) {
 						Image icon = RepositoryItemType.RELEASE.isItemType( repoItem.getFilename() )
-										? releaseIcon : libraryIcon;
+										? Utils.releaseIcon : Utils.libraryIcon;
 						TreeItem<RepositoryTreeNode> libraryItem = new TreeItem<>(new RepositoryTreeNode(
 								repoItem.getFilename() + " (" + repoItem.getVersion() + ")", repoItem ),
 								new ImageView( icon ) );
@@ -177,39 +171,51 @@ public class BrowseRepositoryDialogController {
 			List<RemoteRepository> remoteRepositories = manager.listRemoteRepositories();
 			TreeItem<RepositoryTreeNode> rootItem = new TreeItem<>(
 					new RepositoryTreeNode( "OTM Repositories", null ),
-					new ImageView( rootIcon ) );
+					new ImageView( Utils.rootIcon ) );
 			
 			for (RemoteRepository repository : remoteRepositories) {
-				TreeItem<RepositoryTreeNode> repoItem = new TreeItem<>(
-						new RepositoryTreeNode( repository.getDisplayName(), null ),
-						new ImageView( repositoryIcon ) );
-				List<String> baseNamespaces = repository.listBaseNamespaces();
+				boolean repoAvailable = true;
+				List<String> baseNamespaces;
 				
-				for (String rootNS : repository.listRootNamespaces()) {
-					TreeItem<RepositoryTreeNode> rootNSItem = new TreeItem<>(
-							new RepositoryTreeNode( rootNS, null ),
-							new ImageView( rootNSIcon ) );
+				try {
+					baseNamespaces = repository.listBaseNamespaces();
 					
-					for (String baseNS : baseNamespaces) {
-						if (!baseNS.startsWith( rootNS )) continue;
-						String baseNSLabel = baseNS.equals( rootNS ) ? "/" : baseNS.substring( rootNS.length() );
-						TreeItem<RepositoryTreeNode> baseNSItem = new TreeItem<>(
-								new RepositoryTreeNode( baseNSLabel, null ),
-								new ImageView( baseNSIcon ) );
+				} catch (RepositoryException e) {
+					baseNamespaces = new ArrayList<>();
+					repoAvailable = false;
+				}
+				String repoDisplayName = repository.getDisplayName() + (repoAvailable ? "" : " (Unavailable)");
+				TreeItem<RepositoryTreeNode> repoItem = new TreeItem<>(
+						new RepositoryTreeNode( repoDisplayName, null ),
+						new ImageView( repoAvailable ? Utils.repositoryIcon : Utils.errorIcon ) );
+				
+				if (repoAvailable) {
+					for (String rootNS : repository.listRootNamespaces()) {
+						TreeItem<RepositoryTreeNode> rootNSItem = new TreeItem<>(
+								new RepositoryTreeNode( rootNS, null ),
+								new ImageView( Utils.rootNSIcon ) );
 						
-						rootNSItem.getChildren().add( baseNSItem );
-						baseNSItem.getChildren().add( new TreeItem<>( new RepositoryTreeNode( repository, baseNS ) ) );
-						baseNSItem.expandedProperty().addListener( new ChangeListener<Boolean>() {
-							@SuppressWarnings("unchecked")
-							public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-								if ((newValue != null) && newValue) {
-									BooleanProperty property = (BooleanProperty) observable;
-									handleTreeItemExpand( (TreeItem<RepositoryTreeNode>) property.getBean() );
+						for (String baseNS : baseNamespaces) {
+							if (!baseNS.startsWith( rootNS )) continue;
+							String baseNSLabel = baseNS.equals( rootNS ) ? "/" : baseNS.substring( rootNS.length() );
+							TreeItem<RepositoryTreeNode> baseNSItem = new TreeItem<>(
+									new RepositoryTreeNode( baseNSLabel, null ),
+									new ImageView( Utils.baseNSIcon ) );
+							
+							rootNSItem.getChildren().add( baseNSItem );
+							baseNSItem.getChildren().add( new TreeItem<>( new RepositoryTreeNode( repository, baseNS ) ) );
+							baseNSItem.expandedProperty().addListener( new ChangeListener<Boolean>() {
+								@SuppressWarnings("unchecked")
+								public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+									if ((newValue != null) && newValue) {
+										BooleanProperty property = (BooleanProperty) observable;
+										handleTreeItemExpand( (TreeItem<RepositoryTreeNode>) property.getBean() );
+									}
 								}
-							}
-						});
+							});
+						}
+						repoItem.getChildren().add( rootNSItem );
 					}
-					repoItem.getChildren().add( rootNSItem );
 				}
 				rootItem.getChildren().add( repoItem );
 			}

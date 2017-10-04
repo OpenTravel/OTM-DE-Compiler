@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.opentravel.release.MessageBuilder;
 import org.opentravel.release.NodeProperty;
 import org.opentravel.release.Utils;
 import org.opentravel.release.navigate.TreeNode;
@@ -68,9 +67,9 @@ public class ActionResponseTreeNode extends TreeNode<TLActionResponse> {
 		List<NodeProperty> props = new ArrayList<>();
 		TLActionResponse response = getEntity();
 		
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.statusCodes"), getDisplayStatusCodes() ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.description"), getDescription( response ) ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.payloadType"), getEntityDisplayName( response.getPayloadType() ) ) );
+		props.add( new NodeProperty( "statusCodes", () -> { return getDisplayStatusCodes(); } ) );
+		props.add( new NodeProperty( "description", () -> { return getDescription( response ); } ) );
+		props.add( new NodeProperty( "payloadType", () -> { return getEntityDisplayName( response.getPayloadType() ); } ) );
 		return props;
 	}
 

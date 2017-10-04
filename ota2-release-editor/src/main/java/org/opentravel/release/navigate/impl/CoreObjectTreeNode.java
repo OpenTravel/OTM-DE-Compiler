@@ -19,7 +19,6 @@ package org.opentravel.release.navigate.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opentravel.release.MessageBuilder;
 import org.opentravel.release.NodeProperty;
 import org.opentravel.release.Utils;
 import org.opentravel.release.navigate.TreeNode;
@@ -68,10 +67,10 @@ public class CoreObjectTreeNode extends TreeNode<TLCoreObject> {
 		List<NodeProperty> props = new ArrayList<>();
 		TLCoreObject core = getEntity();
 		
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.name"), core.getName() ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.description"), getDescription( core ) ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.extends"), getExtensionName( core ) ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.notExtendable"), core.isNotExtendable() + "" ) );
+		props.add( new NodeProperty( "name", () -> { return core.getName(); } ) );
+		props.add( new NodeProperty( "description", () -> { return getDescription( core ); } ) );
+		props.add( new NodeProperty( "extends", () -> { return getExtensionName( core ); } ) );
+		props.add( new NodeProperty( "notExtendable", () -> { return core.isNotExtendable() + ""; } ) );
 		return props;
 	}
 

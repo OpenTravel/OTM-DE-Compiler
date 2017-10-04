@@ -50,6 +50,7 @@ import org.opentravel.schemacompiler.repository.ReleaseItem;
 import org.opentravel.schemacompiler.repository.ReleaseManager;
 import org.opentravel.schemacompiler.repository.ReleaseMember;
 import org.opentravel.schemacompiler.repository.RemoteRepository;
+import org.opentravel.schemacompiler.repository.RepositoryAvailabilityChecker;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryItemCommit;
@@ -190,6 +191,7 @@ public class OTMReleaseController {
 	private Button applyToAllButton;
 	
 	private RepositoryManager repositoryManager;
+	private RepositoryAvailabilityChecker availabilityChecker;
 	private boolean managedRelease = false;
 	private boolean releaseDirty = false;
 	private boolean modelDirty = false;
@@ -206,6 +208,8 @@ public class OTMReleaseController {
 	public OTMReleaseController() {
 		try {
 			repositoryManager = RepositoryManager.getDefault();
+			availabilityChecker = RepositoryAvailabilityChecker.getInstance( repositoryManager );
+			availabilityChecker.pingAllRepositories( true );
 			
 		} catch (RepositoryException e) {
 			e.printStackTrace( System.out );
@@ -309,31 +313,33 @@ public class OTMReleaseController {
 		if (confirmCloseRelease()) {
 			closeRelease();
 		}
-		BrowseRepositoryDialogController controller =
-				BrowseRepositoryDialogController.createBrowseRepositoryDialog(
-						"Open Managed Release", RepositoryItemType.RELEASE, primaryStage );
-		
-		controller.showAndWait();
-		
-		if (controller.isOkSelected()) {
-			RepositoryItem selectedItem = controller.getSelectedRepositoryItem();
+		if (availabilityChecker.pingAllRepositories( false )) {
+			BrowseRepositoryDialogController controller =
+					BrowseRepositoryDialogController.createBrowseRepositoryDialog(
+							"Open Managed Release", RepositoryItemType.RELEASE, primaryStage );
 			
-			if (selectedItem != null) {
-				Runnable r = new BackgroundTask( "Loading Managed Release...", StatusType.INFO ) {
-					public void execute() throws Throwable {
-						ReleaseManager manager = new ReleaseManager( repositoryManager );
-						
-						validationFindings = new ValidationFindings();
-						manager.loadRelease( selectedItem, validationFindings );
-						OTMReleaseController.this.releaseManager = manager;
-						OTMReleaseController.this.releaseFile = URLUtils.toFile(
-								releaseManager.getRelease().getReleaseUrl() );
-						OTMReleaseController.this.managedRelease = true;
-						updateControlsForNewRelease();
-					}
-				};
+			controller.showAndWait();
+			
+			if (controller.isOkSelected()) {
+				RepositoryItem selectedItem = controller.getSelectedRepositoryItem();
 				
-				new Thread( r ).start();
+				if (selectedItem != null) {
+					Runnable r = new BackgroundTask( "Loading Managed Release...", StatusType.INFO ) {
+						public void execute() throws Throwable {
+							ReleaseManager manager = new ReleaseManager( repositoryManager );
+							
+							validationFindings = new ValidationFindings();
+							manager.loadRelease( selectedItem, validationFindings );
+							OTMReleaseController.this.releaseManager = manager;
+							OTMReleaseController.this.releaseFile = URLUtils.toFile(
+									releaseManager.getRelease().getReleaseUrl() );
+							OTMReleaseController.this.managedRelease = true;
+							updateControlsForNewRelease();
+						}
+					};
+					
+					new Thread( r ).start();
+				}
 			}
 		}
 	}
@@ -741,6 +747,9 @@ public class OTMReleaseController {
 		if (releaseManager != null) {
 			releaseFile = null;
 			releaseManager = null;
+			managedRelease = false;
+			releaseDirty = false;
+			modelDirty = false;
 			
 			Platform.runLater( () -> {
 				updateCommitHistories();

@@ -61,6 +61,7 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 	private Release release;
 	private TLModel model;
 	private RepositoryManager repositoryManager;
+	private RepositoryAvailabilityChecker availabilityChecker;
 	private ReleaseFileUtils fileUtils;
 	
 	/**
@@ -79,6 +80,7 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 	 */
 	public ReleaseManager(RepositoryManager repositoryManager) {
 		this.repositoryManager = repositoryManager;
+		this.availabilityChecker = RepositoryAvailabilityChecker.getInstance( repositoryManager );
 		this.fileUtils = new ReleaseFileUtils( repositoryManager );
 		this.model = new TLModel();
 		new ProjectManager( model, false, repositoryManager );
@@ -176,6 +178,9 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 	public ReleaseItem loadRelease(RepositoryItem releaseItem, ValidationFindings findings) throws RepositoryException {
 		try {
 	    	if (findings == null) findings = new ValidationFindings();
+	    	if (!availabilityChecker.pingRepository( releaseItem )) {
+	    		throw new RepositoryException("The remote repository for this release is unavailable.");
+	    	}
 			repositoryManager.refreshLocalCopy( releaseItem );
 			URL releaseUrl = repositoryManager.getContentLocation( releaseItem );
 			File releaseFile = URLUtils.toFile( releaseUrl );
@@ -438,6 +443,10 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 	public void loadReleaseModel(ValidationFindings findings)
 			throws RepositoryException, LibraryLoaderException {
     	if (findings == null) findings = new ValidationFindings();
+    	if (!availabilityChecker.pingRepositories( release )) {
+    		throw new RepositoryException(
+    				"The remote repository for one or more libraries in this release is unavailable.");
+    	}
         LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>( model );
 		ReleaseLibraryModuleLoader moduleLoader = new ReleaseLibraryModuleLoader( this, modelLoader.getModuleLoader() );
 		

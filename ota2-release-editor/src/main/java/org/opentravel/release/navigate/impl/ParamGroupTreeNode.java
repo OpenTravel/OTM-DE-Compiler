@@ -19,7 +19,6 @@ package org.opentravel.release.navigate.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opentravel.release.MessageBuilder;
 import org.opentravel.release.NodeProperty;
 import org.opentravel.release.Utils;
 import org.opentravel.release.navigate.TreeNode;
@@ -68,10 +67,10 @@ public class ParamGroupTreeNode extends TreeNode<TLParamGroup> {
 		List<NodeProperty> props = new ArrayList<>();
 		TLParamGroup paramGroup = getEntity();
 		
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.name"), paramGroup.getName() ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.description"), getDescription( paramGroup ) ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.idGroup"), paramGroup.isIdGroup() + "" ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.facetRef"), getEntityDisplayName( paramGroup.getFacetRef() ) ) );
+		props.add( new NodeProperty( "name", () -> { return paramGroup.getName(); } ) );
+		props.add( new NodeProperty( "description", () -> { return getDescription( paramGroup ); } ) );
+		props.add( new NodeProperty( "idGroup", () -> { return paramGroup.isIdGroup() + ""; } ) );
+		props.add( new NodeProperty( "facetRef", () -> { return getEntityDisplayName( paramGroup.getFacetRef() ); } ) );
 		return props;
 	}
 

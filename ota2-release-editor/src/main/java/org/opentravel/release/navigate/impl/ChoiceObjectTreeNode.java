@@ -19,7 +19,6 @@ package org.opentravel.release.navigate.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opentravel.release.MessageBuilder;
 import org.opentravel.release.NodeProperty;
 import org.opentravel.release.Utils;
 import org.opentravel.release.navigate.TreeNode;
@@ -69,10 +68,10 @@ public class ChoiceObjectTreeNode extends TreeNode<TLChoiceObject> {
 		List<NodeProperty> props = new ArrayList<>();
 		TLChoiceObject choice = getEntity();
 		
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.name"), choice.getName() ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.description"), getDescription( choice ) ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.extends"), getExtensionName( choice ) ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.notExtendable"), choice.isNotExtendable() + "" ) );
+		props.add( new NodeProperty( "name", () -> { return choice.getName(); } ) );
+		props.add( new NodeProperty( "description", () -> { return getDescription( choice ); } ) );
+		props.add( new NodeProperty( "extends", () -> { return getExtensionName( choice ); } ) );
+		props.add( new NodeProperty( "notExtendable", () -> { return choice.isNotExtendable() + ""; } ) );
 		return props;
 	}
 

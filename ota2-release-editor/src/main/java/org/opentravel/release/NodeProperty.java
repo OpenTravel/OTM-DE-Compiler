@@ -27,12 +27,18 @@ public class NodeProperty {
 	/**
 	 * Constructor that specifies the property name and value.
 	 * 
-	 * @param name  the property name
-	 * @param value  the value of the property
+	 * @param propertyNameKey  the resource bundle key for the property name
+	 * @param valueProvider  provides the value for the node property
 	 */
-	public NodeProperty(String name, String value) {
-		this.name = name;
-		this.value = value;
+	public NodeProperty(String propertyNameKey, ValueProvider valueProvider) {
+		this.name = MessageBuilder.formatMessage( "propertyName." + propertyNameKey );
+		
+		try {
+			this.value = valueProvider.getValue();
+			
+		} catch (Throwable t) {
+			this.value = "";
+		}
 	}
 	
 	/**
@@ -51,6 +57,15 @@ public class NodeProperty {
 	 */
 	public String getValue() {
 		return value;
+	}
+	
+	/**
+	 * Interface used to provide a value for the node property.
+	 */
+	public static interface ValueProvider {
+		
+		public String getValue();
+		
 	}
 	
 }

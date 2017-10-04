@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.opentravel.release.MessageBuilder;
 import org.opentravel.release.NodeProperty;
 import org.opentravel.release.Utils;
 import org.opentravel.release.navigate.TreeNode;
@@ -68,12 +67,12 @@ public class ElementTreeNode extends TreeNode<TLProperty> {
 		List<NodeProperty> props = new ArrayList<>();
 		TLProperty element = getEntity();
 		
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.name"), element.getName() ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.description"), getDescription( element ) ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.type"), getEntityDisplayName( element.getType() ) ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.isReference"), element.isReference() + "" ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.repeat"), element.getRepeat() + "" ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.mandatory"), element.isMandatory() + "" ) );
+		props.add( new NodeProperty( "name", () -> { return element.getName(); } ) );
+		props.add( new NodeProperty( "description", () -> { return getDescription( element ); } ) );
+		props.add( new NodeProperty( "type", () -> { return getEntityDisplayName( element.getType() ); } ) );
+		props.add( new NodeProperty( "isReference", () -> { return element.isReference() + ""; } ) );
+		props.add( new NodeProperty( "repeat", () -> { return element.getRepeat() + ""; } ) );
+		props.add( new NodeProperty( "mandatory", () -> { return element.isMandatory() + ""; } ) );
 		return props;
 	}
 

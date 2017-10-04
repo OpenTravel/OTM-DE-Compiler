@@ -91,16 +91,15 @@ public class AbstractFacetTreeNode<E extends TLAbstractFacet> extends TreeNode<E
 		List<NodeProperty> props = new ArrayList<>();
 		TLAbstractFacet facet = getEntity();
 		
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.facetType"),
-				MessageBuilder.formatMessage( facet.getFacetType().toString() ) ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.description"), getDescription( facet ) ) );
+		props.add( new NodeProperty( "name", () -> { return MessageBuilder.formatMessage( facet.getFacetType().toString() ); } ) );
+		props.add( new NodeProperty( "description", () -> { return getDescription( facet ); } ) );
 		
 		if (facet instanceof TLContextualFacet) {
 			TLContextualFacet ctxFacet = (TLContextualFacet) facet;
 			
-			props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.localFacet"), ctxFacet.isLocalFacet() + "" ) );
-			props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.facetOwner"), getEntityDisplayName( ctxFacet.getOwningEntity() ) ) );
-			props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.owningLibrary"), getLibraryDisplayName( ctxFacet.getOwningLibrary() ) ) );
+			props.add( new NodeProperty( "localFacet", () -> { return ctxFacet.isLocalFacet() + ""; } ) );
+			props.add( new NodeProperty( "facetOwner", () -> { return getEntityDisplayName( ctxFacet.getOwningEntity() ); } ) );
+			props.add( new NodeProperty( "owningLibrary", () -> { return getLibraryDisplayName( ctxFacet.getOwningLibrary() ); } ) );
 		}
 		return props;
 	}

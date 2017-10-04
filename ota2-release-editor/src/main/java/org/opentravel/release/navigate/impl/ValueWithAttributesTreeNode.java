@@ -19,7 +19,6 @@ package org.opentravel.release.navigate.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opentravel.release.MessageBuilder;
 import org.opentravel.release.NodeProperty;
 import org.opentravel.release.Utils;
 import org.opentravel.release.navigate.TreeNode;
@@ -69,9 +68,9 @@ public class ValueWithAttributesTreeNode extends TreeNode<TLValueWithAttributes>
 		List<NodeProperty> props = new ArrayList<>();
 		TLValueWithAttributes vwa = getEntity();
 		
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.name"), vwa.getName() ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.description"), getDescription( vwa ) ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.parentType"), getEntityDisplayName( vwa.getParentType() ) ) );
+		props.add( new NodeProperty( "name", () -> { return vwa.getName(); } ) );
+		props.add( new NodeProperty( "description", () -> { return getDescription( vwa ); } ) );
+		props.add( new NodeProperty( "parentType", () -> { return getEntityDisplayName( vwa.getParentType() ); } ) );
 		return props;
 	}
 

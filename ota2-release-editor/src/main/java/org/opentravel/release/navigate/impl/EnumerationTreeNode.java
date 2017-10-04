@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.opentravel.release.MessageBuilder;
 import org.opentravel.release.NodeProperty;
 import org.opentravel.release.Utils;
 import org.opentravel.release.navigate.TreeNode;
@@ -88,11 +87,10 @@ public abstract class EnumerationTreeNode<E extends TLAbstractEnumeration> exten
 		List<NodeProperty> props = new ArrayList<>();
 		TLAbstractEnumeration enumeration = getEntity();
 		
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.name"), enumeration.getName() ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.enumType"),
-				(enumeration instanceof TLOpenEnumeration) ? "Open" : "Closed" ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.description"), getDescription( enumeration ) ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.extends"), getExtensionName( enumeration ) ) );
+		props.add( new NodeProperty( "name", () -> { return enumeration.getName(); } ) );
+		props.add( new NodeProperty( "enumType",() -> { return (enumeration instanceof TLOpenEnumeration) ? "Open" : "Closed"; } ) );
+		props.add( new NodeProperty( "description", () -> { return getDescription( enumeration ); } ) );
+		props.add( new NodeProperty( "extends", () -> { return getExtensionName( enumeration ); } ) );
 		return props;
 	}
 

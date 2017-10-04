@@ -19,7 +19,6 @@ package org.opentravel.release.navigate.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opentravel.release.MessageBuilder;
 import org.opentravel.release.NodeProperty;
 import org.opentravel.release.Utils;
 import org.opentravel.release.navigate.TreeNode;
@@ -70,8 +69,8 @@ public class ExtensionPointFacetTreeNode extends TreeNode<TLExtensionPointFacet>
 		List<NodeProperty> props = new ArrayList<>();
 		TLExtensionPointFacet epf = getEntity();
 		
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.extends"), getExtensionName( epf ) ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.description"), getDescription( epf ) ) );
+		props.add( new NodeProperty( "extends", () -> { return getExtensionName( epf ); } ) );
+		props.add( new NodeProperty( "description", () -> { return getDescription( epf ); } ) );
 		return props;
 	}
 

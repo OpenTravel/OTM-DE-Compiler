@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.opentravel.release.MessageBuilder;
 import org.opentravel.release.NodeProperty;
 import org.opentravel.release.Utils;
 import org.opentravel.release.navigate.TreeNode;
@@ -68,37 +67,37 @@ public class SimpleTreeNode extends TreeNode<TLSimple> {
 		List<NodeProperty> props = new ArrayList<>();
 		TLSimple simple = getEntity();
 		
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.name"), simple.getName() ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.description"), getDescription( simple ) ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.parentType"), getEntityDisplayName( simple.getParentType() ) ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.listTypeInd"), simple.isListTypeInd() + "" ) );
+		props.add( new NodeProperty( "name", () -> { return simple.getName(); } ) );
+		props.add( new NodeProperty( "description", () -> { return getDescription( simple ); } ) );
+		props.add( new NodeProperty( "parentType", () -> { return getEntityDisplayName( simple.getParentType() ); } ) );
+		props.add( new NodeProperty( "listTypeInd", () -> { return simple.isListTypeInd() + ""; } ) );
 		
 		if (simple.getPattern() != null) {
-			props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.pattern"), simple.getPattern() ) );
+			props.add( new NodeProperty( "pattern", () -> { return simple.getPattern(); } ) );
 		}
 		if (simple.getMinLength() >= 0) {
-			props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.minLength"), simple.getMinLength() + "" ) );
+			props.add( new NodeProperty( "minLength", () -> { return simple.getMinLength() + ""; } ) );
 		}
 		if (simple.getMaxLength() >= 0) {
-			props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.maxLength"), simple.getMaxLength() + "" ) );
+			props.add( new NodeProperty( "maxLength", () -> { return simple.getMaxLength() + ""; } ) );
 		}
 		if (simple.getFractionDigits() >= 0) {
-			props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.fractionDigits"), simple.getFractionDigits() + "" ) );
+			props.add( new NodeProperty( "fractionDigits", () -> { return simple.getFractionDigits() + ""; } ) );
 		}
 		if (simple.getTotalDigits() >= 0) {
-			props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.totalDigits"), simple.getTotalDigits() + "" ) );
+			props.add( new NodeProperty( "totalDigits", () -> { return simple.getTotalDigits() + ""; } ) );
 		}
 		if (simple.getMinInclusive() != null) {
-			props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.minInclusive"), simple.getMinInclusive() + "" ) );
+			props.add( new NodeProperty( "minInclusive", () -> { return simple.getMinInclusive() + ""; } ) );
 		}
 		if (simple.getMaxInclusive() != null) {
-			props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.maxInclusive"), simple.getMaxInclusive() + "" ) );
+			props.add( new NodeProperty( "maxInclusive", () -> { return simple.getMaxInclusive() + ""; } ) );
 		}
 		if (simple.getMinExclusive() != null) {
-			props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.minExclusive"), simple.getMinExclusive() + "" ) );
+			props.add( new NodeProperty( "minExclusive", () -> { return simple.getMinExclusive() + ""; } ) );
 		}
 		if (simple.getMaxExclusive() != null) {
-			props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.maxExclusive"), simple.getMaxExclusive() + "" ) );
+			props.add( new NodeProperty( "maxExclusive", () -> { return simple.getMaxExclusive() + ""; } ) );
 		}
 		return props;
 	}

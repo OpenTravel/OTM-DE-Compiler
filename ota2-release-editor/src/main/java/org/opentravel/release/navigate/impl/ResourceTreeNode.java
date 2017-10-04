@@ -19,7 +19,6 @@ package org.opentravel.release.navigate.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opentravel.release.MessageBuilder;
 import org.opentravel.release.NodeProperty;
 import org.opentravel.release.Utils;
 import org.opentravel.release.navigate.TreeNode;
@@ -71,13 +70,13 @@ public class ResourceTreeNode extends TreeNode<TLResource> {
 		List<NodeProperty> props = new ArrayList<>();
 		TLResource resource = getEntity();
 		
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.name"), resource.getName() ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.description"), getDescription( resource ) ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.extends"), getExtensionName( resource ) ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.abstract"), resource.isAbstract() + "" ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.basePath"), resource.getBasePath() ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.firstClass"), resource.isFirstClass() + "" ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.businessObject"), getEntityDisplayName( resource.getBusinessObjectRef() ) ) );
+		props.add( new NodeProperty( "name", () -> { return resource.getName(); } ) );
+		props.add( new NodeProperty( "description", () -> { return getDescription( resource ); } ) );
+		props.add( new NodeProperty( "extends", () -> { return getExtensionName( resource ); } ) );
+		props.add( new NodeProperty( "abstract", () -> { return resource.isAbstract() + ""; } ) );
+		props.add( new NodeProperty( "basePath", () -> { return resource.getBasePath(); } ) );
+		props.add( new NodeProperty( "firstClass", () -> { return resource.isFirstClass() + ""; } ) );
+		props.add( new NodeProperty( "businessObject", () -> { return getEntityDisplayName( resource.getBusinessObjectRef() ); } ) );
 		return props;
 	}
 

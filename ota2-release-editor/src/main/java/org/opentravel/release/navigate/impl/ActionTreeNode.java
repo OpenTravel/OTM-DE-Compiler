@@ -19,7 +19,6 @@ package org.opentravel.release.navigate.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opentravel.release.MessageBuilder;
 import org.opentravel.release.NodeProperty;
 import org.opentravel.release.Utils;
 import org.opentravel.release.navigate.TreeNode;
@@ -68,9 +67,9 @@ public class ActionTreeNode extends TreeNode<TLAction> {
 		List<NodeProperty> props = new ArrayList<>();
 		TLAction action = getEntity();
 		
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.actionId"), action.getActionId() ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.description"), getDescription( action ) ) );
-		props.add( new NodeProperty( MessageBuilder.formatMessage("propertyName.commonAction"), action.isCommonAction() + "" ) );
+		props.add( new NodeProperty( "actionId", () -> { return action.getActionId(); } ) );
+		props.add( new NodeProperty( "description", () -> { return getDescription( action ); } ) );
+		props.add( new NodeProperty( "commonAction", () -> { return action.isCommonAction() + ""; } ) );
 		return props;
 	}
 
