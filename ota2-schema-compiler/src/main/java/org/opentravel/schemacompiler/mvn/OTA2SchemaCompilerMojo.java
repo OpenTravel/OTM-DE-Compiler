@@ -326,19 +326,19 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
     }
 
 	/**
-	 * @see org.opentravel.schemacompiler.task.CompileAllTaskOptions#isCompileSwagger()
-	 */
-	@Override
-	public boolean isCompileSwagger() {
-		return compileSwagger;
-	}
-	
-	/**
 	 * @see org.opentravel.schemacompiler.task.CompileAllTaskOptions#isCompileHtml()
 	 */
 	@Override
 	public boolean isCompileHtml() {
 		return compileHtml;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.task.CompileAllTaskOptions#isCompileSwagger()
+	 */
+	@Override
+	public boolean isCompileSwagger() {
+		return compileSwagger;
 	}
 
 	/**
