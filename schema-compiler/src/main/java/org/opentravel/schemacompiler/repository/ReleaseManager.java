@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.opentravel.ns.ota2.release_v01_00.ReleaseStatus;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
@@ -502,6 +503,22 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
     		throw new IllegalStateException("The release is already managed by a remote repository.");
     	}
     	
+    	// Reload the release model just to be sure it is in-sync and contains no errors
+    	try {
+        	ValidationFindings findings = new ValidationFindings();
+        	
+			loadReleaseModel(findings);
+			
+			if (findings.hasFinding( FindingType.ERROR )) {
+	    		throw new RepositoryException(
+	    				"Unable to publish the release because it contains validation errors: " +
+	    						releaseFile.getName());
+			}
+			
+		} catch (LibraryLoaderException e) {
+    		throw new RepositoryException("Error refreshing release model: " + releaseFile.getName(), e);
+		}
+    	
     	// Backup the file locally before publishing
     	try {
     		ReleaseFileUtils.createBackupFile( releaseFile );
@@ -512,16 +529,48 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
     	
     	// Update the release's status to BETA or FULL
     	try {
-        	ReleaseStatus newStatus = (release.getDefaultEffectiveDate() == null) ? ReleaseStatus.FULL : ReleaseStatus.BETA;
+    		Map<ReleaseMember,TLLibraryStatus> statusMap = new HashMap<>();
+        	ReleaseStatus newStatus = ReleaseStatus.FULL;
         	
-        	if (newStatus != ReleaseStatus.BETA) {
+    		for (ReleaseMember member : release.getAllMembers()) {
+    			AbstractLibrary _library = getLibrary( member );
+    			
+    			if (_library instanceof TLLibrary) {
+    				TLLibrary library = (TLLibrary) _library;
+    				
+    				switch (library.getStatus()) {
+						case DRAFT:
+						case UNDER_REVIEW:
+							newStatus = ReleaseStatus.BETA;
+							break;
+						case FINAL:
+						case OBSOLETE:
+							// FINAL libraries will revert to the latest commit
+							member.setEffectiveDate( null );
+							break;
+    				}
+    				statusMap.put( member, library.getStatus() );
+    				
+    			} else if (_library == null) {
+    	    		throw new RepositoryException(
+    	    				"Unable to publish the release because one or more libraries could not be loaded: " +
+    	    						releaseFile.getName());
+    			}
+    		}
+        	
+        	// When we publish a beta release, any null effective dates (latest commit) for
+    		// DRAFT libraries are set to the current date/time of the publication.
+    		if (newStatus == ReleaseStatus.BETA) {
+            	Date currentDateTime = new Date();
+            	
         		for (ReleaseMember member : release.getAllMembers()) {
-        			if (member.getEffectiveDate() != null) {
-        				newStatus = ReleaseStatus.BETA;
-        				break;
+        			if ((statusMap.get( member ) == TLLibraryStatus.DRAFT)
+        					&& (member.getEffectiveDate() == null)) {
+        				member.setEffectiveDate( currentDateTime );
         			}
         		}
-        	}
+    		}
+    		
         	release.setStatus( newStatus );
         	fileUtils.saveReleaseFile( release, false );
     		

@@ -119,7 +119,7 @@ public class OTMReleaseController {
 	
 	public static final String FXML_FILE = "/ota2-release-editor.fxml";
 	
-	private static final DateFormat dateTimeFormat = new SimpleDateFormat( "d MMM yyyy HH:mm:ss" );
+	private static final DateFormat dateTimeFormat = new SimpleDateFormat( "d MMM yyyy h:mm:ssa" );
 	private static final String SUBSTITUTION_GROUP_CHOICE = "Substitution Group";
 	private static final String BLANK_DATE_VALUE = "Latest Commit";
 	private static final String DEFAULT_SUFFIX = " (Release Default)";
@@ -686,6 +686,8 @@ public class OTMReleaseController {
 					referencedTableView.setItems(
 							FXCollections.observableList( releaseManager.getRelease().getReferencedMembers() ) );
 					modelDirty = false;
+					principalTableView.refresh();
+					referencedTableView.refresh();
 					updateControlStates();
 					updateModelTreeView();
 				}
@@ -1278,7 +1280,7 @@ public class OTMReleaseController {
 				(managedRelease ? " (Managed / Read-Only)" : "") );
 		releaseName.setText( (release == null) ? "" : release.getName() );
 		releaseBaseNamespace.setText( (release == null) ? "" : release.getBaseNamespace() );
-		releaseStatus.setText( (release == null) ? "" : release.getStatus().toString() );
+		releaseStatus.setText( (release == null) ? "" : MessageBuilder.formatMessage( release.getStatus().toString() ) );
 		releaseVersion.setText( (release == null) ? "" : release.getVersion() );
 		releaseDescription.setText( (release == null) ? "" : release.getDescription() );
 		defaultEffectiveDate.setLocalDateTime( effectiveDate );
@@ -1480,8 +1482,6 @@ public class OTMReleaseController {
 	 * @return String
 	 */
 	private String toDateString(RepositoryItemCommit commit) {
-		return toDateString( commit.getEffectiveOn() );
-		/*
 		StringBuilder dateStr = new StringBuilder();
 		String remarks = commit.getRemarks();
 		
@@ -1491,7 +1491,6 @@ public class OTMReleaseController {
 			dateStr.append(" (").append( remarks.trim() ).append(")");
 		}
 		return dateStr.toString();
-		*/
 	}
 	
 	/**
@@ -1702,7 +1701,7 @@ public class OTMReleaseController {
 		} );
 		libraryTreeView.getSelectionModel().selectedItemProperty().addListener( event -> {
 			TreeItem<TreeNode<?>> treeItem = libraryTreeView.getSelectionModel().getSelectedItem();
-			List<NodeProperty> nodeProps = treeItem.getValue().getProperties();
+			List<NodeProperty> nodeProps = (treeItem == null) ? Collections.emptyList() : treeItem.getValue().getProperties();
 			
 			propertyTableView.setItems( FXCollections.observableList( nodeProps ) );
 		});
@@ -1733,7 +1732,7 @@ public class OTMReleaseController {
 			AbstractLibrary library = releaseManager.getLibrary( nodeFeatures.getValue() );
 			TLLibraryStatus status = (library instanceof TLLibrary) ? ((TLLibrary) library).getStatus() : TLLibraryStatus.FINAL;
 			
-			return new ReadOnlyStringWrapper( status.toString() );
+			return new ReadOnlyStringWrapper( MessageBuilder.formatMessage( status.toString() ) );
 		});
 		principalDateColumn.setCellValueFactory( nodeFeatures -> {
 			return new ReadOnlyObjectWrapper<String>( toDateString( nodeFeatures.getValue().getEffectiveDate() ) );
@@ -1767,7 +1766,7 @@ public class OTMReleaseController {
 			AbstractLibrary library = releaseManager.getLibrary( nodeFeatures.getValue() );
 			TLLibraryStatus status = (library instanceof TLLibrary) ? ((TLLibrary) library).getStatus() : TLLibraryStatus.FINAL;
 			
-			return new ReadOnlyStringWrapper( status.toString() );
+			return new ReadOnlyStringWrapper( MessageBuilder.formatMessage( status.toString() ) );
 		});
 		referencedDateColumn.setCellValueFactory( nodeFeatures -> {
 			return new ReadOnlyObjectWrapper<String>( toDateString( nodeFeatures.getValue().getEffectiveDate() ) );

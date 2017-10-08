@@ -31,6 +31,7 @@ import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -41,6 +42,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
@@ -1772,8 +1774,12 @@ public class RemoteRepositoryClient implements RemoteRepository {
 			contentUrl.append( "&version=" ).append( URLEncoder.encode( item.getVersion(), "UTF-8" ) );
 			contentUrl.append( "&filename=" ).append( URLEncoder.encode( item.getFilename(), "UTF-8" ) );
 			
+			effectiveDate = DateUtils.truncate( effectiveDate, Calendar.SECOND );
+			
 			for (RepositoryItemCommit commit : history.getCommitHistory()) {
-				if ((effectiveDate == null) || effectiveDate.before( commit.getEffectiveOn() )) {
+				Date commitDate = DateUtils.truncate( commit.getEffectiveOn(), Calendar.SECOND );
+				
+				if ((effectiveDate == null) || !commitDate.after( effectiveDate )) {
 					contentUrl.append( "&commit=" ).append( commit.getCommitNumber() );
 					break;
 				}

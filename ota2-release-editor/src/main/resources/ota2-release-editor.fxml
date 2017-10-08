@@ -481,7 +481,7 @@
                         <KeyCodeCombination alt="UP" code="S" control="DOWN" meta="UP" shift="DOWN" shortcut="UP" />
                      </accelerator>
                   </MenuItem>
-                  <MenuItem fx:id="compileMenu" mnemonicParsing="false" onAction="#compileRelease" text="Compile..." />
+                  <MenuItem fx:id="compileMenu" mnemonicParsing="false" onAction="#compileRelease" text="Compile" />
 	              <MenuItem fx:id="closeMenu" mnemonicParsing="false" onAction="#closeReleaseFile" text="Close">
                      <accelerator>
                         <KeyCodeCombination alt="UP" code="W" control="DOWN" meta="UP" shift="UP" shortcut="UP" />

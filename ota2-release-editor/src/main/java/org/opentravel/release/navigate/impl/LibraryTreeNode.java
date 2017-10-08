@@ -19,6 +19,7 @@ package org.opentravel.release.navigate.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opentravel.release.MessageBuilder;
 import org.opentravel.release.NodeProperty;
 import org.opentravel.release.Utils;
 import org.opentravel.release.navigate.TreeNode;
@@ -74,6 +75,7 @@ public class LibraryTreeNode extends TreeNode<TLLibrary> {
 		props.add( new NodeProperty( "namespace", () -> { return library.getNamespace(); } ) );
 		props.add( new NodeProperty( "prefix", () -> { return library.getPrefix(); } ) );
 		props.add( new NodeProperty( "version", () -> { return library.getVersion(); } ) );
+		props.add( new NodeProperty( "status", () -> { return MessageBuilder.formatMessage( library.getStatus().toString() ); } ) );
 		props.add( new NodeProperty( "comments", () -> { return library.getComments(); } ) );
 		return props;
 	}
