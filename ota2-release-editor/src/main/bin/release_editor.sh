@@ -16,4 +16,4 @@
 #
 JVM_OPTS=-Xms512m -Xmx4g
 
-java $JVM_OPTS -jar ota2-resource-editor.jar "$@"
+java $JVM_OPTS -jar ota2-release-editor.jar "$@"

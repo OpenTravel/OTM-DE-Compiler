@@ -27,6 +27,7 @@ import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLComplexTypeBase;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLFacetType;
@@ -64,7 +65,10 @@ public class EntityFacetSelection {
 			realEntityType = ((TLAlias) realEntityType).getOwningEntity();
 		}
 		
-		if (realEntityType instanceof TLFacet) {
+		if (realEntityType instanceof TLContextualFacet) {
+			this.facetOwner = (TLFacetOwner) realEntityType;
+			
+		} else if (realEntityType instanceof TLFacet) {
 			// If the entity is a facet, then it will be the only member of the facet list
 			TLFacet facet = (TLFacet) realEntityType;
 			String facetName = HelperUtils.getDisplayName( facet, false );
@@ -85,7 +89,10 @@ public class EntityFacetSelection {
 		}
 		
 		// Retrieve the facet list based upon the entity type
-		if (facetOwner instanceof TLComplexTypeBase) {
+		if (facetOwner instanceof TLContextualFacet) {
+			facetList = FacetCodegenUtils.getAvailableFacets( (TLContextualFacet) facetOwner );
+			
+		} else if (facetOwner instanceof TLComplexTypeBase) {
 			facetList = FacetCodegenUtils.getAvailableFacets( (TLComplexTypeBase) facetOwner );
 			
 		} else if (facetOwner instanceof TLOperation) {

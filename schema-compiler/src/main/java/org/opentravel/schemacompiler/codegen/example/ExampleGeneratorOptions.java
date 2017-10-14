@@ -22,7 +22,6 @@ import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
-import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLOperation;
 
 /**
@@ -88,9 +87,6 @@ public class ExampleGeneratorOptions {
     	
     	if (entity instanceof TLOperation) {
     		throw new IllegalArgumentException("Operation facets are not part of substitution groups.");
-    	}
-    	if (preferredFacet.getFacetType() == TLFacetType.QUERY) {
-    		throw new IllegalArgumentException("Query facets are not part of the substitution group for a business object.");
     	}
     	preferredFacetMap.put( entityName, preferredFacet );
     }

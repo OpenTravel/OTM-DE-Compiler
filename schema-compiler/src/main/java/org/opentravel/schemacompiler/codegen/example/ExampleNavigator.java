@@ -43,6 +43,7 @@ import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
@@ -368,16 +369,26 @@ public class ExampleNavigator {
      *            the facet entity to visit and navigate
      */
     public void navigateFacet(TLFacet facet) {
+    	TLFacet navFacet = facet;
+    	
         try {
-            incrementRecursionCount(facet);
+        	if (facet instanceof TLContextualFacet) {
+        		TLFacet preferredFacet = options.getPreferredFacet( (TLContextualFacet) facet );
+        		
+        		if (preferredFacet != null) {
+        			navFacet = preferredFacet;
+        		}
+        	}
+        	
+            incrementRecursionCount(navFacet);
 
-            if (canVisit(facet)) {
-                visitor.startFacet(facet);
-                navigateFacetMembers(facet);
-                visitor.endFacet(facet);
+            if (canVisit(navFacet)) {
+                visitor.startFacet(navFacet);
+                navigateFacetMembers(navFacet);
+                visitor.endFacet(navFacet);
             }
         } finally {
-            decrementRecursionCount(facet);
+            decrementRecursionCount(navFacet);
         }
     }
 

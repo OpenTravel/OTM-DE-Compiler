@@ -43,6 +43,7 @@ import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
@@ -237,6 +238,13 @@ public class ExampleHelperController {
 			for (TLLibrary library : model.getUserDefinedLibraries()) {
 				for (TLBusinessObject bo : library.getBusinessObjectTypes()) {
 					selectableObjects.add( new OTMObjectChoice( bo ) );
+					
+					for (TLContextualFacet facet : bo.getQueryFacets()) {
+						selectableObjects.add( new OTMObjectChoice( facet ) );
+					}
+					for (TLContextualFacet facet : bo.getUpdateFacets()) {
+						selectableObjects.add( new OTMObjectChoice( facet ) );
+					}
 				}
 				for (TLCoreObject core : library.getCoreObjectTypes()) {
 					selectableObjects.add( new OTMObjectChoice( core ) );

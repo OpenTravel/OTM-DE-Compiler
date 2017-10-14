@@ -30,11 +30,11 @@
 	<fileSets>
 		<fileSet>
 			<directory>${project.basedir}/src/main/bin</directory>
-			<outputDirectory>OTM_ResourceApp</outputDirectory>
+			<outputDirectory>OTM_ReleaseEditor</outputDirectory>
 		</fileSet>
 		<fileSet>
 			<directory>${project.build.directory}/jfx/app</directory>
-			<outputDirectory>OTM_ResourceApp</outputDirectory>
+			<outputDirectory>OTM_ReleaseEditor</outputDirectory>
 		</fileSet>
 	</fileSets>
 	

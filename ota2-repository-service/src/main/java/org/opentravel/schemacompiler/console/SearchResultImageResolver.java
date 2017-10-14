@@ -56,13 +56,41 @@ public class SearchResultImageResolver {
 	private static final String UNKNOWN_IMAGE = "unknown.png";
 	
 	/**
+	 * Returns the filename of the image for the given object.
+	 * 
+	 * @param obj  the object for which to return an icon image filename
+	 * @return String
+	 */
+	public String getIconImage(Object obj) {
+		String imageFilename;
+		
+		if (obj instanceof SearchResult) {
+			imageFilename = _getIconImage( (SearchResult<?>) obj );
+			
+		} else if (obj instanceof NamedEntity) {
+			imageFilename = _getIconImage( (NamedEntity) obj );
+			
+		} else if (obj instanceof NamespaceItem) {
+			imageFilename = _getIconImage( (NamespaceItem) obj );
+			
+		} else if (obj == null) {
+			throw new NullPointerException("Object cannot be null.");
+			
+		} else {
+			throw new IllegalArgumentException(
+					"Unable to resolve icon image for object type: " + obj.getClass().getName());
+		}
+		return imageFilename;
+	}
+	
+	/**
 	 * Returns the filename of the image for the given search result item.
 	 * 
 	 * @param resultItem  the search result item for which to return an icon image
 	 * @return String
 	 */
-	public String getIconImage(SearchResult<?> resultItem) {
-		return getIconImage( resultItem.getEntityType() );
+	private String _getIconImage(SearchResult<?> resultItem) {
+		return _getIconImage( resultItem.getEntityType() );
 	}
 	
 	/**
@@ -71,8 +99,8 @@ public class SearchResultImageResolver {
 	 * @param entity  the OTM entity for which to return an icon image
 	 * @return String
 	 */
-	public String getIconImage(NamedEntity entity) {
-		return getIconImage( entity.getClass() );
+	private String _getIconImage(NamedEntity entity) {
+		return _getIconImage( entity.getClass() );
 	}
 	
 	/**
@@ -81,13 +109,13 @@ public class SearchResultImageResolver {
 	 * @param resultItem  the namespace item for which to return an icon image
 	 * @return String
 	 */
-	public String getIconImage(NamespaceItem item) {
+	private String _getIconImage(NamespaceItem item) {
 		Class<?> itemType = TLLibrary.class;
 		
 		if (RepositoryItemType.RELEASE.isItemType( item.getFilename() )) {
 			itemType = Release.class;
 		}
-		return getIconImage( itemType );
+		return _getIconImage( itemType );
 	}
 	
 	/**
@@ -96,7 +124,7 @@ public class SearchResultImageResolver {
 	 * @param entityType  the OTM entity type for which to return an icon image
 	 * @return String
 	 */
-	private String getIconImage(Class<?> entityType) {
+	private String _getIconImage(Class<?> entityType) {
 		String imageFilename = imageMap.get( entityType );
 		
 		if (imageFilename == null) {
