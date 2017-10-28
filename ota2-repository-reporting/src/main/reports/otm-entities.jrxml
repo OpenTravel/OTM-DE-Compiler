@@ -1,0 +1,790 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.4.3.final using JasperReports Library version 6.4.3  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="otm-entities" pageWidth="792" pageHeight="612" orientation="Landscape" columnWidth="572" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="b1417fe8-ab7f-4f7e-a0ef-410d422a3e18">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OTM Repository Reports DB"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<subDataset name="entities_by_month" uuid="fe59cda7-7a18-430b-b137-56a1b3588a5e">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OTM Repository Reports DB"/>
+		<queryString language="SQL">
+			<![CDATA[select * from entities_by_month]]>
+		</queryString>
+		<field name="total_count" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="total_count"/>
+		</field>
+		<field name="resource_count" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="resource_count"/>
+		</field>
+		<field name="service_count" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="service_count"/>
+		</field>
+		<field name="business_object_count" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="business_object_count"/>
+		</field>
+		<field name="choice_object_count" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="choice_object_count"/>
+		</field>
+		<field name="core_object_count" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="core_object_count"/>
+		</field>
+		<field name="contextual_facet_count" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="contextual_facet_count"/>
+		</field>
+		<field name="epf_count" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="epf_count"/>
+		</field>
+		<field name="vwa_count" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="vwa_count"/>
+		</field>
+		<field name="open_enum_count" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="open_enum_count"/>
+		</field>
+		<field name="closed_enum_count" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="closed_enum_count"/>
+		</field>
+		<field name="simple_count" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="simple_count"/>
+		</field>
+		<field name="create_month" class="java.sql.Date">
+			<property name="com.jaspersoft.studio.field.label" value="create_month"/>
+		</field>
+	</subDataset>
+	<queryString language="SQL">
+		<![CDATA[select * from entities_by_library]]>
+	</queryString>
+	<field name="base_namespace" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="base_namespace"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="library"/>
+	</field>
+	<field name="library_name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="library_name"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="library"/>
+	</field>
+	<field name="total_count" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="total_count"/>
+	</field>
+	<field name="resource_count" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="resource_count"/>
+	</field>
+	<field name="service_count" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="service_count"/>
+	</field>
+	<field name="business_object_count" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="business_object_count"/>
+	</field>
+	<field name="choice_object_count" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="choice_object_count"/>
+	</field>
+	<field name="core_object_count" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="core_object_count"/>
+	</field>
+	<field name="contextual_facet_count" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="contextual_facet_count"/>
+	</field>
+	<field name="epf_count" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="epf_count"/>
+	</field>
+	<field name="vwa_count" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="vwa_count"/>
+	</field>
+	<field name="open_enum_count" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="open_enum_count"/>
+	</field>
+	<field name="closed_enum_count" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="closed_enum_count"/>
+	</field>
+	<field name="simple_count" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="simple_count"/>
+	</field>
+	<variable name="TODAY" class="java.util.Date">
+		<variableExpression><![CDATA[new Date()]]></variableExpression>
+	</variable>
+	<variable name="RESOURCE_COUNT" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{resource_count}]]></variableExpression>
+	</variable>
+	<variable name="SERVICE_COUNT" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{service_count}]]></variableExpression>
+	</variable>
+	<variable name="BUSINESS_OBJECT_COUNT" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{business_object_count}]]></variableExpression>
+	</variable>
+	<variable name="CHOICE_OBJECT_COUNT" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{choice_object_count}]]></variableExpression>
+	</variable>
+	<variable name="CORE_OBJECT_COUNT" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{core_object_count}]]></variableExpression>
+	</variable>
+	<variable name="CONTEXTUAL_FACET_COUNT" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{contextual_facet_count}]]></variableExpression>
+	</variable>
+	<variable name="VWA_COUNT" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{vwa_count}]]></variableExpression>
+	</variable>
+	<variable name="EPF_COUNT" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{epf_count}]]></variableExpression>
+	</variable>
+	<variable name="OPEN_ENUM_COUNT" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{open_enum_count}]]></variableExpression>
+	</variable>
+	<variable name="CLOSED_ENUM_COUNT" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{closed_enum_count}]]></variableExpression>
+	</variable>
+	<variable name="SIMPLE_COUNT" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{simple_count}]]></variableExpression>
+	</variable>
+	<variable name="TOTAL_COUNT" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{total_count}]]></variableExpression>
+	</variable>
+	<group name="base_namespace">
+		<groupExpression><![CDATA[$F{base_namespace}]]></groupExpression>
+	</group>
+	<group name="Group1">
+		<groupExpression><![CDATA[$F{base_namespace}]]></groupExpression>
+		<groupHeader>
+			<band height="20">
+				<textField>
+					<reportElement mode="Opaque" x="0" y="0" width="750" height="20" backcolor="#EBEBEB" uuid="b3d9182d-7e80-4f64-b3e1-0053b7ba84d7"/>
+					<textElement verticalAlignment="Middle">
+						<font size="11" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{base_namespace}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<title>
+		<band height="60" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="750" height="30" uuid="e78a0f5f-8358-4f3c-bb8d-85d3de1da9b0"/>
+				<textElement textAlignment="Center">
+					<font size="20" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Travelport OTM Repository]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="30" width="750" height="30" uuid="d917e74f-a0b6-4d52-8f0a-07b083258d15"/>
+				<textElement textAlignment="Center">
+					<font size="16"/>
+				</textElement>
+				<text><![CDATA[OTM Entity Types]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="90" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<staticText>
+				<reportElement x="0" y="60" width="230" height="20" uuid="b5abe8bf-99ba-4ea5-8fd0-913cd9f0ca95"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Library Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="230" y="0" width="40" height="80" uuid="56bfcdce-06ee-4036-a45d-8d272ca7e249">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle" rotation="Left">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Resources (REST)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="270" y="0" width="40" height="80" uuid="2d61ed67-b5cb-4abc-a65d-0c49574f7654">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle" rotation="Left">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Services (SOAP)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="310" y="0" width="40" height="80" uuid="8b1d0403-aec2-44f1-b4d9-8cf878e3b6df">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle" rotation="Left">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Business Objects]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="510" y="0" width="40" height="80" uuid="13ead616-ec0c-4216-abae-5e742aae1d7b">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle" rotation="Left">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Extension Point Facets]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="470" y="0" width="40" height="80" uuid="a38b3d33-7f68-49af-8ee9-29ee7fc56cce">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle" rotation="Left">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[VWAs]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="390" y="0" width="40" height="80" uuid="b4c7cf91-1dd4-4790-aba7-f890b4929490">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle" rotation="Left">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Core Objects]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="350" y="0" width="40" height="80" uuid="cd5474f9-887f-413f-a7fe-0d1c9a32854d">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle" rotation="Left">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Choice Objects]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="630" y="0" width="40" height="80" uuid="f94dde69-573d-41fb-b8cf-bf1c7ca755be">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle" rotation="Left">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Simple Types]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="590" y="0" width="40" height="80" uuid="21c9791d-eaed-45b4-b725-19f72fb13cd2">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle" rotation="Left">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Closed Enums]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="550" y="0" width="40" height="80" uuid="42c4553e-fdd6-4a74-b162-c659a67b07bb">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle" rotation="Left">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Open Enums]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="430" y="0" width="40" height="80" uuid="53ce2645-ea04-4af3-b1d8-bbd7d231fddc">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle" rotation="Left">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Contextual Facets]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="690" y="0" width="40" height="80" uuid="50a3f222-64b7-4fd9-aadd-d27f839560f7">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle" rotation="Left">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<textField>
+				<reportElement x="0" y="0" width="230" height="20" isPrintWhenDetailOverflows="true" uuid="1dd5f3c6-2d3f-4dba-9d8b-2fab8949615f">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{library_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="230" y="0" width="40" height="20" uuid="0fe3c47b-73c2-46c0-9ef2-f2e347e0754e">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None"/>
+				<textFieldExpression><![CDATA[$F{resource_count}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="630" y="0" width="40" height="20" uuid="8ad82062-fc5c-44eb-8604-e990174e2675">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{simple_count}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="590" y="0" width="40" height="20" uuid="8ace794b-e96c-4fd3-8f62-a35d0791d08b">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{closed_enum_count}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="550" y="0" width="40" height="20" uuid="a688747c-d0ad-42c7-aa51-39ed28be0682">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{open_enum_count}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="510" y="0" width="40" height="20" uuid="ee46850d-1212-44c7-a8ea-ed849421e103">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{epf_count}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="470" y="0" width="40" height="20" uuid="1113d044-be2d-4202-a1c9-844e96794a41">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{vwa_count}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="390" y="0" width="40" height="20" uuid="b824ab50-4954-4fb1-b2e4-0b3770952030">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{core_object_count}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="350" y="0" width="40" height="20" uuid="95c30721-966a-47f9-8c54-412e4d66ad96">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{choice_object_count}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="310" y="0" width="40" height="20" uuid="c028e880-b9f9-4b50-9e8b-85d5ff5c15b1">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{business_object_count}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="270" y="0" width="40" height="20" uuid="1274d6b8-761d-4f1f-8e9c-2678f66888bc">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{service_count}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="430" y="0" width="40" height="20" uuid="f5c24bf9-b8e7-46af-93b0-72db63b8c473">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{contextual_facet_count}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="690" y="0" width="40" height="20" uuid="ea586415-b9bd-4685-a1c7-75bf8a8631fb">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{total_count}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="20" splitType="Stretch">
+			<textField>
+				<reportElement x="470" y="0" width="100" height="20" uuid="ca2e9ca5-c5a7-47bc-a1ae-1bd5ac42c309"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("yyyy-M-d").format($V{TODAY})]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="280" y="0" width="290" height="20" uuid="0ba00ac2-9dbd-48d9-8b33-0d992b45e441">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" of " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="0" width="280" height="20" uuid="fd2f2b73-02c7-4444-8aba-eb116aa8e8a6">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="510" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<staticText>
+				<reportElement x="0" y="170" width="180" height="20" uuid="2ca0f9b3-331c-4d16-98a4-bb4297f8a0ac"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total Entity Counts ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="180" y="40" width="40" height="120" uuid="6ae7ca85-d6c5-44fd-8ed9-c61545fceb74">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle" rotation="Left">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Resources (REST)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="220" y="40" width="40" height="120" uuid="612bf965-b125-4cb2-b5f7-d52473aeb8f0">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle" rotation="Left">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Services (SOAP)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="260" y="40" width="40" height="120" uuid="c460cc80-1bc5-48b2-bb3d-ec7b3d76c808">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle" rotation="Left">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Business Objects]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="460" y="40" width="40" height="120" uuid="4d91c9f4-6c7d-47dc-a640-b053a6120a68">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle" rotation="Left">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Extension Point Facets]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="420" y="40" width="40" height="120" uuid="a9af3919-680a-425a-b298-1856b6d28794">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle" rotation="Left">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[VWAs]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="340" y="40" width="40" height="120" uuid="4c282241-cf37-4181-8428-ba4b217b514b">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle" rotation="Left">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Core Objects]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="300" y="40" width="40" height="120" uuid="25c8f4d1-d2f7-4cf0-af7b-4dc779b616a7">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle" rotation="Left">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Choice Objects]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="580" y="40" width="40" height="120" uuid="eae4be3b-3c50-4692-9d23-b025412d0fa2">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle" rotation="Left">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Simple Types]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="540" y="40" width="40" height="120" uuid="603ae78a-a0be-4082-aa2f-994f8edafc04">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle" rotation="Left">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Closed Enums]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="500" y="40" width="40" height="120" uuid="4c1a4a54-050f-4ad1-9a5c-d320bfa92c29">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle" rotation="Left">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Open Enums]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="380" y="40" width="40" height="120" uuid="52845f2b-53f8-4bce-9534-2bb944de02fc">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle" rotation="Left">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Contextual Facets]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="640" y="40" width="40" height="120" uuid="3f6dba1f-00ec-4643-8227-ed888eab609f">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle" rotation="Left">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Grand Total]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="180" y="170" width="40" height="20" uuid="bdca0ee5-d693-4a89-ab6f-f477f7bde0cb">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None">
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{RESOURCE_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="580" y="170" width="40" height="20" uuid="60eea0e2-ea99-4f87-ab9f-4e6bb0ed6a1b">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SIMPLE_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="540" y="170" width="40" height="20" uuid="b8da0742-c24b-4ded-831f-48b54cc26941">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{CLOSED_ENUM_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="500" y="170" width="40" height="20" uuid="55a8950c-f358-449b-bd11-c57dea8ddfde">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{OPEN_ENUM_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="460" y="170" width="40" height="20" uuid="e5c5e28c-f104-47b3-bba1-e3fe0f67daf9">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{EPF_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="420" y="170" width="40" height="20" uuid="e64035f0-9cb8-451b-a15c-213789f8ca00">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{VWA_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="340" y="170" width="40" height="20" uuid="7ae4bf10-435c-436e-8296-837cabcaf189">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{CORE_OBJECT_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="300" y="170" width="40" height="20" uuid="9a719ff6-4277-4bd5-b22f-979a3d829998">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{CHOICE_OBJECT_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="260" y="170" width="40" height="20" uuid="6806495b-012e-4c2f-ab8a-0d7c13b35e56">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{BUSINESS_OBJECT_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="220" y="170" width="40" height="20" uuid="2e2da5da-bfb3-4afd-920f-5a48869af1e6">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SERVICE_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="380" y="170" width="40" height="20" uuid="d37cfa0a-526e-401e-8aac-19cc302d2424">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{CONTEXTUAL_FACET_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="640" y="170" width="40" height="20" uuid="7eabaad2-c4e8-43e2-b3e4-9af33643fa4d">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOTAL_COUNT}]]></textFieldExpression>
+			</textField>
+			<stackedBarChart>
+				<chart evaluationTime="Report">
+					<reportElement x="0" y="210" width="750" height="300" uuid="0194243f-81b1-49b6-98da-fd2f4f783800"/>
+					<chartTitle/>
+					<chartSubtitle/>
+					<chartLegend position="Right"/>
+				</chart>
+				<categoryDataset>
+					<dataset>
+						<datasetRun subDataset="entities_by_month" uuid="1074643e-1951-4909-8f4a-c769e421ac54">
+							<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+						</datasetRun>
+					</dataset>
+					<categorySeries>
+						<seriesExpression><![CDATA["Resources (REST)"]]></seriesExpression>
+						<categoryExpression><![CDATA[new SimpleDateFormat("MMM-yyyy").format($F{create_month})]]></categoryExpression>
+						<valueExpression><![CDATA[$F{resource_count}]]></valueExpression>
+					</categorySeries>
+					<categorySeries>
+						<seriesExpression><![CDATA["Services (SOAP)"]]></seriesExpression>
+						<categoryExpression><![CDATA[new SimpleDateFormat("MMM-yyyy").format($F{create_month})]]></categoryExpression>
+						<valueExpression><![CDATA[$F{service_count}]]></valueExpression>
+					</categorySeries>
+					<categorySeries>
+						<seriesExpression><![CDATA["Business Objects"]]></seriesExpression>
+						<categoryExpression><![CDATA[new SimpleDateFormat("MMM-yyyy").format($F{create_month})]]></categoryExpression>
+						<valueExpression><![CDATA[$F{business_object_count}]]></valueExpression>
+					</categorySeries>
+					<categorySeries>
+						<seriesExpression><![CDATA["Choice Objects"]]></seriesExpression>
+						<categoryExpression><![CDATA[new SimpleDateFormat("MMM-yyyy").format($F{create_month})]]></categoryExpression>
+						<valueExpression><![CDATA[$F{choice_object_count}]]></valueExpression>
+					</categorySeries>
+					<categorySeries>
+						<seriesExpression><![CDATA["Core Objects"]]></seriesExpression>
+						<categoryExpression><![CDATA[new SimpleDateFormat("MMM-yyyy").format($F{create_month})]]></categoryExpression>
+						<valueExpression><![CDATA[$F{core_object_count}]]></valueExpression>
+					</categorySeries>
+					<categorySeries>
+						<seriesExpression><![CDATA["Contextual Facets"]]></seriesExpression>
+						<categoryExpression><![CDATA[new SimpleDateFormat("MMM-yyyy").format($F{create_month})]]></categoryExpression>
+						<valueExpression><![CDATA[$F{contextual_facet_count}]]></valueExpression>
+					</categorySeries>
+					<categorySeries>
+						<seriesExpression><![CDATA["VWA's"]]></seriesExpression>
+						<categoryExpression><![CDATA[new SimpleDateFormat("MMM-yyyy").format($F{create_month})]]></categoryExpression>
+						<valueExpression><![CDATA[$F{vwa_count}]]></valueExpression>
+					</categorySeries>
+					<categorySeries>
+						<seriesExpression><![CDATA["Extension Point Facets"]]></seriesExpression>
+						<categoryExpression><![CDATA[new SimpleDateFormat("MMM-yyyy").format($F{create_month})]]></categoryExpression>
+						<valueExpression><![CDATA[$F{epf_count}]]></valueExpression>
+					</categorySeries>
+					<categorySeries>
+						<seriesExpression><![CDATA["Open Enums"]]></seriesExpression>
+						<categoryExpression><![CDATA[new SimpleDateFormat("MMM-yyyy").format($F{create_month})]]></categoryExpression>
+						<valueExpression><![CDATA[$F{open_enum_count}]]></valueExpression>
+					</categorySeries>
+					<categorySeries>
+						<seriesExpression><![CDATA["Closed Enums"]]></seriesExpression>
+						<categoryExpression><![CDATA[new SimpleDateFormat("MMM-yyyy").format($F{create_month})]]></categoryExpression>
+						<valueExpression><![CDATA[$F{closed_enum_count}]]></valueExpression>
+					</categorySeries>
+					<categorySeries>
+						<seriesExpression><![CDATA["Simple Types"]]></seriesExpression>
+						<categoryExpression><![CDATA[new SimpleDateFormat("MMM-yyyy").format($F{create_month})]]></categoryExpression>
+						<valueExpression><![CDATA[$F{simple_count}]]></valueExpression>
+					</categorySeries>
+				</categoryDataset>
+				<barPlot>
+					<plot labelRotation="90.0"/>
+					<itemLabel/>
+					<categoryAxisFormat labelRotation="90.0">
+						<axisFormat labelColor="#000000" tickLabelColor="#000000" axisLineColor="#000000"/>
+					</categoryAxisFormat>
+					<valueAxisFormat>
+						<axisFormat labelColor="#000000" tickLabelColor="#000000" axisLineColor="#000000"/>
+					</valueAxisFormat>
+				</barPlot>
+			</stackedBarChart>
+			<staticText>
+				<reportElement x="0" y="0" width="750" height="30" uuid="f66fc814-b641-4a70-b807-7e2bc2610229"/>
+				<textElement textAlignment="Center">
+					<font size="20" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Summary of OTM Entity Types]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

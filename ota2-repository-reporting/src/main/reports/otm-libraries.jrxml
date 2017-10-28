@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.4.3.final using JasperReports Library version 6.4.3  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="otm-libraries" pageWidth="612" pageHeight="792" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isSummaryNewPage="true" uuid="64e62470-b7ea-4da2-8fb0-94f827548851">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OTM Repository Reports DB"/>
+	<subDataset name="libraries_by_month" uuid="0d71eae7-70a0-41fb-a9d1-639428ce753b">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OTM Repository Reports DB"/>
+		<queryString language="SQL">
+			<![CDATA[select * from libraries_by_month]]>
+		</queryString>
+		<field name="library_count" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="library_count"/>
+		</field>
+		<field name="create_month" class="java.sql.Date">
+			<property name="com.jaspersoft.studio.field.label" value="create_month"/>
+		</field>
+	</subDataset>
+	<subDataset name="library_versions_by_month" uuid="181aecd9-4616-4b24-bab7-fb6b4690630d">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OTM Repository Reports DB"/>
+		<queryString language="SQL">
+			<![CDATA[select * from library_versions_by_month]]>
+		</queryString>
+		<field name="library_version_count" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="library_version_count"/>
+		</field>
+		<field name="create_month" class="java.sql.Date">
+			<property name="com.jaspersoft.studio.field.label" value="create_month"/>
+		</field>
+	</subDataset>
+	<subDataset name="commits_by_month" uuid="2c753ba7-869e-4c6f-943a-6db55ffde23c">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OTM Repository Reports DB"/>
+		<queryString language="SQL">
+			<![CDATA[select * from commits_by_month]]>
+		</queryString>
+		<field name="commit_count" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="commit_count"/>
+		</field>
+		<field name="commit_month" class="java.sql.Date">
+			<property name="com.jaspersoft.studio.field.label" value="commit_month"/>
+		</field>
+	</subDataset>
+	<queryString language="SQL">
+		<![CDATA[select * from libraries_by_namespace]]>
+	</queryString>
+	<field name="base_namespace" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="base_namespace"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="library"/>
+	</field>
+	<field name="library_name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="library_name"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="library"/>
+	</field>
+	<field name="version_count" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="version_count"/>
+	</field>
+	<variable name="TODAY" class="java.util.Date">
+		<variableExpression><![CDATA[new Date()]]></variableExpression>
+	</variable>
+	<variable name="VERSION_COUNT" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{version_count}]]></variableExpression>
+	</variable>
+	<group name="base_namespace">
+		<groupExpression><![CDATA[$F{base_namespace}]]></groupExpression>
+		<groupHeader>
+			<band height="20">
+				<textField>
+					<reportElement mode="Opaque" x="0" y="0" width="570" height="20" backcolor="#EBEBEB" uuid="8ce5ffe1-0e50-4ed9-ae87-ddeff1a1cb57"/>
+					<textElement verticalAlignment="Middle">
+						<font size="11" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{base_namespace}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="60" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="570" height="30" uuid="09dce2cf-7b1b-45c4-bb39-b037e17e30ec"/>
+				<textElement textAlignment="Center">
+					<font size="20" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Travelport OTM Repository]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="30" width="570" height="30" uuid="02d92fb7-a39a-4b70-810a-6b551b88a6f6"/>
+				<textElement textAlignment="Center">
+					<font size="16"/>
+				</textElement>
+				<text><![CDATA[OTM Libraries]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="20" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="210" height="20" uuid="380a85be-7fd6-452e-a06d-233ce23ab2c8"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Library Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="210" y="0" width="170" height="20" uuid="1f99e853-3321-437d-b659-bcc824e7adc0"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Number of Versions]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="21" splitType="Stretch">
+			<frame>
+				<reportElement x="0" y="0" width="570" height="21" uuid="202ae64e-8e2b-4551-a4f7-a85ae3aa09c5"/>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="false">
+					<reportElement x="0" y="0" width="230" height="21" uuid="f95be513-e13a-49fb-b823-8a4f81dccbe6"/>
+					<textElement verticalAlignment="Middle">
+						<font size="11"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{library_name}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="230" y="0" width="150" height="21" uuid="035c22a9-70f4-4686-9196-44c3acf7f109"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="11"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{version_count}]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="20" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="280" height="20" uuid="ad040b28-e5ba-4b20-9273-e5b30d826714">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="280" y="0" width="290" height="20" uuid="94bbbaed-198a-43b0-af19-d660749ae3c1">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" of " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="470" y="0" width="100" height="20" uuid="abc113ea-2f4e-41ea-a7b1-a3aefedb66fd"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("yyyy-M-d").format($V{TODAY})]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="720" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<staticText>
+				<reportElement x="0" y="40" width="110" height="20" uuid="b4218422-ea31-430d-8cf0-cb74d7f4058a"/>
+				<textElement verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total Libraries:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="60" width="110" height="23" uuid="75cfb136-4b13-46a8-ac87-4c1ef7e8b749"/>
+				<textElement verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total Versions:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="110" y="40" width="100" height="20" uuid="f54622f7-4617-46d3-a2ab-95d9474560f3"/>
+				<textElement verticalAlignment="Middle">
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="110" y="60" width="100" height="23" uuid="a3f1655d-0abc-4504-864f-2609d1b84798"/>
+				<textElement verticalAlignment="Middle">
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{VERSION_COUNT}]]></textFieldExpression>
+			</textField>
+			<bar3DChart>
+				<chart isShowLegend="false" evaluationTime="Report">
+					<reportElement x="0" y="90" width="570" height="190" uuid="58403ba7-3ecc-4c37-b2d0-dbee7dfc4907"/>
+					<chartTitle>
+						<font size="14"/>
+						<titleExpression><![CDATA["Libraries Created By Month"]]></titleExpression>
+					</chartTitle>
+					<chartSubtitle/>
+					<chartLegend/>
+				</chart>
+				<categoryDataset>
+					<dataset>
+						<datasetRun subDataset="libraries_by_month" uuid="9adb28c2-d346-4892-8acc-313fc00cadcc">
+							<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+						</datasetRun>
+					</dataset>
+					<categorySeries>
+						<seriesExpression><![CDATA["Libraries Created"]]></seriesExpression>
+						<categoryExpression><![CDATA[new SimpleDateFormat("MMM-yyyy").format($F{create_month})]]></categoryExpression>
+						<valueExpression><![CDATA[$F{library_count}]]></valueExpression>
+					</categorySeries>
+				</categoryDataset>
+				<bar3DPlot>
+					<plot labelRotation="90.0"/>
+					<itemLabel/>
+					<categoryAxisFormat labelRotation="90.0">
+						<axisFormat labelColor="#000000" tickLabelColor="#000000" axisLineColor="#000000">
+							<tickLabelFont>
+								<font fontName="Arial Narrow" size="9"/>
+							</tickLabelFont>
+						</axisFormat>
+					</categoryAxisFormat>
+					<valueAxisFormat>
+						<axisFormat labelColor="#000000" tickLabelColor="#000000" axisLineColor="#000000"/>
+					</valueAxisFormat>
+				</bar3DPlot>
+			</bar3DChart>
+			<staticText>
+				<reportElement x="0" y="0" width="570" height="30" uuid="ffdd9473-1799-4797-817e-a0752279d967"/>
+				<textElement textAlignment="Center">
+					<font size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Summary of OTM Library Activity]]></text>
+			</staticText>
+			<bar3DChart>
+				<chart isShowLegend="false" evaluationTime="Report">
+					<reportElement x="0" y="300" width="570" height="200" uuid="e2f5e850-2713-4f39-8f77-9bbdc83a424d"/>
+					<chartTitle>
+						<font size="14"/>
+						<titleExpression><![CDATA["Library Versions Created By Month"]]></titleExpression>
+					</chartTitle>
+					<chartSubtitle/>
+					<chartLegend/>
+				</chart>
+				<categoryDataset>
+					<dataset>
+						<datasetRun subDataset="library_versions_by_month" uuid="72b9eec5-a244-4e01-ab28-69454c3add5c">
+							<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+						</datasetRun>
+					</dataset>
+					<categorySeries>
+						<seriesExpression><![CDATA["Library Versions Created"]]></seriesExpression>
+						<categoryExpression><![CDATA[new SimpleDateFormat("MMM-yyyy").format($F{create_month})]]></categoryExpression>
+						<valueExpression><![CDATA[$F{library_version_count}]]></valueExpression>
+					</categorySeries>
+				</categoryDataset>
+				<bar3DPlot>
+					<plot labelRotation="90.0"/>
+					<itemLabel/>
+					<categoryAxisFormat labelRotation="90.0">
+						<axisFormat labelColor="#000000" tickLabelColor="#000000" axisLineColor="#000000">
+							<tickLabelFont>
+								<font fontName="Arial Narrow" size="9"/>
+							</tickLabelFont>
+						</axisFormat>
+					</categoryAxisFormat>
+					<valueAxisFormat>
+						<axisFormat labelColor="#000000" tickLabelColor="#000000" axisLineColor="#000000"/>
+					</valueAxisFormat>
+				</bar3DPlot>
+			</bar3DChart>
+			<bar3DChart>
+				<chart isShowLegend="false" evaluationTime="Report">
+					<reportElement x="1" y="520" width="570" height="200" uuid="df216281-4033-4438-9ac4-a72c67ef8fdf"/>
+					<chartTitle>
+						<font size="14"/>
+						<titleExpression><![CDATA["Library Commits By Month"]]></titleExpression>
+					</chartTitle>
+					<chartSubtitle/>
+					<chartLegend/>
+				</chart>
+				<categoryDataset>
+					<dataset>
+						<datasetRun subDataset="commits_by_month" uuid="cde438ef-bf4d-495c-a20c-94eb2395a872">
+							<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+						</datasetRun>
+					</dataset>
+					<categorySeries>
+						<seriesExpression><![CDATA["Library Commits"]]></seriesExpression>
+						<categoryExpression><![CDATA[new SimpleDateFormat("MMM-yyyy").format($F{commit_month})]]></categoryExpression>
+						<valueExpression><![CDATA[$F{commit_count}]]></valueExpression>
+					</categorySeries>
+				</categoryDataset>
+				<bar3DPlot>
+					<plot labelRotation="90.0"/>
+					<itemLabel/>
+					<categoryAxisFormat labelRotation="90.0">
+						<axisFormat labelColor="#000000" tickLabelColor="#000000" axisLineColor="#000000">
+							<tickLabelFont>
+								<font fontName="Arial Narrow" size="9"/>
+							</tickLabelFont>
+						</axisFormat>
+					</categoryAxisFormat>
+					<valueAxisFormat>
+						<axisFormat labelColor="#000000" tickLabelColor="#000000" axisLineColor="#000000"/>
+					</valueAxisFormat>
+				</bar3DPlot>
+			</bar3DChart>
+			<line>
+				<reportElement x="80" y="290" width="400" height="1" uuid="9d8d58b2-144a-432d-8b51-a8f0f27ff0cb"/>
+			</line>
+			<line>
+				<reportElement x="80" y="510" width="400" height="1" uuid="7914847a-9bef-4631-a31c-0d841a069b14"/>
+			</line>
+		</band>
+	</summary>
+</jasperReport>

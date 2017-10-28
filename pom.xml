@@ -25,6 +25,7 @@
 		<module>ota2-example-upgrade-utility</module>
 		<module>ota2-diff-utility</module>
 		<module>ota2-message-validator</module>
+		<module>ota2-repository-reporting</module>
 	</modules>
 
 	<properties>
@@ -117,11 +118,12 @@
 					</includes>
 					<excludes>
 						<exclude>**/pom.xml</exclude>
-						<!-- exclude eclipse launchers -->
 						<exclude>**/*.launch</exclude>
 						<exclude>**/*.txt</exclude>
 						<exclude>**/*.sh</exclude>
 						<exclude>**/*.properties</exclude>
+						<exclude>**/*.sql</exclude>
+						<exclude>**/*.jrxml</exclude>
 						<exclude>src/test/resources/**</exclude>
 						<exclude>src/main/resources/**</exclude>
 					</excludes>
