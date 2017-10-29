@@ -25,7 +25,7 @@
 		<module>ota2-example-upgrade-utility</module>
 		<module>ota2-diff-utility</module>
 		<module>ota2-message-validator</module>
-		<module>ota2-repository-reporting</module>
+		<!--module>ota2-repository-reporting</module-->
 	</modules>
 
 	<properties>

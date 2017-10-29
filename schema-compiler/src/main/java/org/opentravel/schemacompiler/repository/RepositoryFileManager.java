@@ -1125,7 +1125,7 @@ public abstract class RepositoryFileManager {
             Marshaller marshaller = jaxbContext.createMarshaller();
 
             if (!file.exists()) {
-                file.getParentFile().mkdirs();
+            	createDirectory( file.getParentFile() );
             }
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
             marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper",
@@ -1156,7 +1156,22 @@ public abstract class RepositoryFileManager {
                     e);
         }
     }
-
+    
+    /**
+     * Recursively creates the given directory and all parents.  Any directories
+     * that are created are added to the current change set.
+     * 
+     * @param directory  the directory to be created
+     * @throws RepositoryException  thrown if a new directory cannot be added to the current change set
+     */
+    protected void createDirectory(File directory) throws RepositoryException {
+    	if ((directory != null) && !directory.exists()) {
+    		createDirectory( directory.getParentFile() );
+    		directory.mkdir();
+    		addToChangeSet( directory );
+    	}
+    }
+    
     /**
      * Saves the content from the given <code>InputStream</code> to the specified file. If a file
      * already exists at the specified location, it will be overwritten by the content that is

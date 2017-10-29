@@ -58,7 +58,8 @@ public class RepositoryMultiUserTestBase {
                 "/src/test/resources/repo-snapshots");
         File repositorySnapshot = new File(snapshotBase, repositorySnapshotFolder);
 
-        jettyServer = new JettyTestServer(port, repositorySnapshot, testClass);
+        jettyServer = new JettyTestServer(port, repositorySnapshot, testClass,
+        		RepositoryTestBase.defaultRepositoryConfig);
         jettyServer.start();
     }
     

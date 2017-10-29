@@ -155,31 +155,33 @@ public class DefaultRepositoryFileManager extends RepositoryFileManager {
      *             thrown if the backup file cannot be created
      */
     protected void createBackupFile(File originalFile, File backupFile) throws IOException {
-        InputStream in = null;
-        OutputStream out = null;
-        try {
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-
-            in = new FileInputStream(originalFile);
-            out = new FileOutputStream(backupFile);
-
-            while ((bytesRead = in.read(buffer)) >= 0) {
-                out.write(buffer, 0, bytesRead);
-            }
-
-        } finally {
+    	if (originalFile.isFile()) {
+            InputStream in = null;
+            OutputStream out = null;
             try {
-                if (in != null)
-                    in.close();
-            } catch (Throwable t) {
+                byte[] buffer = new byte[1024];
+                int bytesRead;
+
+                in = new FileInputStream(originalFile);
+                out = new FileOutputStream(backupFile);
+
+                while ((bytesRead = in.read(buffer)) >= 0) {
+                    out.write(buffer, 0, bytesRead);
+                }
+
+            } finally {
+                try {
+                    if (in != null)
+                        in.close();
+                } catch (Throwable t) {
+                }
+                try {
+                    if (out != null)
+                        out.close();
+                } catch (Throwable t) {
+                }
             }
-            try {
-                if (out != null)
-                    out.close();
-            } catch (Throwable t) {
-            }
-        }
+    	}
     }
 
     /**

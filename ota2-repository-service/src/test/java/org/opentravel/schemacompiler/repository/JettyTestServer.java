@@ -53,8 +53,12 @@ public class JettyTestServer {
      *            the server port to which HTTP requests will be directed on the local host
      * @param snapshotLocation
      *            the folder location that contains an initial snapshot of the OTA2.0 repository
+     * @param testClass
+     *            the test class that is starting the server instance
+     * @param repositoryConfigFile
+     *            location of the main OTA2 repository configuration file
      */
-    public JettyTestServer(int port, File snapshotLocation, Class<?> testClass) {
+    public JettyTestServer(int port, File snapshotLocation, Class<?> testClass, File repositoryConfigFile) {
         this.repositorySnapshotLocation = snapshotLocation;
         this.repositoryRuntimeLocation = new File(System.getProperty("user.dir"),
                 "/target/test-workspace/" + testClass.getSimpleName() + "/test-repository");
@@ -73,8 +77,7 @@ public class JettyTestServer {
                     + repositoryRuntimeLocation.getAbsolutePath());
         }
         System.setProperty("test.class", testClass.getSimpleName());
-        System.setProperty("ota2.repository.config", System.getProperty("user.dir")
-                + "/target/test-classes/ota2-repository-config.xml");
+        System.setProperty("ota2.repository.config", repositoryConfigFile.getAbsolutePath());
         RepositoryComponentFactory.resetDefault();
     }
 
@@ -179,12 +182,11 @@ public class JettyTestServer {
      *             thrown if the contents of the repository cannot be initialized
      */
     private void initializeRuntimeRepository() throws IOException {
-        RepositoryTestUtils.deleteContents(repositoryIndexLocation);
-        RepositoryTestUtils.deleteContents(repositoryRuntimeLocation);
-
         if (repositorySnapshotLocation != null) {
+            RepositoryTestUtils.deleteContents(repositoryRuntimeLocation);
             RepositoryTestUtils.copyContents(repositorySnapshotLocation, repositoryRuntimeLocation);
         }
+        RepositoryTestUtils.deleteContents(repositoryIndexLocation);
     }
 
     public class NoLogging implements Logger {

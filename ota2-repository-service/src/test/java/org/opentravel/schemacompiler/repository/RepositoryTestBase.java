@@ -38,6 +38,11 @@ public abstract class RepositoryTestBase {
     protected static ThreadLocal<Repository> testRepository = new ThreadLocal<Repository>();
     protected static ThreadLocal<JettyTestServer> jettyServer = new ThreadLocal<JettyTestServer>();
     protected static ThreadLocal<File> wipFolder = new ThreadLocal<File>();
+    
+    protected static File defaultRepositoryConfig = new File(System.getProperty("user.dir"),
+    		"/target/test-classes/ota2-repository-config.xml");
+    protected static File svnRepositoryConfig = new File(System.getProperty("user.dir"),
+    		"/target/test-classes/ota2-repository-config-svn.xml");
 
     protected static void setupWorkInProcessArea(Class<?> testClass) throws Exception {
         File wipSnapshot = new File(System.getProperty("user.dir"), "/src/test/resources/test-data");
@@ -65,7 +70,7 @@ public abstract class RepositoryTestBase {
         localRepository.mkdirs();
         repositoryManager.set(new RepositoryManager(localRepository));
 
-        jettyServer.set(new JettyTestServer(port, repositorySnapshot, testClass));
+        jettyServer.set(new JettyTestServer(port, repositorySnapshot, testClass, defaultRepositoryConfig));
         jettyServer.get().start();
 
         testRepository.set(jettyServer.get().configureRepositoryManager(repositoryManager.get()));

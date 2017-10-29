@@ -28,8 +28,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.opentravel.schemacompiler.repository.RepositoryException;
-import org.opentravel.schemacompiler.repository.RepositoryFileManager;
 import org.tmatesoft.svn.core.SVNCancelException;
 import org.tmatesoft.svn.core.SVNDepth;
 import org.tmatesoft.svn.core.SVNErrorCode;
@@ -61,6 +59,7 @@ public class SVNRepositoryFileManager extends RepositoryFileManager {
     private static final String INITIALIZATION_COMMIT_MESSAGE = "New content detected during repository initialization.";
     private static final String USER_COMMIT_MESSAGE = "Committed by repository user: {0}.";
 
+    private static Object svnCommitLock = new Object();
     private static Log log = LogFactory.getLog(SVNRepositoryFileManager.class);
 
     private ThreadLocal<Set<File>> svnChangeSet = new ThreadLocal<Set<File>>() {
@@ -117,26 +116,28 @@ public class SVNRepositoryFileManager extends RepositoryFileManager {
      */
     @Override
     protected void commitChangeSet(Set<File> changeSet) throws RepositoryException {
-        try {
-            // Add any unmanaged files to SVN version control before committing
-            File[] svnFiles = buildSvnChangeSet(changeSet);
+        synchronized (svnCommitLock) {
+            try {
+                // Add any unmanaged files to SVN version control before committing
+                File[] svnFiles = buildSvnChangeSet(changeSet);
+                
+                // Commit the changes from the change set
+                if (svnFiles.length > 0) {
+                    SVNCommitClient commitClient = svnClient.getCommitClient();
+                    SVNCommitPacket commitPacket = commitClient.doCollectCommitItems(svnFiles, false,
+                            false, SVNDepth.INFINITY, null);
 
-            // Commit the changes from the change set
-            if (svnFiles.length > 0) {
-                SVNCommitClient commitClient = svnClient.getCommitClient();
-                SVNCommitPacket commitPacket = commitClient.doCollectCommitItems(svnFiles, false,
-                        false, SVNDepth.INFINITY, null);
+                    if (commitPacket.getCommitItems().length > 0) {
+                        String userId = getCurrentUserId();
 
-                if (commitPacket.getCommitItems().length > 0) {
-                    String userId = getCurrentUserId();
-
-                    commitClient.doCommit(commitPacket, false, MessageFormat.format(
-                            USER_COMMIT_MESSAGE, (userId == null) ? "Unknown" : userId));
+                        commitClient.doCommit(commitPacket, false, MessageFormat.format(
+                                USER_COMMIT_MESSAGE, (userId == null) ? "Unknown" : userId));
+                    }
                 }
+            } catch (SVNException e) {
+                throw new RepositoryException("SVN error while committing change set: "
+                        + e.getMessage(), e);
             }
-        } catch (SVNException e) {
-            throw new RepositoryException("SVN error while committing change set: "
-                    + e.getMessage(), e);
         }
     }
 
@@ -145,24 +146,26 @@ public class SVNRepositoryFileManager extends RepositoryFileManager {
      */
     @Override
     protected void rollbackChangeSet(Set<File> changeSet) throws RepositoryException {
-        try {
-            SVNWCClient wcClient = svnClient.getWCClient();
-            File[] svnFiles = buildSvnChangeSet(changeSet);
+        synchronized (svnCommitLock) {
+            try {
+                SVNWCClient wcClient = svnClient.getWCClient();
+                File[] svnFiles = buildSvnChangeSet(changeSet);
 
-            // Use SVN to revert any files that were deleted or modified files
-            wcClient.doRevert(svnFiles, SVNDepth.IMMEDIATES, null);
+                // Use SVN to revert any files that were deleted or modified files
+                wcClient.doRevert(svnFiles, SVNDepth.IMMEDIATES, null);
 
-            // Rebuild the change set; any files remaining after the revert must be new files
-            // that need to be removed from the file system.
-            svnFiles = buildSvnChangeSet(changeSet);
+                // Rebuild the change set; any files remaining after the revert must be new files
+                // that need to be removed from the file system.
+                svnFiles = buildSvnChangeSet(changeSet);
 
-            for (File file : svnFiles) {
-                file.delete();
+                for (File file : svnFiles) {
+                    file.delete();
+                }
+
+            } catch (SVNException e) {
+                throw new RepositoryException("SVN error while rolling back change set: "
+                        + e.getMessage(), e);
             }
-
-        } catch (SVNException e) {
-            throw new RepositoryException("SVN error while rolling back change set: "
-                    + e.getMessage(), e);
         }
     }
 
@@ -325,7 +328,7 @@ public class SVNRepositoryFileManager extends RepositoryFileManager {
 
         for (File file : changeSet) {
             try {
-                statusClient.doStatus(file, SVNRevision.HEAD, SVNDepth.FILES, false, false, false,
+                statusClient.doStatus(file, SVNRevision.HEAD, SVNDepth.INFINITY, false, true, false,
                         false, new RepositorySVNStatusHandler(), null);
 
             } catch (SVNException e) {
@@ -390,8 +393,7 @@ public class SVNRepositoryFileManager extends RepositoryFileManager {
         private Map<SVNEventAction, String> eventDisplayLabels = new HashMap<SVNEventAction, String>();
 
         /**
-         * @see org.tmatesoft.svn.core.wc.ISVNEventHandler#handleEvent(org.tmatesoft.svn.core.wc.SVNEvent,
-         *      double)
+         * @see org.tmatesoft.svn.core.wc.ISVNEventHandler#handleEvent(org.tmatesoft.svn.core.wc.SVNEvent, double)
          */
         @Override
         public void handleEvent(SVNEvent event, double progress) throws SVNException {
