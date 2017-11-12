@@ -356,6 +356,12 @@
 
 	<repositories>
 		<repository>
+			<id>repository.maven.central-public</id>
+			<name>Maven Central repository</name>
+			<url>http://repo1.maven.org/maven2/</url>
+			<layout>default</layout>
+		</repository>
+		<repository>
 			<id>repository.jboss.org-public</id>
 			<name>JBoss.org Maven repository</name>
 			<url>https://repository.jboss.org/nexus/content/groups/public</url>
