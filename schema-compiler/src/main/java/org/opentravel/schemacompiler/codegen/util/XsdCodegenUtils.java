@@ -33,6 +33,7 @@ import org.opentravel.ns.ota2.appinfo_v01_00.Library;
 import org.opentravel.ns.ota2.appinfo_v01_00.OTA2Entity;
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
+import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.NamedEntity;
@@ -770,6 +771,23 @@ public class XsdCodegenUtils {
     public static boolean isIdRefsType(TLPropertyType type) {
         return (type != null) && XMLConstants.W3C_XML_SCHEMA_NS_URI.equals(type.getNamespace())
                 && "IDREFS".equals(type.getLocalName());
+    }
+    
+    /**
+     * Returns true if the given entity type is 'ota2:Empty'.
+     * 
+     * @param type  the entity type to analyze
+     * @return boolean
+     */
+    public static boolean isOtaEmptyType(NamedEntity type) {
+    	SchemaDependency emptyType = SchemaDependency.getEmptyElement();
+    	boolean result = false;
+    	
+    	if (type != null) {
+    		result = emptyType.getSchemaDeclaration().getNamespace().equals( type.getNamespace() )
+    				&& emptyType.getLocalName().equals( type.getLocalName() );
+    	}
+    	return result;
     }
 
     /**

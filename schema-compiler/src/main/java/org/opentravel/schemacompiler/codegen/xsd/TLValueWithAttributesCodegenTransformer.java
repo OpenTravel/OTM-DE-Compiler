@@ -75,7 +75,7 @@ public class TLValueWithAttributesCodegenTransformer extends
         }
         XsdCodegenUtils.addAppInfo(source, targetType);
 
-        if (vwaParentType != null) {
+        if ((vwaParentType != null) && !XsdCodegenUtils.isOtaEmptyType( vwaParentType )) {
             if ((vwaParentType instanceof TLOpenEnumeration)
                     || (vwaParentType instanceof TLRoleEnumeration)) {
                 extType.setBase(new QName(vwaParentType.getNamespace(), XsdCodegenUtils
