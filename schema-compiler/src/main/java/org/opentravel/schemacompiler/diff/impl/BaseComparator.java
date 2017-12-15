@@ -16,6 +16,7 @@
 
 package org.opentravel.schemacompiler.diff.impl;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -34,11 +35,14 @@ import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.version.VersionScheme;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 import org.opentravel.schemacompiler.version.VersionSchemeFactory;
+import org.opentravel.schemacompiler.version.Versioned;
 
 /**
  * Base class for all components used to compare an aspect of the OTM model.
  */
 public abstract class BaseComparator {
+	
+	protected static VersionSchemeFactory vsFactory = VersionSchemeFactory.getInstance();
 	
 	private Map<String,String> namespaceMappings = new HashMap<>();
 	private ModelCompareOptions compareOptions;
@@ -204,6 +208,48 @@ public abstract class BaseComparator {
 			
 		} catch (VersionSchemeException e) {
 			// Do not throw an exception - just return false
+		}
+		return result;
+	}
+	
+	/**
+	 * Returns true if the new entity is a later minor version of the old one.
+	 * 
+	 * @param oldEntity  the old version of the entity
+	 * @param newEntity  the new version of the entity
+	 * @return boolean
+	 */
+	protected boolean isMinorVersionCompare(EntityComparisonFacade oldEntity, EntityComparisonFacade newEntity,
+			String versionScheme) {
+		NamedEntity _oldEntity = oldEntity.getEntity();
+		NamedEntity _newEntity = newEntity.getEntity();
+		boolean localNamesMatch = _oldEntity.getLocalName().equals( _newEntity.getLocalName() );
+		boolean result = false;
+		
+		// Make sure the local names match and that both entities are versioned and of the same type
+		if (localNamesMatch && (_oldEntity instanceof Versioned) && (_newEntity instanceof Versioned)
+				&& _oldEntity.getClass().equals( _newEntity.getClass() )) {
+			try {
+				VersionScheme vScheme = vsFactory.getVersionScheme( versionScheme );
+				String oldNS = _oldEntity.getNamespace();
+				String newNS = _newEntity.getNamespace();
+				String oldVersionId = vScheme.getVersionIdentifier( oldNS );
+				String newVersionId = vScheme.getVersionIdentifier( newNS );
+				
+				// Base namespaces and major version identifiers must match
+				if (vScheme.getBaseNamespace( oldNS ).equals( vScheme.getBaseNamespace( newNS ) )
+						&& vScheme.getMajorVersion( oldVersionId ).equals( vScheme.getMajorVersion( newVersionId ))) {
+					List<Versioned> versionList = Arrays.asList( (Versioned) _oldEntity, (Versioned) _newEntity );
+					
+					// We have a minor version, but we need to make sure the earlier minor
+					// version is our old entity
+					Collections.sort( versionList, vScheme.getComparator( true ) );
+					result = (versionList.get( 0 ) == _oldEntity);
+				}
+				
+			} catch (VersionSchemeException e) {
+				// Should never happen, but ignore and return false if it does
+			}
 		}
 		return result;
 	}

@@ -158,6 +158,7 @@ public class RollupReferenceHandler {
             captureRollupReferences( bo.getSummaryFacet() );
             captureRollupReferences( bo.getDetailFacet() );
 
+            // TODO: Need to handle local nested contextual facets
             for (TLFacet newFacet : bo.getCustomFacets()) {
             	captureRollupReferences( newFacet );
             }
@@ -179,6 +180,7 @@ public class RollupReferenceHandler {
             captureRollupReferences( choice.getExtension() );
             captureRollupReferences( choice.getSharedFacet() );
 
+            // TODO: Need to handle local nested contextual facets
             for (TLFacet newFacet : choice.getChoiceFacets()) {
             	captureRollupReferences( newFacet );
             }

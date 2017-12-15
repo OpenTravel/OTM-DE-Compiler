@@ -455,7 +455,9 @@ public class TLModel implements Validatable {
     @SuppressWarnings("unchecked")
     protected <E extends ModelEvent<?>> void publishEvent(E event) {
         if ((event != null) && listenersEnabled) {
-            for (ModelEventListener<?, ?> listener : listeners) {
+        	List<ModelEventListener<?,?>> _listeners = new ArrayList<>( listeners );
+        	
+            for (ModelEventListener<?, ?> listener : _listeners) {
                 if (event.canBeProcessedBy(listener)) {
                     ((ModelEventListener<E, ?>) listener).processModelEvent(event);
                 }

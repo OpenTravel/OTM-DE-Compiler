@@ -77,9 +77,11 @@ public class FieldComparator extends BaseComparator {
 			}
 			
 			if (isVersionChange( oldAssignedTypeName, newAssignedTypeName, versionScheme )) {
-				changeItems.add( new FieldChangeItem( FieldChangeType.TYPE_VERSION_CHANGED,
-						getVersion( (NamedEntity) oldField.getAssignedType() ),
-						getVersion( (NamedEntity) newField.getAssignedType() ) ) );
+				if (!getCompareOptions().isSuppressFieldVersionChanges()) {
+					changeItems.add( new FieldChangeItem( FieldChangeType.TYPE_VERSION_CHANGED,
+							getVersion( (NamedEntity) oldField.getAssignedType() ),
+							getVersion( (NamedEntity) newField.getAssignedType() ) ) );
+				}
 				
 			} else {
 				changeItems.add( new FieldChangeItem( FieldChangeType.TYPE_CHANGED,

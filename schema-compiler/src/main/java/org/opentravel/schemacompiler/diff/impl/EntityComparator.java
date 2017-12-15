@@ -36,14 +36,11 @@ import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLMemberField;
 import org.opentravel.schemacompiler.model.TLProperty;
-import org.opentravel.schemacompiler.version.VersionSchemeFactory;
 
 /**
  * Performs a comparison of two OTM entities.
  */
 public class EntityComparator extends BaseComparator {
-	
-	private static VersionSchemeFactory vsFactory = VersionSchemeFactory.getInstance();
 	
 	private DisplayFomatter formatter = new DisplayFomatter();
 	
@@ -72,6 +69,7 @@ public class EntityComparator extends BaseComparator {
 		// Look for changes in the library values
 		AbstractLibrary owningLibrary = oldEntity.getOwningLibrary();
 		String versionScheme = (owningLibrary == null) ? null : owningLibrary.getVersionScheme();
+		boolean isMinorVersionCompare = isMinorVersionCompare( oldEntity, newEntity, versionScheme );
 		QName oldParentTypeName = getEntityName( oldEntity.getParentType() );
 		QName newParentTypeName = getEntityName( newEntity.getParentType() );
 		QName oldExtendsTypeName = getEntityName( oldEntity.getExtendsType() );
@@ -167,20 +165,27 @@ public class EntityComparator extends BaseComparator {
 		}
 		
 		compareListContents( oldEntity.getAliasNames(), newEntity.getAliasNames(),
-				EntityChangeType.ALIAS_ADDED, EntityChangeType.ALIAS_DELETED, changeItems );
+				EntityChangeType.ALIAS_ADDED, EntityChangeType.ALIAS_DELETED, changeItems,
+				isMinorVersionCompare );
 		compareListContents( oldEntity.getFacetNames(), newEntity.getFacetNames(),
-				EntityChangeType.FACET_ADDED, EntityChangeType.FACET_DELETED, changeItems );
+				EntityChangeType.FACET_ADDED, EntityChangeType.FACET_DELETED, changeItems,
+				isMinorVersionCompare );
 		compareListContents( oldEntity.getRoleNames(), newEntity.getRoleNames(),
-				EntityChangeType.ROLE_ADDED, EntityChangeType.ROLE_DELETED, changeItems );
+				EntityChangeType.ROLE_ADDED, EntityChangeType.ROLE_DELETED, changeItems,
+				isMinorVersionCompare );
 		compareListContents( oldEntity.getEnumValues(), newEntity.getEnumValues(),
-				EntityChangeType.ENUM_VALUE_ADDED, EntityChangeType.ENUM_VALUE_DELETED, changeItems );
+				EntityChangeType.ENUM_VALUE_ADDED, EntityChangeType.ENUM_VALUE_DELETED, changeItems,
+				isMinorVersionCompare );
 		
-		compareMemberFields( oldEntity.getMemberFields(), newEntity.getMemberFields(), changeItems );
+		compareMemberFields( oldEntity.getMemberFields(), newEntity.getMemberFields(), changeItems,
+				isMinorVersionCompare );
 		
 		compareListContents( oldEntity.getEquivalents(), newEntity.getEquivalents(),
-				EntityChangeType.EQUIVALENT_ADDED, EntityChangeType.EQUIVALENT_DELETED, changeItems );
+				EntityChangeType.EQUIVALENT_ADDED, EntityChangeType.EQUIVALENT_DELETED, changeItems,
+				isMinorVersionCompare );
 		compareListContents( oldEntity.getExamples(), newEntity.getExamples(),
-				EntityChangeType.EXAMPLE_ADDED, EntityChangeType.EXAMPLE_DELETED, changeItems );
+				EntityChangeType.EXAMPLE_ADDED, EntityChangeType.EXAMPLE_DELETED, changeItems,
+				isMinorVersionCompare );
 		
 		return changeSet;
 	}
@@ -194,17 +199,22 @@ public class EntityComparator extends BaseComparator {
 	 * @param addedChangeType  the entity change type to use for added values
 	 * @param deletedChangeType  the entity change type to use for deleted values
 	 * @param changeItems  the list of change items for the entity
+	 * @param isMinorVersionCompare  true if the second entity is a later minor version of the first
 	 */
 	private void compareListContents(List<String> oldValues, List<String> newValues,
-			EntityChangeType addedChangeType, EntityChangeType deletedChangeType, List<EntityChangeItem> changeItems) {
+			EntityChangeType addedChangeType, EntityChangeType deletedChangeType, List<EntityChangeItem> changeItems,
+			boolean isMinorVersionCompare) {
 		for (String newValue : newValues) {
 			if (!oldValues.contains( newValue )) {
 				changeItems.add( new EntityChangeItem( addedChangeType, null, newValue ) );
 			}
 		}
-		for (String oldValue : oldValues) {
-			if (!newValues.contains( oldValue )) {
-				changeItems.add( new EntityChangeItem( deletedChangeType, oldValue, null ) );
+		
+		if (!isMinorVersionCompare) {
+			for (String oldValue : oldValues) {
+				if (!newValues.contains( oldValue )) {
+					changeItems.add( new EntityChangeItem( deletedChangeType, oldValue, null ) );
+				}
 			}
 		}
 	}
@@ -217,9 +227,10 @@ public class EntityComparator extends BaseComparator {
 	 * @param oldFields  the list of fields for the old entity version
 	 * @param newFields  the list of fields for the new entity version
 	 * @param changeItems  the list of change items for the entity
+	 * @param isMinorVersionCompare  true if the second entity is a later minor version of the first
 	 */
 	private void compareMemberFields(List<TLMemberField<?>> oldFields, List<TLMemberField<?>> newFields,
-			List<EntityChangeItem> changeItems) {
+			List<EntityChangeItem> changeItems, boolean isMinorVersionCompare) {
 		ModelCompareOptions options = getCompareOptions();
 		Map<String,String> fieldNSMappings = options.isSuppressFieldVersionChanges() ?
 				getNamespaceMappings() : new HashMap<String,String>();
@@ -339,13 +350,15 @@ public class EntityComparator extends BaseComparator {
 			}
 		}
 		
-		// Look for fields that were deleted from the old version
-		for (QName fieldName : oldFieldNames) {
-			if (!newFieldMap.containsKey( fieldName )) {
-				List<TLMemberField<?>> deletedFields = oldFieldMap.get( fieldName );
-				
-				for (TLMemberField<?> deletedField : deletedFields) {
-					changeItems.add( new EntityChangeItem( EntityChangeType.MEMBER_FIELD_DELETED, deletedField ) );
+		// Look for fields that were deleted from the old version (does not apply for minor versions)
+		if (!isMinorVersionCompare) {
+			for (QName fieldName : oldFieldNames) {
+				if (!newFieldMap.containsKey( fieldName )) {
+					List<TLMemberField<?>> deletedFields = oldFieldMap.get( fieldName );
+					
+					for (TLMemberField<?> deletedField : deletedFields) {
+						changeItems.add( new EntityChangeItem( EntityChangeType.MEMBER_FIELD_DELETED, deletedField ) );
+					}
 				}
 			}
 		}
