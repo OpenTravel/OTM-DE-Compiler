@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opentravel.schemacompiler.diff;
+package org.opentravel.schemacompiler.util;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,7 +27,11 @@ import java.util.Properties;
 
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.opentravel.schemacompiler.diff.impl.DisplayFomatter;
+import org.opentravel.schemacompiler.diff.EntityChangeSet;
+import org.opentravel.schemacompiler.diff.LibraryChangeSet;
+import org.opentravel.schemacompiler.diff.ModelCompareOptions;
+import org.opentravel.schemacompiler.diff.ProjectChangeSet;
+import org.opentravel.schemacompiler.diff.impl.DisplayFormatter;
 import org.opentravel.schemacompiler.diff.impl.EntityComparator;
 import org.opentravel.schemacompiler.diff.impl.EntityComparisonFacade;
 import org.opentravel.schemacompiler.diff.impl.LibraryComparator;
@@ -165,7 +169,7 @@ public class ModelComparator {
 		Map<String,Object> context = new HashMap<>();
 		
 		context.put( "changeSet", changeSet );
-		context.put( "formatter", new DisplayFomatter() );
+		context.put( "formatter", new DisplayFormatter() );
 		context.put( "TEMPLATE_FOLDER", TEMPLATE_FOLDER );
 		
 		try (Writer writer = new OutputStreamWriter( out )) {

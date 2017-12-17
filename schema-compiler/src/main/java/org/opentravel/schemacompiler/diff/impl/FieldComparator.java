@@ -32,7 +32,7 @@ import org.opentravel.schemacompiler.model.NamedEntity;
  */
 public class FieldComparator extends BaseComparator {
 	
-	private DisplayFomatter formatter = new DisplayFomatter();
+	private DisplayFormatter formatter = new DisplayFormatter();
 	
 	/**
 	 * Constructor that initializes the comparison options and namespace mappings

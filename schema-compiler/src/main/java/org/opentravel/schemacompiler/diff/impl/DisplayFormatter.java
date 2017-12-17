@@ -29,6 +29,7 @@ import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.model.TLMemberField;
 import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLProperty;
@@ -37,7 +38,7 @@ import org.opentravel.schemacompiler.model.TLPropertyType;
 /**
  * Methods used to format user-displayable names for various OTM object types.
  */
-public class DisplayFomatter {
+public class DisplayFormatter {
 	
 	private static DateFormat dateFormat = new SimpleDateFormat( "MMMMM d, yyyy '&amp;' h:mma z" );
 	
@@ -59,6 +60,17 @@ public class DisplayFomatter {
 	public String getEntityTypeDisplayName(Class<?> entityType) {
 		return (entityType == null) ? null : SchemaCompilerApplicationContext.getContext().getMessage(
 				entityType.getSimpleName() + ".displayName", null, Locale.getDefault() );
+	}
+	
+	/**
+	 * Returns the display name for the given library status.
+	 * 
+	 * @param status  the library status for which to return a display name
+	 * @return String
+	 */
+	public String getLibraryStatusDisplayName(TLLibraryStatus status) {
+		return (status == null) ? null : SchemaCompilerApplicationContext.getContext().getMessage(
+				status.toString() + ".displayName", null, Locale.getDefault() );
 	}
 	
 	/**

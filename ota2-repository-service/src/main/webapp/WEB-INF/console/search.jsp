@@ -21,12 +21,56 @@
 <c:if test="${latestVersions}"><c:set var="latestVersionsCheckState" value="checked" /></c:if>
 <c:if test="${finalVersions}"><c:set var="finalVersionsCheckState" value="checked" /></c:if>
 <form id="searchForm" action="${pageContext.request.contextPath}/console/search.html" method="GET">
-	<input name="keywords" type="text" class="searchKeywords" value="${keywords}"/>
-	<input type="submit" value="Search" class="formButton" />
-	<br>
-	<input name="latestVersions" type="checkbox" value="true" <%= "true".equals(request.getParameter("latestVersions")) ? "checked" : "" %> /> <span class="searchOption">Latest Versions Only</span>
-	&nbsp; | &nbsp;
-	<input name="finalVersions" type="checkbox" value="true" <%= "true".equals(request.getParameter("finalVersions")) ? "checked" : "" %> /> <span class="searchOption">Final Versions Only</span>
+	<table>
+		<tr>
+			<td style="width: 1%; white-space: nowrap; vertical-align: middle;">
+				<input name="keywords" type="text" class="searchKeywords" value="${keywords}"/>
+				<input type="submit" value="Search" class="formButton" />
+			</td>
+			<td> &nbsp; &nbsp; </td>
+			<td style="text-align: left; vertical-align: top;">
+				<table>
+					<tr>
+						<td colspan="2"><h4>Search Filters:</h4></td>
+					</tr>
+					<tr>
+						<td class="searchOption" style="width: 1%;">&nbsp; Latest Versions:</td>
+						<td><input name="latestVersions" type="checkbox" value="true" <%= "true".equals(request.getParameter("latestVersions")) ? "checked" : "" %> /></td>
+					</tr>
+					<tr>
+						<td class="searchOption" style="width: 1%;">&nbsp; Minimum Status:</td>
+						<td>
+							<select name="minStatus" size="1">
+								<c:forEach var="option" items="${statusOptions}">
+									<option ${option.selectedTag} value="${option.value}">${option.displayName}</option>
+								</c:forEach>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td class="searchOption" style="width: 1%;">&nbsp; Namespace:</td>
+						<td>
+							<select name="nsFilter" size="1">
+								<c:forEach var="option" items="${nsOptions}">
+									<option ${option.selectedTag} value="${option.value}">${option.displayName}</option>
+								</c:forEach>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td class="searchOption" style="width: 1%;">&nbsp; Entity Type:</td>
+						<td>
+							<select name="entityType" size="1">
+								<c:forEach var="option" items="${entityTypeOptions}">
+									<option ${option.selectedTag} value="${option.value}">${option.displayName}</option>
+								</c:forEach>
+							</select>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
 </form>
 
 <c:if test="${searchResults != null}">

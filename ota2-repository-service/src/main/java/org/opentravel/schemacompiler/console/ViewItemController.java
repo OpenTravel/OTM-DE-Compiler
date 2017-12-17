@@ -129,13 +129,13 @@ public class ViewItemController extends BaseController {
             	
             } else {
                 setErrorMessage("You are not authorized to view the requested release.", model);
-                targetPage = new SearchController().searchPage(null, false, false, session, model);
+                targetPage = new SearchController().defaultSearchPage( session, model);
             }
 
         } catch (Throwable t) {
             log.error("An error occured while displaying the release.", t);
             setErrorMessage("An error occured while displaying the release (see server log for details).", model);
-            targetPage = new SearchController().searchPage(null, false, false, session, model);
+            targetPage = new SearchController().defaultSearchPage( session, model);
         }
 
         if (targetPage == null) {
@@ -185,7 +185,7 @@ public class ViewItemController extends BaseController {
             	
             } else {
                 setErrorMessage("You are not authorized to view the requested library.", model);
-                targetPage = new SearchController().searchPage(null, false, false, session, model);
+                targetPage = new SearchController().defaultSearchPage( session, model);
             }
 
         } catch (Throwable t) {
@@ -193,7 +193,7 @@ public class ViewItemController extends BaseController {
             setErrorMessage(
                     "An error occured while displaying the library (see server log for details).",
                     model);
-            targetPage = new SearchController().searchPage(null, false, false, session, model);
+            targetPage = new SearchController().defaultSearchPage( session, model);
         }
 
         if (targetPage == null) {
@@ -243,7 +243,7 @@ public class ViewItemController extends BaseController {
             	
             } else {
                 setErrorMessage("You are not authorized to view the requested library.", model);
-                targetPage = new SearchController().searchPage(null, false, false, session, model);
+                targetPage = new SearchController().defaultSearchPage( session, model);
             }
 
         } catch (Throwable t) {
@@ -251,7 +251,7 @@ public class ViewItemController extends BaseController {
             setErrorMessage(
                     "An error occured while displaying the library (see server log for details).",
                     model);
-            targetPage = new SearchController().searchPage(null, false, false, session, model);
+            targetPage = new SearchController().defaultSearchPage( session, model);
         }
 
         if (targetPage == null) {
@@ -294,7 +294,7 @@ public class ViewItemController extends BaseController {
             	
             } else {
                 setErrorMessage("You are not authorized to view the requested library.", model);
-                targetPage = new SearchController().searchPage(null, false, false, session, model);
+                targetPage = new SearchController().defaultSearchPage( session, model);
             }
 
         } catch (Throwable t) {
@@ -302,7 +302,7 @@ public class ViewItemController extends BaseController {
             setErrorMessage(
                     "An error occured while displaying the library (see server log for details).",
                     model);
-            targetPage = new SearchController().searchPage(null, false, false, session, model);
+            targetPage = new SearchController().defaultSearchPage( session, model);
         }
 
         if (targetPage == null) {
@@ -346,14 +346,14 @@ public class ViewItemController extends BaseController {
             	
             } else {
                 setErrorMessage("You are not authorized to view the requested library.", model);
-                targetPage = new SearchController().searchPage(null, false, false, session, model);
+                targetPage = new SearchController().defaultSearchPage( session, model);
             }
 
         } catch (Throwable t) {
             log.error("An error occured while displaying the library.", t);
             setErrorMessage(
                     "An error occured while displaying the library (see server log for details).", model);
-            targetPage = new SearchController().searchPage(null, false, false, session, model);
+            targetPage = new SearchController().defaultSearchPage( session, model);
         }
 
         if (targetPage == null) {
@@ -417,14 +417,14 @@ public class ViewItemController extends BaseController {
             	
             } else {
                 setErrorMessage("You are not authorized to view the requested library.", model);
-                targetPage = new SearchController().searchPage(null, false, false, session, model);
+                targetPage = new SearchController().defaultSearchPage( session, model);
             }
 
         } catch (Throwable t) {
             log.error("An error occured while displaying the library.", t);
             setErrorMessage(
                     "An error occured while displaying the library (see server log for details).", model);
-            targetPage = new SearchController().searchPage(null, false, false, session, model);
+            targetPage = new SearchController().defaultSearchPage( session, model);
         }
 
         if (targetPage == null) {
@@ -481,7 +481,7 @@ public class ViewItemController extends BaseController {
                 
             } else {
                 setErrorMessage("You are not authorized to view the requested library.", model);
-                targetPage = new SearchController().searchPage(null, false, false, session, model);
+                targetPage = new SearchController().defaultSearchPage( session, model);
             }
 
         } catch (Throwable t) {
@@ -489,7 +489,7 @@ public class ViewItemController extends BaseController {
             setErrorMessage(
                     "An error occured while displaying the library (see server log for details).",
                     model);
-            targetPage = new SearchController().searchPage(null, false, false, session, model);
+            targetPage = new SearchController().defaultSearchPage( session, model);
         }
 
         if (targetPage == null) {
@@ -540,11 +540,11 @@ public class ViewItemController extends BaseController {
                 	
                 } else {
                     setErrorMessage("You are not authorized to view the requested entity.", model);
-                    targetPage = new SearchController().searchPage(null, false, false, session, model);
+                    targetPage = new SearchController().defaultSearchPage( session, model);
                 }
             } else {
                 setErrorMessage("The requested entity could not be found.", model);
-                targetPage = new SearchController().searchPage(null, false, false, session, model);
+                targetPage = new SearchController().defaultSearchPage( session, model);
             }
             
         } catch (Throwable t) {
@@ -601,11 +601,11 @@ public class ViewItemController extends BaseController {
                 	
                 } else {
                     setErrorMessage("You are not authorized to view the requested entity.", model);
-                    targetPage = new SearchController().searchPage(null, false, false, session, model);
+                    targetPage = new SearchController().defaultSearchPage( session, model);
                 }
             } else {
                 setErrorMessage("The requested entity could not be found.", model);
-                targetPage = new SearchController().searchPage(null, false, false, session, model);
+                targetPage = new SearchController().defaultSearchPage( session, model);
             }
             
         } catch (Throwable t) {
@@ -657,11 +657,11 @@ public class ViewItemController extends BaseController {
                 	
                 } else {
                     setErrorMessage("You are not authorized to view the requested entity.", model);
-                    targetPage = new SearchController().searchPage(null, false, false, session, model);
+                    targetPage = new SearchController().defaultSearchPage( session, model);
                 }
             } else {
                 setErrorMessage("The requested entity could not be found.", model);
-                targetPage = new SearchController().searchPage(null, false, false, session, model);
+                targetPage = new SearchController().defaultSearchPage( session, model);
             }
             
         } catch (Throwable t) {

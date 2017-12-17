@@ -42,7 +42,7 @@ import org.opentravel.schemacompiler.model.TLProperty;
  */
 public class EntityComparator extends BaseComparator {
 	
-	private DisplayFomatter formatter = new DisplayFomatter();
+	private DisplayFormatter formatter = new DisplayFormatter();
 	
 	/**
 	 * Constructor that initializes the comparison options and namespace mappings

@@ -77,7 +77,7 @@ public class LoginController extends BaseController {
         } else { // authentication failed
             model.addAttribute("loginError", true);
             model.addAttribute("userId", userId);
-            return new SearchController().searchPage(null, false, false, session, model);
+            return new SearchController().defaultSearchPage(session, model);
         }
     }
 
