@@ -1186,6 +1186,7 @@ public final class ProjectManager {
             throws LibraryLoaderException, RepositoryException {
         LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>(model);
         List<ProjectItem> newItems = new ArrayList<ProjectItem>();
+        boolean listenersEnabled = model.isListenersEnabled();
 
         // Initialize the loader and validation findings
         if (monitor != null) monitor.beginLoad( libraryFiles.size() + managedItems.size() );
@@ -1215,6 +1216,7 @@ public final class ProjectManager {
             // Load the library from the local file system if it does not already exist in the model
             if (!model.hasLibrary(libraryUrl)) {
                 try {
+                	model.setListenersEnabled( false );
                     modelLoader.loadLibraryModel(new LibraryStreamInputSource(libraryUrl));
 
                     AbstractLibrary managedLibrary = model.getLibrary(libraryUrl);
@@ -1257,6 +1259,9 @@ public final class ProjectManager {
                                                 .getExceptionClass(t).getSimpleName(),
                                         ExceptionUtils.getExceptionMessage(t));
                     }
+                    
+                } finally {
+                	model.setListenersEnabled( listenersEnabled );
                 }
 
             } else { // Otherwise, locate the existing project item
@@ -1284,6 +1289,7 @@ public final class ProjectManager {
                                                         // system if it does not already exist in
                                                         // the model
                 try {
+                	model.setListenersEnabled( false );
                     modelLoader.loadLibraryModel(new LibraryStreamInputSource(libraryUrl));
 
                     AbstractLibrary unmanagedLibrary = model.getLibrary(libraryUrl);
@@ -1304,7 +1310,11 @@ public final class ProjectManager {
                                                 .getExceptionClass(t).getSimpleName(),
                                         ExceptionUtils.getExceptionMessage(t));
                     }
+                    
+                } finally {
+                	model.setListenersEnabled( listenersEnabled );
                 }
+                
             } else { // Otherwise, locate the existing project item
                 newItem = findOrCreateProjectItem(model.getLibrary(libraryUrl));
             }
