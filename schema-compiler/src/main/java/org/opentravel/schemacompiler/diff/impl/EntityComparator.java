@@ -64,7 +64,7 @@ public class EntityComparator extends BaseComparator {
 	 */
 	public EntityChangeSet compareEntities(EntityComparisonFacade oldEntity, EntityComparisonFacade newEntity) {
 		EntityChangeSet changeSet = new EntityChangeSet( oldEntity.getEntity(), newEntity.getEntity() );
-		List<EntityChangeItem> changeItems = changeSet.getEntityChangeItems();
+		List<EntityChangeItem> changeItems = changeSet.getChangeItems();
 		
 		// Look for changes in the library values
 		AbstractLibrary owningLibrary = oldEntity.getOwningLibrary();
@@ -74,6 +74,8 @@ public class EntityComparator extends BaseComparator {
 		QName newParentTypeName = getEntityName( newEntity.getParentType() );
 		QName oldExtendsTypeName = getEntityName( oldEntity.getExtendsType() );
 		QName newExtendsTypeName = getEntityName( newEntity.getExtendsType() );
+		QName oldBasePayloadTypeName = getEntityName( oldEntity.getBasePayloadType() );
+		QName newBasePayloadTypeName = getEntityName( newEntity.getBasePayloadType() );
 		QName oldSimpleCoreTypeName = getEntityName( oldEntity.getSimpleCoreType() );
 		QName newSimpleCoreTypeName = getEntityName( newEntity.getSimpleCoreType() );
 		
@@ -110,6 +112,29 @@ public class EntityComparator extends BaseComparator {
 						formatter.getEntityDisplayName( oldEntity.getExtendsType() ),
 						formatter.getEntityDisplayName( newEntity.getExtendsType() ) ) );
 			}
+		}
+		if (valueChanged( oldBasePayloadTypeName, newBasePayloadTypeName )) {
+			if (isVersionChange( oldBasePayloadTypeName, newBasePayloadTypeName, versionScheme )) {
+				changeItems.add( new EntityChangeItem( EntityChangeType.BASE_PAYLOAD_VERSION_CHANGED,
+						oldEntity.getOwningLibrary().getVersion(), newEntity.getOwningLibrary().getVersion() ) );
+				
+			} else {
+				changeItems.add( new EntityChangeItem( EntityChangeType.BASE_PAYLOAD_CHANGED,
+						formatter.getEntityDisplayName( oldEntity.getBasePayloadType() ),
+						formatter.getEntityDisplayName( newEntity.getBasePayloadType() ) ) );
+			}
+		}
+		if (oldEntity.getReferenceType() != newEntity.getReferenceType()) {
+			changeItems.add( new EntityChangeItem( EntityChangeType.REFERENCE_TYPE_CHANGED,
+					oldEntity.getReferenceType() + "", newEntity.getReferenceType() + "" ) );
+		}
+		if (valueChanged( oldEntity.getReferenceFacetName(), newEntity.getReferenceFacetName() )) {
+			changeItems.add( new EntityChangeItem( EntityChangeType.REFERENCE_FACET_CHANGED,
+					oldEntity.getReferenceFacetName(), newEntity.getReferenceFacetName() ) );
+		}
+		if (oldEntity.getReferenceRepeat() != newEntity.getReferenceRepeat()) {
+			changeItems.add( new EntityChangeItem( EntityChangeType.REFERENCE_REPEAT_CHANGED,
+					oldEntity.getReferenceRepeat() + "", newEntity.getReferenceRepeat() + "" ) );
 		}
 		if (valueChanged( oldSimpleCoreTypeName, newSimpleCoreTypeName )) {
 			if (isVersionChange( oldSimpleCoreTypeName, newSimpleCoreTypeName, versionScheme )) {
@@ -266,7 +291,7 @@ public class EntityComparator extends BaseComparator {
 									new FieldComparisonFacade( oldVersionFields.get( 0 ) ),
 									new FieldComparisonFacade( newVersionFields.get( 0 ) ) );
 					
-					if (!fieldChangeSet.getFieldChangeItems().isEmpty()) {
+					if (!fieldChangeSet.getChangeItems().isEmpty()) {
 						pendingChangeItems.add( new EntityChangeItem( fieldChangeSet ) );
 					}
 					
@@ -326,7 +351,7 @@ public class EntityComparator extends BaseComparator {
 									FieldChangeSet fieldChangeSet = new FieldComparator( options, fieldNSMappings ).compareFields(
 											new FieldComparisonFacade( oldField ), new FieldComparisonFacade( newField ) );
 									
-									if (!fieldChangeSet.getFieldChangeItems().isEmpty()) {
+									if (!fieldChangeSet.getChangeItems().isEmpty()) {
 										pendingChangeItems.add( new EntityChangeItem( fieldChangeSet ) );
 									}
 								}

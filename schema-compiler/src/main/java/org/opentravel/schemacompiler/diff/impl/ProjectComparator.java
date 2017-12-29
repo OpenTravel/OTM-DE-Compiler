@@ -58,7 +58,7 @@ public class ProjectComparator extends BaseComparator {
 	 */
 	public ProjectChangeSet compareProjects(Project oldProject, Project newProject) {
 		ProjectChangeSet changeSet = new ProjectChangeSet( oldProject, newProject );
-		List<ProjectChangeItem> changeItems = changeSet.getProjectChangeItems();
+		List<ProjectChangeItem> changeItems = changeSet.getChangeItems();
 		Map<QName,TLLibrary> oldLibraries = buildLibraryMap( oldProject );
 		Map<QName,TLLibrary> newLibraries = buildLibraryMap( newProject );
 		SortedSet<QName> oldLibraryNames = new TreeSet<QName>( new QNameComparator() );
@@ -149,7 +149,7 @@ public class ProjectComparator extends BaseComparator {
 					new LibraryComparator( getCompareOptions(), getNamespaceMappings() )
 							.compareLibraries( item.oldVersion, item.newVersion );
 			
-			if (!libraryChangeSet.getLibraryChangeItems().isEmpty()) {
+			if (!libraryChangeSet.getChangeItems().isEmpty()) {
 				changeItems.add( new ProjectChangeItem( item.changeType, libraryChangeSet ) );
 			}
 		}

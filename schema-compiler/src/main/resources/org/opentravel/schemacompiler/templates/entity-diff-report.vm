@@ -12,17 +12,26 @@
 <table class="headerTable">
 	<tr>
 		<td class="headerTableTh">Old Entity Version:</td>
-		<td class="headerTableTd">$formatter.getLocalDisplayName( $changeSet.oldEntity ) ($formatter.getLibraryFilename( $changeSet.oldEntity.owningLibrary ))</td>
+		<td class="headerTableTd">
+			$formatter.getLocalDisplayName( $changeSet.oldVersion ) ($formatter.getLibraryFilename( $changeSet.oldVersion.owningLibrary ))
+			#set ( $repoViewUrl = $formatter.getEntityViewDetailsUrl( $entityChangeSet.oldVersion ) )
+			#if ($repoViewUrl != "")&nbsp; <small>[ <a href="$repoViewUrl">Repository View</a> ]</small> #end
+		</td>
 	</tr><tr>
 		<td class="headerTableTh">New Entity Version:</td>
-		<td class="headerTableTd">$formatter.getLocalDisplayName( $changeSet.newEntity ) ($formatter.getLibraryFilename( $changeSet.newEntity.owningLibrary ))</td>
+		<td class="headerTableTd">
+			$formatter.getLocalDisplayName( $changeSet.newVersion ) ($formatter.getLibraryFilename( $changeSet.newVersion.owningLibrary ))
+			#set ( $repoViewUrl = $formatter.getEntityViewDetailsUrl( $entityChangeSet.newVersion ) )
+			#if ($repoViewUrl != "")&nbsp; <small>[ <a href="$repoViewUrl">Repository View</a> ]</small> #end
+		</td>
 	</tr><tr>
 		<td class="headerTableTh">Report Date/Time:</td>
 		<td class="headerTableTd">$formatter.reportTimestamp()</td>
 	</tr>
 </table>
 
-<h4>Modified Entity: $formatter.getLocalDisplayName( $changeSet.newEntity ) ($formatter.getLibraryDisplayName( $changeSet.newEntity.owningLibrary ))</h4>
+<h3>Modified Entity: $formatter.getLocalDisplayName( $changeSet.newVersion )</h3>
+<small>[ $formatter.getLibraryDisplayName( $changeSet.newVersion.owningLibrary ) ]</small>
 #set ( $entityChangeSet = $changeSet )
 #parse( "$TEMPLATE_FOLDER/entity-diff-table.vm" )
 

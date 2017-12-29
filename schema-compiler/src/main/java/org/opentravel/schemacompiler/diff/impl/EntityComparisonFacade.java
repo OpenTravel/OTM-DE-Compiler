@@ -22,8 +22,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAbstractEnumeration;
+import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
@@ -33,6 +35,10 @@ import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLMemberField;
 import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.model.TLProperty;
+import org.opentravel.schemacompiler.model.TLPropertyOwner;
+import org.opentravel.schemacompiler.model.TLReferenceType;
+import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.version.MinorVersionHelper;
@@ -54,6 +60,10 @@ public class EntityComparisonFacade {
 	private String name;
 	private NamedEntity parentType;
 	private NamedEntity extendsType;
+	private NamedEntity basePayloadType;
+	private TLReferenceType referenceType;
+	private String referenceFacetName;
+	private int referenceRepeat;
 	private NamedEntity simpleCoreType;
 	private List<String> aliasNames = new ArrayList<>();
 	private List<String> facetNames = new ArrayList<>();
@@ -108,6 +118,12 @@ public class EntityComparisonFacade {
 			
 		} else if (entity instanceof TLExtensionPointFacet) {
 			init( (TLExtensionPointFacet) entity );
+			
+		} else if (entity instanceof TLResource) {
+			init( (TLResource) entity );
+			
+		} else if (entity instanceof TLActionFacet) {
+			init( (TLActionFacet) entity );
 		}
 	}
 	
@@ -184,8 +200,6 @@ public class EntityComparisonFacade {
 	 * @param entity  the entity from which to create the facade
 	 */
 	private void init(TLCoreObject entity) {
-		List<TLCoreObject> versionChain = getMinorVersions( entity );
-		
 		this.entityType = entity.getClass();
 		this.owningLibrary = (TLLibrary) entity.getOwningLibrary();
 		this.name = entity.getName();
@@ -196,13 +210,7 @@ public class EntityComparisonFacade {
 		this.roleNames = ModelCompareUtils.getRoleNames( entity );
 		this.equivalents = ModelCompareUtils.getEquivalents( entity );
 		this.documentation = entity.getDocumentation();
-		
-		for (TLCoreObject entityVersion : versionChain) {
-			this.memberFields.addAll( entityVersion.getSummaryFacet().getMemberFields() );
-		}
-		for (TLCoreObject entityVersion : versionChain) {
-			this.memberFields.addAll( entityVersion.getDetailFacet().getMemberFields() );
-		}
+		addCoreObjectFields( entity );
 	}
 	
 	/**
@@ -211,8 +219,6 @@ public class EntityComparisonFacade {
 	 * @param entity  the entity from which to create the facade
 	 */
 	private void init(TLChoiceObject entity) {
-		List<TLChoiceObject> versionChain = getMinorVersions( entity );
-		
 		this.entityType = entity.getClass();
 		this.owningLibrary = (TLLibrary) entity.getOwningLibrary();
 		this.name = entity.getName();
@@ -221,13 +227,7 @@ public class EntityComparisonFacade {
 		this.facetNames = ModelCompareUtils.getFacetNames( entity );
 		this.equivalents = ModelCompareUtils.getEquivalents( entity );
 		this.documentation = entity.getDocumentation();
-		
-		for (TLChoiceObject entityVersion : versionChain) {
-			this.memberFields.addAll( entityVersion.getSharedFacet().getMemberFields() );
-		}
-		for (TLChoiceObject entityVersion : versionChain) {
-			addContextualFacetFields( entityVersion.getChoiceFacets(), new HashSet<TLContextualFacet>() );
-		}
+		addChoiceObjectFields( entity );
 	}
 	
 	/**
@@ -327,6 +327,101 @@ public class EntityComparisonFacade {
 	}
 	
 	/**
+	 * Initializes this comparison facade using the given resource.
+	 * 
+	 * @param entity  the entity from which to create the facade
+	 */
+	private void init(TLResource entity) {
+		this.entityType = entity.getClass();
+		this.owningLibrary = (TLLibrary) entity.getOwningLibrary();
+		this.name = entity.getName();
+	}
+	
+	/**
+	 * Initializes this comparison facade using the given action facet type.
+	 * 
+	 * @param entity  the entity from which to create the facade
+	 */
+	private void init(TLActionFacet entity) {
+		NamedEntity messagePayload = ResourceCodegenUtils.getPayloadType( entity );
+		NamedEntity basePayload = entity.getBasePayload();
+		
+		if (!entity.getOwningResource().isAbstract()
+				&& (messagePayload instanceof TLActionFacet)
+				&& (entity.getReferenceType() != TLReferenceType.NONE)) {
+			TLPropertyOwner boElementOwner = null;
+			TLProperty boElement;
+			
+			if (basePayload == null) {
+				TLCoreObject dummyCore = new TLCoreObject();
+				
+				// If null, we need to create a dummy owner for the BO property so
+				// the comparator can find it's owning namespace later.
+				dummyCore.setName("__dummy__");
+				dummyCore.setOwningLibrary( entity.getOwningLibrary() );
+				basePayload = dummyCore;
+			}
+			if (basePayload instanceof TLCoreObject) {
+				boElementOwner = ((TLCoreObject) basePayload).getSummaryFacet();
+				
+			} else if (basePayload instanceof TLChoiceObject) {
+				boElementOwner = ((TLChoiceObject) basePayload).getSharedFacet();
+			}
+			boElement = ResourceCodegenUtils.createBusinessObjectElement( entity, boElementOwner );
+			
+			if (boElement != null) {
+				this.memberFields.add( boElement );
+			}
+		}
+		
+		if (basePayload instanceof TLChoiceObject) {
+			addChoiceObjectFields( (TLChoiceObject) basePayload );
+			
+		} else if (basePayload instanceof TLCoreObject) {
+			addCoreObjectFields( (TLCoreObject) basePayload );
+		}
+		
+		this.entityType = entity.getClass();
+		this.owningLibrary = (TLLibrary) entity.getOwningLibrary();
+		this.referenceType = entity.getReferenceType();
+		this.referenceRepeat = entity.getReferenceRepeat();
+		this.referenceFacetName = entity.getReferenceFacetName();
+		this.documentation = entity.getDocumentation();
+	}
+	
+	/**
+	 * Adds all of the member fields for the given core object to this facade.
+	 * 
+	 * @param entity  the core object whose fields are to be added
+	 */
+	private void addCoreObjectFields(TLCoreObject entity) {
+		List<TLCoreObject> versionChain = getMinorVersions( entity );
+		
+		for (TLCoreObject entityVersion : versionChain) {
+			this.memberFields.addAll( entityVersion.getSummaryFacet().getMemberFields() );
+		}
+		for (TLCoreObject entityVersion : versionChain) {
+			this.memberFields.addAll( entityVersion.getDetailFacet().getMemberFields() );
+		}
+	}
+	
+	/**
+	 * Adds all of the member fields for the given choice object to this facade.
+	 * 
+	 * @param entity  the choice object whose fields are to be added
+	 */
+	private void addChoiceObjectFields(TLChoiceObject entity) {
+		List<TLChoiceObject> versionChain = getMinorVersions( entity );
+		
+		for (TLChoiceObject entityVersion : versionChain) {
+			this.memberFields.addAll( entityVersion.getSharedFacet().getMemberFields() );
+		}
+		for (TLChoiceObject entityVersion : versionChain) {
+			addContextualFacetFields( entityVersion.getChoiceFacets(), new HashSet<TLContextualFacet>() );
+		}
+	}
+	
+	/**
 	 * Recursive method that adds all fields for the given contextual facet and all of its
 	 * children to the list of member fields for this facade.
 	 * 
@@ -415,6 +510,42 @@ public class EntityComparisonFacade {
 	 */
 	public NamedEntity getExtendsType() {
 		return extendsType;
+	}
+
+	/**
+	 * Returns the value of the 'basePayloadType' field.
+	 *
+	 * @return NamedEntity
+	 */
+	public NamedEntity getBasePayloadType() {
+		return basePayloadType;
+	}
+
+	/**
+	 * Returns the value of the 'referenceType' field.
+	 *
+	 * @return TLReferenceType
+	 */
+	public TLReferenceType getReferenceType() {
+		return referenceType;
+	}
+
+	/**
+	 * Returns the value of the 'referenceFacetName' field.
+	 *
+	 * @return String
+	 */
+	public String getReferenceFacetName() {
+		return referenceFacetName;
+	}
+
+	/**
+	 * Returns the value of the 'referenceRepeat' field.
+	 *
+	 * @return int
+	 */
+	public int getReferenceRepeat() {
+		return referenceRepeat;
 	}
 
 	/**

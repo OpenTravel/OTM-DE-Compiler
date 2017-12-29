@@ -12,10 +12,10 @@
 <table class="headerTable">
 	<tr>
 		<td class="headerTableTh">Old Project Version:</td>
-		<td class="headerTableTd">$changeSet.oldProject.projectFile.name</td>
+		<td class="headerTableTd">$changeSet.oldVersion.projectFile.name</td>
 	</tr><tr>
 		<td class="headerTableTh">New Project Version:</td>
-		<td class="headerTableTd">$changeSet.newProject.projectFile.name</td>
+		<td class="headerTableTd">$changeSet.newVersion.projectFile.name</td>
 	</tr><tr>
 		<td class="headerTableTh">Report Date/Time:</td>
 		<td class="headerTableTd">$formatter.reportTimestamp()</td>
@@ -31,19 +31,27 @@
 		<th>Old Value</th>
 		<th>New Value</th>
 	</tr>
-	#if ($changeSet.projectChangeItems.empty)
+	#if ($changeSet.changeItems.empty)
 		<td colspan="3">No differences found.</td>
 	#end
-	#foreach ( $changeItem in $changeSet.projectChangeItems )
+	#foreach ( $changeItem in $changeSet.changeItems )
 		<tr class="$rowstyle">
 			<td>$changeItem.displayMessage</td>
 			#if ($changeItem.modifiedLibrary)
-				<td colspan="2">$formatter.getLibraryDisplayName( $changeItem.modifiedLibrary.newLibrary ) (<a href="#$changeItem.modifiedLibrary.bookmarkId">View Details</a>)</td>
+				<td colspan="2">$formatter.getLibraryDisplayName( $changeItem.modifiedLibrary.newVersion ) (<a href="#$changeItem.modifiedLibrary.bookmarkId">View Details</a>)</td>
 			#elseif ($changeItem.addedLibrary)
 				<td>&nbsp;</td>
-				<td>$formatter.getLibraryDisplayName( $changeItem.addedLibrary )</td>
+				<td>
+					$formatter.getLibraryDisplayName( $changeItem.addedLibrary )
+					#set ( $repoViewUrl = $formatter.getLibraryViewDetailsUrl( $changeItem.addedLibrary ) )
+					#if ($repoViewUrl != "") &nbsp; <small>[ <a href="$repoViewUrl">Repository View</a> ]</small> #end
+				</td>
 			#elseif ($changeItem.deletedLibrary)
-				<td>$formatter.getLibraryDisplayName( $changeItem.deletedLibrary )</td>
+				<td>
+					$formatter.getLibraryDisplayName( $changeItem.deletedLibrary )
+					#set ( $repoViewUrl = $formatter.getLibraryViewDetailsUrl( $changeItem.deletedLibrary ) )
+					#if ($repoViewUrl != "") &nbsp; <small>[ <a href="$repoViewUrl">Repository View</a> ]</small> #end
+				</td>
 				<td>&nbsp;</td>
 			#else
 				<td>#if ($changeItem.oldValue) $changeItem.oldValue #else &nbsp; #end</td>
@@ -54,24 +62,33 @@
 	#end
 </table>
 
-#foreach ( $changeItem in $changeSet.projectChangeItems )
-#if ($changeItem.modifiedLibrary)
-#set ( $libraryChangeSet = $changeItem.modifiedLibrary )
-<br><a name="$libraryChangeSet.bookmarkId" />
-<h3>Modified Library: $formatter.getLibraryDisplayName( $libraryChangeSet.newLibrary )</h3>
-#parse( "$TEMPLATE_FOLDER/library-diff-table.vm" )
+#foreach ( $changeItem in $changeSet.changeItems )
+	#if ($changeItem.modifiedLibrary)
+		#set ( $libraryChangeSet = $changeItem.modifiedLibrary )
+		<br><a name="$libraryChangeSet.bookmarkId" />
+		<h3>Modified Library: $formatter.getLibraryDisplayName( $libraryChangeSet.newVersion )</h3>
+		#parse( "$TEMPLATE_FOLDER/library-diff-table.vm" )
 
-#foreach ( $libraryChangeItem in $libraryChangeSet.libraryChangeItems )
-#if ($libraryChangeItem.modifiedEntity)
-#set ( $entityChangeSet = $libraryChangeItem.modifiedEntity )
-<br><a name="$entityChangeSet.bookmarkId" />
-<h4>Modified Entity: $formatter.getLocalDisplayName( $entityChangeSet.newEntity ) ($formatter.getLibraryDisplayName( $libraryChangeSet.newLibrary ))</h4>
-#parse( "$TEMPLATE_FOLDER/entity-diff-table.vm" )
+		#foreach ( $libraryChangeItem in $libraryChangeSet.changeItems )
 
-#end
-#end
+			#if ($libraryChangeItem.modifiedEntity)
+				#set ( $entityChangeSet = $libraryChangeItem.modifiedEntity )
+				<br><a name="$entityChangeSet.bookmarkId" />
+				<h4>Modified Entity: $formatter.getLocalDisplayName( $entityChangeSet.newVersion )</h4>
+				<small>[ $formatter.getLibraryDisplayName( $entityChangeSet.newVersion.owningLibrary ) ]</small>
+				#set ( $viewDetailsUrl = $formatter.getEntityViewDetailsUrl( $entityChangeSet.newVersion ) )
+				#if ($viewDetailsUrl) <small><a href="$viewDetailsUrl">View Details</a></small> #end
+				#parse( "$TEMPLATE_FOLDER/entity-diff-table.vm" )
+			#end
 
-#end
+			#if ($libraryChangeItem.modifiedResource)
+				#set ( $resourceChangeSet = $libraryChangeItem.modifiedResource )
+				#parse( "$TEMPLATE_FOLDER/resource-diff-group.vm" )
+			#end
+
+		#end
+
+	#end
 #end
 
 <p/><br/><p/><br/><p/><br/><p/><br/><p/><br/>

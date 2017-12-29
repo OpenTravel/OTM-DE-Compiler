@@ -56,7 +56,7 @@ public class FieldComparator extends BaseComparator {
 		int oldRepeatCount = (oldField.getRepeatCount() <= 1) ? 0 : oldField.getRepeatCount();
 		int newRepeatCount = (newField.getRepeatCount() <= 1) ? 0 : newField.getRepeatCount();
 		FieldChangeSet changeSet = new FieldChangeSet( oldField.getField(), newField.getField() );
-		List<FieldChangeItem> changeItems = changeSet.getFieldChangeItems();
+		List<FieldChangeItem> changeItems = changeSet.getChangeItems();
 		QName oldAssignedTypeName = getEntityName( oldField.getAssignedType() );
 		QName newAssignedTypeName = getEntityName( newField.getAssignedType() );
 		

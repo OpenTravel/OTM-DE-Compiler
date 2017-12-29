@@ -16,9 +16,6 @@
 
 package org.opentravel.schemacompiler.diff;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.opentravel.schemacompiler.model.TLLibrary;
 
 /**
@@ -26,11 +23,7 @@ import org.opentravel.schemacompiler.model.TLLibrary;
  * well as the entity change sets for the library members that existed in both versions
  * of the library.
  */
-public class LibraryChangeSet extends ChangeSet {
-	
-	private TLLibrary oldLibrary;
-	private TLLibrary newLibrary;
-	private List<LibraryChangeItem> libraryChangeItems = new ArrayList<>();
+public class LibraryChangeSet extends ChangeSet<TLLibrary,LibraryChangeItem> {
 	
 	/**
 	 * Constructor that assigns the old and new version of a library that was modified.
@@ -39,42 +32,14 @@ public class LibraryChangeSet extends ChangeSet {
 	 * @param newLibrary  the new version of the library
 	 */
 	public LibraryChangeSet(TLLibrary oldLibrary, TLLibrary newLibrary) {
-		this.oldLibrary = oldLibrary;
-		this.newLibrary = newLibrary;
-	}
-	
-	/**
-	 * Returns the old version of the library.
-	 *
-	 * @return TLLibrary
-	 */
-	public TLLibrary getOldLibrary() {
-		return oldLibrary;
-	}
-	
-	/**
-	 * Returns the new version of the library.
-	 *
-	 * @return TLLibrary
-	 */
-	public TLLibrary getNewLibrary() {
-		return newLibrary;
-	}
-	
-	/**
-	 * Returns the list of changes between the old and new version of the library.
-	 *
-	 * @return List<LibraryChangeItem>
-	 */
-	public List<LibraryChangeItem> getLibraryChangeItems() {
-		return libraryChangeItems;
+		super( oldLibrary, newLibrary );
 	}
 	
 	/**
 	 * @see org.opentravel.schemacompiler.diff.ChangeSet#getBookmarkId()
 	 */
 	public String getBookmarkId() {
-		return getBookmarkId( (newLibrary != null) ? newLibrary : oldLibrary );
+		return getBookmarkId( (getNewVersion() != null) ? getNewVersion() : getOldVersion() );
 	}
 
 }

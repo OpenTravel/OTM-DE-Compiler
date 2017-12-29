@@ -5,19 +5,43 @@
 		<th>Old Value</th>
 		<th>New Value</th>
 	</tr>
-	#if ($libraryChangeSet.libraryChangeItems.empty)
+	#if ($libraryChangeSet.changeItems.empty)
 		<td colspan="3">No differences found.</td>
 	#end
-	#foreach ( $libraryChangeItem in $libraryChangeSet.libraryChangeItems )
+	#foreach ( $libraryChangeItem in $libraryChangeSet.changeItems )
 		<tr class="$rowstyle">
 			<td>$libraryChangeItem.displayMessage</td>
 			#if ($libraryChangeItem.modifiedEntity)
-				<td colspan="2">$formatter.getEntityDisplayName( $libraryChangeItem.modifiedEntity.newEntity ) (<a href="#$libraryChangeItem.modifiedEntity.bookmarkId">View Details</a>)</td>
+				<td colspan="2">$formatter.getEntityDisplayName( $libraryChangeItem.modifiedEntity.newVersion ) (<a href="#$libraryChangeItem.modifiedEntity.bookmarkId">View Details</a>)</td>
 			#elseif ($libraryChangeItem.addedEntity)
 				<td>&nbsp;</td>
-				<td>$formatter.getEntityDisplayName( $libraryChangeItem.addedEntity )</td>
+				<td>
+					$formatter.getEntityDisplayName( $libraryChangeItem.addedEntity )
+					#set ( $repoViewUrl = $formatter.getEntityViewDetailsUrl( $libraryChangeItem.addedEntity ) )
+					#if ($repoViewUrl != "") &nbsp; <small>[ <a href="$repoViewUrl">Repository View</a> ]</small> #end
+				</td>
 			#elseif ($libraryChangeItem.deletedEntity)
-				<td>$formatter.getEntityDisplayName( $libraryChangeItem.deletedEntity )</td>
+				<td>
+					$formatter.getEntityDisplayName( $libraryChangeItem.deletedEntity )
+					#set ( $repoViewUrl = $formatter.getEntityViewDetailsUrl( $libraryChangeItem.deletedEntity ) )
+					#if ($repoViewUrl != "") &nbsp; <small>[ <a href="$repoViewUrl">Repository View</a> ]</small> #end
+				</td>
+				<td>&nbsp;</td>
+			#elseif ($libraryChangeItem.modifiedResource)
+				<td colspan="2">$formatter.getEntityDisplayName( $libraryChangeItem.modifiedResource.newVersion ) (<a href="#$libraryChangeItem.modifiedResource.bookmarkId">View Details</a>)</td>
+			#elseif ($libraryChangeItem.addedResource)
+				<td>&nbsp;</td>
+				<td>
+					$formatter.getEntityDisplayName( $libraryChangeItem.addedResource )
+					#set ( $repoViewUrl = $formatter.getEntityViewDetailsUrl( $libraryChangeItem.addedResource ) )
+					#if ($repoViewUrl != "") &nbsp; <small>[ <a href="$repoViewUrl">Repository View</a> ]</small> #end
+				</td>
+			#elseif ($libraryChangeItem.deletedResource)
+				<td>
+					$formatter.getEntityDisplayName( $libraryChangeItem.deletedResource )
+					#set ( $repoViewUrl = $formatter.getEntityViewDetailsUrl( $libraryChangeItem.deletedResource ) )
+					#if ($repoViewUrl != "") &nbsp; <small>[ <a href="$repoViewUrl">Repository View</a> ]</small> #end
+				</td>
 				<td>&nbsp;</td>
 			#else
 				<td>#if ($libraryChangeItem.oldValue) $libraryChangeItem.oldValue #else &nbsp; #end</td>

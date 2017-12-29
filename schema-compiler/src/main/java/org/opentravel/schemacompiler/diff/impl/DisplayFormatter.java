@@ -16,7 +16,10 @@
 
 package org.opentravel.schemacompiler.diff.impl;
 
+import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -28,12 +31,24 @@ import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLAction;
+import org.opentravel.schemacompiler.model.TLActionFacet;
+import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.model.TLMemberField;
 import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.model.TLParamGroup;
+import org.opentravel.schemacompiler.model.TLParameter;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLPropertyType;
+import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.model.TLResourceParentRef;
+import org.opentravel.schemacompiler.repository.RemoteRepository;
+import org.opentravel.schemacompiler.repository.RepositoryException;
+import org.opentravel.schemacompiler.repository.RepositoryItem;
+import org.opentravel.schemacompiler.repository.RepositoryManager;
+import org.opentravel.schemacompiler.util.URLUtils;
 
 /**
  * Methods used to format user-displayable names for various OTM object types.
@@ -41,6 +56,20 @@ import org.opentravel.schemacompiler.model.TLPropertyType;
 public class DisplayFormatter {
 	
 	private static DateFormat dateFormat = new SimpleDateFormat( "MMMMM d, yyyy '&amp;' h:mma z" );
+	
+	private RepositoryManager repositoryManager;
+	
+	/**
+	 * Default constructor.
+	 */
+	public DisplayFormatter() {
+		try {
+			repositoryManager = RepositoryManager.getDefault();
+			
+		} catch (RepositoryException e) {
+			throw new RuntimeException("Unable to initialize repository manager.", e);
+		}
+	}
 	
 	/**
 	 * Returns a user-displayable string with the current date and time.
@@ -170,6 +199,76 @@ public class DisplayFormatter {
 	}
 	
 	/**
+	 * Returns a display name for the given entity.
+	 * 
+	 * @param entity  the entity for which to return a display name
+	 * @return String
+	 */
+	public String getParentRefDisplayName(TLResourceParentRef entity) {
+		TLResource parentResource = entity.getParentResource();
+		TLParamGroup parentParamGroup = entity.getParentParamGroup();
+		StringBuilder displayName = new StringBuilder();
+		
+		displayName.append( (parentResource == null) ? "UNKNOWN" : getLocalDisplayName( parentResource ) );
+		displayName.append(" / ");
+		displayName.append( (parentParamGroup == null) ? "UNKNOWN" : getParamGroupDisplayName( parentParamGroup ) );
+		return displayName.toString();
+	}
+	
+	/**
+	 * Returns a display name for the given entity.
+	 * 
+	 * @param entity  the entity for which to return a display name
+	 * @return String
+	 */
+	public String getParamGroupDisplayName(TLParamGroup entity) {
+		return entity.getName();
+	}
+	
+	/**
+	 * Returns a display name for the given entity.
+	 * 
+	 * @param entity  the entity for which to return a display name
+	 * @return String
+	 */
+	public String getParameterDisplayName(TLParameter entity) {
+		TLParamGroup paramGroup = entity.getOwner();
+		StringBuilder displayName = new StringBuilder();
+		
+		displayName.append( paramGroup.getName() );
+		displayName.append(" - ");
+		displayName.append(entity.getFieldRefName());
+		return displayName.toString();
+	}
+	
+	/**
+	 * Returns a display name for the given entity.
+	 * 
+	 * @param entity  the entity for which to return a display name
+	 * @return String
+	 */
+	public String getActionDisplayName(TLAction entity) {
+		return entity.getActionId();
+	}
+	
+	/**
+	 * Returns a display name for the given entity.
+	 * 
+	 * @param entity  the entity for which to return a display name
+	 * @return String
+	 */
+	public String getActionResponseDisplayName(TLActionResponse entity) {
+		StringBuilder displayName = new StringBuilder();
+		TLAction action = entity.getOwner();
+		
+		displayName.append( (action == null) ? "UNKNOWN" : action.getActionId() );
+		displayName.append( " [" );
+		displayName.append( ResourceComparator.getResponseId( entity ) );
+		displayName.append( "]" );
+		return displayName.toString();
+	}
+	
+	/**
 	 * Returns the name of the field as it will be referenced in an XML schema
 	 * declaration.
 	 * 
@@ -205,6 +304,88 @@ public class DisplayFormatter {
 	        }
 		}
 		return fieldName;
+	}
+	
+	/**
+	 * Returns the repository URL for the given library or null if the library
+	 * is not managed by a repository.
+	 * 
+	 * @param library  the library for which to return a repository URL
+	 * @return String
+	 */
+	public String getLibraryViewDetailsUrl(TLLibrary library) {
+		RepositoryItem item = getRepositoryItem( library );
+		String url = null;
+		
+		if ((item != null) && (item.getRepository() instanceof RemoteRepository)) {
+			try {
+				StringBuilder urlBuilder = new StringBuilder( ((RemoteRepository) item.getRepository()).getEndpointUrl() );
+				
+				urlBuilder.append( "/console/libraryDictionary.html" );
+				urlBuilder.append( "?baseNamespace=" ).append( URLEncoder.encode( library.getBaseNamespace(), "UTF-8" ) );
+				urlBuilder.append( "&filename=" ).append( item.getFilename() );
+				urlBuilder.append( "&version=" ).append( item.getVersion() );
+				url = urlBuilder.toString();
+				
+			} catch (UnsupportedEncodingException e) {
+				// Ignore error and return null
+			}
+		}
+		return (url == null) ? "" : url;
+	}
+	
+	/**
+	 * Returns the repository URL for the given entity or null if the entity's library
+	 * is not managed by a repository.
+	 * 
+	 * @param library  the entity for which to return a repository URL
+	 * @return String
+	 */
+	public String getEntityViewDetailsUrl(NamedEntity entity) {
+		AbstractLibrary lib = ((entity == null) || (entity instanceof TLActionFacet)) ? null : entity.getOwningLibrary();
+		String url = null;
+		
+		if (lib instanceof TLLibrary) {
+			TLLibrary library = (TLLibrary) lib;
+			RepositoryItem item = getRepositoryItem( library );
+			
+			if ((item != null) && (item.getRepository() instanceof RemoteRepository)) {
+				try {
+					StringBuilder urlBuilder = new StringBuilder( ((RemoteRepository) item.getRepository()).getEndpointUrl() );
+					
+					urlBuilder.append( "/console/entityDictionary.html" );
+					urlBuilder.append( "?namespace=" ).append( URLEncoder.encode( entity.getNamespace(), "UTF-8" ) );
+					urlBuilder.append( "&localName=" ).append( entity.getLocalName() );
+					url = urlBuilder.toString();
+					
+				} catch (UnsupportedEncodingException e) {
+					// Ignore error and return null
+				}
+			}
+		}
+		return (url == null) ? "" : url;
+	}
+	
+	/**
+	 * Returns the repository item for the given library or null if the
+	 * library is not managed by a repository.
+	 * 
+	 * @param library  the library for which to return the repository item
+	 * @return RemoteRepository
+	 */
+	private RepositoryItem getRepositoryItem(AbstractLibrary library) {
+		RepositoryItem item = null;
+		
+		if ((library != null) && URLUtils.isFileURL( library.getLibraryUrl() )) {
+			try {
+				File libraryFile = URLUtils.toFile( library.getLibraryUrl() );
+				item = repositoryManager.getRepositoryItem( libraryFile );
+				
+			} catch (RepositoryException e) {
+				// Ignore error and return null
+			}
+		}
+		return item;
 	}
 	
 }

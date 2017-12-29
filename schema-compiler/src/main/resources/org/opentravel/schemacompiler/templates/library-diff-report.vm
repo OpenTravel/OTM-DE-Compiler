@@ -12,28 +12,45 @@
 <table class="headerTable">
 	<tr>
 		<td class="headerTableTh">Old Library Version:</td>
-		<td class="headerTableTd">$formatter.getLibraryFilename( $changeSet.oldLibrary )</td>
+		<td class="headerTableTd">
+			$formatter.getLibraryFilename( $changeSet.oldVersion )
+			#set ( $repoViewUrl = $formatter.getLibraryViewDetailsUrl( $changeSet.oldVersion ) )
+			#if ($repoViewUrl != "") &nbsp; <small>[ <a href="$repoViewUrl">Repository View</a> ]</small> #end
+		</td>
 	</tr><tr>
 		<td class="headerTableTh">New Library Version:</td>
-		<td class="headerTableTd">$formatter.getLibraryFilename( $changeSet.newLibrary )</td>
+		<td class="headerTableTd">
+			$formatter.getLibraryFilename( $changeSet.newVersion )
+			#set ( $repoViewUrl = $formatter.getLibraryViewDetailsUrl( $changeSet.newVersion ) )
+			#if ($repoViewUrl != "") &nbsp; <small>[ <a href="$repoViewUrl">Repository View</a> ]</small> #end
+		</td>
 	</tr><tr>
 		<td class="headerTableTh">Report Date/Time:</td>
 		<td class="headerTableTd">$formatter.reportTimestamp()</td>
 	</tr>
 </table>
 
-<h2>Library: $formatter.getLibraryDisplayName( $changeSet.newLibrary )</h2>
+<h2>Library: $formatter.getLibraryDisplayName( $changeSet.newVersion )</h2>
 #set ( $libraryChangeSet = $changeSet )
 #parse( "$TEMPLATE_FOLDER/library-diff-table.vm" )
 
-#foreach ( $libraryChangeItem in $changeSet.libraryChangeItems )
-#if ($libraryChangeItem.modifiedEntity)
-#set ( $entityChangeSet = $libraryChangeItem.modifiedEntity )
-<br><a name="$entityChangeSet.bookmarkId" />
-<h3>Modified Entity: $formatter.getLocalDisplayName( $entityChangeSet.newEntity ) ($formatter.getLibraryDisplayName( $changeSet.newLibrary ))</h3>
-#parse( "$TEMPLATE_FOLDER/entity-diff-table.vm" )
+#foreach ( $libraryChangeItem in $changeSet.changeItems )
 
+#if ($libraryChangeItem.modifiedEntity)
+	#set ( $entityChangeSet = $libraryChangeItem.modifiedEntity )
+	<br><a name="$entityChangeSet.bookmarkId" />
+	<h4>Modified Entity: $formatter.getLocalDisplayName( $entityChangeSet.newVersion )</h4>
+	<small>[ $formatter.getLibraryDisplayName( $entityChangeSet.newVersion.owningLibrary ) ]</small>
+	#set ( $repoViewUrl = $formatter.getEntityViewDetailsUrl( $entityChangeSet.newVersion ) )
+	#if ($repoViewUrl != "") &nbsp; <small>[ <a href="$repoViewUrl">Repository View</a> ]</small> #end
+	#parse( "$TEMPLATE_FOLDER/entity-diff-table.vm" )
 #end
+
+#if ($libraryChangeItem.modifiedResource)
+	#set ( $resourceChangeSet = $libraryChangeItem.modifiedResource )
+	#parse( "$TEMPLATE_FOLDER/resource-diff-group.vm" )
+#end
+
 #end
 
 <p/><br/><p/><br/><p/><br/><p/><br/><p/><br/>

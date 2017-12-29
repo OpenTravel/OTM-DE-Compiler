@@ -31,13 +31,16 @@ import org.opentravel.schemacompiler.diff.EntityChangeSet;
 import org.opentravel.schemacompiler.diff.LibraryChangeSet;
 import org.opentravel.schemacompiler.diff.ModelCompareOptions;
 import org.opentravel.schemacompiler.diff.ProjectChangeSet;
+import org.opentravel.schemacompiler.diff.ResourceChangeSet;
 import org.opentravel.schemacompiler.diff.impl.DisplayFormatter;
 import org.opentravel.schemacompiler.diff.impl.EntityComparator;
 import org.opentravel.schemacompiler.diff.impl.EntityComparisonFacade;
 import org.opentravel.schemacompiler.diff.impl.LibraryComparator;
 import org.opentravel.schemacompiler.diff.impl.ProjectComparator;
+import org.opentravel.schemacompiler.diff.impl.ResourceComparator;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.repository.Project;
 
 /**
@@ -49,9 +52,10 @@ import org.opentravel.schemacompiler.repository.Project;
 public class ModelComparator {
 	
 	private static final String TEMPLATE_FOLDER = "/org/opentravel/schemacompiler/templates";
-	private static final String PROJECT_DIFF_TEMPLATE = TEMPLATE_FOLDER + "/project-diff-report.vm";
-	private static final String LIBRARY_DIFF_TEMPLATE = TEMPLATE_FOLDER + "/library-diff-report.vm";
-	private static final String ENTITY_DIFF_TEMPLATE  = TEMPLATE_FOLDER + "/entity-diff-report.vm";
+	private static final String PROJECT_DIFF_TEMPLATE  = TEMPLATE_FOLDER + "/project-diff-report.vm";
+	private static final String LIBRARY_DIFF_TEMPLATE  = TEMPLATE_FOLDER + "/library-diff-report.vm";
+	private static final String ENTITY_DIFF_TEMPLATE   = TEMPLATE_FOLDER + "/entity-diff-report.vm";
+	private static final String RESOURCE_DIFF_TEMPLATE = TEMPLATE_FOLDER + "/resource-diff-report.vm";
 	
 	private static final String VELOCITY_CONFIG_FILE = TEMPLATE_FOLDER + "/velocity.properties";
 	
@@ -134,6 +138,9 @@ public class ModelComparator {
 	 * @return EntityChangeSet
 	 */
 	public EntityChangeSet compareEntities(NamedEntity oldEntity, NamedEntity newEntity) {
+		if ((oldEntity instanceof TLResource) || (newEntity instanceof TLResource)) {
+			throw new IllegalArgumentException("Use 'compareResources()' to compare two OTM resource versions.");
+		}
 		EntityComparator comparator = new EntityComparator( compareOptions, null );
 		
 		comparator.addNamespaceMapping( oldEntity.getNamespace(), newEntity.getNamespace() );
@@ -153,6 +160,34 @@ public class ModelComparator {
 	public void compareEntities(NamedEntity oldEntity, NamedEntity newEntity, OutputStream out)
 			throws IOException {
 		generateReport( compareEntities( oldEntity, newEntity), ENTITY_DIFF_TEMPLATE, out );
+	}
+	
+	/**
+	 * Compares two versions of the same OTM resource.
+	 * 
+	 * @param oldResource  the old resource version
+	 * @param newResource  the new resource version
+	 * @return ResourceChangeSet
+	 */
+	public ResourceChangeSet compareResources(TLResource oldResource, TLResource newResource) {
+		ResourceComparator comparator = new ResourceComparator( compareOptions, null );
+		
+		comparator.addNamespaceMapping( oldResource.getNamespace(), newResource.getNamespace() );
+		return comparator.compareResources( oldResource, newResource );
+	}
+	
+	/**
+	 * Compares two versions of the same OTM entity and writes a formatted HTML report of the
+	 * results to the output stream provided.
+	 * 
+	 * @param oldEntity  the old entity version
+	 * @param newEntity  the new entity version
+	 * @param out  the output stream to which the formatted report will be written
+	 * @throws IOException  thrown if an error occurs during report generation
+	 */
+	public void compareResources(TLResource oldResource, TLResource newResource, OutputStream out)
+			throws IOException {
+		generateReport( compareResources( oldResource, newResource), RESOURCE_DIFF_TEMPLATE, out );
 	}
 	
 	/**

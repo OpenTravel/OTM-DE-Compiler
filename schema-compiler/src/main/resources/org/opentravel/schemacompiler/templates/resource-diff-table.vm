@@ -1,0 +1,78 @@
+#set ( $rowstyle = "rowColor" )
+<table width="80%">
+	<tr>
+		<th>Change Description</th>
+		<th>Old Value</th>
+		<th>New Value</th>
+	</tr>
+	#if ($changeSet.changeItems.empty)
+		<td colspan="3">No differences found.</td>
+	#end
+	#foreach ( $changeItem in $changeSet.changeItems )
+		<tr class="$rowstyle">
+			<td>$changeItem.displayMessage</td>
+			#if ($changeItem.modifiedParentRef)
+				#set ( $parentRefChangeSet = $changeItem.modifiedParentRef )
+				<td colspan="2">$formatter.getParentRefDisplayName( $parentRefChangeSet.newVersion ) (<a href="#$parentRefChangeSet.bookmarkId">View Details</a>)</td>
+			#elseif ($changeItem.addedParentRef)
+				<td>&nbsp;</td>
+				<td>$formatter.getFieldName( $changeItem.addedParentRef )</td>
+			#elseif ($changeItem.deletedParentRef)
+				<td>$formatter.getFieldName( $changeItem.deletedParentRef )</td>
+				<td>&nbsp;</td>
+			#elseif ($changeItem.modifiedParamGroup)
+				#set ( $paramGroupChangeSet = $changeItem.modifiedParamGroup )
+				<td colspan="2">$formatter.getParamGroupDisplayName( $paramGroupChangeSet.newVersion ) (<a href="#$paramGroupChangeSet.bookmarkId">View Details</a>)</td>
+			#elseif ($changeItem.addedParamGroup)
+				<td>&nbsp;</td>
+				<td>$formatter.getFieldName( $changeItem.addedParamGroup )</td>
+			#elseif ($changeItem.deletedParamGroup)
+				<td>$formatter.getFieldName( $changeItem.deletedParamGroup )</td>
+				<td>&nbsp;</td>
+			#elseif ($changeItem.modifiedParameter)
+				#set ( $parameterChangeSet = $changeItem.modifiedParameter )
+				<td colspan="2">$formatter.getParameterDisplayName( $parameterChangeSet.newVersion ) (<a href="#$parameterChangeSet.bookmarkId">View Details</a>)</td>
+			#elseif ($changeItem.addedParameter)
+				<td>&nbsp;</td>
+				<td>$formatter.getFieldName( $changeItem.addedParameter )</td>
+			#elseif ($changeItem.deletedParameter)
+				<td>$formatter.getFieldName( $changeItem.deletedParameter )</td>
+				<td>&nbsp;</td>
+			#elseif ($changeItem.modifiedActionFacet)
+				#set ( $actionFacetChangeSet = $changeItem.modifiedActionFacet )
+				<td colspan="2">$formatter.getLocalDisplayName( $actionFacetChangeSet.newVersion ) (<a href="#$actionFacetChangeSet.bookmarkId">View Details</a>)</td>
+			#elseif ($changeItem.addedActionFacet)
+				<td>&nbsp;</td>
+				<td>$formatter.getFieldName( $changeItem.addedActionFacet )</td>
+			#elseif ($changeItem.deletedActionFacet)
+				<td>$formatter.getFieldName( $changeItem.deletedActionFacet )</td>
+				<td>&nbsp;</td>
+			#elseif ($changeItem.modifiedAction)
+				#set ( $actionChangeSet = $changeItem.modifiedAction )
+				<td colspan="2">$formatter.getActionDisplayName( $actionChangeSet.newVersion ) (<a href="#$actionChangeSet.bookmarkId">View Details</a>)</td>
+			#elseif ($changeItem.addedAction)
+				<td>&nbsp;</td>
+				<td>$formatter.getFieldName( $changeItem.addedAction )</td>
+			#elseif ($changeItem.deletedAction)
+				<td>$formatter.getFieldName( $changeItem.deletedAction )</td>
+				<td>&nbsp;</td>
+			#elseif ($changeItem.modifiedActionResponse)
+				#set ( $actionResponseChangeSet = $changeItem.modifiedActionResponse )
+				<td colspan="2">$formatter.getActionResponseDisplayName( $actionResponseChangeSet.newVersion ) (<a href="#$actionResponseChangeSet.bookmarkId">View Details</a>)</td>
+			#elseif ($changeItem.addedActionResponse)
+				<td>&nbsp;</td>
+				<td>$formatter.getFieldName( $changeItem.addedActionResponse )</td>
+			#elseif ($changeItem.deletedActionResponse)
+				<td>$formatter.getFieldName( $changeItem.deletedActionResponse )</td>
+				<td>&nbsp;</td>
+			#elseif ($changeItem.changeType == "DOCUMENTATION_CHANGED")
+				<td colspan="2">See model for details</td>
+			#else
+				<td>#if ($changeItem.oldValue) $changeItem.oldValue #else &nbsp; #end</td>
+				<td>#if ($changeItem.newValue) $changeItem.newValue #else &nbsp; #end</td>
+			#end
+		</tr>
+		#if ($rowstyle == "rowColor") #set ($rowstyle = "altColor") #else #set ($rowstyle = "rowColor") #end
+	#end
+</table>
+

@@ -16,30 +16,30 @@
 
 package org.opentravel.schemacompiler.diff;
 
-import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLResource;
 
 /**
- * Container for all change items identified during the comparison of two entities, as
- * well as the field change sets for the fields that existed in both versions of the
- * entity.
+ * Container for all change items identified during the comparison of two resources, as
+ * well as the change sets for their member components.
  */
-public class EntityChangeSet extends ChangeSet<NamedEntity,EntityChangeItem> {
+public class ResourceChangeSet extends ChangeSet<TLResource,ResourceChangeItem> {
 	
 	/**
-	 * Constructor that assigns the old and new version of an entity that was modified.
+	 * Constructor that assigns the old and new version of a resource that was modified.
 	 * 
-	 * @param oldEntity  the old version of the entity
-	 * @param newEntity  the new version of the entity
+	 * @param oldResource  the old version of the resource
+	 * @param newResource  the new version of the resource
 	 */
-	public EntityChangeSet(NamedEntity oldEntity, NamedEntity newEntity) {
-		super( oldEntity, newEntity );
+	public ResourceChangeSet(TLResource oldResource, TLResource newResource) {
+		super( oldResource, newResource );
 	}
-	
+
 	/**
 	 * @see org.opentravel.schemacompiler.diff.ChangeSet#getBookmarkId()
 	 */
+	@Override
 	public String getBookmarkId() {
 		return getBookmarkId( (getNewVersion() != null) ? getNewVersion() : getOldVersion() );
 	}
-
+	
 }

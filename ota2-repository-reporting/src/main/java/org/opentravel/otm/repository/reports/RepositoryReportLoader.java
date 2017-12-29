@@ -64,7 +64,7 @@ import org.slf4j.LoggerFactory;
  */
 public class RepositoryReportLoader {
 	
-	public static boolean debug = false;
+	public static boolean debug = true;
 	
     private static final Logger log = LoggerFactory.getLogger( RepositoryReportLoader.class );
 	private static VersionScheme versionScheme;

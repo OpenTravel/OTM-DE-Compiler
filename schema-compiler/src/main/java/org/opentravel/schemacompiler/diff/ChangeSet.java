@@ -16,13 +16,58 @@
 
 package org.opentravel.schemacompiler.diff;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
 
 /**
  * Abstract base class for all OTM-Diff change sets.
  */
-public abstract class ChangeSet {
+public abstract class ChangeSet<E,C extends ChangeItem<?>> {
+	
+	private E oldVersion;
+	private E newVersion;
+	private List<C> changeItems = new ArrayList<>();
+	
+	/**
+	 * Constructor that assigns the old and new version of an entity that was modified.
+	 * 
+	 * @param oldVersion  the old version of the object
+	 * @param newVersion  the new version of the object
+	 */
+	public ChangeSet(E oldVersion, E newVersion) {
+		this.oldVersion = oldVersion;
+		this.newVersion = newVersion;
+	}
+	
+	/**
+	 * Returns the old version of the object.
+	 *
+	 * @return E
+	 */
+	public E getOldVersion() {
+		return oldVersion;
+	}
+
+	/**
+	 * Returns the new version of the object.
+	 *
+	 * @return E
+	 */
+	public E getNewVersion() {
+		return newVersion;
+	}
+
+	/**
+	 * Returns the list of changes between the old and new version.
+	 *
+	 * @return List<C>
+	 */
+	public List<C> getChangeItems() {
+		return changeItems;
+	}
 	
 	/**
 	 * Returns a unique ID for this change set that can be used as a bookmark anchor

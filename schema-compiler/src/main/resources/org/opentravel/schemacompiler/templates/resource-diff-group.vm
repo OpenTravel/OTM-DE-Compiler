@@ -1,0 +1,66 @@
+#set ( $changeSet = $resourceChangeSet )
+<br><a name="$changeSet.bookmarkId" />
+<h4>Modified Resource: $formatter.getLocalDisplayName( $changeSet.newVersion )</h4>
+<small>[ $formatter.getLibraryDisplayName( $changeSet.newVersion.owningLibrary ) ]</small>
+#set ( $repoViewUrl = $formatter.getEntityViewDetailsUrl( $changeSet.newVersion ) )
+#if ($repoViewUrl != "")&nbsp; <small>[ <a href="$repoViewUrl">Repository View</a> ]</small> #end
+#parse( "$TEMPLATE_FOLDER/resource-diff-table.vm" )
+
+#foreach ( $resourceChangeItem in $resourceChangeSet.changeItems )
+	#if ($resourceChangeItem.modifiedParentRef)
+		#set ( $changeSet = $resourceChangeItem.modifiedParentRef )
+			<br><a name="$changeSet.bookmarkId" />
+			<h4>Modified Parent Reference: $formatter.getParentRefDisplayName( $changeSet.newVersion )</h4>
+			<small>[ $formatter.getLibraryDisplayName( $changeSet.newVersion.owningLibrary ) / $formatter.getLocalDisplayName( $changeSet.newVersion.owner ) ]</small>
+			#parse( "$TEMPLATE_FOLDER/resource-diff-table.vm" )
+	#end
+#end
+
+#foreach ( $resourceChangeItem in $resourceChangeSet.changeItems )
+	#if ($resourceChangeItem.modifiedParamGroup)
+		#set ( $changeSet = $resourceChangeItem.modifiedParamGroup )
+		<br><a name="$changeSet.bookmarkId" />
+		<h4>Modified Param Group: $formatter.getParamGroupDisplayName( $changeSet.newVersion )</h4>
+		<small>[ $formatter.getLibraryDisplayName( $changeSet.newVersion.owningLibrary ) / $formatter.getLocalDisplayName( $changeSet.newVersion.owner ) ]</small>
+		#parse( "$TEMPLATE_FOLDER/resource-diff-table.vm" )
+	#end
+#end
+
+#foreach ( $resourceChangeItem in $resourceChangeSet.changeItems )
+	#if ($resourceChangeItem.modifiedParamGroup)
+		#foreach ( $paramGroupChangeItem in $resourceChangeSet.modifiedParamGroup.changeItems )
+			#if ($paramGroupChangeItem.modifiedParameter)
+				#set ( $changeSet = $libraryChangeItem.modifiedParamGroup )
+				<br><a name="$changeSet.bookmarkId" />
+				<h4>Modified Parameter: $formatter.getParameterDisplayName( $changeSet.newVersion )</h4>
+				<small>[ $formatter.getLibraryDisplayName( $changeSet.newVersion.owningLibrary ) / $formatter.getLocalDisplayName( $changeSet.newVersion.owner.owner ) ]</small>
+				#parse( "$TEMPLATE_FOLDER/resource-diff-table.vm" )
+			#end
+		#end
+	#end
+#end
+
+#foreach ( $resourceChangeItem in $resourceChangeSet.changeItems )
+	#if ($resourceChangeItem.modifiedAction)
+		#set ( $changeSet = $resourceChangeItem.modifiedAction )
+		<br><a name="$changeSet.bookmarkId" />
+		<h4>Modified Action: $formatter.getActionDisplayName( $changeSet.newVersion )</h4>
+		<small>[ $formatter.getLibraryDisplayName( $changeSet.newVersion.owningLibrary ) / $formatter.getLocalDisplayName( $changeSet.newVersion.owner ) ]</small>
+		#parse( "$TEMPLATE_FOLDER/resource-diff-table.vm" )
+	#end
+#end
+
+#foreach ( $resourceChangeItem in $resourceChangeSet.changeItems )
+	#if ($resourceChangeItem.modifiedAction)
+		#foreach ( $actionChangeItem in $resourceChangeItem.modifiedAction.changeItems )
+			#if ($actionChangeItem.modifiedActionResponse)
+				#set ( $changeSet = $libraryChangeItem.modifiedActionResponse )
+				<br><a name="$changeSet.bookmarkId" />
+				<h4>Modified Action Response: $formatter.getActionResponseDisplayName( $changeSet.newVersion )</h4>
+				<small>[ $formatter.getLibraryDisplayName( $changeSet.newVersion.owningLibrary ) / $formatter.getLocalDisplayName( $changeSet.newVersion.owner.owner ) ]</small>
+				#parse( "$TEMPLATE_FOLDER/resource-diff-table.vm" )
+			#end
+		#end
+	#end
+#end
+

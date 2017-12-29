@@ -27,10 +27,14 @@ import org.opentravel.schemacompiler.diff.LibraryChangeItem;
 import org.opentravel.schemacompiler.diff.LibraryChangeSet;
 import org.opentravel.schemacompiler.diff.LibraryChangeType;
 import org.opentravel.schemacompiler.diff.ModelCompareOptions;
+import org.opentravel.schemacompiler.diff.ResourceChangeSet;
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.model.TLService;
 
 /**
  * Performs a comparison of two OTM libraries.
@@ -62,8 +66,12 @@ public class LibraryComparator extends BaseComparator {
 		Map<String,NamedEntity> newEntities = buildEntityMap( newLibrary );
 		SortedSet<String> oldEntityNames = new TreeSet<String>( oldEntities.keySet() );
 		SortedSet<String> newEntityNames = new TreeSet<String>( newEntities.keySet() );
+		Map<String,TLResource> oldResources = buildResourceMap( oldLibrary );
+		Map<String,TLResource> newResources = buildResourceMap( newLibrary );
+		SortedSet<String> oldResourceNames = new TreeSet<String>( oldResources.keySet() );
+		SortedSet<String> newResourceNames = new TreeSet<String>( newResources.keySet() );
 		LibraryChangeSet changeSet = new LibraryChangeSet( oldLibrary, newLibrary );
-		List<LibraryChangeItem> changeItems = changeSet.getLibraryChangeItems();
+		List<LibraryChangeItem> changeItems = changeSet.getChangeItems();
 		
 		// Look for changes in the library values
 		if (valueChanged( oldLibrary.getName(), newLibrary.getName() )) {
@@ -118,11 +126,44 @@ public class LibraryComparator extends BaseComparator {
 										new EntityComparisonFacade( oldEntity ),
 										new EntityComparisonFacade( newEntity ) );
 				
-				if (!entityChangeSet.getEntityChangeItems().isEmpty()) {
+				if (!entityChangeSet.getChangeItems().isEmpty()) {
 					changeItems.add( new LibraryChangeItem( entityChangeSet ) );
 				}
 			}
 		}
+		
+		// Identify new resources that were added
+		for (String newName : newResourceNames) {
+			if (!oldResources.containsKey( newName )) {
+				changeItems.add( new LibraryChangeItem(
+						LibraryChangeType.MEMBER_ADDED, newResources.get( newName ) ) );
+			}
+		}
+		
+		// Identify old resources that were deleted
+		for (String oldName : oldResourceNames) {
+			if (!newResources.containsKey( oldName )) {
+				changeItems.add( new LibraryChangeItem(
+						LibraryChangeType.MEMBER_DELETED, oldResources.get( oldName ) ) );
+			}
+		}
+		
+		// Identify resources that were modified
+		for (String resourceName : oldResourceNames) {
+			if (newResources.containsKey( resourceName )) {
+				TLResource oldResource = oldResources.get( resourceName );
+				TLResource newResource = newResources.get( resourceName );
+				ResourceChangeSet resourceChangeSet =
+						new ResourceComparator(
+								getCompareOptions(), getNamespaceMappings() ).compareResources(
+										oldResource, newResource );
+				
+				if (!resourceChangeSet.getChangeItems().isEmpty()) {
+					changeItems.add( new LibraryChangeItem( resourceChangeSet ) );
+				}
+			}
+		}
+		
 		return changeSet;
 	}
 	
@@ -141,14 +182,43 @@ public class LibraryComparator extends BaseComparator {
 					&& ((TLContextualFacet) entity).isLocalFacet()) {
 				continue; // skip local contextual facets
 			}
-			entityMap.put( entity.getLocalName(), entity );
+			if (entity instanceof TLService) {
+				continue; // services handled below this loop
+				
+			} else if (entity instanceof TLResource) {
+				TLResource resource = (TLResource) entity;
+				
+				for (TLActionFacet actionFacet : resource.getActionFacets()) {
+					entityMap.put( actionFacet.getLocalName(), actionFacet );
+				}
+				
+			} else {
+				entityMap.put( entity.getLocalName(), entity );
+			}
 		}
+		
 		if (library.getService() != null) {
 			for (TLOperation op : library.getService().getOperations()) {
 				entityMap.put( op.getLocalName(), op );
 			}
 		}
 		return entityMap;
+	}
+	
+	/**
+	 * Constructs a map of all resources in the library that associates the
+	 * their local names with the resources themselves.
+	 * 
+	 * @param library  the library for which to create a resource map
+	 * @return Map<String,TLResource>
+	 */
+	private Map<String,TLResource> buildResourceMap(TLLibrary library) {
+		Map<String,TLResource> resourceMap = new HashMap<>();
+		
+		for (TLResource resource : library.getResourceTypes()) {
+			resourceMap.put( resource.getLocalName(), resource );
+		}
+		return resourceMap;
 	}
 	
 }

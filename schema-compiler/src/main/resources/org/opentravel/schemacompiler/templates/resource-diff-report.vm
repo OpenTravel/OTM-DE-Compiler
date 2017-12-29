@@ -1,0 +1,44 @@
+<html>
+<head>
+	<title>OTM Model Comparison Report</title>
+	<style>
+#parse( "$TEMPLATE_FOLDER/diff-styles.vm" )
+	</style>
+</head>
+<body>
+
+<h1>OTM Comparison Report</h1>
+
+<table class="headerTable">
+	<tr>
+		<td class="headerTableTh">Old Resource Version:</td>
+		<td class="headerTableTd">$formatter.getLocalDisplayName( $changeSet.oldVersion ) ($formatter.getLibraryFilename( $changeSet.oldVersion.owningLibrary ))</td>
+	</tr><tr>
+		<td class="headerTableTh">New Resource Version:</td>
+		<td class="headerTableTd">$formatter.getLocalDisplayName( $changeSet.newVersion ) ($formatter.getLibraryFilename( $changeSet.newVersion.owningLibrary ))</td>
+	</tr><tr>
+		<td class="headerTableTh">Report Date/Time:</td>
+		<td class="headerTableTd">$formatter.reportTimestamp()</td>
+	</tr>
+</table>
+
+#set ( $resourceChangeSet = $changeSet )
+#parse( "$TEMPLATE_FOLDER/resource-diff-group.vm" )
+
+#foreach ( $resourceChangeItem in $resourceChangeSet.changeItems )
+	#if ($resourceChangeItem.modifiedActionFacet)
+		#set ( $entityChangeSet = $resourceChangeItem.modifiedActionFacet )
+		<br><a name="$entityChangeSet.bookmarkId" />
+		<h4>Modified Entity: $formatter.getLocalDisplayName( $entityChangeSet.newVersion )</h4>
+		<small>[ $formatter.getLibraryDisplayName( $entityChangeSet.newVersion.owningLibrary ) ]</small>
+		#parse( "$TEMPLATE_FOLDER/entity-diff-table.vm" )
+	#end
+#end
+
+<p/><br/><p/><br/><p/><br/><p/><br/><p/><br/>
+<p/><br/><p/><br/><p/><br/><p/><br/><p/><br/>
+<p/><br/><p/><br/><p/><br/><p/><br/><p/><br/>
+<p/><br/><p/><br/><p/><br/><p/><br/><p/><br/>
+
+</body>
+</html>

@@ -728,8 +728,12 @@ public class ResourceCodegenUtils {
     		boElement = new TLProperty();
     		
     		if (actionFacet.getReferenceFacetName() != null) {
-    			elementType = ResourceCodegenUtils.getReferencedFacet(
+    			TLPropertyType facetType = ResourceCodegenUtils.getReferencedFacet(
     					referencedBO, actionFacet.getReferenceFacetName() );
+    			
+    			if (facetType != null) {
+    				elementType = facetType;
+    			}
     		}
     		boElement.setName( elementType.getLocalName() );
     		boElement.setType( elementType );

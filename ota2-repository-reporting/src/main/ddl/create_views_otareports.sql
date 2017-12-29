@@ -25,6 +25,7 @@ CREATE OR REPLACE VIEW libraries_by_namespace AS
   FROM library l, library_version lv
   WHERE l.base_namespace IN (SELECT base_namespace FROM included_namespaces)
     AND lv.library_id = l.id
+--    AND lv.create_date >= "2017-01-01 00:00:00"
   GROUP BY l.base_namespace, l.library_name
   ORDER BY l.base_namespace, l.library_name;
 
@@ -32,6 +33,7 @@ CREATE OR REPLACE VIEW libraries_by_month AS
   SELECT COUNT(*) library_count, STR_TO_DATE( CONCAT( DATE_FORMAT( l.create_date, "%Y-%m"), "-01" ), "%Y-%m-%d" ) create_month
   FROM library l
   WHERE l.base_namespace IN (SELECT base_namespace FROM included_namespaces)
+--    AND l.create_date >= "2017-01-01 00:00:00"
   GROUP BY YEAR( l.create_date ), MONTH( l.create_date )
   ORDER BY YEAR( l.create_date ), MONTH( l.create_date );
 
@@ -40,6 +42,7 @@ CREATE OR REPLACE VIEW library_versions_by_month AS
   FROM library l, library_version lv
   WHERE lv.library_id = l.id
     AND l.base_namespace IN (SELECT base_namespace FROM included_namespaces)
+--    AND lv.create_date >= "2017-01-01 00:00:00"
   GROUP BY YEAR( lv.create_date ), MONTH( lv.create_date )
   ORDER BY YEAR( lv.create_date ), MONTH( lv.create_date );
 
@@ -49,6 +52,7 @@ CREATE OR REPLACE VIEW commits_by_month AS
   WHERE l.base_namespace IN (SELECT base_namespace FROM included_namespaces)
     AND lv.library_id = l.id
     AND lc.library_version_id = lv.id
+--    AND lv.create_date >= "2017-01-01 00:00:00"
   GROUP BY YEAR( lc.commit_date ), MONTH( lc.commit_date )
   ORDER BY YEAR( lc.commit_date ), MONTH( lc.commit_date );
   
@@ -69,6 +73,7 @@ CREATE OR REPLACE VIEW entities_by_library AS
   WHERE l.base_namespace IN (SELECT base_namespace FROM included_namespaces)
     AND e.library_id = l.id
     AND e.delete_date IS NULL
+--    AND l.create_date >= "2017-01-01 00:00:00"
   GROUP BY l.base_namespace, l.library_name
   ORDER BY l.base_namespace, l.library_name;
 
@@ -90,5 +95,6 @@ CREATE OR REPLACE VIEW entities_by_month AS
   WHERE l.base_namespace IN (SELECT base_namespace FROM included_namespaces)
     AND e.library_id = l.id
     AND e.delete_date IS NULL
+--    AND l.create_date >= "2017-01-01 00:00:00"
   GROUP BY YEAR( e.create_date ), MONTH( e.create_date )
   ORDER BY YEAR( e.create_date ), MONTH( e.create_date );

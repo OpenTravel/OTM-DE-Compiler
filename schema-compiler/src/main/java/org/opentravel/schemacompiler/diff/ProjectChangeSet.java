@@ -16,9 +16,6 @@
 
 package org.opentravel.schemacompiler.diff;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.opentravel.schemacompiler.repository.Project;
 
 /**
@@ -26,11 +23,7 @@ import org.opentravel.schemacompiler.repository.Project;
  * well as the library change sets for the libraries that existed in both versions of the
  * project.
  */
-public class ProjectChangeSet extends ChangeSet {
-	
-	private Project oldProject;
-	private Project newProject;
-	private List<ProjectChangeItem> projectChangeItems = new ArrayList<>();
+public class ProjectChangeSet extends ChangeSet<Project,ProjectChangeItem> {
 	
 	/**
 	 * Constructor that assigns the old and new version of a project that was modified.
@@ -39,42 +32,14 @@ public class ProjectChangeSet extends ChangeSet {
 	 * @param newProject  the new version of the project
 	 */
 	public ProjectChangeSet(Project oldProject, Project newProject) {
-		this.oldProject = oldProject;
-		this.newProject = newProject;
+		super( oldProject, newProject );
 	}
 
-	/**
-	 * Returns the old version of the project.
-	 *
-	 * @return Project
-	 */
-	public Project getOldProject() {
-		return oldProject;
-	}
-
-	/**
-	 * Returns the new version of the project.
-	 *
-	 * @return Project
-	 */
-	public Project getNewProject() {
-		return newProject;
-	}
-
-	/**
-	 * Returns the list of changes between the old and new version of the project.
-	 *
-	 * @return List<ProjectChangeItem>
-	 */
-	public List<ProjectChangeItem> getProjectChangeItems() {
-		return projectChangeItems;
-	}
-	
 	/**
 	 * @see org.opentravel.schemacompiler.diff.ChangeSet#getBookmarkId()
 	 */
 	public String getBookmarkId() {
-		Project project = (newProject != null) ? newProject : oldProject;
+		Project project = (getNewVersion() != null) ? getNewVersion() : getOldVersion();
 		return (project == null) ? "UNKNOWN_PROJECT" : ("prj$" + project.getName());
 	}
 

@@ -18,11 +18,15 @@ h2 {
 }
 h3 {
 	font-size: 1.2em;
-	margin-bottom: 2px;
+	margin-bottom: 0px;
 }
 h4 {
 	font-size: 1.1em;
-	margin-bottom: 2px;
+	margin-bottom: 0px;
+}
+small {
+	font-size: 0.75em;
+	margin-bottom: 0px;
 }
 table {
     border-collapse: collapse;

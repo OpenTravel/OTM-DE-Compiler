@@ -16,6 +16,7 @@
 
 package org.opentravel.diffutil;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -26,10 +27,36 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
+import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLModel;
+import org.opentravel.schemacompiler.model.TLOperation;
+import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.model.TLService;
+import org.opentravel.schemacompiler.repository.Project;
+import org.opentravel.schemacompiler.repository.ProjectItem;
+import org.opentravel.schemacompiler.repository.ProjectManager;
+import org.opentravel.schemacompiler.repository.RepositoryItem;
+import org.opentravel.schemacompiler.saver.LibrarySaveException;
+import org.opentravel.schemacompiler.util.ModelComparator;
+import org.opentravel.schemacompiler.util.SchemaCompilerException;
+import org.opentravel.schemacompiler.validate.FindingMessageFormat;
+import org.opentravel.schemacompiler.validate.FindingType;
+import org.opentravel.schemacompiler.validate.ValidationFindings;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.events.Event;
+import org.w3c.dom.events.EventListener;
+import org.w3c.dom.events.EventTarget;
+
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Worker;
+import javafx.concurrent.Worker.State;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -44,23 +71,6 @@ import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
-import org.opentravel.schemacompiler.model.NamedEntity;
-import org.opentravel.schemacompiler.model.TLContextualFacet;
-import org.opentravel.schemacompiler.model.TLLibrary;
-import org.opentravel.schemacompiler.model.TLModel;
-import org.opentravel.schemacompiler.model.TLOperation;
-import org.opentravel.schemacompiler.model.TLService;
-import org.opentravel.schemacompiler.repository.Project;
-import org.opentravel.schemacompiler.repository.ProjectItem;
-import org.opentravel.schemacompiler.repository.ProjectManager;
-import org.opentravel.schemacompiler.repository.RepositoryItem;
-import org.opentravel.schemacompiler.saver.LibrarySaveException;
-import org.opentravel.schemacompiler.util.ModelComparator;
-import org.opentravel.schemacompiler.util.SchemaCompilerException;
-import org.opentravel.schemacompiler.validate.FindingMessageFormat;
-import org.opentravel.schemacompiler.validate.FindingType;
-import org.opentravel.schemacompiler.validate.ValidationFindings;
 
 /**
  * JavaFX controller class for the OTM-Diff application.
@@ -463,7 +473,11 @@ public class DiffUtilityController {
 				boolean newLibrarySelected = (((newLibraryFile != null) && newLibraryFile.exists()) || (newLibraryRepo != null));
 				boolean nullOldEntitySelected = (oldEntityChoice.getValue() != null) && (oldEntityChoice.getValue().value == null);
 				boolean nullNewEntitySelected = (newEntityChoice.getValue() != null) && (newEntityChoice.getValue().value == null);
-				boolean runLibraryEnabled = oldLibrarySelected && newLibrarySelected && (nullOldEntitySelected == nullNewEntitySelected);
+				boolean resourceOldEntitySelected = (oldEntityChoice.getValue() != null) && (oldEntityChoice.getValue().label.startsWith("Resource:"));
+				boolean resourceNewEntitySelected = (newEntityChoice.getValue() != null) && (newEntityChoice.getValue().label.startsWith("Resource:"));
+				boolean runLibraryEnabled = oldLibrarySelected && newLibrarySelected
+						&& ( (nullOldEntitySelected && (nullOldEntitySelected == nullNewEntitySelected))
+								|| (!nullOldEntitySelected && (resourceOldEntitySelected == resourceNewEntitySelected)) );
 				
 				runProjectButton.disableProperty().set( !runProjectEnabled );
 				runLibraryButton.disableProperty().set( !runLibraryEnabled );
@@ -559,6 +573,9 @@ public class DiffUtilityController {
 					newItems.add( new ChoiceItem("Operation: " + operation.getName() ) );
 				}
 				
+			} else if (entity instanceof TLResource) {
+				newItems.add( new ChoiceItem( "Resource: " + entity.getLocalName(), entity.getLocalName() ) );
+				
 			} else {
 				newItems.add( new ChoiceItem( entity.getLocalName() ) );
 			}
@@ -645,6 +662,20 @@ public class DiffUtilityController {
 		
 		for (File tempFile : tempFiles) {
 			tempFile.delete();
+		}
+	}
+	
+	/**
+	 * Opens the given URL using the default system web browser.
+	 * 
+	 * @param url  the URL to browse
+	 */
+	private void navigateExternalLink(String url) {
+		try {
+		    Desktop.getDesktop().browse( new URL( url ).toURI() );
+		    
+		} catch (Exception e) {
+			// Ignore error
 		}
 	}
 	
@@ -746,9 +777,17 @@ public class DiffUtilityController {
 							throw new IllegalStateException("Selected entities are not accessible.");
 						}
 						
-						try (OutputStream out = new FileOutputStream( reportFile )) {
-							new ModelComparator( userSettings.getCompareOptions() )
-									.compareEntities( oldEntity, newEntity, out );
+						if ((oldEntity instanceof TLResource) && (newEntity instanceof TLResource)) {
+							try (OutputStream out = new FileOutputStream( reportFile )) {
+								new ModelComparator( userSettings.getCompareOptions() )
+										.compareResources( (TLResource) oldEntity, (TLResource) newEntity, out );
+							}
+							
+						} else {
+							try (OutputStream out = new FileOutputStream( reportFile )) {
+								new ModelComparator( userSettings.getCompareOptions() )
+										.compareEntities( oldEntity, newEntity, out );
+							}
 						}
 					}
 					showReport( reportFile );
@@ -788,6 +827,29 @@ public class DiffUtilityController {
 			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
 				updateControlStates();
 			}
+		});
+		reportViewer.getEngine().getLoadWorker().stateProperty().addListener(new ChangeListener<State>() {
+		    public void changed(ObservableValue<? extends State> ov, State oldState, State newState) {
+		        if (newState == Worker.State.SUCCEEDED) {
+		            EventListener listener = new EventListener() {
+		                public void handleEvent(Event ev) {
+		                	String href = ((Element)ev.getTarget()).getAttribute("href");
+		                	
+		                	if ((href != null) && !href.startsWith("#")) {
+			                	ev.preventDefault();
+			                	navigateExternalLink( href );
+		                	}
+		                }
+		            };
+
+		            Document doc = reportViewer.getEngine().getDocument();
+		            NodeList lista = doc.getElementsByTagName("a");
+		            
+		            for (int i=0; i<lista.getLength(); i++) {
+		                ((EventTarget)lista.item(i)).addEventListener("click", listener, false);
+		            }
+		        }
+		    }
 		});
 		updateControlStates();
 	}

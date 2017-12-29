@@ -5,18 +5,18 @@
 		<th>Old Value</th>
 		<th>New Value</th>
 	</tr>
-	#if ($entityChangeSet.entityChangeItems.empty)
+	#if ($entityChangeSet.changeItems.empty)
 		<td colspan="3">No differences found.</td>
 	#end
-	#foreach ( $entityChangeItem in $entityChangeSet.entityChangeItems )
+	#foreach ( $entityChangeItem in $entityChangeSet.changeItems )
 		<tr class="$rowstyle">
 			<td>$entityChangeItem.displayMessage</td>
 			#if ($entityChangeItem.modifiedField)
 				#set ( $fieldChangeSet = $entityChangeItem.modifiedField )
-				<td colspan="2">$formatter.getFieldName( $fieldChangeSet.newField )
+				<td colspan="2">$formatter.getFieldName( $fieldChangeSet.newVersion )
 					<div id="$fieldChangeSet.bookmarkId">
 						<ul class="fieldDetails">
-						#foreach ($fieldChangeItem in $fieldChangeSet.fieldChangeItems)
+						#foreach ($fieldChangeItem in $fieldChangeSet.changeItems)
 							<li>$fieldChangeItem.displayMessage</li>
 						#end
 						</ul>
