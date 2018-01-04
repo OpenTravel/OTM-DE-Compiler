@@ -323,6 +323,9 @@ public class ResourceCodegenUtils {
 		paramFacets.add(facet);
 		
 		for (TLProperty element : PropertyCodegenUtils.getInheritedProperties(facet)) {
+			if (element.isReference()) {
+				continue; // Skip reference elements since the effective type is really IDREF(S)
+			}
 			if (includeIneligibleFacets || (element.getRepeat() == 0)
 					|| (element.getRepeat() == 1)) { // Skip repeating elements unless specifically requested
 				TLPropertyType elementType = element.getType();
