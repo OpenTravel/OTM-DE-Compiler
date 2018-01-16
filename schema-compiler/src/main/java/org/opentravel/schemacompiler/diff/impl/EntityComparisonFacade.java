@@ -26,13 +26,17 @@ import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAbstractEnumeration;
 import org.opentravel.schemacompiler.model.TLActionFacet;
+import org.opentravel.schemacompiler.model.TLAlias;
+import org.opentravel.schemacompiler.model.TLAliasOwner;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
+import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLMemberField;
 import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLProperty;
@@ -124,6 +128,9 @@ public class EntityComparisonFacade {
 			
 		} else if (entity instanceof TLActionFacet) {
 			init( (TLActionFacet) entity );
+			
+		} else if (entity instanceof TLAlias) {
+			init( (TLAlias) entity );
 		}
 	}
 	
@@ -266,6 +273,41 @@ public class EntityComparisonFacade {
 		for (TLBusinessObject entityVersion : versionChain) {
 			addContextualFacetFields( entityVersion.getUpdateFacets(), new HashSet<TLContextualFacet>() );
 		}
+	}
+	
+	/**
+	 * Initializes this comparison facade using the given alias.
+	 * 
+	 * @param entity  the entity from which to create the facade
+	 */
+	private void init(TLAlias entity) {
+		TLAliasOwner owner = entity.getOwningEntity();
+		
+		while (owner instanceof TLContextualFacet) {
+			owner = (TLAliasOwner) ((TLContextualFacet) owner).getOwningEntity();
+		}
+		if (owner instanceof TLFacet) {
+			owner = (TLAliasOwner) ((TLFacet) owner).getOwningEntity();
+		}
+		if (owner instanceof TLListFacet) {
+			owner = (TLAliasOwner) ((TLListFacet) owner).getOwningEntity();
+		}
+		
+		if (owner instanceof TLBusinessObject) {
+			init( (TLBusinessObject) owner );
+			
+		} else if (owner instanceof TLChoiceObject) {
+			init( (TLChoiceObject) owner );
+			
+		} else if (owner instanceof TLCoreObject) {
+			init( (TLCoreObject) owner );
+			
+		} else {
+			throw new IllegalArgumentException(
+					"Unrecognized facet owner type: " + owner.getClass().getSimpleName());
+		}
+		this.entityType = TLAlias.class;
+		this.name = entity.getName();
 	}
 	
 	/**

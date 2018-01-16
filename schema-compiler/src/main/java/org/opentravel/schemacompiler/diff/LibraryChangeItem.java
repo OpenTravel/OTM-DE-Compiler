@@ -24,6 +24,7 @@ import org.opentravel.schemacompiler.model.TLResource;
  */
 public class LibraryChangeItem extends ChangeItem<LibraryChangeType> {
 	
+	private LibraryChangeSet changeSet;
 	private NamedEntity addedEntity;
 	private NamedEntity deletedEntity;
 	private EntityChangeSet modifiedEntity;
@@ -34,10 +35,12 @@ public class LibraryChangeItem extends ChangeItem<LibraryChangeType> {
 	/**
 	 * Constructor used when an entity was added or deleted from its owning library.
 	 * 
+	 * @param changeSet  the change set to which this item belongs
 	 * @param changeType  the type of library change
 	 * @param affectedEntity  the entity that was added or removed
 	 */
-	public LibraryChangeItem(LibraryChangeType changeType, NamedEntity affectedEntity) {
+	public LibraryChangeItem(LibraryChangeSet changeSet, LibraryChangeType changeType, NamedEntity affectedEntity) {
+		this.changeSet = changeSet;
 		this.changeType = changeType;
 		
 		switch (changeType) {
@@ -55,9 +58,11 @@ public class LibraryChangeItem extends ChangeItem<LibraryChangeType> {
 	/**
 	 * Constructor used when a library entity was modified.
 	 * 
+	 * @param changeSet  the change set to which this item belongs
 	 * @param modifiedEntity  the change set for a modified entity
 	 */
-	public LibraryChangeItem(EntityChangeSet modifiedEntity) {
+	public LibraryChangeItem(LibraryChangeSet changeSet, EntityChangeSet modifiedEntity) {
+		this.changeSet = changeSet;
 		this.changeType = LibraryChangeType.MEMBER_CHANGED;
 		this.modifiedEntity = modifiedEntity;
 	}
@@ -65,10 +70,12 @@ public class LibraryChangeItem extends ChangeItem<LibraryChangeType> {
 	/**
 	 * Constructor used when a resource was added or deleted from its owning library.
 	 * 
+	 * @param changeSet  the change set to which this item belongs
 	 * @param changeType  the type of library change
 	 * @param affectedResource  the resource that was added or removed
 	 */
-	public LibraryChangeItem(LibraryChangeType changeType, TLResource affectedResource) {
+	public LibraryChangeItem(LibraryChangeSet changeSet, LibraryChangeType changeType, TLResource affectedResource) {
+		this.changeSet = changeSet;
 		this.changeType = changeType;
 		
 		switch (changeType) {
@@ -86,9 +93,11 @@ public class LibraryChangeItem extends ChangeItem<LibraryChangeType> {
 	/**
 	 * Constructor used when a library resource was modified.
 	 * 
+	 * @param changeSet  the change set to which this item belongs
 	 * @param modifiedResource  the change set for a modified resource
 	 */
-	public LibraryChangeItem(ResourceChangeSet modifiedResource) {
+	public LibraryChangeItem(LibraryChangeSet changeSet, ResourceChangeSet modifiedResource) {
+		this.changeSet = changeSet;
 		this.changeType = LibraryChangeType.RESOURCE_CHANGED;
 		this.modifiedResource = modifiedResource;
 	}
@@ -96,14 +105,25 @@ public class LibraryChangeItem extends ChangeItem<LibraryChangeType> {
 	/**
 	 * Constructor used when a library value was changed.
 	 * 
+	 * @param changeSet  the change set to which this item belongs
 	 * @param changeType  the type of library change
 	 * @param oldValue  the affected value from the old version
 	 * @param newValue  the affected value from the new version
 	 */
-	public LibraryChangeItem(LibraryChangeType changeType, String oldValue, String newValue) {
+	public LibraryChangeItem(LibraryChangeSet changeSet, LibraryChangeType changeType, String oldValue, String newValue) {
+		this.changeSet = changeSet;
 		this.changeType = changeType;
 		this.oldValue = oldValue;
 		this.newValue = newValue;
+	}
+
+	/**
+	 * Returns the change set to which this item belongs.
+	 *
+	 * @return LibraryChangeSet
+	 */
+	public LibraryChangeSet getChangeSet() {
+		return changeSet;
 	}
 
 	/**

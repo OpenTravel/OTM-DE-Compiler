@@ -71,15 +71,15 @@ public class ProjectComparator extends BaseComparator {
 		
 		// Look for changes in the project values
 		if (valueChanged( oldProject.getName(), newProject.getName() )) {
-			changeItems.add( new ProjectChangeItem( ProjectChangeType.NAME_CHANGED,
+			changeItems.add( new ProjectChangeItem( changeSet, ProjectChangeType.NAME_CHANGED,
 					oldProject.getName(), newProject.getName() ) );
 		}
 		if (valueChanged( oldProject.getProjectId(), newProject.getProjectId() )) {
-			changeItems.add( new ProjectChangeItem( ProjectChangeType.NAMESPACE_CHANGED,
+			changeItems.add( new ProjectChangeItem( changeSet, ProjectChangeType.NAMESPACE_CHANGED,
 					oldProject.getProjectId(), newProject.getProjectId() ) );
 		}
 		if (valueChanged( oldProject.getDescription(), newProject.getDescription() )) {
-			changeItems.add( new ProjectChangeItem( ProjectChangeType.DESCRIPTION_CHANGED,
+			changeItems.add( new ProjectChangeItem( changeSet, ProjectChangeType.DESCRIPTION_CHANGED,
 					oldProject.getDescription(), newProject.getDescription() ) );
 		}
 		
@@ -132,13 +132,13 @@ public class ProjectComparator extends BaseComparator {
 		
 		// Any new names left over represent libraries that were added
 		for (QName newName : newLibraryNames) {
-			changeItems.add( new ProjectChangeItem(
+			changeItems.add( new ProjectChangeItem( changeSet,
 					ProjectChangeType.LIBRARY_ADDED, newLibraries.get( newName ) ) );
 		}
 		
 		// Any old names left over represent libraries that were removed
 		for (QName oldName : oldLibraryNames) {
-			changeItems.add( new ProjectChangeItem(
+			changeItems.add( new ProjectChangeItem( changeSet,
 					ProjectChangeType.LIBRARY_DELETED, oldLibraries.get( oldName ) ) );
 		}
 		
@@ -150,7 +150,7 @@ public class ProjectComparator extends BaseComparator {
 							.compareLibraries( item.oldVersion, item.newVersion );
 			
 			if (!libraryChangeSet.getChangeItems().isEmpty()) {
-				changeItems.add( new ProjectChangeItem( item.changeType, libraryChangeSet ) );
+				changeItems.add( new ProjectChangeItem( changeSet, item.changeType, libraryChangeSet ) );
 			}
 		}
 		

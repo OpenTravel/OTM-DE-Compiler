@@ -61,12 +61,12 @@ public class FieldComparator extends BaseComparator {
 		QName newAssignedTypeName = getEntityName( newField.getAssignedType() );
 		
 		if (valueChanged( oldField.getMemberType(), newField.getMemberType() )) {
-			changeItems.add( new FieldChangeItem( FieldChangeType.MEMBER_TYPE_CHANGED,
+			changeItems.add( new FieldChangeItem( changeSet, FieldChangeType.MEMBER_TYPE_CHANGED,
 					formatter.getEntityTypeDisplayName( oldField.getMemberType() ),
 					formatter.getEntityTypeDisplayName( newField.getMemberType() ) ) );
 		}
 		if (valueChanged( oldField.getOwningFacet(), newField.getOwningFacet() )) {
-			changeItems.add( new FieldChangeItem( FieldChangeType.OWNING_FACET_CHANGED,
+			changeItems.add( new FieldChangeItem( changeSet, FieldChangeType.OWNING_FACET_CHANGED,
 					oldField.getOwningFacet(), newField.getOwningFacet() ) );
 		}
 		if (valueChanged( oldAssignedTypeName, newAssignedTypeName )) {
@@ -78,39 +78,39 @@ public class FieldComparator extends BaseComparator {
 			
 			if (isVersionChange( oldAssignedTypeName, newAssignedTypeName, versionScheme )) {
 				if (!getCompareOptions().isSuppressFieldVersionChanges()) {
-					changeItems.add( new FieldChangeItem( FieldChangeType.TYPE_VERSION_CHANGED,
+					changeItems.add( new FieldChangeItem( changeSet, FieldChangeType.TYPE_VERSION_CHANGED,
 							getVersion( (NamedEntity) oldField.getAssignedType() ),
 							getVersion( (NamedEntity) newField.getAssignedType() ) ) );
 				}
 				
 			} else {
-				changeItems.add( new FieldChangeItem( FieldChangeType.TYPE_CHANGED,
+				changeItems.add( new FieldChangeItem( changeSet, FieldChangeType.TYPE_CHANGED,
 						formatter.getEntityDisplayName( oldField.getAssignedType() ),
 						formatter.getEntityDisplayName( newField.getAssignedType() ) ) );
 			}
 		}
 		if (oldRepeatCount != newRepeatCount) {
-			changeItems.add( new FieldChangeItem( FieldChangeType.CARDINALITY_CHANGE,
+			changeItems.add( new FieldChangeItem( changeSet, FieldChangeType.CARDINALITY_CHANGE,
 					"" + oldRepeatCount, "" + newRepeatCount ) );
 		}
 		if (oldField.isMandatory() != newField.isMandatory()) {
 			FieldChangeType changeType = newField.isMandatory() ?
 					FieldChangeType.CHANGED_TO_MANDATORY : FieldChangeType.CHANGED_TO_OPTIONAL;
-			changeItems.add( new FieldChangeItem( changeType, "" + oldField.isMandatory(), "" + newField.isMandatory() ) );
+			changeItems.add( new FieldChangeItem( changeSet, changeType, "" + oldField.isMandatory(), "" + newField.isMandatory() ) );
 		}
 		if (oldField.isReference() != newField.isReference()) {
 			FieldChangeType changeType = newField.isReference() ?
 					FieldChangeType.CHANGED_TO_REFERENCE : FieldChangeType.CHANGED_TO_NON_REFERENCE;
-			changeItems.add( new FieldChangeItem( changeType, "" + oldField.isReference(), "" + newField.isReference() ) );
+			changeItems.add( new FieldChangeItem( changeSet, changeType, "" + oldField.isReference(), "" + newField.isReference() ) );
 		}
 		if (valueChanged( oldField.getDocumentation(), newField.getDocumentation() )) {
-			changeItems.add( new FieldChangeItem( FieldChangeType.DOCUMENTATION_CHANGED, null, null ) );
+			changeItems.add( new FieldChangeItem( changeSet, FieldChangeType.DOCUMENTATION_CHANGED, null, null ) );
 		}
 		
 		compareListContents( oldField.getEquivalents(), newField.getEquivalents(),
-				FieldChangeType.EQUIVALENT_ADDED, FieldChangeType.EQUIVALENT_DELETED, changeItems );
+				FieldChangeType.EQUIVALENT_ADDED, FieldChangeType.EQUIVALENT_DELETED, changeSet );
 		compareListContents( oldField.getExamples(), newField.getExamples(),
-				FieldChangeType.EXAMPLE_ADDED, FieldChangeType.EXAMPLE_DELETED, changeItems );
+				FieldChangeType.EXAMPLE_ADDED, FieldChangeType.EXAMPLE_DELETED, changeSet );
 		
 		return changeSet;
 	}
@@ -126,15 +126,17 @@ public class FieldComparator extends BaseComparator {
 	 * @param changeItems  the list of change items for the field
 	 */
 	private void compareListContents(List<String> oldValues, List<String> newValues,
-			FieldChangeType addedChangeType, FieldChangeType deletedChangeType, List<FieldChangeItem> changeItems) {
+			FieldChangeType addedChangeType, FieldChangeType deletedChangeType, FieldChangeSet changeSet) {
+		List<FieldChangeItem> changeItems = changeSet.getChangeItems();
+		
 		for (String newValue : newValues) {
 			if (!oldValues.contains( newValue )) {
-				changeItems.add( new FieldChangeItem( addedChangeType, null, newValue ) );
+				changeItems.add( new FieldChangeItem( changeSet, addedChangeType, null, newValue ) );
 			}
 		}
 		for (String oldValue : oldValues) {
 			if (!newValues.contains( oldValue )) {
-				changeItems.add( new FieldChangeItem( deletedChangeType, oldValue, null ) );
+				changeItems.add( new FieldChangeItem( changeSet, deletedChangeType, oldValue, null ) );
 			}
 		}
 	}

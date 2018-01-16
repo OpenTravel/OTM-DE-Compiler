@@ -80,69 +80,69 @@ public class EntityComparator extends BaseComparator {
 		QName newSimpleCoreTypeName = getEntityName( newEntity.getSimpleCoreType() );
 		
 		if (valueChanged( oldEntity.getEntityType(), newEntity.getEntityType() )) {
-			changeItems.add( new EntityChangeItem( EntityChangeType.ENTITY_TYPE_CHANGED,
+			changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.ENTITY_TYPE_CHANGED,
 					formatter.getEntityTypeDisplayName( oldEntity.getEntityType() ),
 					formatter.getEntityTypeDisplayName( newEntity.getEntityType() ) ) );
 		}
 		if (valueChanged( oldEntity.getName(), newEntity.getName() )) {
-			changeItems.add( new EntityChangeItem( EntityChangeType.NAME_CHANGED,
+			changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.NAME_CHANGED,
 					oldEntity.getName(), newEntity.getName() ) );
 		}
 		if (valueChanged( oldEntity.getDocumentation(), newEntity.getDocumentation() )) {
-			changeItems.add( new EntityChangeItem( EntityChangeType.DOCUMENTATION_CHANGED, null, null ) );
+			changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.DOCUMENTATION_CHANGED, null, null ) );
 		}
 		if (valueChanged( oldParentTypeName, newParentTypeName )) {
 			if (isVersionChange( oldParentTypeName, newParentTypeName, versionScheme )) {
-				changeItems.add( new EntityChangeItem( EntityChangeType.PARENT_TYPE_VERSION_CHANGED,
+				changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.PARENT_TYPE_VERSION_CHANGED,
 						oldEntity.getOwningLibrary().getVersion(), newEntity.getOwningLibrary().getVersion() ) );
 				
 			} else {
-				changeItems.add( new EntityChangeItem( EntityChangeType.PARENT_TYPE_CHANGED,
+				changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.PARENT_TYPE_CHANGED,
 						formatter.getEntityDisplayName( oldEntity.getParentType() ),
 						formatter.getEntityDisplayName( newEntity.getParentType() ) ) );
 			}
 		}
 		if (valueChanged( oldExtendsTypeName, newExtendsTypeName )) {
 			if (isVersionChange( oldExtendsTypeName, newExtendsTypeName, versionScheme )) {
-				changeItems.add( new EntityChangeItem( EntityChangeType.EXTENSION_VERSION_CHANGED,
+				changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.EXTENSION_VERSION_CHANGED,
 						oldEntity.getOwningLibrary().getVersion(), newEntity.getOwningLibrary().getVersion() ) );
 				
 			} else {
-				changeItems.add( new EntityChangeItem( EntityChangeType.EXTENSION_CHANGED,
+				changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.EXTENSION_CHANGED,
 						formatter.getEntityDisplayName( oldEntity.getExtendsType() ),
 						formatter.getEntityDisplayName( newEntity.getExtendsType() ) ) );
 			}
 		}
 		if (valueChanged( oldBasePayloadTypeName, newBasePayloadTypeName )) {
 			if (isVersionChange( oldBasePayloadTypeName, newBasePayloadTypeName, versionScheme )) {
-				changeItems.add( new EntityChangeItem( EntityChangeType.BASE_PAYLOAD_VERSION_CHANGED,
+				changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.BASE_PAYLOAD_VERSION_CHANGED,
 						oldEntity.getOwningLibrary().getVersion(), newEntity.getOwningLibrary().getVersion() ) );
 				
 			} else {
-				changeItems.add( new EntityChangeItem( EntityChangeType.BASE_PAYLOAD_CHANGED,
+				changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.BASE_PAYLOAD_CHANGED,
 						formatter.getEntityDisplayName( oldEntity.getBasePayloadType() ),
 						formatter.getEntityDisplayName( newEntity.getBasePayloadType() ) ) );
 			}
 		}
 		if (oldEntity.getReferenceType() != newEntity.getReferenceType()) {
-			changeItems.add( new EntityChangeItem( EntityChangeType.REFERENCE_TYPE_CHANGED,
+			changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.REFERENCE_TYPE_CHANGED,
 					oldEntity.getReferenceType() + "", newEntity.getReferenceType() + "" ) );
 		}
 		if (valueChanged( oldEntity.getReferenceFacetName(), newEntity.getReferenceFacetName() )) {
-			changeItems.add( new EntityChangeItem( EntityChangeType.REFERENCE_FACET_CHANGED,
+			changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.REFERENCE_FACET_CHANGED,
 					oldEntity.getReferenceFacetName(), newEntity.getReferenceFacetName() ) );
 		}
 		if (oldEntity.getReferenceRepeat() != newEntity.getReferenceRepeat()) {
-			changeItems.add( new EntityChangeItem( EntityChangeType.REFERENCE_REPEAT_CHANGED,
+			changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.REFERENCE_REPEAT_CHANGED,
 					oldEntity.getReferenceRepeat() + "", newEntity.getReferenceRepeat() + "" ) );
 		}
 		if (valueChanged( oldSimpleCoreTypeName, newSimpleCoreTypeName )) {
 			if (isVersionChange( oldSimpleCoreTypeName, newSimpleCoreTypeName, versionScheme )) {
-				changeItems.add( new EntityChangeItem( EntityChangeType.SIMPLE_CORE_TYPE_VERSION_CHANGED,
+				changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.SIMPLE_CORE_TYPE_VERSION_CHANGED,
 						oldEntity.getOwningLibrary().getVersion(), newEntity.getOwningLibrary().getVersion() ) );
 				
 			} else {
-				changeItems.add( new EntityChangeItem( EntityChangeType.SIMPLE_CORE_TYPE_CHANGED,
+				changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.SIMPLE_CORE_TYPE_CHANGED,
 						formatter.getEntityDisplayName( oldEntity.getSimpleCoreType() ),
 						formatter.getEntityDisplayName( newEntity.getSimpleCoreType() ) ) );
 			}
@@ -150,66 +150,66 @@ public class EntityComparator extends BaseComparator {
 		if (oldEntity.isSimpleList() != newEntity.isSimpleList()) {
 			EntityChangeType changeType = newEntity.isSimpleList() ?
 					EntityChangeType.CHANGED_TO_SIMPLE_LIST : EntityChangeType.CHANGED_TO_SIMPLE_NON_LIST;
-			changeItems.add( new EntityChangeItem( changeType, "" + oldEntity.isSimpleList(), "" + newEntity.isSimpleList() ) );
+			changeItems.add( new EntityChangeItem( changeSet, changeType, "" + oldEntity.isSimpleList(), "" + newEntity.isSimpleList() ) );
 		}
 		if (valueChanged( oldEntity.getPatternConstraint(), newEntity.getPatternConstraint() )) {
-			changeItems.add( new EntityChangeItem( EntityChangeType.PATTERN_CONSTRAINT_CHANGED,
+			changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.PATTERN_CONSTRAINT_CHANGED,
 					oldEntity.getPatternConstraint(), newEntity.getPatternConstraint() ) );
 		}
 		if (oldEntity.getMinLengthConstraint() != newEntity.getMinLengthConstraint()) {
-			changeItems.add( new EntityChangeItem( EntityChangeType.MIN_LENGTH_CONSTRAINT_CHANGED,
+			changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.MIN_LENGTH_CONSTRAINT_CHANGED,
 					"" + oldEntity.getMinLengthConstraint(), "" + newEntity.getMinLengthConstraint() ) );
 		}
 		if (oldEntity.getMaxLengthConstraint() != newEntity.getMaxLengthConstraint()) {
-			changeItems.add( new EntityChangeItem( EntityChangeType.MAX_LENGTH_CONSTRAINT_CHANGED,
+			changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.MAX_LENGTH_CONSTRAINT_CHANGED,
 					"" + oldEntity.getMaxLengthConstraint(), "" + newEntity.getMaxLengthConstraint() ) );
 		}
 		if (oldEntity.getFractionDigitsConstraint() != newEntity.getFractionDigitsConstraint()) {
-			changeItems.add( new EntityChangeItem( EntityChangeType.FRACTION_DIGITS_CONSTRAINT_CHANGED,
+			changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.FRACTION_DIGITS_CONSTRAINT_CHANGED,
 					"" + oldEntity.getFractionDigitsConstraint(), "" + newEntity.getFractionDigitsConstraint() ) );
 		}
 		if (oldEntity.getTotalDigitsConstraint() != newEntity.getTotalDigitsConstraint()) {
-			changeItems.add( new EntityChangeItem( EntityChangeType.TOTAL_DIGITS_CONSTRAINT_CHANGED,
+			changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.TOTAL_DIGITS_CONSTRAINT_CHANGED,
 					"" + oldEntity.getTotalDigitsConstraint(), "" + newEntity.getTotalDigitsConstraint() ) );
 		}
 		if (valueChanged( oldEntity.getMinInclusiveConstraint(), newEntity.getMinInclusiveConstraint() )) {
-			changeItems.add( new EntityChangeItem( EntityChangeType.MIN_INCLUSIVE_CONSTRAINT_CHANGED,
+			changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.MIN_INCLUSIVE_CONSTRAINT_CHANGED,
 					oldEntity.getMinInclusiveConstraint(), newEntity.getMinInclusiveConstraint() ) );
 		}
 		if (valueChanged( oldEntity.getMaxInclusiveConstraint(), newEntity.getMaxInclusiveConstraint() )) {
-			changeItems.add( new EntityChangeItem( EntityChangeType.MAX_INCLUSIVE_CONSTRAINT_CHANGED,
+			changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.MAX_INCLUSIVE_CONSTRAINT_CHANGED,
 					oldEntity.getMaxInclusiveConstraint(), newEntity.getMaxInclusiveConstraint() ) );
 		}
 		if (valueChanged( oldEntity.getMinExclusiveConstraint(), newEntity.getMinExclusiveConstraint() )) {
-			changeItems.add( new EntityChangeItem( EntityChangeType.MIN_EXCLUSIVE_CONSTRAINT_CHANGED,
+			changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.MIN_EXCLUSIVE_CONSTRAINT_CHANGED,
 					oldEntity.getMinExclusiveConstraint(), newEntity.getMinExclusiveConstraint() ) );
 		}
 		if (valueChanged( oldEntity.getMaxExclusiveConstraint(), newEntity.getMaxExclusiveConstraint() )) {
-			changeItems.add( new EntityChangeItem( EntityChangeType.MAX_EXCLUSIVE_CONSTRAINT_CHANGED,
+			changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.MAX_EXCLUSIVE_CONSTRAINT_CHANGED,
 					oldEntity.getMaxExclusiveConstraint(), newEntity.getMaxExclusiveConstraint() ) );
 		}
 		
 		compareListContents( oldEntity.getAliasNames(), newEntity.getAliasNames(),
-				EntityChangeType.ALIAS_ADDED, EntityChangeType.ALIAS_DELETED, changeItems,
+				EntityChangeType.ALIAS_ADDED, EntityChangeType.ALIAS_DELETED, changeSet,
 				isMinorVersionCompare );
 		compareListContents( oldEntity.getFacetNames(), newEntity.getFacetNames(),
-				EntityChangeType.FACET_ADDED, EntityChangeType.FACET_DELETED, changeItems,
+				EntityChangeType.FACET_ADDED, EntityChangeType.FACET_DELETED, changeSet,
 				isMinorVersionCompare );
 		compareListContents( oldEntity.getRoleNames(), newEntity.getRoleNames(),
-				EntityChangeType.ROLE_ADDED, EntityChangeType.ROLE_DELETED, changeItems,
+				EntityChangeType.ROLE_ADDED, EntityChangeType.ROLE_DELETED, changeSet,
 				isMinorVersionCompare );
 		compareListContents( oldEntity.getEnumValues(), newEntity.getEnumValues(),
-				EntityChangeType.ENUM_VALUE_ADDED, EntityChangeType.ENUM_VALUE_DELETED, changeItems,
+				EntityChangeType.ENUM_VALUE_ADDED, EntityChangeType.ENUM_VALUE_DELETED, changeSet,
 				isMinorVersionCompare );
 		
-		compareMemberFields( oldEntity.getMemberFields(), newEntity.getMemberFields(), changeItems,
+		compareMemberFields( oldEntity.getMemberFields(), newEntity.getMemberFields(), changeSet,
 				isMinorVersionCompare );
 		
 		compareListContents( oldEntity.getEquivalents(), newEntity.getEquivalents(),
-				EntityChangeType.EQUIVALENT_ADDED, EntityChangeType.EQUIVALENT_DELETED, changeItems,
+				EntityChangeType.EQUIVALENT_ADDED, EntityChangeType.EQUIVALENT_DELETED, changeSet,
 				isMinorVersionCompare );
 		compareListContents( oldEntity.getExamples(), newEntity.getExamples(),
-				EntityChangeType.EXAMPLE_ADDED, EntityChangeType.EXAMPLE_DELETED, changeItems,
+				EntityChangeType.EXAMPLE_ADDED, EntityChangeType.EXAMPLE_DELETED, changeSet,
 				isMinorVersionCompare );
 		
 		return changeSet;
@@ -223,22 +223,24 @@ public class EntityComparator extends BaseComparator {
 	 * @param newValues  the new version's list of values
 	 * @param addedChangeType  the entity change type to use for added values
 	 * @param deletedChangeType  the entity change type to use for deleted values
-	 * @param changeItems  the list of change items for the entity
+	 * @param changeSet  the change set for the entity
 	 * @param isMinorVersionCompare  true if the second entity is a later minor version of the first
 	 */
 	private void compareListContents(List<String> oldValues, List<String> newValues,
-			EntityChangeType addedChangeType, EntityChangeType deletedChangeType, List<EntityChangeItem> changeItems,
+			EntityChangeType addedChangeType, EntityChangeType deletedChangeType, EntityChangeSet changeSet,
 			boolean isMinorVersionCompare) {
+		List<EntityChangeItem> changeItems = changeSet.getChangeItems();
+		
 		for (String newValue : newValues) {
 			if (!oldValues.contains( newValue )) {
-				changeItems.add( new EntityChangeItem( addedChangeType, null, newValue ) );
+				changeItems.add( new EntityChangeItem( changeSet, addedChangeType, null, newValue ) );
 			}
 		}
 		
 		if (!isMinorVersionCompare) {
 			for (String oldValue : oldValues) {
 				if (!newValues.contains( oldValue )) {
-					changeItems.add( new EntityChangeItem( deletedChangeType, oldValue, null ) );
+					changeItems.add( new EntityChangeItem( changeSet, deletedChangeType, oldValue, null ) );
 				}
 			}
 		}
@@ -251,11 +253,12 @@ public class EntityComparator extends BaseComparator {
 	 * 
 	 * @param oldFields  the list of fields for the old entity version
 	 * @param newFields  the list of fields for the new entity version
-	 * @param changeItems  the list of change items for the entity
+	 * @param changeSet  the change set for the entity
 	 * @param isMinorVersionCompare  true if the second entity is a later minor version of the first
 	 */
 	private void compareMemberFields(List<TLMemberField<?>> oldFields, List<TLMemberField<?>> newFields,
-			List<EntityChangeItem> changeItems, boolean isMinorVersionCompare) {
+			EntityChangeSet changeSet, boolean isMinorVersionCompare) {
+		List<EntityChangeItem> changeItems = changeSet.getChangeItems();
 		ModelCompareOptions options = getCompareOptions();
 		Map<String,String> fieldNSMappings = options.isSuppressFieldVersionChanges() ?
 				getNamespaceMappings() : new HashMap<String,String>();
@@ -292,7 +295,7 @@ public class EntityComparator extends BaseComparator {
 									new FieldComparisonFacade( newVersionFields.get( 0 ) ) );
 					
 					if (!fieldChangeSet.getChangeItems().isEmpty()) {
-						pendingChangeItems.add( new EntityChangeItem( fieldChangeSet ) );
+						pendingChangeItems.add( new EntityChangeItem( changeSet, fieldChangeSet ) );
 					}
 					
 				} else {
@@ -309,7 +312,8 @@ public class EntityComparator extends BaseComparator {
 							List<TLMemberField<?>> newVersionOwnerFields = newFieldsByOwner.get( fieldOwner );
 							
 							for (TLMemberField<?> addedField : newVersionOwnerFields) {
-								pendingChangeItems.add( new EntityChangeItem( EntityChangeType.MEMBER_FIELD_ADDED, addedField ) );
+								pendingChangeItems.add( new EntityChangeItem(
+										changeSet, EntityChangeType.MEMBER_FIELD_ADDED, addedField ) );
 							}
 						}
 					}
@@ -320,7 +324,8 @@ public class EntityComparator extends BaseComparator {
 							List<TLMemberField<?>> oldVersionOwnerFields = oldFieldsByOwner.get( fieldOwner );
 							
 							for (TLMemberField<?> deletedField : oldVersionOwnerFields) {
-								pendingChangeItems.add( new EntityChangeItem( EntityChangeType.MEMBER_FIELD_DELETED, deletedField ) );
+								pendingChangeItems.add( new EntityChangeItem(
+										changeSet, EntityChangeType.MEMBER_FIELD_DELETED, deletedField ) );
 							}
 							
 						}
@@ -342,17 +347,19 @@ public class EntityComparator extends BaseComparator {
 								TLMemberField<?> newField = (i >= newVersionOwnerFields.size()) ? null : newVersionOwnerFields.get( i );
 								
 								if (oldField == null) {
-									pendingChangeItems.add( new EntityChangeItem( EntityChangeType.MEMBER_FIELD_ADDED, newField ) );
+									pendingChangeItems.add( new EntityChangeItem(
+											changeSet, EntityChangeType.MEMBER_FIELD_ADDED, newField ) );
 									
 								} else if (newField == null) {
-									pendingChangeItems.add( new EntityChangeItem( EntityChangeType.MEMBER_FIELD_DELETED, oldField ) );
+									pendingChangeItems.add( new EntityChangeItem(
+											changeSet, EntityChangeType.MEMBER_FIELD_DELETED, oldField ) );
 									
 								} else {
 									FieldChangeSet fieldChangeSet = new FieldComparator( options, fieldNSMappings ).compareFields(
 											new FieldComparisonFacade( oldField ), new FieldComparisonFacade( newField ) );
 									
 									if (!fieldChangeSet.getChangeItems().isEmpty()) {
-										pendingChangeItems.add( new EntityChangeItem( fieldChangeSet ) );
+										pendingChangeItems.add( new EntityChangeItem( changeSet, fieldChangeSet ) );
 									}
 								}
 							}
@@ -370,7 +377,8 @@ public class EntityComparator extends BaseComparator {
 				List<TLMemberField<?>> addedFields = newFieldMap.get( fieldName );
 				
 				for (TLMemberField<?> addedField : addedFields) {
-					changeItems.add( new EntityChangeItem( EntityChangeType.MEMBER_FIELD_ADDED, addedField ) );
+					changeItems.add( new EntityChangeItem(
+							changeSet, EntityChangeType.MEMBER_FIELD_ADDED, addedField ) );
 				}
 			}
 		}
@@ -382,7 +390,8 @@ public class EntityComparator extends BaseComparator {
 					List<TLMemberField<?>> deletedFields = oldFieldMap.get( fieldName );
 					
 					for (TLMemberField<?> deletedField : deletedFields) {
-						changeItems.add( new EntityChangeItem( EntityChangeType.MEMBER_FIELD_DELETED, deletedField ) );
+						changeItems.add( new EntityChangeItem(
+								changeSet, EntityChangeType.MEMBER_FIELD_DELETED, deletedField ) );
 					}
 				}
 			}

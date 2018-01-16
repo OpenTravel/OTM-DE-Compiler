@@ -29,6 +29,7 @@ import org.opentravel.schemacompiler.model.TLResourceParentRef;
  */
 public class ResourceChangeItem extends ChangeItem<ResourceChangeType> {
 	
+	private ResourceChangeSet changeSet;
 	private TLResourceParentRef addedParentRef;
 	private TLResourceParentRef deletedParentRef;
 	private ResourceParentRefChangeSet modifiedParentRef;
@@ -51,10 +52,12 @@ public class ResourceChangeItem extends ChangeItem<ResourceChangeType> {
 	/**
 	 * Constructor used when a parent reference was added or deleted from its owning resource.
 	 * 
+	 * @param changeSet  the change set to which this item belongs
 	 * @param changeType  the type of resource change
 	 * @param affectedParentRef  the parent reference that was added or removed
 	 */
-	public ResourceChangeItem(ResourceChangeType changeType, TLResourceParentRef affectedParentRef) {
+	public ResourceChangeItem(ResourceChangeSet changeSet, ResourceChangeType changeType, TLResourceParentRef affectedParentRef) {
+		this.changeSet = changeSet;
 		this.changeType = changeType;
 		
 		switch (changeType) {
@@ -72,9 +75,11 @@ public class ResourceChangeItem extends ChangeItem<ResourceChangeType> {
 	/**
 	 * Constructor used when a resource parent reference was modified.
 	 * 
+	 * @param changeSet  the change set to which this item belongs
 	 * @param modifiedParentRef  the change set for a modified parent reference
 	 */
-	public ResourceChangeItem(ResourceParentRefChangeSet modifiedParentRef) {
+	public ResourceChangeItem(ResourceChangeSet changeSet, ResourceParentRefChangeSet modifiedParentRef) {
+		this.changeSet = changeSet;
 		this.changeType = ResourceChangeType.PARENT_REF_CHANGED;
 		this.modifiedParentRef = modifiedParentRef;
 	}
@@ -82,10 +87,12 @@ public class ResourceChangeItem extends ChangeItem<ResourceChangeType> {
 	/**
 	 * Constructor used when a parent reference was added or deleted from its owning resource.
 	 * 
+	 * @param changeSet  the change set to which this item belongs
 	 * @param changeType  the type of resource change
 	 * @param affectedParentRef  the parameter group that was added or removed
 	 */
-	public ResourceChangeItem(ResourceChangeType changeType, TLParamGroup affectedParamGroup) {
+	public ResourceChangeItem(ResourceChangeSet changeSet, ResourceChangeType changeType, TLParamGroup affectedParamGroup) {
+		this.changeSet = changeSet;
 		this.changeType = changeType;
 		
 		switch (changeType) {
@@ -105,7 +112,8 @@ public class ResourceChangeItem extends ChangeItem<ResourceChangeType> {
 	 * 
 	 * @param modifiedParamGroup  the change set for a modified parameter group
 	 */
-	public ResourceChangeItem(ResourceParamGroupChangeSet modifiedParamGroup) {
+	public ResourceChangeItem(ResourceChangeSet changeSet, ResourceParamGroupChangeSet modifiedParamGroup) {
+		this.changeSet = changeSet;
 		this.changeType = ResourceChangeType.PARAM_GROUP_CHANGED;
 		this.modifiedParamGroup = modifiedParamGroup;
 	}
@@ -113,10 +121,12 @@ public class ResourceChangeItem extends ChangeItem<ResourceChangeType> {
 	/**
 	 * Constructor used when a parameter was added or deleted from its owning resource.
 	 * 
+	 * @param changeSet  the change set to which this item belongs
 	 * @param changeType  the type of resource change
 	 * @param affectedParameter  the parameter that was added or removed
 	 */
-	public ResourceChangeItem(ResourceChangeType changeType, TLParameter affectedParameter) {
+	public ResourceChangeItem(ResourceChangeSet changeSet, ResourceChangeType changeType, TLParameter affectedParameter) {
+		this.changeSet = changeSet;
 		this.changeType = changeType;
 		
 		switch (changeType) {
@@ -134,9 +144,11 @@ public class ResourceChangeItem extends ChangeItem<ResourceChangeType> {
 	/**
 	 * Constructor used when a resource parameter was modified.
 	 * 
+	 * @param changeSet  the change set to which this item belongs
 	 * @param modifiedParameter  the change set for a modified parameter
 	 */
-	public ResourceChangeItem(ResourceParameterChangeSet modifiedParameter) {
+	public ResourceChangeItem(ResourceChangeSet changeSet, ResourceParameterChangeSet modifiedParameter) {
+		this.changeSet = changeSet;
 		this.changeType = ResourceChangeType.PARAMETER_CHANGED;
 		this.modifiedParameter = modifiedParameter;
 	}
@@ -144,10 +156,12 @@ public class ResourceChangeItem extends ChangeItem<ResourceChangeType> {
 	/**
 	 * Constructor used when a action facet was added or deleted from its owning resource.
 	 * 
+	 * @param changeSet  the change set to which this item belongs
 	 * @param changeType  the type of resource change
 	 * @param affectedActionFacet  the action facet that was added or removed
 	 */
-	public ResourceChangeItem(ResourceChangeType changeType, TLActionFacet affectedActionFacet) {
+	public ResourceChangeItem(ResourceChangeSet changeSet, ResourceChangeType changeType, TLActionFacet affectedActionFacet) {
+		this.changeSet = changeSet;
 		this.changeType = changeType;
 		
 		switch (changeType) {
@@ -165,9 +179,11 @@ public class ResourceChangeItem extends ChangeItem<ResourceChangeType> {
 	/**
 	 * Constructor used when a resource action facet was modified.
 	 * 
+	 * @param changeSet  the change set to which this item belongs
 	 * @param modifiedActionFacet  the change set for a modified action facet
 	 */
-	public ResourceChangeItem(EntityChangeSet modifiedActionFacet) {
+	public ResourceChangeItem(ResourceChangeSet changeSet, EntityChangeSet modifiedActionFacet) {
+		this.changeSet = changeSet;
 		this.changeType = ResourceChangeType.ACTION_FACET_CHANGED;
 		this.modifiedActionFacet = modifiedActionFacet;
 	}
@@ -175,10 +191,12 @@ public class ResourceChangeItem extends ChangeItem<ResourceChangeType> {
 	/**
 	 * Constructor used when an action was added or deleted from its owning resource.
 	 * 
+	 * @param changeSet  the change set to which this item belongs
 	 * @param changeType  the type of resource change
 	 * @param affectedAction  the action that was added or removed
 	 */
-	public ResourceChangeItem(ResourceChangeType changeType, TLAction affectedAction) {
+	public ResourceChangeItem(ResourceChangeSet changeSet, ResourceChangeType changeType, TLAction affectedAction) {
+		this.changeSet = changeSet;
 		this.changeType = changeType;
 		
 		switch (changeType) {
@@ -196,9 +214,11 @@ public class ResourceChangeItem extends ChangeItem<ResourceChangeType> {
 	/**
 	 * Constructor used when a resource action was modified.
 	 * 
+	 * @param changeSet  the change set to which this item belongs
 	 * @param modifiedAction  the change set for a modified action
 	 */
-	public ResourceChangeItem(ResourceActionChangeSet modifiedAction) {
+	public ResourceChangeItem(ResourceChangeSet changeSet, ResourceActionChangeSet modifiedAction) {
+		this.changeSet = changeSet;
 		this.changeType = ResourceChangeType.ACTION_CHANGED;
 		this.modifiedAction = modifiedAction;
 	}
@@ -206,10 +226,12 @@ public class ResourceChangeItem extends ChangeItem<ResourceChangeType> {
 	/**
 	 * Constructor used when an action response was added or deleted from its owning resource.
 	 * 
+	 * @param changeSet  the change set to which this item belongs
 	 * @param changeType  the type of resource change
 	 * @param affectedActionResponse  the action response that was added or removed
 	 */
-	public ResourceChangeItem(ResourceChangeType changeType, TLActionResponse affectedActionResponse) {
+	public ResourceChangeItem(ResourceChangeSet changeSet, ResourceChangeType changeType, TLActionResponse affectedActionResponse) {
+		this.changeSet = changeSet;
 		this.changeType = changeType;
 		
 		switch (changeType) {
@@ -227,9 +249,11 @@ public class ResourceChangeItem extends ChangeItem<ResourceChangeType> {
 	/**
 	 * Constructor used when an action response was modified.
 	 * 
+	 * @param changeSet  the change set to which this item belongs
 	 * @param modifiedActionResponse  the change set for a modified action response
 	 */
-	public ResourceChangeItem(ResourceActionResponseChangeSet modifiedActionResponse) {
+	public ResourceChangeItem(ResourceChangeSet changeSet, ResourceActionResponseChangeSet modifiedActionResponse) {
+		this.changeSet = changeSet;
 		this.changeType = ResourceChangeType.RESPONSE_CHANGED;
 		this.modifiedActionResponse = modifiedActionResponse;
 	}
@@ -237,14 +261,25 @@ public class ResourceChangeItem extends ChangeItem<ResourceChangeType> {
 	/**
 	 * Constructor used when a resource value was changed.
 	 * 
+	 * @param changeSet  the change set to which this item belongs
 	 * @param changeType  the type of entity change
 	 * @param oldValue  the affected value from the old version
 	 * @param newValue  the affected value from the new version
 	 */
-	public ResourceChangeItem(ResourceChangeType changeType, String oldValue, String newValue) {
+	public ResourceChangeItem(ResourceChangeSet changeSet, ResourceChangeType changeType, String oldValue, String newValue) {
+		this.changeSet = changeSet;
 		this.changeType = changeType;
 		this.oldValue = oldValue;
 		this.newValue = newValue;
+	}
+
+	/**
+	 * Returns the change set to which this item belongs.
+	 *
+	 * @return ResourceChangeSet
+	 */
+	public ResourceChangeSet getChangeSet() {
+		return changeSet;
 	}
 
 	/**

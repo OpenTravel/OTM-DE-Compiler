@@ -23,6 +23,7 @@ import org.opentravel.schemacompiler.model.TLLibrary;
  */
 public class ProjectChangeItem extends ChangeItem<ProjectChangeType> {
 	
+	private ProjectChangeSet changeSet;
 	private TLLibrary addedLibrary;
 	private TLLibrary deletedLibrary;
 	private LibraryChangeSet modifiedLibrary;
@@ -30,10 +31,12 @@ public class ProjectChangeItem extends ChangeItem<ProjectChangeType> {
 	/**
 	 * Constructor used when a library was added or deleted from its owning project.
 	 * 
+	 * @param changeSet  the change set to which this item belongs
 	 * @param changeType  the type of project change
 	 * @param affectedLibrary  the library that was added or removed
 	 */
-	public ProjectChangeItem(ProjectChangeType changeType, TLLibrary affectedLibrary) {
+	public ProjectChangeItem(ProjectChangeSet changeSet, ProjectChangeType changeType, TLLibrary affectedLibrary) {
+		this.changeSet = changeSet;
 		this.changeType = changeType;
 		
 		switch (changeType) {
@@ -51,10 +54,13 @@ public class ProjectChangeItem extends ChangeItem<ProjectChangeType> {
 	/**
 	 * Constructor used when a project library was modified.
 	 * 
+	 * @param changeSet  the change set to which this item belongs
 	 * @param changeType  the type of project change
 	 * @param modifiedLibrary  the change set for a modified library
 	 */
-	public ProjectChangeItem(ProjectChangeType changeType, LibraryChangeSet modifiedLibrary) {
+	public ProjectChangeItem(ProjectChangeSet changeSet, ProjectChangeType changeType, LibraryChangeSet modifiedLibrary) {
+		this.changeSet = changeSet;
+		
 		switch (changeType) {
 			case LIBRARY_CHANGED:
 			case LIBRARY_VERSION_CHANGED:
@@ -69,14 +75,25 @@ public class ProjectChangeItem extends ChangeItem<ProjectChangeType> {
 	/**
 	 * Constructor used when a project value was changed.
 	 * 
+	 * @param changeSet  the change set to which this item belongs
 	 * @param changeType  the type of project change
 	 * @param oldValue  the affected value from the old version
 	 * @param newValue  the affected value from the new version
 	 */
-	public ProjectChangeItem(ProjectChangeType changeType, String oldValue, String newValue) {
+	public ProjectChangeItem(ProjectChangeSet changeSet, ProjectChangeType changeType, String oldValue, String newValue) {
+		this.changeSet = changeSet;
 		this.changeType = changeType;
 		this.oldValue = oldValue;
 		this.newValue = newValue;
+	}
+
+	/**
+	 * Returns the change set to which this item belongs.
+	 *
+	 * @return ProjectChangeSet
+	 */
+	public ProjectChangeSet getChangeSet() {
+		return changeSet;
 	}
 
 	/**

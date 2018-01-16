@@ -23,6 +23,7 @@ import org.opentravel.schemacompiler.model.TLMemberField;
  */
 public class EntityChangeItem extends ChangeItem<EntityChangeType> {
 	
+	private EntityChangeSet changeSet;
 	private TLMemberField<?> addedField;
 	private TLMemberField<?> deletedField;
 	private FieldChangeSet modifiedField;
@@ -30,10 +31,12 @@ public class EntityChangeItem extends ChangeItem<EntityChangeType> {
 	/**
 	 * Constructor used when a field was added or deleted from its owning entity.
 	 * 
+	 * @param changeSet  the change set to which this item belongs
 	 * @param changeType  the type of entity change
 	 * @param affectedField  the field that was added or removed
 	 */
-	public EntityChangeItem(EntityChangeType changeType, TLMemberField<?> affectedField) {
+	public EntityChangeItem(EntityChangeSet changeSet, EntityChangeType changeType, TLMemberField<?> affectedField) {
+		this.changeSet = changeSet;
 		this.changeType = changeType;
 		
 		switch (changeType) {
@@ -51,9 +54,11 @@ public class EntityChangeItem extends ChangeItem<EntityChangeType> {
 	/**
 	 * Constructor used when an entity field was modified.
 	 * 
+	 * @param changeSet  the change set to which this item belongs
 	 * @param modifiedField  the change set for a modified field
 	 */
-	public EntityChangeItem(FieldChangeSet modifiedField) {
+	public EntityChangeItem(EntityChangeSet changeSet, FieldChangeSet modifiedField) {
+		this.changeSet = changeSet;
 		this.changeType = EntityChangeType.MEMBER_FIELD_CHANGED;
 		this.modifiedField = modifiedField;
 	}
@@ -61,14 +66,25 @@ public class EntityChangeItem extends ChangeItem<EntityChangeType> {
 	/**
 	 * Constructor used when an entity value was changed.
 	 * 
+	 * @param changeSet  the change set to which this item belongs
 	 * @param changeType  the type of entity change
 	 * @param oldValue  the affected value from the old version
 	 * @param newValue  the affected value from the new version
 	 */
-	public EntityChangeItem(EntityChangeType changeType, String oldValue, String newValue) {
+	public EntityChangeItem(EntityChangeSet changeSet, EntityChangeType changeType, String oldValue, String newValue) {
+		this.changeSet = changeSet;
 		this.changeType = changeType;
 		this.oldValue = oldValue;
 		this.newValue = newValue;
+	}
+
+	/**
+	 * Returns the change set to which this item belongs.
+	 *
+	 * @return EntityChangeSet
+	 */
+	public EntityChangeSet getChangeSet() {
+		return changeSet;
 	}
 
 	/**

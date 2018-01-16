@@ -49,8 +49,6 @@ import org.opentravel.schemacompiler.model.TLResourceParentRef;
  */
 public class ResourceComparator extends BaseComparator {
 	
-	// TODO: Check for documentation changes on child resource types
-	
 	private DisplayFormatter formatter = new DisplayFormatter();
 	
 	/**
@@ -90,42 +88,53 @@ public class ResourceComparator extends BaseComparator {
 		QName newBORefTypeName = (newBORefType == null) ? null : getEntityName( newBORefType );
 		
 		if (valueChanged( oldResource.getName(), newResource.getName() )) {
-			changeItems.add( new ResourceChangeItem( ResourceChangeType.NAME_CHANGED,
+			changeItems.add( new ResourceChangeItem( changeSet,
+					ResourceChangeType.NAME_CHANGED,
 					oldResource.getName(), newResource.getName() ) );
 		}
 		if (valueChanged( oldResource.getDocumentation(), newResource.getDocumentation() )) {
-			changeItems.add( new ResourceChangeItem( ResourceChangeType.DOCUMENTATION_CHANGED, null, null ) );
+			changeItems.add( new ResourceChangeItem( changeSet,
+					ResourceChangeType.DOCUMENTATION_CHANGED, null, null ) );
 		}
 		if (valueChanged( oldResource.getBasePath(), newResource.getBasePath() )) {
-			changeItems.add( new ResourceChangeItem( ResourceChangeType.BASE_PATH_CHANGED,
+			changeItems.add( new ResourceChangeItem( changeSet,
+					ResourceChangeType.BASE_PATH_CHANGED,
 					oldResource.getBasePath(), newResource.getBasePath() ) );
 		}
 		if (oldResource.isAbstract() != newResource.isAbstract()) {
-			changeItems.add( new ResourceChangeItem( ResourceChangeType.ABSTRACT_IND_CHANGED,
+			changeItems.add( new ResourceChangeItem( changeSet,
+					ResourceChangeType.ABSTRACT_IND_CHANGED,
 					oldResource.isAbstract() + "", newResource.isAbstract() + "" ) );
 		}
 		if (oldResource.isFirstClass() != newResource.isFirstClass()) {
-			changeItems.add( new ResourceChangeItem( ResourceChangeType.FIRST_CLASS_IND_CHANGED,
+			changeItems.add( new ResourceChangeItem( changeSet,
+					ResourceChangeType.FIRST_CLASS_IND_CHANGED,
 					oldResource.isFirstClass() + "", newResource.isFirstClass() + "" ) );
 		}
 		if (valueChanged( oldExtendsTypeName, newExtendsTypeName )) {
 			if (isVersionChange( oldExtendsTypeName, newExtendsTypeName, versionScheme )) {
-				changeItems.add( new ResourceChangeItem( ResourceChangeType.EXTENSION_VERSION_CHANGED,
-						oldResource.getOwningLibrary().getVersion(), newResource.getOwningLibrary().getVersion() ) );
+				changeItems.add( new ResourceChangeItem( changeSet,
+						ResourceChangeType.EXTENSION_VERSION_CHANGED,
+						oldResource.getOwningLibrary().getVersion(),
+						newResource.getOwningLibrary().getVersion() ) );
 				
 			} else {
-				changeItems.add( new ResourceChangeItem( ResourceChangeType.EXTENSION_CHANGED,
+				changeItems.add( new ResourceChangeItem( changeSet,
+						ResourceChangeType.EXTENSION_CHANGED,
 						formatter.getEntityDisplayName( oldExtendsType ),
 						formatter.getEntityDisplayName( newExtendsType ) ) );
 			}
 		}
 		if (valueChanged( oldBORefTypeName, newBORefTypeName )) {
 			if (isVersionChange( oldBORefTypeName, newBORefTypeName, versionScheme )) {
-				changeItems.add( new ResourceChangeItem( ResourceChangeType.BUSINESS_OBJECT_REF_VERSION_CHANGED,
-						oldResource.getOwningLibrary().getVersion(), newResource.getOwningLibrary().getVersion() ) );
+				changeItems.add( new ResourceChangeItem( changeSet,
+						ResourceChangeType.BUSINESS_OBJECT_REF_VERSION_CHANGED,
+						oldResource.getOwningLibrary().getVersion(),
+						newResource.getOwningLibrary().getVersion() ) );
 				
 			} else {
-				changeItems.add( new ResourceChangeItem( ResourceChangeType.BUSINESS_OBJECT_REF_CHANGED,
+				changeItems.add( new ResourceChangeItem( changeSet,
+						ResourceChangeType.BUSINESS_OBJECT_REF_CHANGED,
 						formatter.getEntityDisplayName( oldBORefType ),
 						formatter.getEntityDisplayName( newBORefType ) ) );
 			}
@@ -133,30 +142,32 @@ public class ResourceComparator extends BaseComparator {
 		
 		// Look for added, removed, and changed TLResourceParentReference
 		for (TLResourceParentRef newParentRef : newResource.getParentRefs()) {
-			String newParentRefName = newParentRef.getParentResource().getName() + "/" + newParentRef.getParentParamGroup().getName();
+			String newParentRefName = newParentRef.getParentResource().getName() +
+					"/" + newParentRef.getParentParamGroup().getName();
 			TLResourceParentRef oldParentRef = oldResource.getParentRef( newParentRefName );
 			
 			if (oldParentRef == null) {
-				changeItems.add( new ResourceChangeItem( ResourceChangeType.PARENT_REF_ADDED,
-						null, newParentRefName ) );
+				changeItems.add( new ResourceChangeItem( changeSet,
+						ResourceChangeType.PARENT_REF_ADDED, null, newParentRefName ) );
 				
 			} else {
 				ResourceParentRefChangeSet parentRefChangeSet = compareParentRefs(
-						oldParentRef, newParentRef, isMinorVersionCompare );
+						oldParentRef, newParentRef, changeSet, isMinorVersionCompare );
 				
 				if (!parentRefChangeSet.getChangeItems().isEmpty()) {
-					changeItems.add( new ResourceChangeItem( parentRefChangeSet ) );
+					changeItems.add( new ResourceChangeItem( changeSet, parentRefChangeSet ) );
 				}
 			}
 		}
 		if (!isMinorVersionCompare) {
 			for (TLResourceParentRef oldParentRef : oldResource.getParentRefs()) {
-				String oldParentRefName = oldParentRef.getParentResource().getName() + "/" + oldParentRef.getParentParamGroup().getName();
+				String oldParentRefName = oldParentRef.getParentResource().getName() +
+						"/" + oldParentRef.getParentParamGroup().getName();
 				TLResourceParentRef newParentRef = oldResource.getParentRef( oldParentRefName );
 				
 				if (newParentRef == null) {
-					changeItems.add( new ResourceChangeItem( ResourceChangeType.PARENT_REF_DELETED,
-							oldParentRefName, null ) );
+					changeItems.add( new ResourceChangeItem( changeSet,
+							ResourceChangeType.PARENT_REF_DELETED, oldParentRefName, null ) );
 				}
 			}
 		}
@@ -167,15 +178,15 @@ public class ResourceComparator extends BaseComparator {
 			TLParamGroup oldParamGroup = oldResource.getParamGroup( newParamGroupName );
 			
 			if (oldParamGroup == null) {
-				changeItems.add( new ResourceChangeItem( ResourceChangeType.PARAM_GROUP_ADDED,
-						null, newParamGroupName ) );
+				changeItems.add( new ResourceChangeItem( changeSet,
+						ResourceChangeType.PARAM_GROUP_ADDED, null, newParamGroupName ) );
 				
 			} else {
 				ResourceParamGroupChangeSet paramGroupChangeSet = compareParamGroups(
-						oldParamGroup, newParamGroup, isMinorVersionCompare );
+						oldParamGroup, newParamGroup, changeSet, isMinorVersionCompare );
 				
 				if (!paramGroupChangeSet.getChangeItems().isEmpty()) {
-					changeItems.add( new ResourceChangeItem( paramGroupChangeSet ) );
+					changeItems.add( new ResourceChangeItem( changeSet, paramGroupChangeSet ) );
 				}
 			}
 		}
@@ -185,8 +196,8 @@ public class ResourceComparator extends BaseComparator {
 				TLParamGroup newParamGroup = oldResource.getParamGroup( oldParamGroupName );
 				
 				if (newParamGroup == null) {
-					changeItems.add( new ResourceChangeItem( ResourceChangeType.PARAM_GROUP_DELETED,
-							oldParamGroupName, null ) );
+					changeItems.add( new ResourceChangeItem( changeSet,
+							ResourceChangeType.PARAM_GROUP_DELETED, oldParamGroupName, null ) );
 				}
 			}
 		}
@@ -197,8 +208,8 @@ public class ResourceComparator extends BaseComparator {
 			TLActionFacet oldActionFacet = oldResource.getActionFacet( newActionFacetName );
 			
 			if (oldActionFacet == null) {
-				changeItems.add( new ResourceChangeItem( ResourceChangeType.ACTION_FACET_ADDED,
-						newActionFacetName, null ) );
+				changeItems.add( new ResourceChangeItem( changeSet,
+						ResourceChangeType.ACTION_FACET_ADDED, newActionFacetName, null ) );
 				
 			} else {
 				EntityComparator comparator = new EntityComparator( getCompareOptions(), getNamespaceMappings() );
@@ -206,7 +217,7 @@ public class ResourceComparator extends BaseComparator {
 						new EntityComparisonFacade( oldActionFacet ), new EntityComparisonFacade( newActionFacet ) );
 				
 				if (!actionFacetChangeSet.getChangeItems().isEmpty()) {
-					changeItems.add( new ResourceChangeItem( actionFacetChangeSet ) );
+					changeItems.add( new ResourceChangeItem( changeSet, actionFacetChangeSet ) );
 				}
 			}
 		}
@@ -216,8 +227,8 @@ public class ResourceComparator extends BaseComparator {
 				TLActionFacet newActionFacet = oldResource.getActionFacet( oldActionFacetName );
 				
 				if (newActionFacet == null) {
-					changeItems.add( new ResourceChangeItem( ResourceChangeType.ACTION_FACET_DELETED,
-							oldActionFacetName, null ) );
+					changeItems.add( new ResourceChangeItem( changeSet,
+							ResourceChangeType.ACTION_FACET_DELETED, oldActionFacetName, null ) );
 				}
 			}
 		}
@@ -228,15 +239,15 @@ public class ResourceComparator extends BaseComparator {
 			TLAction oldAction = oldResource.getAction( newActionName );
 			
 			if (oldAction == null) {
-				changeItems.add( new ResourceChangeItem( ResourceChangeType.ACTION_ADDED,
-						null, newActionName ) );
+				changeItems.add( new ResourceChangeItem( changeSet,
+						ResourceChangeType.ACTION_ADDED, null, newActionName ) );
 				
 			} else {
 				ResourceActionChangeSet actionChangeSet = compareActions(
-						oldAction, newAction, isMinorVersionCompare );
+						oldAction, newAction, changeSet, isMinorVersionCompare );
 				
 				if (!actionChangeSet.getChangeItems().isEmpty()) {
-					changeItems.add( new ResourceChangeItem( actionChangeSet ) );
+					changeItems.add( new ResourceChangeItem( changeSet, actionChangeSet ) );
 				}
 			}
 		}
@@ -246,8 +257,8 @@ public class ResourceComparator extends BaseComparator {
 				TLAction newAction = oldResource.getAction( oldActionName );
 				
 				if (newAction == null) {
-					changeItems.add( new ResourceChangeItem( ResourceChangeType.ACTION_DELETED,
-							oldActionName, null ) );
+					changeItems.add( new ResourceChangeItem( changeSet,
+							ResourceChangeType.ACTION_DELETED, oldActionName, null ) );
 				}
 			}
 		}
@@ -260,24 +271,29 @@ public class ResourceComparator extends BaseComparator {
 	 * 
 	 * @param oldParentRef  facade for the old resource parent reference version
 	 * @param newParentRef  facade for the new resource parent reference version
+	 * @param resourceChangeSet  change set for the owning resource
 	 * @param isMinorVersionCompare  true if the new version is a later minor version of the old one
 	 * @return ResourceParentRefChangeSet
 	 */
 	public ResourceParentRefChangeSet compareParentRefs(TLResourceParentRef oldParentRef,
-			TLResourceParentRef newParentRef, boolean isMinorVersionCompare) {
+			TLResourceParentRef newParentRef, ResourceChangeSet resourceChangeSet, boolean isMinorVersionCompare) {
 		ResourceParentRefChangeSet changeSet = new ResourceParentRefChangeSet( oldParentRef, newParentRef );
 		List<ResourceChangeItem> changeItems = changeSet.getChangeItems();
 		
 		if (valueChanged( oldParentRef.getPathTemplate(), newParentRef.getPathTemplate() )) {
-			changeItems.add( new ResourceChangeItem( ResourceChangeType.PATH_TEMPLATE_CHANGED,
+			changeItems.add( new ResourceChangeItem( resourceChangeSet,
+					ResourceChangeType.PATH_TEMPLATE_CHANGED,
 					oldParentRef.getPathTemplate(), newParentRef.getPathTemplate() ) );
 		}
 		if (valueChanged( oldParentRef.getParentParamGroupName(), newParentRef.getParentParamGroupName() )) {
-			changeItems.add( new ResourceChangeItem( ResourceChangeType.PARENT_PARAM_GROUP_CHANGED,
-					oldParentRef.getParentParamGroupName(), newParentRef.getParentParamGroupName() ) );
+			changeItems.add( new ResourceChangeItem( resourceChangeSet,
+					ResourceChangeType.PARENT_PARAM_GROUP_CHANGED,
+					oldParentRef.getParentParamGroupName(),
+					newParentRef.getParentParamGroupName() ) );
 		}
 		if (valueChanged( oldParentRef.getDocumentation(), newParentRef.getDocumentation() )) {
-			changeItems.add( new ResourceChangeItem( ResourceChangeType.DOCUMENTATION_CHANGED, null, null ) );
+			changeItems.add( new ResourceChangeItem( resourceChangeSet,
+					ResourceChangeType.DOCUMENTATION_CHANGED, null, null ) );
 		}
 		return changeSet;
 	}
@@ -287,20 +303,22 @@ public class ResourceComparator extends BaseComparator {
 	 * 
 	 * @param oldParamGroup  facade for the old resource parameter group version
 	 * @param newParamGroup  facade for the new resource parameter group version
+	 * @param resourceChangeSet  change set for the owning resource
 	 * @param isMinorVersionCompare  true if the new version is a later minor version of the old one
 	 * @return ResourceParamGroupChangeSet
 	 */
 	public ResourceParamGroupChangeSet compareParamGroups(TLParamGroup oldParamGroup,
-			TLParamGroup newParamGroup, boolean isMinorVersionCompare) {
+			TLParamGroup newParamGroup, ResourceChangeSet resourceChangeSet, boolean isMinorVersionCompare) {
 		ResourceParamGroupChangeSet changeSet = new ResourceParamGroupChangeSet( oldParamGroup, newParamGroup );
 		List<ResourceChangeItem> changeItems = changeSet.getChangeItems();
 		
 		if (valueChanged( oldParamGroup.getFacetRefName(), newParamGroup.getFacetRefName() )) {
-			changeItems.add( new ResourceChangeItem( ResourceChangeType.FACET_REF_CHANGED,
+			changeItems.add( new ResourceChangeItem( resourceChangeSet, ResourceChangeType.FACET_REF_CHANGED,
 					oldParamGroup.getFacetRefName(), newParamGroup.getFacetRefName() ) );
 		}
 		if (valueChanged( oldParamGroup.getDocumentation(), newParamGroup.getDocumentation() )) {
-			changeItems.add( new ResourceChangeItem( ResourceChangeType.DOCUMENTATION_CHANGED, null, null ) );
+			changeItems.add( new ResourceChangeItem( resourceChangeSet,
+					ResourceChangeType.DOCUMENTATION_CHANGED, null, null ) );
 		}
 		
 		// Look for added, removed, and changed TLActionResponse
@@ -309,15 +327,15 @@ public class ResourceComparator extends BaseComparator {
 			TLParameter oldParam = oldParamGroup.getParameter( newParamName );
 			
 			if (oldParam == null) {
-				changeItems.add( new ResourceChangeItem( ResourceChangeType.PARAMETER_ADDED,
-						null, newParamName ) );
+				changeItems.add( new ResourceChangeItem( resourceChangeSet,
+						ResourceChangeType.PARAMETER_ADDED, null, newParamName ) );
 				
 			} else {
 				ResourceParameterChangeSet paramChangeSet = compareParameters(
-						oldParam, newParam, isMinorVersionCompare );
+						oldParam, newParam, resourceChangeSet, isMinorVersionCompare );
 				
 				if (!paramChangeSet.getChangeItems().isEmpty()) {
-					changeItems.add( new ResourceChangeItem( paramChangeSet ) );
+					changeItems.add( new ResourceChangeItem( resourceChangeSet, paramChangeSet ) );
 				}
 			}
 		}
@@ -328,8 +346,8 @@ public class ResourceComparator extends BaseComparator {
 				TLParameter newParam = newParamGroup.getParameter( oldParamName );
 				
 				if (newParam == null) {
-					changeItems.add( new ResourceChangeItem( ResourceChangeType.PARAMETER_DELETED,
-							oldParamName, null ) );
+					changeItems.add( new ResourceChangeItem( resourceChangeSet,
+							ResourceChangeType.PARAMETER_DELETED, oldParamName, null ) );
 				}
 			}
 		}
@@ -342,11 +360,12 @@ public class ResourceComparator extends BaseComparator {
 	 * 
 	 * @param oldParameter  facade for the old resource parameter version
 	 * @param newParameter  facade for the new resource parameter version
+	 * @param resourceChangeSet  change set for the owning resource
 	 * @param isMinorVersionCompare  true if the new version is a later minor version of the old one
 	 * @return ResourceParameterChangeSet
 	 */
 	public ResourceParameterChangeSet compareParameters(TLParameter oldParameter,
-			TLParameter newParameter, boolean isMinorVersionCompare) {
+			TLParameter newParameter, ResourceChangeSet resourceChangeSet, boolean isMinorVersionCompare) {
 		ResourceParameterChangeSet changeSet = new ResourceParameterChangeSet( oldParameter, newParameter );
 		List<ResourceChangeItem> changeItems = changeSet.getChangeItems();
 		List<String> oldEqualvalents = ModelCompareUtils.getEquivalents( oldParameter );
@@ -355,17 +374,19 @@ public class ResourceComparator extends BaseComparator {
 		List<String> newExamples = ModelCompareUtils.getExamples( newParameter );
 		
 		if (oldParameter.getLocation() != newParameter.getLocation() ) {
-			changeItems.add( new ResourceChangeItem( ResourceChangeType.LOCATION_CHANGED,
+			changeItems.add( new ResourceChangeItem( resourceChangeSet,
+					ResourceChangeType.LOCATION_CHANGED,
 					oldParameter.getLocation() + "", newParameter.getLocation() + "" ) );
 		}
 		if (valueChanged( oldParameter.getDocumentation(), newParameter.getDocumentation() )) {
-			changeItems.add( new ResourceChangeItem( ResourceChangeType.DOCUMENTATION_CHANGED, null, null ) );
+			changeItems.add( new ResourceChangeItem( resourceChangeSet,
+					ResourceChangeType.DOCUMENTATION_CHANGED, null, null ) );
 		}
 		
 		compareListContents( oldEqualvalents, newEqualvalents, ResourceChangeType.EQUIVALENT_ADDED,
-				ResourceChangeType.EQUIVALENT_DELETED, changeItems, isMinorVersionCompare );
+				ResourceChangeType.EQUIVALENT_DELETED, changeItems, resourceChangeSet, isMinorVersionCompare );
 		compareListContents( oldExamples, newExamples, ResourceChangeType.EXAMPLE_ADDED,
-				ResourceChangeType.EXAMPLE_DELETED, changeItems, isMinorVersionCompare );
+				ResourceChangeType.EXAMPLE_DELETED, changeItems, resourceChangeSet, isMinorVersionCompare );
 		return changeSet;
 	}
 	
@@ -374,11 +395,12 @@ public class ResourceComparator extends BaseComparator {
 	 * 
 	 * @param oldAction  facade for the old resource action version
 	 * @param newAction  facade for the new resource action version
+	 * @param resourceChangeSet  change set for the owning resource
 	 * @param isMinorVersionCompare  true if the new version is a later minor version of the old one
 	 * @return ResourceActionChangeSet
 	 */
 	public ResourceActionChangeSet compareActions(TLAction oldAction, TLAction newAction,
-			boolean isMinorVersionCompare) {
+			ResourceChangeSet resourceChangeSet, boolean isMinorVersionCompare) {
 		ResourceActionChangeSet changeSet = new ResourceActionChangeSet( oldAction, newAction );
 		List<ResourceChangeItem> changeItems = changeSet.getChangeItems();
 		AbstractLibrary owningLibrary = oldAction.getOwningLibrary();
@@ -391,37 +413,45 @@ public class ResourceComparator extends BaseComparator {
 		QName newPayloadTypeName = (newPayloadType == null) ? null : getEntityName( newPayloadType );
 		
 		if (oldAction.isCommonAction() != newAction.isCommonAction() ) {
-			changeItems.add( new ResourceChangeItem( ResourceChangeType.COMMON_ACTION_IND_CHANGED,
+			changeItems.add( new ResourceChangeItem( resourceChangeSet,
+					ResourceChangeType.COMMON_ACTION_IND_CHANGED,
 					oldAction.isCommonAction() + "", newAction.isCommonAction() + "" ) );
 		}
 		if (oldRequest.getHttpMethod() != newRequest.getHttpMethod() ) {
-			changeItems.add( new ResourceChangeItem( ResourceChangeType.REQUEST_METHOD_CHANGED,
+			changeItems.add( new ResourceChangeItem( resourceChangeSet,
+					ResourceChangeType.REQUEST_METHOD_CHANGED,
 					oldRequest.getHttpMethod() + "", newRequest.getHttpMethod() + "" ) );
 		}
 		if (valueChanged( oldRequest.getParamGroupName(), newRequest.getParamGroupName() )) {
-			changeItems.add( new ResourceChangeItem( ResourceChangeType.REQUEST_PARAM_GROUP_CHANGED,
+			changeItems.add( new ResourceChangeItem( resourceChangeSet,
+					ResourceChangeType.REQUEST_PARAM_GROUP_CHANGED,
 					oldRequest.getParamGroupName(), newRequest.getParamGroupName() ) );
 		}
 		if (valueChanged( oldRequest.getPathTemplate(), newRequest.getPathTemplate() )) {
-			changeItems.add( new ResourceChangeItem( ResourceChangeType.REQUEST_PATH_TEMPLATE_CHANGED,
+			changeItems.add( new ResourceChangeItem( resourceChangeSet,
+					ResourceChangeType.REQUEST_PATH_TEMPLATE_CHANGED,
 					oldRequest.getPathTemplate(), newRequest.getPathTemplate() ) );
 		}
 		if (valueChanged( oldPayloadTypeName, newPayloadTypeName )) {
 			if (isVersionChange( oldPayloadTypeName, newPayloadTypeName, versionScheme )) {
-				changeItems.add( new ResourceChangeItem( ResourceChangeType.REQUEST_PAYLOAD_TYPE_VERSION_CHANGED,
-						oldAction.getOwningLibrary().getVersion(), newAction.getOwningLibrary().getVersion() ) );
+				changeItems.add( new ResourceChangeItem( resourceChangeSet,
+						ResourceChangeType.REQUEST_PAYLOAD_TYPE_VERSION_CHANGED,
+						oldAction.getOwningLibrary().getVersion(),
+						newAction.getOwningLibrary().getVersion() ) );
 				
 			} else {
-				changeItems.add( new ResourceChangeItem( ResourceChangeType.REQUEST_PAYLOAD_TYPE_CHANGED,
+				changeItems.add( new ResourceChangeItem( resourceChangeSet,
+						ResourceChangeType.REQUEST_PAYLOAD_TYPE_CHANGED,
 						formatter.getEntityDisplayName( oldPayloadType ),
 						formatter.getEntityDisplayName( newPayloadType ) ) );
 			}
 		}
 		compareListContents( getStrings( oldRequest.getMimeTypes() ), getStrings( newRequest.getMimeTypes() ),
 				ResourceChangeType.REQUEST_MIME_TYPE_ADDED, ResourceChangeType.REQUEST_MIME_TYPE_DELETED,
-				changeItems, false);
+				changeItems, resourceChangeSet, false);
 		if (valueChanged( oldAction.getDocumentation(), newAction.getDocumentation() )) {
-			changeItems.add( new ResourceChangeItem( ResourceChangeType.DOCUMENTATION_CHANGED, null, null ) );
+			changeItems.add( new ResourceChangeItem( resourceChangeSet,
+					ResourceChangeType.DOCUMENTATION_CHANGED, null, null ) );
 		}
 		
 		// Look for added, removed, and changed TLActionResponse
@@ -430,15 +460,15 @@ public class ResourceComparator extends BaseComparator {
 			TLActionResponse oldResponse = getResponse( oldAction, newResponseName );
 			
 			if (oldResponse == null) {
-				changeItems.add( new ResourceChangeItem( ResourceChangeType.RESPONSE_ADDED,
-						null, newResponseName ) );
+				changeItems.add( new ResourceChangeItem( resourceChangeSet,
+						ResourceChangeType.RESPONSE_ADDED, null, newResponseName ) );
 				
 			} else {
 				ResourceActionResponseChangeSet responseChangeSet = compareActionResponses(
-						oldResponse, newResponse, isMinorVersionCompare );
+						oldResponse, newResponse, resourceChangeSet, isMinorVersionCompare );
 				
 				if (!responseChangeSet.getChangeItems().isEmpty()) {
-					changeItems.add( new ResourceChangeItem( responseChangeSet ) );
+					changeItems.add( new ResourceChangeItem( resourceChangeSet, responseChangeSet ) );
 				}
 			}
 		}
@@ -449,8 +479,8 @@ public class ResourceComparator extends BaseComparator {
 				TLActionResponse newResponse = getResponse( newAction, oldResponseName );
 				
 				if (newResponse == null) {
-					changeItems.add( new ResourceChangeItem( ResourceChangeType.RESPONSE_DELETED,
-							oldResponseName, null ) );
+					changeItems.add( new ResourceChangeItem( resourceChangeSet,
+							ResourceChangeType.RESPONSE_DELETED, oldResponseName, null ) );
 				}
 			}
 		}
@@ -463,11 +493,12 @@ public class ResourceComparator extends BaseComparator {
 	 * 
 	 * @param oldResponse  facade for the old resource action response version
 	 * @param newResponse  facade for the new resource action response version
+	 * @param resourceChangeSet  change set for the owning resource
 	 * @param isMinorVersionCompare  true if the new version is a later minor version of the old one
 	 * @return ResourceActionResponseChangeSet
 	 */
 	public ResourceActionResponseChangeSet compareActionResponses(TLActionResponse oldResponse,
-			TLActionResponse newResponse, boolean isMinorVersionCompare) {
+			TLActionResponse newResponse, ResourceChangeSet resourceChangeSet, boolean isMinorVersionCompare) {
 		ResourceActionResponseChangeSet changeSet = new ResourceActionResponseChangeSet( oldResponse, newResponse );
 		List<ResourceChangeItem> changeItems = changeSet.getChangeItems();
 		AbstractLibrary owningLibrary = oldResponse.getOwningLibrary();
@@ -479,15 +510,17 @@ public class ResourceComparator extends BaseComparator {
 		
 		compareListContents( getStrings( oldResponse.getStatusCodes() ), getStrings( newResponse.getStatusCodes() ),
 				ResourceChangeType.STATUS_CODE_ADDED, ResourceChangeType.STATUS_CODE_DELETED,
-				changeItems, false);
+				changeItems, resourceChangeSet, false);
 		
 		if (valueChanged( oldPayloadTypeName, newPayloadTypeName )) {
 			if (isVersionChange( oldPayloadTypeName, newPayloadTypeName, versionScheme )) {
-				changeItems.add( new ResourceChangeItem( ResourceChangeType.RESPONSE_PAYLOAD_TYPE_VERSION_CHANGED,
+				changeItems.add( new ResourceChangeItem( resourceChangeSet,
+						ResourceChangeType.RESPONSE_PAYLOAD_TYPE_VERSION_CHANGED,
 						oldResponse.getOwningLibrary().getVersion(), newResponse.getOwningLibrary().getVersion() ) );
 				
 			} else {
-				changeItems.add( new ResourceChangeItem( ResourceChangeType.RESPONSE_PAYLOAD_TYPE_CHANGED,
+				changeItems.add( new ResourceChangeItem( resourceChangeSet,
+						ResourceChangeType.RESPONSE_PAYLOAD_TYPE_CHANGED,
 						formatter.getEntityDisplayName( oldPayloadType ),
 						formatter.getEntityDisplayName( newPayloadType ) ) );
 			}
@@ -495,10 +528,11 @@ public class ResourceComparator extends BaseComparator {
 		
 		compareListContents( getStrings( oldResponse.getMimeTypes() ), getStrings( newResponse.getMimeTypes() ),
 				ResourceChangeType.RESPONSE_MIME_TYPE_ADDED, ResourceChangeType.RESPONSE_MIME_TYPE_DELETED,
-				changeItems, false);
+				changeItems, resourceChangeSet, false);
 		
 		if (valueChanged( oldResponse.getDocumentation(), newResponse.getDocumentation() )) {
-			changeItems.add( new ResourceChangeItem( ResourceChangeType.DOCUMENTATION_CHANGED, null, null ) );
+			changeItems.add( new ResourceChangeItem( resourceChangeSet,
+					ResourceChangeType.DOCUMENTATION_CHANGED, null, null ) );
 		}
 		
 		return changeSet;
@@ -513,21 +547,23 @@ public class ResourceComparator extends BaseComparator {
 	 * @param addedChangeType  the entity change type to use for added values
 	 * @param deletedChangeType  the entity change type to use for deleted values
 	 * @param changeItems  the list of change items for the entity
+	 * @param resourceChangeSet  change set for the owning resource
 	 * @param isMinorVersionCompare  true if the second entity is a later minor version of the first
 	 */
 	private void compareListContents(List<String> oldValues, List<String> newValues,
-			ResourceChangeType addedChangeType, ResourceChangeType deletedChangeType, List<ResourceChangeItem> changeItems,
+			ResourceChangeType addedChangeType, ResourceChangeType deletedChangeType,
+			List<ResourceChangeItem> changeItems, ResourceChangeSet resourceChangeSet,
 			boolean isMinorVersionCompare) {
 		for (String newValue : newValues) {
 			if (!oldValues.contains( newValue )) {
-				changeItems.add( new ResourceChangeItem( addedChangeType, null, newValue ) );
+				changeItems.add( new ResourceChangeItem( resourceChangeSet, addedChangeType, null, newValue ) );
 			}
 		}
 		
 		if (!isMinorVersionCompare) {
 			for (String oldValue : oldValues) {
 				if (!newValues.contains( oldValue )) {
-					changeItems.add( new ResourceChangeItem( deletedChangeType, oldValue, null ) );
+					changeItems.add( new ResourceChangeItem( resourceChangeSet, deletedChangeType, oldValue, null ) );
 				}
 			}
 		}

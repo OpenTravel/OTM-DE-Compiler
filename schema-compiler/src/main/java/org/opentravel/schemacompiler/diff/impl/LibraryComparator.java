@@ -75,34 +75,34 @@ public class LibraryComparator extends BaseComparator {
 		
 		// Look for changes in the library values
 		if (valueChanged( oldLibrary.getName(), newLibrary.getName() )) {
-			changeItems.add( new LibraryChangeItem( LibraryChangeType.NAME_CHANGED,
+			changeItems.add( new LibraryChangeItem( changeSet, LibraryChangeType.NAME_CHANGED,
 					oldLibrary.getName(), newLibrary.getName() ) );
 		}
 		if (valueChanged( oldLibrary.getNamespace(), newLibrary.getNamespace() )) {
-			changeItems.add( new LibraryChangeItem( LibraryChangeType.NAMESPACE_CHANGED,
+			changeItems.add( new LibraryChangeItem( changeSet, LibraryChangeType.NAMESPACE_CHANGED,
 					oldLibrary.getNamespace(), newLibrary.getNamespace() ) );
 		}
 		if (valueChanged( oldLibrary.getPrefix(), newLibrary.getPrefix() )) {
-			changeItems.add( new LibraryChangeItem( LibraryChangeType.PREFIX_CHANGED,
+			changeItems.add( new LibraryChangeItem( changeSet, LibraryChangeType.PREFIX_CHANGED,
 					oldLibrary.getPrefix(), newLibrary.getPrefix() ) );
 		}
 		if (valueChanged( oldLibrary.getVersionScheme(), newLibrary.getVersionScheme() )) {
-			changeItems.add( new LibraryChangeItem( LibraryChangeType.VERSION_SCHEME_CHANGED,
+			changeItems.add( new LibraryChangeItem( changeSet, LibraryChangeType.VERSION_SCHEME_CHANGED,
 					oldLibrary.getVersionScheme(), newLibrary.getVersionScheme() ) );
 		}
 		if (valueChanged( oldStatus, newStatus )) {
-			changeItems.add( new LibraryChangeItem( LibraryChangeType.STATUS_CHANGED,
+			changeItems.add( new LibraryChangeItem( changeSet, LibraryChangeType.STATUS_CHANGED,
 					oldStatus, newStatus ) );
 		}
 		if (valueChanged( oldLibrary.getComments(), newLibrary.getComments() )) {
-			changeItems.add( new LibraryChangeItem( LibraryChangeType.COMMENTS_CHANGED,
+			changeItems.add( new LibraryChangeItem( changeSet, LibraryChangeType.COMMENTS_CHANGED,
 					oldLibrary.getComments(), newLibrary.getComments() ) );
 		}
 		
 		// Identify new entities that were added
 		for (String newName : newEntityNames) {
 			if (!oldEntities.containsKey( newName )) {
-				changeItems.add( new LibraryChangeItem(
+				changeItems.add( new LibraryChangeItem( changeSet,
 						LibraryChangeType.MEMBER_ADDED, newEntities.get( newName ) ) );
 			}
 		}
@@ -110,7 +110,7 @@ public class LibraryComparator extends BaseComparator {
 		// Identify old entities that were deleted
 		for (String oldName : oldEntityNames) {
 			if (!newEntities.containsKey( oldName )) {
-				changeItems.add( new LibraryChangeItem(
+				changeItems.add( new LibraryChangeItem( changeSet, 
 						LibraryChangeType.MEMBER_DELETED, oldEntities.get( oldName ) ) );
 			}
 		}
@@ -127,7 +127,7 @@ public class LibraryComparator extends BaseComparator {
 										new EntityComparisonFacade( newEntity ) );
 				
 				if (!entityChangeSet.getChangeItems().isEmpty()) {
-					changeItems.add( new LibraryChangeItem( entityChangeSet ) );
+					changeItems.add( new LibraryChangeItem( changeSet, entityChangeSet ) );
 				}
 			}
 		}
@@ -135,7 +135,7 @@ public class LibraryComparator extends BaseComparator {
 		// Identify new resources that were added
 		for (String newName : newResourceNames) {
 			if (!oldResources.containsKey( newName )) {
-				changeItems.add( new LibraryChangeItem(
+				changeItems.add( new LibraryChangeItem( changeSet,
 						LibraryChangeType.MEMBER_ADDED, newResources.get( newName ) ) );
 			}
 		}
@@ -143,7 +143,7 @@ public class LibraryComparator extends BaseComparator {
 		// Identify old resources that were deleted
 		for (String oldName : oldResourceNames) {
 			if (!newResources.containsKey( oldName )) {
-				changeItems.add( new LibraryChangeItem(
+				changeItems.add( new LibraryChangeItem( changeSet,
 						LibraryChangeType.MEMBER_DELETED, oldResources.get( oldName ) ) );
 			}
 		}
@@ -159,7 +159,7 @@ public class LibraryComparator extends BaseComparator {
 										oldResource, newResource );
 				
 				if (!resourceChangeSet.getChangeItems().isEmpty()) {
-					changeItems.add( new LibraryChangeItem( resourceChangeSet ) );
+					changeItems.add( new LibraryChangeItem( changeSet, resourceChangeSet ) );
 				}
 			}
 		}

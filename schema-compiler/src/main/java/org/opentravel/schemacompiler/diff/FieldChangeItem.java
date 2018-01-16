@@ -22,17 +22,30 @@ package org.opentravel.schemacompiler.diff;
  */
 public class FieldChangeItem extends ChangeItem<FieldChangeType> {
 	
+	private FieldChangeSet changeSet;
+	
 	/**
 	 * Constructor used when a field value was changed.
 	 * 
+	 * @param changeSet  the change set to which this item belongs
 	 * @param changeType  the type of field change
 	 * @param oldValue  the affected value from the old version
 	 * @param newValue  the affected value from the new version
 	 */
-	public FieldChangeItem(FieldChangeType changeType, String oldValue, String newValue) {
+	public FieldChangeItem(FieldChangeSet changeSet, FieldChangeType changeType, String oldValue, String newValue) {
+		this.changeSet = changeSet;
 		this.changeType = changeType;
 		this.oldValue = oldValue;
 		this.newValue = newValue;
+	}
+
+	/**
+	 * Returns the change set to which this item belongs.
+	 *
+	 * @return FieldChangeSet
+	 */
+	public FieldChangeSet getChangeSet() {
+		return changeSet;
 	}
 
 }
