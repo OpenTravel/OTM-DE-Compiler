@@ -230,11 +230,11 @@ public class ModelCompareUtils {
 		try {
 			if ((name != null) && (name.getLocalPart() != null) && (name.getNamespaceURI() != null)) {
 				VersionScheme vScheme = vsFactory.getVersionScheme( versionScheme );
-				String targetBaseNS = vScheme.getBaseNamespace( name.getNamespaceURI() );
+				String targetBaseNS = getBaseNamespace( name.getNamespaceURI(), vScheme );
 				
 				for (QName testName : nameSet) {
 					if (name.getLocalPart().equals( testName.getLocalPart() )) {
-						String testBaseNS = vScheme.getBaseNamespace( testName.getNamespaceURI() );
+						String testBaseNS = getBaseNamespace( testName.getNamespaceURI(), vScheme );
 						
 						if (targetBaseNS.equals( testBaseNS )) {
 							matchingNames.add( testName );
@@ -246,6 +246,24 @@ public class ModelCompareUtils {
 			// Ignore and return no matching names
 		}
 		return matchingNames;
+	}
+	
+	/**
+	 * Returns the corresponding base namespace if the given one contains a version component.
+	 * 
+	 * @param ns  the namespace for which to return a base
+	 * @param vScheme  the version scheme to use when analyzing the namespace URI
+	 * @return String
+	 */
+	private static String getBaseNamespace(String ns, VersionScheme vScheme) {
+		String baseNS;
+		try {
+			baseNS = vScheme.getBaseNamespace( ns );
+			
+		} catch (IllegalArgumentException e) {
+			baseNS = ns;
+		}
+		return baseNS;
 	}
 	
 	/**

@@ -29,7 +29,6 @@ import org.opentravel.schemacompiler.model.TLAction;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLActionRequest;
 import org.opentravel.schemacompiler.model.TLActionResponse;
-import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLContext;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
@@ -88,8 +87,8 @@ public class DocumentationUtils {
 			} else if (currentElement instanceof TLContextualFacet) {
 				TLContextualFacet facet = (TLContextualFacet) currentElement;
 				
-				docPath.insert(0, "|@CONTEXTUAL:" + facet.getFacetType().toString() + ":" + facet.getName());
-				currentElement = facet.getOwningEntity();
+				docPath.insert(0, "@CONTEXTUAL:" + facet.getLocalName());
+				currentElement = null;
 				
 			} else if (currentElement instanceof TLFacet) {
 				TLFacet facet = (TLFacet) currentElement;
@@ -207,6 +206,9 @@ public class DocumentationUtils {
 					if (pathParts.isEmpty()) docOwner = (TLDocumentationOwner) currentElement;
 				} else if (pathPart.startsWith("@CONTEXT:")) {
 					docOwner = ((TLLibrary) currentElement).getContext( pathPart.substring( 9 ) );
+				} else if (pathPart.startsWith("@CONTEXTUAL:")) {
+					currentElement = (TLContextualFacet) ((TLLibrary) currentElement).getNamedMember( pathPart.substring( 12 ) );
+					if (pathParts.isEmpty()) docOwner = (TLDocumentationOwner) currentElement;
 				} else {
 					currentElement = ((TLLibrary) currentElement).getNamedMember( pathPart );
 					if (pathParts.isEmpty()) docOwner = (TLDocumentationOwner) currentElement;
@@ -273,6 +275,7 @@ public class DocumentationUtils {
 					currentElement = null;
 				}
 				
+			/*
 			} else if (pathPart.startsWith("@CONTEXTUAL:")) {
 				String[] facetParts = pathPart.substring( 12 ).split( ":" );
 				TLFacetType facetType = getFacetType( facetParts[0] );
@@ -284,6 +287,7 @@ public class DocumentationUtils {
 				} else {
 					currentElement = null;
 				}
+			*/
 				
 			} else if (pathPart.startsWith("@FACET:")) {
 				TLFacetType facetType = getFacetType( pathPart.substring( 7 ) );

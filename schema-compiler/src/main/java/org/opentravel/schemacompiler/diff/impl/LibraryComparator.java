@@ -136,7 +136,7 @@ public class LibraryComparator extends BaseComparator {
 		for (String newName : newResourceNames) {
 			if (!oldResources.containsKey( newName )) {
 				changeItems.add( new LibraryChangeItem( changeSet,
-						LibraryChangeType.MEMBER_ADDED, newResources.get( newName ) ) );
+						LibraryChangeType.RESOURCE_ADDED, newResources.get( newName ) ) );
 			}
 		}
 		
@@ -144,7 +144,7 @@ public class LibraryComparator extends BaseComparator {
 		for (String oldName : oldResourceNames) {
 			if (!newResources.containsKey( oldName )) {
 				changeItems.add( new LibraryChangeItem( changeSet,
-						LibraryChangeType.MEMBER_DELETED, oldResources.get( oldName ) ) );
+						LibraryChangeType.RESOURCE_DELETED, oldResources.get( oldName ) ) );
 			}
 		}
 		

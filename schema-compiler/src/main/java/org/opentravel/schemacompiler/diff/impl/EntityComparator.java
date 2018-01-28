@@ -36,6 +36,8 @@ import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLMemberField;
 import org.opentravel.schemacompiler.model.TLProperty;
+import org.opentravel.schemacompiler.version.VersionScheme;
+import org.opentravel.schemacompiler.version.VersionSchemeException;
 
 /**
  * Performs a comparison of two OTM entities.
@@ -43,6 +45,7 @@ import org.opentravel.schemacompiler.model.TLProperty;
 public class EntityComparator extends BaseComparator {
 	
 	private DisplayFormatter formatter = new DisplayFormatter();
+	private VersionScheme versionScheme;
 	
 	/**
 	 * Constructor that initializes the comparison options and namespace mappings
@@ -65,6 +68,8 @@ public class EntityComparator extends BaseComparator {
 	public EntityChangeSet compareEntities(EntityComparisonFacade oldEntity, EntityComparisonFacade newEntity) {
 		EntityChangeSet changeSet = new EntityChangeSet( oldEntity.getEntity(), newEntity.getEntity() );
 		List<EntityChangeItem> changeItems = changeSet.getChangeItems();
+		
+		this.versionScheme = getVScheme( oldEntity.getOwningLibrary() );
 		
 		// Look for changes in the library values
 		AbstractLibrary owningLibrary = oldEntity.getOwningLibrary();
@@ -422,6 +427,8 @@ public class EntityComparator extends BaseComparator {
 					fieldName = elementName;
 				}
 			}
+			fieldName = getAdjustedQName( fieldName );
+			
 			List<TLMemberField<?>> fields = fieldMap.get( fieldName );
 			
 			if (fields == null) {
@@ -446,8 +453,8 @@ public class EntityComparator extends BaseComparator {
 		for (TLMemberField<?> field : fieldList) {
 			NamedEntity fieldOwner = (NamedEntity) field.getOwner();
 			String mappedNS = getNamespaceMappings().get( fieldOwner.getNamespace() );
-			QName ownerName = new QName(
-					(mappedNS != null) ? mappedNS : fieldOwner.getNamespace(), fieldOwner.getLocalName() );
+			QName ownerName = getAdjustedQName( new QName(
+					(mappedNS != null) ? mappedNS : fieldOwner.getNamespace(), fieldOwner.getLocalName() ) );
 			List<TLMemberField<?>> fields = fieldMap.get( ownerName );
 			
 			if (fields == null) {
@@ -457,6 +464,24 @@ public class EntityComparator extends BaseComparator {
 			fields.add( field );
 		}
 		return fieldMap;
+	}
+	
+	/**
+	 * If the comparison option is activated to ignore version changes, the namespace
+	 * of the given <code>QName</code> will be adjusted to the base namespace.  If the
+	 * option is not active, the original <code>QName</code> will be returned.
+	 * 
+	 * @param name  the qualified name to adjust
+	 * @return QName
+	 */
+	private QName getAdjustedQName(QName name) {
+		QName adjustedName = name;
+		
+		if (getCompareOptions().isSuppressFieldVersionChanges()) {
+			adjustedName = new QName( versionScheme.getBaseNamespace(
+					name.getNamespaceURI() ), name.getLocalPart() );
+		}
+		return adjustedName;
 	}
 	
 	/**
@@ -481,6 +506,32 @@ public class EntityComparator extends BaseComparator {
 			versionScheme = vsFactory.getDefaultVersionScheme();
 		}
 		return versionScheme;
+	}
+	
+	/**
+	 * Returns the version scheme for the given library.
+	 * 
+	 * @param library  the library for which to return a version scheme
+	 * @return VersionScheme
+	 */
+	private VersionScheme getVScheme(AbstractLibrary library) {
+		VersionScheme vScheme = null;
+		try {
+			if (library != null) {
+				vScheme = vsFactory.getVersionScheme( library.getVersionScheme() );
+			}
+			
+		} catch (VersionSchemeException e) {}
+		
+		if (vScheme == null) {
+			try {
+				vScheme = vsFactory.getVersionScheme( vsFactory.getDefaultVersionScheme() );
+				
+			} catch (VersionSchemeException e1) {
+				throw new Error("Error - Default version scheme could not be identified.");
+			}
+		}
+		return vScheme;
 	}
 	
 }
