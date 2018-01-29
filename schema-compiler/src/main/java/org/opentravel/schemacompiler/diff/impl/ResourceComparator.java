@@ -39,6 +39,7 @@ import org.opentravel.schemacompiler.model.TLAction;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLActionRequest;
 import org.opentravel.schemacompiler.model.TLActionResponse;
+import org.opentravel.schemacompiler.model.TLHttpMethod;
 import org.opentravel.schemacompiler.model.TLParamGroup;
 import org.opentravel.schemacompiler.model.TLParameter;
 import org.opentravel.schemacompiler.model.TLResource;
@@ -407,27 +408,33 @@ public class ResourceComparator extends BaseComparator {
 		String versionScheme = (owningLibrary == null) ? null : owningLibrary.getVersionScheme();
 		TLActionRequest oldRequest = oldAction.getRequest();
 		TLActionRequest newRequest = newAction.getRequest();
-		NamedEntity oldPayloadType = oldRequest.getPayloadType();
-		NamedEntity newPayloadType = newRequest.getPayloadType();
+		NamedEntity oldPayloadType = (oldRequest == null) ? null : oldRequest.getPayloadType();
+		NamedEntity newPayloadType = (newRequest == null) ? null : newRequest.getPayloadType();
 		QName oldPayloadTypeName = (oldPayloadType == null) ? null : getEntityName( oldPayloadType );
 		QName newPayloadTypeName = (newPayloadType == null) ? null : getEntityName( newPayloadType );
+		TLHttpMethod oldHttpMethod = (oldRequest == null) ? null : oldRequest.getHttpMethod();
+		TLHttpMethod newHttpMethod = (newRequest == null) ? null : newRequest.getHttpMethod();
+		TLParamGroup oldParamGroup = (oldRequest == null) ? null : oldRequest.getParamGroup();
+		TLParamGroup newParamGroup = (newRequest == null) ? null : newRequest.getParamGroup();
+		String oldPathTemplate = (oldRequest == null) ? null : oldRequest.getPathTemplate();
+		String newPathTemplate = (newRequest == null) ? null : newRequest.getPathTemplate();
 		
 		if (oldAction.isCommonAction() != newAction.isCommonAction() ) {
 			changeItems.add( new ResourceChangeItem( resourceChangeSet,
 					ResourceChangeType.COMMON_ACTION_IND_CHANGED,
 					oldAction.isCommonAction() + "", newAction.isCommonAction() + "" ) );
 		}
-		if (oldRequest.getHttpMethod() != newRequest.getHttpMethod() ) {
+		if (oldHttpMethod != newHttpMethod) {
 			changeItems.add( new ResourceChangeItem( resourceChangeSet,
 					ResourceChangeType.REQUEST_METHOD_CHANGED,
-					oldRequest.getHttpMethod() + "", newRequest.getHttpMethod() + "" ) );
+					oldHttpMethod + "", newHttpMethod + "" ) );
 		}
-		if (valueChanged( oldRequest.getParamGroupName(), newRequest.getParamGroupName() )) {
+		if (valueChanged( oldParamGroup, newParamGroup )) {
 			changeItems.add( new ResourceChangeItem( resourceChangeSet,
 					ResourceChangeType.REQUEST_PARAM_GROUP_CHANGED,
 					oldRequest.getParamGroupName(), newRequest.getParamGroupName() ) );
 		}
-		if (valueChanged( oldRequest.getPathTemplate(), newRequest.getPathTemplate() )) {
+		if (valueChanged( oldPathTemplate, newPathTemplate )) {
 			changeItems.add( new ResourceChangeItem( resourceChangeSet,
 					ResourceChangeType.REQUEST_PATH_TEMPLATE_CHANGED,
 					oldRequest.getPathTemplate(), newRequest.getPathTemplate() ) );
@@ -446,9 +453,13 @@ public class ResourceComparator extends BaseComparator {
 						formatter.getEntityDisplayName( newPayloadType ) ) );
 			}
 		}
-		compareListContents( getStrings( oldRequest.getMimeTypes() ), getStrings( newRequest.getMimeTypes() ),
-				ResourceChangeType.REQUEST_MIME_TYPE_ADDED, ResourceChangeType.REQUEST_MIME_TYPE_DELETED,
-				changeItems, resourceChangeSet, false);
+		
+		if ((oldRequest != null) && (newRequest != null)) {
+			compareListContents( getStrings( oldRequest.getMimeTypes() ), getStrings( newRequest.getMimeTypes() ),
+					ResourceChangeType.REQUEST_MIME_TYPE_ADDED, ResourceChangeType.REQUEST_MIME_TYPE_DELETED,
+					changeItems, resourceChangeSet, false);
+		}
+		
 		if (valueChanged( oldAction.getDocumentation(), newAction.getDocumentation() )) {
 			changeItems.add( new ResourceChangeItem( resourceChangeSet,
 					ResourceChangeType.DOCUMENTATION_CHANGED, null, null ) );
