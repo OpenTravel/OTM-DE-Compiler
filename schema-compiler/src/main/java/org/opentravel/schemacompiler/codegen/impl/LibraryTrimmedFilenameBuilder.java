@@ -57,8 +57,7 @@ public class LibraryTrimmedFilenameBuilder implements
 
         if (item instanceof TLLibrary) {
             if (memberFilename != null) {
-                filename = memberFilename + "_Trim_" + item.getName() + "_"
-                        + ((TLLibrary) item).getVersion().replaceAll("\\.", "_");
+                filename = memberFilename + "_Trim_" + libraryFilenameBuilder.buildFilename(item, "");
             } else {
                 filename = libraryFilenameBuilder.buildFilename(item, "") + "_Trim";
             }

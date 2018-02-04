@@ -15,9 +15,19 @@
  */
 package org.opentravel.schemacompiler.codegen.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLModel;
 
 /**
  * Implementation of the <code>CodeGenerationFilenameBuilder</code> interface that can create
@@ -28,23 +38,143 @@ import org.opentravel.schemacompiler.model.TLLibrary;
  */
 public class LibraryFilenameBuilder<L extends AbstractLibrary> implements
         CodeGenerationFilenameBuilder<L> {
-
+	
+	private Map<L,String> baseFilenameMap;
+	
     /**
-     * @see org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder#buildFilename(org.opentravel.schemacompiler.model.TLModelElement,
-     *      java.lang.String)
+     * @see org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder#buildFilename(org.opentravel.schemacompiler.model.TLModelElement,java.lang.String)
      */
     @Override
     public String buildFilename(L item, String fileExtension) {
+    	synchronized (this) {
+    		if (baseFilenameMap == null) {
+    			TLModel model = (item == null) ? null : item.getOwningModel();
+    			
+    			if (model != null) {
+        			initBaseFilenames( model );
+    			}
+    		}
+    	}
         String fileExt = (fileExtension.length() == 0) ? "" : ("." + fileExtension);
-        String filename = item.getName();
-
-        if (item instanceof TLLibrary) {
-            filename += "_" + ((TLLibrary) item).getVersion().replaceAll("\\.", "_");
-        }
+    	String filename = baseFilenameMap.get( item );
+    	
+    	if (filename == null) {
+            filename = new FilenameDetails( item ).getFilename();
+    	}
         if (!filename.toLowerCase().endsWith(fileExt)) {
             filename += fileExt;
         }
         return filename;
     }
-
+    
+    /**
+     * Initializes the filenames that should be used for each library in the model.
+     * 
+     * @param model  the model that contains all libraries to which names should be assigned
+     */
+    @SuppressWarnings("unchecked")
+	private void initBaseFilenames(TLModel model) {
+    	Set<FilenameDetails> filenameDetails = new HashSet<>();
+    	boolean conflictsExist;
+    	
+    	// Build the initial list of filename details
+    	for (AbstractLibrary library : model.getAllLibraries()) {
+    		filenameDetails.add( new FilenameDetails( library ) );
+    	}
+    	
+    	// Check for conflicts and continue attempting to resolve until no more
+    	// conflicts exist, or no further options are available.
+    	do {
+    		Map<String,List<FilenameDetails>> detailsByFilename = new HashMap<>();
+    		
+    		for (FilenameDetails fd : filenameDetails) {
+    			List<FilenameDetails> detailsList = detailsByFilename.get( fd.getFilename() );
+    			
+    			if (detailsList == null) {
+    				detailsList = new ArrayList<>();
+    				detailsByFilename.put( fd.getFilename(), detailsList );
+    			}
+    			detailsList.add( fd );
+    		}
+    		conflictsExist = false;
+    		
+    		for (List<FilenameDetails> detailsList : detailsByFilename.values()) {
+    			if (detailsList.size() > 1) {
+    				boolean changesMade = false;
+    				
+    				for (FilenameDetails fd : detailsList) {
+    					if (!fd.nsComponents.isEmpty()) {
+        					fd.libraryFilename = fd.library.getName() + "_" + fd.nsComponents.remove( 0 );
+    						changesMade = true;
+    					}
+    				}
+    				
+    				// If no more namespace options are available, allow the conflict to exist.  In this
+    				// situation, there are other errors in the model that should not have allowed us to
+    				// get this far.  Exiting at this point will prevent us from getting stuck in an
+    				// infinite loop.
+    				conflictsExist |= changesMade;
+    			}
+    		}
+    		
+    	} while (conflictsExist);
+    	
+    	baseFilenameMap = new HashMap<>();
+    	
+    	for (FilenameDetails fd : filenameDetails) {
+    		baseFilenameMap.put( (L) fd.library, fd.getFilename() );
+    	}
+    }
+    
+    /**
+     * Encapsulates the various details of a library's filename (used during initialization).
+     */
+    private static class FilenameDetails {
+    	
+    	public AbstractLibrary library;
+    	public List<String> nsComponents = new ArrayList<>();
+    	public String libraryFilename;
+    	public String versionSuffix;
+    	
+    	/**
+    	 * Constructor that assigns the initial values for each component of the filename
+    	 * details.
+    	 * 
+    	 * @param library  the library to which a filename will be assigned
+    	 */
+    	public FilenameDetails(AbstractLibrary library) {
+    		String baseNS;
+    		
+    		this.library = library;
+    		this.libraryFilename = library.getName();
+    		
+            if (library instanceof TLLibrary) {
+            	TLLibrary tlLibrary = (TLLibrary) library;
+            	
+            	baseNS = tlLibrary.getBaseNamespace();
+                this.versionSuffix = "_" + tlLibrary.getVersion().replaceAll("\\.", "_");
+                
+            } else {
+            	baseNS = library.getNamespace();
+            	this.versionSuffix = "";
+            }
+            
+            if (baseNS.endsWith("/")) {
+            	baseNS = baseNS.substring( 0, baseNS.length() - 1 );
+            }
+            this.nsComponents = new ArrayList<>( Arrays.asList( baseNS.split( "/" ) ) );
+            Collections.reverse( this.nsComponents );
+    	}
+    	
+    	/**
+    	 * Returns the filename as currently specified by these details.
+    	 * 
+    	 * @return String
+    	 */
+    	public String getFilename() {
+    		return libraryFilename + versionSuffix;
+    	}
+    	
+    }
+    
 }
