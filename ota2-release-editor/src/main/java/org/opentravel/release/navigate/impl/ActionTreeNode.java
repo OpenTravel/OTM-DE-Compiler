@@ -81,7 +81,9 @@ public class ActionTreeNode extends TreeNode<TLAction> {
 		List<TreeNode<?>> children = new ArrayList<>();
 		TLAction action = getEntity();
 		
-		children.add( treeNodeFactory.newTreeNode( action.getRequest() ) );
+		if (action.getRequest() != null) {
+			children.add( treeNodeFactory.newTreeNode( action.getRequest() ) );
+		}
 		
 		for (TLActionResponse entity : action.getResponses()) {
 			children.add( treeNodeFactory.newTreeNode( entity ) );
