@@ -35,6 +35,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
+import org.opentravel.application.common.AbstractMainWindowController;
 import org.opentravel.schemacompiler.codegen.example.ExampleGeneratorOptions;
 import org.opentravel.schemacompiler.ioc.CompilerExtensionRegistry;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
@@ -60,6 +61,7 @@ import org.w3c.dom.Document;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -106,13 +108,11 @@ import javafx.stage.WindowEvent;
 /**
  * JavaFX controller class for the OTA2 Example Upgrade Utility application.
  */
-public class ExampleUpgradeController {
+public class ExampleUpgradeController extends AbstractMainWindowController {
 	
 	public static final String FXML_FILE = "/ota2-example-upgrade.fxml";
 	
 	private static final DataFormat DRAG_FORMAT = new DataFormat("application/ota2-original-dom-node");
-	
-	private Stage primaryStage;
 	
     @FXML private TextField libraryText;
     @FXML private Tooltip libraryTooltip;
@@ -154,6 +154,7 @@ public class ExampleUpgradeController {
 	private Map<QName,List<OTMObjectChoice>> familyMatches = new HashMap<>();
 	private Map<String,List<OTMObjectChoice>> allElementsByBaseNS = new HashMap<>();
 	private FacetSelections facetSelections;
+	private UserSettings userSettings;
 	
 	private String dragId;
 	private TreeItem<DOMTreeOriginalNode> dragItem;
@@ -170,7 +171,7 @@ public class ExampleUpgradeController {
 				new FileChooser.ExtensionFilter( "OTM Projects", "*.otp" ),
 				new FileChooser.ExtensionFilter( "OTM Libraries", "*.otm" ),
 				new FileChooser.ExtensionFilter( "All Files", "*.*" ) );
-		File selectedFile = chooser.showOpenDialog( primaryStage );
+		File selectedFile = chooser.showOpenDialog( getPrimaryStage() );
 		
 		if ((selectedFile != null) && selectedFile.exists()) {
 			Runnable r = new BackgroundTask( "Loading Library: " + selectedFile.getName() ) {
@@ -200,6 +201,7 @@ public class ExampleUpgradeController {
 							
 							model = newModel;
 							modelFile = selectedFile;
+							userSettings.setLastModelFile( modelFile );
 							
 							// Scan the model to pre-populate tables with lists of potential entity
 							// selections for the example root element.
@@ -221,6 +223,7 @@ public class ExampleUpgradeController {
 						
 					} finally {
 						updateControlStates();
+						userSettings.save();
 					}
 				}
 			};
@@ -357,7 +360,7 @@ public class ExampleUpgradeController {
 		FileChooser chooser = newFileChooser( "Select Example File", initialDirectory,
 				new FileChooser.ExtensionFilter( "XML Files", "*.xml" ),
 				new FileChooser.ExtensionFilter( "JSON Files", "*.json" ) );
-		File selectedFile = chooser.showOpenDialog( primaryStage );
+		File selectedFile = chooser.showOpenDialog( getPrimaryStage() );
 		
 		if ((selectedFile != null) && selectedFile.exists()) {
 			Runnable r = new BackgroundTask( "Loading Example Document: " + selectedFile.getName() ) {
@@ -379,9 +382,11 @@ public class ExampleUpgradeController {
 						}
 						exampleFile = selectedFile;
 						exampleFolder = exampleFile.getParentFile();
+						userSettings.setLastExampleFolder( exampleFolder );
 						
 					} finally {
 						updateControlStates();
+						userSettings.save();
 					}
 				}
 			};
@@ -476,7 +481,7 @@ public class ExampleUpgradeController {
 			
 			dialogStage.setTitle( "OTM Object Selection Strategy" );
 			dialogStage.initModality( Modality.WINDOW_MODAL );
-			dialogStage.initOwner( primaryStage );
+			dialogStage.initOwner( getPrimaryStage() );
 			dialogStage.setScene( scene );
 			
 			controller = loader.getController();
@@ -525,7 +530,7 @@ public class ExampleUpgradeController {
 		FileChooser chooser = newFileChooser( "Save Example Output", userSettings.getLastExampleFolder(),
 				xmlSelected ? new FileChooser.ExtensionFilter( "XML Files", "*.xml" )
 							: new FileChooser.ExtensionFilter( "JSON Files", "*.json" ) );
-		File targetFile = chooser.showSaveDialog( primaryStage );
+		File targetFile = chooser.showSaveDialog( getPrimaryStage() );
 		
 		if (targetFile != null) {
 			Runnable r = new BackgroundTask( "Saving Report" ) {
@@ -586,7 +591,7 @@ public class ExampleUpgradeController {
 			
 			dialogStage.setTitle( title );
 			dialogStage.initModality( Modality.WINDOW_MODAL );
-			dialogStage.initOwner( primaryStage );
+			dialogStage.initOwner( getPrimaryStage() );
 			dialogStage.setScene( scene );
 			
 			controller = loader.getController();
@@ -852,11 +857,15 @@ public class ExampleUpgradeController {
 	 * Assigns the primary stage for the window associated with this controller.
 	 *
 	 * @param primaryStage  the primary stage for this controller
-	 * @param userSettings  provides user setting information from the last application session
 	 */
-	public void initialize(Stage primaryStage, UserSettings settings) {
+	@Override
+	protected void initialize(Stage primaryStage) {
 		List<String> bindingStyles = CompilerExtensionRegistry.getAvailableExtensionIds();
 		String defaultStyle = CompilerExtensionRegistry.getActiveExtension();
+		UserSettings settings = UserSettings.load();
+		
+		super.initialize( primaryStage );
+		this.userSettings = settings;
 		
 		// Since the preview pane is a custom component, we have to configure it manually
 		previewPane = new CodeArea();
@@ -1008,14 +1017,14 @@ public class ExampleUpgradeController {
 					}
 				});
 		
-		this.primaryStage = primaryStage;
-		this.primaryStage.getScene().getStylesheets().add(
-				ExampleUpgradeController.class.getResource( "/styles/xml-highlighting.css" ).toExternalForm() );
-		this.primaryStage.getScene().getStylesheets().add(
-				ExampleUpgradeController.class.getResource( "/styles/json-highlighting.css" ).toExternalForm() );
-		this.primaryStage.getScene().getStylesheets().add(
-				ExampleUpgradeController.class.getResource( "/styles/tree-styles.css" ).toExternalForm() );
-		this.primaryStage.setOnCloseRequest( new EventHandler<WindowEvent>() {
+		ObservableList<String> stylesheets = getPrimaryStage().getScene().getStylesheets();
+		final EventHandler<WindowEvent> existingOnClose = getPrimaryStage().getOnCloseRequest();
+		
+		stylesheets.add( ExampleUpgradeController.class.getResource( "/styles/xml-highlighting.css" ).toExternalForm() );
+		stylesheets.add( ExampleUpgradeController.class.getResource( "/styles/json-highlighting.css" ).toExternalForm() );
+		stylesheets.add( ExampleUpgradeController.class.getResource( "/styles/tree-styles.css" ).toExternalForm() );
+		
+		getPrimaryStage().setOnCloseRequest( new EventHandler<WindowEvent>() {
 			public void handle(WindowEvent event) {
 				if ((upgradeDocument != null) && upgradeDocumentDirty) {
 					Alert confirmDialog = new Alert( AlertType.CONFIRMATION );
@@ -1031,25 +1040,12 @@ public class ExampleUpgradeController {
 						saveExampleOutput( null );
 					}
 				}
+				if (existingOnClose != null) {
+					existingOnClose.handle( event );
+				}
 			}
 		});
 		updateControlStates();
-	}
-	
-	/**
-	 * Allows the controller to save any updates to the user settings prior to application
-	 * close.
-	 * 
-	 * @param settings  the user settings to be updated
-	 */
-	public void updateUserSettings(UserSettings settings) {
-		if (modelFile != null) {
-			settings.setLastModelFile( modelFile );
-		}
-		if (exampleFolder != null) {
-			settings.setLastExampleFolder( exampleFolder );
-		}
-		settings.setRepeatCount( repeatCountSpinner.getValue() );
 	}
 	
 	/**

@@ -21,7 +21,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.opentravel.otm</groupId>
-			<artifactId>schema-compiler</artifactId>
+			<artifactId>ota2-application-common</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

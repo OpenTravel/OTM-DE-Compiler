@@ -29,6 +29,7 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonType;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAttributeType;
+import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLListFacet;
@@ -73,6 +74,7 @@ public class SimpleTypeInfo {
     private String maxInclusive;
     private String minExclusive;
     private String maxExclusive;
+    private boolean listTypeInd = false;
     
 	/**
 	 * Constructs the list of all constraints for the given simple type.
@@ -143,6 +145,8 @@ public class SimpleTypeInfo {
 					if ((maxExclusive == null) && (simple.getMaxExclusive() != null)) {
 						maxExclusive = simple.getMaxExclusive();
 					}
+					listTypeInd |= simple.isListTypeInd();
+					
 					findConstraints( simple.getParentType(),  visitedEntities );
 					
 					// Work-around for OTM-DE since it represents XSDSimple types as TLSimples (reason unknown)
@@ -165,6 +169,9 @@ public class SimpleTypeInfo {
 					if (listFacet.getFacetType() == TLFacetType.SIMPLE) {
 						findConstraints( ((TLListFacet) simpleType).getItemFacet(), visitedEntities );
 					}
+					
+				} else if (simpleType instanceof TLClosedEnumeration) {
+					baseSimpleType = simpleType;
 					
 				} else if (simpleType instanceof XSDSimpleType) {
 					JsonSchema simpleSchema = xsdSimplePrimitives.get( simpleType.getLocalName() );
@@ -315,6 +322,15 @@ public class SimpleTypeInfo {
 		return maxExclusive;
 	}
 	
+	/**
+	 * Returns true if the type is a simple list.
+	 *
+	 * @return boolean
+	 */
+	public boolean isListType() {
+		return listTypeInd;
+	}
+
 	/**
 	 * Constructs a new JSON type instance.
 	 * 

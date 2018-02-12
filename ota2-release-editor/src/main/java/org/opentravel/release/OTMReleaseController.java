@@ -36,6 +36,7 @@ import java.util.Optional;
 
 import javax.xml.namespace.QName;
 
+import org.opentravel.application.common.AbstractMainWindowController;
 import org.opentravel.release.NewReleaseDialogController.NewReleaseInfo;
 import org.opentravel.release.navigate.TreeNode;
 import org.opentravel.release.navigate.TreeNodeFactory;
@@ -115,7 +116,7 @@ import jfxtras.scene.control.LocalDateTimeTextField;
 /**
  * JavaFX controller class for the OTM-Diff application.
  */
-public class OTMReleaseController {
+public class OTMReleaseController extends AbstractMainWindowController {
 	
 	public static final String FXML_FILE = "/ota2-release-editor.fxml";
 	
@@ -123,8 +124,6 @@ public class OTMReleaseController {
 	private static final String SUBSTITUTION_GROUP_CHOICE = "Substitution Group";
 	private static final String BLANK_DATE_VALUE = "Latest Commit";
 	private static final String DEFAULT_SUFFIX = " (Release Default)";
-	
-	private Stage primaryStage;
 	
 	@FXML private MenuItem newMenu;
 	@FXML private MenuItem openMenu;
@@ -250,7 +249,7 @@ public class OTMReleaseController {
 	@FXML public void newReleaseFile(ActionEvent event) {
 		try {
 			NewReleaseDialogController controller = NewReleaseDialogController.createNewReleaseDialog(
-					userSettings.getReleaseFolder(), primaryStage );
+					userSettings.getReleaseFolder(), getPrimaryStage() );
 			NewReleaseInfo releaseInfo = controller.showDialog();
 			
 			if (releaseInfo != null) {
@@ -303,7 +302,7 @@ public class OTMReleaseController {
 			closeRelease();
 		}
 		FileChooser chooser = newFileChooser( "Open", userSettings.getReleaseFolder() );
-		File selectedFile = chooser.showOpenDialog( primaryStage );
+		File selectedFile = chooser.showOpenDialog( getPrimaryStage() );
 		
 		if ((selectedFile != null) && (selectedFile != releaseFile)) {
 			Runnable r = new BackgroundTask( "Loading Release: " + selectedFile.getName(), StatusType.INFO ) {
@@ -342,7 +341,7 @@ public class OTMReleaseController {
 		if (availabilityChecker.pingAllRepositories( false )) {
 			BrowseRepositoryDialogController controller =
 					BrowseRepositoryDialogController.createBrowseRepositoryDialog(
-							"Open Managed Release", RepositoryItemType.RELEASE, primaryStage );
+							"Open Managed Release", RepositoryItemType.RELEASE, getPrimaryStage() );
 			
 			controller.showAndWait();
 			
@@ -397,7 +396,7 @@ public class OTMReleaseController {
 	@FXML public void saveReleaseFileAs(ActionEvent event) {
 		if ((releaseManager != null) && confirmCloseRelease()) {
 			DirectoryChooser chooser = newDirectoryChooser( "Save As Folder", userSettings.getReleaseFolder() );
-			File selectedFolder = chooser.showDialog( primaryStage );
+			File selectedFolder = chooser.showDialog( getPrimaryStage() );
 			
 			if (selectedFolder != null) {
 				File saveAsFile = releaseManager.getSaveAsFile( selectedFolder );
@@ -542,7 +541,7 @@ public class OTMReleaseController {
 		if (releaseManager != null) {
 			BrowseRepositoryDialogController controller =
 					BrowseRepositoryDialogController.createBrowseRepositoryDialog(
-							"Add Principle Library", RepositoryItemType.LIBRARY, primaryStage );
+							"Add Principle Library", RepositoryItemType.LIBRARY, getPrimaryStage() );
 			
 			controller.showAndWait();
 			
@@ -733,7 +732,7 @@ public class OTMReleaseController {
 	@FXML public void newReleaseVersion(ActionEvent event) {
 		if ((releaseManager != null) && managedRelease) {
 			DirectoryChooser chooser = newDirectoryChooser( "New Version Folder", userSettings.getReleaseFolder() );
-			File selectedFolder = chooser.showDialog( primaryStage );
+			File selectedFolder = chooser.showDialog( getPrimaryStage() );
 			
 			if (selectedFolder != null) {
 				File newVersionFile = releaseManager.getNewVersionFile( selectedFolder );
@@ -772,7 +771,7 @@ public class OTMReleaseController {
 	@FXML public void unpublishRelease(ActionEvent event) {
 		if ((releaseManager != null) && managedRelease) {
 			DirectoryChooser chooser = newDirectoryChooser( "Unpublish to Local Folder", userSettings.getReleaseFolder() );
-			File selectedFolder = chooser.showDialog( primaryStage );
+			File selectedFolder = chooser.showDialog( getPrimaryStage() );
 			
 			if (selectedFolder != null) {
 				File saveAsFile = releaseManager.getSaveAsFile( selectedFolder );
@@ -904,14 +903,14 @@ public class OTMReleaseController {
 		
 		if (confirmClose) {
 			UserSettings settings = UserSettings.load();
-			Scene scene = primaryStage.getScene();
+			Scene scene = getPrimaryStage().getScene();
 			
 			settings.setWindowPosition( new Point(
-					primaryStage.xProperty().intValue(), primaryStage.yProperty().intValue() ) );
+					getPrimaryStage().xProperty().intValue(), getPrimaryStage().yProperty().intValue() ) );
 			settings.setWindowSize( new Dimension(
 					scene.widthProperty().intValue(), scene.heightProperty().intValue() ) );
 			settings.save();
-			primaryStage.close();
+			getPrimaryStage().close();
 		}
 		return confirmClose;
 	}
@@ -923,7 +922,7 @@ public class OTMReleaseController {
 	 * @param event  the action event that triggered this method call
 	 */
 	@FXML public void aboutApplication(ActionEvent event) {
-		AboutDialogController.createAboutDialog( primaryStage ).showAndWait();
+		AboutDialogController.createAboutDialog( getPrimaryStage() ).showAndWait();
 	}
 	
 	/**
@@ -1543,11 +1542,14 @@ public class OTMReleaseController {
 	 * and initializes all visual controls.
 	 *
 	 * @param primaryStage  the primary stage for this controller
-	 * @param userSettings  provides user setting information from the last application session
 	 */
-	public void initialize(Stage primaryStage, UserSettings userSettings) {
+	@Override
+	public void initialize(Stage primaryStage) {
 		List<String> bindingStyles = CompilerExtensionRegistry.getAvailableExtensionIds();
 		String defaultStyle = CompilerExtensionRegistry.getActiveExtension();
+		UserSettings userSettings = UserSettings.load();
+		
+		super.initialize( primaryStage );
 		
 		// Initialize the possible values in choice groups and spinners
 		bindingStyleChoice.setItems( FXCollections.observableArrayList( bindingStyles ) );
@@ -1822,7 +1824,6 @@ public class OTMReleaseController {
 		// Complete initialization and update the control states
 		this.releaseAccordion.setExpandedPane( this.releaseMembersPane );
 		this.libraryTreeView.setShowRoot( false );
-		this.primaryStage = primaryStage;
 		this.userSettings = userSettings;
 		
 		updateControlStates();

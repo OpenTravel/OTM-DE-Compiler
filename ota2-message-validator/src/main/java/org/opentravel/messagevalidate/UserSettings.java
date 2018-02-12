@@ -15,8 +15,6 @@
  */
 package org.opentravel.messagevalidate;
 
-import java.awt.Dimension;
-import java.awt.Point;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -25,17 +23,17 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Properties;
 
+import org.opentravel.application.common.AbstractUserSettings;
+
 /**
  * Persists settings for the <code>ExampleHelper</code> application between sessions.
  */
-public class UserSettings {
+public class UserSettings extends AbstractUserSettings {
 	
 	private static final String USER_SETTINGS_FILE = "/.ota2/.mv-settings.properties";
 	
 	private static File settingsFile = new File( System.getProperty( "user.home" ), USER_SETTINGS_FILE );
 	
-	private Point windowPosition;
-	private Dimension windowSize;
 	private File projectFolder;
 	private File messageFolder;
 	
@@ -53,22 +51,11 @@ public class UserSettings {
 			
 		} else {
 			try (InputStream is = new FileInputStream( settingsFile )) {
-				String currentFolder = System.getProperty( "user.dir" );
 				Properties usProps = new Properties();
+				
 				usProps.load( is );
-				
-				int windowPositionX = Integer.parseInt( usProps.getProperty( "windowPositionX" ) );
-				int windowPositionY = Integer.parseInt( usProps.getProperty( "windowPositionY" ) );
-				int windowWidth = Integer.parseInt( usProps.getProperty( "windowWidth" ) );
-				int windowHeight = Integer.parseInt( usProps.getProperty( "windowHeight" ) );
-				String projectFolder = usProps.getProperty( "projectFolder", currentFolder );
-				String messageFolder = usProps.getProperty( "messageFolder", currentFolder );
-				
 				settings = new UserSettings();
-				settings.setWindowPosition( new Point( windowPositionX, windowPositionY ) );
-				settings.setWindowSize( new Dimension( windowWidth, windowHeight ) );
-				settings.setProjectFolder( new File( projectFolder ) );
-				settings.setMessageFolder( new File( messageFolder ) );
+				settings.load( usProps );
 				
 			} catch(Throwable t) {
 				t.printStackTrace( System.out );
@@ -82,30 +69,17 @@ public class UserSettings {
 	}
 	
 	/**
-	 * Saves the settings in the user's home directory.
+	 * @see org.opentravel.application.common.AbstractUserSettings#save()
 	 */
+	@Override
 	public void save() {
 		if (!settingsFile.getParentFile().exists()) {
 			settingsFile.getParentFile().mkdirs();
 		}
 		try (OutputStream out = new FileOutputStream( settingsFile )) {
-			UserSettings defaultValues = getDefaultSettings();
-			String currentFolder = System.getProperty( "user.dir" );
 			Properties usProps = new Properties();
-			Point windowPosition = (this.windowPosition == null) ?
-					defaultValues.getWindowPosition() : this.windowPosition;
-			Dimension windowSize = (this.windowSize == null) ?
-					defaultValues.getWindowSize() : this.windowSize;
-			String pFolder = (projectFolder == null) ? currentFolder : projectFolder.getAbsolutePath();
-			String mFolder = (messageFolder == null) ? currentFolder : messageFolder.getAbsolutePath();
 			
-			usProps.put( "windowPositionX", windowPosition.x + "" );
-			usProps.put( "windowPositionY", windowPosition.y + "" );
-			usProps.put( "windowWidth", windowSize.width + "" );
-			usProps.put( "windowHeight", windowSize.height + "" );
-			usProps.put( "projectFolder", pFolder );
-			usProps.put( "messageFolder", mFolder );
-			
+			save( usProps );
 			usProps.store( out, null );
 			
 		} catch(IOException e) {
@@ -123,47 +97,39 @@ public class UserSettings {
 		String userHomeDirectory = System.getProperty( "user.home" );
 		UserSettings settings = new UserSettings();
 		
-		settings.setWindowPosition( new Point( 0, 0 ) );
-		settings.setWindowSize( new Dimension( 800, 600 ) );
+		settings.setWindowPosition( settings.getDefaultWindowPosition() );
+		settings.setWindowSize( settings.getDefaultWindowSize() );
 		settings.setProjectFolder( new File( userHomeDirectory ) );
 		settings.setMessageFolder( new File( userHomeDirectory ) );
 		return settings;
 	}
 
 	/**
-	 * Returns the location of the application window.
-	 *
-	 * @return Point
+	 * @see org.opentravel.application.common.AbstractUserSettings#load(java.util.Properties)
 	 */
-	public Point getWindowPosition() {
-		return windowPosition;
+	@Override
+	protected void load(Properties settingsProps) {
+		String currentFolder = System.getProperty( "user.dir" );
+		String projectFolder = settingsProps.getProperty( "projectFolder", currentFolder );
+		String messageFolder = settingsProps.getProperty( "messageFolder", currentFolder );
+		
+		setProjectFolder( new File( projectFolder ) );
+		setMessageFolder( new File( messageFolder ) );
+		super.load( settingsProps );
 	}
 
 	/**
-	 * Assigns the location of the application window.
-	 *
-	 * @param windowPosition  the window position to assign
+	 * @see org.opentravel.application.common.AbstractUserSettings#save(java.util.Properties)
 	 */
-	public void setWindowPosition(Point windowPosition) {
-		this.windowPosition = windowPosition;
-	}
-
-	/**
-	 * Returns the size of the application window.
-	 *
-	 * @return Dimension
-	 */
-	public Dimension getWindowSize() {
-		return windowSize;
-	}
-
-	/**
-	 * Assigns the size of the application window.
-	 *
-	 * @param windowSize  the window size to assign
-	 */
-	public void setWindowSize(Dimension windowSize) {
-		this.windowSize = windowSize;
+	@Override
+	protected void save(Properties settingsProps) {
+		String currentFolder = System.getProperty( "user.dir" );
+		String pFolder = (projectFolder == null) ? currentFolder : projectFolder.getAbsolutePath();
+		String mFolder = (messageFolder == null) ? currentFolder : messageFolder.getAbsolutePath();
+		
+		settingsProps.put( "projectFolder", pFolder );
+		settingsProps.put( "messageFolder", mFolder );
+		super.save( settingsProps );
 	}
 
 	/**

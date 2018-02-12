@@ -120,6 +120,14 @@ public class TLAttributeJsonCodegenTransformer extends AbstractJsonSchemaTransfo
     		jsonUtils.applySimpleTypeDocumentation( attrSchema, source.getType() );
     		attrSchema.getExampleItems().addAll( jsonUtils.getExampleInfo( source ) );
     		attrSchema.getEquivalentItems().addAll( jsonUtils.getEquivalentInfo( source ) );
+    		
+			if (simpleInfo.isListType()) {
+            	JsonSchema itemSchema = attrSchema;
+				
+            	attrSchema = new JsonSchema();
+            	attrSchema.setType( JsonType.jsonArray );
+            	attrSchema.setItems( new JsonSchemaReference( itemSchema ) );
+			}
     		attrSchemaRef.setSchema( attrSchema );
     		
         } else if (source.isReference()) {
@@ -142,6 +150,7 @@ public class TLAttributeJsonCodegenTransformer extends AbstractJsonSchemaTransfo
         		attrSchema.getEquivalentItems().addAll( jsonUtils.getEquivalentInfo( source ) );
         		attrSchemaRef.setSchema( attrSchema );
             }
+            
         } else if (attributeType instanceof XSDSimpleType) {
         	JsonDocumentation doc = new JsonDocumentation();
         	JsonSchema attrSchema = new JsonSchema();
@@ -152,10 +161,29 @@ public class TLAttributeJsonCodegenTransformer extends AbstractJsonSchemaTransfo
         	attrSchemaRef.setSchema( attrSchema );
         	
         } else {
-    		transformDocumentation( source, attrSchemaRef );
-    		attrSchemaRef.getExampleItems().addAll( jsonUtils.getExampleInfo( source ) );
-    		attrSchemaRef.getEquivalentItems().addAll( jsonUtils.getEquivalentInfo( source ) );
-        	attrSchemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath( attributeType, getMemberFieldOwner() ) );
+        	JsonSchemaReference schemaRef = attrSchemaRef;
+        	
+    		transformDocumentation( source, schemaRef );
+    		schemaRef.getExampleItems().addAll( jsonUtils.getExampleInfo( source ) );
+    		schemaRef.getEquivalentItems().addAll( jsonUtils.getEquivalentInfo( source ) );
+    		
+			if (simpleInfo.isListType()) {
+            	JsonSchema attrSchema = new JsonSchema();
+				
+            	schemaRef = new JsonSchemaReference();
+            	attrSchema.setType( JsonType.jsonArray );
+            	attrSchema.setItems( schemaRef );
+            	attrSchemaRef.setSchema( attrSchema );
+			}
+			
+    		if (simpleInfo.getBaseSimpleType() != null) {
+            	schemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath(
+            			simpleInfo.getBaseSimpleType(), getMemberFieldOwner() ) );
+    			
+    		} else {
+            	schemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath(
+            			attributeType, getMemberFieldOwner() ) );
+    		}
         }
 	}
 	

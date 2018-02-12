@@ -13,13 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.util;
+
+package org.opentravel.application.common;
+
+import javafx.stage.Stage;
 
 /**
- * Temporary class used to indicate whether the OTM1.6 file format is enabled for the compiler.
+ * Base controller class for all JavaFX main window controllers.
  */
-public class OTM16Upgrade {
+public class AbstractMainWindowController {
 	
-	public static boolean otm16Enabled = true;
+	private Stage primaryStage;
+	
+	/**
+	 * Returns the primary stage for the window associated with this controller.
+	 * 
+	 * @return Stage
+	 */
+	protected Stage getPrimaryStage() {
+		return primaryStage;
+	}
+	
+	/**
+	 * Assigns the primary stage for the window associated with this controller.
+	 *
+	 * @param primaryStage  the primary stage for this controller
+	 */
+	protected void initialize(Stage primaryStage) {
+		this.primaryStage = primaryStage;
+	}
 	
 }

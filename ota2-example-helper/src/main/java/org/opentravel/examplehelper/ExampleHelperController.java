@@ -28,6 +28,7 @@ import java.util.List;
 
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
+import org.opentravel.application.common.AbstractMainWindowController;
 import org.opentravel.schemacompiler.codegen.example.ExampleBuilder;
 import org.opentravel.schemacompiler.codegen.example.ExampleDocumentBuilder;
 import org.opentravel.schemacompiler.codegen.example.ExampleGeneratorOptions;
@@ -98,13 +99,11 @@ import javafx.util.Callback;
 /**
  * JavaFX controller class for the OTA2 Example Helper application.
  */
-public class ExampleHelperController {
+public class ExampleHelperController extends AbstractMainWindowController {
 	
 	public static final String FXML_FILE = "/ota2-example-helper.fxml";
 	
 	private static final FacetCodegenDelegateFactory facetDelegateFactory = new FacetCodegenDelegateFactory( null );
-	
-	private Stage primaryStage;
 	
 	@FXML private TextField libraryText;
 	@FXML private ChoiceBox<String> bindingStyleChoice;
@@ -168,7 +167,7 @@ public class ExampleHelperController {
 				new FileChooser.ExtensionFilter( "OTM Projects", "*.otp" ),
 				new FileChooser.ExtensionFilter( "OTM Libraries", "*.otm" ),
 				new FileChooser.ExtensionFilter( "All Files", "*.*" ) );
-		File selectedFile = chooser.showOpenDialog( primaryStage );
+		File selectedFile = chooser.showOpenDialog( getPrimaryStage() );
 		
 		if ((selectedFile != null) && selectedFile.exists()) {
 			Runnable r = new BackgroundTask( "Loading Library: " + selectedFile.getName() ) {
@@ -393,7 +392,7 @@ public class ExampleHelperController {
 		FileChooser chooser = newFileChooser( "Save Example Output", userSettings.getLastExampleFolder(),
 				xmlSelected ? new FileChooser.ExtensionFilter( "XML Files", "*.xml" )
 							: new FileChooser.ExtensionFilter( "JSON Files", "*.json" ) );
-		File targetFile = chooser.showSaveDialog( primaryStage );
+		File targetFile = chooser.showSaveDialog( getPrimaryStage() );
 		
 		if (targetFile != null) {
 			Runnable r = new BackgroundTask( "Saving Report" ) {
@@ -453,11 +452,14 @@ public class ExampleHelperController {
 	 * Assigns the primary stage for the window associated with this controller.
 	 *
 	 * @param primaryStage  the primary stage for this controller
-	 * @param userSettings  provides user setting information from the last application session
 	 */
-	public void initialize(Stage primaryStage, UserSettings settings) {
+	@Override
+	protected void initialize(Stage primaryStage) {
 		List<String> bindingStyles = CompilerExtensionRegistry.getAvailableExtensionIds();
 		String defaultStyle = CompilerExtensionRegistry.getActiveExtension();
+		UserSettings settings = UserSettings.load();
+		
+		super.initialize( primaryStage );
 		
 		// Since the preview pane is a custom component, we have to configure it manually
 		previewPane = new CodeArea();
@@ -534,7 +536,6 @@ public class ExampleHelperController {
 		
 		saveButton.setDisable( true );
 		
-		this.primaryStage = primaryStage;
 		primaryStage.getScene().getStylesheets().add(
 				ExampleHelperController.class.getResource( "/styles/xml-highlighting.css" ).toExternalForm() );
 		primaryStage.getScene().getStylesheets().add(

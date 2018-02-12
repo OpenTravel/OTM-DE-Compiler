@@ -20,6 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
 
+import org.opentravel.application.common.AbstractMainWindowController;
 import org.opentravel.schemacompiler.ioc.CompilerExtensionRegistry;
 import org.opentravel.schemacompiler.task.CompileAllCompilerTask;
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
@@ -41,11 +42,9 @@ import javafx.stage.Stage;
 /**
  * JavaFX controller class for the OTM-Diff application.
  */
-public class OTMMessageValidatorController {
+public class OTMMessageValidatorController extends AbstractMainWindowController {
 	
 	public static final String FXML_FILE = "/ota2-message-validator.fxml";
-	
-	private Stage primaryStage;
 	
 	@FXML private TextField projectFilename;
 	@FXML private TextField messageFilename;
@@ -69,7 +68,7 @@ public class OTMMessageValidatorController {
 	@FXML public void handleSelectProjectFile(ActionEvent event) {
 		FileChooser chooser = newFileChooser( "Select OTM Project", userSettings.getProjectFolder(),
 				new String[] { "otp" }, new String[] { "OTM Project Files" } );
-		File selectedFile = chooser.showOpenDialog( primaryStage );
+		File selectedFile = chooser.showOpenDialog( getPrimaryStage() );
 		
 		if (selectedFile != null) {
 			Runnable r = new BackgroundTask( "Loading Project: " + selectedFile.getName() ) {
@@ -98,7 +97,7 @@ public class OTMMessageValidatorController {
 	@FXML public void handleSelectMessageFile(ActionEvent event) {
 		FileChooser chooser = newFileChooser( "Select Message to Validate", userSettings.getMessageFolder(),
 				new String[] { "json", "xml" }, new String[] { "JSON Message Files", "XML Message Files" } );
-		File selectedFile = chooser.showOpenDialog( primaryStage );
+		File selectedFile = chooser.showOpenDialog( getPrimaryStage() );
 		
 		if (selectedFile != null) {
 			Runnable r = new BackgroundTask( "Validating Message File: " + selectedFile.getName() ) {
@@ -291,8 +290,9 @@ public class OTMMessageValidatorController {
 	 *
 	 * @param primaryStage  the primary stage for this controller
 	 */
-	public void setPrimaryStage(Stage primaryStage) {
-		this.primaryStage = primaryStage;
+	@Override
+	protected void initialize(Stage primaryStage) {
+		super.initialize( primaryStage );
 		this.userSettings = UserSettings.load();
 		updateControlStates();
 	}

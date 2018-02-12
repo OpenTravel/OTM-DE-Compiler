@@ -15,8 +15,6 @@
  */
 package org.opentravel.diffutil;
 
-import java.awt.Dimension;
-import java.awt.Point;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -25,19 +23,18 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Properties;
 
+import org.opentravel.application.common.AbstractUserSettings;
 import org.opentravel.schemacompiler.diff.ModelCompareOptions;
 
 /**
  * Persists settings for the <code>ExampleHelper</code> application between sessions.
  */
-public class UserSettings {
+public class UserSettings extends AbstractUserSettings {
 	
 	private static final String USER_SETTINGS_FILE = "/.ota2/.du-settings.properties";
 	
 	private static File settingsFile = new File( System.getProperty( "user.home" ), USER_SETTINGS_FILE );
 	
-	private Point windowPosition;
-	private Dimension windowSize;
 	private File oldProjectFolder;
 	private File newProjectFolder;
 	private File oldLibraryFolder;
@@ -59,29 +56,11 @@ public class UserSettings {
 			
 		} else {
 			try (InputStream is = new FileInputStream( settingsFile )) {
-				String currentFolder = System.getProperty( "user.dir" );
 				Properties usProps = new Properties();
+				
 				usProps.load( is );
-				
-				int windowPositionX = Integer.parseInt( usProps.getProperty( "windowPositionX" ) );
-				int windowPositionY = Integer.parseInt( usProps.getProperty( "windowPositionY" ) );
-				int windowWidth = Integer.parseInt( usProps.getProperty( "windowWidth" ) );
-				int windowHeight = Integer.parseInt( usProps.getProperty( "windowHeight" ) );
-				String opFolder = usProps.getProperty( "oldProjectFolder", currentFolder );
-				String npFolder = usProps.getProperty( "newProjectFolder", currentFolder );
-				String olFolder = usProps.getProperty( "oldLibraryFolder", currentFolder );
-				String nlFolder = usProps.getProperty( "newLibraryFolder", currentFolder );
-				String reportFolder = usProps.getProperty( "reportFolder", currentFolder );
-				
 				settings = new UserSettings();
-				settings.setWindowPosition( new Point( windowPositionX, windowPositionY ) );
-				settings.setWindowSize( new Dimension( windowWidth, windowHeight ) );
-				settings.setOldProjectFolder( new File( opFolder ) );
-				settings.setNewProjectFolder( new File( npFolder ) );
-				settings.setOldLibraryFolder( new File( olFolder ) );
-				settings.setNewLibraryFolder( new File( nlFolder ) );
-				settings.setReportFolder( new File( reportFolder ) );
-				settings.compareOptions.loadOptions( usProps );
+				settings.load( usProps );
 				
 			} catch(Throwable t) {
 				t.printStackTrace( System.out );
@@ -95,37 +74,17 @@ public class UserSettings {
 	}
 	
 	/**
-	 * Saves the settings in the user's home directory.
+	 * @see org.opentravel.application.common.AbstractUserSettings#save()
 	 */
+	@Override
 	public void save() {
 		if (!settingsFile.getParentFile().exists()) {
 			settingsFile.getParentFile().mkdirs();
 		}
 		try (OutputStream out = new FileOutputStream( settingsFile )) {
-			UserSettings defaultValues = getDefaultSettings();
-			String currentFolder = System.getProperty( "user.dir" );
 			Properties usProps = new Properties();
-			Point windowPosition = (this.windowPosition == null) ?
-					defaultValues.getWindowPosition() : this.windowPosition;
-			Dimension windowSize = (this.windowSize == null) ?
-					defaultValues.getWindowSize() : this.windowSize;
-			String opFolder = (oldProjectFolder == null) ? currentFolder : oldProjectFolder.getAbsolutePath();
-			String npFolder = (newProjectFolder == null) ? currentFolder : newProjectFolder.getAbsolutePath();
-			String olFolder = (oldLibraryFolder == null) ? currentFolder : oldLibraryFolder.getAbsolutePath();
-			String nlFolder = (newLibraryFolder == null) ? currentFolder : newLibraryFolder.getAbsolutePath();
-			String rptFolder = (reportFolder == null) ? currentFolder : reportFolder.getAbsolutePath();
 			
-			usProps.put( "windowPositionX", windowPosition.x + "" );
-			usProps.put( "windowPositionY", windowPosition.y + "" );
-			usProps.put( "windowWidth", windowSize.width + "" );
-			usProps.put( "windowHeight", windowSize.height + "" );
-			usProps.put( "oldProjectFolder", opFolder );
-			usProps.put( "newProjectFolder", npFolder );
-			usProps.put( "oldLibraryFolder", olFolder );
-			usProps.put( "newLibraryFolder", nlFolder );
-			usProps.put( "reportFolder", rptFolder );
-			compareOptions.saveOptions( usProps );
-			
+			save( usProps );
 			usProps.store( out, null );
 			
 		} catch(IOException e) {
@@ -143,8 +102,8 @@ public class UserSettings {
 		String userHomeDirectory = System.getProperty( "user.home" );
 		UserSettings settings = new UserSettings();
 		
-		settings.setWindowPosition( new Point( 0, 0 ) );
-		settings.setWindowSize( new Dimension( 800, 600 ) );
+		settings.setWindowPosition( settings.getDefaultWindowPosition() );
+		settings.setWindowSize( settings.getDefaultWindowSize() );
 		settings.setOldProjectFolder( new File( userHomeDirectory ) );
 		settings.setNewProjectFolder( new File( userHomeDirectory ) );
 		settings.setOldLibraryFolder( new File( userHomeDirectory ) );
@@ -154,39 +113,45 @@ public class UserSettings {
 	}
 
 	/**
-	 * Returns the location of the application window.
-	 *
-	 * @return Point
+	 * @see org.opentravel.application.common.AbstractUserSettings#load(java.util.Properties)
 	 */
-	public Point getWindowPosition() {
-		return windowPosition;
+	@Override
+	protected void load(Properties settingsProps) {
+		String currentFolder = System.getProperty( "user.dir" );
+		String opFolder = settingsProps.getProperty( "oldProjectFolder", currentFolder );
+		String npFolder = settingsProps.getProperty( "newProjectFolder", currentFolder );
+		String olFolder = settingsProps.getProperty( "oldLibraryFolder", currentFolder );
+		String nlFolder = settingsProps.getProperty( "newLibraryFolder", currentFolder );
+		String reportFolder = settingsProps.getProperty( "reportFolder", currentFolder );
+		
+		setOldProjectFolder( new File( opFolder ) );
+		setNewProjectFolder( new File( npFolder ) );
+		setOldLibraryFolder( new File( olFolder ) );
+		setNewLibraryFolder( new File( nlFolder ) );
+		setReportFolder( new File( reportFolder ) );
+		compareOptions.loadOptions( settingsProps );
+		super.load( settingsProps );
 	}
 
 	/**
-	 * Assigns the location of the application window.
-	 *
-	 * @param windowPosition  the window position to assign
+	 * @see org.opentravel.application.common.AbstractUserSettings#save(java.util.Properties)
 	 */
-	public void setWindowPosition(Point windowPosition) {
-		this.windowPosition = windowPosition;
-	}
-
-	/**
-	 * Returns the size of the application window.
-	 *
-	 * @return Dimension
-	 */
-	public Dimension getWindowSize() {
-		return windowSize;
-	}
-
-	/**
-	 * Assigns the size of the application window.
-	 *
-	 * @param windowSize  the window size to assign
-	 */
-	public void setWindowSize(Dimension windowSize) {
-		this.windowSize = windowSize;
+	@Override
+	protected void save(Properties settingsProps) {
+		String currentFolder = System.getProperty( "user.dir" );
+		String opFolder = (oldProjectFolder == null) ? currentFolder : oldProjectFolder.getAbsolutePath();
+		String npFolder = (newProjectFolder == null) ? currentFolder : newProjectFolder.getAbsolutePath();
+		String olFolder = (oldLibraryFolder == null) ? currentFolder : oldLibraryFolder.getAbsolutePath();
+		String nlFolder = (newLibraryFolder == null) ? currentFolder : newLibraryFolder.getAbsolutePath();
+		String rptFolder = (reportFolder == null) ? currentFolder : reportFolder.getAbsolutePath();
+		
+		settingsProps.put( "oldProjectFolder", opFolder );
+		settingsProps.put( "newProjectFolder", npFolder );
+		settingsProps.put( "oldLibraryFolder", olFolder );
+		settingsProps.put( "newLibraryFolder", nlFolder );
+		settingsProps.put( "reportFolder", rptFolder );
+		compareOptions.saveOptions( settingsProps );
+		super.save( settingsProps );
 	}
 
 	/**

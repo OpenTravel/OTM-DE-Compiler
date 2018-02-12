@@ -27,6 +27,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opentravel.application.common.AbstractMainWindowController;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
@@ -75,11 +76,9 @@ import javafx.stage.Stage;
 /**
  * JavaFX controller class for the OTM-Diff application.
  */
-public class DiffUtilityController {
+public class DiffUtilityController extends AbstractMainWindowController {
 	
 	public static final String FXML_FILE = "/ota2-diff-util.fxml";
-	
-	private Stage primaryStage;
 	
 	@FXML private TextField oldProjectFilename;
 	@FXML private TextField newProjectFilename;
@@ -121,7 +120,7 @@ public class DiffUtilityController {
 	@FXML public void selectOldProject(ActionEvent event) {
 		FileChooser chooser = newFileChooser( "Select Old Project Version",
 				userSettings.getOldProjectFolder(), "otp", "OTM Project Files" );
-		File selectedFile = chooser.showOpenDialog( primaryStage );
+		File selectedFile = chooser.showOpenDialog( getPrimaryStage() );
 		
 		if (selectedFile != null) {
 			oldProjectFile = selectedFile;
@@ -141,7 +140,7 @@ public class DiffUtilityController {
 	@FXML public void selectNewProject(ActionEvent event) {
 		FileChooser chooser = newFileChooser( "Select New Project Version",
 				userSettings.getNewProjectFolder(), "otp", "OTM Project Files" );
-		File selectedFile = chooser.showOpenDialog( primaryStage );
+		File selectedFile = chooser.showOpenDialog( getPrimaryStage() );
 		
 		if (selectedFile != null) {
 			newProjectFile = selectedFile;
@@ -161,7 +160,7 @@ public class DiffUtilityController {
 	@FXML public void selectOldLibraryFromFile(ActionEvent event) {
 		FileChooser chooser = newFileChooser( "Select Old Library Version",
 				userSettings.getOldLibraryFolder(), "otm", "OTM Library Files" );
-		File selectedFile = chooser.showOpenDialog( primaryStage );
+		File selectedFile = chooser.showOpenDialog( getPrimaryStage() );
 		
 		if (selectedFile != null) {
 			Runnable r = new BackgroundTask( "Loading Library: " + selectedFile.getName() ) {
@@ -233,7 +232,7 @@ public class DiffUtilityController {
 	@FXML public void selectNewLibraryFromFile(ActionEvent event) {
 		FileChooser chooser = newFileChooser( "Select New Library Version",
 				userSettings.getNewLibraryFolder(), "otm", "OTM Library Files" );
-		File selectedFile = chooser.showOpenDialog( primaryStage );
+		File selectedFile = chooser.showOpenDialog( getPrimaryStage() );
 		
 		if (selectedFile != null) {
 			Runnable r = new BackgroundTask( "Loading Library: " + selectedFile.getName() ) {
@@ -309,7 +308,7 @@ public class DiffUtilityController {
 	@FXML public void saveReport(ActionEvent event) {
 		FileChooser chooser = newFileChooser( "Save Report",
 				userSettings.getReportFolder(), "html", "HTML Files" );
-		File targetFile = chooser.showSaveDialog( primaryStage );
+		File targetFile = chooser.showSaveDialog( getPrimaryStage() );
 		
 		if (targetFile != null) {
 			Runnable r = new BackgroundTask( "Saving Report" ) {
@@ -376,7 +375,7 @@ public class DiffUtilityController {
 			
 			dialogStage.setTitle( "Model Comparison Options" );
 			dialogStage.initModality( Modality.WINDOW_MODAL );
-			dialogStage.initOwner( primaryStage );
+			dialogStage.initOwner( getPrimaryStage() );
 			dialogStage.setScene( scene );
 			
 			controller = loader.getController();
@@ -410,7 +409,7 @@ public class DiffUtilityController {
 			
 			dialogStage.setTitle( "Select OTM Library" );
 			dialogStage.initModality( Modality.WINDOW_MODAL );
-			dialogStage.initOwner( primaryStage );
+			dialogStage.initOwner( getPrimaryStage() );
 			dialogStage.setScene( scene );
 			
 			controller = loader.getController();
@@ -808,9 +807,10 @@ public class DiffUtilityController {
 	 *
 	 * @param primaryStage  the primary stage for this controller
 	 */
-	public void setPrimaryStage(Stage primaryStage) {
+	@Override
+	protected void initialize(Stage primaryStage) {
 		
-		this.primaryStage = primaryStage;
+		super.initialize( primaryStage );
 		this.userSettings = UserSettings.load();
 		
 		oldEntityChoice.valueProperty().addListener( new ChangeListener<ChoiceItem>() {

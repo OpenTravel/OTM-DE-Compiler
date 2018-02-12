@@ -16,26 +16,14 @@
 
 package org.opentravel.examplehelper;
 
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.io.IOException;
-
+import org.opentravel.application.common.AbstractOTMApplication;
+import org.opentravel.application.common.AbstractUserSettings;
 import org.opentravel.schemacompiler.util.OTM16Upgrade;
-
-import javafx.event.EventHandler;
-import javafx.fxml.FXMLLoader;
-import javafx.geometry.Rectangle2D;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Screen;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
 /**
  * JavaFX application for the OTA2 Example Helpere Utility.
  */
-public class ExampleHelperApplication extends javafx.application.Application {
+public class ExampleHelperApplication extends AbstractOTMApplication {
 	
 	/**
 	 * Main method invoked from the command-line.
@@ -47,81 +35,29 @@ public class ExampleHelperApplication extends javafx.application.Application {
 	}
 	
 	/**
-	 * @see javafx.application.Application#start(javafx.stage.Stage)
+	 * @see org.opentravel.application.common.AbstractOTMApplication#getMainWindowFxmlLocation()
 	 */
 	@Override
-	public void start(Stage primaryStage) {
-		try {
-			FXMLLoader loader = new FXMLLoader( ExampleHelperApplication.class.getResource(
-					ExampleHelperController.FXML_FILE ) );
-			Parent root = loader.load();
-			ExampleHelperController controller = loader.getController();
-			UserSettings userSettings = UserSettings.load();
-			
-			validateWindowLocation( userSettings );
-			primaryStage.setTitle("OTM-DE Example Helper");
-			primaryStage.setScene( new Scene( root, userSettings.getWindowSize().getWidth(),
-					userSettings.getWindowSize().getHeight() ) );
-			primaryStage.setX( userSettings.getWindowPosition().getX() );
-			primaryStage.setY( userSettings.getWindowPosition().getY() );
-			
-			primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-				public void handle(WindowEvent we) {
-					UserSettings settings = UserSettings.load();
-					Scene scene = primaryStage.getScene();
-					
-					controller.updateUserSettings( settings );
-					settings.setWindowPosition( new Point(
-							primaryStage.xProperty().intValue(), primaryStage.yProperty().intValue() ) );
-					settings.setWindowSize( new Dimension(
-							scene.widthProperty().intValue(), scene.heightProperty().intValue() ) );
-					settings.save();
-				}
-			});
-			controller.initialize( primaryStage, userSettings );
-			primaryStage.show();
-			
-		} catch (IOException e) {
-			System.out.println(e.getMessage());
-			throw new RuntimeException("Unable to initialize JavaFX application.", e);
-		}
+	protected String getMainWindowFxmlLocation() {
+		return ExampleHelperController.FXML_FILE;
 	}
-	
+
 	/**
-	 * Compares the window dimensions contained within the given user settings against the
-	 * current screen dimensions.  If the previous coordinates are outside of the current
-	 * viewing area, they will be adjusted so that the main window is visible.
-	 * 
-	 * @param userSettings  the user settings that specify the preferred window size and location
+	 * @see org.opentravel.application.common.AbstractOTMApplication#getUserSettings()
 	 */
-	private void validateWindowLocation(UserSettings userSettings) {
-		Point position = new Point( userSettings.getWindowPosition() );
-		Dimension size = userSettings.getWindowSize();
-		Rectangle windowBounds = new Rectangle( position.x, position.y, size.width, size.height);
-		Rectangle screenBounds = new Rectangle( 0, 0, 0, 0 );
-		
-		// Calculate the full dimensions of the visible screen area
-		for (Screen screen : Screen.getScreens()) {
-			Rectangle2D bounds = screen.getBounds();
-			
-			screenBounds.x = Math.min( screenBounds.x, (int) bounds.getMinX() );
-			screenBounds.y = Math.min( screenBounds.y, (int) bounds.getMinY() );
-		}
-		for (Screen screen : Screen.getScreens()) {
-			Rectangle2D bounds = screen.getBounds();
-			
-			screenBounds.width  = Math.max( screenBounds.width - screenBounds.x, (int) bounds.getWidth() - screenBounds.x );
-			screenBounds.height = Math.max( screenBounds.height - screenBounds.y, (int) bounds.getHeight() - screenBounds.y );
-		}
-		
-		// If the window is outside of the visible area, move the origin to the default
-		// coordinates (0,0)
-		if (!screenBounds.contains(windowBounds)) {
-			userSettings.setWindowPosition( new Point( 0, 0 ) );
-			userSettings.setWindowSize( UserSettings.getDefaultSettings().getWindowSize() );
-		}
+	@Override
+	protected AbstractUserSettings getUserSettings() {
+		return UserSettings.load();
 	}
-	
+
+	/**
+	 * @see org.opentravel.application.common.AbstractOTMApplication#getMainWindowTitle()
+	 */
+	@Override
+	protected String getMainWindowTitle() {
+		return "OTM-DE Example Helper";
+	}
+
 	/**
 	 * Since this is a read-only application, enable the OTM 1.6 file format for
 	 * all operations.
