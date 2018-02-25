@@ -29,7 +29,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="550.0" minWidth="400.0" prefHeight="700.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.opentravel.release.OTMReleaseController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="550.0" minWidth="400.0" prefHeight="700.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.opentravel.release.OTMReleaseController">
    <center>
       <SplitPane dividerPositions="0.65" minHeight="-Infinity" prefHeight="20.0" prefWidth="200.0" BorderPane.alignment="CENTER">
         <items>
@@ -471,6 +471,7 @@
                         <KeyCodeCombination alt="UP" code="O" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                      </accelerator>
                   </MenuItem>
+                  <MenuItem fx:id="importMenu" mnemonicParsing="false" onAction="#importFromProject" text="Import from OTP..." />
                   <MenuItem fx:id="saveMenu" mnemonicParsing="false" onAction="#saveReleaseFile" text="Save">
                      <accelerator>
                         <KeyCodeCombination alt="UP" code="S" control="DOWN" meta="UP" shift="UP" shortcut="UP" />

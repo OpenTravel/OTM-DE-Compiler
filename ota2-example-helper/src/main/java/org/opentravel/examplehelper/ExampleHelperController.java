@@ -29,6 +29,8 @@ import java.util.List;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
 import org.opentravel.application.common.AbstractMainWindowController;
+import org.opentravel.application.common.BrowseRepositoryDialogController;
+import org.opentravel.application.common.StatusType;
 import org.opentravel.schemacompiler.codegen.example.ExampleBuilder;
 import org.opentravel.schemacompiler.codegen.example.ExampleDocumentBuilder;
 import org.opentravel.schemacompiler.codegen.example.ExampleGeneratorOptions;
@@ -50,7 +52,16 @@ import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.repository.Project;
+import org.opentravel.schemacompiler.repository.ProjectItem;
 import org.opentravel.schemacompiler.repository.ProjectManager;
+import org.opentravel.schemacompiler.repository.ReleaseManager;
+import org.opentravel.schemacompiler.repository.RepositoryAvailabilityChecker;
+import org.opentravel.schemacompiler.repository.RepositoryException;
+import org.opentravel.schemacompiler.repository.RepositoryItem;
+import org.opentravel.schemacompiler.repository.RepositoryItemType;
+import org.opentravel.schemacompiler.repository.RepositoryManager;
+import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingMessageFormat;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
@@ -122,6 +133,8 @@ public class ExampleHelperController extends AbstractMainWindowController {
 	private VirtualizedScrollPane<?> previewScrollPane;
 	private CodeArea previewPane;
 	
+	private RepositoryManager repositoryManager;
+	private RepositoryAvailabilityChecker availabilityChecker;
 	private File modelFile;
 	private File exampleFolder;
 	private TLModel model;
@@ -130,58 +143,54 @@ public class ExampleHelperController extends AbstractMainWindowController {
 	private FacetSelections facetSelections;
 	
 	/**
-	 * Constructs a new file chooser instance using the information provided.
-	 * 
-	 * @param title  the title of the file chooser dialog
-	 * @param initialDirectory  the initial directory for the chooser
-	 * @param extensionFilters  the extension filters to include in the chooser
-	 * @return FileChooser
+	 * Default constructor.
 	 */
-	private FileChooser newFileChooser(String title, File initialDirectory, FileChooser.ExtensionFilter... extensionFilters) {
-		FileChooser chooser = new FileChooser();
-		File directory = initialDirectory;
-		
-		// Make sure the initial directory for the chooser exists
-		while ((directory != null) && !directory.exists()) {
-			directory = directory.getParentFile();
+	public ExampleHelperController() {
+		try {
+			repositoryManager = RepositoryManager.getDefault();
+			availabilityChecker = RepositoryAvailabilityChecker.getInstance( repositoryManager );
+			availabilityChecker.pingAllRepositories( true );
+			
+		} catch (RepositoryException e) {
+			e.printStackTrace( System.out );
 		}
-		if (directory == null) {
-			directory = new File( System.getProperty("user.home") );
-		}
-		
-		chooser.setTitle( title );
-		chooser.setInitialDirectory( directory );
-		chooser.getExtensionFilters().addAll( extensionFilters );
-		return chooser;
 	}
 	
 	/**
-	 * Called when the user clicks the button to load a new project or library file.
+	 * Called when the user clicks the button to load a new project, release, or library file.
 	 * 
 	 * @param event  the action event that triggered this method call
 	 */
 	@FXML public void selectLibrary(ActionEvent event) {
+		UserSettings userSettings = UserSettings.load();
 		File initialDirectory = (modelFile != null) ?
-				modelFile.getParentFile() : UserSettings.load().getLastModelFile().getParentFile();
-		FileChooser chooser = newFileChooser( "Select OTM Library or Project", initialDirectory,
-				new FileChooser.ExtensionFilter( "OTM Projects", "*.otp" ),
-				new FileChooser.ExtensionFilter( "OTM Libraries", "*.otm" ),
-				new FileChooser.ExtensionFilter( "All Files", "*.*" ) );
+				modelFile.getParentFile() : userSettings.getLastModelFile().getParentFile();
+		FileChooser chooser = newFileChooser( "Import from OTP", initialDirectory,
+				new String[] { "*.otp", "OTM Project Files (*.otp)" },
+				new String[] { "*.otr", "OTM Release Files (*.otr)" },
+				new String[] { "*.otm", "OTM Library Files (*.otm)" },
+				new String[] { "*.*", "All Files (*.*)" } );
 		File selectedFile = chooser.showOpenDialog( getPrimaryStage() );
 		
 		if ((selectedFile != null) && selectedFile.exists()) {
-			Runnable r = new BackgroundTask( "Loading Library: " + selectedFile.getName() ) {
+			Runnable r = new BackgroundTask( "Loading Model: " + selectedFile.getName(), StatusType.INFO ) {
 				public void execute() throws Throwable {
 					try {
 						ValidationFindings findings;
 						TLModel newModel = null;
 						
-						if (selectedFile.getName().endsWith(".otp")) {
+						if (selectedFile.getName().endsWith(".otr")) {
+							ReleaseManager manager = new ReleaseManager( repositoryManager );
+							
+							findings = new ValidationFindings();
+							manager.loadRelease( selectedFile, findings );
+							newModel = manager.getModel();
+							
+						} else if (selectedFile.getName().endsWith(".otp")) {
 							ProjectManager manager = new ProjectManager( false );
 							
 							findings = new ValidationFindings();
 							manager.loadProject( selectedFile, findings );
-							
 							newModel = manager.getModel();
 							
 						} else { // assume OTM library file
@@ -207,12 +216,70 @@ public class ExampleHelperController extends AbstractMainWindowController {
 						}
 						
 					} finally {
+						userSettings.setLastModelFile( selectedFile );
+						userSettings.save();
 						updateControlStates();
 					}
 				}
 			};
 			
 			new Thread( r ).start();
+		}
+	}
+	
+	/**
+	 * Called when the user clicks the button to load a new project, release, or
+	 * library from a remote repository.
+	 * 
+	 * @param event  the action event that triggered this method call
+	 */
+	@FXML public void selectFromRepository(ActionEvent event) {
+		if (availabilityChecker.pingAllRepositories( false )) {
+			BrowseRepositoryDialogController controller =
+					BrowseRepositoryDialogController.createDialog(
+							"Open Library or Release", null, getPrimaryStage() );
+			
+			controller.showAndWait();
+			
+			if (controller.isOkSelected()) {
+				RepositoryItem selectedItem = controller.getSelectedRepositoryItem();
+				
+				if (selectedItem != null) {
+					Runnable r = new BackgroundTask( "Loading Model: " + selectedItem.getFilename(), StatusType.INFO ) {
+						public void execute() throws Throwable {
+							try {
+								if (RepositoryItemType.LIBRARY.isItemType( selectedItem.getFilename() )) {
+									ProjectManager projectManager = new ProjectManager( new TLModel(), false, repositoryManager );
+									Project tempProject = projectManager.newProject( File.createTempFile( "tempProject", ".otp" ),
+											"http://example-helper.com/project/temp", "Temp Project", null );
+									ProjectItem item = projectManager.addManagedProjectItem( selectedItem, tempProject );
+									
+									model = projectManager.getModel();
+									modelFile = URLUtils.toFile( item.getContent().getLibraryUrl() );
+									
+								} else { // must be a release
+									ReleaseManager releaseManager = new ReleaseManager( repositoryManager );
+									ValidationFindings findings = new ValidationFindings();
+									
+									releaseManager.loadRelease( selectedItem, findings );
+									
+									if (findings.hasFinding( FindingType.ERROR )) {
+										throw new LibraryLoaderException("Validation errors detected in model (see log for details)");
+									}
+									model = releaseManager.getModel();
+									modelFile = URLUtils.toFile( releaseManager.getRelease().getReleaseUrl() );
+								}
+								updateEntityChoices();
+								
+							} finally {
+								updateControlStates();
+							}
+						}
+					};
+					
+					new Thread( r ).start();
+				}
+			}
 		}
 	}
 	
@@ -389,13 +456,14 @@ public class ExampleHelperController extends AbstractMainWindowController {
 	@FXML public void saveExampleOutput(ActionEvent event) {
 		boolean xmlSelected = xmlRadio.isSelected();
 		UserSettings userSettings = UserSettings.load();
-		FileChooser chooser = newFileChooser( "Save Example Output", userSettings.getLastExampleFolder(),
-				xmlSelected ? new FileChooser.ExtensionFilter( "XML Files", "*.xml" )
-							: new FileChooser.ExtensionFilter( "JSON Files", "*.json" ) );
+		FileChooser chooser = newFileChooser( "Save Example Output",
+				userSettings.getLastExampleFolder(),
+				xmlSelected ? new String[] { "*.xml", "XML Files (*.xml)" } :
+							  new String[] { "*.json", "JSON Files (*.json)" } );
 		File targetFile = chooser.showSaveDialog( getPrimaryStage() );
 		
 		if (targetFile != null) {
-			Runnable r = new BackgroundTask( "Saving Report" ) {
+			Runnable r = new BackgroundTask( "Saving Report", StatusType.INFO ) {
 				protected void execute() throws Throwable {
 					try {
 						try (Writer out = new FileWriter( targetFile )) {
@@ -414,10 +482,10 @@ public class ExampleHelperController extends AbstractMainWindowController {
 	}
 	
 	/**
-	 * Updates the enabled/disables states of the visual controls based on the current
-	 * state of user selections.
+	 * @see org.opentravel.application.common.AbstractMainWindowController#updateControlStates()
 	 */
-	private void updateControlStates() {
+	@Override
+	protected void updateControlStates() {
 		Platform.runLater( new Runnable() {
 			public void run() {
 				libraryText.setText( (modelFile == null) ? "" : modelFile.getName() );
@@ -426,13 +494,10 @@ public class ExampleHelperController extends AbstractMainWindowController {
 	}
 	
 	/**
-	 * Displays a message to the user in the status bar and optionally disables the
-	 * interactive controls on the display.
-	 * 
-	 * @param message  the status bar message to display
-	 * @param disableControls  flag indicating whether interactive controls should be disabled
+	 * @see org.opentravel.application.common.AbstractMainWindowController#setStatusMessage(java.lang.String, org.opentravel.application.common.StatusType, boolean)
 	 */
-	private void setStatusMessage(String message, boolean disableControls) {
+	@Override
+	protected void setStatusMessage(String message, StatusType statusType, boolean disableControls) {
 		Platform.runLater( new Runnable() {
 			public void run() {
 				statusBarLabel.setText( message );
@@ -556,57 +621,6 @@ public class ExampleHelperController extends AbstractMainWindowController {
 			settings.setLastExampleFolder( exampleFolder );
 		}
 		settings.setRepeatCount( repeatCountSpinner.getValue() );
-	}
-	
-	/**
-	 * Abstract class that executes a background task in a non-UI thread.
-	 */
-	private abstract class BackgroundTask implements Runnable {
-		
-		private String statusMessage;
-		
-		/**
-		 * Constructor that specifies the status message to display during task execution.
-		 * 
-		 * @param statusMessage  the status message for the task
-		 */
-		public BackgroundTask(String statusMessage) {
-			this.statusMessage = statusMessage;
-		}
-		
-		/**
-		 * Executes the sub-class specific task functions.
-		 * 
-		 * @throws Throwable  thrown if an error occurs during task execution
-		 */
-		protected abstract void execute() throws Throwable;
-
-		/**
-		 * @see java.lang.Runnable#run()
-		 */
-		@Override
-		public void run() {
-			try {
-				setStatusMessage( statusMessage, true );
-				execute();
-				
-			} catch (Throwable t) {
-				String errorMessage = (t.getMessage() != null) ? t.getMessage() : "See log output for details.";
-				
-				try {
-					setStatusMessage( "ERROR: " + errorMessage, false );
-					updateControlStates();
-					t.printStackTrace( System.out );
-					Thread.sleep( 1000 );
-					
-				} catch (InterruptedException e) {}
-				
-			} finally {
-				setStatusMessage( null, false );
-				updateControlStates();
-			}
-		}
-		
 	}
 	
 	/**

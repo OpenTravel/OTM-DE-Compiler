@@ -14,48 +14,84 @@
  * limitations under the License.
  */
 
-package org.opentravel.diffutil;
+package org.opentravel.application.common;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+
+import org.opentravel.schemacompiler.model.TLLibraryStatus;
+import org.opentravel.schemacompiler.repository.RemoteRepository;
+import org.opentravel.schemacompiler.repository.RepositoryException;
+import org.opentravel.schemacompiler.repository.RepositoryItem;
+import org.opentravel.schemacompiler.repository.RepositoryItemType;
+import org.opentravel.schemacompiler.repository.RepositoryManager;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
-
-import org.opentravel.schemacompiler.model.TLLibraryStatus;
-import org.opentravel.schemacompiler.repository.RemoteRepository;
-import org.opentravel.schemacompiler.repository.RepositoryException;
-import org.opentravel.schemacompiler.repository.RepositoryItem;
-import org.opentravel.schemacompiler.repository.RepositoryManager;
 
 /**
  * Controller for the dialog in which the user can select an OTM library from
  * a remote repository.
  */
-public class SelectLibraryDialogController {
+public class BrowseRepositoryDialogController {
 	
-	public static final String FXML_FILE = "/select-library.fxml";
-	
-	private final Image rootIcon = new Image( getClass().getResourceAsStream( "/images/root.gif" ) );
-	private final Image repositoryIcon = new Image( getClass().getResourceAsStream( "/images/repository.gif" ) );
-	private final Image rootNSIcon = new Image( getClass().getResourceAsStream( "/images/rootNS.gif" ) );
-	private final Image baseNSIcon = new Image( getClass().getResourceAsStream( "/images/baseNS.gif" ) );
-	private final Image libraryIcon = new Image( getClass().getResourceAsStream( "/images/library.png" ) );
+	private static final String FXML_FILE = "/browse-repository.fxml";
 	
 	private Stage dialogStage;
 	private boolean okSelected = false;
+	private RepositoryItemType itemTypeFilter;
 	private RepositoryItem selectedRepositoryItem;
 	
 	@FXML private TreeView<RepositoryTreeNode> repositoryTreeView;
 	@FXML private Button okButton;
+	
+	/**
+	 * Initializes the dialog stage and controller used to select an OTM library
+	 * or release from a remote repository.
+	 * 
+	 * @param title  the title of the dialog box
+	 * @param itemTypeFilter  the type filter to apply for repository items
+	 * @param stage  the stage that will own the new dialog
+	 * @return BrowseRepositoryDialogController
+	 */
+	public static BrowseRepositoryDialogController createDialog(
+			String title, RepositoryItemType itemTypeFilter, Stage stage) {
+		BrowseRepositoryDialogController controller = null;
+		try {
+			FXMLLoader loader = new FXMLLoader( BrowseRepositoryDialogController.class.getResource( FXML_FILE ) );
+			Parent page = loader.load();
+			Stage dialogStage = new Stage();
+			Scene scene = new Scene( page );
+			
+			dialogStage.setTitle( title );
+			dialogStage.initModality( Modality.WINDOW_MODAL );
+			dialogStage.initOwner( stage );
+			dialogStage.setScene( scene );
+			
+			controller = loader.getController();
+			controller.setDialogStage( dialogStage );
+			controller.setItemTypeFilter( itemTypeFilter );
+			controller.initializeTreeView();
+			
+		} catch (IOException e) {
+			e.printStackTrace( System.out );
+		}
+		return controller;
+	}
 	
 	/**
 	 * Called when the user clicks the Ok button to confirm their library
@@ -92,17 +128,19 @@ public class SelectLibraryDialogController {
 			if (treeNode.tempNode) {
 				try {
 					List<RepositoryItem> repoItemList = treeNode.repository.listItems(
-							treeNode.baseNS, TLLibraryStatus.DRAFT, false );
+							treeNode.baseNS, TLLibraryStatus.DRAFT, false, itemTypeFilter );
 					
 					// Remove the temporary item and replace it with OTM library items
 					treeItem.getChildren().clear();
 					
 					for (RepositoryItem repoItem : repoItemList) {
+						Image icon = RepositoryItemType.RELEASE.isItemType( repoItem.getFilename() )
+										? Images.releaseIcon : Images.libraryIcon;
 						TreeItem<RepositoryTreeNode> libraryItem = new TreeItem<>(new RepositoryTreeNode(
 								repoItem.getFilename() + " (" + repoItem.getVersion() + ")", repoItem ),
-								new ImageView( libraryIcon ) );
+								new ImageView( icon ) );
 						
-						treeItem.getChildren().add(libraryItem);
+						treeItem.getChildren().add( libraryItem );
 					}
 					
 				} catch (RepositoryException e) {
@@ -127,45 +165,57 @@ public class SelectLibraryDialogController {
 	/**
 	 * Initializes the contents of the repository tree view.
 	 */
-	public void initializeTreeView() {
+	private void initializeTreeView() {
 		try {
 			RepositoryManager manager = RepositoryManager.getDefault();
 			List<RemoteRepository> remoteRepositories = manager.listRemoteRepositories();
 			TreeItem<RepositoryTreeNode> rootItem = new TreeItem<>(
 					new RepositoryTreeNode( "OTM Repositories", null ),
-					new ImageView( rootIcon ) );
+					new ImageView( Images.rootIcon ) );
 			
 			for (RemoteRepository repository : remoteRepositories) {
-				TreeItem<RepositoryTreeNode> repoItem = new TreeItem<>(
-						new RepositoryTreeNode( repository.getDisplayName(), null ),
-						new ImageView( repositoryIcon ) );
-				List<String> baseNamespaces = repository.listBaseNamespaces();
+				boolean repoAvailable = true;
+				List<String> baseNamespaces;
 				
-				for (String rootNS : repository.listRootNamespaces()) {
-					TreeItem<RepositoryTreeNode> rootNSItem = new TreeItem<>(
-							new RepositoryTreeNode( rootNS, null ),
-							new ImageView( rootNSIcon ) );
+				try {
+					baseNamespaces = repository.listBaseNamespaces();
 					
-					for (String baseNS : baseNamespaces) {
-						if (!baseNS.startsWith( rootNS )) continue;
-						String baseNSLabel = baseNS.equals( rootNS ) ? "/" : baseNS.substring( rootNS.length() );
-						TreeItem<RepositoryTreeNode> baseNSItem = new TreeItem<>(
-								new RepositoryTreeNode( baseNSLabel, null ),
-								new ImageView( baseNSIcon ) );
+				} catch (RepositoryException e) {
+					baseNamespaces = new ArrayList<>();
+					repoAvailable = false;
+				}
+				String repoDisplayName = repository.getDisplayName() + (repoAvailable ? "" : " (Unavailable)");
+				TreeItem<RepositoryTreeNode> repoItem = new TreeItem<>(
+						new RepositoryTreeNode( repoDisplayName, null ),
+						new ImageView( repoAvailable ? Images.repositoryIcon : Images.errorIcon ) );
+				
+				if (repoAvailable) {
+					for (String rootNS : repository.listRootNamespaces()) {
+						TreeItem<RepositoryTreeNode> rootNSItem = new TreeItem<>(
+								new RepositoryTreeNode( rootNS, null ),
+								new ImageView( Images.rootNSIcon ) );
 						
-						rootNSItem.getChildren().add( baseNSItem );
-						baseNSItem.getChildren().add( new TreeItem<>( new RepositoryTreeNode( repository, baseNS ) ) );
-						baseNSItem.expandedProperty().addListener( new ChangeListener<Boolean>() {
-							@SuppressWarnings("unchecked")
-							public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-								if ((newValue != null) && newValue) {
-									BooleanProperty property = (BooleanProperty) observable;
-									handleTreeItemExpand( (TreeItem<RepositoryTreeNode>) property.getBean() );
+						for (String baseNS : baseNamespaces) {
+							if (!baseNS.startsWith( rootNS )) continue;
+							String baseNSLabel = baseNS.equals( rootNS ) ? "/" : baseNS.substring( rootNS.length() );
+							TreeItem<RepositoryTreeNode> baseNSItem = new TreeItem<>(
+									new RepositoryTreeNode( baseNSLabel, null ),
+									new ImageView( Images.baseNSIcon ) );
+							
+							rootNSItem.getChildren().add( baseNSItem );
+							baseNSItem.getChildren().add( new TreeItem<>( new RepositoryTreeNode( repository, baseNS ) ) );
+							baseNSItem.expandedProperty().addListener( new ChangeListener<Boolean>() {
+								@SuppressWarnings("unchecked")
+								public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+									if ((newValue != null) && newValue) {
+										BooleanProperty property = (BooleanProperty) observable;
+										handleTreeItemExpand( (TreeItem<RepositoryTreeNode>) property.getBean() );
+									}
 								}
-							}
-						});
+							});
+						}
+						repoItem.getChildren().add( rootNSItem );
 					}
-					repoItem.getChildren().add( rootNSItem );
 				}
 				rootItem.getChildren().add( repoItem );
 			}
@@ -177,6 +227,9 @@ public class SelectLibraryDialogController {
 						handleTreeItemSelection( newValue );
 					}
 				});
+			repositoryTreeView.setOnMouseClicked( e -> {
+				if (e.getClickCount() >  1) selectOk( null );
+			});
 			okButton.setDisable( true );
 			
 		} catch (RepositoryException e) {
@@ -204,7 +257,17 @@ public class SelectLibraryDialogController {
 	public RepositoryItem getSelectedRepositoryItem() {
 		return selectedRepositoryItem;
 	}
-
+	
+	/**
+	 * Assigns the type of repository item that should be included in the
+	 * filtered results.  If null, no filter will be applied.
+	 * 
+	 * @param itemTypeFilter  the filter to apply for repository item types
+	 */
+	public void setItemTypeFilter(RepositoryItemType itemTypeFilter) {
+		this.itemTypeFilter = itemTypeFilter;
+	}
+	
 	/**
 	 * Assigns the stage for the dialog.
 	 *

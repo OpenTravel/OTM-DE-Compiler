@@ -36,6 +36,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
 import org.opentravel.application.common.AbstractMainWindowController;
+import org.opentravel.application.common.StatusType;
 import org.opentravel.schemacompiler.codegen.example.ExampleGeneratorOptions;
 import org.opentravel.schemacompiler.ioc.CompilerExtensionRegistry;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
@@ -51,6 +52,8 @@ import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.repository.ProjectManager;
+import org.opentravel.schemacompiler.repository.ReleaseManager;
+import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.validate.FindingMessageFormat;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
@@ -168,13 +171,14 @@ public class ExampleUpgradeController extends AbstractMainWindowController {
 		File initialDirectory = (modelFile != null) ?
 				modelFile.getParentFile() : UserSettings.load().getLastModelFile().getParentFile();
 		FileChooser chooser = newFileChooser( "Select OTM Library or Project", initialDirectory,
-				new FileChooser.ExtensionFilter( "OTM Projects", "*.otp" ),
-				new FileChooser.ExtensionFilter( "OTM Libraries", "*.otm" ),
-				new FileChooser.ExtensionFilter( "All Files", "*.*" ) );
+				new String[] { "*.otp", "OTM Project Files (*.otp)" },
+				new String[] { "*.otr", "OTM Release Files (*.otr)" },
+				new String[] { "*.otm", "OTM Libraries Files (*.otm)" },
+				new String[] { "*.*", "All Files (*.*)" } );
 		File selectedFile = chooser.showOpenDialog( getPrimaryStage() );
 		
 		if ((selectedFile != null) && selectedFile.exists()) {
-			Runnable r = new BackgroundTask( "Loading Library: " + selectedFile.getName() ) {
+			Runnable r = new BackgroundTask( "Loading Model: " + selectedFile.getName(), StatusType.INFO ) {
 				public void execute() throws Throwable {
 					try {
 						ValidationFindings findings;
@@ -187,6 +191,17 @@ public class ExampleUpgradeController extends AbstractMainWindowController {
 							manager.loadProject( selectedFile, findings );
 							
 							newModel = manager.getModel();
+							
+						} else if (selectedFile.getName().endsWith(".otr")) {
+							ReleaseManager releaseManager = new ReleaseManager( RepositoryManager.getDefault() );
+							
+							findings = new ValidationFindings();
+							releaseManager.loadRelease( selectedFile, findings );
+							
+							if (findings.hasFinding( FindingType.ERROR )) {
+								throw new LibraryLoaderException("Validation errors detected in model (see log for details)");
+							}
+							newModel = releaseManager.getModel();
 							
 						} else { // assume OTM library file
 					        LibraryInputSource<InputStream> libraryInput = new LibraryStreamInputSource( selectedFile );
@@ -230,32 +245,6 @@ public class ExampleUpgradeController extends AbstractMainWindowController {
 			
 			new Thread( r ).start();
 		}
-	}
-	
-	/**
-	 * Constructs a new file chooser instance using the information provided.
-	 * 
-	 * @param title  the title of the file chooser dialog
-	 * @param initialDirectory  the initial directory for the chooser
-	 * @param extensionFilters  the extension filters to include in the chooser
-	 * @return FileChooser
-	 */
-	private FileChooser newFileChooser(String title, File initialDirectory, FileChooser.ExtensionFilter... extensionFilters) {
-		FileChooser chooser = new FileChooser();
-		File directory = initialDirectory;
-		
-		// Make sure the initial directory for the chooser exists
-		while ((directory != null) && !directory.exists()) {
-			directory = directory.getParentFile();
-		}
-		if (directory == null) {
-			directory = new File( System.getProperty("user.home") );
-		}
-		
-		chooser.setTitle( title );
-		chooser.setInitialDirectory( directory );
-		chooser.getExtensionFilters().addAll( extensionFilters );
-		return chooser;
 	}
 	
 	/**
@@ -357,13 +346,13 @@ public class ExampleUpgradeController extends AbstractMainWindowController {
 	@FXML public void selectExampleFile(ActionEvent event) {
 		File initialDirectory = (exampleFolder != null) ?
 				exampleFolder : UserSettings.load().getLastExampleFolder();
-		FileChooser chooser = newFileChooser( "Select Example File", initialDirectory,
-				new FileChooser.ExtensionFilter( "XML Files", "*.xml" ),
-				new FileChooser.ExtensionFilter( "JSON Files", "*.json" ) );
+		FileChooser chooser = newFileChooser( "Save Example Output", initialDirectory,
+				new String[] { "*.xml", "XML Files (*.xml)" },
+				new String[] { "*.json", "JSON Files (*.json)" } );
 		File selectedFile = chooser.showOpenDialog( getPrimaryStage() );
 		
 		if ((selectedFile != null) && selectedFile.exists()) {
-			Runnable r = new BackgroundTask( "Loading Example Document: " + selectedFile.getName() ) {
+			Runnable r = new BackgroundTask( "Loading Example Document: " + selectedFile.getName(), StatusType.INFO ) {
 				public void execute() throws Throwable {
 					try {
 						if (selectedFile.getName().endsWith(".xml")) {
@@ -527,13 +516,14 @@ public class ExampleUpgradeController extends AbstractMainWindowController {
 	@FXML public void saveExampleOutput(ActionEvent event) {
 		boolean xmlSelected = true;
 		UserSettings userSettings = UserSettings.load();
-		FileChooser chooser = newFileChooser( "Save Example Output", userSettings.getLastExampleFolder(),
-				xmlSelected ? new FileChooser.ExtensionFilter( "XML Files", "*.xml" )
-							: new FileChooser.ExtensionFilter( "JSON Files", "*.json" ) );
+		FileChooser chooser = newFileChooser( "Save Example Output",
+				userSettings.getLastExampleFolder(),
+				xmlSelected ? new String[] { "*.xml", "XML Files (*.xml)" } :
+							  new String[] { "*.json", "JSON Files (*.json)" } );
 		File targetFile = chooser.showSaveDialog( getPrimaryStage() );
 		
 		if (targetFile != null) {
-			Runnable r = new BackgroundTask( "Saving Report" ) {
+			Runnable r = new BackgroundTask( "Saving Report", StatusType.INFO ) {
 				protected void execute() throws Throwable {
 					try {
 						try (Writer out = new FileWriter( targetFile )) {
@@ -745,10 +735,10 @@ public class ExampleUpgradeController extends AbstractMainWindowController {
 	}
 	
 	/**
-	 * Updates the enabled/disables states of the visual controls based on the current
-	 * state of user selections.
+	 * @see org.opentravel.application.common.AbstractMainWindowController#updateControlStates()
 	 */
-	private void updateControlStates() {
+	@Override
+	protected void updateControlStates() {
 		Platform.runLater( () -> {
 			boolean exDisplayDisabled = (originalDocument == null);
 			boolean exControlsDisabled = (model == null) || (originalDocument == null);
@@ -824,13 +814,10 @@ public class ExampleUpgradeController extends AbstractMainWindowController {
 	}
 	
 	/**
-	 * Displays a message to the user in the status bar and optionally disables the
-	 * interactive controls on the display.
-	 * 
-	 * @param message  the status bar message to display
-	 * @param disableControls  flag indicating whether interactive controls should be disabled
+	 * @see org.opentravel.application.common.AbstractMainWindowController#setStatusMessage(java.lang.String, org.opentravel.application.common.StatusType, boolean)
 	 */
-	private void setStatusMessage(String message, boolean disableControls) {
+	@Override
+	protected void setStatusMessage(String message, StatusType statusType, boolean disableControls) {
 		Platform.runLater( () -> {
 			statusBarLabel.setText( message );
 			
@@ -1060,57 +1047,6 @@ public class ExampleUpgradeController extends AbstractMainWindowController {
 		options.setMaxRepeat( repeatCountSpinner.getValue() );
 		facetSelections.configureExampleOptions( options );
 		return options;
-	}
-	
-	/**
-	 * Abstract class that executes a background task in a non-UI thread.
-	 */
-	private abstract class BackgroundTask implements Runnable {
-		
-		private String statusMessage;
-		
-		/**
-		 * Constructor that specifies the status message to display during task execution.
-		 * 
-		 * @param statusMessage  the status message for the task
-		 */
-		public BackgroundTask(String statusMessage) {
-			this.statusMessage = statusMessage;
-		}
-		
-		/**
-		 * Executes the sub-class specific task functions.
-		 * 
-		 * @throws Throwable  thrown if an error occurs during task execution
-		 */
-		protected abstract void execute() throws Throwable;
-
-		/**
-		 * @see java.lang.Runnable#run()
-		 */
-		@Override
-		public void run() {
-			try {
-				setStatusMessage( statusMessage, true );
-				execute();
-				
-			} catch (Throwable t) {
-				String errorMessage = (t.getMessage() != null) ? t.getMessage() : "See log output for details.";
-				
-				try {
-					setStatusMessage( "ERROR: " + errorMessage, false );
-					updateControlStates();
-					t.printStackTrace( System.out );
-					Thread.sleep( 1000 );
-					
-				} catch (InterruptedException e) {}
-				
-			} finally {
-				setStatusMessage( null, false );
-				updateControlStates();
-			}
-		}
-		
 	}
 	
 	/**

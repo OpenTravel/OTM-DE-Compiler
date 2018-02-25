@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.PrintStream;
 
 import org.opentravel.application.common.AbstractMainWindowController;
+import org.opentravel.application.common.StatusType;
 import org.opentravel.schemacompiler.ioc.CompilerExtensionRegistry;
 import org.opentravel.schemacompiler.task.CompileAllCompilerTask;
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
@@ -36,7 +37,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 
 /**
@@ -66,12 +66,14 @@ public class OTMMessageValidatorController extends AbstractMainWindowController 
 	 * @param event  the action event that triggered this method call
 	 */
 	@FXML public void handleSelectProjectFile(ActionEvent event) {
-		FileChooser chooser = newFileChooser( "Select OTM Project", userSettings.getProjectFolder(),
-				new String[] { "otp" }, new String[] { "OTM Project Files" } );
+		FileChooser chooser = newFileChooser( "Select OTM Project",
+				userSettings.getProjectFolder(),
+				new String[] { "*.otp", "OTM Project Files (*.otp)" },
+				new String[] { "*.*", "All Files (*.*)" } );
 		File selectedFile = chooser.showOpenDialog( getPrimaryStage() );
 		
 		if (selectedFile != null) {
-			Runnable r = new BackgroundTask( "Loading Project: " + selectedFile.getName() ) {
+			Runnable r = new BackgroundTask( "Loading Project: " + selectedFile.getName(), StatusType.INFO ) {
 				public void execute() throws Throwable {
 					try {
 						projectFile = selectedFile;
@@ -95,12 +97,14 @@ public class OTMMessageValidatorController extends AbstractMainWindowController 
 	 * @param event  the action event that triggered this method call
 	 */
 	@FXML public void handleSelectMessageFile(ActionEvent event) {
-		FileChooser chooser = newFileChooser( "Select Message to Validate", userSettings.getMessageFolder(),
-				new String[] { "json", "xml" }, new String[] { "JSON Message Files", "XML Message Files" } );
+		FileChooser chooser = newFileChooser( "Select Message to Validate",
+				userSettings.getMessageFolder(),
+				new String[] { "*.xml", "XML Message Files (*.xml)" },
+				new String[] { "*.json", "JSON Message Files (*.json)" } );
 		File selectedFile = chooser.showOpenDialog( getPrimaryStage() );
 		
 		if (selectedFile != null) {
-			Runnable r = new BackgroundTask( "Validating Message File: " + selectedFile.getName() ) {
+			Runnable r = new BackgroundTask( "Validating Message File: " + selectedFile.getName(), StatusType.INFO ) {
 				public void execute() throws Throwable {
 					try {
 						messageFile = selectedFile;
@@ -124,7 +128,7 @@ public class OTMMessageValidatorController extends AbstractMainWindowController 
 	 * @param event  the action event that triggered this method call
 	 */
 	@FXML public void handleValidateMessage(ActionEvent event) {
-		Runnable r = new BackgroundTask( "Validating Message..." ) {
+		Runnable r = new BackgroundTask( "Validating Message...", StatusType.INFO ) {
 			public void execute() throws Throwable {
 				ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
 				
@@ -216,13 +220,10 @@ public class OTMMessageValidatorController extends AbstractMainWindowController 
 	}
 	
 	/**
-	 * Displays a message to the user in the status bar and optionally disables the
-	 * interactive controls on the display.
-	 * 
-	 * @param message  the status bar message to display
-	 * @param disableControls  flag indicating whether interactive controls should be disabled
+	 * @see org.opentravel.application.common.AbstractMainWindowController#setStatusMessage(java.lang.String, org.opentravel.application.common.StatusType, boolean)
 	 */
-	private void setStatusMessage(String message, boolean disableControls) {
+	@Override
+	protected void setStatusMessage(String message, StatusType statusType, boolean disableControls) {
 		Platform.runLater( new Runnable() {
 			public void run() {
 				statusBarLabel.setText( message );
@@ -236,45 +237,10 @@ public class OTMMessageValidatorController extends AbstractMainWindowController 
 	}
 	
 	/**
-	 * Returns a new file chooser that is configured for the selection of a sepecific
-	 * type of file.
-	 * 
-	 * @param title  the title of the new file chooser
-	 * @param initialDirectory  the initial directory location for the chooser
-	 * @param fileExtension  the file extension of the chooser's filter
-	 * @param extensionDescription  description of the specified file extension
-	 * @return FileChooser
+	 * @see org.opentravel.application.common.AbstractMainWindowController#updateControlStates()
 	 */
-	private FileChooser newFileChooser(String title, File initialDirectory,
-			String[] fileExtension, String[] extensionDescription) {
-		FileChooser chooser = new FileChooser();
-		File directory = initialDirectory;
-		
-		// Make sure the initial directory for the chooser exists
-		while ((directory != null) && !directory.exists()) {
-			directory = directory.getParentFile();
-		}
-		if (directory == null) {
-			directory = new File( System.getProperty("user.home") );
-		}
-		ExtensionFilter[] filters = new ExtensionFilter[ fileExtension.length + 1 ];
-		
-		for (int i = 0; i < fileExtension.length; i++) {
-			filters[i] = new ExtensionFilter(extensionDescription[i], "*." + fileExtension[i] );
-		}
-		filters[ filters.length - 1 ] = new FileChooser.ExtensionFilter("All Files", "*.*");
-		
-		chooser.setTitle( title );
-		chooser.setInitialDirectory( directory );
-		chooser.getExtensionFilters().addAll( filters );
-		return chooser;
-	}
-	
-	/**
-	 * Updates the enabled/disables states of the visual controls based on the current
-	 * state of user selections.
-	 */
-	private void updateControlStates() {
+	@Override
+	protected void updateControlStates() {
 		Platform.runLater( new Runnable() {
 			public void run() {
 				boolean projectSelected = (projectFile != null) && projectFile.exists();
@@ -295,57 +261,6 @@ public class OTMMessageValidatorController extends AbstractMainWindowController 
 		super.initialize( primaryStage );
 		this.userSettings = UserSettings.load();
 		updateControlStates();
-	}
-	
-	/**
-	 * Abstract class that executes a background task in a non-UI thread.
-	 */
-	private abstract class BackgroundTask implements Runnable {
-		
-		private String statusMessage;
-		
-		/**
-		 * Constructor that specifies the status message to display during task execution.
-		 * 
-		 * @param statusMessage  the status message for the task
-		 */
-		public BackgroundTask(String statusMessage) {
-			this.statusMessage = statusMessage;
-		}
-		
-		/**
-		 * Executes the sub-class specific task functions.
-		 * 
-		 * @throws Throwable  thrown if an error occurs during task execution
-		 */
-		protected abstract void execute() throws Throwable;
-
-		/**
-		 * @see java.lang.Runnable#run()
-		 */
-		@Override
-		public void run() {
-			try {
-				setStatusMessage( statusMessage, true );
-				execute();
-				
-			} catch (Throwable t) {
-				String errorMessage = (t.getMessage() != null) ? t.getMessage() : "See log output for details.";
-				
-				try {
-					setStatusMessage( "ERROR: " + errorMessage, false );
-					updateControlStates();
-					t.printStackTrace( System.out );
-					Thread.sleep( 1000 );
-					
-				} catch (InterruptedException e) {}
-				
-			} finally {
-				setStatusMessage( null, false );
-				updateControlStates();
-			}
-		}
-		
 	}
 	
 }

@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.opentravel.application.common.Images;
 import org.opentravel.release.NodeProperty;
-import org.opentravel.release.Utils;
 import org.opentravel.release.navigate.TreeNode;
 import org.opentravel.release.navigate.TreeNodeFactory;
 import org.opentravel.schemacompiler.model.TLProperty;
@@ -56,7 +56,7 @@ public class ElementTreeNode extends TreeNode<TLProperty> {
 	 */
 	@Override
 	public Image getIcon() {
-		return Utils.elementIcon;
+		return Images.elementIcon;
 	}
 
 	/**

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opentravel.release;
+package org.opentravel.application.common;
 
 import javafx.scene.image.Image;
 
@@ -24,9 +24,9 @@ import javafx.scene.image.Image;
  */
 public enum StatusType {
 	
-	INFO( Utils.infoIcon ),
-	WARNING( Utils.warningIcon ),
-	ERROR( Utils.errorIcon );
+	INFO( Images.infoIcon ),
+	WARNING( Images.warningIcon ),
+	ERROR( Images.errorIcon );
 	
 	private Image icon;
 	

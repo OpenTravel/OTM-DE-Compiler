@@ -24,10 +24,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.opentravel.application.common.AbstractMainWindowController;
+import org.opentravel.application.common.BrowseRepositoryDialogController;
+import org.opentravel.application.common.StatusType;
+import org.opentravel.schemacompiler.loader.LibraryInputSource;
+import org.opentravel.schemacompiler.loader.LibraryModelLoader;
+import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
@@ -38,7 +45,12 @@ import org.opentravel.schemacompiler.model.TLService;
 import org.opentravel.schemacompiler.repository.Project;
 import org.opentravel.schemacompiler.repository.ProjectItem;
 import org.opentravel.schemacompiler.repository.ProjectManager;
+import org.opentravel.schemacompiler.repository.ReleaseManager;
+import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
+import org.opentravel.schemacompiler.repository.RepositoryItemCommit;
+import org.opentravel.schemacompiler.repository.RepositoryItemType;
+import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.saver.LibrarySaveException;
 import org.opentravel.schemacompiler.util.ModelComparator;
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
@@ -53,11 +65,9 @@ import org.w3c.dom.events.EventListener;
 import org.w3c.dom.events.EventTarget;
 
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Worker;
-import javafx.concurrent.Worker.State;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -66,7 +76,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
@@ -88,10 +97,16 @@ public class DiffUtilityController extends AbstractMainWindowController {
 	@FXML private ChoiceBox<ChoiceItem> newEntityChoice;
 	@FXML private Button oldProjectFileButton;
 	@FXML private Button newProjectFileButton;
+	@FXML private Button oldReleaseFileButton;
+	@FXML private Button newReleaseFileButton;
 	@FXML private Button oldLibraryFileButton;
 	@FXML private Button newLibraryFileButton;
 	@FXML private Button oldLibraryRepoButton;
 	@FXML private Button newLibraryRepoButton;
+	@FXML private Label oldCommitLabel;
+	@FXML private Label newCommitLabel;
+	@FXML private ChoiceBox<CommitChoiceItem> oldCommitChoice;
+	@FXML private ChoiceBox<CommitChoiceItem> newCommitChoice;
 	@FXML private Button runProjectButton;
 	@FXML private Button runLibraryButton;
 	@FXML private WebView reportViewer;
@@ -100,12 +115,16 @@ public class DiffUtilityController extends AbstractMainWindowController {
 	@FXML private Button saveReportButton;
 	@FXML private Label statusBarLabel;
 	
-	private File oldProjectFile;
-	private File newProjectFile;
+	private File oldProjectOrReleaseFile;
+	private File newProjectOrReleaseFile;
 	private File oldLibraryFile;
 	private File newLibraryFile;
-	private RepositoryItem oldLibraryRepo;
-	private RepositoryItem newLibraryRepo;
+	private RepositoryItem oldLibraryRepoItem;
+	private RepositoryItem newLibraryRepoItem;
+	private RepositoryItemCommit oldLibraryCommit;
+	private RepositoryItemCommit newLibraryCommit;
+	private RepositoryItem oldReleaseRepoItem;
+	private RepositoryItem newReleaseRepoItem;
 	
 	private ProjectManager oldProjectManager = new ProjectManager( new TLModel(), false, null );
 	private ProjectManager newProjectManager = new ProjectManager( new TLModel(), false, null );
@@ -118,12 +137,16 @@ public class DiffUtilityController extends AbstractMainWindowController {
 	 * @param event  the action event that triggered this method call
 	 */
 	@FXML public void selectOldProject(ActionEvent event) {
-		FileChooser chooser = newFileChooser( "Select Old Project Version",
-				userSettings.getOldProjectFolder(), "otp", "OTM Project Files" );
+		FileChooser chooser = newFileChooser( "Select Old Project or Release Version",
+				userSettings.getOldProjectFolder(),
+				new String[] { "*.otp", "OTM Project Files (*.otp)" },
+				new String[] { "*.otr", "OTM Release Files (*.otr)" },
+				new String[] { "*.*", "All Files (*.*)" } );
 		File selectedFile = chooser.showOpenDialog( getPrimaryStage() );
 		
 		if (selectedFile != null) {
-			oldProjectFile = selectedFile;
+			oldReleaseRepoItem = null;
+			oldProjectOrReleaseFile = selectedFile;
 			oldProjectFilename.setText( selectedFile.getName() );
 			updateControlStates();
 			userSettings.setOldProjectFolder( selectedFile.getParentFile() );
@@ -138,16 +161,64 @@ public class DiffUtilityController extends AbstractMainWindowController {
 	 * @param event  the action event that triggered this method call
 	 */
 	@FXML public void selectNewProject(ActionEvent event) {
-		FileChooser chooser = newFileChooser( "Select New Project Version",
-				userSettings.getNewProjectFolder(), "otp", "OTM Project Files" );
+		FileChooser chooser = newFileChooser( "Select New Project or Release Version",
+				userSettings.getNewProjectFolder(),
+				new String[] { "*.otp", "OTM Project Files (*.otp)" },
+				new String[] { "*.otr", "OTM Release Files (*.otr)" },
+				new String[] { "*.*", "All Files (*.*)" } );
 		File selectedFile = chooser.showOpenDialog( getPrimaryStage() );
 		
 		if (selectedFile != null) {
-			newProjectFile = selectedFile;
+			newReleaseRepoItem = null;
+			newProjectOrReleaseFile = selectedFile;
 			newProjectFilename.setText( selectedFile.getName() );
 			updateControlStates();
 			userSettings.setNewProjectFolder( selectedFile.getParentFile() );
 			userSettings.save();
+		}
+	}
+	
+	/**
+	 * Called when the user clicks the button select the old version of an OTM
+	 * release from a remote repository.
+	 * 
+	 * @param event  the action event that triggered this method call
+	 */
+	@FXML public void selectOldRelease(ActionEvent event) {
+		BrowseRepositoryDialogController controller = BrowseRepositoryDialogController.createDialog(
+				"Select Old Release Version", RepositoryItemType.RELEASE, getPrimaryStage() );
+		
+		if (controller != null) {
+			controller.showAndWait();
+			
+			if (controller.isOkSelected()) {
+				oldProjectOrReleaseFile = null;
+				oldReleaseRepoItem = controller.getSelectedRepositoryItem();
+				oldProjectFilename.setText( oldReleaseRepoItem.getFilename() );
+				updateControlStates();
+			}
+		}
+	}
+	
+	/**
+	 * Called when the user clicks the button select the new version of an OTM
+	 * release from a remote repository.
+	 * 
+	 * @param event  the action event that triggered this method call
+	 */
+	@FXML public void selectNewRelease(ActionEvent event) {
+		BrowseRepositoryDialogController controller = BrowseRepositoryDialogController.createDialog(
+				"Select New Release Version", RepositoryItemType.RELEASE, getPrimaryStage() );
+		
+		if (controller != null) {
+			controller.showAndWait();
+			
+			if (controller.isOkSelected()) {
+				newProjectOrReleaseFile = null;
+				newReleaseRepoItem = controller.getSelectedRepositoryItem();
+				newProjectFilename.setText( newReleaseRepoItem.getFilename() );
+				updateControlStates();
+			}
 		}
 	}
 	
@@ -159,20 +230,24 @@ public class DiffUtilityController extends AbstractMainWindowController {
 	 */
 	@FXML public void selectOldLibraryFromFile(ActionEvent event) {
 		FileChooser chooser = newFileChooser( "Select Old Library Version",
-				userSettings.getOldLibraryFolder(), "otm", "OTM Library Files" );
+				userSettings.getOldLibraryFolder(),
+				new String[] { "*.otm", "OTM Library Files (*.otm)" },
+				new String[] { "*.*", "All Files (*.*)" } );
 		File selectedFile = chooser.showOpenDialog( getPrimaryStage() );
 		
 		if (selectedFile != null) {
-			Runnable r = new BackgroundTask( "Loading Library: " + selectedFile.getName() ) {
+			Runnable r = new BackgroundTask( "Loading Library: " + selectedFile.getName(), StatusType.INFO ) {
 				public void execute() throws Throwable {
 					try {
 						TLLibrary library;
 						
-						oldLibraryRepo = null;
+						oldLibraryRepoItem = null;
+						oldLibraryCommit = null;
 						oldLibraryFile = selectedFile;
 						setFilenameText( selectedFile.getName(), oldLibraryFilename );
 						library = loadLibrary( selectedFile, oldProjectManager );
 						updateEntityList( oldEntityChoice, library );
+						updateCommitList( oldCommitChoice, null );
 						
 					} finally {
 						closeAllProjects( oldProjectManager );
@@ -184,7 +259,6 @@ public class DiffUtilityController extends AbstractMainWindowController {
 			
 			new Thread( r ).start();
 		}
-		
 	}
 	
 	/**
@@ -194,23 +268,26 @@ public class DiffUtilityController extends AbstractMainWindowController {
 	 * @param event  the action event that triggered this method call
 	 */
 	@FXML public void selectOldLibraryFromRepo(ActionEvent event) {
-		SelectLibraryDialogController controller = initSelectLibraryFromRepoDialog();
+		BrowseRepositoryDialogController controller = BrowseRepositoryDialogController.createDialog(
+				"Select Old Library Version", RepositoryItemType.LIBRARY, getPrimaryStage() );
 		
 		if (controller != null) {
 			controller.showAndWait();
 			
 			if (controller.isOkSelected()) {
 				final RepositoryItem selectedItem = controller.getSelectedRepositoryItem();
-				Runnable r = new BackgroundTask( "Loading Library: " + selectedItem.getFilename() ) {
+				Runnable r = new BackgroundTask( "Loading Library: " + selectedItem.getFilename(), StatusType.INFO ) {
 					public void execute() throws Throwable {
 						try {
 							TLLibrary library;
 							
-							oldLibraryRepo = selectedItem;
 							oldLibraryFile = null;
+							oldLibraryCommit = null;
+							oldLibraryRepoItem = selectedItem;
 							setFilenameText( selectedItem.getFilename(), oldLibraryFilename );
-							library = loadLibrary( selectedItem, oldProjectManager );
+							library = loadLibrary( selectedItem, null, oldProjectManager );
 							updateEntityList( oldEntityChoice, library );
+							updateCommitList( oldCommitChoice, oldLibraryRepoItem );
 							
 						} finally {
 							closeAllProjects( oldProjectManager );
@@ -231,20 +308,24 @@ public class DiffUtilityController extends AbstractMainWindowController {
 	 */
 	@FXML public void selectNewLibraryFromFile(ActionEvent event) {
 		FileChooser chooser = newFileChooser( "Select New Library Version",
-				userSettings.getNewLibraryFolder(), "otm", "OTM Library Files" );
+				userSettings.getNewLibraryFolder(),
+				new String[] { "*.otm", "OTM Library Files (*.otm)" },
+				new String[] { "*.*", "All Files (*.*)" } );
 		File selectedFile = chooser.showOpenDialog( getPrimaryStage() );
 		
 		if (selectedFile != null) {
-			Runnable r = new BackgroundTask( "Loading Library: " + selectedFile.getName() ) {
+			Runnable r = new BackgroundTask( "Loading Library: " + selectedFile.getName(), StatusType.INFO ) {
 				public void execute() throws Throwable {
 					try {
 						TLLibrary library;
 						
-						newLibraryRepo = null;
+						newLibraryRepoItem = null;
+						newLibraryCommit = null;
 						newLibraryFile = selectedFile;
 						setFilenameText( selectedFile.getName(), newLibraryFilename );
 						library = loadLibrary( selectedFile, newProjectManager );
 						updateEntityList( newEntityChoice, library );
+						updateCommitList( newCommitChoice, null );
 						
 					} finally {
 						closeAllProjects( newProjectManager );
@@ -265,29 +346,32 @@ public class DiffUtilityController extends AbstractMainWindowController {
 	 * @param event  the action event that triggered this method call
 	 */
 	@FXML public void selectNewLibraryFromRepo(ActionEvent event) {
-		SelectLibraryDialogController controller = initSelectLibraryFromRepoDialog();
+		BrowseRepositoryDialogController controller = BrowseRepositoryDialogController.createDialog(
+				"Select New Library Version", RepositoryItemType.LIBRARY, getPrimaryStage() );
 		
 		if (controller != null) {
 			controller.showAndWait();
 			
 			if (controller.isOkSelected()) {
 				RepositoryItem selectedItem = controller.getSelectedRepositoryItem();
-				Runnable r = new BackgroundTask( "Loading Library: " + selectedItem.getFilename() ) {
+				Runnable r = new BackgroundTask( "Loading Library: " + selectedItem.getFilename(), StatusType.INFO ) {
 					public void execute() throws Throwable {
 						try {
 							TLLibrary library;
 							
-							newLibraryRepo = selectedItem;
 							newLibraryFile = null;
+							newLibraryCommit = null;
+							newLibraryRepoItem = selectedItem;
 							setFilenameText( selectedItem.getFilename(), newLibraryFilename );
-							library = loadLibrary( selectedItem, newProjectManager );
+							library = loadLibrary( selectedItem, null, newProjectManager );
 							updateEntityList( newEntityChoice, library );
+							updateCommitList( newCommitChoice, newLibraryRepoItem );
 							
 						} catch (Throwable t) {
 							t.printStackTrace( System.out );
 							
 						} finally {
-							setStatusMessage( null, false );
+							setStatusMessage( null, null, false );
 							updateControlStates();
 							closeAllProjects( newProjectManager );
 						}
@@ -307,11 +391,13 @@ public class DiffUtilityController extends AbstractMainWindowController {
 	 */
 	@FXML public void saveReport(ActionEvent event) {
 		FileChooser chooser = newFileChooser( "Save Report",
-				userSettings.getReportFolder(), "html", "HTML Files" );
+				userSettings.getReportFolder(),
+				new String[] { "*.html", "HTML Files (*.html)" },
+				new String[] { "*.*", "All Files (*.*)" } );
 		File targetFile = chooser.showSaveDialog( getPrimaryStage() );
 		
 		if (targetFile != null) {
-			Runnable r = new BackgroundTask( "Saving Report" ) {
+			Runnable r = new BackgroundTask( "Saving Report", StatusType.INFO ) {
 				protected void execute() throws Throwable {
 					try {
 						URL reportUrl = new URL( reportViewer.getEngine().getLocation() );
@@ -393,71 +479,10 @@ public class DiffUtilityController extends AbstractMainWindowController {
 	}
 	
 	/**
-	 * Initializes the dialog stage and controller used to select an OTM library
-	 * from a remote repository.
-	 * 
-	 * @return SelectLibraryDialogController
+	 * @see org.opentravel.application.common.AbstractMainWindowController#updateControlStates()
 	 */
-	private SelectLibraryDialogController initSelectLibraryFromRepoDialog() {
-		SelectLibraryDialogController controller = null;
-		try {
-			FXMLLoader loader = new FXMLLoader( DiffUtilityController.class.getResource(
-					SelectLibraryDialogController.FXML_FILE ) );
-			AnchorPane page = (AnchorPane) loader.load();
-			Stage dialogStage = new Stage();
-			Scene scene = new Scene( page );
-			
-			dialogStage.setTitle( "Select OTM Library" );
-			dialogStage.initModality( Modality.WINDOW_MODAL );
-			dialogStage.initOwner( getPrimaryStage() );
-			dialogStage.setScene( scene );
-			
-			controller = loader.getController();
-			controller.setDialogStage( dialogStage );
-			controller.initializeTreeView();
-			
-		} catch (IOException e) {
-			e.printStackTrace( System.out );
-		}
-		return controller;
-	}
-	
-	/**
-	 * Returns a new file chooser that is configured for the selection of a sepecific
-	 * type of file.
-	 * 
-	 * @param title  the title of the new file chooser
-	 * @param initialDirectory  the initial directory location for the chooser
-	 * @param fileExtension  the file extension of the chooser's filter
-	 * @param extensionDescription  description of the specified file extension
-	 * @return FileChooser
-	 */
-	private FileChooser newFileChooser(String title, File initialDirectory,
-			String fileExtension, String extensionDescription) {
-		FileChooser chooser = new FileChooser();
-		File directory = initialDirectory;
-		
-		// Make sure the initial directory for the chooser exists
-		while ((directory != null) && !directory.exists()) {
-			directory = directory.getParentFile();
-		}
-		if (directory == null) {
-			directory = new File( System.getProperty("user.home") );
-		}
-		
-		chooser.setTitle( title );
-		chooser.setInitialDirectory( directory );
-		chooser.getExtensionFilters().addAll(
-				new FileChooser.ExtensionFilter(extensionDescription, "*." + fileExtension ),
-				new FileChooser.ExtensionFilter("All Files", "*.*") );
-		return chooser;
-	}
-	
-	/**
-	 * Updates the enabled/disables states of the visual controls based on the current
-	 * state of user selections.
-	 */
-	private void updateControlStates() {
+	@Override
+	protected void updateControlStates() {
 		Platform.runLater( new Runnable() {
 			public void run() {
 				String reportLocation = reportViewer.getEngine().getLocation();
@@ -466,10 +491,12 @@ public class DiffUtilityController extends AbstractMainWindowController {
 				boolean reportDisplayed = (reportLocation != null) && reportLocation.startsWith( "file:" );
 				boolean canBrowseBack = historyIdx > 0;
 				boolean canBrowseForward = historyIdx < (historySize - 1);
-				boolean runProjectEnabled = (oldProjectFile != null) && oldProjectFile.exists()
-						&& (newProjectFile != null) && newProjectFile.exists();
-				boolean oldLibrarySelected = (((oldLibraryFile != null) && oldLibraryFile.exists()) || (oldLibraryRepo != null));
-				boolean newLibrarySelected = (((newLibraryFile != null) && newLibraryFile.exists()) || (newLibraryRepo != null));
+				boolean runProjectEnabled = (oldProjectOrReleaseFile != null) && isProjectFile( oldProjectOrReleaseFile ) && oldProjectOrReleaseFile.exists()
+						&& (newProjectOrReleaseFile != null) && isProjectFile( newProjectOrReleaseFile ) && newProjectOrReleaseFile.exists();
+				boolean runReleaseEnabled = ((oldReleaseRepoItem != null) || ((oldProjectOrReleaseFile != null) && isReleaseFile( oldProjectOrReleaseFile ) && oldProjectOrReleaseFile.exists()))
+						&& ((newReleaseRepoItem != null) || ((newProjectOrReleaseFile != null) && isReleaseFile( newProjectOrReleaseFile ) && newProjectOrReleaseFile.exists()));
+				boolean oldLibrarySelected = (((oldLibraryFile != null) && oldLibraryFile.exists()) || (oldLibraryRepoItem != null));
+				boolean newLibrarySelected = (((newLibraryFile != null) && newLibraryFile.exists()) || (newLibraryRepoItem != null));
 				boolean nullOldEntitySelected = (oldEntityChoice.getValue() != null) && (oldEntityChoice.getValue().value == null);
 				boolean nullNewEntitySelected = (newEntityChoice.getValue() != null) && (newEntityChoice.getValue().value == null);
 				boolean resourceOldEntitySelected = (oldEntityChoice.getValue() != null) && (oldEntityChoice.getValue().label.startsWith("Resource:"));
@@ -477,12 +504,18 @@ public class DiffUtilityController extends AbstractMainWindowController {
 				boolean runLibraryEnabled = oldLibrarySelected && newLibrarySelected
 						&& ( (nullOldEntitySelected && (nullOldEntitySelected == nullNewEntitySelected))
 								|| (!nullOldEntitySelected && (resourceOldEntitySelected == resourceNewEntitySelected)) );
+				boolean oldLibraryManaged = (oldLibraryRepoItem != null);
+				boolean newLibraryManaged = (newLibraryRepoItem != null);
 				
-				runProjectButton.disableProperty().set( !runProjectEnabled );
+				runProjectButton.disableProperty().set( !(runProjectEnabled || runReleaseEnabled) );
 				runLibraryButton.disableProperty().set( !runLibraryEnabled );
 				saveReportButton.disableProperty().set( !reportDisplayed );
 				backButton.disableProperty().set( !canBrowseBack );
 				forwardButton.disableProperty().set( !canBrowseForward );
+				oldCommitLabel.disableProperty().set( !oldLibraryManaged );
+				oldCommitChoice.disableProperty().set( !oldLibraryManaged );
+				newCommitLabel.disableProperty().set( !newLibraryManaged );
+				newCommitChoice.disableProperty().set( !newLibraryManaged );
 			}
 		});
 	}
@@ -522,13 +555,10 @@ public class DiffUtilityController extends AbstractMainWindowController {
 	}
 	
 	/**
-	 * Displays a message to the user in the status bar and optionally disables the
-	 * interactive controls on the display.
-	 * 
-	 * @param message  the status bar message to display
-	 * @param disableControls  flag indicating whether interactive controls should be disabled
+	 * @see org.opentravel.application.common.AbstractMainWindowController#setStatusMessage(java.lang.String, org.opentravel.application.common.StatusType, boolean)
 	 */
-	private void setStatusMessage(String message, boolean disableControls) {
+	@Override
+	protected void setStatusMessage(String message, StatusType statusType, boolean disableControls) {
 		Platform.runLater( new Runnable() {
 			public void run() {
 				statusBarLabel.setText( message );
@@ -540,6 +570,10 @@ public class DiffUtilityController extends AbstractMainWindowController {
 				newLibraryFileButton.disableProperty().set( disableControls );
 				oldLibraryRepoButton.disableProperty().set( disableControls );
 				newLibraryRepoButton.disableProperty().set( disableControls );
+				oldCommitLabel.disableProperty().set( disableControls );
+				oldCommitChoice.disableProperty().set( disableControls );
+				newCommitLabel.disableProperty().set( disableControls );
+				newCommitChoice.disableProperty().set( disableControls );
 				runProjectButton.disableProperty().set( disableControls );
 				runLibraryButton.disableProperty().set( disableControls );
 				saveReportButton.disableProperty().set( disableControls );
@@ -590,6 +624,102 @@ public class DiffUtilityController extends AbstractMainWindowController {
 	}
 	
 	/**
+	 * Updates the given choice box with items from the commit history of the given repository item.
+	 * 
+	 * @param commitChoice  the commit choice box that will allow selection of a commit
+	 * @param libraryRepoItem  the repository item for the library whose commit history will be selectable
+	 */
+	private void updateCommitList(ChoiceBox<CommitChoiceItem> commitChoice, RepositoryItem libraryRepoItem) {
+		if (libraryRepoItem != null) {
+			try {
+				List<RepositoryItemCommit> commitHistory =
+						libraryRepoItem.getRepository().getHistory( libraryRepoItem ).getCommitHistory();
+				List<CommitChoiceItem> choiceItems = new ArrayList<>();
+				
+				if (!commitHistory.isEmpty()) {
+					commitHistory.forEach( commit -> choiceItems.add( new CommitChoiceItem( commit ) ) );
+					choiceItems.get( 0 ).value = null; // first item is the latest commit, so set to null
+				}
+				
+				if (!choiceItems.isEmpty()) {
+					Platform.runLater( () -> {
+						commitChoice.setItems( FXCollections.observableList( choiceItems ) );
+						commitChoice.getSelectionModel().select( 0 );
+					} );
+				}
+				
+			} catch (RepositoryException e) {
+				Platform.runLater( () -> {
+					commitChoice.setItems( FXCollections.emptyObservableList() );
+				} );
+				e.printStackTrace( System.out );
+			}
+		} else {
+			Platform.runLater( () -> {
+				commitChoice.setItems( FXCollections.emptyObservableList() );
+			} );
+		}
+	}
+	
+	/**
+	 * Called when the user modifies the old commit selection.
+	 */
+	private void oldCommitSelectionChanged() {
+		CommitChoiceItem selectedItem = oldCommitChoice.getValue();
+		RepositoryItemCommit selectedCommit = (selectedItem == null) ? null : selectedItem.value;
+		boolean selectionChanged;
+		
+		if (selectedCommit == null) {
+			selectionChanged = (oldLibraryCommit != null);
+		} else {
+			selectionChanged = (oldLibraryCommit == null) || (selectedCommit.getCommitNumber() != oldLibraryCommit.getCommitNumber());
+		}
+		
+		if (selectionChanged) {
+			Runnable r = new BackgroundTask( "Reloading Library: " +
+					oldLibraryRepoItem.getFilename(), StatusType.INFO ) {
+				protected void execute() throws Throwable {
+					TLLibrary library = loadLibrary( oldLibraryRepoItem,
+							oldLibraryCommit, oldProjectManager );
+					updateEntityList( oldEntityChoice, library );
+				}
+			};
+			
+			oldLibraryCommit = selectedCommit;
+			new Thread( r ).start();
+		}
+	}
+	
+	/**
+	 * Called when the user modifies the new commit selection.
+	 */
+	private void newCommitSelectionChanged() {
+		CommitChoiceItem selectedItem = newCommitChoice.getValue();
+		RepositoryItemCommit selectedCommit = (selectedItem == null) ? null : selectedItem.value;
+		boolean selectionChanged;
+		
+		if (selectedCommit == null) {
+			selectionChanged = (newLibraryCommit != null);
+		} else {
+			selectionChanged = (newLibraryCommit == null) || (selectedCommit.getCommitNumber() != newLibraryCommit.getCommitNumber());
+		}
+		
+		if (selectionChanged) {
+			Runnable r = new BackgroundTask( "Reloading Library: " +
+					newLibraryRepoItem.getFilename(), StatusType.INFO ) {
+				protected void execute() throws Throwable {
+					TLLibrary library = loadLibrary( newLibraryRepoItem,
+							newLibraryCommit, newProjectManager );
+					updateEntityList( newEntityChoice, library );
+				}
+			};
+			
+			newLibraryCommit = selectedCommit;
+			new Thread( r ).start();
+		}
+	}
+	
+	/**
 	 * Loads and returns an OTM library from the specified file.
 	 * 
 	 * @param libraryFile  the library file to load
@@ -612,12 +742,14 @@ public class DiffUtilityController extends AbstractMainWindowController {
 	 * Loads and returns an OTM library from a remote repository.
 	 * 
 	 * @param libraryItem  the library repository item to load
+	 * @param itemCommit  the commit of the managed library to be loaded
 	 * @param projectManager  the project manager to use when processing the load
 	 * @return TLLibrary
 	 * @throws SchemaCompilerException  thrown if an error occurs during the library loading process
 	 */
-	private TLLibrary loadLibrary(RepositoryItem libraryItem, ProjectManager projectManager)
-			throws SchemaCompilerException {
+	private TLLibrary loadLibrary(RepositoryItem libraryItem, RepositoryItemCommit itemCommit,
+			ProjectManager projectManager) throws SchemaCompilerException {
+		/*
 		Project tempProject;
 		ProjectItem item;
 		
@@ -625,6 +757,24 @@ public class DiffUtilityController extends AbstractMainWindowController {
 		tempProject = newTempProject( projectManager );
 		item = projectManager.addManagedProjectItem( libraryItem, tempProject );
 		return (TLLibrary) item.getContent();
+		*/
+        LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>();
+        LibraryInputSource<InputStream> libraryInput;
+		
+		if (itemCommit == null) {
+			RepositoryManager repositoryManager = RepositoryManager.getDefault();
+			URL libraryUrl = repositoryManager.getContentLocation( libraryItem );
+			
+			libraryInput = new LibraryStreamInputSource( libraryUrl );
+			
+		} else {
+			libraryInput = libraryItem.getRepository().getHistoricalContentSource(
+					libraryItem, itemCommit.getEffectiveOn() );
+		}
+		modelLoader.loadLibraryModel( libraryInput );
+		
+		return (TLLibrary) modelLoader.getLibraryModel().getLibrary(
+				libraryItem.getNamespace(), libraryItem.getLibraryName() );
 	}
 	
 	/**
@@ -679,50 +829,110 @@ public class DiffUtilityController extends AbstractMainWindowController {
 	}
 	
 	/**
+	 * Returns true if the given file is an OTM project (.otp) file.
+	 * 
+	 * @param f  the file to check
+	 * @return boolean
+	 */
+	private boolean isProjectFile(File f) {
+		return f.getName().toLowerCase().endsWith(".otp");
+	}
+	
+	/**
+	 * Returns true if the given file is an OTM release (.otr) file.
+	 * 
+	 * @param f  the file to check
+	 * @return boolean
+	 */
+	private boolean isReleaseFile(File f) {
+		return f.getName().toLowerCase().endsWith(".otr");
+	}
+	
+	/**
 	 * Called when the user clicks the 'Run Comparison' button to compare two
 	 * OTM projects.
 	 * 
 	 * @param event  the action event that triggered this method call
 	 */
 	@FXML public void runProjectComparison(ActionEvent event) {
-		Runnable r = new BackgroundTask( "Running comparison..." ) {
+		Runnable r = new BackgroundTask( "Running comparison...", StatusType.INFO ) {
 			public void execute() throws Throwable {
-				try {
-					showReport( null );
-					ValidationFindings oldFindings = new ValidationFindings();
-					ValidationFindings newFindings = new ValidationFindings();
-					Project oldProject = oldProjectManager.loadProject( oldProjectFile, oldFindings );
-					Project newProject = newProjectManager.loadProject( newProjectFile, newFindings );
+				ValidationFindings oldFindings = new ValidationFindings();
+				ValidationFindings newFindings = new ValidationFindings();
+				boolean logFindings = false;
+				
+				showReport( null );
+				
+				if ((oldProjectOrReleaseFile != null) && (newProjectOrReleaseFile != null)
+						&& isProjectFile( oldProjectOrReleaseFile ) && isProjectFile( newProjectOrReleaseFile )) {
+					try {
+						Project oldProject = oldProjectManager.loadProject( oldProjectOrReleaseFile, oldFindings );
+						Project newProject = newProjectManager.loadProject( newProjectOrReleaseFile, newFindings );
+						
+						if (!oldFindings.hasFinding( FindingType.ERROR ) && !newFindings.hasFinding( FindingType.ERROR )) {
+							File reportFile = File.createTempFile( "otmDiff", ".html" );
+							
+							try (OutputStream out = new FileOutputStream( reportFile )) {
+								new ModelComparator( userSettings.getCompareOptions() )
+										.compareProjects( oldProject, newProject, out );
+							}
+							showReport( reportFile );
+							reportFile.deleteOnExit();
+							
+						} else {
+							logFindings = true;
+						}
+						
+					} finally {
+						closeAllProjects( oldProjectManager );
+						closeAllProjects( newProjectManager );
+					}
+					
+				} else { // release comparison
+					ReleaseManager oldReleaseManager = new ReleaseManager();
+					ReleaseManager newReleaseManager = new ReleaseManager();
+					
+					if (oldProjectOrReleaseFile != null) {
+						oldReleaseManager.loadRelease( oldProjectOrReleaseFile, oldFindings );
+					} else {
+						oldReleaseManager.loadRelease( oldReleaseRepoItem, oldFindings );
+					}
+					
+					if (newProjectOrReleaseFile != null) {
+						newReleaseManager.loadRelease( newProjectOrReleaseFile, newFindings );
+					} else {
+						newReleaseManager.loadRelease( newReleaseRepoItem, newFindings );
+					}
 					
 					if (!oldFindings.hasFinding( FindingType.ERROR ) && !newFindings.hasFinding( FindingType.ERROR )) {
 						File reportFile = File.createTempFile( "otmDiff", ".html" );
 						
 						try (OutputStream out = new FileOutputStream( reportFile )) {
 							new ModelComparator( userSettings.getCompareOptions() )
-									.compareProjects( oldProject, newProject, out );
+									.compareReleases( oldReleaseManager, newReleaseManager, out );
 						}
 						showReport( reportFile );
 						reportFile.deleteOnExit();
 						
 					} else {
-						if (oldFindings.hasFinding()) {
-							System.out.println("\nErrors/Warnings: " + oldProjectFile.getName());
-							for (String message : oldFindings.getAllValidationMessages( FindingMessageFormat.IDENTIFIED_FORMAT )) {
-								System.out.println("  " + message);
-							}
-						}
-						if (newFindings.hasFinding()) {
-							System.out.println("\nErrors/Warnings: " + newProjectFile.getName());
-							for (String message : newFindings.getAllValidationMessages( FindingMessageFormat.IDENTIFIED_FORMAT )) {
-								System.out.println("  " + message);
-							}
-						}
-						throw new RuntimeException("Validation error(s) detected in one or both projects.");
+						logFindings = true;
 					}
-					
-				} finally {
-					closeAllProjects( oldProjectManager );
-					closeAllProjects( newProjectManager );
+				}
+				
+				if (logFindings) {
+					if (oldFindings.hasFinding()) {
+						System.out.println("\nErrors/Warnings: " + oldProjectOrReleaseFile.getName());
+						for (String message : oldFindings.getAllValidationMessages( FindingMessageFormat.IDENTIFIED_FORMAT )) {
+							System.out.println("  " + message);
+						}
+					}
+					if (newFindings.hasFinding()) {
+						System.out.println("\nErrors/Warnings: " + newProjectOrReleaseFile.getName());
+						for (String message : newFindings.getAllValidationMessages( FindingMessageFormat.IDENTIFIED_FORMAT )) {
+							System.out.println("  " + message);
+						}
+					}
+					throw new RuntimeException("Validation error(s) detected in one or both projects.");
 				}
 			}
 		};
@@ -737,7 +947,7 @@ public class DiffUtilityController extends AbstractMainWindowController {
 	 * @param event  the action event that triggered this method call
 	 */
 	@FXML public void runLibraryComparison(ActionEvent event) {
-		Runnable r = new BackgroundTask( "Running comparison..." ) {
+		Runnable r = new BackgroundTask( "Running comparison...", StatusType.INFO ) {
 			public void execute() throws Throwable {
 				try {
 					File reportFile = File.createTempFile( "otmDiff", ".html" );
@@ -747,16 +957,16 @@ public class DiffUtilityController extends AbstractMainWindowController {
 					
 					if (oldLibraryFile != null) {
 						oldLibrary = loadLibrary( oldLibraryFile, oldProjectManager );
-					} else if (oldLibraryRepo != null) {
-						oldLibrary = loadLibrary( oldLibraryRepo, oldProjectManager );
+					} else if (oldLibraryRepoItem != null) {
+						oldLibrary = loadLibrary( oldLibraryRepoItem, oldLibraryCommit, oldProjectManager );
 					} else {
 						throw new IllegalStateException("Old library version not accessible.");
 					}
 					
 					if (newLibraryFile != null) {
 						newLibrary = loadLibrary( newLibraryFile, newProjectManager );
-					} else if (newLibraryRepo != null) {
-						newLibrary = loadLibrary( newLibraryRepo, newProjectManager );
+					} else if (newLibraryRepoItem != null) {
+						newLibrary = loadLibrary( newLibraryRepoItem, newLibraryCommit, newProjectManager );
 					} else {
 						throw new IllegalStateException("New library version not accessible.");
 					}
@@ -813,96 +1023,37 @@ public class DiffUtilityController extends AbstractMainWindowController {
 		super.initialize( primaryStage );
 		this.userSettings = UserSettings.load();
 		
-		oldEntityChoice.valueProperty().addListener( new ChangeListener<ChoiceItem>() {
-			public void changed(ObservableValue<? extends ChoiceItem> observable, ChoiceItem oldValue, ChoiceItem newValue) {
-				updateControlStates();
-			}
-		} );
-		newEntityChoice.valueProperty().addListener( new ChangeListener<ChoiceItem>() {
-			public void changed(ObservableValue<? extends ChoiceItem> observable, ChoiceItem oldValue, ChoiceItem newValue) {
-				updateControlStates();
-			}
-		} );
-		reportViewer.getEngine().getHistory().currentIndexProperty().addListener( new ChangeListener<Number>() {
-			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-				updateControlStates();
-			}
-		});
-		reportViewer.getEngine().getLoadWorker().stateProperty().addListener(new ChangeListener<State>() {
-		    public void changed(ObservableValue<? extends State> ov, State oldState, State newState) {
-		        if (newState == Worker.State.SUCCEEDED) {
-		            EventListener listener = new EventListener() {
-		                public void handleEvent(Event ev) {
-		                	String href = ((Element)ev.getTarget()).getAttribute("href");
-		                	
-		                	if ((href != null) && !href.startsWith("#")) {
-			                	ev.preventDefault();
-			                	navigateExternalLink( href );
-		                	}
-		                }
-		            };
+		oldEntityChoice.valueProperty().addListener( (observable, oldValue, newValue) -> updateControlStates() );
+		newEntityChoice.valueProperty().addListener( (observable, oldValue, newValue) -> updateControlStates() );
+		oldCommitChoice.valueProperty().addListener(
+				(observable, oldValue, newValue) -> oldCommitSelectionChanged() );
+		newCommitChoice.valueProperty().addListener(
+				(observable, oldValue, newValue) -> newCommitSelectionChanged() );
+		reportViewer.getEngine().getHistory().currentIndexProperty().addListener(
+				(observable, oldValue, newValue) -> updateControlStates() );
+		reportViewer.getEngine().getLoadWorker().stateProperty().addListener(
+				(observable, oldState, newState) -> {
+			        if (newState == Worker.State.SUCCEEDED) {
+			            EventListener listener = new EventListener() {
+			                public void handleEvent(Event ev) {
+			                	String href = ((Element)ev.getTarget()).getAttribute("href");
+			                	
+			                	if ((href != null) && !href.startsWith("#")) {
+				                	ev.preventDefault();
+				                	navigateExternalLink( href );
+			                	}
+			                }
+			            };
 
-		            Document doc = reportViewer.getEngine().getDocument();
-		            NodeList lista = doc.getElementsByTagName("a");
-		            
-		            for (int i=0; i<lista.getLength(); i++) {
-		                ((EventTarget)lista.item(i)).addEventListener("click", listener, false);
-		            }
-		        }
-		    }
-		});
+			            Document doc = reportViewer.getEngine().getDocument();
+			            NodeList lista = doc.getElementsByTagName("a");
+			            
+			            for (int i=0; i<lista.getLength(); i++) {
+			                ((EventTarget)lista.item(i)).addEventListener("click", listener, false);
+			            }
+			        }
+				});
 		updateControlStates();
-	}
-	
-	/**
-	 * Abstract class that executes a background task in a non-UI thread.
-	 */
-	private abstract class BackgroundTask implements Runnable {
-		
-		private String statusMessage;
-		
-		/**
-		 * Constructor that specifies the status message to display during task execution.
-		 * 
-		 * @param statusMessage  the status message for the task
-		 */
-		public BackgroundTask(String statusMessage) {
-			this.statusMessage = statusMessage;
-		}
-		
-		/**
-		 * Executes the sub-class specific task functions.
-		 * 
-		 * @throws Throwable  thrown if an error occurs during task execution
-		 */
-		protected abstract void execute() throws Throwable;
-
-		/**
-		 * @see java.lang.Runnable#run()
-		 */
-		@Override
-		public void run() {
-			try {
-				setStatusMessage( statusMessage, true );
-				execute();
-				
-			} catch (Throwable t) {
-				String errorMessage = (t.getMessage() != null) ? t.getMessage() : "See log output for details.";
-				
-				try {
-					setStatusMessage( "ERROR: " + errorMessage, false );
-					updateControlStates();
-					t.printStackTrace( System.out );
-					Thread.sleep( 1000 );
-					
-				} catch (InterruptedException e) {}
-				
-			} finally {
-				setStatusMessage( null, false );
-				updateControlStates();
-			}
-		}
-		
 	}
 	
 	/**
@@ -933,6 +1084,40 @@ public class DiffUtilityController extends AbstractMainWindowController {
 			this.value = value;
 		}
 
+		/**
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			return label;
+		}
+		
+	}
+	
+	/**
+	 * Encapsulates a single selectable item for a library's commit date and comments.
+	 */
+	private static class CommitChoiceItem {
+		
+		private static final DateFormat dateFormat = new SimpleDateFormat("M/d/yyyy");
+		public String label;
+		public RepositoryItemCommit value;
+		
+		/**
+		 * Constructor that initializes the value and display label for the item.
+		 * 
+		 * @param commit  the commit record for a repository item
+		 */
+		public CommitChoiceItem(RepositoryItemCommit commit) {
+			StringBuilder text = new StringBuilder();
+			
+			text.append( dateFormat.format( commit.getEffectiveOn() ) );
+			text.append(" [").append( commit.getUser() ).append("]: ");
+			text.append( commit.getRemarks() );
+			this.value = commit;
+			this.label = text.toString();
+		}
+		
 		/**
 		 * @see java.lang.Object#toString()
 		 */

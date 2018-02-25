@@ -19,8 +19,8 @@ package org.opentravel.release.navigate.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opentravel.application.common.Images;
 import org.opentravel.release.NodeProperty;
-import org.opentravel.release.Utils;
 import org.opentravel.release.navigate.TreeNode;
 import org.opentravel.release.navigate.TreeNodeFactory;
 import org.opentravel.schemacompiler.model.TLAction;
@@ -59,7 +59,7 @@ public class ResourceTreeNode extends TreeNode<TLResource> {
 	 */
 	@Override
 	public Image getIcon() {
-		return Utils.resourceIcon;
+		return Images.resourceIcon;
 	}
 
 	/**

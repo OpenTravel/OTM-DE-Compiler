@@ -44,6 +44,8 @@ import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLPropertyType;
 import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLResourceParentRef;
+import org.opentravel.schemacompiler.repository.ProjectManager;
+import org.opentravel.schemacompiler.repository.Release;
 import org.opentravel.schemacompiler.repository.RemoteRepository;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
@@ -136,14 +138,47 @@ public class DisplayFormatter {
 		String filename = null;
 		
 		if (library != null) {
-			URL libraryUrl = (library == null) ? null : library.getLibraryUrl();
+			RepositoryItem item = getRepositoryItem( library );
+			
+			if (item != null) {
+				filename = item.getFilename();
+				
+			} else {
+				URL libraryUrl = library.getLibraryUrl();
+				String url = (libraryUrl == null) ? null : libraryUrl.toExternalForm();
+				
+				if (url != null) {
+					filename = url.substring( url.lastIndexOf('/') + 1 );
+				}
+				if (filename == null) {
+					filename = library.getName();
+				}
+			}
+		}
+		if (filename == null) {
+			filename = "UNKNOWN";
+		}
+		return filename;
+	}
+	
+	/**
+	 * Returns the filename component of the release's URL.
+	 * 
+	 * @param release  the release for which to return the filename
+	 * @return String
+	 */
+	public String getReleaseFilename(Release release) {
+		String filename = null;
+		
+		if (release != null) {
+			URL libraryUrl = release.getReleaseUrl();
 			String url = (libraryUrl == null) ? null : libraryUrl.toExternalForm();
 			
 			if (url != null) {
 				filename = url.substring( url.lastIndexOf('/') + 1 );
 			}
 			if (filename == null) {
-				filename = library.getName();
+				filename = release.getName();
 			}
 		}
 		if (filename == null) {
@@ -335,6 +370,34 @@ public class DisplayFormatter {
 	}
 	
 	/**
+	 * Returns the repository URL for the given release or null if the release
+	 * is not managed by a repository.
+	 * 
+	 * @param release  the release for which to return a repository URL
+	 * @return String
+	 */
+	public String getReleaseViewDetailsUrl(Release release) {
+		RepositoryItem item = getRepositoryItem( release );
+		String url = null;
+		
+		if ((item != null) && (item.getRepository() instanceof RemoteRepository)) {
+			try {
+				StringBuilder urlBuilder = new StringBuilder( ((RemoteRepository) item.getRepository()).getEndpointUrl() );
+				
+				urlBuilder.append( "/console/releaseView.html" );
+				urlBuilder.append( "?baseNamespace=" ).append( URLEncoder.encode( release.getBaseNamespace(), "UTF-8" ) );
+				urlBuilder.append( "&filename=" ).append( item.getFilename() );
+				urlBuilder.append( "&version=" ).append( item.getVersion() );
+				url = urlBuilder.toString();
+				
+			} catch (UnsupportedEncodingException e) {
+				// Ignore error and return null
+			}
+		}
+		return (url == null) ? "" : url;
+	}
+	
+	/**
 	 * Returns the repository URL for the given entity or null if the entity's library
 	 * is not managed by a repository.
 	 * 
@@ -376,10 +439,48 @@ public class DisplayFormatter {
 	private RepositoryItem getRepositoryItem(AbstractLibrary library) {
 		RepositoryItem item = null;
 		
-		if ((library != null) && URLUtils.isFileURL( library.getLibraryUrl() )) {
+		if (library != null) {
+			if (URLUtils.isFileURL( library.getLibraryUrl() )) {
+				try {
+					File libraryFile = URLUtils.toFile( library.getLibraryUrl() );
+					item = repositoryManager.getRepositoryItem( libraryFile );
+					
+				} catch (RepositoryException e) {
+					// Ignore error and return null
+				}
+				
+			} else if ((library instanceof TLLibrary) &&
+					library.getLibraryUrl().toExternalForm().contains("/historical-content?")) {
+				// Special case for historical content URL's (by definition, these are managed libraries)
+				try {
+					TLLibrary tlLibrary = (TLLibrary) library;
+					
+					item = repositoryManager.getRepositoryItem( tlLibrary.getBaseNamespace(),
+							ProjectManager.getPublicationFilename( library ), tlLibrary.getVersion() );
+					
+				} catch (RepositoryException e) {
+					// Ignore error and return null
+				}
+			}
+			
+		}
+		return item;
+	}
+	
+	/**
+	 * Returns the repository item for the given release or null if the
+	 * release is not managed by a repository.
+	 * 
+	 * @param release  the release for which to return the repository item
+	 * @return RemoteRepository
+	 */
+	private RepositoryItem getRepositoryItem(Release release) {
+		RepositoryItem item = null;
+		
+		if ((release != null) && URLUtils.isFileURL( release.getReleaseUrl() )) {
 			try {
-				File libraryFile = URLUtils.toFile( library.getLibraryUrl() );
-				item = repositoryManager.getRepositoryItem( libraryFile );
+				File releaseFile = URLUtils.toFile( release.getReleaseUrl() );
+				item = repositoryManager.getRepositoryItem( releaseFile );
 				
 			} catch (RepositoryException e) {
 				// Ignore error and return null

@@ -31,17 +31,20 @@ import org.opentravel.schemacompiler.diff.EntityChangeSet;
 import org.opentravel.schemacompiler.diff.LibraryChangeSet;
 import org.opentravel.schemacompiler.diff.ModelCompareOptions;
 import org.opentravel.schemacompiler.diff.ProjectChangeSet;
+import org.opentravel.schemacompiler.diff.ReleaseChangeSet;
 import org.opentravel.schemacompiler.diff.ResourceChangeSet;
 import org.opentravel.schemacompiler.diff.impl.DisplayFormatter;
 import org.opentravel.schemacompiler.diff.impl.EntityComparator;
 import org.opentravel.schemacompiler.diff.impl.EntityComparisonFacade;
 import org.opentravel.schemacompiler.diff.impl.LibraryComparator;
 import org.opentravel.schemacompiler.diff.impl.ProjectComparator;
+import org.opentravel.schemacompiler.diff.impl.ReleaseComparator;
 import org.opentravel.schemacompiler.diff.impl.ResourceComparator;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.repository.Project;
+import org.opentravel.schemacompiler.repository.ReleaseManager;
 
 /**
  * Performs model-level comparisons of two OTM model components.  The algorithm can handle
@@ -52,6 +55,7 @@ import org.opentravel.schemacompiler.repository.Project;
 public class ModelComparator {
 	
 	private static final String TEMPLATE_FOLDER = "/org/opentravel/schemacompiler/templates";
+	private static final String RELEASE_DIFF_TEMPLATE  = TEMPLATE_FOLDER + "/release-diff-report.vm";
 	private static final String PROJECT_DIFF_TEMPLATE  = TEMPLATE_FOLDER + "/project-diff-report.vm";
 	private static final String LIBRARY_DIFF_TEMPLATE  = TEMPLATE_FOLDER + "/library-diff-report.vm";
 	private static final String ENTITY_DIFF_TEMPLATE   = TEMPLATE_FOLDER + "/entity-diff-report.vm";
@@ -75,6 +79,31 @@ public class ModelComparator {
 	 */
 	public ModelComparator(ModelCompareOptions compareOptions) {
 		this.compareOptions = compareOptions;
+	}
+	
+	/**
+	 * Compares two versions of the same OTM release.
+	 * 
+	 * @param oldRelease  the old release version
+	 * @param newRelease  the new release version
+	 * @return ReleaseChangeSet
+	 */
+	public ReleaseChangeSet compareReleases(ReleaseManager oldRelease, ReleaseManager newRelease) {
+		return new ReleaseComparator( compareOptions ).compareReleases( oldRelease, newRelease );
+	}
+	
+	/**
+	 * Compares two versions of the same OTM release and writes a formatted HTML report of the
+	 * results to the output stream provided.
+	 * 
+	 * @param oldRelease  the old release version
+	 * @param newRelease  the new release version
+	 * @param out  the output stream to which the formatted report will be written
+	 * @throws IOException  thrown if an error occurs during report generation
+	 */
+	public void compareReleases(ReleaseManager oldRelease, ReleaseManager newRelease, OutputStream out)
+			throws IOException {
+		generateReport( compareReleases( oldRelease, newRelease ), RELEASE_DIFF_TEMPLATE, out );
 	}
 	
 	/**

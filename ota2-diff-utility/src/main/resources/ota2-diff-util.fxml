@@ -18,7 +18,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.web.WebView?>
 
-<BorderPane prefHeight="394.0" prefWidth="563.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.opentravel.diffutil.DiffUtilityController">
+<BorderPane prefHeight="394.0" prefWidth="563.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.opentravel.diffutil.DiffUtilityController">
    <top>
       <TabPane prefHeight="178.0" prefWidth="563.0" tabClosingPolicy="UNAVAILABLE">
          <tabs>
@@ -28,8 +28,8 @@
                      <children>
                         <GridPane AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <columnConstraints>
-                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="90.0" minWidth="10.0" prefWidth="90.0" />
-                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="389.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                              <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0" />
                               <ColumnConstraints hgrow="SOMETIMES" maxWidth="100.0" minWidth="10.0" prefWidth="100.0" />
                            </columnConstraints>
                            <rowConstraints>
@@ -37,18 +37,36 @@
                               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                            </rowConstraints>
                            <children>
-                              <Label text="Old Project" GridPane.halignment="RIGHT" GridPane.valignment="TOP">
+                              <Label text="Old Project / Release" GridPane.halignment="RIGHT" GridPane.valignment="TOP">
                                 <padding>
                                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                  </padding>
                               </Label>
                               <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">
                                  <children>
-                                    <TextField fx:id="oldProjectFilename" editable="false" HBox.hgrow="ALWAYS" />
+                                    <TextField fx:id="oldProjectFilename" editable="false" HBox.hgrow="ALWAYS">
+                                       <HBox.margin>
+                                          <Insets right="2.0" />
+                                       </HBox.margin></TextField>
                                     <Button fx:id="oldProjectFileButton" mnemonicParsing="false" onAction="#selectOldProject" text="...">
                                        <tooltip>
                                           <Tooltip text="Select Old Project File" />
                                        </tooltip>
+                                       <HBox.margin>
+                                          <Insets left="2.0" right="2.0" />
+                                       </HBox.margin>
+                                    </Button>
+                                    <Button fx:id="oldReleaseFileButton" maxHeight="15.0" mnemonicParsing="false" onAction="#selectOldRelease" prefHeight="25.0">
+                                       <tooltip>
+                                          <Tooltip text="Select Old Project File" />
+                                       </tooltip>
+                                       <graphic>
+                                          <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" translateX="3.0">
+                                             <image>
+                                                <Image url="@images/repository.gif" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
                                     </Button>
                                  </children>
                               </HBox>
@@ -57,18 +75,36 @@
                                     <Insets bottom="5.0" left="5.0" />
                                  </GridPane.margin>
                               </Button>
-                              <Label text="New Project" GridPane.halignment="RIGHT" GridPane.rowIndex="1" GridPane.valignment="TOP">
+                              <Label text="New Project / Release" GridPane.halignment="RIGHT" GridPane.rowIndex="1" GridPane.valignment="TOP">
                                  <padding>
                                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                  </padding>
                               </Label>
                               <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
                                  <children>
-                                    <TextField fx:id="newProjectFilename" editable="false" HBox.hgrow="ALWAYS" />
+                                    <TextField fx:id="newProjectFilename" editable="false" HBox.hgrow="ALWAYS">
+                                       <HBox.margin>
+                                          <Insets right="2.0" />
+                                       </HBox.margin></TextField>
                                     <Button fx:id="newProjectFileButton" mnemonicParsing="false" onAction="#selectNewProject" text="...">
                                        <tooltip>
                                           <Tooltip text="Select New Project File" />
-                                       </tooltip></Button>
+                                       </tooltip>
+                                       <HBox.margin>
+                                          <Insets left="2.0" right="2.0" />
+                                       </HBox.margin></Button>
+                                    <Button fx:id="newReleaseFileButton" maxWidth="15.0" mnemonicParsing="false" onAction="#selectNewRelease" prefHeight="25.0">
+                                       <tooltip>
+                                          <Tooltip text="Select New Project File" />
+                                       </tooltip>
+                                       <graphic>
+                                          <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" translateX="3.0">
+                                             <image>
+                                                <Image url="@images/repository.gif" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
+                                    </Button>
                                  </children>
                               </HBox>
                            </children>
@@ -88,6 +124,8 @@
                           <columnConstraints>
                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="90.0" minWidth="50.0" prefWidth="90.0" />
                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="100.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="100.0" minWidth="60.0" prefWidth="100.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="60.0" prefWidth="100.0" />
                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="100.0" minWidth="60.0" prefWidth="100.0" />
                           </columnConstraints>
                           <rowConstraints>
@@ -120,13 +158,19 @@
                                       <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                    </padding>
                                 </Label>
-                                <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">
+                                <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="3">
                                    <children>
-                                      <TextField fx:id="oldLibraryFilename" editable="false" HBox.hgrow="ALWAYS" />
+                                      <TextField fx:id="oldLibraryFilename" editable="false" HBox.hgrow="ALWAYS">
+                                       <HBox.margin>
+                                          <Insets right="2.0" />
+                                       </HBox.margin></TextField>
                                       <Button fx:id="oldLibraryFileButton" mnemonicParsing="false" onAction="#selectOldLibraryFromFile" text="...">
                                          <tooltip>
                                             <Tooltip text="Select Old Library from File" />
                                          </tooltip>
+                                       <HBox.margin>
+                                          <Insets left="2.0" right="2.0" />
+                                       </HBox.margin>
                                       </Button>
                                       <Button fx:id="oldLibraryRepoButton" maxWidth="15.0" mnemonicParsing="false" onAction="#selectOldLibraryFromRepo" prefHeight="25.0" prefWidth="3.0">
                                          <graphic>
@@ -137,7 +181,7 @@
                                             </ImageView>
                                          </graphic>
                                          <HBox.margin>
-                                            <Insets />
+                                            <Insets left="2.0" />
                                          </HBox.margin>
                                          <tooltip>
                                             <Tooltip text="Select Old Library from Repository" />
@@ -145,16 +189,16 @@
                                       </Button>
                                    </children>
                                 </HBox>
-                                <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="2">
                                    <children>
                                       <TextField fx:id="newLibraryFilename" editable="false" HBox.hgrow="ALWAYS">
                                          <HBox.margin>
-                                            <Insets top="15.0" />
+                                            <Insets right="2.0" top="15.0" />
                                          </HBox.margin>
                                       </TextField>
                                       <Button fx:id="newLibraryFileButton" mnemonicParsing="false" onAction="#selectNewLibraryFromFile" text="...">
                                          <HBox.margin>
-                                            <Insets top="15.0" />
+                                            <Insets left="2.0" right="2.0" top="15.0" />
                                          </HBox.margin>
                                          <tooltip>
                                             <Tooltip text="Select New Library from File" />
@@ -169,7 +213,7 @@
                                             </ImageView>
                                          </graphic>
                                          <HBox.margin>
-                                            <Insets top="15.0" />
+                                            <Insets left="2.0" top="15.0" />
                                          </HBox.margin>
                                          <tooltip>
                                             <Tooltip text="Select New Library from Repository" />
@@ -177,13 +221,25 @@
                                       </Button>
                                    </children>
                                 </HBox>
-                                <ChoiceBox fx:id="oldEntityChoice" maxWidth="1.7976931348623157E308" prefWidth="150.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" />
-                                <ChoiceBox fx:id="newEntityChoice" maxWidth="1.7976931348623157E308" prefWidth="150.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" />
-                                <Button fx:id="runLibraryButton" mnemonicParsing="false" onAction="#runLibraryComparison" text="Run Comparison" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="2" GridPane.rowSpan="2147483647">
+                                <ChoiceBox fx:id="oldEntityChoice" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" />
+                                <ChoiceBox fx:id="newEntityChoice" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" />
+                                <Button fx:id="runLibraryButton" mnemonicParsing="false" onAction="#runLibraryComparison" text="Run Comparison" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="4" GridPane.rowSpan="2147483647">
                                    <GridPane.margin>
                                       <Insets left="5.0" />
                                    </GridPane.margin>
                                 </Button>
+                              <Label fx:id="oldCommitLabel" text="Commit Date" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="1" GridPane.valignment="TOP">
+                                 <padding>
+                                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                 </padding>
+                              </Label>
+                              <ChoiceBox fx:id="oldCommitChoice" maxWidth="1.7976931348623157E308" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" />
+                              <Label fx:id="newCommitLabel" text="Commit Date" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="3" GridPane.valignment="TOP">
+                                 <padding>
+                                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                 </padding>
+                              </Label>
+                              <ChoiceBox fx:id="newCommitChoice" maxWidth="1.7976931348623157E308" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" />
                              </children>
                              <padding>
                                 <Insets bottom="5.0" left="5.0" right="5.0" top="10.0" />

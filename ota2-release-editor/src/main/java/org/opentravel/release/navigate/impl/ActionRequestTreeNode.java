@@ -20,9 +20,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.opentravel.application.common.Images;
 import org.opentravel.release.MessageBuilder;
 import org.opentravel.release.NodeProperty;
-import org.opentravel.release.Utils;
 import org.opentravel.release.navigate.TreeNode;
 import org.opentravel.release.navigate.TreeNodeFactory;
 import org.opentravel.schemacompiler.model.TLActionRequest;
@@ -58,7 +58,7 @@ public class ActionRequestTreeNode extends TreeNode<TLActionRequest> {
 	 */
 	@Override
 	public Image getIcon() {
-		return Utils.requestIcon;
+		return Images.requestIcon;
 	}
 
 	/**

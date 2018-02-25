@@ -19,8 +19,8 @@ package org.opentravel.release.navigate.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opentravel.application.common.Images;
 import org.opentravel.release.NodeProperty;
-import org.opentravel.release.Utils;
 import org.opentravel.release.navigate.TreeNode;
 import org.opentravel.release.navigate.TreeNodeFactory;
 import org.opentravel.schemacompiler.model.TLAttribute;
@@ -58,7 +58,7 @@ public class ExtensionPointFacetTreeNode extends TreeNode<TLExtensionPointFacet>
 	 */
 	@Override
 	public Image getIcon() {
-		return Utils.extensionPointFacetIcon;
+		return Images.extensionPointFacetIcon;
 	}
 
 	/**

@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.opentravel.application.common.Images;
 import org.opentravel.release.NodeProperty;
-import org.opentravel.release.Utils;
 import org.opentravel.release.navigate.TreeNode;
 import org.opentravel.release.navigate.TreeNodeFactory;
 import org.opentravel.schemacompiler.model.TLAbstractEnumeration;
@@ -76,7 +76,7 @@ public abstract class EnumerationTreeNode<E extends TLAbstractEnumeration> exten
 	 */
 	@Override
 	public Image getIcon() {
-		return Utils.enumerationIcon;
+		return Images.enumerationIcon;
 	}
 
 	/**

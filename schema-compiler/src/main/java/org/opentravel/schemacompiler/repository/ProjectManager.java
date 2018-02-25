@@ -2465,7 +2465,7 @@ public final class ProjectManager {
      *            the library whose filename is to be returned
      * @return String
      */
-    private String getPublicationFilename(AbstractLibrary library) {
+    public static String getPublicationFilename(AbstractLibrary library) {
         String filename = null;
 
         if (library instanceof TLLibrary) {

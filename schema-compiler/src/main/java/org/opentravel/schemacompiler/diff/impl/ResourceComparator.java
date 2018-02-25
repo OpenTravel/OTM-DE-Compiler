@@ -414,8 +414,6 @@ public class ResourceComparator extends BaseComparator {
 		QName newPayloadTypeName = (newPayloadType == null) ? null : getEntityName( newPayloadType );
 		TLHttpMethod oldHttpMethod = (oldRequest == null) ? null : oldRequest.getHttpMethod();
 		TLHttpMethod newHttpMethod = (newRequest == null) ? null : newRequest.getHttpMethod();
-		TLParamGroup oldParamGroup = (oldRequest == null) ? null : oldRequest.getParamGroup();
-		TLParamGroup newParamGroup = (newRequest == null) ? null : newRequest.getParamGroup();
 		String oldPathTemplate = (oldRequest == null) ? null : oldRequest.getPathTemplate();
 		String newPathTemplate = (newRequest == null) ? null : newRequest.getPathTemplate();
 		
@@ -429,7 +427,7 @@ public class ResourceComparator extends BaseComparator {
 					ResourceChangeType.REQUEST_METHOD_CHANGED,
 					oldHttpMethod + "", newHttpMethod + "" ) );
 		}
-		if (valueChanged( oldParamGroup, newParamGroup )) {
+		if (valueChanged( oldRequest.getParamGroupName(), newRequest.getParamGroupName() )) {
 			changeItems.add( new ResourceChangeItem( resourceChangeSet,
 					ResourceChangeType.REQUEST_PARAM_GROUP_CHANGED,
 					oldRequest.getParamGroupName(), newRequest.getParamGroupName() ) );

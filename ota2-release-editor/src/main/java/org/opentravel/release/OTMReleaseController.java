@@ -34,9 +34,15 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
 import org.opentravel.application.common.AbstractMainWindowController;
+import org.opentravel.application.common.BrowseRepositoryDialogController;
+import org.opentravel.application.common.StatusType;
+import org.opentravel.ns.ota2.project_v01_00.ManagedProjectItemType;
+import org.opentravel.ns.ota2.project_v01_00.ProjectItemType;
+import org.opentravel.ns.ota2.project_v01_00.ProjectType;
 import org.opentravel.release.NewReleaseDialogController.NewReleaseInfo;
 import org.opentravel.release.navigate.TreeNode;
 import org.opentravel.release.navigate.TreeNodeFactory;
@@ -62,11 +68,13 @@ import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryItemCommit;
 import org.opentravel.schemacompiler.repository.RepositoryItemType;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
+import org.opentravel.schemacompiler.repository.impl.ProjectFileUtils;
 import org.opentravel.schemacompiler.saver.LibrarySaveException;
 import org.opentravel.schemacompiler.task.CompileAllCompilerTask;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingMessageFormat;
 import org.opentravel.schemacompiler.validate.FindingType;
+import org.opentravel.schemacompiler.validate.ValidationException;
 import org.opentravel.schemacompiler.validate.ValidationFinding;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 
@@ -127,6 +135,7 @@ public class OTMReleaseController extends AbstractMainWindowController {
 	
 	@FXML private MenuItem newMenu;
 	@FXML private MenuItem openMenu;
+	@FXML private MenuItem importMenu;
 	@FXML private MenuItem saveMenu;
 	@FXML private MenuItem saveAsMenu;
 	@FXML private MenuItem compileMenu;
@@ -301,7 +310,10 @@ public class OTMReleaseController extends AbstractMainWindowController {
 		if (confirmCloseRelease()) {
 			closeRelease();
 		}
-		FileChooser chooser = newFileChooser( "Open", userSettings.getReleaseFolder() );
+		FileChooser chooser = newFileChooser( "Open",
+				userSettings.getReleaseFolder(),
+				new String[] { "*.otr", "OTM Release Files" },
+				new String[] { "*.*", "All Files (*.*)" } );
 		File selectedFile = chooser.showOpenDialog( getPrimaryStage() );
 		
 		if ((selectedFile != null) && (selectedFile != releaseFile)) {
@@ -340,7 +352,7 @@ public class OTMReleaseController extends AbstractMainWindowController {
 		}
 		if (availabilityChecker.pingAllRepositories( false )) {
 			BrowseRepositoryDialogController controller =
-					BrowseRepositoryDialogController.createBrowseRepositoryDialog(
+					BrowseRepositoryDialogController.createDialog(
 							"Open Managed Release", RepositoryItemType.RELEASE, getPrimaryStage() );
 			
 			controller.showAndWait();
@@ -366,6 +378,69 @@ public class OTMReleaseController extends AbstractMainWindowController {
 					new Thread( r ).start();
 				}
 			}
+		}
+	}
+	
+	/**
+	 * Called when the user clicks the button to import an OTM release from
+	 * an existing OTM project (.otp) file.
+	 * 
+	 * @param event  the action event that triggered this method call
+	 */
+	@FXML public void importFromProject(ActionEvent event) {
+		if (confirmCloseRelease()) {
+			closeRelease();
+		}
+		FileChooser chooser = newFileChooser( "Import from OTP",
+				userSettings.getReleaseFolder(),
+				new String[] { "*.otp", "OTM Project Files (*.otp)" },
+				new String[] { "*.*", "All Files (*.*)" } );
+		File selectedFile = chooser.showOpenDialog( getPrimaryStage() );
+		
+		if ((selectedFile != null) && (selectedFile != releaseFile)) {
+			Runnable r = new BackgroundTask( "Importing Release: " + selectedFile.getName(), StatusType.INFO ) {
+				public void execute() throws Throwable {
+					try {
+						ValidationFindings findings = new ValidationFindings();
+						ProjectType project = ProjectFileUtils.loadJaxbProjectFile( selectedFile, findings );
+						ReleaseManager newReleaseManager = new ReleaseManager( repositoryManager );
+						
+						if (findings.hasFinding( FindingType.ERROR )) {
+							throw new ValidationException(
+									"Error loading OTM project file (see log for details)", findings );
+						}
+						
+						newReleaseManager.createNewRelease( project.getProjectId(),
+								project.getName(), selectedFile.getParentFile() );
+						
+						for (JAXBElement<? extends ProjectItemType> itemElement : project.getProjectItemBase()) {
+							ProjectItemType item = itemElement.getValue();
+							
+							if (item instanceof ManagedProjectItemType) {
+								ManagedProjectItemType managedItem = (ManagedProjectItemType) item;
+								RepositoryItem repoItem = repositoryManager.getRepositoryItem(managedItem.getBaseNamespace(),
+										managedItem.getFilename(), managedItem.getVersion() );
+								
+								newReleaseManager.addPrincipalMember( repoItem );
+							}
+						}
+						newReleaseManager.loadReleaseModel( validationFindings = new ValidationFindings() );
+						newReleaseManager.saveRelease();
+						
+						OTMReleaseController.this.releaseManager = newReleaseManager;
+						OTMReleaseController.this.releaseFile = URLUtils.toFile( newReleaseManager.getRelease().getReleaseUrl() );
+						OTMReleaseController.this.validationFindings = new ValidationFindings();
+						OTMReleaseController.this.managedRelease = false;
+						updateControlsForNewRelease();
+						
+					} finally {
+						userSettings.setReleaseFolder( selectedFile.getParentFile() );
+						userSettings.save();
+					}
+				}
+			};
+			
+			new Thread( r ).start();
 		}
 	}
 	
@@ -540,7 +615,7 @@ public class OTMReleaseController extends AbstractMainWindowController {
 	@FXML public void addPrincipalLibrary(ActionEvent event) {
 		if (releaseManager != null) {
 			BrowseRepositoryDialogController controller =
-					BrowseRepositoryDialogController.createBrowseRepositoryDialog(
+					BrowseRepositoryDialogController.createDialog(
 							"Add Principle Library", RepositoryItemType.LIBRARY, getPrimaryStage() );
 			
 			controller.showAndWait();
@@ -926,65 +1001,10 @@ public class OTMReleaseController extends AbstractMainWindowController {
 	}
 	
 	/**
-	 * Returns a new file chooser that is configured for the selection of OTM
-	 * release files.
-	 * 
-	 * @param title  the title of the new file chooser
-	 * @param initialDirectory  the initial directory location for the chooser
-	 * @return FileChooser
+	 * @see org.opentravel.application.common.AbstractMainWindowController#setStatusMessage(java.lang.String, org.opentravel.application.common.StatusType, boolean)
 	 */
-	private FileChooser newFileChooser(String title, File initialDirectory) {
-		FileChooser chooser = new FileChooser();
-		File directory = initialDirectory;
-		
-		// Make sure the initial directory for the chooser exists
-		while ((directory != null) && !directory.exists()) {
-			directory = directory.getParentFile();
-		}
-		if (directory == null) {
-			directory = new File( System.getProperty("user.home") );
-		}
-		
-		chooser.setTitle( title );
-		chooser.setInitialDirectory( directory );
-		chooser.getExtensionFilters().addAll(
-				new FileChooser.ExtensionFilter("OTM Release Files", "*.otr" ),
-				new FileChooser.ExtensionFilter("All Files", "*.*") );
-		return chooser;
-	}
-	
-	/**
-	 * Returns a new directory chooser instance.
-	 * 
-	 * @param title  the title of the new directory chooser
-	 * @param initialDirectory  the initial directory location for the chooser
-	 * @return DirectoryChooser
-	 */
-	private DirectoryChooser newDirectoryChooser(String title, File initialDirectory) {
-		DirectoryChooser chooser = new DirectoryChooser();
-		File directory = initialDirectory;
-		
-		// Make sure the initial directory for the chooser exists
-		while ((directory != null) && !directory.exists()) {
-			directory = directory.getParentFile();
-		}
-		if (directory == null) {
-			directory = new File( System.getProperty("user.home") );
-		}
-		
-		chooser.setTitle( title );
-		chooser.setInitialDirectory( directory );
-		return chooser;
-	}
-	
-	/**
-	 * Displays a message to the user in the status bar and optionally disables the
-	 * interactive controls on the display.
-	 * 
-	 * @param message  the status bar message to display
-	 * @param disableControls  flag indicating whether interactive controls should be disabled
-	 */
-	private void setStatusMessage(String message, StatusType statusType, boolean disableControls) {
+	@Override
+	protected void setStatusMessage(String message, StatusType statusType, boolean disableControls) {
 		Platform.runLater( () -> {
 			statusBarLabel.setText( message );
 			statusBarIcon.setImage( (statusType == null) ? null : statusType.getIcon() );
@@ -1139,10 +1159,10 @@ public class OTMReleaseController extends AbstractMainWindowController {
 	}
 	
 	/**
-	 * Updates the enabled/disables states of the visual controls based on the current
-	 * state of user selections.
+	 * @see org.opentravel.application.common.AbstractMainWindowController#updateControlStates()
 	 */
-	private void updateControlStates() {
+	@Override
+	protected void updateControlStates() {
 		Platform.runLater( () -> {
 			boolean isReleaseLoaded = (releaseManager != null);
 			boolean isGenerateExamples = (isReleaseLoaded && generateExamplesCheckbox.isSelected());
@@ -1161,6 +1181,7 @@ public class OTMReleaseController extends AbstractMainWindowController {
 			// Set the enable/disable status of all controls
 			newMenu.setDisable( false );
 			openMenu.setDisable( false );
+			importMenu.setDisable( false );
 			saveMenu.setDisable( !isSaveEnabled );
 			saveAsMenu.setDisable( !isSaveAsEnabled );
 			compileMenu.setDisable( !isCompileEnabled );
@@ -1827,60 +1848,6 @@ public class OTMReleaseController extends AbstractMainWindowController {
 		this.userSettings = userSettings;
 		
 		updateControlStates();
-	}
-	
-	/**
-	 * Abstract class that executes a background task in a non-UI thread.
-	 */
-	private abstract class BackgroundTask implements Runnable {
-		
-		private String statusMessage;
-		private StatusType statusType;
-		
-		/**
-		 * Constructor that specifies the status message to display during task execution.
-		 * 
-		 * @param statusMessage  the status message for the task
-		 * @param statusType  the type of status message to display
-		 */
-		public BackgroundTask(String statusMessage, StatusType statusType) {
-			this.statusMessage = statusMessage;
-			this.statusType = statusType;
-		}
-		
-		/**
-		 * Executes the sub-class specific task functions.
-		 * 
-		 * @throws Throwable  thrown if an error occurs during task execution
-		 */
-		protected abstract void execute() throws Throwable;
-
-		/**
-		 * @see java.lang.Runnable#run()
-		 */
-		@Override
-		public void run() {
-			try {
-				setStatusMessage( statusMessage, statusType, true );
-				execute();
-				
-			} catch (Throwable t) {
-				String errorMessage = (t.getMessage() != null) ? t.getMessage() : "See log output for details.";
-				
-				try {
-					setStatusMessage( "ERROR: " + errorMessage, StatusType.ERROR, false );
-					updateControlStates();
-					t.printStackTrace( System.out );
-					Thread.sleep( 1000 );
-					
-				} catch (InterruptedException e) {}
-				
-			} finally {
-				setStatusMessage( null, null, false );
-				updateControlStates();
-			}
-		}
-		
 	}
 	
 	/**
