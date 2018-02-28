@@ -33,7 +33,9 @@ import org.opentravel.schemacompiler.validate.impl.ResourceUrlValidator;
 public class QualifiedAction {
 	
 	private List<TLResourceParentRef> parentRefs = new ArrayList<>();
+	private List<QualifiedParameter> parameters;
 	private TLAction action;
+	private String actionId;
 	
 	/**
 	 * Full constructor.  The list of parent reference supplied to this method should be
@@ -49,6 +51,7 @@ public class QualifiedAction {
 			}
 		}
 		this.action = action;
+		initParameters();
 	}
 	
 	/**
@@ -78,6 +81,24 @@ public class QualifiedAction {
 		return ResourceCodegenUtils.getDeclaredOrInheritedRequest( action );
 	}
 	
+	/**
+	 * Returns the unique action identifier for this qualified action.
+	 *
+	 * @return String
+	 */
+	public String getActionId() {
+		return (actionId != null) ? actionId : action.getActionId();
+	}
+
+	/**
+	 * Assigns the unique action identifier for this qualified action.
+	 *
+	 * @param actionId  the unique action identifier value to assign
+	 */
+	public void setActionId(String actionId) {
+		this.actionId = actionId;
+	}
+
 	/**
 	 * Returns the path template for this qualified action.  If a parent resource
 	 * reference is present, the resulting path will include the path of the parent.
@@ -109,22 +130,30 @@ public class QualifiedAction {
 	 * @return List<QualifiedParameter>
 	 */
 	public List<QualifiedParameter> getParameters() {
-		List<QualifiedParameter> paramList = new ArrayList<>();
+		return parameters;
+	}
+	
+	/**
+	 * Initializes the list of qualified parameters for this action.
+	 */
+	private void initParameters() {
 		TLActionRequest actionRequest = getActionRequest();
 		
+		parameters = new ArrayList<>();
+		
+		// Build the list of qualified parameters
 		for (TLResourceParentRef parentRef : parentRefs) {
 			if (parentRef.getParentParamGroup() != null) {
 				for (TLParameter parameter : parentRef.getParentParamGroup().getParameters()) {
-					paramList.add( new QualifiedParameter( parentRef, parameter ) );
+					parameters.add( new QualifiedParameter( parentRef, parameter ) );
 				}
 			}
 		}
-		if (actionRequest.getParamGroup() != null) {
+		if ((actionRequest != null) && actionRequest.getParamGroup() != null) {
 			for (TLParameter parameter : actionRequest.getParamGroup().getParameters()) {
-				paramList.add( new QualifiedParameter( null, parameter ) );
+				parameters.add( new QualifiedParameter( null, parameter ) );
 			}
 		}
-		return paramList;
 	}
 	
 }

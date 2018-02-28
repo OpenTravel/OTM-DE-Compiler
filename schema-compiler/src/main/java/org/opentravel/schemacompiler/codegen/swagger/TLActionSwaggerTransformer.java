@@ -39,7 +39,6 @@ import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 import org.opentravel.schemacompiler.model.TLMimeType;
 import org.opentravel.schemacompiler.model.TLReferenceType;
-import org.opentravel.schemacompiler.model.TLResourceParentRef;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 
 /**
@@ -57,21 +56,13 @@ public class TLActionSwaggerTransformer extends AbstractSwaggerCodegenTransforme
         		getTransformerFactory().getTransformer(QualifiedParameter.class, SwaggerParameter.class);
         ObjectTransformer<TLActionResponse,CodegenArtifacts,CodeGenerationTransformerContext> responseTransformer =
         		getTransformerFactory().getTransformer(TLActionResponse.class, CodegenArtifacts.class);
-		List<TLResourceParentRef> sourceParentRefs = source.getParentRefs();
 		TLAction sourceAction = source.getAction();
 		TLActionRequest sourceRequest = ResourceCodegenUtils.getDeclaredOrInheritedRequest( sourceAction );
 		List<TLActionResponse> sourceResponses = ResourceCodegenUtils.getInheritedResponses( sourceAction );
 		SwaggerParameter bodyParam = createBodyParameter( sourceRequest );
 		SwaggerOperation swaggerOp = new SwaggerOperation();
-		StringBuilder operationId = new StringBuilder( sourceAction.getActionId() );
 		
-		for (TLResourceParentRef parentRef : sourceParentRefs) {
-			if (operationId.length() > 0) {
-				operationId.append("_");
-			}
-			operationId.append( parentRef.getParentResourceName() );
-		}
-		swaggerOp.setOperationId( operationId.toString() );
+		swaggerOp.setOperationId( source.getActionId() );
 		swaggerOp.setSummary( sourceAction.getOwner().getName() + " - " + sourceAction.getActionId() );
 		transformDocumentation( sourceAction, swaggerOp );
 		swaggerOp.setDeprecated( DocumentationFinder.isDeprecated( sourceAction ) );

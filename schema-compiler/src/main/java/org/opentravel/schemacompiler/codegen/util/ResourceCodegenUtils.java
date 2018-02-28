@@ -18,8 +18,10 @@ package org.opentravel.schemacompiler.codegen.util;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -442,6 +444,7 @@ public class ResourceCodegenUtils {
 						actionList, new HashSet<TLResourceParentRef>() );
 			}
 		}
+		assignActionIds( actionList );
 		return actionList;
 	}
 	
@@ -465,6 +468,7 @@ public class ResourceCodegenUtils {
 						actionList, new HashSet<TLResourceParentRef>() );
 			}
 		}
+		assignActionIds( actionList );
 		return actionList;
 	}
 	
@@ -493,6 +497,30 @@ public class ResourceCodegenUtils {
 				visitedParentRefs.add( pRef );
 				buildQualifiedActions( action, pRef, newParentList, actionList, visitedParentRefs );
 			}
+		}
+	}
+	
+	/**
+	 * Assigns the list of unique identifiers for each of the qualified actions
+	 * in the list provided.
+	 * 
+	 * @param actionList  the list of qualified actions to process
+	 */
+	private static void assignActionIds(List<QualifiedAction> actionList) {
+		Map<String,Integer> actionCountsById = new HashMap<>();
+		
+		for (QualifiedAction action : actionList) {
+			String actionId = action.getAction().getActionId();
+			Integer actionCount = actionCountsById.get( actionId );
+			String suffix;
+			
+			if (actionCount == null) {
+				actionCount = 1;
+				actionCountsById.put( actionId, actionCount );
+			}
+			suffix = (actionCount == 1) ? "" : (actionCount + "");
+			action.setActionId( actionId + suffix );
+			actionCountsById.put( actionId, actionCount + 1 );
 		}
 	}
 	

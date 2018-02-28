@@ -229,7 +229,8 @@ public class TLActionFacetJsonCodegenTransformer extends AbstractJsonSchemaTrans
 		 */
 		@Override
 		protected JsonSchemaNamedReference createDefinition(TLAlias alias) {
-			return null; // Suppress generation of alias definitions
+			// Suppress generation of alias definitions
+			return (alias != null) ? null : super.createDefinition( null );
 		}
 		
 	}

@@ -32,9 +32,11 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonType;
+import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
+import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLDocumentation;
@@ -98,19 +100,6 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
      * @return JsonSchemaNamedReference
      */
     protected JsonSchemaNamedReference createDefinition(TLAlias alias) {
-    	JsonSchemaNamedReference definition = createDefinition();
-    	
-    	if (alias != null) {
-    		definition.setName( getDefinitionName( alias ) );
-    	}
-    	return definition;
-    }
-    
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.json.facet.FacetJsonSchemaDelegate#createDefinition()
-	 */
-	@Override
-	protected JsonSchemaNamedReference createDefinition() {
         TLFacet sourceFacet = getSourceFacet();
         TLFacet baseFacet = getLocalBaseFacet();
         SchemaDependency baseFacetDependency = getLocalBaseFacetDependency();
@@ -118,11 +107,13 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
         JsonSchema localFacetSchema = new JsonSchema();
         JsonSchema facetSchema;
         
-        definition.setName( getDefinitionName( sourceFacet ) );
+        definition.setName( getDefinitionName( (alias != null) ? alias : sourceFacet ) );
         
         if (baseFacet != null) {
+        	TLAlias baseAlias = (alias == null) ? null : AliasCodegenUtils.getOwnerAlias( alias );
+        	NamedEntity baseType = (alias == null) ? baseFacet : baseAlias;
         	JsonSchemaReference baseSchemaRef = new JsonSchemaReference(
-        			jsonUtils.getSchemaReferencePath( baseFacet, sourceFacet ) );
+        			jsonUtils.getSchemaReferencePath( baseType, sourceFacet ) );
         	
         	facetSchema = new JsonSchema();
         	facetSchema.getAllOf().add( baseSchemaRef );
@@ -165,6 +156,14 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
 	        }
 		}
 		return definition;
+    }
+    
+	/**
+	 * @see org.opentravel.schemacompiler.codegen.json.facet.FacetJsonSchemaDelegate#createDefinition()
+	 */
+	@Override
+	protected JsonSchemaNamedReference createDefinition() {
+		return createDefinition( null );
 	}
 	
 	/**
