@@ -142,18 +142,30 @@ public class ProjectFileUtils extends AbstractFileUtils {
     /**
      * Saves the JAXB representation of the project to the specified file location.
      * 
-     * @param projectFile
-     *            the file to which the project contents should be saved
-     * @param jaxbProject
-     *            the JAXB representation of the project's contents
+     * @param project
+     *            the OTM project to be saved
      * @throws LibrarySaveException
      *             thrown if the project file cannot be saved
      */
     public static void saveProjectFile(Project project) throws LibrarySaveException {
+    	saveProjectFile( convertToJaxbProject(project), project.getProjectFile() );
+    }
+    
+    /**
+     * Saves the JAXB representation of the project to the specified file location.
+     * 
+     * @param jaxbProject
+     *            the JAXB representation of the project's contents
+     * @param projectFile
+     *            the file to which the project contents should be saved
+     * @throws LibrarySaveException
+     *             thrown if the project file cannot be saved
+     */
+    public static void saveProjectFile(ProjectType jaxbProject, File projectFile) throws LibrarySaveException {
         boolean success = false;
         File backupFile = null;
         try {
-            backupFile = createBackupFile(project.getProjectFile());
+            backupFile = createBackupFile(projectFile);
         } catch (IOException e) {
             // If we could not create the backup file, proceed without one
         }
@@ -161,8 +173,8 @@ public class ProjectFileUtils extends AbstractFileUtils {
         try {
             Marshaller marshaller = jaxbContext.createMarshaller();
 
-            if (!project.getProjectFile().exists()) {
-                project.getProjectFile().getParentFile().mkdirs();
+            if (!projectFile.exists()) {
+            	projectFile.getParentFile().mkdirs();
             }
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
             marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper",
@@ -182,8 +194,7 @@ public class ProjectFileUtils extends AbstractFileUtils {
 
                     });
             marshaller.setSchema(projectValidationSchema);
-            marshaller.marshal(objectFactory.createProject(convertToJaxbProject(project)),
-                    project.getProjectFile());
+            marshaller.marshal(objectFactory.createProject(jaxbProject), projectFile);
             success = true;
 
         } catch (JAXBException e) {
@@ -192,7 +203,7 @@ public class ProjectFileUtils extends AbstractFileUtils {
         } finally {
             if (!success && (backupFile != null)) {
                 try {
-                    restoreBackupFile(backupFile, project.getProjectFile().getName());
+                    restoreBackupFile(backupFile, projectFile.getName());
                 } catch (Throwable t) {
                 }
             }

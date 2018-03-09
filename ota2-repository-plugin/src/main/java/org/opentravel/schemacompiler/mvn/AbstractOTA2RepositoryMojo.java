@@ -174,13 +174,14 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 				if (library instanceof BuiltInLibrary) {
 					continue;
 				}
-				File libraryFile = URLUtils.toFile( library.getLibraryUrl() );
-				File snapshotFile = new File( snapshotLibraryFolder, libraryFile.getName() );
+//				File libraryFile = URLUtils.toFile( library.getLibraryUrl() );
+				String libraryFilename = ProjectManager.getPublicationFilename( library );
+				File snapshotFile = new File( snapshotLibraryFolder, libraryFilename );
 				URL snapshotUrl = URLUtils.toURL( snapshotFile );
 				
 				snapshotLibraryFiles.add( snapshotFile );
 				library.setLibraryUrl( snapshotUrl );
-				otm16Registry.put( snapshotUrl.toExternalForm(), is16Library( libraryFile ) );
+				otm16Registry.put( snapshotUrl.toExternalForm(), is16Library( library.getLibraryUrl() ) );
 			}
 			
 			// Update the imports and includes to the new snapshot folder location
@@ -490,18 +491,17 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 	/**
 	 * Returns true if the given library was originally saved in the OTM 1.6 file format.
 	 * 
-	 * @param libraryFile  the library file to be analyzed
+	 * @param libraryUrl  the URL location of the library to be analyzed
 	 * @return boolean
 	 */
-	private boolean is16Library(File libraryFile) {
+	private boolean is16Library(URL libraryUrl) {
     	boolean is16Library = false;
 
         try {
-            if ((libraryFile != null) && libraryFile.exists()
-                    && !libraryFile.getName().toLowerCase().endsWith(".xsd")) {
+            if ((libraryUrl != null) && !libraryUrl.getPath().toLowerCase().endsWith(".xsd")) {
                 LibraryModuleLoader<InputStream> loader = new MultiVersionLibraryModuleLoader();
                 LibraryModuleInfo<Object> moduleInfo = loader.loadLibrary(
-                        new LibraryStreamInputSource(libraryFile), new ValidationFindings());
+                        new LibraryStreamInputSource(libraryUrl), new ValidationFindings());
                 Object jaxbLibrary = moduleInfo.getJaxbArtifact();
                 
                 if (jaxbLibrary != null) {
