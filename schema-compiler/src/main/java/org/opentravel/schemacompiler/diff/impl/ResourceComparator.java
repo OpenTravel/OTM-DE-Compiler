@@ -416,6 +416,8 @@ public class ResourceComparator extends BaseComparator {
 		TLHttpMethod newHttpMethod = (newRequest == null) ? null : newRequest.getHttpMethod();
 		String oldPathTemplate = (oldRequest == null) ? null : oldRequest.getPathTemplate();
 		String newPathTemplate = (newRequest == null) ? null : newRequest.getPathTemplate();
+		String oldParamGroupName = (oldRequest == null) ? null : oldRequest.getParamGroupName();
+		String newParamGroupName = (newRequest == null) ? null : newRequest.getParamGroupName();
 		
 		if (oldAction.isCommonAction() != newAction.isCommonAction() ) {
 			changeItems.add( new ResourceChangeItem( resourceChangeSet,
@@ -427,10 +429,10 @@ public class ResourceComparator extends BaseComparator {
 					ResourceChangeType.REQUEST_METHOD_CHANGED,
 					oldHttpMethod + "", newHttpMethod + "" ) );
 		}
-		if (valueChanged( oldRequest.getParamGroupName(), newRequest.getParamGroupName() )) {
+		if (valueChanged( oldParamGroupName, newParamGroupName )) {
 			changeItems.add( new ResourceChangeItem( resourceChangeSet,
 					ResourceChangeType.REQUEST_PARAM_GROUP_CHANGED,
-					oldRequest.getParamGroupName(), newRequest.getParamGroupName() ) );
+					oldParamGroupName, newParamGroupName ) );
 		}
 		if (valueChanged( oldPathTemplate, newPathTemplate )) {
 			changeItems.add( new ResourceChangeItem( resourceChangeSet,

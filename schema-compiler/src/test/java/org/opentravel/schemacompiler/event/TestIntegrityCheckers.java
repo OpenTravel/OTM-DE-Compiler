@@ -32,7 +32,10 @@ import org.opentravel.schemacompiler.loader.LibraryModelLoader;
 import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLAttributeType;
+import org.opentravel.schemacompiler.model.TLChoiceObject;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLExample;
+import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLInclude;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
@@ -40,6 +43,7 @@ import org.opentravel.schemacompiler.model.TLNamespaceImport;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.util.SchemaCompilerTestUtils;
+import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 
@@ -252,6 +256,50 @@ public class TestIntegrityCheckers extends AbstractModelEventTests {
         } finally {
             testModel.removeListener(listener);
         }
+    }
+    
+    @Test
+    public void testCtxFacetNamespaceImportIntegryityChecker() throws Exception {
+    	File libraryCOFile = new File( SchemaCompilerTestUtils.getBaseLibraryLocation(), "/TestLibraryCO.otm" );
+    	File libraryCFFile = new File( SchemaCompilerTestUtils.getBaseLibraryLocation(), "/TestLibraryCF.otm" );
+    	TLChoiceObject choiceObj = new TLChoiceObject();
+    	TLContextualFacet facet = new TLContextualFacet();
+    	TLLibrary libraryCO = new TLLibrary();
+    	TLLibrary libraryCF = new TLLibrary();
+    	TLModel model = new TLModel();
+    	
+    	model.addListener( new ModelIntegrityChecker() );
+    	
+    	libraryCO.setName("TestLibraryCO");
+    	libraryCO.setNamespace( PACKAGE_1_NAMESPACE );
+    	libraryCO.setPrefix( "pkg1" );
+    	libraryCO.setLibraryUrl( URLUtils.toURL( libraryCOFile ) );
+    	model.addLibrary( libraryCO );
+    	
+    	libraryCF.setName("TestLibraryCF");
+    	libraryCF.setNamespace( PACKAGE_2_NAMESPACE );
+    	libraryCF.setPrefix( "pkg2" );
+    	libraryCF.setLibraryUrl( URLUtils.toURL( libraryCFFile ) );
+    	model.addLibrary( libraryCF );
+    	
+    	choiceObj.setName( "TestChoice" );
+    	libraryCO.addNamedMember( choiceObj );
+    	
+    	// Assign the facet's owner, then add it to the library
+    	facet.setFacetType( TLFacetType.CHOICE );
+    	facet.setOwningEntity( choiceObj );
+    	libraryCF.addNamedMember( facet );
+        assertImportsNamespace( libraryCF, PACKAGE_1_NAMESPACE, "TestLibraryCO.otm" );
+        
+        // Revert the facet to its original state (no owner, not in a library)
+        libraryCF.removeNamedMember( facet );
+        facet.setOwningEntity( null );
+        
+        // Reverse the order, add the facet to a library, then assign its owner
+    	facet.setFacetType( TLFacetType.CHOICE );
+    	libraryCF.addNamedMember( facet );
+    	facet.setOwningEntity( choiceObj );
+        assertImportsNamespace( libraryCF, PACKAGE_1_NAMESPACE, "TestLibraryCO.otm" );
     }
 
     @Test

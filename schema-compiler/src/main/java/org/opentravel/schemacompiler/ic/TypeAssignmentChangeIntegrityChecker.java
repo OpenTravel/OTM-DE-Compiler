@@ -40,6 +40,7 @@ public class TypeAssignmentChangeIntegrityChecker
     public void processModelEvent(ValueChangeEvent<TLModelElement, NamedEntity> event) {
         if ((event.getType() == ModelEventType.TYPE_ASSIGNMENT_MODIFIED)
                 || (event.getType() == ModelEventType.EXTENDS_ENTITY_MODIFIED)
+                || (event.getType() == ModelEventType.FACET_OWNER_MODIFIED)
                 || (event.getType() == ModelEventType.PARENT_RESOURCE_MODIFIED)
                 || (event.getType() == ModelEventType.BASE_PAYLOAD_MODIFIED)
                 || (event.getType() == ModelEventType.PARAM_GROUP_MODIFIED)
