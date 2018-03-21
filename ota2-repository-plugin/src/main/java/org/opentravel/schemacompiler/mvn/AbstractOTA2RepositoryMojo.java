@@ -174,14 +174,13 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 				if (library instanceof BuiltInLibrary) {
 					continue;
 				}
-//				File libraryFile = URLUtils.toFile( library.getLibraryUrl() );
 				String libraryFilename = ProjectManager.getPublicationFilename( library );
 				File snapshotFile = new File( snapshotLibraryFolder, libraryFilename );
 				URL snapshotUrl = URLUtils.toURL( snapshotFile );
 				
 				snapshotLibraryFiles.add( snapshotFile );
-				library.setLibraryUrl( snapshotUrl );
 				otm16Registry.put( snapshotUrl.toExternalForm(), is16Library( library.getLibraryUrl() ) );
+				library.setLibraryUrl( snapshotUrl );
 			}
 			
 			// Update the imports and includes to the new snapshot folder location

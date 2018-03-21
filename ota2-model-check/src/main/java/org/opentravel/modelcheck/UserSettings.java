@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.diffutil;
+package org.opentravel.modelcheck;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,23 +24,19 @@ import java.io.OutputStream;
 import java.util.Properties;
 
 import org.opentravel.application.common.AbstractUserSettings;
-import org.opentravel.schemacompiler.diff.ModelCompareOptions;
 
 /**
- * Persists settings for the <code>Diff-Utility</code> application between sessions.
+ * Persists settings for the <code>ModelCheck</code> application between sessions.
  */
 public class UserSettings extends AbstractUserSettings {
 	
-	private static final String USER_SETTINGS_FILE = "/.ota2/.du-settings.properties";
+	private static final String USER_SETTINGS_FILE = "/.ota2/.mc-settings.properties";
 	
 	private static File settingsFile = new File( System.getProperty( "user.home" ), USER_SETTINGS_FILE );
 	
-	private File oldProjectFolder;
-	private File newProjectFolder;
-	private File oldLibraryFolder;
-	private File newLibraryFolder;
+	private File projectFolder;
 	private File reportFolder;
-	private ModelCompareOptions compareOptions = new ModelCompareOptions();
+	private ModelCheckOptions modelCheckOptions = new ModelCheckOptions();
 	
 	/**
 	 * Returns the user settings from the prior session.  If no prior settings exist,
@@ -104,11 +100,8 @@ public class UserSettings extends AbstractUserSettings {
 		
 		settings.setWindowPosition( settings.getDefaultWindowPosition() );
 		settings.setWindowSize( settings.getDefaultWindowSize() );
-		settings.setOldProjectFolder( new File( userHomeDirectory ) );
-		settings.setNewProjectFolder( new File( userHomeDirectory ) );
-		settings.setOldLibraryFolder( new File( userHomeDirectory ) );
-		settings.setNewLibraryFolder( new File( userHomeDirectory ) );
-		settings.compareOptions = new ModelCompareOptions();
+		settings.setProjectFolder( new File( userHomeDirectory ) );
+		settings.modelCheckOptions = new ModelCheckOptions();
 		return settings;
 	}
 
@@ -118,18 +111,12 @@ public class UserSettings extends AbstractUserSettings {
 	@Override
 	protected void load(Properties settingsProps) {
 		String currentFolder = System.getProperty( "user.dir" );
-		String opFolder = settingsProps.getProperty( "oldProjectFolder", currentFolder );
-		String npFolder = settingsProps.getProperty( "newProjectFolder", currentFolder );
-		String olFolder = settingsProps.getProperty( "oldLibraryFolder", currentFolder );
-		String nlFolder = settingsProps.getProperty( "newLibraryFolder", currentFolder );
+		String projectFolder = settingsProps.getProperty( "projectFolder", currentFolder );
 		String reportFolder = settingsProps.getProperty( "reportFolder", currentFolder );
 		
-		setOldProjectFolder( new File( opFolder ) );
-		setNewProjectFolder( new File( npFolder ) );
-		setOldLibraryFolder( new File( olFolder ) );
-		setNewLibraryFolder( new File( nlFolder ) );
+		setProjectFolder( new File( projectFolder ) );
 		setReportFolder( new File( reportFolder ) );
-		compareOptions.loadOptions( settingsProps );
+		modelCheckOptions.loadOptions( settingsProps );
 		super.load( settingsProps );
 	}
 
@@ -139,91 +126,31 @@ public class UserSettings extends AbstractUserSettings {
 	@Override
 	protected void save(Properties settingsProps) {
 		String currentFolder = System.getProperty( "user.dir" );
-		String opFolder = (oldProjectFolder == null) ? currentFolder : oldProjectFolder.getAbsolutePath();
-		String npFolder = (newProjectFolder == null) ? currentFolder : newProjectFolder.getAbsolutePath();
-		String olFolder = (oldLibraryFolder == null) ? currentFolder : oldLibraryFolder.getAbsolutePath();
-		String nlFolder = (newLibraryFolder == null) ? currentFolder : newLibraryFolder.getAbsolutePath();
+		String pFolder = (projectFolder == null) ? currentFolder : projectFolder.getAbsolutePath();
 		String rptFolder = (reportFolder == null) ? currentFolder : reportFolder.getAbsolutePath();
 		
-		settingsProps.put( "oldProjectFolder", opFolder );
-		settingsProps.put( "newProjectFolder", npFolder );
-		settingsProps.put( "oldLibraryFolder", olFolder );
-		settingsProps.put( "newLibraryFolder", nlFolder );
+		settingsProps.put( "projectFolder", pFolder );
 		settingsProps.put( "reportFolder", rptFolder );
-		compareOptions.saveOptions( settingsProps );
+		modelCheckOptions.saveOptions( settingsProps );
 		super.save( settingsProps );
 	}
 
 	/**
-	 * Returns the location of the old project folder.
+	 * Returns the location of the project folder.
 	 *
 	 * @return File
 	 */
-	public File getOldProjectFolder() {
-		return oldProjectFolder;
+	public File getProjectFolder() {
+		return projectFolder;
 	}
 
 	/**
-	 * Assigns the location of the old project folder.
+	 * Assigns the location of the project folder.
 	 *
-	 * @param oldProjectFolder  the folder location to assign
+	 * @param projectFolder  the folder location to assign
 	 */
-	public void setOldProjectFolder(File oldProjectFolder) {
-		this.oldProjectFolder = oldProjectFolder;
-	}
-
-	/**
-	 * Returns the location of the new project folder.
-	 *
-	 * @return File
-	 */
-	public File getNewProjectFolder() {
-		return newProjectFolder;
-	}
-
-	/**
-	 * Assigns the location of the new project folder.
-	 *
-	 * @param newProjectFolder  the folder location to assign
-	 */
-	public void setNewProjectFolder(File newProjectFolder) {
-		this.newProjectFolder = newProjectFolder;
-	}
-
-	/**
-	 * Returns the location of the old library folder.
-	 *
-	 * @return File
-	 */
-	public File getOldLibraryFolder() {
-		return oldLibraryFolder;
-	}
-
-	/**
-	 * Assigns the location of the old library folder.
-	 *
-	 * @param oldLibraryFolder  the folder location to assign
-	 */
-	public void setOldLibraryFolder(File oldLibraryFolder) {
-		this.oldLibraryFolder = oldLibraryFolder;
-	}
-
-	/**
-	 * Returns the location of the new library folder.
-	 *
-	 * @return File
-	 */
-	public File getNewLibraryFolder() {
-		return newLibraryFolder;
-	}
-
-	/**
-	 * Assigns the location of the new library folder.
-	 *
-	 * @param newLibraryFolder  the folder location to assign
-	 */
-	public void setNewLibraryFolder(File newLibraryFolder) {
-		this.newLibraryFolder = newLibraryFolder;
+	public void setProjectFolder(File projectFolder) {
+		this.projectFolder = projectFolder;
 	}
 
 	/**
@@ -245,13 +172,13 @@ public class UserSettings extends AbstractUserSettings {
 	}
 
 	/**
-	 * Returns the options that should be applied when comparing two OTM models,
-	 * libraries, or entities.
-	 * 
-	 * @return ModelCompareOptions
+	 * Returns the rules that should be enforced when performing model
+	 * check analysis.
+	 *
+	 * @return ModelCheckOptions
 	 */
-	public ModelCompareOptions getCompareOptions() {
-		return compareOptions;
+	public ModelCheckOptions getModelCheckOptions() {
+		return modelCheckOptions;
 	}
-	
+
 }
