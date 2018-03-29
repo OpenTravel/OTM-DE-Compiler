@@ -83,6 +83,11 @@ public class QualifiedAction {
 	
 	/**
 	 * Returns the unique action identifier for this qualified action.
+	 * 
+	 * <p>It should be noted that this action ID (for the <code>QualifiedAction</code>)
+	 * may be different from that of the <code>TLAction</code> ID.  This is because the
+	 * qualified action's identifier is a function of both the <code>TLAction</code>
+	 * and the parent references that comprise the qualified action.
 	 *
 	 * @return String
 	 */
@@ -92,6 +97,11 @@ public class QualifiedAction {
 
 	/**
 	 * Assigns the unique action identifier for this qualified action.
+	 *
+	 * <p>It should be noted that this action ID (for the <code>QualifiedAction</code>)
+	 * may be different from that of the <code>TLAction</code> ID.  This is because the
+	 * qualified action's identifier is a function of both the <code>TLAction</code>
+	 * and the parent references that comprise the qualified action.
 	 *
 	 * @param actionId  the unique action identifier value to assign
 	 */

@@ -16,12 +16,16 @@
 
 package org.opentravel.modelcheck;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.opentravel.application.common.AbstractMainWindowController;
 import org.opentravel.application.common.StatusType;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -46,6 +50,8 @@ public class ModelCheckController extends AbstractMainWindowController {
 	@FXML private WebView reportViewer;
 	@FXML private ImageView statusBarIcon;
 	@FXML private Label statusBarLabel;
+	
+	private UserSettings userSettings;
 	
 	/**
 	 * Called when the user clicks the button to select a release or project file from
@@ -116,7 +122,11 @@ public class ModelCheckController extends AbstractMainWindowController {
 			statusBarIcon.setImage( (statusType == null) ? null : statusType.getIcon() );
 			
 			if (disableControls) {
-				// TODO: Disable visual controls
+				List<Node> controls = Arrays.asList( filenameText, localFileButton,
+						managedReleaseButton, optionsButton, navBackButton, navForwardButton,
+						reportViewer );
+				
+				controls.forEach( c -> c.setDisable( true ) );
 				
 			} else {
 				updateControlStates();
@@ -129,7 +139,18 @@ public class ModelCheckController extends AbstractMainWindowController {
 	 */
 	@Override
 	protected void updateControlStates() {
-		
+		Platform.runLater( () -> {
+			String reportLocation = reportViewer.getEngine().getLocation();
+			int historyIdx = reportViewer.getEngine().getHistory().getCurrentIndex();
+			int historySize = reportViewer.getEngine().getHistory().getEntries().size();
+			boolean reportDisplayed = (reportLocation != null) && reportLocation.startsWith( "file:" );
+			boolean canBrowseBack = historyIdx > 0;
+			boolean canBrowseForward = historyIdx < (historySize - 1);
+			
+			saveReportButton.disableProperty().set( !reportDisplayed );
+			navBackButton.disableProperty().set( !canBrowseBack );
+			navForwardButton.disableProperty().set( !canBrowseForward );
+		} );
 	}
 
 	/**
@@ -137,7 +158,9 @@ public class ModelCheckController extends AbstractMainWindowController {
 	 */
 	@Override
 	protected void initialize(Stage primaryStage) {
-		super.initialize(primaryStage);
+		super.initialize( primaryStage );
+		this.userSettings = UserSettings.load();
+		updateControlStates();
 	}
 	
 }
