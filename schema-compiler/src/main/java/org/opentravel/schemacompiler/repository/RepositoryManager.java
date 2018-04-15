@@ -732,31 +732,30 @@ public class RepositoryManager implements Repository {
             if (localRepositoryId.equals(itemMetadata.getOwningRepository())
                     && RepositoryUtils.isInclusiveStatus(itemStatus, includeStatus)) {
                 RepositoryItem item = RepositoryUtils.createRepositoryItem(this, itemMetadata);
-                List<RepositoryItemVersionedWrapper> libraryVersions = libraryVersionMap.get(item
-                        .getLibraryName());
-
+                String libraryKey = item.getLibraryName() +
+                		(RepositoryItemType.LIBRARY.isItemType( item.getFilename() ) ? ":OTM" : ":OTR");
+                List<RepositoryItemVersionedWrapper> libraryVersions = libraryVersionMap.get(libraryKey);
+                
                 if (libraryVersions == null) {
                     libraryVersions = new ArrayList<RepositoryItemVersionedWrapper>();
-                    libraryVersionMap.put(item.getLibraryName(), libraryVersions);
+                    libraryVersionMap.put(libraryKey, libraryVersions);
                 }
                 libraryVersions.add(new RepositoryItemVersionedWrapper(item));
             }
         }
         
         // Sort the results by the item's name first, then by descending version number
-        List<String> libraryNames = new ArrayList<String>();
+        List<String> libraryKeys = new ArrayList<String>();
 
-        libraryNames.addAll(libraryVersionMap.keySet());
-        Collections.sort(libraryNames);
+        libraryKeys.addAll(libraryVersionMap.keySet());
+        Collections.sort(libraryKeys);
 
-        for (String libraryName : libraryNames) {
-            List<RepositoryItemVersionedWrapper> libraryVersions = libraryVersionMap
-                    .get(libraryName);
+        for (String libraryKey : libraryKeys) {
+            List<RepositoryItemVersionedWrapper> libraryVersions = libraryVersionMap.get(libraryKey);
             String versionSchemeId = libraryVersions.get(0).getVersionScheme();
 
             try {
-                VersionScheme versionScheme = VersionSchemeFactory.getInstance().getVersionScheme(
-                        versionSchemeId);
+                VersionScheme versionScheme = VersionSchemeFactory.getInstance().getVersionScheme(versionSchemeId);
                 Collections.sort(libraryVersions, versionScheme.getComparator(false));
 
             } catch (VersionSchemeException e) {
@@ -765,8 +764,7 @@ public class RepositoryManager implements Repository {
             }
 
             if (latestVersionsOnly) {
-                RepositoryUtils.checkItemState((RepositoryItemImpl) libraryVersions.get(0)
-                        .getItem(), this);
+                RepositoryUtils.checkItemState((RepositoryItemImpl) libraryVersions.get(0).getItem(), this);
                 itemList.add(libraryVersions.get(0).getItem());
 
             } else {

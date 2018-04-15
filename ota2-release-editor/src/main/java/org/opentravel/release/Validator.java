@@ -106,26 +106,8 @@ public class Validator {
 		if (requiredValue && (textValue.length() == 0)) {
 			errorMessage = MessageBuilder.formatMessage( MISSING_REQUIRED_VALUE, fieldName );
 			
-		} else if (textValue.length() > 0) {
-			boolean isValid = versionScheme.isValidVersionIdentifier( textValue );
-			
-			if (isValid) {
-				String majorVersion = versionScheme.getMajorVersion( textValue );
-				String minorVersion = versionScheme.getMinorVersion( textValue );
-				String patchVersion = versionScheme.getPatchLevel( textValue );
-				
-				try {
-					isValid = (majorVersion != null) && (Integer.parseInt( majorVersion ) > 0)
-							&& (minorVersion != null) && (Integer.parseInt( minorVersion ) == 0)
-							&& (patchVersion != null) && (Integer.parseInt( patchVersion ) == 0);
-					
-				} catch (NumberFormatException e) {
-					isValid = false;
-				}
-			}
-			if (!isValid) {
-				errorMessage = MessageBuilder.formatMessage( INVALID_VERSION_ID );
-			}
+		} else if ((textValue.length() > 0) && !versionScheme.isValidVersionIdentifier( textValue )) {
+			errorMessage = MessageBuilder.formatMessage( INVALID_VERSION_ID );
 		}
 		setErrorMessage( text, errorMessage );
 		return (errorMessage == null);

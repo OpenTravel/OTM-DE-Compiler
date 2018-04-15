@@ -32,18 +32,18 @@
 			<h2 style="padding-bottom: 0;">Release: ${item.libraryName} <small>(${item.version})</small></h2>
 			<h3 style="padding-top: 0;">Namespace: <a href="${namespaceUrl}">${item.namespace}</a></h3>
 		</td>
-		<td style="white-space:nowrap;width:10%;text-align:right;">
-			Maven Plugin Dependency:
-			<img src="${pageContext.request.contextPath}/images/clipboard.png"
-					onclick="copyDependencyToClipboard();" style="cursor:pointer;" />
+		<td style="white-space:nowrap;width:10%;text-align:left;">
 			<c:if test="${sessionScope.isAdminAuthorized}">
 				<c:url var="deleteItemUrl" value="/console/adminDeleteItem.html">
 					<c:param name="baseNamespace" value="${item.baseNamespace}" />
 					<c:param name="filename" value="${item.filename}" />
 					<c:param name="version" value="${item.version}" />
 				</c:url>
-				<br/>[ <a href="${deleteItemUrl}">Delete this Release</a> ]
+				[ <a href="${deleteItemUrl}">Delete this Release</a> ]<br/>
 			</c:if>
+			Maven Plugin Dependency:
+			<img src="${pageContext.request.contextPath}/images/clipboard.png"
+					onclick="copyDependencyToClipboard();" style="cursor:pointer;" />
 		</td>
 	</tr>
 	<tr>

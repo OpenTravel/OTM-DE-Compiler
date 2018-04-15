@@ -78,7 +78,7 @@
                                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                  </padding>
                               </Label>
-                              <TextField fx:id="releaseFilename" editable="false" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" />
+                              <TextField fx:id="releaseFilename" editable="false" style="-fx-background-color: #EEE; -fx-border-color: #888; -fx-border-radius: 3;" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" />
                               <Button fx:id="releaseFileButton" mnemonicParsing="false" onAction="#openReleaseFile" text="..." GridPane.columnIndex="2">
                                  <GridPane.margin>
                                     <Insets left="5.0" />
