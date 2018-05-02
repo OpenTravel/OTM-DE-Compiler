@@ -21,8 +21,10 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -169,12 +171,14 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 			
 			List<File> snapshotLibraryFiles = new ArrayList<>();
 			Map<String,Boolean> otm16Registry = new HashMap<>();
+			Set<String> existingFilenames = new HashSet<>();
 			
 			for (AbstractLibrary library : model.getAllLibraries()) {
 				if (library instanceof BuiltInLibrary) {
 					continue;
 				}
-				String libraryFilename = ProjectManager.getPublicationFilename( library );
+				String defaultFilename = ProjectManager.getPublicationFilename( library );
+				String libraryFilename = getLibrarySnapshotFilename( defaultFilename, existingFilenames );
 				File snapshotFile = new File( snapshotLibraryFolder, libraryFilename );
 				URL snapshotUrl = URLUtils.toURL( snapshotFile );
 				
@@ -484,6 +488,40 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 			snapshotFilename = sourceFilename.substring( 0, extIdx );
 		}
 		snapshotFilename += "-snapshot";
+		return snapshotFilename;
+	}
+	
+	/**
+	 * Returns a unique snapshot filename for the library with the given default
+	 * filename.
+	 * 
+	 * @param defaultFilename  the library's default filename
+	 * @param existingFilenames  the set of existing filenames already created
+	 * @return String
+	 * @throws LibrarySaveException  thrown if the library snapshot filename cannot be calculated
+	 */
+	private String getLibrarySnapshotFilename(String defaultFilename, Set<String> existingFilenames)
+			throws LibrarySaveException {
+		String snapshotFilename = null;
+		
+		if (!existingFilenames.contains( defaultFilename )) {
+			existingFilenames.add( defaultFilename );
+			snapshotFilename = defaultFilename;
+			
+		} else {
+			for (char suffix = 'a'; suffix <= 'z'; suffix++) {
+				snapshotFilename = defaultFilename.replace( ".otm", "_" + suffix + ".otm" );
+				
+				if (!existingFilenames.contains( snapshotFilename )) {
+					existingFilenames.add( snapshotFilename );
+					break;
+				}
+			}
+		}
+		
+		if (snapshotFilename == null) {
+			throw new LibrarySaveException("Too many libraries of the same name included in the snapshot.");
+		}
 		return snapshotFilename;
 	}
 	
