@@ -169,12 +169,13 @@ public class DefaultLibraryNamespaceResolver implements LibraryNamespaceResolver
     }
 
     /**
-	 * @see org.opentravel.schemacompiler.loader.LibraryNamespaceResolver#setRepositoryLocation(java.lang.String, java.lang.String)
+	 * @see org.opentravel.schemacompiler.loader.LibraryNamespaceResolver#setRepositoryLocation(java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public void setRepositoryLocation(String repositoryUri, String libraryUrl) {
+	public void setRepositoryLocation(String repositoryUri, String namespace, String libraryUrl) {
         if (repositoryUri.startsWith("otm://")) {
-        	repositoryUrlCache.put( repositoryUri, libraryUrl );
+        	String cacheKey = namespace + "~" + repositoryUri;
+        	repositoryUrlCache.put( cacheKey, libraryUrl );
         }
 	}
 
@@ -233,7 +234,8 @@ public class DefaultLibraryNamespaceResolver implements LibraryNamespaceResolver
 
         if (filePath.startsWith("otm://")) {
             try {
-            	String cachedUrl = repositoryUrlCache.get(filePath);
+            	String cacheKey = namespace + "~" + filePath;
+            	String cachedUrl = repositoryUrlCache.get(cacheKey);
             	
             	if (cachedUrl != null) {
             		referencedUrl = new URL( cachedUrl );
@@ -246,7 +248,7 @@ public class DefaultLibraryNamespaceResolver implements LibraryNamespaceResolver
 
                     if (repositoryItem != null) {
                         referencedUrl = repositoryManager.getContentLocation(repositoryItem);
-                        repositoryUrlCache.put( filePath, referencedUrl.toExternalForm() );
+                        repositoryUrlCache.put( cacheKey, referencedUrl.toExternalForm() );
                     }
             	}
             } catch (MalformedURLException e) {

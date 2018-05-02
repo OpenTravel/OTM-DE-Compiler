@@ -99,6 +99,6 @@ public interface LibraryNamespaceResolver {
      * @param repositoryUri  the URI of the repository item
      * @param libraryUrl  the resolved URL of the library
      */
-    public void setRepositoryLocation(String repositoryUri, String libraryUrl);
+    public void setRepositoryLocation(String repositoryUri, String namespace, String libraryUrl);
 
 }

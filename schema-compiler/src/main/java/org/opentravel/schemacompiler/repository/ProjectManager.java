@@ -1204,7 +1204,7 @@ public final class ProjectManager {
             	String repositoryUri = "otm://" + managedItem.getRepository().getId() + "/" + managedItem.getFilename();
             	String libraryUrl = repositoryManager.getContentLocation( managedItem ).toExternalForm();
             	
-            	nsResolver.setRepositoryLocation( repositoryUri, libraryUrl );
+            	nsResolver.setRepositoryLocation( repositoryUri, managedItem.getNamespace(), libraryUrl );
             }
         }
         
