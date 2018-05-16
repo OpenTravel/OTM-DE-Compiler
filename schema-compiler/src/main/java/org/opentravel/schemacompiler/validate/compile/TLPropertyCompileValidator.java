@@ -18,6 +18,7 @@ package org.opentravel.schemacompiler.validate.compile;
 import java.util.List;
 
 import javax.xml.XMLConstants;
+import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
@@ -209,8 +210,10 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
                             propertyType);
 
             if (PropertyCodegenUtils.hasGlobalElement(resolvedPropertyType)) {
-                String referencedLocalName = PropertyCodegenUtils.getDefaultXmlElementName(
-                        resolvedPropertyType, target.isReference()).getLocalPart();
+            	QName referencedQName = PropertyCodegenUtils.getDefaultXmlElementName(
+                        resolvedPropertyType, target.isReference());
+                String referencedLocalName = (referencedQName == null) ?
+                		null : referencedQName.getLocalPart();
                 String propertyLocalName = target.getName();
 
                 if (!target.isReference()) {

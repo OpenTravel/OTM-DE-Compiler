@@ -120,11 +120,13 @@ public class DuplicateFieldChecker {
 			}
 			
 			// Update the occurrance count for this field name
-			if (fieldCounts.containsKey( fieldName )) {
-				fieldCounts.put( fieldName, fieldCounts.get( fieldName ) + 1 );
-				
-			} else {
-				fieldCounts.put( fieldName, 1 );
+			if (fieldName != null) {
+				if (fieldCounts.containsKey( fieldName )) {
+					fieldCounts.put( fieldName, fieldCounts.get( fieldName ) + 1 );
+					
+				} else {
+					fieldCounts.put( fieldName, 1 );
+				}
 			}
 		}
 		

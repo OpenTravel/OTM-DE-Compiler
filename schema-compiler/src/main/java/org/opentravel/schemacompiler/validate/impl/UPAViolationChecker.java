@@ -260,8 +260,12 @@ public class UPAViolationChecker {
 				}
 				
 			} else {
-				elementNames.add( new QName( element.getOwningLibrary().getNamespace(),
-						fieldNameResolver.getIdentity( element ) ) );
+				String fieldName = fieldNameResolver.getIdentity( element );
+				
+				if (fieldName != null) {
+					elementNames.add( new QName(
+							element.getOwningLibrary().getNamespace(), fieldName ) );
+				}
 			}
 		}
 		return elementNames;

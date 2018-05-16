@@ -15,6 +15,8 @@
  */
 package org.opentravel.schemacompiler.validate.impl;
 
+import javax.xml.namespace.QName;
+
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.model.TLAttribute;
@@ -57,7 +59,8 @@ public class FacetMemberIdentityResolver implements IdentityResolver<TLModelElem
                     element.getOwner(), element.getType());
 
             if (PropertyCodegenUtils.hasGlobalElement(elementType)) {
-                identity = XsdCodegenUtils.getGlobalElementName(elementType).getLocalPart();
+            	QName identityName = XsdCodegenUtils.getGlobalElementName(elementType);
+                identity = (identityName == null) ? null : identityName.getLocalPart();
 
             } else if ((element.getName() == null) || (element.getName().length() == 0)) {
                 identity = (elementType == null) ? "" : elementType.getLocalName();
@@ -65,6 +68,7 @@ public class FacetMemberIdentityResolver implements IdentityResolver<TLModelElem
             } else {
                 identity = element.getName();
             }
+            
             if ((identity != null) && element.isReference() && !identity.endsWith("Ref")) {
             	identity += "Ref";
             }
