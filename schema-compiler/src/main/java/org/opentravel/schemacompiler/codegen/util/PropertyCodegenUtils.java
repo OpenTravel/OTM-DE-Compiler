@@ -18,8 +18,10 @@ package org.opentravel.schemacompiler.codegen.util;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.xml.XMLConstants;
@@ -55,6 +57,9 @@ import org.opentravel.schemacompiler.model.TLRole;
 import org.opentravel.schemacompiler.model.TLRoleEnumeration;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
+import org.opentravel.schemacompiler.version.MinorVersionHelper;
+import org.opentravel.schemacompiler.version.VersionSchemeException;
+import org.opentravel.schemacompiler.version.Versioned;
 
 /**
  * Shared static methods used during the code generation for <code>TLProperty</code> elements.
@@ -390,6 +395,7 @@ public class PropertyCodegenUtils {
      */
     public static List<TLAttribute> getInheritedFacetAttributes(TLFacet facet) {
         Collection<TLFacetOwner> visitedOwners = new HashSet<TLFacetOwner>();
+        Map<String,Set<NamedEntity>> inheritanceRoots = new HashMap<>();
         List<TLAttribute> attributeList = new ArrayList<TLAttribute>();
         TLFacetOwner facetOwner = facet.getOwningEntity();
         TLFacet aFacet = facet;
@@ -410,7 +416,23 @@ public class PropertyCodegenUtils {
                 Collections.reverse(localAttributes);
 
                 for (TLAttribute attribute : localAttributes) {
-                    attributeList.add(0, attribute);
+                    NamedEntity inheritanceRoot = getInheritanceRoot(attribute.getType());
+                    Set<NamedEntity> attrInheritanceRoots = inheritanceRoots.get(attribute.getName());
+                    
+                    if (attrInheritanceRoots == null) {
+                    	attrInheritanceRoots = new HashSet<>();
+                    	inheritanceRoots.put( attribute.getName(), attrInheritanceRoots );
+                    }
+                    
+                    // Properties whose types are members of an inheritance hierarchy of same-name
+                    // inherited properties should be skipped if they were eclipsed by lower-level
+                    // properties of the owner's hierarchy
+                    if ((inheritanceRoot == null) || !attrInheritanceRoots.contains(inheritanceRoot)) {
+                        if (inheritanceRoot != null) {
+                        	attrInheritanceRoots.add(inheritanceRoot);
+                        }
+                        attributeList.add(0, attribute);
+                    }
                 }
             }
             visitedOwners.add(facetOwner);
@@ -511,8 +533,9 @@ public class PropertyCodegenUtils {
      * @return List<TLProperty>
      */
     public static List<TLProperty> getInheritedFacetProperties(TLFacet facet) {
-        Collection<TLFacetOwner> visitedOwners = new HashSet<TLFacetOwner>();
-        Set<NamedEntity> inheritanceRoots = new HashSet<NamedEntity>();
+        Collection<TLFacetOwner> visitedOwners = new HashSet<>();
+        Set<NamedEntity> complexInheritanceRoots = new HashSet<>();
+        Map<String,Set<NamedEntity>> simpleInheritanceRoots = new HashMap<>();
         List<TLProperty> propertyList = new ArrayList<TLProperty>();
         TLFacetOwner facetOwner = facet.getOwningEntity();
         TLFacet aFacet = facet;
@@ -537,16 +560,38 @@ public class PropertyCodegenUtils {
                 		
                 	} else {
                         TLPropertyType propertyType = resolvePropertyType(property.getOwner(), property.getType());
-                        NamedEntity inheritanceRoot = getInheritanceRoot(propertyType);
+                        
+                        if (PropertyCodegenUtils.hasGlobalElement( propertyType )) {
+                            NamedEntity inheritanceRoot = getInheritanceRoot(propertyType);
 
-                        // Properties whose types are members of an inheritance hierarchy should be
-                        // skipped if they were eclipsed by lower-level properties of the owner's
-                        // hierarchy
-                        if ((inheritanceRoot == null) || !inheritanceRoots.contains(inheritanceRoot)) {
-                            if (inheritanceRoot != null) {
-                                inheritanceRoots.add(inheritanceRoot);
+                            // Properties whose types are members of an inheritance hierarchy should be
+                            // skipped if they were eclipsed by lower-level properties of the owner's
+                            // hierarchy
+                            if ((inheritanceRoot == null) || !complexInheritanceRoots.contains(inheritanceRoot)) {
+                                if (inheritanceRoot != null) {
+                                	complexInheritanceRoots.add(inheritanceRoot);
+                                }
+                                propertyList.add(0, property);
                             }
-                            propertyList.add(0, property);
+                            
+                        } else {
+                            NamedEntity inheritanceRoot = getInheritanceRoot(propertyType);
+                            Set<NamedEntity> propertyInheritanceRoots = simpleInheritanceRoots.get( property.getName() );
+                            
+                            if (propertyInheritanceRoots == null) {
+                            	propertyInheritanceRoots = new HashSet<>();
+                            	simpleInheritanceRoots.put( property.getName(), propertyInheritanceRoots );
+                            }
+                            
+                            // Properties whose types are members of an inheritance hierarchy of same-name
+                            // inherited properties should be skipped if they were eclipsed by lower-level
+                            // properties of the owner's hierarchy
+                            if ((inheritanceRoot == null) || !propertyInheritanceRoots.contains(inheritanceRoot)) {
+                                if (inheritanceRoot != null) {
+                                	propertyInheritanceRoots.add(inheritanceRoot);
+                                }
+                                propertyList.add(0, property);
+                            }
                         }
                 	}
                 }
@@ -664,6 +709,22 @@ public class PropertyCodegenUtils {
                             : ((TLAliasOwner) facetOwner).getAlias(ownerAlias.getName());
                     parentEntity = FacetCodegenUtils.getFacetOwnerExtension(parentEntity);
                 }
+                
+            } else if (propertyType instanceof Versioned) {
+				try {
+	            	MinorVersionHelper versionHelper = new MinorVersionHelper();
+	            	Versioned currentVersion = (Versioned) propertyType;
+	            	Versioned priorVersion = versionHelper.getVersionExtension( currentVersion );
+	            	
+	            	while (priorVersion != null) {
+	            		currentVersion = priorVersion;
+	            		priorVersion = versionHelper.getVersionExtension( currentVersion );
+	            	}
+            		inheritanceRoot = currentVersion;
+	            	
+				} catch (VersionSchemeException e) {
+					// Ignore and return null for the inheritance root
+				}
             }
         }
         return inheritanceRoot;
