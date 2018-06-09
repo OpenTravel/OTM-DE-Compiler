@@ -34,6 +34,7 @@ public class TLResourceCompileValidator extends TLResourceBaseValidator {
     public static final String ERROR_INVALID_BASE_PATH             = "INVALID_BASE_PATH";
     public static final String ERROR_PARAM_GROUPS_NOT_ALLOWED      = "PARAM_GROUPS_NOT_ALLOWED";
     public static final String ERROR_MULTIPLE_COMMON_ACTIONS       = "MULTIPLE_COMMON_ACTIONS";
+    public static final String ERROR_PARENT_REFERENCES_REQUIRED    = "PARENT_REFERENCES_REQUIRED";
     
 	private static ResourceUrlValidator urlValidator = new ResourceUrlValidator();
 	
@@ -68,6 +69,9 @@ public class TLResourceCompileValidator extends TLResourceBaseValidator {
         	if ((basePath != null) &&
         			!(urlValidator.isValid( basePath ) || urlValidator.isValidPath( basePath ))) {
             	builder.addFinding( FindingType.ERROR, "basePath", ERROR_INVALID_BASE_PATH, basePath );
+        	}
+        	if (!target.isFirstClass() && target.getParentRefs().isEmpty()) {
+            	builder.addFinding( FindingType.ERROR, "firstClass", ERROR_PARENT_REFERENCES_REQUIRED );
         	}
         	builder.setEntityReferenceProperty("businessObjectRef", businessObjectRef, target.getBusinessObjectRefName())
         			.setFindingType(FindingType.ERROR).assertNotNull();
