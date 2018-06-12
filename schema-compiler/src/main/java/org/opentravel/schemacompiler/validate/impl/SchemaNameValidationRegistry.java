@@ -456,8 +456,16 @@ public class SchemaNameValidationRegistry {
             		(facet.getReferenceType() != TLReferenceType.NONE);
 
             if (hasContent) {
-                addElementNameToRegistry(XsdCodegenUtils.getGlobalElementName(facet), facet);
-                addTypeNameToRegistry(facet);
+            	TLResource owner = facet.getOwningResource();
+            	
+            	// Do not add action facets to the name registry if the business object
+            	// reference of the owning resource is null.  This condition will cause
+            	// misleading validation errors to be reported for the name conflict when
+            	// the real error is the missing business object reference.
+            	if ((owner != null) && (owner.getBusinessObjectRef() != null)) {
+                    addElementNameToRegistry(XsdCodegenUtils.getGlobalElementName(facet), facet);
+                    addTypeNameToRegistry(facet);
+            	}
             }
             return true;
 		}
