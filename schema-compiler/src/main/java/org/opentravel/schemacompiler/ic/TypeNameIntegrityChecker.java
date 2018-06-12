@@ -23,6 +23,7 @@ import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLActionRequest;
 import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAttribute;
+import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLModelElement;
 import org.opentravel.schemacompiler.model.TLParamGroup;
@@ -54,6 +55,7 @@ public class TypeNameIntegrityChecker extends
         
         if ((event.getType() == ModelEventType.TYPE_ASSIGNMENT_MODIFIED)
                 || (event.getType() == ModelEventType.EXTENDS_ENTITY_MODIFIED)
+                || (event.getType() == ModelEventType.FACET_OWNER_MODIFIED)
                 || (event.getType() == ModelEventType.PARENT_RESOURCE_MODIFIED)
                 || (event.getType() == ModelEventType.BASE_PAYLOAD_MODIFIED)
                 || (event.getType() == ModelEventType.FACET_REF_MODIFIED)
@@ -77,6 +79,9 @@ public class TypeNameIntegrityChecker extends
 
             } else if (sourceObject instanceof TLExtension) {
                 ((TLExtension) sourceObject).setExtendsEntityName(entityName);
+                
+            } else if (sourceObject instanceof TLContextualFacet) {
+                ((TLContextualFacet) sourceObject).setOwningEntityName(entityName);
                 
             } else if (sourceObject instanceof TLResourceParentRef) {
                 ((TLResourceParentRef) sourceObject).setParentResourceName(entityName);

@@ -110,12 +110,16 @@ public class ProjectFileUtils extends AbstractFileUtils {
             jaxbProject = documentElement.getValue();
 
         } catch (JAXBException e) {
-            String filename = (projectFile == null) ? "[UNKNOWN FILE]" : projectFile.getName();
+            if (findings != null) {
+                String filename = (projectFile == null) ? "[UNKNOWN FILE]" : projectFile.getName();
 
-            findings.addFinding(FindingType.ERROR, new FileValidationSource(projectFile),
-                    LoaderValidationMessageKeys.ERROR_UNREADABLE_PROJECT_CONTENT, filename,
-                    ExceptionUtils.getExceptionClass(e).getSimpleName(),
-                    ExceptionUtils.getExceptionMessage(e));
+                findings.addFinding(FindingType.ERROR, new FileValidationSource(projectFile),
+                        LoaderValidationMessageKeys.ERROR_UNREADABLE_PROJECT_CONTENT, filename,
+                        ExceptionUtils.getExceptionClass(e).getSimpleName(),
+                        ExceptionUtils.getExceptionMessage(e));
+            } else {
+                throw new LibraryLoaderException(e.getMessage(), e);
+            }
 
         } catch (IOException e) {
             if (findings != null) {
