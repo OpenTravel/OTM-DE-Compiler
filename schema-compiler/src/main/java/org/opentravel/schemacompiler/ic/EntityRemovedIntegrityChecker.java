@@ -304,9 +304,19 @@ public abstract class EntityRemovedIntegrityChecker<S, I> extends
                 TLModel model = parameter.getOwningModel();
                 boolean listenersEnabled = disableListeners(model);
                 
-                // If a field is deleted, we will delete any corresponing parameters
-                // rather than setting their reference to null
-                parameter.getOwner().removeParameter(parameter);
+                if (parameter.getFieldRef() == null) {
+                    // If a field is deleted from its owner, we will delete any corresponing
+                    // parameters rather than setting their reference to null
+                    parameter.getOwner().removeParameter(parameter);
+                	
+                } else if (referencedEntity.getOwningModel() == null) {
+                	// If the field is still assigned to its owner but the owning
+                	// model is null, we will set the field reference to null since the
+                	// field's library was likely removed from the model.  We should leave
+                	// the parameter in place since it can re-resolve the field reference
+                	// if the library is reloaded.
+                	parameter.setFieldRef( null );
+                }
                 restoreListeners(model, listenersEnabled);
             }
             return true;

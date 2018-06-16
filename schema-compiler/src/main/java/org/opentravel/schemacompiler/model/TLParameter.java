@@ -118,7 +118,9 @@ public class TLParameter extends TLModelElement implements TLDocumentationOwner,
         ModelEvent<?> event = new ModelEventBuilder(ModelEventType.FIELD_REF_MODIFIED, this)
         		.setOldValue(this.fieldRef).setNewValue(fieldRef).buildEvent();
         
-    	this.fieldRefName = (fieldRef == null) ? null : fieldRef.getName();
+        if (fieldRef != null) {
+        	this.fieldRefName = fieldRef.getName();
+        }
 		this.fieldRef = fieldRef;
         publishEvent(event);
 	}
