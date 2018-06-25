@@ -25,12 +25,15 @@ import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
+import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLPropertyOwner;
 import org.opentravel.schemacompiler.model.TLPropertyType;
+import org.opentravel.schemacompiler.model.TLReferenceType;
 
 /**
  * Tree builder component that constructs trees of <code>EntityMemberNode</code>s from
@@ -96,6 +99,21 @@ public class EntityMemberTreeBuilder {
 				
 			} else if (facetSelection.getEntityType() instanceof TLFacet) {
 				facetList.add( (TLFacet) facetSelection.getEntityType() );
+			}
+			
+			// If required, build a business object element for an action facet
+			if (entity instanceof TLActionFacet) {
+				TLActionFacet actionFacet = (TLActionFacet) entity;
+				
+				if ((actionFacet.getReferenceType() != TLReferenceType.NONE)
+						&& !facetSelection.getFacetNames().isEmpty()) {
+					TLBusinessObject boRef = actionFacet.getOwningResource().getBusinessObjectRef();
+					EntityMemberNode boNode = buildTree( boRef, priorEntityNames );
+					
+					if (boNode != null) {
+						rootNode.addChild( facetSelection.getFacetNames().get( 0 ), boNode );
+					}
+				}
 			}
 			
 			// Build a child node for each element of each facet
