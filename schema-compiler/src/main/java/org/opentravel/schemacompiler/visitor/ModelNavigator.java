@@ -943,7 +943,9 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
         	navigateFacetMembers(facet);
         	
         	for (TLContextualFacet childFacet : childFacets) {
-        		navigateContextualFacet(childFacet);
+        		if (childFacet.isLocalFacet()) {
+            		navigateContextualFacet(childFacet);
+        		}
         	}
         }
         addVisitedNode(facet);
