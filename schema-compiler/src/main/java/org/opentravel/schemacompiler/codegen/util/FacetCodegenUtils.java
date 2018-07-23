@@ -638,10 +638,15 @@ public class FacetCodegenUtils {
 
             if (declaredFacet == null) {
             	TLContextualFacet ghostFacet = new TLContextualFacet();
-
+            	
+            	if (inheritedFacet.isLocalFacet()) {
+                    ghostFacet.setOwningLibrary(facetOwner.getOwningLibrary());
+            		
+            	} else {
+                    ghostFacet.setOwningLibrary(inheritedFacet.getOwningLibrary());
+            	}
                 ghostFacet.setFacetType(facetType);
                 ghostFacet.setName(inheritedFacet.getName());
-                ghostFacet.setOwningLibrary(inheritedFacet.getOwningLibrary());
                 ghostFacet.setOwningEntity(facetOwner);
                 ghostFacets.add(ghostFacet);
             }
@@ -792,7 +797,7 @@ public class FacetCodegenUtils {
         		}
         	}
         	for (TLContextualFacet ghostFacet : ghostFacets) {
-        		if (ghostFacet.getOwningLibrary() == originalLibrary) {
+        		if (!ghostFacet.isLocalFacet() && (ghostFacet.getOwningLibrary() == originalLibrary)) {
         			nonLocalFacets.add( ghostFacet );
         		}
         		findNonLocalGhostFacets( ghostFacet, originalLibrary, nonLocalFacets );
