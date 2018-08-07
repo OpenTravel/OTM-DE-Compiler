@@ -120,14 +120,6 @@ public class TLAttributeJsonCodegenTransformer extends AbstractJsonSchemaTransfo
     		jsonUtils.applySimpleTypeDocumentation( attrSchema, source.getType() );
     		attrSchema.getExampleItems().addAll( jsonUtils.getExampleInfo( source ) );
     		attrSchema.getEquivalentItems().addAll( jsonUtils.getEquivalentInfo( source ) );
-    		
-			if (simpleInfo.isListType()) {
-            	JsonSchema itemSchema = attrSchema;
-				
-            	attrSchema = new JsonSchema();
-            	attrSchema.setType( JsonType.jsonArray );
-            	attrSchema.setItems( new JsonSchemaReference( itemSchema ) );
-			}
     		attrSchemaRef.setSchema( attrSchema );
     		
         } else if (source.isReference()) {
