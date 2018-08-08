@@ -404,9 +404,14 @@ public class RepositoryManager implements Repository {
         RepositoryInfoType localRepositoryMetadata = fileManager.loadRepositoryMetadata();
         RepositoryInfoType remoteRepositoryMetadata = RemoteRepositoryClient
                 .getRepositoryMetadata(endpointUrl);
-        String newRepositoryID = remoteRepositoryMetadata.getID();
+        
+        if (remoteRepositoryMetadata == null) {
+        	throw new RepositoryException("The endpoint URL for the remote repository could not be accessed.");
+        }
 
         // Make sure the requested endpoint is not a duplicate of an existing repository
+        String newRepositoryID = remoteRepositoryMetadata.getID();
+        
         if (localRepositoryMetadata.getRemoteRepositories() != null) {
             if (localRepositoryMetadata.getID().equals(newRepositoryID)) {
                 throw new RepositoryException(
