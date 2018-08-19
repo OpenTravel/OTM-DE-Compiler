@@ -896,8 +896,6 @@ public class RepositoryManager implements Repository {
                 versionIdentifier);
 
         for (RemoteRepositoryClient repository : remoteRepositories) {
-            if (itemContent.exists())
-                break;
             try {
                 repository.downloadContent(baseNS, filename, versionIdentifier, false);
 

@@ -28,8 +28,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -65,7 +63,6 @@ import org.opentravel.ns.ota2.repositoryinfo_v01_00.EntityInfoType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryHistoryType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoListType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoType;
-import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryStatus;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.ListItems2RQType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.ListItemsRQType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.NamespaceListType;
@@ -141,8 +138,6 @@ public class RemoteRepositoryClient implements RemoteRepository {
     private static final String ENTITY_WHERE_USED_ENDPOINT = SERVICE_CONTEXT + "/entity-where-used";
     private static final String ENTITY_WHERE_EXTENDED_ENDPOINT = SERVICE_CONTEXT + "/entity-where-extended";
     private static final String HISTORICAL_CONTENT_ENDPOINT = SERVICE_CONTEXT + "/historical-content";
-
-    private static final DateFormat dateOnlyFormat = new SimpleDateFormat("dd-MM-yyyy");
 
     private static Log log = LogFactory.getLog(RemoteRepositoryClient.class);
     protected static ObjectFactory objectFactory = new ObjectFactory();
@@ -1588,26 +1583,20 @@ public class RemoteRepositoryClient implements RemoteRepository {
         String baseNS = RepositoryNamespaceUtils.normalizeUri(baseNamespace);
         String cacheKey = baseNS + "~" + filename + "~" + versionIdentifier;
         LibraryInfoType contentMetadata = null;
-        boolean refreshRequired, isStaleContent = false;
+        boolean refreshRequired = true;
+        boolean isStaleContent = false;
         Date localLastUpdated;
 
         try {
             contentMetadata = manager.getFileManager().loadLibraryMetadata(baseNS, filename, versionIdentifier);
             localLastUpdated = XMLGregorianCalendarConverter.toJavaDate(contentMetadata.getLastUpdated());
-            refreshRequired = forceUpdate || (contentMetadata.getStatus() == LibraryStatus.DRAFT) || // always update draft items
-                    (refreshPolicy == RefreshPolicy.ALWAYS);
-
-            if (!refreshRequired && (refreshPolicy == RefreshPolicy.DAILY)) {
-                refreshRequired = !dateOnlyFormat.format(localLastUpdated).equals(dateOnlyFormat.format(new Date()));
-            }
             
         } catch (RepositoryException e) {
         	localLastUpdated = new Date( 0L ); // make sure the local date is earlier than anything we will get from the repository
-            refreshRequired = true;
         }
         
         // Skip the download if the item has been downloaded recently
-        if (refreshRequired && downloadCache.contains( cacheKey )) {
+        if (downloadCache.contains( cacheKey )) {
             log.info("Skipping download of repository item '" + id + "' - " + baseNS + "; "
                     + filename + "; " + versionIdentifier);
             refreshRequired = false;
