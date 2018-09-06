@@ -34,15 +34,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
 import org.opentravel.application.common.AbstractMainWindowController;
 import org.opentravel.application.common.BrowseRepositoryDialogController;
 import org.opentravel.application.common.StatusType;
-import org.opentravel.ns.ota2.project_v01_00.ManagedProjectItemType;
-import org.opentravel.ns.ota2.project_v01_00.ProjectItemType;
-import org.opentravel.ns.ota2.project_v01_00.ProjectType;
 import org.opentravel.release.NewReleaseDialogController.NewReleaseInfo;
 import org.opentravel.release.navigate.TreeNode;
 import org.opentravel.release.navigate.TreeNodeFactory;
@@ -68,13 +64,11 @@ import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryItemCommit;
 import org.opentravel.schemacompiler.repository.RepositoryItemType;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
-import org.opentravel.schemacompiler.repository.impl.ProjectFileUtils;
 import org.opentravel.schemacompiler.saver.LibrarySaveException;
 import org.opentravel.schemacompiler.task.CompileAllCompilerTask;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingMessageFormat;
 import org.opentravel.schemacompiler.validate.FindingType;
-import org.opentravel.schemacompiler.validate.ValidationException;
 import org.opentravel.schemacompiler.validate.ValidationFinding;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 
@@ -402,31 +396,9 @@ public class OTMReleaseController extends AbstractMainWindowController {
 				public void execute() throws Throwable {
 					try {
 						ValidationFindings findings = new ValidationFindings();
-						ProjectType project = ProjectFileUtils.loadJaxbProjectFile( selectedFile, findings );
 						ReleaseManager newReleaseManager = new ReleaseManager( repositoryManager );
 						
-						if (findings.hasFinding( FindingType.ERROR )) {
-							throw new ValidationException(
-									"Error loading OTM project file (see log for details)", findings );
-						}
-						
-						newReleaseManager.createNewRelease( project.getProjectId(),
-								project.getName(), selectedFile.getParentFile() );
-						
-						for (JAXBElement<? extends ProjectItemType> itemElement : project.getProjectItemBase()) {
-							ProjectItemType item = itemElement.getValue();
-							
-							if (item instanceof ManagedProjectItemType) {
-								ManagedProjectItemType managedItem = (ManagedProjectItemType) item;
-								RepositoryItem repoItem = repositoryManager.getRepositoryItem(managedItem.getBaseNamespace(),
-										managedItem.getFilename(), managedItem.getVersion() );
-								
-								newReleaseManager.addPrincipalMember( repoItem );
-							}
-						}
-						newReleaseManager.loadReleaseModel( validationFindings = new ValidationFindings() );
-						newReleaseManager.saveRelease();
-						
+						newReleaseManager.importFromProject( selectedFile, findings );
 						OTMReleaseController.this.releaseManager = newReleaseManager;
 						OTMReleaseController.this.releaseFile = URLUtils.toFile( newReleaseManager.getRelease().getReleaseUrl() );
 						OTMReleaseController.this.validationFindings = new ValidationFindings();

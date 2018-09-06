@@ -26,6 +26,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.bind.JAXBElement;
+
+import org.opentravel.ns.ota2.project_v01_00.ManagedProjectItemType;
+import org.opentravel.ns.ota2.project_v01_00.ProjectItemType;
+import org.opentravel.ns.ota2.project_v01_00.ProjectType;
 import org.opentravel.ns.ota2.release_v01_00.ReleaseStatus;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
@@ -35,6 +40,7 @@ import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.model.TLModel;
+import org.opentravel.schemacompiler.repository.impl.ProjectFileUtils;
 import org.opentravel.schemacompiler.repository.impl.ReleaseFileUtils;
 import org.opentravel.schemacompiler.repository.impl.ReleaseItemImpl;
 import org.opentravel.schemacompiler.repository.impl.ReleaseLibraryModuleLoader;
@@ -43,6 +49,7 @@ import org.opentravel.schemacompiler.transform.util.ModelReferenceResolver;
 import org.opentravel.schemacompiler.util.ExceptionUtils;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
+import org.opentravel.schemacompiler.validate.ValidationException;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.compile.TLModelCompileValidator;
 import org.opentravel.schemacompiler.version.VersionScheme;
@@ -118,6 +125,45 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 		saveRelease();
 		
 		return ReleaseItemImpl.newUnmanagedItem( this );
+	}
+	
+	/**
+	 * Imports the contents of a release from the given OTM project file.
+	 * 
+	 * @param otpFile  the OTM project file from which to load the initial contents of the release
+	 * @param findings  the validation findings where errors and warning should be reported
+	 * @return ReleaseItem
+	 * @throws RepositoryException  thrown if an error occurs that prevents the release from being loaded
+	 * @throws LibraryLoaderException  thrown if the OTM project file cannot be loaded
+	 * @throws ValidationException  thrown if errors are detected in the content of the loaded OTM project
+	 * @throws LibrarySaveException  thrown if an error occurs while attempting to save the new project file
+	 */
+	public ReleaseItem importFromProject(File otpFile, ValidationFindings findings)
+			throws RepositoryException, LibraryLoaderException, ValidationException, LibrarySaveException {
+		ProjectType project = ProjectFileUtils.loadJaxbProjectFile( otpFile, findings );
+		
+		if (findings.hasFinding( FindingType.ERROR )) {
+			throw new ValidationException(
+					"Error loading OTM project file (see log for details)", findings );
+		}
+		
+		ReleaseItem newRelease = createNewRelease(
+				project.getProjectId(), project.getName(), otpFile.getParentFile() );
+		
+		for (JAXBElement<? extends ProjectItemType> itemElement : project.getProjectItemBase()) {
+			ProjectItemType item = itemElement.getValue();
+			
+			if (item instanceof ManagedProjectItemType) {
+				ManagedProjectItemType managedItem = (ManagedProjectItemType) item;
+				RepositoryItem repoItem = repositoryManager.getRepositoryItem(managedItem.getBaseNamespace(),
+						managedItem.getFilename(), managedItem.getVersion() );
+				
+				addPrincipalMember( repoItem );
+			}
+		}
+		loadReleaseModel( findings );
+		saveRelease();
+		return newRelease;
 	}
 	
 	/**

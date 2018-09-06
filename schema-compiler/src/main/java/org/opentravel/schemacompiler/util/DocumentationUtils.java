@@ -118,7 +118,7 @@ public class DocumentationUtils {
 				TLRole role = (TLRole) currentElement;
 				TLRoleEnumeration roleEnum = role.getRoleEnumeration();
 				
-				docPath.insert(0, "|" + role.getName());
+				docPath.insert(0, "|@ROLE:" + role.getName());
 				currentElement = (roleEnum == null) ? null : roleEnum.getOwningEntity();
 				
 			} else if (currentElement instanceof TLExtension) {
@@ -312,6 +312,17 @@ public class DocumentationUtils {
 					}
 				} else {
 					currentElement = null;
+				}
+				
+			} else if (pathPart.startsWith("@ROLE:")) {
+				String roleName = pathPart.substring( 6 );
+				
+				for (TLRole role : ((TLCoreObject) currentElement).getRoleEnumeration().getRoles()) {
+					if (roleName.equals( role.getName() )) {
+						currentElement = role;
+						if (pathParts.isEmpty()) docOwner = (TLDocumentationOwner) currentElement;
+						break;
+					}
 				}
 				
 			} else {
