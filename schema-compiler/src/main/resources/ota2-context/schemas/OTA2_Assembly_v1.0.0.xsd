@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns="http://www.OpenTravel.org/ns/OTA2/Assembly_v01_00" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="http://www.OpenTravel.org/ns/OTA2/Assembly_v01_00" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	
+	<xsd:element name="Assembly" type="AssemblyType" />
+	<xsd:complexType name="AssemblyType">
+		<xsd:sequence>
+			<xsd:element ref="AssemblyIdentity" minOccurs="1" maxOccurs="1" />
+			<xsd:element ref="Provider" minOccurs="0" maxOccurs="99" />
+			<xsd:element ref="Consumer" minOccurs="0" maxOccurs="99" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:element name="AssemblyIdentity" type="AssemblyIdentityType" />
+	<xsd:complexType name="AssemblyIdentityType">
+		<xsd:sequence>
+			<xsd:element name="BaseNamespace" type="xsd:anyURI" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="Name" type="String_Short" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="Filename" type="Filename" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="Version" type="String_Short" minOccurs="1" maxOccurs="1" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:element name="Provider" type="AssemblyItemType" />
+	<xsd:element name="Consumer" type="AssemblyItemType" />
+	<xsd:complexType name="AssemblyItemType">
+		<xsd:sequence>
+			<xsd:element name="BaseNamespace" type="xsd:anyURI" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="Filename" type="Filename" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="Version" type="String_Short" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="ResourceNamespace" type="xsd:anyURI" minOccurs="0" maxOccurs="1" />
+			<xsd:element name="ResourceLocalName" type="String_Short" minOccurs="0" maxOccurs="1" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:simpleType name="Filename">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="[A-Za-z0-9/\.\-\|:_]*" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="String_Short">
+		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="256" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+</xsd:schema>

@@ -15,8 +15,6 @@
  */
 package org.opentravel.schemacompiler.mvn;
 
-import java.io.File;
-
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Execute;
@@ -38,12 +36,9 @@ public class InitRepositorySnapshotMojo extends AbstractOTA2RepositoryMojo {
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		validate();
-		File snapshotProjectFile = getSnapshotProjectFile();
-		File snapshotLibraryFolder = getSnapshotLibraryFolder();
 		
-		if (snapshotProjectFile.exists() && snapshotLibraryFolder.exists()) {
+		if (snapshotInitialized()) {
 			getLog().info("OTA2 repository snapshot already initialized.");
-			
 		} else {
 			createOrUpdateSnapshot();
 		}

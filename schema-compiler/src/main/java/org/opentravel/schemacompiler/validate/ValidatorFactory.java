@@ -33,6 +33,7 @@ public class ValidatorFactory {
 
     public static final String COMPILE_RULE_SET_ID = "defaultCompileValidationRules";
     public static final String SAVE_RULE_SET_ID = "defaultSaveValidationRules";
+    public static final String ASSEMBLY_RULE_SET_ID = "assemblyValidationRules";
 
     private static final Logger log = LoggerFactory.getLogger(ValidatorFactory.class);
 

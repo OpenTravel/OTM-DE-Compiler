@@ -166,6 +166,20 @@
 		</property>
 	</bean>
 	
+	<bean id="ota2AssemblySchema" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
+		<property name="namespace" value="http://www.OpenTravel.org/ns/OTA2/Assembly_v01_00" />
+		<property name="name" value="OTA2_Assembly_v1.0.0" />
+		<property name="defaultPrefix" value="osm" />
+		<property name="locations">
+			<list>
+				<bean class="org.opentravel.schemacompiler.ioc.SchemaLocation">
+					<property name="format" value="XSD" />
+					<property name="location" value="classpath:/ota2-context/schemas/OTA2_Assembly_v1.0.0.xsd" />
+				</bean>
+			</list>
+		</property>
+	</bean>
+	
 	<bean id="ota2CatalogSchema" class="org.opentravel.schemacompiler.ioc.SchemaDeclaration" scope="singleton">
 		<property name="namespace" value="http://www.OpenTravel.org/ns/OTA2/LibraryCatalog_v01_00" />
 		<property name="name" value="OTA2_LibraryCatalog_v1.0.0" />
@@ -560,6 +574,29 @@
 		</property>
 	</bean>
 
+	<!--
+	  Validation Rule Set: ServiceAssembly
+	  
+	  Defines the default set of validator classes that should be used to perform validation of OTA2 model components prior to
+	  compilation by a code generator.  If errors are reported during compile validation, code generation will not be attempted
+	  (warnings are allowed) .All validation target types must implement the 'org.opentravel.schemacompiler.validate.Validatable'
+	  interface, and all validator classes must implement the 'org.opentravel.schemacompiler.validate.Validator' interface.
+	  -->
+	<bean id="assemblyValidationRules" class="org.opentravel.schemacompiler.validate.ValidationRuleSet" scope="prototype">
+		<property name="validatorMappings">
+			<list>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.repository.ServiceAssembly" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.assembly.ServiceAssemblyValidator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
+					<property name="targetClass" value="org.opentravel.schemacompiler.repository.ServiceAssemblyItem" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.assembly.ServiceAssemblyItemValidator" />
+				</bean>
+			</list>
+		</property>
+	</bean>
+	
 	<!--
 	  Transform Factory: Library Model Loader
 	  

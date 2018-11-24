@@ -32,6 +32,7 @@ public class SchemaDeclarations {
     public static final SchemaDeclaration OTA2_PROJECT_SCHEMA;
     public static final SchemaDeclaration OTA2_REPOSITORY_SCHEMA;
     public static final SchemaDeclaration OTA2_RELEASE_SCHEMA;
+    public static final SchemaDeclaration OTA2_ASSEMBLY_SCHEMA;
     public static final SchemaDeclaration WSDL_SCHEMA;
     public static final SchemaDeclaration SOAP_SCHEMA;
     public static final SchemaDeclaration SCHEMA_FOR_SCHEMAS;
@@ -45,6 +46,7 @@ public class SchemaDeclarations {
     private static final String OTA2_PROJECT_SCHEMA_ID = "ota2ProjectSchema";
     private static final String OTA2_REPOSITORY_SCHEMA_ID = "ota2RepositorySchema";
     private static final String OTA2_RELEASE_SCHEMA_ID = "ota2ReleaseSchema";
+    private static final String OTA2_ASSEMBLY_SCHEMA_ID = "ota2AssemblySchema";
     private static final String WSDL_SCHEMA_ID = "wsdlSchema";
     private static final String SOAP_SCHEMA_ID = "soapSchema";
     private static final String SCHEMA_FOR_SCHEMAS_ID = "schemaForSchemas";
@@ -65,6 +67,7 @@ public class SchemaDeclarations {
             OTA2_PROJECT_SCHEMA = (SchemaDeclaration) appContext.getBean(OTA2_PROJECT_SCHEMA_ID);
             OTA2_REPOSITORY_SCHEMA = (SchemaDeclaration) appContext.getBean(OTA2_REPOSITORY_SCHEMA_ID);
             OTA2_RELEASE_SCHEMA = (SchemaDeclaration) appContext.getBean(OTA2_RELEASE_SCHEMA_ID);
+            OTA2_ASSEMBLY_SCHEMA = (SchemaDeclaration) appContext.getBean(OTA2_ASSEMBLY_SCHEMA_ID);
             WSDL_SCHEMA = (SchemaDeclaration) appContext.getBean(WSDL_SCHEMA_ID);
             SOAP_SCHEMA = (SchemaDeclaration) appContext.getBean(SOAP_SCHEMA_ID);
             SCHEMA_FOR_SCHEMAS = (SchemaDeclaration) appContext.getBean(SCHEMA_FOR_SCHEMAS_ID);

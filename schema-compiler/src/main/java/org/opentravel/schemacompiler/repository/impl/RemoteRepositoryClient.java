@@ -1829,6 +1829,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
         item.setRepository(this);
         item.setNamespace(libraryInfo.getNamespace());
         item.setBaseNamespace(libraryInfo.getBaseNamespace());
+        item.setLibraryName(libraryInfo.getLibraryName());
         item.setFilename(libraryInfo.getFilename());
         item.setVersion(libraryInfo.getVersion());
         item.setStatus(TLLibraryStatus.valueOf(libraryInfo.getStatus().toString().toUpperCase()));

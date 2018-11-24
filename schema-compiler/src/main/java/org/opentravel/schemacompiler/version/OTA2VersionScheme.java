@@ -15,13 +15,13 @@
  */
 package org.opentravel.schemacompiler.version;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.opentravel.schemacompiler.util.URLUtils;
 
 /**
  * Default version scheme implementation for OTA2.0 namespaces.
@@ -100,7 +100,7 @@ public class OTA2VersionScheme implements VersionScheme {
      */
     @Override
     public String setVersionIdentifier(String namespaceUri, String versionIdentifier) {
-        if (!isValidURI(namespaceUri)) {
+        if (!URLUtils.isValidURI(namespaceUri)) {
             throw new IllegalArgumentException("Invalid namespace for version scheme: "
                     + namespaceUri);
         }
@@ -252,28 +252,8 @@ public class OTA2VersionScheme implements VersionScheme {
      */
     @Override
     public boolean isValidNamespace(String namespaceUri) {
-        return isValidURI(namespaceUri)
+        return URLUtils.isValidURI(namespaceUri)
                 && versionedNamespacePattern.matcher(namespaceUri).matches();
-    }
-
-    /**
-     * Returns true if the given URI is valid.
-     * 
-     * @param namespaceUri
-     *            the namespace URI to check
-     * @return boolean
-     */
-    private boolean isValidURI(String namespaceUri) {
-        boolean result = false;
-        try {
-            if (namespaceUri != null) {
-                new URI(namespaceUri);
-                result = true;
-            }
-        } catch (URISyntaxException e) {
-            // Ignore error and return false
-        }
-        return result;
     }
 
     /**

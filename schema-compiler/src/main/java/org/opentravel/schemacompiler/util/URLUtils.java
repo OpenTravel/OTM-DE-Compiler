@@ -17,6 +17,8 @@ package org.opentravel.schemacompiler.util;
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -392,4 +394,23 @@ public class URLUtils {
         return filename;
     }
     
+    /**
+     * Returns true if the given URI is valid.
+     * 
+     * @param namespaceUri  the namespace URI to check
+     * @return boolean
+     */
+    public static boolean isValidURI(String namespaceUri) {
+        boolean result = false;
+        try {
+            if (namespaceUri != null) {
+                new URI(namespaceUri);
+                result = true;
+            }
+        } catch (URISyntaxException e) {
+            // Ignore error and return false
+        }
+        return result;
+    }
+
 }

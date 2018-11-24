@@ -66,7 +66,7 @@ import org.opentravel.schemacompiler.xml.XMLGregorianCalendarConverter;
 import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
 
 /**
- * Static helper methods that handle the loading and saving of projects to and from the local file
+ * Static helper methods that handle the loading and saving of releases to and from the local file
  * system using JAXB.
  */
 public class ReleaseFileUtils extends AbstractFileUtils {
@@ -125,7 +125,7 @@ public class ReleaseFileUtils extends AbstractFileUtils {
             }
 
         } catch (Throwable t) {
-            throw new LibraryLoaderException("Unknown error while loading project.", t);
+            throw new LibraryLoaderException("Unknown error while loading release.", t);
         }
         return release;
     }
@@ -203,7 +203,7 @@ public class ReleaseFileUtils extends AbstractFileUtils {
             success = true;
 
         } catch (JAXBException | IOException e) {
-            throw new LibrarySaveException("Unknown error while saving project.", e);
+            throw new LibrarySaveException("Unknown error while saving release.", e);
 
         } finally {
             if (!success && (backupFile != null)) {

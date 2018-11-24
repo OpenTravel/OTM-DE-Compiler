@@ -89,6 +89,11 @@ public class Release {
 		this.baseNamespace = baseNamespace;
 	}
 	
+	/**
+	 * The full namespace of the release (including the version identifier suffix).
+	 * 
+	 * @return String
+	 */
 	public String getNamespace() {
 		return versionScheme.setVersionIdentifier( baseNamespace, version );
 	}
