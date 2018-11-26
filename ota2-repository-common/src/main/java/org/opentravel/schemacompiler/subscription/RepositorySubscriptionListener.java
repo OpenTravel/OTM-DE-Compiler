@@ -30,9 +30,9 @@ import org.opentravel.schemacompiler.repository.RepositoryManager;
  * Forwards notifications to the <code>SubscriptionManager</code> when actionable events
  * occur in an OTM repository.
  */
-public class RepositoryNotificationListener implements RepositoryListener {
+public class RepositorySubscriptionListener implements RepositoryListener {
 	
-    private static Log log = LogFactory.getLog( RepositoryNotificationListener.class );
+    private static Log log = LogFactory.getLog( RepositorySubscriptionListener.class );
     
 	private SubscriptionManager subscriptionManager;
 	private RepositoryManager repositoryManager;
@@ -44,7 +44,7 @@ public class RepositoryNotificationListener implements RepositoryListener {
 	 * @param subscriptionManager  the subscription manager to be notified
 	 * @param repositoryManager  the repository manager from which to forward events
 	 */
-	public RepositoryNotificationListener(SubscriptionManager subscriptionManager,
+	public RepositorySubscriptionListener(SubscriptionManager subscriptionManager,
 			RepositoryManager repositoryManager) {
 		this.subscriptionManager = subscriptionManager;
 		this.repositoryManager = repositoryManager;

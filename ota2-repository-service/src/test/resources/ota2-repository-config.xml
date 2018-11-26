@@ -158,12 +158,12 @@
 		Optional configuration that defines the ActiveMQ connection factory and queues used to communicate with
 		the free-text indexing service.
 	-->
-	<bean id="amqConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+	<bean id="localAMQConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
 		<constructor-arg index="0" value="tcp://localhost:61616" />
 	</bean>
 	
-	<bean id="connectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
-		<property name="targetConnectionFactory" ref="amqConnectionFactory" />
+	<bean id="indexingConnectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
+		<property name="targetConnectionFactory" ref="localAMQConnectionFactory" />
 		<property name="sessionCacheSize" value="10" />
 	</bean>
 
@@ -172,10 +172,44 @@
 	</bean>
 
 	<bean id="indexingJmsService" class="org.springframework.jms.core.JmsTemplate">
-		<property name="connectionFactory" ref="connectionFactory" />
+		<property name="connectionFactory" ref="indexingConnectionFactory" />
 		<property name="defaultDestination" ref="indexingJobQueue" />
 		<property name="receiveTimeout" value="500" />
 	</bean>
+	
+	<!--
+		Notification Service Configuration:
+		
+		Optional configuration that defines the implementation class for the notification service and the
+		JMS connection factory and queues used to publish notification events.
+		
+		NOTE: The 'notificationAMQConnectionFactory' bean definition may change based upon the MQ provider to
+		which notifications will be sent.  This example assumes an ActiveMQ provider running on localhost.
+	-->
+	<!--
+	<bean id="notificationService" class="org.opentravel.schemacompiler.notification.JMSNotificationService">
+		<constructor-arg ref="notificationJmsService" />
+	</bean>
+	
+	<bean id="notificationAMQConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+		<constructor-arg index="0" value="tcp://localhost:61616" />
+	</bean>
+	
+	<bean id="notificationConnectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
+		<property name="targetConnectionFactory" ref="localAMQConnectionFactory" />
+		<property name="sessionCacheSize" value="10" />
+	</bean>
+
+	<bean id="notificationTopic" class="org.apache.activemq.command.ActiveMQTopic">
+		<constructor-arg index="0" value="otm.notification.topic" />
+	</bean>
+
+	<bean id="notificationJmsService" class="org.springframework.jms.core.JmsTemplate">
+		<property name="connectionFactory" ref="notificationConnectionFactory" />
+		<property name="defaultDestination" ref="notificationTopic" />
+		<property name="receiveTimeout" value="500" />
+	</bean>
+	-->
 	
 	<!--
 		Subscription Manager Configuration:

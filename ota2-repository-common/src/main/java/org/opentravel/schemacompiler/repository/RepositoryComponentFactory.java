@@ -17,6 +17,7 @@ package org.opentravel.schemacompiler.repository;
 
 import java.io.File;
 
+import org.opentravel.schemacompiler.notification.NotificationService;
 import org.opentravel.schemacompiler.security.AuthenticationProvider;
 import org.opentravel.schemacompiler.security.RepositorySecurityManager;
 import org.opentravel.schemacompiler.subscription.SubscriptionManager;
@@ -39,8 +40,9 @@ public class RepositoryComponentFactory {
     private static final String SEARCH_INDEX_LOCATION_KEY = "searchIndexLocation";
     private static final String REPOSITORY_MANAGER_KEY = "repositoryManager";
     private static final String SECURITY_MANAGER_KEY = "securityManager";
-    private static final String SUBSCRIPTION_MANAGER_KEY = "subscriptionManager";
     private static final String AUTHENTICATION_PROVIDER_KEY = "authenticationProvider";
+    private static final String SUBSCRIPTION_MANAGER_KEY = "subscriptionManager";
+    private static final String NOTIFICATION_SERVICE_KEY = "notificationService";
     private static final String INDEXING_JMS_SERVICE_KEY = "indexingJmsService";
 
     private static RepositoryComponentFactory defaultInstance;
@@ -116,7 +118,7 @@ public class RepositoryComponentFactory {
             defaultInstance = null;
         }
     }
-
+    
     /**
      * Returns the root folder location of the OTA2.0 repository as defined in the service
      * configuration file.
@@ -165,18 +167,8 @@ public class RepositoryComponentFactory {
     }
     
     /**
-     * Returns the <code>JmsTemplate</code> that will serve as the indexing service to publish
-     * indexing jobs to a remote server.
-     * 
-     * @return JmsTemplate
-     */
-    public JmsTemplate getIndexingJmsService() {
-        return (JmsTemplate) appContext.getBean(INDEXING_JMS_SERVICE_KEY);
-    }
-    
-    /**
      * Returns the <code>SubscriptionManager</code> as defined in the service configuration
-     * file.
+     * file.  If no subscription manager has been configured, this method will return null.
      * 
      * @return SubscriptionManager
      */
@@ -188,6 +180,43 @@ public class RepositoryComponentFactory {
     		
     	} catch (NoSuchBeanDefinitionException e) {
     		// Ignore - subscription manager is an optional component
+    	}
+    	return manager;
+    }
+
+    /**
+     * Returns the <code>JmsTemplate</code> that will serve as the indexing service to publish
+     * indexing jobs to a remote server.  If no notification JMS service has
+     * been configured, this method will return null.
+     * 
+     * @return JmsTemplate
+     */
+    public JmsTemplate getIndexingJmsService() {
+    	JmsTemplate service = null;
+    	
+    	try {
+            service = (JmsTemplate) appContext.getBean(INDEXING_JMS_SERVICE_KEY);
+            
+    	} catch (NoSuchBeanDefinitionException e) {
+    		// Ignore - subscription manager is an optional component
+    	}
+    	return service;
+    }
+    
+    /**
+     * Returns the <code>NotificationService</code> as defined in the service configuration
+     * file.  If no notification service has been configured, this method will return null.
+     * 
+     * @return NotificationService
+     */
+    public NotificationService getNotificationService() {
+    	NotificationService manager = null;
+    	
+    	try {
+    		manager = (NotificationService) appContext.getBean(NOTIFICATION_SERVICE_KEY);
+    		
+    	} catch (NoSuchBeanDefinitionException e) {
+    		// Ignore - notification service is an optional component
     	}
     	return manager;
     }

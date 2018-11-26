@@ -25,6 +25,7 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.opentravel.schemacompiler.index.FreeTextSearchServiceFactory;
+import org.opentravel.schemacompiler.notification.NotificationServiceFactory;
 import org.opentravel.schemacompiler.subscription.SubscriptionManager;
 import org.opentravel.schemacompiler.util.OTM16Upgrade;
 
@@ -66,6 +67,7 @@ public class RepositoryServlet extends ServletContainer {
         OTM16Upgrade.otm16Enabled = true;
         FreeTextSearchServiceFactory.registerServiceOwner(this);
         SubscriptionManager sManager = RepositoryComponentFactory.getDefault().getSubscriptionManager();
+        NotificationServiceFactory.getInstance(); // Initialize the notification service
         
         if (sManager != null) {
             sManager.startNotificationListener();
@@ -94,6 +96,9 @@ public class RepositoryServlet extends ServletContainer {
         } catch (IOException e) {
             log.error("Error shutting down the free-text search service.", e);
         }
+        
+        // Shut down the notification service
+        NotificationServiceFactory.shutdown();
     }
 
 }

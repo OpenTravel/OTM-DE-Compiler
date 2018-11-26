@@ -93,7 +93,7 @@ public class SubscriptionManager {
 	
 	private Thread notificationThread;
 	private BlockingQueue<NotificationJob> notificationQueue = new DelayQueue<>();
-	private RepositoryNotificationListener repositoryListener;
+	private RepositorySubscriptionListener repositoryListener;
 	private long notificationDelay = DEFAULT_NOTIFICATION_DELAY;
 	private boolean shutdownRequested = false;
 	
@@ -470,7 +470,7 @@ public class SubscriptionManager {
 			
 			shutdownRequested = false;
 			notificationThread.start();
-			repositoryListener = new RepositoryNotificationListener( this, manager );
+			repositoryListener = new RepositorySubscriptionListener( this, manager );
 			manager.addListener( repositoryListener );
 			
 		} else {
