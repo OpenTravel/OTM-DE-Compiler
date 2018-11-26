@@ -28,8 +28,15 @@
 			<xsd:element name="BaseNamespace" type="xsd:anyURI" minOccurs="1" maxOccurs="1" />
 			<xsd:element name="Filename" type="Filename" minOccurs="1" maxOccurs="1" />
 			<xsd:element name="Version" type="String_Short" minOccurs="1" maxOccurs="1" />
-			<xsd:element name="ResourceNamespace" type="xsd:anyURI" minOccurs="0" maxOccurs="1" />
-			<xsd:element name="ResourceLocalName" type="String_Short" minOccurs="0" maxOccurs="1" />
+			<xsd:element ref="ResourceName" minOccurs="0" maxOccurs="1" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:element name="ResourceName" type="QualifiedNameType" />
+	<xsd:complexType name="QualifiedNameType">
+		<xsd:sequence>
+			<xsd:element name="Namespace" type="xsd:anyURI" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="LocalName" type="String_Short" minOccurs="1" maxOccurs="1" />
 		</xsd:sequence>
 	</xsd:complexType>
 	

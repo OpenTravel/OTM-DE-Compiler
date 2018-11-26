@@ -39,6 +39,7 @@ import org.opentravel.ns.ota2.assembly_v01_00.AssemblyIdentityType;
 import org.opentravel.ns.ota2.assembly_v01_00.AssemblyItemType;
 import org.opentravel.ns.ota2.assembly_v01_00.AssemblyType;
 import org.opentravel.ns.ota2.assembly_v01_00.ObjectFactory;
+import org.opentravel.ns.ota2.assembly_v01_00.QualifiedNameType;
 import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
@@ -300,8 +301,11 @@ public class ServiceAssemblyFileUtils extends AbstractFileUtils {
     	jaxbItem.setVersion( rItem.getVersion() );
     	
     	if (resourceName != null) {
-        	jaxbItem.setResourceNamespace( resourceName.getNamespaceURI() );
-        	jaxbItem.setResourceLocalName( resourceName.getLocalPart() );
+    		QualifiedNameType jaxbResourceName = new QualifiedNameType();
+    		
+    		jaxbResourceName.setNamespace( resourceName.getNamespaceURI() );
+    		jaxbResourceName.setLocalName( resourceName.getLocalPart() );
+    		jaxbItem.setResourceName( jaxbResourceName );
     	}
     	return jaxbItem;
     }
@@ -349,9 +353,11 @@ public class ServiceAssemblyFileUtils extends AbstractFileUtils {
     	
     	item.setReleaseItem( rItem );
     	
-    	if ((jaxbItem.getResourceNamespace() != null) && (jaxbItem.getResourceLocalName() != null)) {
+    	if (jaxbItem.getResourceName() != null) {
+    		QualifiedNameType jaxbResourceName = jaxbItem.getResourceName();
+    		
         	item.setResourceName( new QName(
-        			jaxbItem.getResourceNamespace(), jaxbItem.getResourceLocalName() ) );
+        			jaxbResourceName.getNamespace(), jaxbResourceName.getLocalName() ) );
     	}
     	return item;
     }
