@@ -62,7 +62,7 @@ public class FacetInfoWriter extends AbstractInheritedInfoWriter<FacetOwnerDocum
 		Content label = getInfoLabel();
         memberTree.addContent(label);
 		List<FacetDocumentationBuilder> facets = source.getFacets();
-		if (facets.size() > 0) {
+		if (!facets.isEmpty()) {
 			Content tableTree = getTableTree();
 			for (FacetDocumentationBuilder fdb : facets) {
 				Content facetSummary = getInfo(fdb, facets.indexOf(fdb), false);
@@ -93,8 +93,7 @@ public class FacetInfoWriter extends AbstractInheritedInfoWriter<FacetOwnerDocum
 		HtmlTree tdSummary = new HtmlTree(HtmlTag.TD);
 		setInfoColumnStyle(tdSummary);
 		addFacetType(member, tdSummary);
-		//writer.addSummaryComment(member, tdSummary);
-		HtmlTree tr = HtmlTree.TR(tdFacetName);
+		HtmlTree tr = HtmlTree.tr(tdFacetName);
 		tr.addContent(tdSummary);
 		addRowStyle(tr, counter);
 		return tr;	
@@ -105,8 +104,8 @@ public class FacetInfoWriter extends AbstractInheritedInfoWriter<FacetOwnerDocum
 	 */
 	protected void addFacetType(FacetDocumentationBuilder member,
 			Content tdSummary) {
-		Content strong = HtmlTree.STRONG(new RawHtml(member.getType().name()));
-		Content code = HtmlTree.CODE(strong);
+		Content strong = HtmlTree.strong(new RawHtml(member.getType().name()));
+		Content code = HtmlTree.code(strong);
 		tdSummary.addContent(code);
 	}
 
@@ -118,7 +117,7 @@ public class FacetInfoWriter extends AbstractInheritedInfoWriter<FacetOwnerDocum
 		HtmlTree code = new HtmlTree(HtmlTag.CODE);
 		code.addContent(new RawHtml(writer.getLink(new LinkInfoImpl(
 				LinkInfoImpl.CONTEXT_SUMMARY_RETURN_TYPE, member))));
-		Content strong = HtmlTree.STRONG(code);
+		Content strong = HtmlTree.strong(code);
 		tdSummaryType.addContent(strong);
 	}
 	
@@ -134,7 +133,7 @@ public class FacetInfoWriter extends AbstractInheritedInfoWriter<FacetOwnerDocum
     	List<FacetDocumentationBuilder> facets = source.getFacets();
     	while(ext != null){
     		List<FacetDocumentationBuilder> extFacets = ext.getFacets();   		
-    		List<FacetDocumentationBuilder> inheritedFacets = new ArrayList<FacetDocumentationBuilder>();
+    		List<FacetDocumentationBuilder> inheritedFacets = new ArrayList<>();
     		for(FacetDocumentationBuilder fdb : extFacets){
     			boolean hasFacet = false;
     			for(FacetDocumentationBuilder fdb2 : facets){   
@@ -159,7 +158,7 @@ public class FacetInfoWriter extends AbstractInheritedInfoWriter<FacetOwnerDocum
     			}
     		}
     		
-    		if (inheritedFacets.size() > 0) {
+    		if (!inheritedFacets.isEmpty()) {
     			addInheritedInfoHeader(ext, summaryTree,
 						"doclet.Facets_Inherited_From");
 				addInheritedInfo(inheritedFacets, ext, summaryTree);
@@ -199,9 +198,8 @@ public class FacetInfoWriter extends AbstractInheritedInfoWriter<FacetOwnerDocum
 	@Override
 	protected String[] getInfoTableHeader() {
 		Configuration config = writer.configuration();
-		String[] header = new String[] { config.getText("doclet.Name"),
-				config.getText("doclet.Type") };
-		return header;
+		
+		return new String[] { config.getText("doclet.Name"), config.getText("doclet.Type") };
 	}
 
 }

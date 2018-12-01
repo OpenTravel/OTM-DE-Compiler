@@ -45,8 +45,7 @@ public class StringCache {
     /**
      * Statistics hash map for byte chunk.
      */
-    protected static final HashMap<ByteEntry, int[]> bcStats = new HashMap<ByteEntry, int[]>(
-            cacheSize);
+    protected static final HashMap<ByteEntry,int[]> bcStats = new HashMap<>(cacheSize);
 
     /**
      * toString count for byte chunk.
@@ -61,8 +60,7 @@ public class StringCache {
     /**
      * Statistics hash map for char chunk.
      */
-    protected static final HashMap<CharEntry, int[]> ccStats = new HashMap<CharEntry, int[]>(
-            cacheSize);
+    protected static final HashMap<CharEntry,int[]> ccStats = new HashMap<>(cacheSize);
 
     /**
      * toString count for char chunk.
@@ -85,7 +83,12 @@ public class StringCache {
     protected static int hitCount = 0;
 
     // ------------------------------------------------------------ Properties
-
+    
+    /**
+     * Private constructor to prevent instantiation.
+     */
+    private StringCache() {}
+    
     /**
      * @return Returns the cacheSize.
      */
@@ -198,7 +201,7 @@ public class StringCache {
                     // the string
                     if (bcCount > trainThreshold) {
                         // Sort the entries according to occurrence
-                        TreeMap<Integer, ArrayList<ByteEntry>> tempMap = new TreeMap<Integer, ArrayList<ByteEntry>>();
+                        TreeMap<Integer,ArrayList<ByteEntry>> tempMap = new TreeMap<>();
                         Iterator<ByteEntry> entries = bcStats.keySet().iterator();
                         while (entries.hasNext()) {
                             ByteEntry entry = entries.next();
@@ -208,7 +211,7 @@ public class StringCache {
                             ArrayList<ByteEntry> list = tempMap.get(count);
                             if (list == null) {
                                 // Create list
-                                list = new ArrayList<ByteEntry>();
+                                list = new ArrayList<>();
                                 tempMap.put(count, list);
                             }
                             list.add(entry);
@@ -227,7 +230,7 @@ public class StringCache {
                             Object key = tempMap.lastKey();
                             ArrayList<ByteEntry> list = tempMap.get(key);
                             for (int i = 0; i < list.size() && n < size; i++) {
-                                ByteEntry entry = (ByteEntry) list.get(i);
+                                ByteEntry entry = list.get(i);
                                 tempChunk.setBytes(entry.name, 0, entry.name.length);
                                 int insertPos = findClosest(tempChunk, tempbcCache, n);
                                 if (insertPos == n) {
@@ -307,7 +310,7 @@ public class StringCache {
                     // the string
                     if (ccCount > trainThreshold) {
                         // Sort the entries according to occurrence
-                        TreeMap<Integer, ArrayList<CharEntry>> tempMap = new TreeMap<Integer, ArrayList<CharEntry>>();
+                        TreeMap<Integer,ArrayList<CharEntry>> tempMap = new TreeMap<>();
                         Iterator<CharEntry> entries = ccStats.keySet().iterator();
                         while (entries.hasNext()) {
                             CharEntry entry = entries.next();
@@ -317,7 +320,7 @@ public class StringCache {
                             ArrayList<CharEntry> list = tempMap.get(count);
                             if (list == null) {
                                 // Create list
-                                list = new ArrayList<CharEntry>();
+                                list = new ArrayList<>();
                                 tempMap.put(count, list);
                             }
                             list.add(entry);
@@ -336,7 +339,7 @@ public class StringCache {
                             Object key = tempMap.lastKey();
                             ArrayList<CharEntry> list = tempMap.get(key);
                             for (int i = 0; i < list.size() && n < size; i++) {
-                                CharEntry entry = (CharEntry) list.get(i);
+                                CharEntry entry = list.get(i);
                                 tempChunk.setChars(entry.name, 0, entry.name.length);
                                 int insertPos = findClosest(tempChunk, tempccCache, n);
                                 if (insertPos == n) {

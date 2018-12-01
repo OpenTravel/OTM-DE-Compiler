@@ -41,7 +41,7 @@ public class ContextLibraryMemberAddedIntegrityChecker extends
     public void processModelEvent(OwnershipEvent<TLLibrary, LibraryMember> event) {
         if ((event.getType() == ModelEventType.MEMBER_ADDED)) {
             ContextReferrerVisitor visitor = new ContextReferrerVisitor(null);
-            Set<String> visitedContextIds = new HashSet<String>();
+            Set<String> visitedContextIds = new HashSet<>();
 
             ModelNavigator.navigate(event.getAffectedItem(), visitor);
 

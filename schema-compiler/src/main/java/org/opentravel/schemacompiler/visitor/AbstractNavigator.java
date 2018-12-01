@@ -31,7 +31,7 @@ import org.opentravel.schemacompiler.model.AbstractLibrary;
 public abstract class AbstractNavigator<T> {
 
     protected ModelElementVisitor visitor;
-    protected Set<Object> visitedNodes = new HashSet<Object>();
+    protected Set<Object> visitedNodes = new HashSet<>();
 
     /**
      * Default constructor.

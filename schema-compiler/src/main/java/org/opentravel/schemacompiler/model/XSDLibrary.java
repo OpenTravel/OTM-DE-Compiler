@@ -102,7 +102,7 @@ public class XSDLibrary extends AbstractLibrary {
      * @return boolean
      */
     public static boolean isValidLibraryMember(LibraryMember namedMember) {
-        return (namedMember == null) ? false : validMemberTypes.contains(namedMember.getClass());
+        return (namedMember != null) && validMemberTypes.contains(namedMember.getClass());
     }
 
     /**
@@ -110,7 +110,7 @@ public class XSDLibrary extends AbstractLibrary {
      */
     @Override
     protected boolean isValidMember(LibraryMember namedMember) {
-        return (namedMember == null) ? false : validMemberTypes.contains(namedMember.getClass());
+        return (namedMember != null) && validMemberTypes.contains(namedMember.getClass());
     }
 
     /**
@@ -156,15 +156,15 @@ public class XSDLibrary extends AbstractLibrary {
      */
     static {
         try {
-            Set<Class<?>> validTypes = new HashSet<Class<?>>();
+            Set<Class<?>> validTypes = new HashSet<>();
 
             validTypes.add(XSDSimpleType.class);
             validTypes.add(XSDComplexType.class);
             validTypes.add(XSDElement.class);
             validMemberTypes = Collections.unmodifiableSet(validTypes);
 
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

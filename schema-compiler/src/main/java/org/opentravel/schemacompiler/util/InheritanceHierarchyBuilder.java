@@ -84,7 +84,7 @@ public class InheritanceHierarchyBuilder {
         Map<NamedEntity, NamedEntity> extensionMap = visitor.getExtensionMap();
 
         // Group each of the elements into their separate hierarchies
-        Map<NamedEntity, Set<NamedEntity>> rootHierarchyMap = new HashMap<NamedEntity, Set<NamedEntity>>();
+        Map<NamedEntity,Set<NamedEntity>> rootHierarchyMap = new HashMap<>();
 
         for (NamedEntity hierarchyMember : extensionMap.keySet()) {
             NamedEntity rootMember = getHierarchyRoot(hierarchyMember, extensionMap);
@@ -93,7 +93,7 @@ public class InheritanceHierarchyBuilder {
                 Set<NamedEntity> hierarchyMembers = rootHierarchyMap.get(rootMember);
 
                 if (hierarchyMembers == null) {
-                    hierarchyMembers = new HashSet<NamedEntity>();
+                    hierarchyMembers = new HashSet<>();
                     rootHierarchyMap.put(rootMember, hierarchyMembers);
                 }
                 if (!hierarchyMembers.contains(rootMember)) {
@@ -104,11 +104,11 @@ public class InheritanceHierarchyBuilder {
         }
 
         // Sort the hierarchies and construct the final map
-        Map<NamedEntity, List<NamedEntity>> hierarchyInfo = new HashMap<NamedEntity, List<NamedEntity>>();
+        Map<NamedEntity,List<NamedEntity>> hierarchyInfo = new HashMap<>();
         Comparator<NamedEntity> hierarchyComparator = new HierarchyComparator(extensionMap);
 
         for (Set<NamedEntity> hierarchyMembers : rootHierarchyMap.values()) {
-            List<NamedEntity> sortedMembers = new ArrayList<NamedEntity>(hierarchyMembers);
+            List<NamedEntity> sortedMembers = new ArrayList<>(hierarchyMembers);
             Collections.sort(sortedMembers, hierarchyComparator);
 
             for (NamedEntity member : sortedMembers) {
@@ -200,7 +200,7 @@ public class InheritanceHierarchyBuilder {
      */
     private class ExtensionVisitor extends ModelElementVisitorAdapter {
 
-        private Map<NamedEntity, NamedEntity> extensionMap = new HashMap<NamedEntity, NamedEntity>();
+        private Map<NamedEntity,NamedEntity> extensionMap = new HashMap<>();
 
         /**
          * Returns the map of extension relationships collected during model navigation.
@@ -276,7 +276,7 @@ public class InheritanceHierarchyBuilder {
      */
     private class HierarchyComparator implements Comparator<NamedEntity> {
 
-        private Map<NamedEntity, NamedEntity> extensionMap = new HashMap<NamedEntity, NamedEntity>();
+        private Map<NamedEntity,NamedEntity> extensionMap = new HashMap<>();
 
         /**
          * Constructor that supplies the extension relationships to use when comparing members of an
@@ -299,10 +299,8 @@ public class InheritanceHierarchyBuilder {
             int result;
 
             if (member1Level.equals(member2Level)) {
-                String member1Name = (member1 == null) ? "" : ((NamedEntity) member1)
-                        .getLocalName();
-                String member2Name = (member2 == null) ? "" : ((NamedEntity) member2)
-                        .getLocalName();
+                String member1Name = (member1 == null) ? "" : member1.getLocalName();
+                String member2Name = (member2 == null) ? "" : member2.getLocalName();
 
                 result = member1Name.compareTo(member2Name);
             } else {

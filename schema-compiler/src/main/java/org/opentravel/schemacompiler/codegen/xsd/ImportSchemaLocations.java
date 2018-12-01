@@ -55,10 +55,10 @@ public class ImportSchemaLocations {
     protected static Schema validationSchema;
     protected static JAXBContext jaxbContext;
 
-    private Map<String, File> namespaceSchemaLocations = new HashMap<String, File>();
-    private Map<String, String> namespacePrefixes = new HashMap<String, String>();
-    private Map<String, List<File>> originalSchemaLocations = new HashMap<String, List<File>>();
-    private Set<String> importedNamespaces = new HashSet<String>();
+    private Map<String,File> namespaceSchemaLocations = new HashMap<>();
+    private Map<String,String> namespacePrefixes = new HashMap<>();
+    private Map<String,List<File>> originalSchemaLocations = new HashMap<>();
+    private Set<String> importedNamespaces = new HashSet<>();
     private File baseOutputFolder;
 
     /**
@@ -97,7 +97,7 @@ public class ImportSchemaLocations {
             List<File> schemaFiles = originalSchemaLocations.get(namespace);
 
             if (schemaFiles == null) {
-                schemaFiles = new ArrayList<File>();
+                schemaFiles = new ArrayList<>();
                 schemaFiles.add(namespaceSchemaLocations.get(namespace));
                 originalSchemaLocations.put(namespace, schemaFiles);
                 namespaceSchemaLocations.put(namespace, getConsolidatedImportFilename(namespace));
@@ -142,7 +142,7 @@ public class ImportSchemaLocations {
      * @throws CodeGenerationException
      */
     public List<File> generateConsolidatedImportFiles() throws CodeGenerationException {
-        List<File> importFiles = new ArrayList<File>();
+        List<File> importFiles = new ArrayList<>();
 
         for (String namespace : originalSchemaLocations.keySet()) {
             if (importedNamespaces.contains(namespace)) {
@@ -254,8 +254,8 @@ public class ImportSchemaLocations {
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
             marshaller.marshal(schema, schemaFile);
 
-        } catch (Throwable t) {
-            throw new CodeGenerationException(t);
+        } catch (Exception e) {
+            throw new CodeGenerationException(e);
         }
     }
 
@@ -273,8 +273,8 @@ public class ImportSchemaLocations {
             validationSchema = schemaFactory.newSchema(new StreamSource(schemaStream));
             jaxbContext = JAXBContext.newInstance(SCHEMA_CONTEXT);
 
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

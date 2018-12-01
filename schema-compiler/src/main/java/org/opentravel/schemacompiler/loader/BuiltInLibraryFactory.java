@@ -20,6 +20,8 @@ import java.util.List;
 
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Factory used to construct the list of built-in libraries that should be included with every model
@@ -29,6 +31,8 @@ import org.opentravel.schemacompiler.model.BuiltInLibrary;
  */
 public final class BuiltInLibraryFactory {
 
+    private static final Logger log = LoggerFactory.getLogger(BuiltInLibraryFactory.class);
+    
     private List<BuiltInLibraryLoader> loaders;
 
     /**
@@ -66,7 +70,7 @@ public final class BuiltInLibraryFactory {
      * @return List<BuiltInLibrary>
      */
     public List<BuiltInLibrary> getBuiltInLibraries() {
-        List<BuiltInLibrary> builtIns = new ArrayList<BuiltInLibrary>();
+        List<BuiltInLibrary> builtIns = new ArrayList<>();
 
         for (BuiltInLibraryLoader loader : loaders) {
             try {
@@ -76,7 +80,7 @@ public final class BuiltInLibraryFactory {
                     builtIns.add(library);
                 }
             } catch (LibraryLoaderException e) {
-                e.printStackTrace(); // print error and move on to the next library
+            	log.error("Error loading built-in library", e);
             }
         }
         return builtIns;

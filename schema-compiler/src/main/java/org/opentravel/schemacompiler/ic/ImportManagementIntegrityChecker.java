@@ -95,8 +95,8 @@ public abstract class ImportManagementIntegrityChecker<E extends ModelEvent<S>, 
     public static void verifyReferencedLibraries(TLLibrary originatingLibrary,
             Map<AbstractLibrary, URL> libraryUrlOverrides) {
         List<AbstractLibrary> referencedLibraries = getReferencedLibraries((TLLibrary) originatingLibrary);
-        Map<String, List<String>> importedFileHints = new HashMap<String, List<String>>();
-        List<AbstractLibrary> includedLibs = new ArrayList<AbstractLibrary>();
+        Map<String,List<String>> importedFileHints = new HashMap<>();
+        List<AbstractLibrary> includedLibs = new ArrayList<>();
 
         // First, check each existing import/include to make sure we still need it
         for (AbstractLibrary referencedLib : referencedLibraries) {
@@ -107,7 +107,7 @@ public abstract class ImportManagementIntegrityChecker<E extends ModelEvent<S>, 
                     List<String> importList = importedFileHints.get(referencedLib.getNamespace());
 
                     if (importList == null) {
-                        importList = new ArrayList<String>();
+                        importList = new ArrayList<>();
                         importedFileHints.put(referencedLib.getNamespace(), importList);
                     }
                     importList.add(getReferenceUrl(originatingLibrary, referencedLib,
@@ -224,7 +224,7 @@ public abstract class ImportManagementIntegrityChecker<E extends ModelEvent<S>, 
      */
     private static void removeUnneededImports(TLLibrary owningLibrary,
             Map<String, List<String>> importedFileHints) {
-        List<TLNamespaceImport> importList = new ArrayList<TLNamespaceImport>(
+        List<TLNamespaceImport> importList = new ArrayList<>(
                 owningLibrary.getNamespaceImports());
 
         for (TLNamespaceImport nsImport : importList) {
@@ -262,8 +262,8 @@ public abstract class ImportManagementIntegrityChecker<E extends ModelEvent<S>, 
      */
     private static void removeUnneededIncludes(TLLibrary owningLibrary,
             List<AbstractLibrary> includedLibs, Map<AbstractLibrary, URL> libraryUrlOverrides) {
-        List<TLInclude> includeList = new ArrayList<TLInclude>(owningLibrary.getIncludes());
-        List<String> requiredIncludeUrls = new ArrayList<String>();
+        List<TLInclude> includeList = new ArrayList<>(owningLibrary.getIncludes());
+        List<String> requiredIncludeUrls = new ArrayList<>();
 
         // First build the list of required library URL's
         for (AbstractLibrary includedLib : includedLibs) {
@@ -313,7 +313,8 @@ public abstract class ImportManagementIntegrityChecker<E extends ModelEvent<S>, 
             AbstractLibrary referencedLibrary, Map<AbstractLibrary, URL> libraryUrlOverrides) {
         ProjectManager projectManager = ProjectManager.getProjectManager(originatingLibrary
                 .getOwningModel());
-        URL originatingLibraryUrl, referencedLibraryUrl;
+        URL originatingLibraryUrl;
+        URL referencedLibraryUrl;
         String referenceUrl = null;
 
         // Lookup the correct URLs for the originating and referenced libraries
@@ -430,7 +431,7 @@ public abstract class ImportManagementIntegrityChecker<E extends ModelEvent<S>, 
      */
     private static class ReferencedLibraryVisitor extends ModelElementVisitorAdapter {
 
-        private List<AbstractLibrary> referencedLibraries = new ArrayList<AbstractLibrary>();
+        private List<AbstractLibrary> referencedLibraries = new ArrayList<>();
         private TLLibrary referencingLibrary;
 
         /**

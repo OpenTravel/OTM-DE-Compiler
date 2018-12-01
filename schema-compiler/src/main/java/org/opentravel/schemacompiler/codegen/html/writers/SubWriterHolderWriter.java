@@ -109,7 +109,7 @@ public class SubWriterHolderWriter extends HtmlDocletWriter {
      * @return a content tree for the member
      */
     public Content getMemberTree(Content contentTree) {
-        Content ul = HtmlTree.UL(HtmlStyle.blockList, contentTree);
+        Content ul = HtmlTree.ul(HtmlStyle.blockList, contentTree);
         return ul;
     }
 

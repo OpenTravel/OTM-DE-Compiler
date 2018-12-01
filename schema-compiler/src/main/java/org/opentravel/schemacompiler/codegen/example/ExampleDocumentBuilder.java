@@ -47,7 +47,7 @@ public class ExampleDocumentBuilder extends ExampleBuilder<Document>{
 
     private static final String XML_HEADER_CONTENT = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n\n";
     
-    private Map<String, String> schemaLocations = new HashMap<String, String>();
+    private Map<String,String> schemaLocations = new HashMap<>();
 
     
     /**

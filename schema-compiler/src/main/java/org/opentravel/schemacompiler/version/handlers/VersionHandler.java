@@ -101,7 +101,7 @@ public abstract class VersionHandler<V extends Versioned> {
      */
     public List<V> getAllVersionExtensions(V versionedEntity)
             throws VersionSchemeException {
-        List<V> extendedVersions = new ArrayList<V>();
+        List<V> extendedVersions = new ArrayList<>();
         V extendedVersion = versionedEntity;
 
         while ((extendedVersion = getVersionExtension(extendedVersion)) != null) {
@@ -234,8 +234,8 @@ public abstract class VersionHandler<V extends Versioned> {
      * @throws VersionSchemeException  thrown if the entity's version scheme is not recognized
      */
     protected VersionScheme getVersionScheme(Versioned entity) throws VersionSchemeException {
-        VersionSchemeFactory factory = VersionSchemeFactory.getInstance();
-        return (entity == null) ? null : factory.getVersionScheme(entity.getVersionScheme());
+        VersionSchemeFactory f = VersionSchemeFactory.getInstance();
+        return (entity == null) ? null : f.getVersionScheme(entity.getVersionScheme());
     }
     
     /**

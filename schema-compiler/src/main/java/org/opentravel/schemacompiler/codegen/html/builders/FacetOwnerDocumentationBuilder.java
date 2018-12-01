@@ -30,7 +30,7 @@ import org.opentravel.schemacompiler.model.TLFacetOwner;
 public abstract class FacetOwnerDocumentationBuilder<T extends TLFacetOwner & TLDocumentationOwner>
 		extends NamedEntityDocumentationBuilder<T> {
 
-	List<FacetDocumentationBuilder> facets = new ArrayList<FacetDocumentationBuilder>();
+	List<FacetDocumentationBuilder> facets = new ArrayList<>();
 
 	/**
 	 * @param manager
@@ -53,7 +53,9 @@ public abstract class FacetOwnerDocumentationBuilder<T extends TLFacetOwner & TL
 	@Override
 	public void build() throws Exception {
 		ListIterator<FacetDocumentationBuilder> facetIter = facets.listIterator();
-		FacetDocumentationBuilder prev, next;
+		FacetDocumentationBuilder prev;
+		FacetDocumentationBuilder next;
+		
 		while(facetIter.hasNext()){
 			prev = facetIter.hasPrevious() ? facets.get(facetIter.previousIndex()) : null;
 			FacetDocumentationBuilder builder = facetIter.next();

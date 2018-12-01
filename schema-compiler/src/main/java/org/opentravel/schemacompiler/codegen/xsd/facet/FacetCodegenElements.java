@@ -31,8 +31,8 @@ import org.w3._2001.xmlschema.Element;
  */
 public class FacetCodegenElements {
 
-    private Map<NamedEntity, Element> subgroupElements = new HashMap<NamedEntity, Element>();
-    private Map<NamedEntity, List<Element>> facetElements = new HashMap<NamedEntity, List<Element>>();
+    private Map<NamedEntity,Element> subgroupElements = new HashMap<>();
+    private Map<NamedEntity,List<Element>> facetElements = new HashMap<>();
 
     /**
      * Adds/merges the contents of the given <code>FacetCodegenElements</code> with this instance.
@@ -92,7 +92,7 @@ public class FacetCodegenElements {
             List<Element> elementList = facetElements.get(elementOwner);
 
             if (elementList == null) {
-                elementList = new ArrayList<Element>();
+                elementList = new ArrayList<>();
                 facetElements.put(elementOwner, elementList);
             }
             elementList.add(element);
@@ -110,7 +110,7 @@ public class FacetCodegenElements {
         List<Element> elementList = facetElements.get(elementOwner);
 
         if (elementList == null) {
-            elementList = new ArrayList<Element>();
+            elementList = new ArrayList<>();
         }
         return elementList;
     }

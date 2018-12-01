@@ -77,7 +77,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 
 	private JsonNodeFactory nodeFactory = JsonNodeFactory.withExactBigDecimals( true );
 	private ObjectNode node;
-	private List<JsonIdReferenceAssignment> referenceAssignments = new ArrayList<JsonIdReferenceAssignment>();
+	private List<JsonIdReferenceAssignment> referenceAssignments = new ArrayList<>();
 
 	/**
 	 * Default constructor.

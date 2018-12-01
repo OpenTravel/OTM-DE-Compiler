@@ -44,14 +44,14 @@ public class LibraryDocumentationBuilder implements DocumentationBuilder {
 
 	private LibraryDocumentationBuilder prev;
 	
-	private List<DocumentationBuilder> businessObjects = new ArrayList<DocumentationBuilder>();
-	private List<DocumentationBuilder> coreObjects = new ArrayList<DocumentationBuilder>();
-	private List<DocumentationBuilder> choiceObjects = new ArrayList<DocumentationBuilder>();
-	private List<DocumentationBuilder> vwaObjects = new ArrayList<DocumentationBuilder>();
-	private List<DocumentationBuilder> serviceObjects = new ArrayList<DocumentationBuilder>();
-	private List<DocumentationBuilder> enumObjects = new ArrayList<DocumentationBuilder>();
-	private List<DocumentationBuilder> simpleObjects = new ArrayList<DocumentationBuilder>();
-	private List<DocumentationBuilder> allObjects = new ArrayList<DocumentationBuilder>();
+	private List<DocumentationBuilder> businessObjects = new ArrayList<>();
+	private List<DocumentationBuilder> coreObjects = new ArrayList<>();
+	private List<DocumentationBuilder> choiceObjects = new ArrayList<>();
+	private List<DocumentationBuilder> vwaObjects = new ArrayList<>();
+	private List<DocumentationBuilder> serviceObjects = new ArrayList<>();
+	private List<DocumentationBuilder> enumObjects = new ArrayList<>();
+	private List<DocumentationBuilder> simpleObjects = new ArrayList<>();
+	private List<DocumentationBuilder> allObjects = new ArrayList<>();
 
 	/**
 	 * @param element
@@ -152,9 +152,11 @@ public class LibraryDocumentationBuilder implements DocumentationBuilder {
 		writer.addFooter(content);
 		writer.printDocument(content);
 		writer.close();
-		DocumentationBuilder p, n;
+		DocumentationBuilder p;
+		DocumentationBuilder n;
 		ListIterator<DocumentationBuilder> objectIter = allObjects
 				.listIterator();
+		
 		while (objectIter.hasNext()) {
 			p = objectIter.hasPrevious() ? allObjects.get(objectIter
 					.previousIndex()) : null;

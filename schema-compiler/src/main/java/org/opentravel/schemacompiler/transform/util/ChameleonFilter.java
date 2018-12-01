@@ -39,7 +39,7 @@ import org.opentravel.schemacompiler.util.URLUtils;
  */
 public class ChameleonFilter implements AnonymousEntityFilter {
 
-    private Collection<String> anonymousLibraryUrls = new ArrayList<String>();
+    private Collection<String> anonymousLibraryUrls = new ArrayList<>();
 
     /**
      * Constructor that assigns the library that is to be considered the assigning entity for all
@@ -52,7 +52,7 @@ public class ChameleonFilter implements AnonymousEntityFilter {
         if ((contextLibrary != null)
                 && !AnonymousEntityFilter.ANONYMOUS_PSEUDO_NAMESPACE.equals(contextLibrary
                         .getNamespace())) {
-            Collection<URL> chameleonUrls = new ArrayList<URL>();
+            Collection<URL> chameleonUrls = new ArrayList<>();
 
             findChameleonLibraryUrls(contextLibrary, contextLibrary.getNamespace(), chameleonUrls,
                     new HashSet<AbstractLibrary>());
@@ -87,7 +87,7 @@ public class ChameleonFilter implements AnonymousEntityFilter {
             anonymousEntities = (Collection<Object>) anonymousEntity;
 
         } else {
-            anonymousEntities = new ArrayList<Object>();
+            anonymousEntities = new ArrayList<>();
 
             if (anonymousEntity != null) {
                 anonymousEntities.add(anonymousEntity);
@@ -152,9 +152,8 @@ public class ChameleonFilter implements AnonymousEntityFilter {
                             continue;
                         }
 
-                        // Disregard non-chameleon libraries that are assigned to a different namespace;
-                        // these are errors
-                        // that will be picked up by the validator
+                        // Disregard non-chameleon libraries that are assigned to a different namespace.
+                        // These are errors that will be picked up by the validator
                         if (!isChameleon(includedLibrary)
                                 && !includedLibrary.getNamespace().equals(targetNamespace)) {
                             continue;
@@ -163,7 +162,7 @@ public class ChameleonFilter implements AnonymousEntityFilter {
                         // If we have not seen the included library before, recurse to determine if it
                         // (or one of
                         // its includes) is a chameleon that should be considered.
-                        if ((includedLibrary != null) && !visitedLibraries.contains(includedLibrary)) {
+                        if (!visitedLibraries.contains(includedLibrary)) {
                             findChameleonLibraryUrls(includedLibrary, targetNamespace, chameleonUrls,
                                     visitedLibraries);
                         }

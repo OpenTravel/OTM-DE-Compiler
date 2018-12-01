@@ -113,7 +113,7 @@ public abstract class AbstractVersionHelper {
      */
     public List<TLLibrary> getVersionChain(TLLibrary library) throws VersionSchemeException {
         VersionScheme versionScheme = getVersionScheme(library);
-        List<TLLibrary> versionChain = new ArrayList<TLLibrary>();
+        List<TLLibrary> versionChain = new ArrayList<>();
         String currentVersionNS = library.getNamespace();
 
         if (library.getOwningModel() == null) {
@@ -223,7 +223,7 @@ public abstract class AbstractVersionHelper {
      *             thrown if the given library is not associated with a TLModel instance
      */
     List<TLLibrary> getLaterMinorVersions(TLLibrary library) throws VersionSchemeException {
-        List<TLLibrary> minorVersionList = new ArrayList<TLLibrary>();
+        List<TLLibrary> minorVersionList = new ArrayList<>();
 
         if (library.getOwningModel() == null) {
             throw new IllegalStateException(
@@ -231,7 +231,7 @@ public abstract class AbstractVersionHelper {
                             + library.getLibraryUrl().toExternalForm());
         }
 
-        if ((library != null) && (library.getNamespace() != null)) {
+        if (library.getNamespace() != null) {
             VersionScheme versionScheme = getVersionScheme(library);
 
             for (TLLibrary lib : library.getOwningModel().getUserDefinedLibraries()) {
@@ -264,7 +264,7 @@ public abstract class AbstractVersionHelper {
      *             thrown if the given library is not associated with a TLModel instance
      */
     List<TLLibrary> getLaterPatchVersions(TLLibrary library) throws VersionSchemeException {
-        List<TLLibrary> patchVersionList = new ArrayList<TLLibrary>();
+        List<TLLibrary> patchVersionList = new ArrayList<>();
 
         if ((library != null) && (library.getNamespace() != null)) {
             VersionScheme versionScheme = getVersionScheme(library);
@@ -357,7 +357,7 @@ public abstract class AbstractVersionHelper {
      */
     List<ProjectItem> importLaterMinorVersionsFromRepository(TLLibrary library,
             List<TLLibrary> existingLaterMinorVersions) throws VersionSchemeException {
-        List<ProjectItem> importedVersions = new ArrayList<ProjectItem>();
+        List<ProjectItem> importedVersions = new ArrayList<>();
         VersionScheme versionScheme = getVersionScheme(library);
 
         if (activeProject != null) {
@@ -366,7 +366,7 @@ public abstract class AbstractVersionHelper {
             String libraryMajorVersion = versionScheme.getMajorVersion(library.getVersion());
             Comparator<Versioned> versionComparator = versionScheme.getComparator(true);
             VersionWrapper libraryWrapper = new VersionWrapper(library);
-            List<RepositoryItem> laterMinorVersions = new ArrayList<RepositoryItem>();
+            List<RepositoryItem> laterMinorVersions = new ArrayList<>();
 
             // Add all of the new versions as long as they
             // 1) have the same major version,
@@ -426,7 +426,7 @@ public abstract class AbstractVersionHelper {
      */
     List<ProjectItem> importLaterPatchVersionsFromRepository(TLLibrary library,
             List<TLLibrary> existingLaterPatchVersions) throws VersionSchemeException {
-        List<ProjectItem> importedVersions = new ArrayList<ProjectItem>();
+        List<ProjectItem> importedVersions = new ArrayList<>();
         VersionScheme versionScheme = getVersionScheme(library);
 
         if (activeProject != null) {
@@ -436,7 +436,7 @@ public abstract class AbstractVersionHelper {
             String libraryMinorVersion = versionScheme.getMinorVersion(library.getVersion());
             Comparator<Versioned> versionComparator = versionScheme.getComparator(true);
             VersionWrapper libraryWrapper = new VersionWrapper(library);
-            List<RepositoryItem> laterPatchVersions = new ArrayList<RepositoryItem>();
+            List<RepositoryItem> laterPatchVersions = new ArrayList<>();
 
             // Add all of the new versions as long as they
             // 1) have the same major and minor version,
@@ -491,16 +491,14 @@ public abstract class AbstractVersionHelper {
      * @param versionScheme
      *            the version scheme of the library
      * @return List<RepositoryItem>
-     * @throws VersionSchemeException
-     *             thrown if the library's version scheme is invalid
      */
     private List<RepositoryItem> findAllManagedVersionsNotLoaded(TLLibrary library,
-            VersionScheme versionScheme) throws VersionSchemeException {
+            VersionScheme versionScheme) {
         RepositoryManager repositoryManager = activeProject.getProjectManager()
                 .getRepositoryManager();
-        List<Repository> repositoriesToSearch = new ArrayList<Repository>();
-        List<RepositoryItem> newVersions = new ArrayList<RepositoryItem>();
-        List<String> itemKeys = new ArrayList<String>();
+        List<Repository> repositoriesToSearch = new ArrayList<>();
+        List<RepositoryItem> newVersions = new ArrayList<>();
+        List<String> itemKeys = new ArrayList<>();
 
         repositoriesToSearch.addAll(repositoryManager.listRemoteRepositories());
         repositoriesToSearch.add(repositoryManager); // the repository manager instance represents
@@ -928,9 +926,8 @@ public abstract class AbstractVersionHelper {
     boolean isReadOnly(AbstractLibrary library) {
         ProjectItem item = (activeProject == null) ? null : activeProject.getProjectManager()
                 .getProjectItem(library);
-        boolean readOnly = (item != null) ? item.isReadOnly() : library.isReadOnly();
-
-        return readOnly;
+        
+        return (item != null) ? item.isReadOnly() : library.isReadOnly();
     }
 
     /**
@@ -995,7 +992,7 @@ public abstract class AbstractVersionHelper {
             library = null;
 
         } else if (versionedEntity instanceof LibraryElement) {
-            AbstractLibrary lib = ((LibraryElement) versionedEntity).getOwningLibrary();
+            AbstractLibrary lib = versionedEntity.getOwningLibrary();
 
             if (lib instanceof TLLibrary) {
                 library = (TLLibrary) lib;
@@ -1166,8 +1163,8 @@ public abstract class AbstractVersionHelper {
          */
         @Override
         public boolean isLaterVersion(Versioned otherVersionedItem) {
-            return ((library == null) || (otherVersionedItem == null)) ? false : library
-                    .isLaterVersion(otherVersionedItem.getOwningLibrary());
+            return (library != null) && (otherVersionedItem != null) &&
+            		library.isLaterVersion(otherVersionedItem.getOwningLibrary());
         }
 
         /**

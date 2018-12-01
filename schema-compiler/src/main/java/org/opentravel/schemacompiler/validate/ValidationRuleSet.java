@@ -29,8 +29,8 @@ import java.util.List;
  */
 public class ValidationRuleSet {
 
-    private List<ValidationRuleSet> nestedRuleSets = new ArrayList<ValidationRuleSet>();
-    private List<ValidatorMapping<?>> validatorMappings = new ArrayList<ValidatorMapping<?>>();
+    private List<ValidationRuleSet> nestedRuleSets = new ArrayList<>();
+    private List<ValidatorMapping<?>> validatorMappings = new ArrayList<>();
 
     /**
      * Default constructor.
@@ -90,7 +90,7 @@ public class ValidationRuleSet {
      */
     public <T extends Validatable> List<Class<Validator<T>>> getValidatorClasses(
             Class<T> targetClass) {
-        List<Class<Validator<T>>> validatorClasses = new ArrayList<Class<Validator<T>>>();
+        List<Class<Validator<T>>> validatorClasses = new ArrayList<>();
 
         if (targetClass != null) {
             findValidatorClasses(targetClass, this, validatorClasses,

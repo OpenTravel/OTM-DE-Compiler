@@ -40,9 +40,9 @@ public final class SymbolTable {
 
     private static final String OPERATION_SYMBOL_PREFIX = "OP:";
 
-    private Map<String, Map<String, Object>> namespaceSymbols = new HashMap<String, Map<String, Object>>();
-    private List<DerivedEntityFactory<Object>> derivedEntityFactories = new ArrayList<DerivedEntityFactory<Object>>();
-    private Map<String, List<Object>> anonymousEntities = new HashMap<String, List<Object>>();
+    private Map<String,Map<String, Object>> namespaceSymbols = new HashMap<>();
+    private List<DerivedEntityFactory<Object>> derivedEntityFactories = new ArrayList<>();
+    private Map<String,List<Object>> anonymousEntities = new HashMap<>();
 
     /**
      * Returns the entity with the specified name or null if such an entity has not been defined.
@@ -64,7 +64,7 @@ public final class SymbolTable {
                 || AnonymousEntityFilter.ANONYMOUS_PSEUDO_NAMESPACE.equals(namespace)) {
             List<Object> entityList = anonymousEntities.get(localName);
 
-            if ((entityList != null) && (entityList.size() > 0)) {
+            if ((entityList != null) && !entityList.isEmpty()) {
                 // If there are duplicate entities assigned to the same name, we will just
                 // pick the first one
                 entity = entityList.get(0);
@@ -145,7 +145,7 @@ public final class SymbolTable {
      * @return Collection<String>
      */
     public Collection<String> getLocalNames(String namespace) {
-        Set<String> localNames = new HashSet<String>();
+        Set<String> localNames = new HashSet<>();
 
         if ((namespace == null)
                 || AnonymousEntityFilter.ANONYMOUS_PSEUDO_NAMESPACE.equals(namespace)) {
@@ -183,7 +183,7 @@ public final class SymbolTable {
             List<Object> entityList = anonymousEntities.get(localName);
 
             if (entityList == null) {
-                entityList = new ArrayList<Object>();
+                entityList = new ArrayList<>();
                 anonymousEntities.put(localName, entityList);
             }
             entityList.add(entity);
@@ -193,7 +193,7 @@ public final class SymbolTable {
             Map<String, Object> localSymbols = namespaceSymbols.get(namespace);
 
             if (localSymbols == null) {
-                localSymbols = new HashMap<String, Object>();
+                localSymbols = new HashMap<>();
                 namespaceSymbols.put(namespace, localSymbols);
             }
             localSymbols.put(localName, entity);
@@ -244,6 +244,7 @@ public final class SymbolTable {
      */
     public void displayTable() {
         System.out.println("Symbol Table:");
+        
         for (String ns : namespaceSymbols.keySet()) {
             Map<String, Object> localNameMap = namespaceSymbols.get(ns);
             System.out.println("  " + ns);

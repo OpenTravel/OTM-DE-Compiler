@@ -41,7 +41,7 @@ public abstract class ComplexTypeDocumentationBuilder<T extends TLFacetOwner & T
 	 */
 	public ComplexTypeDocumentationBuilder(T element) {
 		super(element);
-		aliases = new ArrayList<String>();
+		aliases = new ArrayList<>();
 		for (TLAlias alias : element.getAliases()) {
 			aliases.add(alias.getName());
 		}

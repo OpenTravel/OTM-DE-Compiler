@@ -75,7 +75,7 @@ public class ExampleNavigator {
 	
 	private static FacetCodegenDelegateFactory facetDelegateFactory = new FacetCodegenDelegateFactory(null);
 
-    private Stack<Object> entityStack = new Stack<Object>();
+    private Stack<Object> entityStack = new Stack<>();
     private ExtensionPointRegistry extensionPointRegistry;
     private Map<TLChoiceObject,List<TLFacet>> choiceFacetRotation = new HashMap<>();
     private ExampleGeneratorOptions options;
@@ -650,7 +650,7 @@ public class ExampleNavigator {
     protected void navigateFacetMembers(TLFacet facet) {
         Map<TLFacetType, List<TLExtensionPointFacet>> facetExtensionsByType =
         		extensionPointRegistry.getExtensionPoints( facet );
-        Set<TLFacetType> processedExtensionPointTypes = new HashSet<TLFacetType>();
+        Set<TLFacetType> processedExtensionPointTypes = new HashSet<>();
         String previousFacetIdentity = null;
 
         // Start by navigating attributes and indicators for this facet
@@ -978,7 +978,7 @@ public class ExampleNavigator {
      * @return TLAbstractFacet
      */
     private TLAbstractFacet getMaximumDetail(TLFacetOwner facetOwner) {
-        List<TLAbstractFacet> candidateFacets = new ArrayList<TLAbstractFacet>();
+        List<TLAbstractFacet> candidateFacets = new ArrayList<>();
         TLAbstractFacet result = null;
 
         if (facetOwner instanceof TLBusinessObject) {
@@ -1026,7 +1026,7 @@ public class ExampleNavigator {
      * @return TLAbstractFacet
      */
     private TLListFacet getMaximumListDetail(TLCoreObject facetOwner) {
-        List<TLListFacet> candidateFacets = new ArrayList<TLListFacet>();
+        List<TLListFacet> candidateFacets = new ArrayList<>();
         TLListFacet result = null;
 
         candidateFacets.add(facetOwner.getDetailListFacet());
@@ -1054,7 +1054,7 @@ public class ExampleNavigator {
 
         if ((preferredFacet != null) && !preferredFacet.declaresContent()) {
             TLFacetOwner facetOwner = preferredFacet.getOwningEntity();
-            List<TLAbstractFacet> candidateFacets = new ArrayList<TLAbstractFacet>();
+            List<TLAbstractFacet> candidateFacets = new ArrayList<>();
 
             if (facetOwner instanceof TLBusinessObject) {
                 TLBusinessObject businessObject = (TLBusinessObject) facetOwner;
@@ -1109,7 +1109,7 @@ public class ExampleNavigator {
 
         if ((preferredFacet != null) && !preferredFacet.declaresContent()) {
             TLCoreObject facetOwner = (TLCoreObject) preferredFacet.getOwningEntity();
-            List<TLListFacet> candidateFacets = new ArrayList<TLListFacet>();
+            List<TLListFacet> candidateFacets = new ArrayList<>();
 
             switch (preferredFacet.getFacetType()) {
                 case DETAIL:

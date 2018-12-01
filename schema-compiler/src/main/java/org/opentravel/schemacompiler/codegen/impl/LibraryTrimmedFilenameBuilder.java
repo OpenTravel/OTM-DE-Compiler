@@ -30,7 +30,7 @@ import org.opentravel.schemacompiler.model.TLLibrary;
 public class LibraryTrimmedFilenameBuilder implements
         CodeGenerationFilenameBuilder<AbstractLibrary> {
 
-    private LibraryFilenameBuilder<AbstractLibrary> libraryFilenameBuilder = new LibraryFilenameBuilder<AbstractLibrary>();
+    private LibraryFilenameBuilder<AbstractLibrary> libraryFilenameBuilder = new LibraryFilenameBuilder<>();
     private String memberFilename;
 
     /**

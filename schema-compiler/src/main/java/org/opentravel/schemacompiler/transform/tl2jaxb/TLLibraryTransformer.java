@@ -99,7 +99,7 @@ public class TLLibraryTransformer extends
         for (TLNamespaceImport modelImport : source.getNamespaceImports()) {
             NamespaceImport jaxbImport = new NamespaceImport();
 
-            if ((modelImport.getFileHints() != null) && (modelImport.getFileHints().size() > 0)) {
+            if ((modelImport.getFileHints() != null) && !modelImport.getFileHints().isEmpty()) {
                 StringBuilder fileHints = new StringBuilder();
 
                 for (String fileHint : modelImport.getFileHints()) {
@@ -145,7 +145,7 @@ public class TLLibraryTransformer extends
      * @return List<String>
      */
     private List<String> getIncludePaths(List<TLInclude> includes) {
-        List<String> roleNames = new ArrayList<String>();
+        List<String> roleNames = new ArrayList<>();
 
         for (TLInclude include : includes) {
             if (include.getPath() != null) {
@@ -189,7 +189,7 @@ public class TLLibraryTransformer extends
      */
     static {
         try {
-            Map<Class<?>, Class<?>> classMappings = new HashMap<Class<?>, Class<?>>();
+            Map<Class<?>,Class<?>> classMappings = new HashMap<>();
 
             classMappings.put(TLService.class, Service.class);
             classMappings.put(TLBusinessObject.class, BusinessObject.class);
@@ -203,8 +203,8 @@ public class TLLibraryTransformer extends
             classMappings.put(TLExtensionPointFacet.class, ExtensionPointFacet.class);
             model2JaxbClassMappings = Collections.unmodifiableMap(classMappings);
 
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

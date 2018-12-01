@@ -36,12 +36,12 @@ import org.opentravel.schemacompiler.security.UserPrincipal;
  */
 public class NamespacePermissions {
 
-    private static List<RepositoryPermission> prioritizedPermissions = Arrays
-            .asList(new RepositoryPermission[] { RepositoryPermission.READ_FINAL,
-                    RepositoryPermission.READ_DRAFT, RepositoryPermission.WRITE });
+    private static List<RepositoryPermission> prioritizedPermissions = Arrays.asList(
+    		RepositoryPermission.READ_FINAL, RepositoryPermission.READ_DRAFT,
+            RepositoryPermission.WRITE );
 
     private String namespace;
-    private List<NamespacePermission> permissions = new ArrayList<NamespacePermission>();
+    private List<NamespacePermission> permissions = new ArrayList<>();
 
     /**
      * Default constructor.
@@ -84,8 +84,8 @@ public class NamespacePermissions {
      *            the list of group names for which permissions must exist in this namespace
      */
     public void createGroupPermissions(List<String> groupNames) {
-        Map<String, NamespacePermission> principalPermissions = new HashMap<String, NamespacePermission>();
-        List<String> principalNames = new ArrayList<String>();
+        Map<String,NamespacePermission> principalPermissions = new HashMap<>();
+        List<String> principalNames = new ArrayList<>();
 
         // Create an index of all permissions by principal
         for (NamespacePermission nsPermission : permissions) {
@@ -116,7 +116,7 @@ public class NamespacePermissions {
 
         // Assemble a new list of permissions, adding new (empty) permissions for the missing
         // principals
-        List<NamespacePermission> newPermissions = new ArrayList<NamespacePermission>();
+        List<NamespacePermission> newPermissions = new ArrayList<>();
 
         for (String principalName : principalNames) {
             NamespacePermission nsPermission = principalPermissions.get(principalName);
@@ -138,8 +138,8 @@ public class NamespacePermissions {
      * @return NamespaceAuthorizations
      */
     public NamespaceAuthorizations toJaxbAuthorizations() {
-        Map<RepositoryPermission, AuthorizationSpec> jaxbGrants = new HashMap<RepositoryPermission, AuthorizationSpec>();
-        Map<RepositoryPermission, AuthorizationSpec> jaxbDenies = new HashMap<RepositoryPermission, AuthorizationSpec>();
+        Map<RepositoryPermission,AuthorizationSpec> jaxbGrants = new HashMap<>();
+        Map<RepositoryPermission,AuthorizationSpec> jaxbDenies = new HashMap<>();
         NamespaceAuthorizations jaxbAuthorizations = new NamespaceAuthorizations();
 
         // Assemble the set of granted and denied permissions
@@ -187,8 +187,8 @@ public class NamespacePermissions {
      *            the permissions loaded from the JAXB configuration file
      */
     private void init(NamespaceAuthorizations jaxbPermissions) {
-        Map<String, NamespacePermission> principalPermissions = new HashMap<String, NamespacePermission>();
-        List<String> principalNames = new ArrayList<String>();
+        Map<String,NamespacePermission> principalPermissions = new HashMap<>();
+        List<String> principalNames = new ArrayList<>();
 
         if (jaxbPermissions != null) {
 

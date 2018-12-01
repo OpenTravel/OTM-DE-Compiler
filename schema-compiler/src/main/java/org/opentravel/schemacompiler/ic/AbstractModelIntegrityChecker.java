@@ -47,7 +47,7 @@ public abstract class AbstractModelIntegrityChecker implements
      * @return ModelEventListener<?,?>
      */
     protected List<ModelEventListener<?, ?>> getListeners() {
-        return new ArrayList<ModelEventListener<?, ?>>();
+        return new ArrayList<>();
     }
 
     /**

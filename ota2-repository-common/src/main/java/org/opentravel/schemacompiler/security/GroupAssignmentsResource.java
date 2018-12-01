@@ -66,10 +66,10 @@ public class GroupAssignmentsResource extends FileResource<Map<String, List<Stri
      */
     public String[] getAssignedGroups(String userId) {
         Map<String, List<String>> groupAssignments = getResource();
-        List<String> assignedGroups = new ArrayList<String>();
+        List<String> assignedGroups = new ArrayList<>();
 
         for (String groupName : groupAssignments.keySet()) {
-            List<String> memberIds = new ArrayList<String>( groupAssignments.get(groupName) );
+            List<String> memberIds = new ArrayList<>( groupAssignments.get(groupName) );
             boolean memberOfGroup = false;
             
             for (String memberId : memberIds) {
@@ -92,7 +92,7 @@ public class GroupAssignmentsResource extends FileResource<Map<String, List<Stri
      */
     public String[] getGroupNames() {
         Map<String, List<String>> groupAssignments = getResource();
-        List<String> allGroups = new ArrayList<String>(groupAssignments.keySet());
+        List<String> allGroups = new ArrayList<>(groupAssignments.keySet());
 
         Collections.sort(allGroups);
         return allGroups.toArray(new String[allGroups.size()]);
@@ -107,7 +107,7 @@ public class GroupAssignmentsResource extends FileResource<Map<String, List<Stri
      */
     public String[] getAssignedUsers(String groupName) {
         Map<String, List<String>> groupAssignments = getResource();
-        List<String> groupMembers = new ArrayList<String>();
+        List<String> groupMembers = new ArrayList<>();
 
         for (String _groupName : groupAssignments.keySet()) {
             if (groupName.equals(_groupName)) {
@@ -123,8 +123,8 @@ public class GroupAssignmentsResource extends FileResource<Map<String, List<Stri
      * @see org.opentravel.schemacompiler.config.FileResource#getDefaultResourceValue()
      */
     @Override
-    protected Map<String, List<String>> getDefaultResourceValue() {
-        return new HashMap<String, List<String>>();
+    protected Map<String,List<String>> getDefaultResourceValue() {
+        return new HashMap<>();
     }
 
     /**
@@ -135,7 +135,7 @@ public class GroupAssignmentsResource extends FileResource<Map<String, List<Stri
         if (fileUtils == null)
             return getDefaultResourceValue(); // Special case for constructor initialization
         GroupAssignments groupAssignments = fileUtils.loadGroupAssignments(dataFile);
-        Map<String, List<String>> assignmentMap = new HashMap<String, List<String>>();
+        Map<String,List<String>> assignmentMap = new HashMap<>();
 
         for (Group group : groupAssignments.getGroup()) {
             assignmentMap.put(group.getName(), new ArrayList<String>(group.getMember()));

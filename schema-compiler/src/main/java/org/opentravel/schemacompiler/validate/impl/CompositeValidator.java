@@ -35,7 +35,7 @@ import org.opentravel.schemacompiler.validate.ValidatorFactory;
  */
 public class CompositeValidator<T extends Validatable> implements Validator<T> {
 
-    private List<Validator<T>> validators = new ArrayList<Validator<T>>();
+    private List<Validator<T>> validators = new ArrayList<>();
     private ValidationContext context;
     private ValidatorFactory factory;
 

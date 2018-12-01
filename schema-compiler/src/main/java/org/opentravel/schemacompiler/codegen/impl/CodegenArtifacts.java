@@ -27,7 +27,7 @@ import java.util.List;
  */
 public class CodegenArtifacts {
 
-    private List<Object> artifactList = new ArrayList<Object>();
+    private List<Object> artifactList = new ArrayList<>();
 
     /**
      * Adds an artifact to the current list.
@@ -89,7 +89,7 @@ public class CodegenArtifacts {
      */
     @SuppressWarnings("unchecked")
     public <A> List<A> getArtifactsOfType(Class<A> artifactType) {
-        List<A> aList = new ArrayList<A>();
+        List<A> aList = new ArrayList<>();
 
         for (Object artifact : artifactList) {
             if ((artifact != null) && artifactType.isAssignableFrom(artifact.getClass())) {

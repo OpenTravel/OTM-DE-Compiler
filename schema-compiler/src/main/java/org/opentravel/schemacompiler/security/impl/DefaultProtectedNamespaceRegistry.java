@@ -29,7 +29,7 @@ import org.opentravel.schemacompiler.security.ProtectedNamespaceRegistry;
  */
 public class DefaultProtectedNamespaceRegistry extends ProtectedNamespaceRegistry {
 
-    private List<ProtectedNamespaceGroup> nsGroups = new ArrayList<ProtectedNamespaceGroup>();
+    private List<ProtectedNamespaceGroup> nsGroups = new ArrayList<>();
 
     /**
      * @see org.opentravel.schemacompiler.security.ProtectedNamespaceRegistry#getProtectedNamespaces()

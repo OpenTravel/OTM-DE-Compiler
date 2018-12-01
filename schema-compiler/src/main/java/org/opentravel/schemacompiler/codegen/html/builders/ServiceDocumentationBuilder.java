@@ -30,7 +30,7 @@ import org.opentravel.schemacompiler.codegen.html.writers.ServiceWriter;
  */
 public class ServiceDocumentationBuilder extends NamedEntityDocumentationBuilder<TLService> {
 	
-	private List<OperationDocumentationBuilder> operations = new ArrayList<OperationDocumentationBuilder>();
+	private List<OperationDocumentationBuilder> operations = new ArrayList<>();
 	
 	private String endpointURL;
 

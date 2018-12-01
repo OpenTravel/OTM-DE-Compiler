@@ -40,8 +40,8 @@ public final class UserPrincipal implements Serializable {
     private String lastName;
     private String firstName;
     private String emailAddress;
-    private Collection<String> assignedGroups = new ArrayList<String>();
-    private Collection<String> authorizationIds = new HashSet<String>();
+    private Collection<String> assignedGroups = new ArrayList<>();
+    private Collection<String> authorizationIds = new HashSet<>();
     
     /**
      * Default constructor.
@@ -174,8 +174,8 @@ public final class UserPrincipal implements Serializable {
     		anonymousUser.setLastName( "Anonymous" );
     		ANONYMOUS_USER = new UserPrincipal( anonymousUser, null );
     		 
-    	} catch (Throwable t) {
-    		throw new ExceptionInInitializerError( t );
+    	} catch (Exception e) {
+    		throw new ExceptionInInitializerError( e );
     	}
     }
     

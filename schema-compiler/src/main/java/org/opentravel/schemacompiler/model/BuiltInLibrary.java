@@ -38,9 +38,7 @@ import org.opentravel.schemacompiler.version.XSDVersionScheme;
  */
 public class BuiltInLibrary extends AbstractLibrary {
 
-    public static enum BuiltInType {
-        XSD_BUILTIN, TLLIBRARY_BUILTIN, SCHEMA_FOR_SCHEMAS_BUILTIN
-    };
+    public enum BuiltInType { XSD_BUILTIN, TLLIBRARY_BUILTIN, SCHEMA_FOR_SCHEMAS_BUILTIN }
 
     private static final Set<Class<?>> xsdMemberTypes;
 
@@ -67,12 +65,12 @@ public class BuiltInLibrary extends AbstractLibrary {
             List<LibraryMember> members) {
 
         this(namespace, name, prefix, libraryUrl, members, null, null,
-                createDefaultSchemaDeclaration(namespace, name, prefix, libraryUrl.toString(), true),
+                createDefaultSchemaDeclaration(namespace, name, prefix, libraryUrl.toString()),
                 XSDVersionScheme.ID);
     }
 
     private static SchemaDeclaration createDefaultSchemaDeclaration(String namespace, String name,
-            String prefix, String libraryUrl, boolean deprecated) {
+            String prefix, String libraryUrl) {
         SchemaDeclaration schemaDeclaration = new SchemaDeclaration();
         schemaDeclaration.setNamespace(namespace);
         schemaDeclaration.setName(name);
@@ -337,15 +335,15 @@ public class BuiltInLibrary extends AbstractLibrary {
      */
     static {
         try {
-            Set<Class<?>> xsdTypes = new HashSet<Class<?>>();
+            Set<Class<?>> xsdTypes = new HashSet<>();
 
             xsdTypes.add(XSDSimpleType.class);
             xsdTypes.add(XSDComplexType.class);
             xsdTypes.add(XSDElement.class);
             xsdMemberTypes = Collections.unmodifiableSet(xsdTypes);
 
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

@@ -169,7 +169,7 @@ public class VersionChainFactory {
 			libraryChain = librariesByName.get( library.getName() );
 			
 			if (libraryChain == null) {
-				libraryChain = new VersionChain<TLLibrary>( library.getBaseNamespace(),
+				libraryChain = new VersionChain<>( library.getBaseNamespace(),
 						library.getName(), new LibraryVersionComparator( vScheme, true ) );
 				librariesByName.put( library.getName(), libraryChain );
 			}
@@ -216,7 +216,7 @@ public class VersionChainFactory {
 					entityChain = entitiesByName.get( entity.getLocalName() );
 					
 					if (entityChain == null) {
-						entityChain = new VersionChain<Versioned>( library.getBaseNamespace(),
+						entityChain = new VersionChain<>( library.getBaseNamespace(),
 								entity.getLocalName(), vScheme.getComparator( true ) );
 						entitiesByName.put( entity.getLocalName(), entityChain );
 					}

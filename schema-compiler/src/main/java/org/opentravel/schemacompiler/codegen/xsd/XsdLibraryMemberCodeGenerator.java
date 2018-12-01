@@ -63,7 +63,7 @@ public class XsdLibraryMemberCodeGenerator extends AbstractXsdCodeGenerator<Libr
      */
     @Override
     protected CodeGenerationFilenameBuilder<LibraryMember> getDefaultFilenameBuilder() {
-        return new LibraryMemberFilenameBuilder<LibraryMember>();
+        return new LibraryMemberFilenameBuilder<>();
     }
 
     /**

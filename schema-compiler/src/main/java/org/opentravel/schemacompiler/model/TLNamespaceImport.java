@@ -34,7 +34,7 @@ public class TLNamespaceImport extends TLModelElement {
     private AbstractLibrary owningLibrary;
     private String prefix;
     private String namespace;
-    private List<String> fileHints = new ArrayList<String>();
+    private List<String> fileHints = new ArrayList<>();
 
     /**
      * Full constructor.
@@ -169,7 +169,7 @@ public class TLNamespaceImport extends TLModelElement {
      */
     public synchronized List<String> getFileHints() {
         if (owningLibrary != null) {
-            List<String> oldHints = new ArrayList<String>(fileHints);
+            List<String> oldHints = new ArrayList<>(fileHints);
 
             fileHints.clear();
             fileHints.addAll(FileHintUtils.resolveHints(oldHints, owningLibrary.getLibraryUrl()));

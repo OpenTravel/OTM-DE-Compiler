@@ -19,7 +19,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
@@ -133,12 +132,11 @@ public class CatalogLibraryNamespaceResolver extends MapLibraryNamespaceResolver
      *             thrown if the catalog file cannot be loaded
      */
     private void initCatalog(InputStream is) throws LibraryLoaderException {
-        try {
+        try (InputStream schemaStream = SchemaDeclarations.OTA2_CATALOG_SCHEMA.getContent(
+        		CodeGeneratorFactory.XSD_TARGET_FORMAT)) {
             // Load and parse the catalog content from the stream
             SchemaFactory schemaFactory = SchemaFactory
                     .newInstance(javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            InputStream schemaStream = SchemaDeclarations.OTA2_CATALOG_SCHEMA.getContent(
-            		CodeGeneratorFactory.XSD_TARGET_FORMAT);
             Schema validationSchema = schemaFactory.newSchema(new StreamSource(schemaStream));
             Unmarshaller unmarshaller = JAXBContext.newInstance(SCHEMA_CONTEXT)
                     .createUnmarshaller();
@@ -155,21 +153,9 @@ public class CatalogLibraryNamespaceResolver extends MapLibraryNamespaceResolver
                     }
                 }
             }
-        } catch (IOException e) {
+            
+        } catch (URISyntaxException | IOException | JAXBException | SAXException e) {
             throw new LibraryLoaderException(e);
-        } catch (URISyntaxException e) {
-            throw new LibraryLoaderException(e);
-        } catch (JAXBException e) {
-            throw new LibraryLoaderException(e);
-        } catch (SAXException e) {
-            throw new LibraryLoaderException(e);
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (Throwable t) {
-                }
-            }
         }
     }
 
@@ -177,7 +163,7 @@ public class CatalogLibraryNamespaceResolver extends MapLibraryNamespaceResolver
      * @see org.opentravel.schemacompiler.loader.impl.MapLibraryNamespaceResolver#getRelativeUrlBase()
      */
     @Override
-    protected URL getRelativeUrlBase() throws MalformedURLException {
+    protected URL getRelativeUrlBase() {
         return (catalogFolder != null) ? catalogFolder : super.getRelativeUrlBase();
     }
 

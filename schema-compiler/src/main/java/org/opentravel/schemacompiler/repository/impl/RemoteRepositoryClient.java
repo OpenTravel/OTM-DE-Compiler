@@ -47,7 +47,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthState;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -146,7 +145,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
     private String id;
     private String displayName;
     private String endpointUrl;
-    private List<String> rootNamespaces = new ArrayList<String>();
+    private List<String> rootNamespaces = new ArrayList<>();
     private RefreshPolicy refreshPolicy;
     private String userId;
     private String encryptedPassword;
@@ -181,11 +180,10 @@ public class RemoteRepositoryClient implements RemoteRepository {
      * @param request  the request to send to the remote repository
      * @return HttpResponse
      * @throws RepositoryException  thrown if an error response is received from the remote server
-     * @throws ClientProtocolException  thrown if an error occurs in the HTTP protocol
      * @throws IOException  thrown if an error occurs during request execution
      */
     private HttpResponse executeWithAuthentication(HttpUriRequest request)
-            throws RepositoryException, ClientProtocolException, IOException {
+            throws RepositoryException, IOException {
     	HttpResponse response = createHttpClient().execute(request, createHttpContext());
     	int statusCode = response.getStatusLine().getStatusCode();
     	
@@ -206,11 +204,9 @@ public class RemoteRepositoryClient implements RemoteRepository {
      * @param request  the request to send to the remote repository
      * @return HttpResponse
      * @throws RepositoryException  thrown if an error response is received from the remote server
-     * @throws ClientProtocolException  thrown if an error occurs in the HTTP protocol
      * @throws IOException  thrown if an error occurs during request execution
      */
-    private static HttpResponse execute(HttpUriRequest request) throws RepositoryException,
-    		ClientProtocolException, IOException {
+    private static HttpResponse execute(HttpUriRequest request) throws RepositoryException, IOException {
     	HttpResponse response = createHttpClient().execute(request);
     	int statusCode = response.getStatusLine().getStatusCode();
     	
@@ -399,7 +395,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
                     .createUnmarshaller();
             JAXBElement<NamespaceListType> jaxbElement = (JAXBElement<NamespaceListType>) unmarshaller
                     .unmarshal(response.getEntity().getContent());
-            List<String> nsList = new ArrayList<String>();
+            List<String> nsList = new ArrayList<>();
 
             nsList.addAll(jaxbElement.getValue().getNamespace());
             return nsList;
@@ -425,7 +421,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
                     .createUnmarshaller();
             JAXBElement<NamespaceListType> jaxbElement = (JAXBElement<NamespaceListType>) unmarshaller
                     .unmarshal(response.getEntity().getContent());
-            List<String> nsList = new ArrayList<String>();
+            List<String> nsList = new ArrayList<>();
 
             nsList.addAll(jaxbElement.getValue().getNamespace());
             return nsList;
@@ -451,7 +447,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
                     .createUnmarshaller();
             JAXBElement<NamespaceListType> jaxbElement = (JAXBElement<NamespaceListType>) unmarshaller
                     .unmarshal(response.getEntity().getContent());
-            List<String> nsList = new ArrayList<String>();
+            List<String> nsList = new ArrayList<>();
 
             nsList.addAll(jaxbElement.getValue().getNamespace());
             return nsList;
@@ -490,7 +486,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
                     .createUnmarshaller();
             JAXBElement<LibraryInfoListType> jaxbElement = (JAXBElement<LibraryInfoListType>) unmarshaller
                     .unmarshal(response.getEntity().getContent());
-            List<RepositoryItem> itemList = new ArrayList<RepositoryItem>();
+            List<RepositoryItem> itemList = new ArrayList<>();
 
             for (LibraryInfoType itemMetadata : jaxbElement.getValue().getLibraryInfo()) {
                 RepositoryItemImpl item = RepositoryUtils.createRepositoryItem(manager,
@@ -552,7 +548,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
             Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
             JAXBElement<LibraryInfoListType> jaxbElement = (JAXBElement<LibraryInfoListType>)
             		unmarshaller.unmarshal(response.getEntity().getContent());
-            List<RepositoryItem> itemList = new ArrayList<RepositoryItem>();
+            List<RepositoryItem> itemList = new ArrayList<>();
 
             for (LibraryInfoType itemMetadata : jaxbElement.getValue().getLibraryInfo()) {
                 RepositoryItemImpl item = RepositoryUtils.createRepositoryItem(manager,
@@ -586,7 +582,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
             Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
             JAXBElement<LibraryInfoListType> jaxbElement = (JAXBElement<LibraryInfoListType>) unmarshaller
                     .unmarshal(response.getEntity().getContent());
-            List<RepositoryItem> itemList = new ArrayList<RepositoryItem>();
+            List<RepositoryItem> itemList = new ArrayList<>();
 
             for (LibraryInfoType itemMetadata : jaxbElement.getValue().getLibraryInfo()) {
                 RepositoryItemImpl item = RepositoryUtils.createRepositoryItem(manager,
@@ -690,7 +686,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
                     .createUnmarshaller();
             JAXBElement<LibraryInfoListType> jaxbElement = (JAXBElement<LibraryInfoListType>) unmarshaller
                     .unmarshal(response.getEntity().getContent());
-            List<RepositoryItem> itemList = new ArrayList<RepositoryItem>();
+            List<RepositoryItem> itemList = new ArrayList<>();
 
             for (LibraryInfoType itemMetadata : jaxbElement.getValue().getLibraryInfo()) {
                 RepositoryItemImpl itemVersion = RepositoryUtils.createRepositoryItem(manager,
@@ -831,7 +827,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
             Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
             JAXBElement<LibraryInfoListType> jaxbElement = (JAXBElement<LibraryInfoListType>) unmarshaller
                     .unmarshal(response.getEntity().getContent());
-            List<RepositoryItem> itemList = new ArrayList<RepositoryItem>();
+            List<RepositoryItem> itemList = new ArrayList<>();
 
             for (LibraryInfoType rsItemMetadata : jaxbElement.getValue().getLibraryInfo()) {
                 RepositoryItemImpl rsItem = RepositoryUtils.createRepositoryItem(manager, rsItemMetadata);
@@ -869,7 +865,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
             Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
             JAXBElement<EntityInfoListType> jaxbElement = (JAXBElement<EntityInfoListType>) unmarshaller
                     .unmarshal(response.getEntity().getContent());
-            List<EntitySearchResult> searchResults = new ArrayList<EntitySearchResult>();
+            List<EntitySearchResult> searchResults = new ArrayList<>();
 
             for (EntityInfoType rsEntityMetadata : jaxbElement.getValue().getEntityInfo()) {
             	searchResults.add( new EntitySearchResult( rsEntityMetadata, manager ) );
@@ -903,7 +899,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
             Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
             JAXBElement<EntityInfoListType> jaxbElement = (JAXBElement<EntityInfoListType>) unmarshaller
                     .unmarshal(response.getEntity().getContent());
-            List<EntitySearchResult> searchResults = new ArrayList<EntitySearchResult>();
+            List<EntitySearchResult> searchResults = new ArrayList<>();
 
             for (EntityInfoType rsEntityMetadata : jaxbElement.getValue().getEntityInfo()) {
             	searchResults.add( new EntitySearchResult( rsEntityMetadata, manager ) );
@@ -961,7 +957,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
             Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
             JAXBElement<LibraryInfoListType> jaxbElement = (JAXBElement<LibraryInfoListType>) unmarshaller
                     .unmarshal(response.getEntity().getContent());
-            List<RepositoryItem> itemList = new ArrayList<RepositoryItem>();
+            List<RepositoryItem> itemList = new ArrayList<>();
 
             for (LibraryInfoType itemMetadata : jaxbElement.getValue().getLibraryInfo()) {
                 RepositoryItemImpl item = RepositoryUtils.createRepositoryItem(manager, itemMetadata);
@@ -1259,8 +1255,8 @@ public class RemoteRepositoryClient implements RemoteRepository {
             } else {
                 try {
                     manager.getFileManager().rollbackChangeSet();
-                } catch (Throwable t) {
-                    log.error("Error rolling back the current change set.", t);
+                } catch (Exception e) {
+                    log.error("Error rolling back the current change set.", e);
                 }
             }
         }
@@ -1361,8 +1357,8 @@ public class RemoteRepositoryClient implements RemoteRepository {
             } else {
                 try {
                     manager.getFileManager().rollbackChangeSet();
-                } catch (Throwable t) {
-                    log.error("Error rolling back the current change set.", t);
+                } catch (Exception e) {
+                    log.error("Error rolling back the current change set.", e);
                 }
             }
         }
@@ -1692,8 +1688,8 @@ public class RemoteRepositoryClient implements RemoteRepository {
                 } else {
                     try {
                         manager.getFileManager().rollbackChangeSet();
-                    } catch (Throwable t) {
-                        log.error("Error rolling back the current change set.", t);
+                    } catch (Exception e) {
+                        log.error("Error rolling back the current change set.", e);
                     }
                 }
                 downloadCache.add( cacheKey );

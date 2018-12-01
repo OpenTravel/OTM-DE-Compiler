@@ -247,7 +247,7 @@ public class ServiceAssemblyManager {
 		
 		// Next, load the model using the releases to assign effective dates for
 		// each library
-        LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>();
+        LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<>();
 		MultiReleaseModuleLoader moduleLoader = new MultiReleaseModuleLoader(
 				allReleases, repositoryManager,  modelLoader.getModuleLoader() );
 		TLModel model;
@@ -273,7 +273,7 @@ public class ServiceAssemblyManager {
 		for (ServiceAssemblyItem saItem : assemblyItems) {
 			Release release = itemReleaseMap.get( saItem );
 			List<TLLibrary> saLibraries = (release == null) ?
-					new ArrayList<TLLibrary>() : getLibraries( release , model );
+					new ArrayList<>() : getLibraries( release , model );
 			QName resourceName = saItem.getResourceName();
 			
 			if (resourceName != null) {

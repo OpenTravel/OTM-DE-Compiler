@@ -39,7 +39,7 @@ public class RepositoryLockManager {
     private static RepositoryLockManager defaultInstance = new RepositoryLockManager();
     private static long timeout = DEFAULT_TIMEOUT;
 
-    private Map<LockableResource, ReentrantReadWriteLock> lockRegistry = new HashMap<LockableResource, ReentrantReadWriteLock>();
+    private Map<LockableResource,ReentrantReadWriteLock> lockRegistry = new HashMap<>();
 
     /**
      * Default constructor (private - use singleton instance instead).

@@ -101,42 +101,26 @@ public class JsonSchemaBuiltInCodeGenerator extends AbstractCodeGenerator<BuiltI
      */
     protected void generateJsonLibraryOutput(BuiltInLibrary source, CodeGenerationContext context)
             throws CodeGenerationException {
-        BufferedReader reader = null;
-        BufferedWriter writer = null;
-        try {
-            if (!source.getNamespace().equals(XMLConstants.W3C_XML_SCHEMA_NS_URI)) {
-            	InputStream is = source.getSchemaDeclaration()
-                        .getContent(CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT);
-            	
+        if (!source.getNamespace().equals(XMLConstants.W3C_XML_SCHEMA_NS_URI)) {
+        	try (InputStream is = source.getSchemaDeclaration()
+                    .getContent(CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT)) {
             	if (is != null) {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader( is ));
                     File outputFile = getOutputFile(source, context);
                     String line = null;
 
-                    reader = new BufferedReader(new InputStreamReader( is ));
-                    writer = new BufferedWriter(new FileWriter(outputFile));
-
-                    while ((line = reader.readLine()) != null) {
-                        writer.write(line);
-                        writer.write(LINE_SEPARATOR);
+                    try(BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {
+                        while ((line = reader.readLine()) != null) {
+                            writer.write(line);
+                            writer.write(LINE_SEPARATOR);
+                        }
+                        addGeneratedFile(outputFile);
                     }
-                    addGeneratedFile(outputFile);
             	}
-            }
-        } catch (IOException e) {
-            throw new CodeGenerationException(e);
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (Throwable t) {
-                }
-            }
-            if (writer != null) {
-                try {
-                    writer.close();
-                } catch (Throwable t) {
-                }
-            }
+            	
+            } catch (IOException e) {
+                throw new CodeGenerationException(e);
+        	}
         }
     }
     
@@ -216,7 +200,7 @@ public class JsonSchemaBuiltInCodeGenerator extends AbstractCodeGenerator<BuiltI
      */
     @Override
     protected CodeGenerationFilenameBuilder<BuiltInLibrary> getDefaultFilenameBuilder() {
-        return new LibraryFilenameBuilder<BuiltInLibrary>();
+        return new LibraryFilenameBuilder<>();
     }
     
     /**
@@ -233,7 +217,7 @@ public class JsonSchemaBuiltInCodeGenerator extends AbstractCodeGenerator<BuiltI
 		 */
 		@Override
 		protected CodeGenerationFilenameBuilder<BuiltInLibrary> getDefaultFilenameBuilder() {
-            return new LibraryFilenameBuilder<BuiltInLibrary>();
+            return new LibraryFilenameBuilder<>();
 		}
 
 		/**

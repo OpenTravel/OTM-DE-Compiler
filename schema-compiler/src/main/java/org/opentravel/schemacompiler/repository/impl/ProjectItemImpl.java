@@ -15,7 +15,6 @@
  */
 package org.opentravel.schemacompiler.repository.impl;
 
-import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -68,7 +67,7 @@ public class ProjectItemImpl extends RepositoryItemImpl implements ProjectItem {
      *            the project manager that owns the the item
      * @return ProjectItem
      */
-    public static ProjectItem newUnmanagedItem(File libraryFile, AbstractLibrary libraryContent,
+    public static ProjectItem newUnmanagedItem(AbstractLibrary libraryContent,
             ProjectManager projectManager) {
         ProjectItemImpl item = new ProjectItemImpl(libraryContent, projectManager);
 
@@ -166,7 +165,7 @@ public class ProjectItemImpl extends RepositoryItemImpl implements ProjectItem {
      */
     @Override
     public List<Project> memberOfProjects() {
-        List<Project> projectList = new ArrayList<Project>();
+        List<Project> projectList = new ArrayList<>();
 
         for (Project project : projectManager.getAllProjects()) {
             if (project.isMemberOf(this)) {

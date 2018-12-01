@@ -105,8 +105,8 @@ public class TLValueWithAttributesCompileValidator extends TLValueWithAttributes
         // Check to see if any of the declared attribute/indicator names conflict with the
         // 'Extension'
         // attributes created for the open enumeration attributes.
-        Set<String> openEnumerationAttributes = new HashSet<String>();
-        Set<String> attributeNames = new HashSet<String>();
+        Set<String> openEnumerationAttributes = new HashSet<>();
+        Set<String> attributeNames = new HashSet<>();
 
         for (TLModelElement member : inheritedMembers) {
             if (member instanceof TLAttribute) {

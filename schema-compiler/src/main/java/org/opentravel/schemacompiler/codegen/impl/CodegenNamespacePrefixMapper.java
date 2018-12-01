@@ -48,8 +48,8 @@ import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
  */
 public class CodegenNamespacePrefixMapper extends NamespacePrefixMapper {
 
-    private Map<String, String> namespacePrefixMappings = new HashMap<String, String>();
-    private List<String> uriDeclarations = new ArrayList<String>();
+    private Map<String, String> namespacePrefixMappings = new HashMap<>();
+    private List<String> uriDeclarations = new ArrayList<>();
     private Set<String> importedNamespaces;
     private AbstractJaxbCodeGenerator<?> codeGenerator;
 
@@ -100,7 +100,7 @@ public class CodegenNamespacePrefixMapper extends NamespacePrefixMapper {
      *            the code generation filter used to remove superfluous prefix mappings
      */
     private void addLibraryNamespaceMappings(AbstractLibrary library, CodeGenerationFilter filter) {
-        Map<String, String> importPrefixMappings = new HashMap<String, String>();
+        Map<String, String> importPrefixMappings = new HashMap<>();
         String targetNamespace = library.getNamespace();
 
         // First build a map of pre-assigned prefixes for namespaces that were explicitly imported
@@ -239,7 +239,7 @@ public class CodegenNamespacePrefixMapper extends NamespacePrefixMapper {
      * @return Set<String>
      */
     private Set<String> getImportedNamespaces(Schema schema) {
-        Set<String> nsImports = new HashSet<String>();
+        Set<String> nsImports = new HashSet<>();
 
         if (schema != null) {
             for (OpenAttrs importOrInclude : schema.getIncludeOrImportOrRedefine()) {

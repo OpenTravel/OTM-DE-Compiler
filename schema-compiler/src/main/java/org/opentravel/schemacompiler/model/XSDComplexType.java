@@ -37,7 +37,7 @@ public class XSDComplexType extends TLLibraryMember implements TLPropertyType {
     private String name;
     private TopLevelComplexType jaxbType;
     private XSDElement identityAlias;
-    private List<XSDElement> aliases = new ArrayList<XSDElement>();
+    private List<XSDElement> aliases = new ArrayList<>();
 
     /**
      * Constructor that specifies the name of this model element and the underlying JAXB type from
@@ -86,7 +86,7 @@ public class XSDComplexType extends TLLibraryMember implements TLPropertyType {
      */
     @Override
     public String getLocalName() {
-        return name;
+        return getName();
     }
 
     /**

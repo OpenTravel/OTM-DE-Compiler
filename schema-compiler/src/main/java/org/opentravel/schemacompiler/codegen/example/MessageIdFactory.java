@@ -27,8 +27,8 @@ import javax.xml.namespace.QName;
  */
 public class MessageIdFactory {
 
-    private Map<QName, String> prefixMap = new HashMap<QName, String>();
-    private Map<QName, IdCounter> counterMap = new HashMap<QName, IdCounter>();
+    private Map<QName, String> prefixMap = new HashMap<>();
+    private Map<QName, IdCounter> counterMap = new HashMap<>();
 
     /**
      * Returns a unique XML message ID for the given namespace/name combination.

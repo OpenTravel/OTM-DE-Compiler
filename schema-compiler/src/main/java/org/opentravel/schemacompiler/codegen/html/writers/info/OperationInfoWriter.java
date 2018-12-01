@@ -90,7 +90,7 @@ public class OperationInfoWriter extends
 			int counter, boolean b) {
 		HtmlTree tdOperation = new HtmlTree(HtmlTag.TD);
 		tdOperation.setStyle(HtmlStyle.colOne);
-		tdOperation.addContent(HtmlTree.HEADING(HtmlTag.H4, new RawHtml(fdb.getName())));
+		tdOperation.addContent(HtmlTree.heading(HtmlTag.H4, new RawHtml(fdb.getName())));
 		TLDocumentation doc = fdb.getElement().getDocumentation();
 		if (doc != null) {
 			DocumentationInfoWriter docWriter = new DocumentationInfoWriter(
@@ -99,7 +99,7 @@ public class OperationInfoWriter extends
 		}
 		FacetInfoWriter facetWriter = new FacetInfoWriter(writer, fdb);
 		facetWriter.addInfo(tdOperation);
-		HtmlTree tr = HtmlTree.TR(tdOperation);
+		HtmlTree tr = HtmlTree.tr(tdOperation);
 		tr.setStyle(HtmlStyle.rowColor);
 		return tr;
 	}

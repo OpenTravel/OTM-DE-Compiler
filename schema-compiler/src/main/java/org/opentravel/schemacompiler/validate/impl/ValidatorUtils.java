@@ -37,7 +37,12 @@ import org.opentravel.schemacompiler.model.TLValueWithAttributes;
  * @author S. Livezey
  */
 public class ValidatorUtils {
-
+	
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private ValidatorUtils() {}
+	
     /**
      * Returns true if the given entity matches the built-in empty string type.
      * 
@@ -104,7 +109,7 @@ public class ValidatorUtils {
      * @return List<TLModelElement>
      */
     public static List<TLModelElement> getMembers(TLValueWithAttributes target) {
-        List<TLModelElement> members = new ArrayList<TLModelElement>();
+        List<TLModelElement> members = new ArrayList<>();
 
         members.addAll(target.getAttributes());
         members.addAll(target.getIndicators());
@@ -122,7 +127,7 @@ public class ValidatorUtils {
      * @return List<TLModelElement>
      */
     public static List<TLModelElement> getMembers(TLExtensionPointFacet target) {
-        List<TLModelElement> members = new ArrayList<TLModelElement>();
+        List<TLModelElement> members = new ArrayList<>();
 
         members.addAll(target.getAttributes());
         members.addAll(target.getElements());
@@ -154,7 +159,7 @@ public class ValidatorUtils {
      * @return List<TLModelElement>
      */
     public static List<TLModelElement> getMembers(TLFacet target, boolean includeIndicators) {
-        List<TLModelElement> facetMembers = new ArrayList<TLModelElement>();
+        List<TLModelElement> facetMembers = new ArrayList<>();
 
         if (includeIndicators) {
             facetMembers.addAll(target.getIndicators());
@@ -172,7 +177,7 @@ public class ValidatorUtils {
      * @return List<TLModelElement>
      */
     public static List<TLModelElement> getInheritedMembers(TLValueWithAttributes target) {
-        List<TLModelElement> memberList = new ArrayList<TLModelElement>();
+        List<TLModelElement> memberList = new ArrayList<>();
 
         memberList.addAll(PropertyCodegenUtils.getInheritedAttributes(target));
         memberList.addAll(PropertyCodegenUtils.getInheritedIndicators(target));
@@ -188,7 +193,7 @@ public class ValidatorUtils {
      * @return List<TLModelElement>
      */
     public static List<TLModelElement> getInheritedMembers(TLFacet target) {
-        List<TLModelElement> inheritedMembers = new ArrayList<TLModelElement>();
+        List<TLModelElement> inheritedMembers = new ArrayList<>();
 
         inheritedMembers.addAll(PropertyCodegenUtils.getInheritedAttributes(target));
         inheritedMembers.addAll(PropertyCodegenUtils.getInheritedProperties(target));
@@ -204,8 +209,8 @@ public class ValidatorUtils {
      * @return boolean
      */
     public static boolean hasMultipleIdMembers(NamedEntity entity) {
-        List<TLAttribute> attributeList = new ArrayList<TLAttribute>();
-        List<TLProperty> propertyList = new ArrayList<TLProperty>();
+        List<TLAttribute> attributeList = new ArrayList<>();
+        List<TLProperty> propertyList = new ArrayList<>();
         boolean declaresId = false;
         int idCount = 0;
 

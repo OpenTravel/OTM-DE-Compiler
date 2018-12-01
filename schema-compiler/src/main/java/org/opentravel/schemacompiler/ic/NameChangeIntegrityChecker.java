@@ -146,7 +146,7 @@ public class NameChangeIntegrityChecker extends
         ModelElementCollector collectVisitor = new ModelElementCollector();
 
         ModelNavigator.navigate(modifiedEntity, collectVisitor);
-        return new ArrayList<TLModelElement>(collectVisitor.getLibraryEntities());
+        return new ArrayList<>(collectVisitor.getLibraryEntities());
     }
 
     /**

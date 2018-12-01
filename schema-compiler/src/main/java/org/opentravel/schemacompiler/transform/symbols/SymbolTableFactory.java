@@ -31,7 +31,7 @@ import org.opentravel.schemacompiler.transform.SymbolTable;
  */
 public class SymbolTableFactory {
 
-    private Map<Class<?>, SymbolTablePopulator<?>> populatorMap = new HashMap<Class<?>, SymbolTablePopulator<?>>();
+    private Map<Class<?>,SymbolTablePopulator<?>> populatorMap = new HashMap<>();
 
     /**
      * Private constructor.

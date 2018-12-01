@@ -51,8 +51,8 @@ public abstract class AttributeOwnerDocumentationBuilder<T extends TLDocumentati
 	 */
 	public AttributeOwnerDocumentationBuilder(T t) {
 		super(t);
-		attributes = new ArrayList<AttributeDocumentationBuilder>();
-		indicators = new ArrayList<IndicatorDocumentationBuilder>();
+		attributes = new ArrayList<>();
+		indicators = new ArrayList<>();
 		for(TLAttribute attribute : t.getAttributes()){
 			AttributeDocumentationBuilder attBuilder = new AttributeDocumentationBuilder(attribute);
 			attributes.add(attBuilder);

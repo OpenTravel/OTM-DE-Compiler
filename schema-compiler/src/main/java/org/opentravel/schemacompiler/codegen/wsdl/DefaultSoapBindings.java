@@ -73,6 +73,10 @@ public class DefaultSoapBindings implements CodeGenerationWsdlBindings {
 	
 	private static final String VERSION_ATTRIBUTE_NAME = "version";
 	private static final String TIMESTAMP_ATTRIBUTE_NAME = "timeStamp";
+	private static final String SERVICE_SUFFIX = "Service";
+	private static final String PORT_SUFFIX = "Port";
+	private static final String PORT_TYPE_SUFFIX = "PortType";
+	private static final String BINDING_SUFFIX = "Binding";
 
 	/**
 	 * Adds the JAXB context package for the SOAP binding components used in
@@ -82,7 +86,7 @@ public class DefaultSoapBindings implements CodeGenerationWsdlBindings {
 	 */
 	@Override
 	public Collection<String> getJaxbContextPackages() {
-		Collection<String> jaxbPackages = new HashSet<String>();
+		Collection<String> jaxbPackages = new HashSet<>();
 
 		jaxbPackages.add("org.xmlsoap.schemas.wsdl.soap");
 		return jaxbPackages;
@@ -93,9 +97,7 @@ public class DefaultSoapBindings implements CodeGenerationWsdlBindings {
 	 */
 	@Override
 	public Collection<SchemaDeclaration> getDependentSchemas() {
-		Collection<SchemaDeclaration> schemaList = getSchemasImports();
-
-		return schemaList;
+		return getSchemasImports();
 	}
 
 	/**
@@ -103,7 +105,7 @@ public class DefaultSoapBindings implements CodeGenerationWsdlBindings {
 	 */
 	@Override
 	public List<SchemaDependency> getDependentElements() {
-		List<SchemaDependency> elementList = new ArrayList<SchemaDependency>();
+		List<SchemaDependency> elementList = new ArrayList<>();
 
 		elementList.add(SchemaDependency.getMessageHeader());
 		elementList.add(SchemaDependency.getMessageFault());
@@ -115,7 +117,7 @@ public class DefaultSoapBindings implements CodeGenerationWsdlBindings {
 	 */
 	@Override
 	public Collection<SchemaDeclaration> getSchemasImports() {
-		Collection<SchemaDeclaration> schemaList = new ArrayList<SchemaDeclaration>();
+		Collection<SchemaDeclaration> schemaList = new ArrayList<>();
 
 		addDeclaration(SchemaDependency.getMessageFault(), schemaList);
 		addDeclaration(SchemaDependency.getMessageHeader(), schemaList);
@@ -163,7 +165,7 @@ public class DefaultSoapBindings implements CodeGenerationWsdlBindings {
 	@Override
 	public List<TMessage> getFaultMessages(TOperation operation,
 			OperationType operationType, TLFacetType messageType) {
-		List<TMessage> faultMessages = new ArrayList<TMessage>();
+		List<TMessage> faultMessages = new ArrayList<>();
 		String faultName = operation.getName();
 		TMessage faultMessage = new TMessage();
 		TPart faultBody = new TPart();
@@ -327,10 +329,10 @@ public class DefaultSoapBindings implements CodeGenerationWsdlBindings {
 		String bindingName = null;
 
 		if (portTypeName != null) {
-			if (portTypeName.endsWith("PortType")) {
-				bindingName = portTypeName.replace("PortType", "Binding");
+			if (portTypeName.endsWith(PORT_TYPE_SUFFIX)) {
+				bindingName = portTypeName.replace(PORT_TYPE_SUFFIX, BINDING_SUFFIX);
 			} else {
-				bindingName = portTypeName + "Binding";
+				bindingName = portTypeName + BINDING_SUFFIX;
 			}
 		}
 		return bindingName;
@@ -437,10 +439,10 @@ public class DefaultSoapBindings implements CodeGenerationWsdlBindings {
 		String serviceName = null;
 
 		if (bindingName != null) {
-			if (bindingName.endsWith("Binding")) {
-				serviceName = bindingName.replace("Binding", "Service");
+			if (bindingName.endsWith(BINDING_SUFFIX)) {
+				serviceName = bindingName.replace(BINDING_SUFFIX, SERVICE_SUFFIX);
 			} else {
-				serviceName = bindingName + "Service";
+				serviceName = bindingName + SERVICE_SUFFIX;
 			}
 		}
 		return serviceName;
@@ -460,10 +462,10 @@ public class DefaultSoapBindings implements CodeGenerationWsdlBindings {
 		String portName = null;
 
 		if (bindingName != null) {
-			if (bindingName.endsWith("Binding")) {
-				portName = bindingName.replace("Binding", "Port");
+			if (bindingName.endsWith(BINDING_SUFFIX)) {
+				portName = bindingName.replace(BINDING_SUFFIX, PORT_SUFFIX);
 			} else {
-				portName = bindingName + "Port";
+				portName = bindingName + PORT_SUFFIX;
 			}
 		}
 		return portName;
@@ -477,8 +479,8 @@ public class DefaultSoapBindings implements CodeGenerationWsdlBindings {
 	 *            the list of all messages defined in the owning WSDL document
 	 * @return Map<String,TMessage>
 	 */
-	private Map<String, TMessage> getMessageMap(List<TMessage> wsdlMessages) {
-		Map<String, TMessage> messageMap = new HashMap<String, TMessage>();
+	private Map<String,TMessage> getMessageMap(List<TMessage> wsdlMessages) {
+		Map<String,TMessage> messageMap = new HashMap<>();
 
 		for (TMessage message : wsdlMessages) {
 			messageMap.put(message.getName(), message);

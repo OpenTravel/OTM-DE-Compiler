@@ -82,8 +82,8 @@ public class SearchController extends BaseController {
                     .getSearchIndexLocation(), getRepositoryManager());
             searchService = FreeTextSearchServiceFactory.getInstance();
 
-        } catch (Throwable t) {
-            log.error("Error initializing the free-text search service.", t);
+        } catch (Exception e) {
+            log.error("Error initializing the free-text search service.", e);
         }
     }
 
@@ -114,7 +114,7 @@ public class SearchController extends BaseController {
 		model.addAttribute( "nsOptions", getNamespaceOptions( nsFilter ) );
 		
 		if ((keywords != null) && (keywords.length() > 0)) {
-			List<SearchResult<?>> searchResults = new ArrayList<SearchResult<?>>();
+			List<SearchResult<?>> searchResults = new ArrayList<>();
 			
 			if (searchService != null) {
 				try {
@@ -334,8 +334,8 @@ public class SearchController extends BaseController {
 				entityFilterMap.put( entityType.getSimpleName(), entityType );
 			}
 			
-		} catch (Throwable t) {
-			throw new ExceptionInInitializerError( t );
+		} catch (Exception e) {
+			throw new ExceptionInInitializerError( e );
 		}
 	}
 	

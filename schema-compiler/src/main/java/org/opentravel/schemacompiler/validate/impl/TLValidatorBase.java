@@ -269,7 +269,7 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
      */
     protected void checkEmptyValueType(TLExampleOwner exampleOwner, NamedEntity assignedType,
             String propertyName, ValidationBuilder<?> builder) {
-        if ((exampleOwner != null) && (exampleOwner.getExamples().size() > 0)) {
+        if ((exampleOwner != null) && !exampleOwner.getExamples().isEmpty()) {
             if (ValidatorUtils.isEmptyValueType(assignedType)) {
                 builder.addFinding(FindingType.WARNING, propertyName,
                         WARNING_EXAMPLE_FOR_EMPTY_TYPE);
@@ -538,7 +538,7 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
                 : entity.getLocalName();
         String majorVersionNamespace = getMajorVersionNamespace((TLLibrary) entity
                 .getOwningLibrary());
-        List<NamedEntity> matchingEntities = new ArrayList<NamedEntity>();
+        List<NamedEntity> matchingEntities = new ArrayList<>();
 
         // Build a list of all entities from the base namespace whose local names match that of the
         // given entity
@@ -565,7 +565,7 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
         // Only check for validation errors if we find duplicates of the entity's name
         if (matchingEntities.size() > 1) {
             Collection<Versioned> versionFamily = (entity instanceof Versioned) ?
-            		getMajorVersionFamily((Versioned) entity) : new ArrayList<Versioned>();
+            		getMajorVersionFamily((Versioned) entity) : new ArrayList<>();
 
             for (NamedEntity matchingEntity : matchingEntities) {
                 if (matchingEntity == entity) {
@@ -610,10 +610,10 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
      */
     @SuppressWarnings("unchecked")
     private <V extends Versioned> Collection<V> getMajorVersionFamily(V versionedEntity) {
-        Map<Versioned, Collection<V>> minorVersionFamilyMappings = (Map<Versioned, Collection<V>>) getContextCacheEntry("majorVersionFamilyMappings");
+        Map<Versioned,Collection<V>> minorVersionFamilyMappings = (Map<Versioned, Collection<V>>) getContextCacheEntry("majorVersionFamilyMappings");
         
         if (minorVersionFamilyMappings == null) {
-            minorVersionFamilyMappings = new HashMap<Versioned, Collection<V>>();
+            minorVersionFamilyMappings = new HashMap<>();
             setContextCacheEntry("majorVersionFamilyMappings", minorVersionFamilyMappings);
         }
         Collection<V> minorVersionFamily = minorVersionFamilyMappings.get(versionedEntity);
@@ -646,7 +646,7 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
         Map<String, String> majorVersionNamespaceMappings = (Map<String, String>) getContextCacheEntry("majorVersionNamespaceMappings");
 
         if (majorVersionNamespaceMappings == null) {
-            majorVersionNamespaceMappings = new HashMap<String, String>();
+            majorVersionNamespaceMappings = new HashMap<>();
             setContextCacheEntry("majorVersionNamespaceMappings", majorVersionNamespaceMappings);
         }
         String libraryNamespace = library.getNamespace();

@@ -502,7 +502,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
                 .getTransformer(TLAttribute.class, CodegenArtifacts.class);
         ObjectTransformer<TLIndicator, Annotated, CodeGenerationTransformerContext> indicatorTransformer = getTransformerFactory()
                 .getTransformer(TLIndicator.class, Annotated.class);
-        List<Annotated> jaxbAttributes = new ArrayList<Annotated>();
+        List<Annotated> jaxbAttributes = new ArrayList<>();
 
         for (TLAttribute attribute : getAttributes()) {
             jaxbAttributes.addAll(attributeTransformer.transform(attribute).getArtifactsOfType(
@@ -573,7 +573,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
      * @return TLPropertyType
      */
     protected TLPropertyType getPreferredFacet(TLCoreObject coreObject, TLFacetType facetType) {
-        Stack<TLAbstractFacet> facetHierarchy = new Stack<TLAbstractFacet>();
+        Stack<TLAbstractFacet> facetHierarchy = new Stack<>();
 
         facetHierarchy.push(coreObject.getSimpleFacet());
         facetHierarchy.push(coreObject.getSummaryFacet());
@@ -594,7 +594,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
      */
     protected TLPropertyType getPreferredFacet(TLBusinessObject businessObject,
             TLFacetType facetType) {
-        Stack<TLAbstractFacet> facetHierarchy = new Stack<TLAbstractFacet>();
+        Stack<TLAbstractFacet> facetHierarchy = new Stack<>();
 
         facetHierarchy.push(businessObject.getIdFacet());
         facetHierarchy.push(businessObject.getSummaryFacet());
@@ -621,7 +621,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
         while (!facetHierarchy.isEmpty() && !facetHierarchy.peek().declaresContent()) {
             facetHierarchy.pop();
         }
-        return (TLPropertyType) (facetHierarchy.isEmpty() ? null : facetHierarchy.peek());
+        return (facetHierarchy.isEmpty() ? null : facetHierarchy.peek());
     }
     
     /**
@@ -651,9 +651,8 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
      */
     private CodeGenerationFilter getCodegenFilter() {
     	CodeGenerator<?> codeGenerator = (transformerContext == null) ? null : transformerContext.getCodeGenerator();
-    	CodeGenerationFilter filter = (codeGenerator == null) ? null : codeGenerator.getFilter();
     	
-    	return filter;
+    	return (codeGenerator == null) ? null : codeGenerator.getFilter();
     }
 
     /**
@@ -685,7 +684,8 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
         public TLFacet getInheritedFacet() {
             TLFacetOwner extendedOwner = FacetCodegenUtils.getFacetOwnerExtension(sourceFacet
                     .getOwningEntity());
-            TLFacet inheritedFacet = null, firstCandidate = null;
+            TLFacet inheritedFacet = null;
+            TLFacet firstCandidate = null;
 
             while ((inheritedFacet == null) && (extendedOwner != null)) {
                 TLFacet candidateFacet = FacetCodegenUtils.getFacetOfType(extendedOwner,
@@ -715,10 +715,8 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
                         firstCandidate = candidateFacet;
                     }
                 }
-                if (candidateFacet != null) {
-                    if (isMatchingCandidate(candidateFacet)) {
-                        inheritedFacet = firstCandidate;
-                    }
+                if ((candidateFacet != null) && isMatchingCandidate(candidateFacet)) {
+                    inheritedFacet = firstCandidate;
                 }
                 if (inheritedFacet == null) {
                     extendedOwner = FacetCodegenUtils.getFacetOwnerExtension(extendedOwner);

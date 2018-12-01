@@ -44,8 +44,8 @@ public class TLDocumentationCodegenTransformer extends
     public static final String IMPLEMENTER_SOURCE = "Implementer";
     public static final String MORE_INFO_SOURCE = "MoreInfo";
 
-    private static List<String> standardSources = Arrays.asList(new String[] { DESCRIPTION_SOURCE,
-            DEPRECATION_SOURCE, REFERENCE_SOURCE, IMPLEMENTER_SOURCE, MORE_INFO_SOURCE });
+    private static List<String> standardSources = Arrays.asList( DESCRIPTION_SOURCE,
+            DEPRECATION_SOURCE, REFERENCE_SOURCE, IMPLEMENTER_SOURCE, MORE_INFO_SOURCE );
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
@@ -76,7 +76,7 @@ public class TLDocumentationCodegenTransformer extends
         for (TLAdditionalDocumentationItem item : source.getOtherDocs()) {
             annotation.getAppinfoOrDocumentation().add(newDocumentation(item, item.getContext()));
         }
-        return (annotation.getAppinfoOrDocumentation().size() == 0) ? null : annotation;
+        return (annotation.getAppinfoOrDocumentation().isEmpty()) ? null : annotation;
     }
 
     /**
@@ -87,9 +87,9 @@ public class TLDocumentationCodegenTransformer extends
      * @return Annotation
      */
     public static Annotation mergeDocumentation(Annotation... annotations) {
-        Map<String, List<Documentation>> documentationBySource = new HashMap<String, List<Documentation>>();
-        List<Documentation> otherDocumentations = new ArrayList<Documentation>();
-        List<Appinfo> appInfos = new ArrayList<Appinfo>();
+        Map<String,List<Documentation>> documentationBySource = new HashMap<>();
+        List<Documentation> otherDocumentations = new ArrayList<>();
+        List<Appinfo> appInfos = new ArrayList<>();
         Annotation result = new Annotation();
 
         // First, organize each of the documentation elements by type
@@ -106,7 +106,7 @@ public class TLDocumentationCodegenTransformer extends
                                 .getSource());
 
                         if (docs == null) {
-                            docs = new ArrayList<Documentation>();
+                            docs = new ArrayList<>();
                             documentationBySource.put(documentation.getSource(), docs);
                         }
                         docs.add(documentation);

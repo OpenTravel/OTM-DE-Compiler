@@ -48,7 +48,7 @@ public class FacetDocumentationBuilder extends
 	 */
 	public FacetDocumentationBuilder(TLFacet t) {
 		super(t);
-		properties = new ArrayList<PropertyDocumentationBuilder>();
+		properties = new ArrayList<>();
 		for (TLProperty prop : t.getElements()) {
 			properties.add(new PropertyDocumentationBuilder(prop));
 		}
@@ -58,7 +58,7 @@ public class FacetDocumentationBuilder extends
 			superType = DocumentationBuilderFactory.getInstance()
 					.getDocumentationBuilder(superFacet);
 		}
-		aliases = new ArrayList<String>();
+		aliases = new ArrayList<>();
 		for (TLAlias alias : t.getAliases()) {
 			aliases.add(alias.getLocalName());
 		}

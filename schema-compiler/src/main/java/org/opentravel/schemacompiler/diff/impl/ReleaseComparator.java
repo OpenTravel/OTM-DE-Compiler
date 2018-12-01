@@ -65,8 +65,8 @@ public class ReleaseComparator extends BaseComparator {
 		List<ReleaseChangeItem> changeItems = changeSet.getChangeItems();
 		Map<QName,TLLibrary> oldLibraries = buildLibraryMap( oldReleaseManager );
 		Map<QName,TLLibrary> newLibraries = buildLibraryMap( newReleaseManager );
-		SortedSet<QName> oldLibraryNames = new TreeSet<QName>( new QNameComparator() );
-		SortedSet<QName> newLibraryNames = new TreeSet<QName>( new QNameComparator() );
+		SortedSet<QName> oldLibraryNames = new TreeSet<>( new QNameComparator() );
+		SortedSet<QName> newLibraryNames = new TreeSet<>( new QNameComparator() );
 		List<ChangeSetItem> pendingChangeSets = new ArrayList<>();
 		Iterator<QName> iterator;
 		

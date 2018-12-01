@@ -38,8 +38,13 @@ public class FreeTextSearchServiceFactory {
     private static Log log = LogFactory.getLog(FreeTextSearchServiceFactory.class);
     
     private static FreeTextSearchService defaultInstance;
-    private static Set<Object> serviceOwners = new HashSet<Object>();
+    private static Set<Object> serviceOwners = new HashSet<>();
     private static boolean realTimeIndexing = false;
+    
+    /**
+     * Private constructor to prevent instantiation.
+     */
+    private FreeTextSearchServiceFactory() {}
     
     /**
      * Returns the singleton instance of the service. This method only returns a service instance
@@ -77,9 +82,9 @@ public class FreeTextSearchServiceFactory {
         			Constructor<FreeTextSearchService> c =
         					(Constructor<FreeTextSearchService>) clazz.getConstructor( File.class, RepositoryManager.class );
         			
-        			defaultInstance = (FreeTextSearchService) c.newInstance( indexLocation, repositoryManager );
+        			defaultInstance = c.newInstance( indexLocation, repositoryManager );
         			
-        		} catch (Throwable t) {
+        		} catch (Exception e) {
         			log.error("Error initializing JMS Free-Text Search - Using real-time indexing.");
                     defaultInstance = new RealTimeFreeTextSearchService(indexLocation, repositoryManager);
         		}
@@ -171,8 +176,8 @@ public class FreeTextSearchServiceFactory {
             realTimeIndexing = System.getProperty("ota2.repository.realTimeIndexing", "false")
                     .equalsIgnoreCase("true");
     		
-    	} catch (Throwable t) {
-    		throw new ExceptionInInitializerError(t);
+    	} catch (Exception e) {
+    		throw new ExceptionInInitializerError(e);
     	}
     }
     

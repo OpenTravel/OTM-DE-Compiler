@@ -28,8 +28,8 @@ import java.util.Set;
  */
 public class DefaultModelEventFilter<E extends ModelEvent<S>, S> extends ModelEventFilter<E,S> {
 	
-	private Set<ModelEventType> allowableEventTypes = new HashSet<ModelEventType>();
-	private Set<Class<? extends S>> allowableSourceObjectTypes = new HashSet<Class<? extends S>>();
+	private Set<ModelEventType> allowableEventTypes = new HashSet<>();
+	private Set<Class<? extends S>> allowableSourceObjectTypes = new HashSet<>();
 	
 	/**
 	 * Constructor that assignes the underlying listener for this filter.

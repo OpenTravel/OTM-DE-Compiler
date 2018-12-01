@@ -104,13 +104,13 @@ public class LibraryIndexWriter extends AbstractNamespaceIndexWriter {
      */
     protected void addLibraryList(List<TLLibrary> libraries, String text,
             String tableSummary, Content body) {
-        Content table = HtmlTree.TABLE(HtmlStyle.overviewSummary, 0, 3, 0, tableSummary,
+        Content table = HtmlTree.table(HtmlStyle.overviewSummary, 0, 3, 0, tableSummary,
                 getTableCaption(text));
         table.addContent(getSummaryTableHeader(libraryTableHeader, "col"));
         Content tbody = new HtmlTree(HtmlTag.TBODY);
         addLibrariesList(libraries, tbody);
         table.addContent(tbody);
-        Content div = HtmlTree.DIV(HtmlStyle.contentContainer, table);
+        Content div = HtmlTree.div(HtmlStyle.contentContainer, table);
         body.addContent(div);
     }
 
@@ -126,12 +126,12 @@ public class LibraryIndexWriter extends AbstractNamespaceIndexWriter {
             	String name = AbstractDocumentationBuilder.getLibraryName(lib);
                 Content packageLinkContent = getLibraryLink(name,
                         getNamespaceName(name));
-                Content tdPackage = HtmlTree.TD(HtmlStyle.colFirst, packageLinkContent);
+                Content tdPackage = HtmlTree.td(HtmlStyle.colFirst, packageLinkContent);
                 HtmlTree tdSummary = new HtmlTree(HtmlTag.TD);
                 tdSummary.setStyle(HtmlStyle.colLast);
                 tdSummary.addContent(getSpace());
               // addSummaryComment(ns, tdSummary);// TODO add this back in
-                HtmlTree tr = HtmlTree.TR(tdPackage);
+                HtmlTree tr = HtmlTree.tr(tdPackage);
                 tr.addContent(tdSummary);
                 if (libraries.indexOf(lib)%2 == 0)
                     tr.setStyle(HtmlStyle.altColor);

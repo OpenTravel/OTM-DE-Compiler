@@ -77,7 +77,7 @@ public class TLDocumentationTransformer extends
      * @return List<Description>
      */
     private List<Description> buildDescriptions(List<TLDocumentationItem> items) {
-        List<Description> result = new ArrayList<Description>();
+        List<Description> result = new ArrayList<>();
 
         if (items != null) {
             for (TLDocumentationItem item : items) {
@@ -99,7 +99,7 @@ public class TLDocumentationTransformer extends
      * @return List<String>
      */
     private List<String> buildTexts(List<TLDocumentationItem> items) {
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
 
         if (items != null) {
             for (TLDocumentationItem item : items) {

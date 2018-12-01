@@ -35,7 +35,7 @@ import org.opentravel.schemacompiler.validate.ValidationFindings;
  */
 public class MultiVersionLibraryModuleLoader extends AbstractLibraryModuleLoader {
 
-    private List<LibraryModuleLoader<InputStream>> moduleLoaders = new ArrayList<LibraryModuleLoader<InputStream>>();
+    private List<LibraryModuleLoader<InputStream>> moduleLoaders = new ArrayList<>();
 
     /**
      * Default constructor.

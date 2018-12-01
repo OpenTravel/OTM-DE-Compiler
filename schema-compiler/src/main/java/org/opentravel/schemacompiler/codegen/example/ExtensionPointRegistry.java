@@ -52,7 +52,7 @@ public class ExtensionPointRegistry {
      * @param model  the model from which to initialize the registry
      */
 	public ExtensionPointRegistry(TLModel model) {
-        this.extensionPointRegistry = new HashMap<TLPatchableFacet, List<TLExtensionPointFacet>>();
+        this.extensionPointRegistry = new HashMap<>();
 
         for (TLLibrary library : model.getUserDefinedLibraries()) {
             for (TLExtensionPointFacet xpFacet : library.getExtensionPointFacetTypes()) {
@@ -66,7 +66,7 @@ public class ExtensionPointRegistry {
                             .get(extendedFacet);
 
                     if (extensionPoints == null) {
-                        extensionPoints = new ArrayList<TLExtensionPointFacet>();
+                        extensionPoints = new ArrayList<>();
                         extensionPointRegistry.put(extendedFacet, extensionPoints);
                     }
                     extensionPoints.add(xpFacet);
@@ -85,7 +85,7 @@ public class ExtensionPointRegistry {
      * @return Map<TLFacetType,List<TLExtensionPointFacet>>
      */
     public Map<TLFacetType, List<TLExtensionPointFacet>> getExtensionPoints(TLPatchableFacet facet) {
-        Map<TLFacetType, List<TLExtensionPointFacet>> result = new HashMap<TLFacetType, List<TLExtensionPointFacet>>();
+        Map<TLFacetType, List<TLExtensionPointFacet>> result = new HashMap<>();
         MinorVersionHelper versionHelper = new MinorVersionHelper();
 
         // Lookup the extension point facets that reference the given entity facet
@@ -108,7 +108,7 @@ public class ExtensionPointRegistry {
                         List<TLExtensionPointFacet> extensionPoints = result.get(hFacet.getFacetType());
 
                         if (extensionPoints == null) {
-                            extensionPoints = new ArrayList<TLExtensionPointFacet>();
+                            extensionPoints = new ArrayList<>();
                             result.put(hFacet.getFacetType(), extensionPoints);
                         }
                         for (TLExtensionPointFacet xpFacet : hExtensionPoints) {

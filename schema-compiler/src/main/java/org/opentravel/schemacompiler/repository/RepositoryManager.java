@@ -103,7 +103,7 @@ public class RepositoryManager implements Repository {
     private String localRepositoryId;
     private String localRepositoryDisplayName;
     private Date lastUpdatedDate;
-    private List<RemoteRepositoryClient> remoteRepositories = new ArrayList<RemoteRepositoryClient>();
+    private List<RemoteRepositoryClient> remoteRepositories = new ArrayList<>();
     private List<String> rootNamespaces;
     private List<RepositoryListener> listeners = new ArrayList<>();
     
@@ -353,7 +353,7 @@ public class RepositoryManager implements Repository {
      * @return List<RemoteRepository>
      */
     public List<RemoteRepository> listRemoteRepositories() {
-        List<RemoteRepository> repositoryList = new ArrayList<RemoteRepository>();
+        List<RemoteRepository> repositoryList = new ArrayList<>();
 
         repositoryList.addAll(remoteRepositories);
         return repositoryList;
@@ -641,7 +641,7 @@ public class RepositoryManager implements Repository {
      */
     @Override
     public List<String> listRootNamespaces() throws RepositoryException {
-        List<String> rootNamespaces = new ArrayList<String>();
+        List<String> rootNamespaces = new ArrayList<>();
 
         if ((this.rootNamespaces == null) || this.rootNamespaces.isEmpty()) {
             rootNamespaces.add(CURRENT_USER_BASE_NAMESPACE
@@ -671,7 +671,7 @@ public class RepositoryManager implements Repository {
     @Override
     public List<String> listBaseNamespaces() throws RepositoryException {
         List<String> nsList = fileManager.findAllBaseNamespaces(listRootNamespaces());
-        List<String> baseNamespaces = new ArrayList<String>();
+        List<String> baseNamespaces = new ArrayList<>();
 
         for (String ns : nsList) {
             baseNamespaces.add(ns);
@@ -686,7 +686,7 @@ public class RepositoryManager implements Repository {
     @Override
     public List<String> listAllNamespaces() throws RepositoryException {
         List<String> nsList = fileManager.findAllNamespaces(listRootNamespaces());
-        List<String> namespaces = new ArrayList<String>();
+        List<String> namespaces = new ArrayList<>();
 
         for (String ns : nsList) {
             namespaces.add(ns);
@@ -720,9 +720,9 @@ public class RepositoryManager implements Repository {
 	public List<RepositoryItem> listItems(String baseNamespace, TLLibraryStatus includeStatus,
 			boolean latestVersionsOnly, RepositoryItemType itemType) throws RepositoryException {
         String baseNS = RepositoryNamespaceUtils.normalizeUri(baseNamespace);
-        Map<String, List<RepositoryItemVersionedWrapper>> libraryVersionMap = new HashMap<String, List<RepositoryItemVersionedWrapper>>();
+        Map<String,List<RepositoryItemVersionedWrapper>> libraryVersionMap = new HashMap<>();
         List<LibraryInfoType> metadataList = fileManager.loadLibraryMetadataRecords(baseNS);
-        List<RepositoryItem> itemList = new ArrayList<RepositoryItem>();
+        List<RepositoryItem> itemList = new ArrayList<>();
 
         for (LibraryInfoType itemMetadata : metadataList) {
         	TLLibraryStatus itemStatus = RepositoryUtils.getLibraryStatus( itemMetadata.getStatus() );
@@ -741,7 +741,7 @@ public class RepositoryManager implements Repository {
                 List<RepositoryItemVersionedWrapper> libraryVersions = libraryVersionMap.get(libraryKey);
                 
                 if (libraryVersions == null) {
-                    libraryVersions = new ArrayList<RepositoryItemVersionedWrapper>();
+                    libraryVersions = new ArrayList<>();
                     libraryVersionMap.put(libraryKey, libraryVersions);
                 }
                 libraryVersions.add(new RepositoryItemVersionedWrapper(item));
@@ -749,7 +749,7 @@ public class RepositoryManager implements Repository {
         }
         
         // Sort the results by the item's name first, then by descending version number
-        List<String> libraryKeys = new ArrayList<String>();
+        List<String> libraryKeys = new ArrayList<>();
 
         libraryKeys.addAll(libraryVersionMap.keySet());
         Collections.sort(libraryKeys);
@@ -789,7 +789,7 @@ public class RepositoryManager implements Repository {
 	@Override
     public List<RepositoryItem> search(String freeTextQuery, boolean latestVersionsOnly,
             boolean includeDraftVersions) throws RepositoryException {
-        List<RepositoryItem> searchResults = new ArrayList<RepositoryItem>();
+        List<RepositoryItem> searchResults = new ArrayList<>();
 
         for (RemoteRepository repository : remoteRepositories) {
             try {
@@ -846,12 +846,12 @@ public class RepositoryManager implements Repository {
      */
     @Override
     public List<RepositoryItem> getVersionHistory(RepositoryItem item) throws RepositoryException {
-        List<RepositoryItem> versionHistory = new ArrayList<RepositoryItem>();
+        List<RepositoryItem> versionHistory = new ArrayList<>();
 
         if (item.getRepository() == this) {
             String baseNS = RepositoryNamespaceUtils.normalizeUri(item.getBaseNamespace());
             List<LibraryInfoType> metadataList = fileManager.loadLibraryMetadataRecords(baseNS);
-            List<RepositoryItemVersionedWrapper> versionList = new ArrayList<RepositoryItemVersionedWrapper>();
+            List<RepositoryItemVersionedWrapper> versionList = new ArrayList<>();
 
             for (LibraryInfoType libraryMetadata : metadataList) {
                 if (libraryMetadata.getLibraryName().equals(item.getLibraryName())) {
@@ -1102,7 +1102,7 @@ public class RepositoryManager implements Repository {
             // Validation Check - Check to see if the new root is a parent or child of an existing
             // root namespace
             String repositoryBaseFolder = fileManager.getRepositoryLocation().getAbsolutePath();
-            List<String> existingRootNSFolderPaths = new ArrayList<String>();
+            List<String> existingRootNSFolderPaths = new ArrayList<>();
             String rootNSTestPath = rootNSFolder.getAbsolutePath();
 
             if (!rootNSTestPath.endsWith("/")) {
@@ -2379,7 +2379,7 @@ public class RepositoryManager implements Repository {
 
             } catch (RepositoryException e) {
                 // Not an error if the file does not yet exist - just use an empty list
-                rootNamespaces = new ArrayList<String>();
+                rootNamespaces = new ArrayList<>();
             }
         }
 
@@ -2482,8 +2482,8 @@ public class RepositoryManager implements Repository {
             } else if (forceRefresh || (lastUpdatedDate == null)
                     || actualLastUpdated.after(lastUpdatedDate)) {
                 RepositoryInfoType repositoryInfo = fileManager.loadRepositoryMetadata();
-                Map<String, RemoteRepositoryClient> oldRepositories = new HashMap<String, RemoteRepositoryClient>();
-                Map<String, RemoteRepositoryType> newRepositories = new HashMap<String, RemoteRepositoryType>();
+                Map<String,RemoteRepositoryClient> oldRepositories = new HashMap<>();
+                Map<String,RemoteRepositoryType> newRepositories = new HashMap<>();
 
                 // Build a catalog of all the new and existing repositories, indexed by ID
                 for (RemoteRepositoryClient oldRepository : remoteRepositories) {

@@ -104,7 +104,7 @@ public class ValidatorFactory {
      *            the type of object for which to return a validator
      */
     public <T extends Validatable> Validator<T> getValidatorForClass(Class<T> targetClass) {
-        List<Class<Validator<T>>> validatorClasses = (ruleSet == null) ? new ArrayList<Class<Validator<T>>>()
+        List<Class<Validator<T>>> validatorClasses = (ruleSet == null) ? new ArrayList<>()
                 : ruleSet.getValidatorClasses(targetClass);
         Validator<T> validator = null;
 
@@ -113,7 +113,7 @@ public class ValidatorFactory {
                 validator = newValidator((Class<Validator<T>>) validatorClasses.get(0));
 
             } else if (validatorClasses.size() > 1) {
-                CompositeValidator<T> cValidator = new CompositeValidator<T>();
+                CompositeValidator<T> cValidator = new CompositeValidator<>();
 
                 for (Class<Validator<T>> validatorClass : validatorClasses) {
                     cValidator.addValidator(newValidator(validatorClass));
@@ -145,8 +145,8 @@ public class ValidatorFactory {
                 newValidator.setValidationContext(context);
                 validator = newValidator;
             }
-        } catch (Throwable t) {
-            log.error("Unable to instantiate validator of type: " + validatorClass.getName(), t);
+        } catch (Exception e) {
+            log.error("Unable to instantiate validator of type: " + validatorClass.getName(), e);
         }
         return validator;
     }

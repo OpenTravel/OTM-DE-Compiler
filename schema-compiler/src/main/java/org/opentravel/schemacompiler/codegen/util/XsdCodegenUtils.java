@@ -82,14 +82,21 @@ public class XsdCodegenUtils {
     public static final QName XSD_BOOLEAN_TYPE = new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "boolean");
     public static final QName XSD_STRING_TYPE = new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "string");
     public static final QName XML_SCHEMA_ID_TYPE = new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "ID");
-    private static final Map<Class<?>, String> libraryTypeNames;
 
     public static final String BUILT_INS_FOLDER = "built-ins";
     public static final String LEGACY_FOLDER = "legacy";
 
+    private static final Map<Class<?>, String> libraryTypeNames;
+    public static final String ERROR_NAME = "ERROR";
+    
     private static org.opentravel.ns.ota2.appinfo_v01_00.ObjectFactory appInfoObjectFactory = new org.opentravel.ns.ota2.appinfo_v01_00.ObjectFactory();
     private static DatatypeFactory jaxbDatatypeFactory;
 
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private XsdCodegenUtils() {}
+	
     /**
      * Returns the name of the global XML schema element associated with the given property type, or
      * null if the type cannot be referenced by element (e.g. simple types).
@@ -157,7 +164,7 @@ public class XsdCodegenUtils {
             	if (ownerAlias != null) {
                 	elementLocalName = ownerAlias.getLocalName() + getElementFacetSuffix(facet);
                 } else {
-                    elementLocalName = "ERROR" + getElementFacetSuffix(facet);
+                    elementLocalName = ERROR_NAME + getElementFacetSuffix(facet);
             	}
             	
             } else if (alias.getOwningEntity() instanceof TLFacet) {
@@ -171,7 +178,7 @@ public class XsdCodegenUtils {
                         elementLocalName = ownerAlias.getLocalName() + getElementFacetSuffix(facet);
                     }
                 } else {
-                    elementLocalName = "ERROR" + getElementFacetSuffix(facet);
+                    elementLocalName = ERROR_NAME + getElementFacetSuffix(facet);
                 }
             } else if (alias.getOwningEntity() instanceof TLListFacet) {
                 TLListFacet listFacet = (TLListFacet) alias.getOwningEntity();
@@ -228,10 +235,9 @@ public class XsdCodegenUtils {
             if (facet.getFacetType() == TLFacetType.SUMMARY) {
                 elementName = facetOwner.getLocalName();
             }
-        } else if (facetOwner instanceof TLChoiceObject) {
-            if (facet.getFacetType() == TLFacetType.SHARED) {
-                elementName = facetOwner.getLocalName();
-            }
+        } else if ((facetOwner instanceof TLChoiceObject)
+        		&& (facet.getFacetType() == TLFacetType.SHARED)) {
+            elementName = facetOwner.getLocalName();
         }
 
         // Default value is the normal global element name
@@ -242,7 +248,7 @@ public class XsdCodegenUtils {
                 elementName = globalName.getLocalPart();
                 
         	} else {
-        		elementName = "ERROR";
+        		elementName = ERROR_NAME;
         	}
         }
         return new QName(facet.getNamespace(), elementName);
@@ -292,7 +298,7 @@ public class XsdCodegenUtils {
                 elementName = globalName.getLocalPart();
         		
         	} else {
-        		elementName = "ERROR";
+        		elementName = ERROR_NAME;
         	}
         }
         return new QName(facet.getNamespace(), elementName);
@@ -452,8 +458,7 @@ public class XsdCodegenUtils {
             TLAbstractFacet facet = ((TLBusinessObject) modelEntity).getIdFacet();
 
             if (referencingProperty != null) {
-                facet = PropertyCodegenUtils.findNonEmptyFacet(
-                        referencingProperty.getOwner(), facet);
+                facet = PropertyCodegenUtils.findNonEmptyFacet(facet);
             }
             typeName = getFacetTypeName(facet);
 
@@ -461,8 +466,7 @@ public class XsdCodegenUtils {
             TLAbstractFacet facet = ((TLCoreObject) modelEntity).getSummaryFacet();
 
             if (referencingProperty != null) {
-                facet = PropertyCodegenUtils.findNonEmptyFacet(
-                        referencingProperty.getOwner(), facet);
+                facet = PropertyCodegenUtils.findNonEmptyFacet(facet);
             }
             typeName = getFacetTypeName(facet);
 
@@ -876,7 +880,7 @@ public class XsdCodegenUtils {
             // owner's
             // settings in those cases.
             if ((modelEntity instanceof TLAbstractFacet) && !(modelEntity instanceof TLSimpleFacet)) {
-                modelEntity = (NamedEntity) ((TLAbstractFacet) modelEntity).getOwningEntity();
+                modelEntity = ((TLAbstractFacet) modelEntity).getOwningEntity();
             }
 
             // Add the library type annotation to the appInfo element
@@ -1089,7 +1093,7 @@ public class XsdCodegenUtils {
      */
     static {
         try {
-            Map<Class<?>, String> typeNames = new HashMap<Class<?>, String>();
+            Map<Class<?>, String> typeNames = new HashMap<>();
 
             typeNames.put(TLSimple.class, "Simple");
             typeNames.put(TLValueWithAttributes.class, "ValueWithAttributes");
@@ -1107,8 +1111,8 @@ public class XsdCodegenUtils {
             libraryTypeNames = Collections.unmodifiableMap(typeNames);
             jaxbDatatypeFactory = DatatypeFactory.newInstance();
 
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

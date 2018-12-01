@@ -134,8 +134,8 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
      *             thrown if an unexpected error occurs during the compilation process
      */
     public ValidationFindings compileOutput(URL libraryOrProjectOrReleaseUrl) throws SchemaCompilerException {
-        Collection<TLLibrary> userDefinedLibraries = new ArrayList<TLLibrary>();
-        Collection<XSDLibrary> legacySchemas = new ArrayList<XSDLibrary>();
+        Collection<TLLibrary> userDefinedLibraries = new ArrayList<>();
+        Collection<XSDLibrary> legacySchemas = new ArrayList<>();
         ValidationFindings findings;
 
         if (isProjectFile(libraryOrProjectOrReleaseUrl)) {
@@ -198,7 +198,7 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
         } else { // Must be an OTM file
             LibraryInputSource<InputStream> libraryInput =
             		new LibraryStreamInputSource(libraryOrProjectOrReleaseUrl);
-            LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>();
+            LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<>();
             String catalogLocation = getCatalogLocation();
             TLModel model;
             
@@ -231,8 +231,8 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
      *             thrown if an unexpected error occurs during the compilation process
      */
     public ValidationFindings compileOutput(Project project) throws SchemaCompilerException {
-        Collection<TLLibrary> userDefinedLibraries = new ArrayList<TLLibrary>();
-        Collection<XSDLibrary> legacySchemas = new ArrayList<XSDLibrary>();
+        Collection<TLLibrary> userDefinedLibraries = new ArrayList<>();
+        Collection<XSDLibrary> legacySchemas = new ArrayList<>();
 
         for (ProjectItem item : project.getProjectItems()) {
             AbstractLibrary itemContent = item.getContent();
@@ -262,8 +262,8 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
      *             thrown if an unexpected error occurs during the compilation process
      */
     public ValidationFindings compileOutput(ReleaseManager releaseManager) throws SchemaCompilerException {
-        Collection<TLLibrary> userDefinedLibraries = new ArrayList<TLLibrary>();
-        Collection<XSDLibrary> legacySchemas = new ArrayList<XSDLibrary>();
+        Collection<TLLibrary> userDefinedLibraries = new ArrayList<>();
+        Collection<XSDLibrary> legacySchemas = new ArrayList<>();
         String outputFolder = getOutputFolder();
         
     	for (ReleaseMember member : releaseManager.getRelease().getPrincipalMembers()) {
@@ -372,8 +372,8 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
             }
             return findings;
 
-        } catch (Throwable t) {
-            throw new SchemaCompilerException(t);
+        } catch (Exception e) {
+            throw new SchemaCompilerException(e);
         }
     }
 
@@ -510,7 +510,7 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
      * @return List<File>
      */
     public List<File> getGeneratedFiles() {
-        List<File> fileList = new ArrayList<File>();
+        List<File> fileList = new ArrayList<>();
 
         for (String filePath : generatedFiles.keySet()) {
             fileList.add(generatedFiles.get(filePath));

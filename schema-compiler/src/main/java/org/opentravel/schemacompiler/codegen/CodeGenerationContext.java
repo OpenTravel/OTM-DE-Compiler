@@ -97,7 +97,7 @@ public class CodeGenerationContext {
     /** Context key indicating that OTM extensions should be suppressed in the generated swagger documents. */
     public static final String CK_SUPRESS_OTM_EXTENSIONS = "schemacompiler.swagger.supressOtmExtensions";
 
-    private Map<String, String> contents = new HashMap<String, String>();
+    private Map<String, String> contents = new HashMap<>();
 
     /**
      * Returns a value from the context. If a value for the specified key is not defined, this

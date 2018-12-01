@@ -64,12 +64,12 @@ public class LibraryComparator extends BaseComparator {
 		String newStatus = (newLibrary.getStatus() == null) ? null : newLibrary.getStatus().toString();
 		Map<String,NamedEntity> oldEntities = buildEntityMap( oldLibrary );
 		Map<String,NamedEntity> newEntities = buildEntityMap( newLibrary );
-		SortedSet<String> oldEntityNames = new TreeSet<String>( oldEntities.keySet() );
-		SortedSet<String> newEntityNames = new TreeSet<String>( newEntities.keySet() );
+		SortedSet<String> oldEntityNames = new TreeSet<>( oldEntities.keySet() );
+		SortedSet<String> newEntityNames = new TreeSet<>( newEntities.keySet() );
 		Map<String,TLResource> oldResources = buildResourceMap( oldLibrary );
 		Map<String,TLResource> newResources = buildResourceMap( newLibrary );
-		SortedSet<String> oldResourceNames = new TreeSet<String>( oldResources.keySet() );
-		SortedSet<String> newResourceNames = new TreeSet<String>( newResources.keySet() );
+		SortedSet<String> oldResourceNames = new TreeSet<>( oldResources.keySet() );
+		SortedSet<String> newResourceNames = new TreeSet<>( newResources.keySet() );
 		LibraryChangeSet changeSet = new LibraryChangeSet( oldLibrary, newLibrary );
 		List<LibraryChangeItem> changeItems = changeSet.getChangeItems();
 		

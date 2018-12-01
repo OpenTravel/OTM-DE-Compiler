@@ -136,14 +136,14 @@ public class ModelElementCloner {
         this.sourceTransformContext = new SymbolResolverTransformerContext();
         this.sourceTransformContext
                 .setSymbolResolver(new TL2JaxbLibrarySymbolResolver(modelSymbols));
-        this.sourceTransformerFactory = new TypeMappingTransformerFactory<SymbolResolverTransformerContext>(
+        this.sourceTransformerFactory = new TypeMappingTransformerFactory<>(
                 TransformerFactory.getInstance(
                         SchemaCompilerApplicationContext.SAVER_TRANSFORMER_FACTORY,
                         sourceTransformContext));
         this.sourceTransformerFactory.setContext(this.sourceTransformContext);
 
         this.targetTransformContext = new DefaultTransformerContext();
-        this.targetTransformerFactory = new TypeMappingTransformerFactory<DefaultTransformerContext>(
+        this.targetTransformerFactory = new TypeMappingTransformerFactory<>(
                 TransformerFactory.getInstance(
                         SchemaCompilerApplicationContext.LOADER_TRANSFORMER_FACTORY,
                         targetTransformContext));
@@ -159,7 +159,7 @@ public class ModelElementCloner {
      * @throws IllegalArgumentException
      *             thrown if the given source object cannot be cloned
      */
-    public <C extends ModelElement, I> C clone(C source) {
+    public <C extends ModelElement> C clone(C source) {
         C clonedObject = null;
 
         if (source instanceof LibraryElement) {
@@ -195,7 +195,7 @@ public class ModelElementCloner {
             }
 
             // Use the transformer subsystem to create the clone of the object
-            Map<Object, NamedEntity> typeAssignments = new HashMap<Object, NamedEntity>();
+            Map<Object,NamedEntity> typeAssignments = new HashMap<>();
 
             sourceTransformerFactory.setTypeAssignments(typeAssignments);
             targetTransformerFactory.setTypeAssignments(typeAssignments);
@@ -357,14 +357,6 @@ public class ModelElementCloner {
         }
 
         /**
-         * @see org.opentravel.schemacompiler.transform.TransformerFactory#setContext(org.opentravel.schemacompiler.transform.ObjectTransformerContext)
-         */
-        @Override
-        public void setContext(C transformerContext) {
-            super.setContext(transformerContext);
-        }
-
-        /**
          * Assigns the map instance to use for type assignments collected and assigned by the
          * transformers returned by this factory.
          * 
@@ -380,18 +372,15 @@ public class ModelElementCloner {
          *      java.lang.Class)
          */
         @Override
-        public <S, T> ObjectTransformer<S, T, C> getTransformer(Class<S> sourceType,
-                Class<T> targetType) {
-            ObjectTransformer<S, T, C> delegateTransformer = delegateFactory.getTransformer(
-                    sourceType, targetType);
-            ObjectTransformer<S, T, C> transformer;
+        public <S, T> ObjectTransformer<S,T,C> getTransformer(Class<S> sourceType, Class<T> targetType) {
+            ObjectTransformer<S,T,C> delegateTransformer = delegateFactory.getTransformer(sourceType, targetType);
+            ObjectTransformer<S,T,C> transformer;
 
             if (TLModelElement.class.isAssignableFrom(sourceType)) {
-                transformer = new TypeMappingTransformer<S, T, C>(delegateTransformer,
+                transformer = new TypeMappingTransformer<>(delegateTransformer,
                         typeAssignments);
             } else {
-                transformer = new TypeAssignmentTransformer<S, T, C>(delegateTransformer,
-                        typeAssignments);
+                transformer = new TypeAssignmentTransformer<>(delegateTransformer, typeAssignments);
             }
             transformer.setContext(getContext());
             return transformer;
@@ -403,11 +392,11 @@ public class ModelElementCloner {
      * Wrapper class for a transformer that captures the type assignments for the source element
      * being transformed.
      */
-    private class TypeMappingTransformer<S, T, C extends ObjectTransformerContext> implements
-            ObjectTransformer<S, T, C> {
+    private class TypeMappingTransformer<S,T,C extends ObjectTransformerContext> implements
+            ObjectTransformer<S,T,C> {
 
-        private Map<Object, NamedEntity> typeAssignments;
-        private ObjectTransformer<S, T, C> delegate;
+        private Map<Object,NamedEntity> typeAssignments;
+        private ObjectTransformer<S,T,C> delegate;
 
         /**
          * Constructor that assigns the delegate transformer and the mapping of type assignments.
@@ -419,8 +408,8 @@ public class ModelElementCloner {
          * @param typeNameAssignments
          *            the mappings of type names for the entities being transformed
          */
-        public TypeMappingTransformer(ObjectTransformer<S, T, C> delegate,
-                Map<Object, NamedEntity> typeAssignments) {
+        public TypeMappingTransformer(ObjectTransformer<S,T,C> delegate,
+                Map<Object,NamedEntity> typeAssignments) {
             this.typeAssignments = typeAssignments;
             this.delegate = delegate;
         }
@@ -468,11 +457,11 @@ public class ModelElementCloner {
      * Wrapper class for a transformer that re-assigns the type assignments for the target element
      * being transformed (originally captured from the element being cloned).
      */
-    private class TypeAssignmentTransformer<S, T, C extends ObjectTransformerContext> implements
-            ObjectTransformer<S, T, C> {
+    private class TypeAssignmentTransformer<S,T,C extends ObjectTransformerContext> implements
+            ObjectTransformer<S,T,C> {
 
-        private Map<Object, NamedEntity> typeAssignments;
-        private ObjectTransformer<S, T, C> delegate;
+        private Map<Object,NamedEntity> typeAssignments;
+        private ObjectTransformer<S,T,C> delegate;
 
         /**
          * Constructor that assigns the delegate transformer and the mapping of type assignments.
@@ -534,7 +523,7 @@ public class ModelElementCloner {
      */
     static {
         try {
-            Map<Class<?>, Class<?>> iotMap = new HashMap<Class<?>, Class<?>>();
+            Map<Class<?>,Class<?>> iotMap = new HashMap<>();
 
             iotMap.put(TLActionFacet.class, FacetAction.class);
             iotMap.put(TLAction.class, Action.class);
@@ -569,8 +558,8 @@ public class ModelElementCloner {
             iotMap.put(TLValueWithAttributes.class, ValueWithAttributes.class);
             intermediateObjectTypes = Collections.unmodifiableMap(iotMap);
 
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

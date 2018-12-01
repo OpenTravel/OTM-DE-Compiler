@@ -81,8 +81,8 @@ public abstract class RepositoryFileManager {
     private static Log log = LogFactory.getLog(RepositoryFileManager.class);
 
     private static final ThreadLocal<Set<File>> changeSet = new ThreadLocal<Set<File>>() {
-        protected Set<File> initialValue() {
-            return new HashSet<File>();
+        @Override protected Set<File> initialValue() {
+            return new HashSet<>();
         }
     };
 
@@ -92,10 +92,10 @@ public abstract class RepositoryFileManager {
 
     private static File ota2HomeFolder;
     private static File defaultRepositoryLocation;
-    private static Map<String, String> namespaceIdCache = new HashMap<String, String>();
+    private static Map<String,String> namespaceIdCache = new HashMap<>();
 
     private ThreadLocal<String> currentUserId = new ThreadLocal<String>() {
-        protected String initialValue() {
+        @Override protected String initialValue() {
             return null;
         }
     };
@@ -219,7 +219,7 @@ public abstract class RepositoryFileManager {
                             + repositoryLocation.getAbsolutePath());
         }
         RepositoryInfoType repositoryMetadata = (RepositoryInfoType) loadFile(repositoryMetadataFile);
-        List<String> rootNamespaces = new ArrayList<String>();
+        List<String> rootNamespaces = new ArrayList<>();
 
         // Normalize each of the root namespace URI's before returning
         for (String rootNS : repositoryMetadata.getRootNamespace()) {
@@ -261,11 +261,10 @@ public abstract class RepositoryFileManager {
      * 
      * @return Date
      */
-    public Date getRepositoryMetadataLastUpdated() throws RepositoryException {
+    public Date getRepositoryMetadataLastUpdated() {
         File repositoryMetadataFile = new File(repositoryLocation, REPOSITORY_METADATA_FILENAME);
 
-        return repositoryMetadataFile.exists() ? new Date(repositoryMetadataFile.lastModified())
-                : null;
+        return repositoryMetadataFile.exists() ? new Date(repositoryMetadataFile.lastModified()) : null;
     }
 
     /**
@@ -377,11 +376,11 @@ public abstract class RepositoryFileManager {
      */
     public List<LibraryInfoType> loadLibraryMetadataRecords(String baseNamespace)
             throws RepositoryException {
-        List<LibraryInfoType> metadataList = new ArrayList<LibraryInfoType>();
+        List<LibraryInfoType> metadataList = new ArrayList<>();
 
         // First, compile the list of possible folders for the specified base namespace
         File baseFolder = getNamespaceFolder(baseNamespace, null);
-        List<File> namespaceFolders = new ArrayList<File>();
+        List<File> namespaceFolders = new ArrayList<>();
 
         if (baseFolder.exists()) {
             for (File folderMember : baseFolder.listFiles()) {
@@ -544,7 +543,7 @@ public abstract class RepositoryFileManager {
      *             thrown if the namespace URI provided is not valid
      */
     public List<String> findAllNamespaces(List<String> rootNamespaces) throws RepositoryException {
-        List<String> namespaces = new ArrayList<String>();
+        List<String> namespaces = new ArrayList<>();
 
         for (String rootNamespace : rootNamespaces) {
             findNamespaces(rootNamespace, true, namespaces);
@@ -565,7 +564,7 @@ public abstract class RepositoryFileManager {
      */
     public List<String> findAllBaseNamespaces(List<String> rootNamespaces)
             throws RepositoryException {
-        List<String> namespaces = new ArrayList<String>();
+        List<String> namespaces = new ArrayList<>();
 
         for (String rootNamespace : rootNamespaces) {
             findNamespaces(rootNamespace, false, namespaces);
@@ -619,7 +618,7 @@ public abstract class RepositoryFileManager {
     public List<String> findChildBaseNamespacePaths(String baseNamespace)
             throws RepositoryException {
         File nsFolder = getNamespaceFolder(baseNamespace, null);
-        List<String> childPaths = new ArrayList<String>();
+        List<String> childPaths = new ArrayList<>();
 
         if (nsFolder.exists()) {
             for (File folderMember : nsFolder.listFiles()) {
@@ -650,7 +649,7 @@ public abstract class RepositoryFileManager {
     public List<String> findChildVersionNamespacePaths(String baseNamespace)
             throws RepositoryException {
         File nsFolder = getNamespaceFolder(baseNamespace, null);
-        List<String> childPaths = new ArrayList<String>();
+        List<String> childPaths = new ArrayList<>();
 
         if (nsFolder.exists()) {
             for (File folderMember : nsFolder.listFiles()) {

@@ -92,7 +92,7 @@ public abstract class AbstractInfoWriter<T> implements InfoWriter{
 	 */
 	protected void addCollapseTrigger(Content content, String targetId,
 			String triggerId) {
-		HtmlTree openSpan = HtmlTree.SPAN(HtmlTree.EMPTY);
+		HtmlTree openSpan = HtmlTree.span(HtmlTree.EMPTY);
 		openSpan.addAttr(HtmlAttr.CLASS, HtmlStyle.toggleButton + " "
 				+ HtmlStyle.imgOpen);
 		String openId = triggerId + "Open";
@@ -103,7 +103,7 @@ public abstract class AbstractInfoWriter<T> implements InfoWriter{
 		openSpan.addDataAttr("toggle", "collapsed");
 		openSpan.addDataAttr("imgTarget", "#" + closedId);
 		content.addContent(openSpan);
-		HtmlTree closedSpan = HtmlTree.SPAN(HtmlTree.EMPTY);
+		HtmlTree closedSpan = HtmlTree.span(HtmlTree.EMPTY);
 		closedSpan.setStyle(HtmlStyle.imgClosed);
 		closedSpan.addAttr(HtmlAttr.ID, closedId);
 		closedSpan.addAttr(HtmlAttr.TITLE, "closed");
@@ -137,7 +137,7 @@ public abstract class AbstractInfoWriter<T> implements InfoWriter{
 	protected Content getTableTree() {
 		Content content = caption == null ? HtmlTree.EMPTY : writer
 				.getTableCaption(caption);
-		Content table = HtmlTree.TABLE(HtmlStyle.overviewSummary, 0, 3, 0,
+		Content table = HtmlTree.table(HtmlStyle.overviewSummary, 0, 3, 0,
 				getInfoTableSummary(), content);
 		table.addContent(writer.getSummaryTableHeader(getInfoTableHeader(),
 				"col"));
@@ -156,7 +156,7 @@ public abstract class AbstractInfoWriter<T> implements InfoWriter{
 	protected abstract String[] getInfoTableHeader();
 	
 	protected Content getInfoLabel() {
-		return HtmlTree.HEADING(HtmlConstants.SUMMARY_HEADING,
+		return HtmlTree.heading(HtmlConstants.SUMMARY_HEADING,
 				title);
 	}
 

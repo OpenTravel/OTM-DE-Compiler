@@ -147,13 +147,6 @@ public class TLExampleCompileValidator extends TLValidatorBase<TLExample> {
             }
         }
 
-        /*
-         * Commented out until better editing capabilities are available in the GUI for examples
-         * 
-         * builder.setProperty("description", target.getValue()).setFindingType(FindingType.WARNING)
-         * .assertNotNullOrBlank();
-         */
-
         builder.setProperty("context", target.getOwningEntity().getExamples())
                 .setFindingType(FindingType.ERROR)
                 .assertNoDuplicates(new IdentityResolver<TLExample>() {
@@ -187,7 +180,7 @@ public class TLExampleCompileValidator extends TLValidatorBase<TLExample> {
      * @return TLAttributeType
      */
     private TLAttributeType getSimpleType(TLExample target) {
-        List<TLModelElement> visitedElements = new ArrayList<TLModelElement>();
+        List<TLModelElement> visitedElements = new ArrayList<>();
         TLModelElement simpleType = (TLModelElement) target.getOwningEntity();
 
         while ((simpleType != null) && !(simpleType instanceof TLSimple)
@@ -229,10 +222,8 @@ public class TLExampleCompileValidator extends TLValidatorBase<TLExample> {
      * @return String[]
      */
     private String[] getExampleValues(TLExample target, NamedEntity simpleType) {
-        String pattern = (simpleType instanceof TLSimple) ? getPattern((TLSimple) simpleType)
-                : null;
-        boolean isListType = (simpleType instanceof TLSimple) ? ((TLSimple) simpleType)
-                .isListTypeInd() : false;
+        String pattern = (simpleType instanceof TLSimple) ? getPattern((TLSimple) simpleType) : null;
+        boolean isListType = (simpleType instanceof TLSimple) && ((TLSimple) simpleType).isListTypeInd();
         String[] values = null;
 
         if ((target.getValue() == null) || target.getValue().trim().equals("")) {
@@ -245,7 +236,7 @@ public class TLExampleCompileValidator extends TLValidatorBase<TLExample> {
                 Matcher m;
 
                 if ((m = splitPattern.matcher(target.getValue())).matches()) {
-                    List<String> valueList = new ArrayList<String>();
+                    List<String> valueList = new ArrayList<>();
                     valueList.add(m.group(1));
 
                     while (m.find()) {
@@ -254,9 +245,9 @@ public class TLExampleCompileValidator extends TLValidatorBase<TLExample> {
                     values = valueList.toArray(new String[valueList.size()]);
 
                 } else {
-                    // If the pattern isn't recognized, we probably have an invalid example;
-                    // fallback is
-                    // to split the example values using standard white space separators.
+                    // If the pattern isn't recognized, we probably have an invalid example.
+                    // The fallback is to split the example values using standard white space
+                	// separators.
                     values = target.getValue().split("\\s+");
                 }
 

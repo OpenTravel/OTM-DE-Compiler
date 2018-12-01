@@ -81,13 +81,13 @@ public class EnumerationWriter extends NamedEntityWriter<EnumerationDocumentatio
 				for (EnumValueDocumentationBuilder edb : values) {
 					HtmlTree tdName = new HtmlTree(HtmlTag.TD);
 					tdName.setStyle(HtmlStyle.colFirst);
-					Content strong = HtmlTree.STRONG(new RawHtml(edb.getName()));
-					Content code = HtmlTree.CODE(strong);
+					Content strong = HtmlTree.strong(new RawHtml(edb.getName()));
+					Content code = HtmlTree.code(strong);
 					tdName.addContent(code);
 					HtmlTree tdDescription = new HtmlTree(HtmlTag.TD);
 					setInfoColumnStyle(tdDescription);			
 					writer.addSummaryComment(edb, tdDescription);
-					HtmlTree tr = HtmlTree.TR(tdName);
+					HtmlTree tr = HtmlTree.tr(tdName);
 					tr.addContent(tdDescription);
 					addRowStyle(tr, values.indexOf(edb));
 					tableTree.addContent(tr);

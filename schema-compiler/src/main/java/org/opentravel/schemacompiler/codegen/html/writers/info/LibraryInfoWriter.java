@@ -149,7 +149,7 @@ public class LibraryInfoWriter extends AbstractInfoWriter<LibraryDocumentationBu
 		HtmlTree tdSummary = new HtmlTree(HtmlTag.TD);
 		setInfoColumnStyle(tdSummary);
 		writer.addSummaryComment(object, tdSummary);
-		HtmlTree tr = HtmlTree.TR(tdObjectName);
+		HtmlTree tr = HtmlTree.tr(tdObjectName);
 		tr.addContent(tdSummary);
 		addRowStyle(tr, counter);
 		return tr;	
@@ -159,7 +159,7 @@ public class LibraryInfoWriter extends AbstractInfoWriter<LibraryDocumentationBu
 		HtmlTree code = new HtmlTree(HtmlTag.CODE);
 		code.addContent(new RawHtml(writer.getLink(new LinkInfoImpl(
 				LinkInfoImpl.CONTEXT_LIBRARY, object))));
-		Content strong = HtmlTree.STRONG(code);
+		Content strong = HtmlTree.strong(code);
 		tree.addContent(strong);
 	}
 

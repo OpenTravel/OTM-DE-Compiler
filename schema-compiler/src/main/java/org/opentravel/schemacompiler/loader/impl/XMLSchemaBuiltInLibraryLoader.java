@@ -74,7 +74,7 @@ public class XMLSchemaBuiltInLibraryLoader implements BuiltInLibraryLoader {
      */
     static {
         try {
-            List<LibraryMember> members = new ArrayList<LibraryMember>();
+            List<LibraryMember> members = new ArrayList<>();
 
             for (EnumXsdSimpleType xsdSimpleType : EnumXsdSimpleType.values()) {
                 members.add(new XSDSimpleType(xsdSimpleType.value(), null));
@@ -82,8 +82,8 @@ public class XMLSchemaBuiltInLibraryLoader implements BuiltInLibraryLoader {
             XML_SCHEMA_LIBRARY_MEMBERS = members;
             XML_SCHEMA_LIBRARY_URL = new URL(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

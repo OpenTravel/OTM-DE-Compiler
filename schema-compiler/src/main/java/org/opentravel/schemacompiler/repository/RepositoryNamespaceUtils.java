@@ -28,7 +28,12 @@ import java.util.regex.Pattern;
 public class RepositoryNamespaceUtils {
 
     private static final Pattern pathPartPattern = Pattern.compile("(/[^/]*)/");
-
+    
+    /**
+     * Private constructor to prevent instantiation.
+     */
+    private RepositoryNamespaceUtils() {}
+    
     /**
      * Normalizes the given URI path to remove relative folder path references (e.g. '/.', '/..',
      * and '//'). The URI that is returned will never end with a '/' path separator.
@@ -48,7 +53,7 @@ public class RepositoryNamespaceUtils {
         if ((urlPath.indexOf("/./") >= 0) || (urlPath.indexOf("/../") >= 0)
                 || (urlPath.indexOf("//") >= 0)) {
             StringBuilder targetUrl = new StringBuilder();
-            List<String> pathList = new ArrayList<String>();
+            List<String> pathList = new ArrayList<>();
 
             if (uriProtocol != null) {
                 targetUrl.append(uriProtocol).append(":/");
@@ -148,7 +153,8 @@ public class RepositoryNamespaceUtils {
      */
     public static String getParentNamespace(String ns, Repository repository)
             throws RepositoryException {
-        boolean isValidNS = false, isRootNS = false;
+        boolean isValidNS = false;
+        boolean isRootNS = false;
         String parentNS;
 
         if (!ns.endsWith("/"))

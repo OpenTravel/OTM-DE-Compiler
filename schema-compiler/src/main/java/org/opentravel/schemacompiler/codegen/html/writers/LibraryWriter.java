@@ -96,13 +96,13 @@ public class LibraryWriter extends SubWriterHolderWriter implements
 		addNavLinks(true, bodyTree);
 		HtmlTree div = new HtmlTree(HtmlTag.DIV);
 		div.addStyle(HtmlStyle.header);
-		Content tHeading = HtmlTree.HEADING(HtmlConstants.TITLE_HEADING, true,
+		Content tHeading = HtmlTree.heading(HtmlConstants.TITLE_HEADING, true,
 				HtmlStyle.title, libraryLabel);
 		tHeading.addContent(getSpace());
 		Content libraryHead = new RawHtml(library.getName());
 		tHeading.addContent(libraryHead);
 		div.addContent(tHeading);
-		tHeading = HtmlTree.HEADING(HtmlConstants.TITLE_HEADING, true,
+		tHeading = HtmlTree.heading(HtmlConstants.TITLE_HEADING, true,
 				HtmlStyle.title, namespaceLabel );
 		tHeading.addContent(getSpace());
 		libraryHead = new RawHtml(namespace);
@@ -135,7 +135,7 @@ public class LibraryWriter extends SubWriterHolderWriter implements
 					.addContent(getMarkerAnchor("library_description"));
 			Content h2Content = new StringContent(configuration.getText(
 					"doclet.Library_Description", library.getName()));
-			packageContentTree.addContent(HtmlTree.HEADING(
+			packageContentTree.addContent(HtmlTree.heading(
 					HtmlConstants.PACKAGE_HEADING, true, h2Content));
 			addInlineComment(doc, packageContentTree);
 		}
@@ -164,7 +164,7 @@ public class LibraryWriter extends SubWriterHolderWriter implements
 	 */
 	protected Content getNavLinkClassUse() {
 		Content useLink = getHyperLink("library-use.html", "", useLabel, "", "");
-		Content li = HtmlTree.LI(useLink);
+		Content li = HtmlTree.li(useLink);
 		return li;
 	}
 
@@ -176,11 +176,11 @@ public class LibraryWriter extends SubWriterHolderWriter implements
 	public Content getNavLinkPrevious() {
 		Content li;
 		if (prev == null) {
-			li = HtmlTree.LI(prevLibraryLabel);
+			li = HtmlTree.li(prevLibraryLabel);
 		} else {
 			String path = DirectoryManager.getRelativePath(library.getName(),
 					prev.getName());
-			li = HtmlTree.LI(getHyperLink(path + OUTPUT_FILE_NAME, "",
+			li = HtmlTree.li(getHyperLink(path + OUTPUT_FILE_NAME, "",
 					prevLibraryLabel, "", ""));
 		}
 		return li;
@@ -194,11 +194,11 @@ public class LibraryWriter extends SubWriterHolderWriter implements
 	public Content getNavLinkNext() {
 		Content li;
 		if (next == null) {
-			li = HtmlTree.LI(nextLibraryLabel);
+			li = HtmlTree.li(nextLibraryLabel);
 		} else {
 			String path = DirectoryManager.getRelativePath(library.getName(),
 					next.getName());
-			li = HtmlTree.LI(getHyperLink(path + "library-summary.html", "",
+			li = HtmlTree.li(getHyperLink(path + "library-summary.html", "",
 					nextLibraryLabel, "", ""));
 		}
 		return li;
@@ -213,7 +213,7 @@ public class LibraryWriter extends SubWriterHolderWriter implements
 	protected Content getNavLinkTree() {
 		Content useLink = getHyperLink("package-tree.html", "", treeLabel, "",
 				"");
-		Content li = HtmlTree.LI(useLink);
+		Content li = HtmlTree.li(useLink);
 		return li;
 	}
 
@@ -223,7 +223,7 @@ public class LibraryWriter extends SubWriterHolderWriter implements
 	 * @return a content tree for the package link
 	 */
 	protected Content getNavLinkLibrary() {
-		Content li = HtmlTree.LI(HtmlStyle.navBarCell1Rev, libraryLabel);
+		Content li = HtmlTree.li(HtmlStyle.navBarCell1Rev, libraryLabel);
 		return li;
 	}
 

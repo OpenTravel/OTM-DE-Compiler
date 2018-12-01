@@ -78,21 +78,12 @@ public class TLPropertyCodegenTransformer extends
      */
     private TopLevelElement transformValueProperty(TLProperty source) {
         TLPropertyOwner propertyOwner = source.getOwner();
-        TLPropertyType propertyType = PropertyCodegenUtils.resolvePropertyType(
-                source.getOwner(), source.getType());
+        TLPropertyType propertyType = PropertyCodegenUtils.resolvePropertyType(source.getType());
         TopLevelElement element = new TopLevelElement();
 
         if (!PropertyCodegenUtils.hasGlobalElement(propertyType)) {
             // If the property references a type that does not define a global element, assign the
             // name/type fields of the JAXB element
-            String propertyTypeNS = propertyType.getNamespace();
-
-            if ((propertyTypeNS == null)
-                    || propertyTypeNS.equals(AnonymousEntityFilter.ANONYMOUS_PSEUDO_NAMESPACE)) {
-                // If this type is from a chameleon schema, replace its namespace with that of the
-                // local library
-                propertyTypeNS = propertyOwner.getNamespace();
-            }
             element.setType(new QName(propertyType.getNamespace(), XsdCodegenUtils
                     .getGlobalTypeName(propertyType, source)));
 
@@ -106,8 +97,7 @@ public class TLPropertyCodegenTransformer extends
         } else {
             // If the property references a type that defines a global element, assign the 'ref'
             // field of the JAXB element.
-            QName propertyRef = PropertyCodegenUtils.getDefaultSchemaElementName(propertyType,
-                    false);
+            QName propertyRef = PropertyCodegenUtils.getDefaultSchemaElementName(propertyType, false);
             String propertyTypeNS = propertyRef.getNamespaceURI();
 
             // If this type is from a chameleon schema, replace its namespace with that of the local
@@ -129,7 +119,7 @@ public class TLPropertyCodegenTransformer extends
             TLCoreObject facetOwner = (TLCoreObject) ((TLListFacet) source.getType())
                     .getOwningEntity();
 
-            if (facetOwner.getRoleEnumeration().getRoles().size() > 0) {
+            if (!facetOwner.getRoleEnumeration().getRoles().isEmpty()) {
                 element.setMaxOccurs(facetOwner.getRoleEnumeration().getRoles().size() + "");
             } else {
                 element.setMaxOccurs(PropertyCodegenUtils.getMaxOccurs(source));
@@ -150,15 +140,14 @@ public class TLPropertyCodegenTransformer extends
      * @return TopLevelElement
      */
     private TopLevelElement transformReferenceProperty(TLProperty source) {
-        TLPropertyType propertyType = PropertyCodegenUtils.resolvePropertyType(
-                source.getOwner(), source.getType());
+        TLPropertyType propertyType = PropertyCodegenUtils.resolvePropertyType(source.getType());
         TopLevelElement element = new TopLevelElement();
         Annotation annotation = new Annotation();
         Appinfo appInfo = new Appinfo();
         OTA2Entity ota2Entity = new OTA2Entity();
-        String elementName = source.getName();
         String maxOccurs = PropertyCodegenUtils.getMaxOccurs(source);
         boolean isMultipleReference;
+        String elementName;
 
         if (PropertyCodegenUtils.hasGlobalElement(propertyType)) {
             elementName = PropertyCodegenUtils.getDefaultSchemaElementName(propertyType, true)

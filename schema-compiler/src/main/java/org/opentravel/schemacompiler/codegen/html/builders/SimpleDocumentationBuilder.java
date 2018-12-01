@@ -43,8 +43,7 @@ public class SimpleDocumentationBuilder extends
 
 	@Override
 	public void build() throws Exception {
-		NamedEntityWriter<SimpleDocumentationBuilder> writer = new NamedEntityWriter<SimpleDocumentationBuilder>(
-				this, prev, next);
+		NamedEntityWriter<SimpleDocumentationBuilder> writer = new NamedEntityWriter<>(this, prev, next);
 		Content contentTree = writer.getHeader();
 		writer.addMemberInheritanceTree(contentTree);
 		Content classContentTree = writer.getContentHeader();

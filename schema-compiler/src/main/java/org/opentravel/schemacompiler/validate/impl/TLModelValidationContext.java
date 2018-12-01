@@ -29,7 +29,7 @@ import org.opentravel.schemacompiler.validate.ValidationContext;
  */
 public class TLModelValidationContext implements ValidationContext {
 
-    private Map<String, Object> validationCache = new HashMap<String, Object>();
+    private Map<String,Object> validationCache = new HashMap<>();
     private SymbolResolver symbolResolver;
     private TLModel model;
 

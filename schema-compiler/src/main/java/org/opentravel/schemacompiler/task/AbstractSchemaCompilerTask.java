@@ -215,13 +215,12 @@ public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask im
             CodeGenerationContext context, CodeGenerationFilenameBuilder<?> filenameBuilder,
             CodeGenerationFilter filter) {
         if (filenameBuilder == null) {
-            filenameBuilder = new LibraryFilenameBuilder<AbstractLibrary>();
+            filenameBuilder = new LibraryFilenameBuilder<>();
         }
         CodeGenerationFilenameBuilder<TLLibrary> tlFilenameBuilder = (CodeGenerationFilenameBuilder<TLLibrary>) filenameBuilder;
         CodeGenerationFilenameBuilder<XSDLibrary> xsdFilenameBuilder = (CodeGenerationFilenameBuilder<XSDLibrary>) filenameBuilder;
-        CodeGenerationFilenameBuilder<XSDLibrary> extFilenameBuilder = new LegacySchemaExtensionFilenameBuilder<XSDLibrary>(
-                xsdFilenameBuilder);
-        CodeGenerationFilenameBuilder<BuiltInLibrary> builtInFilenameBuilder = new LibraryFilenameBuilder<BuiltInLibrary>();
+        CodeGenerationFilenameBuilder<XSDLibrary> extFilenameBuilder = new LegacySchemaExtensionFilenameBuilder<>(xsdFilenameBuilder);
+        CodeGenerationFilenameBuilder<BuiltInLibrary> builtInFilenameBuilder = new LibraryFilenameBuilder<>();
 
         File outputFolder = XsdCodegenUtils.getBaseOutputFolder(context);
         File legacyOutputFolder = new File(outputFolder,
@@ -257,7 +256,7 @@ public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask im
         // For built-ins, we have to dig into the schema declaration dependencies that are defined
         // in
         // the Spring application context
-        Set<SchemaDeclaration> builtInDependencies = new HashSet<SchemaDeclaration>();
+        Set<SchemaDeclaration> builtInDependencies = new HashSet<>();
 
         for (BuiltInLibrary library : model.getBuiltInLibraries()) {
             if (library.getNamespace().equals(XMLConstants.W3C_XML_SCHEMA_NS_URI)) {
@@ -392,6 +391,7 @@ public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask im
     /**
      * @see org.opentravel.schemacompiler.task.AbstractCompilerTask#createContext()
      */
+    @Override
     protected CodeGenerationContext createContext() {
         CodeGenerationContext context = super.createContext();
         

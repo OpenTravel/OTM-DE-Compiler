@@ -80,7 +80,7 @@ public class AliasInfoWriter extends AbstractInfoWriter<AliasOwnerDocumentationB
 		// HtmlTree tdValue = new HtmlTree(HtmlTag.TD);
 		// setSummaryColumnStyle(tdValue);
 		// addDocumentationValue(value, tdValue);
-		HtmlTree tr = HtmlTree.TR(tdAliasName);
+		HtmlTree tr = HtmlTree.tr(tdAliasName);
 		// tr.addContent(tdValue);
 		// if (counter % 2 == 0)
 		// tr.addStyle(HtmlStyle.altColor);
@@ -95,7 +95,7 @@ public class AliasInfoWriter extends AbstractInfoWriter<AliasOwnerDocumentationB
 	protected void addAliasName(String name, Content tdSummaryType) {
 		HtmlTree code = new HtmlTree(HtmlTag.CODE);
 		code.addContent(new RawHtml(name));
-		Content strong = HtmlTree.STRONG(code);
+		Content strong = HtmlTree.strong(code);
 		tdSummaryType.addContent(strong);
 	}
 
@@ -110,7 +110,7 @@ public class AliasInfoWriter extends AbstractInfoWriter<AliasOwnerDocumentationB
 	 */
 	@Override
 	public Content getTableTree() {
-		HtmlTree table = HtmlTree.TABLE(HtmlStyle.overviewSummary, 0, 3, 0,
+		HtmlTree table = HtmlTree.table(HtmlStyle.overviewSummary, 0, 3, 0,
 				getInfoTableSummary(),
 				writer.getTableCaption(caption));
 		table.addStyle(HtmlStyle.borderTop);
@@ -138,7 +138,7 @@ public class AliasInfoWriter extends AbstractInfoWriter<AliasOwnerDocumentationB
 
 	@Override
 	protected void addInfoSummary(Content memberTree) {
-		Content label = HtmlTree.HEADING(HtmlConstants.SUMMARY_HEADING,writer.getResource("doclet.Alias_Summary"));
+		Content label = HtmlTree.heading(HtmlConstants.SUMMARY_HEADING,writer.getResource("doclet.Alias_Summary"));
 		memberTree.addContent(label);
 		List<String> aliases = ((AliasOwnerDocumentationBuilder) source).getAliases();
 		if (aliases.size() > 0) {

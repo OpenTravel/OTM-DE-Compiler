@@ -73,7 +73,7 @@ public class IndexBuilder {
 	 * Mapping of each Unicode Character with the member list containing members
 	 * with names starting with it.
 	 */
-	private Map<Character, List<LibraryMember>> indexmap = new HashMap<Character, List<LibraryMember>>();
+	private Map<Character, List<LibraryMember>> indexmap = new HashMap<>();
 
 	protected final Object[] elements;
 
@@ -145,7 +145,7 @@ public class IndexBuilder {
 	 *            Root of the documemt.
 	 */
 	protected void buildIndexMap(TLModel model) {
-		List<LibraryMember> objects = new ArrayList<LibraryMember>();
+		List<LibraryMember> objects = new ArrayList<>();
 		for (TLLibrary lib : model.getUserDefinedLibraries()) {
 			objects.addAll(lib.getNamedMembers());
 		}
@@ -169,7 +169,7 @@ public class IndexBuilder {
 			Character unicode = new Character(ch);
 			List<LibraryMember> list = indexmap.get(unicode);
 			if (list == null) {
-				list = new ArrayList<LibraryMember>();
+				list = new ArrayList<>();
 				indexmap.put(unicode, list);
 			}
 			list.add(member);

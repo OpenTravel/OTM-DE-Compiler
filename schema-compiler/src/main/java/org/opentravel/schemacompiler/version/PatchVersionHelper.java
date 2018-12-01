@@ -90,10 +90,10 @@ public final class PatchVersionHelper extends AbstractVersionHelper {
      */
     public List<TLExtensionPointFacet> getLaterPatchVersions(Versioned versionedEntity)
             throws VersionSchemeException {
-        List<TLExtensionPointFacet> patchList = new ArrayList<TLExtensionPointFacet>();
+        List<TLExtensionPointFacet> patchList = new ArrayList<>();
 
         if (versionedEntity instanceof LibraryElement) {
-            LibraryElement versionedMember = (LibraryElement) versionedEntity;
+            LibraryElement versionedMember = versionedEntity;
 
             if (versionedMember.getOwningLibrary() instanceof TLLibrary) {
                 List<TLLibrary> patchVersionLibraries = getLaterPatchVersions((TLLibrary) versionedMember
@@ -102,7 +102,7 @@ public final class PatchVersionHelper extends AbstractVersionHelper {
                 if (!patchVersionLibraries.isEmpty()) {
                     // Start by identifying the possible facets to which an extension point facet
                     // can refer
-                    Set<TLPatchableFacet> entityFacets = new HashSet<TLPatchableFacet>(
+                    Set<TLPatchableFacet> entityFacets = new HashSet<>(
                     		getVersionHandler(versionedEntity).getPatchableFacets(versionedEntity) );
                     
                     // Search the extension points to determine if any of them reference a facet of
@@ -137,7 +137,7 @@ public final class PatchVersionHelper extends AbstractVersionHelper {
             throws VersionSchemeException {
         TLLibrary owningLibrary = getOwningLibrary((Versioned) versionedEntityFacet.getOwningEntity());
         List<TLLibrary> patchLibraries = getLaterPatchVersions(owningLibrary);
-        List<TLLibrary> eligibleLibraries = new ArrayList<TLLibrary>();
+        List<TLLibrary> eligibleLibraries = new ArrayList<>();
 
         // Search the patch libraries, and return only those who do not yet contain a patch for the
         // given facet
@@ -217,7 +217,7 @@ public final class PatchVersionHelper extends AbstractVersionHelper {
      */
     public TLLibrary createNewPatchVersion(TLLibrary library, File libraryFile)
             throws VersionSchemeException, LibrarySaveException {
-        List<ProjectItem> importedVersions = new ArrayList<ProjectItem>();
+        List<ProjectItem> importedVersions = new ArrayList<>();
         try {
             // First, do some preliminary error checking
             if (isWorkInProcessLibrary(library)) {

@@ -122,15 +122,15 @@ public class DocumentationInfoWriter extends
 		if (desc == null) {
 			content = HtmlTree.EMPTY;
 		} else {
-			HtmlTree tdDesc = HtmlTree.TD(writer
+			HtmlTree tdDesc = HtmlTree.td(writer
 					.getResource("doclet.Description"));
-			HtmlTree tdComment = HtmlTree.TD(HtmlTree.HEADING(HtmlTag.H5,
+			HtmlTree tdComment = HtmlTree.td(HtmlTree.heading(HtmlTag.H5,
 					new StringContent(desc)));
-			HtmlTree descRow = HtmlTree.TR(tdDesc);
+			HtmlTree descRow = HtmlTree.tr(tdDesc);
 			descRow.addContent(tdComment);
 			HtmlTree descTree = new HtmlTree(HtmlTag.PRE);
 			descTree.addContent(desc);
-			content = HtmlTree.DIV(HtmlStyle.description, descTree);
+			content = HtmlTree.div(HtmlStyle.description, descTree);
 		}
 		return content;
 	}
@@ -188,7 +188,7 @@ public class DocumentationInfoWriter extends
 		HtmlTree tdValue = new HtmlTree(HtmlTag.TD);
 		setInfoColumnStyle(tdValue);
 		addDocumentationValue(values, tdValue);
-		HtmlTree tr = HtmlTree.TR(tdDocType);
+		HtmlTree tr = HtmlTree.tr(tdDocType);
 		tr.addContent(tdValue);
 		addRowStyle(tr, counter);
 		tableTree.addContent(tr);
@@ -216,7 +216,7 @@ public class DocumentationInfoWriter extends
 		HtmlTree tdValue = new HtmlTree(HtmlTag.TD);
 		setInfoColumnStyle(tdValue);
 		addDocumentationValue(value, tdValue);
-		HtmlTree tr = HtmlTree.TR(tdDocType);
+		HtmlTree tr = HtmlTree.tr(tdDocType);
 		tr.addContent(tdValue);
 		addRowStyle(tr, counter);
 		tableTree.addContent(tr);
@@ -225,7 +225,7 @@ public class DocumentationInfoWriter extends
 	protected void addDocumentationType(String name, Content tdSummaryType) {
 		HtmlTree code = new HtmlTree(HtmlTag.CODE);
 		code.addContent(new RawHtml(name));
-		Content strong = HtmlTree.STRONG(code);
+		Content strong = HtmlTree.strong(code);
 		tdSummaryType.addContent(strong);
 	}
 
@@ -246,7 +246,7 @@ public class DocumentationInfoWriter extends
 				Content separator = new StringContent(", ");
 				tdValue.addContent(separator);
 			}
-			Content link = HtmlTree.CODE(new RawHtml(value.getText()));
+			Content link = HtmlTree.code(new RawHtml(value.getText()));
 			tdValue.addContent(link);
 		}
 	}
@@ -262,7 +262,7 @@ public class DocumentationInfoWriter extends
 	 *            the content tree to which the link will be added
 	 */
 	protected void addDocumentationValue(String value, Content tdValue) {
-		Content link = HtmlTree.CODE(new RawHtml(value));
+		Content link = HtmlTree.code(new RawHtml(value));
 		tdValue.addContent(link);
 	}
 

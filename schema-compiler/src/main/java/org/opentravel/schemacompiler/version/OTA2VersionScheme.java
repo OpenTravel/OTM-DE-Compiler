@@ -37,8 +37,7 @@ public class OTA2VersionScheme implements VersionScheme {
     private static final Pattern prefixPattern = Pattern.compile("([A-Za-z0-9]+)-\\d*");
 
     /**
-     * @see org.opentravel.schemacompiler.version.VersionScheme#getVersionIdentifier(java.lang.String,
-     *      java.lang.String, java.lang.String)
+     * @see org.opentravel.schemacompiler.version.VersionScheme#getVersionIdentifier(java.lang.String,java.lang.String, java.lang.String)
      */
     @Override
     public String getVersionIdentifier(String majorVersion, String minorVersion, String patchLevel) {
@@ -109,7 +108,7 @@ public class OTA2VersionScheme implements VersionScheme {
                     + versionIdentifier);
         }
         Matcher m = versionedNamespacePattern.matcher(namespaceUri);
-        boolean isPaddedVersionIds = m.matches() ? isPaddedIdentifier(m.group(3)) : false;
+        boolean isPaddedVersionIds = m.matches() && isPaddedIdentifier(m.group(3));
         int[] versionParts = splitVersionIdentifier(versionIdentifier);
         String[] _versionParts = new String[versionParts.length];
         String baseNamespace = m.matches() ? m.group(1) : namespaceUri;
@@ -214,7 +213,7 @@ public class OTA2VersionScheme implements VersionScheme {
         if (isValidNamespace(namespaceUri)) {
             List<String> versionChain = getMajorVersionChain(namespaceUri);
 
-            if (versionChain.size() > 0) {
+            if (!versionChain.isEmpty()) {
                 majorVersionNamespace = versionChain.get(versionChain.size() - 1);
             } else {
                 majorVersionNamespace = namespaceUri;
@@ -384,7 +383,7 @@ public class OTA2VersionScheme implements VersionScheme {
     public List<String> getMajorVersionChain(String namespaceUri) {
         String versionIdentifier = getVersionIdentifier(namespaceUri);
         int[] versionParts = splitVersionIdentifier(versionIdentifier);
-        List<String> versionChain = new ArrayList<String>();
+        List<String> versionChain = new ArrayList<>();
 
         if (isValidNamespace(namespaceUri)) {
             do {

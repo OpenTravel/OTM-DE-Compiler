@@ -22,6 +22,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
@@ -34,6 +35,11 @@ public class Utils {
 	
 	private static final String MESSAGE_RB = "/org/opentravel/schemacompiler/admin/admin-messages.properties";
 	private static final ResourceBundle messageBundle;
+	
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private Utils() {}
 	
 	/**
 	 * Returns the resource bundle to be used for all user-displayable output.
@@ -85,36 +91,26 @@ public class Utils {
 	 * @throws IOException  thrown if the contents of the file cannot be backed up
 	 */
 	public static File createBackupFile(File originalFile) throws IOException {
-		BufferedReader reader = null;
-		PrintStream out = null;
+		File backupFile = new File(originalFile.getAbsolutePath() + ".tmp");
+		String line;
 		
-		try {
-			File backupFile = new File(originalFile.getAbsolutePath() + ".tmp");
-			String line;
-			
-			if (backupFile.exists()) {
-				if (!backupFile.delete()) {
-					throw new IOException("Unable to delete the previous backup file located at: " +
-							backupFile.getAbsolutePath());
+		if (backupFile.exists()) {
+			try {
+				Files.delete( backupFile.toPath() );
+				
+			} catch (IOException e) {
+				throw new IOException("Unable to delete the previous backup file located at: " +
+						backupFile.getAbsolutePath(), e);
+			}
+		}
+		try (BufferedReader reader = new BufferedReader(new FileReader(originalFile))) {
+			try (PrintStream out = new PrintStream(new FileOutputStream(backupFile))) {
+				while ((line = reader.readLine()) != null) {
+					out.println(line);
 				}
 			}
-			reader = new BufferedReader(new FileReader(originalFile));
-			out = new PrintStream(new FileOutputStream(backupFile));
-			
-			while ((line = reader.readLine()) != null) {
-				out.println(line);
-			}
-			out.flush();
-			return backupFile;
-			
-		} finally {
-			try {
-				if (reader != null) reader.close();
-			} catch (Throwable t) {}
-			try {
-				if (out != null) out.close();
-			} catch (Throwable t) {}
 		}
+		return backupFile;
 	}
 	
 	/**
@@ -126,8 +122,12 @@ public class Utils {
 	 */
 	public static void restoreOriginalFile(File originalFile, File backupFile) throws IOException {
 		if (originalFile.exists()) {
-			if (!originalFile.delete()) {
-				throw new IOException("Unable to roll back the output file after a problem has occurred (the file is probably corrupted).");
+			try {
+				Files.delete( originalFile.toPath() );
+				
+			} catch (IOException e) {
+				throw new IOException("Unable to roll back the output file after a problem has occurred"
+						+ " (the file is probably corrupted).", e);
 			}
 		}
 		if (!backupFile.renameTo(originalFile)) {
@@ -142,8 +142,8 @@ public class Utils {
 		try {
 			messageBundle = new PropertyResourceBundle(CredentialsManager.class.getResourceAsStream(MESSAGE_RB));
 			
-		} catch (Throwable t) {
-			throw new ExceptionInInitializerError(t);
+		} catch (Exception e) {
+			throw new ExceptionInInitializerError(e);
 		}
 	}
 	

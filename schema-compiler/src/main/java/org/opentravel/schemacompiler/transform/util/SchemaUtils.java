@@ -31,7 +31,12 @@ import org.w3._2001.xmlschema.Schema;
  * @author S. Livezey
  */
 public class SchemaUtils {
-
+	
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private SchemaUtils() {}
+	
     /**
      * Constructs a list of standard library <code>TLNamespaceImport</code> objects using the import
      * and prefix information from the XML schema provided.
@@ -41,7 +46,7 @@ public class SchemaUtils {
      * @return List<LibraryModuleImport>
      */
     public static List<LibraryModuleImport> getSchemaImports(Schema schema) {
-        List<LibraryModuleImport> imports = new ArrayList<LibraryModuleImport>();
+        List<LibraryModuleImport> imports = new ArrayList<>();
 
         if (schema != null) {
             int nsCount = 1;
@@ -53,7 +58,7 @@ public class SchemaUtils {
 
                     nsCount++;
                     imports.add(new LibraryModuleImport(schemaImport.getNamespace(), prefix, Arrays
-                            .asList(new String[] { schemaImport.getSchemaLocation() })));
+                            .asList( schemaImport.getSchemaLocation() )));
                 }
             }
         }
@@ -69,7 +74,7 @@ public class SchemaUtils {
      * @return List<String>
      */
     public static List<String> getSchemaIncludes(Schema schema) {
-        List<String> includes = new ArrayList<String>();
+        List<String> includes = new ArrayList<>();
 
         if (schema != null) {
             for (OpenAttrs element : schema.getIncludeOrImportOrRedefine()) {

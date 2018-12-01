@@ -108,7 +108,7 @@ public class LibraryFrameWriter extends HtmlDocletWriter {
 			String name = AbstractDocumentationBuilder.getLibraryName(library);
 			Content body = packgen.getBody(false, packgen.getWindowTitle(name));
 			Content pkgNameContent = new RawHtml(name);
-			Content heading = HtmlTree.HEADING(HtmlConstants.TITLE_HEADING,
+			Content heading = HtmlTree.heading(HtmlConstants.TITLE_HEADING,
 					HtmlStyle.bar, packgen.getTargetLibraryLink(name,
 							"classFrame", pkgNameContent));
 			body.addContent(heading);
@@ -140,11 +140,11 @@ public class LibraryFrameWriter extends HtmlDocletWriter {
 				getResource("doclet.CoreObjects"), contentTree);
 		addClassKindListing(library.getValueWithAttributesTypes(),
 				getResource("doclet.VWA"), contentTree);
-		List<TLAbstractEnumeration> enums = new ArrayList<TLAbstractEnumeration>();
+		List<TLAbstractEnumeration> enums = new ArrayList<>();
 		enums.addAll(library.getClosedEnumerationTypes());
 		enums.addAll(library.getOpenEnumerationTypes());
 		addClassKindListing(enums, getResource("doclet.Enums"), contentTree);
-		List<TLService> services = new ArrayList<TLService>();
+		List<TLService> services = new ArrayList<>();
 		services.add(library.getService());
 		addClassKindListing(services, getResource("doclet.Services"),
 				contentTree);
@@ -175,7 +175,7 @@ public class LibraryFrameWriter extends HtmlDocletWriter {
 					continue;
 				}
 				if (!printedHeader) {
-					Content heading = HtmlTree.HEADING(
+					Content heading = HtmlTree.heading(
 							HtmlConstants.CONTENT_HEADING, true, labelContent);
 					contentTree.addContent(heading);
 					printedHeader = true;
@@ -183,7 +183,7 @@ public class LibraryFrameWriter extends HtmlDocletWriter {
 				Content link = new RawHtml(getLink(new LinkInfoImpl(
 						LinkInfoImpl.PACKAGE_FRAME, member,
 						member.getLocalName(), "classFrame")));
-				Content li = HtmlTree.LI(link);
+				Content li = HtmlTree.li(link);
 				ul.addContent(li);
 			}
 			contentTree.addContent(ul);

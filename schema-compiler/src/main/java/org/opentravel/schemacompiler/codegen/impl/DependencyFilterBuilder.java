@@ -204,7 +204,7 @@ public class DependencyFilterBuilder {
      * @return List<BuiltInLibrary>
      */
     private List<BuiltInLibrary> getBuiltInDependencies(BuiltInLibrary library) {
-        List<BuiltInLibrary> builtInDependencies = new ArrayList<BuiltInLibrary>();
+        List<BuiltInLibrary> builtInDependencies = new ArrayList<>();
 
         findBuiltInDependencies(library, builtInDependencies);
         return builtInDependencies;
@@ -589,14 +589,7 @@ public class DependencyFilterBuilder {
          */
         @Override
         public boolean visitExtension(TLExtension extension) {
-            boolean result = false;
-
-            if (includeEntityExtensions) {
-                if (extension.getExtendsEntity() != null) {
-                    result = true;
-                }
-            }
-            return result;
+            return ((includeEntityExtensions) && (extension.getExtendsEntity() != null));
         }
 
     }

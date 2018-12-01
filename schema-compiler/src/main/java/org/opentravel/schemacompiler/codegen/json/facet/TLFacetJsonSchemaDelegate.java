@@ -242,7 +242,7 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
         		getTransformerFactory().getTransformer(TLProperty.class, JsonSchemaNamedReference.class);
         ObjectTransformer<TLIndicator, JsonSchemaNamedReference, CodeGenerationTransformerContext> indicatorTransformer =
         		getTransformerFactory().getTransformer(TLIndicator.class, JsonSchemaNamedReference.class);
-        List<JsonSchemaNamedReference> definitions = new ArrayList<JsonSchemaNamedReference>();
+        List<JsonSchemaNamedReference> definitions = new ArrayList<>();
 		CodeGenerationTransformerContext transformContext = getTransformerFactory().getContext();
 		
 		transformContext.setContextCacheEntry( AbstractJsonSchemaTransformer.MEMBER_FIELD_OWNER_KEY, getSourceFacet() );

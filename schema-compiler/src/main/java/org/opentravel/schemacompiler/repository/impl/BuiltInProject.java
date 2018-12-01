@@ -50,7 +50,7 @@ public class BuiltInProject extends Project {
                 BUILTIN_PROJECT_NAME_KEY, null, Locale.getDefault()));
 
         for (BuiltInLibrary builtInLibrary : projectManager.getModel().getBuiltInLibraries()) {
-            super.add(ProjectItemImpl.newUnmanagedItem(null, builtInLibrary, projectManager));
+            super.add(ProjectItemImpl.newUnmanagedItem(builtInLibrary, projectManager));
         }
     }
 

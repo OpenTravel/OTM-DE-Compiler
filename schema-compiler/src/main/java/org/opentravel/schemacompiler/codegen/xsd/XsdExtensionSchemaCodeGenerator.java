@@ -61,7 +61,7 @@ public class XsdExtensionSchemaCodeGenerator extends AbstractXsdCodeGenerator<XS
 
     protected static JAXBContext jaxbContext;
 
-    private CodeGenerationFilenameBuilder<XSDLibrary> legacySchemaFilenameBuilder = new LibraryFilenameBuilder<XSDLibrary>();
+    private CodeGenerationFilenameBuilder<XSDLibrary> legacySchemaFilenameBuilder = new LibraryFilenameBuilder<>();
 
     /**
      * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#getLibrary(org.opentravel.schemacompiler.model.TLModelElement)
@@ -98,7 +98,7 @@ public class XsdExtensionSchemaCodeGenerator extends AbstractXsdCodeGenerator<XS
      */
     @Override
     protected CodeGenerationFilenameBuilder<XSDLibrary> getDefaultFilenameBuilder() {
-        return new LegacySchemaExtensionFilenameBuilder<XSDLibrary>(legacySchemaFilenameBuilder);
+        return new LegacySchemaExtensionFilenameBuilder<>(legacySchemaFilenameBuilder);
     }
 
     /**
@@ -171,8 +171,8 @@ public class XsdExtensionSchemaCodeGenerator extends AbstractXsdCodeGenerator<XS
         try {
             jaxbContext = JAXBContext.newInstance(SCHEMA_CONTEXT);
 
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

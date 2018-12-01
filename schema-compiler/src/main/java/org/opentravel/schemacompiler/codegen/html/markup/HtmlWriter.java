@@ -456,8 +456,8 @@ public class HtmlWriter extends PrintWriter {
         // and package-frame
         if (includeScript) {
             body.addContent(getWinTitleScript());
-            Content noScript = HtmlTree.NOSCRIPT(
-                    HtmlTree.DIV(getResource("doclet.No_Script_Message")));
+            Content noScript = HtmlTree.noscript(
+                    HtmlTree.div(getResource("doclet.No_Script_Message")));
             body.addContent(noScript);
         }
         return body;
@@ -494,7 +494,7 @@ public class HtmlWriter extends PrintWriter {
      * @return an HtmlTree for the TITLE tag
      */
     public HtmlTree getTitle() {
-        HtmlTree title = HtmlTree.TITLE(new StringContent(winTitle));
+        HtmlTree title = HtmlTree.title(new StringContent(winTitle));
         return title;
     }
 

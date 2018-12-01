@@ -28,7 +28,7 @@ import org.opentravel.schemacompiler.transform.TransformerFactory;
  */
 public class DefaultTransformerContext implements ObjectTransformerContext {
 
-    private Map<String, Object> contextCache = new HashMap<String, Object>();
+    private Map<String,Object> contextCache = new HashMap<>();
     private TransformerFactory<?> factory;
 
     /**

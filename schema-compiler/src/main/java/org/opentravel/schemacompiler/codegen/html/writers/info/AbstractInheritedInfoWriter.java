@@ -109,7 +109,7 @@ public abstract class AbstractInheritedInfoWriter<T extends AbstractDocumentatio
 		Content classLink = new RawHtml(writer.getPreQualifiedMemberLink(
 				LinkInfoImpl.CONTEXT_MEMBER, parent, false));
 		Content label = writer.getResource((labelKey));
-		Content labelHeading = HtmlTree.HEADING(
+		Content labelHeading = HtmlTree.heading(
 				HtmlConstants.INHERITED_SUMMARY_HEADING, label);
 		labelHeading.addContent(writer.getSpace());
 		labelHeading.addContent(classLink);

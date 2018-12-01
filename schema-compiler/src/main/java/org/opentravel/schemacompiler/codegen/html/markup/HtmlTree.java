@@ -80,8 +80,10 @@ public class HtmlTree extends Content {
      */
     public HtmlTree(HtmlTag tag, Content... contents) {
         this(tag);
-        for (Content content: contents)
-            addContent(content);
+        
+        for (Content c: contents) {
+            addContent(c);
+        }
     }
 
     /**
@@ -91,8 +93,9 @@ public class HtmlTree extends Content {
      * @param attrValue value of the attribute
      */
     public void addAttr(HtmlAttr attrName, String attrValue) {
-        if (attrs.isEmpty())
-            attrs = new LinkedHashMap<String,String>();
+        if (attrs.isEmpty()) {
+            attrs = new LinkedHashMap<>();
+        }
         attrs.put(nullCheck(attrName.toString()), nullCheck(attrValue));
     }
     
@@ -103,8 +106,9 @@ public class HtmlTree extends Content {
      * @param attrValue value of the attribute
      */
     public void addDataAttr(String name, String attrValue) {
-        if (attrs.isEmpty())
-            attrs = new LinkedHashMap<String,String>();
+        if (attrs.isEmpty()) {
+            attrs = new LinkedHashMap<>();
+        }
         attrs.put("data-" + nullCheck(name), nullCheck(attrValue));
     }
 
@@ -125,6 +129,7 @@ public class HtmlTree extends Content {
     public void addStyle(HtmlStyle style) {
     	if(hasAttr(HtmlAttr.CLASS)){
     		String c = attrs.get(HtmlAttr.CLASS.toString());
+    		
     		if(!c.contains(style.toString())){
     			c = c + " " + style;
     			attrs.put(HtmlAttr.CLASS.toString(), c);
@@ -141,8 +146,9 @@ public class HtmlTree extends Content {
      */
     public void addContent(Content tagContent) {
         if (tagContent == HtmlTree.EMPTY || tagContent.isValid()) {
-            if (content.isEmpty())
-                content = new ArrayList<Content>();
+            if (content.isEmpty()) {
+                content = new ArrayList<>();
+            }
             content.add(tagContent);
         }
     }
@@ -173,7 +179,7 @@ public class HtmlTree extends Content {
      * @param body content for the anchor tag
      * @return an HtmlTree object
      */
-    public static HtmlTree A(String ref, Content body) {
+    public static HtmlTree a(String ref, Content body) {
         HtmlTree htmltree = new HtmlTree(HtmlTag.A, nullCheck(body));
         htmltree.addAttr(HtmlAttr.HREF, nullCheck(ref));
         return htmltree;
@@ -186,8 +192,8 @@ public class HtmlTree extends Content {
      * @param body content for the anchor tag
      * @return an HtmlTree object
      */
-    public static HtmlTree A_NAME(String name, Content body) {
-        HtmlTree htmltree = HtmlTree.A_NAME(name);
+    public static HtmlTree aName(String name, Content body) {
+        HtmlTree htmltree = HtmlTree.aName(name);
         htmltree.addContent(nullCheck(body));
         return htmltree;
     }
@@ -198,7 +204,7 @@ public class HtmlTree extends Content {
      * @param name name for the anchor tag
      * @return an HtmlTree object
      */
-    public static HtmlTree A_NAME(String name) {
+    public static HtmlTree aName(String name) {
         HtmlTree htmltree = new HtmlTree(HtmlTag.A);
         htmltree.addAttr(HtmlAttr.NAME, nullCheck(name));
         return htmltree;
@@ -210,9 +216,8 @@ public class HtmlTree extends Content {
      * @param body content for the tag
      * @return an HtmlTree object for the CAPTION tag
      */
-    public static HtmlTree CAPTION(Content body) {
-        HtmlTree htmltree = new HtmlTree(HtmlTag.CAPTION, nullCheck(body));
-        return htmltree;
+    public static HtmlTree caption(Content body) {
+        return new HtmlTree(HtmlTag.CAPTION, nullCheck(body));
     }
 
     /**
@@ -221,9 +226,8 @@ public class HtmlTree extends Content {
      * @param body content for the tag
      * @return an HtmlTree object for the CODE tag
      */
-    public static HtmlTree CODE(Content body) {
-        HtmlTree htmltree = new HtmlTree(HtmlTag.CODE, nullCheck(body));
-        return htmltree;
+    public static HtmlTree code(Content body) {
+        return new HtmlTree(HtmlTag.CODE, nullCheck(body));
     }
 
     /**
@@ -232,9 +236,8 @@ public class HtmlTree extends Content {
      * @param body content for the tag
      * @return an HtmlTree object for the DD tag
      */
-    public static HtmlTree DD(Content body) {
-        HtmlTree htmltree = new HtmlTree(HtmlTag.DD, nullCheck(body));
-        return htmltree;
+    public static HtmlTree dd(Content body) {
+        return new HtmlTree(HtmlTag.DD, nullCheck(body));
     }
 
     /**
@@ -243,9 +246,8 @@ public class HtmlTree extends Content {
      * @param body content for the tag
      * @return an HtmlTree object for the DL tag
      */
-    public static HtmlTree DL(Content body) {
-        HtmlTree htmltree = new HtmlTree(HtmlTag.DL, nullCheck(body));
-        return htmltree;
+    public static HtmlTree dl(Content body) {
+        return new HtmlTree(HtmlTag.DL, nullCheck(body));
     }
 
     /**
@@ -256,10 +258,12 @@ public class HtmlTree extends Content {
      * @param body content for the tag
      * @return an HtmlTree object for the DIV tag
      */
-    public static HtmlTree DIV(HtmlStyle styleClass, Content body) {
+    public static HtmlTree div(HtmlStyle styleClass, Content body) {
         HtmlTree htmltree = new HtmlTree(HtmlTag.DIV, nullCheck(body));
-        if (styleClass != null)
+        
+        if (styleClass != null) {
             htmltree.setStyle(styleClass);
+        }
         return htmltree;
     }
 
@@ -269,8 +273,8 @@ public class HtmlTree extends Content {
      * @param body content for the tag
      * @return an HtmlTree object for the DIV tag
      */
-    public static HtmlTree DIV(Content body) {
-        return DIV(null, body);
+    public static HtmlTree div(Content body) {
+        return div(null, body);
     }
 
     /**
@@ -279,9 +283,8 @@ public class HtmlTree extends Content {
      * @param body content for the tag
      * @return an HtmlTree object for the DT tag
      */
-    public static HtmlTree DT(Content body) {
-        HtmlTree htmltree = new HtmlTree(HtmlTag.DT, nullCheck(body));
-        return htmltree;
+    public static HtmlTree dt(Content body) {
+        return new HtmlTree(HtmlTag.DT, nullCheck(body));
     }
 
     /**
@@ -290,9 +293,8 @@ public class HtmlTree extends Content {
      * @param body content to be added to the tag
      * @return an HtmlTree object for the EM tag
      */
-    public static HtmlTree EM(Content body) {
-        HtmlTree htmltree = new HtmlTree(HtmlTag.EM, nullCheck(body));
-        return htmltree;
+    public static HtmlTree em(Content body) {
+        return new HtmlTree(HtmlTag.EM, nullCheck(body));
     }
 
     /**
@@ -304,7 +306,7 @@ public class HtmlTree extends Content {
      * @param scrolling specifies whether to display scrollbars in the frame
      * @return an HtmlTree object for the FRAME tag
      */
-    public static HtmlTree FRAME(String src, String name, String title, String scrolling) {
+    public static HtmlTree frame(String src, String name, String title, String scrolling) {
         HtmlTree htmltree = new HtmlTree(HtmlTag.FRAME);
         htmltree.addAttr(HtmlAttr.SRC, nullCheck(src));
         htmltree.addAttr(HtmlAttr.NAME, nullCheck(name));
@@ -322,8 +324,8 @@ public class HtmlTree extends Content {
      * @param title the title for the frame
      * @return an HtmlTree object for the SPAN tag
      */
-    public static HtmlTree FRAME(String src, String name, String title) {
-        return FRAME(src, name, title, null);
+    public static HtmlTree frame(String src, String name, String title) {
+        return frame(src, name, title, null);
     }
 
     /**
@@ -335,7 +337,7 @@ public class HtmlTree extends Content {
      * @param onload the script to run when the document loads
      * @return an HtmlTree object for the FRAMESET tag
      */
-    public static HtmlTree FRAMESET(String cols, String rows, String title, String onload) {
+    public static HtmlTree frameset(String cols, String rows, String title, String onload) {
         HtmlTree htmltree = new HtmlTree(HtmlTag.FRAMESET);
         if (cols != null)
             htmltree.addAttr(HtmlAttr.COLS, cols);
@@ -356,7 +358,7 @@ public class HtmlTree extends Content {
      * @param body content for the tag
      * @return an HtmlTree object for the tag
      */
-    public static HtmlTree HEADING(HtmlTag headingTag, boolean printTitle,
+    public static HtmlTree heading(HtmlTag headingTag, boolean printTitle,
             HtmlStyle styleClass, Content body) {
         HtmlTree htmltree = new HtmlTree(headingTag, nullCheck(body));
         if (printTitle)
@@ -375,8 +377,8 @@ public class HtmlTree extends Content {
      * @param body content for the tag
      * @return an HtmlTree object for the tag
      */
-    public static HtmlTree HEADING(HtmlTag headingTag, HtmlStyle styleClass, Content body) {
-        return HEADING(headingTag, false, styleClass, body);
+    public static HtmlTree heading(HtmlTag headingTag, HtmlStyle styleClass, Content body) {
+        return heading(headingTag, false, styleClass, body);
     }
 
     /**
@@ -388,8 +390,8 @@ public class HtmlTree extends Content {
      * @param body content for the tag
      * @return an HtmlTree object for the tag
      */
-    public static HtmlTree HEADING(HtmlTag headingTag, boolean printTitle, Content body) {
-        return HEADING(headingTag, printTitle, null, body);
+    public static HtmlTree heading(HtmlTag headingTag, boolean printTitle, Content body) {
+        return heading(headingTag, printTitle, null, body);
     }
 
     /**
@@ -399,8 +401,8 @@ public class HtmlTree extends Content {
      * @param body content for the tag
      * @return an HtmlTree object for the tag
      */
-    public static HtmlTree HEADING(HtmlTag headingTag, Content body) {
-        return HEADING(headingTag, false, null, body);
+    public static HtmlTree heading(HtmlTag headingTag, Content body) {
+        return heading(headingTag, false, null, body);
     }
 
     /**
@@ -412,7 +414,7 @@ public class HtmlTree extends Content {
      * @param body body for the HTML tag
      * @return an HtmlTree object for the HTML tag
      */
-    public static HtmlTree HTML(String lang, Content head, Content body) {
+    public static HtmlTree html(String lang, Content head, Content body) {
         HtmlTree htmltree = new HtmlTree(HtmlTag.HTML, nullCheck(head), nullCheck(body));
         htmltree.addAttr(HtmlAttr.LANG, nullCheck(lang));
         return htmltree;
@@ -424,9 +426,8 @@ public class HtmlTree extends Content {
      * @param body content for the tag
      * @return an HtmlTree object for the I tag
      */
-    public static HtmlTree I(Content body) {
-        HtmlTree htmltree = new HtmlTree(HtmlTag.I, nullCheck(body));
-        return htmltree;
+    public static HtmlTree i(Content body) {
+        return new HtmlTree(HtmlTag.I, nullCheck(body));
     }
 
     /**
@@ -435,8 +436,8 @@ public class HtmlTree extends Content {
      * @param body content for the tag
      * @return an HtmlTree object for the LI tag
      */
-    public static HtmlTree LI(Content body) {
-        return LI(null, body);
+    public static HtmlTree li(Content body) {
+        return li(null, body);
     }
 
     /**
@@ -446,7 +447,7 @@ public class HtmlTree extends Content {
      * @param body content for the tag
      * @return an HtmlTree object for the LI tag
      */
-    public static HtmlTree LI(HtmlStyle styleClass, Content body) {
+    public static HtmlTree li(HtmlStyle styleClass, Content body) {
         HtmlTree htmltree = new HtmlTree(HtmlTag.LI, nullCheck(body));
         if (styleClass != null)
             htmltree.setStyle(styleClass);
@@ -462,7 +463,7 @@ public class HtmlTree extends Content {
      * @param title title for the link
      * @return an HtmlTree object for the LINK tag
      */
-    public static HtmlTree LINK(String rel, String type, String href, String title) {
+    public static HtmlTree link(String rel, String type, String href, String title) {
         HtmlTree htmltree = new HtmlTree(HtmlTag.LINK);
         htmltree.addAttr(HtmlAttr.REL, nullCheck(rel));
         htmltree.addAttr(HtmlAttr.TYPE, nullCheck(type));
@@ -479,7 +480,7 @@ public class HtmlTree extends Content {
      * @param charset character set used
      * @return an HtmlTree object for the META tag
      */
-    public static HtmlTree META(String httpEquiv, String content, String charSet) {
+    public static HtmlTree meta(String httpEquiv, String content, String charSet) {
         HtmlTree htmltree = new HtmlTree(HtmlTag.META);
         htmltree.addAttr(HtmlAttr.HTTP_EQUIV, nullCheck(httpEquiv));
         htmltree.addAttr(HtmlAttr.CONTENT, nullCheck(content));
@@ -494,7 +495,7 @@ public class HtmlTree extends Content {
      * @param content type of content
      * @return an HtmlTree object for the META tag
      */
-    public static HtmlTree META(String name, String content) {
+    public static HtmlTree meta(String name, String content) {
         HtmlTree htmltree = new HtmlTree(HtmlTag.META);
         htmltree.addAttr(HtmlAttr.NAME, nullCheck(name));
         htmltree.addAttr(HtmlAttr.CONTENT, nullCheck(content));
@@ -507,9 +508,8 @@ public class HtmlTree extends Content {
      * @param body content of the noscript tag
      * @return an HtmlTree object for the NOSCRIPT tag
      */
-    public static HtmlTree NOSCRIPT(Content body) {
-        HtmlTree htmltree = new HtmlTree(HtmlTag.NOSCRIPT, nullCheck(body));
-        return htmltree;
+    public static HtmlTree noscript(Content body) {
+        return new HtmlTree(HtmlTag.NOSCRIPT, nullCheck(body));
     }
 
     /**
@@ -518,8 +518,8 @@ public class HtmlTree extends Content {
      * @param body content of the Paragraph tag
      * @return an HtmlTree object for the P tag
      */
-    public static HtmlTree P(Content body) {
-        return P(null, body);
+    public static HtmlTree p(Content body) {
+        return p(null, body);
     }
 
     /**
@@ -529,7 +529,7 @@ public class HtmlTree extends Content {
      * @param body content of the Paragraph tag
      * @return an HtmlTree object for the P tag
      */
-    public static HtmlTree P(HtmlStyle styleClass, Content body) {
+    public static HtmlTree p(HtmlStyle styleClass, Content body) {
         HtmlTree htmltree = new HtmlTree(HtmlTag.P, nullCheck(body));
         if (styleClass != null)
             htmltree.setStyle(styleClass);
@@ -542,9 +542,8 @@ public class HtmlTree extends Content {
      * @param body content for the tag
      * @return an HtmlTree object for the SMALL tag
      */
-    public static HtmlTree SMALL(Content body) {
-        HtmlTree htmltree = new HtmlTree(HtmlTag.SMALL, nullCheck(body));
-        return htmltree;
+    public static HtmlTree small(Content body) {
+        return new HtmlTree(HtmlTag.SMALL, nullCheck(body));
     }
 
     /**
@@ -553,9 +552,8 @@ public class HtmlTree extends Content {
      * @param body content for the tag
      * @return an HtmlTree object for the STRONG tag
      */
-    public static HtmlTree STRONG(Content body) {
-        HtmlTree htmltree = new HtmlTree(HtmlTag.STRONG, nullCheck(body));
-        return htmltree;
+    public static HtmlTree strong(Content body) {
+        return new HtmlTree(HtmlTag.STRONG, nullCheck(body));
     }
 
     /**
@@ -564,8 +562,8 @@ public class HtmlTree extends Content {
      * @param body content for the tag
      * @return an HtmlTree object for the SPAN tag
      */
-    public static HtmlTree SPAN(Content body) {
-        return SPAN(null, body);
+    public static HtmlTree span(Content body) {
+        return span(null, body);
     }
 
     /**
@@ -575,10 +573,12 @@ public class HtmlTree extends Content {
      * @param body content for the tag
      * @return an HtmlTree object for the SPAN tag
      */
-    public static HtmlTree SPAN(HtmlStyle styleClass, Content body) {
+    public static HtmlTree span(HtmlStyle styleClass, Content body) {
         HtmlTree htmltree = new HtmlTree(HtmlTag.SPAN, nullCheck(body));
-        if (styleClass != null)
+        
+        if (styleClass != null) {
             htmltree.setStyle(styleClass);
+        }
         return htmltree;
     }
 
@@ -592,7 +592,7 @@ public class HtmlTree extends Content {
      * @param body content for the table
      * @return an HtmlTree object for the TABLE tag
      */
-    public static HtmlTree TABLE(int border, int width, String summary,
+    public static HtmlTree table(int border, int width, String summary,
             Content body) {
         HtmlTree htmltree = new HtmlTree(HtmlTag.TABLE, nullCheck(body));
         htmltree.addAttr(HtmlAttr.BORDER, Integer.toString(border));
@@ -613,7 +613,7 @@ public class HtmlTree extends Content {
      * @param body content for the table
      * @return an HtmlTree object for the TABLE tag
      */
-    public static HtmlTree TABLE(HtmlStyle styleClass, int border, int cellPadding,
+    public static HtmlTree table(HtmlStyle styleClass, int border, int cellPadding,
             int cellSpacing, String summary, Content body) {
         HtmlTree htmltree = new HtmlTree(HtmlTag.TABLE, nullCheck(body));
         if (styleClass != null)
@@ -636,9 +636,9 @@ public class HtmlTree extends Content {
      * @param body content for the table
      * @return an HtmlTree object for the TABLE tag
      */
-    public static HtmlTree TABLE(int border, int cellPadding,
+    public static HtmlTree table(int border, int cellPadding,
             int cellSpacing, String summary, Content body) {
-        return TABLE(null, border, cellPadding, cellSpacing, summary, body);
+        return table(null, border, cellPadding, cellSpacing, summary, body);
     }
 
     /**
@@ -648,7 +648,7 @@ public class HtmlTree extends Content {
      * @param body content for the tag
      * @return an HtmlTree object for the TD tag
      */
-    public static HtmlTree TD(HtmlStyle styleClass, Content body) {
+    public static HtmlTree td(HtmlStyle styleClass, Content body) {
         HtmlTree htmltree = new HtmlTree(HtmlTag.TD, nullCheck(body));
         if (styleClass != null)
             htmltree.setStyle(styleClass);
@@ -661,8 +661,8 @@ public class HtmlTree extends Content {
      * @param body content for the tag
      * @return an HtmlTree object for the TD tag
      */
-    public static HtmlTree TD(Content body) {
-        return TD(null, body);
+    public static HtmlTree td(Content body) {
+        return td(null, body);
     }
 
     /**
@@ -673,7 +673,7 @@ public class HtmlTree extends Content {
      * @param body content for the tag
      * @return an HtmlTree object for the TH tag
      */
-    public static HtmlTree TH(HtmlStyle styleClass, String scope, Content body) {
+    public static HtmlTree th(HtmlStyle styleClass, String scope, Content body) {
         HtmlTree htmltree = new HtmlTree(HtmlTag.TH, nullCheck(body));
         if (styleClass != null)
             htmltree.setStyle(styleClass);
@@ -688,8 +688,8 @@ public class HtmlTree extends Content {
      * @param body content for the tag
      * @return an HtmlTree object for the TH tag
      */
-    public static HtmlTree TH(String scope, Content body) {
-        return TH(null, scope, body);
+    public static HtmlTree th(String scope, Content body) {
+        return th(null, scope, body);
     }
 
     /**
@@ -698,9 +698,8 @@ public class HtmlTree extends Content {
      * @param body content for the tag
      * @return an HtmlTree object for the TITLE tag
      */
-    public static HtmlTree TITLE(Content body) {
-        HtmlTree htmltree = new HtmlTree(HtmlTag.TITLE, nullCheck(body));
-        return htmltree;
+    public static HtmlTree title(Content body) {
+        return new HtmlTree(HtmlTag.TITLE, nullCheck(body));
     }
 
     /**
@@ -709,9 +708,8 @@ public class HtmlTree extends Content {
      * @param body content for the tag
      * @return an HtmlTree object for the TR tag
      */
-    public static HtmlTree TR(Content body) {
-        HtmlTree htmltree = new HtmlTree(HtmlTag.TR, nullCheck(body));
-        return htmltree;
+    public static HtmlTree tr(Content body) {
+        return new HtmlTree(HtmlTag.TR, nullCheck(body));
     }
 
     /**
@@ -721,8 +719,9 @@ public class HtmlTree extends Content {
      * @param body content for the tag
      * @return an HtmlTree object for the UL tag
      */
-    public static HtmlTree UL(HtmlStyle styleClass, Content body) {
+    public static HtmlTree ul(HtmlStyle styleClass, Content body) {
         HtmlTree htmltree = new HtmlTree(HtmlTag.UL, nullCheck(body));
+        
         htmltree.setStyle(nullCheck(styleClass));
         return htmltree;
     }
@@ -769,6 +768,7 @@ public class HtmlTree extends Content {
      *
      * @return true if the HTML tree is valid
      */
+    @Override
     public boolean isValid() {
         switch (htmlTag) {
             case A :

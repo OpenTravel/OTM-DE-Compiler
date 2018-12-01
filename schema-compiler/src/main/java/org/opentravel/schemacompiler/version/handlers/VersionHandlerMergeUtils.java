@@ -67,7 +67,7 @@ public class VersionHandlerMergeUtils {
     public void mergeAttributes(TLAttributeOwner target, List<TLAttribute> attributesToMerge,
     		RollupReferenceHandler referenceHandler) {
 		ModelElementCloner cloner = getCloner( target );
-        Set<String> existingAttributeNames = new HashSet<String>();
+        Set<String> existingAttributeNames = new HashSet<>();
         List<TLAttribute> existingAttributes = null;
 
         if (target instanceof TLValueWithAttributes) {
@@ -104,16 +104,15 @@ public class VersionHandlerMergeUtils {
     public void mergeProperties(TLPropertyOwner target, List<TLProperty> propertiesToMerge,
     		RollupReferenceHandler referenceHandler) {
 		ModelElementCloner cloner = getCloner( target );
-        Set<NamedEntity> existingSubstitutionGroups = new HashSet<NamedEntity>();
-        Set<String> existingPropertyNames = new HashSet<String>();
+        Set<NamedEntity> existingSubstitutionGroups = new HashSet<>();
+        Set<String> existingPropertyNames = new HashSet<>();
 
         if (target instanceof TLFacet) {
             List<TLProperty> existingProperties = PropertyCodegenUtils
                     .getInheritedProperties( (TLFacet) target );
 
             for (TLProperty property : existingProperties) {
-                TLPropertyType propertyType = PropertyCodegenUtils.resolvePropertyType(
-                		target, property.getType() );
+                TLPropertyType propertyType = PropertyCodegenUtils.resolvePropertyType( property.getType() );
                 
                 if (propertyType != null) {
                     NamedEntity substitutionGroup = PropertyCodegenUtils.hasGlobalElement( propertyType ) ?
@@ -131,8 +130,7 @@ public class VersionHandlerMergeUtils {
 
         for (TLProperty sourceProperty : propertiesToMerge) {
             if (!existingPropertyNames.contains( sourceProperty.getName() )) {
-                TLPropertyType propertyType = PropertyCodegenUtils.resolvePropertyType(
-                		target, sourceProperty.getType() );
+                TLPropertyType propertyType = PropertyCodegenUtils.resolvePropertyType( sourceProperty.getType() );
                 NamedEntity substitutionGroup = PropertyCodegenUtils.hasGlobalElement( propertyType ) ?
                 		PropertyCodegenUtils.getInheritanceRoot( propertyType ) : null;
 
@@ -155,7 +153,7 @@ public class VersionHandlerMergeUtils {
      */
     public void mergeIndicators(TLIndicatorOwner target, List<TLIndicator> indicatorsToMerge) {
 		ModelElementCloner cloner = getCloner( target );
-        Set<String> existingIndicatorNames = new HashSet<String>();
+        Set<String> existingIndicatorNames = new HashSet<>();
         List<TLIndicator> existingIndicators = null;
 
         if (target instanceof TLValueWithAttributes) {
@@ -235,7 +233,7 @@ public class VersionHandlerMergeUtils {
     public void mergeEnumeratedValues(TLAbstractEnumeration target, List<TLEnumValue> valuesToMerge) {
 		ModelElementCloner cloner = getCloner( target );
         List<TLEnumValue> existingValues = EnumCodegenUtils.getInheritedValues( target );
-    	Set<String> existingValueLiterals = new HashSet<String>();
+    	Set<String> existingValueLiterals = new HashSet<>();
         
         for (TLEnumValue existingValue : existingValues) {
         	existingValueLiterals.add( existingValue.getLiteral() );

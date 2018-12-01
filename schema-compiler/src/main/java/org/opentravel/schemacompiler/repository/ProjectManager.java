@@ -96,11 +96,11 @@ public final class ProjectManager {
 
     private static Log log = LogFactory.getLog(ProjectManager.class);
 
-    private static Map<TLModel, ProjectManager> instanceMap = new HashMap<TLModel, ProjectManager>();
+    private static Map<TLModel,ProjectManager> instanceMap = new HashMap<>();
 
     private RepositoryManager repositoryManager;
-    private List<Project> projects = new ArrayList<Project>();
-    private List<ProjectItem> projectItems = new ArrayList<ProjectItem>();
+    private List<Project> projects = new ArrayList<>();
+    private List<ProjectItem> projectItems = new ArrayList<>();
     private boolean autoSaveProjects;
     private Project builtInProject;
     private TLModel model;
@@ -350,8 +350,8 @@ public final class ProjectManager {
             
             // Load the contents of the model using the library reference from each of the project
             // items defined in the file.
-            List<RepositoryItem> managedItems = new ArrayList<RepositoryItem>();
-            List<File> unmanagedItemFiles = new ArrayList<File>();
+            List<RepositoryItem> managedItems = new ArrayList<>();
+            List<File> unmanagedItemFiles = new ArrayList<>();
             RepositoryItem defaultItem = null;
             URL defaultItemUrl = null;
 
@@ -509,8 +509,8 @@ public final class ProjectManager {
      */
     private void registerUnknownRepositories(ProjectType jaxbProject, File projectFile,
             ValidationFindings loaderFindings) {
-        Map<String, String> repositoryUrls = new HashMap<String, String>();
-        Set<String> repositoryIds = new HashSet<String>();
+        Map<String,String> repositoryUrls = new HashMap<>();
+        Set<String> repositoryIds = new HashSet<>();
 
         // Collect the IDs of the repositories that were explicitly referenced
         for (JAXBElement<? extends ProjectItemType> jaxbItem : jaxbProject.getProjectItemBase()) {
@@ -544,7 +544,7 @@ public final class ProjectManager {
                     repositoryManager.addRemoteRepository(repositoryUrl);
                     success = true;
 
-                } catch (Throwable t) {
+                } catch (Exception e) {
                     // No error; post a warning and continue
 
                 } finally {
@@ -616,7 +616,7 @@ public final class ProjectManager {
         // In addition to the project itself, save any of the unmanaged libraries if requested
         // by the caller.
         if (saveUnmanagedLibraries) {
-            List<TLLibrary> libraryList = new ArrayList<TLLibrary>();
+            List<TLLibrary> libraryList = new ArrayList<>();
 
             for (ProjectItem item : project.getProjectItems()) {
                 RepositoryItemState itemState = item.getState();
@@ -693,7 +693,7 @@ public final class ProjectManager {
      */
     @SuppressWarnings("unchecked")
 	public List<ProjectItem> refreshManagedProjectItems(ValidationFindings findings) throws LibraryLoaderException, RepositoryException {
-        LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>(model);
+        LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<>(model);
     	LibraryRemovedIntegrityChecker removeProcessor = new LibraryRemovedIntegrityChecker();
     	ValidationFindings loaderFindings = new ValidationFindings();
     	Map<String,ProjectItem> refreshedItemMap = new HashMap<>();
@@ -723,11 +723,11 @@ public final class ProjectManager {
         			refreshedItemMap.put( libraryUrl.toExternalForm(), item );
         		}
     			
-            } catch (Throwable t) {
+            } catch (Exception e) {
 				loaderFindings.addFinding(FindingType.ERROR, new LibraryValidationSource(item.getContent()),
 						LoaderValidationMessageKeys.ERROR_UNKNOWN_EXCEPTION_DURING_MODULE_LOAD, URLUtils
 							.getShortRepresentation(item.getContent().getLibraryUrl()), ExceptionUtils
-							.getExceptionClass(t).getSimpleName(), ExceptionUtils.getExceptionMessage(t));
+							.getExceptionClass(e).getSimpleName(), ExceptionUtils.getExceptionMessage(e));
             }
     	}
     	
@@ -768,12 +768,12 @@ public final class ProjectManager {
     				}
     			}
     			
-            } catch (Throwable t) {
+            } catch (Exception e) {
 				loaderFindings.addFinding(FindingType.ERROR, new LibraryValidationSource(refreshedItem.getContent()),
 						LoaderValidationMessageKeys.ERROR_UNKNOWN_EXCEPTION_DURING_MODULE_LOAD,
 							URLUtils .getShortRepresentation(libraryUrl),
-							ExceptionUtils.getExceptionClass(t).getSimpleName(),
-							ExceptionUtils.getExceptionMessage(t));
+							ExceptionUtils.getExceptionClass(e).getSimpleName(),
+							ExceptionUtils.getExceptionMessage(e));
             }
     	}
     	ModelReferenceResolver.resolveReferences(modelLoader.getLibraryModel());
@@ -841,7 +841,7 @@ public final class ProjectManager {
      *             thrown if the project item's version scheme is not recognized
      */
     public List<ProjectItem> getVersionChain(ProjectItem item) throws VersionSchemeException {
-        List<ProjectItem> versionChain = new ArrayList<ProjectItem>();
+        List<ProjectItem> versionChain = new ArrayList<>();
 
         if (item != null) {
             if (item.getContent() instanceof TLLibrary) {
@@ -870,7 +870,7 @@ public final class ProjectManager {
      * @return Collection<Project>
      */
     public Collection<Project> getAssignedProjects(ProjectItem item) {
-        Collection<Project> projectList = new ArrayList<Project>();
+        Collection<Project> projectList = new ArrayList<>();
 
         for (Project project : projects) {
             if (project.getProjectItems().contains(item)) {
@@ -915,8 +915,8 @@ public final class ProjectManager {
     public ProjectItem addManagedProjectItem(RepositoryItem item, Project project)
             throws LibraryLoaderException, RepositoryException {
         List<ProjectItem> itemList = addManagedProjectItems(
-                Arrays.asList(new RepositoryItem[] { item }), project);
-        return (itemList.size() == 0) ? null : itemList.get(0);
+                Arrays.asList( item ), project);
+        return itemList.isEmpty() ? null : itemList.get(0);
     }
 
     /**
@@ -1033,8 +1033,7 @@ public final class ProjectManager {
 
         // If no project item exists yet, create one automatically
         if (projectItem == null) {
-            projectItem = ProjectItemImpl.newUnmanagedItem(
-                    URLUtils.toFile(library.getLibraryUrl()), library, this);
+            projectItem = ProjectItemImpl.newUnmanagedItem(library, this);
 
             if (model.getLibrary(library.getLibraryUrl()) == null) {
                 model.addLibrary(library);
@@ -1077,8 +1076,8 @@ public final class ProjectManager {
     public ProjectItem addUnmanagedProjectItem(File libraryFile, Project project)
             throws LibraryLoaderException, RepositoryException {
         List<ProjectItem> itemList = addUnmanagedProjectItems(
-                Arrays.asList(new File[] { libraryFile }), project);
-        return (itemList.size() == 0) ? null : itemList.get(0);
+                Arrays.asList( libraryFile ), project);
+        return itemList.isEmpty() ? null : itemList.get(0);
     }
 
     /**
@@ -1184,8 +1183,8 @@ public final class ProjectManager {
             List<RepositoryItem> managedItems, Project project, ValidationFindings loaderFindings,
             LoaderProgressMonitor monitor)
             throws LibraryLoaderException, RepositoryException {
-        LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>(model);
-        List<ProjectItem> newItems = new ArrayList<ProjectItem>();
+        LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<>(model);
+        List<ProjectItem> newItems = new ArrayList<>();
         boolean listenersEnabled = model.isListenersEnabled();
 
         // Initialize the loader and validation findings
@@ -1248,7 +1247,7 @@ public final class ProjectManager {
                         newItem = newManagedProjectItem(managedItem, managedLibrary);
                     }
 
-                } catch (Throwable t) {
+                } catch (Exception e) {
                     if (loaderFindings != null) {
                         loaderFindings
                                 .addFinding(
@@ -1256,8 +1255,8 @@ public final class ProjectManager {
                                         new FileValidationSource(project.getProjectFile()),
                                         LoaderValidationMessageKeys.ERROR_UNKNOWN_EXCEPTION_DURING_PROJECT_LOAD,
                                         URLUtils.getShortRepresentation(libraryUrl), ExceptionUtils
-                                                .getExceptionClass(t).getSimpleName(),
-                                        ExceptionUtils.getExceptionMessage(t));
+                                                .getExceptionClass(e).getSimpleName(),
+                                        ExceptionUtils.getExceptionMessage(e));
                     }
                     
                 } finally {
@@ -1295,11 +1294,10 @@ public final class ProjectManager {
                     AbstractLibrary unmanagedLibrary = model.getLibrary(libraryUrl);
 
                     if (unmanagedLibrary != null) {
-                        newItem = ProjectItemImpl.newUnmanagedItem(URLUtils.toFile(libraryUrl),
-                                unmanagedLibrary, this);
+                        newItem = ProjectItemImpl.newUnmanagedItem(unmanagedLibrary, this);
                     }
 
-                } catch (Throwable t) {
+                } catch (Exception e) {
                     if (loaderFindings != null) {
                         loaderFindings
                                 .addFinding(
@@ -1307,8 +1305,8 @@ public final class ProjectManager {
                                         new FileValidationSource(project.getProjectFile()),
                                         LoaderValidationMessageKeys.ERROR_UNKNOWN_EXCEPTION_DURING_PROJECT_LOAD,
                                         URLUtils.getShortRepresentation(libraryUrl), ExceptionUtils
-                                                .getExceptionClass(t).getSimpleName(),
-                                        ExceptionUtils.getExceptionMessage(t));
+                                                .getExceptionClass(e).getSimpleName(),
+                                        ExceptionUtils.getExceptionMessage(e));
                     }
                     
                 } finally {
@@ -1373,7 +1371,7 @@ public final class ProjectManager {
      */
     public void publish(ProjectItem item, Repository repository)
             throws PublishWithLocalDependenciesException, RepositoryException {
-        publish(Arrays.asList(new ProjectItem[] { item }), repository);
+        publish(Arrays.asList( item ), repository);
     }
 
     /**
@@ -1399,7 +1397,7 @@ public final class ProjectManager {
         // Check repository state of each item to make sure it can be published; also make sure that
         // the
         // user has write access to each item's namespace in the target repository
-        Set<String> authorizedNamespaces = new HashSet<String>();
+        Set<String> authorizedNamespaces = new HashSet<>();
 
         for (ProjectItem item : items) {
             if (item.getState() != RepositoryItemState.UNMANAGED) {
@@ -1419,7 +1417,7 @@ public final class ProjectManager {
         }
 
         // Also be sure that no dependencies on unmanaged files exist before proceeding
-        Collection<ProjectItem> unmanagedReferences = new ArrayList<ProjectItem>();
+        Collection<ProjectItem> unmanagedReferences = new ArrayList<>();
 
         findUnmanagedReferences(items, unmanagedReferences);
 
@@ -1439,8 +1437,8 @@ public final class ProjectManager {
         prepareForPublication(items, repository);
 
         // Publish each item's content to the repository and download a copy to the local cache
-        Collection<ProjectItem> successfullyPublishedItems = new ArrayList<ProjectItem>();
-        Map<AbstractLibrary, URL> originalLibraryUrls = new HashMap<AbstractLibrary, URL>();
+        Collection<ProjectItem> successfullyPublishedItems = new ArrayList<>();
+        Map<AbstractLibrary,URL> originalLibraryUrls = new HashMap<>();
         boolean allItemsSuccessful = false;
 
         try {
@@ -1539,8 +1537,8 @@ public final class ProjectManager {
                 // the
                 // project to reference them using a repository URI for the import/include file
                 // hints
-                Collection<Project> affectedProjects = new HashSet<Project>();
-                Set<ProjectItem> affectedProjectItems = new HashSet<ProjectItem>();
+                Collection<Project> affectedProjects = new HashSet<>();
+                Set<ProjectItem> affectedProjectItems = new HashSet<>();
 
                 for (ProjectItem item : items) {
                     affectedProjects.addAll(getAssignedProjects(item));
@@ -1574,10 +1572,10 @@ public final class ProjectManager {
                     try {
                         repository.delete(rollbackItem);
 
-                    } catch (Throwable t) {
+                    } catch (Exception e) {
                         log.warn(
                                 "Error during publicaton rollback - unable to delete item from the repository: "
-                                        + rollbackItem.getFilename(), t);
+                                        + rollbackItem.getFilename(), e);
                     }
 
                     // Reset the properties of the local project item to their original state
@@ -1605,14 +1603,14 @@ public final class ProjectManager {
     private void findUnmanagedReferences(Collection<ProjectItem> pendingPublicationItems,
             Collection<ProjectItem> unmanagedReferences) {
         for (ProjectItem item : pendingPublicationItems) {
-            Collection<ProjectItem> itemList = new HashSet<ProjectItem>();
+            Collection<ProjectItem> itemList = new HashSet<>();
             int unmanagedReferenceCount = -1;
 
             itemList.add(item); // 1st loop - just analyze the new item
 
             while (unmanagedReferences.size() != unmanagedReferenceCount) { // continue until our
                                                                             // count does not change
-                Collection<ProjectItem> newUnmanagedReferences = new HashSet<ProjectItem>();
+                Collection<ProjectItem> newUnmanagedReferences = new HashSet<>();
 
                 unmanagedReferenceCount = unmanagedReferences.size();
 
@@ -1668,10 +1666,10 @@ public final class ProjectManager {
      */
     private void prepareForPublication(Collection<ProjectItem> pendingPublicationItems,
             Repository repository) throws RepositoryException {
-        Collection<TLLibrary> preparedLibraries = new ArrayList<TLLibrary>();
+        Collection<TLLibrary> preparedLibraries = new ArrayList<>();
         boolean success = false;
         try {
-            Map<AbstractLibrary, URL> libraryUrlOverrides = new HashMap<AbstractLibrary, URL>();
+            Map<AbstractLibrary,URL> libraryUrlOverrides = new HashMap<>();
 
             for (ProjectItem item : pendingPublicationItems) {
                 // Calculate the URL for the local repository location of the item (needed for the
@@ -1819,7 +1817,7 @@ public final class ProjectManager {
                     if (backupFile != null)
                         ProjectFileUtils.removeBackupFile(backupFile);
                 }
-            } catch (Throwable t) {
+            } catch (Exception e) {
             }
         }
     }
@@ -2207,8 +2205,8 @@ public final class ProjectManager {
      */
     private void updateProjectDependencies(Project project,
             Collection<ProjectItem> addedProjectItems) throws RepositoryException {
-        Map<String, ProjectItem> globalItemMap = new HashMap<String, ProjectItem>();
-        Set<String> existingProjectLibraries = new HashSet<String>();
+        Map<String,ProjectItem> globalItemMap = new HashMap<>();
+        Set<String> existingProjectLibraries = new HashSet<>();
 
         // Prepare the set of existing project libraries and a global map of all know project items
         refreshProjectItems();
@@ -2259,7 +2257,7 @@ public final class ProjectManager {
      *             thrown if one or more managed repository items cannot be accessed
      */
     private void refreshProjectItems() throws RepositoryException {
-        Set<String> existingItemUrls = new HashSet<String>();
+        Set<String> existingItemUrls = new HashSet<>();
 
         for (ProjectItem item : projectItems) {
             existingItemUrls.add(item.getContent().getLibraryUrl().toExternalForm());
@@ -2275,8 +2273,7 @@ public final class ProjectManager {
                     newItem = newManagedProjectItem(null, library);
 
                 } else { // New unmanaged project item
-                    newItem = ProjectItemImpl.newUnmanagedItem(
-                            URLUtils.toFile(library.getLibraryUrl()), library, this);
+                    newItem = ProjectItemImpl.newUnmanagedItem(library, this);
                 }
                 addProjectItem(newItem);
             }
@@ -2291,7 +2288,7 @@ public final class ProjectManager {
      *            the project item that was modified
      */
     private void saveAffectedProjects(ProjectItem item) {
-        saveAffectedProjects(Arrays.asList(new ProjectItem[] { item }));
+        saveAffectedProjects(Arrays.asList( item ));
     }
 
     /**
@@ -2302,7 +2299,7 @@ public final class ProjectManager {
      *            the project item that was modified
      */
     private void saveAffectedProjects(List<ProjectItem> itemList) {
-        Set<Project> affectedProjects = new HashSet<Project>();
+        Set<Project> affectedProjects = new HashSet<>();
 
         for (ProjectItem item : itemList) {
             for (Project project : item.memberOfProjects()) {
@@ -2325,7 +2322,7 @@ public final class ProjectManager {
      * the underlying <code>TLModel</code>.
      */
     protected void purgeOrphanedProjectItems() {
-        List<ProjectItem> orphanedItems = new ArrayList<ProjectItem>();
+        List<ProjectItem> orphanedItems = new ArrayList<>();
 
         for (ProjectItem item : projectItems) {
             if (item.memberOfProjects().isEmpty()) {
@@ -2362,8 +2359,7 @@ public final class ProjectManager {
                 projectItem = newManagedProjectItem(null, library);
 
             } else { // New unmanaged project item
-                projectItem = ProjectItemImpl.newUnmanagedItem(
-                        URLUtils.toFile(library.getLibraryUrl()), library, this);
+                projectItem = ProjectItemImpl.newUnmanagedItem(library, this);
             }
             addProjectItem(projectItem);
         }

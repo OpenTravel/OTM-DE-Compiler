@@ -34,7 +34,7 @@ public class EnumerationDocumentationBuilder extends
 
 	private boolean isOpen;
 
-	List<EnumValueDocumentationBuilder> values = new ArrayList<EnumValueDocumentationBuilder>();
+	List<EnumValueDocumentationBuilder> values = new ArrayList<>();
 
 	/**
 	 * @param manager

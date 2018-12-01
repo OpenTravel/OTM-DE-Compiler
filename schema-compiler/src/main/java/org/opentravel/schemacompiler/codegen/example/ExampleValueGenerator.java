@@ -67,12 +67,12 @@ public class ExampleValueGenerator {
     private static final String OTA_BUILT_INS_EXAMPLES     = "/ota2-context/built-ins/ota-examples.properties";
     private static final String UNKNOWN_EXAMPLE_VALUE = "???";
 
-    private static enum ExampleSearchMode {
+    private enum ExampleSearchMode {
         PREFERRED_EXAMPLE, ANY_EXAMPLE, LEGACY_VALUE
-    };
+    }
 
     private Map<String, LegacyTypeExampleProvider> legacyExampleProviders;
-    private Map<String, Map<String, List<String>>> enumerationExamples = new HashMap<String, Map<String, List<String>>>();
+    private Map<String, Map<String, List<String>>> enumerationExamples = new HashMap<>();
     private MessageIdFactory idFactory = new MessageIdFactory();
     private String preferredContext;
 
@@ -361,13 +361,13 @@ public class ExampleValueGenerator {
         // Create the list of example data values if this is our first time generating examples
         // for this enumeration
         if (localEnumExamples == null) {
-            localEnumExamples = new HashMap<String, List<String>>();
+            localEnumExamples = new HashMap<>();
             enumerationExamples.put(coreObject.getNamespace(), localEnumExamples);
         }
         roleExamples = localEnumExamples.get(coreObject.getLocalName());
 
         if (roleExamples == null) {
-            roleExamples = new ArrayList<String>();
+            roleExamples = new ArrayList<>();
             localEnumExamples.put(coreObject.getLocalName(), roleExamples);
 
             for (TLRole roleValue : coreObject.getRoleEnumeration().getRoles()) {
@@ -796,13 +796,13 @@ public class ExampleValueGenerator {
                 // examples
                 // for this enumeration
                 if (localEnumExamples == null) {
-                    localEnumExamples = new HashMap<String, List<String>>();
+                    localEnumExamples = new HashMap<>();
                     enumerationExamples.put(enumeration.getNamespace(), localEnumExamples);
                 }
                 enumExamples = localEnumExamples.get(enumeration.getLocalName());
 
                 if (enumExamples == null) {
-                    enumExamples = new ArrayList<String>();
+                    enumExamples = new ArrayList<>();
                     localEnumExamples.put(enumeration.getLocalName(), enumExamples);
 
                     for (TLEnumValue enumValue : EnumCodegenUtils.getInheritedValues( enumeration )) {
@@ -840,13 +840,13 @@ public class ExampleValueGenerator {
                 // examples
                 // for this enumeration
                 if (localEnumExamples == null) {
-                    localEnumExamples = new HashMap<String, List<String>>();
+                    localEnumExamples = new HashMap<>();
                     enumerationExamples.put(roleEnum.getNamespace(), localEnumExamples);
                 }
                 enumExamples = localEnumExamples.get(roleEnum.getLocalName());
 
                 if (enumExamples == null) {
-                    enumExamples = new ArrayList<String>();
+                    enumExamples = new ArrayList<>();
                     localEnumExamples.put(roleEnum.getLocalName(), enumExamples);
 
                     for (TLRole roleValue : PropertyCodegenUtils.getInheritedRoles(roleEnum
@@ -891,7 +891,7 @@ public class ExampleValueGenerator {
         LegacyTypeExampleProvider s4sExampleProvider = new LegacyTypeExampleProvider(SCHEMA_FOR_SCHEMA_EXAMPLES);
         LegacyTypeExampleProvider otaExampleProvider = new LegacyTypeExampleProvider(OTA_BUILT_INS_EXAMPLES);
 
-        legacyExampleProviders = new HashMap<String, LegacyTypeExampleProvider>();
+        legacyExampleProviders = new HashMap<>();
         legacyExampleProviders.put(s4sExampleProvider.getNamespace(), s4sExampleProvider);
         legacyExampleProviders.put(otaExampleProvider.getNamespace(), otaExampleProvider);
     }

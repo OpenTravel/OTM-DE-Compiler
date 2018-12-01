@@ -123,7 +123,7 @@ public class RepositoryContentResource {
     @GET
     @Path("repository-metadata")
     @Produces(MediaType.TEXT_XML)
-    public JAXBElement<RepositoryInfoType> getRepositoryMetadata() throws RepositoryException {
+    public JAXBElement<RepositoryInfoType> getRepositoryMetadata() {
         return objectFactory.createRepositoryInfo(repositoryMetadataResource.getResource());
     }
 
@@ -242,7 +242,7 @@ public class RepositoryContentResource {
             JAXBElement<ListItemsRQType> listItemsRQ,
             @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
 
-        Map<String, Map<TLLibraryStatus, Boolean>> accessibleItemCache = new HashMap<String, Map<TLLibraryStatus, Boolean>>();
+        Map<String,Map<TLLibraryStatus,Boolean>> accessibleItemCache = new HashMap<>();
         List<RepositoryItem> namespaceItems = repositoryManager.listItems(listItemsRQ.getValue()
                 .getNamespace(), listItemsRQ.getValue().isLatestVersionOnly(), listItemsRQ
                 .getValue().isIncludeDraft());
@@ -279,7 +279,7 @@ public class RepositoryContentResource {
             @QueryParam("itemType") String itemTypeStr,
             @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
 
-        Map<String, Map<TLLibraryStatus, Boolean>> accessibleItemCache = new HashMap<String, Map<TLLibraryStatus, Boolean>>();
+        Map<String,Map<TLLibraryStatus,Boolean>> accessibleItemCache = new HashMap<>();
         RepositoryItemType itemType = getItemType( itemTypeStr );
         List<RepositoryItem> namespaceItems = repositoryManager.listItems(
         		listItemsRQ.getValue().getNamespace(), getStatus( listItemsRQ.getValue().getIncludeStatus().toString() ),
@@ -322,7 +322,7 @@ public class RepositoryContentResource {
             @QueryParam("includeDraft") boolean includeDraftVersions,
             @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
 
-        Map<String, Map<TLLibraryStatus, Boolean>> accessibleItemCache = new HashMap<String, Map<TLLibraryStatus, Boolean>>();
+        Map<String,Map<TLLibraryStatus,Boolean>> accessibleItemCache = new HashMap<>();
         TLLibraryStatus searchStatus = includeDraftVersions ? null : TLLibraryStatus.FINAL;
         List<SearchResult<?>> searchResults = FreeTextSearchServiceFactory.getInstance().search(
                 freeTextQuery, searchStatus, latestVersionsOnly, false );
@@ -368,7 +368,7 @@ public class RepositoryContentResource {
             @QueryParam("itemType") String itemTypeStr,
             @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
 
-        Map<String, Map<TLLibraryStatus, Boolean>> accessibleItemCache = new HashMap<String, Map<TLLibraryStatus, Boolean>>();
+        Map<String,Map<TLLibraryStatus,Boolean>> accessibleItemCache = new HashMap<>();
         TLLibraryStatus searchStatus = getStatus( includeStatusStr );
         RepositoryItemType itemType = getItemType( itemTypeStr );
         List<SearchResult<?>> searchResults = FreeTextSearchServiceFactory.getInstance().search(
@@ -463,7 +463,7 @@ public class RepositoryContentResource {
             JAXBElement<RepositoryItemIdentityType> identityElement,
             @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
 
-        Map<String, Map<TLLibraryStatus, Boolean>> accessibleItemCache = new HashMap<String, Map<TLLibraryStatus, Boolean>>();
+        Map<String,Map<TLLibraryStatus,Boolean>> accessibleItemCache = new HashMap<>();
         RepositoryItemIdentityType itemIdentity = identityElement.getValue();
         LibraryInfoType itemMetadata = repositoryManager.getFileManager().loadLibraryMetadata(
                 itemIdentity.getBaseNamespace(), itemIdentity.getFilename(),
@@ -501,7 +501,7 @@ public class RepositoryContentResource {
             JAXBElement<LibraryInfoType> itemMetadata,
             @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
     	
-        Map<String, Map<TLLibraryStatus, Boolean>> accessibleItemCache = new HashMap<String, Map<TLLibraryStatus, Boolean>>();
+        Map<String,Map<TLLibraryStatus,Boolean>> accessibleItemCache = new HashMap<>();
         UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
     	RepositoryItem item = RepositoryUtils.createRepositoryItem(repositoryManager, itemMetadata.getValue());
     	
@@ -543,7 +543,7 @@ public class RepositoryContentResource {
             @QueryParam("includeIndirect") String includeIndirectStr,
             @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
     	
-        Map<String, Map<TLLibraryStatus, Boolean>> accessibleItemCache = new HashMap<String, Map<TLLibraryStatus, Boolean>>();
+        Map<String,Map<TLLibraryStatus,Boolean>> accessibleItemCache = new HashMap<>();
         UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
     	FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
     	RepositoryItem searchItem = RepositoryUtils.createRepositoryItem(repositoryManager, itemMetadata.getValue());
@@ -590,7 +590,7 @@ public class RepositoryContentResource {
             @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
     	
         EntityInfoType entityMetadata = entityMetadataElement.getValue();
-        Map<String, Map<TLLibraryStatus, Boolean>> accessibleItemCache = new HashMap<String, Map<TLLibraryStatus, Boolean>>();
+        Map<String,Map<TLLibraryStatus,Boolean>> accessibleItemCache = new HashMap<>();
         UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
     	FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
     	RepositoryItem searchItem = RepositoryUtils.createRepositoryItem(repositoryManager, entityMetadata);
@@ -652,7 +652,7 @@ public class RepositoryContentResource {
             @HeaderParam("Authorization") String authorizationHeader) throws RepositoryException {
     	
         EntityInfoType entityMetadata = entityMetadataElement.getValue();
-        Map<String, Map<TLLibraryStatus, Boolean>> accessibleItemCache = new HashMap<String, Map<TLLibraryStatus, Boolean>>();
+        Map<String,Map<TLLibraryStatus,Boolean>> accessibleItemCache = new HashMap<>();
         UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
     	FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
     	RepositoryItem searchItem = RepositoryUtils.createRepositoryItem(repositoryManager, entityMetadata);
@@ -1508,8 +1508,7 @@ public class RepositoryContentResource {
         LibraryInfoListType lockedItems = new LibraryInfoListType();
         
         if (user != UserPrincipal.ANONYMOUS_USER) {
-            Map<String, Map<TLLibraryStatus, Boolean>> accessibleItemCache =
-            		new HashMap<String, Map<TLLibraryStatus, Boolean>>();
+            Map<String,Map<TLLibraryStatus,Boolean>> accessibleItemCache = new HashMap<>();
         	List<LibrarySearchResult> lockedLibraries =
         			FreeTextSearchServiceFactory.getInstance().getLockedLibraries( user.getUserId(), false );
         	
@@ -1543,11 +1542,10 @@ public class RepositoryContentResource {
     protected boolean isReadable(RepositoryItem item, UserPrincipal user,
             Map<String, Map<TLLibraryStatus, Boolean>> accessibleItemCache)
             throws RepositorySecurityException {
-        Map<TLLibraryStatus, Boolean> cacheRecord = accessibleItemCache
-                .get(item.getBaseNamespace());
+        Map<TLLibraryStatus,Boolean> cacheRecord = accessibleItemCache.get(item.getBaseNamespace());
 
         if (cacheRecord == null) {
-            cacheRecord = new HashMap<TLLibraryStatus, Boolean>();
+            cacheRecord = new HashMap<>();
             accessibleItemCache.put(item.getBaseNamespace(), cacheRecord);
         }
         Boolean hasAccess = cacheRecord.get(item.getStatus());
@@ -1574,7 +1572,7 @@ public class RepositoryContentResource {
     	
     	if (library != null) {
     		List<ReleaseSearchResult> releaseList = service.getLibraryReleases( library, false );
-    		result = (releaseList.size() > 0);
+    		result = !releaseList.isEmpty();
     	}
     	return result;
     }
@@ -1665,9 +1663,9 @@ public class RepositoryContentResource {
                     service.deleteRepositoryItemIndex(item);
                 }
 
-            } catch (Throwable t) {
+            } catch (Exception e) {
                 log.warn("Error submitting repository item for indexing: " + item.getFilename()
-                        + " [" + item.getNamespace() + "]", t);
+                        + " [" + item.getNamespace() + "]", e);
             }
         }
     }

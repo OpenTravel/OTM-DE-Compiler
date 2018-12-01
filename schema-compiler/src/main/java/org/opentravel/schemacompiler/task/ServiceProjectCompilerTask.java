@@ -80,9 +80,9 @@ public class ServiceProjectCompilerTask extends AbstractSchemaCompilerTask imple
     @Override
     protected void generateOutput(Collection<TLLibrary> userDefinedLibraries,
             Collection<XSDLibrary> legacySchemas) throws SchemaCompilerException {
-        Map<String, Boolean> duplicateServiceNameIndicators = new HashMap<String, Boolean>();
+        Map<String,Boolean> duplicateServiceNameIndicators = new HashMap<>();
         DependencyFilterBuilder filterBuilder = new DependencyFilterBuilder().setIncludeExtendedLegacySchemas( true );
-        List<TLService> serviceList = new ArrayList<TLService>();
+        List<TLService> serviceList = new ArrayList<>();
 
         // Collect the list of services to generate and identify the services that will require
         // version identification as part of their WSDL filename.
@@ -190,6 +190,7 @@ public class ServiceProjectCompilerTask extends AbstractSchemaCompilerTask imple
     /**
      * @see org.opentravel.schemacompiler.task.AbstractCompilerTask#createContext()
      */
+    @Override
     protected CodeGenerationContext createContext() {
         CodeGenerationContext context = super.createContext();
 

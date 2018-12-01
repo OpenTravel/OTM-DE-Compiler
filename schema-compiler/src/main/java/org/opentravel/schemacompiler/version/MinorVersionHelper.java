@@ -52,8 +52,7 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
      * is being used, the other constructor should be used to assign the active project for the
      * helper.
      */
-    public MinorVersionHelper() {
-    }
+    public MinorVersionHelper() {}
 
     /**
      * Constructor that assigns the active project for an application's <code>ProjectManager</code>.
@@ -91,7 +90,7 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
         String baseNamespace = library.getBaseNamespace();
         TLLibrary priorVersion = null;
 
-        if ((library != null) && (baseNamespace != null) && (library.getOwningModel() != null)
+        if ((baseNamespace != null) && (library.getOwningModel() != null)
                 && !versionScheme.isMajorVersion(library.getNamespace())) {
             String priorMinorVersion;
 
@@ -163,10 +162,10 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
     public <V extends Versioned> List<V> getLaterMinorVersions(V versionedEntity)
             throws VersionSchemeException {
     	VersionHandler<V> handler = getVersionHandler( versionedEntity );
-        List<V> versionExtensions = new ArrayList<V>();
+        List<V> versionExtensions = new ArrayList<>();
 
         if (versionedEntity instanceof LibraryElement) {
-            LibraryElement versionedMember = (LibraryElement) versionedEntity;
+            LibraryElement versionedMember = versionedEntity;
 
             if (versionedMember.getOwningLibrary() instanceof TLLibrary) {
                 List<TLLibrary> minorVersionLibraries = getLaterMinorVersions((TLLibrary) versionedMember
@@ -199,7 +198,7 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
 	public <V extends Versioned> List<V> getMajorVersionFamily(V versionedEntity)
             throws VersionSchemeException {
         Collection<V> priorEntityVersions = getAllVersionExtensions(versionedEntity);
-        List<V> majorVersionFamily = new ArrayList<V>();
+        List<V> majorVersionFamily = new ArrayList<>();
 
         if ((versionedEntity.getBaseNamespace() != null)
                 && (versionedEntity.getOwningModel() != null)) {
@@ -209,7 +208,7 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
                 if (!library.getBaseNamespace().equals(versionedEntity.getBaseNamespace())) {
                     continue;
                 }
-                List<V> versionedMembers = new ArrayList<V>();
+                List<V> versionedMembers = new ArrayList<>();
 
                 // Find all of the entities from this library of the same type as our original
                 // versioned entity
@@ -265,7 +264,7 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
             throws VersionSchemeException {
         TLLibrary owningLibrary = getOwningLibrary(versionedEntity);
         List<TLLibrary> minorVersionLibraries = getLaterMinorVersions(owningLibrary);
-        List<TLLibrary> eligibleLibraries = new ArrayList<TLLibrary>();
+        List<TLLibrary> eligibleLibraries = new ArrayList<>();
     	VersionHandler<Versioned> handler = getVersionHandler( versionedEntity );
     	
         // Search the patch libraries, and return only those who do not yet contain a patch for the
@@ -341,7 +340,7 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
      */
     public TLLibrary createNewMinorVersion(TLLibrary library, File libraryFile)
             throws VersionSchemeException, ValidationException, LibrarySaveException {
-        List<ProjectItem> importedVersions = new ArrayList<ProjectItem>();
+        List<ProjectItem> importedVersions = new ArrayList<>();
         try {
             VersionScheme versionScheme = VersionSchemeFactory.getInstance().getVersionScheme(
                     library.getVersionScheme());

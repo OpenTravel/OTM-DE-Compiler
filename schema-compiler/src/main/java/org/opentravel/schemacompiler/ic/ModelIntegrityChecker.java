@@ -35,7 +35,7 @@ public class ModelIntegrityChecker extends AbstractModelIntegrityChecker {
      */
     @Override
     protected List<ModelEventListener<?, ?>> getListeners() {
-        List<ModelEventListener<?, ?>> listeners = new ArrayList<ModelEventListener<?, ?>>();
+        List<ModelEventListener<?,?>> listeners = new ArrayList<>();
 
         listeners.add(new TypeAssignmentChangeIntegrityChecker());
         listeners.add(new LibraryMemberChangeIntegrityChecker());

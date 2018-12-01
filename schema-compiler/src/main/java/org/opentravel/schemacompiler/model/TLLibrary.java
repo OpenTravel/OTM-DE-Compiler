@@ -71,7 +71,7 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
      */
     @Override
     protected boolean isValidMember(LibraryMember namedMember) {
-        return (namedMember == null) ? false : validMemberTypes.contains(namedMember.getClass());
+        return (namedMember != null) && validMemberTypes.contains(namedMember.getClass());
     }
 
     /**
@@ -334,7 +334,7 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
         List<LibraryMember> members = super.getNamedMembers();
 
         if (service != null) {
-            members = new ArrayList<LibraryMember>(members);
+            members = new ArrayList<>(members);
             members.add(service);
             members = Collections.unmodifiableList(members);
         }
@@ -454,10 +454,10 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
             TLOperation op = (TLOperation) namedMember;
 
             if (targetLibrary.getService() == null) {
-                TLService service = new TLService();
+                TLService svc = new TLService();
 
-                service.setName(this.getService().getName());
-                targetLibrary.setService(service);
+                svc.setName(this.getService().getName());
+                targetLibrary.setService(svc);
             }
             this.getService().removeOperation(op);
             targetLibrary.getService().addOperation(op);
@@ -836,7 +836,7 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
      */
     @SuppressWarnings("unchecked")
     private <T extends NamedEntity> List<T> buildMemberList(Class<T> memberType) {
-        List<T> memberList = new ArrayList<T>();
+        List<T> memberList = new ArrayList<>();
 
         for (NamedEntity member : getNamedMembers()) {
             if (memberType.equals(member.getClass())) {
@@ -851,7 +851,7 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
      */
     static {
         try {
-            Set<Class<?>> validTypes = new HashSet<Class<?>>();
+            Set<Class<?>> validTypes = new HashSet<>();
 
             validTypes.add(TLSimple.class);
             validTypes.add(TLValueWithAttributes.class);
@@ -866,8 +866,8 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
             validTypes.add(TLDocumentationPatch.class);
             validMemberTypes = Collections.unmodifiableSet(validTypes);
 
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

@@ -73,8 +73,8 @@ public class EntityComparator extends BaseComparator {
 		
 		// Look for changes in the library values
 		AbstractLibrary owningLibrary = oldEntity.getOwningLibrary();
-		String versionScheme = (owningLibrary == null) ? null : owningLibrary.getVersionScheme();
-		boolean isMinorVersionCompare = isMinorVersionCompare( oldEntity, newEntity, versionScheme );
+		String vScheme = (owningLibrary == null) ? null : owningLibrary.getVersionScheme();
+		boolean isMinorVersionCompare = isMinorVersionCompare( oldEntity, newEntity, vScheme );
 		QName oldParentTypeName = getEntityName( oldEntity.getParentType() );
 		QName newParentTypeName = getEntityName( newEntity.getParentType() );
 		QName oldExtendsTypeName = getEntityName( oldEntity.getExtendsType() );
@@ -97,7 +97,7 @@ public class EntityComparator extends BaseComparator {
 			changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.DOCUMENTATION_CHANGED, null, null ) );
 		}
 		if (valueChanged( oldParentTypeName, newParentTypeName )) {
-			if (isVersionChange( oldParentTypeName, newParentTypeName, versionScheme )) {
+			if (isVersionChange( oldParentTypeName, newParentTypeName, vScheme )) {
 				changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.PARENT_TYPE_VERSION_CHANGED,
 						oldEntity.getOwningLibrary().getVersion(), newEntity.getOwningLibrary().getVersion() ) );
 				
@@ -108,7 +108,7 @@ public class EntityComparator extends BaseComparator {
 			}
 		}
 		if (valueChanged( oldExtendsTypeName, newExtendsTypeName )) {
-			if (isVersionChange( oldExtendsTypeName, newExtendsTypeName, versionScheme )) {
+			if (isVersionChange( oldExtendsTypeName, newExtendsTypeName, vScheme )) {
 				changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.EXTENSION_VERSION_CHANGED,
 						oldEntity.getOwningLibrary().getVersion(), newEntity.getOwningLibrary().getVersion() ) );
 				
@@ -119,7 +119,7 @@ public class EntityComparator extends BaseComparator {
 			}
 		}
 		if (valueChanged( oldBasePayloadTypeName, newBasePayloadTypeName )) {
-			if (isVersionChange( oldBasePayloadTypeName, newBasePayloadTypeName, versionScheme )) {
+			if (isVersionChange( oldBasePayloadTypeName, newBasePayloadTypeName, vScheme )) {
 				changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.BASE_PAYLOAD_VERSION_CHANGED,
 						oldEntity.getOwningLibrary().getVersion(), newEntity.getOwningLibrary().getVersion() ) );
 				
@@ -142,7 +142,7 @@ public class EntityComparator extends BaseComparator {
 					oldEntity.getReferenceRepeat() + "", newEntity.getReferenceRepeat() + "" ) );
 		}
 		if (valueChanged( oldSimpleCoreTypeName, newSimpleCoreTypeName )) {
-			if (isVersionChange( oldSimpleCoreTypeName, newSimpleCoreTypeName, versionScheme )) {
+			if (isVersionChange( oldSimpleCoreTypeName, newSimpleCoreTypeName, vScheme )) {
 				changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.SIMPLE_CORE_TYPE_VERSION_CHANGED,
 						oldEntity.getOwningLibrary().getVersion(), newEntity.getOwningLibrary().getVersion() ) );
 				
@@ -266,7 +266,7 @@ public class EntityComparator extends BaseComparator {
 		List<EntityChangeItem> changeItems = changeSet.getChangeItems();
 		ModelCompareOptions options = getCompareOptions();
 		Map<String,String> fieldNSMappings = options.isSuppressFieldVersionChanges() ?
-				getNamespaceMappings() : new HashMap<String,String>();
+				getNamespaceMappings() : new HashMap<>();
 		Map<QName,List<TLMemberField<?>>> oldFieldMap = buildFieldMap( oldFields );
 		Map<QName,List<TLMemberField<?>>> newFieldMap = buildFieldMap( newFields );
 		SortedSet<QName> oldFieldNames = new TreeSet<>( new QNameComparator() );
@@ -284,9 +284,9 @@ public class EntityComparator extends BaseComparator {
 		while (iterator.hasNext()) {
 			QName oldFieldName = iterator.next();
 			List<TLMemberField<?>> oldVersionFields = oldFieldMap.get( oldFieldName );
-			String versionScheme = getVersionScheme( oldVersionFields );
-			List<QName> matchingNewFieldNames = ModelCompareUtils.findMatchingVersions( oldFieldName, newFieldNames,  versionScheme );
-			QName newFieldName = ModelCompareUtils.findClosestVersion( oldFieldName, matchingNewFieldNames, versionScheme );
+			String vScheme = getVersionScheme( oldVersionFields );
+			List<QName> matchingNewFieldNames = ModelCompareUtils.findMatchingVersions( oldFieldName, newFieldNames,  vScheme );
+			QName newFieldName = ModelCompareUtils.findClosestVersion( oldFieldName, matchingNewFieldNames, vScheme );
 			
 			if (newFieldName != null) {
 				List<TLMemberField<?>> newVersionFields = newFieldMap.get( newFieldName );
@@ -492,20 +492,20 @@ public class EntityComparator extends BaseComparator {
 	 */
 	private String getVersionScheme(List<TLMemberField<?>> fieldList) {
 		TLMemberField<?> field = (fieldList == null) ? null : fieldList.get( 0 );
-		String versionScheme = null;
+		String vScheme = null;
 		
 		if ((field != null) && (field.getOwner() instanceof NamedEntity)) {
 			NamedEntity fieldOwner = (NamedEntity) field.getOwner();
 			AbstractLibrary library = fieldOwner.getOwningLibrary();
 			
 			if (library != null) {
-				versionScheme = library.getVersionScheme();
+				vScheme = library.getVersionScheme();
 			}
 		}
-		if (versionScheme == null) {
-			versionScheme = vsFactory.getDefaultVersionScheme();
+		if (vScheme == null) {
+			vScheme = vsFactory.getDefaultVersionScheme();
 		}
-		return versionScheme;
+		return vScheme;
 	}
 	
 	/**
@@ -521,9 +521,7 @@ public class EntityComparator extends BaseComparator {
 				vScheme = vsFactory.getVersionScheme( library.getVersionScheme() );
 			}
 			
-		} catch (VersionSchemeException e) {}
-		
-		if (vScheme == null) {
+		} catch (VersionSchemeException e) {
 			try {
 				vScheme = vsFactory.getVersionScheme( vsFactory.getDefaultVersionScheme() );
 				

@@ -159,7 +159,7 @@ public abstract class AbstractXsdTransformer<S, T> extends AbstractCodegenTransf
     protected void addImports(Schema schema, AbstractLibrary sourceLibrary,
             CodeGenerationFilenameBuilder<AbstractLibrary> filenameBuilder,
             CodeGenerationFilter importFilter) {
-        List<AbstractLibrary> importList = new ArrayList<AbstractLibrary>();
+        List<AbstractLibrary> importList = new ArrayList<>();
         String targetNamespace = schema.getTargetNamespace();
         TLModel model = sourceLibrary.getOwningModel();
 
@@ -315,11 +315,11 @@ public abstract class AbstractXsdTransformer<S, T> extends AbstractCodegenTransf
      */
     private Map<AbstractLibrary, List<AbstractLibrary>> getIncludeDependencies(
             List<AbstractLibrary> libraryList) {
-        Map<AbstractLibrary, List<AbstractLibrary>> includeDependencies = new HashMap<AbstractLibrary, List<AbstractLibrary>>();
+        Map<AbstractLibrary,List<AbstractLibrary>> includeDependencies = new HashMap<>();
         ApplicationContext appContext = SchemaCompilerApplicationContext.getContext();
 
         for (AbstractLibrary library : libraryList) {
-            List<AbstractLibrary> includedLibraries = new ArrayList<AbstractLibrary>();
+            List<AbstractLibrary> includedLibraries = new ArrayList<>();
 
             if (library instanceof BuiltInLibrary) {
                 BuiltInLibrary builtIn = (BuiltInLibrary) library;
@@ -381,7 +381,7 @@ public abstract class AbstractXsdTransformer<S, T> extends AbstractCodegenTransf
      */
     private List<URL> getIncludeURLs(AbstractLibrary library) {
         URL libraryFolder = URLUtils.getParentURL(library.getLibraryUrl());
-        List<URL> includeUrls = new ArrayList<URL>();
+        List<URL> includeUrls = new ArrayList<>();
 
         for (TLInclude include : library.getIncludes()) {
             try {
@@ -410,7 +410,7 @@ public abstract class AbstractXsdTransformer<S, T> extends AbstractCodegenTransf
     protected void addIncludes(Schema schema, AbstractLibrary sourceLibrary,
             CodeGenerationFilenameBuilder<AbstractLibrary> filenameBuilder,
             CodeGenerationFilter includeFilter) {
-        List<AbstractLibrary> compileTimeDependencies = new ArrayList<AbstractLibrary>();
+        List<AbstractLibrary> compileTimeDependencies = new ArrayList<>();
         List<AbstractLibrary> includeList = sourceLibrary.getOwningModel()
                 .getLibrariesForNamespace(sourceLibrary.getNamespace());
 
@@ -490,7 +490,7 @@ public abstract class AbstractXsdTransformer<S, T> extends AbstractCodegenTransf
      */
     protected CodegenArtifacts buildCorrelatedArtifacts(NamedEntity source,
             FacetCodegenElements codegenElements, CodegenArtifacts codegenArtifacts) {
-        List<NamedEntity> entityList = new ArrayList<NamedEntity>();
+        List<NamedEntity> entityList = new ArrayList<>();
         CodegenArtifacts correlatedArtifacts = new CodegenArtifacts();
 
         if (source instanceof TLAliasOwner) {

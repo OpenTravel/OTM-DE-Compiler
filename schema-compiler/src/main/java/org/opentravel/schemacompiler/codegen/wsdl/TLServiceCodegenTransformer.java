@@ -58,7 +58,7 @@ public class TLServiceCodegenTransformer extends AbstractWsdlTransformer<TLServi
         if (cgContext.getValue(CodeGenerationContext.CK_PROJECT_FILENAME) != null) {
             filenameBuilder = new ProjectLibraryMemberTrimmedFilenameBuilder();
         } else {
-            filenameBuilder = new LibraryMemberTrimmedFilenameBuilder<LibraryMember>(source);
+            filenameBuilder = new LibraryMemberTrimmedFilenameBuilder<>(source);
         }
 
         definitions.setName(source.getName());

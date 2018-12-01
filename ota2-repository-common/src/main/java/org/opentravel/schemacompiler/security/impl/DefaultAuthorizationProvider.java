@@ -44,7 +44,7 @@ public class DefaultAuthorizationProvider implements AuthorizationProvider {
 
     private Log log = LogFactory.getLog(DefaultAuthorizationProvider.class);
 
-    private Map<String, AuthorizationResource> authorizationCache = new HashMap<String, AuthorizationResource>();
+    private Map<String,AuthorizationResource> authorizationCache = new HashMap<>();
     private SecurityFileUtils fileUtils;
 
     /**
@@ -182,7 +182,7 @@ public class DefaultAuthorizationProvider implements AuthorizationProvider {
      */
     private List<String> getNamespaceHierarchy(String namespace) throws RepositorySecurityException {
         try {
-            List<String> hierarchy = new ArrayList<String>();
+            List<String> hierarchy = new ArrayList<>();
             URI ns = new URI(namespace);
             String nsScheme = ns.getScheme();
             String nsAuthority = ns.getAuthority();

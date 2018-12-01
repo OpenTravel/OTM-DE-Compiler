@@ -25,7 +25,6 @@ import java.util.Map;
 
 import org.opentravel.schemacompiler.extension.CompilerExtension;
 import org.opentravel.schemacompiler.extension.CompilerExtensionProvider;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.support.GenericApplicationContext;
@@ -63,8 +62,7 @@ public class OTA2CompilerExtensionProvider implements CompilerExtensionProvider 
      *      java.lang.String)
      */
     @Override
-    public void loadCompilerExtension(GenericApplicationContext context, String extensionId)
-            throws BeansException {
+    public void loadCompilerExtension(GenericApplicationContext context, String extensionId) {
         if (!isSupportedExtension(extensionId)) {
             throw new IllegalArgumentException("Unsupported compiler extension: " + extensionId);
         }
@@ -88,8 +86,7 @@ public class OTA2CompilerExtensionProvider implements CompilerExtensionProvider 
      * @see org.opentravel.schemacompiler.extension.CompilerExtensionProvider#loadGeneralCompilerExtensions(org.springframework.context.support.GenericApplicationContext)
      */
     @Override
-    public void loadGeneralCompilerExtensions(GenericApplicationContext context)
-            throws BeansException {
+    public void loadGeneralCompilerExtensions(GenericApplicationContext context) {
         // No action required for this extension provider
     }
 
@@ -119,7 +116,7 @@ public class OTA2CompilerExtensionProvider implements CompilerExtensionProvider 
     private static void registerBindingStyle(Collection<CompilerExtension> extensions,
             Map<String, List<String>> urlMap, String extensionId, int rank,
             String... configLocations) {
-        List<String> configUrls = new ArrayList<String>();
+        List<String> configUrls = new ArrayList<>();
 
         for (String configLocation : configLocations) {
             configUrls.add(configLocation);
@@ -133,8 +130,8 @@ public class OTA2CompilerExtensionProvider implements CompilerExtensionProvider 
      */
     static {
         try {
-            Collection<CompilerExtension> extensions = new ArrayList<CompilerExtension>();
-            Map<String, List<String>> urlMap = new HashMap<String, List<String>>();
+            Collection<CompilerExtension> extensions = new ArrayList<>();
+            Map<String,List<String>> urlMap = new HashMap<>();
 
             registerBindingStyle(extensions, urlMap,
                     OTA2CompilerConstants.OTA2_COMPILER_EXTENSION_ID, 50,
@@ -143,8 +140,8 @@ public class OTA2CompilerExtensionProvider implements CompilerExtensionProvider 
             compilerExtensions = Collections.unmodifiableCollection(extensions);
             extensionUrls = Collections.unmodifiableMap(urlMap);
 
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

@@ -65,10 +65,10 @@ public abstract class AbstractWsdlCodeGenerator<S extends LibraryMember> extends
     private static final String DEFAULT_JAXB_PACKAGES = ":org.xmlsoap.schemas.wsdl"
             + ":org.w3._2001.xmlschema" + ":org.opentravel.ns.ota2.appinfo_v01_00";
 
-    private static Map<String, JAXBContext> contextCache = new HashMap<String, JAXBContext>();
+    private static Map<String,JAXBContext> contextCache = new HashMap<>();
     protected static Schema validationSchema;
 
-    private List<AbstractLibrary> wsdlDependencies = new ArrayList<AbstractLibrary>();
+    private List<AbstractLibrary> wsdlDependencies = new ArrayList<>();
     private TransformerFactory<CodeGenerationTransformerContext> transformerFactory;
 
     /**
@@ -261,8 +261,8 @@ public abstract class AbstractWsdlCodeGenerator<S extends LibraryMember> extends
 
             validationSchema = schemaFactory.newSchema(new StreamSource(schemaStream));
 
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

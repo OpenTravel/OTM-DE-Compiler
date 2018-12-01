@@ -65,7 +65,7 @@ public class DefaultLibraryNamespaceResolver implements LibraryNamespaceResolver
     @Override
     public Collection<URL> resovleLibraryImport(URI libraryNamespace, String versionScheme,
             String[] fileHints) {
-        Collection<URL> libraryUrls = new HashSet<URL>();
+        Collection<URL> libraryUrls = new HashSet<>();
         String namespace = libraryNamespace.toString();
 
         for (String fileHint : ((fileHints == null) ? new String[0] : fileHints)) {
@@ -297,7 +297,7 @@ public class DefaultLibraryNamespaceResolver implements LibraryNamespaceResolver
             try {
                 String contextFolderPath = getContextFolderUrl();
 
-                if ((contextFolderPath != null) && (filePath != null)) {
+                if (contextFolderPath != null) {
                     referencedUrl = new URL(new StringBuilder(getContextFolderUrl()).append(
                             filePath).toString());
                 }
@@ -342,7 +342,7 @@ public class DefaultLibraryNamespaceResolver implements LibraryNamespaceResolver
 
         if ((repositoryManager != null) && (versionScheme != null)) {
             RepositoryItemImpl repositoryItem = new RepositoryItemImpl();
-            List<Repository> repositories = new ArrayList<Repository>();
+            List<Repository> repositories = new ArrayList<>();
 
             repositories.addAll(repositoryManager.listRemoteRepositories());
             repositories.add(repositoryManager); // the repository manager owns the local repository

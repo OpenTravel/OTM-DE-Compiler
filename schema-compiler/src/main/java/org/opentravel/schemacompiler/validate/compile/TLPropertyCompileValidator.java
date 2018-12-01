@@ -207,8 +207,7 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
         // belongs to a built-in library since it cannot be edited to add aliases).
         if (propertyType != null) {
             TLPropertyType resolvedPropertyType = (target.getOwner() == null) ? propertyType
-                    : PropertyCodegenUtils.resolvePropertyType(target.getOwner(),
-                            propertyType);
+                    : PropertyCodegenUtils.resolvePropertyType(propertyType);
 
             if (PropertyCodegenUtils.hasGlobalElement(resolvedPropertyType)) {
             	QName referencedQName = PropertyCodegenUtils.getDefaultXmlElementName(

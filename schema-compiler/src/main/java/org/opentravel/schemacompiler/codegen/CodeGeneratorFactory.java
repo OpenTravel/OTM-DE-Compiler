@@ -42,7 +42,7 @@ public final class CodeGeneratorFactory {
     private static final String FACTORY_NAME = "codeGeneratorFactory";
     private static final Pattern whitespacePattern = Pattern.compile("\\s+");
 
-    private Map<String, CodeGeneratorMapping> targetFormatMappings = new HashMap<String, CodeGeneratorMapping>();
+    private Map<String,CodeGeneratorMapping> targetFormatMappings = new HashMap<>();
 
     /**
      * Default constructor (private).

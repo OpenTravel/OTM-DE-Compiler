@@ -60,43 +60,39 @@ public class XsdLegacySchemaCodeGenerator extends AbstractCodeGenerator<XSDLibra
     @Override
     public void doGenerateOutput(XSDLibrary source, CodeGenerationContext context)
             throws CodeGenerationException {
-        BufferedReader reader = null;
-        BufferedWriter writer = null;
-        try {
+        try (BufferedReader reader = getContentReader( source.getLibraryUrl() )) {
             File outputFile = getOutputFile(source, context);
             String line = null;
 
-            if (URLUtils.isFileURL(source.getLibraryUrl())) {
-                reader = new BufferedReader(new FileReader(URLUtils.toFile(source.getLibraryUrl())));
-            } else {
-                reader = new BufferedReader(new InputStreamReader(source.getLibraryUrl()
-                        .openStream()));
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {
+                while ((line = reader.readLine()) != null) {
+                    writer.write(line);
+                    writer.write(LINE_SEPARATOR);
+                }
+                addGeneratedFile(outputFile);
             }
-            writer = new BufferedWriter(new FileWriter(outputFile));
-
-            while ((line = reader.readLine()) != null) {
-                writer.write(line);
-                writer.write(LINE_SEPARATOR);
-            }
-            addGeneratedFile(outputFile);
 
         } catch (IOException e) {
             throw new CodeGenerationException(e);
-
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (Throwable t) {
-                }
-            }
-            if (writer != null) {
-                try {
-                    writer.close();
-                } catch (Throwable t) {
-                }
-            }
         }
+    }
+    
+    /**
+     * Returns a buffered reader to read content from the given URL.
+     * 
+     * @param contentUrl  the URL for which to return a reader
+     * @return BufferedReader
+     * @throws IOException  thrown if an error occurs while creating the reader
+     */
+    private BufferedReader getContentReader(URL contentUrl) throws IOException {
+    	BufferedReader reader;
+    	
+        if (URLUtils.isFileURL(contentUrl)) {
+            reader = new BufferedReader(new FileReader(URLUtils.toFile(contentUrl)));
+        } else {
+            reader = new BufferedReader(new InputStreamReader(contentUrl.openStream()));
+        }
+    	return reader;
     }
 
     /**
@@ -158,7 +154,7 @@ public class XsdLegacySchemaCodeGenerator extends AbstractCodeGenerator<XSDLibra
      */
     @Override
     protected CodeGenerationFilenameBuilder<XSDLibrary> getDefaultFilenameBuilder() {
-        return new LibraryFilenameBuilder<XSDLibrary>();
+        return new LibraryFilenameBuilder<>();
     }
 
 }

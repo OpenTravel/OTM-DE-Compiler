@@ -179,7 +179,7 @@ public abstract class DerivedChildEntityListManager<E, D> {
      */
     private class DerivedEntityComparator implements Comparator<D> {
 
-        private Map<D, Integer> derivedEntityPositions = new HashMap<D, Integer>();
+        private Map<D,Integer> derivedEntityPositions = new HashMap<>();
 
         /**
          * Constructor used to initialize the comparator with the relative positions of the original

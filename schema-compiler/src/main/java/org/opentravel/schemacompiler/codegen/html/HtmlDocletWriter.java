@@ -212,7 +212,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 				+ DocletConstants.NL;
 		Content scriptContent = new RawHtml(scriptCode);
 		script.addContent(scriptContent);
-		Content div = HtmlTree.DIV(script);
+		Content div = HtmlTree.div(script);
 		return div;
 	}
 
@@ -307,10 +307,10 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 		head.addContent(headComment);
 		head.addContent(getTitle());
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		Content meta = HtmlTree.META("date", dateFormat.format(new Date()));
+		Content meta = HtmlTree.meta("date", dateFormat.format(new Date()));
 		head.addContent(meta);
 		head.addContent(getStyleSheetProperties());
-		Content htmlTree = HtmlTree.HTML(configuration.getLocale()
+		Content htmlTree = HtmlTree.html(configuration.getLocale()
 				.getLanguage(), head, body);
 		Content script = getJQueryScript();
 		htmlTree.addContent(script);
@@ -402,13 +402,13 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 		}
 		navDiv.addContent(navList);
 		body.addContent(navDiv);
-		Content ulNav = HtmlTree.UL(HtmlStyle.navList, getNavLinkPrevious());
+		Content ulNav = HtmlTree.ul(HtmlStyle.navList, getNavLinkPrevious());
 		ulNav.addContent(getNavLinkNext());
-		Content subDiv = HtmlTree.DIV(HtmlStyle.subNav, ulNav);
-		Content ulFrames = HtmlTree.UL(HtmlStyle.navList, getNavShowLists());
+		Content subDiv = HtmlTree.div(HtmlStyle.subNav, ulNav);
+		Content ulFrames = HtmlTree.ul(HtmlStyle.navList, getNavShowLists());
 		ulFrames.addContent(getNavHideLists(filename));
 		subDiv.addContent(ulFrames);
-		HtmlTree ulAllClasses = HtmlTree.UL(HtmlStyle.navList,
+		HtmlTree ulAllClasses = HtmlTree.ul(HtmlStyle.navList,
 				getNavLinkClassIndex());
 		ulAllClasses.addAttr(HtmlAttr.ID, allClassesId.toString());
 		subDiv.addContent(ulAllClasses);
@@ -454,7 +454,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	protected Content getNavLinkContents() {
 		Content linkContent = getHyperLink(relativePath
 				+ "overview-summary.html", "", overviewLabel, "", "");
-		Content li = HtmlTree.LI(linkContent);
+		Content li = HtmlTree.li(linkContent);
 		return li;
 	}
 
@@ -467,7 +467,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	 */
 	protected Content getNavLinkLibrary(String ns) {
 		Content linkContent = getLibraryLink(ns, libraryLabel);
-		Content li = HtmlTree.LI(linkContent);
+		Content li = HtmlTree.li(linkContent);
 		return li;
 	}
 
@@ -477,7 +477,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	 * @return a content tree for the link
 	 */
 	protected Content getNavLinkLibrary() {
-		Content li = HtmlTree.LI(libraryLabel);
+		Content li = HtmlTree.li(libraryLabel);
 		return li;
 	}
 
@@ -488,7 +488,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	 * @return a content tree for the link
 	 */
 	protected Content getNavLinkClassUse() {
-		Content li = HtmlTree.LI(useLabel);
+		Content li = HtmlTree.li(useLabel);
 		return li;
 	}
 
@@ -503,9 +503,9 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	public Content getNavLinkPrevious(String prev) {
 		Content li;
 		if (prev != null) {
-			li = HtmlTree.LI(getHyperLink(prev, "", prevLabel, "", ""));
+			li = HtmlTree.li(getHyperLink(prev, "", prevLabel, "", ""));
 		} else
-			li = HtmlTree.LI(prevLabel);
+			li = HtmlTree.li(prevLabel);
 		return li;
 	}
 
@@ -520,9 +520,9 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	public Content getNavLinkNext(String next) {
 		Content li;
 		if (next != null) {
-			li = HtmlTree.LI(getHyperLink(next, "", nextLabel, "", ""));
+			li = HtmlTree.li(getHyperLink(next, "", nextLabel, "", ""));
 		} else
-			li = HtmlTree.LI(nextLabel);
+			li = HtmlTree.li(nextLabel);
 		return li;
 	}
 
@@ -536,7 +536,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	protected Content getNavShowLists(String link) {
 		Content framesContent = getHyperLink(link + "?" + path + filename, "",
 				framesLabel, "", "_top");
-		Content li = HtmlTree.LI(framesContent);
+		Content li = HtmlTree.li(framesContent);
 		return li;
 	}
 
@@ -561,7 +561,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	protected Content getNavHideLists(String link) {
 		Content noFramesContent = getHyperLink(link, "", noframesLabel, "",
 				"_top");
-		Content li = HtmlTree.LI(noFramesContent);
+		Content li = HtmlTree.li(noFramesContent);
 		return li;
 	}
 
@@ -578,7 +578,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 		Content treeLinkContent;
 		treeLinkContent = getHyperLink(relativePath + "overview-tree.html", "",
 				treeLabel, "", "");
-		Content li = HtmlTree.LI(treeLinkContent);
+		Content li = HtmlTree.li(treeLinkContent);
 		return li;
 	}
 
@@ -592,7 +592,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	protected Content getNavLinkMainTree(String label) {
 		Content mainTreeContent = getHyperLink(relativePath
 				+ "overview-tree.html", new StringContent(label));
-		Content li = HtmlTree.LI(mainTreeContent);
+		Content li = HtmlTree.li(mainTreeContent);
 		return li;
 	}
 
@@ -603,7 +603,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	 * @return a content tree for the link
 	 */
 	protected Content getNavLinkObject() {
-		Content li = HtmlTree.LI(objectLabel);
+		Content li = HtmlTree.li(objectLabel);
 		return li;
 	}
 
@@ -656,7 +656,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 		}
 		Content linkContent = getHyperLink(relativePath + helpfilenm, "",
 				helpLabel, "", "");
-		Content li = HtmlTree.LI(linkContent);
+		Content li = HtmlTree.li(linkContent);
 		return li;
 	}
 	
@@ -675,19 +675,19 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 		Content tableHeader;
 		if (size == 1) {
 			tableHeader = new StringContent(header[0]);
-			tr.addContent(HtmlTree.TH(HtmlStyle.colOne, scope, tableHeader));
+			tr.addContent(HtmlTree.th(HtmlStyle.colOne, scope, tableHeader));
 			return tr;
 		}
 		for (int i = 0; i < size; i++) {
 			tableHeader = new StringContent(header[i]);
 			if (i == 0)
-				tr.addContent(HtmlTree.TH(HtmlStyle.colFirst, scope,
+				tr.addContent(HtmlTree.th(HtmlStyle.colFirst, scope,
 						tableHeader));
 			else if (i == (size - 1))
 				tr.addContent(HtmlTree
-						.TH(HtmlStyle.colLast, scope, tableHeader));
+						.th(HtmlStyle.colLast, scope, tableHeader));
 			else
-				tr.addContent(HtmlTree.TH(scope, tableHeader));
+				tr.addContent(HtmlTree.th(scope, tableHeader));
 		}
 		return tr;
 	}
@@ -701,10 +701,10 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	 */
 	public Content getTableCaption(String rawText) {
 		Content title = new RawHtml(rawText);
-		Content captionSpan = HtmlTree.SPAN(title);
+		Content captionSpan = HtmlTree.span(title);
 		Content space = getSpace();
-		Content tabSpan = HtmlTree.SPAN(HtmlStyle.tabEnd, space);
-		Content caption = HtmlTree.CAPTION(captionSpan);
+		Content tabSpan = HtmlTree.span(HtmlStyle.tabEnd, space);
+		Content caption = HtmlTree.caption(captionSpan);
 		caption.addContent(tabSpan);
 		return caption;
 	}
@@ -732,7 +732,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	public Content getMarkerAnchor(String anchorName, Content anchorContent) {
 		if (anchorContent == null)
 			anchorContent = new Comment(" ");
-		Content markerAnchor = HtmlTree.A_NAME(anchorName, anchorContent);
+		Content markerAnchor = HtmlTree.aName(anchorName, anchorContent);
 		return markerAnchor;
 	}
 
@@ -1561,11 +1561,11 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 		Content div;
 		Content result = new RawHtml(comment);
 		if (depr) {
-			Content italic = HtmlTree.I(result);
-			div = HtmlTree.DIV(HtmlStyle.block, italic);
+			Content italic = HtmlTree.i(result);
+			div = HtmlTree.div(HtmlStyle.block, italic);
 			htmltree.addContent(div);
 		} else {
-			div = HtmlTree.DIV(HtmlStyle.block, result);
+			div = HtmlTree.div(HtmlStyle.block, result);
 			htmltree.addContent(div);
 		}
 		if (comment.length() == 0) {
@@ -1652,7 +1652,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 			filename = HtmlDoclet.DEFAULT_STYLESHEET;
 		}
 		filename = relativePath + filename;
-		HtmlTree link = HtmlTree.LINK("stylesheet", "text/css", filename,
+		HtmlTree link = HtmlTree.link("stylesheet", "text/css", filename,
 				"Style");
 		return link;
 	}

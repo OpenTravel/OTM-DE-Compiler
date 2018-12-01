@@ -30,7 +30,7 @@ import org.opentravel.schemacompiler.transform.PrefixResolver;
  */
 public class JaxbLibraryPrefixResolver implements PrefixResolver {
 
-    private Map<String, String> prefixMappings = new HashMap<String, String>();
+    private Map<String,String> prefixMappings = new HashMap<>();
     private String localNamespace;
 
     /**

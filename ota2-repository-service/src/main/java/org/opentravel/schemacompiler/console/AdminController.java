@@ -76,8 +76,8 @@ public class AdminController extends BaseController {
                     .getSearchIndexLocation(), getRepositoryManager());
             searchService = FreeTextSearchServiceFactory.getInstance();
 
-        } catch (Throwable t) {
-            log.error("Error initializing the free-text search service.", t);
+        } catch (Exception e) {
+            log.error("Error initializing the free-text search service.", e);
         }
     }
 
@@ -92,8 +92,10 @@ public class AdminController extends BaseController {
     @RequestMapping({ "/adminHome.html", "/adminHome.htm" })
     public String adminHomePage(HttpSession session, Model model, RedirectAttributes redirectAttrs) {
     	String homeRedirect = checkAdminAccess( session, redirectAttrs );
-    	if (homeRedirect != null) return homeRedirect;
-    	
+        
+    	if (homeRedirect != null) {
+    		return homeRedirect;
+    	}
         return applyCommonValues(session, model, "adminHome");
     }
 
@@ -111,10 +113,13 @@ public class AdminController extends BaseController {
             @RequestParam(value = "displayName", required = false) String displayName,
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
     	String homeRedirect = checkAdminAccess( session, redirectAttrs );
-    	if (homeRedirect != null) return homeRedirect;
         RepositoryManager repositoryManager = getRepositoryManager();
         String targetPage = null;
 
+    	if (homeRedirect != null) {
+    		return homeRedirect;
+    	}
+    	
         if ((displayName != null) && (displayName.length() > 0)) {
             String repositoryId = repositoryManager.getId();
 
@@ -157,8 +162,12 @@ public class AdminController extends BaseController {
             @RequestParam(value = "action", required = false) String formAction,
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
     	String homeRedirect = checkAdminAccess( session, redirectAttrs );
-    	if (homeRedirect != null) return homeRedirect;
         String targetPage = null;
+        
+    	if (homeRedirect != null) {
+    		return homeRedirect;
+    	}
+    	
         try {
             UserPrincipal user = getCurrentUser(session);
 
@@ -193,7 +202,7 @@ public class AdminController extends BaseController {
         }
 
         if (targetPage == null) {
-            List<NamespaceItem> rootNamespaceItems = new ArrayList<NamespaceItem>();
+            List<NamespaceItem> rootNamespaceItems = new ArrayList<>();
 
             try {
                 for (String rootNS : getRepositoryManager().listRootNamespaces()) {
@@ -227,7 +236,11 @@ public class AdminController extends BaseController {
             @RequestParam(value = "namespace", required = false) String baseNamespace,
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
     	String homeRedirect = checkAdminAccess( session, redirectAttrs );
-    	if (homeRedirect != null) return homeRedirect;
+    	
+    	if (homeRedirect != null) {
+    		return homeRedirect;
+    	}
+    	
         try {
             if ((baseNamespace != null) && (baseNamespace.length() == 0)) {
                 baseNamespace = null;
@@ -273,9 +286,13 @@ public class AdminController extends BaseController {
             @ModelAttribute("permissions") NamespacePermissions permissions, HttpSession session,
             Model model, RedirectAttributes redirectAttrs) {
     	String homeRedirect = checkAdminAccess( session, redirectAttrs );
-    	if (homeRedirect != null) return homeRedirect;
-        List<String> permissionOptions = new ArrayList<String>();
+        List<String> permissionOptions = new ArrayList<>();
         String targetPage = null;
+        
+    	if (homeRedirect != null) {
+    		return homeRedirect;
+    	}
+    	
         try {
             if ((baseNamespace != null) && (baseNamespace.length() == 0)) {
                 baseNamespace = null;
@@ -336,7 +353,10 @@ public class AdminController extends BaseController {
             @RequestParam(value = "namespace", required = false) String baseNamespace,
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
     	String homeRedirect = checkAdminAccess( session, redirectAttrs );
-    	if (homeRedirect != null) return homeRedirect;
+        
+    	if (homeRedirect != null) {
+    		return homeRedirect;
+    	}
     	
         if ((baseNamespace != null) && (baseNamespace.length() == 0)) {
             baseNamespace = null;
@@ -358,10 +378,13 @@ public class AdminController extends BaseController {
     @RequestMapping({ "/adminUsers.html", "/adminUsers.htm" })
     public String adminUsersPage(HttpSession session, Model model, RedirectAttributes redirectAttrs) {
     	String homeRedirect = checkAdminAccess( session, redirectAttrs );
-    	if (homeRedirect != null) return homeRedirect;
         RepositorySecurityManager securityManager = RepositoryComponentFactory.getDefault().getSecurityManager();
         List<UserPrincipal> allUsers = securityManager.getAllUsers();
         
+    	if (homeRedirect != null) {
+    		return homeRedirect;
+    	}
+    	
         model.addAttribute("userAccounts", allUsers);
         model.addAttribute("isLocalUserManagement", isLocalUserManagement());
         return applyCommonValues(session, model, "adminUsers");
@@ -392,8 +415,12 @@ public class AdminController extends BaseController {
             @RequestParam(value = "passwordConfirm", required = false) String passwordConfirm,
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
     	String homeRedirect = checkAdminAccess( session, redirectAttrs );
-    	if (homeRedirect != null) return homeRedirect;
         boolean success = false;
+        
+    	if (homeRedirect != null) {
+    		return homeRedirect;
+    	}
+    	
         try {
             if (userId != null) {
                 RepositorySecurityManager securityManager = RepositoryComponentFactory.getDefault().getSecurityManager();
@@ -467,8 +494,12 @@ public class AdminController extends BaseController {
             @RequestParam(value = "updateUser", required = false) boolean updateUser,
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
     	String homeRedirect = checkAdminAccess( session, redirectAttrs );
-    	if (homeRedirect != null) return homeRedirect;
         boolean success = false;
+        
+    	if (homeRedirect != null) {
+    		return homeRedirect;
+    	}
+    	
         try {
             RepositorySecurityManager securityManager = RepositoryComponentFactory.getDefault().getSecurityManager();
             UserPrincipal user = securityManager.getUser( userId );
@@ -539,8 +570,12 @@ public class AdminController extends BaseController {
             @RequestParam(value = "createUser", required = false) boolean createUser,
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
     	String homeRedirect = checkAdminAccess( session, redirectAttrs );
-    	if (homeRedirect != null) return homeRedirect;
         boolean success = false;
+        
+    	if (homeRedirect != null) {
+    		return homeRedirect;
+    	}
+    	
         try {
         	if (createUser && (userId != null) && (userId.length() > 0)) {
                 RepositorySecurityManager securityManager = RepositoryComponentFactory.getDefault().getSecurityManager();
@@ -595,7 +630,11 @@ public class AdminController extends BaseController {
             @RequestParam(value = "confirmDelete", required = false) boolean confirmDelete,
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
     	String homeRedirect = checkAdminAccess( session, redirectAttrs );
-    	if (homeRedirect != null) return homeRedirect;
+    	
+    	if (homeRedirect != null) {
+    		return homeRedirect;
+    	}
+    	
         try {
             if (confirmDelete) {
                 RepositorySecurityManager securityManager = RepositoryComponentFactory.getDefault().getSecurityManager();
@@ -633,8 +672,12 @@ public class AdminController extends BaseController {
             @RequestParam(value = "newPasswordConfirm", required = false) String newPasswordConfirm,
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
     	String homeRedirect = checkAdminAccess( session, redirectAttrs );
-    	if (homeRedirect != null) return homeRedirect;
         boolean success = false;
+        
+    	if (homeRedirect != null) {
+    		return homeRedirect;
+    	}
+    	
         try {
             if ((newPassword == null) && (newPasswordConfirm == null)) {
                 // no action - initial display of the form
@@ -678,11 +721,15 @@ public class AdminController extends BaseController {
     @RequestMapping({ "/adminGroups.html", "/adminGroups.htm" })
     public String adminGroupsPage(HttpSession session, Model model, RedirectAttributes redirectAttrs) {
     	String homeRedirect = checkAdminAccess( session, redirectAttrs );
-    	if (homeRedirect != null) return homeRedirect;
+        
+    	if (homeRedirect != null) {
+    		return homeRedirect;
+    	}
+    	
         try {
             RepositorySecurityManager securityManager = RepositoryComponentFactory.getDefault().getSecurityManager();
             List<UserPrincipal> allUsers = securityManager.getAllUsers();
-            List<UserGroup> allGroups = new ArrayList<UserGroup>();
+            List<UserGroup> allGroups = new ArrayList<>();
 
             for (String groupName : securityManager.getGroupNames()) {
                 allGroups.add(securityManager.getGroup(groupName));
@@ -711,13 +758,16 @@ public class AdminController extends BaseController {
             @RequestParam(value = "groupName", required = false) String groupName,
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
     	String homeRedirect = checkAdminAccess( session, redirectAttrs );
-    	if (homeRedirect != null) return homeRedirect;
         String targetPage = null;
-
+        
+    	if (homeRedirect != null) {
+    		return homeRedirect;
+    	}
+    	
         if (groupName != null) {
             try {
                 GroupAssignmentsResource groupsResource = new GroupAssignmentsResource(getRepositoryManager());
-                List<UserGroup> groupList = new ArrayList<UserGroup>();
+                List<UserGroup> groupList = new ArrayList<>();
                 List<String> groupNames = Arrays.asList(groupsResource.getGroupNames());
 
                 if (groupName.indexOf(' ') >= 0) {
@@ -768,13 +818,16 @@ public class AdminController extends BaseController {
             @RequestParam(value = "confirmDelete", required = false) boolean confirmDelete,
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
     	String homeRedirect = checkAdminAccess( session, redirectAttrs );
-    	if (homeRedirect != null) return homeRedirect;
         String targetPage = null;
 
+    	if (homeRedirect != null) {
+    		return homeRedirect;
+    	}
+    	
         if (confirmDelete) {
             try {
                 GroupAssignmentsResource groupsResource = new GroupAssignmentsResource(getRepositoryManager());
-                List<UserGroup> groupList = new ArrayList<UserGroup>();
+                List<UserGroup> groupList = new ArrayList<>();
                 List<String> groupNames = Arrays.asList(groupsResource.getGroupNames());
 
                 for (String existingGroupName : groupNames) {
@@ -820,19 +873,22 @@ public class AdminController extends BaseController {
             @RequestParam(value = "groupMembers", required = false) String groupMembers,
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
     	String homeRedirect = checkAdminAccess( session, redirectAttrs );
-    	if (homeRedirect != null) return homeRedirect;
         RepositorySecurityManager securityManager = RepositoryComponentFactory.getDefault().getSecurityManager();
         GroupAssignmentsResource groupsResource = new GroupAssignmentsResource(getRepositoryManager());
         String targetPage = null;
 
+    	if (homeRedirect != null) {
+    		return homeRedirect;
+    	}
+    	
         if (groupMembers != null) {
             try {
                 List<String> groupNames = Arrays.asList(groupsResource.getGroupNames());
-                List<UserGroup> groupList = new ArrayList<UserGroup>();
+                List<UserGroup> groupList = new ArrayList<>();
 
                 for (String existingGroupName : groupNames) {
                     if (existingGroupName.equals(groupName)) {
-                        List<String> memberIds = new ArrayList<String>();
+                        List<String> memberIds = new ArrayList<>();
 
                         for (String memberId : groupMembers.split(",")) {
                             if ((memberId != null) && (memberId.length() > 0)) {
@@ -933,9 +989,12 @@ public class AdminController extends BaseController {
             @RequestParam(value = "confirmDelete", required = false) boolean confirmDeletion,
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
     	String homeRedirect = checkAdminAccess( session, redirectAttrs );
-    	if (homeRedirect != null) return homeRedirect;
         String targetPage = null;
 
+    	if (homeRedirect != null) {
+    		return homeRedirect;
+    	}
+    	
         if (confirmDeletion) {
             try {
                 UserPrincipal user = getCurrentUser(session);
@@ -1008,8 +1067,11 @@ public class AdminController extends BaseController {
             @RequestParam(value = "confirmPromote", required = false) boolean confirmPromote,
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
     	String homeRedirect = checkAdminAccess( session, redirectAttrs );
-    	if (homeRedirect != null) return homeRedirect;
         String targetPage = null;
+        
+    	if (homeRedirect != null) {
+    		return homeRedirect;
+    	}
 
         if (confirmPromote) {
             try {
@@ -1080,9 +1142,12 @@ public class AdminController extends BaseController {
             @RequestParam(value = "confirmDemote", required = false) boolean confirmDemote,
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
     	String homeRedirect = checkAdminAccess( session, redirectAttrs );
-    	if (homeRedirect != null) return homeRedirect;
         String targetPage = null;
-
+        
+    	if (homeRedirect != null) {
+    		return homeRedirect;
+    	}
+    	
         if (confirmDemote) {
             try {
                 UserPrincipal user = getCurrentUser(session);
@@ -1152,9 +1217,12 @@ public class AdminController extends BaseController {
             @RequestParam(value = "confirmUnlock", required = false) boolean confirmUnlock,
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
     	String homeRedirect = checkAdminAccess( session, redirectAttrs );
-    	if (homeRedirect != null) return homeRedirect;
         String targetPage = null;
 
+    	if (homeRedirect != null) {
+    		return homeRedirect;
+    	}
+    	
         if (confirmUnlock) {
             try {
                 UserPrincipal user = getCurrentUser(session);
@@ -1223,9 +1291,12 @@ public class AdminController extends BaseController {
             @RequestParam(value = "confirmRecalculate", required = false) boolean confirmRecalculate,
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
     	String homeRedirect = checkAdminAccess( session, redirectAttrs );
-    	if (homeRedirect != null) return homeRedirect;
         String targetPage = null;
-
+        
+    	if (homeRedirect != null) {
+    		return homeRedirect;
+    	}
+    	
         if (confirmRecalculate) {
             try {
                 UserPrincipal user = getCurrentUser(session);

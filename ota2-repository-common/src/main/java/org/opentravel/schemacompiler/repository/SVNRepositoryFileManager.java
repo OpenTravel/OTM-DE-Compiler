@@ -63,8 +63,8 @@ public class SVNRepositoryFileManager extends RepositoryFileManager {
     private static Log log = LogFactory.getLog(SVNRepositoryFileManager.class);
 
     private ThreadLocal<Set<File>> svnChangeSet = new ThreadLocal<Set<File>>() {
-        protected Set<File> initialValue() {
-            return new HashSet<File>();
+        @Override protected Set<File> initialValue() {
+            return new HashSet<>();
         }
     };
 
@@ -390,7 +390,7 @@ public class SVNRepositoryFileManager extends RepositoryFileManager {
      */
     private class RepositorySVNEventHandler implements ISVNEventHandler {
 
-        private Map<SVNEventAction, String> eventDisplayLabels = new HashMap<SVNEventAction, String>();
+        private Map<SVNEventAction,String> eventDisplayLabels = new HashMap<>();
 
         /**
          * @see org.tmatesoft.svn.core.wc.ISVNEventHandler#handleEvent(org.tmatesoft.svn.core.wc.SVNEvent, double)

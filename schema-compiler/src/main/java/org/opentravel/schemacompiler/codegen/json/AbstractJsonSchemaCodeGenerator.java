@@ -64,7 +64,7 @@ public abstract class AbstractJsonSchemaCodeGenerator<S extends TLModelElement> 
     
     private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
     
-    private List<SchemaDeclaration> compileTimeDependencies = new ArrayList<SchemaDeclaration>();
+    private List<SchemaDeclaration> compileTimeDependencies = new ArrayList<>();
     private TransformerFactory<CodeGenerationTransformerContext> transformerFactory;
 
     /**
@@ -82,19 +82,16 @@ public abstract class AbstractJsonSchemaCodeGenerator<S extends TLModelElement> 
     @Override
     public void doGenerateOutput(S source, CodeGenerationContext context)
             throws CodeGenerationException {
-        Writer out = null;
-        try {
+        File outputFile = getOutputFile(source, context);
+        
+        try (Writer out = new FileWriter(outputFile)) {
             JsonSchema jsonSchema = transformSourceObjectToJsonSchema(source, context);
             JsonObject jsonDocument = jsonSchema.toJson();
-            File outputFile = getOutputFile(source, context);
             
             if (context.getBooleanValue( CodeGenerationContext.CK_SUPRESS_OTM_EXTENSIONS )) {
             	JsonSchemaCodegenUtils.stripOtmExtensions( jsonDocument );
             }
-            out = new FileWriter(outputFile);
             gson.toJson( jsonDocument, out );
-            out.close();
-            out = null;
 
             // Finish up by copying any dependencies that were identified during code generation
             if (context.getBooleanValue(CodeGenerationContext.CK_COPY_COMPILE_TIME_DEPENDENCIES)) {
@@ -102,16 +99,8 @@ public abstract class AbstractJsonSchemaCodeGenerator<S extends TLModelElement> 
             }
             addGeneratedFile(outputFile);
 
-        } catch (Throwable t) {
-            throw new CodeGenerationException(t);
-
-        } finally {
-            try {
-                if (out != null) {
-                    out.close();
-                }
-            } catch (Throwable t) {
-            }
+        } catch (Exception e) {
+            throw new CodeGenerationException(e);
         }
     }
     
@@ -272,8 +261,7 @@ public abstract class AbstractJsonSchemaCodeGenerator<S extends TLModelElement> 
      */
     public Collection<SchemaDeclaration> getCompileTimeDependencies() {
         ApplicationContext appContext = SchemaCompilerApplicationContext.getContext();
-        Collection<SchemaDeclaration> dependencies = new ArrayList<SchemaDeclaration>(
-                compileTimeDependencies);
+        Collection<SchemaDeclaration> dependencies = new ArrayList<>(compileTimeDependencies);
 
         for (SchemaDeclaration dependency : compileTimeDependencies) {
             resolveIndirectDependencies(dependency.getDependencies(), appContext, dependencies);

@@ -87,7 +87,7 @@ public class DocumentationTransformer extends
      * @return List<String>
      */
     private List<String> trimDescriptionStrings(List<Description> descriptions) {
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
 
         if (descriptions != null) {
             for (Description desc : descriptions) {

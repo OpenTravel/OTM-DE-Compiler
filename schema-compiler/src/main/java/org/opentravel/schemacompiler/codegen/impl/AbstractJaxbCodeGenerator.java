@@ -61,7 +61,7 @@ public abstract class AbstractJaxbCodeGenerator<S extends ModelElement> extends
 
     private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
-    private List<SchemaDeclaration> compileTimeDependencies = new ArrayList<SchemaDeclaration>();
+    private List<SchemaDeclaration> compileTimeDependencies = new ArrayList<>();
 
     /**
      * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#doGenerateOutput(java.lang.Object,
@@ -70,18 +70,15 @@ public abstract class AbstractJaxbCodeGenerator<S extends ModelElement> extends
     @Override
     public void doGenerateOutput(S source, CodeGenerationContext context)
             throws CodeGenerationException {
-        OutputStream out = null;
-        try {
+        File outputFile = getOutputFile(source, context);
+        
+        try (OutputStream out = new FileOutputStream(outputFile)){
             Object jaxbObject = transformSourceObjectToJaxb(source, context);
             Marshaller marshaller = getMarshaller(source, getJaxbSchema(jaxbObject));
             Document domDocument = XMLPrettyPrinter.newDocument();
-            File outputFile = getOutputFile(source, context);
 
             marshaller.marshal(jaxbObject, domDocument);
-            out = new FileOutputStream(outputFile);
             new XMLPrettyPrinter(getLineBreakProcessor()).formatDocument(domDocument, out);
-            out.close();
-            out = null;
 
             // Finish up by copying any dependencies that were identified during code generation
             if (context.getBooleanValue(CodeGenerationContext.CK_COPY_COMPILE_TIME_DEPENDENCIES)) {
@@ -89,16 +86,8 @@ public abstract class AbstractJaxbCodeGenerator<S extends ModelElement> extends
             }
             addGeneratedFile(outputFile);
 
-        } catch (Throwable t) {
-            throw new CodeGenerationException(t);
-
-        } finally {
-            try {
-                if (out != null) {
-                    out.close();
-                }
-            } catch (Throwable t) {
-            }
+        } catch (Exception e) {
+            throw new CodeGenerationException(e);
         }
     }
 
@@ -225,8 +214,7 @@ public abstract class AbstractJaxbCodeGenerator<S extends ModelElement> extends
      */
     public Collection<SchemaDeclaration> getCompileTimeDependencies() {
         ApplicationContext appContext = SchemaCompilerApplicationContext.getContext();
-        Collection<SchemaDeclaration> dependencies = new ArrayList<SchemaDeclaration>(
-                compileTimeDependencies);
+        Collection<SchemaDeclaration> dependencies = new ArrayList<>(compileTimeDependencies);
 
         for (SchemaDeclaration dependency : compileTimeDependencies) {
             resolveIndirectDependencies(dependency.getDependencies(), appContext, dependencies);

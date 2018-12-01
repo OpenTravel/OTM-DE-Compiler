@@ -32,7 +32,7 @@ public class VersionSchemeFactory {
 
     private static final String FACTORY_NAME = "versionSchemeFactory";
 
-    private Map<String, Class<?>> versionSchemeMappings = new HashMap<String, Class<?>>();
+    private Map<String,Class<?>> versionSchemeMappings = new HashMap<>();
     private String defaultVersionScheme;
 
     /**
@@ -48,9 +48,8 @@ public class VersionSchemeFactory {
      */
     public static VersionSchemeFactory getInstance() {
         ApplicationContext appContext = SchemaCompilerApplicationContext.getContext();
-        VersionSchemeFactory factory = (VersionSchemeFactory) appContext.getBean(FACTORY_NAME);
-
-        return factory;
+        
+        return (VersionSchemeFactory) appContext.getBean(FACTORY_NAME);
     }
 
     /**
@@ -75,10 +74,10 @@ public class VersionSchemeFactory {
             try {
                 versionScheme = versionSchemeClass.newInstance();
 
-            } catch (Throwable t) {
+            } catch (Exception e) {
                 throw new VersionSchemeException(
                         "Error instantiating version scheme implementation class: "
-                                + versionSchemeClass.getName(), t);
+                                + versionSchemeClass.getName(), e);
             }
         } else {
             throw new VersionSchemeException("Unknown version scheme identifier: "

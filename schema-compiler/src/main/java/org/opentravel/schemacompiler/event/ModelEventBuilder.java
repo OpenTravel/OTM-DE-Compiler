@@ -54,14 +54,14 @@ public class ModelEventBuilder {
         ModelEvent<?> modelEvent = null;
 
         if (eventType.getEventClass().equals(OwnershipEvent.class) && (affectedItem != null)) {
-            OwnershipEvent<Object, Object> event = new OwnershipEvent<Object, Object>(eventType,
+            OwnershipEvent<Object, Object> event = new OwnershipEvent<>(eventType,
                     sourceObject);
 
             event.setAffectedItem(affectedItem);
             modelEvent = event;
 
         } else if (eventType.getEventClass().equals(ValueChangeEvent.class)) {
-            ValueChangeEvent<Object, Object> event = new ValueChangeEvent<Object, Object>(
+            ValueChangeEvent<Object, Object> event = new ValueChangeEvent<>(
                     eventType, sourceObject);
 
             event.setOldValue(oldValue);

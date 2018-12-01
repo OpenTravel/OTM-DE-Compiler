@@ -40,8 +40,8 @@ public class ValidationFindings implements Serializable {
 
 	private static final long serialVersionUID = -7081558490066747720L;
 	
-	private Collection<ValidationFinding> allFindings = new TreeSet<ValidationFinding>();
-    private Map<Validatable, List<String>> messageKeysBySourceObject = new HashMap<Validatable, List<String>>();
+	private Collection<ValidationFinding> allFindings = new TreeSet<>();
+    private Map<Validatable,List<String>> messageKeysBySourceObject = new HashMap<>();
 
     /**
      * Returns true if no findings have been added to this collection.
@@ -213,7 +213,7 @@ public class ValidationFindings implements Serializable {
                     messageParams);
 
             if (messageKeys == null) {
-                messageKeys = new ArrayList<String>();
+                messageKeys = new ArrayList<>();
                 messageKeysBySourceObject.put(source, messageKeys);
             }
             messageKeys.add(messageKey);
@@ -234,7 +234,7 @@ public class ValidationFindings implements Serializable {
 
                 if ((messageKeys == null) || !messageKeys.contains(otherMessage.getMessageKey())) {
                     if (messageKeys == null) {
-                        messageKeys = new ArrayList<String>();
+                        messageKeys = new ArrayList<>();
                         messageKeysBySourceObject.put(otherMessage.getSource(), messageKeys);
                     }
                     messageKeys.add(otherMessage.getMessageKey());
@@ -250,7 +250,7 @@ public class ValidationFindings implements Serializable {
      * @return List<ValidationFinding>
      */
     public List<ValidationFinding> getAllFindingsAsList() {
-        List<ValidationFinding> findings = new ArrayList<ValidationFinding>();
+        List<ValidationFinding> findings = new ArrayList<>();
 
         findings.addAll(allFindings);
         return findings;
@@ -265,7 +265,7 @@ public class ValidationFindings implements Serializable {
      * @return List<ValidationFinding>
      */
     public List<ValidationFinding> getFindingsAsList(Validatable source) {
-        List<ValidationFinding> findings = new ArrayList<ValidationFinding>();
+        List<ValidationFinding> findings = new ArrayList<>();
 
         for (ValidationFinding finding : allFindings) {
             if (finding.getSource() == source) {
@@ -284,7 +284,7 @@ public class ValidationFindings implements Serializable {
      * @return List<ValidationFinding>
      */
     public List<ValidationFinding> getFindingsAsList(FindingType type) {
-        List<ValidationFinding> findings = new ArrayList<ValidationFinding>();
+        List<ValidationFinding> findings = new ArrayList<>();
 
         for (ValidationFinding finding : allFindings) {
             if (finding.getType() == type) {
@@ -305,7 +305,7 @@ public class ValidationFindings implements Serializable {
      * @return List<ValidationFinding>
      */
     public List<ValidationFinding> getFindingsAsList(Validatable source, FindingType type) {
-        List<ValidationFinding> findings = new ArrayList<ValidationFinding>();
+        List<ValidationFinding> findings = new ArrayList<>();
 
         for (ValidationFinding finding : allFindings) {
             if ((finding.getSource() == source) && (finding.getType() == type)) {
@@ -334,7 +334,7 @@ public class ValidationFindings implements Serializable {
      * @return String[]
      */
     public String[] getAllValidationMessages(FindingMessageFormat format) {
-        List<String> messageList = new ArrayList<String>();
+        List<String> messageList = new ArrayList<>();
 
         for (ValidationFinding finding : allFindings) {
             messageList.add(finding.getFormattedMessage(format));
@@ -356,7 +356,7 @@ public class ValidationFindings implements Serializable {
      * @return String[]
      */
     public String[] getValidationMessages(Validatable source, FindingMessageFormat format) {
-        List<String> messageList = new ArrayList<String>();
+        List<String> messageList = new ArrayList<>();
 
         for (ValidationFinding finding : allFindings) {
             if (finding.getSource() == source) {
@@ -382,7 +382,7 @@ public class ValidationFindings implements Serializable {
      * @return String[]
      */
     public String[] getValidationMessages(FindingType type, FindingMessageFormat format) {
-        List<String> messageList = new ArrayList<String>();
+        List<String> messageList = new ArrayList<>();
 
         for (ValidationFinding finding : allFindings) {
             if (finding.getType() == type) {
@@ -412,7 +412,7 @@ public class ValidationFindings implements Serializable {
      */
     public String[] getValidationMessages(Validatable source, FindingType type,
             FindingMessageFormat format) {
-        List<String> messageList = new ArrayList<String>();
+        List<String> messageList = new ArrayList<>();
 
         for (ValidationFinding finding : allFindings) {
             if ((finding.getSource() == source) && (finding.getType() == type)) {

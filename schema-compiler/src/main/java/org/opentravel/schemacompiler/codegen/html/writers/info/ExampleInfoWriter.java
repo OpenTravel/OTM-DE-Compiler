@@ -74,7 +74,7 @@ public class ExampleInfoWriter extends
 	protected Content getExampleHeader(String labelKey) {
 		Content header = new HtmlTree(HtmlTag.DIV);
 		Content label = writer.getResource(("doclet.Example_" + labelKey));
-		HtmlTree labelHeading = HtmlTree.HEADING(
+		HtmlTree labelHeading = HtmlTree.heading(
 				HtmlConstants.INHERITED_SUMMARY_HEADING, label);
 		addCollapseTrigger(labelHeading, "example" + labelKey, labelKey);
 		header.addContent(labelHeading);
@@ -85,7 +85,7 @@ public class ExampleInfoWriter extends
 		exampleTree.addContent(getExampleHeader(labelKey));
 		HtmlTree pre = new HtmlTree(HtmlTag.PRE);
 		pre.addContent(example);
-		HtmlTree exampleDiv = HtmlTree.DIV(pre);
+		HtmlTree exampleDiv = HtmlTree.div(pre);
 		makeCollapsible(exampleDiv, "example" + labelKey);
 		exampleTree.addContent(exampleDiv);
 	}

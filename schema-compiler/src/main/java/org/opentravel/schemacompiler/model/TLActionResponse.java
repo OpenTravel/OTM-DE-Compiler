@@ -106,7 +106,7 @@ public class TLActionResponse extends TLModelElement implements TLDocumentationO
 		ModelEvent<?> event = new ModelEventBuilder(ModelEventType.STATUS_CODES_MODIFIED, this)
 				.setOldValue(this.statusCodes).setNewValue(statusCodes).buildEvent();
 
-		this.statusCodes = (statusCodes == null) ? new ArrayList<Integer>() : statusCodes;
+		this.statusCodes = (statusCodes == null) ? new ArrayList<>() : statusCodes;
         publishEvent(event);
 	}
 
@@ -206,7 +206,7 @@ public class TLActionResponse extends TLModelElement implements TLDocumentationO
         ModelEvent<?> event = new ModelEventBuilder(ModelEventType.MIME_TYPES_MODIFIED, this)
         		.setOldValue(this.mimeTypes).setNewValue(mimeTypes).buildEvent();
 
-		this.mimeTypes = (mimeTypes == null) ? new ArrayList<TLMimeType>() : mimeTypes;
+		this.mimeTypes = (mimeTypes == null) ? new ArrayList<>() : mimeTypes;
         publishEvent(event);
 	}
 

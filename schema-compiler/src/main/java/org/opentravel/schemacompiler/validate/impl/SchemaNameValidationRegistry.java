@@ -61,10 +61,10 @@ import org.opentravel.schemacompiler.visitor.ModelNavigator;
  */
 public class SchemaNameValidationRegistry {
 
-    private Map<NamedEntity, QName> entityTypeNames = new HashMap<NamedEntity, QName>();
-    private Map<NamedEntity, Set<QName>> entityElementNames = new HashMap<NamedEntity, Set<QName>>();
-    private Map<QName, Set<NamedEntity>> typeNameEntities = new HashMap<QName, Set<NamedEntity>>();
-    private Map<QName, Set<NamedEntity>> elementNameEntities = new HashMap<QName, Set<NamedEntity>>();
+    private Map<NamedEntity,QName> entityTypeNames = new HashMap<>();
+    private Map<NamedEntity,Set<QName>> entityElementNames = new HashMap<>();
+    private Map<QName,Set<NamedEntity>> typeNameEntities = new HashMap<>();
+    private Map<QName,Set<NamedEntity>> elementNameEntities = new HashMap<>();
 
     /**
      * Constructor that initializes the registry using all <code>NamedEntity</code> symbols from the
@@ -99,7 +99,7 @@ public class SchemaNameValidationRegistry {
      * @return Collection<QName>
      */
     public Collection<QName> getSchemaElementNames(NamedEntity entity) {
-        Collection<QName> elementNames = new HashSet<QName>();
+        Collection<QName> elementNames = new HashSet<>();
 
         if (entityElementNames.containsKey(entity)) {
             elementNames.addAll(entityElementNames.get(entity));
@@ -117,7 +117,7 @@ public class SchemaNameValidationRegistry {
      * @return Collection<NamedEntity>
      */
     public Collection<NamedEntity> findEntitiesBySchemaTypeName(QName schemaTypeName) {
-        Collection<NamedEntity> entities = new HashSet<NamedEntity>();
+        Collection<NamedEntity> entities = new HashSet<>();
 
         if (entityTypeNames.containsKey(schemaTypeName)) {
             entities.addAll(typeNameEntities.get(schemaTypeName));
@@ -135,7 +135,7 @@ public class SchemaNameValidationRegistry {
      * @return Collection<NamedEntity>
      */
     public Collection<NamedEntity> findEntitiesBySchemaElementName(QName schemaElementName) {
-        Collection<NamedEntity> entities = new HashSet<NamedEntity>();
+        Collection<NamedEntity> entities = new HashSet<>();
 
         if (elementNameEntities.containsKey(schemaElementName)) {
             entities.addAll(elementNameEntities.get(schemaElementName));
@@ -207,7 +207,7 @@ public class SchemaNameValidationRegistry {
             Set<NamedEntity> registeredEntities = typeNameEntities.get(typeName);
 
             if (registeredEntities == null) {
-                registeredEntities = new HashSet<NamedEntity>();
+                registeredEntities = new HashSet<>();
                 typeNameEntities.put(typeName, registeredEntities);
             }
             registeredEntities.add(entity);
@@ -310,11 +310,11 @@ public class SchemaNameValidationRegistry {
             Set<QName> elementNames = entityElementNames.get(entity);
 
             if (registeredEntities == null) {
-                registeredEntities = new HashSet<NamedEntity>();
+                registeredEntities = new HashSet<>();
                 elementNameEntities.put(elementName, registeredEntities);
             }
             if (elementNames == null) {
-                elementNames = new HashSet<QName>();
+                elementNames = new HashSet<>();
                 entityElementNames.put(entity, elementNames);
             }
             registeredEntities.add(entity);

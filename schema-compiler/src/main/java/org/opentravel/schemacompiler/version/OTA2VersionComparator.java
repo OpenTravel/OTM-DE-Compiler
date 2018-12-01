@@ -26,7 +26,7 @@ import java.util.Map;
  */
 public class OTA2VersionComparator implements Comparator<Versioned> {
 
-    private Map<String, VersionIdentifier> identifierCache = new HashMap<String, VersionIdentifier>();
+    private Map<String,VersionIdentifier> identifierCache = new HashMap<>();
     private boolean sortAscending;
 
     /**

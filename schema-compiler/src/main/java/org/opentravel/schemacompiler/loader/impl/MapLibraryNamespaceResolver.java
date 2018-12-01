@@ -40,15 +40,9 @@ public class MapLibraryNamespaceResolver extends DefaultLibraryNamespaceResolver
             .synchronizedMap(new HashMap<URI, List<URL>>());
 
     /**
-     * Default constructor.
+     * @see org.opentravel.schemacompiler.loader.impl.DefaultLibraryNamespaceResolver#resovleLibraryImport(java.net.URI, java.lang.String, java.lang.String[])
      */
-    public MapLibraryNamespaceResolver() {
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.loader.impl.DefaultLibraryNamespaceResolver#resovleLibraryImport(java.net.URI,
-     *      java.lang.String, java.lang.String[])
-     */
+    @Override
     public Collection<URL> resovleLibraryImport(URI libraryNamespace, String versionScheme,
             String[] fileHints) {
         Collection<URL> libraryUrls;
@@ -79,7 +73,7 @@ public class MapLibraryNamespaceResolver extends DefaultLibraryNamespaceResolver
         List<URL> urlList = namespaceMappings.get(libraryNamespace);
 
         if (urlList == null) {
-            urlList = new ArrayList<URL>();
+            urlList = new ArrayList<>();
             namespaceMappings.put(libraryNamespace, urlList);
         }
         if (!urlList.contains(libraryUrl)) {
@@ -119,9 +113,8 @@ public class MapLibraryNamespaceResolver extends DefaultLibraryNamespaceResolver
      * override if an alternate base path is required.
      * 
      * @return URL
-     * @throws MalformedURLException
      */
-    protected URL getRelativeUrlBase() throws MalformedURLException {
+    protected URL getRelativeUrlBase() {
         return URLUtils.toURL(new File(System.getProperty("user.dir")));
     }
 

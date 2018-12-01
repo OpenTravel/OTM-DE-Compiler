@@ -117,37 +117,21 @@ public class XsdBuiltInCodeGenerator extends AbstractCodeGenerator<BuiltInLibrar
      */
     protected void generateXsdLibraryOutput(BuiltInLibrary source, CodeGenerationContext context)
             throws CodeGenerationException {
-        BufferedReader reader = null;
-        BufferedWriter writer = null;
-        try {
-            if (!source.getNamespace().equals(XMLConstants.W3C_XML_SCHEMA_NS_URI)) {
-                File outputFile = getOutputFile(source, context);
-                String line = null;
+        if (!source.getNamespace().equals(XMLConstants.W3C_XML_SCHEMA_NS_URI)) {
+            File outputFile = getOutputFile(source, context);
+            String line = null;
 
-                reader = new BufferedReader(new InputStreamReader(source.getSchemaDeclaration()
-                        .getContent(CodeGeneratorFactory.XSD_TARGET_FORMAT)));
-                writer = new BufferedWriter(new FileWriter(outputFile));
-
-                while ((line = reader.readLine()) != null) {
-                    writer.write(line);
-                    writer.write(LINE_SEPARATOR);
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(source.getSchemaDeclaration()
+                    .getContent(CodeGeneratorFactory.XSD_TARGET_FORMAT)))) {
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {
+                    while ((line = reader.readLine()) != null) {
+                        writer.write(line);
+                        writer.write(LINE_SEPARATOR);
+                    }
+                    addGeneratedFile(outputFile);
                 }
-                addGeneratedFile(outputFile);
-            }
-        } catch (IOException e) {
-            throw new CodeGenerationException(e);
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (Throwable t) {
-                }
-            }
-            if (writer != null) {
-                try {
-                    writer.close();
-                } catch (Throwable t) {
-                }
+            } catch (IOException e) {
+                throw new CodeGenerationException(e);
             }
         }
     }
@@ -232,7 +216,7 @@ public class XsdBuiltInCodeGenerator extends AbstractCodeGenerator<BuiltInLibrar
      */
     @Override
     protected CodeGenerationFilenameBuilder<BuiltInLibrary> getDefaultFilenameBuilder() {
-        return new LibraryFilenameBuilder<BuiltInLibrary>();
+        return new LibraryFilenameBuilder<>();
     }
 
     /**
@@ -285,7 +269,7 @@ public class XsdBuiltInCodeGenerator extends AbstractCodeGenerator<BuiltInLibrar
          */
         @Override
         protected CodeGenerationFilenameBuilder<BuiltInLibrary> getDefaultFilenameBuilder() {
-            return new LibraryFilenameBuilder<BuiltInLibrary>();
+            return new LibraryFilenameBuilder<>();
         }
 
         /**

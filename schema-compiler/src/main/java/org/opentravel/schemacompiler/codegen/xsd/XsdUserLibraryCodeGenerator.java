@@ -68,7 +68,7 @@ public class XsdUserLibraryCodeGenerator extends AbstractXsdCodeGenerator<TLLibr
      */
     @Override
     protected CodeGenerationFilenameBuilder<TLLibrary> getDefaultFilenameBuilder() {
-        return new LibraryFilenameBuilder<TLLibrary>();
+        return new LibraryFilenameBuilder<>();
     }
 
 }

@@ -130,8 +130,8 @@ public class ProjectFileUtils extends AbstractFileUtils {
                 throw new LibraryLoaderException(e.getMessage(), e);
             }
 
-        } catch (Throwable t) {
-            throw new LibraryLoaderException("Unknown error while loading project.", t);
+        } catch (Exception e) {
+            throw new LibraryLoaderException("Unknown error while loading project.", e);
 
         } finally {
             try {
@@ -224,7 +224,7 @@ public class ProjectFileUtils extends AbstractFileUtils {
     private static ProjectType convertToJaxbProject(Project project) {
         URL projectFileUrl = URLUtils.toURL(project.getProjectFile());
         ProjectItem defaultItem = project.getDefaultItem();
-        Set<String> repositoryIds = new HashSet<String>();
+        Set<String> repositoryIds = new HashSet<>();
         ProjectType jaxbProject = new ProjectType();
 
         jaxbProject.setProjectId(project.getProjectId());
@@ -308,8 +308,8 @@ public class ProjectFileUtils extends AbstractFileUtils {
      * @return List<ProjectItem>
      */
     private static List<ProjectItem> purgeImpliedManagedVersions(List<ProjectItem> projectItems) {
-        Map<ProjectItem, List<String>> itemVersionChains = new HashMap<ProjectItem, List<String>>();
-        List<ProjectItem> keepItems = new ArrayList<ProjectItem>();
+        Map<ProjectItem,List<String>> itemVersionChains = new HashMap<>();
+        List<ProjectItem> keepItems = new ArrayList<>();
 
         for (ProjectItem item : projectItems) {
             if (item.getState() == RepositoryItemState.UNMANAGED) {
@@ -365,7 +365,7 @@ public class ProjectFileUtils extends AbstractFileUtils {
 
         // Scan the original list, and assemble the final list of items that should be included in
         // project's save file
-        List<ProjectItem> result = new ArrayList<ProjectItem>();
+        List<ProjectItem> result = new ArrayList<>();
 
         for (ProjectItem item : projectItems) {
             if ((item.getState() == RepositoryItemState.UNMANAGED) || keepItems.contains(item)) {
@@ -420,8 +420,8 @@ public class ProjectFileUtils extends AbstractFileUtils {
             projectValidationSchema = schemaFactory.newSchema(new StreamSource(schemaStream));
             jaxbContext = JAXBContext.newInstance(SCHEMA_CONTEXT);
 
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

@@ -76,8 +76,8 @@ public class TLLibraryCompileValidator extends TLLibraryBaseValidator {
                 .setFindingType(FindingType.ERROR).assertContainsNoNullElements();
 
         // Validate each of the namespace imports
-        Set<String> declaredPrefixes = new HashSet<String>();
-        Set<String> duplicatePrefixes = new HashSet<String>();
+        Set<String> declaredPrefixes = new HashSet<>();
+        Set<String> duplicatePrefixes = new HashSet<>();
 
         for (TLNamespaceImport nsImport : target.getNamespaceImports()) {
             String prefix = nsImport.getPrefix();
@@ -157,7 +157,7 @@ public class TLLibraryCompileValidator extends TLLibraryBaseValidator {
      * @return Map<String,List<TLService>>
      */
     protected Map<String, List<TLService>> getAllServicesByNamespace(TLModel model) {
-        Map<String, List<TLService>> servicesByNamespace = new HashMap<String, List<TLService>>();
+        Map<String,List<TLService>> servicesByNamespace = new HashMap<>();
 
         if (model != null) {
             for (TLLibrary lib : model.getUserDefinedLibraries()) {
@@ -166,7 +166,7 @@ public class TLLibraryCompileValidator extends TLLibraryBaseValidator {
                             .getNamespace());
 
                     if (serviceList == null) {
-                        serviceList = new ArrayList<TLService>();
+                        serviceList = new ArrayList<>();
                         servicesByNamespace.put(lib.getService().getNamespace(), serviceList);
                     }
                     serviceList.add(lib.getService());

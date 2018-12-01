@@ -61,13 +61,18 @@ import org.opentravel.schemacompiler.model.TLSimpleFacet;
 public class DocumentationUtils {
 	
 	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private DocumentationUtils() {}
+	
+	/**
 	 * Returns the path for the given documentation owner within its owning library.
 	 * 
 	 * @param owner  the documentation owner for which to return a path
 	 * @return String
 	 */
 	public static String getDocumentationPath(TLDocumentationOwner owner) {
-		ModelElement currentElement = (ModelElement) owner;
+		ModelElement currentElement = owner;
 		StringBuilder docPath = new StringBuilder();
 		
 		while (currentElement != null) {
@@ -194,7 +199,7 @@ public class DocumentationUtils {
 	public static TLDocumentationOwner getDocumentationOwner(String docPath, TLLibrary library) {
 		String[] _pathParts = ((docPath == null) || (docPath.length() <= 1)) ? new String[0] : docPath.split("\\|");
 		List<String> pathParts = new ArrayList<>( Arrays.asList( _pathParts ) );
-		ModelElement currentElement = (ModelElement) library;
+		ModelElement currentElement = library;
 		TLDocumentationOwner docOwner = null;
 		
 		while ((docOwner == null) && (currentElement != null) && !pathParts.isEmpty()) {
@@ -207,7 +212,7 @@ public class DocumentationUtils {
 				} else if (pathPart.startsWith("@CONTEXT:")) {
 					docOwner = ((TLLibrary) currentElement).getContext( pathPart.substring( 9 ) );
 				} else if (pathPart.startsWith("@CONTEXTUAL:")) {
-					currentElement = (TLContextualFacet) ((TLLibrary) currentElement).getNamedMember( pathPart.substring( 12 ) );
+					currentElement = ((TLLibrary) currentElement).getNamedMember( pathPart.substring( 12 ) );
 					if (pathParts.isEmpty()) docOwner = (TLDocumentationOwner) currentElement;
 				} else {
 					currentElement = ((TLLibrary) currentElement).getNamedMember( pathPart );
@@ -274,20 +279,6 @@ public class DocumentationUtils {
 				} else {
 					currentElement = null;
 				}
-				
-			/*
-			} else if (pathPart.startsWith("@CONTEXTUAL:")) {
-				String[] facetParts = pathPart.substring( 12 ).split( ":" );
-				TLFacetType facetType = getFacetType( facetParts[0] );
-				String facetName = (facetParts.length >= 2) ? facetParts[1] : null;
-				
-				if (currentElement instanceof TLFacetOwner) {
-					currentElement = FacetCodegenUtils.getFacetOfType( (TLBusinessObject) currentElement, facetType, facetName );
-					if (pathParts.isEmpty()) docOwner = (TLDocumentationOwner) currentElement;
-				} else {
-					currentElement = null;
-				}
-			*/
 				
 			} else if (pathPart.startsWith("@FACET:")) {
 				TLFacetType facetType = getFacetType( pathPart.substring( 7 ) );

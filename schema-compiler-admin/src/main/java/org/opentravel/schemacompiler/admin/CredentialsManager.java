@@ -31,6 +31,9 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.opentravel.schemacompiler.security.PasswordHelper;
+import org.opentravel.schemacompiler.util.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Command-line utility used to perform the tasks required to manage the credentials file for a
@@ -43,10 +46,11 @@ public class CredentialsManager {
     private static final String SCRIPT_WINDOWS = "ota2credentials.bat";
     private static final String SCRIPT_BASH = "ota2credentials.sh";
 
-    private static final String SCRIPT_NAME = System.getProperty("os.name").startsWith("Windows") ? SCRIPT_WINDOWS
-            : SCRIPT_BASH;
+    private static final String SCRIPT_NAME = System.getProperty("os.name").startsWith("Windows") ? SCRIPT_WINDOWS : SCRIPT_BASH;
     private static final String SCRIPT_SYNTAX = SCRIPT_NAME + " [options] <credentials-file>";
 
+    private static final Logger log = LoggerFactory.getLogger(CredentialsManager.class);
+    
     /**
      * Main method invoked from the command-line.
      * 
@@ -81,14 +85,15 @@ public class CredentialsManager {
             } else {
                 displayHelp();
             }
-        } catch (Throwable t) {
-            Throwable rootCause = Utils.getRootCauseException(t);
+            
+        } catch (Exception e) {
+            Throwable rootCause = Utils.getRootCauseException(e);
             String errorMessage = MessageFormat.format(
                     Utils.getMessageBundle().getString("credentials.errorMessage"), ((rootCause
                             .getMessage() == null) ? rootCause.getClass().getSimpleName()
                             : rootCause.getMessage()));
 
-            System.out.println(errorMessage);
+            log.error(errorMessage);
         }
     }
 
@@ -108,74 +113,39 @@ public class CredentialsManager {
      */
     protected void updateCredentialsFile(File credentialsFile, String userId, String password,
             boolean removeUserId) throws IOException {
-        BufferedReader reader = null;
-        PrintStream out = null;
         boolean success = false;
         File backupFile = null;
 
         try {
             // Read the contents of the existing file (if one exists)
-            List<String> fileEntries = new ArrayList<String>();
-
-            if (credentialsFile.exists()) {
-                // Backup the existing file before we start
-                backupFile = Utils.createBackupFile(credentialsFile);
-
-                reader = new BufferedReader(new FileReader(credentialsFile));
-                String line;
-
-                while ((line = reader.readLine()) != null) {
-                    fileEntries.add(line);
-                }
-                reader.close();
-                reader = null;
-            }
+            List<String> fileEntries = readFileEntries(credentialsFile);
 
             // Write the contents of the file back out, making sure the appropriate action was taken
             // for the entry that corresponds to the request user ID
+            backupFile = Utils.createBackupFile(credentialsFile);
             boolean userEntryProcessed = false;
 
-            out = new PrintStream(new FileOutputStream(credentialsFile));
-
-            for (String fileEntry : fileEntries) {
-                if (fileEntry.trim().startsWith("#")) {
-                    out.println(fileEntry);
-                } else {
-                    String[] entryParts = fileEntry.split(":");
-                    String entryUserId = (entryParts.length >= 1) ? entryParts[0] : "";
-
-                    if ((entryUserId != null) && entryUserId.equals(userId)) {
-                        if (!removeUserId) {
-                            StringBuilder newEntry = new StringBuilder();
-
-                            newEntry.append(userId).append(':')
-                                    .append(PasswordHelper.encrypt(password));
-
-                            for (int i = 2; i < entryParts.length; i++) {
-                                newEntry.append(':').append(entryParts[i]);
-                            }
-                            out.println(newEntry.toString());
-                        }
-                        userEntryProcessed = true;
-
-                    } else {
+            try (PrintStream out = new PrintStream(new FileOutputStream(credentialsFile))) {
+                for (String fileEntry : fileEntries) {
+                    if (fileEntry.trim().startsWith("#")) {
                         out.println(fileEntry);
+                        
+                    } else {
+                    	String updatedEntry = processEntry(fileEntry, userId, password, removeUserId);
+                    	
+                    	if (updatedEntry != null) {
+                    		out.print(updatedEntry);
+                    	}
+                        userEntryProcessed |= (updatedEntry == null) || !fileEntry.equals(updatedEntry);
                     }
                 }
-            }
 
-            // Handle case of a new user entry
-            if (!userEntryProcessed) {
-                out.println(userId + ":" + PasswordHelper.encrypt(password));
+                // Handle case of a new user entry
+                if (!userEntryProcessed) {
+                    out.println(userId + ":" + PasswordHelper.encrypt(password));
+                }
             }
-
-            out.flush();
-            out.close();
-            out = null;
-
-            if (backupFile != null) {
-                backupFile.delete();
-            }
+            FileUtils.delete(backupFile);
             success = true;
 
         } finally {
@@ -185,22 +155,71 @@ public class CredentialsManager {
                         Utils.restoreOriginalFile(credentialsFile, backupFile);
                     }
                 } catch (IOException e) {
-                    System.out.println("ERROR: " + e.getMessage());
+                	log.error(String.format("ERROR: %s", e.getMessage()));
                 }
-            }
-            try {
-                if (reader != null)
-                    reader.close();
-            } catch (Throwable t) {
-            }
-            try {
-                if (out != null)
-                    out.close();
-            } catch (Throwable t) {
             }
         }
     }
+    
+    /**
+     * Reads each entry as a line from the specified credentials file.
+     * 
+     * @param credentialsFile  the credentials file to load
+     * @return List<String>
+     * @throws IOException  thrown if an error occurs while reading file content
+     */
+    private List<String> readFileEntries(File credentialsFile) throws IOException {
+        List<String> fileEntries = new ArrayList<>();
 
+        if (credentialsFile.exists()) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(credentialsFile))) {
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+                    fileEntries.add(line);
+                }
+            }
+        }
+        return fileEntries;
+    }
+    
+    /**
+     * Processes the given entry to update the password or remove the entry
+     * altogether.  If the user ID of the original entry does not match the
+     * expected one, the original entry will be returned.  If the entry is
+     * to be removed, null will be returned.
+     * 
+     * @param origEntry  the original credentials file entry
+     * @param userId  the user ID whose entry is to be updated or removed
+     * @param password  the updated password for the user
+     * @param removeUserId  flag indicating that the user's entry is to be removed
+     * @return String
+     */
+    private String processEntry(String origEntry, String userId, String password,
+            boolean removeUserId) {
+        String[] entryParts = origEntry.split(":");
+        String entryUserId = (entryParts.length >= 1) ? entryParts[0] : "";
+        String updatedEntry = origEntry;
+
+        if ((entryUserId != null) && entryUserId.equals(userId)) {
+            if (removeUserId) {
+            	updatedEntry = null;
+            	
+            } else {
+                StringBuilder newEntry = new StringBuilder();
+
+                newEntry.append(userId).append(':')
+                        .append(PasswordHelper.encrypt(password));
+
+                for (int i = 2; i < entryParts.length; i++) {
+                    newEntry.append(':').append(entryParts[i]);
+                }
+                updatedEntry = newEntry.toString();
+            }
+        }
+        return updatedEntry;
+    }
+    
     /**
      * Returns the command-line options for the OTA2 compiler.
      * 

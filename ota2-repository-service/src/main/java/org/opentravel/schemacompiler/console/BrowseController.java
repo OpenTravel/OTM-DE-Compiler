@@ -75,7 +75,7 @@ public class BrowseController extends BaseController {
             RepositoryManager repositoryManager = getRepositoryManager();
             RepositorySecurityManager securityManager = getSecurityManager();
             UserPrincipal user = getCurrentUser(session);
-            List<NamespaceItem> browseItems = new ArrayList<NamespaceItem>();
+            List<NamespaceItem> browseItems = new ArrayList<>();
 
             if (baseNamespace == null) { // display root namespaces
                 for (String rootNS : repositoryManager.listRootNamespaces()) {
@@ -85,7 +85,7 @@ public class BrowseController extends BaseController {
                             browseItems.add(new NamespaceItem(rootNS));
                         }
 
-                    } catch (Throwable t) {
+                    } catch (Exception e) {
                         log.warn("Error determining user access to root namespace: " + rootNS);
                     }
                 }
@@ -150,8 +150,8 @@ public class BrowseController extends BaseController {
             model.addAttribute("filename", filename);
             model.addAttribute("browseItems", browseItems);
 
-        } catch (Throwable t) {
-            log.error("An error occured while displaying the browse page.", t);
+        } catch (Exception e) {
+            log.error("An error occured while displaying the browse page.", e);
             setErrorMessage("An error occured while displaying the page (see server log for details).", model);
         }
         return applyCommonValues(model, "browse");
@@ -265,8 +265,8 @@ public class BrowseController extends BaseController {
             }
             model.addAttribute("lockedLibraries", lockedLibraries);
             
-        } catch (Throwable t) {
-            log.error("An error occured while displaying the locked libraries page.", t);
+        } catch (Exception e) {
+            log.error("An error occured while displaying the locked libraries page.", e);
             setErrorMessage("An error occured while displaying the page (see server log for details).", model);
         }
         return applyCommonValues(model, "lockedLibraries");
@@ -297,8 +297,8 @@ public class BrowseController extends BaseController {
             model.addAttribute("user", user);
             model.addAttribute("subscriptions", subscriptions);
             
-        } catch (Throwable t) {
-            log.error("An error occured while displaying the subscriptions page.", t);
+        } catch (Exception e) {
+            log.error("An error occured while displaying the subscriptions page.", e);
             setErrorMessage("An error occured while displaying the page (see server log for details).", model);
         }
         return applyCommonValues(model, "subscriptions");
@@ -557,7 +557,7 @@ public class BrowseController extends BaseController {
         try {
             String rootNS = RepositoryNamespaceUtils.getRootNamespace(ns, getRepositoryManager());
             String pathFromRoot = rootNS.equals(ns) ? null : ns.substring(rootNS.length() + 1);
-            List<NamespaceItem> parentItems = new ArrayList<NamespaceItem>();
+            List<NamespaceItem> parentItems = new ArrayList<>();
             StringBuilder nsPath = new StringBuilder(rootNS);
 
             parentItems.add(new NamespaceItem(rootNS));

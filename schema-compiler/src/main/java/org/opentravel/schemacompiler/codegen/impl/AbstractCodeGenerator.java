@@ -46,7 +46,7 @@ public abstract class AbstractCodeGenerator<S extends ModelElement> implements C
 
     private CodeGenerationFilter filter;
     private CodeGenerationFilenameBuilder<S> filenameBuilder;
-    private Map<String, File> generatedFiles = new TreeMap<String, File>();
+    private Map<String,File> generatedFiles = new TreeMap<>();
     protected Logger log = NOPLogger.NOP_LOGGER;
 
     /**
@@ -304,7 +304,7 @@ public abstract class AbstractCodeGenerator<S extends ModelElement> implements C
      * @return Collection<File>
      */
     protected Collection<File> getGeneratedFiles() {
-        Collection<File> fileList = new ArrayList<File>();
+        Collection<File> fileList = new ArrayList<>();
 
         for (String filePath : generatedFiles.keySet()) {
             fileList.add(generatedFiles.get(filePath));

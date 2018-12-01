@@ -57,7 +57,7 @@ import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
  */
 public class ModelElementCollector extends ModelElementVisitorAdapter {
 
-    private Collection<TLModelElement> libraryEntities = new HashSet<TLModelElement>();
+    private Collection<TLModelElement> libraryEntities = new HashSet<>();
 
     /**
      * Returns the list of named entities that were collected during library navigation.

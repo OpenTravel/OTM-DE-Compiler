@@ -200,7 +200,7 @@ public class ObsoleteBuiltInVisitor extends ModelElementVisitorAdapter {
 			RepositoryItem item = otaRepository.getRepositoryItem( OBSOLETE_BUILTIN_URL, OBSOLETE_BUILTIN_NS );
 			
 			if (item != null) {
-				LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>( model );
+				LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<>( model );
 				File libraryFile = URLUtils.toFile( manager.getContentLocation( item ) );
 		        LibraryInputSource<InputStream> libraryInput = new LibraryStreamInputSource( libraryFile );
 				
@@ -208,8 +208,8 @@ public class ObsoleteBuiltInVisitor extends ModelElementVisitorAdapter {
 				managedLib = model.getLibrary( OBSOLETE_BUILTIN_NS, OBSOLETE_BUILTIN_NAME );
 			}
 			
-		} catch (Throwable t) {
-			log.warn("Error loading obsolete built-in dependency from the OpenTravel repository.", t);
+		} catch (Exception e) {
+			log.warn("Error loading obsolete built-in dependency from the OpenTravel repository.", e);
 		}
 		return managedLib;
 	}
@@ -256,7 +256,7 @@ public class ObsoleteBuiltInVisitor extends ModelElementVisitorAdapter {
 		public void resolveReference(AbstractLibrary obsoleteBuiltInLibrary) {
 			NamedEntity entity = obsoleteBuiltInLibrary.getNamedMember( referenceLocalName );
 			
-			if ((obsoleteBuiltInLibrary != null) && (entity != null)) {
+			if (entity != null) {
 				if (modelElement instanceof TLSimple) {
 					((TLSimple) modelElement).setParentType( (TLAttributeType) entity );
 					

@@ -39,7 +39,7 @@ public class TransformerFactory<C extends ObjectTransformerContext> {
 
     private static final Logger log = LoggerFactory.getLogger(TransformerFactory.class);
 
-    private Map<Class<?>, Map<Class<?>, Class<?>>> sourceTypeMappings = new HashMap<Class<?>, Map<Class<?>, Class<?>>>();
+    private Map<Class<?>,Map<Class<?>,Class<?>>> sourceTypeMappings = new HashMap<>();
     private C transformerContext;
 
     /**
@@ -98,7 +98,7 @@ public class TransformerFactory<C extends ObjectTransformerContext> {
                     .get(mapping.getSource());
 
             if (targetTypeMappings == null) {
-                targetTypeMappings = new HashMap<Class<?>, Class<?>>();
+                targetTypeMappings = new HashMap<>();
                 sourceTypeMappings.put(mapping.getSource(), targetTypeMappings);
             }
             targetTypeMappings.put(mapping.getTarget(), mapping.getTransformer());
@@ -131,9 +131,8 @@ public class TransformerFactory<C extends ObjectTransformerContext> {
      *            the source object for which to return a mapping
      * @return Set<Class<?>>
      */
-    @SuppressWarnings("unchecked")
     public Set<Class<?>> findTargetTypes(Object sourceObj) {
-        return (sourceObj == null) ? Collections.EMPTY_SET : findTargetTypes(sourceObj.getClass());
+        return (sourceObj == null) ? Collections.emptySet() : findTargetTypes(sourceObj.getClass());
     }
 
     /**
@@ -151,7 +150,7 @@ public class TransformerFactory<C extends ObjectTransformerContext> {
         if ((targetTypeMappings != null) && !targetTypeMappings.isEmpty()) {
             targetTypes = targetTypeMappings.keySet();
         } else {
-            targetTypes = new HashSet<Class<?>>();
+            targetTypes = new HashSet<>();
         }
         return targetTypes;
     }
@@ -210,8 +209,8 @@ public class TransformerFactory<C extends ObjectTransformerContext> {
                     transformer = transformerClass.newInstance();
                     transformer.setContext(transformerContext);
                 }
-            } catch (Throwable t) {
-                log.error("Unable to instantiate transformer for type: " + sourceType.getName(), t);
+            } catch (Exception e) {
+                log.error("Unable to instantiate transformer for type: " + sourceType.getName(), e);
             }
         }
         return transformer;

@@ -52,7 +52,7 @@ public abstract class ComplexTypeTransformer<S, T> extends
     protected List<TLAttribute> transformAttributes(List<Attribute> jaxbAttributes) {
         ObjectTransformer<Attribute, TLAttribute, DefaultTransformerContext> attributeTransformer = getTransformerFactory()
                 .getTransformer(Attribute.class, TLAttribute.class);
-        List<TLAttribute> attributes = new ArrayList<TLAttribute>();
+        List<TLAttribute> attributes = new ArrayList<>();
 
         if (jaxbAttributes != null) {
             for (Attribute jaxbAttribute : jaxbAttributes) {
@@ -72,7 +72,7 @@ public abstract class ComplexTypeTransformer<S, T> extends
     protected List<TLProperty> transformElements(List<Property> jaxbProperties) {
         ObjectTransformer<Property, TLProperty, DefaultTransformerContext> propertyTransformer = getTransformerFactory()
                 .getTransformer(Property.class, TLProperty.class);
-        List<TLProperty> properties = new ArrayList<TLProperty>();
+        List<TLProperty> properties = new ArrayList<>();
 
         if (jaxbProperties != null) {
             for (Property jaxbProperty : jaxbProperties) {
@@ -93,7 +93,7 @@ public abstract class ComplexTypeTransformer<S, T> extends
     protected List<TLIndicator> transformIndicators(List<Indicator> jaxbIndicators) {
         ObjectTransformer<Indicator, TLIndicator, DefaultTransformerContext> indicatorTransformer = getTransformerFactory()
                 .getTransformer(Indicator.class, TLIndicator.class);
-        List<TLIndicator> indicators = new ArrayList<TLIndicator>();
+        List<TLIndicator> indicators = new ArrayList<>();
 
         if (jaxbIndicators != null) {
             for (Indicator jaxbAttribute : jaxbIndicators) {

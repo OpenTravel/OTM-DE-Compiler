@@ -494,7 +494,7 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
     		throw new RepositoryException(
     				"The remote repository for one or more libraries in this release is unavailable.");
     	}
-        LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>( model );
+        LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<>( model );
 		ReleaseLibraryModuleLoader moduleLoader = new ReleaseLibraryModuleLoader( this, modelLoader.getModuleLoader() );
 		
 		model.clearModel();
@@ -850,12 +850,12 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
             try {
                 findings.addAll( TLModelCompileValidator.validateModelElement( library, false ) );
 
-            } catch (Throwable t) {
+            } catch (Exception e) {
                 findings.addFinding( FindingType.ERROR, library,
                         ERROR_UNKNOWN_EXCEPTION_DURING_VALIDATION, library.getName(),
-                        ExceptionUtils.getExceptionClass( t ).getSimpleName(),
-                        ExceptionUtils.getExceptionMessage( t ) );
-                log.debug("Unexpected exception validating liberary module: " + library.getName(), t);
+                        ExceptionUtils.getExceptionClass( e ).getSimpleName(),
+                        ExceptionUtils.getExceptionMessage( e ) );
+                log.debug("Unexpected exception validating liberary module: " + library.getName(), e);
             }
         }
     }
@@ -1070,8 +1070,8 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
     		VersionSchemeFactory factory = VersionSchemeFactory.getInstance();
     		versionScheme = factory.getVersionScheme( factory.getDefaultVersionScheme() );
     		
-    	} catch (Throwable t) {
-    		throw new ExceptionInInitializerError( t );
+    	} catch (Exception e) {
+    		throw new ExceptionInInitializerError( e );
     	}
     }
     

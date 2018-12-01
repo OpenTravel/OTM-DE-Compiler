@@ -65,7 +65,7 @@ public class HtmlDocument extends Content {
      * @param htmlTree HTML tree of the document
      */
     public HtmlDocument(Content docType, Content docComment, Content htmlTree) {
-        docContent = new ArrayList<Content>();
+        docContent = new ArrayList<>();
         addContent(nullCheck(docType));
         addContent(nullCheck(docComment));
         addContent(nullCheck(htmlTree));
@@ -78,7 +78,7 @@ public class HtmlDocument extends Content {
      * @param htmlTree HTML tree of the document
      */
     public HtmlDocument(Content docType, Content htmlTree) {
-        docContent = new ArrayList<Content>();
+        docContent = new ArrayList<>();
         addContent(nullCheck(docType));
         addContent(nullCheck(htmlTree));
     }

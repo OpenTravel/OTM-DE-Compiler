@@ -60,11 +60,10 @@ public class TLOperationCodegenTransformer extends
         TMessage requestMessage = createMessage(source.getRequest());
         TMessage responseMessage = createMessage(source.getResponse());
         TMessage notifMessage = createMessage(source.getNotification());
-        List<TMessage> faultMessages = new ArrayList<TMessage>();
+        List<TMessage> faultMessages = new ArrayList<>();
         CodegenArtifacts artifacts = new CodegenArtifacts();
 
-        artifacts.addArtifact(createPortTypeOperation(source, requestMessage, responseMessage,
-                notifMessage, faultMessages));
+        artifacts.addArtifact(createPortTypeOperation(source, faultMessages));
         artifacts.addArtifact(requestMessage);
         artifacts.addArtifact(responseMessage);
         artifacts.addArtifact(notifMessage);
@@ -113,18 +112,11 @@ public class TLOperationCodegenTransformer extends
      * 
      * @param sourceOperation
      *            the source operation for which a port-type is being generated
-     * @param requestMessage
-     *            the request message for the operation
-     * @param responseMessage
-     *            the response message for the operation
-     * @param notifMessage
-     *            the notification message for the operation
      * @param faultMessages
      *            the fault messages for the operation
      * @return TOperation
      */
     private TOperation createPortTypeOperation(TLOperation sourceOperation,
-            TMessage requestMessage, TMessage responseMessage, TMessage notifMessage,
             List<TMessage> faultMessages) {
         String targetNamespace = getTargetNamespace(sourceOperation.getOwningService());
         TOperation operation = new TOperation();

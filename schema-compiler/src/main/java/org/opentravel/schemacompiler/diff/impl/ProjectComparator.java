@@ -61,8 +61,8 @@ public class ProjectComparator extends BaseComparator {
 		List<ProjectChangeItem> changeItems = changeSet.getChangeItems();
 		Map<QName,TLLibrary> oldLibraries = buildLibraryMap( oldProject );
 		Map<QName,TLLibrary> newLibraries = buildLibraryMap( newProject );
-		SortedSet<QName> oldLibraryNames = new TreeSet<QName>( new QNameComparator() );
-		SortedSet<QName> newLibraryNames = new TreeSet<QName>( new QNameComparator() );
+		SortedSet<QName> oldLibraryNames = new TreeSet<>( new QNameComparator() );
+		SortedSet<QName> newLibraryNames = new TreeSet<>( new QNameComparator() );
 		List<ChangeSetItem> pendingChangeSets = new ArrayList<>();
 		Iterator<QName> iterator;
 		

@@ -40,7 +40,7 @@ public class LegacyTypeExampleProvider {
     private static final String NAMESPACE_PROPERTY = "namespace";
 
     private String namespace;
-    private Map<String, List<String>> exampleTypeMappings = new HashMap<String, List<String>>();
+    private Map<String, List<String>> exampleTypeMappings = new HashMap<>();
 
     /**
      * Constructor that defines the classpath location of the configuration file used to define the
@@ -121,7 +121,7 @@ public class LegacyTypeExampleProvider {
                         List<String> exampleValues = exampleTypeMappings.get(typeName);
 
                         if (exampleValues == null) {
-                            exampleValues = new ArrayList<String>();
+                            exampleValues = new ArrayList<>();
                             exampleTypeMappings.put(typeName, exampleValues);
                         }
                         exampleValues.addAll(Arrays.asList(valueArray));

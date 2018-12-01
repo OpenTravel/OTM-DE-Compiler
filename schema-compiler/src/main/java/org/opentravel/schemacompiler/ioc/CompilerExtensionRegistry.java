@@ -41,7 +41,12 @@ public class CompilerExtensionRegistry {
 
     private static String activeExtensionId;
     private static CompilerExtensionProvider activeProvider;
-
+    
+    /**
+     * Private constructor to prevent instantiation.
+     */
+    private CompilerExtensionRegistry() {}
+    
     /**
      * Returns the list of OTA2 compiler extension IDs that are currently available in the
      * application run-time.
@@ -49,7 +54,7 @@ public class CompilerExtensionRegistry {
      * @return List<String>
      */
     public static List<String> getAvailableExtensionIds() {
-        List<String> extensionIds = new ArrayList<String>();
+        List<String> extensionIds = new ArrayList<>();
 
         for (CompilerExtension extension : findCompilerExtensions()) {
             extensionIds.add(extension.getExtensionId());
@@ -168,11 +173,9 @@ public class CompilerExtensionRegistry {
      *            the XML bean definition reader used to load and parse Spring configuration files
      * @param configLocation
      *            the classpath location of the configuration file to load
-     * @throws BeansException
-     *             thrown if the configuration file cannot be loaded
      */
     private static void loadConfigurationFile(XmlBeanDefinitionReader beanReader,
-            String configLocation) throws BeansException {
+            String configLocation) {
         String configPath = configLocation.startsWith("classpath:") ? configLocation.substring(10)
                 : configLocation;
         InputStream configStream = CompilerExtensionRegistry.loadResource(configPath);
@@ -192,7 +195,7 @@ public class CompilerExtensionRegistry {
      * @return List<CompilerExtension>
      */
     private static List<CompilerExtension> findCompilerExtensions() {
-        List<CompilerExtension> extensionList = new ArrayList<CompilerExtension>();
+        List<CompilerExtension> extensionList = new ArrayList<>();
 
         for (CompilerExtensionProvider provider : ServiceLoader
                 .load(CompilerExtensionProvider.class)) {
@@ -210,12 +213,12 @@ public class CompilerExtensionRegistry {
         try {
             List<CompilerExtension> extensions = findCompilerExtensions();
 
-            if (extensions.size() > 0) {
+            if (!extensions.isEmpty()) {
                 setActiveExtension(extensions.get(0).getExtensionId());
             }
 
-        } catch (final Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

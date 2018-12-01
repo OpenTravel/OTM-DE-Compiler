@@ -73,11 +73,11 @@ import org.w3c.dom.NodeList;
  */
 public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
 	
-	private Map<String, String> namespaceMappings = new HashMap<String, String>();
-	private Set<String> extensionPointNamespaces = new HashSet<String>();
+	private Map<String,String> namespaceMappings = new HashMap<>();
+	private Set<String> extensionPointNamespaces = new HashSet<>();
 	private Document domDocument;
 
-	private List<DOMIdReferenceAssignment> referenceAssignments = new ArrayList<DOMIdReferenceAssignment>();
+	private List<DOMIdReferenceAssignment> referenceAssignments = new ArrayList<>();
 
 	/**
 	 * Default constructor.
@@ -140,7 +140,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
 	 */
 	@Override
 	public Collection<String> getBoundNamespaces() {
-		List<String> nsList = new ArrayList<String>();
+		List<String> nsList = new ArrayList<>();
 
 		/*
 		 * Commented out this line due to false validation errors on
@@ -975,7 +975,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
 		Element domElement = context.getNode();
 
         if ((domElement != null) && (wsdlBindings != null)) {
-        	Map<String,String> nsMappings = new HashMap<String,String>();
+        	Map<String,String> nsMappings = new HashMap<>();
 			Element rootElement = domElement.getOwnerDocument()
 					.getDocumentElement();
         	

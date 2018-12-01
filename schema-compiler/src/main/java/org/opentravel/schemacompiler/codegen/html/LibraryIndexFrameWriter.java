@@ -103,9 +103,9 @@ public class LibraryIndexFrameWriter extends AbstractNamespaceIndexWriter {
      */
     protected void addLibraryList(List<TLLibrary> libraries, String text,
             String tableSummary, Content body) {
-        Content heading = HtmlTree.HEADING(HtmlConstants.PACKAGE_HEADING, true,
+        Content heading = HtmlTree.heading(HtmlConstants.PACKAGE_HEADING, true,
                 librariesLabel);
-        Content div = HtmlTree.DIV(HtmlStyle.indexContainer, heading);
+        Content div = HtmlTree.div(HtmlStyle.indexContainer, heading);
         HtmlTree ul = new HtmlTree(HtmlTag.UL);
         ul.addAttr(HtmlAttr.TITLE, librariesLabel.toString());
         for(TLLibrary lib : libraries) {
@@ -138,7 +138,7 @@ public class LibraryIndexFrameWriter extends AbstractNamespaceIndexWriter {
             packageLinkContent = getHyperLink("library-frame.html",
                     "", packageLabel, "", "libraryFrame");
         }
-        Content li = HtmlTree.LI(packageLinkContent);
+        Content li = HtmlTree.li(packageLinkContent);
         return li;
     }
 
@@ -172,7 +172,7 @@ public class LibraryIndexFrameWriter extends AbstractNamespaceIndexWriter {
     protected void addAllObjectsLink(Content body) {
         Content linkContent = getHyperLink("allmembers-frame.html", "",
                 allMembersLabel, "", "libraryFrame");
-        Content div = HtmlTree.DIV(HtmlStyle.indexHeader, linkContent);
+        Content div = HtmlTree.div(HtmlStyle.indexHeader, linkContent);
         body.addContent(div);
     }
 
@@ -180,7 +180,7 @@ public class LibraryIndexFrameWriter extends AbstractNamespaceIndexWriter {
      * {@inheritDoc}
      */
     protected void addNavigationBarFooter(Content body) {
-        Content p = HtmlTree.P(getSpace());
+        Content p = HtmlTree.p(getSpace());
         body.addContent(p);
     }
 }

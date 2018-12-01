@@ -37,7 +37,7 @@ public class JsonSchemaUserLibraryCodeGenerator extends AbstractJsonSchemaCodeGe
 	 */
 	@Override
 	protected CodeGenerationFilenameBuilder<TLLibrary> getDefaultFilenameBuilder() {
-        return new LibraryFilenameBuilder<TLLibrary>();
+        return new LibraryFilenameBuilder<>();
 	}
 
 	/**

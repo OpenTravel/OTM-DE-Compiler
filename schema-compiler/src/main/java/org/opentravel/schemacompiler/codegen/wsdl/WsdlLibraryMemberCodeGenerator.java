@@ -48,7 +48,7 @@ public class WsdlLibraryMemberCodeGenerator extends AbstractWsdlCodeGenerator<Li
      */
     @Override
     protected CodeGenerationFilenameBuilder<LibraryMember> getDefaultFilenameBuilder() {
-        return new LibraryMemberFilenameBuilder<LibraryMember>();
+        return new LibraryMemberFilenameBuilder<>();
     }
 
 }

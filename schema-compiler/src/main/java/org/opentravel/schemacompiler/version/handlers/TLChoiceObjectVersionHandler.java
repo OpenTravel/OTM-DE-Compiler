@@ -88,8 +88,8 @@ public class TLChoiceObjectVersionHandler extends TLExtensionOwnerVersionHandler
 	public void rollupMinorVersion(TLChoiceObject minorVersion, TLChoiceObject majorVersionTarget,
 			RollupReferenceHandler referenceHandler) {
 		VersionHandlerMergeUtils mergeUtils = new VersionHandlerMergeUtils( getFactory() );
-        Map<String, TLFacet> targetFacets = new HashMap<String, TLFacet>();
-        Map<String, TLFacet> sourceFacets = new HashMap<String, TLFacet>();
+        Map<String,TLFacet> targetFacets = new HashMap<>();
+        Map<String,TLFacet> sourceFacets = new HashMap<>();
 		
         mergeUtils.addToIdentityFacetMap( majorVersionTarget.getSharedFacet(), targetFacets );
         mergeUtils.addToIdentityFacetMap( minorVersion.getSharedFacet(), sourceFacets );

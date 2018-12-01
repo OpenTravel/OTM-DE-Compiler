@@ -32,9 +32,9 @@ import org.opentravel.schemacompiler.model.XSDLibrary;
  */
 public class DefaultCodeGenerationFilter implements CodeGenerationFilter {
 
-    private Set<AbstractLibrary> allowedLibraries = new HashSet<AbstractLibrary>();
-    private Set<XSDLibrary> extensionLibraries = new HashSet<XSDLibrary>();
-    private Set<LibraryElement> allowedEntities = new HashSet<LibraryElement>();
+    private Set<AbstractLibrary> allowedLibraries = new HashSet<>();
+    private Set<XSDLibrary> extensionLibraries = new HashSet<>();
+    private Set<LibraryElement> allowedEntities = new HashSet<>();
 
     /**
      * Adds the given library to the list of libraries that will be allowed by this filter.

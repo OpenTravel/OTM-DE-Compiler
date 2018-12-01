@@ -192,7 +192,7 @@ public class URLUtils {
                 String sourceUrl = url.toExternalForm();
                 StringBuilder targetUrl = new StringBuilder(sourceUrl.substring(0,
                         sourceUrl.lastIndexOf(urlPath)));
-                List<String> pathList = new ArrayList<String>();
+                List<String> pathList = new ArrayList<>();
 
                 // Use the stack to resolve relative path references
                 boolean pathStarted = false;
@@ -279,7 +279,8 @@ public class URLUtils {
         // Break each of the paths into their respective components
         String[] base = basePath.split(Pattern.quote("/"), -1);
         String[] target = targetPath.split(Pattern.quote("/"), 0);
-        String commonPath = "", relativePath = "";
+        String commonPath = "";
+        String relativePath = "";
         int commonIndex = 0;
 
         // First get all the common elements. Store them as a string, while we count how
@@ -324,8 +325,10 @@ public class URLUtils {
      * @return boolean
      */
     private static boolean isMatchingProtocolAndAuthority(URL url1, URL url2) {
-        String protocol1 = url1.getProtocol(), protocol2 = url2.getProtocol();
-        String authority1 = url1.getAuthority(), authority2 = url2.getAuthority();
+        String protocol1 = url1.getProtocol();
+        String protocol2 = url2.getProtocol();
+        String authority1 = url1.getAuthority();
+        String authority2 = url2.getAuthority();
         boolean protocolMatches = ((protocol1 == null) || protocol1.equals("")) ? ((protocol2 == null) || protocol2
                 .equals("")) : protocol1.equals(protocol2);
         boolean authorityMatches = ((authority1 == null) || authority1.equals("")) ? ((authority2 == null) || authority2
@@ -334,9 +337,12 @@ public class URLUtils {
 
         if (isMatch && (protocol1 != null) && protocol1.equals("file")
         		&& (protocol2 != null) && protocol2.equals("file")) {
-            String path1 = url1.getPath(), path2 = url2.getPath();
-            int driveIdx1 = path1.indexOf('|'), driveIdx2 = path2.indexOf('|');
-            String driveLetter1 = null, driveLetter2 = null;
+            String path1 = url1.getPath();
+            String path2 = url2.getPath();
+            int driveIdx1 = path1.indexOf('|');
+            int driveIdx2 = path2.indexOf('|');
+            String driveLetter1 = null;
+            String driveLetter2 = null;
 
             if (driveIdx1 >= 0) {
                 driveLetter1 = path1.substring(0, driveIdx1);

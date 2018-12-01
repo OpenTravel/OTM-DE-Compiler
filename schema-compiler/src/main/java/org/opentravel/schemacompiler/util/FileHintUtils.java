@@ -30,6 +30,11 @@ import java.util.List;
  */
 public class FileHintUtils {
 
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private FileHintUtils() {}
+	
     /**
      * Attempts to resolve each of the given file hints to resources on the local file system. If
      * any of the hints represent files that do not exist, they are combined with adjacent hints in
@@ -42,7 +47,7 @@ public class FileHintUtils {
      * @return List<String>
      */
     public static List<String> resolveHints(String hints, URL libraryUrl) {
-        return (hints == null) ? new ArrayList<String>() : resolveHints(hints.trim().split("\\s+"),
+        return (hints == null) ? new ArrayList<>() : resolveHints(hints.trim().split("\\s+"),
                 libraryUrl);
     }
 
@@ -58,7 +63,7 @@ public class FileHintUtils {
      * @return List<String>
      */
     public static List<String> resolveHints(String[] hints, URL libraryUrl) {
-        return (hints == null) ? new ArrayList<String>() : resolveHints(Arrays.asList(hints),
+        return (hints == null) ? new ArrayList<>() : resolveHints(Arrays.asList(hints),
                 libraryUrl);
     }
 
@@ -74,24 +79,24 @@ public class FileHintUtils {
      * @return List<String>
      */
     public static List<String> resolveHints(List<String> hints, URL libraryUrl) {
-        List<String> resolvedHints = new ArrayList<String>();
+        List<String> resolvedHints = new ArrayList<>();
 
         if ((libraryUrl == null) || !URLUtils.isFileURL(libraryUrl)) {
             resolvedHints.addAll(hints);
 
         } else {
-            List<String> badHints = new ArrayList<String>();
+            List<String> badHints = new ArrayList<>();
 
             for (String hint : hints) {
                 try {
                     File hintFile = URLUtils.toFile(URLUtils.getResolvedURL(hint, libraryUrl));
 
-                    if (hintFile.exists() || ((badHints.size() == 0) && hasFileExtension(hint))) {
+                    if (hintFile.exists() || (badHints.isEmpty() && hasFileExtension(hint))) {
                         resolvedHints.addAll(badHints);
                         resolvedHints.add(hint);
                         badHints.clear();
 
-                    } else if (badHints.size() > 0) {
+                    } else if (!badHints.isEmpty()) {
                         StringBuilder _compoundHint = new StringBuilder();
 
                         for (String badHint : badHints) {
@@ -114,7 +119,7 @@ public class FileHintUtils {
                         badHints.add(hint);
                     }
 
-                } catch (Throwable t) {
+                } catch (Exception e) {
                     // Ignore and just return the hint as-is
                     resolvedHints.addAll(badHints);
                     resolvedHints.add(hint);

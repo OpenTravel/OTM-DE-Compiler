@@ -33,7 +33,7 @@ import org.opentravel.schemacompiler.model.XSDLibrary;
  */
 public class LibraryMemberSchemaFilter implements CodeGenerationFilter {
 
-    private List<AbstractLibrary> builtInLibraries = new ArrayList<AbstractLibrary>();
+    private List<AbstractLibrary> builtInLibraries = new ArrayList<>();
     private LibraryMember libraryMember;
     private CodeGenerationFilter libraryFilter;
 

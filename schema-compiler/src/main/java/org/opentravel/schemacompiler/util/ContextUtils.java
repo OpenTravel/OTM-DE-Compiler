@@ -31,7 +31,12 @@ import org.opentravel.schemacompiler.visitor.ModelNavigator;
  * @author S. Livezey
  */
 public class ContextUtils {
-
+	
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private ContextUtils() {}
+	
     /**
      * When a model element is moved from one library to another, it is necessary to scan its
      * context ID references and rename them to valid values in the target library. This mapping is
@@ -46,7 +51,7 @@ public class ContextUtils {
     public static void translateContextIdReferences(LibraryElement entity, TLLibrary sourceLibrary,
             TLLibrary targetLibrary) {
         ContextReferrerVisitor visitor = new ContextReferrerVisitor(null);
-        Map<String, String> targetContextMap = new HashMap<String, String>();
+        Map<String,String> targetContextMap = new HashMap<>();
 
         for (TLContext context : targetLibrary.getContexts()) {
             if ((context.getContextId() != null) && (context.getApplicationContext() != null)) {
@@ -93,7 +98,7 @@ public class ContextUtils {
      */
     public static void resolveApplicationContexts(LibraryElement entity) {
         if (entity.getOwningLibrary() instanceof TLLibrary) {
-            Map<String, String> applicationContextMap = new HashMap<String, String>();
+            Map<String,String> applicationContextMap = new HashMap<>();
             ContextReferrerVisitor visitor = new ContextReferrerVisitor(null);
             TLLibrary owningLibrary = (TLLibrary) entity.getOwningLibrary();
 

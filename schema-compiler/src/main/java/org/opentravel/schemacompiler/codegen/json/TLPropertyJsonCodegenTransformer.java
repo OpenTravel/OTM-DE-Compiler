@@ -63,8 +63,7 @@ public class TLPropertyJsonCodegenTransformer extends AbstractJsonSchemaTransfor
     private JsonSchemaNamedReference transformValueProperty(TLProperty source) {
 		JsonSchemaNamedReference jsonProperty = new JsonSchemaNamedReference();
     	JsonSchemaReference schemaRef = new JsonSchemaReference();
-        TLPropertyType propertyType = PropertyCodegenUtils.resolvePropertyType(
-                source.getOwner(), source.getType());
+        TLPropertyType propertyType = PropertyCodegenUtils.resolvePropertyType(source.getType());
 
         if (!PropertyCodegenUtils.hasGlobalElement(propertyType)) {
             // If the element's name has not been specified, use the name of its assigned type
@@ -93,14 +92,13 @@ public class TLPropertyJsonCodegenTransformer extends AbstractJsonSchemaTransfor
      * @return JsonSchemaNamedReference
      */
     private JsonSchemaNamedReference transformReferenceProperty(TLProperty source) {
-        TLPropertyType propertyType = PropertyCodegenUtils.resolvePropertyType(
-                source.getOwner(), source.getType());
+        TLPropertyType propertyType = PropertyCodegenUtils.resolvePropertyType(source.getType());
 		JsonSchemaNamedReference jsonProperty = new JsonSchemaNamedReference();
 		JsonSchema propertySchema = new JsonSchema();
         JsonEntityInfo entityInfo = new JsonEntityInfo();
-        String elementName = source.getName();
         String maxOccurs = PropertyCodegenUtils.getMaxOccurs(source);
         boolean isMultipleReference;
+        String elementName;
 
         if (PropertyCodegenUtils.hasGlobalElement(propertyType)) {
             elementName = PropertyCodegenUtils.getDefaultSchemaElementName(propertyType, true).getLocalPart();
@@ -181,7 +179,7 @@ public class TLPropertyJsonCodegenTransformer extends AbstractJsonSchemaTransfor
 			if (!(listFacet.getItemFacet() instanceof TLSimpleFacet)) {
 				TLCoreObject facetOwner = (TLCoreObject) listFacet.getOwningEntity();
 				
-				if (facetOwner.getRoleEnumeration().getRoles().size() > 0) {
+				if (!facetOwner.getRoleEnumeration().getRoles().isEmpty()) {
 					maxOccurs = facetOwner.getRoleEnumeration().getRoles().size() + "";
 				} else {
 					maxOccurs = PropertyCodegenUtils.getMaxOccurs( source );

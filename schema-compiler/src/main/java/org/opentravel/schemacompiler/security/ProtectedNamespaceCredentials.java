@@ -30,9 +30,9 @@ import java.util.Map;
  */
 public final class ProtectedNamespaceCredentials {
 
-    private List<String> groupIds = new ArrayList<String>();
-    private Map<String, String> userIdCredentials = new HashMap<String, String>();
-    private Map<String, String> passwordCredentials = new HashMap<String, String>();
+    private List<String> groupIds = new ArrayList<>();
+    private Map<String,String> userIdCredentials = new HashMap<>();
+    private Map<String,String> passwordCredentials = new HashMap<>();
 
     /**
      * Assigns the userId and password credentials for the specified protected namespace group.

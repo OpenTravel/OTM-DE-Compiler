@@ -15,6 +15,7 @@
  */
 package org.opentravel.schemacompiler.loader.impl;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
@@ -106,10 +107,9 @@ public abstract class AbstractLibraryModuleLoader implements LibraryModuleLoader
             javax.xml.validation.Schema validationSchema) throws LibraryLoaderException,
             JAXBException {
         URL libraryUrl = (inputSource == null) ? null : inputSource.getLibraryURL();
-        InputStream is = (inputSource == null) ? null : inputSource.getLibraryContent();
         Object jaxbLibrary = null;
 
-        try {
+        try (InputStream is = (inputSource == null) ? null : inputSource.getLibraryContent()) {
             if (is != null) {
                 Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 
@@ -117,8 +117,7 @@ public abstract class AbstractLibraryModuleLoader implements LibraryModuleLoader
                     unmarshaller.setSchema(validationSchema);
                 }
 
-                JAXBElement<?> documentElement = (JAXBElement<?>) unmarshaller
-                        .unmarshal( is );
+                JAXBElement<?> documentElement = (JAXBElement<?>) unmarshaller.unmarshal( is );
                 jaxbLibrary = documentElement.getValue();
 
             } else {
@@ -129,13 +128,9 @@ public abstract class AbstractLibraryModuleLoader implements LibraryModuleLoader
                         (libraryUrl == null) ? "[MISSING URL]" : URLUtils
                                 .getShortRepresentation(libraryUrl));
             }
-        } finally {
-            try {
-                if (is != null)
-                    is.close();
-            } catch (Throwable t) {
-            }
-        }
+        } catch (IOException e) {
+        	throw new LibraryLoaderException("Error reading from library input source", e);
+		}
         return jaxbLibrary;
     }
 
@@ -149,44 +144,39 @@ public abstract class AbstractLibraryModuleLoader implements LibraryModuleLoader
         URL schemaUrl = (inputSource == null) ? null : inputSource.getLibraryURL();
         LibraryModuleInfo<Schema> moduleInfo = null;
 
-        try {
-            InputStream is = (inputSource == null) ? null : inputSource.getLibraryContent();
+        try (InputStream is = (inputSource == null) ? null : inputSource.getLibraryContent()) {
             Schema schema = null;
+            
+            if (is != null) {
+                XMLStreamReader xmlsReader = XMLInputFactory.newInstance()
+                        .createXMLStreamReader(inputSource.getLibraryContent());
+                Map<String,String> namespacePrefixMappings = new HashMap<>();
+                Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 
-            try {
-                if (is != null) {
-                    XMLStreamReader xmlsReader = XMLInputFactory.newInstance()
-                            .createXMLStreamReader(inputSource.getLibraryContent());
-                    Map<String, String> namespacePrefixMappings = new HashMap<String, String>();
-                    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+                unmarshaller.setSchema(schemaValidationSchema);
+                schema = (Schema) unmarshaller.unmarshal(new PrefixMappingXMLStreamReader(
+                        xmlsReader, namespacePrefixMappings));
 
-                    unmarshaller.setSchema(schemaValidationSchema);
-                    schema = (Schema) unmarshaller.unmarshal(new PrefixMappingXMLStreamReader(
-                            xmlsReader, namespacePrefixMappings));
+                // Use the schema's ID field to store the prefix value
+                schema.setId(namespacePrefixMappings.get(schema.getTargetNamespace()));
 
-                    // Use the schema's ID field to store the prefix value
-                    schema.setId(namespacePrefixMappings.get(schema.getTargetNamespace()));
+                moduleInfo = buildModuleInfo(schema);
 
-                    moduleInfo = buildModuleInfo(schema);
-
-                } else {
-                    validationFindings.addFinding(
-                            FindingType.WARNING,
-                            new URLValidationSource(schemaUrl),
-                            WARNING_SCHEMA_NOT_FOUND,
-                            (schemaUrl == null) ? "[MISSING URL]" : URLUtils
-                                    .getShortRepresentation(schemaUrl));
-                }
-            } finally {
-                try {
-                    if (is != null)
-                        is.close();
-                } catch (Throwable t) {
-                }
+            } else {
+                validationFindings.addFinding(
+                        FindingType.WARNING,
+                        new URLValidationSource(schemaUrl),
+                        WARNING_SCHEMA_NOT_FOUND,
+                        (schemaUrl == null) ? "[MISSING URL]" : URLUtils
+                                .getShortRepresentation(schemaUrl));
             }
+                
         } catch (XMLStreamException e) {
             throw new LibraryLoaderException("Error creating XMLStreamReader instance.", e);
 
+        } catch (IOException e) {
+        	throw new LibraryLoaderException("Error reading from library input source", e);
+        	
         } catch (JAXBException e) {
             String urlString = (schemaUrl == null) ? "[MISSING URL]" : URLUtils
                     .getShortRepresentation(schemaUrl);
@@ -195,7 +185,8 @@ public abstract class AbstractLibraryModuleLoader implements LibraryModuleLoader
                     ERROR_UNREADABLE_SCHEMA_CONTENT, urlString, ExceptionUtils.getExceptionClass(e)
                             .getSimpleName(), ExceptionUtils.getExceptionMessage(e));
             log.debug("Error during JAXB parsing of content from URL: " + urlString, e);
-        }
+            
+		}
 
         return moduleInfo;
     }
@@ -211,7 +202,7 @@ public abstract class AbstractLibraryModuleLoader implements LibraryModuleLoader
         List<LibraryModuleImport> imports = SchemaUtils.getSchemaImports(schema);
         List<String> includes = SchemaUtils.getSchemaIncludes(schema);
 
-        return new LibraryModuleInfo<Schema>(schema, null, schema.getTargetNamespace(), null,
+        return new LibraryModuleInfo<>(schema, null, schema.getTargetNamespace(), null,
                 includes, imports);
     }
 
@@ -232,6 +223,7 @@ public abstract class AbstractLibraryModuleLoader implements LibraryModuleLoader
             this.namespacePrefixMappings = namespacePrefixMappings;
         }
 
+        @Override
         public int next() throws XMLStreamException {
             int nextResult = super.next();
 
@@ -263,8 +255,8 @@ public abstract class AbstractLibraryModuleLoader implements LibraryModuleLoader
             schemaValidationSchema = schemaFactory.newSchema(new StreamSource(schemaStream));
             jaxbContext = JAXBContext.newInstance(SCHEMA_CONTEXT);
 
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

@@ -26,7 +26,7 @@ import java.util.List;
 public class UserGroup {
 
     private String groupName;
-    private List<String> memberIds = new ArrayList<String>();
+    private List<String> memberIds = new ArrayList<>();
 
     /**
      * Constructor that defines the name of the group and the user ID of each member assigned to it.

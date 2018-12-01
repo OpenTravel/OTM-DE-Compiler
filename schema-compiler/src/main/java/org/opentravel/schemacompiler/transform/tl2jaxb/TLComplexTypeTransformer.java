@@ -51,7 +51,7 @@ public abstract class TLComplexTypeTransformer<S, T> extends
      * @return List<String>
      */
     protected List<String> getAliasNames(List<TLAlias> aliases) {
-        List<String> aliasNames = new ArrayList<String>();
+        List<String> aliasNames = new ArrayList<>();
 
         for (TLAlias alias : aliases) {
             String aliasName = trimString(alias.getName());
@@ -73,7 +73,7 @@ public abstract class TLComplexTypeTransformer<S, T> extends
     protected List<Attribute> transformAttributes(List<TLAttribute> modelAttributes) {
         ObjectTransformer<TLAttribute, Attribute, SymbolResolverTransformerContext> attributeTransformer = getTransformerFactory()
                 .getTransformer(TLAttribute.class, Attribute.class);
-        List<Attribute> attributes = new ArrayList<Attribute>();
+        List<Attribute> attributes = new ArrayList<>();
 
         if (modelAttributes != null) {
             for (TLAttribute modelAttribute : modelAttributes) {
@@ -93,7 +93,7 @@ public abstract class TLComplexTypeTransformer<S, T> extends
     protected List<Property> transformElements(List<TLProperty> modelProperties) {
         ObjectTransformer<TLProperty, Property, SymbolResolverTransformerContext> propertyTransformer = getTransformerFactory()
                 .getTransformer(TLProperty.class, Property.class);
-        List<Property> properties = new ArrayList<Property>();
+        List<Property> properties = new ArrayList<>();
 
         if (modelProperties != null) {
             for (TLProperty modelProperty : modelProperties) {
@@ -115,7 +115,7 @@ public abstract class TLComplexTypeTransformer<S, T> extends
     protected List<Indicator> transformIndicators(List<TLIndicator> modelIndicators) {
         ObjectTransformer<TLIndicator, Indicator, SymbolResolverTransformerContext> indicatorTransformer = getTransformerFactory()
                 .getTransformer(TLIndicator.class, Indicator.class);
-        List<Indicator> indicators = new ArrayList<Indicator>();
+        List<Indicator> indicators = new ArrayList<>();
 
         if (modelIndicators != null) {
             for (TLIndicator modelIndicator : modelIndicators) {

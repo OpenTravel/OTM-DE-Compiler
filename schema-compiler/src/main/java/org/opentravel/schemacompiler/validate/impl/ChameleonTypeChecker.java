@@ -60,7 +60,7 @@ import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
  */
 public class ChameleonTypeChecker {
 
-    private Map<String, List<XSDLibrary>> chameleonSchemaMappings = new HashMap<String, List<XSDLibrary>>();
+    private Map<String,List<XSDLibrary>> chameleonSchemaMappings = new HashMap<>();
     private AbstractLibrary sourceLibrary;
 
     /**
@@ -102,14 +102,14 @@ public class ChameleonTypeChecker {
      * @return Collection<String>
      */
     private Collection<String> scanForDuplicateSymbols() {
-        Set<String> duplicateSymbols = new HashSet<String>();
+        Set<String> duplicateSymbols = new HashSet<>();
 
         for (String namespace : chameleonSchemaMappings.keySet()) {
             List<XSDLibrary> chameleonSchemas = chameleonSchemaMappings.get(namespace);
-            Set<String> chameleonTypes = new HashSet<String>();
-            Set<String> chameleonElements = new HashSet<String>();
-            Set<String> duplicateTypes = new HashSet<String>();
-            Set<String> duplicateElements = new HashSet<String>();
+            Set<String> chameleonTypes = new HashSet<>();
+            Set<String> chameleonElements = new HashSet<>();
+            Set<String> duplicateTypes = new HashSet<>();
+            Set<String> duplicateElements = new HashSet<>();
 
             for (XSDLibrary chameleonSchema : chameleonSchemas) {
                 for (LibraryMember member : chameleonSchema.getNamedMembers()) {
@@ -174,7 +174,7 @@ public class ChameleonTypeChecker {
             List<XSDLibrary> chameleonSchemas = chameleonSchemaMappings.get(referringNamespace);
 
             if (chameleonSchemas == null) {
-                chameleonSchemas = new ArrayList<XSDLibrary>();
+                chameleonSchemas = new ArrayList<>();
                 chameleonSchemaMappings.put(referringNamespace, chameleonSchemas);
             }
             if (!chameleonSchemas.contains(legacySchema)) {
@@ -191,7 +191,7 @@ public class ChameleonTypeChecker {
                 AbstractLibrary includedLibrary = legacySchema.getOwningModel().getLibrary(
                         includedUrl);
 
-                if ((includedLibrary != null) && (includedLibrary instanceof XSDLibrary)
+                if ((includedLibrary instanceof XSDLibrary)
                         && !visitedLibraries.contains(includedLibrary)) {
                     navigateXSDLibraryDependencies((XSDLibrary) includedLibrary, schemaNamespace,
                             visitedLibraries);
@@ -206,7 +206,7 @@ public class ChameleonTypeChecker {
                     AbstractLibrary importedLibrary = legacySchema.getOwningModel().getLibrary(
                             importedUrl);
 
-                    if ((importedLibrary != null) && (importedLibrary instanceof XSDLibrary)
+                    if ((importedLibrary instanceof XSDLibrary)
                             && !visitedLibraries.contains(importedLibrary)) {
                         navigateXSDLibraryDependencies((XSDLibrary) importedLibrary,
                                 schemaNamespace, visitedLibraries);

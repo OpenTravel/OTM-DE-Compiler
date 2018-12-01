@@ -31,6 +31,8 @@ import org.opentravel.schemacompiler.task.TaskFactory;
 import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.validate.FindingMessageFormat;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Test class to verify command-line invocation.
@@ -42,13 +44,14 @@ public class Main {
     private static final String SCRIPT_WINDOWS = "ota2compile.bat";
     private static final String SCRIPT_BASH = "ota2compile.sh";
 
-    private static final String SCRIPT_NAME = System.getProperty("os.name").startsWith("Windows") ? SCRIPT_WINDOWS
-            : SCRIPT_BASH;
+    private static final String SCRIPT_NAME = System.getProperty("os.name").startsWith("Windows") ? SCRIPT_WINDOWS : SCRIPT_BASH;
     private static final String SCRIPT_SYNTAX = SCRIPT_NAME + " [options] <library-file>";
 
     private static final String MESSAGE_RB = "/org/opentravel/schemacompiler/cli/cli-messages.properties";
     private static final ResourceBundle messageBundle;
 
+    private static final Logger log = LoggerFactory.getLogger(Main.class);
+    
     /**
      * Main method invoked from the command-line.
      * 
@@ -75,18 +78,7 @@ public class Main {
 
                 // Select the user-specified schema compiler extension
                 String bindingStyle = taskOptions.getBindingStyle();
-                boolean validBinding = true;
-
-                if (bindingStyle != null) {
-                    if (CompilerExtensionRegistry.getAvailableExtensionIds().contains(bindingStyle)) {
-                        CompilerExtensionRegistry.setActiveExtension(bindingStyle);
-
-                    } else {
-                        System.out.println(MessageFormat.format(
-                                messageBundle.getString("invalidBindingStyle"), bindingStyle));
-                        validBinding = false;
-                    }
-                }
+                boolean validBinding = setActiveBindingStyle( bindingStyle );
 
                 // Execute the compiler for the user-specified file
                 String filename = commandLineArgs.getArgs()[0];
@@ -95,37 +87,75 @@ public class Main {
                 if (validBinding && libraryFile.exists()) {
                     CompileAllCompilerTask compilerTask = TaskFactory
                             .getTask(CompileAllCompilerTask.class);
-
+                    ValidationFindings findings;
+                    
                     compilerTask.applyTaskOptions(taskOptions);
-
-                    ValidationFindings findings = compilerTask.compileOutput(libraryFile);
-
-                    if (findings.hasFinding()) {
-                        System.out.println(messageBundle.getObject("validationFindings"));
-                        String[] messages = findings
-                                .getAllValidationMessages(FindingMessageFormat.IDENTIFIED_FORMAT);
-
-                        for (String message : messages) {
-                            System.out.println(message);
-                        }
-                    }
+                    findings = compilerTask.compileOutput(libraryFile);
+                    logFindings( findings );
+                    
                 } else {
                     throw new IOException(MessageFormat.format(
                             messageBundle.getString("fileNotFound"), filename));
                 }
+                
             } else {
                 displayHelp();
             }
-        } catch (Throwable t) {
-            Throwable rootCause = getRootCauseException(t);
+            
+        } catch (Exception e) {
+            Throwable rootCause = getRootCauseException(e);
             String errorMessage = MessageFormat.format(messageBundle.getString("errorMessage"),
                     ((rootCause.getMessage() == null) ? rootCause.getClass().getSimpleName()
                             : rootCause.getMessage()));
 
-            System.out.println(errorMessage);
+            log.error(errorMessage);
         }
     }
 
+    /**
+     * Assigns the active binding style for the OTM compiler.  If the specified
+     * binding style is valid this method will return true; false otherwise.
+     * 
+     * @param bindingStyle  the binding style to assign
+     * @return boolean
+     */
+    private boolean setActiveBindingStyle(String bindingStyle) {
+        boolean validBinding = true;
+
+        if (bindingStyle != null) {
+            if (CompilerExtensionRegistry.getAvailableExtensionIds().contains(bindingStyle)) {
+                CompilerExtensionRegistry.setActiveExtension(bindingStyle);
+
+            } else {
+            	if (log.isErrorEnabled()) {
+                    log.error(MessageFormat.format(
+                            messageBundle.getString("invalidBindingStyle"), bindingStyle));
+            	}
+                validBinding = false;
+            }
+        }
+        return validBinding;
+    }
+    
+    /**
+     * Logs the given set of validation findings.  If no errors/warnings
+     * exist, no output will be produced.
+     * 
+     * @param findings  the validation findings to log
+     */
+    private void logFindings(ValidationFindings findings) {
+        if (findings.hasFinding() && log.isInfoEnabled()) {
+            String[] messages = findings
+                    .getAllValidationMessages(FindingMessageFormat.IDENTIFIED_FORMAT);
+
+            log.info(messageBundle.getObject("validationFindings").toString());
+            
+            for (String message : messages) {
+                log.info(message);
+            }
+        }
+    }
+    
     /**
      * Returns the command-line options for the OTA2 compiler.
      * 
@@ -198,8 +228,8 @@ public class Main {
         try {
             messageBundle = new PropertyResourceBundle(Main.class.getResourceAsStream(MESSAGE_RB));
 
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 
@@ -212,8 +242,8 @@ public class Main {
             // compiler extension (as determined by the local configuration file).
             CompilerExtensionRegistry.getActiveExtension();
 
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

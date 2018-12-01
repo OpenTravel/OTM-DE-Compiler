@@ -182,7 +182,7 @@ public abstract class AbstractWsdlTransformer<S, T> extends AbstractCodegenTrans
      */
     protected List<TLOperation> getInheritedOperations(TLService source) {
         // Identify the prior versions of the given service
-        List<TLService> serviceVersions = new ArrayList<TLService>();
+        List<TLService> serviceVersions = new ArrayList<>();
         try {
             TLLibrary library = (TLLibrary) source.getOwningLibrary();
 
@@ -199,15 +199,15 @@ public abstract class AbstractWsdlTransformer<S, T> extends AbstractCodegenTrans
         }
 
         // Construct a registry of serivce operations that are defined for each version
-        Map<String, List<TLOperation>> operationRegistry = new HashMap<String, List<TLOperation>>();
-        List<String> operationNames = new ArrayList<String>();
+        Map<String,List<TLOperation>> operationRegistry = new HashMap<>();
+        List<String> operationNames = new ArrayList<>();
 
         for (TLService serviceVersion : serviceVersions) {
             for (TLOperation operation : serviceVersion.getOperations()) {
                 List<TLOperation> operationList = operationRegistry.get(operation.getName());
 
                 if (operationList == null) {
-                    operationList = new ArrayList<TLOperation>();
+                    operationList = new ArrayList<>();
                     operationRegistry.put(operation.getName(), operationList);
                     operationNames.add(operation.getName());
                 }
@@ -216,7 +216,7 @@ public abstract class AbstractWsdlTransformer<S, T> extends AbstractCodegenTrans
         }
 
         // Assembly the resulting list in the order that each of the operations were encountered
-        List<TLOperation> inheritedOperations = new ArrayList<TLOperation>();
+        List<TLOperation> inheritedOperations = new ArrayList<>();
 
         for (String operationName : operationNames) {
             inheritedOperations.addAll(operationRegistry.get(operationName));
@@ -233,7 +233,7 @@ public abstract class AbstractWsdlTransformer<S, T> extends AbstractCodegenTrans
      * @return List<TLService>
      */
     protected List<TLService> getDependentServices(TLService service) {
-        List<TLService> serviceList = new ArrayList<TLService>();
+        List<TLService> serviceList = new ArrayList<>();
 
         for (TLOperation operation : getInheritedOperations(service)) {
             if (!serviceList.contains(operation.getOwningService())) {

@@ -37,8 +37,8 @@ import org.opentravel.schemacompiler.event.ModelEventType;
  */
 abstract class ChildEntityListManager<C, O> {
 
-    private List<DerivedChildEntityListManager<C, ?>> derivedListManagers = new ArrayList<DerivedChildEntityListManager<C, ?>>();
-    private List<C> children = new ArrayList<C>();
+    private List<DerivedChildEntityListManager<C,?>> derivedListManagers = new ArrayList<>();
+    private List<C> children = new ArrayList<>();
     private O owner;
     private ModelEventType addEventType;
     private ModelEventType removeEventType;
@@ -220,7 +220,7 @@ abstract class ChildEntityListManager<C, O> {
      * removed.
      */
     public void clearChildren() {
-        List<C> childList = new ArrayList<C>(children);
+        List<C> childList = new ArrayList<>(children);
 
         for (C child : childList) {
             removeChild(child);

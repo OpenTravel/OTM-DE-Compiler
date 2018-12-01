@@ -83,13 +83,13 @@ public class CoreObjectWriter
 				for (TLRole role : roles) {
 					HtmlTree tdName = new HtmlTree(HtmlTag.TD);
 					tdName.setStyle(HtmlStyle.colFirst);
-					Content strong = HtmlTree.STRONG(new RawHtml(role.getName()));
-					Content code = HtmlTree.CODE(strong);
+					Content strong = HtmlTree.strong(new RawHtml(role.getName()));
+					Content code = HtmlTree.code(strong);
 					tdName.addContent(code);
 					HtmlTree tdDescription = new HtmlTree(HtmlTag.TD);
 					setInfoColumnStyle(tdDescription);			
 					writer.addSummaryComment(role, tdDescription);
-					HtmlTree tr = HtmlTree.TR(tdName);
+					HtmlTree tr = HtmlTree.tr(tdName);
 					tr.addContent(tdDescription);
 					addRowStyle(tr, roles.indexOf(role));
 					tableTree.addContent(tr);

@@ -45,6 +45,8 @@ import org.opentravel.schemacompiler.transform.TransformerFactory;
 import org.opentravel.schemacompiler.transform.symbols.DefaultTransformerContext;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Allows users with the appropriate permissions to update a library (OTM) file with
@@ -63,6 +65,8 @@ public class LibraryCrcManager {
 	private static final String SCRIPT_NAME = System.getProperty("os.name").startsWith("Windows") ? SCRIPT_WINDOWS : SCRIPT_BASH;
 	private static final String SCRIPT_SYNTAX = SCRIPT_NAME + " [options] <otm-library-file>";
 	
+    private static final Logger log = LoggerFactory.getLogger(LibraryCrcManager.class);
+    
 	private ProtectedNamespaceRegistry namespaceRegistry = ProtectedNamespaceRegistry.getInstance();
 	
 	/**
@@ -87,41 +91,56 @@ public class LibraryCrcManager {
 				File libraryFile = Utils.getFileFromCommandLineArg(commandLineArgs.getArgs()[0]);
 				Object jaxbLibrary = loadLibrary(libraryFile);
 				TLLibrary library = transformLibrary(libraryFile, jaxbLibrary);
-				ProtectedNamespaceCredentials credentials = null;
 				
 				// For protected namespaces, ensure the user's credentials allow write-access to the library
-				if (namespaceRegistry.isProtectedNamespace(library.getNamespace())) {
-					String userId = commandLineArgs.hasOption('u') ? commandLineArgs.getOptionValue('u') : null;
-					String password = commandLineArgs.hasOption('p') ? commandLineArgs.getOptionValue('p') : null;
-					
-					if ((userId == null) || (password == null)) {
-						throw new SchemaCompilerSecurityException(
-								"User credentials are required to reset the CRC for libraries in a protected namespace.");
-					}
-					credentials = buildCredentials(userId, password);
-					
-					if (!namespaceRegistry.hasWriteAccess(library.getNamespace(), credentials)) {
-						throw new SchemaCompilerSecurityException(
-								"The userID and/or password provided are not valid for the library's protected namespace.");
-					}
-					LibrarySecurityHandler.setUserCredentials(credentials);
-				}
+				checkWriteAccess(library, commandLineArgs);
 				
 				// Re-save the file (forces re-calculation of the CRC)
 				new LibraryModelSaver().saveLibrary(library);
-				System.out.println( MessageFormat.format(
-						Utils.getMessageBundle().getString("crc.success"), libraryFile.getName()) );
+				
+				if (log.isInfoEnabled()) {
+					log.info( MessageFormat.format(
+							Utils.getMessageBundle().getString("crc.success"), libraryFile.getName()) );
+				}
 				
 			} else {
 				displayHelp();
 			}
 			
-		} catch (Throwable t) {
-			Throwable rootCause = Utils.getRootCauseException(t);
+		} catch (Exception e) {
+			Throwable rootCause = Utils.getRootCauseException(e);
 			String errorMessage = MessageFormat.format(Utils.getMessageBundle().getString("crc.errorMessage"),
 					((rootCause.getMessage() == null) ? rootCause.getClass().getSimpleName() : rootCause.getMessage()) );
 			
-			System.out.println(errorMessage);
+			log.error(errorMessage);
+		}
+	}
+	
+	/**
+	 * Performs checks to ensure the user has write access to the given library.
+	 * 
+	 * @param library  the library for which to check write access
+	 * @param commandLineArgs  command-line arguments
+	 * @throws SchemaCompilerSecurityException  thrown if the user does not have write access
+	 */
+	private void checkWriteAccess(TLLibrary library, CommandLine commandLineArgs)
+			throws SchemaCompilerSecurityException {
+		if (namespaceRegistry.isProtectedNamespace(library.getNamespace())) {
+			String userId = commandLineArgs.hasOption('u') ? commandLineArgs.getOptionValue('u') : null;
+			String password = commandLineArgs.hasOption('p') ? commandLineArgs.getOptionValue('p') : null;
+			ProtectedNamespaceCredentials credentials;
+			
+			if ((userId == null) || (password == null)) {
+				throw new SchemaCompilerSecurityException(
+						"User credentials are required to reset the CRC for libraries in a protected namespace.");
+			}
+			credentials = buildCredentials(userId, password);
+			
+			if (!namespaceRegistry.hasWriteAccess(library.getNamespace(), credentials)) {
+				throw new SchemaCompilerSecurityException(
+						"The userID and/or password provided are not valid for the library's protected namespace.");
+			}
+			LibrarySecurityHandler.setUserCredentials(credentials);
 		}
 	}
 	

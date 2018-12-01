@@ -78,7 +78,7 @@ public class AuthorizationResource extends FileResource<NamespaceAuthorizations>
      * @return Set<RepositoryPermission>
      */
     public Set<RepositoryPermission> getGrantedPermissions(UserPrincipal user) {
-        Set<RepositoryPermission> grantedPermissions = new HashSet<RepositoryPermission>();
+        Set<RepositoryPermission> grantedPermissions = new HashSet<>();
         NamespaceAuthorizations authorizations = getResource();
 
         // Search the grants/denies to determine which permissions apply to this user
@@ -99,7 +99,7 @@ public class AuthorizationResource extends FileResource<NamespaceAuthorizations>
      * @return Set<RepositoryPermission>
      */
     public Set<RepositoryPermission> getDeniedPermissions(UserPrincipal user) {
-        Set<RepositoryPermission> deniedPermissions = new HashSet<RepositoryPermission>();
+        Set<RepositoryPermission> deniedPermissions = new HashSet<>();
         NamespaceAuthorizations authorizations = getResource();
 
         // Search the grants/denies to determine which permissions apply to this user
@@ -170,6 +170,7 @@ public class AuthorizationResource extends FileResource<NamespaceAuthorizations>
             fileManager.addToChangeSet(dataFile);
             fileUtils.saveNamespaceAuthorizations(dataFile, authorizations);
             fileManager.commitChangeSet();
+            success = true;
 
         } catch (IOException e) {
             throw new RepositoryException("Error saving the group assignments file.", e);

@@ -54,6 +54,11 @@ import org.opentravel.schemacompiler.visitor.ModelNavigator;
 public class FacetCodegenUtils {
 	
 	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private FacetCodegenUtils() {}
+	
+	/**
 	 * For contextual facets, this method will return the value of the 'name' field.  For
 	 * non-contextual facets, null will be returned.
 	 * 
@@ -77,7 +82,7 @@ public class FacetCodegenUtils {
      * @return List<TLFacet>
      */
     public static List<TLFacet> getAllFacetsOfType(TLFacetOwner owner, TLFacetType facetType) {
-        List<TLFacet> facetList = new ArrayList<TLFacet>();
+        List<TLFacet> facetList = new ArrayList<>();
 
         if (facetType.isContextual()) {
             if (owner instanceof TLBusinessObject) {
@@ -136,6 +141,7 @@ public class FacetCodegenUtils {
      * @param facetContext  the context ID of the facet to return (only used for contextual facets)
      * @param facetLabel  the label of the facet to return (only used for contextual or action facets)
      * @return TLFacet
+     * @deprecated Use the {@link #getFacetOfType(TLFacetOwner, TLFacetType, String)} method instead
      */
     @Deprecated
     public static TLFacet getFacetOfType(TLFacetOwner owner, TLFacetType facetType,
@@ -400,7 +406,7 @@ public class FacetCodegenUtils {
      * @return List<TLFacet>
      */
     public static List<TLFacet> getLocalFacetHierarchy(TLFacet facet) {
-        List<TLFacet> localHierarchy = new ArrayList<TLFacet>();
+        List<TLFacet> localHierarchy = new ArrayList<>();
         
         getLocalFacetHierarchy( facet, localHierarchy, new HashSet<TLFacet>() );
         return localHierarchy;
@@ -601,7 +607,7 @@ public class FacetCodegenUtils {
         Set<String> inheritedFacetNames = new HashSet<>();
         List<TLContextualFacet> inheritedFacets = new ArrayList<>();
         TLFacetOwner extendedOwner = getFacetOwnerExtension(facetOwner);
-        Set<TLFacetOwner> visitedOwners = new HashSet<TLFacetOwner>();
+        Set<TLFacetOwner> visitedOwners = new HashSet<>();
 
         // Find all of the inherited facets of the specified facet type
         while (extendedOwner != null) {
@@ -665,10 +671,10 @@ public class FacetCodegenUtils {
      * @return List<TLActionFacet>
      */
     public static List<TLActionFacet> findGhostFacets(TLResource resource) {
-        Set<String> inheritedFacetNames = new HashSet<String>();
-        List<TLActionFacet> inheritedFacets = new ArrayList<TLActionFacet>();
+        Set<String> inheritedFacetNames = new HashSet<>();
+        List<TLActionFacet> inheritedFacets = new ArrayList<>();
         TLResource extendedResource = ResourceCodegenUtils.getExtendedResource(resource);
-        Set<TLResource> visitedOwners = new HashSet<TLResource>();
+        Set<TLResource> visitedOwners = new HashSet<>();
 
         // Find all of the inherited facets of the specified facet type
         while (extendedResource != null) {
@@ -697,7 +703,7 @@ public class FacetCodegenUtils {
         // facets that are declared by the facetOwner's ancestors. Any ancestor facets that do not
         // have a matching item that is explicitly declared by the facetOwner should be considered a
         // ghost facet.
-        List<TLActionFacet> ghostFacets = new ArrayList<TLActionFacet>();
+        List<TLActionFacet> ghostFacets = new ArrayList<>();
     	
         for (TLActionFacet inheritedFacet : inheritedFacets) {
         	TLActionFacet declaredFacet = resource.getActionFacet(inheritedFacet.getName());
@@ -839,7 +845,7 @@ public class FacetCodegenUtils {
     private static Map<TLFacetOwner,List<TLFacetOwner>> buildExtensionRegistry(TLModel model) {
     	final Map<TLFacetOwner,List<TLFacetOwner>> registry = new HashMap<>();
     	ModelElementVisitor visitor = new ModelElementVisitorAdapter() {
-			public boolean visitExtension(TLExtension extension) {
+    		@Override public boolean visitExtension(TLExtension extension) {
 				TLExtensionOwner extendingEntity = extension.getOwner();
 				NamedEntity extendedEntity = extension.getExtendsEntity();
 				
@@ -872,7 +878,7 @@ public class FacetCodegenUtils {
         boolean hasRequest = factory.getDelegate(operation.getRequest()).hasContent();
         boolean hasResponse = factory.getDelegate(operation.getResponse()).hasContent();
         boolean hasNotification = factory.getDelegate(operation.getNotification()).hasContent();
-        OperationType opType = OperationType.INVALID;
+        OperationType opType;
 
         if (hasRequest && !hasResponse && !hasNotification) {
             opType = OperationType.ONE_WAY;

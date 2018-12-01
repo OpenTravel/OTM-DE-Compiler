@@ -315,7 +315,7 @@ public class DisplayFormatter {
 		// Default value is the assigned field name, but this may be different for elements (properties)
 		if (field instanceof TLProperty) {
 			TLProperty element = (TLProperty) field;
-	        TLPropertyType propertyType = PropertyCodegenUtils.resolvePropertyType( element.getOwner(), element.getType() );
+	        TLPropertyType propertyType = PropertyCodegenUtils.resolvePropertyType( element.getType() );
 			
 	        // If the property has a global element, use that name instead of the one assigned to the property
 	        if (PropertyCodegenUtils.hasGlobalElement( propertyType )) {

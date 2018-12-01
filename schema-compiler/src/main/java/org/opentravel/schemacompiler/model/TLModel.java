@@ -46,8 +46,8 @@ import org.opentravel.schemacompiler.validate.Validatable;
  */
 public class TLModel implements Validatable {
 
-    private List<AbstractLibrary> libraryList = new ArrayList<AbstractLibrary>();
-    private List<ModelEventListener<?, ?>> listeners = new ArrayList<ModelEventListener<?, ?>>();
+    private List<AbstractLibrary> libraryList = new ArrayList<>();
+    private List<ModelEventListener<?,?>> listeners = new ArrayList<>();
     private boolean listenersEnabled = true;
     private int chameleonCounter;
 
@@ -72,7 +72,7 @@ public class TLModel implements Validatable {
      * @return Collection<String>
      */
     public Collection<String> getNamespaces() {
-        Set<String> namespaceSet = new HashSet<String>();
+        Set<String> namespaceSet = new HashSet<>();
 
         for (AbstractLibrary library : libraryList) {
             String namespace = library.getNamespace();
@@ -230,9 +230,9 @@ public class TLModel implements Validatable {
             destLibrary.addNamedMember(member);
 
             // Update the import/includes of the source and destination libraries
-            OwnershipEvent<TLLibrary, LibraryMember> removeEvent = new OwnershipEvent<TLLibrary, LibraryMember>(
+            OwnershipEvent<TLLibrary,LibraryMember> removeEvent = new OwnershipEvent<>(
                     ModelEventType.MEMBER_REMOVED, sourceLibrary, member);
-            OwnershipEvent<TLLibrary, LibraryMember> addEvent = new OwnershipEvent<TLLibrary, LibraryMember>(
+            OwnershipEvent<TLLibrary,LibraryMember> addEvent = new OwnershipEvent<>(
                     ModelEventType.MEMBER_ADDED, destLibrary, member);
             LibraryMemberChangeIntegrityChecker lmcListener = new LibraryMemberChangeIntegrityChecker();
 
@@ -241,7 +241,7 @@ public class TLModel implements Validatable {
 
             // Update the typeName fields for all entities in the model that reference
             // the moved entity
-            ValueChangeEvent<ModelElement, NamedEntity> nameChangeEvent = new ValueChangeEvent<ModelElement, NamedEntity>(
+            ValueChangeEvent<ModelElement,NamedEntity> nameChangeEvent = new ValueChangeEvent<>(
                     ModelEventType.NAME_MODIFIED, member);
             new NameChangeIntegrityChecker().processModelEvent(nameChangeEvent);
 
@@ -260,7 +260,7 @@ public class TLModel implements Validatable {
         boolean listenerFlag = isListenersEnabled();
 
         setListenersEnabled(false);
-        libraryList = new ArrayList<AbstractLibrary>();
+        libraryList = new ArrayList<>();
         initModel();
         setListenersEnabled(listenerFlag);
     }
@@ -326,7 +326,7 @@ public class TLModel implements Validatable {
      * @return List<BuiltInLibrary>
      */
     public List<BuiltInLibrary> getBuiltInLibraries() {
-        List<BuiltInLibrary> libraries = new ArrayList<BuiltInLibrary>();
+        List<BuiltInLibrary> libraries = new ArrayList<>();
 
         for (AbstractLibrary lib : libraryList) {
             if (lib instanceof BuiltInLibrary) {
@@ -342,7 +342,7 @@ public class TLModel implements Validatable {
      * @return List<XSDLibrary>
      */
     public List<XSDLibrary> getLegacySchemaLibraries() {
-        List<XSDLibrary> libraries = new ArrayList<XSDLibrary>();
+        List<XSDLibrary> libraries = new ArrayList<>();
 
         for (AbstractLibrary lib : libraryList) {
             if (lib instanceof XSDLibrary) {
@@ -358,7 +358,7 @@ public class TLModel implements Validatable {
      * @return List<TLLibrary>
      */
     public List<TLLibrary> getUserDefinedLibraries() {
-        List<TLLibrary> libraries = new ArrayList<TLLibrary>();
+        List<TLLibrary> libraries = new ArrayList<>();
 
         for (AbstractLibrary lib : libraryList) {
             if (lib instanceof TLLibrary) {
@@ -377,7 +377,7 @@ public class TLModel implements Validatable {
      * @return List<AbstractLibrary>
      */
     public List<AbstractLibrary> getLibrariesForNamespace(String namespace) {
-        List<AbstractLibrary> libraries = new ArrayList<AbstractLibrary>();
+        List<AbstractLibrary> libraries = new ArrayList<>();
 
         if (namespace != null) {
             for (AbstractLibrary library : libraryList) {
@@ -523,7 +523,7 @@ public class TLModel implements Validatable {
      *            the library to receive the imports
      */
     protected void addBuiltInImports(TLLibrary library) {
-        Map<String, String> existingImports = new HashMap<String, String>();
+        Map<String,String> existingImports = new HashMap<>();
 
         // Collect namespace mappings from the library's existing imports
         for (TLNamespaceImport nsImport : library.getNamespaceImports()) {

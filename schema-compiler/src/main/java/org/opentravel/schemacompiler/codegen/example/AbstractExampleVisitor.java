@@ -79,10 +79,10 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
     protected ExampleValueGenerator exampleValueGenerator;
     protected CodeGenerationWsdlBindings wsdlBindings = null;   
     protected String lastExampleValue;
-	protected Map<QName, List<String>> idRegistry = new HashMap<QName, List<String>>();	
-	protected Stack<TLPropertyOwner> facetStack = new Stack<TLPropertyOwner>();
+	protected Map<QName, List<String>> idRegistry = new HashMap<>();	
+	protected Stack<TLPropertyOwner> facetStack = new Stack<>();
 	protected ExampleContext context = new ExampleContext(null);
-	protected Stack<ExampleContext> contextStack = new Stack<ExampleContext>();
+	protected Stack<ExampleContext> contextStack = new Stack<>();
 
 
     /**
@@ -589,7 +589,7 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
 		List<String> idList = idRegistry.get(entityName);
 
 		if (idList == null) {
-			idList = new ArrayList<String>();
+			idList = new ArrayList<>();
 			idRegistry.put(entityName, idList);
 		}
 		idList.add(id);
@@ -791,7 +791,7 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
  			} else {
  				// Build a list of eligible entity names that qualify for the
  				// reference
- 				List<QName> entityNames = new ArrayList<QName>();
+ 				List<QName> entityNames = new ArrayList<>();
  				NamedEntity entity = referencedEntity;
 
  				// Add all applicable names for the entity and its alias

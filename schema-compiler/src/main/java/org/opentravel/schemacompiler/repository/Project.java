@@ -44,9 +44,9 @@ public class Project {
     private String description;
     private ProjectItem defaultItem;
     private String defaultContextId;
-    private List<ProjectItem> projectItems = new ArrayList<ProjectItem>();
-    private List<ProjectItemType> failedItems = new ArrayList<ProjectItemType>();
-    private Collection<ProjectChangeListener> listeners = new ArrayList<ProjectChangeListener>();
+    private List<ProjectItem> projectItems = new ArrayList<>();
+    private List<ProjectItemType> failedItems = new ArrayList<>();
+    private Collection<ProjectChangeListener> listeners = new ArrayList<>();
 
     /**
      * Constructor that assigns the <code>ProjectManger</code> that will own the new project.
@@ -217,7 +217,7 @@ public class Project {
     public ProjectItem getDefaultItem() {
         ProjectItem result = defaultItem;
 
-        if ((result == null) && (projectItems.size() > 0)) {
+        if ((result == null) && !projectItems.isEmpty()) {
             result = projectItems.get(0);
         }
         return result;
@@ -246,7 +246,7 @@ public class Project {
      * @return List<ProjectItem>
      */
     public List<ProjectItem> getProjectItems() {
-        return new ArrayList<ProjectItem>(projectItems);
+        return new ArrayList<>(projectItems);
     }
 
     /**

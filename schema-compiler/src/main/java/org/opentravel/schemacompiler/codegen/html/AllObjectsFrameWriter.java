@@ -139,13 +139,13 @@ public class AllObjectsFrameWriter extends HtmlDocletWriter {
     protected void buildAllMembersFile(boolean wantFrames) throws IOException {
         String label = configuration.getText("doclet.All_Members");
         Content body = getBody(false, getWindowTitle(label));
-        Content heading = HtmlTree.HEADING(HtmlConstants.TITLE_HEADING,
+        Content heading = HtmlTree.heading(HtmlConstants.TITLE_HEADING,
                 HtmlStyle.bar, allMembersLabel);
         body.addContent(heading);
         Content ul = new HtmlTree(HtmlTag.UL);
         // Generate the class links and add it to the tdFont tree.
         addAllClasses(ul, wantFrames);
-        Content div = HtmlTree.DIV(HtmlStyle.indexContainer, ul);
+        Content div = HtmlTree.div(HtmlStyle.indexContainer, ul);
         body.addContent(div);
         printHtmlDocument(null, false, body);
     }
@@ -192,7 +192,7 @@ public class AllObjectsFrameWriter extends HtmlDocletWriter {
             }else{
             	linkContent = new StringContent();
             }
-            Content li = HtmlTree.LI(linkContent);
+            Content li = HtmlTree.li(linkContent);
             content.addContent(li);
         }
     }

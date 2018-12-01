@@ -35,8 +35,8 @@ import org.opentravel.schemacompiler.visitor.DependencyNavigator;
  */
 public class ProjectItemDependencyNavigator extends DependencyNavigator {
 
-    protected Set<String> visitedLibraries = new HashSet<String>();
-    protected Set<NamedEntity> visitedEntities = new HashSet<NamedEntity>();
+    protected Set<String> visitedLibraries = new HashSet<>();
+    protected Set<NamedEntity> visitedEntities = new HashSet<>();
 
     /**
      * @see org.opentravel.schemacompiler.visitor.DependencyNavigator#navigateDependency(org.opentravel.schemacompiler.model.NamedEntity)
@@ -118,7 +118,7 @@ public class ProjectItemDependencyNavigator extends DependencyNavigator {
      * @return List<AbstractLibrary>
      */
     private List<AbstractLibrary> getPreviousLibraryVersions(AbstractLibrary library) {
-        List<AbstractLibrary> previousVersions = new ArrayList<AbstractLibrary>();
+        List<AbstractLibrary> previousVersions = new ArrayList<>();
 
         if ((library instanceof TLLibrary) && (library.getOwningModel() != null)) {
             try {

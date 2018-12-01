@@ -38,7 +38,7 @@ import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
  */
 public class ContextReferrerVisitor extends ModelElementVisitorAdapter {
 
-    private List<TLContextReferrer> contextReferrers = new ArrayList<TLContextReferrer>();
+    private List<TLContextReferrer> contextReferrers = new ArrayList<>();
     private String contextId;
 
     /**

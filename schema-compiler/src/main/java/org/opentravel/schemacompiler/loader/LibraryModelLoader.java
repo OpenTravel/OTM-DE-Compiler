@@ -86,9 +86,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
     private static final Logger log = LoggerFactory.getLogger(LibraryModelLoader.class);
 
     /** Internal indicator used to define the possible types of loader operations. */
-    private static enum OperationType {
-        CLIENT_REQUESTED, INCLUDE, IMPORT
-    };
+    private enum OperationType { CLIENT_REQUESTED, INCLUDE, IMPORT }
 
     private LibraryNamespaceResolver namespaceResolver = new DefaultLibraryNamespaceResolver();
     private LibraryModuleLoader<C> moduleLoader;
@@ -97,7 +95,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
     private TLModel libraryModel;
 
     private ValidationFindings loaderFindings = new ValidationFindings();
-    private Map<String, ValidationFinding> importLoaderFindings = new HashMap<String, ValidationFinding>();
+    private Map<String, ValidationFinding> importLoaderFindings = new HashMap<>();
 
     /**
      * Default constructor that creates a new <code>TLModel</code> instance to be populated by the
@@ -173,11 +171,8 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
      * 
      * @param namespaceResolver
      *            the namespace resolver to assign
-     * @throws LibraryLoaderException
-     *             thrown if a system-level exception occurs
      */
-    public void setNamespaceResolver(LibraryNamespaceResolver namespaceResolver)
-            throws LibraryLoaderException {
+    public void setNamespaceResolver(LibraryNamespaceResolver namespaceResolver) {
         this.namespaceResolver = namespaceResolver;
         this.namespaceResolver.setModel(libraryModel);
     }
@@ -305,7 +300,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
                     jaxbArtifacts);
 
             // Build a list of namespaces for the modules we just loaded
-            Collection<String> namespaces = new HashSet<String>();
+            Collection<String> namespaces = new HashSet<>();
 
             for (LibraryModuleInfo<Object> libraryInfo : jaxbArtifacts.libraryUrlMappings.values()) {
                 namespaces.add(libraryInfo.getNamespace());
@@ -366,7 +361,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
         ValidationFindings findings = new ValidationFindings();
 
         // Add the namespace/file import findings that are still valid
-        Set<String> validLibraryKeys = new HashSet<String>();
+        Set<String> validLibraryKeys = new HashSet<>();
 
         for (AbstractLibrary library : libraryModel.getAllLibraries()) {
             if (library instanceof BuiltInLibrary)
@@ -453,7 +448,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
             // Verify that the namespace of the module we are adding matches the expectations
             if ((expectedNamespace != null)
                     && !expectedNamespace.equals(libraryInfo.getNamespace())
-                    && !(operationType == OperationType.CLIENT_REQUESTED)
+                    && (operationType != OperationType.CLIENT_REQUESTED)
                     && !isAllowedNamespaceVariation(expectedNamespace, libraryInfo.getNamespace(),
                             libraryInfo.getVersionScheme())) {
                 String errorKey = (operationType == OperationType.INCLUDE) ? ERROR_NAMESPACE_MISMATCH_ON_INCLUDE
@@ -527,14 +522,14 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
                     addLoaderFinding(FindingType.ERROR, new LibraryValidationSource(library),
                             ERROR_INVALID_NAMESPACE_URI_ON_IMPORT, nsImport.getNamespace());
                     log.debug("Invalid namespace URI on import: " + libraryInfo.getNamespace(), e);
-                } catch (Throwable t) {
+                } catch (Exception e) {
                     addLoaderFinding(FindingType.ERROR, new LibraryValidationSource(library),
                             ERROR_UNKNOWN_EXCEPTION_DURING_MODULE_LOAD,
-                            libraryInfo.getLibraryName(), ExceptionUtils.getExceptionClass(t)
-                                    .getSimpleName(), ExceptionUtils.getExceptionMessage(t));
+                            libraryInfo.getLibraryName(), ExceptionUtils.getExceptionClass(e)
+                                    .getSimpleName(), ExceptionUtils.getExceptionMessage(e));
                     log.debug(
                             "Unexpected exception loading liberary module: "
-                                    + libraryInfo.getLibraryName(), t);
+                                    + libraryInfo.getLibraryName(), e);
                 }
             }
 
@@ -584,7 +579,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
                     	}
                     	
                         Collection<LibraryInputSource<C>> versionInputSources = getInputSources(
-                                new URI(versionNS), libraryInfo.getVersionScheme(), fileHint.toString());
+                                new URI(versionNS), libraryInfo.getVersionScheme(), fileHint);
 
                         if (!versionInputSources.isEmpty()) {
                             for (LibraryInputSource<C> dlInputSource : versionInputSources) {
@@ -600,13 +595,13 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
                         addLoaderFinding(FindingType.ERROR, new LibraryValidationSource(library),
                                 ERROR_INVALID_NAMESPACE_URI_ON_IMPORT, versionNS);
                         log.debug("Invalid namespace URI on import: " + libraryInfo.getNamespace(), e);
-                    } catch (Throwable t) {
+                    } catch (Exception e) {
                         addLoaderFinding(FindingType.ERROR, new LibraryValidationSource(library),
                                 ERROR_UNKNOWN_EXCEPTION_DURING_MODULE_LOAD,
-                                libraryInfo.getLibraryName(), ExceptionUtils.getExceptionClass(t)
-                                        .getSimpleName(), ExceptionUtils.getExceptionMessage(t));
+                                libraryInfo.getLibraryName(), ExceptionUtils.getExceptionClass(e)
+                                        .getSimpleName(), ExceptionUtils.getExceptionMessage(e));
                         log.debug("Unexpected exception loading liberary module: "
-                                        + libraryInfo.getLibraryName(), t);
+                                        + libraryInfo.getLibraryName(), e);
                     }
                 }
             } catch (VersionSchemeException e) {
@@ -726,15 +721,15 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
                     addLoaderFinding(FindingType.ERROR, new URLValidationSource(schemaUrl),
                             ERROR_INVALID_NAMESPACE_URI_ON_IMPORT, nsImport.getNamespace());
                     log.debug("Invalid namespace URI on import: " + schema.getTargetNamespace(), e);
-                } catch (Throwable t) {
+                } catch (Exception e) {
                     addLoaderFinding(FindingType.ERROR, new URLValidationSource(schemaUrl),
                             ERROR_UNKNOWN_EXCEPTION_DURING_MODULE_LOAD,
                             URLUtils.getShortRepresentation(schemaUrl), ExceptionUtils
-                                    .getExceptionClass(t).getSimpleName(),
-                            ExceptionUtils.getExceptionMessage(t));
+                                    .getExceptionClass(e).getSimpleName(),
+                            ExceptionUtils.getExceptionMessage(e));
                     log.debug(
                             "Unexpected exception loading schema module: "
-                                    + URLUtils.getShortRepresentation(schemaUrl), t);
+                                    + URLUtils.getShortRepresentation(schemaUrl), e);
                 }
             }
         }
@@ -774,15 +769,15 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
                             WARNING_DUPLICATE_SCHEMA, URLUtils.getShortRepresentation(schemaUrl));
                 }
 
-            } catch (Throwable t) {
+            } catch (Exception e) {
                 addLoaderFinding(FindingType.ERROR, new URLValidationSource(schemaUrl),
                         ERROR_UNKNOWN_EXCEPTION_DURING_TRANSFORMATION,
                         URLUtils.getShortRepresentation(schemaUrl), ExceptionUtils
-                                .getExceptionClass(t).getSimpleName(),
-                        ExceptionUtils.getExceptionMessage(t));
+                                .getExceptionClass(e).getSimpleName(),
+                        ExceptionUtils.getExceptionMessage(e));
                 log.debug(
                         "Unexpected exception during library transformation: "
-                                + URLUtils.getShortRepresentation(schemaUrl), t);
+                                + URLUtils.getShortRepresentation(schemaUrl), e);
             }
         }
         resolveLegacySchemaAliases();
@@ -857,15 +852,15 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
                     }
                 }
 
-            } catch (Throwable t) {
+            } catch (Exception e) {
                 addLoaderFinding(FindingType.ERROR,
                         new LibraryValidationSource(libraryInfo.getJaxbArtifact()),
                         ERROR_UNKNOWN_EXCEPTION_DURING_TRANSFORMATION,
-                        libraryInfo.getLibraryName(), ExceptionUtils.getExceptionClass(t)
-                                .getSimpleName(), ExceptionUtils.getExceptionMessage(t));
+                        libraryInfo.getLibraryName(), ExceptionUtils.getExceptionClass(e)
+                                .getSimpleName(), ExceptionUtils.getExceptionMessage(e));
                 log.debug(
                         "Unexpected exception during library transformation: "
-                                + libraryInfo.getLibraryName(), t);
+                                + libraryInfo.getLibraryName(), e);
             }
         }
     }
@@ -884,12 +879,12 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
                 jaxbArtifacts.validationFindings.addAll(TLModelCompileValidator
                         .validateModelElement(library, false));
 
-            } catch (Throwable t) {
+            } catch (Exception e) {
                 addLoaderFinding(FindingType.ERROR, library,
                         ERROR_UNKNOWN_EXCEPTION_DURING_VALIDATION, library.getName(),
-                        ExceptionUtils.getExceptionClass(t).getSimpleName(),
-                        ExceptionUtils.getExceptionMessage(t));
-                log.debug("Unexpected exception validating liberary module: " + library.getName(), t);
+                        ExceptionUtils.getExceptionClass(e).getSimpleName(),
+                        ExceptionUtils.getExceptionMessage(e));
+                log.debug("Unexpected exception validating liberary module: " + library.getName(), e);
             }
         }
     }
@@ -900,7 +895,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
      * definitions.
      */
     private void resolveLegacySchemaAliases() {
-        Map<String, List<XSDLibrary>> schemasByNamespace = new HashMap<String, List<XSDLibrary>>();
+        Map<String,List<XSDLibrary>> schemasByNamespace = new HashMap<>();
 
         // First, collect a list of XSDLibraries by namespace
         for (String namespace : libraryModel.getNamespaces()) {
@@ -909,7 +904,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
                     List<XSDLibrary> schemaList = schemasByNamespace.get(namespace);
 
                     if (schemaList == null) {
-                        schemaList = new ArrayList<XSDLibrary>();
+                        schemaList = new ArrayList<>();
                         schemasByNamespace.put(namespace, schemaList);
                     }
                     schemaList.add((XSDLibrary) library);
@@ -919,8 +914,8 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
 
         // Resolve element references within each respective namespace
         for (String namespace : schemasByNamespace.keySet()) {
-            Map<String, XSDComplexType> typesByName = new HashMap<String, XSDComplexType>();
-            List<XSDElement> elementList = new ArrayList<XSDElement>();
+            Map<String,XSDComplexType> typesByName = new HashMap<>();
+            List<XSDElement> elementList = new ArrayList<>();
 
             // Organize collections of all types and elements within this namespace
             for (XSDLibrary schema : schemasByNamespace.get(namespace)) {
@@ -980,7 +975,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
      */
     private Collection<LibraryInputSource<C>> getInputSources(URI libraryNamespace,
             String versionScheme, String fileHint) throws LibraryLoaderException {
-        List<String> fileHints = new ArrayList<String>();
+        List<String> fileHints = new ArrayList<>();
 
         if (fileHint != null) {
             fileHints.add(fileHint);
@@ -1002,12 +997,10 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
      *            the list of file hints that should be consindered when attempting to identify the
      *            input source(s)
      * @return Collection<LibraryInputSource<C>>
-     * @throws LibraryLoaderException
-     *             thrown if a system-level exception occurs
      */
     private Collection<LibraryInputSource<C>> getInputSources(URI libraryNamespace,
-            String versionScheme, List<String> fileHints) throws LibraryLoaderException {
-        Collection<LibraryInputSource<C>> inputSources = new ArrayList<LibraryInputSource<C>>();
+            String versionScheme, List<String> fileHints) {
+        Collection<LibraryInputSource<C>> inputSources = new ArrayList<>();
 
         // Special Case: Ignore the XML schema namespace since it is predefined in every TLModel
         // instance
@@ -1154,8 +1147,8 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
             Class<?> moduleLoaderClass = MultiVersionLibraryModuleLoader.class;
             setModuleLoader((LibraryModuleLoader<C>) moduleLoaderClass.newInstance());
 
-        } catch (Throwable t) {
-            throw new LibraryLoaderException(t);
+        } catch (Exception e) {
+            throw new LibraryLoaderException(e);
         }
 
     }
@@ -1167,8 +1160,8 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
      */
     private class JAXBModelArtifacts {
 
-        public Map<URL, LibraryModuleInfo<Object>> libraryUrlMappings = new HashMap<URL, LibraryModuleInfo<Object>>();
-        public Map<URL, LibraryModuleInfo<Schema>> schemaUrlMappings = new HashMap<URL, LibraryModuleInfo<Schema>>();
+        public Map<URL,LibraryModuleInfo<Object>> libraryUrlMappings = new HashMap<>();
+        public Map<URL,LibraryModuleInfo<Schema>> schemaUrlMappings = new HashMap<>();
         public ValidationFindings validationFindings = new ValidationFindings();
 
         public void addLibraryModule(URL libraryUrl, LibraryModuleInfo<Object> libraryModule) {

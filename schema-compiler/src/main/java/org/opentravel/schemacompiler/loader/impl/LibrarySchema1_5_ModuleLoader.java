@@ -130,7 +130,7 @@ public class LibrarySchema1_5_ModuleLoader extends AbstractLibraryModuleLoader {
      * @return LibraryModuleInfo
      */
     private LibraryModuleInfo<Object> buildModuleInfo(Library library, URL libraryUrl) {
-        List<LibraryModuleImport> imports = new ArrayList<LibraryModuleImport>();
+        List<LibraryModuleImport> imports = new ArrayList<>();
         List<String> includes = library.getIncludes();
 
         for (NamespaceImport nsImport : library.getImport()) {
@@ -138,7 +138,7 @@ public class LibrarySchema1_5_ModuleLoader extends AbstractLibraryModuleLoader {
                     FileHintUtils.resolveHints(nsImport.getFileHints(), libraryUrl)));
         }
         
-        return new LibraryModuleInfo<Object>(library, library.getName(), library.getNamespace(),
+        return new LibraryModuleInfo<>(library, library.getName(), library.getNamespace(),
                 library.getVersionScheme(), includes, imports);
     }
 
@@ -156,8 +156,8 @@ public class LibrarySchema1_5_ModuleLoader extends AbstractLibraryModuleLoader {
             libraryValidationSchema = schemaFactory.newSchema(new StreamSource(schemaStream));
             jaxbContext = JAXBContext.newInstance(SCHEMA_CONTEXT);
 
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

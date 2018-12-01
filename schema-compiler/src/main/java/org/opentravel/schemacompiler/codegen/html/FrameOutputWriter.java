@@ -125,13 +125,13 @@ public class FrameOutputWriter extends HtmlDocletWriter {
      */
     protected void addFrameWarning(Content contentTree) {
         Content noframes = new HtmlTree(HtmlTag.NOFRAMES);
-        Content noScript = HtmlTree.NOSCRIPT(
-                HtmlTree.DIV(getResource("doclet.No_Script_Message")));
+        Content noScript = HtmlTree.noscript(
+                HtmlTree.div(getResource("doclet.No_Script_Message")));
         noframes.addContent(noScript);
-        Content noframesHead = HtmlTree.HEADING(HtmlConstants.CONTENT_HEADING,
+        Content noframesHead = HtmlTree.heading(HtmlConstants.CONTENT_HEADING,
                 getResource("doclet.Frame_Alert"));
         noframes.addContent(noframesHead);
-        Content p = HtmlTree.P(getResource("doclet.Frame_Warning_Message",
+        Content p = HtmlTree.p(getResource("doclet.Frame_Warning_Message",
                 getHyperLinkString(configuration.topFile,
                 configuration.getText("doclet.Non_Frame_Version"))));
         noframes.addContent(p);
@@ -144,12 +144,12 @@ public class FrameOutputWriter extends HtmlDocletWriter {
      * @return a content tree for the frame details
      */
     protected Content getFrameDetails() {
-        HtmlTree frameset = HtmlTree.FRAMESET("20%,80%", null, "Documentation frame",
+        HtmlTree frameset = HtmlTree.frameset("20%,80%", null, "Documentation frame",
                 "top.loadFrames()");
         if (noOfNamespaces <= 1) {
             addAllObjectsFrameTag(frameset);
         } else if (noOfNamespaces > 1) {
-            HtmlTree leftFrameset = HtmlTree.FRAMESET(null, "30%,70%", "Left frames",
+            HtmlTree leftFrameset = HtmlTree.frameset(null, "30%,70%", "Left frames",
                 "top.loadFrames()");
             addAllLibrariesFrameTag(leftFrameset);
             addAllObjectsFrameTag(leftFrameset);
@@ -166,7 +166,7 @@ public class FrameOutputWriter extends HtmlDocletWriter {
      * @param contentTree the content tree to which the information will be added
      */
     private void addAllLibrariesFrameTag(Content contentTree) {
-        HtmlTree frame = HtmlTree.FRAME(LibraryIndexFrameWriter.DEFAULT_FILENAME, "libraryListFrame",
+        HtmlTree frame = HtmlTree.frame(LibraryIndexFrameWriter.DEFAULT_FILENAME, "libraryListFrame",
                 configuration.getText("doclet.All_Libraries"));
         contentTree.addContent(frame);
     }
@@ -177,7 +177,7 @@ public class FrameOutputWriter extends HtmlDocletWriter {
      * @param contentTree the content tree to which the information will be added
      */
     private void addAllObjectsFrameTag(Content contentTree) {
-        HtmlTree frame = HtmlTree.FRAME(AllObjectsFrameWriter.OUTPUT_FILE_NAME_FRAMES, "libraryFrame",
+        HtmlTree frame = HtmlTree.frame(AllObjectsFrameWriter.OUTPUT_FILE_NAME_FRAMES, "libraryFrame",
                 configuration.getText("doclet.All_library_members"));
         contentTree.addContent(frame);
     }
@@ -188,7 +188,7 @@ public class FrameOutputWriter extends HtmlDocletWriter {
      * @param contentTree the content tree to which the information will be added
      */
     private void addClassFrameTag(Content contentTree) {
-        HtmlTree frame = HtmlTree.FRAME(configuration.topFile, "classFrame",
+        HtmlTree frame = HtmlTree.frame(configuration.topFile, "classFrame",
                 configuration.getText("doclet.Library_member_descriptions"),
                 SCROLL_YES);
         contentTree.addContent(frame);

@@ -55,8 +55,7 @@ public class FacetMemberIdentityResolver implements IdentityResolver<TLModelElem
 
         } else if (entity instanceof TLProperty) {
             TLProperty element = (TLProperty) entity;
-            TLPropertyType elementType = PropertyCodegenUtils.resolvePropertyType(
-                    element.getOwner(), element.getType());
+            TLPropertyType elementType = PropertyCodegenUtils.resolvePropertyType(element.getType());
 
             if (PropertyCodegenUtils.hasGlobalElement(elementType)) {
             	QName identityName = XsdCodegenUtils.getGlobalElementName(elementType);

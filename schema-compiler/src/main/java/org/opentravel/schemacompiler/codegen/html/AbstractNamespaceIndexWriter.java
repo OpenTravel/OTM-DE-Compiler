@@ -173,9 +173,9 @@ public abstract class AbstractNamespaceIndexWriter extends HtmlDocletWriter {
     protected void addConfigurationTitle(Content body) {
         if (configuration.doctitle.length() > 0) {
             Content title = new RawHtml(configuration.doctitle);
-            Content heading = HtmlTree.HEADING(HtmlConstants.TITLE_HEADING,
+            Content heading = HtmlTree.heading(HtmlConstants.TITLE_HEADING,
                     HtmlStyle.title, title);
-            Content div = HtmlTree.DIV(HtmlStyle.header, heading);
+            Content div = HtmlTree.div(HtmlStyle.header, heading);
             body.addContent(div);
         }
     }
@@ -187,7 +187,7 @@ public abstract class AbstractNamespaceIndexWriter extends HtmlDocletWriter {
      * @return a Content object to be added to the documentation tree
      */
     protected Content getNavLinkContents() {
-        Content li = HtmlTree.LI(HtmlStyle.navBarCell1Rev, overviewLabel);
+        Content li = HtmlTree.li(HtmlStyle.navBarCell1Rev, overviewLabel);
         return li;
     }
 

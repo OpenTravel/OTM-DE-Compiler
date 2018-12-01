@@ -98,7 +98,7 @@ public abstract class BaseTransformer<S, T, C extends ObjectTransformerContext> 
      * @return List<String>
      */
     protected List<String> trimStrings(List<String> strList) {
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
 
         if (strList != null) {
             for (String str : strList) {
@@ -123,7 +123,7 @@ public abstract class BaseTransformer<S, T, C extends ObjectTransformerContext> 
     protected String consolidateStrings(List<String> strList) {
         String result = null;
 
-        if ((strList != null) && (strList.size() > 0)) {
+        if ((strList != null) && !strList.isEmpty()) {
             StringBuilder strBuilder = new StringBuilder();
 
             for (String str : strList) {
@@ -164,9 +164,7 @@ public abstract class BaseTransformer<S, T, C extends ObjectTransformerContext> 
                         vScheme.getMinorVersion(version), patchLevel);
                 adjustedNamespace = vScheme.setVersionIdentifier(namespace, version);
 
-            } catch (VersionSchemeException e) {
-                // Ignore error - just return the original namespace value
-            } catch (IllegalArgumentException e) {
+            } catch (VersionSchemeException | IllegalArgumentException e) {
                 // Ignore error - just return the original namespace value
             }
         }
@@ -181,7 +179,7 @@ public abstract class BaseTransformer<S, T, C extends ObjectTransformerContext> 
      * @return String
      */
     private String stripInvalidXMLCharacters(String str) {
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
 
         for (char ch : str.toCharArray()) {
             if ((ch == 0x9) || (ch == 0xA) || (ch == 0xD) || ((ch >= 0x20) && (ch <= 0xD7FF))

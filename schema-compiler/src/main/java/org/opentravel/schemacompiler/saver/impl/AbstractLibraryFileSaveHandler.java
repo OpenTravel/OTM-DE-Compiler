@@ -124,13 +124,7 @@ public abstract class AbstractLibraryFileSaveHandler<T> implements LibrarySaveHa
             out = null;
             success = true;
 
-        } catch (IllegalArgumentException e) {
-            throw new LibrarySaveException(e);
-
-        } catch (JAXBException e) {
-            throw new LibrarySaveException(e);
-
-        } catch (IOException e) {
+        } catch (IllegalArgumentException | JAXBException | IOException e) {
             throw new LibrarySaveException(e);
 
         } finally {
@@ -328,15 +322,15 @@ public abstract class AbstractLibraryFileSaveHandler<T> implements LibrarySaveHa
      */
     static {
         try {
-            Map<String, String> prefixMappings = new HashMap<String, String>();
+            Map<String,String> prefixMappings = new HashMap<>();
 
             prefixMappings.put(SchemaDeclarations.OTA2_LIBRARY_SCHEMA_1_5.getNamespace(), "");
             prefixMappings.put(XMLConstants.W3C_XML_SCHEMA_NS_URI, "xsd");
             prefixMappings.put(XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI, "xsi");
             preferredPrefixMappings = Collections.unmodifiableMap(prefixMappings);
 
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

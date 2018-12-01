@@ -260,9 +260,7 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
 
     private static Log log = LogFactory.getLog(JNDIAuthenticationProvider.class);
 
-    private static enum AuthenticationMode {
-        USER_LOOKUP, USER_SEARCH
-    };
+    private enum AuthenticationMode { USER_LOOKUP, USER_SEARCH }
 
     private AuthenticationMode mode;
 
@@ -743,7 +741,7 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
      */
     protected Hashtable<String, String> getDirectoryContextEnvironment(String loginId,
             String loginPassword, boolean isConnectionRetry) {
-        Hashtable<String, String> env = new Hashtable<String, String>();
+        Hashtable<String,String> env = new Hashtable<>();
 
         env.put(Context.INITIAL_CONTEXT_FACTORY, contextFactory);
 

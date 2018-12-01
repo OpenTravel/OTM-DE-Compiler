@@ -67,7 +67,7 @@ public abstract class ValidationBuilder<T extends ValidationBuilder<T>> {
     public static final String ERROR_MUST_BE_ON_OR_AFTER = "MUST_BE_ON_OR_AFTER";
 
     private static final Map<Integer, DateFormat> dateFormats;
-    private static Map<String, Pattern> regexCache = new HashMap<String, Pattern>();
+    private static Map<String,Pattern> regexCache = new HashMap<>();
 
     protected Validatable targetObject;
     protected Object propertyValue;
@@ -1167,7 +1167,7 @@ public abstract class ValidationBuilder<T extends ValidationBuilder<T>> {
             if (df != null) {
                 result = df.parse(df.format(a_date));
             }
-        } catch (Throwable t) {
+        } catch (Exception e) {
             // No error - return the original value
         }
         return result;
@@ -1198,7 +1198,7 @@ public abstract class ValidationBuilder<T extends ValidationBuilder<T>> {
      */
     static {
         try {
-            Map<Integer, DateFormat> formats = new HashMap<Integer, DateFormat>();
+            Map<Integer,DateFormat> formats = new HashMap<>();
 
             formats.put(Calendar.YEAR, new SimpleDateFormat("yyyy"));
             formats.put(Calendar.MONTH, new SimpleDateFormat("yyyy.MM"));
@@ -1209,8 +1209,8 @@ public abstract class ValidationBuilder<T extends ValidationBuilder<T>> {
             formats.put(Calendar.MILLISECOND, new SimpleDateFormat("yyyy.MM.dd HH:mm:ss SSS"));
             dateFormats = Collections.unmodifiableMap(formats);
 
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

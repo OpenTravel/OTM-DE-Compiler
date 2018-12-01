@@ -100,7 +100,7 @@ public final class MajorVersionHelper extends AbstractVersionHelper {
                 library.getVersionScheme());
         TLLibrary majorVersion = null;
 
-        if ((library != null) && (library.getNamespace() != null)) {
+        if (library.getNamespace() != null) {
             if (versionScheme.isMajorVersion(library.getNamespace())) {
                 majorVersion = library; // simple case: we already have the major version
 
@@ -172,7 +172,7 @@ public final class MajorVersionHelper extends AbstractVersionHelper {
      */
     public TLLibrary createNewMajorVersion(TLLibrary library, File libraryFile)
             throws VersionSchemeException, ValidationException, LibrarySaveException {
-        List<ProjectItem> importedVersions = new ArrayList<ProjectItem>();
+        List<ProjectItem> importedVersions = new ArrayList<>();
         try {
             TLLibrary previousMajorVersion = getMajorVersion(library);
             
@@ -199,7 +199,7 @@ public final class MajorVersionHelper extends AbstractVersionHelper {
             minorVersionLibraries.add(0, previousMajorVersion);
             TLLibrary lastMinorVersion = minorVersionLibraries.isEmpty() ? null
                     : minorVersionLibraries.get(minorVersionLibraries.size() - 1);
-            List<TLLibrary> patchLibraries = (lastMinorVersion == null) ? new ArrayList<TLLibrary>()
+            List<TLLibrary> patchLibraries = (lastMinorVersion == null) ? new ArrayList<>()
                     : getLaterPatchVersions(lastMinorVersion);
             importedVersions.addAll(importLaterPatchVersionsFromRepository(lastMinorVersion,
                     patchLibraries));
@@ -370,8 +370,7 @@ public final class MajorVersionHelper extends AbstractVersionHelper {
             throw new VersionSchemeException(
                     "The target and minor versions to be rolled-up are not assigned to the same base namespace.");
         }
-        if (!((NamedEntity) majorVersionTarget).getLocalName().equals(
-                ((NamedEntity) minorVersion).getLocalName())) {
+        if (!majorVersionTarget.getLocalName().equals(minorVersion.getLocalName())) {
             throw new VersionSchemeException(
                     "The minor version provided is not a later version of the target entity because it does not have the same name.");
         }
@@ -553,8 +552,8 @@ public final class MajorVersionHelper extends AbstractVersionHelper {
 	private TLContextualFacet rollupNonLocalFacet(TLContextualFacet sourceFacet, TLFacetOwner targetOwner,
 			TLLibrary targetLibrary, RollupReferenceHandler referenceHandler) {
 		VersionHandlerMergeUtils mergeUtils = new VersionHandlerMergeUtils( new VersionHandlerFactory() );
-        Map<String, TLFacet> targetFacets = new HashMap<String, TLFacet>();
-        Map<String, TLFacet> sourceFacets = new HashMap<String, TLFacet>();
+        Map<String,TLFacet> targetFacets = new HashMap<>();
+        Map<String,TLFacet> sourceFacets = new HashMap<>();
 		TLContextualFacet targetFacet = targetLibrary.getContextualFacetType( sourceFacet.getLocalName() );
 		
 		if (targetFacet == null) {

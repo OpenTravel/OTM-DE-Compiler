@@ -100,8 +100,8 @@ public class TLOperationVersionHandler extends TLExtensionOwnerVersionHandler<TL
 	public void rollupMinorVersion(TLOperation minorVersion, TLOperation majorVersionTarget,
 			RollupReferenceHandler referenceHandler) {
 		VersionHandlerMergeUtils mergeUtils = new VersionHandlerMergeUtils( getFactory() );
-        Map<String, TLFacet> targetFacets = new HashMap<String, TLFacet>();
-        Map<String, TLFacet> sourceFacets = new HashMap<String, TLFacet>();
+        Map<String,TLFacet> targetFacets = new HashMap<>();
+        Map<String,TLFacet> sourceFacets = new HashMap<>();
 		
         mergeUtils.addToIdentityFacetMap( majorVersionTarget.getRequest(), targetFacets );
         mergeUtils.addToIdentityFacetMap( majorVersionTarget.getResponse(), targetFacets );
