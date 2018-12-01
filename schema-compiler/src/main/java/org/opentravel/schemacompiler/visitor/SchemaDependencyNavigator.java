@@ -887,9 +887,6 @@ public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
         } else if (entity instanceof TLFacet) {
             navigateFacet((TLFacet) entity, null);
 
-        } else if (entity instanceof TLActionFacet) {
-            navigateActionFacet((TLActionFacet) entity);
-
         } else if (entity instanceof TLSimpleFacet) {
             navigateSimpleFacet((TLSimpleFacet) entity);
 

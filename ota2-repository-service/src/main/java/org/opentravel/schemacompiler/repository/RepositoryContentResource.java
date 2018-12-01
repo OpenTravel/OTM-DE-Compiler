@@ -611,8 +611,10 @@ public class RepositoryContentResource {
             	if (isReadable == null) {
                 	LibrarySearchResult srLibrary = searchService.getLibrary( searchResult.getOwningLibraryId(), false );
                 	
-            		isReadable = (srLibrary != null) && isReadable(srLibrary.getRepositoryItem(), user, accessibleItemCache);
-            		libraryCache.put( srLibrary.getSearchIndexId(), srLibrary );
+                	if (srLibrary != null) {
+                		isReadable = isReadable(srLibrary.getRepositoryItem(), user, accessibleItemCache);
+                		libraryCache.put( srLibrary.getSearchIndexId(), srLibrary );
+                	}
             	}
             	
                 if (isReadable) {
@@ -670,8 +672,10 @@ public class RepositoryContentResource {
             	if (isReadable == null) {
                 	LibrarySearchResult srLibrary = searchService.getLibrary( searchResult.getOwningLibraryId(), false );
                 	
-            		isReadable = (srLibrary != null) && isReadable(srLibrary.getRepositoryItem(), user, accessibleItemCache);
-            		libraryCache.put( srLibrary.getSearchIndexId(), srLibrary );
+                	if (srLibrary != null) {
+                		isReadable = isReadable(srLibrary.getRepositoryItem(), user, accessibleItemCache);
+                		libraryCache.put( srLibrary.getSearchIndexId(), srLibrary );
+                	}
             	}
             	
                 if (isReadable) {
@@ -1585,8 +1589,12 @@ public class RepositoryContentResource {
      */
     private TLLibraryStatus getStatus(String statusStr) throws RepositoryException {
     	try {
-    		return ((statusStr == null) || (statusStr.length() == 0)) ?
-    				null : TLLibraryStatus.valueOf( statusStr );
+    		if (statusStr != null) {
+    			return TLLibraryStatus.valueOf( statusStr );
+    			
+    		} else {
+    			throw new RepositoryException("Library status cannot be null.");
+    		}
     		
     	} catch (IllegalArgumentException e) {
     		throw new RepositoryException("Unknown library status: " + statusStr);

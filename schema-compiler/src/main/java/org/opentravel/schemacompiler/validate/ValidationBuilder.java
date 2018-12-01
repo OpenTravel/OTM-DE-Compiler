@@ -1044,12 +1044,19 @@ public abstract class ValidationBuilder<T extends ValidationBuilder<T>> {
      *             thrown if the current property value is not a numeric value
      */
     protected long propertyValueAsLong() {
-        if ((propertyValue == null) || (propertyValue instanceof Number)) {
-            return ((Number) propertyValue).longValue();
+    	long theValue;
+    	
+        if (propertyValue == null) {
+        	theValue = 0L;
+        	
+        } else if (propertyValue instanceof Number) {
+            theValue = ((Number) propertyValue).longValue();
+            
         } else {
             throw new IllegalArgumentException(
                     "The requested assertion only applies to numeric values.");
         }
+        return theValue;
     }
 
     /**
@@ -1060,12 +1067,19 @@ public abstract class ValidationBuilder<T extends ValidationBuilder<T>> {
      *             thrown if the current property value is not a numeric value
      */
     protected double propertyValueAsDouble() {
-        if ((propertyValue == null) || (propertyValue instanceof Number)) {
-            return ((Number) propertyValue).doubleValue();
+    	double theValue;
+    	
+        if (propertyValue == null) {
+        	theValue = 0.0D;
+        	
+        } else if (propertyValue instanceof Number) {
+            theValue = ((Number) propertyValue).doubleValue();
+            
         } else {
             throw new IllegalArgumentException(
                     "The requested assertion only applies to numeric values.");
         }
+        return theValue;
     }
 
     /**

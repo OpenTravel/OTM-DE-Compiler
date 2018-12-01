@@ -174,6 +174,8 @@ public final class MajorVersionHelper extends AbstractVersionHelper {
             throws VersionSchemeException, ValidationException, LibrarySaveException {
         List<ProjectItem> importedVersions = new ArrayList<ProjectItem>();
         try {
+            TLLibrary previousMajorVersion = getMajorVersion(library);
+            
             // First, do some preliminary error checking
             if (isWorkInProcessLibrary(library)) {
                 throw new VersionSchemeException(
@@ -183,11 +185,14 @@ public final class MajorVersionHelper extends AbstractVersionHelper {
                 throw new VersionSchemeException(
                         "Unable to create the new version - a duplicate of this unmanaged library has already been published.");
             }
+            if (previousMajorVersion == null) {
+                throw new VersionSchemeException(
+                        "Unable to find corresponding major version for library: " + library.getName());
+            }
 
             // Load all of the related libraries required to build the new version
             VersionScheme versionScheme = VersionSchemeFactory.getInstance().getVersionScheme(
                     library.getVersionScheme());
-            TLLibrary previousMajorVersion = getMajorVersion(library);
             List<TLLibrary> minorVersionLibraries = getLaterMinorVersions(previousMajorVersion);
             importedVersions.addAll(importLaterMinorVersionsFromRepository(previousMajorVersion,
                     minorVersionLibraries));

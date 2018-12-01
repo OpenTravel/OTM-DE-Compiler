@@ -104,9 +104,7 @@ public class LibraryFrameWriter extends HtmlDocletWriter {
 	 *            The package for which "library-frame.html" is to be generated.
 	 */
 	public static void generate(Configuration configuration, TLLibrary library) {
-		LibraryFrameWriter packgen;
-		try {
-			packgen = new LibraryFrameWriter(configuration, library);
+		try (LibraryFrameWriter packgen = new LibraryFrameWriter(configuration, library)) {
 			String name = AbstractDocumentationBuilder.getLibraryName(library);
 			Content body = packgen.getBody(false, packgen.getWindowTitle(name));
 			Content pkgNameContent = new RawHtml(name);

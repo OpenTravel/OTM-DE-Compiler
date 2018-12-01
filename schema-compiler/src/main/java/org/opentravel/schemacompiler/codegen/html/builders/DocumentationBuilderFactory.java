@@ -103,10 +103,14 @@ public class DocumentationBuilderFactory {
 	public DocumentationBuilder getLibraryDocumentationBuilder(TLLibrary lib,
 			TLLibrary prev, TLLibrary next) {
 		DocumentationBuilder builder = getLibraryBuilder(lib);
-		DocumentationBuilder prevBuilder = getLibraryBuilder(prev);
-		DocumentationBuilder nextBuilder = getLibraryBuilder(next);
-		builder.setNext(nextBuilder);
-		builder.setPrevious(prevBuilder);
+		
+		if (builder != null) {
+			DocumentationBuilder prevBuilder = getLibraryBuilder(prev);
+			DocumentationBuilder nextBuilder = getLibraryBuilder(next);
+			
+			builder.setNext(nextBuilder);
+			builder.setPrevious(prevBuilder);
+		}
 		return builder;
 	}
 

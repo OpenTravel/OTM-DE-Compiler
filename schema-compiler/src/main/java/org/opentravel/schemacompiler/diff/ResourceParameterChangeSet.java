@@ -44,9 +44,10 @@ public class ResourceParameterChangeSet extends ChangeSet<TLParameter,ResourceCh
 		TLParamGroup paramGroup = (param == null) ? null : param.getOwner();
 		TLResource owner = (paramGroup == null) ? null : paramGroup.getOwner();
 		String paramGroupName = (paramGroup == null) ? null : paramGroup.getFacetRefName();
+		String fieldRefName = (param == null) ? "UNKNOWN" : param.getFieldRefName();
 		
 		return getBookmarkId( owner ) + "$pg$" + ((paramGroupName == null) ? "UNKNOWN_PARAMGRP" : paramGroupName)
-				+ "$param$" + param.getFieldRefName();
+				+ "$param$" + fieldRefName;
 	}
 	
 }

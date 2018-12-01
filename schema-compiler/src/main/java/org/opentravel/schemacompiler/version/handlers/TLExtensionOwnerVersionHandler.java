@@ -79,7 +79,7 @@ public abstract class TLExtensionOwnerVersionHandler<V extends TLVersionedExtens
 	    			null : priorMinorVersions.get(priorMinorVersions.size() - 1);
 	    	
 	    	if (earliestMinorVersion != null) {
-				TLExtension extension = (earliestMinorVersion == null) ? null : earliestMinorVersion.getExtension();
+				TLExtension extension = earliestMinorVersion.getExtension();
 	    		
 		    	if (extension != null) {
 		    		baseExtension = getExtendedEntity( earliestMinorVersion );
@@ -103,17 +103,16 @@ public abstract class TLExtensionOwnerVersionHandler<V extends TLVersionedExtens
 	 */
 	protected void assignBaseExtension(V majorVersion, V minorVersion) throws VersionSchemeException {
     	NamedEntity baseExtension = getBaseExtension( minorVersion );
-    	
-        majorVersion = getCloner( minorVersion ).clone( minorVersion );
+        V cloneVersion = getCloner( minorVersion ).clone( minorVersion );
         
     	if (baseExtension != null) {
     		TLExtension extension = new TLExtension();
     		
     		extension.setExtendsEntity( baseExtension );
-    		majorVersion.setExtension( extension );
+    		cloneVersion.setExtension( extension );
     		
     	} else {
-    		majorVersion.setExtension( null );
+    		cloneVersion.setExtension( null );
     	}
 	}
 	

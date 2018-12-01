@@ -679,15 +679,17 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
     	// Save a local copy of the release file (if required)
     	if (saveFolder != null) {
     		Release newRelease = cloneRelease();
-    		File newVersionFile;
     		
-    		newManager = new ReleaseManager( repositoryManager );
-    		newRelease.setStatus( ReleaseStatus.DRAFT );
-    		newVersionFile = new File( saveFolder, fileUtils.getReleaseFilename( newRelease ) );
-    		newRelease.setReleaseUrl( URLUtils.toURL( newVersionFile ) );
-    		fileUtils.saveReleaseFile( newRelease, false );
-    		newManager.loadRelease( newVersionFile, new ValidationFindings() );
-    		
+    		if (newRelease != null) {
+        		File newVersionFile;
+        		
+        		newManager = new ReleaseManager( repositoryManager );
+        		newRelease.setStatus( ReleaseStatus.DRAFT );
+        		newVersionFile = new File( saveFolder, fileUtils.getReleaseFilename( newRelease ) );
+        		newRelease.setReleaseUrl( URLUtils.toURL( newVersionFile ) );
+        		fileUtils.saveReleaseFile( newRelease, false );
+        		newManager.loadRelease( newVersionFile, new ValidationFindings() );
+    		}
     	}
     	
     	// Now we can delete the release from the remote repository
@@ -748,14 +750,16 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 		String newVersion = versionScheme.incrementMajorVersion( release.getVersion() );
 		ReleaseManager newManager = new ReleaseManager( repositoryManager );
 		Release newRelease = cloneRelease();
-		File newVersionFile;
 		
-		newRelease.setVersion( newVersion );
-		newVersionFile = new File( saveFolder, fileUtils.getReleaseFilename( newRelease ) );
-		newRelease.setReleaseUrl( URLUtils.toURL( newVersionFile ) );
-		fileUtils.saveReleaseFile( newRelease, false );
-		newManager.loadRelease( newVersionFile, findings );
-		
+		if (newRelease != null) {
+			File newVersionFile;
+			
+			newRelease.setVersion( newVersion );
+			newVersionFile = new File( saveFolder, fileUtils.getReleaseFilename( newRelease ) );
+			newRelease.setReleaseUrl( URLUtils.toURL( newVersionFile ) );
+			fileUtils.saveReleaseFile( newRelease, false );
+			newManager.loadRelease( newVersionFile, findings );
+		}
 		return newManager;
     }
     
@@ -795,16 +799,18 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
     	if (findings == null) findings = new ValidationFindings();
 		ReleaseManager newManager = new ReleaseManager( repositoryManager );
 		Release newRelease = cloneRelease();
-		File newVersionFile;
 		
-		newRelease.setName( releaseName );
-		newRelease.setVersion( "1.0.0" );
-		newRelease.setStatus( ReleaseStatus.DRAFT );
-		newVersionFile = new File( saveFolder, fileUtils.getReleaseFilename( newRelease ) );
-		newRelease.setReleaseUrl( URLUtils.toURL( newVersionFile ) );
-		fileUtils.saveReleaseFile( newRelease, false );
-		newManager.loadRelease( newVersionFile, findings );
-		
+		if (newRelease != null) {
+			File newVersionFile;
+			
+			newRelease.setName( releaseName );
+			newRelease.setVersion( "1.0.0" );
+			newRelease.setStatus( ReleaseStatus.DRAFT );
+			newVersionFile = new File( saveFolder, fileUtils.getReleaseFilename( newRelease ) );
+			newRelease.setReleaseUrl( URLUtils.toURL( newVersionFile ) );
+			fileUtils.saveReleaseFile( newRelease, false );
+			newManager.loadRelease( newVersionFile, findings );
+		}
 		return newManager;
     }
     

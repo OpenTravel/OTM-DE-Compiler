@@ -57,8 +57,7 @@ import org.opentravel.schemacompiler.util.URLUtils;
  */
 public class DisplayFormatter {
 	
-	private static DateFormat dateFormat = new SimpleDateFormat( "MMMMM d, yyyy '&amp;' h:mma z" );
-	
+	private DateFormat dateFormat = new SimpleDateFormat( "MMMMM d, yyyy '&amp;' h:mma z" );
 	private RepositoryManager repositoryManager;
 	
 	/**

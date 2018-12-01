@@ -472,7 +472,7 @@ public class CharChunk implements Cloneable, Serializable, CharSequence {
     @Override
     public String toString() {
         if (null == buff) {
-            return null;
+            return "";
         } else if (end - start == 0) {
             return "";
         }
@@ -496,7 +496,7 @@ public class CharChunk implements Cloneable, Serializable, CharSequence {
      *            the String to compare
      * @return true if the comparison succeeded, false otherwise
      */
-    public boolean equals(String s) {
+    public boolean isEquivalent(String s) {
         char[] c = buff;
         int len = end - start;
         if (c == null || len != s.length()) {
@@ -518,7 +518,7 @@ public class CharChunk implements Cloneable, Serializable, CharSequence {
      *            the String to compare
      * @return true if the comparison succeeded, false otherwise
      */
-    public boolean equalsIgnoreCase(String s) {
+    public boolean isEquivalentIgnoreCase(String s) {
         char[] c = buff;
         int len = end - start;
         if (c == null || len != s.length()) {
@@ -533,11 +533,11 @@ public class CharChunk implements Cloneable, Serializable, CharSequence {
         return true;
     }
 
-    public boolean equals(CharChunk cc) {
-        return equals(cc.getChars(), cc.getOffset(), cc.getLength());
+    public boolean isEquivalent(CharChunk cc) {
+        return isEquivalent(cc.getChars(), cc.getOffset(), cc.getLength());
     }
 
-    public boolean equals(char b2[], int off2, int len2) {
+    public boolean isEquivalent(char b2[], int off2, int len2) {
         char b1[] = buff;
         if (b1 == null && b2 == null)
             return true;
@@ -555,7 +555,7 @@ public class CharChunk implements Cloneable, Serializable, CharSequence {
         return true;
     }
 
-    public boolean equals(byte b2[], int off2, int len2) {
+    public boolean isEquivalent(byte b2[], int off2, int len2) {
         char b1[] = buff;
         if (b2 == null && b1 == null)
             return true;

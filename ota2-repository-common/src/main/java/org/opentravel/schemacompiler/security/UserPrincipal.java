@@ -15,6 +15,7 @@
  */
 package org.opentravel.schemacompiler.security;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,11 +29,13 @@ import org.opentravel.ns.ota2.repositoryinfoext_v01_00.UserInfo;
  * 
  * @author S. Livezey
  */
-public final class UserPrincipal {
+public final class UserPrincipal implements Serializable {
 
-    public static final String ANONYMOUS_USER_ID = "anonymous";
+	public static final String ANONYMOUS_USER_ID = "anonymous";
     public static final UserPrincipal ANONYMOUS_USER;
 
+	private static final long serialVersionUID = -262866758359574776L;
+	
     private String userId;
     private String lastName;
     private String firstName;

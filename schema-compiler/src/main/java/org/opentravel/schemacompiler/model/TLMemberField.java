@@ -21,7 +21,7 @@ package org.opentravel.schemacompiler.model;
  * @param <O>  the type of the member field owner
  * @author S. Livezey
  */
-public interface TLMemberField<O extends TLMemberFieldOwner> {
+public interface TLMemberField<O extends TLMemberFieldOwner> extends LibraryElement {
 	
 	/**
 	 * Returns the name of the member field.

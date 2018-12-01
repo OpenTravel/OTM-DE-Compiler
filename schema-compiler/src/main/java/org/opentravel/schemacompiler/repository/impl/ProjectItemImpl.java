@@ -232,15 +232,18 @@ public class ProjectItemImpl extends RepositoryItemImpl implements ProjectItem {
     @Override
     public String getFilename() {
         URL libraryUrl = (libraryContent == null) ? null : libraryContent.getLibraryUrl();
-        String urlString = (libraryUrl == null) ? null : libraryUrl.toExternalForm();
-        String filename;
+        String filename = null;
+        
+        if (libraryUrl != null) {
+            String urlString = libraryUrl.toExternalForm();
 
-        if (urlString.endsWith("/")) {
-            filename = null;
+            if (urlString.endsWith("/")) {
+                filename = null;
 
-        } else {
-            int idx = urlString.lastIndexOf('/');
-            filename = (idx < 0) ? urlString : urlString.substring(idx + 1);
+            } else {
+                int idx = urlString.lastIndexOf('/');
+                filename = (idx < 0) ? urlString : urlString.substring(idx + 1);
+            }
         }
         return filename;
     }

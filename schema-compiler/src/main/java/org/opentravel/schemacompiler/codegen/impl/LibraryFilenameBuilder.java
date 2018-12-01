@@ -50,9 +50,7 @@ public class LibraryFilenameBuilder<L extends AbstractLibrary> implements
     		if (baseFilenameMap == null) {
     			TLModel model = (item == null) ? null : item.getOwningModel();
     			
-    			if (model != null) {
-        			initBaseFilenames( model );
-    			}
+				baseFilenameMap = initBaseFilenames( model );
     		}
     	}
         String fileExt = (fileExtension.length() == 0) ? "" : ("." + fileExtension);
@@ -71,59 +69,63 @@ public class LibraryFilenameBuilder<L extends AbstractLibrary> implements
      * Initializes the filenames that should be used for each library in the model.
      * 
      * @param model  the model that contains all libraries to which names should be assigned
+     * @return Map<L,String>
      */
     @SuppressWarnings("unchecked")
-	private void initBaseFilenames(TLModel model) {
-    	Set<FilenameDetails> filenameDetails = new HashSet<>();
-    	boolean conflictsExist;
+	private Map<L,String> initBaseFilenames(TLModel model) {
+    	Map<L,String> filenameMap = new HashMap<>();
     	
-    	// Build the initial list of filename details
-    	for (AbstractLibrary library : model.getAllLibraries()) {
-    		filenameDetails.add( new FilenameDetails( library ) );
+    	if (model != null) {
+        	Set<FilenameDetails> filenameDetails = new HashSet<>();
+        	boolean conflictsExist;
+        	
+        	// Build the initial list of filename details
+        	for (AbstractLibrary library : model.getAllLibraries()) {
+        		filenameDetails.add( new FilenameDetails( library ) );
+        	}
+        	
+        	// Check for conflicts and continue attempting to resolve until no more
+        	// conflicts exist, or no further options are available.
+        	do {
+        		Map<String,List<FilenameDetails>> detailsByFilename = new HashMap<>();
+        		
+        		for (FilenameDetails fd : filenameDetails) {
+        			List<FilenameDetails> detailsList = detailsByFilename.get( fd.getFilename() );
+        			
+        			if (detailsList == null) {
+        				detailsList = new ArrayList<>();
+        				detailsByFilename.put( fd.getFilename(), detailsList );
+        			}
+        			detailsList.add( fd );
+        		}
+        		conflictsExist = false;
+        		
+        		for (List<FilenameDetails> detailsList : detailsByFilename.values()) {
+        			if (detailsList.size() > 1) {
+        				boolean changesMade = false;
+        				
+        				for (FilenameDetails fd : detailsList) {
+        					if (!fd.nsComponents.isEmpty()) {
+            					fd.libraryFilename = fd.library.getName() + "_" + fd.nsComponents.remove( 0 );
+        						changesMade = true;
+        					}
+        				}
+        				
+        				// If no more namespace options are available, allow the conflict to exist.  In this
+        				// situation, there are other errors in the model that should not have allowed us to
+        				// get this far.  Exiting at this point will prevent us from getting stuck in an
+        				// infinite loop.
+        				conflictsExist |= changesMade;
+        			}
+        		}
+        		
+        	} while (conflictsExist);
+        	
+        	for (FilenameDetails fd : filenameDetails) {
+        		filenameMap.put( (L) fd.library, fd.getFilename() );
+        	}
     	}
-    	
-    	// Check for conflicts and continue attempting to resolve until no more
-    	// conflicts exist, or no further options are available.
-    	do {
-    		Map<String,List<FilenameDetails>> detailsByFilename = new HashMap<>();
-    		
-    		for (FilenameDetails fd : filenameDetails) {
-    			List<FilenameDetails> detailsList = detailsByFilename.get( fd.getFilename() );
-    			
-    			if (detailsList == null) {
-    				detailsList = new ArrayList<>();
-    				detailsByFilename.put( fd.getFilename(), detailsList );
-    			}
-    			detailsList.add( fd );
-    		}
-    		conflictsExist = false;
-    		
-    		for (List<FilenameDetails> detailsList : detailsByFilename.values()) {
-    			if (detailsList.size() > 1) {
-    				boolean changesMade = false;
-    				
-    				for (FilenameDetails fd : detailsList) {
-    					if (!fd.nsComponents.isEmpty()) {
-        					fd.libraryFilename = fd.library.getName() + "_" + fd.nsComponents.remove( 0 );
-    						changesMade = true;
-    					}
-    				}
-    				
-    				// If no more namespace options are available, allow the conflict to exist.  In this
-    				// situation, there are other errors in the model that should not have allowed us to
-    				// get this far.  Exiting at this point will prevent us from getting stuck in an
-    				// infinite loop.
-    				conflictsExist |= changesMade;
-    			}
-    		}
-    		
-    	} while (conflictsExist);
-    	
-    	baseFilenameMap = new HashMap<>();
-    	
-    	for (FilenameDetails fd : filenameDetails) {
-    		baseFilenameMap.put( (L) fd.library, fd.getFilename() );
-    	}
+    	return filenameMap;
     }
     
     /**

@@ -196,6 +196,7 @@ public class RepositoryAvailabilityChecker {
 					
 				} catch (InterruptedException | ExecutionException e) {
 					repoAvailable = false;
+					Thread.currentThread().interrupt();
 				}
 				
 				someAvailable |= repoAvailable;
@@ -218,41 +219,39 @@ public class RepositoryAvailabilityChecker {
 	 * @param repositoryId  the ID of the repository to ping
 	 * @return boolean
 	 */
-	public boolean pingRepository(String repositoryId) {
-		synchronized (repositoryId.intern()) {
-			Long lastPing = successfulPingCache.get( repositoryId );
-			boolean isAvailable;
+	public synchronized boolean pingRepository(String repositoryId) {
+		Long lastPing = successfulPingCache.get( repositoryId );
+		boolean isAvailable;
+		
+		if ((lastPing == null) || ((System.currentTimeMillis() - lastPing) > recheckInterval)) {
+			Repository repository = repositoryManager.getRepository( repositoryId );
 			
-			if ((lastPing == null) || ((System.currentTimeMillis() - lastPing) > recheckInterval)) {
-				Repository repository = repositoryManager.getRepository( repositoryId );
-				
-				if (repository != null) {
-					if (repository instanceof RemoteRepository) {
-						try {
-							String endpointUrl = ((RemoteRepository) repository).getEndpointUrl();
-							
-							RemoteRepositoryClient.getRepositoryMetadata( endpointUrl );
-							successfulPingCache.put( repositoryId, System.currentTimeMillis() );
-							isAvailable = true;
-							
-						} catch (RepositoryException e) {
-							successfulPingCache.remove( repositoryId );
-							isAvailable = false;
-						}
+			if (repository != null) {
+				if (repository instanceof RemoteRepository) {
+					try {
+						String endpointUrl = ((RemoteRepository) repository).getEndpointUrl();
 						
-					} else { // Local repository is always available
+						RemoteRepositoryClient.getRepositoryMetadata( endpointUrl );
+						successfulPingCache.put( repositoryId, System.currentTimeMillis() );
 						isAvailable = true;
+						
+					} catch (RepositoryException e) {
+						successfulPingCache.remove( repositoryId );
+						isAvailable = false;
 					}
 					
-				} else { // Invalid repository ID, so it is not available
-					isAvailable = false;
+				} else { // Local repository is always available
+					isAvailable = true;
 				}
 				
-			} else { // Last successful ping was inside the recheck interval (assume available)
-				isAvailable = true;
+			} else { // Invalid repository ID, so it is not available
+				isAvailable = false;
 			}
-			return isAvailable;
+			
+		} else { // Last successful ping was inside the recheck interval (assume available)
+			isAvailable = true;
 		}
+		return isAvailable;
 	}
 	
 }

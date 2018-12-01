@@ -159,22 +159,24 @@ public class TLAttributeJsonCodegenTransformer extends AbstractJsonSchemaTransfo
     		schemaRef.getExampleItems().addAll( jsonUtils.getExampleInfo( source ) );
     		schemaRef.getEquivalentItems().addAll( jsonUtils.getEquivalentInfo( source ) );
     		
-			if (simpleInfo.isListType()) {
-            	JsonSchema attrSchema = new JsonSchema();
-				
-            	schemaRef = new JsonSchemaReference();
-            	attrSchema.setType( JsonType.jsonArray );
-            	attrSchema.setItems( schemaRef );
-            	attrSchemaRef.setSchema( attrSchema );
-			}
-			
-    		if (simpleInfo.getBaseSimpleType() != null) {
-            	schemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath(
-            			simpleInfo.getBaseSimpleType(), getMemberFieldOwner() ) );
+    		if (simpleInfo != null) {
+    			if (simpleInfo.isListType()) {
+                	JsonSchema attrSchema = new JsonSchema();
+    				
+                	schemaRef = new JsonSchemaReference();
+                	attrSchema.setType( JsonType.jsonArray );
+                	attrSchema.setItems( schemaRef );
+                	attrSchemaRef.setSchema( attrSchema );
+    			}
     			
-    		} else {
-            	schemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath(
-            			attributeType, getMemberFieldOwner() ) );
+        		if (simpleInfo.getBaseSimpleType() != null) {
+                	schemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath(
+                			simpleInfo.getBaseSimpleType(), getMemberFieldOwner() ) );
+        			
+        		} else {
+                	schemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath(
+                			attributeType, getMemberFieldOwner() ) );
+        		}
     		}
         }
 	}

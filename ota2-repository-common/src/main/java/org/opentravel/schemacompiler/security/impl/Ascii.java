@@ -198,7 +198,7 @@ public class Ascii {
             throw new NumberFormatException();
         }
 
-        long n = c - '0';
+        long n = ((long) c) - ((long) '0');
         long m;
 
         while (--len > 0) {
@@ -225,7 +225,7 @@ public class Ascii {
             throw new NumberFormatException();
         }
 
-        long n = c - '0';
+        long n = ((long) c) - ((long) '0');
         long m;
 
         while (--len > 0) {

@@ -1292,7 +1292,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
             if (queryResults.scoreDocs.length == 1) {
             	doc = searcher.doc( queryResults.scoreDocs[0].doc, contentAttr );
             			
-            } else if (queryResults.scoreDocs.length == 1) {
+            } else if (queryResults.scoreDocs.length == 0) {
             	throw new RepositoryException("Item not found in search index: " + searchIndexId);
             	
             } else {

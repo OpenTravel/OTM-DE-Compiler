@@ -129,50 +129,51 @@ public class ChameleonFilter implements AnonymousEntityFilter {
      */
     private void findChameleonLibraryUrls(AbstractLibrary library, String targetNamespace,
             Collection<URL> chameleonUrls, Set<AbstractLibrary> visitedLibraries) {
-        if (isChameleon(library) && !chameleonUrls.contains(library.getLibraryUrl())) {
-            chameleonUrls.add(library.getLibraryUrl());
-        }
-        visitedLibraries.add(library);
+    	if (library != null) {
+            if (isChameleon(library) && !chameleonUrls.contains(library.getLibraryUrl())) {
+                chameleonUrls.add(library.getLibraryUrl());
+            }
+            visitedLibraries.add(library);
 
-        // Built-in libraries do not support includes
-        if (!(library instanceof BuiltInLibrary) && (library.getOwningModel() != null)) {
-            TLModel model = library.getOwningModel();
+            // Built-in libraries do not support includes
+            if (!(library instanceof BuiltInLibrary) && (library.getOwningModel() != null)) {
+                TLModel model = library.getOwningModel();
 
-            for (TLInclude include : library.getIncludes()) {
-                try {
-                    URL includedUrl = URLUtils.getResolvedURL(include.getPath(),
-                            URLUtils.getParentURL(library.getLibraryUrl()));
-                    AbstractLibrary includedLibrary = model.getLibrary(includedUrl);
+                for (TLInclude include : library.getIncludes()) {
+                    try {
+                        URL includedUrl = URLUtils.getResolvedURL(include.getPath(),
+                                URLUtils.getParentURL(library.getLibraryUrl()));
+                        AbstractLibrary includedLibrary = model.getLibrary(includedUrl);
 
-                    // Skip include URL's that do not resolve to a valid library in the model; these
-                    // are most likely
-                    // errors that will be detected by the validator.
-                    if (includedLibrary == null) {
-                        continue;
+                        // Skip include URL's that do not resolve to a valid library in the model; these
+                        // are most likely
+                        // errors that will be detected by the validator.
+                        if (includedLibrary == null) {
+                            continue;
+                        }
+
+                        // Disregard non-chameleon libraries that are assigned to a different namespace;
+                        // these are errors
+                        // that will be picked up by the validator
+                        if (!isChameleon(includedLibrary)
+                                && !includedLibrary.getNamespace().equals(targetNamespace)) {
+                            continue;
+                        }
+
+                        // If we have not seen the included library before, recurse to determine if it
+                        // (or one of
+                        // its includes) is a chameleon that should be considered.
+                        if ((includedLibrary != null) && !visitedLibraries.contains(includedLibrary)) {
+                            findChameleonLibraryUrls(includedLibrary, targetNamespace, chameleonUrls,
+                                    visitedLibraries);
+                        }
+
+                    } catch (MalformedURLException e) {
+                        // No error - just skip and move on to the next include
                     }
-
-                    // Disregard non-chameleon libraries that are assigned to a different namespace;
-                    // these are errors
-                    // that will be picked up by the validator
-                    if (!isChameleon(includedLibrary)
-                            && !includedLibrary.getNamespace().equals(targetNamespace)) {
-                        continue;
-                    }
-
-                    // If we have not seen the included library before, recurse to determine if it
-                    // (or one of
-                    // its includes) is a chameleon that should be considered.
-                    if ((includedLibrary != null) && !visitedLibraries.contains(includedLibrary)) {
-                        findChameleonLibraryUrls(includedLibrary, targetNamespace, chameleonUrls,
-                                visitedLibraries);
-                    }
-
-                } catch (MalformedURLException e) {
-                    // No error - just skip and move on to the next include
                 }
             }
-
-        }
+    	}
     }
 
     /**

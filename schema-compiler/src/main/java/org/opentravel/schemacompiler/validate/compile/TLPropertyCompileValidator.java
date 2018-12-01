@@ -182,7 +182,8 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
     				List<Versioned> laterMinorVersions =
     						new MinorVersionHelper().getLaterMinorVersions( priorVersionType );
         			
-    				isSpecialCase = laterMinorVersions.contains( propertyType );
+    				isSpecialCase = (propertyType instanceof Versioned) &&
+    						laterMinorVersions.contains( (Versioned) propertyType );
     				
     			} catch (VersionSchemeException e) {
     				// No error - assume not a special case and move on

@@ -114,14 +114,17 @@ public class VersionHandlerMergeUtils {
             for (TLProperty property : existingProperties) {
                 TLPropertyType propertyType = PropertyCodegenUtils.resolvePropertyType(
                 		target, property.getType() );
-                NamedEntity substitutionGroup = PropertyCodegenUtils.hasGlobalElement( propertyType ) ?
-                		PropertyCodegenUtils.getInheritanceRoot( propertyType ) : null;
+                
+                if (propertyType != null) {
+                    NamedEntity substitutionGroup = PropertyCodegenUtils.hasGlobalElement( propertyType ) ?
+                    		PropertyCodegenUtils.getInheritanceRoot( propertyType ) : null;
 
-                if (substitutionGroup != null) {
-                    existingSubstitutionGroups.add( substitutionGroup );
-                }
-                if (property.getName() != null) {
-                    existingPropertyNames.add( property.getName() );
+                    if (substitutionGroup != null) {
+                        existingSubstitutionGroups.add( substitutionGroup );
+                    }
+                    if (property.getName() != null) {
+                        existingPropertyNames.add( property.getName() );
+                    }
                 }
             }
         }

@@ -98,6 +98,7 @@ public class RepositoryLockManager {
             return resource;
 
         } catch (InterruptedException e) {
+        	Thread.currentThread().interrupt();
             throw new RepositoryException("Timed out waiting for read lock for resource: "
                     + resourceName, e);
         }
@@ -143,6 +144,7 @@ public class RepositoryLockManager {
             return resource;
 
         } catch (InterruptedException e) {
+        	Thread.currentThread().interrupt();
             throw new RepositoryException("Timed out waiting for write lock for resource: "
                     + resourceName, e);
         }

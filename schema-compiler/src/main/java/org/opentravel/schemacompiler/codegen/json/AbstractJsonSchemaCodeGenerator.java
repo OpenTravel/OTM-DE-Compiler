@@ -149,15 +149,16 @@ public abstract class AbstractJsonSchemaCodeGenerator<S extends TLModelElement> 
                 if (!outputFile.exists()) {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(
                             schemaDeclaration.getContent(CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT)));
-                    BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
-                    String line = null;
+                    
+                    try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {
+                        String line = null;
 
-                    while ((line = reader.readLine()) != null) {
-                        writer.write(line);
-                        writer.write(LINE_SEPARATOR);
+                        while ((line = reader.readLine()) != null) {
+                            writer.write(line);
+                            writer.write(LINE_SEPARATOR);
+                        }
                     }
                     reader.close();
-                    writer.close();
                 }
                 addGeneratedFile(outputFile); // count dependency as generated - even if it already existed
             }

@@ -131,7 +131,7 @@ public final class LibraryModelSaver {
         SymbolResolverTransformerContext context = new SymbolResolverTransformerContext();
         SymbolResolver symbolResolver = new TL2JaxbLibrarySymbolResolver(
                 SymbolTableFactory.newSymbolTableFromModel(library.getOwningModel()));
-        ValidationFindings findings = null;
+        ValidationFindings findings = new ValidationFindings();
 
         context.setSymbolResolver(symbolResolver);
 
@@ -142,9 +142,9 @@ public final class LibraryModelSaver {
             }
             symbolResolver.setPrefixResolver(new LibraryPrefixResolver(library));
             symbolResolver.setAnonymousEntityFilter(new ChameleonFilter(library));
-            findings = saveLibrary(library, context);
+            findings.addAll( saveLibrary(library, context) );
         }
-        return (findings == null) ? new ValidationFindings() : findings;
+        return findings;
     }
 
     /**

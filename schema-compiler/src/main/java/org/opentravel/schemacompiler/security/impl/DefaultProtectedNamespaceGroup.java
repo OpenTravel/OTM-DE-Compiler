@@ -250,14 +250,15 @@ public class DefaultProtectedNamespaceGroup implements ProtectedNamespaceGroup {
                 }
                 BufferedReader reader = new BufferedReader(new InputStreamReader(
                         is = cnx.getInputStream()));
-                PrintWriter writer = new PrintWriter(new FileWriter(cacheFile));
-                String line;
+                
+                try (PrintWriter writer = new PrintWriter(new FileWriter(cacheFile))) {
+                    String line;
 
-                while ((line = reader.readLine()) != null) {
-                    writer.println(line);
+                    while ((line = reader.readLine()) != null) {
+                        writer.println(line);
+                    }
+                    writer.flush();
                 }
-                writer.flush();
-                writer.close();
             }
 
         } catch (IOException e) {

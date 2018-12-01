@@ -366,9 +366,9 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
             ValidationFindings findings = new ValidationFindings();
 
             for (TLLibrary library : userDefinedLibraries) {
-                return TLModelValidator.validateModelElement(library,
+                findings.addAll( TLModelValidator.validateModelElement(library,
                         (validationRuleSetId != null) ? validationRuleSetId
-                                : ValidatorFactory.COMPILE_RULE_SET_ID);
+                                : ValidatorFactory.COMPILE_RULE_SET_ID) );
             }
             return findings;
 

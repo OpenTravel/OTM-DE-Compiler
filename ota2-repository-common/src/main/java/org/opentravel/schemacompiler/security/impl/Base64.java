@@ -137,8 +137,8 @@ public class Base64 {
             // log.debug( "val2 = " + val2 );
             // log.debug( "k4   = " + (k<<4) );
             // log.debug( "vak  = " + (val2 | (k<<4)) );
-            encodedData[encodedIndex + 1] = lookUpBase64Alphabet[val2 | (k << 4)];
-            encodedData[encodedIndex + 2] = lookUpBase64Alphabet[(l << 2) | val3];
+            encodedData[encodedIndex + 1] = lookUpBase64Alphabet[val2 | ((k << 4) & 0xff)];
+            encodedData[encodedIndex + 2] = lookUpBase64Alphabet[(l << 2) | (val3 & 0xff)];
             encodedData[encodedIndex + 3] = lookUpBase64Alphabet[b3 & 0x3f];
         }
 
@@ -166,7 +166,7 @@ public class Base64 {
             byte val2 = ((b2 & SIGN) == 0) ? (byte) (b2 >> 4) : (byte) ((b2) >> 4 ^ 0xf0);
 
             encodedData[encodedIndex] = lookUpBase64Alphabet[val1];
-            encodedData[encodedIndex + 1] = lookUpBase64Alphabet[val2 | (k << 4)];
+            encodedData[encodedIndex + 1] = lookUpBase64Alphabet[val2 | ((k << 4) & 0xff)];
             encodedData[encodedIndex + 2] = lookUpBase64Alphabet[l << 2];
             encodedData[encodedIndex + 3] = PAD;
         }
@@ -239,7 +239,7 @@ public class Base64 {
 
                 decodedData[encodedIndex] = (char) ((b1 << 2 | b2 >> 4) & 0xff);
                 decodedData[encodedIndex + 1] = (char) ((((b2 & 0xf) << 4) | ((b3 >> 2) & 0xf)) & 0xff);
-                decodedData[encodedIndex + 2] = (char) ((b3 << 6 | b4) & 0xff);
+                decodedData[encodedIndex + 2] = (char) ((b3 << 6 | (b4 & 0xff)) & 0xff);
             } else if (marker0 == PAD) {
                 // Two PAD e.g. 3c[Pad][Pad]
                 decodedData[encodedIndex] = (char) ((b1 << 2 | b2 >> 4) & 0xff);

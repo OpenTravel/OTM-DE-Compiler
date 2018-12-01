@@ -90,7 +90,7 @@ public class URLUtils {
     public static File toFile(URL url) {
         if (!isFileURL(url)) {
             throw new IllegalArgumentException("URL is not a local file reference: "
-                    + ((url == null) ? null : url.toExternalForm()));
+                    + url.toExternalForm());
         } else {
             String filePath = url.getPath();
 
@@ -332,7 +332,8 @@ public class URLUtils {
                 .equals("")) : authority1.equals(authority2);
         boolean isMatch = protocolMatches && authorityMatches;
 
-        if (isMatch && protocol1.equals("file") && protocol2.equals("file")) {
+        if (isMatch && (protocol1 != null) && protocol1.equals("file")
+        		&& (protocol2 != null) && protocol2.equals("file")) {
             String path1 = url1.getPath(), path2 = url2.getPath();
             int driveIdx1 = path1.indexOf('|'), driveIdx2 = path2.indexOf('|');
             String driveLetter1 = null, driveLetter2 = null;

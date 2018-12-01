@@ -485,7 +485,7 @@ public class AdminController extends BaseController {
             	} else if ((emailAddress != null) && !emailPattern.matcher( emailAddress ).matches()) {
                     setErrorMessage("The email provided is not a valid address.", model);
 
-                } else { // everything is ok - add the user
+                } else if (user != null) { // everything is ok - add the user
                 	user.setUserId( userId );
                 	user.setLastName( lastName );
                 	user.setFirstName( firstName );
@@ -495,6 +495,7 @@ public class AdminController extends BaseController {
                     setStatusMessage("User '" + userId + "' updated successfully.", redirectAttrs);
                     success = true;
                 }
+            	
                 if (!success) {
                     model.addAttribute("userId", userId);
                     model.addAttribute("lastName", lastName);

@@ -390,7 +390,10 @@ public class BrowseController extends BaseController {
         		// the subscriptions page.  This is a hack, but good enough for now.
         		try {
         			Thread.sleep(1000);
-        		} catch (InterruptedException e) {}
+        			
+        		} catch (InterruptedException e) {
+        			Thread.currentThread().interrupt();
+        		}
                 targetPage = "redirect:/console/subscriptions.html";
                 
         	} else {
@@ -519,7 +522,10 @@ public class BrowseController extends BaseController {
         		// the subscriptions page.  This is a hack, but good enough for now.
         		try {
         			Thread.sleep(1000);
-        		} catch (InterruptedException e) {}
+        			
+        		} catch (InterruptedException e) {
+        			Thread.currentThread().interrupt();
+        		}
                 targetPage = "redirect:/console/subscriptions.html";
         		
         	} else {

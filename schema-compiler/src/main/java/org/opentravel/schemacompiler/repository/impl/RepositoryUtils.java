@@ -22,8 +22,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,8 +59,6 @@ import org.opentravel.schemacompiler.version.VersionSchemeFactory;
  * @author S. Livezey
  */
 public class RepositoryUtils {
-	
-	public static final DateFormat utcDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 	
     /**
      * Creates a new repository item instance using information from the meta-data record provided.

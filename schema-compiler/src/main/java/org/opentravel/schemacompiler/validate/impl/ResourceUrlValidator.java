@@ -61,7 +61,7 @@ public class ResourceUrlValidator extends UrlValidator {
 		} else {
 			pathToCheck = path;
 		}
-		return super.isValidPath(pathToCheck) && (pathToCheck.indexOf('?') < 0);
+		return (pathToCheck != null) && super.isValidPath(pathToCheck) && (pathToCheck.indexOf('?') < 0);
 	}
 
 	/**

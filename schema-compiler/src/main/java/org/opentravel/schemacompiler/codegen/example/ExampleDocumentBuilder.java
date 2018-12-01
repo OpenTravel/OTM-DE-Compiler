@@ -122,6 +122,9 @@ public class ExampleDocumentBuilder extends ExampleBuilder<Document>{
     public void buildToStream(Writer buffer) throws ValidationException, CodeGenerationException {
         try {
             TransformerFactory transFactory = TransformerFactory.newInstance();
+            
+            transFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            
             Transformer transformer = transFactory.newTransformer();
             Document domDocument = buildTree();
 

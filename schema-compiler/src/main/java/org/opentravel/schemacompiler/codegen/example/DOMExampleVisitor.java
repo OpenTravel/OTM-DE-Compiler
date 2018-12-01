@@ -886,12 +886,9 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
      */
 	private Element createXmlElement(String namespace, String localName,
 			NamedEntity prefixEntity) {
-		String ns = (namespace == null) ? null : namespace.intern();
-		String ln = (localName == null) ? null : localName.intern();
-		String prefix = prefixEntity.getOwningLibrary().getPrefix();
-		String p = (prefix == null) ? null : prefix;
+		String p = (prefixEntity == null) ? null : prefixEntity.getOwningLibrary().getPrefix();
 		
-		return createXmlElement(ns, ln, p);
+		return createXmlElement(namespace.intern(), localName.intern(), p);
     }
 
     /**

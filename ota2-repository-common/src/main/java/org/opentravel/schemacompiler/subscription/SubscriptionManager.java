@@ -417,6 +417,7 @@ public class SubscriptionManager {
 			
 		} catch (InterruptedException e) {
 			// Ignore - should never happen since the DelayQueue does not have a constrained size limit
+			Thread.currentThread().interrupt();
 		}
 	}
 	
@@ -431,7 +432,7 @@ public class SubscriptionManager {
 	 */
 	public void notifySubscribedUsers(RepositoryItem item, RepositoryActionType action, String remarks) {
 		try {
-			if ((action == RepositoryActionType.NS_CREATED) || (action == RepositoryActionType.NS_CREATED)) {
+			if ((action == RepositoryActionType.NS_CREATED) || (action == RepositoryActionType.NS_DELETED)) {
 				throw new IllegalArgumentException("Namespace-related actions are not allowed for this method.");
 			}
 			String userId = manager.getFileManager().getCurrentUserId();
@@ -450,6 +451,7 @@ public class SubscriptionManager {
 			
 		} catch (InterruptedException e) {
 			// Ignore - should never happen since the DelayQueue does not have a constrained size limit
+			Thread.currentThread().interrupt();
 		}
 	}
 	
@@ -493,7 +495,8 @@ public class SubscriptionManager {
 					notificationThread.join( 1000 ); // wait a full second before giving up
 					
 				} catch (InterruptedException e) {
-					// Ignore and exit
+					Thread.currentThread().interrupt();
+					
 				} finally {
 					notificationThread = null;
 				}
@@ -579,7 +582,7 @@ public class SubscriptionManager {
 				}
 				
 			} catch (InterruptedException e) {
-				// Ignore and continue looping until shutdown requested
+				Thread.currentThread().interrupt();
 			}
 		}
 	}

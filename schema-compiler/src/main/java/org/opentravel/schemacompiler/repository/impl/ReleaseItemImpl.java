@@ -139,15 +139,19 @@ public class ReleaseItemImpl extends RepositoryItemImpl implements ReleaseItem {
     public String getFilename() {
     	Release release = getContent();
         URL releaseUrl = (release == null) ? null : release.getReleaseUrl();
-        String urlString = (releaseUrl == null) ? null : releaseUrl.toExternalForm();
-        String filename;
+        String filename = null;
+        
+        if (releaseUrl != null) {
+            String urlString = releaseUrl.toExternalForm();
 
-        if (urlString.endsWith("/")) {
-            filename = null;
+            if (urlString.endsWith("/")) {
+                filename = null;
 
-        } else {
-            int idx = urlString.lastIndexOf('/');
-            filename = (idx < 0) ? urlString : urlString.substring(idx + 1);
+            } else {
+                int idx = urlString.lastIndexOf('/');
+                filename = (idx < 0) ? urlString : urlString.substring(idx + 1);
+            }
+        	
         }
         return filename;
     }

@@ -55,11 +55,13 @@ public class ProjectItemDependencyNavigator extends DependencyNavigator {
             // Also navigate all prior versions of this library since it is required that they
             // are part of the model
             for (AbstractLibrary previousLibraryVersion : previousLibraryVersions) {
-                if (!visitedLibraries.contains(previousLibraryVersion)) {
+            	String previousLibraryUrl = previousLibraryVersion.getLibraryUrl().toExternalForm();
+            	
+                if (!visitedLibraries.contains(previousLibraryUrl)) {
                     if (previousLibraryVersion instanceof TLLibrary) {
                         visitor.visitUserDefinedLibrary((TLLibrary) previousLibraryVersion);
                     }
-                    visitedLibraries.add(previousLibraryVersion.getLibraryUrl().toExternalForm());
+                    visitedLibraries.add(previousLibraryUrl);
                     navigateLibraryMembers(previousLibraryVersion, target);
                 }
             }
@@ -80,7 +82,9 @@ public class ProjectItemDependencyNavigator extends DependencyNavigator {
         // exists in the model, but we do not need to recursively navigate them. That
         // is already being handled by the navigateDependency() method above
         for (AbstractLibrary previousLibraryVersion : previousLibraryVersions) {
-            if ((!visitedLibraries.contains(previousLibraryVersion))
+        	String previousLibraryUrl = previousLibraryVersion.getLibraryUrl().toExternalForm();
+        	
+            if ((!visitedLibraries.contains(previousLibraryUrl))
                     && (previousLibraryVersion instanceof TLLibrary)) {
             	super.navigateLibrary((TLLibrary) previousLibraryVersion);
             }

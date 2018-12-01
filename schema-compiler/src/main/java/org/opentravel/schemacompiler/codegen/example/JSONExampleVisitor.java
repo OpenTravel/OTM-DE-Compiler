@@ -1127,32 +1127,11 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 			}
 
 			if (elementName == null) {
-				if ((property.getName() == null)
-						|| (property.getName().length() == 0)) {
+				if ((property.getName() == null) || (property.getName().length() == 0)) {
 					elementName = propertyType.getLocalName();
+					
 				} else {
 					elementName = property.getName();
-				}
-
-				// The element may be inherited, so to obtain the proper
-				// namespace we need to use
-				// the
-				// most recently encountered facet (i.e. the top of the facet
-				// stack)
-
-				if (facetStack.isEmpty()) {
-				} else {
-					if (facetStack.peek() == propertyType) {
-						// If the top of the facet stack is our property type,
-						// we need to go up one
-						// more level
-						// to find the facet that declared (or inherited) this
-						// property.
-						if (facetStack.size() > 1) {
-						} else {
-						}
-					} else {
-					}
 				}
 			}
 
@@ -1161,13 +1140,15 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 				// suffix is appended
 				elementName += "Ref";
 			}
+			
 		} else if (isSubstitutionGroupReference(property)) {
 			elementName = property.getType().getLocalName();
+			
 		} else if (propertyType instanceof TLAlias) {
 			elementName = JsonSchemaNamingUtils.getGlobalPropertyName(propertyType);
+			
 		} else {
-			elementName = getContextElementName(propertyType,
-					property.isReference());
+			elementName = getContextElementName(propertyType, property.isReference());
 		}
 		return elementName;
 	}

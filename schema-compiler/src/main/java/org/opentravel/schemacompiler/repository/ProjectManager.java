@@ -1804,10 +1804,15 @@ public final class ProjectManager {
             try {
                 if (!success) {
                     // Roll back workspace file changes if we encountered an error
-                    if ((wipFile != null) && wipFile.exists())
-                        wipFile.delete();
-                    if (backupFile != null)
-                        ProjectFileUtils.restoreBackupFile(backupFile, wipFile.getName());
+                	if (wipFile != null) {
+                        if (wipFile.exists()) {
+                            wipFile.delete();
+                        }
+                        
+                        if (backupFile != null) {
+                            ProjectFileUtils.restoreBackupFile(backupFile, wipFile.getName());
+                        }
+                	}
 
                 } else {
                     // Purge the backup file if the operation was successful

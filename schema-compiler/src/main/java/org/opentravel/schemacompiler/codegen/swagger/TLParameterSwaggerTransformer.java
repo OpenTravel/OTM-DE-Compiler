@@ -115,7 +115,7 @@ public class TLParameterSwaggerTransformer extends AbstractSwaggerCodegenTransfo
 		}
 		
 		// Last resort if we could not identify a type - use a string
-		if (schema.getType() == null) {
+		if ((schema != null) && (schema.getType() == null)) {
 			schema.setType( JsonType.jsonString );
 		}
 		return schema;

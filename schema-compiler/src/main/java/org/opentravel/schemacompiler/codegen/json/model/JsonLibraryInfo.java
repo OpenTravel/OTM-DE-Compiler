@@ -27,7 +27,7 @@ import com.google.gson.JsonObject;
  */
 public class JsonLibraryInfo {
 	
-	private static DateFormat dateFormat = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss.SSSZ" );
+	private DateFormat dateFormat = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss.SSSZ" );
 	// 2015-12-01T17:20:42.144-06:00
 	
     private String projectName;

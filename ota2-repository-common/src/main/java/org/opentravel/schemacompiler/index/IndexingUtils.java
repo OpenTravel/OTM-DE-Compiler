@@ -181,8 +181,11 @@ public class IndexingUtils {
 		StringBuilder identityKey = new StringBuilder();
 		
 		identityKey.append("F:");
-		identityKey.append( sourceQName.getNamespaceURI() ).append("|");
-		identityKey.append( sourceQName.getLocalPart() ).append("|");
+		
+		if (sourceQName != null) {
+			identityKey.append( sourceQName.getNamespaceURI() ).append("|");
+			identityKey.append( sourceQName.getLocalPart() ).append("|");
+		}
 		identityKey.append( finding.getSource().getValidationIdentity() ).append("|");
 		identityKey.append( finding.getMessageKey() );
 		return identityKey.toString();
@@ -220,13 +223,13 @@ public class IndexingUtils {
 	 */
 	public static QName getQualifiedName(Validatable validatable) {
 		TLModelElement targetObject = getTargetEntity( validatable );
-		QName objName;
+		QName objName = null;
 		
 		if (targetObject instanceof TLLibrary) {
 			TLLibrary library = (TLLibrary) targetObject;
 			objName = new QName( library.getNamespace(), library.getName() );
 			
-		} else {
+		} else if (targetObject instanceof NamedEntity) {
 			NamedEntity entity = (NamedEntity) targetObject;
 			objName = new QName( entity.getNamespace(), entity.getLocalName() );
 		}

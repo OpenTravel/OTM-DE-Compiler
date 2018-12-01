@@ -87,9 +87,7 @@ public class TLExtensionPointFacetCodegenTransformer extends
         List<TLAttribute> attributeList = source.getAttributes();
         List<TLProperty> elementList = source.getElements();
         List<TLIndicator> indicatorList = source.getIndicators();
-
-        boolean hasSequence = !elementList.isEmpty();
-        ExplicitGroup sequence = hasSequence ? new ExplicitGroup() : null;
+        ExplicitGroup sequence = !elementList.isEmpty() ? new ExplicitGroup() : null;
         ComplexType type = new TopLevelComplexType();
 
         // Declare the type and assemble the structure of objects
@@ -97,7 +95,7 @@ public class TLExtensionPointFacetCodegenTransformer extends
         type.setSequence(sequence);
 
         // Generate elements for the sequence (if required)
-        if (hasSequence) {
+        if (sequence != null) {
             ObjectTransformer<TLProperty, TopLevelElement, CodeGenerationTransformerContext> elementTransformer = getTransformerFactory()
                     .getTransformer(TLProperty.class, TopLevelElement.class);
 

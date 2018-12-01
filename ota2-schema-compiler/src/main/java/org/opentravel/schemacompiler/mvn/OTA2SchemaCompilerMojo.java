@@ -240,7 +240,7 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
 
                 // Execute the compilation and return
                 CompileAllCompilerTask compilerTask = TaskFactory.getTask(CompileAllCompilerTask.class);
-                ValidationFindings findings;
+                ValidationFindings findings = null;
                 Log log = getLog();
 
                 
@@ -249,25 +249,29 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
                     compilerTask.applyTaskOptions(this);
                     findings = compilerTask.compileOutput(libraryFile);
                 	
-                } else {
+                } else if (releaseItem != null) {
                     log.info("Compiling OTA2 Release: " + releaseItem.getFilename());
                     findings = compilerTask.compileOutput(releaseItem);
                 }
 
-                if (findings.hasFinding()) {
-                    String[] messages = findings
-                            .getAllValidationMessages(FindingMessageFormat.IDENTIFIED_FORMAT);
+                if (findings != null) {
+                    if (findings.hasFinding()) {
+                        String[] messages = findings
+                                .getAllValidationMessages(FindingMessageFormat.IDENTIFIED_FORMAT);
 
-                    log.info("Errors/warnings detected during compilation:");
-                    for (String message : messages) {
-                        log.info(message);
+                        log.info("Errors/warnings detected during compilation:");
+                        for (String message : messages) {
+                            log.info(message);
+                        }
+                    }
+                    
+                    if (!findings.hasFinding(FindingType.ERROR)) {
+                        log.info("Library compilation completed successfully.");
+                    } else {
+                        throw new MojoFailureException("Schema compilation aborted due to errors.");
                     }
                 }
-                if (!findings.hasFinding(FindingType.ERROR)) {
-                    log.info("Library compilation completed successfully.");
-                } else {
-                    throw new MojoFailureException("Schema compilation aborted due to errors.");
-                }
+                
             } catch (Throwable t) {
                 throw new MojoExecutionException("Error during OTA2 library compilation.", t);
             }

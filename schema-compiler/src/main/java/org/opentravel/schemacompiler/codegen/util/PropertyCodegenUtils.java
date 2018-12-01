@@ -416,7 +416,8 @@ public class PropertyCodegenUtils {
                 Collections.reverse(localAttributes);
 
                 for (TLAttribute attribute : localAttributes) {
-                    NamedEntity inheritanceRoot = getInheritanceRoot(attribute.getType());
+                	TLPropertyType attrType = attribute.getType();
+                    NamedEntity inheritanceRoot = (attrType == null) ? null : getInheritanceRoot(attrType);
                     Set<NamedEntity> attrInheritanceRoots = inheritanceRoots.get(attribute.getName());
                     
                     if (attrInheritanceRoots == null) {
@@ -574,7 +575,7 @@ public class PropertyCodegenUtils {
                                 propertyList.add(0, property);
                             }
                             
-                        } else {
+                        } else if (propertyType != null) {
                             NamedEntity inheritanceRoot = getInheritanceRoot(propertyType);
                             Set<NamedEntity> propertyInheritanceRoots = simpleInheritanceRoots.get( property.getName() );
                             

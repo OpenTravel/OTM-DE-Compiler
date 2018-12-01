@@ -287,7 +287,7 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     private String userFirstNameAttribute = "givenName";
     private String userFullNameAttribute = "cn";
     private String userEmailAttribute = "mail";
-    private String userPasswordAttribute = "userPassword";
+    private String userCredentialAttribute = "userPassword";
     private String referralStrategy = "ignore";
     private boolean isInitialized = false;
     private long authenticationCacheTimeout = 300000; // 5-minutes
@@ -635,9 +635,9 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
         try {
             String userDn = userPattern.format(new String[] { userId });
             Attributes userAttributes = context.getAttributes(userDn,
-                    new String[] { userPasswordAttribute });
+                    new String[] { userCredentialAttribute });
 
-            userPassword = getAttributeValue(userAttributes, userPasswordAttribute);
+            userPassword = getAttributeValue(userAttributes, userCredentialAttribute);
 
         } catch (NameNotFoundException e) {
             // Ignore and return null
@@ -1270,18 +1270,18 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
      * @return String
      */
     public String getUserPasswordAttribute() {
-        return userPasswordAttribute;
+        return userCredentialAttribute;
     }
 
     /**
      * Assigns the name of the attribute where passwords are stored on user entries. If not
      * specified, a default value of "userPassword" is assumed.
      * 
-     * @param userPasswordAttribute  the attribute name to assign
+     * @param userCredentialAttribute  the attribute name to assign
      */
-    public void setUserPasswordAttribute(String userPasswordAttribute) {
+    public void setUserPasswordAttribute(String userCredentialAttribute) {
         this.isInitialized = false;
-        this.userPasswordAttribute = userPasswordAttribute;
+        this.userCredentialAttribute = userCredentialAttribute;
     }
 
     /**
@@ -1320,7 +1320,7 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
      * 
      * @return String
      */
-    public String getDigestAlgorithm() {
+    public synchronized String getDigestAlgorithm() {
         return digestAlgorithm;
     }
 
@@ -1348,7 +1348,7 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
      * 
      * @return String
      */
-    public String getDigestEncoding() {
+    public synchronized String getDigestEncoding() {
         return digestEncoding;
     }
 

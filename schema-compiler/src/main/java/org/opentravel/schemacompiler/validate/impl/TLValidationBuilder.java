@@ -166,7 +166,7 @@ public final class TLValidationBuilder extends ValidationBuilder<TLValidationBui
         NamedEntity value = propertyValueAsNamedEntity();
 
         if (value != null) {
-            String entityName = (value == null) ? null : validationContext.getSymbolResolver()
+            String entityName = validationContext.getSymbolResolver()
                     .buildEntityName(value.getNamespace(), value.getLocalName());
             boolean isValid = false;
 

@@ -19,7 +19,7 @@
 html, body {
 	height: 100%;
 }
-body {padding: 0; margin: 0; font-family: arial, helvetica, sans serif; font-size: 12px; background:#ffffff; color:#666666;}
+body {padding: 0; margin: 0; font-family: arial, helvetica, sans-serif; font-size: 12px; background:#ffffff; color:#666666;}
 body table {width:98%; margin:auto;}
 #header {background:#ffffff; padding:5px 5px 5px 5px; font-size:12px; color:#666666}
 
@@ -64,7 +64,7 @@ h3 {font-size:16px; margin:0; padding:8px 0;}
 h3 a {text-decoration: none;}
 .divider {border-top:2px solid #AAAAAA; margin-left:50px; margin-right:50px; margin-top:10px; margin-bottom:10px;}
 
-#browsetable {font-family: arial, helvetica, sans serif; width:100%; margin:auto; border-collapse:collapse;}
+#browsetable {font-family: arial, helvetica, sans-serif; width:100%; margin:auto; border-collapse:collapse;}
 #browsetable td, table th {font-size:1em; border:none; padding:3px 7px 2px 7px;}
 #browsetable th {font-size:14px; line-height:18px; height:20px; text-align:left; padding-top:5px; padding-bottom:4px; background-color:#006699; color:#ffffff;}
 #browsetable tr.d0 {background-color:#fff; line-height:22px;}
@@ -85,7 +85,7 @@ ul.tab li a:hover {background-color: #ddd;}
 ul.tab li a:focus {background-color: #ccc;}
 .activeTab {background-color: #ccc; font-weight:bold;}
 
-#itemtable {font-family: arial, helvetica, sans serif; width:100%; margin:auto; border: 1px solid #ccc; border-collapse:collapse;}
+#itemtable {font-family: arial, helvetica, sans-serif; width:100%; margin:auto; border: 1px solid #ccc; border-collapse:collapse;}
 #itemtable td, table th {font-size:1em; border:none; padding:3px 7px 2px 7px;}
 #itemtable th {font-size:14px; line-height:18px; height:20px; text-align:left; padding-top:5px; padding-bottom:4px; background-color:#006699; color:#ffffff;}
 #itemtable tr.d0 {background-color:#fff; line-height:22px;}
@@ -99,38 +99,38 @@ ul.tab li a:focus {background-color: #ccc;}
 #itemtable td.number {text-align: right; width: 80px;}
 #itemtable th.number {text-align: right;}
 
-#changeNameTable {font-family: arial, helvetica, sans serif; color:#666666; float:left; border-collapse:collapse; width:1%;}
+#changeNameTable {font-family: arial, helvetica, sans-serif; color:#666666; float:left; border-collapse:collapse; width:1%;}
 #changeNameTable td {text-align:left; white-space:nowrap; padding-top:5px; padding-bottom:5px;}
 
-#rootNamespaceTable {font-family: arial, helvetica, sans serif; width:40%; color:#006699; float:left; border-collapse:collapse; margin-top:10px;}
+#rootNamespaceTable {font-family: arial, helvetica, sans-serif; width:40%; color:#006699; float:left; border-collapse:collapse; margin-top:10px;}
 #rootNamespaceTable tr {border:solid 1px #AAAAAA;}
 #rootNamespaceTable td {padding-left:5px; padding-bottom:5px; white-space:nowrap; }
 
-#userTable {font-family: arial, helvetica, sans serif; width:10%; color:#006699; float:left; border-collapse:collapse}
+#userTable {font-family: arial, helvetica, sans-serif; width:10%; color:#006699; float:left; border-collapse:collapse}
 #userTable td, table th {font-size:1em; border:none; padding:3px 7px 2px 7px; white-space:nowrap;}
 #userTable th {font-size:14px; line-height:18px; height:20px; text-align:left; padding-top:5px; padding-bottom:4px; background-color:#006699; color:#ffffff;}
 #userTable tr.d0 {background-color:#fff; line-height:22px;}
 #userTable tr.d1 {background:#eaeaea; line-height:22px;}
 
-#groupTable {font-family: arial, helvetica, sans serif; width:10%; color:#006699; float:left; border-collapse:collapse}
+#groupTable {font-family: arial, helvetica, sans-serif; width:10%; color:#006699; float:left; border-collapse:collapse}
 #groupTable tr {border:solid 1px #AAAAAA;}
 #groupTable td {padding-left:5px; padding-right:5px; padding-bottom:5px; white-space:nowrap; }
-#groupMembersTable {border:solid 1px #AAAAAA; font-family: arial, helvetica, sans serif; width:10%; margin-left:40px; color:#006699; float:left; border-collapse:collapse}
-#groupMembersSelect {width:150px;font-family: arial, helvetica, sans serif;font-size:16px; }
+#groupMembersTable {border:solid 1px #AAAAAA; font-family: arial, helvetica, sans-serif; width:10%; margin-left:40px; color:#006699; float:left; border-collapse:collapse}
+#groupMembersSelect {width:150px;font-family: arial, helvetica, sans-serif;font-size:16px; }
 
-#groupEditTable {font-family: arial, helvetica, sans serif; width:10%; color:#006699; float:left; border-collapse:collapse}
+#groupEditTable {font-family: arial, helvetica, sans-serif; width:10%; color:#006699; float:left; border-collapse:collapse}
 #groupEditTable td {padding-left:5px; padding-right:5px; padding-bottom:5px; white-space:nowrap; }
 #groupEditKnownUsers {font-size:12px;}
 #groupEditNewUser {font-size:12px;}
 
-#permissionsTable {font-family: arial, helvetica, sans serif; border-collapse:collapse;}
+#permissionsTable {font-family: arial, helvetica, sans-serif; border-collapse:collapse;}
 #permissionsTable td, table th {font-size:1em; border:none; padding:3px 7px 2px 7px;}
 #permissionsTable th {font-size:14px; line-height:18px; height:20px; text-align:left; padding-top:5px; padding-bottom:4px; background-color:#006699; color:#ffffff;}
 #permissionsTable tr.ns {background-color:#aaa; color:#444; line-height:22px;}
 #permissionsTable tr.d0 {background-color:#fff; line-height:22px;}
 #permissionsTable tr.d1 {background:#eaeaea; line-height:22px;}
 
-#editUserTable {font-family: arial, helvetica, sans serif; color:#666666; float:left; border-collapse:collapse; width:1%;}
+#editUserTable {font-family: arial, helvetica, sans-serif; color:#666666; float:left; border-collapse:collapse; width:1%;}
 #editUserTable td {white-space:nowrap; padding-top:5px; padding-bottom:5px;}
 
 #errorMessage {border:solid 1px #CC0000; color:#CC0000; text-align:center; padding:5px; margin-bottom:10px;}

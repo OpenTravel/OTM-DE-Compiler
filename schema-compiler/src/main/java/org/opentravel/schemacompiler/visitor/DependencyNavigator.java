@@ -714,9 +714,6 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
         } else if (entity instanceof TLFacet) {
             navigateFacet((TLFacet) entity);
 
-        } else if (entity instanceof TLActionFacet) {
-            navigateActionFacet((TLActionFacet) entity);
-
         } else if (entity instanceof TLSimpleFacet) {
             navigateSimpleFacet((TLSimpleFacet) entity);
 

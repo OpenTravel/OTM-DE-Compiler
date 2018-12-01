@@ -62,7 +62,7 @@ public class CompilerExtensionRegistry {
      * 
      * @return String
      */
-    public static String getActiveExtension() {
+    public static synchronized String getActiveExtension() {
         return activeExtensionId;
     }
 

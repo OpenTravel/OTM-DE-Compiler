@@ -86,7 +86,7 @@ import org.opentravel.schemacompiler.xml.XMLGregorianCalendarConverter;
 public class RepositoryManager implements Repository {
 
     private static final String CURRENT_USER_BASE_NAMESPACE = "http://opentravel.org/local/";
-    private static final String ENCRYPTED_PASSWORD_PREFIX = "enc:";
+    private static final String ENCRYPTED_PREFIX = "enc:";
     private static final int MAX_DISPLAY_NAME_LENGTH = 256;
     private static final Pattern REPOSITORY_ID_PATTERN = Pattern.compile("([A-Za-z0-9\\-._~!$&'()*+,;=]|%[0-9A-Fa-f]{2})*");
     
@@ -356,7 +356,6 @@ public class RepositoryManager implements Repository {
         List<RemoteRepository> repositoryList = new ArrayList<RemoteRepository>();
 
         repositoryList.addAll(remoteRepositories);
-        repositoryList.remove(this);
         return repositoryList;
     }
 
@@ -1577,7 +1576,6 @@ public class RepositoryManager implements Repository {
      */
     public void revert(RepositoryItem item) throws RepositoryException {
         boolean success = false;
-        InputStream in = null;
         try {
             fileManager.startChangeSet();
             String baseNS = RepositoryNamespaceUtils.normalizeUri(item.getBaseNamespace());
@@ -1605,13 +1603,6 @@ public class RepositoryManager implements Repository {
                     + item.getFilename(), e);
 
         } finally {
-            // Close all open streams
-            try {
-                if (in != null)
-                    in.close();
-            } catch (Throwable t) {
-            }
-
             // Commit or roll back the changes based on the result of the operation
             if (success) {
                 fileManager.commitChangeSet();
@@ -2409,7 +2400,7 @@ public class RepositoryManager implements Repository {
                 jaxbRepository.setRefreshPolicy(remoteRepository.getRefreshPolicy());
                 jaxbRepository.getRootNamespace().addAll(remoteRepository.listRootNamespaces());
                 jaxbRepository.setUserID(remoteRepository.getUserId());
-                jaxbRepository.setPassword(ENCRYPTED_PASSWORD_PREFIX
+                jaxbRepository.setPassword(ENCRYPTED_PREFIX
                         + remoteRepository.getEncryptedPassword());
                 repositoryMetadata.getRemoteRepositories().getRemoteRepository()
                         .add(jaxbRepository);
@@ -2567,8 +2558,8 @@ public class RepositoryManager implements Repository {
         if (jaxbPassword != null) {
             String encryptedPassword;
 
-            if (jaxbPassword.startsWith(ENCRYPTED_PASSWORD_PREFIX)) {
-                encryptedPassword = jaxbPassword.substring(ENCRYPTED_PASSWORD_PREFIX.length());
+            if (jaxbPassword.startsWith(ENCRYPTED_PREFIX)) {
+                encryptedPassword = jaxbPassword.substring(ENCRYPTED_PREFIX.length());
 
             } else {
                 encryptedPassword = PasswordHelper.encrypt(jaxbPassword);

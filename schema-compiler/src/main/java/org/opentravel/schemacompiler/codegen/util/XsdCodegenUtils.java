@@ -236,7 +236,14 @@ public class XsdCodegenUtils {
 
         // Default value is the normal global element name
         if (elementName == null) {
-            elementName = getGlobalElementName(facet).getLocalPart();
+        	QName globalName = getGlobalElementName(facet);
+        	
+        	if (globalName != null) {
+                elementName = globalName.getLocalPart();
+                
+        	} else {
+        		elementName = "ERROR";
+        	}
         }
         return new QName(facet.getNamespace(), elementName);
     }
@@ -279,7 +286,14 @@ public class XsdCodegenUtils {
 
         // Default value is the normal global element name
         if (elementName == null) {
-            elementName = getGlobalElementName(facetAlias).getLocalPart();
+        	QName globalName = getGlobalElementName(facetAlias);
+        	
+        	if (globalName != null) {
+                elementName = globalName.getLocalPart();
+        		
+        	} else {
+        		elementName = "ERROR";
+        	}
         }
         return new QName(facet.getNamespace(), elementName);
     }
@@ -319,7 +333,7 @@ public class XsdCodegenUtils {
             	// than cores and business objects
             	referenceElementName = globalElementName;
             	
-            } else {
+            } else if (globalElementName != null) {
                 referenceElementName = new QName(globalElementName.getNamespaceURI(),
                         globalElementName.getLocalPart() + "SubGrp");
             }
@@ -347,18 +361,21 @@ public class XsdCodegenUtils {
     		
     		elementName = getGlobalElementName( actionFacet );
     		
-    		switch (payloadFacet.getFacetType()) {
-    			case DETAIL:
-    			case CHOICE:
-    				facetSuffix = payloadFacet.getFacetType().getIdentityName(
-    						FacetCodegenUtils.getFacetName( payloadFacet ) );
-    				break;
-    			default:
-    				break;
-    		}
-    		if (facetSuffix != null) {
-    			elementName = new QName( elementName.getNamespaceURI(),
-    					elementName.getLocalPart() + facetSuffix );
+    		if (elementName != null) {
+        		switch (payloadFacet.getFacetType()) {
+        			case DETAIL:
+        			case CHOICE:
+        				facetSuffix = payloadFacet.getFacetType().getIdentityName(
+        						FacetCodegenUtils.getFacetName( payloadFacet ) );
+        				break;
+        			default:
+        				break;
+        		}
+        		
+        		if (facetSuffix != null) {
+        			elementName = new QName( elementName.getNamespaceURI(),
+        					elementName.getLocalPart() + facetSuffix );
+        		}
     		}
     	}
     	return elementName;

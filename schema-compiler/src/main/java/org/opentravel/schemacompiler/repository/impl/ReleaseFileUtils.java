@@ -292,7 +292,8 @@ public class ReleaseFileUtils extends AbstractFileUtils {
     	PrincipalMembersType principalMembers = new PrincipalMembersType();
     	ReferencedMembersType referencedMembers = new ReferencedMembersType();
     	ReleaseCompileOptions compilerOptions = release.getCompileOptions();
-    	Map<String,String> optionProps = (compilerOptions == null) ? null : compilerOptions.toProperties();
+    	Map<String,String> optionProps = (compilerOptions == null) ?
+    			new ReleaseCompileOptions().toProperties() : compilerOptions.toProperties();
     	ReleaseType jaxbRelease = new ReleaseType();
     	
     	releaseId.setBaseNamespace( release.getBaseNamespace() );

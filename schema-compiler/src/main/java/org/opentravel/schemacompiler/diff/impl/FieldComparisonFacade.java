@@ -78,7 +78,7 @@ public class FieldComparisonFacade {
 		this.mandatory = field.isMandatory();
 		this.reference = field.isReference();
 		this.repeatCount = 0;
-		this.reference = false;
+		this.reference = field.isReference();
 		this.examples = ModelCompareUtils.getExamples( field );
 		this.equivalents = ModelCompareUtils.getEquivalents( field );
 		

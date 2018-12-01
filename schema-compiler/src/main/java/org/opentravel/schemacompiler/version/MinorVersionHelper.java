@@ -88,7 +88,7 @@ public final class MinorVersionHelper extends AbstractVersionHelper {
     public TLLibrary getPriorMinorVersion(TLLibrary library) throws VersionSchemeException {
         VersionScheme versionScheme = VersionSchemeFactory.getInstance().getVersionScheme(
                 library.getVersionScheme());
-        String baseNamespace = (library == null) ? null : library.getBaseNamespace();
+        String baseNamespace = library.getBaseNamespace();
         TLLibrary priorVersion = null;
 
         if ((library != null) && (baseNamespace != null) && (library.getOwningModel() != null)

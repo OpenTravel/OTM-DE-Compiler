@@ -35,6 +35,7 @@ public class ExceptionUtils {
      * @return Class<? extends Throwable>
      */
     public static final Class<? extends Throwable> getExceptionClass(Throwable t) {
+    	Class<? extends Throwable> exceptionClass = (t == null) ? null : t.getClass();
         Throwable actualCause = t;
 
         while ((actualCause != null)
@@ -42,13 +43,17 @@ public class ExceptionUtils {
 
             if (actualCause instanceof JAXBException) {
                 JAXBException e = (JAXBException) actualCause;
-                actualCause = (e.getLinkedException() != null) ? e.getLinkedException() : e
-                        .getCause();
+                actualCause = (e.getLinkedException() != null) ? e.getLinkedException() : e.getCause();
             } else {
                 actualCause = actualCause.getCause();
             }
         }
-        return (actualCause == null) ? t.getClass() : actualCause.getClass();
+        
+        if (actualCause != null) {
+        	exceptionClass = actualCause.getClass();
+        }
+        
+        return exceptionClass;
     }
 
     /**

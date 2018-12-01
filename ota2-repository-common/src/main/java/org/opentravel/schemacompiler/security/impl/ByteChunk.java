@@ -454,7 +454,7 @@ public class ByteChunk {
     @Override
     public String toString() {
         if (null == buff) {
-            return null;
+            return "";
         } else if (end - start == 0) {
             return "";
         }
@@ -502,7 +502,7 @@ public class ByteChunk {
      *            the String to compare
      * @return true if the comparison succeeded, false otherwise
      */
-    public boolean equals(String s) {
+    public boolean isEquivalent(String s) {
         // ENCODING - this only works if encoding is UTF8-compat
         // ( ok for tomcat, where we compare ascii - header names, etc )!!!
 
@@ -527,7 +527,7 @@ public class ByteChunk {
      *            the String to compare
      * @return true if the comparison succeeded, false otherwise
      */
-    public boolean equalsIgnoreCase(String s) {
+    public boolean isEquivalentIgnoreCase(String s) {
         byte[] b = buff;
         int blen = end - start;
         if (b == null || blen != s.length()) {
@@ -542,11 +542,11 @@ public class ByteChunk {
         return true;
     }
 
-    public boolean equals(ByteChunk bb) {
-        return equals(bb.getBytes(), bb.getStart(), bb.getLength());
+    public boolean isEquivalent(ByteChunk bb) {
+        return isEquivalent(bb.getBytes(), bb.getStart(), bb.getLength());
     }
 
-    public boolean equals(byte b2[], int off2, int len2) {
+    public boolean isEquivalent(byte b2[], int off2, int len2) {
         byte b1[] = buff;
         if (b1 == null && b2 == null)
             return true;
@@ -565,11 +565,11 @@ public class ByteChunk {
         return true;
     }
 
-    public boolean equals(CharChunk cc) {
-        return equals(cc.getChars(), cc.getStart(), cc.getLength());
+    public boolean isEquivalent(CharChunk cc) {
+        return isEquivalent(cc.getChars(), cc.getStart(), cc.getLength());
     }
 
-    public boolean equals(char c2[], int off2, int len2) {
+    public boolean isEquivalent(char c2[], int off2, int len2) {
         // Works only for enc compatible with ASCII/UTF !!!
         byte b1[] = buff;
         if (c2 == null && b1 == null)

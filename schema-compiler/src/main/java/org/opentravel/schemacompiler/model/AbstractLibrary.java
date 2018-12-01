@@ -509,8 +509,7 @@ public abstract class AbstractLibrary extends TLModelElement {
     public void addNamedMember(LibraryMember namedMember) {
         if (namedMember != null) {
             if (!isValidMember(namedMember)) {
-                String memberType = (namedMember == null) ? "<NULL>" : namedMember.getClass()
-                        .getSimpleName();
+                String memberType = namedMember.getClass().getSimpleName();
 
                 throw new IllegalArgumentException("Items of type '" + memberType
                         + "' are not allowed as members of " + this.getClass().getSimpleName()

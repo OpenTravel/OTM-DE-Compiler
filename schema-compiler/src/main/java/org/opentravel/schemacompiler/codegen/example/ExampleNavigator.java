@@ -893,7 +893,7 @@ public class ExampleNavigator {
      * @return TLAbstractFacet
      */
     protected TLAbstractFacet selectExampleFacet(TLFacet defaultFacet) {
-    	TLFacetOwner facetOwner = (defaultFacet == null) ? null : defaultFacet.getOwningEntity();
+    	TLFacetOwner facetOwner = defaultFacet.getOwningEntity();
         TLAbstractFacet exampleFacet = options.getPreferredFacet( facetOwner );
         
         if (exampleFacet == null) { // no preferred facet assigned

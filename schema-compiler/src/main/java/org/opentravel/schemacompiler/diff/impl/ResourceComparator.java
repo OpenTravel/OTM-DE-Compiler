@@ -414,10 +414,10 @@ public class ResourceComparator extends BaseComparator {
 		QName newPayloadTypeName = (newPayloadType == null) ? null : getEntityName( newPayloadType );
 		TLHttpMethod oldHttpMethod = (oldRequest == null) ? null : oldRequest.getHttpMethod();
 		TLHttpMethod newHttpMethod = (newRequest == null) ? null : newRequest.getHttpMethod();
-		String oldPathTemplate = (oldRequest == null) ? null : oldRequest.getPathTemplate();
-		String newPathTemplate = (newRequest == null) ? null : newRequest.getPathTemplate();
-		String oldParamGroupName = (oldRequest == null) ? null : oldRequest.getParamGroupName();
-		String newParamGroupName = (newRequest == null) ? null : newRequest.getParamGroupName();
+		String oldPathTemplate = (oldRequest == null) ? "" : oldRequest.getPathTemplate();
+		String newPathTemplate = (newRequest == null) ? "" : newRequest.getPathTemplate();
+		String oldParamGroupName = (oldRequest == null) ? "" : oldRequest.getParamGroupName();
+		String newParamGroupName = (newRequest == null) ? "" : newRequest.getParamGroupName();
 		
 		if (oldAction.isCommonAction() != newAction.isCommonAction() ) {
 			changeItems.add( new ResourceChangeItem( resourceChangeSet,
@@ -434,7 +434,8 @@ public class ResourceComparator extends BaseComparator {
 					ResourceChangeType.REQUEST_PARAM_GROUP_CHANGED,
 					oldParamGroupName, newParamGroupName ) );
 		}
-		if (valueChanged( oldPathTemplate, newPathTemplate )) {
+		if ((oldRequest != null) && (newRequest != null) &&
+				valueChanged( oldPathTemplate, newPathTemplate )) {
 			changeItems.add( new ResourceChangeItem( resourceChangeSet,
 					ResourceChangeType.REQUEST_PATH_TEMPLATE_CHANGED,
 					oldRequest.getPathTemplate(), newRequest.getPathTemplate() ) );

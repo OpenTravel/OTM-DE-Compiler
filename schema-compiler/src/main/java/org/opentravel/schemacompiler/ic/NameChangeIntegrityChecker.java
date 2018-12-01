@@ -173,7 +173,7 @@ public class NameChangeIntegrityChecker extends
      */
     private static class EntityNameChangeVisitor extends ModelElementVisitorAdapter {
 
-        private List<TLModelElement> modifiedEntities = new ArrayList<>();
+        private List<ModelElement> modifiedEntities = new ArrayList<>();
         private SymbolResolver symbolResolver;
 
         /**

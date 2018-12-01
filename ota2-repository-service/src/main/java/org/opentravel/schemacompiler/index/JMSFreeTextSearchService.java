@@ -119,6 +119,7 @@ public class JMSFreeTextSearchService extends FreeTextSearchService implements I
 				
 			} catch (InterruptedException e) {
 				log.warn("Interrupted while waiting for ");
+				Thread.currentThread().interrupt();
 				
 			} finally {
 				shutdownRequested = false;

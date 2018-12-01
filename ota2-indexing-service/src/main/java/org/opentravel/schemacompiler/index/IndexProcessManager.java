@@ -91,7 +91,9 @@ public class IndexProcessManager {
 				try {
 					Thread.sleep(1000);
 					
-				} catch (InterruptedException e) {}
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+				}
 			}
 			
 		} catch (Throwable t) {
@@ -331,6 +333,7 @@ public class IndexProcessManager {
 				
 			} catch (InterruptedException e) {
 				log.info("Indexing agent shut down.");
+				Thread.currentThread().interrupt();
 			}
 		}
 	}
