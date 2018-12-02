@@ -32,7 +32,7 @@ import org.opentravel.schemacompiler.codegen.html.markup.HtmlTree;
  * @author Eric.Bronson
  *
  */
-public class BusinessObjectWriterTest extends WriterTest {
+public class BusinessObjectWriterTest extends AbstractWriterTest {
 
 	private BusinessObjectDocumentationBuilder builder;
 	private BusinessObjectWriter writer;

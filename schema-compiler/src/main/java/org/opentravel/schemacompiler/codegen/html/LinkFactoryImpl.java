@@ -40,9 +40,6 @@
 package org.opentravel.schemacompiler.codegen.html;
 
 import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
-import org.opentravel.schemacompiler.codegen.html.Configuration;
-import org.opentravel.schemacompiler.codegen.html.HtmlDocletWriter;
-import org.opentravel.schemacompiler.codegen.html.DirectoryManager;
 
 /**
  * A factory that returns a link given the information about it.
@@ -75,8 +72,8 @@ public class LinkFactoryImpl extends LinkFactory {
 		// create one if we are linking to a member.
 		String title = (classLinkInfo.where == null || classLinkInfo.where
 				.length() == 0) ? getObjectToolTip(builder.getNamespace(), false) : "";
-		StringBuffer label = new StringBuffer(
-				classLinkInfo.getClassLinkLabel(m_writer.configuration));
+		StringBuilder label = new StringBuilder(
+				classLinkInfo.getClassLinkLabel(m_writer.newConfiguration()));
 		classLinkInfo.displayLength += label.length();
 		Configuration configuration = Configuration.getInstance();
 		LinkOutputImpl linkOutput = new LinkOutputImpl();
@@ -129,7 +126,7 @@ public class LinkFactoryImpl extends LinkFactory {
 			// with 1.4.2 output.
 			return linkInfo.builder.getName() + ".html";
 		}
-		StringBuffer buf = new StringBuffer(m_writer.relativePath);
+		StringBuilder buf = new StringBuilder(m_writer.relativePath);
 		buf.append(DirectoryManager.getPathToLibrary(
 				linkInfo.builder.getOwningLibrary(), linkInfo.builder.getName()
 						+ ".html"));

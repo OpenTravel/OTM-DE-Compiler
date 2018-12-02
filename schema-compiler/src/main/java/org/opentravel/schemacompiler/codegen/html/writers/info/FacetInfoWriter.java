@@ -45,7 +45,7 @@ public class FacetInfoWriter extends AbstractInheritedInfoWriter<FacetOwnerDocum
 			FacetOwnerDocumentationBuilder<?> owner) {
 		super(writer, owner);
 		title = writer.getResource("doclet.Facet_Summary");
-		caption = writer.configuration().getText("doclet.Facets");
+		caption = writer.newConfiguration().getText("doclet.Facets");
 	}
 	
 	/**
@@ -136,12 +136,12 @@ public class FacetInfoWriter extends AbstractInheritedInfoWriter<FacetOwnerDocum
     		List<FacetDocumentationBuilder> inheritedFacets = new ArrayList<>();
     		for(FacetDocumentationBuilder fdb : extFacets){
     			boolean hasFacet = false;
+    			
     			for(FacetDocumentationBuilder fdb2 : facets){   
     				TLFacetType extFacetType = fdb.getType();
     				if(extFacetType.equals(TLFacetType.ID) || extFacetType.equals(TLFacetType.SUMMARY) || extFacetType.equals(TLFacetType.DETAIL)){
     					if(fdb2.getType().equals(extFacetType)){
     						hasFacet = true;
-    						break;
     					}
     				}else{ // should be a custom or query
     					String extFacetName = fdb.getName();
@@ -149,9 +149,9 @@ public class FacetInfoWriter extends AbstractInheritedInfoWriter<FacetOwnerDocum
     					String extName = extFacetName.substring(ext.getName().length());
     					if(fdb2.getName().contains(extName)){
     						hasFacet = true;
-    						break;
     					}
     				}
+    				if (hasFacet) break;
     			}
     			if(!hasFacet){
     				inheritedFacets.add(fdb);
@@ -186,7 +186,7 @@ public class FacetInfoWriter extends AbstractInheritedInfoWriter<FacetOwnerDocum
 
 
 	protected String getInfoTableSummary() {
-		Configuration config = writer.configuration();
+		Configuration config = writer.newConfiguration();
 		return config.getText("doclet.Facet_Table_Summary",
 				config.getText("doclet.Facet_Summary"),
 				config.getText("doclet.facets"));
@@ -197,7 +197,7 @@ public class FacetInfoWriter extends AbstractInheritedInfoWriter<FacetOwnerDocum
 	 */
 	@Override
 	protected String[] getInfoTableHeader() {
-		Configuration config = writer.configuration();
+		Configuration config = writer.newConfiguration();
 		
 		return new String[] { config.getText("doclet.Name"), config.getText("doclet.Type") };
 	}

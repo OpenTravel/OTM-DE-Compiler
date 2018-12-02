@@ -29,7 +29,7 @@ import org.opentravel.schemacompiler.codegen.html.writers.info.DocumentationInfo
  * @author Eric.Bronson
  *
  */
-public class DocumentationInfoWriterTest extends WriterTest{
+public class DocumentationInfoWriterTest extends AbstractWriterTest{
 	
 
 	@Test

@@ -43,18 +43,16 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ResourceBundle;
+
 import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
-import org.opentravel.schemacompiler.codegen.html.Configuration;
 
 /**
  * Utilities Class for Documentation. Modified from the original JavaDoc Util
@@ -65,12 +63,17 @@ import org.opentravel.schemacompiler.codegen.html.Configuration;
  * @author Eric.Bronson (modified for OTM)
  */
 public class Util {
-
+	
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private Util() {}
+	
 	/**
 	 * A mapping between characters and their corresponding HTML escape
 	 * character.
 	 */
-	public static final String[][] HTML_ESCAPE_CHARS = { { "&", "&amp;" },
+	protected static final String[][] HTML_ESCAPE_CHARS = { { "&", "&amp;" },
 			{ "<", "&lt;" }, { ">", "&gt;" } };
 
 	/**
@@ -105,13 +108,9 @@ public class Util {
 			destDir.mkdirs();
 
 			try (FileOutputStream output = new FileOutputStream(destfile)) {
-
 				while ((len = input.read(bytearr)) != -1) {
 					output.write(bytearr, 0, len);
 				}
-
-			} catch (FileNotFoundException exc) {
-			} catch (SecurityException exc) {
 			}
 		}
 	}
@@ -177,31 +176,13 @@ public class Util {
 					while ((n = in.read(buf)) > 0)
 						out.write(buf, 0, n);
 				} else {
-					try (BufferedReader reader = new BufferedReader(
-							new InputStreamReader(in))) {
-						BufferedWriter writer = null;
-						try {
-							if (configuration.docencoding == null) {
-								writer = new BufferedWriter(
-										new OutputStreamWriter(out));
-							} else {
-								writer = new BufferedWriter(
-										new OutputStreamWriter(out,
-												configuration.docencoding));
-							}
+					try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
+						try (BufferedWriter writer = newWriter(out, configuration)) {
 							String line;
+							
 							while ((line = reader.readLine()) != null) {
 								writer.write(line);
 								writer.write(DocletConstants.NL);
-							}
-						} finally {
-							if (writer != null) {
-								try {
-									writer.close();
-								} catch (IOException ioe) {
-									// -TODO: what to do with IOException on
-									// close
-								}
 							}
 						}
 					}
@@ -210,6 +191,26 @@ public class Util {
 		} catch (IOException ie) {
 			throw new DocletAbortException();
 		}
+	}
+	
+	/**
+	 * Constructs a new writer for the given output stream using the proper
+	 * encoding configuration.
+	 * 
+	 * @param out  the output stream for which to construct a writer
+	 * @param configuration  the configuration to use for writer encoding
+	 * @return BufferedWriter
+	 * @throws IOException  thrown if the writer cannot be created
+	 */
+	private static BufferedWriter newWriter(OutputStream out, Configuration configuration) throws IOException {
+		BufferedWriter writer = null;
+		
+		if (configuration.docencoding == null) {
+			writer = new BufferedWriter(new OutputStreamWriter(out));
+		} else {
+			writer = new BufferedWriter(new OutputStreamWriter(out, configuration.docencoding));
+		}
+		return writer;
 	}
 
 	/**
@@ -285,16 +286,12 @@ public class Util {
 	 * @exception IOException
 	 *                Exception raised by the FileWriter is passed on to next
 	 *                level.
-	 * @exception UnsupportedEncodingException
-	 *                Exception raised by the OutputStreamWriter is passed on to
-	 *                next level.
 	 * @return Writer Writer for the file getting generated.
 	 * @see java.io.FileOutputStream
 	 * @see java.io.OutputStreamWriter
 	 */
 	public static Writer genWriter(Configuration configuration, String path,
-			String filename, String docencoding) throws IOException,
-			UnsupportedEncodingException {
+			String filename, String docencoding) throws IOException {
 		FileOutputStream fos;
 		if (path != null) {
 			DirectoryManager.createDirectory(configuration, path);

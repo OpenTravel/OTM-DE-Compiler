@@ -23,7 +23,7 @@ import org.opentravel.schemacompiler.codegen.html.Content;
 import org.opentravel.schemacompiler.codegen.html.TestLibraryProvider;
 import org.opentravel.schemacompiler.codegen.html.builders.VWADocumentationBuilder;
 
-public class VWAWriterTest extends WriterTest {
+public class VWAWriterTest extends AbstractWriterTest {
 
 	private static VWADocumentationBuilder builder;
 	private static VWAWriter writer;

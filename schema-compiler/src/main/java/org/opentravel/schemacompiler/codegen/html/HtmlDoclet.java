@@ -39,15 +39,14 @@
  */
 package org.opentravel.schemacompiler.codegen.html;
 
-import java.util.*;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.ListIterator;
 
+import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
-import org.opentravel.schemacompiler.codegen.html.DocletAbortException;
-import org.opentravel.schemacompiler.codegen.html.IndexBuilder;
-import org.opentravel.schemacompiler.codegen.html.Util;
-import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
 
 /**
  * The class with "start" method, calls individual Writers.
@@ -67,7 +66,7 @@ public class HtmlDoclet extends AbstractDoclet {
 	public static final String TOGGLE_OPEN_IMAGE = "expand_normal_open_16x16.png";
 	
 	public HtmlDoclet() {
-		configuration = configuration();
+		setConfiguration( newConfiguration() );
 	}
 	
 	/**
@@ -91,7 +90,7 @@ public class HtmlDoclet extends AbstractDoclet {
 	 * Create the configuration instance. Override this method to use a
 	 * different configuration.
 	 */
-	public Configuration configuration() {
+	public Configuration newConfiguration() {
 		return Configuration.getInstance();
 	}
 
@@ -106,36 +105,38 @@ public class HtmlDoclet extends AbstractDoclet {
 	 * @see com.sun.javadoc.RootDoc
 	 */
 	protected void generateOtherFiles(TLModel model) throws Exception {
-		if (configuration.topFile.length() == 0) {
-			configuration.message
+		Configuration conf = getConfiguration();
+		
+		if (conf.topFile.length() == 0) {
+			conf.message
 					.error("doclet.No_Non_Deprecated_Classes_To_Document");
 			return;
 		}
-		String configdestdir = configuration.destDirName;
-		String configstylefile = configuration.stylesheetfile;
+		String configdestdir = conf.destDirName;
+		String configstylefile = conf.stylesheetfile;
 		performCopy(configdestdir, configstylefile);
-		Util.copyResourceFile(configuration, "expand_normal_closed_16x16.png", false);
-		Util.copyResourceFile(configuration, "expand_normal_open_16x16.png", false);
-		Util.copyResourceFile(configuration, "background.gif", false);
-		Util.copyResourceFile(configuration, "tab.gif", false);
-		Util.copyResourceFile(configuration, "titlebar.gif", false);
-		Util.copyResourceFile(configuration, "titlebar_end.gif", false);
+		Util.copyResourceFile(conf, TOGGLE_CLOSE_IMAGE, false);
+		Util.copyResourceFile(conf, TOGGLE_OPEN_IMAGE, false);
+		Util.copyResourceFile(conf, "background.gif", false);
+		Util.copyResourceFile(conf, "tab.gif", false);
+		Util.copyResourceFile(conf, "titlebar.gif", false);
+		Util.copyResourceFile(conf, "titlebar_end.gif", false);
 		
-		AllObjectsFrameWriter.generate(configuration, new IndexBuilder(
-				configuration, false, true));
+		AllObjectsFrameWriter.generate(conf, new IndexBuilder(
+				conf, false, true));
 
-		FrameOutputWriter.generate(configuration);
+		FrameOutputWriter.generate(conf);
 
-		if (configuration.createoverview) {
-			LibraryIndexWriter.generate(configuration);
+		if (conf.createoverview) {
+			LibraryIndexWriter.generate(conf);
 		}
 		// If a stylesheet file is not specified, copy the default stylesheet
 		// and replace newline with platform-specific newline.
-		if (configuration.stylesheetfile.length() == 0) {
+		if (conf.stylesheetfile.length() == 0) {
 			if(configdestdir.isEmpty()){
 				throw new RuntimeException("Style sheet output Directory not specified");
 			}
-			Util.copyFile(configuration, DEFAULT_STYLESHEET, Util.RESOURCESDIR,
+			Util.copyFile(conf, DEFAULT_STYLESHEET, Util.RESOURCESDIR,
 					configdestdir, false, true);
 		}
 	}
@@ -145,25 +146,30 @@ public class HtmlDoclet extends AbstractDoclet {
 	 */
 	protected void generateLibraryFiles(TLModel model) throws Exception {
 		List<TLLibrary> libraries = model.getUserDefinedLibraries();
+		Configuration conf = getConfiguration();
+		
 		if (libraries.size() > 1) {
-			LibraryIndexFrameWriter.generate(configuration);
+			LibraryIndexFrameWriter.generate(conf);
 		}
-		TLLibrary prev, next;
+		TLLibrary prev;
+		TLLibrary next;
 		ListIterator<TLLibrary> libIter = libraries.listIterator();
+		
 		while (libIter.hasNext()) {
 			prev = libIter.hasPrevious() ? libraries.get(libIter.previousIndex()) : null;
 			TLLibrary lib = libIter.next();
 			next = libIter.hasNext() ? libraries.get(libIter.nextIndex()) : null;
-			LibraryFrameWriter.generate(configuration, lib);
-			DocumentationBuilder libraryBuilder = configuration
-					.getBuilderFactory().getLibraryDocumentationBuilder(lib, prev,
-							next);
+			LibraryFrameWriter.generate(conf, lib);
+			DocumentationBuilder libraryBuilder = conf
+					.getBuilderFactory().getLibraryDocumentationBuilder(lib, prev, next);
 			libraryBuilder.build();
 		}
 
 	}
 
 	private void performCopy(String configdestdir, String filename) {
+		Configuration conf = getConfiguration();
+		
 		try {
 			String destdir = (configdestdir.length() > 0) ? configdestdir
 					+ File.separatorChar : "";
@@ -175,17 +181,16 @@ public class HtmlDoclet extends AbstractDoclet {
 				File desthelpfile = new File(destdir + helpstylefilename);
 				if (!desthelpfile.getCanonicalPath().equals(
 						helpstylefile.getCanonicalPath())) {
-					configuration.message.notice((SourcePosition) null,
+					conf.message.notice((SourcePosition) null,
 							"doclet.Copying_File_0_To_File_1",
 							helpstylefile.toString(), desthelpfile.toString());
 					Util.copyFile(desthelpfile, helpstylefile);
 				}
 			}
 		} catch (IOException exc) {
-			configuration.message
-					.error((SourcePosition) null,
-							"doclet.perform_copy_exception_encountered",
-							exc.toString());
+			conf.message.error((SourcePosition) null,
+					"doclet.perform_copy_exception_encountered",
+					exc.toString());
 			throw new DocletAbortException();
 		}
 	}

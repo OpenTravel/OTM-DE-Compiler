@@ -80,11 +80,7 @@ public abstract class RepositoryFileManager {
 
     private static Log log = LogFactory.getLog(RepositoryFileManager.class);
 
-    private static final ThreadLocal<Set<File>> changeSet = new ThreadLocal<Set<File>>() {
-        @Override protected Set<File> initialValue() {
-            return new HashSet<>();
-        }
-    };
+    private static final ThreadLocal<Set<File>> changeSet = ThreadLocal.withInitial( HashSet::new );
 
     private static javax.xml.validation.Schema repositoryValidationSchema;
     protected static ObjectFactory objectFactory = new ObjectFactory();
@@ -94,11 +90,8 @@ public abstract class RepositoryFileManager {
     private static File defaultRepositoryLocation;
     private static Map<String,String> namespaceIdCache = new HashMap<>();
 
-    private ThreadLocal<String> currentUserId = new ThreadLocal<String>() {
-        @Override protected String initialValue() {
-            return null;
-        }
-    };
+    private ThreadLocal<String> currentUserId = ThreadLocal.withInitial( () -> null );
+    
     private File repositoryLocation;
 
     /**
@@ -179,24 +172,16 @@ public abstract class RepositoryFileManager {
         // Only write out the location file if one already exists or the location is to a
         // non-default directory
         if (writeFile) {
-            BufferedWriter writer = null;
-            try {
-                if (!repositoryLocationFile.getParentFile().exists()) {
-                    repositoryLocationFile.getParentFile().mkdirs();
-                }
-                writer = new BufferedWriter(new FileWriter(repositoryLocationFile));
+            if (!repositoryLocationFile.getParentFile().exists()) {
+                repositoryLocationFile.getParentFile().mkdirs();
+            }
+            
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(repositoryLocationFile))) {
                 writer.write(repositoryLocation.getAbsolutePath());
 
             } catch (IOException e) {
                 throw new RepositoryException(
                         "Unable to persist the location of the new repository.", e);
-
-            } finally {
-                try {
-                    if (writer != null)
-                        writer.close();
-                } catch (Throwable t) {
-                }
             }
         }
         RepositoryFileManager.defaultRepositoryLocation = repositoryLocation;
@@ -653,17 +638,20 @@ public abstract class RepositoryFileManager {
 
         if (nsFolder.exists()) {
             for (File folderMember : nsFolder.listFiles()) {
+            	boolean skip = false;
+            	
                 // Skip folders that are not specific to namespace versions
                 if (!folderMember.isDirectory()) {
-                    continue;
+                    skip = true;
 
                 } else if (!folderMember.getName().startsWith(".")) {
                     File nsidFile = new File(folderMember, NAMESPACE_ID_FILENAME);
 
                     if (nsidFile.exists()) {
-                        continue;
+                        skip = true;
                     }
                 }
+                if (skip) continue;
 
                 // Find all of the version URI path segments from each file found in this folder
                 // (multiples
@@ -710,22 +698,20 @@ public abstract class RepositoryFileManager {
                 File nsidFile = new File(namespaceFolder, NAMESPACE_ID_FILENAME);
 
                 if (nsidFile.exists()) {
-                    BufferedReader reader = null;
-                    try {
-                        reader = new BufferedReader(new FileReader(nsidFile));
-                        nsPath = reader.readLine().trim();
-                        namespaceIdCache.put(namespaceFolder.getAbsolutePath(), nsPath);
+                    try (BufferedReader reader = new BufferedReader(new FileReader(nsidFile))) {
+                    	String line = reader.readLine();
+                    	
+                    	if (line != null) {
+                            nsPath = line.trim();
+                            namespaceIdCache.put(namespaceFolder.getAbsolutePath(), nsPath);
+                            
+                    	} else {
+                    		throw new IOException("Empty nsid.txt file.");
+                    	}
 
                     } catch (IOException e) {
                         throw new IOException("Unable to identify the namespace path for folder: "
                                 + namespaceFolder.getAbsolutePath(), e);
-
-                    } finally {
-                        try {
-                            if (reader != null)
-                                reader.close();
-                        } catch (Throwable t) {
-                        }
                     }
                 }
             }
@@ -795,9 +781,7 @@ public abstract class RepositoryFileManager {
             	if (nsidFile.exists()) {
             		// If the namespace file already exists, check it to make sure
             		// we are matching on a case-sensitive basis
-            		BufferedReader reader = null;
-            		try {
-            			reader = new BufferedReader(new FileReader(nsidFile));
+            		try (BufferedReader reader = new BufferedReader(new FileReader(nsidFile))) {
             			String existingNsid = reader.readLine();
             			
             			if (!nsid.equals(existingNsid)) {
@@ -815,31 +799,17 @@ public abstract class RepositoryFileManager {
             		} catch (IOException e) {
                         throw new RepositoryException(
                                 "Unable to verify namespace identification file for URI: " + ns, e);
-            			
-            		} finally {
-                        try {
-                            if (reader != null)
-                            	reader.close();
-                        } catch (Throwable t) {}
             		}
             		
             	} else {
                     // Save the root namespace file if one does not already exist
-                    Writer writer = null;
-                    try {
+                    try (Writer writer = new BufferedWriter(new FileWriter(nsidFile))) {
                         addToChangeSet(nsidFile);
-                        writer = new BufferedWriter(new FileWriter(nsidFile));
                         writer.write(nsid);
 
                     } catch (IOException e) {
                         throw new RepositoryException(
                                 "Unable to create namespace identification file for URI: " + ns, e);
-
-                    } finally {
-                        try {
-                            if (writer != null)
-                                writer.close();
-                        } catch (Throwable t) {}
                     }
             	}
             }
@@ -935,21 +905,19 @@ public abstract class RepositoryFileManager {
      * set.
      */
     public void startChangeSet() {
-        Set<File> changeSet = RepositoryFileManager.changeSet.get();
+        Set<File> chgSet = RepositoryFileManager.changeSet.get();
         try {
-            if (!changeSet.isEmpty()) {
+            if (!chgSet.isEmpty()) {
                 log.warn("Uncommitted change set from previous task - rolling back.");
                 rollbackChangeSet();
             }
 
         } catch (RepositoryException e) {
-            // Since these changes are left over from a previous repository job, we do not want this
-            // rollback
-            // error to cause a failure on the current (and unrelated) job. For that reason, we will
-            // simply
+            // Since these changes are left over from a previous repository job, we do not want this rollback
+            // error to cause a failure on the current (and unrelated) job. For that reason, we will simply
             // log the error and clear the change set.
             log.error("Unable to roll back uncommitted change set from previous task.", e);
-            changeSet.clear();
+            chgSet.clear();
         }
         if (log.isDebugEnabled()) {
             log.debug("Change set started for thread: " + Thread.currentThread().getName());
@@ -986,15 +954,15 @@ public abstract class RepositoryFileManager {
      *             thrown if the change set cannot be committed for any reason
      */
     public void commitChangeSet() throws RepositoryException {
-        Set<File> changeSet = RepositoryFileManager.changeSet.get();
+        Set<File> chgSet = RepositoryFileManager.changeSet.get();
 
-        if (!changeSet.isEmpty()) {
+        if (!chgSet.isEmpty()) {
             if (log.isDebugEnabled()) {
                 log.debug("Committing repository change set: " + Thread.currentThread().getName());
             }
-            commitChangeSet(changeSet);
+            commitChangeSet(chgSet);
         }
-        changeSet.clear();
+        chgSet.clear();
 
         if (log.isDebugEnabled()) {
             log.debug("Change set committed for thread: " + Thread.currentThread().getName());
@@ -1018,15 +986,15 @@ public abstract class RepositoryFileManager {
      *             thrown if the change set cannot be rolled back for any reason
      */
     public void rollbackChangeSet() throws RepositoryException {
-        Set<File> changeSet = RepositoryFileManager.changeSet.get();
+        Set<File> chgSet = RepositoryFileManager.changeSet.get();
 
-        if (!changeSet.isEmpty()) {
+        if (!chgSet.isEmpty()) {
             if (log.isDebugEnabled()) {
                 log.debug("Rolling back repository change set: " + Thread.currentThread().getName());
             }
-            rollbackChangeSet(changeSet);
+            rollbackChangeSet(chgSet);
         }
-        changeSet.clear();
+        chgSet.clear();
 
         if (log.isDebugEnabled()) {
             log.debug("Change set rolled back for thread: " + Thread.currentThread().getName());
@@ -1101,8 +1069,8 @@ public abstract class RepositoryFileManager {
         } catch (JAXBException e) {
             throw new RepositoryException("Unrecognized file format.", e);
 
-        } catch (Throwable t) {
-            throw new RepositoryException("Unknown error while reading repository file.", t);
+        } catch (Exception e) {
+            throw new RepositoryException("Unknown error while reading repository file.", e);
         }
     }
 
@@ -1185,31 +1153,18 @@ public abstract class RepositoryFileManager {
      *             thrown if the content cannot be saved
      */
     public void saveFile(File file, InputStream fileContent) throws RepositoryException {
-        OutputStream out = null;
-        try {
+        try (OutputStream out = new FileOutputStream(file)) {
             addToChangeSet(file);
-            out = new FileOutputStream(file);
             byte[] buffer = new byte[1024];
             int bytesRead;
 
             while ((bytesRead = fileContent.read(buffer)) >= 0) {
                 out.write(buffer, 0, bytesRead);
             }
+            fileContent.close();
 
         } catch (IOException e) {
             throw new RepositoryException("Error saving file: " + file.getName(), e);
-
-        } finally {
-            try {
-                if (fileContent != null)
-                    fileContent.close();
-            } catch (Throwable t) {
-            }
-            try {
-                if (out != null)
-                    out.close();
-            } catch (Throwable t) {
-            }
         }
     }
 
@@ -1224,13 +1179,18 @@ public abstract class RepositoryFileManager {
             String userHome = System.getProperty("user.home").replace('\\', '/');
 
             homeFolder.append(userHome);
-            if (!userHome.endsWith("/"))
+            
+            if (!userHome.endsWith("/")) {
                 homeFolder.append('/');
-            homeFolder.append(".ota2/");
+            }
+            homeFolder.append(REPOSITORY_HOME_FOLDER);
+            
         } else {
             homeFolder.append(ota2Home.replace('\\', '/'));
-            if (!ota2Home.endsWith("/"))
+            
+            if (!ota2Home.endsWith("/")) {
                 homeFolder.append('/');
+            }
         }
         ota2HomeFolder = new File(homeFolder.toString());
     }
@@ -1243,19 +1203,11 @@ public abstract class RepositoryFileManager {
         defaultRepositoryLocation = null;
 
         if (repositoryLocationFile.exists()) {
-            BufferedReader reader = null;
-            try {
-                reader = new BufferedReader(new FileReader(repositoryLocationFile));
+            try (BufferedReader reader = new BufferedReader(new FileReader(repositoryLocationFile))) {
                 defaultRepositoryLocation = new File(reader.readLine().trim());
 
             } catch (IOException e) {
                 // No error - just return the default repository location
-            } finally {
-                try {
-                    if (reader != null)
-                        reader.close();
-                } catch (Throwable t) {
-                }
             }
         }
         if (defaultRepositoryLocation == null) {
@@ -1280,8 +1232,8 @@ public abstract class RepositoryFileManager {
             initOta2HomeFolder();
             initDefaultRepositoryLocation();
 
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

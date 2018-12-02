@@ -35,7 +35,7 @@ import org.opentravel.schemacompiler.codegen.html.builders.LibraryDocumentationB
  * @author Eric.Bronson
  *
  */
-public class LibraryWriterTest extends WriterTest {
+public class LibraryWriterTest extends AbstractWriterTest {
 
 	private static LibraryWriter writer;
 	private static TLLibrary library;
@@ -46,7 +46,7 @@ public class LibraryWriterTest extends WriterTest {
 	 */
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		WriterTest.setUpBeforeClass();
+		AbstractWriterTest.setUpBeforeClass();
 		library = TestLibraryProvider.getLibrary();
 		LibraryDocumentationBuilder builder = new LibraryDocumentationBuilder(library);
 		TLLibrary next = new TLLibrary();

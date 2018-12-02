@@ -87,7 +87,7 @@ public abstract class HtmlDocWriter extends HtmlWriter {
     /**
      * Accessor for configuration.
      */
-    public abstract Configuration configuration();
+    public abstract Configuration newConfiguration();
 
     /**
      * Print Html Hyper Link.

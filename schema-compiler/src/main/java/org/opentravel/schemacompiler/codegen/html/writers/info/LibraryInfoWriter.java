@@ -67,7 +67,7 @@ public class LibraryInfoWriter extends AbstractInfoWriter<LibraryDocumentationBu
 		objects = source.getBusinessObjects();
 		summaryKey = "doclet.BusinessObject_Summary";
 		typeKey = "doclet.BusinessObjects";
-		caption = writer.configuration().getText("doclet.BusinessObjects");
+		caption = writer.newConfiguration().getText("doclet.BusinessObjects");
 		Content objectTree = getObjectsTree();
 		infoTree.addContent(objectTree);
 	}
@@ -76,7 +76,7 @@ public class LibraryInfoWriter extends AbstractInfoWriter<LibraryDocumentationBu
 		objects = source.getCoreObjects();
 		summaryKey = "doclet.CoreObject_Summary";
 		typeKey = "doclet.CoreObjects";
-		caption = writer.configuration().getText("doclet.CoreObjects");
+		caption = writer.newConfiguration().getText("doclet.CoreObjects");
 		Content objectTree = getObjectsTree();
 		infoTree.addContent(objectTree);
 	}
@@ -85,7 +85,7 @@ public class LibraryInfoWriter extends AbstractInfoWriter<LibraryDocumentationBu
 		objects = source.getVWAs();		
 		summaryKey="doclet.VWA_Summary";
 		typeKey="doclet.VWA";
-		caption = writer.configuration().getText("doclet.VWA");
+		caption = writer.newConfiguration().getText("doclet.VWA");
 		Content objectTree = getObjectsTree();
 		infoTree.addContent(objectTree);
 	}
@@ -94,7 +94,7 @@ public class LibraryInfoWriter extends AbstractInfoWriter<LibraryDocumentationBu
 		objects = source.getServices();		
 		summaryKey="doclet.Services_Summary";
 		typeKey = "doclet.Services";
-		caption = writer.configuration().getText("doclet.Services");
+		caption = writer.newConfiguration().getText("doclet.Services");
 		Content objectTree = getObjectsTree();
 		infoTree.addContent(objectTree);
 	}
@@ -103,7 +103,7 @@ public class LibraryInfoWriter extends AbstractInfoWriter<LibraryDocumentationBu
 		objects = source.getEnums();		
 		summaryKey="doclet.Enumeration_Summary";
 		typeKey="doclet.Enums";
-		caption = writer.configuration().getText("doclet.Enums");
+		caption = writer.newConfiguration().getText("doclet.Enums");
 		Content objectTree = getObjectsTree();
 		infoTree.addContent(objectTree);
 	}
@@ -112,7 +112,7 @@ public class LibraryInfoWriter extends AbstractInfoWriter<LibraryDocumentationBu
 		objects = source.getSimpleObjects();		
 		summaryKey="doclet.SimpleType_Summary";
 		typeKey="doclet.SimpleTypes";
-		caption = writer.configuration().getText("doclet.SimpleTypes");
+		caption = writer.newConfiguration().getText("doclet.SimpleTypes");
 		Content objectTree = getObjectsTree();
 		infoTree.addContent(objectTree);
 	}
@@ -128,10 +128,10 @@ public class LibraryInfoWriter extends AbstractInfoWriter<LibraryDocumentationBu
 	 */
 	@Override
 	protected void addInfoSummary(Content memberTree) {
-		if (objects.size() > 0) {
+		if (!objects.isEmpty()) {
 			Content tableTree = getTableTree();
 			for (DocumentationBuilder object : objects) {
-				if (!writer.configuration().isGeneratedDoc(object)) {
+				if (!writer.newConfiguration().isGeneratedDoc(object)) {
 					continue;
 				}
 				Content facetSummary = getInfo(object, objects.indexOf(object));
@@ -164,7 +164,7 @@ public class LibraryInfoWriter extends AbstractInfoWriter<LibraryDocumentationBu
 	}
 
 	protected String getInfoTableSummary() {
-		Configuration config = writer.configuration();
+		Configuration config = writer.newConfiguration();
 		return config.getText(tableSummaryKey,
 				config.getText(summaryKey),
 				config.getText(typeKey));
@@ -179,9 +179,8 @@ public class LibraryInfoWriter extends AbstractInfoWriter<LibraryDocumentationBu
 	 */
 	@Override
 	protected String[] getInfoTableHeader() {
-		Configuration config = writer.configuration();
-		String[] header = new String[] { config.getText("doclet.Name"), config.getText("doclet.Description") };
-		return header;
+		Configuration config = writer.newConfiguration();
+		return new String[] { config.getText("doclet.Name"), config.getText("doclet.Description") };
 	}
 
 }

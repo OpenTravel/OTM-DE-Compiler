@@ -61,7 +61,7 @@
 		<!-- Plugin Versions -->
 		<jaxb2.plugin.version>0.12.1</jaxb2.plugin.version>
 		<license.plugin.version>2.10</license.plugin.version>
-		<felix.bundle.plugin.version>2.3.7</felix.bundle.plugin.version>
+		<felix.bundle.plugin.version>4.1.0</felix.bundle.plugin.version>
 	</properties>
 
 	<build>

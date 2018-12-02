@@ -37,6 +37,8 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.SchemaFactory;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opentravel.ns.ota2.project_v01_00.ManagedProjectItemType;
 import org.opentravel.ns.ota2.project_v01_00.ObjectFactory;
 import org.opentravel.ns.ota2.project_v01_00.ProjectItemType;
@@ -79,6 +81,8 @@ public class ProjectFileUtils extends AbstractFileUtils {
     private static final String SCHEMA_CONTEXT = ":org.w3._2001.xmlschema:org.opentravel.ns.ota2.project_v01_00";
     private static final String PROJECT_FILE_NAMESPACE = "http://www.OpenTravel.org/ns/OTA2/Project_v01_00";
 
+    private static Log log = LogFactory.getLog(ProjectFileUtils.class);
+    
     private static javax.xml.validation.Schema projectValidationSchema;
     private static ObjectFactory objectFactory = new ObjectFactory();
     private static JAXBContext jaxbContext;
@@ -98,10 +102,8 @@ public class ProjectFileUtils extends AbstractFileUtils {
     public static ProjectType loadJaxbProjectFile(File projectFile, ValidationFindings findings)
             throws LibraryLoaderException {
         ProjectType jaxbProject = null;
-        InputStream is = null;
-        try {
-            is = new FileInputStream(projectFile);
-
+        
+        try (InputStream is = new FileInputStream(projectFile)){
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
             unmarshaller.setSchema(projectValidationSchema);
 
@@ -132,13 +134,6 @@ public class ProjectFileUtils extends AbstractFileUtils {
 
         } catch (Exception e) {
             throw new LibraryLoaderException("Unknown error while loading project.", e);
-
-        } finally {
-            try {
-                if (is != null)
-                    is.close();
-            } catch (Throwable t) {
-            }
         }
         return jaxbProject;
     }
@@ -208,7 +203,9 @@ public class ProjectFileUtils extends AbstractFileUtils {
             if (!success && (backupFile != null)) {
                 try {
                     restoreBackupFile(backupFile, projectFile.getName());
-                } catch (Throwable t) {
+                    
+                } catch (Exception e) {
+                	log.warn("Error restoring backup file from failed operation.");
                 }
             }
         }
@@ -323,16 +320,14 @@ public class ProjectFileUtils extends AbstractFileUtils {
 
                 // Determine if the current item is eclipsed by one of the existing keep item
                 for (ProjectItem keepItem : keepItems) {
-                    if (!item.getLibraryName().equals(keepItem.getLibraryName())
-                            || !item.getBaseNamespace().equals(keepItem.getBaseNamespace())) {
-                        continue; // purge candidates must have the same library name and base
-                                  // namespace
-                    }
-                    List<String> keepItemChain = itemVersionChains.get(keepItem);
+                    if (item.getLibraryName().equals(keepItem.getLibraryName())
+                            && item.getBaseNamespace().equals(keepItem.getBaseNamespace())) {
+                        List<String> keepItemChain = itemVersionChains.get(keepItem);
 
-                    if (isInVersionChain(item.getNamespace(), keepItemChain, vScheme)) {
-                        purgeCurrentItem = true;
-                        break;
+                        if (isInVersionChain(item.getNamespace(), keepItemChain, vScheme)) {
+                            purgeCurrentItem = true;
+                            break;
+                        }
                     }
                 }
 

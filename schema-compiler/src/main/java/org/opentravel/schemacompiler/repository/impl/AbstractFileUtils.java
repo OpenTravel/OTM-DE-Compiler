@@ -26,7 +26,7 @@ import java.io.OutputStream;
  * Base class for utility file managers that provide methods for creating,
  * restoring, and deleting backup files during save operations.
  */
-public class AbstractFileUtils {
+public abstract class AbstractFileUtils {
 	
     /**
      * Creates a backup of the specified original file on the local file system. The location of the
@@ -39,40 +39,25 @@ public class AbstractFileUtils {
      *             thrown if the backup file cannot be created
      */
     public static File createBackupFile(File originalFile) throws IOException {
-        InputStream in = null;
-        OutputStream out = null;
-        try {
-            File backupFile;
+        File backupFile;
 
-            if (!originalFile.exists()) {
-                backupFile = null;
+        if (!originalFile.exists()) {
+            backupFile = null;
 
-            } else {
-                byte[] buffer = new byte[1024];
-                int bytesRead;
+        } else {
+            byte[] buffer = new byte[1024];
+            int bytesRead;
 
-                backupFile = new File(originalFile.getParentFile(), getBackupFilename(originalFile));
-                in = new FileInputStream(originalFile);
-                out = new FileOutputStream(backupFile);
-
-                while ((bytesRead = in.read(buffer)) >= 0) {
-                    out.write(buffer, 0, bytesRead);
+            backupFile = new File(originalFile.getParentFile(), getBackupFilename(originalFile));
+            try (InputStream in = new FileInputStream(originalFile)) {
+                try (OutputStream out = new FileOutputStream(backupFile)) {
+                    while ((bytesRead = in.read(buffer)) >= 0) {
+                        out.write(buffer, 0, bytesRead);
+                    }
                 }
             }
-            return backupFile;
-
-        } finally {
-            try {
-                if (in != null)
-                    in.close();
-            } catch (Throwable t) {
-            }
-            try {
-                if (out != null)
-                    out.close();
-            } catch (Throwable t) {
-            }
         }
+        return backupFile;
     }
 
     /**
@@ -99,12 +84,10 @@ public class AbstractFileUtils {
             }
             File originalFile = new File(backupFile.getParentFile(), originalFilename);
 
-            if (originalFile.exists()) {
-                if (!originalFile.delete()) {
-                    throw new IOException(
-                            "Unable to delete original file during restoration of backup: "
-                                    + backupFile.getAbsolutePath());
-                }
+            if (originalFile.exists() && !originalFile.delete()) {
+                throw new IOException(
+                        "Unable to delete original file during restoration of backup: "
+                                + backupFile.getAbsolutePath());
             }
             backupFile.renameTo(originalFile);
         }
@@ -154,31 +137,17 @@ public class AbstractFileUtils {
      *             thrown if the file cannot be copied
      */
     public static void copyFile(File sourceFile, File destinationFile) throws IOException {
-        InputStream in = null;
-        OutputStream out = null;
-        try {
-            if (!destinationFile.getParentFile().exists()) {
-                destinationFile.getParentFile().mkdirs();
-            }
-            in = new FileInputStream(sourceFile);
-            out = new FileOutputStream(destinationFile);
-            byte[] buffer = new byte[1024];
-            int bytesRead;
+        if (!destinationFile.getParentFile().exists()) {
+            destinationFile.getParentFile().mkdirs();
+        }
+        try (InputStream in = new FileInputStream(sourceFile)) {
+            try (OutputStream out = new FileOutputStream(destinationFile)) {
+                byte[] buffer = new byte[1024];
+                int bytesRead;
 
-            while ((bytesRead = in.read(buffer)) >= 0) {
-                out.write(buffer, 0, bytesRead);
-            }
-
-        } finally {
-            try {
-                if (in != null)
-                    in.close();
-            } catch (Throwable t) {
-            }
-            try {
-                if (out != null)
-                    out.close();
-            } catch (Throwable t) {
+                while ((bytesRead = in.read(buffer)) >= 0) {
+                    out.write(buffer, 0, bytesRead);
+                }
             }
         }
     }

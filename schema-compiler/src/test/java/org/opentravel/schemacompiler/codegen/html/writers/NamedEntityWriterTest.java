@@ -39,7 +39,7 @@ import org.opentravel.schemacompiler.event.ModelElementListener;
  * @author Eric.Bronson
  *
  */
-public class NamedEntityWriterTest extends WriterTest {
+public class NamedEntityWriterTest extends AbstractWriterTest {
 
 	NamedEntityWriter<NamedEntityDocumentationBuilder<?>> writer;
 

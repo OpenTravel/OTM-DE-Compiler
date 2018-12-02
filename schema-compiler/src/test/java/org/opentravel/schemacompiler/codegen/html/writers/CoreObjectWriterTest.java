@@ -31,7 +31,7 @@ import org.opentravel.schemacompiler.codegen.html.markup.HtmlTree;
  * @author Eric.Bronson
  *
  */
-public class CoreObjectWriterTest extends WriterTest {
+public class CoreObjectWriterTest extends AbstractWriterTest {
 	private CoreObjectDocumentationBuilder builder;
 	private CoreObjectWriter writer;
 	private TLCoreObject co;

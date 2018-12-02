@@ -21,13 +21,13 @@ import java.io.File;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opentravel.schemacompiler.codegen.html.writers.WriterTest;
+import org.opentravel.schemacompiler.codegen.html.writers.AbstractWriterTest;
 
 /**
  * @author Eric.Bronson
  *
  */
-public class HtmlDocletTest extends WriterTest {
+public class HtmlDocletTest extends AbstractWriterTest {
 
 	private HtmlDoclet doclet;
 

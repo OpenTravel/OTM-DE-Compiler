@@ -19,7 +19,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.net.URL;
-import java.util.Collection;
 
 import javax.xml.namespace.QName;
 
@@ -36,7 +35,6 @@ import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLModelElement;
 import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLService;
-import org.opentravel.schemacompiler.validate.ValidationException;
 import org.opentravel.schemacompiler.xml.XMLPrettyPrinter;
 import org.w3c.dom.Document;
 
@@ -48,21 +46,6 @@ import org.w3c.dom.Document;
  */
 public class ExampleCodeGenerator extends AbstractCodeGenerator<TLModelElement> {
 
-    /**
-	 * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#generateOutput(org.opentravel.schemacompiler.model.ModelElement, org.opentravel.schemacompiler.codegen.CodeGenerationContext)
-	 */
-	@Override
-	public Collection<File> generateOutput(TLModelElement source, CodeGenerationContext context)
-			throws ValidationException, CodeGenerationException {
-		try {
-			return super.generateOutput(source, context);
-			
-		} finally {
-			System.runFinalization();
-			System.gc();
-		}
-	}
-
 	/**
      * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#doGenerateOutput(org.opentravel.schemacompiler.model.TLModelElement,
      *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
@@ -70,32 +53,20 @@ public class ExampleCodeGenerator extends AbstractCodeGenerator<TLModelElement> 
     @Override
     public void doGenerateOutput(TLModelElement source, CodeGenerationContext context)
             throws CodeGenerationException {
-        OutputStream out = null;
-        try {
+        File outputFile = getOutputFile(source, context);
+        
+        try (OutputStream out = new FileOutputStream(outputFile)) {
             ExampleBuilder<Document> exampleBuilder = new ExampleDocumentBuilder(getOptions(context))
                     .setModelElement((NamedEntity) source);
 
             // Generate the XML document and send formatted content to the output file
             Document domDocument = exampleBuilder.buildTree();
-            File outputFile = getOutputFile(source, context);
 
-            out = new FileOutputStream(outputFile);
             new XMLPrettyPrinter().formatDocument(domDocument, out);
-            out.close();
-            out = null;
-
             addGeneratedFile(outputFile);
 
-        } catch (Throwable t) {
-            throw new CodeGenerationException(t);
-
-        } finally {
-            try {
-                if (out != null) {
-                    out.close();
-                }
-            } catch (Throwable t) {
-            }
+        } catch (Exception e) {
+            throw new CodeGenerationException(e);
         }
     }
 
@@ -115,10 +86,8 @@ public class ExampleCodeGenerator extends AbstractCodeGenerator<TLModelElement> 
         Integer maxDepth = context.getIntValue(CodeGenerationContext.CK_EXAMPLE_MAX_DEPTH);
         Boolean suppressOptionalFields = context.getBooleanValue(CodeGenerationContext.CK_SUPPRESS_OPTIONAL_FIELDS);
 
-        if (detailLevel != null) {
-            if (detailLevel.equalsIgnoreCase("MINIMUM")) {
-                options.setDetailLevel(DetailLevel.MINIMUM);
-            }
+        if ((detailLevel != null) && detailLevel.equalsIgnoreCase("MINIMUM")) {
+            options.setDetailLevel(DetailLevel.MINIMUM);
         }
         if (exampleContext != null) {
             options.setExampleContext(exampleContext);
@@ -157,33 +126,29 @@ public class ExampleCodeGenerator extends AbstractCodeGenerator<TLModelElement> 
      */
     @Override
     protected CodeGenerationFilenameBuilder<TLModelElement> getDefaultFilenameBuilder() {
-        return new CodeGenerationFilenameBuilder<TLModelElement>() {
+        return (item, fileExtension) -> {
+            String fileExt = ((fileExtension == null) || (fileExtension.length() == 0)) ? ""
+                    : ("." + fileExtension);
+            String itemName;
 
-            public String buildFilename(TLModelElement item, String fileExtension) {
-                String fileExt = ((fileExtension == null) || (fileExtension.length() == 0)) ? ""
-                        : ("." + fileExtension);
-                String itemName;
+            if ((item instanceof TLFacet)
+                    && (((TLFacet) item).getOwningEntity() instanceof TLOperation)) {
+                TLFacet facetItem = (TLFacet) item;
+                itemName = ((TLOperation) facetItem.getOwningEntity()).getName()
+                        + facetItem.getFacetType().getIdentityName();
 
-                if ((item instanceof TLFacet)
-                        && (((TLFacet) item).getOwningEntity() instanceof TLOperation)) {
-                    TLFacet facetItem = (TLFacet) item;
-                    itemName = ((TLOperation) facetItem.getOwningEntity()).getName()
-                            + facetItem.getFacetType().getIdentityName();
-
-                } else if (item instanceof NamedEntity) {
-                	QName globalElementName = XsdCodegenUtils.getGlobalElementName( (NamedEntity) item );
-                	
-                	if (globalElementName != null) {
-                		itemName = globalElementName.getLocalPart();
-                	} else {
-                        itemName = ((NamedEntity) item).getLocalName();
-                    }
-                } else {
-                    itemName = "";
+            } else if (item instanceof NamedEntity) {
+            	QName globalElementName = XsdCodegenUtils.getGlobalElementName( (NamedEntity) item );
+            	
+            	if (globalElementName != null) {
+            		itemName = globalElementName.getLocalPart();
+            	} else {
+                    itemName = ((NamedEntity) item).getLocalName();
                 }
-                return itemName.replaceAll("_", "") + fileExt;
+            } else {
+                itemName = "";
             }
-
+            return itemName.replaceAll("_", "") + fileExt;
         };
     }
 

@@ -217,20 +217,13 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * @throws IOException  thrown if the new index reader instance cannot be initialized
      */
     protected void refreshIndexReader() throws IOException {
-    	DirectoryReader oldReader = indexReader;
-    	boolean success = false;
-    	
-    	try {
+    	try (DirectoryReader oldReader = indexReader) {
     		searchLock.writeLock().lock();
     		this.indexReader = newIndexReader(indexDirectory);
             this.searchManager = new SearcherManager(indexReader, new SearcherFactory());
-    		success = true;
     		
     	} finally {
     		searchLock.writeLock().unlock();
-    		try {
-    			if (success) oldReader.close();
-    		} catch (Throwable t) {}
     	}
     }
     
@@ -410,12 +403,21 @@ public abstract class FreeTextSearchService implements IndexingTerms {
 					case UNDER_REVIEW:
 						statusQuery.add( new BooleanClause( new TermQuery(
 								new Term( STATUS_FIELD, TLLibraryStatus.UNDER_REVIEW.toString() ) ), Occur.SHOULD ));
+						statusQuery.add( new BooleanClause( new TermQuery(
+								new Term( STATUS_FIELD, TLLibraryStatus.FINAL.toString() ) ), Occur.SHOULD ));
+						statusQuery.add( new BooleanClause( new TermQuery(
+								new Term( STATUS_FIELD, TLLibraryStatus.OBSOLETE.toString() ) ), Occur.SHOULD ));
+						break;
 					case FINAL:
 						statusQuery.add( new BooleanClause( new TermQuery(
 								new Term( STATUS_FIELD, TLLibraryStatus.FINAL.toString() ) ), Occur.SHOULD ));
+						statusQuery.add( new BooleanClause( new TermQuery(
+								new Term( STATUS_FIELD, TLLibraryStatus.OBSOLETE.toString() ) ), Occur.SHOULD ));
+						break;
 					case OBSOLETE:
 						statusQuery.add( new BooleanClause( new TermQuery(
 								new Term( STATUS_FIELD, TLLibraryStatus.OBSOLETE.toString() ) ), Occur.SHOULD ));
+						break;
 					default:
 						break;
 				}
@@ -489,7 +491,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      */
     public LibrarySearchResult getLibrary(String searchIndexId, boolean resolveContent) throws RepositoryException {
     	List<LibrarySearchResult> results = getLibraries( Arrays.asList( searchIndexId ), resolveContent );
-    	return (results.size() == 0) ? null : results.get( 0 );
+    	return results.isEmpty() ? null : results.get( 0 );
     }
     
     /**
@@ -537,7 +539,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      */
     public ReleaseSearchResult getRelease(String searchIndexId, boolean resolveContent) throws RepositoryException {
     	List<ReleaseSearchResult> results = getReleases( Arrays.asList( searchIndexId ), resolveContent );
-    	return (results.size() == 0) ? null : results.get( 0 );
+    	return results.isEmpty() ? null : results.get( 0 );
     }
     
     /**
@@ -589,15 +591,14 @@ public abstract class FreeTextSearchService implements IndexingTerms {
     	SearchResult<?> searchResult = null;
     	BooleanQuery query = newSearchIndexQuery();
     	
-    	switch (itemType) {
-    		case RELEASE:
-    			query.add( new BooleanClause( new TermQuery(
-    					new Term( ENTITY_TYPE_FIELD, Release.class.getName() ) ), Occur.MUST ));
-    			break;
-    		default:
-    			query.add( new BooleanClause( new TermQuery(
-    					new Term( ENTITY_TYPE_FIELD, TLLibrary.class.getName() ) ), Occur.MUST ));
-    	}
+		if (itemType == RepositoryItemType.RELEASE) {
+			query.add( new BooleanClause( new TermQuery(
+					new Term( ENTITY_TYPE_FIELD, Release.class.getName() ) ), Occur.MUST ));
+			
+		} else {
+			query.add( new BooleanClause( new TermQuery(
+					new Term( ENTITY_TYPE_FIELD, TLLibrary.class.getName() ) ), Occur.MUST ));
+		}
     	
 		query.add( new BooleanClause( new TermQuery(
 				new Term( BASE_NAMESPACE_FIELD, item.getBaseNamespace() ) ), Occur.MUST ));
@@ -607,14 +608,13 @@ public abstract class FreeTextSearchService implements IndexingTerms {
 				new Term( VERSION_FIELD, item.getVersion() ) ), Occur.MUST ));
     	List<Document> queryResults = executeQuery( query, resolveContent ? null : nonContentAttrs );
     	
-    	if (queryResults.size() > 0) {
-        	switch (itemType) {
-        		case RELEASE:
-            		searchResult = new ReleaseSearchResult( queryResults.get( 0 ), this );
-        			break;
-        		default:
-            		searchResult = new LibrarySearchResult( queryResults.get( 0 ), repositoryManager, this );
-        	}
+    	if (!queryResults.isEmpty()) {
+    		if (itemType == RepositoryItemType.RELEASE) {
+        		searchResult = new ReleaseSearchResult( queryResults.get( 0 ), this );
+    			
+    		} else {
+        		searchResult = new LibrarySearchResult( queryResults.get( 0 ), repositoryManager, this );
+    		}
     	}
     	return searchResult;
     }
@@ -633,7 +633,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
     		boolean resolveContent, RepositoryItemType itemType) throws RepositoryException {
     	List<SearchResult<?>> searchResults = new ArrayList<>();
     	
-    	if ((searchIndexIds != null) && (searchIndexIds.size() > 0)) {
+    	if ((searchIndexIds != null) && !searchIndexIds.isEmpty()) {
         	BooleanQuery identityQuery = new BooleanQuery();
         	BooleanQuery masterQuery = newSearchIndexQuery();
         	List<Document> queryResults;
@@ -642,26 +642,24 @@ public abstract class FreeTextSearchService implements IndexingTerms {
         		identityQuery.add( new BooleanClause( new TermQuery(
         				new Term( IDENTITY_FIELD, searchIndexId ) ), Occur.SHOULD ));
         	}
-        	switch (itemType) {
-        		case RELEASE:
-        			masterQuery.add( new BooleanClause( new TermQuery(
-        					new Term( ENTITY_TYPE_FIELD, Release.class.getName() ) ), Occur.MUST ));
-        			break;
-        		default:
-        			masterQuery.add( new BooleanClause( new TermQuery(
-        					new Term( ENTITY_TYPE_FIELD, TLLibrary.class.getName() ) ), Occur.MUST ));
-        	}
+    		if (itemType == RepositoryItemType.RELEASE) {
+    			masterQuery.add( new BooleanClause( new TermQuery(
+    					new Term( ENTITY_TYPE_FIELD, Release.class.getName() ) ), Occur.MUST ));
+    			
+    		} else {
+    			masterQuery.add( new BooleanClause( new TermQuery(
+    					new Term( ENTITY_TYPE_FIELD, TLLibrary.class.getName() ) ), Occur.MUST ));
+    		}
         	masterQuery.add( identityQuery, Occur.MUST );
         	queryResults = executeQuery( masterQuery, resolveContent ? null : nonContentAttrs );
         	
         	for (Document doc : queryResults) {
-            	switch (itemType) {
-            		case RELEASE:
-                		searchResults.add( new ReleaseSearchResult( doc, this ) );
-            			break;
-            		default:
-                		searchResults.add( new LibrarySearchResult( doc, repositoryManager, this ) );
-            	}
+        		if (itemType == RepositoryItemType.RELEASE) {
+            		searchResults.add( new ReleaseSearchResult( doc, this ) );
+        			
+        		} else {
+            		searchResults.add( new LibrarySearchResult( doc, repositoryManager, this ) );
+        		}
         	}
     	}
     	return searchResults;
@@ -737,8 +735,8 @@ public abstract class FreeTextSearchService implements IndexingTerms {
             try {
                 if (searcher != null) searchManager.release(searcher);
 
-            } catch (Throwable t) {
-                log.error("Error releasing index searcher.", t);
+            } catch (Exception e) {
+                log.error("Error releasing index searcher.", e);
             }
         	searchLock.readLock().unlock();
         }
@@ -841,8 +839,8 @@ public abstract class FreeTextSearchService implements IndexingTerms {
             try {
                 if (searcher != null) searchManager.release(searcher);
 
-            } catch (Throwable t) {
-                log.error("Error releasing index searcher.", t);
+            } catch (Exception e) {
+                log.error("Error releasing index searcher.", e);
             }
         	searchLock.readLock().unlock();
         }
@@ -859,7 +857,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      */
     public EntitySearchResult getEntity(String searchIndexId, boolean resolveContent) throws RepositoryException {
     	List<EntitySearchResult> results = getEntities( Arrays.asList( searchIndexId ), resolveContent );
-    	return (results.size() == 0) ? null : results.get( 0 );
+    	return results.isEmpty() ? null : results.get( 0 );
     }
     
     /**
@@ -888,7 +886,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
     				new Term( ENTITY_NAME_FIELD, entityName ) ), Occur.MUST ));
         	queryResults = executeQuery( query, resolveContent ? null : nonContentAttrs );
         	
-        	if (queryResults.size() > 0) {
+        	if (!queryResults.isEmpty()) {
         		searchResult = new EntitySearchResult( queryResults.get(0), this );
         	}
     	}
@@ -936,7 +934,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
     public List<EntitySearchResult> getEntities(List<String> searchIndexIds, boolean resolveContent) throws RepositoryException {
     	List<EntitySearchResult> searchResults = new ArrayList<>();
     	
-    	if ((searchIndexIds != null) && (searchIndexIds.size() > 0)) {
+    	if ((searchIndexIds != null) && !searchIndexIds.isEmpty()) {
         	BooleanQuery identityQuery = new BooleanQuery();
         	BooleanQuery masterQuery = newSearchIndexQuery();
         	List<Document> queryResults;
@@ -999,12 +997,12 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * @return List<EntitySearchResult>
      * @throws RepositoryException  thrown if an error occurs while performing the search
      */
-    public List<EntitySearchResult> getExtendedByEntities(EntitySearchResult entityIndex, boolean resolveContents)
+    public List<EntitySearchResult> getExtendedByEntities(EntitySearchResult entityIndex, boolean resolveContent)
     		throws RepositoryException {
     	String entityIndexId = (entityIndex == null) ? null : entityIndex.getSearchIndexId();
         try {
     		Query query = new TermQuery( new Term( EXTENDS_ENTITY_FIELD, entityIndexId ) );
-        	List<Document> queryResults = executeQuery( query, null );
+        	List<Document> queryResults = executeQuery( query, resolveContent ? null : nonContentAttrs );
         	List<EntitySearchResult> searchResults = new ArrayList<>();
             
         	for (Document doc : queryResults) {
@@ -1055,8 +1053,8 @@ public abstract class FreeTextSearchService implements IndexingTerms {
             try {
                 if (searcher != null) searchManager.release(searcher);
 
-            } catch (Throwable t) {
-                log.error("Error releasing index searcher.", t);
+            } catch (Exception e) {
+                log.error("Error releasing index searcher.", e);
             }
         	searchLock.readLock().unlock();
         }
@@ -1230,8 +1228,8 @@ public abstract class FreeTextSearchService implements IndexingTerms {
             try {
                 if (searcher != null) searchManager.release(searcher);
 
-            } catch (Throwable t) {
-                log.error("Error releasing index searcher.", t);
+            } catch (Exception e) {
+                log.error("Error releasing index searcher.", e);
             }
         	searchLock.readLock().unlock();
         }
@@ -1308,8 +1306,8 @@ public abstract class FreeTextSearchService implements IndexingTerms {
             try {
                 if (searcher != null) searchManager.release(searcher);
 
-            } catch (Throwable t) {
-            	log.error("Error releasing free-text searcher.", t);
+            } catch (Exception e) {
+            	log.error("Error releasing free-text searcher.", e);
             }
         	searchLock.readLock().unlock();
         }

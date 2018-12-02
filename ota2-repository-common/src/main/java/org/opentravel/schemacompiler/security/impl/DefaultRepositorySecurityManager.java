@@ -197,10 +197,16 @@ public class DefaultRepositorySecurityManager implements RepositorySecurityManag
             switch (permission) {
                 case READ_FINAL:
                     result |= (authorizedPermission == RepositoryPermission.READ_FINAL);
+                    result |= (authorizedPermission == RepositoryPermission.READ_DRAFT);
+                    result |= (authorizedPermission == RepositoryPermission.WRITE);
+                    break;
                 case READ_DRAFT:
                     result |= (authorizedPermission == RepositoryPermission.READ_DRAFT);
+                    result |= (authorizedPermission == RepositoryPermission.WRITE);
+                    break;
                 case WRITE:
                     result |= (authorizedPermission == RepositoryPermission.WRITE);
+                    break;
             }
         }
         return result;

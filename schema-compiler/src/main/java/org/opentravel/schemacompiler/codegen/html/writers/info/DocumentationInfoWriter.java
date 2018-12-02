@@ -43,7 +43,7 @@ public class DocumentationInfoWriter extends
 	public DocumentationInfoWriter(SubWriterHolderWriter writer,
 			TLDocumentation source) {
 		super(writer, source);
-		caption = writer.configuration().getText(
+		caption = writer.newConfiguration().getText(
 				"doclet.Additional_Documentation");
 		title = writer.getResource("doclet.Description");
 	}
@@ -79,7 +79,7 @@ public class DocumentationInfoWriter extends
 		Content desc = getDescriptionTree();
 		infoTree.addContent(desc);
 		Content tableTree = getTableTree();
-		Configuration config = writer.configuration();
+		Configuration config = writer.newConfiguration();
 		List<? extends TLDocumentationItem> values = source.getImplementers();
 		boolean hasAdditionalDoc = false;
 		if (!values.isEmpty()) {
@@ -144,7 +144,7 @@ public class DocumentationInfoWriter extends
 	 */
 	@Override
 	protected String getInfoTableSummary() {
-		Configuration config = writer.configuration();
+		Configuration config = writer.newConfiguration();
 		return config.getText("doclet.Documentation_Table_Summary",
 				config.getText("doclet.Documentation_Summary"),
 				config.getText("doclet.documentation"));
@@ -159,10 +159,9 @@ public class DocumentationInfoWriter extends
 	 */
 	@Override
 	protected String[] getInfoTableHeader() {
-		Configuration config = writer.configuration();
-		String[] header = new String[] { config.getText("doclet.Type"),
+		Configuration config = writer.newConfiguration();
+		return new String[] { config.getText("doclet.Type"),
 				config.getText("doclet.Value") };
-		return header;
 	}
 
 	/**
@@ -241,13 +240,15 @@ public class DocumentationInfoWriter extends
 	 */
 	protected void addDocumentationValue(
 			List<? extends TLDocumentationItem> values, Content tdValue) {
+		boolean firstValue = true;
+		
 		for (TLDocumentationItem value : values) {
-			if (values.indexOf(value) > 0) {
-				Content separator = new StringContent(", ");
-				tdValue.addContent(separator);
+			if (!firstValue) {
+				tdValue.addContent(new StringContent(", "));
 			}
 			Content link = HtmlTree.code(new RawHtml(value.getText()));
 			tdValue.addContent(link);
+			firstValue = false;
 		}
 	}
 

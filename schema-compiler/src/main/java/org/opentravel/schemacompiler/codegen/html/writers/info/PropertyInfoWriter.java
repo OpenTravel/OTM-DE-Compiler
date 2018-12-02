@@ -38,7 +38,7 @@ public class PropertyInfoWriter
 			FacetDocumentationBuilder owner) {
 		super(writer, owner);
 		title = writer.getResource("doclet.Property_Summary");
-		caption = writer.configuration().getText("doclet.Properties");
+		caption = writer.newConfiguration().getText("doclet.Properties");
 	}
 
 	@Override
@@ -46,7 +46,7 @@ public class PropertyInfoWriter
 		Content label = getInfoLabel();
 		memberTree.addContent(label);
 		List<PropertyDocumentationBuilder> properties = source.getProperties();
-		if (properties.size() > 0) {
+		if (!properties.isEmpty()) {
 			Content tableTree = getTableTree();
 			for (PropertyDocumentationBuilder pdb : properties) {
 				Content propSummary = getInfo(pdb, properties.indexOf(pdb), true);
@@ -72,7 +72,7 @@ public class PropertyInfoWriter
 	protected void addInheritedInfoSummary(Content summaryTree) {
 		FacetDocumentationBuilder parentFacet = getParent(source);
 		while (parentFacet != null) {
-			if (parentFacet.getProperties().size() > 0) {
+			if (!parentFacet.getProperties().isEmpty()) {
 				addInheritedInfoHeader(parentFacet, summaryTree,
 						"doclet.Properties_Inherited_From");
 				addInheritedInfo(parentFacet.getProperties(), parentFacet, summaryTree);
@@ -84,8 +84,7 @@ public class PropertyInfoWriter
 	@Override
 	protected FacetDocumentationBuilder getParent(
 			FacetDocumentationBuilder classDoc) {
-		FacetDocumentationBuilder parent = (FacetDocumentationBuilder) classDoc.getSuperType();
-		return parent;
+		return (FacetDocumentationBuilder) classDoc.getSuperType();
 	}
 
 	/**
@@ -104,7 +103,7 @@ public class PropertyInfoWriter
 	 */
 	@Override
 	protected String getInfoTableSummary() {
-		Configuration config = writer.configuration();
+		Configuration config = writer.newConfiguration();
 		return config.getText("doclet.Property_Table_Summary",
 				config.getText("doclet.Property_Summary"),
 				config.getText("doclet.properties"));
@@ -115,7 +114,7 @@ public class PropertyInfoWriter
 	 */
 	@Override
 	protected String getDetailInfoTableSummary() {
-		Configuration config = writer.configuration();
+		Configuration config = writer.newConfiguration();
 		return config.getText("doclet.Property_Detail_Table_Summary",
 				config.getText("doclet.Property_Detail_Summary"),
 				config.getText("doclet.properties"));

@@ -38,7 +38,7 @@ public abstract class AbstractAttributeInfoWriter<T extends AttributeOwnerDocume
 	public AbstractAttributeInfoWriter(SubWriterHolderWriter writer, T owner) {
 		super(writer, owner);
 		title = writer.getResource("doclet.Attribute_Summary");
-		caption = writer.configuration().getText("doclet.Attributes");
+		caption = writer.newConfiguration().getText("doclet.Attributes");
 	}
 
 	/*
@@ -53,7 +53,7 @@ public abstract class AbstractAttributeInfoWriter<T extends AttributeOwnerDocume
 		Content label = getInfoLabel();
 		summaryTree.addContent(label);
 		List<AttributeDocumentationBuilder> attributes = source.getAttributes();
-		if (attributes.size() > 0) {
+		if (!attributes.isEmpty()) {
 			Content tableTree = getTableTree();
 			for (AttributeDocumentationBuilder adb : attributes) {
 				Content propSummary = getInfo(adb, attributes.indexOf(adb), true);
@@ -77,7 +77,7 @@ public abstract class AbstractAttributeInfoWriter<T extends AttributeOwnerDocume
 	protected void addInheritedInfoSummary(Content summaryTree) {
 		T parent = getParent(source);
 		while (parent != null) {
-			if (parent.getAttributes().size() > 0) {
+			if (!parent.getAttributes().isEmpty()) {
 				addInheritedInfoHeader(parent, summaryTree,
 						"doclet.Attributes_Inherited_From");
 				addInheritedInfo(parent.getAttributes(), parent, summaryTree);
@@ -118,7 +118,7 @@ public abstract class AbstractAttributeInfoWriter<T extends AttributeOwnerDocume
 	 */
 	@Override
 	protected String getInfoTableSummary() {
-		Configuration config = writer.configuration();
+		Configuration config = writer.newConfiguration();
 		return config.getText("doclet.Attribute_Table_Summary",
 				config.getText("doclet.Attribute_Summary"),
 				config.getText("doclet.attributes"));
@@ -128,7 +128,7 @@ public abstract class AbstractAttributeInfoWriter<T extends AttributeOwnerDocume
 	 * {@inheritDoc}TODO pass key to method.
 	 */
 	protected String getDetailInfoTableSummary() {
-		Configuration config = writer.configuration();
+		Configuration config = writer.newConfiguration();
 		return config.getText("doclet.Attribute_Detail_Table_Summary",
 				config.getText("doclet.Attribute_Detail_Summary"),
 				config.getText("doclet.attributes"));

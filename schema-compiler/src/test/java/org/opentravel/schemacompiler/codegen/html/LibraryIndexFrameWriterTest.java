@@ -25,20 +25,20 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opentravel.schemacompiler.model.TLLibrary;
 
-import org.opentravel.schemacompiler.codegen.html.writers.WriterTest;
+import org.opentravel.schemacompiler.codegen.html.writers.AbstractWriterTest;
 
 /**
  * @author Eric.Bronson
  *
  */
-public class LibraryIndexFrameWriterTest extends WriterTest{
+public class LibraryIndexFrameWriterTest extends AbstractWriterTest{
 	
 	/**
 	 * @throws java.lang.Exception
 	 */
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		WriterTest.setUpBeforeClass();
+		AbstractWriterTest.setUpBeforeClass();
 		DEST_DIR.mkdir();
 	}
 

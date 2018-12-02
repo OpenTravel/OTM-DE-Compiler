@@ -44,7 +44,7 @@ public class OperationInfoWriter extends
 			ServiceDocumentationBuilder member) {
 		super(writer, member);
 		title = writer.getResource("doclet.Operation_Summary");
-		caption = writer.configuration().getText("doclet.Operations");
+		caption = writer.newConfiguration().getText("doclet.Operations");
 	}
 
 	/*
@@ -75,19 +75,17 @@ public class OperationInfoWriter extends
 		Content label = getInfoLabel();
 		memberTree.addContent(label);
 		List<OperationDocumentationBuilder> facets = source.getOperations();
-		if (facets.size() > 0) {
+		if (!facets.isEmpty()) {
 			Content tableTree = getTableTree();
 			for (OperationDocumentationBuilder fdb : facets) {
-				Content facetSummary = getInfo(fdb, facets.indexOf(fdb),
-						false);
+				Content facetSummary = getInfo(fdb);
 				tableTree.addContent(facetSummary);
 			}
 			memberTree.addContent(tableTree);
 		}
 	}
 
-	private Content getInfo(OperationDocumentationBuilder fdb,
-			int counter, boolean b) {
+	private Content getInfo(OperationDocumentationBuilder fdb) {
 		HtmlTree tdOperation = new HtmlTree(HtmlTag.TD);
 		tdOperation.setStyle(HtmlStyle.colOne);
 		tdOperation.addContent(HtmlTree.heading(HtmlTag.H4, new RawHtml(fdb.getName())));
@@ -105,7 +103,7 @@ public class OperationInfoWriter extends
 	}
 
 	protected String getInfoTableSummary() {
-		Configuration config = writer.configuration();
+		Configuration config = writer.newConfiguration();
 		return config.getText("doclet.Operation_Table_Summary",
 				config.getText("doclet.Operation_Summary"),
 				config.getText("doclet.operations"));
@@ -120,9 +118,8 @@ public class OperationInfoWriter extends
 	 */
 	@Override
 	protected String[] getInfoTableHeader() {
-		Configuration config = writer.configuration();
-		String[] header = new String[] { config.getText("doclet.Name") };
-		return header;
+		Configuration config = writer.newConfiguration();
+		return new String[] { config.getText("doclet.Name") };
 	}
 
 }

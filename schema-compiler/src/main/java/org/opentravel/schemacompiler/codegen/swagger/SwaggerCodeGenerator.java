@@ -81,12 +81,10 @@ public class SwaggerCodeGenerator extends AbstractCodeGenerator<TLResource> {
 	 */
 	@Override
 	public void doGenerateOutput(TLResource source, CodeGenerationContext context) throws CodeGenerationException {
-        Writer out = null;
-        try {
+        File outputFile = getOutputFile( source, context );
+        try (Writer out = new FileWriter( outputFile )) {
             SwaggerDocument swaggerDoc = transformSourceObjectToSwaggerDocument(source, context);
             JsonObject swaggerJson = swaggerDoc.toJson();
-            File outputFile = getOutputFile( source, context );
-            out = new FileWriter( outputFile );
             
 			if (isSingleFileEnabled( context )) {
 				addBuiltInDefinitions( swaggerJson );
@@ -96,20 +94,10 @@ public class SwaggerCodeGenerator extends AbstractCodeGenerator<TLResource> {
             }
 			
             gson.toJson( swaggerJson, out );
-            out.close();
-            out = null;
-
             addGeneratedFile(outputFile);
 
-        } catch (Throwable t) {
-            throw new CodeGenerationException(t);
-
-        } finally {
-            try {
-                if (out != null) {
-                    out.close();
-                }
-            } catch (Throwable t) {}
+        } catch (Exception e) {
+            throw new CodeGenerationException(e);
         }
 	}
 	

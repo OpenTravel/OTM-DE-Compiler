@@ -87,50 +87,50 @@ public class FacetIndexingService implements IndexingTerms {
 	 * this service instance.
 	 */
 	private void postProcessFacetOwners() {
-		SearcherManager searchManager = null;
-        IndexSearcher searcher = null;
-        
-		try {
+		try (SearcherManager searchManager =
+				new SearcherManager( indexWriter, true, new SearcherFactory() )) {
 			log.info("Indexing contextual facet content...");
-			searchManager = new SearcherManager( indexWriter, true, new SearcherFactory() );
     		searchManager.maybeRefreshBlocking();
-			searcher = searchManager.acquire();
+    		IndexSearcher searcher = searchManager.acquire();
 			
 			for (String facetOwnerId : rootFacetOwnerIds) {
-				try {
-					Document facetOwner = getFacetOwnerSearchMetaData( facetOwnerId, searcher );
-					
-					if (facetOwner != null) {
-						List<Document> contextualFacets = new ArrayList<>();
-						Document searchableDoc;
-						
-						facetOwnerId = IndexingUtils.getSearchableIdentityKey( facetOwnerId );
-						log.debug("Post-processing contextual facet owner: " + facetOwnerId);
-						findContextualFacets( facetOwnerId, contextualFacets, new HashSet<String>(), searcher);
-						searchableDoc = createSearchableDocument( facetOwner, contextualFacets );
-						
-						indexWriter.updateDocument( new Term( IDENTITY_FIELD,
-								IndexingUtils.getSearchableIdentityKey( facetOwnerId ) ), searchableDoc );
-						
-					} else {
-						log.warn("Search index meta-data not found for contextual facet owner: " + facetOwnerId);
-					}
-					
-				} catch (Throwable t) {
-					log.error("Unable to create index for contextual facet owner: " + facetOwnerId, t);
-				}
+				indexFacetOwner( facetOwnerId, searcher );
 			}
+			searchManager.release( searcher );
 			
 		} catch (IOException e) {
 			log.error("Error during contextual facet post-processing.", e);
+		}
+	}
+	
+	/**
+	 * Creates a search index document for the specified facet owner.
+	 * 
+	 * @param facetOwnerId  the search index ID for the facet owner to be indexed
+	 * @param searcher  the index searcher to use for locating the owner's contextual facets
+	 */
+	private void indexFacetOwner(String facetOwnerId, IndexSearcher searcher) {
+		try {
+			Document facetOwner = getFacetOwnerSearchMetaData( facetOwnerId, searcher );
 			
-        } finally {
-			try {
-				if (searcher != null) searchManager.release( searcher );
-			} catch (Throwable t) {}
-			try {
-				if (searchManager != null) searchManager.close();
-			} catch (Throwable t) {}
+			if (facetOwner != null) {
+				List<Document> contextualFacets = new ArrayList<>();
+				Document searchableDoc;
+				
+				facetOwnerId = IndexingUtils.getSearchableIdentityKey( facetOwnerId );
+				log.debug("Post-processing contextual facet owner: " + facetOwnerId);
+				findContextualFacets( facetOwnerId, contextualFacets, new HashSet<String>(), searcher);
+				searchableDoc = createSearchableDocument( facetOwner, contextualFacets );
+				
+				indexWriter.updateDocument( new Term( IDENTITY_FIELD,
+						IndexingUtils.getSearchableIdentityKey( facetOwnerId ) ), searchableDoc );
+				
+			} else {
+				log.warn("Search index meta-data not found for contextual facet owner: " + facetOwnerId);
+			}
+			
+		} catch (Exception e) {
+			log.error("Unable to create index for contextual facet owner: " + facetOwnerId, e);
 		}
 	}
 	
@@ -310,7 +310,7 @@ public class FacetIndexingService implements IndexingTerms {
 	 */
 	public IndexBuilder<ValidationFinding> getIndexBuilder() {
 		return new IndexBuilder<ValidationFinding>() {
-			public void performIndexingAction() {
+			@Override public void performIndexingAction() {
 				setCreateIndex( true );
 				super.performIndexingAction();
 			}

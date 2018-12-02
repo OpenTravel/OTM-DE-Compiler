@@ -32,7 +32,7 @@ import org.opentravel.schemacompiler.codegen.html.builders.FacetDocumentationBui
  * @author Eric.Bronson
  *
  */
-public class FacetWriterTest extends WriterTest{
+public class FacetWriterTest extends AbstractWriterTest{
 
 	private static FacetDocumentationBuilder builder;
 	private static FacetWriter writer;

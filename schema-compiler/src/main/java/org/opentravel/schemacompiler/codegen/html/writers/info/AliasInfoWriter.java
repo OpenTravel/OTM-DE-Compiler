@@ -40,7 +40,7 @@ public class AliasInfoWriter extends AbstractInfoWriter<AliasOwnerDocumentationB
 	public AliasInfoWriter(SubWriterHolderWriter writer,
 			AliasOwnerDocumentationBuilder owner) {
 		super(writer, owner);
-		caption = writer.configuration().getText("doclet.Aliases");
+		caption = writer.newConfiguration().getText("doclet.Aliases");
 	}
 
 	
@@ -71,7 +71,7 @@ public class AliasInfoWriter extends AbstractInfoWriter<AliasOwnerDocumentationB
 		HtmlTree tdAliasName = new HtmlTree(HtmlTag.TD);
 		tdAliasName.setStyle(HtmlStyle.colOne);
 		for (String alias : aliases) {
-			if (!(aliases.indexOf(alias) == 0)) {
+			if (aliases.indexOf(alias) != 0) {
 				tdAliasName.addContent(", ");
 			}
 			addAliasName(alias, tdAliasName);
@@ -123,7 +123,7 @@ public class AliasInfoWriter extends AbstractInfoWriter<AliasOwnerDocumentationB
 	 * {@inheritDoc}TODO pass key to method.
 	 */
 	protected String getInfoTableSummary() {
-		Configuration config = writer.configuration();
+		Configuration config = writer.newConfiguration();
 		return config.getText("doclet.Alias_Table_Summary",
 				config.getText("doclet.Alias_Summary"),
 				config.getText("doclet.aliases"));
@@ -133,15 +133,15 @@ public class AliasInfoWriter extends AbstractInfoWriter<AliasOwnerDocumentationB
 	@Override
 	protected String[] getInfoTableHeader() {
 		// no table header for aliases
-		return null;
+		return new String[0];
 	}
 
 	@Override
 	protected void addInfoSummary(Content memberTree) {
 		Content label = HtmlTree.heading(HtmlConstants.SUMMARY_HEADING,writer.getResource("doclet.Alias_Summary"));
 		memberTree.addContent(label);
-		List<String> aliases = ((AliasOwnerDocumentationBuilder) source).getAliases();
-		if (aliases.size() > 0) {
+		List<String> aliases = source.getAliases();
+		if (!aliases.isEmpty()) {
 			Content tableTree = getTableTree();
 			addAliasSummary(aliases, tableTree);
 			memberTree.addContent(tableTree);

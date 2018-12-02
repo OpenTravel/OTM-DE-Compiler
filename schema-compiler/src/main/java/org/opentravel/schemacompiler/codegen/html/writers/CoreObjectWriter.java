@@ -61,7 +61,7 @@ public class CoreObjectWriter
 				CoreObjectDocumentationBuilder source) {
 			super(writer, source);
 			title = writer.getResource("doclet.Role_Summary");
-			caption = writer.configuration().getText("doclet.Roles");
+			caption = writer.newConfiguration().getText("doclet.Roles");
 		}
 
 		@Override
@@ -78,7 +78,7 @@ public class CoreObjectWriter
 			Content label = getInfoLabel();
 			memberTree.addContent(label);
 			List<TLRole> roles = source.getRoles();
-			if (roles.size() > 0) {
+			if (!roles.isEmpty()) {
 				Content tableTree = getTableTree();
 				for (TLRole role : roles) {
 					HtmlTree tdName = new HtmlTree(HtmlTag.TD);
@@ -104,7 +104,7 @@ public class CoreObjectWriter
 		 */
 		@Override
 		protected String getInfoTableSummary() {
-			Configuration config = writer.configuration();
+			Configuration config = writer.newConfiguration();
 			return config.getText("doclet.Object_Table_Summary",
 					config.getText("doclet.Role_Summary"),
 					config.getText("doclet.Roles"));
@@ -119,10 +119,9 @@ public class CoreObjectWriter
 		 */
 		@Override
 		protected String[] getInfoTableHeader() {
-			Configuration config = writer.configuration();
-			String[] header = new String[] { config.getText("doclet.Role"),
+			Configuration config = writer.newConfiguration();
+			return new String[] { config.getText("doclet.Role"),
 					config.getText("doclet.Description") };
-			return header;
 		}
 		
 	}

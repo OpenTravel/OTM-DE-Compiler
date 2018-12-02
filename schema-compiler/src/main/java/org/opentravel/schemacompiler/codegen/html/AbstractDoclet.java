@@ -15,9 +15,10 @@
  */
 package org.opentravel.schemacompiler.codegen.html;
 
-import org.opentravel.schemacompiler.model.TLModel;
-
 import org.opentravel.schemacompiler.codegen.html.writers.LibraryListWriter;
+import org.opentravel.schemacompiler.model.TLModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An abstract implementation of a Doclet.
@@ -25,16 +26,17 @@ import org.opentravel.schemacompiler.codegen.html.writers.LibraryListWriter;
  */
 public abstract class AbstractDoclet {
 
+    private static final Logger log = LoggerFactory.getLogger(AbstractDoclet.class);
+    
     /**
      * The global configuration information for this run.
      */
-    public Configuration configuration;
+    private Configuration configuration;
 
     /**
      * The only doclet that may use this toolkit is {@value}
      */
-    private static final String OTM_DOCLET_NAME = new
-        HtmlDoclet().getClass().getName();
+    private static final String OTM_DOCLET_NAME = HtmlDoclet.class.getName();
 
     /**
      * Verify that the only doclet that is using this toolkit is
@@ -50,6 +52,24 @@ public abstract class AbstractDoclet {
     }
 
     /**
+	 * Returns the global configuration information for this run.
+	 *
+	 * @return Configuration
+	 */
+	public Configuration getConfiguration() {
+		return configuration;
+	}
+
+	/**
+	 * Assigns the global configuration information for this run.
+	 *
+	 * @param configuration  the configuration settings to assign
+	 */
+	public void setConfiguration(Configuration configuration) {
+		this.configuration = configuration;
+	}
+
+	/**
      * The method that starts the execution of the doclet.
      *
      * @param doclet the doclet to start the execution for.
@@ -57,15 +77,16 @@ public abstract class AbstractDoclet {
      * @return true if the doclet executed without error.  False otherwise.
      */
     public boolean start(AbstractDoclet doclet, TLModel model) {
-        configuration = configuration();
+        configuration = newConfiguration();
         configuration.setModel(model);
         if (! isValidDoclet(doclet)) {
             return false;
         }
         try {
             doclet.startGeneration(model);
+            
         } catch (Exception exc) {
-        	exc.printStackTrace(System.out);
+        	log.error("Error starting doclet generation.", exc);
             return false;
         }
         return true;
@@ -76,7 +97,7 @@ public abstract class AbstractDoclet {
      * Create the configuration instance and returns it.
      * @return the configuration of the doclet.
      */
-    public abstract Configuration configuration();
+    public abstract Configuration newConfiguration();
 
     /**
      * Start the generation of files. Call generate methods in the individual
@@ -87,7 +108,7 @@ public abstract class AbstractDoclet {
      * @see org.opentravel.schemacompiler.codegen.html.RootDoc
      */
     private void startGeneration(TLModel model) throws Exception {
-        if (model.getUserDefinedLibraries().size() == 0) {
+        if (model.getUserDefinedLibraries().isEmpty()) {
             configuration.message.notice("doclet.No_Libraries_To_Document");
             return;
         }

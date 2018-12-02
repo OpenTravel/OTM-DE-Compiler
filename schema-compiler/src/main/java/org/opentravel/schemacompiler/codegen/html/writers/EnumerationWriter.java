@@ -59,7 +59,7 @@ public class EnumerationWriter extends NamedEntityWriter<EnumerationDocumentatio
 				EnumerationDocumentationBuilder source) {
 			super(writer, source);
 			title = writer.getResource("doclet.Value_Summary");
-			caption = writer.configuration().getText("doclet.Values");
+			caption = writer.newConfiguration().getText("doclet.Values");
 		}
 
 		@Override
@@ -102,7 +102,7 @@ public class EnumerationWriter extends NamedEntityWriter<EnumerationDocumentatio
 		 */
 		@Override
 		protected String getInfoTableSummary() {
-			Configuration config = writer.configuration();
+			Configuration config = writer.newConfiguration();
 			return config.getText("doclet.Enum_Value_Table_Summary",
 					config.getText("doclet.Value_Summary"),
 					config.getText("doclet.enum_values"));
@@ -117,7 +117,7 @@ public class EnumerationWriter extends NamedEntityWriter<EnumerationDocumentatio
 		 */
 		@Override
 		protected String[] getInfoTableHeader() {
-			Configuration config = writer.configuration();
+			Configuration config = writer.newConfiguration();
 			String[] header = new String[] { config.getText("doclet.Name"),
 					config.getText("doclet.Description") };
 			return header;

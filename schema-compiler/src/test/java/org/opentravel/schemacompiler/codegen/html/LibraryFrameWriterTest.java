@@ -27,19 +27,19 @@ import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.codegen.html.DirectoryManager;
 import org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder;
-import org.opentravel.schemacompiler.codegen.html.writers.WriterTest;
+import org.opentravel.schemacompiler.codegen.html.writers.AbstractWriterTest;
 
 /**
  * @author Eric.Bronson
  *
  */
-public class LibraryFrameWriterTest extends WriterTest {
+public class LibraryFrameWriterTest extends AbstractWriterTest {
 
 	private static TLLibrary library;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		WriterTest.setUpBeforeClass();
+		AbstractWriterTest.setUpBeforeClass();
 		library = (TLLibrary) config.model.getUserDefinedLibraries().get(0);
 		LibraryFrameWriter.generate(config, library);
 		String filePath = config.destDirName + DirectoryManager.getDirectoryPath(AbstractDocumentationBuilder.getLibraryName(library)) + LibraryFrameWriter.OUTPUT_FILE_NAME;

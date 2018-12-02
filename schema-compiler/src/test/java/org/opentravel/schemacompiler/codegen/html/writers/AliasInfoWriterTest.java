@@ -31,7 +31,7 @@ import org.opentravel.schemacompiler.codegen.html.builders.AliasOwnerDocumentati
  * @author Eric.Bronson
  *
  */
-public class AliasInfoWriterTest extends WriterTest{
+public class AliasInfoWriterTest extends AbstractWriterTest{
 
 	@Test
 	public void testItShouldAddAliasesToTheContent() throws Exception {

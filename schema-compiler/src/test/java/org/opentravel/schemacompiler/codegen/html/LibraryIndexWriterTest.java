@@ -26,19 +26,19 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opentravel.schemacompiler.model.TLLibrary;
 
-import org.opentravel.schemacompiler.codegen.html.writers.WriterTest;
+import org.opentravel.schemacompiler.codegen.html.writers.AbstractWriterTest;
 
 /**
  * @author Eric.Bronson
  *
  */
-public class LibraryIndexWriterTest extends WriterTest {
+public class LibraryIndexWriterTest extends AbstractWriterTest {
 
 	private static String content;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		WriterTest.setUpBeforeClass();
+		AbstractWriterTest.setUpBeforeClass();
 		String filename = LibraryIndexWriter.DEFAULT_FILENAME;
 
 		File f = new File(config.destDirName);

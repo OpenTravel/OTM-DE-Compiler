@@ -26,7 +26,7 @@ import org.opentravel.schemacompiler.codegen.html.Content;
 import org.opentravel.schemacompiler.codegen.html.TestLibraryProvider;
 import org.opentravel.schemacompiler.codegen.html.builders.EnumerationDocumentationBuilder;
 
-public class EnumerationWriterTest extends WriterTest {
+public class EnumerationWriterTest extends AbstractWriterTest {
 	private static EnumerationDocumentationBuilder builder;
 	private static EnumerationWriter writer;
 	private static TLAbstractEnumeration tlEnum;

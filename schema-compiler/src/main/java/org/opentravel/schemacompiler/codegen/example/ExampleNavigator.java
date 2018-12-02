@@ -15,13 +15,14 @@
  */
 package org.opentravel.schemacompiler.codegen.example;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 
 import javax.xml.XMLConstants;
 
@@ -75,7 +76,7 @@ public class ExampleNavigator {
 	
 	private static FacetCodegenDelegateFactory facetDelegateFactory = new FacetCodegenDelegateFactory(null);
 
-    private Stack<Object> entityStack = new Stack<>();
+    private Deque<Object> entityStack = new ArrayDeque<>();
     private ExtensionPointRegistry extensionPointRegistry;
     private Map<TLChoiceObject,List<TLFacet>> choiceFacetRotation = new HashMap<>();
     private ExampleGeneratorOptions options;
@@ -407,7 +408,7 @@ public class ExampleNavigator {
                 TLAbstractFacet itemFacet = listFacet.getItemFacet();
 
                 if ((itemFacet instanceof TLFacet)
-                        && (facetOwner.getRoleEnumeration().getRoles().size() > 0)) {
+                        && !facetOwner.getRoleEnumeration().getRoles().isEmpty()) {
                     for (TLRole role : facetOwner.getRoleEnumeration().getRoles()) {
                         visitor.startListFacet(listFacet, role);
                         navigateFacetMembers((TLFacet) itemFacet);
@@ -697,10 +698,9 @@ public class ExampleNavigator {
                     navigateElement(element);
         		}
                 
-        	} else if (elementItem instanceof TLIndicator) {
-        		if (!options.isSuppressOptionalFields()) {
-                    navigateIndicator( (TLIndicator) elementItem );
-        		}
+        	} else if ((elementItem instanceof TLIndicator)
+        			&& !options.isSuppressOptionalFields()) {
+                navigateIndicator( (TLIndicator) elementItem );
         	}
         }
         
@@ -710,10 +710,9 @@ public class ExampleNavigator {
         List<TLFacet> facetHierarchy = FacetCodegenUtils.getLocalFacetHierarchy(facet);
 
         for (TLFacet hFacet : facetHierarchy) {
-            if (!processedExtensionPointTypes.contains(hFacet.getFacetType())) {
-            	if (extensionPointRegistry.hasExtensionPoint( hFacet )) {
-            		navigateExtensionPoint(hFacet, facetExtensionsByType.get(hFacet.getFacetType()));
-            	}
+            if (!processedExtensionPointTypes.contains(hFacet.getFacetType())
+            		&& extensionPointRegistry.hasExtensionPoint( hFacet )) {
+        		navigateExtensionPoint(hFacet, facetExtensionsByType.get(hFacet.getFacetType()));
             }
         }
     }
@@ -999,20 +998,22 @@ public class ExampleNavigator {
         // Get the maximum level of detail that publishes content
         for (TLAbstractFacet candidate : candidateFacets) {
             FacetCodegenDelegate<TLAbstractFacet> delegate = facetDelegateFactory.getDelegate(candidate);
+            boolean done = false;
 
             if (delegate != null) {
                 if (delegate.hasContent()) {
                     result = candidate;
-                    break;
+                    done = true;
                 }
             } else if (candidate.declaresContent()) {
                 result = candidate;
-                break;
+                done = true;
             }
+            if (done) break;
         }
 
         // Last Resort - Use the first candidate facet in the list
-        if ((result == null) && (candidateFacets.size() > 0)) {
+        if ((result == null) && !candidateFacets.isEmpty()) {
             result = candidateFacets.get(0);
         }
         return result;
@@ -1062,12 +1063,22 @@ public class ExampleNavigator {
                 switch (preferredFacet.getFacetType()) {
                     case DETAIL:
                         candidateFacets.add(0, businessObject.getDetailFacet());
+                        candidateFacets.add(0, preferredFacet);
+                        candidateFacets.add(0, businessObject.getSummaryFacet());
+                        candidateFacets.add(0, businessObject.getIdFacet());
+                        break;
                     case CUSTOM:
                         candidateFacets.add(0, preferredFacet);
+                        candidateFacets.add(0, businessObject.getSummaryFacet());
+                        candidateFacets.add(0, businessObject.getIdFacet());
+                        break;
                     case SUMMARY:
                         candidateFacets.add(0, businessObject.getSummaryFacet());
+                        candidateFacets.add(0, businessObject.getIdFacet());
+                        break;
                     case ID:
                         candidateFacets.add(0, businessObject.getIdFacet());
+                        break;
                     default:
                     	break;
                 }
@@ -1077,10 +1088,16 @@ public class ExampleNavigator {
                 switch (preferredFacet.getFacetType()) {
                     case DETAIL:
                         candidateFacets.add(0, coreObject.getDetailFacet());
+                        candidateFacets.add(0, coreObject.getSummaryFacet());
+                        candidateFacets.add(0, coreObject.getSimpleFacet());
+                        break;
                     case SUMMARY:
                         candidateFacets.add(0, coreObject.getSummaryFacet());
+                        candidateFacets.add(0, coreObject.getSimpleFacet());
+                        break;
                     case SIMPLE:
                         candidateFacets.add(0, coreObject.getSimpleFacet());
+                        break;
                     default:
                     	break;
                 }
@@ -1114,8 +1131,11 @@ public class ExampleNavigator {
             switch (preferredFacet.getFacetType()) {
                 case DETAIL:
                     candidateFacets.add(0, facetOwner.getDetailListFacet());
+                    candidateFacets.add(0, facetOwner.getSummaryListFacet());
+                    break;
                 case SUMMARY:
                     candidateFacets.add(0, facetOwner.getSummaryListFacet());
+                    break;
                 default:
                 	break;
             }

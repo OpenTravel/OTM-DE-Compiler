@@ -433,8 +433,11 @@ public class FacetCodegenUtils {
                     case DETAIL:
                     case CUSTOM:
                         localHierarchy.add(0, getFacetOfType(facetOwner, TLFacetType.SUMMARY));
+                        localHierarchy.add(0, getFacetOfType(facetOwner, TLFacetType.ID));
+                        break;
                     case SUMMARY:
                         localHierarchy.add(0, getFacetOfType(facetOwner, TLFacetType.ID));
+                        break;
     				default:
     					break;
                 }

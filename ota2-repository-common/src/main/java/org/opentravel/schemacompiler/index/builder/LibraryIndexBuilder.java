@@ -21,7 +21,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -87,22 +87,21 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
 			// Start by searching the other sibling versions of this library to calculate
 			// the 'latestVersion' values for the index.
 			for (RepositoryItem itemVersion : getRepositoryManager().listItems( baseNS, false, true )) {
-				if (!libraryName.equals( itemVersion.getLibraryName() )) {
-					continue;
-				}
-				if (sourceObject.getVersion().equals( itemVersion.getVersion() )) {
-					latestVersion = isLatestVersionAtStatus(
-							sourceObject.getStatus(), TLLibraryStatus.DRAFT, laterVersionStatuses );
-					latestVersionAtUnderReview = isLatestVersionAtStatus(
-							sourceObject.getStatus(), TLLibraryStatus.UNDER_REVIEW, laterVersionStatuses );
-					latestVersionAtFinal = isLatestVersionAtStatus(
-							sourceObject.getStatus(), TLLibraryStatus.FINAL, laterVersionStatuses );
-					latestVersionAtObsolete = isLatestVersionAtStatus(
-							sourceObject.getStatus(), TLLibraryStatus.OBSOLETE, laterVersionStatuses );
-					break;
-					
-				} else {
-					laterVersionStatuses.add( itemVersion.getStatus() );
+				if (libraryName.equals( itemVersion.getLibraryName() )) {
+					if (sourceObject.getVersion().equals( itemVersion.getVersion() )) {
+						latestVersion = isLatestVersionAtStatus(
+								sourceObject.getStatus(), TLLibraryStatus.DRAFT, laterVersionStatuses );
+						latestVersionAtUnderReview = isLatestVersionAtStatus(
+								sourceObject.getStatus(), TLLibraryStatus.UNDER_REVIEW, laterVersionStatuses );
+						latestVersionAtFinal = isLatestVersionAtStatus(
+								sourceObject.getStatus(), TLLibraryStatus.FINAL, laterVersionStatuses );
+						latestVersionAtObsolete = isLatestVersionAtStatus(
+								sourceObject.getStatus(), TLLibraryStatus.OBSOLETE, laterVersionStatuses );
+						break;
+						
+					} else {
+						laterVersionStatuses.add( itemVersion.getStatus() );
+					}
 				}
 			}
 			
@@ -240,16 +239,13 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
 	public void deleteIndex() {
 		RepositoryItem sourceObject = getSourceObject();
 		String sourceObjectIdentity = IndexingUtils.getIdentityKey( sourceObject );
-		SearcherManager searchManager = null;
-        IndexSearcher searcher = null;
         
-		try {
+		try (SearcherManager searchManager =
+				new SearcherManager( getIndexWriter(), true, new SearcherFactory() )) {
 			QueryParser parser = new QueryParser( OWNING_LIBRARY_FIELD, new StandardAnalyzer() );
 			Query entityQuery = parser.parse( "\"" + IndexingUtils.getIdentityKey( sourceObject ) + "\"" );
+			IndexSearcher searcher = searchManager.acquire();
 			IndexWriter indexWriter = getIndexWriter();
-			
-			searchManager = new SearcherManager( indexWriter, true, new SearcherFactory() );
-			searcher = searchManager.acquire();
 			
 			// Search for the entity documents that are owned by the library whose index is being deleted
             TopDocs searchResults = searcher.search( entityQuery, Integer.MAX_VALUE );
@@ -264,6 +260,7 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
             	}
             }
             documentKeys.add( sourceObjectIdentity );
+            searchManager.release( searcher );
             
             // Delete all of the documents from the search index
             for (String documentId : documentKeys) {
@@ -276,14 +273,6 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
             
 		} catch (IOException | ParseException e) {
 			log.error("Error deleting search index for repository item.", e);
-			
-        } finally {
-			try {
-				if (searcher != null) searchManager.release( searcher );
-			} catch (Throwable t) {}
-			try {
-				if (searchManager != null) searchManager.close();
-			} catch (Throwable t) {}
 		}
 	}
 	
@@ -299,19 +288,17 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
 		String fileHint = nsInclude.getPath();
 		String identityKey = null;
 		
-		if ((libraryNamespace != null) && (fileHint != null)) {
-			if (fileHint.startsWith("otm://")) {
-				try {
-					RepositoryItem importItem =
-							getRepositoryManager().getRepositoryItem( fileHint, libraryNamespace );
-					
-					if (importItem != null) {
-						identityKey = IndexingUtils.getIdentityKey( importItem );
-					}
-					
-				} catch (RepositoryException | URISyntaxException e) {
-					// No error - return a null identity key value
+		if ((libraryNamespace != null) && (fileHint != null) && fileHint.startsWith("otm://")) {
+			try {
+				RepositoryItem importItem =
+						getRepositoryManager().getRepositoryItem( fileHint, libraryNamespace );
+				
+				if (importItem != null) {
+					identityKey = IndexingUtils.getIdentityKey( importItem );
 				}
+				
+			} catch (RepositoryException | URISyntaxException e) {
+				// No error - return a null identity key value
 			}
 		}
 		return identityKey;
@@ -383,7 +370,7 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
 	 */
 	static {
 		try {
-			Map<TLLibraryStatus,List<TLLibraryStatus>> statusMap = new HashMap<>();
+			Map<TLLibraryStatus,List<TLLibraryStatus>> statusMap = new EnumMap<>(TLLibraryStatus.class);
 			
 			statusMap.put( TLLibraryStatus.DRAFT,        Arrays.asList( TLLibraryStatus.DRAFT, TLLibraryStatus.UNDER_REVIEW, TLLibraryStatus.FINAL, TLLibraryStatus.OBSOLETE ) );
 			statusMap.put( TLLibraryStatus.UNDER_REVIEW, Arrays.asList( TLLibraryStatus.UNDER_REVIEW, TLLibraryStatus.FINAL, TLLibraryStatus.OBSOLETE ) );
@@ -391,8 +378,8 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
 			statusMap.put( TLLibraryStatus.OBSOLETE,     Arrays.asList( TLLibraryStatus.OBSOLETE ) );
 			inclusiveStatuses = Collections.unmodifiableMap( statusMap );
 			
-		} catch (Throwable t) {
-			throw new ExceptionInInitializerError(t);
+		} catch (Exception e) {
+			throw new ExceptionInInitializerError(e);
 		}
 	}
 	

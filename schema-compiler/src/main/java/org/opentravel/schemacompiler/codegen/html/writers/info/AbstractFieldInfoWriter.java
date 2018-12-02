@@ -179,10 +179,9 @@ public abstract class AbstractFieldInfoWriter<T extends NamedEntityDocumentation
 	 */
 	@Override
 	protected String[] getInfoTableHeader() {
-		Configuration config = writer.configuration();
-		String[] header = new String[] { config.getText("doclet.Name"),
+		Configuration config = writer.newConfiguration();
+		return new String[] { config.getText("doclet.Name"),
 				config.getText("doclet.Description") };
-		return header;
 	}
 
 }

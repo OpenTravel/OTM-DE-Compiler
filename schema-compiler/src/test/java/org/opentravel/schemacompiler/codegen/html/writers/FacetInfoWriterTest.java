@@ -31,7 +31,7 @@ import org.opentravel.schemacompiler.codegen.html.writers.info.FacetInfoWriter;
  * @author Eric.Bronson
  *
  */
-public class FacetInfoWriterTest extends WriterTest{
+public class FacetInfoWriterTest extends AbstractWriterTest{
 
 	private static FacetInfoWriter writer;
 
@@ -41,7 +41,7 @@ public class FacetInfoWriterTest extends WriterTest{
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		WriterTest.setUpBeforeClass();
+		AbstractWriterTest.setUpBeforeClass();
 		bo = TestLibraryProvider.getBusinessObject("ExampleBusinessObject");
 	}
 

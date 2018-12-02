@@ -39,22 +39,16 @@
  */
 package org.opentravel.schemacompiler.codegen.html;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.*;
-
-import org.opentravel.schemacompiler.model.LibraryMember;
-import org.opentravel.schemacompiler.model.TLDocumentation;
-import org.opentravel.schemacompiler.model.TLDocumentationOwner;
-import org.opentravel.schemacompiler.model.TLLibrary;
+import java.util.Date;
+import java.util.List;
 
 import org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.builders.FacetDocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.builders.FieldDocumentationBuilder;
-import org.opentravel.schemacompiler.codegen.html.LinkFactoryImpl;
-import org.opentravel.schemacompiler.codegen.html.LinkInfoImpl;
-import org.opentravel.schemacompiler.codegen.html.LinkOutputImpl;
 import org.opentravel.schemacompiler.codegen.html.markup.Comment;
 import org.opentravel.schemacompiler.codegen.html.markup.DocType;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlAttr;
@@ -66,9 +60,10 @@ import org.opentravel.schemacompiler.codegen.html.markup.HtmlTag;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTree;
 import org.opentravel.schemacompiler.codegen.html.markup.RawHtml;
 import org.opentravel.schemacompiler.codegen.html.markup.StringContent;
-import org.opentravel.schemacompiler.codegen.html.DirectoryManager;
-import org.opentravel.schemacompiler.codegen.html.DocletConstants;
-import org.opentravel.schemacompiler.codegen.html.Util;
+import org.opentravel.schemacompiler.model.LibraryMember;
+import org.opentravel.schemacompiler.model.TLDocumentation;
+import org.opentravel.schemacompiler.model.TLDocumentationOwner;
+import org.opentravel.schemacompiler.model.TLLibrary;
 
 /**
  * Class for the Html Format Code Generation specific to JavaDoc. This Class
@@ -116,11 +111,6 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	 * The display length used for indentation while generating the class page.
 	 */
 	public int displayLength = 0;
-
-	/**
-	 * The global configuration information for this run.
-	 */
-	public Configuration configuration;
 
 	/**
 	 * Constructor to construct the HtmlStandardWriter object.
@@ -212,8 +202,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 				+ DocletConstants.NL;
 		Content scriptContent = new RawHtml(scriptCode);
 		script.addContent(scriptContent);
-		Content div = HtmlTree.div(script);
-		return div;
+		return HtmlTree.div(script);
 	}
 
 	/**
@@ -252,7 +241,6 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 				+ DocletConstants.NL + "img.addClass('toggleButton');"
 				+ DocletConstants.NL + "$(this).removeClass('toggleButton');"
 				+ DocletConstants.NL + "});" + DocletConstants.NL + "});";
-		// + DocletConstants.NL + "  //-->";
 		script.addContent(new RawHtml(s));
 		return script;
 	}
@@ -410,10 +398,9 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 		subDiv.addContent(ulFrames);
 		HtmlTree ulAllClasses = HtmlTree.ul(HtmlStyle.navList,
 				getNavLinkClassIndex());
-		ulAllClasses.addAttr(HtmlAttr.ID, allClassesId.toString());
+		ulAllClasses.addAttr(HtmlAttr.ID, allClassesId);
 		subDiv.addContent(ulAllClasses);
-		subDiv.addContent(getAllClassesLinkScript(allClassesId.toString()));
-		//addSummaryDetailLinks(subDiv);
+		subDiv.addContent(getAllClassesLinkScript(allClassesId));
 		if (header) {
 			subDiv.addContent(getMarkerAnchor("skip-navbar_top"));
 			body.addContent(subDiv);
@@ -454,8 +441,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	protected Content getNavLinkContents() {
 		Content linkContent = getHyperLink(relativePath
 				+ "overview-summary.html", "", overviewLabel, "", "");
-		Content li = HtmlTree.li(linkContent);
-		return li;
+		return HtmlTree.li(linkContent);
 	}
 
 	/**
@@ -467,8 +453,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	 */
 	protected Content getNavLinkLibrary(String ns) {
 		Content linkContent = getLibraryLink(ns, libraryLabel);
-		Content li = HtmlTree.li(linkContent);
-		return li;
+		return HtmlTree.li(linkContent);
 	}
 
 	/**
@@ -477,8 +462,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	 * @return a content tree for the link
 	 */
 	protected Content getNavLinkLibrary() {
-		Content li = HtmlTree.li(libraryLabel);
-		return li;
+		return HtmlTree.li(libraryLabel);
 	}
 
 
@@ -488,8 +472,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	 * @return a content tree for the link
 	 */
 	protected Content getNavLinkClassUse() {
-		Content li = HtmlTree.li(useLabel);
-		return li;
+		return HtmlTree.li(useLabel);
 	}
 
 
@@ -504,8 +487,9 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 		Content li;
 		if (prev != null) {
 			li = HtmlTree.li(getHyperLink(prev, "", prevLabel, "", ""));
-		} else
+		} else {
 			li = HtmlTree.li(prevLabel);
+		}
 		return li;
 	}
 
@@ -521,8 +505,9 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 		Content li;
 		if (next != null) {
 			li = HtmlTree.li(getHyperLink(next, "", nextLabel, "", ""));
-		} else
+		} else {
 			li = HtmlTree.li(nextLabel);
+		}
 		return li;
 	}
 
@@ -536,8 +521,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	protected Content getNavShowLists(String link) {
 		Content framesContent = getHyperLink(link + "?" + path + filename, "",
 				framesLabel, "", "_top");
-		Content li = HtmlTree.li(framesContent);
-		return li;
+		return HtmlTree.li(framesContent);
 	}
 
 
@@ -559,10 +543,8 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	 * @return a content tree for the link
 	 */
 	protected Content getNavHideLists(String link) {
-		Content noFramesContent = getHyperLink(link, "", noframesLabel, "",
-				"_top");
-		Content li = HtmlTree.li(noFramesContent);
-		return li;
+		Content noFramesContent = getHyperLink(link, "", noframesLabel, "", "_top");
+		return HtmlTree.li(noFramesContent);
 	}
 
 
@@ -578,8 +560,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 		Content treeLinkContent;
 		treeLinkContent = getHyperLink(relativePath + "overview-tree.html", "",
 				treeLabel, "", "");
-		Content li = HtmlTree.li(treeLinkContent);
-		return li;
+		return HtmlTree.li(treeLinkContent);
 	}
 
 	/**
@@ -592,8 +573,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	protected Content getNavLinkMainTree(String label) {
 		Content mainTreeContent = getHyperLink(relativePath
 				+ "overview-tree.html", new StringContent(label));
-		Content li = HtmlTree.li(mainTreeContent);
-		return li;
+		return HtmlTree.li(mainTreeContent);
 	}
 
 
@@ -603,8 +583,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	 * @return a content tree for the link
 	 */
 	protected Content getNavLinkObject() {
-		Content li = HtmlTree.li(objectLabel);
-		return li;
+		return HtmlTree.li(objectLabel);
 	}
 
 	/**
@@ -626,14 +605,6 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	 * @return a content tree for the link
 	 */
 	protected Content getNavLinkIndex() {
-//		Content linkContent = getHyperLink(
-//				relativePath
-//						+ (configuration.splitindex ? DirectoryManager.getPath("index-files")
-//								+ fileseparator
-//								: "")
-//						+ (configuration.splitindex ? "index-1.html"
-//								: "index-all.html"), "", indexLabel, "", "");
-//		Content li = HtmlTree.LI(linkContent);
 		return HtmlTree.EMPTY;
 	}
 
@@ -656,8 +627,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 		}
 		Content linkContent = getHyperLink(relativePath + helpfilenm, "",
 				helpLabel, "", "");
-		Content li = HtmlTree.li(linkContent);
-		return li;
+		return HtmlTree.li(linkContent);
 	}
 	
 	/**
@@ -732,8 +702,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	public Content getMarkerAnchor(String anchorName, Content anchorContent) {
 		if (anchorContent == null)
 			anchorContent = new Comment(" ");
-		Content markerAnchor = HtmlTree.aName(anchorName, anchorContent);
-		return markerAnchor;
+		return HtmlTree.aName(anchorName, anchorContent);
 	}
 
 	/**
@@ -758,47 +727,6 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	public Content getNamespaceLabel(String packageName) {
 		return new StringContent(packageName);
 	}
-
-	//TODO keep this in we may want to use this later
-	// /**
-	// * Add package deprecation information to the documentation tree
-	// *
-	// * @param deprPkgs list of deprecated packages
-	// * @param headingKey the caption for the deprecated package table
-	// * @param tableSummary the summary for the deprecated package table
-	// * @param tableHeader table headers for the deprecated package table
-	// * @param contentTree the content tree to which the deprecated package
-	// table will be added
-	// */
-	// protected void addPackageDeprecatedAPI(List<Doc> deprPkgs, String
-	// headingKey,
-	// String tableSummary, String[] tableHeader, Content contentTree) {
-	// if (deprPkgs.size() > 0) {
-	// Content table = HtmlTree.TABLE(0, 3, 0, tableSummary,
-	// getTableCaption(configuration().getText(headingKey)));
-	// table.addContent(getSummaryTableHeader(tableHeader, "col"));
-	// Content tbody = new HtmlTree(HtmlTag.TBODY);
-	// for (int i = 0; i < deprPkgs.size(); i++) {
-	// PackageDoc pkg = (PackageDoc) deprPkgs.get(i);
-	// HtmlTree td = HtmlTree.TD(HtmlStyle.colOne,
-	// getNamespaceLink(pkg, getNamespaceName(pkg)));
-	// if (pkg.tags("deprecated").length > 0) {
-	// addInlineDeprecatedComment(pkg, pkg.tags("deprecated")[0], td);
-	// }
-	// HtmlTree tr = HtmlTree.TR(td);
-	// if (i % 2 == 0) {
-	// tr.addStyle(HtmlStyle.altColor);
-	// } else {
-	// tr.addStyle(HtmlStyle.rowColor);
-	// }
-	// tbody.addContent(tr);
-	// }
-	// table.addContent(tbody);
-	// Content li = HtmlTree.LI(HtmlStyle.blockList, table);
-	// Content ul = HtmlTree.UL(HtmlStyle.blockList, li);
-	// contentTree.addContent(ul);
-	// }
-	// }
 
 	/**
 	 * Prine table header information about color, column span and the font.
@@ -1059,7 +987,6 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 		} else {
 			return label;
 		}
-		// }
 	}
 
 	/**
@@ -1086,9 +1013,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	}
 
 	public String italicsObjectName(LibraryMember member, boolean qual) {
-		String name = (qual) ? configuration.getQualifiedName(member) : member
-				.getLocalName();
-		return name;
+		return (qual) ? configuration.getQualifiedName(member) : member.getLocalName();
 	}
 
 	/**
@@ -1143,46 +1068,25 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	public String getCrossClassLink(String qualifiedClassName,
 			String refMemName, String label, boolean strong, String style,
 			boolean code) {
-		String className = "", packageName = qualifiedClassName == null ? ""
-				: qualifiedClassName;
+		String packageName = qualifiedClassName == null ? "" : qualifiedClassName;
+		String className = "";
 		int periodIndex;
+		
 		while ((periodIndex = packageName.lastIndexOf('.')) != -1) {
 			className = packageName.substring(periodIndex + 1,
 					packageName.length())
 					+ (className.length() > 0 ? "." + className : "");
 			packageName = packageName.substring(0, periodIndex);
-			if (getCrossNamespaceLink(packageName) != null) {
-//				String defaultLabel = code ? getCode() + className + getCodeEnd() : className;
-//				// The package exists in external documentation, so link to the
-//				// external
-//				// class (assuming that it exists). This is definitely a
-//				// limitation of
-//				// the -link option. There are ways to determine if an external
-//				// package
-//				// exists, but no way to determine if the external class exists.
-//				// We just
-//				// have to assume that it does.
-//				return getHyperLinkString(configuration.extern.getExternalLink(
-//						packageName, relativePath, className
-//								+ ".html?is-external=true"),
-//						refMemName == null ? "" : refMemName, label == null
-//								|| label.length() == 0 ? defaultLabel : label,
-//						strong, style, configuration.getText(
-//								"doclet.Href_Class_Or_Interface_Title",
-//								packageName), "");
-			}
 		}
 		return null;
 	}
 
 	public boolean isObjectLinkable(DocumentationBuilder builder) {
-		return true;// configuration.extern.isExternal(cd);
+		return true;
 	}
 
 	public String getCrossNamespaceLink(String pkgName) {
 		return null;
-//		return configuration.extern.getExternalLink(pkgName, relativePath,
-//				"/library-summary.html?is-external=true");
 	}
 
 	/**
@@ -1230,7 +1134,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 			AbstractDocumentationBuilder<?> cd, boolean isStrong) {
 		String classlink = "";
 		String pd = cd.getNamespace();
-		if (pd != null) {// && !configuration.shouldExcludeQualifier(pd)) {
+		if (pd != null) {
 			classlink = getNamespace(cd);
 		}
 		classlink += getLink(new LinkInfoImpl(context, cd, cd.getName(),
@@ -1255,8 +1159,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 			AbstractDocumentationBuilder<?> cd, boolean isStrong,
 			Content contentTree) {
 		String pd = cd.getNamespace();
-		if (pd != null) {// && !configuration.shouldExcludeQualifier(pd.name()))
-							// {
+		if (pd != null) {
 			contentTree.addContent(getNamespace(cd));
 		}
 		contentTree.addContent(new RawHtml(getLink(new LinkInfoImpl(context,
@@ -1418,7 +1321,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	public String getDocLink(int context,
 			DocumentationBuilder classDoc, DocumentationBuilder doc,
 			String label, boolean strong) {
-		if (!(Util.isLinkable(classDoc, configuration()))) {
+		if (!(Util.isLinkable(classDoc, newConfiguration()))) {
 			return label;
 		} else{
 			return getLink(new LinkInfoImpl(context, classDoc, doc.getName(),
@@ -1443,7 +1346,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	public Content getDocLink(int context,
 			AbstractDocumentationBuilder<?> classDoc,
 			FieldDocumentationBuilder<?> doc, String label) {
-		if (!(Util.isLinkable(classDoc, configuration()))) {
+		if (!(Util.isLinkable(classDoc, newConfiguration()))) {
 			return new StringContent(label);
 		} else if (doc instanceof FieldDocumentationBuilder<?>) {
 			return new RawHtml(getLink(new LinkInfoImpl(context, classDoc,
@@ -1466,19 +1369,6 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 		if (isProperty) {
 			return emd.getName();
 		}
-		// StringBuilder signature = new StringBuilder(emd.signature());
-		// StringBuilder signatureParsed = new StringBuilder();
-		// int counter = 0;
-		// for (int i = 0; i < signature.length(); i++) {
-		// char c = signature.charAt(i);
-		// if (c == '<') {
-		// counter++;
-		// } else if (c == '>') {
-		// counter--;
-		// } else if (counter == 0) {
-		// signatureParsed.append(c);
-		// }
-		// }
 		return emd.getName();// + signatureParsed.toString();
 	}
 
@@ -1579,7 +1469,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 		if (text.indexOf('<') < 0) {
 			return text;
 		}
-		String noninlinetags[] = { "<ul>", "</ul>", "<ol>", "</ol>", "<dl>",
+		String[] noninlinetags = { "<ul>", "</ul>", "<ol>", "</ol>", "<dl>",
 				"</dl>", "<table>", "</table>", "<tr>", "</tr>", "<td>",
 				"</td>", "<th>", "</th>", "<p>", "</p>", "<li>", "</li>",
 				"<dd>", "</dd>", "<dir>", "</dir>", "<dt>", "</dt>", "<h1>",
@@ -1652,9 +1542,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 			filename = HtmlDoclet.DEFAULT_STYLESHEET;
 		}
 		filename = relativePath + filename;
-		HtmlTree link = HtmlTree.link("stylesheet", "text/css", filename,
-				"Style");
-		return link;
+		return HtmlTree.link("stylesheet", "text/css", filename, "Style");
 	}
 
 	/**
@@ -1665,277 +1553,12 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 		return !(cd instanceof FacetDocumentationBuilder || cd instanceof FieldDocumentationBuilder<?>);
 	}
 
-	// /**
-	// * Write the annotatation types for the given String.
-	// *
-	// * @param String
-	// * the package to write annotations for.
-	// */
-	// public void writeAnnotationInfo(String packageDoc) {
-	// writeAnnotationInfo(packageDoc, packageDoc.annotations());
-	// }
-	//
-	// /**
-	// * Adds the annotatation types for the given packageDoc.
-	// *
-	// * @param packageDoc
-	// * the package to write annotations for.
-	// * @param htmltree
-	// * the documentation tree to which the annotation info will be
-	// * added
-	// */
-	// public void addAnnotationInfo(String packageDoc, Content htmltree) {
-	// addAnnotationInfo(packageDoc, packageDoc.annotations(), htmltree);
-	// }
-	//
-	// /**
-	// * Write the annotatation types for the given doc.
-	// *
-	// * @param doc
-	// * the doc to write annotations for.
-	// */
-	// public void writeAnnotationInfo(ProgramElementDoc doc) {
-	// writeAnnotationInfo(doc, doc.annotations());
-	// }
-	//
-	// /**
-	// * Adds the annotatation types for the given doc.
-	// *
-	// * @param packageDoc
-	// * the package to write annotations for
-	// * @param htmltree
-	// * the content tree to which the annotation types will be added
-	// */
-	// public void addAnnotationInfo(ProgramElementDoc doc, Content htmltree) {
-	// addAnnotationInfo(doc, doc.annotations(), htmltree);
-	// }
-	//
-	// /**
-	// * Write the annotatation types for the given doc and parameter.
-	// *
-	// * @param indent
-	// * the number of spaced to indent the parameters.
-	// * @param doc
-	// * the doc to write annotations for.
-	// * @param param
-	// * the parameter to write annotations for.
-	// */
-	// public boolean writeAnnotationInfo(int indent, Doc doc, Parameter param)
-	// {
-	// return writeAnnotationInfo(indent, doc, param.annotations(), false);
-	// }
-	//
-	// /**
-	// * Add the annotatation types for the given doc and parameter.
-	// *
-	// * @param indent
-	// * the number of spaces to indent the parameters.
-	// * @param doc
-	// * the doc to write annotations for.
-	// * @param param
-	// * the parameter to write annotations for.
-	// * @param tree
-	// * the content tree to which the annotation types will be added
-	// */
-	// public boolean addAnnotationInfo(int indent, Doc doc, Parameter param,
-	// Content tree) {
-	// return addAnnotationInfo(indent, doc, param.annotations(), false, tree);
-	// }
-	//
-	// /**
-	// * Write the annotatation types for the given doc.
-	// *
-	// * @param doc
-	// * the doc to write annotations for.
-	// * @param descList
-	// * the array of {@link AnnotationDesc}.
-	// */
-	// private void writeAnnotationInfo(Doc doc, AnnotationDesc[] descList) {
-	// writeAnnotationInfo(0, doc, descList, true);
-	// }
-	//
-	// /**
-	// * Adds the annotatation types for the given doc.
-	// *
-	// * @param doc
-	// * the doc to write annotations for.
-	// * @param descList
-	// * the array of {@link AnnotationDesc}.
-	// * @param htmltree
-	// * the documentation tree to which the annotation info will be
-	// * added
-	// */
-	// private void addAnnotationInfo(Doc doc, AnnotationDesc[] descList,
-	// Content htmltree) {
-	// addAnnotationInfo(0, doc, descList, true, htmltree);
-	// }
-	//
-	// /**
-	// * Write the annotatation types for the given doc.
-	// *
-	// * @param indent
-	// * the number of extra spaces to indent the annotations.
-	// * @param doc
-	// * the doc to write annotations for.
-	// * @param descList
-	// * the array of {@link AnnotationDesc}.
-	// */
-	// private boolean writeAnnotationInfo(int indent, Doc doc,
-	// AnnotationDesc[] descList, boolean lineBreak) {
-	// List<String> annotations = getAnnotations(indent, descList, lineBreak);
-	// if (annotations.size() == 0) {
-	// return false;
-	// }
-	// fontNoNewLine("-1");
-	// for (Iterator<String> iter = annotations.iterator(); iter.hasNext();) {
-	// print(iter.next());
-	// }
-	// fontEnd();
-	// return true;
-	// }
-	//
-	// /**
-	// * Adds the annotatation types for the given doc.
-	// *
-	// * @param indent
-	// * the number of extra spaces to indent the annotations.
-	// * @param doc
-	// * the doc to write annotations for.
-	// * @param descList
-	// * the array of {@link AnnotationDesc}.
-	// * @param htmltree
-	// * the documentation tree to which the annotation info will be
-	// * added
-	// */
-	// private boolean addAnnotationInfo(int indent, Doc doc,
-	// AnnotationDesc[] descList, boolean lineBreak, Content htmltree) {
-	// List<String> annotations = getAnnotations(indent, descList, lineBreak);
-	// if (annotations.size() == 0) {
-	// return false;
-	// }
-	// Content annotationContent;
-	// for (Iterator<String> iter = annotations.iterator(); iter.hasNext();) {
-	// annotationContent = new RawHtml(iter.next());
-	// htmltree.addContent(annotationContent);
-	// }
-	// return true;
-	// }
-	//
-	// /**
-	// * Return the string representations of the annotation types for the given
-	// * doc.
-	// *
-	// * @param indent
-	// * the number of extra spaces to indent the annotations.
-	// * @param descList
-	// * the array of {@link AnnotationDesc}.
-	// * @param linkBreak
-	// * if true, add new line between each member value.
-	// * @return an array of strings representing the annotations being
-	// * documented.
-	// */
-	// private List<String> getAnnotations(int indent, AnnotationDesc[]
-	// descList,
-	// boolean linkBreak) {
-	// List<String> results = new ArrayList<String>();
-	// StringBuffer annotation;
-	// for (int i = 0; i < descList.length; i++) {
-	// AnnotationTypeDoc annotationDoc = descList[i].annotationType();
-	// if (!Util.isDocumentedAnnotation(annotationDoc)) {
-	// continue;
-	// }
-	// annotation = new StringBuffer();
-	// LinkInfoImpl linkInfo = new LinkInfoImpl(
-	// LinkInfoImpl.CONTEXT_ANNOTATION, annotationDoc);
-	// linkInfo.label = "@" + annotationDoc.name();
-	// annotation.append(getLink(linkInfo));
-	// AnnotationDesc.ElementValuePair[] pairs = descList[i]
-	// .elementValues();
-	// if (pairs.length > 0) {
-	// annotation.append('(');
-	// for (int j = 0; j < pairs.length; j++) {
-	// if (j > 0) {
-	// annotation.append(",");
-	// if (linkBreak) {
-	// annotation.append(DocletConstants.NL);
-	// int spaces = annotationDoc.name().length() + 2;
-	// for (int k = 0; k < (spaces + indent); k++) {
-	// annotation.append(' ');
-	// }
-	// }
-	// }
-	// annotation.append(getDocLink(
-	// LinkInfoImpl.CONTEXT_ANNOTATION,
-	// pairs[j].element(), pairs[j].element().name(),
-	// false));
-	// annotation.append('=');
-	// AnnotationValue annotationValue = pairs[j].value();
-	// List<AnnotationValue> annotationTypeValues = new
-	// ArrayList<AnnotationValue>();
-	// if (annotationValue.value() instanceof AnnotationValue[]) {
-	// AnnotationValue[] annotationArray = (AnnotationValue[]) annotationValue
-	// .value();
-	// for (int k = 0; k < annotationArray.length; k++) {
-	// annotationTypeValues.add(annotationArray[k]);
-	// }
-	// } else {
-	// annotationTypeValues.add(annotationValue);
-	// }
-	// annotation.append(annotationTypeValues.size() == 1 ? ""
-	// : "{");
-	// for (Iterator<AnnotationValue> iter = annotationTypeValues
-	// .iterator(); iter.hasNext();) {
-	// annotation.append(annotationValueToString(iter.next()));
-	// annotation.append(iter.hasNext() ? "," : "");
-	// }
-	// annotation.append(annotationTypeValues.size() == 1 ? ""
-	// : "}");
-	// }
-	// annotation.append(")");
-	// }
-	// annotation.append(linkBreak ? DocletConstants.NL : "");
-	// results.add(annotation.toString());
-	// }
-	// return results;
-	// }
-	//
-	// private String annotationValueToString(AnnotationValue annotationValue) {
-	// if (annotationValue.value() instanceof Type) {
-	// Type type = (Type) annotationValue.value();
-	// if (type.asClassDoc() != null) {
-	// LinkInfoImpl linkInfo = new LinkInfoImpl(
-	// LinkInfoImpl.CONTEXT_ANNOTATION, type);
-	// linkInfo.label = (type.asClassDoc().isIncluded() ? type
-	// .typeName() : type.qualifiedTypeName())
-	// + type.dimension() + ".class";
-	// return getLink(linkInfo);
-	// } else {
-	// return type.typeName() + type.dimension() + ".class";
-	// }
-	// } else if (annotationValue.value() instanceof AnnotationDesc) {
-	// List<String> list = getAnnotations(0,
-	// new AnnotationDesc[] { (AnnotationDesc) annotationValue
-	// .value() }, false);
-	// StringBuffer buf = new StringBuffer();
-	// for (Iterator<String> iter = list.iterator(); iter.hasNext();) {
-	// buf.append(iter.next());
-	// }
-	// return buf.toString();
-	// } else if (annotationValue.value() instanceof MemberDoc) {
-	// return getDocLink(LinkInfoImpl.CONTEXT_ANNOTATION,
-	// (MemberDoc) annotationValue.value(),
-	// ((MemberDoc) annotationValue.value()).name(), false);
-	// } else {
-	// return annotationValue.toString();
-	// }
-	// }
-
 	/**
 	 * Return the configuation for this doclet.
 	 *
 	 * @return the configuration for this doclet.
 	 */
-	public Configuration configuration() {
+	public Configuration newConfiguration() {
 		return configuration;
 	}
 }

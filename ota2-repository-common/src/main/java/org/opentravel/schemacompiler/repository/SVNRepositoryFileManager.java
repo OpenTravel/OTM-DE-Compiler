@@ -62,11 +62,7 @@ public class SVNRepositoryFileManager extends RepositoryFileManager {
     private static Object svnCommitLock = new Object();
     private static Log log = LogFactory.getLog(SVNRepositoryFileManager.class);
 
-    private ThreadLocal<Set<File>> svnChangeSet = new ThreadLocal<Set<File>>() {
-        @Override protected Set<File> initialValue() {
-            return new HashSet<>();
-        }
-    };
+    private ThreadLocal<Set<File>> svnChangeSet = ThreadLocal.withInitial( HashSet::new );
 
     private SVNClientManager svnClient;
 
@@ -194,11 +190,11 @@ public class SVNRepositoryFileManager extends RepositoryFileManager {
 
             // Search for any new, modified, or deleted files on the local file system and commit
             // them to the remote repository
-            File[] svnChangeSet = buildSvnChangeSet(getRepositoryLocation());
+            File[] svnChgSet = buildSvnChangeSet(getRepositoryLocation());
 
-            if (svnChangeSet.length > 0) {
+            if (svnChgSet.length > 0) {
                 SVNCommitClient commitClient = svnClient.getCommitClient();
-                SVNCommitPacket commitPacket = commitClient.doCollectCommitItems(svnChangeSet,
+                SVNCommitPacket commitPacket = commitClient.doCollectCommitItems(svnChgSet,
                         false, false, SVNDepth.INFINITY, null);
 
                 if (commitPacket.getCommitItems().length > 0) {
@@ -241,23 +237,16 @@ public class SVNRepositoryFileManager extends RepositoryFileManager {
         // Attempt to load the SVN credentials from the property file (if one was specified)
         if (svnCredentialsFile != null) {
             if (svnCredentialsFile.exists()) {
-                InputStream is = null;
-                try {
+                try (InputStream is = new FileInputStream(svnCredentialsFile)) {
                     Properties credentialsProps = new Properties();
 
-                    is = new FileInputStream(svnCredentialsFile);
                     credentialsProps.load(is);
                     userId = credentialsProps.getProperty("svn.userid");
                     password = credentialsProps.getProperty("svn.password");
 
                 } catch (IOException e) {
-
-                } finally {
-                    try {
-                        if (is != null)
-                            is.close();
-                    } catch (Throwable t) {
-                    }
+                    log.warn("SVN credentials file unreadable (using default credentials): "
+                            + svnCredentialsFile.getAbsolutePath());
                 }
 
             } else {
@@ -465,6 +454,7 @@ public class SVNRepositoryFileManager extends RepositoryFileManager {
          */
         @Override
         public void checkCancelled() throws SVNCancelException {
+        	// No action required
         }
 
     }

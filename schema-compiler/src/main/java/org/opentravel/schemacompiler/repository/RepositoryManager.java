@@ -641,16 +641,16 @@ public class RepositoryManager implements Repository {
      */
     @Override
     public List<String> listRootNamespaces() throws RepositoryException {
-        List<String> rootNamespaces = new ArrayList<>();
+        List<String> rootNsList = new ArrayList<>();
 
         if ((this.rootNamespaces == null) || this.rootNamespaces.isEmpty()) {
-            rootNamespaces.add(CURRENT_USER_BASE_NAMESPACE
+        	rootNsList.add(CURRENT_USER_BASE_NAMESPACE
                     + System.getProperty("user.name").toLowerCase());
 
         } else {
-            rootNamespaces.addAll(this.rootNamespaces);
+        	rootNsList.addAll(this.rootNamespaces);
         }
-        return rootNamespaces;
+        return rootNsList;
     }
 
     /**
@@ -1146,16 +1146,16 @@ public class RepositoryManager implements Repository {
                 	try {
                 		listener.onCreateRootNamespace( rootNamespace );
                 		
-                	} catch (Throwable t) {
-                		log.warn("Unexpected error during listener invocation.", t);
+                	} catch (Exception e) {
+                		log.warn("Unexpected error during listener invocation.", e);
                 	}
                 }
                 
             } else {
                 try {
                     fileManager.rollbackChangeSet();
-                } catch (Throwable t) {
-                    log.error("Error rolling back the current change set.", t);
+                } catch (Exception e) {
+                    log.error("Error rolling back the current change set.", e);
                 }
             }
         }
@@ -1197,16 +1197,16 @@ public class RepositoryManager implements Repository {
                 	try {
                 		listener.onDeleteRootNamespace( rootNamespace );
                 		
-                	} catch (Throwable t) {
-                		log.warn("Unexpected error during listener invocation.", t);
+                	} catch (Exception e) {
+                		log.warn("Unexpected error during listener invocation.", e);
                 	}
                 }
                 
             } else {
                 try {
                     fileManager.rollbackChangeSet();
-                } catch (Throwable t) {
-                    log.error("Error rolling back the current change set.", t);
+                } catch (Exception e) {
+                    log.error("Error rolling back the current change set.", e);
                 }
             }
         }
@@ -1243,16 +1243,16 @@ public class RepositoryManager implements Repository {
                 	try {
                 		listener.onCreateNamespace( baseNamespace );
                 		
-                	} catch (Throwable t) {
-                		log.warn("Unexpected error during listener invocation.", t);
+                	} catch (Exception e) {
+                		log.warn("Unexpected error during listener invocation.", e);
                 	}
                 }
                 
             } else {
                 try {
                     fileManager.rollbackChangeSet();
-                } catch (Throwable t) {
-                    log.error("Error rolling back the current change set.", t);
+                } catch (Exception e) {
+                    log.error("Error rolling back the current change set.", e);
                 }
             }
         }
@@ -1282,16 +1282,16 @@ public class RepositoryManager implements Repository {
                 	try {
                 		listener.onDeleteNamespace( baseNamespace );
                 		
-                	} catch (Throwable t) {
-                		log.warn("Unexpected error during listener invocation.", t);
+                	} catch (Exception e) {
+                		log.warn("Unexpected error during listener invocation.", e);
                 	}
                 }
                 
             } else {
                 try {
                     fileManager.rollbackChangeSet();
-                } catch (Throwable t) {
-                    log.error("Error rolling back the current change set.", t);
+                } catch (Exception e) {
+                    log.error("Error rolling back the current change set.", e);
                 }
             }
         }
@@ -1309,7 +1309,7 @@ public class RepositoryManager implements Repository {
         String targetNS = RepositoryNamespaceUtils.normalizeUri(namespace);
         RepositoryItem publishedItem = null;
         boolean success = false;
-        try {
+        try (InputStream contentStream = unmanagedContent) {
             log.info("Publishing '" + filename + "' to namespace '" + targetNS + "'");
             fileManager.startChangeSet();
 
@@ -1364,7 +1364,7 @@ public class RepositoryManager implements Repository {
             File contentFile = new File(metadataFile.getParent(), filename);
 
             // Save the library content
-            fileManager.saveFile(contentFile, unmanagedContent);
+            fileManager.saveFile(contentFile, contentStream);
             log.info("Library content saved: " + contentFile.getAbsolutePath());
             
             // Build and return the repository item to represent the content we just published
@@ -1378,17 +1378,10 @@ public class RepositoryManager implements Repository {
                     + baseNamespace + "'");
             return publishedItem;
 
-        } catch (VersionSchemeException e) {
+        } catch (VersionSchemeException | IOException e) {
             throw new RepositoryException(e.getMessage(), e);
 
         } finally {
-            // Close all streams
-            try {
-                if (unmanagedContent != null)
-                    unmanagedContent.close();
-            } catch (Throwable t) {
-            }
-
             // Commit or roll back the changes based on the result of the operation
             if (success) {
                 fileManager.commitChangeSet();
@@ -1398,16 +1391,16 @@ public class RepositoryManager implements Repository {
                 	try {
                 		listener.onPublish( publishedItem );
                 		
-                	} catch (Throwable t) {
-                		log.warn("Unexpected error during listener invocation.", t);
+                	} catch (Exception e) {
+                		log.warn("Unexpected error during listener invocation.", e);
                 	}
                 }
                 
             } else {
                 try {
                     fileManager.rollbackChangeSet();
-                } catch (Throwable t) {
-                    log.error("Error rolling back the current change set.", t);
+                } catch (Exception e) {
+                    log.error("Error rolling back the current change set.", e);
                 }
             }
         }
@@ -1509,7 +1502,7 @@ public class RepositoryManager implements Repository {
         }
 
         boolean success = false;
-        try {
+        try (InputStream contentStream = wipContent) {
             log.info("Committing updated content '" + item.getFilename() + "' to namespace '"
                     + item.getBaseNamespace() + "'");
             fileManager.startChangeSet();
@@ -1518,7 +1511,7 @@ public class RepositoryManager implements Repository {
             File contentFile = fileManager.getLibraryContentLocation(item.getBaseNamespace(),
                     item.getFilename(), item.getVersion());
 
-            fileManager.saveFile(contentFile, wipContent);
+            fileManager.saveFile(contentFile, contentStream);
 
             // Create the history entry for this update
             historyManager.addToHistory( item, new Date(), remarks );
@@ -1532,13 +1525,10 @@ public class RepositoryManager implements Repository {
                     + baseNS + "'");
             success = true;
 
+        } catch (IOException e) {
+        	throw new RepositoryException("Error reading from WIP content stream.", e);
+        	
         } finally {
-            try {
-                if (wipContent != null)
-                    wipContent.close();
-            } catch (Throwable t) {
-            }
-
             // Commit or roll back the changes based on the result of the operation
             if (success) {
                 fileManager.commitChangeSet();
@@ -1549,8 +1539,8 @@ public class RepositoryManager implements Repository {
                     	try {
                     		listener.onCommit( item, remarks );
                     		
-                    	} catch (Throwable t) {
-                    		log.warn("Unexpected error during listener invocation.", t);
+                    	} catch (Exception e) {
+                    		log.warn("Unexpected error during listener invocation.", e);
                     	}
                     }
                 }
@@ -1558,8 +1548,8 @@ public class RepositoryManager implements Repository {
             } else {
                 try {
                     fileManager.rollbackChangeSet();
-                } catch (Throwable t) {
-                    log.error("Error rolling back the current change set.", t);
+                } catch (Exception e) {
+                    log.error("Error rolling back the current change set.", e);
                 }
             }
         }
@@ -1610,8 +1600,8 @@ public class RepositoryManager implements Repository {
             } else {
                 try {
                     fileManager.rollbackChangeSet();
-                } catch (Throwable t) {
-                    log.error("Error rolling back the current change set.", t);
+                } catch (Exception e) {
+                    log.error("Error rolling back the current change set.", e);
                 }
             }
         }
@@ -1661,16 +1651,16 @@ public class RepositoryManager implements Repository {
                     	try {
                     		listener.onLock( item );
                     		
-                    	} catch (Throwable t) {
-                    		log.warn("Unexpected error during listener invocation.", t);
+                    	} catch (Exception e) {
+                    		log.warn("Unexpected error during listener invocation.", e);
                     	}
                     }
                     
                 } else {
                     try {
                         fileManager.rollbackChangeSet();
-                    } catch (Throwable t) {
-                        log.error("Error rolling back the current change set.", t);
+                    } catch (Exception e) {
+                        log.error("Error rolling back the current change set.", e);
                     }
                 }
             }
@@ -1699,27 +1689,18 @@ public class RepositoryManager implements Repository {
                 item.getFilename());
 
         if (item.getRepository() == this) {
-            InputStream wipContent = null;
-
-            try {
-                if (commitWIP) {
-                    if (!wipFile.exists()) {
-                        throw new RepositoryException("The work-in-process file does not exist: "
-                                + item.getFilename());
-                    }
-                    wipContent = new FileInputStream(wipFile);
+            if (commitWIP) {
+                if (!wipFile.exists()) {
+                    throw new RepositoryException("The work-in-process file does not exist: "
+                            + item.getFilename());
                 }
-                unlock(item, wipContent, remarks);
+                
+                try (InputStream wipContent = new FileInputStream(wipFile)){
+                    unlock(item, wipContent, remarks);
 
-            } catch (IOException e) {
-                throw new RepositoryException("The work-in-process file cannot be accessed: "
-                        + item.getFilename());
-
-            } finally {
-                try {
-                    if (wipContent != null)
-                        wipContent.close();
-                } catch (Throwable t) {
+                } catch (IOException e) {
+                    throw new RepositoryException("The work-in-process file cannot be accessed: "
+                            + item.getFilename());
                 }
             }
 
@@ -1820,16 +1801,16 @@ public class RepositoryManager implements Repository {
                 	try {
                 		listener.onUnlock( item, (wipContent != null), remarks );
                 		
-                	} catch (Throwable t) {
-                		log.warn("Unexpected error during listener invocation.", t);
+                	} catch (Exception e) {
+                		log.warn("Unexpected error during listener invocation.", e);
                 	}
                 }
                 
             } else {
                 try {
                     fileManager.rollbackChangeSet();
-                } catch (Throwable t) {
-                    log.error("Error rolling back the current change set.", t);
+                } catch (Exception e) {
+                    log.error("Error rolling back the current change set.", e);
                 }
             }
         }
@@ -1881,16 +1862,12 @@ public class RepositoryManager implements Repository {
                 
                 targetStatus = libraryContent.is16Library ? currentStatus.nextStatus() : TLLibraryStatus.FINAL;
 
-                if (libraryContent != null) {
-                    libraryContent.content.setStatus(targetStatus);
-                }
+                libraryContent.content.setStatus(targetStatus);
                 libraryMetadata.setStatus(targetStatus.toRepositoryStatus());
                 libraryMetadata.setLastUpdated(XMLGregorianCalendarConverter.toXMLGregorianCalendar(new Date()));
 
                 // Save the changes and update the repository item sent for this method call
-                if (libraryContent != null) {
-                	saveOtmLibraryContent( libraryContent );
-                }
+            	saveOtmLibraryContent( libraryContent );
                 fileManager.saveLibraryMetadata(libraryMetadata);
 
                 // Create the history entry for this update
@@ -1920,16 +1897,16 @@ public class RepositoryManager implements Repository {
                     	try {
                     		listener.onPromote( item, originalStatus );
                     		
-                    	} catch (Throwable t) {
-                    		log.warn("Unexpected error during listener invocation.", t);
+                    	} catch (Exception e) {
+                    		log.warn("Unexpected error during listener invocation.", e);
                     	}
                     }
                     
                 } else {
                     try {
                         fileManager.rollbackChangeSet();
-                    } catch (Throwable t) {
-                        log.error("Error rolling back the current change set.", t);
+                    } catch (Exception e) {
+                        log.error("Error rolling back the current change set.", e);
                     }
                 }
             }
@@ -1985,16 +1962,12 @@ public class RepositoryManager implements Repository {
                 
                 targetStatus = libraryContent.is16Library ? currentStatus.previousStatus() : TLLibraryStatus.DRAFT;
 
-                if (libraryContent != null) {
-                    libraryContent.content.setStatus(targetStatus);
-                }
+                libraryContent.content.setStatus(targetStatus);
                 libraryMetadata.setStatus(targetStatus.toRepositoryStatus());
                 libraryMetadata.setLastUpdated(XMLGregorianCalendarConverter
                         .toXMLGregorianCalendar(new Date()));
-
-                if (libraryContent != null) {
-                	saveOtmLibraryContent( libraryContent );
-                }
+                
+            	saveOtmLibraryContent( libraryContent );
                 fileManager.saveLibraryMetadata(libraryMetadata);
 
                 // Create the history entry for this update
@@ -2025,16 +1998,16 @@ public class RepositoryManager implements Repository {
                     	try {
                     		listener.onDemote( item, originalStatus );
                     		
-                    	} catch (Throwable t) {
-                    		log.warn("Unexpected error during listener invocation.", t);
+                    	} catch (Exception e) {
+                    		log.warn("Unexpected error during listener invocation.", e);
                     	}
                     }
                     
                 } else {
                     try {
                         fileManager.rollbackChangeSet();
-                    } catch (Throwable t) {
-                        log.error("Error rolling back the current change set.", t);
+                    } catch (Exception e) {
+                        log.error("Error rolling back the current change set.", e);
                     }
                 }
             }
@@ -2073,16 +2046,12 @@ public class RepositoryManager implements Repository {
                 // Change the status of the library metadata and content
                 LibraryContentWrapper libraryContent = loadOtmLibraryContent(contentFile);
 
-                if (libraryContent != null) {
-                    libraryContent.content.setStatus(newStatus);
-                }
+                libraryContent.content.setStatus(newStatus);
                 libraryMetadata.setStatus(newStatus.toRepositoryStatus());
                 libraryMetadata.setLastUpdated(XMLGregorianCalendarConverter
                         .toXMLGregorianCalendar(new Date()));
 
-                if (libraryContent != null) {
-                	saveOtmLibraryContent( libraryContent );
-                }
+            	saveOtmLibraryContent( libraryContent );
                 fileManager.saveLibraryMetadata(libraryMetadata);
 
                 if (!(item instanceof ProjectItem)) {
@@ -2108,16 +2077,16 @@ public class RepositoryManager implements Repository {
                     	try {
                     		listener.onUpdateStatus( item, originalStatus );
                     		
-                    	} catch (Throwable t) {
-                    		log.warn("Unexpected error during listener invocation.", t);
+                    	} catch (Exception e) {
+                    		log.warn("Unexpected error during listener invocation.", e);
                     	}
                     }
                     
                 } else {
                     try {
                         fileManager.rollbackChangeSet();
-                    } catch (Throwable t) {
-                        log.error("Error rolling back the current change set.", t);
+                    } catch (Exception e) {
+                        log.error("Error rolling back the current change set.", e);
                     }
                 }
             }
@@ -2151,11 +2120,9 @@ public class RepositoryManager implements Repository {
                 // Re-save the library content; this will force a recalculation of the CRC value
                 LibraryContentWrapper libraryContent = loadOtmLibraryContent(contentFile);
 
-                if (libraryContent != null) {
-                    // Set the library's status - just in case it is out of sync with the meta-data record
-                    libraryContent.content.setStatus(TLLibraryStatus.fromRepositoryStatus(libraryMetadata.getStatus()));
-                	saveOtmLibraryContent( libraryContent );
-                }
+                // Set the library's status - just in case it is out of sync with the meta-data record
+                libraryContent.content.setStatus(TLLibraryStatus.fromRepositoryStatus(libraryMetadata.getStatus()));
+            	saveOtmLibraryContent( libraryContent );
 
                 libraryMetadata.setLastUpdated(XMLGregorianCalendarConverter
                         .toXMLGregorianCalendar(new Date()));
@@ -2182,16 +2149,16 @@ public class RepositoryManager implements Repository {
                     	try {
                     		listener.onRecalculateCrc( item );
                     		
-                    	} catch (Throwable t) {
-                    		log.warn("Unexpected error during listener invocation.", t);
+                    	} catch (Exception e) {
+                    		log.warn("Unexpected error during listener invocation.", e);
                     	}
                     }
                     
                 } else {
                     try {
                         fileManager.rollbackChangeSet();
-                    } catch (Throwable t) {
-                        log.error("Error rolling back the current change set.", t);
+                    } catch (Exception e) {
+                        log.error("Error rolling back the current change set.", e);
                     }
                 }
             }
@@ -2245,16 +2212,16 @@ public class RepositoryManager implements Repository {
                     	try {
                     		listener.onDelete( item );
                     		
-                    	} catch (Throwable t) {
-                    		log.warn("Unexpected error during listener invocation.", t);
+                    	} catch (Exception e) {
+                    		log.warn("Unexpected error during listener invocation.", e);
                     	}
                     }
                     
                 } else {
                     try {
                         fileManager.rollbackChangeSet();
-                    } catch (Throwable t) {
-                        log.error("Error rolling back the current change set.", t);
+                    } catch (Exception e) {
+                        log.error("Error rolling back the current change set.", e);
                     }
                 }
             }
@@ -2366,20 +2333,20 @@ public class RepositoryManager implements Repository {
      *             thrown if the local repository's configuration settings cannot be updated
      */
     public void saveLocalRepositoryMetadata() throws RepositoryException {
-        List<String> rootNamespaces = this.rootNamespaces;
+        List<String> rootNsList = this.rootNamespaces;
         boolean success = false;
 
         // Get the list of root namespaces from the existing file if the list has not yet been
         // initialized. They are not accessible from local repository fields because a default
         // namespace is always published for the local repository.
-        if (rootNamespaces == null) {
+        if (rootNsList == null) {
             try {
                 RepositoryInfoType fileMetadata = fileManager.loadRepositoryMetadata();
-                rootNamespaces = fileMetadata.getRootNamespace();
+                rootNsList = fileMetadata.getRootNamespace();
 
             } catch (RepositoryException e) {
                 // Not an error if the file does not yet exist - just use an empty list
-                rootNamespaces = new ArrayList<>();
+            	rootNsList = new ArrayList<>();
             }
         }
 
@@ -2388,7 +2355,7 @@ public class RepositoryManager implements Repository {
 
             repositoryMetadata.setID(localRepositoryId);
             repositoryMetadata.setDisplayName(localRepositoryDisplayName);
-            repositoryMetadata.getRootNamespace().addAll(rootNamespaces);
+            repositoryMetadata.getRootNamespace().addAll(rootNsList);
             repositoryMetadata.setRemoteRepositories(new RemoteRepositoriesType());
 
             for (RemoteRepositoryClient remoteRepository : remoteRepositories) {
@@ -2415,7 +2382,8 @@ public class RepositoryManager implements Repository {
                 if (!success) {
                     refreshLocalRepositoryInfo(true);
                 }
-            } catch (Throwable t) {
+            } catch (Exception e) {
+            	log.error("Error while attempt to refresh local repository settings", e);
             }
         }
     }

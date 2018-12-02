@@ -35,7 +35,7 @@ import org.opentravel.schemacompiler.codegen.html.writers.info.PropertyInfoWrite
  * @author Eric.Bronson
  *
  */
-public class PropertyInfoWriterTest extends WriterTest{
+public class PropertyInfoWriterTest extends AbstractWriterTest{
 
 	private static FacetDocumentationBuilder builder;
 	private static PropertyInfoWriter writer;
@@ -47,7 +47,7 @@ public class PropertyInfoWriterTest extends WriterTest{
 	 */
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		WriterTest.setUpBeforeClass();
+		AbstractWriterTest.setUpBeforeClass();
 		TLBusinessObject bo = TestLibraryProvider.getBusinessObject("CompoundBusinessObject");
 		facet = bo.getDetailFacet();
 		builder = new FacetDocumentationBuilder(facet);
@@ -61,7 +61,7 @@ public class PropertyInfoWriterTest extends WriterTest{
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
 		facetWriter.close();
-		WriterTest.tearDownAfterClass();
+		AbstractWriterTest.tearDownAfterClass();
 	}
 
 	@Test

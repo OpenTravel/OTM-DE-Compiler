@@ -28,7 +28,7 @@ import org.opentravel.schemacompiler.codegen.html.builders.ServiceDocumentationB
  * @author Eric.Bronson
  *
  */
-public class ServiceWriterTest extends WriterTest {
+public class ServiceWriterTest extends AbstractWriterTest {
 
 
 	private ServiceDocumentationBuilder builder;

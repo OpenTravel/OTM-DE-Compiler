@@ -38,7 +38,7 @@ public abstract class AbstractIndicatorInfoWriter<T extends AttributeOwnerDocume
 			T owner) {
 		super(writer, owner);
 		title = writer.getResource("doclet.Indicator_Summary");
-		caption = writer.configuration().getText("doclet.Indicators");
+		caption = writer.newConfiguration().getText("doclet.Indicators");
 	}
 
 
@@ -54,7 +54,7 @@ public abstract class AbstractIndicatorInfoWriter<T extends AttributeOwnerDocume
 		Content label = getInfoLabel();
 		summaryTree.addContent(label);
 		List<IndicatorDocumentationBuilder> indicators = source.getIndicators();
-		if (indicators.size() > 0) {
+		if (!indicators.isEmpty()) {
 			Content tableTree = getTableTree();
 			for (IndicatorDocumentationBuilder idb : indicators) {
 				Content propSummary = getInfo(idb, indicators.indexOf(idb), false);
@@ -76,7 +76,7 @@ public abstract class AbstractIndicatorInfoWriter<T extends AttributeOwnerDocume
 	protected void addInheritedInfoSummary(Content summaryTree) {
 		T parent = getParent(source);
 		while (parent != null) {
-			if (parent.getIndicators().size() > 0) {
+			if (!parent.getIndicators().isEmpty()) {
 				addInheritedInfoHeader(parent, summaryTree,
 						"doclet.Indicators_Inherited_From");
 				addInheritedInfo(parent.getIndicators(), parent, summaryTree);
@@ -116,7 +116,7 @@ public abstract class AbstractIndicatorInfoWriter<T extends AttributeOwnerDocume
 	 */
 	@Override
 	protected String getInfoTableSummary() {
-		Configuration config = writer.configuration();
+		Configuration config = writer.newConfiguration();
 		return config.getText("doclet.Indicator_Table_Summary",
 				config.getText("doclet.Indicator_Summary"),
 				config.getText("doclet.indicators"));
@@ -126,6 +126,7 @@ public abstract class AbstractIndicatorInfoWriter<T extends AttributeOwnerDocume
 		return "";
 	}
 	
+	@Override
 	protected Content getDetailedInfo(IndicatorDocumentationBuilder field) {
 		return HtmlTree.EMPTY;
 	}
