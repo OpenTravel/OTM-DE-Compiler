@@ -257,7 +257,7 @@ public interface VersionScheme {
      * version that originated the chain.
      * 
      * <p>
-     * For example, the version chain for version <code>2.3.2</code> is: <code>2.3.2</code>,
+     * For EXAMPLE, the version chain for version <code>2.3.2</code> is: <code>2.3.2</code>,
      * <code>2.3.1</code>, <code>2.3.0</code>, <code>2.2.0</code>, <code>2.1.0</code>,
      * <code>2.0.0</code>.
      * 

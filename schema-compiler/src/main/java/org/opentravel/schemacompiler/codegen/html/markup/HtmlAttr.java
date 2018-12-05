@@ -80,6 +80,7 @@ public enum HtmlAttr {
         this.value = name;
     }
 
+    @Override
     public String toString() {
         return value;
     }

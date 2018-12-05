@@ -40,17 +40,6 @@ public abstract class FieldDocumentationBuilder<T extends TLDocumentationOwner>
 
 	protected String exampleValue;
 	
-	
-//	private int minLength = -1;
-//  private int maxLength = -1;
-//  private int fractionDigits = -1;
-//  private int totalDigits = -1;
-//  private String minInclusive;
-//  private String maxInclusive;
-//  private String minExclusive;
-//  private String maxExclusive;
-	
-
 	/**
 	 * @param 
 	 */

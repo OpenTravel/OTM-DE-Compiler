@@ -547,19 +547,19 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
     }
 
     /**
-     * Generates example XML files for all elements of the given library.
+     * Generates EXAMPLE XML files for all elements of the given library.
      * 
      * @param userDefinedLibraries
-     *            the list of user-defined libraries for which to generate example XML files
+     *            the list of user-defined libraries for which to generate EXAMPLE XML files
      * @param context
      *            the code generation context to use for code generation
      * @param filenameBuilder
      *            the filename builder to use for schema location filename construction
      * @param filter
-     *            the filter used to identify specific artifacts for which example generation is
+     *            the filter used to identify specific artifacts for which EXAMPLE generation is
      *            required
      * @param targetFormat
-     * 			  indicates the output format of the generated example files (e.g. "XML" or "JSON")
+     * 			  indicates the output format of the generated EXAMPLE files (e.g. "XML" or "JSON")
      * @throws SchemaCompilerException
      */
 	protected void generateExampleArtifacts(Collection<TLLibrary> userDefinedLibraries,
@@ -574,7 +574,7 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
                 continue;
             }
 
-            // Generate example files for each member of the library
+            // Generate EXAMPLE files for each member of the library
             for (LibraryMember member : library.getNamedMembers()) {
                 if ((filter != null) && !filter.processEntity(member)) {
                     continue;
@@ -636,11 +636,11 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
 	}
                 	
 	/**
-	 * Gets the example generator for the specified target output format.
+	 * Gets the EXAMPLE generator for the specified target output format.
 	 * 
-	 * @param targetFormat  the target output format of the example files to be generated
-	 * @param filenameBuilder  the filename builder for the example code generator
-	 * @return the list of example generators.
+	 * @param targetFormat  the target output format of the EXAMPLE files to be generated
+	 * @param filenameBuilder  the filename builder for the EXAMPLE code generator
+	 * @return the list of EXAMPLE generators.
 	 * @throws CodeGenerationException
 	 */
 	private CodeGenerator<TLModelElement> getExampleGenerator(String targetFormat,
@@ -655,10 +655,10 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
 	}
 
     /**
-     * Returns the location of the example output folder for all members of the given library.
+     * Returns the location of the EXAMPLE output folder for all members of the given library.
      * 
      * @param libraryMember
-     *            the library member element for which the example output folder is needed
+     *            the library member element for which the EXAMPLE output folder is needed
      * @param context
      *            the code generation context
      * @return String

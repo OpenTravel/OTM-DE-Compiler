@@ -43,16 +43,14 @@ package org.opentravel.schemacompiler.codegen.html;
 import java.io.IOException;
 import java.util.List;
 
-import org.opentravel.schemacompiler.model.TLLibrary;
-
 import org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlAttr;
+import org.opentravel.schemacompiler.codegen.html.markup.HtmlConstants;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlStyle;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTag;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTree;
 import org.opentravel.schemacompiler.codegen.html.markup.RawHtml;
-import org.opentravel.schemacompiler.codegen.html.markup.HtmlConstants;
-import org.opentravel.schemacompiler.codegen.html.DocletAbortException;
+import org.opentravel.schemacompiler.model.TLLibrary;
 
 
 /**
@@ -64,6 +62,9 @@ import org.opentravel.schemacompiler.codegen.html.DocletAbortException;
  * @author eric.bronson(modified for otm)
  */
 public class LibraryIndexFrameWriter extends AbstractNamespaceIndexWriter {
+	
+	private static final String LIBRARY_FRAME_HTML = "library-frame.html";
+	private static final String LIBRARY_FRAME = "libraryFrame";
 	
 	/**
 	 * The default file name for this writer.
@@ -105,7 +106,7 @@ public class LibraryIndexFrameWriter extends AbstractNamespaceIndexWriter {
             String tableSummary, Content body) {
         Content heading = HtmlTree.heading(HtmlConstants.PACKAGE_HEADING, true,
                 librariesLabel);
-        Content div = HtmlTree.div(HtmlStyle.indexContainer, heading);
+        Content div = HtmlTree.div(HtmlStyle.INDEX_CONTAINER, heading);
         HtmlTree ul = new HtmlTree(HtmlTag.UL);
         ul.addAttr(HtmlAttr.TITLE, librariesLabel.toString());
         for(TLLibrary lib : libraries) {
@@ -131,36 +132,28 @@ public class LibraryIndexFrameWriter extends AbstractNamespaceIndexWriter {
         if (ns.length() > 0) {
             packageLabel = getNamespaceLabel(ns);
             packageLinkContent = getHyperLink(pathString(ns,
-                    "library-frame.html"), "", packageLabel, "",
-                    "libraryFrame");
+                    LIBRARY_FRAME_HTML), "", packageLabel, "",
+                    LIBRARY_FRAME);
         } else {
             packageLabel = new RawHtml("&lt;unnamed package&gt;");
-            packageLinkContent = getHyperLink("library-frame.html",
-                    "", packageLabel, "", "libraryFrame");
+            packageLinkContent = getHyperLink(LIBRARY_FRAME_HTML,
+                    "", packageLabel, "", LIBRARY_FRAME);
         }
-        Content li = HtmlTree.li(packageLinkContent);
-        return li;
+        return HtmlTree.li(packageLinkContent);
     }
 
     /**
      * {@inheritDoc}
      */
     protected void addNavigationBarHeader(Content body) {
-//        Content headerContent;
-//        if (configuration.packagesheader.length() > 0) {
-//            headerContent = new RawHtml(replaceDocRootDir(configuration.packagesheader));
-//        } else {
-//            headerContent = new RawHtml(replaceDocRootDir(configuration.header));
-//        }
-//        Content heading = HtmlTree.HEADING(HtmlConstants.TITLE_HEADING, true,
-//                HtmlStyle.bar, headerContent);
-//        body.addContent(heading);
+    	// No action required
     }
 
     /**
      * Do nothing as there is no overview information in this page.
      */
     protected void addOverviewHeader(Content body) {
+    	// No action required
     }
 
     /**
@@ -169,10 +162,11 @@ public class LibraryIndexFrameWriter extends AbstractNamespaceIndexWriter {
      *
      * @param body the Content object to which the all classes link should be added
      */
+    @Override
     protected void addAllObjectsLink(Content body) {
         Content linkContent = getHyperLink("allmembers-frame.html", "",
-                allMembersLabel, "", "libraryFrame");
-        Content div = HtmlTree.div(HtmlStyle.indexHeader, linkContent);
+                allMembersLabel, "", LIBRARY_FRAME);
+        Content div = HtmlTree.div(HtmlStyle.INDEX_HEADER, linkContent);
         body.addContent(div);
     }
 

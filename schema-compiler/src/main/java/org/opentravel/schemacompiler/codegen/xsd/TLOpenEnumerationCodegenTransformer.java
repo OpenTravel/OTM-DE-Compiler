@@ -108,7 +108,7 @@ public class TLOpenEnumerationCodegenTransformer extends
         simpleEnum.setName(source.getName() + "_Base");
         restriction.setBase(new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "string"));
 
-        // Generate the documentation block (if required)
+        // Generate the documentation BLOCK (if required)
         TLDocumentation sourceDoc = DocumentationFinder.getDocumentation( source );
         
         if (sourceDoc != null) {

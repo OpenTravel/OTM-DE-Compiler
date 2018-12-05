@@ -87,7 +87,7 @@ public class SubWriterHolderWriter extends HtmlDocletWriter {
      */
     public Content getContentHeader() {
         HtmlTree div = new HtmlTree(HtmlTag.DIV);
-        div.setStyle(HtmlStyle.contentContainer);
+        div.setStyle(HtmlStyle.CONTENT_CONTAINER);
         return div;
     }
 
@@ -98,7 +98,7 @@ public class SubWriterHolderWriter extends HtmlDocletWriter {
      */
     public Content getMemberTreeHeader() {
         HtmlTree li = new HtmlTree(HtmlTag.LI);
-        li.setStyle(HtmlStyle.blockList);
+        li.setStyle(HtmlStyle.BLOCK_LIST);
         return li;
     }
 
@@ -109,8 +109,7 @@ public class SubWriterHolderWriter extends HtmlDocletWriter {
      * @return a content tree for the member
      */
     public Content getMemberTree(Content contentTree) {
-        Content ul = HtmlTree.ul(HtmlStyle.blockList, contentTree);
-        return ul;
+        return HtmlTree.ul(HtmlStyle.BLOCK_LIST, contentTree);
     }
 
 }

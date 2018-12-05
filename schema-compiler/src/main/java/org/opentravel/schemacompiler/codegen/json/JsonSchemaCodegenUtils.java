@@ -285,7 +285,7 @@ public class JsonSchemaCodegenUtils {
     /**
      * Returns the list of equivalent values for the JSON schema documentation.
      * 
-     * @param entity  the entity for which to equivalent example values
+     * @param entity  the entity for which to equivalent EXAMPLE values
      * @return List<JsonContextualValue>
      */
     public List<JsonContextualValue> getEquivalentInfo(TLEquivalentOwner entity) {
@@ -302,9 +302,9 @@ public class JsonSchemaCodegenUtils {
     }
     
     /**
-     * Returns the list of example values for the JSON schema documentation.
+     * Returns the list of EXAMPLE values for the JSON schema documentation.
      * 
-     * @param entity  the entity for which to return example values
+     * @param entity  the entity for which to return EXAMPLE values
      * @return List<JsonContextualValue>
      */
     public List<JsonContextualValue> getExampleInfo(TLExampleOwner entity) {

@@ -39,7 +39,7 @@ public class FacetOwnerWriterImpl<T extends FacetOwnerDocumentationBuilder<?>> e
 	 */
 	@Override
 	public void addFacetInfo(Content objectTree) {
-		if(member.getFacets().size() > 0){
+		if(!member.getFacets().isEmpty()){
 			FacetInfoWriter facetWriter = new FacetInfoWriter(this, member);
 			facetWriter.addInfo(objectTree);
 		}

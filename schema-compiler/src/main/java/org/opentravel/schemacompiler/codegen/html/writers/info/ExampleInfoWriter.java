@@ -67,7 +67,7 @@ public class ExampleInfoWriter extends
      */
     public Content getExampleTree() {    	
         HtmlTree div = new HtmlTree(HtmlTag.DIV);
-        div.setStyle(HtmlStyle.example);
+        div.setStyle(HtmlStyle.EXAMPLE);
         return div;
     }
 
@@ -76,7 +76,7 @@ public class ExampleInfoWriter extends
 		Content label = writer.getResource(("doclet.Example_" + labelKey));
 		HtmlTree labelHeading = HtmlTree.heading(
 				HtmlConstants.INHERITED_SUMMARY_HEADING, label);
-		addCollapseTrigger(labelHeading, "example" + labelKey, labelKey);
+		addCollapseTrigger(labelHeading, "EXAMPLE" + labelKey, labelKey);
 		header.addContent(labelHeading);
 		return header;
 	}
@@ -86,7 +86,7 @@ public class ExampleInfoWriter extends
 		HtmlTree pre = new HtmlTree(HtmlTag.PRE);
 		pre.addContent(example);
 		HtmlTree exampleDiv = HtmlTree.div(pre);
-		makeCollapsible(exampleDiv, "example" + labelKey);
+		makeCollapsible(exampleDiv, "EXAMPLE" + labelKey);
 		exampleTree.addContent(exampleDiv);
 	}
 

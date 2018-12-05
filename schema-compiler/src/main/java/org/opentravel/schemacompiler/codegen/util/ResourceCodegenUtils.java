@@ -622,7 +622,7 @@ public class ResourceCodegenUtils {
 	
 	/**
 	 * Returns true if the given action facet only exists as a template and should not
-	 * be included in the generated schema (and example) output.
+	 * be included in the generated schema (and EXAMPLE) output.
 	 * 
 	 * @param actionFacet  the action facet to check
 	 * @return boolean

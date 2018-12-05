@@ -52,7 +52,7 @@ public class TLSimpleCodegenTransformer extends AbstractXsdTransformer<TLSimple,
         SimpleType simple = source.isListTypeInd() ? createListSimple(source)
                 : createStandardSimple(source);
 
-        // Generate the documentation block (if required)
+        // Generate the documentation BLOCK (if required)
         TLDocumentation sourceDoc = DocumentationFinder.getDocumentation( source );
         
         if (sourceDoc != null) {

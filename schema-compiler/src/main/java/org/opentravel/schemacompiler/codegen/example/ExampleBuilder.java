@@ -27,12 +27,12 @@ import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.compile.TLModelCompileValidator;
 
 /**
- * Builder component that is capable of producing example output for model entities in a variety
+ * Builder component that is capable of producing EXAMPLE output for model entities in a variety
  * of formats (e.g. Object Tree, text, and streaming output).
  * 
  * @author S. Livezey, E. Bronson
  */
-public abstract class ExampleBuilder<Tree> {
+public abstract class ExampleBuilder<T> {
 	
 	protected ExampleGeneratorOptions options = new ExampleGeneratorOptions();
     protected NamedEntity modelElement;
@@ -44,37 +44,37 @@ public abstract class ExampleBuilder<Tree> {
     }
     
     /**
-     * Constructor that assigns the example generation options to use when constructing the example
+     * Constructor that assigns the EXAMPLE generation options to use when constructing the EXAMPLE
      * content and formatting the text/stream output.
      * 
      * @param options
-     *            the example generation options
+     *            the EXAMPLE generation options
      */
     public ExampleBuilder(ExampleGeneratorOptions options) {
         setOptions(options);
     }
 
     /**
-     * Assigns the example generation options for this builder instance. Assigning a null value to
+     * Assigns the EXAMPLE generation options for this builder instance. Assigning a null value to
      * this method will result in the default option values being used.
      * 
      * @param options
-     *            the example generation options to assign
+     *            the EXAMPLE generation options to assign
      * @return ExampleDocumentBuilder
      */
-    public ExampleBuilder<Tree> setOptions(ExampleGeneratorOptions options) {
+    public ExampleBuilder<T> setOptions(ExampleGeneratorOptions options) {
         this.options = (options == null) ? new ExampleGeneratorOptions() : options;
         return this;
     }
 
     /**
-     * Assigns the model element for which example output is to be generated.
+     * Assigns the model element for which EXAMPLE output is to be generated.
      * 
      * @param modelElement
-     *            the model element for which to create example output
+     *            the model element for which to create EXAMPLE output
      * @return ExampleDocumentBuilder
      */
-    public ExampleBuilder<Tree> setModelElement(NamedEntity modelElement) {
+    public ExampleBuilder<T> setModelElement(NamedEntity modelElement) {
         this.modelElement = modelElement;
         return this;
     }
@@ -89,26 +89,26 @@ public abstract class ExampleBuilder<Tree> {
      */
     protected void validateModelElement() throws ValidationException {
         if (modelElement == null) {
-            throw new NullPointerException("The model element for example output cannot be null.");
+            throw new NullPointerException("The model element for EXAMPLE output cannot be null.");
         }
         ValidationFindings findings = TLModelCompileValidator
                 .validateModelElement((TLModelElement) modelElement);
 
         if (findings.hasFinding(FindingType.ERROR)) {
             throw new ValidationException(
-                    "Unable to generate example content due to validation errors.", findings);
+                    "Unable to generate EXAMPLE content due to validation errors.", findings);
         }
     }
     
     /**
-     * Generates the example output and returns a string containing the content.
+     * Generates the EXAMPLE output and returns a string containing the content.
      * 
      * @return String
      * @throws ValidationException
      *             thrown if one or more of the entities for which content is to be generated
      *             contains errors (warnings are acceptable and will not produce an exception)
      * @throws CodeGenerationException
-     *             thrown if an error occurs during example content generation
+     *             thrown if an error occurs during EXAMPLE content generation
      */
     public String buildString() throws ValidationException, CodeGenerationException {
         StringWriter writer = new StringWriter();
@@ -118,29 +118,29 @@ public abstract class ExampleBuilder<Tree> {
     }
 
     /**
-     * Generates the example output and directs the resuting content to the specified writer.
+     * Generates the EXAMPLE output and directs the resuting content to the specified writer.
      * 
      * @param buffer
-     *            the output writer to which the example content should be directed
+     *            the output writer to which the EXAMPLE content should be directed
      * @return String
      * @throws ValidationException
      *             thrown if one or more of the entities for which content is to be generated
      *             contains errors (warnings are acceptable and will not produce an exception)
      * @throws CodeGenerationException
-     *             thrown if an error occurs during example content generation
+     *             thrown if an error occurs during EXAMPLE content generation
      */
     public abstract void buildToStream(Writer buffer) throws ValidationException, CodeGenerationException;
     
     /**
-     * Generates the example output as a structure and returns the raw tree content.
+     * Generates the EXAMPLE output as a structure and returns the raw tree content.
      * 
      * @return Tree
      * @throws ValidationException
      *             thrown if one or more of the entities for which content is to be generated
      *             contains errors (warnings are acceptable and will not produce an exception)
      * @throws CodeGenerationException
-     *             thrown if an error occurs during example content generation
+     *             thrown if an error occurs during EXAMPLE content generation
      */
-    public abstract Tree buildTree() throws ValidationException, CodeGenerationException;
+    public abstract T buildTree() throws ValidationException, CodeGenerationException;
 
 }

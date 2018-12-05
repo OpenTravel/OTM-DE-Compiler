@@ -394,7 +394,7 @@ public class FacetCodegenUtils {
     }
 
     /**
-     * Returns the inheritance hierarchy for facets with the same owner. For example, passing the
+     * Returns the inheritance hierarchy for facets with the same owner. For EXAMPLE, passing the
      * detail facet of a business object to this method would result in a list containing the ID,
      * summary, and detail facets from the original facet's owner. The hierarchy that is returned is
      * sorted from the highest level of the inheritance hierarchy to the lowest. At a minimum, the

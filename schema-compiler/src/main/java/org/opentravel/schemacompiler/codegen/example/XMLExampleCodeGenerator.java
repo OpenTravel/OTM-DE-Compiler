@@ -75,8 +75,8 @@ public class XMLExampleCodeGenerator extends AbstractExampleCodeGenerator {
 
 			addGeneratedFile(outputFile);
 
-		} catch (Throwable t) {
-			throw new CodeGenerationException(t);
+		} catch (Exception e) {
+			throw new CodeGenerationException(e);
 		}
 	}
 

@@ -101,9 +101,9 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
      */
     @Override
     public boolean declaresContent() {
-        return super.declaresContent() || (attributeManager.getChildren().size() > 0)
-                || (elementManager.getChildren().size() > 0)
-                || (indicatorManager.getChildren().size() > 0);
+        return super.declaresContent() || !attributeManager.getChildren().isEmpty()
+                || !elementManager.getChildren().isEmpty()
+                || !indicatorManager.getChildren().isEmpty();
     }
 
     /**
@@ -486,6 +486,7 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
 
     /**
      * @see org.opentravel.schemacompiler.model.TLContextReferrer#getContext()
+     * @deprecated  Use is discontinued - no new functional equivalent
      */
     @Deprecated
     public String getContext() {
@@ -494,6 +495,7 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
 
     /**
      * @see org.opentravel.schemacompiler.model.TLContextReferrer#setContext(java.lang.String)
+     * @deprecated  Use is discontinued - no new functional equivalent
      */
     @Deprecated
     public void setContext(String context) {
@@ -508,6 +510,7 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
      * Returns the value of the 'label' field.
      * 
      * @return String
+     * @deprecated  Use {@link TLContextualFacet#getName()} instead
      */
     @Deprecated
     public String getLabel() {
@@ -519,6 +522,7 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
      * 
      * @param label
      *            the field value to assign
+     * @deprecated  Use {@link TLContextualFacet#setName(String)} instead
      */
     @Deprecated
     public void setLabel(String label) {

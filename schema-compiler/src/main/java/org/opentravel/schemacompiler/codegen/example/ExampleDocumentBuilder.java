@@ -31,14 +31,13 @@ import javax.xml.transform.stream.StreamResult;
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
-import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.validate.ValidationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * Builder component that is capable of producing XML example output for model entities in a variety
+ * Builder component that is capable of producing XML EXAMPLE output for model entities in a variety
  * of formats (e.g. DOM, text, and streaming output).
  * 
  * @author S. Livezey
@@ -51,11 +50,11 @@ public class ExampleDocumentBuilder extends ExampleBuilder<Document>{
 
     
     /**
-     * Constructor that assigns the example generation options to use when constructing the example
+     * Constructor that assigns the EXAMPLE generation options to use when constructing the EXAMPLE
      * content and formatting the text/stream output.
      * 
      * @param options
-     *            the example generation options
+     *            the EXAMPLE generation options
      */
     public ExampleDocumentBuilder(ExampleGeneratorOptions options) {
         super(options);
@@ -63,7 +62,7 @@ public class ExampleDocumentBuilder extends ExampleBuilder<Document>{
   
     /**
      * Assigns the location of the XML schema (XSD) file that should be used to validate the content
-     * from the specified namespace. Schema locations will only be included in the example XML
+     * from the specified namespace. Schema locations will only be included in the EXAMPLE XML
      * output if they are bound to one or more elements in the resulting XML document.
      * 
      * @param library  the library for which to assign a schema location
@@ -107,16 +106,16 @@ public class ExampleDocumentBuilder extends ExampleBuilder<Document>{
 
    
     /**
-     * Generates the example output and directs the resuting content to the specified writer.
+     * Generates the EXAMPLE output and directs the resuting content to the specified writer.
      * 
      * @param buffer
-     *            the output writer to which the example content should be directed
+     *            the output writer to which the EXAMPLE content should be directed
      * @return String
      * @throws ValidationException
      *             thrown if one or more of the entities for which content is to be generated
      *             contains errors (warnings are acceptable and will not produce an exception)
      * @throws CodeGenerationException
-     *             thrown if an error occurs during example content generation
+     *             thrown if an error occurs during EXAMPLE content generation
      */
     @Override
     public void buildToStream(Writer buffer) throws ValidationException, CodeGenerationException {
@@ -137,23 +136,20 @@ public class ExampleDocumentBuilder extends ExampleBuilder<Document>{
             transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
             transformer.transform(new DOMSource(domDocument), new StreamResult(buffer));
 
-        } catch (TransformerException e) {
-            throw new CodeGenerationException(e);
-
-        } catch (IOException e) {
+        } catch (TransformerException | IOException e) {
             throw new CodeGenerationException(e);
         }
     }
 
     /**
-     * Generates the example output as a DOM structure and returns the raw tree content.
+     * Generates the EXAMPLE output as a DOM structure and returns the raw tree content.
      * 
      * @return Document
      * @throws ValidationException
      *             thrown if one or more of the entities for which content is to be generated
      *             contains errors (warnings are acceptable and will not produce an exception)
      * @throws CodeGenerationException
-     *             thrown if an error occurs during example content generation
+     *             thrown if an error occurs during EXAMPLE content generation
      */
     public Document buildTree() throws ValidationException, CodeGenerationException {
         DOMExampleVisitor visitor = new DOMExampleVisitor(options.getExampleContext());
@@ -163,7 +159,7 @@ public class ExampleDocumentBuilder extends ExampleBuilder<Document>{
         ExampleNavigator.navigate(modelElement, visitor, options);
         domDocument = visitor.getDocument();
 
-        if (schemaLocationRequired(modelElement)) {
+        if (schemaLocationRequired()) {
             Element rootElement = domDocument.getDocumentElement();
             StringBuilder schemaLocation = new StringBuilder();
 
@@ -198,12 +194,11 @@ public class ExampleDocumentBuilder extends ExampleBuilder<Document>{
     
     /**
      * Returns true if an 'xsi:schemaLocation' attribute should be added to the
-     * root element of the example for the given entity.
+     * root element of the EXAMPLE for the given entity.
      * 
-     * @param entity  the entity for which an example document is being generated
      * @return boolean
      */
-    private boolean schemaLocationRequired(NamedEntity entity) {
+    private boolean schemaLocationRequired() {
     	return PropertyCodegenUtils.hasGlobalElement(modelElement)
     			|| (modelElement instanceof TLExtensionPointFacet);
     }

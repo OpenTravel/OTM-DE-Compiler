@@ -101,13 +101,15 @@ public abstract class AbstractDocumentationBuilder<T extends TLDocumentationOwne
 		if (name == null) {
 			if (other.name != null)
 				return false;
-		} else if (!name.equals(other.name))
+		} else if (!name.equals(other.name)) {
 			return false;
+		}
 		if (namespace == null) {
 			if (other.namespace != null)
 				return false;
-		} else if (!namespace.equals(other.namespace))
+		} else if (!namespace.equals(other.namespace)) {
 			return false;
+		}
 		return true;
 	}
 

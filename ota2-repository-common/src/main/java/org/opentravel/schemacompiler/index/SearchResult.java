@@ -106,7 +106,7 @@ public abstract class SearchResult<T> implements IndexingTerms {
 	}
 
 	/**
-	 * Returns the description of the OTM item.
+	 * Returns the DESCRIPTION of the OTM item.
 	 *
 	 * @return String
 	 */

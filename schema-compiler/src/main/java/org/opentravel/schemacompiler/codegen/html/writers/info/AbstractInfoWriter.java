@@ -52,13 +52,6 @@ public abstract class AbstractInfoWriter<T> implements InfoWriter{
 	}
 
 	/**
-	 * Add the info tree.
-	 * 
-	 * @param memberTree
-	 */
-	public abstract void addInfo(Content memberTree);
-
-	/**
 	 * Add the actual info content.
 	 * 
 	 * @param memberTree
@@ -75,9 +68,9 @@ public abstract class AbstractInfoWriter<T> implements InfoWriter{
 	 */
 	protected void addRowStyle(HtmlTree tr, int counter) {
 		if (counter % 2 == 0)
-			tr.setStyle(HtmlStyle.rowColor);
+			tr.setStyle(HtmlStyle.ROW_COLOR);
 		else
-			tr.setStyle(HtmlStyle.altColor);
+			tr.setStyle(HtmlStyle.ALT_COLOR);
 	}
 
 	/**
@@ -93,22 +86,22 @@ public abstract class AbstractInfoWriter<T> implements InfoWriter{
 	protected void addCollapseTrigger(Content content, String targetId,
 			String triggerId) {
 		HtmlTree openSpan = HtmlTree.span(HtmlTree.EMPTY);
-		openSpan.addAttr(HtmlAttr.CLASS, HtmlStyle.toggleButton + " "
-				+ HtmlStyle.imgOpen);
+		openSpan.addAttr(HtmlAttr.CLASS, HtmlStyle.TOGGLE_BUTTON + " "
+				+ HtmlStyle.IMG_OPEN);
 		String openId = triggerId + "Open";
 		String closedId = triggerId + "Closed";
 		openSpan.addAttr(HtmlAttr.ID, openId);
 		openSpan.addAttr(HtmlAttr.TITLE, "open");
 		openSpan.addDataAttr("target", "#" + targetId);
-		openSpan.addDataAttr("toggle", "collapsed");
+		openSpan.addDataAttr("toggle", "COLLAPSED");
 		openSpan.addDataAttr("imgTarget", "#" + closedId);
 		content.addContent(openSpan);
 		HtmlTree closedSpan = HtmlTree.span(HtmlTree.EMPTY);
-		closedSpan.setStyle(HtmlStyle.imgClosed);
+		closedSpan.setStyle(HtmlStyle.IMG_CLOSED);
 		closedSpan.addAttr(HtmlAttr.ID, closedId);
 		closedSpan.addAttr(HtmlAttr.TITLE, "closed");
 		closedSpan.addDataAttr("target", "#" + targetId);
-		closedSpan.addDataAttr("toggle", "collapsed");
+		closedSpan.addDataAttr("toggle", "COLLAPSED");
 		closedSpan.addDataAttr("imgTarget", "#" + openId);
 		content.addContent(closedSpan);
 	}
@@ -123,7 +116,7 @@ public abstract class AbstractInfoWriter<T> implements InfoWriter{
 	 */
 	protected void makeCollapsible(HtmlTree tree, String id) {
 		tree.addAttr(HtmlAttr.ID, id);
-		tree.setStyle(HtmlStyle.collapsed);
+		tree.setStyle(HtmlStyle.COLLAPSED);
 	}
 
 	/**
@@ -137,7 +130,7 @@ public abstract class AbstractInfoWriter<T> implements InfoWriter{
 	protected Content getTableTree() {
 		Content content = caption == null ? HtmlTree.EMPTY : writer
 				.getTableCaption(caption);
-		Content table = HtmlTree.table(HtmlStyle.overviewSummary, 0, 3, 0,
+		Content table = HtmlTree.table(HtmlStyle.OVERVIEW_SUMMARY, 0, 3, 0,
 				getInfoTableSummary(), content);
 		table.addContent(writer.getSummaryTableHeader(getInfoTableHeader(),
 				"col"));
@@ -181,7 +174,7 @@ public abstract class AbstractInfoWriter<T> implements InfoWriter{
 	 *            the column for which the style will be set
 	 */
 	protected void setInfoColumnStyle(HtmlTree tdTree) {
-		tdTree.setStyle(HtmlStyle.colLast);
+		tdTree.setStyle(HtmlStyle.COL_LAST);
 	}
 
 	/**
@@ -191,7 +184,7 @@ public abstract class AbstractInfoWriter<T> implements InfoWriter{
 	 */
 	public Content getInfoTreeHeader() {
 		HtmlTree li = new HtmlTree(HtmlTag.LI);
-		li.setStyle(HtmlStyle.blockList);
+		li.setStyle(HtmlStyle.BLOCK_LIST);
 		return li;
 	}
 
@@ -204,7 +197,7 @@ public abstract class AbstractInfoWriter<T> implements InfoWriter{
 	 */
 	public Content getInfoTree() {
 		HtmlTree ul = new HtmlTree(HtmlTag.UL);
-		ul.setStyle(HtmlStyle.blockList);
+		ul.setStyle(HtmlStyle.BLOCK_LIST);
 		return ul;
 	}
 

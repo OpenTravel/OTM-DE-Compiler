@@ -77,7 +77,7 @@ public class TLModelCompileValidator {
      * 
      * <p>
      * NOTE: This method performs validation checks for the given model element, as well as all of
-     * its dependencies. For example, in a model where <code>Payment</code> contains an element
+     * its dependencies. For EXAMPLE, in a model where <code>Payment</code> contains an element
      * reference to <code>PaymentCard</code>, a call to validate <code>Payment</code> may result in
      * findings for <code>PaymentCard</code> since it is a dependency of the original model element.
      * 
@@ -121,7 +121,7 @@ public class TLModelCompileValidator {
 
     /**
      * Visitor that performs validation checks for the assigned model element and all of its
-     * dependencies to determine whether any errors exist prior to producing example output.
+     * dependencies to determine whether any errors exist prior to producing EXAMPLE output.
      * 
      * @author S. Livezey
      */

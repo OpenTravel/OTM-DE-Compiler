@@ -52,7 +52,7 @@ public abstract class AbstractFieldInfoWriter<T extends NamedEntityDocumentation
 
 	protected Content getInfo(S field, int counter, boolean addCollapse) {
 		HtmlTree tdName = new HtmlTree(HtmlTag.TD);
-		tdName.setStyle(HtmlStyle.colFirst);
+		tdName.setStyle(HtmlStyle.COL_FIRST);
 		addFieldName(field, tdName);
 		String lcName = field.getName().toLowerCase();
 		if (addCollapse) {
@@ -80,10 +80,7 @@ public abstract class AbstractFieldInfoWriter<T extends NamedEntityDocumentation
 		addValue("Pattern", field.getPattern(), detailTable, 1);
 		addValue("Max Occurrences", String.valueOf(field.getMaxOcurrences()),
 				detailTable, 0);
-		// TODO add later
-		// addValue("Since Version", String.valueOf(field.getSinceVersion()),
-		// detailTable, 1);
-		HtmlTree td = HtmlTree.td(HtmlStyle.colOne, detailTable);
+		HtmlTree td = HtmlTree.td(HtmlStyle.COL_ONE, detailTable);
 		td.addAttr(HtmlAttr.COLSPAN, "2");
 		HtmlTree tr = HtmlTree.tr(td);
 		makeCollapsible(tr, getDetailId(field));
@@ -93,7 +90,7 @@ public abstract class AbstractFieldInfoWriter<T extends NamedEntityDocumentation
 	private void addValue(String name, String value, Content detailTable,
 			int counter) {
 		HtmlTree tdName = new HtmlTree(HtmlTag.TD);
-		tdName.setStyle(HtmlStyle.colFirst);
+		tdName.setStyle(HtmlStyle.COL_FIRST);
 		tdName.addContent(name);
 		HtmlTree tdDescription = new HtmlTree(HtmlTag.TD);
 		setInfoColumnStyle(tdDescription);
@@ -106,7 +103,7 @@ public abstract class AbstractFieldInfoWriter<T extends NamedEntityDocumentation
 
 	protected void addDetailFieldType(S field, Content detailTable, int counter) {
 		HtmlTree tdName = new HtmlTree(HtmlTag.TD);
-		tdName.setStyle(HtmlStyle.colFirst);
+		tdName.setStyle(HtmlStyle.COL_FIRST);
 		tdName.addContent("Type");
 		HtmlTree tdType = new HtmlTree(HtmlTag.TD);
 		setInfoColumnStyle(tdType);
@@ -126,7 +123,7 @@ public abstract class AbstractFieldInfoWriter<T extends NamedEntityDocumentation
 	}
 
 	protected Content getDetailTableTree() {
-		Content table = HtmlTree.table(HtmlStyle.overviewSummary, 0, 3, 0,
+		Content table = HtmlTree.table(HtmlStyle.OVERVIEW_SUMMARY, 0, 3, 0,
 				getDetailInfoTableSummary(), HtmlTree.EMPTY);
 		table.addContent(getDetailTableHeader());
 		return table;
@@ -142,7 +139,7 @@ public abstract class AbstractFieldInfoWriter<T extends NamedEntityDocumentation
 	 * @return a content tree for the header
 	 */
 	protected Content getDetailTableHeader() {
-		HtmlTree th = HtmlTree.th(HtmlStyle.colOne, "row",
+		HtmlTree th = HtmlTree.th(HtmlStyle.COL_ONE, "row",
 				writer.getResource("doclet.Details"));
 		th.addAttr(HtmlAttr.COLSPAN, "2");
 		return new HtmlTree(HtmlTag.TR, th);
@@ -163,7 +160,7 @@ public abstract class AbstractFieldInfoWriter<T extends NamedEntityDocumentation
 				.getDescription();
 		Content div;
 		Content result = new RawHtml(desc);
-		div = HtmlTree.div(HtmlStyle.block, result);
+		div = HtmlTree.div(HtmlStyle.BLOCK, result);
 		htmltree.addContent(div);
 		if (desc.length() == 0) {
 			htmltree.addContent(RawHtml.nbsp);

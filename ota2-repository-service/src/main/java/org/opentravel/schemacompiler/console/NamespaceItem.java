@@ -136,7 +136,7 @@ public class NamespaceItem {
     }
 
     /**
-	 * Returns the value of the 'description' field.
+	 * Returns the value of the 'DESCRIPTION' field.
 	 *
 	 * @return String
 	 */

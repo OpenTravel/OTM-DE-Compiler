@@ -422,8 +422,8 @@ public interface ModelElementVisitor {
     /**
      * Called when a <code>TLExample</code> instance is encountered during model navigation.
      * 
-     * @param example
-     *            the example entity to visit
+     * @param EXAMPLE
+     *            the EXAMPLE entity to visit
      * @return boolean flag indicating whether to traverse child elements (if any exist)
      */
     public boolean visitExample(TLExample example);

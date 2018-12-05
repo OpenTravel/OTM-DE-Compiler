@@ -29,7 +29,7 @@ import java.util.Properties;
 import org.opentravel.schemacompiler.ioc.CompilerExtensionRegistry;
 
 /**
- * Component that handles the creation of example data values for simple types defined in legacy
+ * Component that handles the creation of EXAMPLE data values for simple types defined in legacy
  * schemas. This is typically used for built-in libraries that are based on legacy XSD schemas
  * (built-in OTM libraries are capable of defining their own examples).
  * 
@@ -44,17 +44,17 @@ public class LegacyTypeExampleProvider {
 
     /**
      * Constructor that defines the classpath location of the configuration file used to define the
-     * example data for the legacy types within a built-in namespace.
+     * EXAMPLE data for the legacy types within a built-in namespace.
      * 
      * @param exampleFileLocation
-     *            the classpath location of the example data configuration file
+     *            the classpath location of the EXAMPLE data configuration file
      */
     public LegacyTypeExampleProvider(String exampleFileLocation) {
         loadExampleFile(exampleFileLocation);
     }
 
     /**
-     * Returns the namespace of the simple legacy types that are serviced by this example provider.
+     * Returns the namespace of the simple legacy types that are serviced by this EXAMPLE provider.
      * 
      * @return String
      */
@@ -63,10 +63,10 @@ public class LegacyTypeExampleProvider {
     }
 
     /**
-     * Returns an example value for the specified legacy simple type.
+     * Returns an EXAMPLE value for the specified legacy simple type.
      * 
      * @param xsdSimple
-     *            the legacy simple type for which to return an example
+     *            the legacy simple type for which to return an EXAMPLE
      * @return String
      */
     public String getExampleValue(String xsdSimpleName) {
@@ -76,7 +76,7 @@ public class LegacyTypeExampleProvider {
             List<String> exampleValues = exampleTypeMappings.get(xsdSimpleName);
 
             if ((exampleValues != null) && !exampleValues.isEmpty()) {
-                // Retrieve the next example and shift the value to the end of the
+                // Retrieve the next EXAMPLE and shift the value to the end of the
                 // rotating list for this type
                 synchronized (exampleValues) {
                     example = exampleValues.remove(0);
@@ -91,7 +91,7 @@ public class LegacyTypeExampleProvider {
      * Loads the specified configuration file and populates this provider instance.
      * 
      * @param exampleFileLocation
-     *            the classpath location of the example data configuration file
+     *            the classpath location of the EXAMPLE data configuration file
      */
     private void loadExampleFile(String exampleFileLocation) {
         try {
@@ -131,12 +131,12 @@ public class LegacyTypeExampleProvider {
 
             if (this.namespace == null) {
                 throw new IllegalArgumentException(
-                        "No namespace specified in the example data file: " + exampleFileLocation);
+                        "No namespace specified in the EXAMPLE data file: " + exampleFileLocation);
             }
 
         } catch (IOException e) {
             throw new IllegalArgumentException(
-                    "Unable to load example data for legacy types from file: "
+                    "Unable to load EXAMPLE data for legacy types from file: "
                             + exampleFileLocation);
         }
     }

@@ -95,7 +95,7 @@ public class NamedEntityWriterTest extends AbstractWriterTest {
 		Content classContentTree = writer.getContentHeader();
 		assertNotNull(classContentTree);
 		String content = classContentTree.toString();
-		assertTrue("Improper content.", content.contains("contentContainer"));
+		assertTrue("Improper content.", content.contains("CONTENT_CONTAINER"));
 	}
 	
 	private class TestEntity implements NamedEntity, TLDocumentationOwner{

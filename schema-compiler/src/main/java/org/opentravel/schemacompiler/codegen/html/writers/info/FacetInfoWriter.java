@@ -88,7 +88,7 @@ public class FacetInfoWriter extends AbstractInheritedInfoWriter<FacetOwnerDocum
 	 */
 	protected Content getInfo(FacetDocumentationBuilder member, int counter, boolean addCollapse) {
 		HtmlTree tdFacetName = new HtmlTree(HtmlTag.TD);
-		tdFacetName.setStyle(HtmlStyle.colFirst);
+		tdFacetName.setStyle(HtmlStyle.COL_FIRST);
 		addFacet(member, tdFacetName);
 		HtmlTree tdSummary = new HtmlTree(HtmlTag.TD);
 		setInfoColumnStyle(tdSummary);

@@ -32,9 +32,7 @@ import org.opentravel.schemacompiler.model.TLOperation;
  */
 public class ExampleGeneratorOptions {
 
-    public static enum DetailLevel {
-        MINIMUM, MAXIMUM
-    };
+    public enum DetailLevel { MINIMUM, MAXIMUM }
 
     private DetailLevel detailLevel = DetailLevel.MAXIMUM;
     private Map<QName,TLFacet> preferredFacetMap = new HashMap<>();
@@ -44,7 +42,7 @@ public class ExampleGeneratorOptions {
     private boolean suppressOptionalFields = false;
 
     /**
-     * Returns the amount of detail to include in the generated example.
+     * Returns the amount of detail to include in the generated EXAMPLE.
      * 
      * @return DetailLevel
      */
@@ -53,7 +51,7 @@ public class ExampleGeneratorOptions {
     }
 
     /**
-     * Assigns the amount of detail to include in the generated example.
+     * Assigns the amount of detail to include in the generated EXAMPLE.
      * 
      * @param detailLevel
      *            the detail level to assign
@@ -144,7 +142,7 @@ public class ExampleGeneratorOptions {
      * nested object structure.
      * 
      * @param maxRecursionDepth
-     *            the maximum recursion depth to allow during example navigation
+     *            the maximum recursion depth to allow during EXAMPLE navigation
      */
     public void setMaxRecursionDepth(int maxRecursionDepth) {
         this.maxRecursionDepth = maxRecursionDepth;
@@ -152,7 +150,7 @@ public class ExampleGeneratorOptions {
 
 	/**
 	 * Returns the flag indicating whether optional fields should be suppressed
-	 * during example generation.
+	 * during EXAMPLE generation.
 	 *
 	 * @return boolean
 	 */
@@ -162,7 +160,7 @@ public class ExampleGeneratorOptions {
 
 	/**
 	 * Assigns the flag indicating whether optional fields should be suppressed
-	 * during example generation.
+	 * during EXAMPLE generation.
 	 *
 	 * @param suppressOptionalFields  the field value to assign
 	 */

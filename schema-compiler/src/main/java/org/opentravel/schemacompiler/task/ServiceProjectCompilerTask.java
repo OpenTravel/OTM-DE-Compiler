@@ -117,7 +117,7 @@ public class ServiceProjectCompilerTask extends AbstractSchemaCompilerTask imple
                             duplicateName));
             addGeneratedFiles(serviceWsdlGenerator.generateOutput(service, context));
 
-            // Generate example files if required; examples are only created for the operation
+            // Generate EXAMPLE files if required; examples are only created for the operation
             // messages (not the contents of the trimmed schemas)
             if (isGenerateExamples()) {
                 generateExampleArtifacts(userDefinedLibraries, context,

@@ -100,7 +100,7 @@ public enum HtmlTag {
     /**
      * Enum representing the type of HTML element.
      */
-    protected static enum BlockType {
+    protected enum BlockType {
         BLOCK,
         INLINE,
         OTHER;
@@ -109,7 +109,7 @@ public enum HtmlTag {
     /**
      * Enum representing HTML end tag requirement.
      */
-    protected static enum EndTag {
+    protected enum EndTag {
         END,
         NOEND;
     }
@@ -134,6 +134,7 @@ public enum HtmlTag {
         return (endTag == EndTag.END);
     }
 
+    @Override
     public String toString() {
         return value;
     }

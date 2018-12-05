@@ -166,7 +166,7 @@ public class IndexBuilder {
 			String name = member.getLocalName();
 			char ch = (name.length() == 0) ? '*' : Character.toUpperCase(name
 					.charAt(0));
-			Character unicode = new Character(ch);
+			Character unicode = Character.valueOf(ch);
 			List<LibraryMember> list = indexmap.get(unicode);
 			if (list == null) {
 				list = new ArrayList<>();

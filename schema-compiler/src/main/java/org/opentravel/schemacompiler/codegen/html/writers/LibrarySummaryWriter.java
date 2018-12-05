@@ -67,19 +67,19 @@ public interface LibrarySummaryWriter {
     public void addObjectsSummary(Content summaryContentTree);
 
     /**
-     * Adds the package description from the "packages.html" file to the documentation
+     * Adds the package DESCRIPTION from the "packages.html" file to the documentation
      * tree.
      *
-     * @param packageContentTree the content tree to which the package description
+     * @param packageContentTree the content tree to which the package DESCRIPTION
      *                           will be added
      */
     public void addNamespaceDescription(Content packageContentTree);
 
 
     /**
-     * Adds the footer to the documentation tree.
+     * Adds the FOOTER to the documentation tree.
      *
-     * @param contentTree the tree to which the footer will be added
+     * @param contentTree the tree to which the FOOTER will be added
      */
     public void addFooter(Content contentTree);
 

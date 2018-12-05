@@ -44,7 +44,7 @@ public interface JsonDocumentationOwner {
 	public List<JsonContextualValue> getEquivalentItems();
 	
 	/**
-	 * Returns the list of example value definitions for the owner.
+	 * Returns the list of EXAMPLE value definitions for the owner.
 	 *
 	 * @return List<JsonContextualValue>
 	 */

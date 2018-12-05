@@ -16,21 +16,21 @@
 package org.opentravel.schemacompiler.task;
 
 /**
- * Interface that defines the task options required for the generation of example output.
+ * Interface that defines the task options required for the generation of EXAMPLE output.
  * 
  * @author S. Livezey
  */
 public interface ExampleCompilerTaskOptions {
 
     /**
-     * Returns the option flag indicating that example data files should be generated.
+     * Returns the option flag indicating that EXAMPLE data files should be generated.
      * 
      * @return boolean
      */
     public boolean isGenerateExamples();
 
     /**
-     * Returns true if the maximum amount of detail is to be included in generated example data. If
+     * Returns true if the maximum amount of detail is to be included in generated EXAMPLE data. If
      * false, minimum detail will be generated.
      * 
      * @return boolean
@@ -38,7 +38,7 @@ public interface ExampleCompilerTaskOptions {
     public boolean isGenerateMaxDetailsForExamples();
 
     /**
-     * Returns the preferred context to use when producing example values for simple data types.
+     * Returns the preferred context to use when producing EXAMPLE values for simple data types.
      * 
      * @return String
      */
@@ -46,14 +46,14 @@ public interface ExampleCompilerTaskOptions {
 
     /**
      * Returns the maximum number of times that repeating elements should be displayed in generated
-     * example output.
+     * EXAMPLE output.
      * 
      * @return Integer
      */
     public Integer getExampleMaxRepeat();
 
     /**
-     * Returns the maximum depth that should be included for nested elements in generated example
+     * Returns the maximum depth that should be included for nested elements in generated EXAMPLE
      * output.
      * 
      * @return Integer
@@ -62,7 +62,7 @@ public interface ExampleCompilerTaskOptions {
     
     /**
      * Returns the flag indicating whether optional fields should be suppressed
-	 * during example generation.
+	 * during EXAMPLE generation.
 	 * 
      * @return boolean
      */

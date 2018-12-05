@@ -389,7 +389,7 @@ public class DefaultSoapBindings implements CodeGenerationWsdlBindings {
 				messageBinding.getAny().add(
 						soapObjectFactory.createBody(soapBody));
 
-			} else { // assume 'header' binding if not the message body
+			} else { // assume 'HEADER' binding if not the message body
 				org.xmlsoap.schemas.wsdl.soap.THeader soapHeader = new org.xmlsoap.schemas.wsdl.soap.THeader();
 
 				soapHeader.setPart(messagePart.getName());

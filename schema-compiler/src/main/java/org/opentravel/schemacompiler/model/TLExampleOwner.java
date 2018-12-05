@@ -19,7 +19,7 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Interface to be implemented by any model component that can provide an example of its usage.
+ * Interface to be implemented by any model component that can provide an EXAMPLE of its usage.
  * 
  * @author S. Livezey
  */
@@ -33,10 +33,10 @@ public interface TLExampleOwner extends LibraryElement {
     public List<TLExample> getExamples();
 
     /**
-     * Returns the example with the specified context ID.
+     * Returns the EXAMPLE with the specified context ID.
      * 
      * @param contextId
-     *            the context of the example to return
+     *            the context of the EXAMPLE to return
      * @return TLExample
      */
     public TLExample getExample(String contextId);
@@ -44,8 +44,8 @@ public interface TLExampleOwner extends LibraryElement {
     /**
      * Adds a <code>TLExample</code> element to the current list.
      * 
-     * @param example
-     *            the example value to add
+     * @param EXAMPLE
+     *            the EXAMPLE value to add
      */
     public void addExample(TLExample example);
 
@@ -53,9 +53,9 @@ public interface TLExampleOwner extends LibraryElement {
      * Adds a <code>TLExample</code> element to the current list.
      * 
      * @param index
-     *            the index at which the given example should be added
-     * @param example
-     *            the example value to add
+     *            the index at which the given EXAMPLE should be added
+     * @param EXAMPLE
+     *            the EXAMPLE value to add
      * @throws IndexOutOfBoundsException
      *             thrown if the index is out of range (index < 0 || index > size())
      */
@@ -64,26 +64,26 @@ public interface TLExampleOwner extends LibraryElement {
     /**
      * Removes the specified <code>TLExample</code> from the current list.
      * 
-     * @param example
-     *            the example value to remove
+     * @param EXAMPLE
+     *            the EXAMPLE value to remove
      */
     public void removeExample(TLExample example);
 
     /**
-     * Moves this example up by one position in the list. If the example is not owned by this object
+     * Moves this EXAMPLE up by one position in the list. If the EXAMPLE is not owned by this object
      * or it is already at the front of the list, this method has no effect.
      * 
-     * @param example
-     *            the example to move
+     * @param EXAMPLE
+     *            the EXAMPLE to move
      */
     public void moveUp(TLExample example);
 
     /**
-     * Moves this example down by one position in the list. If the example is not owned by this
+     * Moves this EXAMPLE down by one position in the list. If the EXAMPLE is not owned by this
      * object or it is already at the end of the list, this method has no effect.
      * 
-     * @param example
-     *            the example to move
+     * @param EXAMPLE
+     *            the EXAMPLE to move
      */
     public void moveDown(TLExample example);
 

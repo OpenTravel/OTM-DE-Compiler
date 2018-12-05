@@ -43,7 +43,7 @@ public class TLDocumentationCompileValidator extends TLValidatorBase<TLDocumenta
     protected ValidationFindings validateFields(TLDocumentation target) {
         TLValidationBuilder builder = newValidationBuilder(target);
 
-        builder.setProperty("description", target.getDescription())
+        builder.setProperty("DESCRIPTION", target.getDescription())
                 .setFindingType(FindingType.ERROR).assertMaximumLength(MAX_DESCRIPTION_LENGTH);
 
         builder.setProperty("deprecations", target.getDeprecations())

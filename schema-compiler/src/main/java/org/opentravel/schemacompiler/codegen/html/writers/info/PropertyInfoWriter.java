@@ -99,7 +99,7 @@ public class PropertyInfoWriter
 	}
 
 	/**
-	 * {@inheritDoc}TODO pass key to method.
+	 * {@inheritDoc}
 	 */
 	@Override
 	protected String getInfoTableSummary() {
@@ -110,7 +110,7 @@ public class PropertyInfoWriter
 	}
 
 	/**
-	 * {@inheritDoc}TODO pass key to method.
+	 * {@inheritDoc}
 	 */
 	@Override
 	protected String getDetailInfoTableSummary() {

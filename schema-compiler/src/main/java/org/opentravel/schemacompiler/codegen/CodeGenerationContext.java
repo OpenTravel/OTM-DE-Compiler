@@ -48,38 +48,38 @@ public class CodeGenerationContext {
     public static final String CK_COPY_COMPILE_TIME_DEPENDENCIES = "schemacompiler.copyCompileTimeDependencies";
 
     /**
-     * Context key indicating the amount of detail that should be provided during example generation
+     * Context key indicating the amount of detail that should be provided during EXAMPLE generation
      * (valid values are "MINIMUM" and "MAXIMUM" - default is "MAXIMUM").
      */
     public static final String CK_EXAMPLE_DETAIL_LEVEL = "schemacompiler.example.detailLevel";
 
     /**
-     * Context key indicating the preferred context to use when creating example values for simple
+     * Context key indicating the preferred context to use when creating EXAMPLE values for simple
      * data types.
      */
     public static final String CK_EXAMPLE_CONTEXT = "schemacompiler.example.context";
 
     /**
      * Context key indicating the maximum number of times that repeating elements should be
-     * displayed in generated example output.
+     * displayed in generated EXAMPLE output.
      */
     public static final String CK_EXAMPLE_MAX_REPEAT = "schemacompiler.example.maxRepeat";
 
     /**
      * Context key indicating the maximum depth that should be included for nested elements in
-     * generated example output.
+     * generated EXAMPLE output.
      */
     public static final String CK_EXAMPLE_MAX_DEPTH = "schemacompiler.example.maxDepth";
 
     /**
      * Context key indicating the maximum depth that should be included for nested elements in
-     * generated example output.
+     * generated EXAMPLE output.
      */
     public static final String CK_SUPPRESS_OPTIONAL_FIELDS = "schemacompiler.example.suppressOptionalFields";
 
     /**
      * Context key indicating the relative path where schema files are located, relative to the
-     * example XML document being generated.
+     * EXAMPLE XML document being generated.
      */
     public static final String CK_EXAMPLE_SCHEMA_RELATIVE_PATH = "schemacompiler.example.schemaRelativePath";
 

@@ -44,7 +44,7 @@ public class ComplexObjectWriter<T extends ComplexTypeDocumentationBuilder<?>> e
 	public void addAliasInfo(Content aliasTree) {
 		List<String> aliasList = member.getAliases();
 		
-		if ((aliasList != null) && (aliasList.size() > 0)) {
+		if ((aliasList != null) && !aliasList.isEmpty()) {
 			AliasInfoWriter aliasWriter = new AliasInfoWriter(this, member);
 			aliasWriter.addInfo(aliasTree);
 		}

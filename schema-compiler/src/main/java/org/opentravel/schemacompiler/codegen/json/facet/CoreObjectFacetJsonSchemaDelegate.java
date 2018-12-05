@@ -53,7 +53,7 @@ public class CoreObjectFacetJsonSchemaDelegate extends TLFacetJsonSchemaDelegate
                 TLCoreObject ownerExtension = (TLCoreObject) FacetCodegenUtils
                         .getFacetOwnerExtension(owner);
 
-                if (owner.getRoleEnumeration().getRoles().size() > 0) {
+                if (!owner.getRoleEnumeration().getRoles().isEmpty()) {
                 	JsonSchemaNamedReference roleAttr = new JsonSchemaNamedReference();
                 	
                 	if (ownerExtension != null) {

@@ -67,11 +67,14 @@ import org.w3c.dom.NodeList;
 
 /**
  * <code>ExampleVisitor</code> component used to construct a DOM tree containing
- * the example data.
+ * the EXAMPLE data.
  * 
  * @author S. Livezey
  */
 public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
+	
+	private static final String EXTENSION = "extension";
+	private static final String OTHER_VALUE = "Other_Value";
 	
 	private Map<String,String> namespaceMappings = new HashMap<>();
 	private Set<String> extensionPointNamespaces = new HashSet<>();
@@ -87,11 +90,11 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
 	}
 
 	/**
-	 * Contstructor that provides the navigation options to use during example
+	 * Contstructor that provides the navigation options to use during EXAMPLE
 	 * generation.
 	 * 
 	 * @param options
-	 *            the example generation options
+	 *            the EXAMPLE generation options
 	 */
 	public DOMExampleVisitor(String preferredContext) {
 		super(preferredContext);
@@ -142,14 +145,6 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
 	public Collection<String> getBoundNamespaces() {
 		List<String> nsList = new ArrayList<>();
 
-		/*
-		 * Commented out this line due to false validation errors on
-		 * substitution group elements that result when multiple namespace
-		 * mappings are included in the 'xsi:schemaLocation' attribute of an
-		 * example XML document.
-		 * 
-		 * nsList.addAll( extensionPointNamespaces );
-		 */
 		if ((domDocument != null) && (domDocument.getDocumentElement() != null)) {
 			nsList.add(0, domDocument.getDocumentElement().getNamespaceURI());
 		}
@@ -447,7 +442,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
     public void startOpenEnumeration(TLOpenEnumeration openEnum) {
         super.startOpenEnumeration(openEnum);
         createSimpleElement(openEnum);
-		context.getNode().setAttribute("extension", "Other_Value");
+		context.getNode().setAttribute(EXTENSION, OTHER_VALUE);
     }
 
     /**
@@ -457,7 +452,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
     public void startRoleEnumeration(TLRoleEnumeration roleEnum) {
         super.startRoleEnumeration(roleEnum);
         createSimpleElement(roleEnum);
-		context.getNode().setAttribute("extension", "Other_Value");
+		context.getNode().setAttribute(EXTENSION, OTHER_VALUE);
     }
 
     /**
@@ -473,7 +468,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
             parentType = ((TLValueWithAttributes) parentType).getParentType();
         }
 
-        // Construct the example content for the VWA
+        // Construct the EXAMPLE content for the VWA
         super.startValueWithAttributes(valueWithAttributes);
         createComplexElement(valueWithAttributes);
 
@@ -487,7 +482,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
         
 		if ((parentType instanceof TLOpenEnumeration)
 				|| (parentType instanceof TLRoleEnumeration)) {
-			context.getNode().setAttribute("extension", "Other_Value");
+			context.getNode().setAttribute(EXTENSION, OTHER_VALUE);
         }
 		context.getNode().setTextContent(
 				generateExampleValue(valueWithAttributes));
@@ -617,8 +612,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
 		context.setNode(newElement);
 
         // Assign the new DOM element as a child of the previous context
-		if (contextStack.isEmpty()
-				|| (contextStack.peek().getNode() == null)) {
+		if (contextStack.isEmpty() || (contextStack.peek().getNode() == null)) {
             domDocument.appendChild(newElement);
         } else {
 			contextStack.peek().getNode().appendChild(newElement);
@@ -736,7 +730,10 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
                     	// one more level to find the facet that declared (or inherited) this
 						// property.
                         if (facetStack.size() > 1) {
-							propertyOwner = facetStack.get(facetStack.size() - 2);
+                        	TLPropertyOwner top = facetStack.pop();
+                        	
+							propertyOwner = facetStack.peek();
+							facetStack.push( top );
                         } else {
 							propertyOwner = property.getOwner();
                         }
@@ -914,9 +911,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
             if (rootElement == null)
                 rootElement = element;
 
-			if ((namespace != null)
-					&& !namespace.equals(rootElement.getNamespaceURI())) {
-
+			if (!namespace.equals(rootElement.getNamespaceURI())) {
                 // Identify a unique prefix for this namespace
                 prefix = preferredPrefix;
                 if (prefix == null)
@@ -941,7 +936,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
     }
 
     /**
-	 * Adds an example role value for the given core object and each of the
+	 * Adds an EXAMPLE role value for the given core object and each of the
 	 * extended objects that it inherits role attributes from.
      * 
      * @param coreObject
@@ -949,7 +944,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
      */
 	protected void addRoleAttributes(TLCoreObject coreObject) {
         while (coreObject != null) {
-            if (coreObject.getRoleEnumeration().getRoles().size() > 0) {
+            if (!coreObject.getRoleEnumeration().getRoles().isEmpty()) {
                 TLCoreObject extendedCore = (TLCoreObject) FacetCodegenUtils
                         .getFacetOwnerExtension(coreObject);
 				String attrName = (extendedCore == null) ? "role" : coreObject
@@ -968,7 +963,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
 	 * base payload type of the operation facet to the current DOM element.
      * 
      * @param operationFacet
-	 *            the operation facet for which to add example web service
+	 *            the operation facet for which to add EXAMPLE web service
 	 *            payload content
      */
 	protected void addOperationPayloadContent(TLFacet operationFacet) {
@@ -983,12 +978,12 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
 					operationFacet);
             
             for (String ns : nsMappings.keySet()) {
-            	String _prefix = nsMappings.get( ns );
-            	String prefix = _prefix;
+            	String origPrefix = nsMappings.get( ns );
+            	String prefix = origPrefix;
             	int counter = 1;
             	
             	while (namespaceMappings.containsValue( prefix )) {
-            		prefix = _prefix + counter;
+            		prefix = origPrefix + counter;
             		counter++;
             	}
             	namespaceMappings.put( ns, prefix );
@@ -1040,7 +1035,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
 	
     /**
 	 * Handles the deferred assignment of 'IDREF' and 'IDREFS' values as a
-	 * post-processing step of the example generation process.
+	 * post-processing step of the EXAMPLE generation process.
      */
 	private class DOMIdReferenceAssignment extends IdReferenceAssignment {
 

@@ -43,16 +43,13 @@ package org.opentravel.schemacompiler.codegen.html;
 import java.io.IOException;
 import java.util.List;
 
-import org.opentravel.schemacompiler.model.LibraryMember;
-import org.opentravel.schemacompiler.codegen.html.LinkInfoImpl;
+import org.opentravel.schemacompiler.codegen.html.markup.HtmlConstants;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlStyle;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTag;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTree;
-import org.opentravel.schemacompiler.codegen.html.markup.HtmlConstants;
 import org.opentravel.schemacompiler.codegen.html.markup.RawHtml;
 import org.opentravel.schemacompiler.codegen.html.markup.StringContent;
-import org.opentravel.schemacompiler.codegen.html.DocletAbortException;
-import org.opentravel.schemacompiler.codegen.html.IndexBuilder;
+import org.opentravel.schemacompiler.model.LibraryMember;
 
 /**
  * Generate the file with list of all the classes in this run. This page will be
@@ -80,11 +77,6 @@ public class AllObjectsFrameWriter extends HtmlDocletWriter {
      * Index of all the classes.
      */
     protected IndexBuilder indexbuilder;
-
-    /**
-     * BR tag to be used within a document tree.
-     */
-    final HtmlTree BR = new HtmlTree(HtmlTag.BR);
 
     /**
      * Construct AllClassesFrameWriter object. Also initilises the indexbuilder
@@ -136,16 +128,16 @@ public class AllObjectsFrameWriter extends HtmlDocletWriter {
      * Print all the classes in the file.
      * @param wantFrames True if we want frames.
      */
-    protected void buildAllMembersFile(boolean wantFrames) throws IOException {
+    protected void buildAllMembersFile(boolean wantFrames) {
         String label = configuration.getText("doclet.All_Members");
         Content body = getBody(false, getWindowTitle(label));
         Content heading = HtmlTree.heading(HtmlConstants.TITLE_HEADING,
-                HtmlStyle.bar, allMembersLabel);
+                HtmlStyle.BAR, allMembersLabel);
         body.addContent(heading);
         Content ul = new HtmlTree(HtmlTag.UL);
         // Generate the class links and add it to the tdFont tree.
         addAllClasses(ul, wantFrames);
-        Content div = HtmlTree.div(HtmlStyle.indexContainer, ul);
+        Content div = HtmlTree.div(HtmlStyle.INDEX_CONTAINER, ul);
         body.addContent(div);
         printHtmlDocument(null, false, body);
     }

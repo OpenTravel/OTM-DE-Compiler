@@ -44,6 +44,7 @@ public class IndicatorDocumentationBuilder extends
 
 	@Override
 	public void build() throws Exception {
+		// No action required
 	}
 
 }

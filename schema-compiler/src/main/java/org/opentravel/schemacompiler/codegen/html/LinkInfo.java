@@ -40,10 +40,8 @@
 
 package org.opentravel.schemacompiler.codegen.html;
 
-import org.opentravel.schemacompiler.model.LibraryMember;
-
 import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
-import org.opentravel.schemacompiler.codegen.html.Configuration;
+import org.opentravel.schemacompiler.model.LibraryMember;
 
 /**
  * Encapsulates information about a link.
@@ -80,7 +78,7 @@ public abstract class LinkInfo {
     public String label;
 
     /**
-     * True if the link should be strong.
+     * True if the link should be STRONG.
      */
     public boolean isStrong = false;
 

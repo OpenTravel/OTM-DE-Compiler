@@ -213,4 +213,10 @@ public class HtmlConstants {
      * Html tag for the member heading.
      */
     public static final HtmlTag MEMBER_HEADING = HtmlTag.H4;
+    
+    /**
+     * Private constructor to prevent instantiation.
+     */
+    private HtmlConstants() {}
+    
 }

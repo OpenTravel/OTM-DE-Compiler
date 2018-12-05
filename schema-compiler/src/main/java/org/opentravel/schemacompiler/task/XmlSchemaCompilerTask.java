@@ -75,7 +75,7 @@ public class XmlSchemaCompilerTask extends AbstractSchemaCompilerTask {
         */
         compileXmlSchemas(userDefinedLibraries, legacySchemas, context, null, filter);
 
-        // Generate example files if required
+        // Generate EXAMPLE files if required
         if (isGenerateExamples()) {
             generateExampleArtifacts(
             		userDefinedLibraries, context, new LibraryFilenameBuilder<AbstractLibrary>(),

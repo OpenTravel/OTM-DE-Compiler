@@ -108,7 +108,7 @@ public class SwaggerParameter implements JsonDocumentationOwner {
 	}
 
 	/**
-	 * Returns the list of example value definitions for this schema.
+	 * Returns the list of EXAMPLE value definitions for this schema.
 	 *
 	 * @return List<JsonContextualValue>
 	 */

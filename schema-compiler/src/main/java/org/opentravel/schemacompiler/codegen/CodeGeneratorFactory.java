@@ -68,9 +68,8 @@ public final class CodeGeneratorFactory {
      */
     public static CodeGeneratorFactory getInstance(String factoryName) {
         ApplicationContext appContext = SchemaCompilerApplicationContext.getContext();
-        CodeGeneratorFactory factory = (CodeGeneratorFactory) appContext.getBean(factoryName);
-
-        return factory;
+        
+        return (CodeGeneratorFactory) appContext.getBean(factoryName);
     }
 
     /**
@@ -119,9 +118,8 @@ public final class CodeGeneratorFactory {
                 try {
                     codeGenerator = codegenClass.newInstance();
 
-                } catch (Throwable t) {
-                    throw new CodeGenerationException("Unable to create code generator instance.",
-                            t);
+                } catch (Exception e) {
+                    throw new CodeGenerationException("Unable to create code generator instance.", e);
                 }
             }
         }

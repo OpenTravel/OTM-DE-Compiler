@@ -39,7 +39,7 @@ public interface DocumentationBuilder {
 	
 	public String getOwningLibrary();
 	
-	public static enum DocumentationBuilderType {
+	public enum DocumentationBuilderType {
 		BUSINESS_OBJECT("BusinessObject"), 
 		CORE_OBJECT("CoreObject"), 
 		CHOICE_OBJECT("ChoiceObject"),
@@ -64,6 +64,7 @@ public interface DocumentationBuilder {
 		/**
 		 * @return the type
 		 */
+		@Override
 		public String toString() {
 			return type;
 		}

@@ -47,7 +47,7 @@ package org.opentravel.schemacompiler.codegen.html;
  */
 public abstract class LinkFactory {
 
-    /**
+	/**
      * Return an empty instance of the link output object.
      *
      * @return an empty instance of the link output object.
@@ -63,8 +63,7 @@ public abstract class LinkFactory {
     public LinkOutput getLinkOutput(LinkInfo linkInfo) {
       if (linkInfo.builder != null) {
             //Just a class link
-            LinkOutput linkOutput = getObjectLink(linkInfo);
-            return linkOutput;
+            return getObjectLink(linkInfo);
         } else {
             return null;
         }
@@ -79,24 +78,4 @@ public abstract class LinkFactory {
      */
     protected abstract LinkOutput getObjectLink(LinkInfo linkInfo);
 
-
-    /**
-     * Return &amp;lt;, which is used in type parameters.  Override this
-     * if your doclet uses something different.
-     *
-     * @return return &amp;lt;, which is used in type parameters.
-     */
-    protected String getLessThanString() {
-        return "&lt;";
-    }
-
-    /**
-     * Return &amp;gt;, which is used in type parameters.  Override this
-     * if your doclet uses something different.
-     *
-     * @return return &amp;gt;, which is used in type parameters.
-     */
-    protected String getGreaterThanString() {
-        return "&gt;";
-    }
 }

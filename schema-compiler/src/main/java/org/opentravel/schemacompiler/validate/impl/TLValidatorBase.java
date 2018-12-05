@@ -255,13 +255,13 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
     }
     
     /**
-     * If the given owner provides example values, this method will issue a warning if the assigned
+     * If the given owner provides EXAMPLE values, this method will issue a warning if the assigned
      * type is 'ota:Empty'.
      * 
      * @param exampleOwner
-     *            the example owner to analyze
+     *            the EXAMPLE owner to analyze
      * @param assignedType
-     *            the assigned type of the example owner
+     *            the assigned type of the EXAMPLE owner
      * @param propertyName
      *            the name of the property for which a warning should be issues
      * @param builder

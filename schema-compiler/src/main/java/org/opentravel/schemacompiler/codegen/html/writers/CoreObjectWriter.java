@@ -82,7 +82,7 @@ public class CoreObjectWriter
 				Content tableTree = getTableTree();
 				for (TLRole role : roles) {
 					HtmlTree tdName = new HtmlTree(HtmlTag.TD);
-					tdName.setStyle(HtmlStyle.colFirst);
+					tdName.setStyle(HtmlStyle.COL_FIRST);
 					Content strong = HtmlTree.strong(new RawHtml(role.getName()));
 					Content code = HtmlTree.code(strong);
 					tdName.addContent(code);
@@ -100,7 +100,7 @@ public class CoreObjectWriter
 
 
 		/**
-		 * {@inheritDoc}TODO pass key to method.
+		 * {@inheritDoc}
 		 */
 		@Override
 		protected String getInfoTableSummary() {

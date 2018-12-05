@@ -43,9 +43,6 @@ import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import org.opentravel.schemacompiler.codegen.html.Configuration;
-import org.opentravel.schemacompiler.codegen.html.SourcePosition;
-
 
 
 /**
@@ -103,10 +100,8 @@ public class MessageRetriever {
      *
      * @param key selects message from resource
      * @param args arguments to be replaced in the message.
-     * @throws MissingResourceException when the key does not
-     * exist in the properties file.
      */
-    public String getText(String key, Object... args) throws MissingResourceException {
+    public String getText(String key, Object... args) {
         if (messageRB == null) {
             try {
                 messageRB = ResourceBundle.getBundle(resourcelocation);

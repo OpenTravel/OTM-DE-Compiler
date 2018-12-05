@@ -114,7 +114,7 @@ import org.opentravel.schemacompiler.security.UserPrincipal;
  * </tr>
  * <tr>
  * <td>securityAuthentication</td>
- * <td>A string specifying the type of authentication to use. "none", "simple", "strong" or a
+ * <td>A string specifying the type of authentication to use. "none", "simple", "STRONG" or a
  * provider specific definition can be used. If no value is given the providers default is used.</td>
  * <td>Optional</td>
  * <td>Optional</td>
@@ -300,22 +300,22 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     @Override
     public boolean isValidUser(String userId, String password) throws RepositorySecurityException {
         boolean isValid = false;
-        try {
-            // Occasionally, the directory context will timeout, so always make a second attempt
-            // before giving up.
+        int attemptCount = 0;
+        
+        while (!isValid && (attemptCount < 2)) {
             try {
                 initializeConfigurationSettings();
                 isValid = checkCredentials(userId, password);
 
-            } catch (CommunicationException e) {
-                isValid = checkCredentials(userId, password);
-
-            } catch (ServiceUnavailableException e) {
-                isValid = checkCredentials(userId, password);
+            } catch (CommunicationException | ServiceUnavailableException e) {
+            	// Continue to make another attempt
+            	
+            } catch (NamingException e) {
+                log.error("Error from remote directory: " + e.getMessage(), e);
+                
+            } finally {
+            	attemptCount++;
             }
-
-        } catch (NamingException e) {
-            log.error("Error from remote directory: " + e.getMessage(), e);
         }
         return isValid;
     }
@@ -417,13 +417,11 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
             AuthenticationCacheEntry cacheEntry = getCachedAuthentication(userId);
             boolean isAuthenticationCached = false;
 
-            if (cacheEntry != null) {
-                if ((authCredentials != null)
-                        && PasswordHelper.encrypt(authCredentials).equals(
-                                cacheEntry.getEncryptedPassword())) {
-                    isAuthenticationCached = true;
-                    isValid = cacheEntry.isAuthenticationSuccessful();
-                }
+            if ((cacheEntry != null) && (authCredentials != null)
+                    && PasswordHelper.encrypt(authCredentials).equals(
+                            cacheEntry.getEncryptedPassword())) {
+                isAuthenticationCached = true;
+                isValid = cacheEntry.isAuthenticationSuccessful();
             }
 
             if (!isAuthenticationCached) {
@@ -463,7 +461,10 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
         } finally {
             try {
                 if (context != null) context.close();
-            } catch (Throwable t) {}
+                
+            } catch (Exception e) {
+				log.warn("Error closing JNDI context.", e);
+            }
         }
     }
 
@@ -503,7 +504,10 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
 		} finally {
 			try {
 				if (context != null) context.close();
-			} catch (Throwable t) {}
+				
+			} catch (Exception e) {
+				log.warn("Error closing JNDI context.", e);
+			}
 		}
 	}
 
@@ -524,15 +528,7 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
 					if (context == null) {
 						context = openConnection( connectionPrincipal, connectionPassword );
 					}
-					try {
-						refreshUserInfo( userInfo, context );
-						
-					} catch (NamingException e) {
-						log.warn( "Error refreshing user information from directory.", e );
-						
-					} finally {
-						profileCacheTimeouts.put( userId, System.currentTimeMillis() + authenticationCacheTimeout );
-					}
+					refreshUserInfo( userInfo, context );
 				}
 			}
 			
@@ -542,7 +538,10 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
 		} finally {
 			try {
 				if (context != null) context.close();
-			} catch (Throwable t) {}
+				
+			} catch (Exception e) {
+				log.warn("Error closing JNDI context.");
+			}
 		}
 	}
 
@@ -552,33 +551,43 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
 	 * @param userInfo  the user information to be refreshed
 	 * @param context  the directory context to use for the refresh
 	 */
-	private void refreshUserInfo(UserInfo userInfo, DirContext context) throws NamingException {
-		String userId = (userInfo == null) ? null : userInfo.getUserId();
-		String userDn;
-		
-		if (userId != null) {
-			if (mode == AuthenticationMode.USER_LOOKUP) {
-				userDn = userPattern.format(new String[] { userId });
-				
-			} else {
-				userDn = findUserDn( userId, context );
-			}
+	private void refreshUserInfo(UserInfo userInfo, DirContext context) {
+		try {
+			String userId = (userInfo == null) ? null : userInfo.getUserId();
+			String userDn;
 			
-			if (userDn == null) {
-				log.warn( "User account does not exist in the directory: " + userId );
-				
-			} else { // Make sure the account profile fields are populated from the directory
-				String contextDnSuffix = "," + context.getNameInNamespace();
-				if (userDn.endsWith( contextDnSuffix )) {
-					userDn = userDn.replaceAll( contextDnSuffix, "" );
+			if (userId != null) {
+				if (mode == AuthenticationMode.USER_LOOKUP) {
+					userDn = userPattern.format(new String[] { userId });
+					
+				} else {
+					userDn = findUserDn( userId, context );
 				}
 				
-				Attributes userAttrs = context.getAttributes( userDn, new String[] {
-						userLastNameAttribute, userFirstNameAttribute, userEmailAttribute } );
-				
-				userInfo.setLastName( getAttributeValue( userAttrs, userLastNameAttribute ) );
-				userInfo.setFirstName( getAttributeValue( userAttrs, userFirstNameAttribute ) );
-				userInfo.setEmailAddress( getAttributeValue( userAttrs, userEmailAttribute ) );
+				if (userDn == null) {
+					log.warn( "User account does not exist in the directory: " + userId );
+					
+				} else { // Make sure the account profile fields are populated from the directory
+					String contextDnSuffix = "," + context.getNameInNamespace();
+					if (userDn.endsWith( contextDnSuffix )) {
+						userDn = userDn.replaceAll( contextDnSuffix, "" );
+					}
+					
+					Attributes userAttrs = context.getAttributes( userDn, new String[] {
+							userLastNameAttribute, userFirstNameAttribute, userEmailAttribute } );
+					
+					userInfo.setLastName( getAttributeValue( userAttrs, userLastNameAttribute ) );
+					userInfo.setFirstName( getAttributeValue( userAttrs, userFirstNameAttribute ) );
+					userInfo.setEmailAddress( getAttributeValue( userAttrs, userEmailAttribute ) );
+				}
+			}
+			
+		} catch (NamingException e) {
+			log.warn( "Error refreshing user information from directory.", e );
+			
+		} finally {
+			if (userInfo != null) {
+				profileCacheTimeouts.put( userInfo.getUserId(), System.currentTimeMillis() + authenticationCacheTimeout );
 			}
 		}
 	}
@@ -601,18 +610,18 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
         DirContext context = null;
 
         if (alternateUrl == null) {
-            context = new InitialDirContext(getDirectoryContextEnvironment(loginId, loginPassword,
-                    false));
+            context = new InitialDirContext( new Hashtable<>(
+            		getDirectoryContextEnvironment(loginId, loginPassword, false) ) );
 
         } else {
             try {
-                context = new InitialDirContext(getDirectoryContextEnvironment(loginId,
-                        loginPassword, false));
+                context = new InitialDirContext(new Hashtable<>(
+                		getDirectoryContextEnvironment(loginId, loginPassword, false) ) );
 
             } catch (NamingException e) {
                 log.warn("Unable to connect using primary directory URL - attempting using alternate address.");
-                context = new InitialDirContext(getDirectoryContextEnvironment(loginId,
-                        loginPassword, true));
+                context = new InitialDirContext(new Hashtable<>(
+                		getDirectoryContextEnvironment(loginId, loginPassword, true) ) );
             }
         }
         return context;
@@ -739,9 +748,9 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
      *            if true, the alternate URL will be employed
      * @return Hashtable<String,String>
      */
-    protected Hashtable<String, String> getDirectoryContextEnvironment(String loginId,
+    protected Map<String, String> getDirectoryContextEnvironment(String loginId,
             String loginPassword, boolean isConnectionRetry) {
-        Hashtable<String,String> env = new Hashtable<>();
+        Map<String,String> env = new HashMap<>();
 
         env.put(Context.INITIAL_CONTEXT_FACTORY, contextFactory);
 
@@ -929,7 +938,7 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Returns the string specifying the type of authentication to use. "none", "simple", "strong"
+     * Returns the string specifying the type of authentication to use. "none", "simple", "STRONG"
      * or a provider specific definition can be used. If no value is given the providers default is
      * used.
      * 
@@ -940,7 +949,7 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Assigns the string specifying the type of authentication to use. "none", "simple", "strong"
+     * Assigns the string specifying the type of authentication to use. "none", "simple", "STRONG"
      * or a provider specific definition can be used. If no value is given the providers default is
      * used.
      * 

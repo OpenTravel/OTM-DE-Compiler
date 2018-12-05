@@ -77,7 +77,7 @@ public class RepositoryLockManager {
 
     /**
      * Acquires a read lock on the requested resource. If another thread owns (or has requested) a
-     * write lock on the same resource, this method will block until the write lock has been
+     * write lock on the same resource, this method will BLOCK until the write lock has been
      * released.
      * 
      * @param namespace
@@ -124,7 +124,7 @@ public class RepositoryLockManager {
 
     /**
      * Acquires a write lock on the requested resource. If one or more threads own a read or write
-     * lock on the same resource, this method will block until the lock(s) have been released.
+     * lock on the same resource, this method will BLOCK until the lock(s) have been released.
      * 
      * @param namespace
      *            the namespace to which the resource is assigned

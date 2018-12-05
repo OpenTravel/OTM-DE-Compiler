@@ -18,6 +18,7 @@ package org.opentravel.schemacompiler.codegen.example;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.xml.XMLConstants;
@@ -69,12 +70,16 @@ import com.fasterxml.jackson.databind.node.ValueNode;
 
 /**
  * <code>ExampleVisitor</code> component used to construct a JSON tree
- * containing the example data.
+ * containing the EXAMPLE data.
  * 
  * @author E. Bronson
  */
 public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 
+	private static final String VALUE = "value";
+	private static final String EXTENSION = "extension";
+	private static final String OTHER_VALUE = "Other_Value";
+	
 	private JsonNodeFactory nodeFactory = JsonNodeFactory.withExactBigDecimals( true );
 	private ObjectNode node;
 	private List<JsonIdReferenceAssignment> referenceAssignments = new ArrayList<>();
@@ -93,7 +98,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 
 	@Override
 	public Collection<String> getBoundNamespaces() {
-		return null;
+		return Collections.emptyList();
 	}
 
 	/**
@@ -136,39 +141,6 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 		TLAlias elementAlias = context.getModelAlias();
 		
 		addJsonFacetType( facet, elementAlias );
-//		NamedEntity elementType = facet;
-		
-		// If this element is part of a polymorphic array, use the array values for
-		// the @type property
-//		if (!contextStack.isEmpty()) {
-//			ExampleContext ctx = contextStack.peek();
-//			
-//			if (ctx.getNode().isArray() && (ctx.getModelElement() != null)) {
-//				elementType = ctx.getModelElement().getType();
-//				elementAlias = ctx.getModelAlias();
-//			}
-//		}
-//		
-//		if (elementType instanceof TLAlias) {
-//			elementAlias = (TLAlias) elementType;
-//			elementType = elementAlias.getOwningEntity();
-//		}
-		/*
-		if ((elementType instanceof TLFacet) || (elementType instanceof TLFacetOwner)) {
-			String typeName;
-			
-			if (elementAlias != null) {
-				typeName = JsonSchemaNamingUtils.getGlobalDefinitionName( elementAlias );
-			} else {
-				typeName = JsonSchemaNamingUtils.getGlobalDefinitionName( elementType );
-			}
-			((ObjectNode) context.getNode()).put("@type", typeName);
-			if ("SampleCore_Detail".equals(typeName)) {
-				System.out.println("tag-1");
-			}
-		}
-		((ObjectNode) context.getNode()).put("@type", "DUMMYTYPE-FACET");
-		*/
 		
 		// Add additional properties for specialized entity types
 		if (facet.getOwningEntity() instanceof TLCoreObject) {
@@ -255,13 +227,6 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 				addRoleAttributes((TLCoreObject) listFacet.getOwningEntity());
 			}
 		}
-
-//		((ObjectNode) context.getNode()).put("@type", "DUMMYTYPE-LISTFACET");
-
-//		if ((listFacet.getOwningEntity() instanceof TLCoreObject)
-//				&& !(listFacet.getItemFacet() instanceof TLSimpleFacet)) {
-//			addRoleAttributes((TLCoreObject) listFacet.getOwningEntity());
-//		}
 	}
 
 	/**
@@ -414,18 +379,18 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 		if ((repeat > 1 || repeat < 0) && !(type instanceof TLListFacet)
 				&& !element.isReference()) {
 			String nodeName = getPropertyElementName(element, type);
-			JsonNode node = context.getNode();
-			JsonNode jn = node.findValue(nodeName);
+			JsonNode n = context.getNode();
+			JsonNode jn = n.findValue(nodeName);
 			ArrayNode arrayNode;
 			if (jn instanceof ArrayNode) {
 				// must be an array
 				arrayNode = (ArrayNode) jn;
 			} else {
 				arrayNode = nodeFactory.arrayNode();
-				((ObjectNode) node).set(nodeName, arrayNode);
+				((ObjectNode) n).set(nodeName, arrayNode);
 			}
 
-			contextStack.add(context);
+			contextStack.push(context);
 			context = new ExampleContext(element);
 			context.setNode(arrayNode);
 		}
@@ -518,7 +483,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 	public void startOpenEnumeration(TLOpenEnumeration openEnum) {
 		super.startOpenEnumeration(openEnum);
 		createSimpleElement(openEnum);
-		((ObjectNode) context.getNode()).put("extension", "Other_Value");
+		((ObjectNode) context.getNode()).put(EXTENSION, OTHER_VALUE);
 	}
 
 	/**
@@ -528,7 +493,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 	public void startRoleEnumeration(TLRoleEnumeration roleEnum) {
 		super.startRoleEnumeration(roleEnum);
 		createSimpleElement(roleEnum);
-		((ObjectNode) context.getNode()).put("extension", "Other_Value");
+		((ObjectNode) context.getNode()).put(EXTENSION, OTHER_VALUE);
 	}
 
 	/**
@@ -544,27 +509,27 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 			parentType = ((TLValueWithAttributes) parentType).getParentType();
 		}
 
-		// Construct the example content for the VWA
+		// Construct the EXAMPLE content for the VWA
 		super.startValueWithAttributes(valueWithAttributes);
 		createObjectNode(valueWithAttributes);
 
 		// Queue up IDREF(S) attributes for assignment during post-processing
 		if (XsdCodegenUtils.isIdRefType(valueWithAttributes.getParentType())) {
-			referenceAssignments.add(new JsonIdReferenceAssignment(null, 1, "value", false));
+			referenceAssignments.add(new JsonIdReferenceAssignment(null, 1, VALUE, false));
 		}
 		if (XsdCodegenUtils.isIdRefsType(valueWithAttributes.getParentType())) {
-			referenceAssignments.add(new JsonIdReferenceAssignment(null, 3, "value", false));
+			referenceAssignments.add(new JsonIdReferenceAssignment(null, 3, VALUE, false));
 		}
 		
 		if ((parentType instanceof TLOpenEnumeration)
 				|| (parentType instanceof TLRoleEnumeration)) {
-			((ObjectNode) context.getNode()).put("extension", "Other_Value");
+			((ObjectNode) context.getNode()).put(EXTENSION, OTHER_VALUE);
 		}
 		if (XsdCodegenUtils.isIdRefsType(valueWithAttributes.getParentType())) {
-			((ObjectNode) context.getNode()).set("value",
+			((ObjectNode) context.getNode()).set(VALUE,
 					generateExampleValueArrayNode(valueWithAttributes));
 		} else {
-			((ObjectNode) context.getNode()).set("value",
+			((ObjectNode) context.getNode()).set(VALUE,
 					generateExampleValueNode(valueWithAttributes));
 		}
 	}
@@ -679,11 +644,11 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 		if (contextStack.isEmpty() || (contextStack.peek().getNode() == null)) {
 			node.set(nodeName, newElement);
 		} else {
-			JsonNode node = contextStack.peek().getNode();
-			if (node.isArray()) {
-				((ArrayNode) node).add(newElement);
+			JsonNode n = contextStack.peek().getNode();
+			if (n.isArray()) {
+				((ArrayNode) n).add(newElement);
 			} else {
-				((ObjectNode) node).set(nodeName, newElement);
+				((ObjectNode) n).set(nodeName, newElement);
 			}
 
 		}
@@ -789,27 +754,27 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 				throw new IllegalStateException(
 						"No element available for new attribute creation.");
 			}
-			JsonNode node;
+			JsonNode n;
 			
 			if (context.getModelAttribute().isReference()) {
 				String value = generateExampleValue(elementType);
 				
 				if (context.getModelAttribute().getReferenceRepeat() > 1) {
-					node = getArrayNode(value); // should be an array
+					n = getArrayNode(value); // should be an array
 				} else {
-					node = getTextNode(value);
+					n = getTextNode(value);
 				}
 				
 			} else if ((elementType instanceof TLListFacet)
 					|| XsdCodegenUtils.isIdRefsType((TLPropertyType) elementType)
 					|| isSimpleList( elementType )) {
-				node = generateExampleValueArrayNode(context.getModelAttribute());
+				n = generateExampleValueArrayNode(context.getModelAttribute());
 			
 			} else {
-				node = generateExampleValueNode(context.getModelAttribute());
+				n = generateExampleValueNode(context.getModelAttribute());
 			}
 			((ObjectNode) context.getNode()).set(
-					getAttributeName(context.getModelAttribute()), node);
+					getAttributeName(context.getModelAttribute()), n);
 
 		} else {
 			String nodeName = getElementName(elementType).intern();
@@ -861,9 +826,9 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 	}
 
     /**
-     * Generates an example value node for the given model entity (if possible).
+     * Generates an EXAMPLE value node for the given model entity (if possible).
      * 
-     * @param entity  the entity for which to generate an example
+     * @param entity  the entity for which to generate an EXAMPLE
      * @return ValueNode
      */
     private ValueNode generateExampleValueNode(Object entity) {
@@ -871,9 +836,9 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
     }
     
     /**
-     * Generates an example value node for the given model entity (if possible).
+     * Generates an EXAMPLE value node for the given model entity (if possible).
      * 
-     * @param entity  the entity for which to generate an example
+     * @param entity  the entity for which to generate an EXAMPLE
      * @return ArrayNode
      */
     private ArrayNode generateExampleValueArrayNode(Object entity) {
@@ -889,9 +854,9 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
     }
     
     /**
-     * Returns an example value node for the given model entity (if possible).
+     * Returns an EXAMPLE value node for the given model entity (if possible).
      * 
-     * @param entity  the entity for which to generate an example
+     * @param entity  the entity for which to generate an EXAMPLE
      * @param exampleStr  string representation of the exaple value to return
      * @return ValueNode
      */
@@ -1071,33 +1036,33 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 	}
 
 	private JsonNode getSimpleTypeNode(NamedEntity elementType) {
-		JsonNode node;
+		JsonNode n;
 		
 		// we are a simple type so we should be a TLPropertyType
 		if (elementType instanceof TLListFacet || XsdCodegenUtils.isIdType((TLPropertyType) elementType)) {
-			node = generateExampleValueNode(context.getModelElement());
+			n = generateExampleValueNode(context.getModelElement());
 		} else {
 			if (XsdCodegenUtils.isIdRefsType((TLPropertyType) elementType)) {
-				node = generateExampleValueArrayNode(elementType);
+				n = generateExampleValueArrayNode(elementType);
 			} else {
 				if (context.getModelElement() != null) {
-					node = generateExampleValueNode(context.getModelElement());
+					n = generateExampleValueNode(context.getModelElement());
 				} else {
-					node = generateExampleValueNode(elementType);
+					n = generateExampleValueNode(elementType);
 				}
 			}
 		}
 		
 		if (elementType instanceof TLOpenEnumeration) {
 			ObjectNode objNode = createObjectNode(elementType);
-			objNode.set("value", node);
-			node = objNode;
+			objNode.set(VALUE, n);
+			n = objNode;
 			
 		} else if ((elementType instanceof TLSimple && ((TLSimple) elementType)
 				.isListTypeInd()) || elementType instanceof TLListFacet) {
-			node = generateExampleValueArrayNode( elementType );
+			n = generateExampleValueArrayNode( elementType );
 		}
-		return node;
+		return n;
 	}
 
 	/**
@@ -1240,7 +1205,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 	}
 
 	/**
-	 * Adds an example role value for the given core object and each of the
+	 * Adds an EXAMPLE role value for the given core object and each of the
 	 * extended objects that it inherits role attributes from.
 	 * 
 	 * @param coreObject
@@ -1248,7 +1213,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 	 */
 	protected void addRoleAttributes(TLCoreObject coreObject) {
 		while (coreObject != null) {
-			if (coreObject.getRoleEnumeration().getRoles().size() > 0) {
+			if (!coreObject.getRoleEnumeration().getRoles().isEmpty()) {
 				TLCoreObject extendedCore = (TLCoreObject) FacetCodegenUtils
 						.getFacetOwnerExtension(coreObject);
 				String attrName = (extendedCore == null) ? "role" : coreObject
@@ -1267,21 +1232,21 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 	 * base payload type of the operation facet to the current json node.
 	 *
 	 * @param operationFacet
-	 *            the operation facet for which to add example web service
+	 *            the operation facet for which to add EXAMPLE web service
 	 *            payload content
 	 */
 	protected void addOperationPayloadContent(TLFacet operationFacet) {
-		ObjectNode node = (ObjectNode) context.getNode();
+		ObjectNode n = (ObjectNode) context.getNode();
 
-		if ((node != null) && (wsdlBindings != null)) {
-			wsdlBindings.addPayloadExampleContent(node, operationFacet);
+		if ((n != null) && (wsdlBindings != null)) {
+			wsdlBindings.addPayloadExampleContent(n, operationFacet);
 		}
 
 	}
 
 	/**
 	 * Handles the deferred assignment of 'IDREF' and 'IDREFS' values as a
-	 * post-processing step of the example generation process.
+	 * post-processing step of the EXAMPLE generation process.
 	 */
 	private class JsonIdReferenceAssignment extends IdReferenceAssignment{
 

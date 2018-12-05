@@ -112,7 +112,7 @@ public abstract class AbstractIndicatorInfoWriter<T extends AttributeOwnerDocume
 	 * #getTableSummary()
 	 */
 	/**
-	 * {@inheritDoc}TODO pass key to method.
+	 * {@inheritDoc}
 	 */
 	@Override
 	protected String getInfoTableSummary() {

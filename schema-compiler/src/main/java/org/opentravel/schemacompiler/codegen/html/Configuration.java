@@ -54,13 +54,13 @@ import org.opentravel.schemacompiler.model.TLModel;
 /**
  * Configure the output based on the command line options.
  * <p>
- * Also determine the length of the command line option. For example, for a
+ * Also determine the length of the command line option. For EXAMPLE, for a
  * option "-header" there will be a string argument associated, then the the
  * length of option "-header" is two. But for option "-nohelp" no argument is
  * needed so it's length is 1.
  * </p>
  * <p>
- * Also do the error checking on the options used. For example it is illegal to
+ * Also do the error checking on the options used. For EXAMPLE it is illegal to
  * use "-helpfile" option when already "-nohelp" option is used.
  * </p>
  *
@@ -326,7 +326,7 @@ public class Configuration {
 			List<AbstractLibrary> libs = model.getLibrariesForNamespace(namespace);
 			//only need one library to determine if its a builtin
 			// is this faster than traversing getBuiltinLibraries?
-			if(libs.size() > 0 && libs.get(0) instanceof BuiltInLibrary){
+			if(!libs.isEmpty() && libs.get(0) instanceof BuiltInLibrary){
 				isGenerated = false;
 			}
 		}
@@ -437,11 +437,6 @@ public class Configuration {
 	}
 
 	public void setModel(TLModel model) {
-//		List<String> ns = new ArrayList<String>();
-//		for (TLLibrary lib : model.getUserDefinedLibraries()) {
-//			ns.add(lib.getNamespace());
-//		}
-//		namespaces = ns;
 		this.model = model;
 	}
 

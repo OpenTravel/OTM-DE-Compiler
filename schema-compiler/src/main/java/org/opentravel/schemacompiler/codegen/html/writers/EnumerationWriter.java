@@ -76,11 +76,11 @@ public class EnumerationWriter extends NamedEntityWriter<EnumerationDocumentatio
 			Content label = getInfoLabel();
 			memberTree.addContent(label);
 			List<EnumValueDocumentationBuilder> values = source.getValues();
-			if (values.size() > 0) {
+			if (!values.isEmpty()) {
 				Content tableTree = getTableTree();
 				for (EnumValueDocumentationBuilder edb : values) {
 					HtmlTree tdName = new HtmlTree(HtmlTag.TD);
-					tdName.setStyle(HtmlStyle.colFirst);
+					tdName.setStyle(HtmlStyle.COL_FIRST);
 					Content strong = HtmlTree.strong(new RawHtml(edb.getName()));
 					Content code = HtmlTree.code(strong);
 					tdName.addContent(code);
@@ -98,7 +98,7 @@ public class EnumerationWriter extends NamedEntityWriter<EnumerationDocumentatio
 
 
 		/**
-		 * {@inheritDoc}TODO pass key to method.
+		 * {@inheritDoc}
 		 */
 		@Override
 		protected String getInfoTableSummary() {
@@ -118,9 +118,9 @@ public class EnumerationWriter extends NamedEntityWriter<EnumerationDocumentatio
 		@Override
 		protected String[] getInfoTableHeader() {
 			Configuration config = writer.newConfiguration();
-			String[] header = new String[] { config.getText("doclet.Name"),
+			
+			return new String[] { config.getText("doclet.Name"),
 					config.getText("doclet.Description") };
-			return header;
 		}
 		
 	}

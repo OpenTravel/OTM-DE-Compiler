@@ -144,7 +144,7 @@ public class LibraryInfoWriter extends AbstractInfoWriter<LibraryDocumentationBu
 	private Content getInfo(DocumentationBuilder object,
 			int counter) {
 		HtmlTree tdObjectName = new HtmlTree(HtmlTag.TD);
-		tdObjectName.setStyle(HtmlStyle.colFirst);
+		tdObjectName.setStyle(HtmlStyle.COL_FIRST);
 		addObject(object, tdObjectName);
 		HtmlTree tdSummary = new HtmlTree(HtmlTag.TD);
 		setInfoColumnStyle(tdSummary);

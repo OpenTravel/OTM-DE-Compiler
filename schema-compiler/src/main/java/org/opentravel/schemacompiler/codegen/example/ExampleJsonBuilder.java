@@ -69,7 +69,6 @@ public class ExampleJsonBuilder extends ExampleBuilder<JsonNode> {
 		JSONExampleVisitor visitor = new JSONExampleVisitor(
 				options.getExampleContext());
 		ExampleNavigator.navigate(modelElement, visitor, options);
-		JsonNode node = visitor.getNode();
-		return node;
+		return visitor.getNode();
 	}
 }

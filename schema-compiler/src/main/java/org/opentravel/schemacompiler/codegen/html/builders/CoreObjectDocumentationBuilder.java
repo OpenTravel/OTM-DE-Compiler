@@ -105,7 +105,7 @@ public class CoreObjectDocumentationBuilder extends
 		classInfoTree = writer.getMemberInfoItemTree();
 		writer.addAliasInfo(classInfoTree);
 		tree.addContent(classInfoTree);
-		if (roles.size() > 0) {
+		if (!roles.isEmpty()) {
 			classInfoTree = writer.getMemberInfoItemTree();
 			writer.addRoleInfo(classInfoTree);
 			tree.addContent(classInfoTree);

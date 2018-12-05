@@ -18,13 +18,11 @@ package org.opentravel.schemacompiler.codegen.example;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.util.Collection;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLModelElement;
-import org.opentravel.schemacompiler.validate.ValidationException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -58,21 +56,6 @@ public class JSONExampleCodeGenerator extends
 	private ObjectMapper mapper;
 
 	/**
-	 * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#generateOutput(org.opentravel.schemacompiler.model.ModelElement, org.opentravel.schemacompiler.codegen.CodeGenerationContext)
-	 */
-	@Override
-	public Collection<File> generateOutput(TLModelElement source, CodeGenerationContext context)
-			throws ValidationException, CodeGenerationException {
-		try {
-			return super.generateOutput(source, context);
-			
-		} finally {
-			System.runFinalization();
-			System.gc();
-		}
-	}
-
-	/**
 	 * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#doGenerateOutput(org.opentravel.schemacompiler.model.TLModelElement,
 	 *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
 	 */
@@ -84,12 +67,11 @@ public class JSONExampleCodeGenerator extends
 			ExampleJsonBuilder exampleBuilder = new ExampleJsonBuilder(
 					getOptions(context));
 			exampleBuilder.setModelElement((NamedEntity) source);
-			ObjectMapper mapper = getObjectMapper();
 			JsonNode node = exampleBuilder.buildTree();
-			mapper.writeValue(out, node);
+			getObjectMapper().writeValue(out, node);
 			addGeneratedFile(outputFile);
-		} catch (Throwable t) {
-			throw new CodeGenerationException(t);
+		} catch (Exception e) {
+			throw new CodeGenerationException(e);
 		}
 	}
 

@@ -302,7 +302,7 @@ public class HtmlTree extends Content {
      *
      * @param src the url of the document to be shown in the frame
      * @param name specifies the name of the frame
-     * @param title the title for the frame
+     * @param title the TITLE for the frame
      * @param scrolling specifies whether to display scrollbars in the frame
      * @return an HtmlTree object for the FRAME tag
      */
@@ -693,10 +693,10 @@ public class HtmlTree extends Content {
     }
 
     /**
-     * Generates a TITLE tag with some content.
+     * Generates a title tag with some content.
      *
      * @param body content for the tag
-     * @return an HtmlTree object for the TITLE tag
+     * @return an HtmlTree object for the title tag
      */
     public static HtmlTree title(Content body) {
         return new HtmlTree(HtmlTag.TITLE, nullCheck(body));

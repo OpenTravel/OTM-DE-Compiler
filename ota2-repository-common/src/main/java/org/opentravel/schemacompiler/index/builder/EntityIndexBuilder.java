@@ -234,7 +234,7 @@ public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> i
 	}
 	
 	/**
-	 * Returns the free-text description of the entity or null if a description
+	 * Returns the free-text DESCRIPTION of the entity or null if a DESCRIPTION
 	 * has not been provided.
 	 * 
 	 * @param entity

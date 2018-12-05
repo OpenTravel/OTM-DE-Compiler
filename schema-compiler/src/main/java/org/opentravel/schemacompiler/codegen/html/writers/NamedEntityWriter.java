@@ -72,11 +72,11 @@ public class NamedEntityWriter<T extends NamedEntityDocumentationBuilder<?>>
 	 *
 	 * @return a content tree for the package link
 	 */
+	@Override
 	protected Content getNavLinkLibrary() {
 		Content linkContent = getHyperLink(LibraryWriter.OUTPUT_FILE_NAME, member.getOwningLibrary(),
 				libraryLabel);
-		Content li = HtmlTree.li(linkContent);
-		return li;
+		return HtmlTree.li(linkContent);
 	}
 
 	/**
@@ -84,9 +84,9 @@ public class NamedEntityWriter<T extends NamedEntityDocumentationBuilder<?>>
 	 *
 	 * @return a content tree for the class link
 	 */
+	@Override
 	protected Content getNavLinkObject() {
-		Content li = HtmlTree.li(HtmlStyle.navBarCell1Rev, objectLabel);
-		return li;
+		return HtmlTree.li(HtmlStyle.NAV_BAR_CELL1_REV, objectLabel);
 	}
 
 	/**
@@ -94,11 +94,10 @@ public class NamedEntityWriter<T extends NamedEntityDocumentationBuilder<?>>
 	 *
 	 * @return a content tree for the class use link
 	 */
+	@Override
 	protected Content getNavLinkClassUse() {
-		Content linkContent = getHyperLink("class-use/" + filename, "",
-				useLabel);
-		Content li = HtmlTree.li(linkContent);
-		return li;
+		Content linkContent = getHyperLink("class-use/" + filename, "", useLabel);
+		return HtmlTree.li(linkContent);
 	}
 
 	/**
@@ -106,6 +105,7 @@ public class NamedEntityWriter<T extends NamedEntityDocumentationBuilder<?>>
 	 *
 	 * @return a content tree for the previous class link
 	 */
+	@Override
 	public Content getNavLinkPrevious() {
 		Content li;
 		if (prev != null) {
@@ -113,8 +113,9 @@ public class NamedEntityWriter<T extends NamedEntityDocumentationBuilder<?>>
 					LinkInfoImpl.CONTEXT_CLASS, prev, "",
 					configuration.getText("doclet.Prev_Object"), true)));
 			li = HtmlTree.li(prevLink);
-		} else
+		} else {
 			li = HtmlTree.li(prevObjectLabel);
+		}
 		return li;
 	}
 
@@ -123,6 +124,7 @@ public class NamedEntityWriter<T extends NamedEntityDocumentationBuilder<?>>
 	 *
 	 * @return a content tree for the next class link
 	 */
+	@Override
 	public Content getNavLinkNext() {
 		Content li;
 		if (next != null) {
@@ -130,8 +132,9 @@ public class NamedEntityWriter<T extends NamedEntityDocumentationBuilder<?>>
 					LinkInfoImpl.CONTEXT_CLASS, next, "",
 					configuration.getText("doclet.Next_Object"), true)));
 			li = HtmlTree.li(nextLink);
-		} else
+		} else {
 			li = HtmlTree.li(nextObjectLabel);
+		}
 		return li;
 	}
 
@@ -148,14 +151,13 @@ public class NamedEntityWriter<T extends NamedEntityDocumentationBuilder<?>>
 				.getNamespace() : "";
 		String clname = member.getName();
 		Content bodyTree = getBody(true, getWindowTitle(clname));
-		//addTop(bodyTree);
 		addNavLinks(true, bodyTree);
 		bodyTree.addContent(HtmlConstants.START_OF_CLASS_DATA);
 		HtmlTree div = new HtmlTree(HtmlTag.DIV);
-		div.setStyle(HtmlStyle.header);
+		div.setStyle(HtmlStyle.HEADER);
 		if (namespace.length() > 0) {
 			Content nsNameContent = new StringContent(namespace);
-			Content nsNameDiv = HtmlTree.div(HtmlStyle.subTitle, nsNameContent);
+			Content nsNameDiv = HtmlTree.div(HtmlStyle.SUB_TITLE, nsNameContent);
 			div.addContent(nsNameDiv);
 		}
 		LinkInfoImpl linkInfo = new LinkInfoImpl(
@@ -165,7 +167,7 @@ public class NamedEntityWriter<T extends NamedEntityDocumentationBuilder<?>>
 		Content headerContent = new StringContent(member.getDocType()
 				.toString() + " " + member.getName());
 		Content heading = HtmlTree.heading(HtmlConstants.CLASS_PAGE_HEADING,
-				true, HtmlStyle.title, headerContent);
+				true, HtmlStyle.TITLE, headerContent);
 		div.addContent(heading);
 		bodyTree.addContent(div);
 		return bodyTree;
@@ -193,11 +195,11 @@ public class NamedEntityWriter<T extends NamedEntityDocumentationBuilder<?>>
 	protected Content getMemberInheritenceTree(T type) {
 		DocumentationBuilder sup = type;
 		HtmlTree classTreeUl = new HtmlTree(HtmlTag.UL);
-		classTreeUl.setStyle(HtmlStyle.inheritance);
+		classTreeUl.setStyle(HtmlStyle.INHERITANCE);
 		Content liTree = null;
 		while (sup != null) {
 			HtmlTree ul = new HtmlTree(HtmlTag.UL);
-			ul.setStyle(HtmlStyle.inheritance);
+			ul.setStyle(HtmlStyle.INHERITANCE);
 			ul.addContent(getTreeForClassHelper(sup));
 			if (liTree != null) {
 				ul.addContent(liTree);
@@ -225,12 +227,11 @@ public class NamedEntityWriter<T extends NamedEntityDocumentationBuilder<?>>
 	 */
 	protected Content getTreeForClassHelper(DocumentationBuilder sup) {
 		Content li = new HtmlTree(HtmlTag.LI);
-		//if (!sup.equals(member)) {
-			Content link = new RawHtml(getLink(new LinkInfoImpl(
-							LinkInfoImpl.CONTEXT_CLASS_TREE_PARENT, sup,
-							sup.getQualifiedName(), false)));
-			li.addContent(link);
-	//	}
+		Content link = new RawHtml(getLink(new LinkInfoImpl(
+				LinkInfoImpl.CONTEXT_CLASS_TREE_PARENT, sup,
+				sup.getQualifiedName(), false)));
+		
+		li.addContent(link);
 		return li;
 	}
 
@@ -255,8 +256,7 @@ public class NamedEntityWriter<T extends NamedEntityDocumentationBuilder<?>>
 	 */
 	@Override
 	public Content getMemberInfoTree(Content classInfoTree) {
-		Content div = HtmlTree.div(HtmlStyle.summary, classInfoTree);
-		return div;
+		return HtmlTree.div(HtmlStyle.SUMMARY, classInfoTree);
 	}
 
 	/*
@@ -300,7 +300,6 @@ public class NamedEntityWriter<T extends NamedEntityDocumentationBuilder<?>>
 	public void addFooter(Content contentTree) {
 		contentTree.addContent(HtmlConstants.END_OF_CLASS_DATA);
 		addNavLinks(false, contentTree);
-		//addBottom(contentTree);
 	}
 
 	/*
@@ -335,11 +334,10 @@ public class NamedEntityWriter<T extends NamedEntityDocumentationBuilder<?>>
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected Content getNavLinkTree() {
-		Content treeLinkContent = getHyperLink("namespace-tree.html", "",
-				treeLabel, "", "");
-		Content li = HtmlTree.li(treeLinkContent);
-		return li;
+		Content treeLinkContent = getHyperLink("namespace-tree.html", "", treeLabel, "", "");
+		return HtmlTree.li(treeLinkContent);
 	}
 
 }

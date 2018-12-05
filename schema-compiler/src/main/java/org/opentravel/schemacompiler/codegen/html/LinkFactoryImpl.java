@@ -49,10 +49,12 @@ import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
  */
 public class LinkFactoryImpl extends LinkFactory {
 
-	private HtmlDocletWriter m_writer;
+	private static final String HTML_FILE_EXT = ".html";
+	
+	private HtmlDocletWriter mWriter;
 
 	public LinkFactoryImpl(HtmlDocletWriter writer) {
-		m_writer = writer;
+		mWriter = writer;
 	}
 
 	/**
@@ -71,18 +73,18 @@ public class LinkFactoryImpl extends LinkFactory {
 		// Create a tool tip if we are linking to a class or interface. Don't
 		// create one if we are linking to a member.
 		String title = (classLinkInfo.where == null || classLinkInfo.where
-				.length() == 0) ? getObjectToolTip(builder.getNamespace(), false) : "";
+				.length() == 0) ? getObjectToolTip(builder.getNamespace()) : "";
 		StringBuilder label = new StringBuilder(
-				classLinkInfo.getClassLinkLabel(m_writer.newConfiguration()));
+				classLinkInfo.getClassLinkLabel(mWriter.newConfiguration()));
 		classLinkInfo.displayLength += label.length();
 		Configuration configuration = Configuration.getInstance();
 		LinkOutputImpl linkOutput = new LinkOutputImpl();
 		if (configuration.isGeneratedDoc(builder)) {
 			String filename = pathString(classLinkInfo);
 			if (linkInfo.linkToSelf
-					|| !(linkInfo.builder.getName() + ".html")
-							.equals(m_writer.filename)) {
-				linkOutput.append(m_writer.getHyperLinkString(filename,
+					|| !(linkInfo.builder.getName() + HTML_FILE_EXT)
+							.equals(mWriter.filename)) {
+				linkOutput.append(mWriter.getHyperLinkString(filename,
 						classLinkInfo.where, label.toString(),
 						classLinkInfo.isStrong, classLinkInfo.styleName, title,
 						classLinkInfo.target));
@@ -98,15 +100,13 @@ public class LinkFactoryImpl extends LinkFactory {
 	/**
 	 * Given a class, return the appropriate tool tip.
 	 *
-	 * @param builder
-	 *            the class to get the tool tip for.
-	 * @return the tool tip for the appropriate class.
+	 * @param namespace
+	 *            the namespace to get the tool tip for.
+	 * @return the tool tip for the namespace.
 	 */
-	private String getObjectToolTip(String namespace,
-			boolean isTypeLink) {
+	private String getObjectToolTip(String namespace) {
 		Configuration configuration = Configuration.getInstance();
-		return configuration.getText("doclet.Href_Member_Title",
-				namespace);
+		return configuration.getText("doclet.Href_Member_Title", namespace);
 	}
 
 	/**
@@ -124,12 +124,12 @@ public class LinkFactoryImpl extends LinkFactory {
 		if (linkInfo.context == LinkInfoImpl.PACKAGE_FRAME) {
 			// Not really necessary to do this but we want to be consistent
 			// with 1.4.2 output.
-			return linkInfo.builder.getName() + ".html";
+			return linkInfo.builder.getName() + HTML_FILE_EXT;
 		}
-		StringBuilder buf = new StringBuilder(m_writer.relativePath);
+		StringBuilder buf = new StringBuilder(mWriter.relativePath);
 		buf.append(DirectoryManager.getPathToLibrary(
 				linkInfo.builder.getOwningLibrary(), linkInfo.builder.getName()
-						+ ".html"));
+						+ HTML_FILE_EXT));
 		return buf.toString();
 	}
 }

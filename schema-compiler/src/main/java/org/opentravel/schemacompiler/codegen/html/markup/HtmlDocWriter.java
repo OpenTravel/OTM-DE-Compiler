@@ -96,7 +96,7 @@ public abstract class HtmlDocWriter extends HtmlWriter {
      * @param where Position of the link in the file. Character '#' is not
      * needed.
      * @param label Tag for the link.
-     * @param strong  Boolean that sets label to strong.
+     * @param STRONG  Boolean that sets label to STRONG.
      */
     public void printHyperLink(String link, String where,
                                String label, boolean strong) {
@@ -122,7 +122,7 @@ public abstract class HtmlDocWriter extends HtmlWriter {
      * @param where      Position of the link in the file. Character '#' is not
      * needed.
      * @param label      Tag for the link.
-     * @param strong       Boolean that sets label to strong.
+     * @param STRONG       Boolean that sets label to STRONG.
      * @param stylename  String style of text defined in style sheet.
      */
     public void printHyperLink(String link, String where,
@@ -138,7 +138,7 @@ public abstract class HtmlDocWriter extends HtmlWriter {
      * @param where      Position of the link in the file. Character '#' is not
      * needed.
      * @param label      Tag for the link.
-     * @param strong       Boolean that sets label to strong.
+     * @param STRONG       Boolean that sets label to STRONG.
      * @return String    Hyper Link.
      */
     public String getHyperLinkString(String link, String where,
@@ -153,7 +153,7 @@ public abstract class HtmlDocWriter extends HtmlWriter {
      * @param where      Position of the link in the file. Character '#' is not
      *                   needed.
      * @param label      Tag for the link.
-     * @param strong       Boolean that sets label to strong.
+     * @param STRONG       Boolean that sets label to STRONG.
      * @param stylename  String style of text defined in style sheet.
      * @return String    Hyper Link.
      */
@@ -184,7 +184,7 @@ public abstract class HtmlDocWriter extends HtmlWriter {
      * @param where      Position of the link in the file. Character '#' is not
      *                   needed.
      * @param label      Tag for the link.
-     * @param strong       Boolean that sets label to strong.
+     * @param STRONG       Boolean that sets label to STRONG.
      * @param stylename  String style of text defined in style sheet.
      * @param title      String that describes the link's content for accessibility.
      * @param target     Target frame.
@@ -214,7 +214,7 @@ public abstract class HtmlDocWriter extends HtmlWriter {
             retlink.append("\">");
         }
         if (strong) {
-            retlink.append("<span class=\"strong\">");
+            retlink.append("<span class=\"STRONG\">");
         }
         retlink.append(label);
         if (strong) {
@@ -353,7 +353,7 @@ public abstract class HtmlDocWriter extends HtmlWriter {
      * @param frameset the frameset to be added to the HTML document
      */
     public void printFramesetDocument(String title, Content frameset) {
-        Content htmlDocType = DocType.Frameset();
+        Content htmlDocType = DocType.newFrameset();
         Content htmlComment = new Comment(configuration.getText("doclet.New_Page"));
         Content head = new HtmlTree(HtmlTag.HEAD);
         

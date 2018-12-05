@@ -17,8 +17,9 @@ package org.opentravel.schemacompiler.codegen.xsd.facet;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Stack;
 
 import javax.xml.namespace.QName;
 
@@ -480,7 +481,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
         // Generate attributes and indicators
         jaxbAttributeList.addAll(createJaxbAttributes(attributeList, indicatorList));
 
-        // Generate the documentation block (if required)
+        // Generate the documentation BLOCK (if required)
         type.setAnnotation(createJaxbDocumentation(sourceFacet));
 
         // Add any required application info
@@ -573,7 +574,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
      * @return TLPropertyType
      */
     protected TLPropertyType getPreferredFacet(TLCoreObject coreObject, TLFacetType facetType) {
-        Stack<TLAbstractFacet> facetHierarchy = new Stack<>();
+        Deque<TLAbstractFacet> facetHierarchy = new LinkedList<>();
 
         facetHierarchy.push(coreObject.getSimpleFacet());
         facetHierarchy.push(coreObject.getSummaryFacet());
@@ -594,7 +595,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
      */
     protected TLPropertyType getPreferredFacet(TLBusinessObject businessObject,
             TLFacetType facetType) {
-        Stack<TLAbstractFacet> facetHierarchy = new Stack<>();
+        Deque<TLAbstractFacet> facetHierarchy = new LinkedList<>();
 
         facetHierarchy.push(businessObject.getIdFacet());
         facetHierarchy.push(businessObject.getSummaryFacet());
@@ -613,8 +614,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
      *            the preferred type of facet to return
      * @return TLPropertyType
      */
-    private TLPropertyType getPreferredFacet(Stack<TLAbstractFacet> facetHierarchy,
-            TLFacetType facetType) {
+    private TLPropertyType getPreferredFacet(Deque<TLAbstractFacet> facetHierarchy, TLFacetType facetType) {
         while (!facetHierarchy.isEmpty() && (facetHierarchy.peek().getFacetType() != facetType)) {
             facetHierarchy.pop();
         }

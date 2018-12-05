@@ -238,7 +238,7 @@ public class IndexingUtils {
 	
 	/**
 	 * Returns the entity or library that will be the indexing target for the source
-	 * object of a validation finding.  For example, the owning entity of an attribute
+	 * object of a validation finding.  For EXAMPLE, the owning entity of an attribute
 	 * finding would be the core object that declared the attribute.
 	 * 
 	 * @param validatable  the object that is the source of a validation finding

@@ -130,8 +130,8 @@ public class JsonSchemaReference  implements JsonDocumentationOwner {
 	}
 
 	/**
-	 * Returns the list of example value definitions for the schema path.  If this
-	 * schema reference contains a by-value schema (not a path reference), these example
+	 * Returns the list of EXAMPLE value definitions for the schema path.  If this
+	 * schema reference contains a by-value schema (not a path reference), these EXAMPLE
 	 * items will be ignored during marshalling.
 	 *
 	 * @return List<JsonContextualValue>

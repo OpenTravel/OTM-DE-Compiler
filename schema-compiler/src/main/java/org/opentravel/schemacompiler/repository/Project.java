@@ -185,7 +185,7 @@ public class Project {
     }
 
     /**
-     * Returns the default context ID to use for example generation in this project.
+     * Returns the default context ID to use for EXAMPLE generation in this project.
      * 
      * @return String
      */
@@ -194,7 +194,7 @@ public class Project {
     }
 
     /**
-     * Assigns the default context ID to use for example generation in this project.
+     * Assigns the default context ID to use for EXAMPLE generation in this project.
      * 
      * @param defaultContextId
      *            the context ID value to assign

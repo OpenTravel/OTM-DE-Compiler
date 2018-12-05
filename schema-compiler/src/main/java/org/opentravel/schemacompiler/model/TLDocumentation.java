@@ -51,11 +51,11 @@ public class TLDocumentation extends TLModelElement implements LibraryElement {
      */
     public boolean isEmpty() {
         return ((description == null) || (description.length() == 0))
-                && (deprecationManager.getChildren().size() == 0)
-                && (referenceManager.getChildren().size() == 0)
-                && (implementerManager.getChildren().size() == 0)
-                && (moreInfoManager.getChildren().size() == 0)
-                && (otherDocManager.getChildren().size() == 0);
+                && deprecationManager.getChildren().isEmpty()
+                && referenceManager.getChildren().isEmpty()
+                && implementerManager.getChildren().isEmpty()
+                && moreInfoManager.getChildren().isEmpty()
+                && otherDocManager.getChildren().isEmpty();
     }
 
     /**
@@ -107,7 +107,7 @@ public class TLDocumentation extends TLModelElement implements LibraryElement {
     }
 
     /**
-     * Returns the value of the 'description' field.
+     * Returns the value of the 'DESCRIPTION' field.
      * 
      * @return String
      */
@@ -122,11 +122,11 @@ public class TLDocumentation extends TLModelElement implements LibraryElement {
      *            the field value to assign
      */
     public void setDescription(String description) {
-        String _description = adjustStringEncoding(description);
+        String encodedDesc = adjustStringEncoding(description);
         ModelEvent<?> event = new ModelEventBuilder(ModelEventType.DESCRIPTION_MODIFIED, this)
-                .setOldValue(this.description).setNewValue(_description).buildEvent();
+                .setOldValue(this.description).setNewValue(encodedDesc).buildEvent();
 
-        this.description = _description;
+        this.description = encodedDesc;
         publishEvent(event);
     }
 

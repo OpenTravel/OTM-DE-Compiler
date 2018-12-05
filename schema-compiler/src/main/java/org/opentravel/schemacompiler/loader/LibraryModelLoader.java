@@ -1039,7 +1039,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
 
     /**
      * Returns true if the actual namespace is an allowed variation from the expected namespace
-     * according to the specified version scheme. For example, "http://opentravel.org/ns/v01_00" would be
+     * according to the specified version scheme. For EXAMPLE, "http://opentravel.org/ns/v01_00" would be
      * an allowed variation of "http://opentravel.org/ns/v01" according to the OTA2 version scheme.
      * 
      * @param expectedNamespace

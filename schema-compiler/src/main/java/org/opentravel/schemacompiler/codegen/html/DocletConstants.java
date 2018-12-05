@@ -96,4 +96,10 @@ public class DocletConstants {
      * The line seperator for the current operating system.
      */
     public static final String NL = System.getProperty("line.separator");
+    
+    /**
+     * Private constructor to prevent instantiation.
+     */
+    private DocletConstants() {}
+    
 }

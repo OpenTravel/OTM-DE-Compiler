@@ -20,7 +20,7 @@ import org.opentravel.schemacompiler.event.ModelEventBuilder;
 import org.opentravel.schemacompiler.event.ModelEventType;
 
 /**
- * Encapsulates a single block of documentation.
+ * Encapsulates a single BLOCK of documentation.
  * 
  * @author S. Livezey
  */

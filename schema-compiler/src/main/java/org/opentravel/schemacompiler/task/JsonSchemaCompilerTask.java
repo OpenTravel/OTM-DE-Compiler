@@ -72,7 +72,7 @@ public class JsonSchemaCompilerTask extends AbstractSchemaCompilerTask {
         */
         compileJsonSchemas(userDefinedLibraries, legacySchemas, context, null, filter);
 
-        // Generate example files if required
+        // Generate EXAMPLE files if required
         if (isGenerateExamples()) {
             generateExampleArtifacts(
             		userDefinedLibraries, context, new LibraryFilenameBuilder<AbstractLibrary>(),

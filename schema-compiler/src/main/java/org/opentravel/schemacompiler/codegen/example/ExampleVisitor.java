@@ -43,8 +43,8 @@ import org.opentravel.schemacompiler.model.XSDElement;
 public interface ExampleVisitor {
 
     /**
-     * After example navigation is complete, this method will return the list of namespaces that
-     * were identified (bound) to the example output during navigation/visitation processing.
+     * After EXAMPLE navigation is complete, this method will return the list of namespaces that
+     * were identified (bound) to the EXAMPLE output during navigation/visitation processing.
      * 
      * @return Collection<String>
      */
@@ -60,7 +60,7 @@ public interface ExampleVisitor {
     public void visitSimpleType(TLAttributeType simpleType);
 
     /**
-     * Called when a <code>TLFacet</code> instance is first encountered during example navigation.
+     * Called when a <code>TLFacet</code> instance is first encountered during EXAMPLE navigation.
      * 
      * @param facet
      *            the model element to be visited
@@ -68,7 +68,7 @@ public interface ExampleVisitor {
     public void startFacet(TLFacet facet);
 
     /**
-     * Called when a <code>TLFacet</code> instance has completed processing during example
+     * Called when a <code>TLFacet</code> instance has completed processing during EXAMPLE
      * navigation.
      * 
      * @param facet
@@ -77,7 +77,7 @@ public interface ExampleVisitor {
     public void endFacet(TLFacet facet);
 
     /**
-     * Called when a <code>TLListFacet</code> instance is first encountered during example
+     * Called when a <code>TLListFacet</code> instance is first encountered during EXAMPLE
      * navigation.
      * 
      * @param listFacet
@@ -88,7 +88,7 @@ public interface ExampleVisitor {
     public void startListFacet(TLListFacet listFacet, TLRole role);
 
     /**
-     * Called when a <code>TLListFacet</code> instance has completed processing during example
+     * Called when a <code>TLListFacet</code> instance has completed processing during EXAMPLE
      * navigation.
      * 
      * @param listFacet
@@ -99,7 +99,7 @@ public interface ExampleVisitor {
     public void endListFacet(TLListFacet listFacet, TLRole role);
 
     /**
-     * Called when a <code>TLAlias</code> instance is first encountered during example navigation.
+     * Called when a <code>TLAlias</code> instance is first encountered during EXAMPLE navigation.
      * 
      * @param alias
      *            the model element to be visited
@@ -107,7 +107,7 @@ public interface ExampleVisitor {
     public void startAlias(TLAlias alias);
 
     /**
-     * Called when a <code>TLAlias</code> instance has completed processing during example
+     * Called when a <code>TLAlias</code> instance has completed processing during EXAMPLE
      * navigation.
      * 
      * @param alias
@@ -116,7 +116,7 @@ public interface ExampleVisitor {
     public void endAlias(TLAlias alias);
 
     /**
-     * Called when a <code>TLActionFacet</code> instance is first encountered during example navigation.
+     * Called when a <code>TLActionFacet</code> instance is first encountered during EXAMPLE navigation.
      * 
      * @param actionFacet  the model element to be visited
      * @param payloadFacet  the facet that will supply the members beyond the business object reference
@@ -124,7 +124,7 @@ public interface ExampleVisitor {
     public void startActionFacet(TLActionFacet actionFacet, TLFacet payloadFacet);
 
     /**
-     * Called when a <code>TLActionFacet</code> instance has completed processing during example
+     * Called when a <code>TLActionFacet</code> instance has completed processing during EXAMPLE
      * navigation.
      * 
      * @param actionFacet  the model element to be visited
@@ -133,7 +133,7 @@ public interface ExampleVisitor {
     public void endActionFacet(TLActionFacet actionFacet, TLFacet payloadFacet);
 
     /**
-     * Called when a <code>TLAttribute</code> instance is first encountered during example
+     * Called when a <code>TLAttribute</code> instance is first encountered during EXAMPLE
      * navigation.
      * 
      * @param attribute
@@ -142,7 +142,7 @@ public interface ExampleVisitor {
     public void startAttribute(TLAttribute attribute);
 
     /**
-     * Called when a <code>TLAttribute</code> instance has completed processing during example
+     * Called when a <code>TLAttribute</code> instance has completed processing during EXAMPLE
      * navigation.
      * 
      * @param attribute
@@ -151,7 +151,7 @@ public interface ExampleVisitor {
     public void endAttribute(TLAttribute attribute);
 
     /**
-     * Called when a <code>TLProperty</code> instance is first encountered during example
+     * Called when a <code>TLProperty</code> instance is first encountered during EXAMPLE
      * navigation, and the property's assigned type is a simple one.
      * 
      * @param element
@@ -160,7 +160,7 @@ public interface ExampleVisitor {
     public void startElement(TLProperty element);
 
     /**
-     * Called when a <code>TLProperty</code> instance has completed processing during example
+     * Called when a <code>TLProperty</code> instance has completed processing during EXAMPLE
      * navigation, and the property's assigned type is a simple one.
      * 
      * @param element
@@ -169,7 +169,7 @@ public interface ExampleVisitor {
     public void endElement(TLProperty element);
 
     /**
-     * Called when a <code>TLIndicator</code> attribute instance is first encountered during example
+     * Called when a <code>TLIndicator</code> attribute instance is first encountered during EXAMPLE
      * navigation.
      * 
      * @param indicator
@@ -179,7 +179,7 @@ public interface ExampleVisitor {
 
     /**
      * Called when a <code>TLIndicator</code> attribute instance has completed processing during
-     * example navigation.
+     * EXAMPLE navigation.
      * 
      * @param indicator
      *            the model element to be visited
@@ -187,7 +187,7 @@ public interface ExampleVisitor {
     public void endIndicatorAttribute(TLIndicator indicator);
 
     /**
-     * Called when a <code>TLIndicator</code> element instance is first encountered during example
+     * Called when a <code>TLIndicator</code> element instance is first encountered during EXAMPLE
      * navigation.
      * 
      * @param indicator
@@ -197,7 +197,7 @@ public interface ExampleVisitor {
 
     /**
      * Called when a <code>TLIndicator</code> element instance has completed processing during
-     * example navigation.
+     * EXAMPLE navigation.
      * 
      * @param indicator
      *            the model element to be visited
@@ -205,7 +205,7 @@ public interface ExampleVisitor {
     public void endIndicatorElement(TLIndicator indicator);
 
     /**
-     * Called when a <code>TLOpenEnumeration</code> instance is first encountered during example
+     * Called when a <code>TLOpenEnumeration</code> instance is first encountered during EXAMPLE
      * navigation.
      * 
      * @param openEnum
@@ -214,7 +214,7 @@ public interface ExampleVisitor {
     public void startOpenEnumeration(TLOpenEnumeration openEnum);
 
     /**
-     * Called when a <code>TLOpenEnumeration</code> instance has completed processing during example
+     * Called when a <code>TLOpenEnumeration</code> instance has completed processing during EXAMPLE
      * navigation.
      * 
      * @param openEnum
@@ -223,7 +223,7 @@ public interface ExampleVisitor {
     public void endOpenEnumeration(TLOpenEnumeration openEnum);
 
     /**
-     * Called when a <code>TLRoleEnumeration</code> instance is first encountered during example
+     * Called when a <code>TLRoleEnumeration</code> instance is first encountered during EXAMPLE
      * navigation.
      * 
      * @param roleEnum
@@ -232,7 +232,7 @@ public interface ExampleVisitor {
     public void startRoleEnumeration(TLRoleEnumeration roleEnum);
 
     /**
-     * Called when a <code>TLRoleEnumeration</code> instance has completed processing during example
+     * Called when a <code>TLRoleEnumeration</code> instance has completed processing during EXAMPLE
      * navigation.
      * 
      * @param roleEnum
@@ -241,7 +241,7 @@ public interface ExampleVisitor {
     public void endRoleEnumeration(TLRoleEnumeration roleEnum);
 
     /**
-     * Called when a <code>TLValueWithAttributes</code> instance is first encountered during example
+     * Called when a <code>TLValueWithAttributes</code> instance is first encountered during EXAMPLE
      * navigation.
      * 
      * @param valueWithAttributes
@@ -251,7 +251,7 @@ public interface ExampleVisitor {
 
     /**
      * Called when a <code>TLValueWithAttributes</code> instance has completed processing during
-     * example navigation.
+     * EXAMPLE navigation.
      * 
      * @param valueWithAttributes
      *            the model element to be visited
@@ -275,7 +275,7 @@ public interface ExampleVisitor {
     public void endExtensionPoint(TLPatchableFacet facet);
 
     /**
-     * Called when a <code>TLExtensionPointFacet</code> instance is first encountered during example
+     * Called when a <code>TLExtensionPointFacet</code> instance is first encountered during EXAMPLE
      * navigation.
      * 
      * @param facet
@@ -285,7 +285,7 @@ public interface ExampleVisitor {
 
     /**
      * Called when a <code>TLExtensionPointFacet</code> instance has completed processing during
-     * example navigation.
+     * EXAMPLE navigation.
      * 
      * @param facet
      *            the model element to be visited
@@ -293,7 +293,7 @@ public interface ExampleVisitor {
     public void endExtensionPointFacet(TLExtensionPointFacet facet);
 
     /**
-     * Called when a <code>XSDComplexType</code> instance is first encountered during example
+     * Called when a <code>XSDComplexType</code> instance is first encountered during EXAMPLE
      * navigation.
      * 
      * @param xsdComplexType
@@ -302,7 +302,7 @@ public interface ExampleVisitor {
     public void startXsdComplexType(XSDComplexType xsdComplexType);
 
     /**
-     * Called when a <code>XSDComplexType</code> instance has completed processing during example
+     * Called when a <code>XSDComplexType</code> instance has completed processing during EXAMPLE
      * navigation.
      * 
      * @param xsdComplexType
@@ -311,7 +311,7 @@ public interface ExampleVisitor {
     public void endXsdComplexType(XSDComplexType xsdComplexType);
 
     /**
-     * Called when a <code>XSDElement</code> instance is first encountered during example
+     * Called when a <code>XSDElement</code> instance is first encountered during EXAMPLE
      * navigation.
      * 
      * @param xsdElement
@@ -320,7 +320,7 @@ public interface ExampleVisitor {
     public void startXsdElement(XSDElement xsdElement);
 
     /**
-     * Called when a <code>XSDElement</code> instance has completed processing during example
+     * Called when a <code>XSDElement</code> instance has completed processing during EXAMPLE
      * navigation.
      * 
      * @param xsdElement

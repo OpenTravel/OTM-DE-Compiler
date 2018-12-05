@@ -31,12 +31,4 @@ public interface AliasOwnerWriter {
      */
     public void addAliasInfo(Content aliasTree);
 
-//    /**
-//     * Get the member details tree.
-//     *
-//     * @param memberTree the content tree used to build the details tree
-//     * @return a content tree for the member details
-//     */
-//    public Content getAliasDetailsTree(Content memberTree);
-
 }

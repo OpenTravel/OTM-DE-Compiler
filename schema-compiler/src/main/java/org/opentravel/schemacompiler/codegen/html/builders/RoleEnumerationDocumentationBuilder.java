@@ -48,14 +48,17 @@ public class RoleEnumerationDocumentationBuilder implements DocumentationBuilder
 
 	@Override
 	public void setNext(DocumentationBuilder next) {
+		// No action required
 	}
 
 	@Override
 	public void setPrevious(DocumentationBuilder prev) {
+		// No action required
 	}
 
 	@Override
 	public void build() throws Exception {
+		// No action required
 	}
 
 	@Override

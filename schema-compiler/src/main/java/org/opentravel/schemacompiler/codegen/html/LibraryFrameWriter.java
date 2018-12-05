@@ -44,20 +44,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opentravel.schemacompiler.model.LibraryMember;
-import org.opentravel.schemacompiler.model.TLAbstractEnumeration;
-import org.opentravel.schemacompiler.model.TLLibrary;
-import org.opentravel.schemacompiler.model.TLService;
 import org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder;
-import org.opentravel.schemacompiler.codegen.html.LinkInfoImpl;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlAttr;
+import org.opentravel.schemacompiler.codegen.html.markup.HtmlConstants;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlStyle;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTag;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTree;
 import org.opentravel.schemacompiler.codegen.html.markup.RawHtml;
-import org.opentravel.schemacompiler.codegen.html.markup.HtmlConstants;
-import org.opentravel.schemacompiler.codegen.html.DirectoryManager;
-import org.opentravel.schemacompiler.codegen.html.DocletAbortException;
+import org.opentravel.schemacompiler.model.LibraryMember;
+import org.opentravel.schemacompiler.model.TLAbstractEnumeration;
+import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLService;
 
 /**
  * Class to generate file for each package contents in the left-hand bottom
@@ -77,7 +74,7 @@ public class LibraryFrameWriter extends HtmlDocletWriter {
 	/**
 	 * Constructor to construct PackageFrameWriter object and to generate
 	 * "package-frame.html" file in the respective package directory. For
-	 * example for package "java.lang" this will generate file
+	 * EXAMPLE for package "java.lang" this will generate file
 	 * "package-frame.html" file in the "java/lang" directory. It will also
 	 * create "java/lang" directory in the current or the destination directory
 	 * if it doesen't exist.
@@ -109,15 +106,14 @@ public class LibraryFrameWriter extends HtmlDocletWriter {
 			Content body = packgen.getBody(false, packgen.getWindowTitle(name));
 			Content pkgNameContent = new RawHtml(name);
 			Content heading = HtmlTree.heading(HtmlConstants.TITLE_HEADING,
-					HtmlStyle.bar, packgen.getTargetLibraryLink(name,
+					HtmlStyle.BAR, packgen.getTargetLibraryLink(name,
 							"classFrame", pkgNameContent));
 			body.addContent(heading);
 			HtmlTree div = new HtmlTree(HtmlTag.DIV);
-			div.setStyle(HtmlStyle.indexContainer);
+			div.setStyle(HtmlStyle.INDEX_CONTAINER);
 			packgen.addClassListing(div);
 			body.addContent(div);
 			packgen.printHtmlDocument(null, false, body);
-			packgen.close();
 		} catch (IOException exc) {
 			configuration.message.error("doclet.exception_encountered",
 					exc.toString(), OUTPUT_FILE_NAME);

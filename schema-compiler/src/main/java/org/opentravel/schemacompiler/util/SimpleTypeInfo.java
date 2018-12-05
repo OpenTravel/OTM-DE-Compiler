@@ -335,7 +335,7 @@ public class SimpleTypeInfo {
 	 * Constructs a new JSON type instance.
 	 * 
 	 * @param type  the JSON type assigned for the schema
-	 * @param description  the description of the schema
+	 * @param DESCRIPTION  the DESCRIPTION of the schema
 	 * @param pattern  the regular expression pattern for the schema
 	 * @param minLength  the minimum string length for the schema
 	 * @param maxLength  the maximum string length for the schema

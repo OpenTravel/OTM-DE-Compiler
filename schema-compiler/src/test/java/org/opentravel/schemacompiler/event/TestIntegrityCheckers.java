@@ -321,17 +321,17 @@ public class TestIntegrityCheckers extends AbstractModelEventTests {
             assertNotNull(counter3);
             assertEquals(0, counter3.getExamples().size());
 
-            // Add an example and ensure it is auto-declared in the library
+            // Add an EXAMPLE and ensure it is auto-declared in the library
             counter3.addExample(testExample);
             assertEquals(originalContextCount + 1, library1p2.getContexts().size());
             assertNotNull(library1p2.getContext("unit-test-context"));
 
-            // Modify the example's context value, and make sure it is auto-declared in the library
+            // Modify the EXAMPLE's context value, and make sure it is auto-declared in the library
             testExample.setContext("unit-test-context2");
             assertEquals(originalContextCount + 2, library1p2.getContexts().size());
             assertNotNull(library1p2.getContext("unit-test-context2"));
 
-            // Delete the test context declarations from the library, and make sure our example got
+            // Delete the test context declarations from the library, and make sure our EXAMPLE got
             // deleted
             library1p2.removeContext(library1p2.getContext("unit-test-context"));
             library1p2.removeContext(library1p2.getContext("unit-test-context2"));

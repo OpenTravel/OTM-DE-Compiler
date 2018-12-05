@@ -55,10 +55,8 @@ public class FacetWriter extends
 	 */
 	@Override
 	public void addAliasInfo(Content aliasTree) {
-		if (member.getAliases().size() > 0) {
-			InfoWriter aliasWriter = new AliasInfoWriter(this,
-					member);
-			aliasWriter.addInfo(aliasTree);
+		if (!member.getAliases().isEmpty()) {
+			new AliasInfoWriter(this, member).addInfo(aliasTree);
 		}
 	}
 
@@ -71,10 +69,8 @@ public class FacetWriter extends
 	 */
 	@Override
 	public void addPropertyInfo(Content memberTree) {
-		if (member.getProperties().size() > 0) {
-			InfoWriter propWriter = new PropertyInfoWriter(this,
-					member);
-			propWriter.addInfo(memberTree);
+		if (!member.getProperties().isEmpty()) {
+			new PropertyInfoWriter(this, member).addInfo(memberTree);
 		}
 	}
 
@@ -89,10 +85,8 @@ public class FacetWriter extends
 	 */
 	@Override
 	public void addAttributeInfo(Content memberTree) {
-		if (member.getAttributes().size() > 0) {
-			InfoWriter attWriter = new FacetAttributeInfoWriter(this,
-					member);
-			attWriter.addInfo(memberTree);
+		if (!member.getAttributes().isEmpty()) {
+			new FacetAttributeInfoWriter(this, member).addInfo(memberTree);
 		}
 	}
 
@@ -106,10 +100,8 @@ public class FacetWriter extends
 	 */
 	@Override
 	public void addIndicatorInfo(Content memberTree) {
-		if (member.getIndicators().size() > 0) {
-			InfoWriter attWriter = new FacetIndicatorInfoWriter(this,
-					member);
-			attWriter.addInfo(memberTree);
+		if (!member.getIndicators().isEmpty()) {
+			new FacetIndicatorInfoWriter(this, member).addInfo(memberTree);
 		}
 	}
 

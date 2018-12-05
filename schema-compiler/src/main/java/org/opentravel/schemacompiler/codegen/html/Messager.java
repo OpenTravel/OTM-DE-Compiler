@@ -59,14 +59,14 @@ import org.slf4j.LoggerFactory;
  * @see java.text.MessageFormat
  * @author Neal Gafter (rewrite)
  */
-public class Messager {//extends Log implements DocErrorReporter {
+public class Messager {
 	
     private static final Logger log = LoggerFactory.getLogger(Messager.class);
 	
     /** The maximum number of errors/warnings that are reported.
      */
-    public final int MaxErrors;
-    public final int MaxWarnings;
+    public final int maxErrors;
+    public final int maxWarnings;
     
     /** The number of errors encountered so far.
      */
@@ -94,8 +94,8 @@ public class Messager {//extends Log implements DocErrorReporter {
      */
     public Messager(String programName) {
         this.programName = programName;
-        this.MaxErrors = getDefaultMaxErrors();
-        this.MaxWarnings = getDefaultMaxWarnings();
+        this.maxErrors = getDefaultMaxErrors();
+        this.maxWarnings = getDefaultMaxWarnings();
     }
 
     protected int getDefaultMaxErrors() {
@@ -215,9 +215,9 @@ public class Messager {//extends Log implements DocErrorReporter {
      * @param msg message to print
      */
     public void printError(SourcePosition pos, String msg) {
-        if (log.isErrorEnabled() && (nerrors < MaxErrors)) {
+        if (log.isErrorEnabled() && (nerrors < maxErrors)) {
             String prefix = (pos == null) ? programName : pos.toString();
-            log.error(prefix + ": " + getText("javadoc.error") + " - " + msg);
+            log.error( String.format("%s: %s - %s", prefix, getText("javadoc.error"), msg));
             prompt();
             nerrors++;
         }
@@ -241,9 +241,9 @@ public class Messager {//extends Log implements DocErrorReporter {
      * @param msg message to print
      */
     public void printWarning(SourcePosition pos, String msg) {
-        if (log.isWarnEnabled() && (nwarnings < MaxWarnings)) {
+        if (log.isWarnEnabled() && (nwarnings < maxWarnings)) {
             String prefix = (pos == null) ? programName : pos.toString();
-            log.warn(prefix +  ": " + getText("javadoc.warning") +" - " + msg);
+            log.warn( String.format("%s: %s - %s", prefix, getText("javadoc.warning"), msg));
             nwarnings++;
         }
     }
@@ -270,7 +270,7 @@ public class Messager {//extends Log implements DocErrorReporter {
             if (pos == null)
                 log.info(msg);
             else
-            	log.info(pos + ": " + msg);
+            	log.info( String.format("%s: %s", pos, msg) );
     	}
     }
 
@@ -452,7 +452,7 @@ public class Messager {//extends Log implements DocErrorReporter {
      */
     public void prompt() {
         if (promptOnError) {
-            System.err.println("resume.abort");// localize?
+           log.error("resume.abort");// localize?
             try {
                 while (true) {
                     switch (System.in.read()) {
@@ -466,7 +466,9 @@ public class Messager {//extends Log implements DocErrorReporter {
                     default:
                     }
                 }
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            	log.warn("Error reading from standard input.");
+            }
         }
     }
 }

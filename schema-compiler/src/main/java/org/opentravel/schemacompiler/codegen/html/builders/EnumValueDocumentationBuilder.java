@@ -38,5 +38,6 @@ public class EnumValueDocumentationBuilder extends AbstractDocumentationBuilder<
 
 	@Override
 	public void build() throws Exception {
+		// No action required
 	}
 }

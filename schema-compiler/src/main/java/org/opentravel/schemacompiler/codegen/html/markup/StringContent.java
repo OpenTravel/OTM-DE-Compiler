@@ -51,13 +51,13 @@ import org.opentravel.schemacompiler.codegen.html.Util;
  */
 public class StringContent extends Content{
 
-    private StringBuilder stringContent;
+    private StringBuilder content;
 
     /**
      * Constructor to construct StringContent object.
      */
     public StringContent() {
-        stringContent = new StringBuilder();
+        content = new StringBuilder();
     }
 
     /**
@@ -66,7 +66,7 @@ public class StringContent extends Content{
      * @param initialContent initial content for the object
      */
     public StringContent(String initialContent) {
-        stringContent = new StringBuilder(
+        content = new StringBuilder(
                 Util.escapeHtmlChars(nullCheck(initialContent)));
     }
 
@@ -89,27 +89,28 @@ public class StringContent extends Content{
      * @param strContent string content to be added
      */
     public void addContent(String strContent) {
-        stringContent.append(Util.escapeHtmlChars(nullCheck(strContent)));
+        content.append(Util.escapeHtmlChars(nullCheck(strContent)));
     }
 
     /**
      * {@inheritDoc}
      */
     public boolean isEmpty() {
-        return (stringContent.length() == 0);
+        return (content.length() == 0);
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public String toString() {
-        return stringContent.toString();
+        return content.toString();
     }
 
     /**
      * {@inheritDoc}
      */
     public void write(StringBuilder contentBuilder) {
-        contentBuilder.append(stringContent);
+        contentBuilder.append(content);
     }
 }

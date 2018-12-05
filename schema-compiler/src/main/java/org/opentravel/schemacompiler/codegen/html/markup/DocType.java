@@ -49,7 +49,7 @@ import org.opentravel.schemacompiler.codegen.html.DocletConstants;
  */
 public class DocType extends Content{
 
-    private String docType;
+    private String docTypeHeader;
 
     private static DocType transitional;
 
@@ -63,7 +63,7 @@ public class DocType extends Content{
      * @param type the doctype to be added
      */
     public DocType(String type, String dtd) {
-    	 docType = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 " + type +
+    	 docTypeHeader = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 " + type +
                  "//EN\" \"" + dtd + "\">" + DocletConstants.NL;
     }
 
@@ -72,7 +72,7 @@ public class DocType extends Content{
      *
      * @return a content tree for transitional DocType
      */
-    public static DocType Transitional() {
+    public static DocType newTransitional() {
         if (transitional == null)
             transitional = new DocType("Transitional", "http://www.w3.org/TR/html4/loose.dtd");
         return transitional;
@@ -83,7 +83,7 @@ public class DocType extends Content{
      *
      * @return a content tree for frameset DocType
      */
-    public static DocType Frameset() {
+    public static DocType newFrameset() {
         if (frameset == null)
             frameset = new DocType("Frameset", "http://www.w3.org/TR/html4/frameset.dtd");
         return frameset;
@@ -94,10 +94,10 @@ public class DocType extends Content{
      *
      * @return a content tree for frameset DocType
      */
-    public static DocType Html5() {
+    public static DocType newHtml5() {
         if (html5 == null)
             html5 = new DocType(null, null);
-        html5.docType = "<!DOCTYPE HTML>" + DocletConstants.NL;
+        html5.docTypeHeader = "<!DOCTYPE HTML>" + DocletConstants.NL;
         return html5;
     }
 
@@ -129,13 +129,13 @@ public class DocType extends Content{
      * {@inheritDoc}
      */
     public boolean isEmpty() {
-        return (docType.length() == 0);
+        return (docTypeHeader.length() == 0);
     }
 
     /**
      * {@inheritDoc}
      */
     public void write(StringBuilder contentBuilder) {
-        contentBuilder.append(docType);
+        contentBuilder.append(docTypeHeader);
     }
 }

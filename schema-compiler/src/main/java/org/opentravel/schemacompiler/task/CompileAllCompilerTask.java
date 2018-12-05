@@ -368,7 +368,7 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
     }
 
     /**
-     * Assigns the option flag indicating that example XML documents should be generated.
+     * Assigns the option flag indicating that EXAMPLE XML documents should be generated.
      * 
      * @param generateExamples
      *            the task option value to assign
@@ -387,7 +387,7 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
 
     /**
      * Assigns the flag indicating whether the maximum amount of detail is to be included in
-     * generated example data. If false, minimum detail will be generated.
+     * generated EXAMPLE data. If false, minimum detail will be generated.
      * 
      * @param generateMaxDetailsForExamples
      *            the boolean flag value to assign
@@ -405,7 +405,7 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
     }
 
     /**
-     * Assigns the preferred context to use when producing example values for simple data types.
+     * Assigns the preferred context to use when producing EXAMPLE values for simple data types.
      * 
      * @param exampleContext
      *            the context ID to assign
@@ -424,7 +424,7 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
 
     /**
      * Assigns the maximum number of times that repeating elements should be displayed in generated
-     * example output.
+     * EXAMPLE output.
      * 
      * @param exampleMaxRepeat
      *            the max repeat value to assign
@@ -442,7 +442,7 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
     }
 
     /**
-     * Assigns the maximum depth that should be included for nested elements in generated example
+     * Assigns the maximum depth that should be included for nested elements in generated EXAMPLE
      * output.
      * 
      * @param exampleMaxDepth
@@ -462,7 +462,7 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
 
     /**
      * Assigns the flag indicating whether optional fields should be suppressed
-	 * during example generation.
+	 * during EXAMPLE generation.
      * 
      * @param generateExamples  the flag value to assign
      */

@@ -15,11 +15,11 @@
  */
 package org.opentravel.schemacompiler.codegen.example;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,7 +68,7 @@ import org.opentravel.schemacompiler.model.XSDSimpleType;
 
 /**
  * Navigator that traverses model elements in order to produce visitor events that will allow the
- * construction of an example data set for the element(s) that are visited.
+ * construction of an EXAMPLE data set for the element(s) that are visited.
  * 
  * @author S. Livezey
  */
@@ -76,7 +76,7 @@ public class ExampleNavigator {
 	
 	private static FacetCodegenDelegateFactory facetDelegateFactory = new FacetCodegenDelegateFactory(null);
 
-    private Deque<Object> entityStack = new ArrayDeque<>();
+    private Deque<Object> entityStack = new LinkedList<>();
     private ExtensionPointRegistry extensionPointRegistry;
     private Map<TLChoiceObject,List<TLFacet>> choiceFacetRotation = new HashMap<>();
     private ExampleGeneratorOptions options;
@@ -89,7 +89,7 @@ public class ExampleNavigator {
      * @param visitor
      *            the visitor to be notified when model elements are encountered
      * @param options
-     *            the options to use during example navigation
+     *            the options to use during EXAMPLE navigation
      * @param model
      *            the model which contains all of the entities to be navigated
      */
@@ -108,7 +108,7 @@ public class ExampleNavigator {
      * @param visitor
      *            the visitor to be notified when model elements are encountered
      * @param options
-     *            the options to use during example navigation
+     *            the options to use during EXAMPLE navigation
      */
     public static void navigate(NamedEntity target, ExampleVisitor visitor,
             ExampleGeneratorOptions options) {
@@ -119,7 +119,7 @@ public class ExampleNavigator {
      * Navigates the given <code>NamedEntity</code> and its sub-elements in a depth-first fashion.
      * 
      * @param target
-     *            the named entity for which an example is to be generated
+     *            the named entity for which an EXAMPLE is to be generated
      */
     public void navigateEntity(NamedEntity target) {
         if (target instanceof TLSimple) {
@@ -493,7 +493,7 @@ public class ExampleNavigator {
         try {
             // Depending upon what owns the alias, we may need to adjust the level of detail that
             // is displayed by the owning facet. To accomplish this, we will need to locate the
-            // corresponding facet on the example facet (e.g. "CoreAlias" would correspond to
+            // corresponding facet on the EXAMPLE facet (e.g. "CoreAlias" would correspond to
             // "CoreAliasDetail".
             TLAliasOwner aliasOwner = alias.getOwningEntity();
             TLAbstractFacet exampleFacet = null;
@@ -634,7 +634,7 @@ public class ExampleNavigator {
      * traversal is performed by this method.
      * 
      * @param target
-     *            the named entity for which an example is to be generated
+     *            the named entity for which an EXAMPLE is to be generated
      */
     protected void navigateSimpleType(TLAttributeType simpleType) {
         visitor.visitSimpleType(simpleType);
@@ -693,7 +693,7 @@ public class ExampleNavigator {
                     previousFacetIdentity = currentFacetIdentity;
                 }
                 
-                // Navigate the example content for the current element
+                // Navigate the EXAMPLE content for the current element
         		if (element.isMandatory() || !options.isSuppressOptionalFields()) {
                     navigateElement(element);
         		}
@@ -883,7 +883,7 @@ public class ExampleNavigator {
     }
 
     /**
-     * Returns the facet that should be used for the purposes of producing example data in the
+     * Returns the facet that should be used for the purposes of producing EXAMPLE data in the
      * generated output. Depending upon the level of detail selected in the
      * <code>ExampleGeneratorOptions</code>, the facet that is returned may or may not be the one
      * that is passed to this method.
@@ -915,7 +915,7 @@ public class ExampleNavigator {
     }
 
     /**
-     * Returns the list facet that should be used for the purposes of producing example data in the
+     * Returns the list facet that should be used for the purposes of producing EXAMPLE data in the
      * generated output. Depending upon the level of detail selected in the
      * <code>ExampleGeneratorOptions</code>, the list facet that is returned may or may not be the
      * one that is passed to this method.

@@ -77,7 +77,7 @@ public class LibrarySchema1_6_ModuleLoader extends AbstractLibraryModuleLoader {
                 // If we are not able to load the library with validation turned on, load it
                 // with validation disabled and issue a loader warning. If the content is still
                 // invalid with validation turned off, the file is completely unreadable. If that
-                // is the case, a JAXB exception will be thrown and the last catch block of this
+                // is the case, a JAXB exception will be thrown and the last catch BLOCK of this
                 // method will issue a loader validation error.
                 try {
                     jaxbLibrary = (Library) loadLibrary(inputSource, validationFindings,

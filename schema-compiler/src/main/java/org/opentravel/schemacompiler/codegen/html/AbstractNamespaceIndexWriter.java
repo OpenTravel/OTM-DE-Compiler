@@ -84,9 +84,9 @@ public abstract class AbstractNamespaceIndexWriter extends HtmlDocletWriter {
     protected abstract void addNavigationBarHeader(Content body);
 
     /**
-     * Adds the navigation bar footer to the documentation tree.
+     * Adds the navigation bar FOOTER to the documentation tree.
      *
-     * @param body the document tree to which the navigation bar footer will be added
+     * @param body the document tree to which the navigation BAR FOOTER will be added
      */
     protected abstract void addNavigationBarFooter(Content body);
 
@@ -159,7 +159,6 @@ public abstract class AbstractNamespaceIndexWriter extends HtmlDocletWriter {
     protected void addIndexContents(List<TLLibrary> libraries, String text,
             String tableSummary, Content body) {
         if (!libraries.isEmpty()) {
-            //Collections.sort(namespaces);
             addAllObjectsLink(body);
             addLibraryList(libraries, text, tableSummary, body);
         }
@@ -174,8 +173,8 @@ public abstract class AbstractNamespaceIndexWriter extends HtmlDocletWriter {
         if (configuration.doctitle.length() > 0) {
             Content title = new RawHtml(configuration.doctitle);
             Content heading = HtmlTree.heading(HtmlConstants.TITLE_HEADING,
-                    HtmlStyle.title, title);
-            Content div = HtmlTree.div(HtmlStyle.header, heading);
+                    HtmlStyle.TITLE, title);
+            Content div = HtmlTree.div(HtmlStyle.HEADER, heading);
             body.addContent(div);
         }
     }
@@ -186,9 +185,9 @@ public abstract class AbstractNamespaceIndexWriter extends HtmlDocletWriter {
      *
      * @return a Content object to be added to the documentation tree
      */
+    @Override
     protected Content getNavLinkContents() {
-        Content li = HtmlTree.li(HtmlStyle.navBarCell1Rev, overviewLabel);
-        return li;
+        return HtmlTree.li(HtmlStyle.NAV_BAR_CELL1_REV, overviewLabel);
     }
 
     /**

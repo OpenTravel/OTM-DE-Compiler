@@ -96,7 +96,7 @@ public class SwaggerCompilerTask extends AbstractSchemaCompilerTask
                             new LibraryTrimmedFilenameBuilder( null ),
                             createSchemaFilter( resource, TLMimeType.TEXT_JSON, TLMimeType.APPLICATION_JSON ) );
                     
-                    // Generate example files if required; examples are only created for the operation
+                    // Generate EXAMPLE files if required; examples are only created for the operation
                     // messages (not the contents of the trimmed schemas)
                     if (isGenerateExamples()) {
                         generateExampleArtifacts(userDefinedLibraries, resourceContext,
@@ -203,7 +203,7 @@ public class SwaggerCompilerTask extends AbstractSchemaCompilerTask
      * library schemas are included.
      * 
      * @param resource  the resource for which to create a filter
-     * @param contentTypes  the MIME types for which to generate example files
+     * @param contentTypes  the MIME types for which to generate EXAMPLE files
      * @return CodeGenerationFilter
      */
     protected CodeGenerationFilter createExampleFilter(TLResource resource, TLMimeType... contentTypes) {

@@ -17,6 +17,7 @@ package org.opentravel.schemacompiler.codegen.html.builders;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Collections;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
@@ -42,12 +43,6 @@ public class DocumentationGenerator implements CodeGenerator<TLModel> {
 
 	protected Logger log;
 
-	/**
-	 * 
-	 */
-	public DocumentationGenerator() {
-	}
-
 	@Override
 	public Collection<File> generateOutput(TLModel model,
 			CodeGenerationContext context) throws ValidationException,
@@ -67,7 +62,7 @@ public class DocumentationGenerator implements CodeGenerator<TLModel> {
 		}
 		config.setModel(model);
 		HtmlDoclet.start(model);
-		return null;
+		return Collections.emptyList();
 	}
 
 	@Override

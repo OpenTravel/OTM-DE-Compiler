@@ -87,7 +87,7 @@ public class OperationInfoWriter extends
 
 	private Content getInfo(OperationDocumentationBuilder fdb) {
 		HtmlTree tdOperation = new HtmlTree(HtmlTag.TD);
-		tdOperation.setStyle(HtmlStyle.colOne);
+		tdOperation.setStyle(HtmlStyle.COL_ONE);
 		tdOperation.addContent(HtmlTree.heading(HtmlTag.H4, new RawHtml(fdb.getName())));
 		TLDocumentation doc = fdb.getElement().getDocumentation();
 		if (doc != null) {
@@ -98,7 +98,7 @@ public class OperationInfoWriter extends
 		FacetInfoWriter facetWriter = new FacetInfoWriter(writer, fdb);
 		facetWriter.addInfo(tdOperation);
 		HtmlTree tr = HtmlTree.tr(tdOperation);
-		tr.setStyle(HtmlStyle.rowColor);
+		tr.setStyle(HtmlStyle.ROW_COLOR);
 		return tr;
 	}
 

@@ -77,9 +77,9 @@ public interface LibraryMemberWriter {
     public Content getMemberTreeHeader();
 
     /**
-     * Add the footer of the page.
+     * Add the FOOTER of the page.
      *
-     * @param contentTree content tree to which the footer will be added
+     * @param contentTree content tree to which the FOOTER will be added
      */
     public void addFooter(Content contentTree);
 

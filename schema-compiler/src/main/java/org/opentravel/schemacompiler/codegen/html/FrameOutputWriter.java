@@ -41,10 +41,9 @@ package org.opentravel.schemacompiler.codegen.html;
 
 import java.io.IOException;
 
+import org.opentravel.schemacompiler.codegen.html.markup.HtmlConstants;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTag;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTree;
-import org.opentravel.schemacompiler.codegen.html.markup.HtmlConstants;
-import org.opentravel.schemacompiler.codegen.html.DocletAbortException;
 
 
 
@@ -67,7 +66,7 @@ public class FrameOutputWriter extends HtmlDocletWriter {
      */
     int noOfNamespaces;
 
-    private final String SCROLL_YES = "yes";
+    private static final String SCROLL_YES = "yes";
 
     /**
      * Constructor to construct FrameOutputWriter object.

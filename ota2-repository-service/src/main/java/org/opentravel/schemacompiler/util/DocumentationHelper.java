@@ -79,7 +79,7 @@ public class DocumentationHelper {
 	}
 	
 	/**
-	 * Returns true if the <code>NamedEntity</code> contains a description.
+	 * Returns true if the <code>NamedEntity</code> contains a DESCRIPTION.
 	 * 
 	 * @return boolean
 	 */
@@ -89,7 +89,7 @@ public class DocumentationHelper {
 	
 	/**
 	 * Returns true if the <code>NamedEntity</code> contains any documentation other
-	 * than the description.
+	 * than the DESCRIPTION.
 	 * 
 	 * @return boolean
 	 */
@@ -99,7 +99,7 @@ public class DocumentationHelper {
 	}
 	
 	/**
-	 * Returns the description for the <code>NamedEntity</code>.
+	 * Returns the DESCRIPTION for the <code>NamedEntity</code>.
 	 *
 	 * @return String
 	 */
@@ -163,7 +163,7 @@ public class DocumentationHelper {
 	}
 	
 	/**
-	 * Returns the description string for the given OTM entity, or null if the entity
+	 * Returns the DESCRIPTION string for the given OTM entity, or null if the entity
 	 * does not declare a documentation value.
 	 * 
 	 * @param entity  the OTM model entity

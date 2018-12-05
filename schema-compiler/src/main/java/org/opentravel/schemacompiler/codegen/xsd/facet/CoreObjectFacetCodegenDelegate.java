@@ -87,7 +87,7 @@ public abstract class CoreObjectFacetCodegenDelegate extends TLFacetCodegenDeleg
                 TLCoreObject ownerExtension = (TLCoreObject) FacetCodegenUtils
                         .getFacetOwnerExtension(owner);
 
-                if (owner.getRoleEnumeration().getRoles().size() > 0) {
+                if (!owner.getRoleEnumeration().getRoles().isEmpty()) {
                     Attribute roleAttr = new Attribute();
 
                     if (ownerExtension != null) {

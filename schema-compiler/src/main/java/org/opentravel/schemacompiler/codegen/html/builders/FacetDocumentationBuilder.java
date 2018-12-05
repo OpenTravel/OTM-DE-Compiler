@@ -66,31 +66,31 @@ public class FacetDocumentationBuilder extends
 
 	private TLFacet getSuperFacet(TLFacet t) {
 		TLFacet superFacet = null;
-		TLFacetOwner owner = t.getOwningEntity();
+		TLFacetOwner facetOwner = t.getOwningEntity();
 		
 		// First, look for a contextual facet owner that declares content
-		while (owner instanceof TLContextualFacet) {
-			TLContextualFacet owningFacet = (TLContextualFacet) owner;
+		while (facetOwner instanceof TLContextualFacet) {
+			TLContextualFacet owningFacet = (TLContextualFacet) facetOwner;
 			
 			if (owningFacet.declaresContent()) {
 				break;
 				
 			} else {
 				t = owningFacet;
-				owner = t.getOwningEntity();
+				facetOwner = t.getOwningEntity();
 			}
 		}
-		if (owner instanceof TLContextualFacet) {
-			superFacet = (TLContextualFacet) owner;
+		if (facetOwner instanceof TLContextualFacet) {
+			superFacet = (TLContextualFacet) facetOwner;
 		}
 		
 		if (superFacet == null) {
 			switch (t.getFacetType()) {
 				case CUSTOM:
-					superFacet = FacetCodegenUtils.getFacetOfType(owner, TLFacetType.SUMMARY);
+					superFacet = FacetCodegenUtils.getFacetOfType(facetOwner, TLFacetType.SUMMARY);
 					
 					if (!superFacet.declaresContent()) {
-						TLFacetOwner ext = FacetCodegenUtils.getFacetOwnerExtension(owner);
+						TLFacetOwner ext = FacetCodegenUtils.getFacetOwnerExtension(facetOwner);
 						
 						while (ext != null) {
 							TLFacet extFacet = FacetCodegenUtils.getFacetOfType(ext, TLFacetType.SUMMARY);
@@ -105,14 +105,14 @@ public class FacetDocumentationBuilder extends
 
 					}
 					if (!superFacet.declaresContent()) {
-						superFacet = FacetCodegenUtils.getFacetOfType(owner, TLFacetType.ID);
+						superFacet = FacetCodegenUtils.getFacetOfType(facetOwner, TLFacetType.ID);
 					}
 					break;
 				case CHOICE:
-					superFacet = FacetCodegenUtils.getFacetOfType(owner, TLFacetType.SHARED);
+					superFacet = FacetCodegenUtils.getFacetOfType(facetOwner, TLFacetType.SHARED);
 					
 					if (!superFacet.declaresContent()) {
-						TLFacetOwner ext = FacetCodegenUtils.getFacetOwnerExtension(owner);
+						TLFacetOwner ext = FacetCodegenUtils.getFacetOwnerExtension(facetOwner);
 						
 						while (ext != null) {
 							TLFacet extFacet = FacetCodegenUtils.getFacetOfType(ext, TLFacetType.SUMMARY);
@@ -128,10 +128,10 @@ public class FacetDocumentationBuilder extends
 					}
 					break;
 				case DETAIL:
-					superFacet = FacetCodegenUtils.getFacetOfType(owner, TLFacetType.SUMMARY);
+					superFacet = FacetCodegenUtils.getFacetOfType(facetOwner, TLFacetType.SUMMARY);
 					
 					if (!superFacet.declaresContent()) {
-						TLFacetOwner ext = FacetCodegenUtils.getFacetOwnerExtension(owner);
+						TLFacetOwner ext = FacetCodegenUtils.getFacetOwnerExtension(facetOwner);
 						
 						while (ext != null) {
 							TLFacet extFacet = FacetCodegenUtils.getFacetOfType(ext, TLFacetType.SUMMARY);
@@ -146,11 +146,11 @@ public class FacetDocumentationBuilder extends
 
 					}
 					if (!superFacet.declaresContent()) {
-						superFacet = FacetCodegenUtils.getFacetOfType(owner, TLFacetType.ID);
+						superFacet = FacetCodegenUtils.getFacetOfType(facetOwner, TLFacetType.ID);
 					}
 					break;
 				case SUMMARY:
-					superFacet = FacetCodegenUtils.getFacetOfType(owner, TLFacetType.ID);
+					superFacet = FacetCodegenUtils.getFacetOfType(facetOwner, TLFacetType.ID);
 					break;
 				default:
 					break;

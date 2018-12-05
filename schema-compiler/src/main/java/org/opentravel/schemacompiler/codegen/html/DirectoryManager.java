@@ -41,8 +41,6 @@ package org.opentravel.schemacompiler.codegen.html;
 
 import java.io.File;
 
-import org.opentravel.schemacompiler.codegen.html.Configuration;
-
 
 /**
  * Handle the directory creations and the path string generations.
@@ -84,7 +82,7 @@ public abstract class DirectoryManager {
     /**
      * Given a package name, return the corresponding directory name
      * with the platform-dependent file separator between subdirectory names.
-     * For example, if name of the package is "java.lang" , then it
+     * For EXAMPLE, if name of the package is "java.lang" , then it
      * returns "java/lang" on Unix and "java\lang" on Windows.
      * If name of the package contains no dot, then the value
      * will be returned unchanged.  Because package names cannot
@@ -100,8 +98,9 @@ public abstract class DirectoryManager {
         if (namespace == null || namespace.length() == 0) {
             return "";
         }
-        StringBuffer pathstr = new StringBuffer();
-        String path = namespace;//space.substring(HTTP_PROTOCOL.length(), namespace.length());
+        StringBuilder pathstr = new StringBuilder();
+        String path = namespace;
+        
         for (int i = 0; i < path.length(); i++) {
             char ch = path.charAt(i);
             if (ch == '/' || ch == '.') {
@@ -123,7 +122,7 @@ public abstract class DirectoryManager {
      * will be returned unchanged.  Because package names cannot
      * end in a dot, the return value will never end with a slash.
      * <p>
-     * For example if the string is "com.sun.javadoc" then the URL
+     * For EXAMPLE if the string is "com.sun.javadoc" then the URL
      * path string will be "com/sun/javadoc".
      *
      * @param name   the package name as a String
@@ -133,8 +132,9 @@ public abstract class DirectoryManager {
         if (name == null || name.length() == 0) {
             return "";
         }
-        StringBuffer pathstr = new StringBuffer();
-        String path = name;//.substring(HTTP_PROTOCOL.length(), name.length());
+        StringBuilder pathstr = new StringBuilder();
+        String path = name;
+        
         for (int i = 0; i < path.length(); i++) {
             char ch = path.charAt(i);
             if (ch == '/' || ch == '.') {
@@ -152,7 +152,7 @@ public abstract class DirectoryManager {
      * to the package directory corresponding to the second string,
      * with the URL file separator "/" separating subdirectory names.
      * <p>
-     * For example, if the parameter "from" is "java.lang"
+     * For EXAMPLE, if the parameter "from" is "java.lang"
      * and parameter "to" is "java.applet", return string
      * "../../java/applet".
      *
@@ -164,7 +164,8 @@ public abstract class DirectoryManager {
      * @see          #getPath(String)
      */
     public static String getRelativePath(String from, String to) {
-        StringBuffer pathstr = new StringBuffer();
+    	StringBuilder pathstr = new StringBuilder();
+    	
         pathstr.append(getRelativePath(from));
         pathstr.append(getPath(to));
         pathstr.append(URL_FILE_SEPARATOR);
@@ -178,7 +179,7 @@ public abstract class DirectoryManager {
      * the documentation, using the URL separator "/" between
      * subdirectory names.
      * <p>
-     * For example, if the string "from" is "java.lang",
+     * For EXAMPLE, if the string "from" is "java.lang",
      * return "../../"
      *
      * @param from    the package name
@@ -189,8 +190,9 @@ public abstract class DirectoryManager {
         if (from == null || from.length() == 0) {
             return "";
         }
-        StringBuffer pathstr = new StringBuffer();
-        String path = from;//.substring(HTTP_PROTOCOL.length(), from.length());
+        StringBuilder pathstr = new StringBuilder();
+        String path = from;
+        
         for (int i = 0; i < path.length(); i++) {
             char ch = path.charAt(i);
             if (ch == '/' || ch == '.') {
@@ -225,7 +227,7 @@ public abstract class DirectoryManager {
     }
 
     /**
-     * Given a path string create all the directories in the path. For example,
+     * Given a path string create all the directories in the path. For EXAMPLE,
      * if the path string is "java/applet", the method will create directory
      * "java" and then "java/applet" if they don't exist. The file separator
      * string "/" is platform dependent system property.
@@ -238,22 +240,15 @@ public abstract class DirectoryManager {
             return;
         }
         File dir = new File(path);
-        if (dir.exists()) {
-            return;
-        } else {
-            if (dir.mkdirs()) {
-                return;
-            } else {
-                configuration.message.error(
-                       "doclet.Unable_to_create_directory_0", path);
-                throw new DocletAbortException();
-            }
+        if (!dir.exists() && !dir.mkdirs()) {
+            configuration.message.error("doclet.Unable_to_create_directory_0", path);
+             throw new DocletAbortException();
         }
     }
 
     /**
      * Given a package name and a file name, return the full path to that file.
-     * For example, if PackageDoc passed is for "java.lang" and the filename
+     * For EXAMPLE, if PackageDoc passed is for "java.lang" and the filename
      * passed is "package-summary.html", then the string returned is
      * "java/lang/package-summary.html".
      *
@@ -261,8 +256,9 @@ public abstract class DirectoryManager {
      * @param filename   File name to be appended to the path of the package.
      */
     public static String getPathToLibrary(String pd, String filename) {
-        StringBuffer buf = new StringBuffer();
+    	StringBuilder buf = new StringBuilder();
         String pathstr = createPathString(pd);
+        
         if (pathstr.length() > 0) {
             buf.append(pathstr);
             buf.append(URL_FILE_SEPARATOR);

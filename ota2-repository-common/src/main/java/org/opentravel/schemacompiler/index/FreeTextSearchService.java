@@ -383,7 +383,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * @param includeStatus  indicates the latest library status to include in the results (null = all statuses)
      * @param latestVersionsOnly  flag indicating whether only the latest versions of a library or entity should
      *							  be returned in the search results
-     * @param resolveContent  flag indicating whether the content details should be pre-resolved; if false, content
+     * @param resolveContent  flag indicating whether the content DETAILS should be pre-resolved; if false, content
      *						  is still available in the search results, but it will be initialized in a lazy fashion
      * @return List<SearchResult<?>>
      * @throws RepositoryException  thrown if an error occurs while performing the search
@@ -484,7 +484,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * Returns the library with the specified search index ID.
      * 
      * @param searchIndexId  the search index ID of the library to retrieve
-     * @param resolveContent  flag indicating whether the content details should be pre-resolved; if false, content
+     * @param resolveContent  flag indicating whether the content DETAILS should be pre-resolved; if false, content
      *						  is still available in the search results, but it will be initialized in a lazy fashion
      * @return LibrarySearchResult
      * @throws RepositoryException  thrown if an error occurs while performing the search
@@ -498,7 +498,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * Returns the library from the search index that is associated with the given repository item.
      * 
      * @param repositoryItem  the repository item for which to return the library from the search index
-     * @param resolveContent  flag indicating whether the content details should be pre-resolved; if false, content
+     * @param resolveContent  flag indicating whether the content DETAILS should be pre-resolved; if false, content
      *						  is still available in the search results, but it will be initialized in a lazy fashion
      * @return LibrarySearchResult
      * @throws RepositoryException  thrown if an error occurs while performing the search
@@ -511,7 +511,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * Returns a list of libraries that correspond to the search index ID's provided.
      * 
      * @param searchIndexIds  the search index ID's for the libraries to retrieve
-     * @param resolveContent  flag indicating whether the content details should be pre-resolved; if false, content
+     * @param resolveContent  flag indicating whether the content DETAILS should be pre-resolved; if false, content
      *						  is still available in the search results, but it will be initialized in a lazy fashion
      * @return List<LibrarySearchResult>
      * @throws RepositoryException  thrown if an error occurs while performing the search
@@ -532,7 +532,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * Returns the release with the specified search index ID.
      * 
      * @param searchIndexId  the search index ID of the release to retrieve
-     * @param resolveContent  flag indicating whether the content details should be pre-resolved; if false, content
+     * @param resolveContent  flag indicating whether the content DETAILS should be pre-resolved; if false, content
      *						  is still available in the search results, but it will be initialized in a lazy fashion
      * @return ReleaseSearchResult
      * @throws RepositoryException  thrown if an error occurs while performing the search
@@ -546,7 +546,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * Returns the release from the search index that is associated with the given repository item.
      * 
      * @param repositoryItem  the repository item for which to return the release from the search index
-     * @param resolveContent  flag indicating whether the content details should be pre-resolved; if false, content
+     * @param resolveContent  flag indicating whether the content DETAILS should be pre-resolved; if false, content
      *						  is still available in the search results, but it will be initialized in a lazy fashion
      * @return ReleaseSearchResult
      * @throws RepositoryException  thrown if an error occurs while performing the search
@@ -559,7 +559,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * Returns a list of releases that correspond to the search index ID's provided.
      * 
      * @param searchIndexIds  the search index ID's for the releases to retrieve
-     * @param resolveContent  flag indicating whether the content details should be pre-resolved; if false, content
+     * @param resolveContent  flag indicating whether the content DETAILS should be pre-resolved; if false, content
      *						  is still available in the search results, but it will be initialized in a lazy fashion
      * @return List<ReleaseSearchResult>
      * @throws RepositoryException  thrown if an error occurs while performing the search
@@ -580,7 +580,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * Returns the library or release from the search index that is associated with the given repository item.
      * 
      * @param repositoryItem  the repository item for which to return the library or release from the search index
-     * @param resolveContent  flag indicating whether the content details should be pre-resolved; if false, content
+     * @param resolveContent  flag indicating whether the content DETAILS should be pre-resolved; if false, content
      *						  is still available in the search results, but it will be initialized in a lazy fashion
      * @param itemType  the type of repository item (library or release) to search for
      * @return SearchResult<?>
@@ -623,7 +623,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * Returns a list of libraries or releases that correspond to the search index ID's provided.
      * 
      * @param searchIndexIds  the search index ID's for the libraries or releases to retrieve
-     * @param resolveContent  flag indicating whether the content details should be pre-resolved; if false, content
+     * @param resolveContent  flag indicating whether the content DETAILS should be pre-resolved; if false, content
      *						  is still available in the search results, but it will be initialized in a lazy fashion
      * @param itemType  the type of repository item (library or release) to search for
      * @return List<LibrarySearchResult>
@@ -670,7 +670,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * is null, this method will return a list of all repository items that are locked by any user.
      * 
      * @param userId  the ID if the user for which to return locked libraries (null for all users)
-     * @param resolveContent  flag indicating whether the content details should be pre-resolved; if false, content
+     * @param resolveContent  flag indicating whether the content DETAILS should be pre-resolved; if false, content
      *						  is still available in the search results, but it will be initialized in a lazy fashion
      * @return List<LibrarySearchResult>
      * @throws RepositoryException  thrown if an error occurs while performing the search
@@ -705,7 +705,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * @param libraryIndex  the index search result for the library to use as the target of the where-used search
      * @param includeIndirectReferences  flag indicating whether indirect where-used references should be included
      *									 in the search results
-     * @param resolveContent  flag indicating whether the content details should be pre-resolved; if false, content
+     * @param resolveContent  flag indicating whether the content DETAILS should be pre-resolved; if false, content
      *						  is still available in the search results, but it will be initialized in a lazy fashion
      * @return List<LibrarySearchResult>
      * @throws RepositoryException  thrown if an error occurs while performing the search
@@ -750,7 +750,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * @param libraryIndex  the index search result for the library to use as the target of the where-used search
      * @param foundIndexIds  cumulative list of entity search index ID's found during previous queries
      * @param searchResults  cumulative list of where-used search results
-     * @param resolveContent  flag indicating whether the content details should be pre-resolved; if false, content
+     * @param resolveContent  flag indicating whether the content DETAILS should be pre-resolved; if false, content
      *						  is still available in the search results, but it will be initialized in a lazy fashion
      * @throws RepositoryException  thrown if an error occurs while performing the search
      */
@@ -775,7 +775,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * 
      * @param searcher  the searcher to use for the query operation
      * @param libraryIndex  the index search result for the library to use as the target of the where-used search
-     * @param resolveContent  flag indicating whether the content details should be pre-resolved; if false, content
+     * @param resolveContent  flag indicating whether the content DETAILS should be pre-resolved; if false, content
      *						  is still available in the search results, but it will be initialized in a lazy fashion
      * @return List<LibrarySearchResult>
      * @throws RepositoryException  thrown if an error occurs while performing the search
@@ -803,7 +803,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * Returns the list of OTM releases that reference the library with the specified search index ID.
      * 
      * @param libraryIndex  the index search result for the library to use as the target of the where-used search
-     * @param resolveContent  flag indicating whether the content details should be pre-resolved; if false, content
+     * @param resolveContent  flag indicating whether the content DETAILS should be pre-resolved; if false, content
      *						  is still available in the search results, but it will be initialized in a lazy fashion
      * @return List<ReleaseSearchResult>
      * @throws RepositoryException  thrown if an error occurs while performing the search
@@ -850,7 +850,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * Returns the entity with the specified search index ID.
      * 
      * @param searchIndexId  the search index ID of the entity to retrieve
-     * @param resolveContent  flag indicating whether the content details should be pre-resolved; if false, content
+     * @param resolveContent  flag indicating whether the content DETAILS should be pre-resolved; if false, content
      *						  is still available in the search results, but it will be initialized in a lazy fashion
      * @return EntitySearchResult
      * @throws RepositoryException  thrown if an error occurs while performing the search
@@ -865,7 +865,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * 
      * @param libraryIndexId  the search index ID of the owning library for which to retrieve entities
      * @param entityName  the local name of the entity to retrieve
-     * @param resolveContent  flag indicating whether the content details should be pre-resolved; if false, content
+     * @param resolveContent  flag indicating whether the content DETAILS should be pre-resolved; if false, content
      *						  is still available in the search results, but it will be initialized in a lazy fashion
      * @return EntitySearchResult
      * @throws RepositoryException  thrown if an error occurs while performing the search
@@ -897,7 +897,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * Returns all entities that are owned by the library the specified search index ID.
      * 
      * @param libraryIndexId  the search index ID of the owning library for which to retrieve entities
-     * @param resolveContent  flag indicating whether the content details should be pre-resolved; if false, content
+     * @param resolveContent  flag indicating whether the content DETAILS should be pre-resolved; if false, content
      *						  is still available in the search results, but it will be initialized in a lazy fashion
      * @return List<EntitySearchResult>
      * @throws RepositoryException  thrown if an error occurs while performing the search
@@ -926,7 +926,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * Returns a list of entities that correspond to the search index ID's provided.
      * 
      * @param searchIndexIds  the search index ID's for the entities to retrieve
-     * @param resolveContent  flag indicating whether the content details should be pre-resolved; if false, content
+     * @param resolveContent  flag indicating whether the content DETAILS should be pre-resolved; if false, content
      *						  is still available in the search results, but it will be initialized in a lazy fashion
      * @return List<EntitySearchResult>
      * @throws RepositoryException  thrown if an error occurs while performing the search
@@ -958,7 +958,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
     /**
      * Returns a list of entities whose 'referenceName' values correspond to the search index ID's provided.
      * 
-     * @param resolveContent  flag indicating whether the content details should be pre-resolved; if false, content
+     * @param resolveContent  flag indicating whether the content DETAILS should be pre-resolved; if false, content
      *						  is still available in the search results, but it will be initialized in a lazy fashion
      * @param searchIndexIds  the search index ID's for the entities to retrieve
      * @return List<EntitySearchResult>
@@ -992,7 +992,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * Returns the list of entities that extend the entity with the specified index ID.
      * 
      * @param entityIndex  the entity for which to return the list of extending entities
-     * @param resolveContent  flag indicating whether the content details should be pre-resolved; if false, content
+     * @param resolveContent  flag indicating whether the content DETAILS should be pre-resolved; if false, content
      *						  is still available in the search results, but it will be initialized in a lazy fashion
      * @return List<EntitySearchResult>
      * @throws RepositoryException  thrown if an error occurs while performing the search
@@ -1023,7 +1023,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * @param entityIndex  the index search result for the entity to use as the target of the where-used search
      * @param includeIndirectReferences  flag indicating whether indirect where-used references should be included
      *									 in the search results
-     * @param resolveContent  flag indicating whether the content details should be pre-resolved; if false, content
+     * @param resolveContent  flag indicating whether the content DETAILS should be pre-resolved; if false, content
      *						  is still available in the search results, but it will be initialized in a lazy fashion
      * @return List<LibrarySearchResult>
      * @throws RepositoryException  thrown if an error occurs while performing the search
@@ -1068,7 +1068,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * @param entityIndex  the index search result for the entity to use as the target of the where-used search
      * @param foundIndexIds  cumulative list of entity search index ID's found during previous queries
      * @param searchResults  cumulative list of where-used search results
-     * @param resolveContent  flag indicating whether the content details should be pre-resolved; if false, content
+     * @param resolveContent  flag indicating whether the content DETAILS should be pre-resolved; if false, content
      *						  is still available in the search results, but it will be initialized in a lazy fashion
      * @throws RepositoryException  thrown if an error occurs while performing the search
      */
@@ -1093,7 +1093,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * 
      * @param searcher  the searcher to use for the query operation
      * @param entityIndex  the index search result for the entity to use as the target of the where-used search
-     * @param resolveContent  flag indicating whether the content details should be pre-resolved; if false, content
+     * @param resolveContent  flag indicating whether the content DETAILS should be pre-resolved; if false, content
      *						  is still available in the search results, but it will be initialized in a lazy fashion
      * @return List<EntitySearchResult>
      * @throws RepositoryException  thrown if an error occurs while performing the search

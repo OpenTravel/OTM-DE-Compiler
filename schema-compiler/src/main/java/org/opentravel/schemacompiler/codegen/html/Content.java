@@ -39,8 +39,6 @@
  */
 package org.opentravel.schemacompiler.codegen.html;
 
-import org.opentravel.schemacompiler.codegen.html.DocletConstants;
-
 
 /**
  * A class to create content for javadoc output pages.

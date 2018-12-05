@@ -333,7 +333,7 @@ public class ReleaseCompileOptions implements CompileAllTaskOptions {
 
     /**
      * Assigns the flag indicating whether optional fields should be suppressed
-	 * during example generation.
+	 * during EXAMPLE generation.
      * 
      * @param generateExamples  the flag value to assign
      */

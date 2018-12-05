@@ -16,6 +16,7 @@
 package org.opentravel.schemacompiler.codegen.example;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +45,7 @@ public class ExtensionPointRegistry {
 	
 	private static FacetCodegenDelegateFactory facetDelegateFactory = new FacetCodegenDelegateFactory(null);
 
-    private Map<TLPatchableFacet, List<TLExtensionPointFacet>> extensionPointRegistry;
+    private Map<TLPatchableFacet,List<TLExtensionPointFacet>> registryMap;
 	
     /**
      * Constructor that initializes the registry with content from the given model.
@@ -52,7 +53,7 @@ public class ExtensionPointRegistry {
      * @param model  the model from which to initialize the registry
      */
 	public ExtensionPointRegistry(TLModel model) {
-        this.extensionPointRegistry = new HashMap<>();
+        this.registryMap = new HashMap<>();
 
         for (TLLibrary library : model.getUserDefinedLibraries()) {
             for (TLExtensionPointFacet xpFacet : library.getExtensionPointFacetTypes()) {
@@ -62,12 +63,11 @@ public class ExtensionPointRegistry {
 
                 if (extendedEntity instanceof TLPatchableFacet) {
                 	TLPatchableFacet extendedFacet = (TLPatchableFacet) extendedEntity;
-                    List<TLExtensionPointFacet> extensionPoints = extensionPointRegistry
-                            .get(extendedFacet);
+                    List<TLExtensionPointFacet> extensionPoints = registryMap.get(extendedFacet);
 
                     if (extensionPoints == null) {
                         extensionPoints = new ArrayList<>();
-                        extensionPointRegistry.put(extendedFacet, extensionPoints);
+                        registryMap.put(extendedFacet, extensionPoints);
                     }
                     extensionPoints.add(xpFacet);
                 }
@@ -85,11 +85,11 @@ public class ExtensionPointRegistry {
      * @return Map<TLFacetType,List<TLExtensionPointFacet>>
      */
     public Map<TLFacetType, List<TLExtensionPointFacet>> getExtensionPoints(TLPatchableFacet facet) {
-        Map<TLFacetType, List<TLExtensionPointFacet>> result = new HashMap<>();
+        Map<TLFacetType, List<TLExtensionPointFacet>> result = new EnumMap<>( TLFacetType.class );
         MinorVersionHelper versionHelper = new MinorVersionHelper();
 
         // Lookup the extension point facets that reference the given entity facet
-        if (extensionPointRegistry != null) {
+        if (registryMap != null) {
             List<TLPatchableFacet> facetHierarchy = new ArrayList<>();
             
             if (facet instanceof TLFacet) {
@@ -102,7 +102,7 @@ public class ExtensionPointRegistry {
                 TLFacetOwner facetOwner = hFacet.getOwningEntity();
 
                 while ((hFacet != null) && (facetOwner != null)) {
-                    List<TLExtensionPointFacet> hExtensionPoints = extensionPointRegistry.get(hFacet);
+                    List<TLExtensionPointFacet> hExtensionPoints = registryMap.get(hFacet);
 
                     if (hExtensionPoints != null) {
                         List<TLExtensionPointFacet> extensionPoints = result.get(hFacet.getFacetType());

@@ -138,7 +138,7 @@ public interface CodeGenerationWsdlBindings {
      * @param namespaceMappings
      *            map that should be used to define any new namespace mappings (key = NS URI / value = NS prefix) 
      * @param operationFacet
-     *            the operation facet from which the example XML element was generated
+     *            the operation facet from which the EXAMPLE XML element was generated
      */
     public void addPayloadExampleContent(Element exampleXml, Map<String,String> namespaceMappings, TLFacet operationFacet);
 
@@ -149,7 +149,7 @@ public interface CodeGenerationWsdlBindings {
      * @param node
      *            the JSON node to which the attributes and/or elements should be added
      * @param operationFacet
-     *            the operation facet from which the example JSON node was generated
+     *            the operation facet from which the EXAMPLE JSON node was generated
      */
 	public void addPayloadExampleContent(ObjectNode node, TLFacet operationFacet);
 

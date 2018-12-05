@@ -123,7 +123,7 @@ public class TLExtensionPointFacetCodegenTransformer extends
             }
         }
 
-        // Generate the documentation block (if required)
+        // Generate the documentation BLOCK (if required)
         TLDocumentation sourceDoc = DocumentationFinder.getDocumentation( source );
         
         if (sourceDoc != null) {

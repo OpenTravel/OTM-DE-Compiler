@@ -240,7 +240,7 @@ public class Release {
 
 	/**
 	 * Returns the map of facet owner names to the names of their associated
-	 * preferred facets.  This is used for example generation during the model
+	 * preferred facets.  This is used for EXAMPLE generation during the model
 	 * compilation process.
 	 *
 	 * @return Map<QName,QName>

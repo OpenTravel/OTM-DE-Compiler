@@ -171,7 +171,7 @@ public class InheritanceHierarchyBuilder {
 
     /**
      * Returns true if the given member is to be considered a member of an isolated inheritance
-     * hierarchy. For example, query facets of business objects should not be considered
+     * hierarchy. For EXAMPLE, query facets of business objects should not be considered
      * substitutable with the business object's ID facet, but it may be considered a substitutable
      * with query facets of the same name from an extended business object.
      * 

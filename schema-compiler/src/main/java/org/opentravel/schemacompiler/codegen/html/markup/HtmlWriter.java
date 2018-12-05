@@ -42,7 +42,6 @@ package org.opentravel.schemacompiler.codegen.html.markup;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 
 import org.opentravel.schemacompiler.codegen.html.Configuration;
 import org.opentravel.schemacompiler.codegen.html.Content;
@@ -62,6 +61,56 @@ import org.opentravel.schemacompiler.codegen.html.Util;
 public class HtmlWriter extends PrintWriter {
 
     /**
+	 * 
+	 */
+	private static final String WIDTH = "\" WIDTH=\"";
+
+	/**
+	 * 
+	 */
+	private static final String VALIGN2 = "\" VALIGN=\"";
+
+	/**
+	 * 
+	 */
+	private static final String SUMMARY = "\" SUMMARY=\"\">";
+
+	/**
+	 * 
+	 */
+	private static final String CLASS = "\" CLASS=\"";
+
+	/**
+	 * 
+	 */
+	private static final String CELLSPACING2 = "\" CELLSPACING=\"";
+
+	/**
+	 * 
+	 */
+	private static final String CELLPADDING2 = "\" CELLPADDING=\"";
+
+	/**
+	 * 
+	 */
+	private static final String TH_ALIGN = "<TH ALIGN=\"";
+
+	/**
+	 * 
+	 */
+	private static final String TD_ALIGN = "<TD ALIGN=\"";
+
+	/**
+	 * 
+	 */
+	private static final String TABLE_BORDER = "<TABLE BORDER=\"";
+
+	/**
+	 * 
+	 */
+	private static final String INDENT_CLOSE_BRACE = "    }";
+
+	/**
      * Name of the file, to which this writer is writing to.
      */
     protected final String htmlFilename;
@@ -74,8 +123,7 @@ public class HtmlWriter extends PrintWriter {
     /**
      * URL file separator string("/").
      */
-    public static final String fileseparator =
-         DirectoryManager.URL_FILE_SEPARATOR;
+    public static final String FILE_SEPARATOR = DirectoryManager.URL_FILE_SEPARATOR;
 
     /**
      * The configuration
@@ -88,7 +136,7 @@ public class HtmlWriter extends PrintWriter {
     protected boolean memberDetailsListPrinted;
 
     /**
-     * Header for tables displaying packages and description..
+     * Header for tables displaying packages and description.
      */
     protected final String[] libraryTableHeader;
 
@@ -184,12 +232,11 @@ public class HtmlWriter extends PrintWriter {
      * @param docencoding Encoding to be used for this file.
      * @exception IOException Exception raised by the FileWriter is passed on
      * to next level.
-     * @exception UnSupportedEncodingException Exception raised by the
      * OutputStreamWriter is passed on to next level.
      */
     public HtmlWriter(Configuration configuration,
                       String path, String filename, String docencoding)
-                      throws IOException, UnsupportedEncodingException {
+                      throws IOException {
         super(Util.genWriter(configuration, path, filename, docencoding));
         this.configuration = configuration;
         htmlFilename = filename;
@@ -299,7 +346,7 @@ public class HtmlWriter extends PrintWriter {
             println("{");
             println("    if (location.href.indexOf('is-external=true') == -1) {");
             println("        parent.document.title=\"" + winTitle + "\";");
-            println("    }");
+            println(INDENT_CLOSE_BRACE);
             println("}");
             scriptEnd();
             noScript();
@@ -319,7 +366,7 @@ public class HtmlWriter extends PrintWriter {
             String scriptCode = "<!--" + DocletConstants.NL +
                     "    if (location.href.indexOf('is-external=true') == -1) {" + DocletConstants.NL +
                     "        parent.document.title=\"" + winTitle + "\";" + DocletConstants.NL +
-                    "    }" + DocletConstants.NL +
+                    INDENT_CLOSE_BRACE + DocletConstants.NL +
                     "//-->" + DocletConstants.NL;
             RawHtml scriptContent = new RawHtml(scriptCode);
             script.addContent(scriptContent);
@@ -373,11 +420,11 @@ public class HtmlWriter extends PrintWriter {
                 "            }" + DocletConstants.NL +
                 "        }" + DocletConstants.NL +
                 "        return true;" + DocletConstants.NL +
-                "    }" + DocletConstants.NL +
+                INDENT_CLOSE_BRACE + DocletConstants.NL +
                 "    function loadFrames() {" + DocletConstants.NL +
                 "        if (targetPage != \"\" && targetPage != \"undefined\")" + DocletConstants.NL +
                 "             top.classFrame.location = top.targetPage;" + DocletConstants.NL +
-                "    }" + DocletConstants.NL;
+                INDENT_CLOSE_BRACE + DocletConstants.NL;
         RawHtml scriptContent = new RawHtml(scriptCode);
         script.addContent(scriptContent);
         return script;
@@ -480,7 +527,7 @@ public class HtmlWriter extends PrintWriter {
     /**
      * Print &lt;TITLE&gt; tag. Add a newline character at the end.
      *
-     * @param winTitle The title of this document.
+     * @param winTitle The TITLE of this document.
      */
     public void title(String winTitle) {
         // Set window title string which is later printed
@@ -489,13 +536,12 @@ public class HtmlWriter extends PrintWriter {
     }
 
     /**
-     * Returns an HtmlTree for the TITLE tag.
+     * Returns an HtmlTree for the title tag.
      *
-     * @return an HtmlTree for the TITLE tag
+     * @return an HtmlTree for the title tag
      */
     public HtmlTree getTitle() {
-        HtmlTree title = HtmlTree.title(new StringContent(winTitle));
-        return title;
+        return HtmlTree.title(new StringContent(winTitle));
     }
 
     /**
@@ -720,7 +766,7 @@ public class HtmlWriter extends PrintWriter {
      * @param widthPercent   Percentage Width of the ruler
      */
     public void hr(int size, int widthPercent) {
-        println("<HR SIZE=\"" + size + "\" WIDTH=\"" + widthPercent + "%\">");
+        println("<HR SIZE=\"" + size + WIDTH + widthPercent + "%\">");
     }
 
     /**
@@ -731,24 +777,6 @@ public class HtmlWriter extends PrintWriter {
      */
     public void hr(int size, String noshade) {
         println("<HR SIZE=\"" + size + "\" NOSHADE>");
-    }
-
-    /**
-     * Get the "&lt;STRONG&gt;" string.
-     *
-     * @return String Return String "&lt;STRONG&gt;";
-     */
-    public String getStrong() {
-        return "<STRONG>";
-    }
-
-    /**
-     * Get the "&lt;/STRONG&gt;" string.
-     *
-     * @return String Return String "&lt;/STRONG&gt;";
-     */
-    public String getStrongEnd() {
-        return "</STRONG>";
     }
 
     /**
@@ -766,7 +794,7 @@ public class HtmlWriter extends PrintWriter {
     }
 
     /**
-     * Print text passed, in strong format using &lt;STRONG&gt; and &lt;/STRONG&gt; tags.
+     * Print text passed, in STRONG format using &lt;STRONG&gt; and &lt;/STRONG&gt; tags.
      *
      * @param text String to be printed in between &lt;STRONG&gt; and &lt;/STRONG&gt; tags.
      */
@@ -906,7 +934,7 @@ public class HtmlWriter extends PrintWriter {
      * @param stylename String stylename.
      */
     public void fontSizeStyle(String size, String stylename) {
-        println("<FONT size=\"" + size + "\" CLASS=\"" + stylename + "\">");
+        println("<FONT size=\"" + size + CLASS + stylename + "\">");
     }
 
     /**
@@ -924,15 +952,6 @@ public class HtmlWriter extends PrintWriter {
      */
     public String getFontColor(String color) {
         return "<FONT COLOR=\"" + color + "\">";
-    }
-
-    /**
-     * Get the "&lt;/FONT&gt;" string.
-     *
-     * @return String Return String "&lt;/FONT&gt;";
-     */
-    public String getFontEnd() {
-        return "</FONT>";
     }
 
     /**
@@ -1096,30 +1115,30 @@ public class HtmlWriter extends PrintWriter {
     public void table(int border, String width, int cellpadding,
                       int cellspacing) {
         println(DocletConstants.NL +
-                "<TABLE BORDER=\"" + border +
-                "\" WIDTH=\"" + width +
-                "\" CELLPADDING=\"" + cellpadding +
-                "\" CELLSPACING=\"" + cellspacing +
-                "\" SUMMARY=\"\">");
+                TABLE_BORDER + border +
+                WIDTH + width +
+                CELLPADDING2 + cellpadding +
+                CELLSPACING2 + cellspacing +
+                SUMMARY);
     }
 
     /**
      * Print HTML &lt;TABLE BORDER="border" WIDTH="width"
-     * CELLPADDING="cellpadding" CELLSPACING="cellspacing" SUMMARY="summary"&gt; tag.
+     * CELLPADDING="cellpadding" CELLSPACING="cellspacing" SUMMARY="SUMMARY"&gt; tag.
      *
      * @param border       Border size.
      * @param width        Width of the table.
      * @param cellpadding  Cellpadding for the table cells.
      * @param cellspacing  Cellspacing for the table cells.
-     * @param summary      Table summary.
+     * @param SUMMARY      Table SUMMARY.
      */
     public void table(int border, String width, int cellpadding,
                       int cellspacing, String summary) {
         println(DocletConstants.NL +
-                "<TABLE BORDER=\"" + border +
-                "\" WIDTH=\"" + width +
-                "\" CELLPADDING=\"" + cellpadding +
-                "\" CELLSPACING=\"" + cellspacing +
+                TABLE_BORDER + border +
+                WIDTH + width +
+                CELLPADDING2 + cellpadding +
+                CELLSPACING2 + cellspacing +
                 "\" SUMMARY=\"" + summary + "\">");
     }
 
@@ -1133,26 +1152,26 @@ public class HtmlWriter extends PrintWriter {
      */
     public void table(int border, int cellpadding, int cellspacing) {
         println(DocletConstants.NL +
-                "<TABLE BORDER=\"" + border +
-                "\" CELLPADDING=\"" + cellpadding +
-                "\" CELLSPACING=\"" + cellspacing +
-                "\" SUMMARY=\"\">");
+                TABLE_BORDER + border +
+                CELLPADDING2 + cellpadding +
+                CELLSPACING2 + cellspacing +
+                SUMMARY);
     }
 
     /**
      * Print HTML &lt;TABLE BORDER="border" CELLPADDING="cellpadding"
-     * CELLSPACING="cellspacing" SUMMARY="summary"&gt; tag.
+     * CELLSPACING="cellspacing" SUMMARY="SUMMARY"&gt; tag.
      *
      * @param border       Border size.
      * @param cellpadding  Cellpadding for the table cells.
      * @param cellspacing  Cellspacing for the table cells.
-     * @param summary      Table summary.
+     * @param SUMMARY      Table SUMMARY.
      */
     public void table(int border, int cellpadding, int cellspacing, String summary) {
         println(DocletConstants.NL +
-                "<TABLE BORDER=\"" + border +
-                "\" CELLPADDING=\"" + cellpadding +
-                "\" CELLSPACING=\"" + cellspacing +
+                TABLE_BORDER + border +
+                CELLPADDING2 + cellpadding +
+                CELLSPACING2 + cellspacing +
                 "\" SUMMARY=\"" + summary + "\">");
     }
 
@@ -1164,9 +1183,9 @@ public class HtmlWriter extends PrintWriter {
      */
     public void table(int border, String width) {
         println(DocletConstants.NL +
-                "<TABLE BORDER=\"" + border +
-                "\" WIDTH=\"" + width +
-                "\" SUMMARY=\"\">");
+                TABLE_BORDER + border +
+                WIDTH + width +
+                SUMMARY);
     }
 
     /**
@@ -1275,7 +1294,7 @@ public class HtmlWriter extends PrintWriter {
      * @param stylename String stylename.
      */
     public void trBgcolorStyle(String color, String stylename) {
-        println("<TR BGCOLOR=\"" + color + "\" CLASS=\"" + stylename + "\">");
+        println("<TR BGCOLOR=\"" + color + CLASS + stylename + "\">");
     }
 
     /**
@@ -1295,7 +1314,7 @@ public class HtmlWriter extends PrintWriter {
      * @param valign String valign.
      */
     public void trAlignVAlign(String align, String valign) {
-        println("<TR ALIGN=\"" + align + "\" VALIGN=\"" + valign + "\">");
+        println("<TR ALIGN=\"" + align + VALIGN2 + valign + "\">");
     }
 
     /**
@@ -1304,7 +1323,7 @@ public class HtmlWriter extends PrintWriter {
      * @param align the align attribute.
      */
     public void thAlign(String align) {
-        print("<TH ALIGN=\"" + align + "\">");
+        print(TH_ALIGN + align + "\">");
     }
 
     /**
@@ -1331,7 +1350,7 @@ public class HtmlWriter extends PrintWriter {
      * @param i integer.
      */
     public void thAlignColspan(String align, int i) {
-        print("<TH ALIGN=\"" + align + "\" COLSPAN=\"" + i + "\">");
+        print(TH_ALIGN + align + "\" COLSPAN=\"" + i + "\">");
     }
 
     /**
@@ -1340,7 +1359,7 @@ public class HtmlWriter extends PrintWriter {
      * @param align the align attribute.
      */
     public void thAlignNowrap(String align) {
-        print("<TH ALIGN=\"" + align + "\" NOWRAP>");
+        print(TH_ALIGN + align + "\" NOWRAP>");
     }
 
     /**
@@ -1366,7 +1385,7 @@ public class HtmlWriter extends PrintWriter {
      * @param stylename String stylename.
      */
     public void tdBgcolorStyle(String color, String stylename) {
-        print("<TD BGCOLOR=\"" + color + "\" CLASS=\"" + stylename + "\">");
+        print("<TD BGCOLOR=\"" + color + CLASS + stylename + "\">");
     }
 
     /**
@@ -1377,7 +1396,7 @@ public class HtmlWriter extends PrintWriter {
      * @param stylename String stylename.
      */
     public void tdColspanBgcolorStyle(int i, String color, String stylename) {
-        print("<TD COLSPAN=" + i + " BGCOLOR=\"" + color + "\" CLASS=\"" +
+        print("<TD COLSPAN=" + i + " BGCOLOR=\"" + color + CLASS +
               stylename + "\">");
     }
 
@@ -1388,7 +1407,7 @@ public class HtmlWriter extends PrintWriter {
      * @param align String align.
      */
     public void tdAlign(String align) {
-        print("<TD ALIGN=\"" + align + "\">");
+        print(TD_ALIGN + align + "\">");
     }
 
     /**
@@ -1398,7 +1417,7 @@ public class HtmlWriter extends PrintWriter {
      * @param stylename    String stylename.
      */
     public void tdVAlignClass(String align, String stylename) {
-        print("<TD VALIGN=\"" + align + "\" CLASS=\"" + stylename + "\">");
+        print("<TD VALIGN=\"" + align + CLASS + stylename + "\">");
     }
 
     /**
@@ -1417,7 +1436,7 @@ public class HtmlWriter extends PrintWriter {
      * @param valign  String valign.
      */
     public void tdAlignVAlign(String align, String valign) {
-        print("<TD ALIGN=\"" + align + "\" VALIGN=\"" + valign + "\">");
+        print(TD_ALIGN + align + VALIGN2 + valign + "\">");
     }
 
     /**
@@ -1427,7 +1446,7 @@ public class HtmlWriter extends PrintWriter {
      * @param rowspan  integer rowspan.
      */
     public void tdAlignRowspan(String align, int rowspan) {
-        print("<TD ALIGN=\"" + align + "\" ROWSPAN=" + rowspan + ">");
+        print(TD_ALIGN + align + "\" ROWSPAN=" + rowspan + ">");
     }
 
     /**
@@ -1439,7 +1458,7 @@ public class HtmlWriter extends PrintWriter {
      */
     public void tdAlignVAlignRowspan(String align, String valign,
                                      int rowspan) {
-        print("<TD ALIGN=\"" + align + "\" VALIGN=\"" + valign
+        print(TD_ALIGN + align + VALIGN2 + valign
                 + "\" ROWSPAN=" + rowspan + ">");
     }
 
@@ -1455,24 +1474,6 @@ public class HtmlWriter extends PrintWriter {
      */
     public void blockquoteEnd() {
         println("</BLOCKQUOTE>");
-    }
-
-    /**
-     * Get the "&lt;code&gt;" string.
-     *
-     * @return String Return String "&lt;code&gt;";
-     */
-    public String getCode() {
-        return "<code>";
-    }
-
-    /**
-     * Get the "&lt;/code&gt;" string.
-     *
-     * @return String Return String "&lt;/code&gt;";
-     */
-    public String getCodeEnd() {
-        return "</code>";
     }
 
     /**

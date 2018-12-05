@@ -18,10 +18,11 @@ package org.opentravel.schemacompiler.codegen.example;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 
 import javax.xml.namespace.QName;
 
@@ -80,13 +81,12 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
     protected CodeGenerationWsdlBindings wsdlBindings = null;   
     protected String lastExampleValue;
 	protected Map<QName, List<String>> idRegistry = new HashMap<>();	
-	protected Stack<TLPropertyOwner> facetStack = new Stack<>();
+	protected Deque<TLPropertyOwner> facetStack = new LinkedList<>();
 	protected ExampleContext context = new ExampleContext(null);
-	protected Stack<ExampleContext> contextStack = new Stack<>();
-
+	protected Deque<ExampleContext> contextStack = new LinkedList<>();
 
     /**
-     * Contstructor that provides the navigation options to use during example generation.
+     * Contstructor that provides the navigation options to use during EXAMPLE generation.
      * 
      * @param preferredContext
      *            the context ID of the preferred context from which to generate examples
@@ -103,10 +103,10 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
     }
 
     /**
-     * Generates an example value for the given model entity (if possible).
+     * Generates an EXAMPLE value for the given model entity (if possible).
      * 
      * @param entity
-     *            the entity for which to generate an example
+     *            the entity for which to generate an EXAMPLE
      * @return String
      */
     protected String generateExampleValue(Object entity) {
@@ -171,7 +171,7 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
             			fractionDigits, RoundingMode.HALF_UP ).toString();
         		
         	} catch (NumberFormatException e) {
-        		// Ignore error - example string will remain unchanged
+        		// Ignore error - EXAMPLE string will remain unchanged
         	}
         }
         
@@ -201,13 +201,10 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
 		} else {
 			ExampleContext facetContext = context;
 
-			// If we are currently processing an attribute value, the facet
-			// context will be the
-			// current one. If we are processing an element value, the facet
-			// context will be
+			// If we are currently processing an attribute value, the facet context will be the
+			// current one. If we are processing an element value, the facet context will be
 			// on top of the context stack.
-			if ((facetContext.modelAttribute == null)
-					&& !contextStack.isEmpty()) {
+			if ((facetContext.modelAttribute == null) && !contextStack.isEmpty()) {
 				facetContext = contextStack.peek();
 			}
 
@@ -239,9 +236,9 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     @Override
     public void visitSimpleType(TLAttributeType simpleType) {
-        if (DEBUG) {
-            log.info(debugIndent + "visitSimpleType() : " + simpleType.getLocalName() + " --> "
-                    + generateExampleValue(simpleType));
+        if (debugLogging() && log.isInfoEnabled()) {
+        	log.info( String.format("%svisitSimpleType() : %s --> %s",
+        			debugIndent, simpleType.getLocalName(), generateExampleValue(simpleType)) );
         }
     }
 
@@ -250,8 +247,8 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     @Override
     public void startFacet(TLFacet facet) {
-        if (DEBUG) {
-            log.info(debugIndent + "startFacet() : " + facet.getLocalName());
+        if (debugLogging() && log.isInfoEnabled()) {
+        	log.info( String.format("%sstartFacet() : %s", debugIndent, facet.getLocalName()) );
             debugIndent.append("  ");
         }
     }
@@ -261,10 +258,11 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     @Override
     public void endFacet(TLFacet facet) {
-        if (DEBUG) {
-            if (debugIndent.length() > 0)
+        if (debugLogging() && log.isInfoEnabled()) {
+            if (debugIndent.length() > 0) {
                 debugIndent.setLength(debugIndent.length() - 2);
-            log.info(debugIndent + "endFacet() : " + facet.getLocalName());
+            }
+        	log.info( String.format("%sendFacet() : %s", debugIndent, facet.getLocalName()) );
         }
     }
 
@@ -274,9 +272,8 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     @Override
     public void startListFacet(TLListFacet listFacet, TLRole role) {
-        if (DEBUG) {
-            log.info(debugIndent + "startListFacet() : " + listFacet.getLocalName() + " / "
-                    + role.getName());
+        if (debugLogging() && log.isInfoEnabled()) {
+        	log.info( String.format("%sstartListFacet() : %s / %s", debugIndent, listFacet.getLocalName(), role.getName()) );
             debugIndent.append("  ");
         }
     }
@@ -287,11 +284,11 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     @Override
     public void endListFacet(TLListFacet listFacet, TLRole role) {
-        if (DEBUG) {
-            if (debugIndent.length() > 0)
+        if (debugLogging() && log.isInfoEnabled()) {
+            if (debugIndent.length() > 0) {
                 debugIndent.setLength(debugIndent.length() - 2);
-            log.info(debugIndent + "endListFacet() : " + listFacet.getLocalName() + " / "
-                    + role.getName());
+            }
+        	log.info( String.format("%sendListFacet() : %s / %s", debugIndent, listFacet.getLocalName(), role.getName()) );
         }
     }
 
@@ -300,8 +297,8 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     @Override
     public void startAlias(TLAlias alias) {
-        if (DEBUG) {
-            log.info(debugIndent + "startAlias() : " + alias.getLocalName());
+        if (debugLogging() && log.isInfoEnabled()) {
+        	log.info( String.format("%sstartAlias() : %s", debugIndent, alias.getLocalName()) );
         }
     }
 
@@ -310,8 +307,8 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     @Override
     public void endAlias(TLAlias alias) {
-        if (DEBUG) {
-            log.info(debugIndent + "endAlias() : " + alias.getLocalName());
+        if (debugLogging() && log.isInfoEnabled()) {
+        	log.info( String.format("%sendAlias() : %s", debugIndent, alias.getLocalName()) );
         }
     }
 
@@ -320,8 +317,8 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
 	 */
 	@Override
 	public void startActionFacet(TLActionFacet actionFacet, TLFacet payloadFacet) {
-        if (DEBUG) {
-            log.info(debugIndent + "startActionFacet() : " + actionFacet.getLocalName());
+        if (debugLogging() && log.isInfoEnabled()) {
+        	log.info( String.format("%sstartActionFacet() : %s", debugIndent, actionFacet.getLocalName()) );
             debugIndent.append("  ");
         }
 	}
@@ -331,8 +328,8 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
 	 */
 	@Override
 	public void endActionFacet(TLActionFacet actionFacet, TLFacet payloadFacet) {
-        if (DEBUG) {
-            log.info(debugIndent + "endActionFacet() : " + actionFacet.getLocalName());
+        if (debugLogging() && log.isInfoEnabled()) {
+        	log.info( String.format("%sendActionFacet() : %s", debugIndent, actionFacet.getLocalName()) );
             debugIndent.append("  ");
         }
 	}
@@ -342,8 +339,8 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     @Override
     public void startAttribute(TLAttribute attribute) {
-        if (DEBUG) {
-            log.info(debugIndent + "startAttribute() : " + attribute.getName());
+        if (debugLogging() && log.isInfoEnabled()) {
+        	log.info( String.format("%sstartAttribute() : %s", debugIndent, attribute.getName()) );
             debugIndent.append("  ");
         }
     }
@@ -353,10 +350,11 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     @Override
     public void endAttribute(TLAttribute attribute) {
-        if (DEBUG) {
-            if (debugIndent.length() > 0)
+        if (debugLogging() && log.isInfoEnabled()) {
+            if (debugIndent.length() > 0) {
                 debugIndent.setLength(debugIndent.length() - 2);
-            log.info(debugIndent + "endAttribute() : " + attribute.getName());
+            }
+        	log.info( String.format("%sendAttribute() : %s", debugIndent, attribute.getName()) );
         }
     }
 
@@ -365,8 +363,8 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     @Override
     public void startElement(TLProperty element) {
-        if (DEBUG) {
-            log.info(debugIndent + "startElement() : " + element.getName());
+        if (debugLogging() && log.isInfoEnabled()) {
+        	log.info( String.format("%sstartElement() : %s", debugIndent, element.getName()) );
             debugIndent.append("  ");
         }
     }
@@ -376,10 +374,11 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     @Override
     public void endElement(TLProperty element) {
-        if (DEBUG) {
-            if (debugIndent.length() > 0)
+        if (debugLogging() && log.isInfoEnabled()) {
+            if (debugIndent.length() > 0) {
                 debugIndent.setLength(debugIndent.length() - 2);
-            log.info(debugIndent + "endElement() : " + element.getName());
+            }
+        	log.info( String.format("%sendElement() : %s", debugIndent, element.getName()) );
         }
     }
 
@@ -388,8 +387,8 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     @Override
     public void startIndicatorAttribute(TLIndicator indicator) {
-        if (DEBUG) {
-            log.info(debugIndent + "startIndicatorAttribute() : " + indicator.getName());
+        if (debugLogging() && log.isInfoEnabled()) {
+        	log.info( String.format("%sstartIndicatorAttribute() : %s", debugIndent, indicator.getName()) );
         }
     }
 
@@ -398,8 +397,8 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     @Override
     public void endIndicatorAttribute(TLIndicator indicator) {
-        if (DEBUG) {
-            log.info(debugIndent + "endIndicatorAttribute() : " + indicator.getName());
+        if (debugLogging() && log.isInfoEnabled()) {
+        	log.info( String.format("%sendIndicatorAttribute() : %s", debugIndent, indicator.getName()) );
         }
     }
 
@@ -408,8 +407,8 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     @Override
     public void startIndicatorElement(TLIndicator indicator) {
-        if (DEBUG) {
-            log.info(debugIndent + "startIndicatorElement() : " + indicator.getName());
+        if (debugLogging() && log.isInfoEnabled()) {
+        	log.info( String.format("%sstartIndicatorElement() : %s", debugIndent, indicator.getName()) );
         }
     }
 
@@ -418,8 +417,8 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     @Override
     public void endIndicatorElement(TLIndicator indicator) {
-        if (DEBUG) {
-            log.info(debugIndent + "endIndicatorElement() : " + indicator.getName());
+        if (debugLogging() && log.isInfoEnabled()) {
+        	log.info( String.format("%sendIndicatorElement() : %s", debugIndent, indicator.getName()) );
         }
     }
 
@@ -428,9 +427,9 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     @Override
     public void startOpenEnumeration(TLOpenEnumeration openEnum) {
-        if (DEBUG) {
-            log.info(debugIndent + "startOpenEnumeration() : " + openEnum.getLocalName() + " --> "
-                    + generateExampleValue(openEnum));
+        if (debugLogging() && log.isInfoEnabled()) {
+        	log.info( String.format("%sstartOpenEnumeration() : %s --> %s",
+        			debugIndent, openEnum.getLocalName(), generateExampleValue(openEnum)) );
         }
     }
 
@@ -439,8 +438,8 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     @Override
     public void endOpenEnumeration(TLOpenEnumeration openEnum) {
-        if (DEBUG) {
-            log.info(debugIndent + "endOpenEnumeration() : " + openEnum.getLocalName());
+        if (debugLogging() && log.isInfoEnabled()) {
+        	log.info( String.format("%sendOpenEnumeration() : %s", debugIndent, openEnum.getLocalName()) );
         }
     }
 
@@ -449,9 +448,9 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     @Override
     public void startRoleEnumeration(TLRoleEnumeration roleEnum) {
-        if (DEBUG) {
-            log.info(debugIndent + "startRoleEnumeration() : " + roleEnum.getLocalName() + " --> "
-                    + generateExampleValue(roleEnum));
+        if (debugLogging() && log.isInfoEnabled()) {
+        	log.info( String.format("%sstartRoleEnumeration() : %s --> %s",
+        			debugIndent, roleEnum.getLocalName(), generateExampleValue(roleEnum)) );
         }
     }
 
@@ -460,8 +459,8 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     @Override
     public void endRoleEnumeration(TLRoleEnumeration roleEnum) {
-        if (DEBUG) {
-            log.info(debugIndent + "endRoleEnumeration() : " + roleEnum.getLocalName());
+        if (debugLogging() && log.isInfoEnabled()) {
+        	log.info( String.format("%sendRoleEnumeration() : %s", debugIndent, roleEnum.getLocalName()) );
         }
     }
 
@@ -470,10 +469,9 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     @Override
     public void startValueWithAttributes(TLValueWithAttributes valueWithAttributes) {
-        if (DEBUG) {
-            log.info(debugIndent + "startValueWithAttributes() : "
-                    + valueWithAttributes.getLocalName() + " --> "
-                    + generateExampleValue(valueWithAttributes));
+        if (debugLogging() && log.isInfoEnabled()) {
+        	log.info( String.format("%sstartValueWithAttributes() : %s --> %s",
+        			debugIndent, valueWithAttributes.getLocalName(), generateExampleValue(valueWithAttributes)) );
         }
     }
 
@@ -482,9 +480,8 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     @Override
     public void endValueWithAttributes(TLValueWithAttributes valueWithAttributes) {
-        if (DEBUG) {
-            log.info(debugIndent + "endValueWithAttributes() : "
-                    + valueWithAttributes.getLocalName());
+        if (debugLogging() && log.isInfoEnabled()) {
+        	log.info( String.format("%sendValueWithAttributes() : %s", debugIndent, valueWithAttributes.getLocalName()) );
         }
     }
 
@@ -493,8 +490,8 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     @Override
     public void startExtensionPoint(TLPatchableFacet facet) {
-        if (DEBUG) {
-            log.info(debugIndent + "startExtensionPoint() : " + facet.getLocalName());
+        if (debugLogging() && log.isInfoEnabled()) {
+        	log.info( String.format("%sstartExtensionPoint() : %s", debugIndent, facet.getLocalName()) );
             debugIndent.append("  ");
         }
     }
@@ -504,10 +501,11 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     @Override
     public void endExtensionPoint(TLPatchableFacet facet) {
-        if (DEBUG) {
-            if (debugIndent.length() > 0)
+        if (debugLogging() && log.isInfoEnabled()) {
+            if (debugIndent.length() > 0) {
                 debugIndent.setLength(debugIndent.length() - 2);
-            log.info(debugIndent + "endExtensionPoint() : " + facet.getLocalName());
+            }
+        	log.info( String.format("%sendExtensionPoint() : %s", debugIndent, facet.getLocalName()) );
         }
     }
 
@@ -516,8 +514,8 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     @Override
     public void startExtensionPointFacet(TLExtensionPointFacet facet) {
-        if (DEBUG) {
-            log.info(debugIndent + "startExtensionPointFacet() : " + facet.getLocalName());
+        if (debugLogging() && log.isInfoEnabled()) {
+        	log.info( String.format("%sstartExtensionPointFacet() : %s", debugIndent, facet.getLocalName()) );
             debugIndent.append("  ");
         }
     }
@@ -527,10 +525,11 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     @Override
     public void endExtensionPointFacet(TLExtensionPointFacet facet) {
-        if (DEBUG) {
-            if (debugIndent.length() > 0)
+        if (debugLogging() && log.isInfoEnabled()) {
+            if (debugIndent.length() > 0) {
                 debugIndent.setLength(debugIndent.length() - 2);
-            log.info(debugIndent + "endExtensionPointFacet() : " + facet.getLocalName());
+            }
+        	log.info( String.format("%sendExtensionPointFacet() : %s", debugIndent, facet.getLocalName()) );
         }
     }
 
@@ -539,8 +538,8 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     @Override
     public void startXsdComplexType(XSDComplexType xsdComplexType) {
-        if (DEBUG) {
-            log.info(debugIndent + "startXsdComplexType() : " + xsdComplexType.getLocalName());
+        if (debugLogging() && log.isInfoEnabled()) {
+        	log.info( String.format("%sstartXsdComplexType() : %s", debugIndent, xsdComplexType.getLocalName()) );
         }
     }
 
@@ -549,8 +548,8 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     @Override
     public void endXsdComplexType(XSDComplexType xsdComplexType) {
-        if (DEBUG) {
-            log.info(debugIndent + "endXsdComplexType() : " + xsdComplexType.getLocalName());
+        if (debugLogging() && log.isInfoEnabled()) {
+        	log.info( String.format("%sendXsdComplexType() : %s", debugIndent, xsdComplexType.getLocalName()) );
         }
     }
 
@@ -559,8 +558,8 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     @Override
     public void startXsdElement(XSDElement xsdElement) {
-        if (DEBUG) {
-            log.info(debugIndent + "startXsdElement() : " + xsdElement.getLocalName());
+        if (debugLogging() && log.isInfoEnabled()) {
+        	log.info( String.format("%sstartXsdElement() : %s", debugIndent, xsdElement.getLocalName()) );
         }
     }
 
@@ -569,8 +568,8 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      */
     @Override
     public void endXsdElement(XSDElement xsdElement) {
-        if (DEBUG) {
-            log.info(debugIndent + "endXsdElement() : " + xsdElement.getLocalName());
+        if (debugLogging() && log.isInfoEnabled()) {
+        	log.info( String.format("%sendXsdElement() : %s", debugIndent, xsdElement.getLocalName()) );
         }
     }
     
@@ -596,7 +595,7 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
 	}
 	
 	/**
-	 * Adds an example role value for the given core object and each of the
+	 * Adds an EXAMPLE role value for the given core object and each of the
 	 * extended objects that it inherits role attributes from.
 	 * 
 	 * @param coreObject
@@ -609,7 +608,7 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
    	 * base payload type of the operation facet to the current object tree.
    	 *
    	 * @param operationFacet
-   	 * the operation facet for which to add example web service
+   	 * the operation facet for which to add EXAMPLE web service
    	 * payload content
    	 */
    	 protected abstract void addOperationPayloadContent(TLFacet operationFacet);
@@ -634,7 +633,7 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
  	}
  	
  	/**
- 	 * Returns the attribute name as it should be generated in the example document.
+ 	 * Returns the attribute name as it should be generated in the EXAMPLE document.
  	 * 
  	 * @param attribute  the attribute whose name is to be returned
  	 * @return String
@@ -700,9 +699,18 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
     	return fractionDigits;
     }
     
+    /**
+     * Returns true if the visitor is configured to log debugging output.
+     * 
+     * @return boolean
+     */
+    private boolean debugLogging() {
+    	return DEBUG;
+    }
+    
  	/**
  	 * Handles the deferred assignment of 'IDREF' and 'IDREFS' values as a
- 	 * post-processing step of the example generation process.
+ 	 * post-processing step of the EXAMPLE generation process.
  	 */
 	protected abstract class IdReferenceAssignment {
 
@@ -796,21 +804,10 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
 
  				// Add all applicable names for the entity and its alias
  				// equivalents
- 				// if (entity instanceof TLAlias) {
- 				// addEntityNames(entity, entityNames);
- 				// entity = ((TLAlias) entity).getOwningEntity();
- 				// }
  				addEntityNames(entity, entityNames);
 
- 				// if (entity instanceof TLAliasOwner) {
- 				// for (TLAlias alias : ((TLAliasOwner) entity).getAliases()) {
- 				// addEntityNames(alias, entityNames);
- 				// }
- 				// }
-
  				// Iterate through the list and select the first name that
- 				// appears in the ID
- 				// registry
+ 				// appears in the ID registry
  				for (QName entityName : entityNames) {
  					if (idRegistry.containsKey(entityName)) {
  						elementName = entityName;

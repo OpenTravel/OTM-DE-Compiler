@@ -81,9 +81,9 @@ public class ModelCompareUtils {
 	}
 	
 	/**
-	 * Returns a list of all example values for the field.
+	 * Returns a list of all EXAMPLE values for the field.
 	 * 
-	 * @param owner  the entity or field for which to return example values
+	 * @param owner  the entity or field for which to return EXAMPLE values
 	 * @return List<String>
 	 */
 	public static List<String> getExamples(TLExampleOwner owner) {

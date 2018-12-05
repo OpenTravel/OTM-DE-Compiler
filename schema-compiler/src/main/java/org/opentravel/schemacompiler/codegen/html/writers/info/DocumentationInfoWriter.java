@@ -130,7 +130,7 @@ public class DocumentationInfoWriter extends
 			descRow.addContent(tdComment);
 			HtmlTree descTree = new HtmlTree(HtmlTag.PRE);
 			descTree.addContent(desc);
-			content = HtmlTree.div(HtmlStyle.description, descTree);
+			content = HtmlTree.div(HtmlStyle.DESCRIPTION, descTree);
 		}
 		return content;
 	}
@@ -182,7 +182,7 @@ public class DocumentationInfoWriter extends
 			List<? extends TLDocumentationItem> values, Content tableTree,
 			int counter) {
 		HtmlTree tdDocType = new HtmlTree(HtmlTag.TD);
-		tdDocType.setStyle(HtmlStyle.colFirst);
+		tdDocType.setStyle(HtmlStyle.COL_FIRST);
 		addDocumentationType(type, tdDocType);
 		HtmlTree tdValue = new HtmlTree(HtmlTag.TD);
 		setInfoColumnStyle(tdValue);
@@ -210,7 +210,7 @@ public class DocumentationInfoWriter extends
 	public void addDocumentationSummary(String type, String value,
 			Content tableTree, int counter) {
 		HtmlTree tdDocType = new HtmlTree(HtmlTag.TD);
-		tdDocType.setStyle(HtmlStyle.colFirst);
+		tdDocType.setStyle(HtmlStyle.COL_FIRST);
 		addDocumentationType(type, tdDocType);
 		HtmlTree tdValue = new HtmlTree(HtmlTag.TD);
 		setInfoColumnStyle(tdValue);

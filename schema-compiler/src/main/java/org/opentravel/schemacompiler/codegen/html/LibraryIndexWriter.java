@@ -43,13 +43,11 @@ package org.opentravel.schemacompiler.codegen.html;
 import java.io.IOException;
 import java.util.List;
 
-import org.opentravel.schemacompiler.model.TLLibrary;
-
 import org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlStyle;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTag;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTree;
-import org.opentravel.schemacompiler.codegen.html.DocletAbortException;
+import org.opentravel.schemacompiler.model.TLLibrary;
 
 
 /**
@@ -71,8 +69,6 @@ public class LibraryIndexWriter extends AbstractNamespaceIndexWriter {
      * Construct the PackageIndexWriter. Also constructs the grouping
      * information as provided on the command line by "-group" option. Stores
      * the order of groups specified by the user.
-     *
-     * @see Group
      */
     public LibraryIndexWriter(Configuration configuration,
                               String filename)
@@ -104,13 +100,13 @@ public class LibraryIndexWriter extends AbstractNamespaceIndexWriter {
      */
     protected void addLibraryList(List<TLLibrary> libraries, String text,
             String tableSummary, Content body) {
-        Content table = HtmlTree.table(HtmlStyle.overviewSummary, 0, 3, 0, tableSummary,
+        Content table = HtmlTree.table(HtmlStyle.OVERVIEW_SUMMARY, 0, 3, 0, tableSummary,
                 getTableCaption(text));
         table.addContent(getSummaryTableHeader(libraryTableHeader, "col"));
         Content tbody = new HtmlTree(HtmlTag.TBODY);
         addLibrariesList(libraries, tbody);
         table.addContent(tbody);
-        Content div = HtmlTree.div(HtmlStyle.contentContainer, table);
+        Content div = HtmlTree.div(HtmlStyle.CONTENT_CONTAINER, table);
         body.addContent(div);
     }
 
@@ -126,23 +122,22 @@ public class LibraryIndexWriter extends AbstractNamespaceIndexWriter {
             	String name = AbstractDocumentationBuilder.getLibraryName(lib);
                 Content packageLinkContent = getLibraryLink(name,
                         getNamespaceName(name));
-                Content tdPackage = HtmlTree.td(HtmlStyle.colFirst, packageLinkContent);
+                Content tdPackage = HtmlTree.td(HtmlStyle.COL_FIRST, packageLinkContent);
                 HtmlTree tdSummary = new HtmlTree(HtmlTag.TD);
-                tdSummary.setStyle(HtmlStyle.colLast);
+                tdSummary.setStyle(HtmlStyle.COL_LAST);
                 tdSummary.addContent(getSpace());
               // addSummaryComment(ns, tdSummary);// TODO add this back in
                 HtmlTree tr = HtmlTree.tr(tdPackage);
                 tr.addContent(tdSummary);
                 if (libraries.indexOf(lib)%2 == 0)
-                    tr.setStyle(HtmlStyle.altColor);
+                    tr.setStyle(HtmlStyle.ALT_COLOR);
                 else
-                    tr.setStyle(HtmlStyle.rowColor);
+                    tr.setStyle(HtmlStyle.ROW_COLOR);
                 tbody.addContent(tr);
             }
         }
     }
 
-    //TODO is this needed? Don't think so
     /**
      * Adds the overview summary comment for this documentation. Add one line
      * summary at the top of the page and generate a link to the description,
@@ -151,26 +146,9 @@ public class LibraryIndexWriter extends AbstractNamespaceIndexWriter {
      * @param body the documentation tree to which the overview header will be added
      */
     protected void addOverviewHeader(Content body) {
+    	// No action required
     }
 
- //TODO Leaving this in as a reminder. In the future we may want to group libraries with the same base namespace   
-//    /**
-//     * Depending upon the grouping information and their titles, add
-//     * separate table indices for each package group.
-//     *
-//     * @param body the documentation tree to which the index will be added
-//     */
-//    protected void addIndex(Content body) {
-//        for (int i = 0; i < groupList.size(); i++) {
-//        String groupname = groupList.get(i);
-//        List<PackageDoc> list = groupPackageMap.get(groupname);
-//            if (list != null && list.size() > 0) {
-//                addIndexContents(list.toArray(new PackageDoc[list.size()]),
-//                        groupname, configuration.getText("doclet.Member_Table_Summary",
-//                        groupname, configuration.getText("doclet.packages")), body);
-//            }
-//        }
-//    }
     /**
      * Adds the overview comment as provided in the file specified by the
      * "-overview" option on the command line.
@@ -181,7 +159,7 @@ public class LibraryIndexWriter extends AbstractNamespaceIndexWriter {
     protected void addOverviewComment(Content htmltree) {
             htmltree.addContent(getMarkerAnchor("overview_description"));
             HtmlTree div = new HtmlTree(HtmlTag.DIV);
-            div.setStyle(HtmlStyle.subTitle);
+            div.setStyle(HtmlStyle.SUB_TITLE);
             htmltree.addContent(div);
     }
 
@@ -191,9 +169,10 @@ public class LibraryIndexWriter extends AbstractNamespaceIndexWriter {
      *
      * @param body the documentation tree to which the overview will be added
      */
+    @Override
     protected void addOverview(Content body) throws IOException {
         HtmlTree div = new HtmlTree(HtmlTag.DIV);
-        div.setStyle(HtmlStyle.footer);
+        div.setStyle(HtmlStyle.FOOTER);
         addOverviewComment(div);
         body.addContent(div);
     }
@@ -214,7 +193,7 @@ public class LibraryIndexWriter extends AbstractNamespaceIndexWriter {
      * Adds the lower navigation bar and the bottom text
      * (from the -bottom option) at the bottom of page.
      *
-     * @param the documentation tree to which the navigation bar footer will be added
+     * @param the documentation tree to which the navigation bar FOOTER will be added
      */
     protected void addNavigationBarFooter(Content body) {
         addNavLinks(false, body);

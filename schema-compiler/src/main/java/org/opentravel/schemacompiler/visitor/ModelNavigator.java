@@ -1145,8 +1145,8 @@ public class ModelNavigator extends AbstractNavigator<TLModel> {
     /**
      * Called when a <code>TLExample</code> instance is encountered during model navigation.
      * 
-     * @param example
-     *            the example entity to visit and navigate
+     * @param EXAMPLE
+     *            the EXAMPLE entity to visit and navigate
      */
     public void navigateExample(TLExample example) {
         if (canVisit(example)) {

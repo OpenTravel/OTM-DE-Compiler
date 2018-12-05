@@ -114,7 +114,7 @@ public abstract class AbstractAttributeInfoWriter<T extends AttributeOwnerDocume
 	 * #getTableSummary()
 	 */
 	/**
-	 * {@inheritDoc}TODO pass key to method.
+	 * {@inheritDoc}
 	 */
 	@Override
 	protected String getInfoTableSummary() {
@@ -125,7 +125,7 @@ public abstract class AbstractAttributeInfoWriter<T extends AttributeOwnerDocume
 	}
 	
 	/**
-	 * {@inheritDoc}TODO pass key to method.
+	 * {@inheritDoc}
 	 */
 	protected String getDetailInfoTableSummary() {
 		Configuration config = writer.newConfiguration();

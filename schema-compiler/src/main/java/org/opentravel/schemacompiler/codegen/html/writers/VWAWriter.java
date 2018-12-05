@@ -54,10 +54,8 @@ public class VWAWriter extends
 	 */
 	@Override
 	public void addAttributeInfo(Content memberTree) {
-		if (member.getAttributes().size() > 0) {
-			VWAAttributeInfoWriter attWriter = new VWAAttributeInfoWriter(this,
-					member);
-			attWriter.addInfo(memberTree);
+		if (!member.getAttributes().isEmpty()) {
+			new VWAAttributeInfoWriter(this, member).addInfo(memberTree);
 		}
 	}
 
@@ -71,10 +69,8 @@ public class VWAWriter extends
 	 */
 	@Override
 	public void addIndicatorInfo(Content memberTree) {
-		if (member.getIndicators().size() > 0) {
-			VWAIndicatorInfoWriter attWriter = new VWAIndicatorInfoWriter(this,
-					member);
-			attWriter.addInfo(memberTree);
+		if (!member.getIndicators().isEmpty()) {
+			new VWAIndicatorInfoWriter(this, member).addInfo(memberTree);
 		}
 	}
 
@@ -117,7 +113,6 @@ public class VWAWriter extends
 		if(doc != null){
 			InfoWriter docWriter = new DocumentationInfoWriter(this, doc);
 			docWriter.setTitle(getResource("doclet.Value_Documentation_Summary"));
-//			docWriter.setCaption(configuration.getText("doclet.Value_Documentation"));
 			docWriter.addInfo(classInfoTree);
 		}
 	}
@@ -125,6 +120,7 @@ public class VWAWriter extends
 
 	@Override
 	public void addPropertyInfo(Content memberTree) {
+		// No action required
 	}
 	
 

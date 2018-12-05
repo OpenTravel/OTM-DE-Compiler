@@ -39,12 +39,9 @@
  */
 package org.opentravel.schemacompiler.codegen.html;
 
-import org.opentravel.schemacompiler.model.LibraryMember;
-
 import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilderFactory;
-import org.opentravel.schemacompiler.codegen.html.Configuration;
-import org.opentravel.schemacompiler.codegen.html.Util;
+import org.opentravel.schemacompiler.model.LibraryMember;
 
 public class LinkInfoImpl extends LinkInfo {
 
@@ -260,7 +257,7 @@ public class LinkInfoImpl extends LinkInfo {
 	 * @param label
 	 *            the label for the link.
 	 * @param isStrong
-	 *            true if the link should be strong.
+	 *            true if the link should be STRONG.
 	 * @param styleName
 	 *            String style of text defined in style sheet.
 	 */
@@ -286,7 +283,7 @@ public class LinkInfoImpl extends LinkInfo {
 	 * @param label
 	 *            the label for the link.
 	 * @param isStrong
-	 *            true if the link should be strong.
+	 *            true if the link should be STRONG.
 	 */
 	public LinkInfoImpl(int context, DocumentationBuilder builder,
 			String where, String label, boolean isStrong) {
@@ -319,7 +316,7 @@ public class LinkInfoImpl extends LinkInfo {
 	 * @param classDoc
 	 *            the class to link to.
 	 * @param isStrong
-	 *            true if the link should be strong.
+	 *            true if the link should be STRONG.
 	 */
 	public LinkInfoImpl(int context, DocumentationBuilder builder,
 			boolean isStrong) {
@@ -338,7 +335,7 @@ public class LinkInfoImpl extends LinkInfo {
 	 * @param label
 	 *            the label for the link.
 	 * @param isStrong
-	 *            true if the link should be strong.
+	 *            true if the link should be STRONG.
 	 */
 	public LinkInfoImpl(int context, DocumentationBuilder builder,
 			String label, boolean isStrong) {
@@ -361,10 +358,6 @@ public class LinkInfoImpl extends LinkInfo {
 		setContext(context);
 	}
 
-	// public LinkInfoImpl(int allClassesFrame, LibraryMember member,
-	// String label, String target2) {
-	// }
-	//
 	public LinkInfoImpl(LibraryMember member, String label) {
 		this.builder = DocumentationBuilderFactory.getInstance()
 				.getDocumentationBuilder(member);
@@ -461,6 +454,8 @@ public class LinkInfoImpl extends LinkInfo {
 		case CONTEXT_SUMMARY_RETURN_TYPE:
 		case CONTEXT_EXECUTABLE_MEMBER_PARAM:
 			excludeTypeBounds = true;
+			break;
+		default:
 			break;
 		}
 		context = c;

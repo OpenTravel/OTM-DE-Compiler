@@ -172,11 +172,11 @@ public class TLExampleCompileValidator extends TLValidatorBase<TLExample> {
     }
 
     /**
-     * Returns the <code>TLSimple</code> entity to which this example applies, or null if it applies
+     * Returns the <code>TLSimple</code> entity to which this EXAMPLE applies, or null if it applies
      * to a non-TL entity type.
      * 
      * @param target
-     *            the example being validated
+     *            the EXAMPLE being validated
      * @return TLAttributeType
      */
     private TLAttributeType getSimpleType(TLExample target) {
@@ -212,13 +212,13 @@ public class TLExampleCompileValidator extends TLValidatorBase<TLExample> {
     }
 
     /**
-     * Returns a list of one or more example values to be validated. If the simple type is a
+     * Returns a list of one or more EXAMPLE values to be validated. If the simple type is a
      * list-type, multiple values will be returned in the resulting array.
      * 
      * @param target
-     *            the example instance being validated
+     *            the EXAMPLE instance being validated
      * @param simpleType
-     *            the simple type against which the example(s) will be validated
+     *            the simple type against which the EXAMPLE(s) will be validated
      * @return String[]
      */
     private String[] getExampleValues(TLExample target, NamedEntity simpleType) {
@@ -245,8 +245,8 @@ public class TLExampleCompileValidator extends TLValidatorBase<TLExample> {
                     values = valueList.toArray(new String[valueList.size()]);
 
                 } else {
-                    // If the pattern isn't recognized, we probably have an invalid example.
-                    // The fallback is to split the example values using standard white space
+                    // If the pattern isn't recognized, we probably have an invalid EXAMPLE.
+                    // The fallback is to split the EXAMPLE values using standard white space
                 	// separators.
                     values = target.getValue().split("\\s+");
                 }
@@ -284,10 +284,10 @@ public class TLExampleCompileValidator extends TLValidatorBase<TLExample> {
     }
 
     /**
-     * Returns true if the given example value is a numeric representation.
+     * Returns true if the given EXAMPLE value is a numeric representation.
      * 
      * @param exampleValue
-     *            the example value to analyze
+     *            the EXAMPLE value to analyze
      * @return boolean
      */
     private boolean isNumericValue(String exampleValue) {
@@ -295,10 +295,10 @@ public class TLExampleCompileValidator extends TLValidatorBase<TLExample> {
     }
 
     /**
-     * Returns the number of fraction digits to the right of the given example decimal value.
+     * Returns the number of fraction digits to the right of the given EXAMPLE decimal value.
      * 
      * @param exampleValue
-     *            the example value to analyze
+     *            the EXAMPLE value to analyze
      * @return int
      */
     private int getFractionDigits(String exampleValue) {
@@ -312,10 +312,10 @@ public class TLExampleCompileValidator extends TLValidatorBase<TLExample> {
     }
 
     /**
-     * Returns the total number of digits in the given example decimal value.
+     * Returns the total number of digits in the given EXAMPLE decimal value.
      * 
      * @param exampleValue
-     *            the example value to analyze
+     *            the EXAMPLE value to analyze
      * @return int
      */
     private int getTotalDigits(String exampleValue) {

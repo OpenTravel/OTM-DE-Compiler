@@ -95,7 +95,7 @@ public abstract class AbstractInheritedInfoWriter<T extends AbstractDocumentatio
 	protected void addInheritedInfo(List<S> inherited, T parent,
 			Content linksTree) {
 		for (S pdb : inherited) {
-			if (!(inherited.indexOf(pdb) == 0)) {
+			if (inherited.indexOf(pdb) != 0) {
 				linksTree.addContent(", ");
 			}
 			addInheritedInfoLink(parent, pdb, linksTree);
@@ -123,14 +123,14 @@ public abstract class AbstractInheritedInfoWriter<T extends AbstractDocumentatio
 	}
 	
 	/**
-	 * Add the inherited summary header.
+	 * Add the inherited SUMMARY header.
 	 *
 	 * @param mw
 	 *            the writer for the member being documented
 	 * @param cd
 	 *            the classdoc to be documented
 	 * @param inheritedTree
-	 *            the content tree to which the inherited summary header will be
+	 *            the content tree to which the inherited SUMMARY header will be
 	 *            added
 	 */
 	protected void addInheritedInfoHeader(T parent, Content inheritedTree,

@@ -74,7 +74,7 @@ public class CoreObjectSummaryFacetCodegenDelegate extends CoreObjectFacetCodege
      */
     @Override
     public TLFacet getLocalBaseFacet() {
-        return null; // No base type for core object summary facets
+        return null; // No base type for core object SUMMARY facets
     }
 
     /**

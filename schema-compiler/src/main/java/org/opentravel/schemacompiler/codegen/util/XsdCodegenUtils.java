@@ -895,7 +895,7 @@ public class XsdCodegenUtils {
                 addEquivalentInfo((TLEquivalentOwner) modelEntity, appInfo);
             }
 
-            // Add an example element if required
+            // Add an EXAMPLE element if required
             if (modelEntity instanceof TLExampleOwner) {
                 addExampleInfo((TLExampleOwner) modelEntity, appInfo);
             }
@@ -906,7 +906,7 @@ public class XsdCodegenUtils {
     }
 
     /**
-     * Adds equivalent elements to the given app-info schema element from the example owner
+     * Adds equivalent elements to the given app-info schema element from the EXAMPLE owner
      * provided. If the 'appInfo' parameter passed to this method is null, a new one will be created
      * automatically.
      * 
@@ -921,7 +921,7 @@ public class XsdCodegenUtils {
     }
 
     /**
-     * Adds equivalent elements to the given app-info schema element from the example owner
+     * Adds equivalent elements to the given app-info schema element from the EXAMPLE owner
      * provided.
      * 
      * @param equivalentOwner
@@ -940,12 +940,12 @@ public class XsdCodegenUtils {
     }
 
     /**
-     * Adds example elements to the given app-info schema element from the example owner provided.
+     * Adds EXAMPLE elements to the given app-info schema element from the EXAMPLE owner provided.
      * If the 'appInfo' parameter passed to this method is null, a new one will be created
      * automatically.
      * 
      * @param exampleOwner
-     *            the example owner for which to generate app-info elements
+     *            the EXAMPLE owner for which to generate app-info elements
      * @param jaxbEntity
      *            the JAXB entity to be decorated with the appropriate 'AppInfo' element(s)
      */
@@ -955,10 +955,10 @@ public class XsdCodegenUtils {
     }
 
     /**
-     * Adds example elements to the given app-info schema element from the example owner provided.
+     * Adds EXAMPLE elements to the given app-info schema element from the EXAMPLE owner provided.
      * 
      * @param exampleOwner
-     *            the example owner for which to generate app-info elements
+     *            the EXAMPLE owner for which to generate app-info elements
      * @param appInfo
      *            the 'AppInfo' element to be populated
      */

@@ -40,7 +40,7 @@ public class ServiceWriter extends NamedEntityWriter<ServiceDocumentationBuilder
 
 	
 	public void addOperationInfo(Content classInfoTree) {
-		if(member.getOperations().size() > 0){
+		if(!member.getOperations().isEmpty()){
 			OperationInfoWriter facetWriter = new OperationInfoWriter(this, member);
 			facetWriter.addInfo(classInfoTree);
 		}

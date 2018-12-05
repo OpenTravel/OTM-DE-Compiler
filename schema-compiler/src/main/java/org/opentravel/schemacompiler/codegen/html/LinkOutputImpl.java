@@ -50,21 +50,22 @@ public class LinkOutputImpl implements LinkOutput {
     /**
      * The output of the link.
      */
-    public StringBuffer output;
-
+    private StringBuilder output = new StringBuilder();
+    
     /**
-     * Construct a new LinkOutputImpl.
+     * Returns the string builder used for output.
+     * 
+     * @return StringBuilder
      */
-    public LinkOutputImpl() {
-        output = new StringBuffer();
+    public StringBuilder getOutput() {
+    	return output;
     }
-
+    
     /**
      * {@inheritDoc}
      */
     public void append(Object o) {
-        output.append(o instanceof String ?
-            (String) o : ((LinkOutputImpl)o).toString());
+        output.append(o instanceof String ? (String) o : ((LinkOutputImpl)o).toString());
     }
 
     /**

@@ -97,7 +97,7 @@ public class ServiceCompilerTask extends AbstractSchemaCompilerTask
                 compileXmlSchemas(userDefinedLibraries, legacySchemas, serviceContext,
                         new LibraryTrimmedFilenameBuilder(service), filter);
 
-                // Generate example files if required; examples are only created for the operation
+                // Generate EXAMPLE files if required; examples are only created for the operation
                 // messages (not the contents of the trimmed schemas)
                 if (isGenerateExamples()) {
                     generateExampleArtifacts(userDefinedLibraries, serviceContext,
@@ -112,7 +112,7 @@ public class ServiceCompilerTask extends AbstractSchemaCompilerTask
      * Returns the location of the output folder for the specified service.
      * 
      * @param service
-     *            the service for which the example output folder is needed
+     *            the service for which the EXAMPLE output folder is needed
      * @param context
      *            the code generation context
      * @return String

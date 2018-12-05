@@ -140,7 +140,7 @@ public class TLContextualFacetCompileValidator extends TLContextualFacetBaseVali
 	
 	/**
 	 * Returns the implied facet type as denoted by the facet's position within its owning
-	 * entity.  For example, a contextual facet that is located within a business object's
+	 * entity.  For EXAMPLE, a contextual facet that is located within a business object's
 	 * list of query facets would return <code>QUERY</code> regardless of the facet's assinged
 	 * type.  If the implied facet type cannot be identified, this method will return null.
 	 * 
