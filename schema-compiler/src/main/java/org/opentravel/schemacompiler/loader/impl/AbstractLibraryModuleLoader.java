@@ -61,8 +61,9 @@ import org.w3._2001.xmlschema.Schema;
 public abstract class AbstractLibraryModuleLoader implements LibraryModuleLoader<InputStream>,
         LoaderValidationMessageKeys {
 
-    protected static final Logger log = LoggerFactory.getLogger(AbstractLibraryModuleLoader.class);
+	protected static final Logger log = LoggerFactory.getLogger(AbstractLibraryModuleLoader.class);
 
+	private static final String MISSING_URL = "[MISSING URL]";
     private static final String SCHEMA_CONTEXT = ":org.w3._2001.xmlschema";
     
     private static javax.xml.validation.Schema schemaValidationSchema;
@@ -125,7 +126,7 @@ public abstract class AbstractLibraryModuleLoader implements LibraryModuleLoader
                         FindingType.WARNING,
                         new URLValidationSource(libraryUrl),
                         WARNING_LIBRARY_NOT_FOUND,
-                        (libraryUrl == null) ? "[MISSING URL]" : URLUtils
+                        (libraryUrl == null) ? MISSING_URL : URLUtils
                                 .getShortRepresentation(libraryUrl));
             }
         } catch (IOException e) {
@@ -167,7 +168,7 @@ public abstract class AbstractLibraryModuleLoader implements LibraryModuleLoader
                         FindingType.WARNING,
                         new URLValidationSource(schemaUrl),
                         WARNING_SCHEMA_NOT_FOUND,
-                        (schemaUrl == null) ? "[MISSING URL]" : URLUtils
+                        (schemaUrl == null) ? MISSING_URL : URLUtils
                                 .getShortRepresentation(schemaUrl));
             }
                 
@@ -178,7 +179,7 @@ public abstract class AbstractLibraryModuleLoader implements LibraryModuleLoader
         	throw new LibraryLoaderException("Error reading from library input source", e);
         	
         } catch (JAXBException e) {
-            String urlString = (schemaUrl == null) ? "[MISSING URL]" : URLUtils
+            String urlString = (schemaUrl == null) ? MISSING_URL : URLUtils
                     .getShortRepresentation(schemaUrl);
 
             validationFindings.addFinding(FindingType.ERROR, new URLValidationSource(schemaUrl),

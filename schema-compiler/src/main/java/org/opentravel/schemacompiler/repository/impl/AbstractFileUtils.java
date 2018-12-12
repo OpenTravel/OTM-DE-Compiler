@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.opentravel.schemacompiler.util.FileUtils;
+
 /**
  * Base class for utility file managers that provide methods for creating,
  * restoring, and deleting backup files during save operations.
@@ -84,12 +86,12 @@ public abstract class AbstractFileUtils {
             }
             File originalFile = new File(backupFile.getParentFile(), originalFilename);
 
-            if (originalFile.exists() && !originalFile.delete()) {
+            if (originalFile.exists() && !FileUtils.confirmDelete(originalFile)) {
                 throw new IOException(
                         "Unable to delete original file during restoration of backup: "
                                 + backupFile.getAbsolutePath());
             }
-            backupFile.renameTo(originalFile);
+            FileUtils.renameTo( backupFile, originalFile );
         }
     }
 
@@ -100,9 +102,7 @@ public abstract class AbstractFileUtils {
      *            the backup file to remove
      */
     public static void removeBackupFile(File backupFile) {
-        if ((backupFile != null) && backupFile.exists()) {
-            backupFile.delete();
-        }
+    		FileUtils.delete( backupFile );
     }
 
     /**

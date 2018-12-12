@@ -118,11 +118,11 @@ public class TLDocumentationItem extends TLModelElement implements LibraryElemen
      *            the field value to assign
      */
     public void setText(String description) {
-        String _description = TLDocumentation.adjustStringEncoding(description);
+        String desc = TLDocumentation.adjustStringEncoding(description);
         ModelEvent<?> event = new ModelEventBuilder(ModelEventType.DOC_TEXT_MODIFIED, this)
-                .setOldValue(this.text).setNewValue(_description).buildEvent();
+                .setOldValue(this.text).setNewValue(desc).buildEvent();
 
-        this.text = _description;
+        this.text = desc;
         publishEvent(event);
     }
 

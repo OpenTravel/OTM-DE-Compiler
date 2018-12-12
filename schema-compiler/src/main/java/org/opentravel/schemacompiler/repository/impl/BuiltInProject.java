@@ -33,7 +33,9 @@ import org.opentravel.schemacompiler.repository.ProjectManager;
  */
 public class BuiltInProject extends Project {
 
-    public static final String BUILTIN_PROJECT_ID = "http://opentravel.org/schemacompiler/projects/built-in";
+	private static final String OPERATION_NOT_SUPPORTED = "Operation not supported for the built-in project.";
+	
+	public static final String BUILTIN_PROJECT_ID = "http://opentravel.org/schemacompiler/projects/built-in";
     public static final String BUILTIN_PROJECT_NAME_KEY = "schemacompiler.project.builtInProject.name";
 
     /**
@@ -59,7 +61,7 @@ public class BuiltInProject extends Project {
      */
     @Override
     public void setProjectId(String projectId) {
-        throw new UnsupportedOperationException("Operation not supported for the built-in project.");
+        throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED);
     }
 
     /**
@@ -67,7 +69,7 @@ public class BuiltInProject extends Project {
      */
     @Override
     public void setProjectFile(File projectFile) {
-        throw new UnsupportedOperationException("Operation not supported for the built-in project.");
+        throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED);
     }
 
     /**
@@ -75,7 +77,7 @@ public class BuiltInProject extends Project {
      */
     @Override
     public void setName(String name) {
-        throw new UnsupportedOperationException("Operation not supported for the built-in project.");
+        throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED);
     }
 
     /**
@@ -83,7 +85,7 @@ public class BuiltInProject extends Project {
      */
     @Override
     public void setDescription(String description) {
-        throw new UnsupportedOperationException("Operation not supported for the built-in project.");
+        throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED);
     }
 
     /**
@@ -91,7 +93,7 @@ public class BuiltInProject extends Project {
      */
     @Override
     protected void add(ProjectItem item) {
-        throw new UnsupportedOperationException("Operation not supported for the built-in project.");
+        throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED);
     }
 
     /**
@@ -99,7 +101,7 @@ public class BuiltInProject extends Project {
      */
     @Override
     public void remove(ProjectItem item) {
-        throw new UnsupportedOperationException("Operation not supported for the built-in project.");
+        throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED);
     }
 
     /**
@@ -107,7 +109,7 @@ public class BuiltInProject extends Project {
      */
     @Override
     public void remove(AbstractLibrary library) {
-        throw new UnsupportedOperationException("Operation not supported for the built-in project.");
+        throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED);
     }
 
     /**
@@ -115,7 +117,7 @@ public class BuiltInProject extends Project {
      */
     @Override
     public void remove(URL libraryUrl) {
-        throw new UnsupportedOperationException("Operation not supported for the built-in project.");
+        throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED);
     }
 
     /**
@@ -131,7 +133,7 @@ public class BuiltInProject extends Project {
      */
     @Override
     public void setDefaultItem(ProjectItem defaultItem) {
-        throw new UnsupportedOperationException("Operation not supported for the built-in project.");
+        throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED);
     }
 
 }

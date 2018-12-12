@@ -268,8 +268,7 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
     public void setIdFacet(TLFacet idFacet) {
         if (idFacet != this.idFacet) {
             if (getOwningModel() != null) {
-                throw new IllegalStateException(
-                        "Facets cannot be modified once their owner has been assigned to a model.");
+                throw new IllegalStateException(FACETS_CANNOT_BE_MODIFIED);
             }
             if (idFacet != null) {
                 idFacet.setFacetType(TLFacetType.ID);

@@ -107,13 +107,13 @@ public class HtmlDoclet extends AbstractDoclet {
 	protected void generateOtherFiles(TLModel model) throws Exception {
 		Configuration conf = getConfiguration();
 		
-		if (conf.topFile.length() == 0) {
+		if (conf.getTopFile().length() == 0) {
 			conf.message
 					.error("doclet.No_Non_Deprecated_Classes_To_Document");
 			return;
 		}
-		String configdestdir = conf.destDirName;
-		String configstylefile = conf.stylesheetfile;
+		String configdestdir = conf.getDestDirName();
+		String configstylefile = conf.getStylesheetfile();
 		performCopy(configdestdir, configstylefile);
 		Util.copyResourceFile(conf, TOGGLE_CLOSE_IMAGE, false);
 		Util.copyResourceFile(conf, TOGGLE_OPEN_IMAGE, false);
@@ -127,12 +127,12 @@ public class HtmlDoclet extends AbstractDoclet {
 
 		FrameOutputWriter.generate(conf);
 
-		if (conf.createoverview) {
+		if (conf.isCreateoverview()) {
 			LibraryIndexWriter.generate(conf);
 		}
 		// If a stylesheet file is not specified, copy the default stylesheet
 		// and replace newline with platform-specific newline.
-		if (conf.stylesheetfile.length() == 0) {
+		if (conf.getStylesheetfile().length() == 0) {
 			if(configdestdir.isEmpty()){
 				throw new RuntimeException("Style sheet output Directory not specified");
 			}

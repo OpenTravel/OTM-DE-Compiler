@@ -67,6 +67,11 @@ public class IndexContentHelper {
     private static ObjectFactory objectFactory = new ObjectFactory();
     private static JAXBContext jaxbContext;
     
+    /**
+     * Private constructor to prevent instantiation.
+     */
+    private IndexContentHelper() {}
+    
 	/**
 	 * Unmarshalls the contents of the given file as a JAXB library.
 	 * 
@@ -330,8 +335,8 @@ public class IndexContentHelper {
             initializeTypeMappings( saverTransformFactory, classMappings );
             entityClassMappings = Collections.unmodifiableMap( classMappings );
             
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

@@ -97,14 +97,14 @@ public class FileHintUtils {
                         badHints.clear();
 
                     } else if (!badHints.isEmpty()) {
-                        StringBuilder _compoundHint = new StringBuilder();
+                        StringBuilder sbCompoundHint = new StringBuilder();
 
                         for (String badHint : badHints) {
-                            _compoundHint.append(badHint).append(" ");
+                            sbCompoundHint.append(badHint).append(" ");
                         }
-                        _compoundHint.append(hint);
+                        sbCompoundHint.append(hint);
 
-                        String compoundHint = _compoundHint.toString();
+                        String compoundHint = sbCompoundHint.toString();
                         hintFile = URLUtils.toFile(URLUtils
                                 .getResolvedURL(compoundHint, libraryUrl));
 

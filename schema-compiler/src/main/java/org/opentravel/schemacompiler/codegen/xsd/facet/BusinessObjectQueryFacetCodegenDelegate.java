@@ -43,14 +43,6 @@ public class BusinessObjectQueryFacetCodegenDelegate extends BusinessObjectFacet
         super(sourceFacet);
     }
 
-    /**
-	 * @see org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate#generateElements()
-	 */
-	@Override
-	public FacetCodegenElements generateElements() {
-		return super.generateElements();
-	}
-
 	/**
      * @see org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegate#hasContent()
      */

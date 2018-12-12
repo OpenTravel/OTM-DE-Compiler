@@ -45,7 +45,6 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoListType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoType;
-import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionList;
 import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionTarget;
 import org.opentravel.schemacompiler.index.builder.IndexBuilder;
 import org.opentravel.schemacompiler.index.builder.IndexBuilderFactory;
@@ -54,7 +53,6 @@ import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
 import org.opentravel.schemacompiler.subscription.SubscriptionNavigator;
-import org.opentravel.schemacompiler.subscription.SubscriptionVisitor;
 import org.opentravel.schemacompiler.util.RepositoryJaxbContext;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
@@ -68,7 +66,7 @@ import org.springframework.jms.core.MessageCreator;
  * 
  * @author S. Livezey
  */
-public class IndexingAgent implements IndexingConstants {
+public class IndexingAgent {
 	
     private static Log log = LogFactory.getLog(IndexingAgent.class);
     
@@ -183,24 +181,24 @@ public class IndexingAgent implements IndexingConstants {
 		
 		while (!shutdownRequested) {
 			try {
-				Message msg = jmsTemplate.receiveSelected( SELECTOR_JOBMSG );
+				Message msg = jmsTemplate.receiveSelected( IndexingConstants.SELECTOR_JOBMSG );
 				
 				if (msg instanceof TextMessage) {
 					TextMessage message = (TextMessage) msg;
-					String messageType = message.getStringProperty( MSGPROP_JOB_TYPE );
+					String messageType = message.getStringProperty( IndexingConstants.MSGPROP_JOB_TYPE );
 					String messageContent = message.getText();
 					
 					if (messageType != null) {
-						if (messageType.equals( JOB_TYPE_CREATE_INDEX )) {
+						if (messageType.equals( IndexingConstants.JOB_TYPE_CREATE_INDEX )) {
 							processIndexingJob( unmarshallRepositoryItems( messageContent ), false );
 							
-						} else if (messageType.equals( JOB_TYPE_DELETE_INDEX )) {
+						} else if (messageType.equals( IndexingConstants.JOB_TYPE_DELETE_INDEX )) {
 							processIndexingJob( unmarshallRepositoryItems( messageContent ), true );
 							
-						} else if (messageType.equals( JOB_TYPE_SUBSCRIPTION )) {
+						} else if (messageType.equals( IndexingConstants.JOB_TYPE_SUBSCRIPTION )) {
 							processIndexingJob( unmarshallSubscriptionTarget( messageContent ), true );
 							
-						} else if (messageType.equals( JOB_TYPE_DELETE_ALL )) {
+						} else if (messageType.equals( IndexingConstants.JOB_TYPE_DELETE_ALL )) {
 							processDeleteAll();
 							
 						} else {
@@ -219,8 +217,8 @@ public class IndexingAgent implements IndexingConstants {
 				} else {
 					log.error("Error receiving indexing job.", e);
 				}
-			} catch (Throwable t) {
-				log.error("Error receiving indexing job.", t);
+			} catch (Exception e) {
+				log.error("Error receiving indexing job.", e);
 			}
 		}
 	}
@@ -285,16 +283,16 @@ public class IndexingAgent implements IndexingConstants {
 		indexWriter.deleteAll();
 		
 		try {
-			new SubscriptionNavigator( repositoryManager ).navigateSubscriptions( new SubscriptionVisitor() {
-				public void visitSubscriptionList(SubscriptionList subscriptionList) {
-					try {
-						processIndexingJob( subscriptionList.getSubscriptionTarget(), false );
-						
-					} catch (IOException e) {
-						log.warn("Error indexing subscription list.", e);
+			new SubscriptionNavigator( repositoryManager ).navigateSubscriptions(
+					subscriptionList -> {
+						try {
+							processIndexingJob( subscriptionList.getSubscriptionTarget(), false );
+							
+						} catch (IOException e) {
+							log.warn("Error indexing subscription list.", e);
+						}
 					}
-				}
-			});
+			);
 			
 		} catch (RepositoryException e) {
 			log.warn("Error during reindexing of repository subscriptions.", e);
@@ -357,9 +355,8 @@ public class IndexingAgent implements IndexingConstants {
 		boolean isCE = false;
 		
 		while (!isCE && (t != null)) {
-			if (!(isCE = t.getClass().equals( ConnectException.class ))) {
-				t = t.getCause();
-			}
+			isCE = t.getClass().equals( ConnectException.class );
+			if (!isCE) t = t.getCause();
 		}
 		return isCE;
 	}
@@ -373,7 +370,8 @@ public class IndexingAgent implements IndexingConstants {
 			public Message createMessage(Session session) throws JMSException {
 				TextMessage msg = session.createTextMessage();
 				
-				msg.setIntProperty( MSGPROP_SELECTOR, SELECTOR_VALUE_COMMITMSG );
+				msg.setIntProperty( IndexingConstants.MSGPROP_SELECTOR,
+						IndexingConstants.SELECTOR_VALUE_COMMITMSG );
 				return msg;
 			}
 		});
@@ -395,8 +393,8 @@ public class IndexingAgent implements IndexingConstants {
 		try {
 			new IndexingAgent().startListening();
 			
-		} catch (Throwable t) {
-			log.fatal("Indexing agent encountered a fatal error.", t);
+		} catch (Exception e) {
+			log.fatal("Indexing agent encountered a fatal error.", e);
 			System.exit( IndexProcessManager.FATAL_EXIT_CODE );
 		}
 	}

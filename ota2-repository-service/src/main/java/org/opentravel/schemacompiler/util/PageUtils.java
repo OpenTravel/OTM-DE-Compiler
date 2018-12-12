@@ -187,8 +187,8 @@ public class PageUtils {
 			dateTimeFormat = new SimpleDateFormat( DATETIME_FORMAT );
 			dateTimeFormat.setTimeZone( timeZone );
 			
-		} catch (Throwable t) {
-			throw new ExceptionInInitializerError( t );
+		} catch (Exception e) {
+			throw new ExceptionInInitializerError( e );
 		}
 	}
 	

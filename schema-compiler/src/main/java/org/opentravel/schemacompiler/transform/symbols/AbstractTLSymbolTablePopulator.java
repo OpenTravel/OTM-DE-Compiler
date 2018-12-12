@@ -42,7 +42,9 @@ import org.opentravel.schemacompiler.transform.SymbolTable;
  */
 public abstract class AbstractTLSymbolTablePopulator<S> implements SymbolTablePopulator<S> {
 
-    /**
+	private static final String LIST_SUFFIX = "_List";
+
+	/**
      * Configures the given symbol table by registering derived entity factories for the list facets
      * of core objects.
      * 
@@ -58,7 +60,7 @@ public abstract class AbstractTLSymbolTablePopulator<S> implements SymbolTablePo
             public void registerDerivedEntity(TLCoreObject originatingEntity,
                     String entityNamespace, SymbolTable symbols) {
                 symbols.addEntity(entityNamespace, originatingEntity.getLocalName() + "_"
-                        + TLFacetType.SIMPLE.getIdentityName() + "_List",
+                        + TLFacetType.SIMPLE.getIdentityName() + LIST_SUFFIX,
                         originatingEntity.getSimpleListFacet());
             }
         });
@@ -71,7 +73,7 @@ public abstract class AbstractTLSymbolTablePopulator<S> implements SymbolTablePo
             public void registerDerivedEntity(TLCoreObject originatingEntity,
                     String entityNamespace, SymbolTable symbols) {
                 symbols.addEntity(entityNamespace, originatingEntity.getLocalName() + "_"
-                        + TLFacetType.SUMMARY.getIdentityName() + "_List",
+                        + TLFacetType.SUMMARY.getIdentityName() + LIST_SUFFIX,
                         originatingEntity.getSummaryListFacet());
             }
         });
@@ -84,7 +86,7 @@ public abstract class AbstractTLSymbolTablePopulator<S> implements SymbolTablePo
             public void registerDerivedEntity(TLCoreObject originatingEntity,
                     String entityNamespace, SymbolTable symbols) {
                 symbols.addEntity(entityNamespace, originatingEntity.getLocalName() + "_"
-                        + TLFacetType.DETAIL.getIdentityName() + "_List",
+                        + TLFacetType.DETAIL.getIdentityName() + LIST_SUFFIX,
                         originatingEntity.getDetailListFacet());
             }
         });
@@ -102,12 +104,11 @@ public abstract class AbstractTLSymbolTablePopulator<S> implements SymbolTablePo
         String namespace = library.getNamespace();
 
         for (NamedEntity libraryMember : library.getNamedMembers()) {
-            if (libraryMember instanceof XSDComplexType) {
+            if ((libraryMember instanceof XSDComplexType) &&
+            			(((XSDComplexType) libraryMember).getIdentityAlias() != null)) {
                 // Complex types that have an identity alias assigned should be ignored in favor
                 // of the global XSD element with the same name
-                if (((XSDComplexType) libraryMember).getIdentityAlias() != null) {
-                    continue;
-                }
+                continue;
             }
             if (!(libraryMember instanceof TLService)) {
                 symbols.addEntity(namespace, libraryMember.getLocalName(), libraryMember);

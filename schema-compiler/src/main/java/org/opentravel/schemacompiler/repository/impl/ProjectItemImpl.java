@@ -108,15 +108,15 @@ public class ProjectItemImpl extends RepositoryItemImpl implements ProjectItem {
         switch (item.getState()) {
             case MANAGED_UNLOCKED:
             case BUILT_IN:
-                throw new IllegalStateException("Cannnot change a project item's state from '"
-                        + item.getState() + "' to MANAGED_UNLOCKED.");
+                throw new IllegalStateException(String.format(
+                		"Cannnot change a project item's state from '%s' to MANAGED_UNLOCKED.", item.getState()));
 			default:
 				break;
         }
-        ProjectItemImpl _item = (ProjectItemImpl) item;
+        ProjectItemImpl pItem = (ProjectItemImpl) item;
 
-        _item.setContent(newContent);
-        _item.setState(RepositoryItemState.MANAGED_UNLOCKED);
+        pItem.setContent(newContent);
+        pItem.setState(RepositoryItemState.MANAGED_UNLOCKED);
     }
 
     /**
@@ -127,8 +127,8 @@ public class ProjectItemImpl extends RepositoryItemImpl implements ProjectItem {
      */
     public static void changeStateToManagedLocked(ProjectItem item) {
         if (item.getState() != RepositoryItemState.MANAGED_UNLOCKED) {
-            throw new IllegalStateException("Cannnot change a project item's state from '"
-                    + item.getState() + "' to MANAGED_UNLOCKED.");
+            throw new IllegalStateException(String.format(
+            		"Cannnot change a project item's state from '%s' to MANAGED_LOCKED.", item.getState()));
         }
         ((ProjectItemImpl) item).setState(RepositoryItemState.MANAGED_LOCKED);
     }
@@ -143,13 +143,13 @@ public class ProjectItemImpl extends RepositoryItemImpl implements ProjectItem {
      */
     public static void changeStateToManagedWIP(ProjectItem item, AbstractLibrary newContent) {
         if (item.getState() != RepositoryItemState.MANAGED_UNLOCKED) {
-            throw new IllegalStateException("Cannnot change a project item's state from '"
-                    + item.getState() + "' to MANAGED_UNLOCKED.");
+            throw new IllegalStateException(String.format(
+            		"Cannnot change a project item's state from '%s' to MANAGED_WIP.", item.getState()));
         }
-        ProjectItemImpl _item = (ProjectItemImpl) item;
+        ProjectItemImpl pItem = (ProjectItemImpl) item;
 
-        _item.setContent(newContent);
-        _item.setState(RepositoryItemState.MANAGED_WIP);
+        pItem.setContent(newContent);
+        pItem.setState(RepositoryItemState.MANAGED_WIP);
     }
 
     /**

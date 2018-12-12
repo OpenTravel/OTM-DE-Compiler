@@ -47,7 +47,7 @@ public class TLClosedEnumeration extends TLAbstractEnumeration implements TLAttr
      */
     @Override
     public XSDFacetProfile getXSDFacetProfile() {
-        return XSDFacetProfile.FP_string;
+        return XSDFacetProfile.FP_STRING;
     }
 
 }

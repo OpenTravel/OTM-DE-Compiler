@@ -71,6 +71,8 @@ import org.opentravel.schemacompiler.version.VersionSchemeFactory;
  */
 public class SubscriptionManager {
 	
+	private static final String ERROR_LOADING_CONTENT = "Error loading subscription list content.";
+
 	public static final String REMARK_UNLOCK_REVERT = "__%%_UNLOCK__REVERT_%%__";
 	
 	private static final long DEFAULT_NOTIFICATION_DELAY = 5000; // 5 sec
@@ -80,7 +82,7 @@ public class SubscriptionManager {
 	
     private static Log log = LogFactory.getLog( SubscriptionManager.class );
     private static VelocityEngine velocityEngine;
-	public static boolean debugMode = false;
+	public static final boolean debugMode = false;
     
 	private Map<String,SubscriptionResource> namespaceCache = new HashMap<>();
 	private Map<String,SubscriptionResource> allVersionsCache = new HashMap<>();
@@ -333,7 +335,7 @@ public class SubscriptionManager {
 				namespaceCache.put( baseNS, sr );
 				
 			} catch (IOException e) {
-				throw new RepositoryException("Error loading subscription list content.", e);
+				throw new RepositoryException(ERROR_LOADING_CONTENT, e);
 			}
     	}
     	return sr.getResource();
@@ -357,7 +359,7 @@ public class SubscriptionManager {
 				allVersionsCache.put( cacheKey, sr );
 				
 			} catch (IOException e) {
-				throw new RepositoryException("Error loading subscription list content.", e);
+				throw new RepositoryException(ERROR_LOADING_CONTENT, e);
 			}
     	}
     	return sr.getResource();
@@ -382,7 +384,7 @@ public class SubscriptionManager {
 				singleVersionCache.put( cacheKey, sr );
 				
 			} catch (IOException e) {
-				throw new RepositoryException("Error loading subscription list content.", e);
+				throw new RepositoryException(ERROR_LOADING_CONTENT, e);
 			}
     	}
     	return sr.getResource();
@@ -464,12 +466,7 @@ public class SubscriptionManager {
 		}
 		
 		if (smtpConfig != null) {
-			notificationThread = new Thread( new Runnable() {
-				public void run() {
-					listenForNotificationEvents();
-				}
-			}, "OTM_NotificationListener" );
-			
+			notificationThread = new Thread( this::listenForNotificationEvents );
 			shutdownRequested = false;
 			notificationThread.start();
 			repositoryListener = new RepositorySubscriptionListener( this, manager );
@@ -612,13 +609,12 @@ public class SubscriptionManager {
 					" (" + recipients.size() + " recipients)");
 			
 			if (!recipients.isEmpty()) {
-//				Session mailSession = Session.getInstance( smtpConfig.getSmtpProps() );
 				final String smtpUser = smtpConfig.getSmtpUser();
 				final String smtpPassword = smtpConfig.getSmtpPassword();
 				Session mailSession = smtpConfig.isAuthEnable() ?
 						Session.getInstance( smtpConfig.getSmtpProps(),
 								 new javax.mail.Authenticator() {
-									protected PasswordAuthentication getPasswordAuthentication() {
+									@Override protected PasswordAuthentication getPasswordAuthentication() {
 										return new PasswordAuthentication( smtpUser, smtpPassword );
 									}
 								 }) :
@@ -661,7 +657,7 @@ public class SubscriptionManager {
 						log.error( "Fatal error sending email notification - " + errorMessage );
 						abortInd = true;
 						
-					} catch (Throwable e) {
+					} catch (Exception e) {
 						String errorMessage = e.getMessage();
 						if (errorMessage == null) errorMessage = e.getClass().getSimpleName();
 						log.error( "Error sending email notification (attempt " + retryCount + ") - " + errorMessage );
@@ -670,8 +666,8 @@ public class SubscriptionManager {
 				}
 			}
 			
-		} catch (Throwable t) {
-			log.error("Error processing notification job.", t);
+		} catch (Exception e) {
+			log.error("Error processing notification job.", e);
 		}
 	}
 	
@@ -777,7 +773,8 @@ public class SubscriptionManager {
 					String fullName = user.getLastName();
 					
 					if (user.getFirstName() != null) {
-						fullName = user.getFirstName() + " " + fullName;
+						fullName = new StringBuilder().append( user.getFirstName() )
+								.append( " " ).append( fullName ).toString();
 					}
 					emailAddresses.add( new InternetAddress( user.getEmailAddress(), fullName ) );
 				}
@@ -819,26 +816,23 @@ public class SubscriptionManager {
 		StringWriter writer = new StringWriter();
 		
 		// Handle some special cases before populating the context
-		if (job.getAction() == RepositoryActionType.UNLOCK) {
-			if (REMARK_UNLOCK_REVERT.equals( job.getRemarks() )) {
-				job.remarks = null;
-				context.put( "isUnlockRevert", true );
-			}
+		if ((job.getAction() == RepositoryActionType.UNLOCK)
+				&& REMARK_UNLOCK_REVERT.equals( job.getRemarks() )) {
+			job.remarks = null;
+			context.put( "isUnlockRevert", true );
 		}
-		if (job.getAction() == RepositoryActionType.LIBRARY_MOVED) {
-			if (job.getRemarks() != null) {
-				String newBaseNamespace;
-				try {
-					VersionSchemeFactory factory = VersionSchemeFactory.getInstance();
-					VersionScheme vScheme = factory.getVersionScheme( job.getItem().getVersionScheme() );
-					
-					newBaseNamespace = vScheme.getBaseNamespace( job.getRemarks() );
-					
-				} catch (VersionSchemeException e) {
-					newBaseNamespace = job.getRemarks();
-				}
-				context.put( "newBaseNamespace", newBaseNamespace );
+		if ((job.getAction() == RepositoryActionType.LIBRARY_MOVED) && (job.getRemarks() != null)) {
+			String newBaseNamespace;
+			try {
+				VersionSchemeFactory factory = VersionSchemeFactory.getInstance();
+				VersionScheme vScheme = factory.getVersionScheme( job.getItem().getVersionScheme() );
+				
+				newBaseNamespace = vScheme.getBaseNamespace( job.getRemarks() );
+				
+			} catch (VersionSchemeException e) {
+				newBaseNamespace = job.getRemarks();
 			}
+			context.put( "newBaseNamespace", newBaseNamespace );
 		}
 		
 		context.put( "repositoryName", manager.getDisplayName() );
@@ -981,8 +975,8 @@ public class SubscriptionManager {
 			ve.setProperty( "classpath.resource.loader.class", ClasspathResourceLoader.class.getName() );
 			velocityEngine = ve;
 			
-		} catch (Throwable t) {
-			throw new ExceptionInInitializerError( t );
+		} catch (Exception e) {
+			throw new ExceptionInInitializerError( e );
 		}
 	}
 	

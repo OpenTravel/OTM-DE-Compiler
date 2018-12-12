@@ -224,10 +224,8 @@ public abstract class AbstractWsdlCodeGenerator<S extends LibraryMember> extends
      * Returns a JAXB context to use for marshalling output file content.
      * 
      * @return JAXBContext
-     * @throws JAXBException
-     *             thrown if the required context cannot be created
      */
-    private static JAXBContext getJaxbContext() throws JAXBException {
+    private static JAXBContext getJaxbContext() {
         ApplicationContext appContext = SchemaCompilerApplicationContext.getContext();
         StringBuilder jaxbPackages = new StringBuilder(DEFAULT_JAXB_PACKAGES);
 
@@ -240,15 +238,27 @@ public abstract class AbstractWsdlCodeGenerator<S extends LibraryMember> extends
             }
         }
         String contextPath = jaxbPackages.toString();
-        JAXBContext jaxbContext = contextCache.get(contextPath);
-
-        if (jaxbContext == null) {
-            jaxbContext = JAXBContext.newInstance(contextPath);
-            contextCache.put(contextPath, jaxbContext);
-        }
-        return jaxbContext;
+        
+        contextCache.computeIfAbsent( contextPath, p -> contextCache.put( p, newContext( p ) ) );
+        return contextCache.get(contextPath);
     }
-
+    
+    /**
+     * Constructs a new JAXB context for the given context path.  If the context cannot
+     * be constructed, an runtime exception will be thrown.
+     * 
+     * @param contextPath  the path for which to create the context
+     * @return JAXBContext
+     */
+	private static JAXBContext newContext(String contextPath) {
+		try {
+			return JAXBContext.newInstance(contextPath);
+			
+		} catch (JAXBException e) {
+			throw new IllegalArgumentException("Error creating JAXB context for path: " + contextPath, e);
+		}
+	}
+	
     /**
      * Initializes the validation schema and shared JAXB context.
      */

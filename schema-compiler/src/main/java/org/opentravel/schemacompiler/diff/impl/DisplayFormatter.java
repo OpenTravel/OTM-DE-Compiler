@@ -57,6 +57,9 @@ import org.opentravel.schemacompiler.util.URLUtils;
  */
 public class DisplayFormatter {
 	
+	private static final String UTF_8 = "UTF-8";
+	private static final String UNKNOWN = "UNKNOWN";
+	
 	private DateFormat dateFormat = new SimpleDateFormat( "MMMMM d, yyyy '&amp;' h:mma z" );
 	private RepositoryManager repositoryManager;
 	
@@ -117,7 +120,7 @@ public class DisplayFormatter {
 			String name = library.getName();
 			
 			if ((name == null) || (name.length() == 0)) {
-				name = "UNKNOWN";
+				name = UNKNOWN;
 			}
 			if (prefix != null) {
 				displayName = prefix + ":";
@@ -155,7 +158,7 @@ public class DisplayFormatter {
 			}
 		}
 		if (filename == null) {
-			filename = "UNKNOWN";
+			filename = UNKNOWN;
 		}
 		return filename;
 	}
@@ -181,7 +184,7 @@ public class DisplayFormatter {
 			}
 		}
 		if (filename == null) {
-			filename = "UNKNOWN";
+			filename = UNKNOWN;
 		}
 		return filename;
 	}
@@ -227,7 +230,7 @@ public class DisplayFormatter {
 			displayName = entity.getLocalName();
 			
 		} else {
-			displayName = "UNKNOWN";
+			displayName = UNKNOWN;
 		}
 		return displayName;
 	}
@@ -243,9 +246,9 @@ public class DisplayFormatter {
 		TLParamGroup parentParamGroup = entity.getParentParamGroup();
 		StringBuilder displayName = new StringBuilder();
 		
-		displayName.append( (parentResource == null) ? "UNKNOWN" : getLocalDisplayName( parentResource ) );
+		displayName.append( (parentResource == null) ? UNKNOWN : getLocalDisplayName( parentResource ) );
 		displayName.append(" / ");
-		displayName.append( (parentParamGroup == null) ? "UNKNOWN" : getParamGroupDisplayName( parentParamGroup ) );
+		displayName.append( (parentParamGroup == null) ? UNKNOWN : getParamGroupDisplayName( parentParamGroup ) );
 		return displayName.toString();
 	}
 	
@@ -295,7 +298,7 @@ public class DisplayFormatter {
 		StringBuilder displayName = new StringBuilder();
 		TLAction action = entity.getOwner();
 		
-		displayName.append( (action == null) ? "UNKNOWN" : action.getActionId() );
+		displayName.append( (action == null) ? UNKNOWN : action.getActionId() );
 		displayName.append( " [" );
 		displayName.append( ResourceComparator.getResponseId( entity ) );
 		displayName.append( "]" );
@@ -356,7 +359,7 @@ public class DisplayFormatter {
 				StringBuilder urlBuilder = new StringBuilder( ((RemoteRepository) item.getRepository()).getEndpointUrl() );
 				
 				urlBuilder.append( "/console/libraryDictionary.html" );
-				urlBuilder.append( "?baseNamespace=" ).append( URLEncoder.encode( library.getBaseNamespace(), "UTF-8" ) );
+				urlBuilder.append( "?baseNamespace=" ).append( URLEncoder.encode( library.getBaseNamespace(), UTF_8 ) );
 				urlBuilder.append( "&filename=" ).append( item.getFilename() );
 				urlBuilder.append( "&version=" ).append( item.getVersion() );
 				url = urlBuilder.toString();
@@ -384,7 +387,7 @@ public class DisplayFormatter {
 				StringBuilder urlBuilder = new StringBuilder( ((RemoteRepository) item.getRepository()).getEndpointUrl() );
 				
 				urlBuilder.append( "/console/releaseView.html" );
-				urlBuilder.append( "?baseNamespace=" ).append( URLEncoder.encode( release.getBaseNamespace(), "UTF-8" ) );
+				urlBuilder.append( "?baseNamespace=" ).append( URLEncoder.encode( release.getBaseNamespace(), UTF_8 ) );
 				urlBuilder.append( "&filename=" ).append( item.getFilename() );
 				urlBuilder.append( "&version=" ).append( item.getVersion() );
 				url = urlBuilder.toString();
@@ -416,7 +419,7 @@ public class DisplayFormatter {
 					StringBuilder urlBuilder = new StringBuilder( ((RemoteRepository) item.getRepository()).getEndpointUrl() );
 					
 					urlBuilder.append( "/console/entityDictionary.html" );
-					urlBuilder.append( "?namespace=" ).append( URLEncoder.encode( entity.getNamespace(), "UTF-8" ) );
+					urlBuilder.append( "?namespace=" ).append( URLEncoder.encode( entity.getNamespace(), UTF_8 ) );
 					urlBuilder.append( "&localName=" ).append( entity.getLocalName() );
 					url = urlBuilder.toString();
 					

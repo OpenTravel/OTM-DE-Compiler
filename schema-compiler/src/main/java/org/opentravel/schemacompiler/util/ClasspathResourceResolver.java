@@ -24,6 +24,8 @@ import java.util.Map;
 import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.ioc.SchemaDeclaration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.w3c.dom.ls.LSInput;
 import org.w3c.dom.ls.LSResourceResolver;
@@ -37,7 +39,8 @@ import org.w3c.dom.ls.LSResourceResolver;
 public class ClasspathResourceResolver implements LSResourceResolver {
 
     private static final String SYSTEM_ID_MAPPINGS_CONTEXT_ID = "systemIdMappings";
-
+	private static final Logger log = LoggerFactory.getLogger(ClasspathResourceResolver.class);
+	
     private Map<String, SchemaDeclaration> systemIdMappings;
 
     /**
@@ -75,34 +78,42 @@ public class ClasspathResourceResolver implements LSResourceResolver {
 
                     @Override
                     public void setSystemId(String systemID) {
+                        // No action required
                     }
 
                     @Override
                     public void setStringData(String stringData) {
+                        // No action required
                     }
 
                     @Override
                     public void setPublicId(String publicID) {
+                        // No action required
                     }
 
                     @Override
                     public void setEncoding(String encoding) {
+                        // No action required
                     }
 
                     @Override
                     public void setCharacterStream(Reader characterStream) {
+                        // No action required
                     }
 
                     @Override
                     public void setCertifiedText(boolean certifiedText) {
+                        // No action required
                     }
 
                     @Override
                     public void setByteStream(InputStream byteStream) {
+                        // No action required
                     }
 
                     @Override
                     public void setBaseURI(String baseURI) {
+                        // No action required
                     }
 
                     @Override
@@ -167,9 +178,8 @@ public class ClasspathResourceResolver implements LSResourceResolver {
         } catch (IOException e) {
             // no error - return a null input stream
         }
-        if (resourceStream == null) {
-            System.out.println("WARNING: No associated schema resource defined for System-ID: "
-                    + systemID);
+        if ((resourceStream == null) && log.isWarnEnabled()) {
+            log.warn(String.format("WARNING: No associated schema resource defined for System-ID: %s", systemID));
         }
         return resourceStream;
     }

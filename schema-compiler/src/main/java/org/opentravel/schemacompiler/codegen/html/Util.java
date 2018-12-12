@@ -130,7 +130,7 @@ public class Util {
 	 */
 	public static void copyResourceFile(Configuration configuration,
 			String resourcefile, boolean overwrite) {
-		String destresourcesdir = configuration.destDirName + RESOURCESDIR;
+		String destresourcesdir = configuration.getDestDirName() + RESOURCESDIR;
 		copyFile(configuration, resourcefile, RESOURCESDIR, destresourcesdir,
 				overwrite, false);
 	}
@@ -205,10 +205,10 @@ public class Util {
 	private static BufferedWriter newWriter(OutputStream out, Configuration configuration) throws IOException {
 		BufferedWriter writer = null;
 		
-		if (configuration.docencoding == null) {
+		if (configuration.getDocencoding() == null) {
 			writer = new BufferedWriter(new OutputStreamWriter(out));
 		} else {
-			writer = new BufferedWriter(new OutputStreamWriter(out, configuration.docencoding));
+			writer = new BufferedWriter(new OutputStreamWriter(out, configuration.getDocencoding()));
 		}
 		return writer;
 	}

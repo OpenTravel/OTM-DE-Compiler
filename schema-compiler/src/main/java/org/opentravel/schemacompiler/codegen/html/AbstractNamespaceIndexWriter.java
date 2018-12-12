@@ -72,7 +72,7 @@ public abstract class AbstractNamespaceIndexWriter extends HtmlDocletWriter {
     public AbstractNamespaceIndexWriter(Configuration configuration,
                                       String filename) throws IOException {
         super(configuration, filename);
-        this.relativepathNoSlash = ".";
+        this.setRelativepathNoSlash(".");
         libraries = configuration.getLibraries();
     }
 
@@ -170,8 +170,8 @@ public abstract class AbstractNamespaceIndexWriter extends HtmlDocletWriter {
      * @param body the document tree to which the title will be added
      */
     protected void addConfigurationTitle(Content body) {
-        if (configuration.doctitle.length() > 0) {
-            Content title = new RawHtml(configuration.doctitle);
+        if (configuration.getDoctitle().length() > 0) {
+            Content title = new RawHtml(configuration.getDoctitle());
             Content heading = HtmlTree.heading(HtmlConstants.TITLE_HEADING,
                     HtmlStyle.TITLE, title);
             Content div = HtmlTree.div(HtmlStyle.HEADER, heading);

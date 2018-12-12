@@ -258,7 +258,7 @@ public class TLSimple extends TLLibraryMember implements Versioned, TLAttributeT
     @Override
     public XSDFacetProfile getXSDFacetProfile() {
         return ((parentType == null) || (parentType == this)) ?
-        		XSDFacetProfile.FP_unknown : XSDFacetProfileLocator.getXSDFacetProfile( parentType );
+        		XSDFacetProfile.FP_UNKNOWN : XSDFacetProfileLocator.getXSDFacetProfile( parentType );
     }
 
     /**

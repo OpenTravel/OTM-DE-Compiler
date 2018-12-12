@@ -258,7 +258,8 @@ import org.opentravel.schemacompiler.security.UserPrincipal;
  */
 public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
 
-    private static Log log = LogFactory.getLog(JNDIAuthenticationProvider.class);
+	private static final String ERROR_CLOSING_JNDI_CONTEXT = "Error closing JNDI context.";
+	private static Log log = LogFactory.getLog(JNDIAuthenticationProvider.class);
 
     private enum AuthenticationMode { USER_LOOKUP, USER_SEARCH }
 
@@ -463,7 +464,7 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
                 if (context != null) context.close();
                 
             } catch (Exception e) {
-				log.warn("Error closing JNDI context.", e);
+				log.warn(ERROR_CLOSING_JNDI_CONTEXT, e);
             }
         }
     }
@@ -506,7 +507,7 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
 				if (context != null) context.close();
 				
 			} catch (Exception e) {
-				log.warn("Error closing JNDI context.", e);
+				log.warn(ERROR_CLOSING_JNDI_CONTEXT, e);
 			}
 		}
 	}
@@ -540,7 +541,7 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
 				if (context != null) context.close();
 				
 			} catch (Exception e) {
-				log.warn("Error closing JNDI context.");
+				log.warn(ERROR_CLOSING_JNDI_CONTEXT);
 			}
 		}
 	}

@@ -44,13 +44,8 @@ public class CorrelatedCodegenArtifacts {
 		}
 		
 		if (artifact != null) {
-			CodegenArtifacts artifacts = entityArtifactMap.get( entity );
-			
-			if (artifacts == null) {
-				artifacts = new CodegenArtifacts();
-				entityArtifactMap.put( entity, artifacts );
-			}
-			artifacts.addArtifact( artifact );
+			entityArtifactMap.computeIfAbsent( entity, e -> entityArtifactMap.put( e, new CodegenArtifacts() ) );
+			entityArtifactMap.get( entity ).addArtifact( artifact );
 		}
 	}
 	

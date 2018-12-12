@@ -69,6 +69,9 @@ import org.opentravel.schemacompiler.repository.RepositoryManager;
  */
 public abstract class FreeTextSearchService implements IndexingTerms {
 	
+	private static final String ERROR_RELEASING_INDEX_SEARCHER = "Error releasing index searcher.";
+	private static final String WHERE_USED_QUERY_ERROR = "Error executing where-used query for entity: ";
+	
 	private static final Set<String> nonContentAttrs = new HashSet<>( Arrays.asList(
 			IDENTITY_FIELD, ENTITY_TYPE_FIELD, ENTITY_NAME_FIELD, ENTITY_NAMESPACE_FIELD,
 			BASE_NAMESPACE_FIELD, FILENAME_FIELD, VERSION_FIELD, VERSION_SCHEME_FIELD,
@@ -115,13 +118,14 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * @throws IOException
      *             thrown if a low-level error occurs while initializing the index reader or writer
      */
+    @SuppressWarnings("squid:S2093") // Try with resource cannot be used since directory must be left open
     public synchronized void startService() throws IOException {
         if (isRunning) {
             throw new IllegalStateException(
                     "Unable to start - the indexing service is already running.");
         }
         try {
-        	searchLock.writeLock().lock();
+        		searchLock.writeLock().lock();
             this.indexDirectory = FSDirectory.open(indexLocation.toPath());
             onStartup(this.indexDirectory);
             
@@ -130,7 +134,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
             this.isRunning = true;
         	
         } finally {
-        	searchLock.writeLock().unlock();
+        		searchLock.writeLock().unlock();
         }
     }
     
@@ -728,15 +732,14 @@ public abstract class FreeTextSearchService implements IndexingTerms {
             return searchResults;
             
         } catch (Exception e) {
-            throw new RepositoryException(
-            		"Error executing where-used query for entity: " + libraryIndex.getSearchIndexId(), e);
+            throw new RepositoryException(WHERE_USED_QUERY_ERROR + libraryIndex.getSearchIndexId(), e);
 
         } finally {
             try {
                 if (searcher != null) searchManager.release(searcher);
 
             } catch (Exception e) {
-                log.error("Error releasing index searcher.", e);
+                log.error(ERROR_RELEASING_INDEX_SEARCHER, e);
             }
         	searchLock.readLock().unlock();
         }
@@ -833,14 +836,14 @@ public abstract class FreeTextSearchService implements IndexingTerms {
         	
         } catch (Exception e) {
             throw new RepositoryException(
-            		"Error executing where-used query for entity: " + libraryIndex.getSearchIndexId(), e);
+            		WHERE_USED_QUERY_ERROR + libraryIndex.getSearchIndexId(), e);
 
         } finally {
             try {
                 if (searcher != null) searchManager.release(searcher);
 
             } catch (Exception e) {
-                log.error("Error releasing index searcher.", e);
+                log.error(ERROR_RELEASING_INDEX_SEARCHER, e);
             }
         	searchLock.readLock().unlock();
         }
@@ -1047,14 +1050,14 @@ public abstract class FreeTextSearchService implements IndexingTerms {
             
         } catch (Exception e) {
             throw new RepositoryException(
-            		"Error executing where-used query for entity: " + entityIndex.getSearchIndexId(), e);
+            		WHERE_USED_QUERY_ERROR + entityIndex.getSearchIndexId(), e);
 
         } finally {
             try {
                 if (searcher != null) searchManager.release(searcher);
 
             } catch (Exception e) {
-                log.error("Error releasing index searcher.", e);
+                log.error(ERROR_RELEASING_INDEX_SEARCHER, e);
             }
         	searchLock.readLock().unlock();
         }
@@ -1229,7 +1232,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
                 if (searcher != null) searchManager.release(searcher);
 
             } catch (Exception e) {
-                log.error("Error releasing index searcher.", e);
+                log.error(ERROR_RELEASING_INDEX_SEARCHER, e);
             }
         	searchLock.readLock().unlock();
         }

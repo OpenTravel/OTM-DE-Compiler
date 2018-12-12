@@ -53,7 +53,9 @@ import org.opentravel.schemacompiler.validate.ValidationFindings;
 @Execute( goal = "ota2-compile", phase = LifecyclePhase.GENERATE_SOURCES )
 public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTaskOptions {
 
-    /**
+	private static final String NULL_VALUE = "[NULL]";
+
+	/**
      * The location of the library file to be compiled.
      */
 	@Parameter
@@ -182,114 +184,102 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
     /**
      * @see org.apache.maven.plugin.Mojo#execute()
      */
-    public void execute() throws MojoExecutionException, MojoFailureException {
-        synchronized (OTA2SchemaCompilerMojo.class) {
-            try {
-                if (debug)
-                    displayOptions();
-
-                // Validate the source file or managed release and the output folder
-                RepositoryItem releaseItem = null;
-                
-                if (libraryFile != null) {
-                    if (!libraryFile.exists()) {
-                        throw new FileNotFoundException("Source file not found: "
-                                + libraryFile.getAbsolutePath());
-                    }
-                	
-                } else if (release != null) {
-                	try {
-                		releaseItem = RepositoryManager.getDefault().getRepositoryItem(
-                				release.getBaseNamespace(), release.getFilename(), release.getVersion() );
-                		
-                		if (!RepositoryItemType.RELEASE.isItemType( releaseItem.getFilename() )) {
-                			throw new RepositoryException(
-                					"The specified repository item is not an OTM release: " + releaseItem.getFilename());
-                		}
-                		
-                	} catch (RepositoryException e) {
-                		throw new MojoFailureException(
-                				"The specified repository item does not exist or is not an OTM release.", e);
-                		
-                	} catch (Throwable t) {
-                		throw new MojoExecutionException(
-                				"Unknown error while accessing the OTM repository", t);
-                	}
-                	
-                } else {
-                	throw new MojoFailureException("Either a libraryFile or a release must be specified.");
-                }
-                
-                if (!outputFolder.exists()) {
-                    if (!outputFolder.mkdirs()) {
-                        throw new IOException("Unable to create ouput folder: "
-                                + outputFolder.getAbsolutePath());
-                    }
-                }
-
-                // Select the user-specified schema compiler extension
-                if (bindingStyle != null) {
-                    if (CompilerExtensionRegistry.getAvailableExtensionIds().contains(bindingStyle)) {
-                        CompilerExtensionRegistry.setActiveExtension(bindingStyle);
-
-                    } else {
-                        throw new MojoFailureException("Invalid binding style specified: "
-                                + bindingStyle);
-                    }
-                }
-
-                // Execute the compilation and return
-                CompileAllCompilerTask compilerTask = TaskFactory.getTask(CompileAllCompilerTask.class);
-                ValidationFindings findings = null;
-                Log log = getLog();
-
-                
-                if (libraryFile !=  null) {
-                    log.info("Compiling OTA2 Library: " + libraryFile.getName());
-                    compilerTask.applyTaskOptions(this);
-                    findings = compilerTask.compileOutput(libraryFile);
-                	
-                } else if (releaseItem != null) {
-                    log.info("Compiling OTA2 Release: " + releaseItem.getFilename());
-                    findings = compilerTask.compileOutput(releaseItem);
-                }
-
-                if (findings != null) {
-                    if (findings.hasFinding()) {
-                        String[] messages = findings
-                                .getAllValidationMessages(FindingMessageFormat.IDENTIFIED_FORMAT);
-
-                        log.info("Errors/warnings detected during compilation:");
-                        for (String message : messages) {
-                            log.info(message);
-                        }
-                    }
-                    
-                    if (!findings.hasFinding(FindingType.ERROR)) {
-                        log.info("Library compilation completed successfully.");
-                    } else {
-                        throw new MojoFailureException("Schema compilation aborted due to errors.");
-                    }
-                }
-                
-            } catch (Throwable t) {
-                throw new MojoExecutionException("Error during OTA2 library compilation.", t);
-            }
-        }
-    }
-
+	public void execute() throws MojoExecutionException, MojoFailureException {
+		synchronized (OTA2SchemaCompilerMojo.class) {
+			try {
+				if (debug) displayOptions();
+				
+				// Validate the source file or managed release and the output folder
+				RepositoryItem releaseItem = null;
+				
+				if (libraryFile != null) {
+					if (!libraryFile.exists()) {
+						throw new FileNotFoundException("Source file not found: " + libraryFile.getAbsolutePath());
+					}
+					
+				} else if (release != null) {
+					try {
+						releaseItem = RepositoryManager.getDefault().getRepositoryItem(release.getBaseNamespace(),
+								release.getFilename(), release.getVersion());
+						
+						if (!RepositoryItemType.RELEASE.isItemType(releaseItem.getFilename())) {
+							throw new RepositoryException("The specified repository item is not an OTM release: "
+									+ releaseItem.getFilename());
+						}
+						
+					} catch (RepositoryException e) {
+						throw new MojoFailureException(
+								"The specified repository item does not exist or is not an OTM release.", e);
+						
+					} catch (Exception e) {
+						throw new MojoExecutionException("Unknown error while accessing the OTM repository", e);
+					}
+					
+				} else {
+					throw new MojoFailureException("Either a libraryFile or a release must be specified.");
+				}
+				
+				if (!outputFolder.exists() && !outputFolder.mkdirs()) {
+					throw new IOException("Unable to create ouput folder: " + outputFolder.getAbsolutePath());
+				}
+				
+				// Select the user-specified schema compiler extension
+				if (bindingStyle != null) {
+					if (CompilerExtensionRegistry.getAvailableExtensionIds().contains(bindingStyle)) {
+						CompilerExtensionRegistry.setActiveExtension(bindingStyle);
+						
+					} else {
+						throw new MojoFailureException("Invalid binding style specified: " + bindingStyle);
+					}
+				}
+				
+				// Execute the compilation and return
+				CompileAllCompilerTask compilerTask = TaskFactory.getTask(CompileAllCompilerTask.class);
+				ValidationFindings findings = null;
+				Log log = getLog();
+				
+				if (libraryFile != null) {
+					log.info("Compiling OTA2 Library: " + libraryFile.getName());
+					compilerTask.applyTaskOptions(this);
+					findings = compilerTask.compileOutput(libraryFile);
+					
+				} else if (releaseItem != null) {
+					log.info("Compiling OTA2 Release: " + releaseItem.getFilename());
+					findings = compilerTask.compileOutput(releaseItem);
+				}
+				
+				if (findings != null) {
+					if (findings.hasFinding()) {
+						String[] messages = findings.getAllValidationMessages(FindingMessageFormat.IDENTIFIED_FORMAT);
+						
+						log.info("Errors/warnings detected during compilation:");
+						for (String message : messages) {
+							log.info(message);
+						}
+					}
+					
+					if (!findings.hasFinding(FindingType.ERROR)) {
+						log.info("Library compilation completed successfully.");
+					} else {
+						throw new MojoFailureException("Schema compilation aborted due to errors.");
+					}
+				}
+				
+			} catch (Exception e) {
+				throw new MojoExecutionException("Error during OTA2 library compilation.", e);
+			}
+		}
+	}
+	
     /**
      * Displays the configuration options for this Mojo for debugging purposes.
      */
     protected void displayOptions() {
         Log log = getLog();
 
-        log.info("libraryFile                   = "
-                + ((libraryFile == null) ? "[NULL]" : libraryFile.getAbsolutePath()));
-        log.info("catalog                       = "
-                + ((catalog == null) ? "[NULL]" : catalog.getAbsolutePath()));
-        log.info("outputFolder                  = "
-                + ((outputFolder == null) ? "[NULL]" : outputFolder.getAbsolutePath()));
+        log.info("libraryFile                   = " + ((libraryFile == null) ? NULL_VALUE : libraryFile.getAbsolutePath()));
+        log.info("catalog                       = " + ((catalog == null) ? NULL_VALUE : catalog.getAbsolutePath()));
+        log.info("outputFolder                  = " + ((outputFolder == null) ? NULL_VALUE : outputFolder.getAbsolutePath()));
         log.info("bindingStyle                  = " + bindingStyle);
         log.info("compileSchemas                = " + compileSchemas);
         log.info("compileJson                   = " + compileJson);
@@ -458,8 +448,8 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
             // compiler extension (as determined by the local configuration file).
             CompilerExtensionRegistry.getActiveExtension();
 
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

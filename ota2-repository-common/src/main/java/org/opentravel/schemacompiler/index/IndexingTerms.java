@@ -19,6 +19,7 @@ package org.opentravel.schemacompiler.index;
  * Interface that defines constants for all indexing fields and terms used by the
  * free-text search service.
  */
+@SuppressWarnings("squid:S1214")
 public interface IndexingTerms {
 	
 	// Common fields used for all indexed entities

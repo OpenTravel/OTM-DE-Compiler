@@ -58,9 +58,9 @@ public abstract class AbstractBuiltInLibraryLoader implements BuiltInLibraryLoad
         } catch (MalformedURLException e) {
             throw new LibraryLoaderException("Invalid library URL: " + libraryUrl
                     + " (the namespace and/or library name needs to be modified).");
-        } catch (Throwable t) {
+        } catch (Exception e) {
             throw new LibraryLoaderException("Unknown error loading built-in library: "
-                    + libraryDeclaration.getName(), t);
+                    + libraryDeclaration.getName(), e);
         }
         return inputSource;
     }

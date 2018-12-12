@@ -177,9 +177,9 @@ public class AuthorizationResource extends FileResource<NamespaceAuthorizations>
 
         } finally {
             try {
-                if (!success)
-                    fileManager.rollbackChangeSet();
-            } catch (Throwable t) {
+                if (!success) fileManager.rollbackChangeSet();
+            } catch (Exception e) {
+                // Ignore possible errors and continue
             }
         }
     }

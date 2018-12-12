@@ -28,6 +28,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.opentravel.schemacompiler.util.FileUtils;
 import org.tmatesoft.svn.core.SVNCancelException;
 import org.tmatesoft.svn.core.SVNDepth;
 import org.tmatesoft.svn.core.SVNErrorCode;
@@ -155,7 +156,7 @@ public class SVNRepositoryFileManager extends RepositoryFileManager {
                 svnFiles = buildSvnChangeSet(changeSet);
 
                 for (File file : svnFiles) {
-                    file.delete();
+                		FileUtils.delete( file );
                 }
 
             } catch (SVNException e) {

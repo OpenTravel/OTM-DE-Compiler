@@ -46,7 +46,7 @@ public final class LibrarySecurityHandler {
      * @return boolean
      */
     public static boolean hasModifyPermission(TLLibrary library) {
-        return (accessController == null) ? true : accessController.hasModifyPermission(library);
+        return (accessController == null) || accessController.hasModifyPermission(library);
     }
 
     /**
@@ -76,8 +76,8 @@ public final class LibrarySecurityHandler {
             } else {
                 accessController = null;
             }
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

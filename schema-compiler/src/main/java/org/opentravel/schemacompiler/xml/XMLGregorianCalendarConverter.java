@@ -30,7 +30,12 @@ import javax.xml.datatype.XMLGregorianCalendar;
 public class XMLGregorianCalendarConverter {
 
     private static DatatypeFactory df = null;
-
+    
+    /**
+     * Private constructor to prevent instantiation.
+     */
+    private XMLGregorianCalendarConverter() {}
+    
     /**
      * Converts a <code>java.util.Date</code> into an instance of <code>XMLGregorianCalendar</code>.
      * 
@@ -73,8 +78,8 @@ public class XMLGregorianCalendarConverter {
         try {
             df = DatatypeFactory.newInstance();
 
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

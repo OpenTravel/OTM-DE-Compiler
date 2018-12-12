@@ -56,8 +56,8 @@ public abstract class IndexBuilder<T> implements IndexingTerms {
 				deleteIndex();
 			}
 			
-		} catch (Throwable t) {
-			log.error("Unknown error encountered during index processing.", t);
+		} catch (Exception e) {
+			log.error("Unknown error encountered during index processing.", e);
 		}
 	}
 	

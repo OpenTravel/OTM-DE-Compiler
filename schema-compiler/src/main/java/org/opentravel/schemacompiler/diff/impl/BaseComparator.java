@@ -99,8 +99,7 @@ public abstract class BaseComparator {
 	 * @return boolean
 	 */
 	protected boolean valueChanged(Object oldValue, Object newValue) {
-		boolean result = (oldValue == null) ? (newValue != null) : !oldValue.equals( newValue );
-		return result;
+		return (oldValue == null) ? (newValue != null) : !oldValue.equals( newValue );
 	}
 	
 	/**
@@ -203,7 +202,7 @@ public abstract class BaseComparator {
 				String oldVersionBaseNS = (oldVersionNS == null) ? null : vScheme.getBaseNamespace( oldVersionNS );
 				String newVersionBaseNS = (newVersionNS == null) ? null : vScheme.getBaseNamespace( newVersionNS );
 				
-				return (oldVersionBaseNS == null) ? false : oldVersionBaseNS.equals( newVersionBaseNS );
+				return (oldVersionBaseNS == null) || oldVersionBaseNS.equals( newVersionBaseNS );
 			}
 			
 		} catch (VersionSchemeException e) {
@@ -221,30 +220,30 @@ public abstract class BaseComparator {
 	 */
 	protected boolean isMinorVersionCompare(EntityComparisonFacade oldEntity, EntityComparisonFacade newEntity,
 			String versionScheme) {
-		NamedEntity _oldEntity = oldEntity.getEntity();
-		NamedEntity _newEntity = newEntity.getEntity();
-		boolean localNamesMatch = _oldEntity.getLocalName().equals( _newEntity.getLocalName() );
+		NamedEntity tempOldEntity = oldEntity.getEntity();
+		NamedEntity tempNewEntity = newEntity.getEntity();
+		boolean localNamesMatch = tempOldEntity.getLocalName().equals( tempNewEntity.getLocalName() );
 		boolean result = false;
 		
 		// Make sure the local names match and that both entities are versioned and of the same type
-		if (localNamesMatch && (_oldEntity instanceof Versioned) && (_newEntity instanceof Versioned)
-				&& _oldEntity.getClass().equals( _newEntity.getClass() )) {
+		if (localNamesMatch && (tempOldEntity instanceof Versioned) && (tempNewEntity instanceof Versioned)
+				&& tempOldEntity.getClass().equals( tempNewEntity.getClass() )) {
 			try {
 				VersionScheme vScheme = vsFactory.getVersionScheme( versionScheme );
-				String oldNS = _oldEntity.getNamespace();
-				String newNS = _newEntity.getNamespace();
+				String oldNS = tempOldEntity.getNamespace();
+				String newNS = tempNewEntity.getNamespace();
 				String oldVersionId = vScheme.getVersionIdentifier( oldNS );
 				String newVersionId = vScheme.getVersionIdentifier( newNS );
 				
 				// Base namespaces and major version identifiers must match
 				if (vScheme.getBaseNamespace( oldNS ).equals( vScheme.getBaseNamespace( newNS ) )
 						&& vScheme.getMajorVersion( oldVersionId ).equals( vScheme.getMajorVersion( newVersionId ))) {
-					List<Versioned> versionList = Arrays.asList( (Versioned) _oldEntity, (Versioned) _newEntity );
+					List<Versioned> versionList = Arrays.asList( (Versioned) tempOldEntity, (Versioned) tempNewEntity );
 					
 					// We have a minor version, but we need to make sure the earlier minor
 					// version is our old entity
 					Collections.sort( versionList, vScheme.getComparator( true ) );
-					result = (versionList.get( 0 ) == _oldEntity);
+					result = (versionList.get( 0 ) == tempOldEntity);
 				}
 				
 			} catch (VersionSchemeException e) {

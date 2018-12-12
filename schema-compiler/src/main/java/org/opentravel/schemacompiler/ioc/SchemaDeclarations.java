@@ -52,6 +52,11 @@ public class SchemaDeclarations {
     private static final String SCHEMA_FOR_SCHEMAS_ID = "schemaForSchemas";
     private static final String OTM_COMMON_SCHEMA_ID = "otmCommonSchema";
     private static final String OTA2_APPINFO_SCHEMA_ID = "ota2AppInfoSchema";
+    
+    /**
+     * Private constructor to prevent instantiation.
+     */
+    private SchemaDeclarations() {}
 
     /**
      * Initializes the required schema declarations from the Spring application context.
@@ -74,8 +79,8 @@ public class SchemaDeclarations {
             OTM_COMMON_SCHEMA = (SchemaDeclaration) appContext.getBean(OTM_COMMON_SCHEMA_ID);
             OTA2_APPINFO_SCHEMA = (SchemaDeclaration) appContext.getBean(OTA2_APPINFO_SCHEMA_ID);
 
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

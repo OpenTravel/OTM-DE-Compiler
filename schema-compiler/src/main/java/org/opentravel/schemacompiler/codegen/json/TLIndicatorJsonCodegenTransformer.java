@@ -40,7 +40,7 @@ public class TLIndicatorJsonCodegenTransformer extends AbstractJsonSchemaTransfo
             indicatorName += "Ind";
         }
         
-        indicatorSchema.setType( JsonType.jsonBoolean );
+        indicatorSchema.setType( JsonType.JSON_BOOLEAN );
         jsonIndicator.setName( indicatorName );
         jsonIndicator.setSchema( new JsonSchemaReference( indicatorSchema ) );
         

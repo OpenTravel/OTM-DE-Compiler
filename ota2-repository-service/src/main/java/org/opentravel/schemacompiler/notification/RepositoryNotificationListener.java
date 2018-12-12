@@ -111,24 +111,32 @@ public class RepositoryNotificationListener implements RepositoryListener {
 	 * @see org.opentravel.schemacompiler.repository.RepositoryListener#onCreateRootNamespace(java.lang.String)
 	 */
 	@Override
-	public void onCreateRootNamespace(String rootNamespace) {}
+	public void onCreateRootNamespace(String rootNamespace) {
+		// No action required for namespace actions
+	}
 
 	/**
 	 * @see org.opentravel.schemacompiler.repository.RepositoryListener#onDeleteRootNamespace(java.lang.String)
 	 */
 	@Override
-	public void onDeleteRootNamespace(String rootNamespace) {}
+	public void onDeleteRootNamespace(String rootNamespace) {
+		// No action required for namespace actions
+	}
 
 	/**
 	 * @see org.opentravel.schemacompiler.repository.RepositoryListener#onCreateNamespace(java.lang.String)
 	 */
 	@Override
-	public void onCreateNamespace(String baseNamespace) {}
+	public void onCreateNamespace(String baseNamespace) {
+		// No action required for namespace actions
+	}
 
 	/**
 	 * @see org.opentravel.schemacompiler.repository.RepositoryListener#onDeleteNamespace(java.lang.String)
 	 */
 	@Override
-	public void onDeleteNamespace(String baseNamespace) {}
+	public void onDeleteNamespace(String baseNamespace) {
+		// No action required for namespace actions
+	}
 
 }

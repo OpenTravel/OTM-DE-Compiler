@@ -25,6 +25,8 @@ import java.io.Writer;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSOutput;
@@ -42,6 +44,8 @@ public class XMLPrettyPrinter {
     public static final String LINE_BREAK_TOKEN = "__LINE_BREAK__";
     public static final String LINE_BREAK_COMMENT = "<!--" + LINE_BREAK_TOKEN + "-->";
 
+	private static final Logger log = LoggerFactory.getLogger(XMLPrettyPrinter.class);
+	
     private static final DocumentBuilder docBuilder;
     private static final DOMImplementationLS domLS;
 
@@ -97,8 +101,8 @@ public class XMLPrettyPrinter {
             serializer.write(document, lsOut);
             writer.flush();
 
-        } catch (Throwable t) {
-            t.printStackTrace(System.out);
+        } catch (Exception e) {
+            log.warn("Error formatting XML document.", e);
         }
     }
 
@@ -176,8 +180,8 @@ public class XMLPrettyPrinter {
             docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             domLS = (DOMImplementationLS) docBuilder.getDOMImplementation().getFeature("LS", "3.0");
 
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

@@ -41,6 +41,23 @@ public class URLUtils {
     }
 
     /**
+     * Converts the given file handle to a URL reference.
+     * 
+     * @param urlStr  the URL string to convert
+     * @return URL
+     * @throws IllegalArgumentException
+     *             thrown if the URL string cannot be converted to a well-formed URL
+     */
+	public static URL toURL(String urlStr) {
+		try {
+			return new URL( urlStr );
+			
+		} catch (MalformedURLException e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
+    
+    /**
      * Returns true if the given URL is a reference to the local file system.
      * 
      * @param url
@@ -279,15 +296,15 @@ public class URLUtils {
         // Break each of the paths into their respective components
         String[] base = basePath.split(Pattern.quote("/"), -1);
         String[] target = targetPath.split(Pattern.quote("/"), 0);
-        String commonPath = "";
-        String relativePath = "";
+        StringBuilder commonPath = new StringBuilder();
+        StringBuilder relativePath = new StringBuilder();
         int commonIndex = 0;
 
         // First get all the common elements. Store them as a string, while we count how
         // many of them there are.
         for (int i = 0; i < target.length && i < base.length; i++) {
             if (target[i].equals(base[i])) {
-                commonPath += target[i] + "/";
+                commonPath.append( target[i] + "/" );
                 commonIndex++;
             } else {
                 break;
@@ -306,12 +323,12 @@ public class URLUtils {
             // the number of common path elements, minus one because the last element in the path
             // is not a directory.
             for (int i = 1; i <= (numDirsUp); i++) {
-                relativePath += ".." + "/";
+                relativePath.append( "../" );
             }
         }
-        relativePath += targetPath.substring(commonPath.length());
+        relativePath.append( targetPath.substring( commonPath.length() ) );
 
-        return relativePath;
+        return relativePath.toString();
     }
 
     /**

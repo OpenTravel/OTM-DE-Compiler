@@ -65,13 +65,13 @@ public class SearchResultImageResolver {
 		String imageFilename;
 		
 		if (obj instanceof SearchResult) {
-			imageFilename = _getIconImage( (SearchResult<?>) obj );
+			imageFilename = internalGetIconImage( (SearchResult<?>) obj );
 			
 		} else if (obj instanceof NamedEntity) {
-			imageFilename = _getIconImage( (NamedEntity) obj );
+			imageFilename = internalGetIconImage( (NamedEntity) obj );
 			
 		} else if (obj instanceof NamespaceItem) {
-			imageFilename = _getIconImage( (NamespaceItem) obj );
+			imageFilename = internalGetIconImage( (NamespaceItem) obj );
 			
 		} else if (obj == null) {
 			throw new NullPointerException("Object cannot be null.");
@@ -89,8 +89,8 @@ public class SearchResultImageResolver {
 	 * @param resultItem  the search result item for which to return an icon image
 	 * @return String
 	 */
-	private String _getIconImage(SearchResult<?> resultItem) {
-		return _getIconImage( resultItem.getEntityType() );
+	private String internalGetIconImage(SearchResult<?> resultItem) {
+		return internalGetIconImage( resultItem.getEntityType() );
 	}
 	
 	/**
@@ -99,8 +99,8 @@ public class SearchResultImageResolver {
 	 * @param entity  the OTM entity for which to return an icon image
 	 * @return String
 	 */
-	private String _getIconImage(NamedEntity entity) {
-		return _getIconImage( entity.getClass() );
+	private String internalGetIconImage(NamedEntity entity) {
+		return internalGetIconImage( entity.getClass() );
 	}
 	
 	/**
@@ -109,13 +109,13 @@ public class SearchResultImageResolver {
 	 * @param resultItem  the namespace item for which to return an icon image
 	 * @return String
 	 */
-	private String _getIconImage(NamespaceItem item) {
+	private String internalGetIconImage(NamespaceItem item) {
 		Class<?> itemType = TLLibrary.class;
 		
 		if (RepositoryItemType.RELEASE.isItemType( item.getFilename() )) {
 			itemType = Release.class;
 		}
-		return _getIconImage( itemType );
+		return internalGetIconImage( itemType );
 	}
 	
 	/**
@@ -124,7 +124,7 @@ public class SearchResultImageResolver {
 	 * @param entityType  the OTM entity type for which to return an icon image
 	 * @return String
 	 */
-	private String _getIconImage(Class<?> entityType) {
+	private String internalGetIconImage(Class<?> entityType) {
 		String imageFilename = imageMap.get( entityType );
 		
 		if (imageFilename == null) {
@@ -138,33 +138,33 @@ public class SearchResultImageResolver {
 	 */
 	static {
 		try {
-			Map<Class<?>,String> _imageMap = new HashMap<>();
+			Map<Class<?>,String> iMap = new HashMap<>();
 			
-			_imageMap.put( Release.class, "release.gif" );
-			_imageMap.put( TLLibrary.class, "library.png" );
-			_imageMap.put( TLSimple.class, "simple.gif" );
-			_imageMap.put( TLOpenEnumeration.class, "enum.gif" );
-			_imageMap.put( TLClosedEnumeration.class, "enum.gif" );
-			_imageMap.put( TLValueWithAttributes.class, "vwa.gif" );
-			_imageMap.put( TLCoreObject.class, "core_object.gif" );
-			_imageMap.put( TLChoiceObject.class, "choice_object.gif" );
-			_imageMap.put( TLBusinessObject.class, "business_object.png" );
-			_imageMap.put( TLFacet.class, "facet.gif" );
-			_imageMap.put( TLContextualFacet.class, "facet_contextual.gif" );
-			_imageMap.put( TLExtensionPointFacet.class, "facet_contextual.gif" );
-			_imageMap.put( TLService.class, "service.gif" );
-			_imageMap.put( TLOperation.class, "operation.gif" );
-			_imageMap.put( TLResource.class, "resource.gif" );
-			_imageMap.put( TLParamGroup.class, "parameter.gif" );
-			_imageMap.put( TLParameter.class, "parameter.gif" );
-			_imageMap.put( TLActionFacet.class, "action_facet.gif" );
-			_imageMap.put( TLAction.class, "resource_action.gif" );
-			_imageMap.put( TLActionRequest.class, "request.gif" );
-			_imageMap.put( TLActionResponse.class, "response.gif" );
-			imageMap = Collections.unmodifiableMap( _imageMap );
+			iMap.put( Release.class, "release.gif" );
+			iMap.put( TLLibrary.class, "library.png" );
+			iMap.put( TLSimple.class, "simple.gif" );
+			iMap.put( TLOpenEnumeration.class, "enum.gif" );
+			iMap.put( TLClosedEnumeration.class, "enum.gif" );
+			iMap.put( TLValueWithAttributes.class, "vwa.gif" );
+			iMap.put( TLCoreObject.class, "core_object.gif" );
+			iMap.put( TLChoiceObject.class, "choice_object.gif" );
+			iMap.put( TLBusinessObject.class, "business_object.png" );
+			iMap.put( TLFacet.class, "facet.gif" );
+			iMap.put( TLContextualFacet.class, "facet_contextual.gif" );
+			iMap.put( TLExtensionPointFacet.class, "facet_contextual.gif" );
+			iMap.put( TLService.class, "service.gif" );
+			iMap.put( TLOperation.class, "operation.gif" );
+			iMap.put( TLResource.class, "resource.gif" );
+			iMap.put( TLParamGroup.class, "parameter.gif" );
+			iMap.put( TLParameter.class, "parameter.gif" );
+			iMap.put( TLActionFacet.class, "action_facet.gif" );
+			iMap.put( TLAction.class, "resource_action.gif" );
+			iMap.put( TLActionRequest.class, "request.gif" );
+			iMap.put( TLActionResponse.class, "response.gif" );
+			imageMap = Collections.unmodifiableMap( iMap );
 			
-		} catch (Throwable t) {
-			throw new ExceptionInInitializerError( t );
+		} catch (Exception e) {
+			throw new ExceptionInInitializerError( e );
 		}
 	}
 	

@@ -85,10 +85,12 @@ public class TLDocumentationJsonCodegenTransformer extends AbstractJsonSchemaTra
     			mergedDoc.addMoreInfo( moreInfo );
     		}
     		for (String docContext : jsonDoc.getOtherDocumentationContexts()) {
+    			StringBuilder ctx = new StringBuilder( docContext );
+    			
     			while (mergedDoc.getOtherDocumentationContexts().contains( docContext )) {
-    				docContext = "_" + docContext;
+    				ctx.append( "_" ).append( docContext );
     			}
-    			mergedDoc.addOtherDocumentation( docContext, jsonDoc.getOtherDocumentation( docContext ) );
+    			mergedDoc.addOtherDocumentation( ctx.toString(), jsonDoc.getOtherDocumentation( ctx.toString() ) );
     		}
     	}
     	return mergedDoc;

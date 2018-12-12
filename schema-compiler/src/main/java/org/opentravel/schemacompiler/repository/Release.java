@@ -266,8 +266,8 @@ public class Release {
 			VersionSchemeFactory factory = VersionSchemeFactory.getInstance();
 			versionScheme = factory.getVersionScheme( factory.getDefaultVersionScheme() );
 			
-		} catch (Throwable t) {
-			throw new ExceptionInInitializerError( t );
+		} catch (Exception e) {
+			throw new ExceptionInInitializerError( e );
 		}
 	}
 	

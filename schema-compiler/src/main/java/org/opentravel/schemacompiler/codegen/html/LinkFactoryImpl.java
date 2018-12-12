@@ -72,22 +72,22 @@ public class LinkFactoryImpl extends LinkFactory {
 		DocumentationBuilder builder = classLinkInfo.getBuilder();
 		// Create a tool tip if we are linking to a class or interface. Don't
 		// create one if we are linking to a member.
-		String title = (classLinkInfo.where == null || classLinkInfo.where
+		String title = (classLinkInfo.getWhere() == null || classLinkInfo.getWhere()
 				.length() == 0) ? getObjectToolTip(builder.getNamespace()) : "";
 		StringBuilder label = new StringBuilder(
 				classLinkInfo.getClassLinkLabel(mWriter.newConfiguration()));
-		classLinkInfo.displayLength += label.length();
+		classLinkInfo.setDisplayLength(classLinkInfo.getDisplayLength() + label.length());
 		Configuration configuration = Configuration.getInstance();
 		LinkOutputImpl linkOutput = new LinkOutputImpl();
 		if (configuration.isGeneratedDoc(builder)) {
 			String filename = pathString(classLinkInfo);
-			if (linkInfo.linkToSelf
-					|| !(linkInfo.builder.getName() + HTML_FILE_EXT)
-							.equals(mWriter.filename)) {
+			if (linkInfo.isLinkToSelf()
+					|| !(linkInfo.getBuilder().getName() + HTML_FILE_EXT)
+							.equals(mWriter.getFilename())) {
 				linkOutput.append(mWriter.getHyperLinkString(filename,
-						classLinkInfo.where, label.toString(),
-						classLinkInfo.isStrong, classLinkInfo.styleName, title,
-						classLinkInfo.target));
+						classLinkInfo.getWhere(), label.toString(),
+						classLinkInfo.isStrong(), classLinkInfo.getStyleName(), title,
+						classLinkInfo.getTarget()));
 				return linkOutput;
 			}
 		}
@@ -121,14 +121,14 @@ public class LinkFactoryImpl extends LinkFactory {
 	 *            the file name, to which path string is.
 	 */
 	private String pathString(LinkInfoImpl linkInfo) {
-		if (linkInfo.context == LinkInfoImpl.PACKAGE_FRAME) {
+		if (linkInfo.getContext() == LinkInfoImpl.PACKAGE_FRAME) {
 			// Not really necessary to do this but we want to be consistent
 			// with 1.4.2 output.
-			return linkInfo.builder.getName() + HTML_FILE_EXT;
+			return linkInfo.getBuilder().getName() + HTML_FILE_EXT;
 		}
-		StringBuilder buf = new StringBuilder(mWriter.relativePath);
+		StringBuilder buf = new StringBuilder(mWriter.getRelativePath());
 		buf.append(DirectoryManager.getPathToLibrary(
-				linkInfo.builder.getOwningLibrary(), linkInfo.builder.getName()
+				linkInfo.getBuilder().getOwningLibrary(), linkInfo.getBuilder().getName()
 						+ HTML_FILE_EXT));
 		return buf.toString();
 	}

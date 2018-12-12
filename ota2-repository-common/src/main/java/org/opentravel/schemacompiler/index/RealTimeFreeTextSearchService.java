@@ -45,7 +45,6 @@ public class RealTimeFreeTextSearchService extends FreeTextSearchService {
 
     private static Log log = LogFactory.getLog(RealTimeFreeTextSearchService.class);
 
-    private IndexWriterConfig writerConfig;
     private IndexWriter indexWriter;
     
 	/**
@@ -65,8 +64,9 @@ public class RealTimeFreeTextSearchService extends FreeTextSearchService {
 	 */
 	@Override
 	protected void onStartup(Directory indexDirectory) throws IOException {
-		this.writerConfig = new IndexWriterConfig( new StandardAnalyzer() );
-		this.writerConfig.setOpenMode( OpenMode.CREATE_OR_APPEND );
+		IndexWriterConfig writerConfig = new IndexWriterConfig( new StandardAnalyzer() );
+		
+		writerConfig.setOpenMode( OpenMode.CREATE_OR_APPEND );
 		this.indexWriter = new IndexWriter( indexDirectory, writerConfig );
 	}
 

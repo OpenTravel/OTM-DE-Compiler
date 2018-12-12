@@ -63,13 +63,8 @@ public class ExtensionPointRegistry {
 
                 if (extendedEntity instanceof TLPatchableFacet) {
                 	TLPatchableFacet extendedFacet = (TLPatchableFacet) extendedEntity;
-                    List<TLExtensionPointFacet> extensionPoints = registryMap.get(extendedFacet);
-
-                    if (extensionPoints == null) {
-                        extensionPoints = new ArrayList<>();
-                        registryMap.put(extendedFacet, extensionPoints);
-                    }
-                    extensionPoints.add(xpFacet);
+                    registryMap.computeIfAbsent(extendedFacet, f -> registryMap.put( f, new ArrayList<>() ) );
+                    registryMap.get(extendedFacet).add( xpFacet );
                 }
             }
         }

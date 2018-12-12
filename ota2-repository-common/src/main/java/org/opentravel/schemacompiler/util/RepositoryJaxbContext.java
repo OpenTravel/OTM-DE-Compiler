@@ -32,6 +32,11 @@ public class RepositoryJaxbContext {
 	private static final JAXBContext extJaxbContext;
 	
 	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private RepositoryJaxbContext() {}
+	
+	/**
 	 * Returns the static JAXB context for standard OTM repository messages.
 	 * 
 	 * @return JAXBContext
@@ -57,8 +62,8 @@ public class RepositoryJaxbContext {
             jaxbContext = JAXBContext.newInstance(SCHEMA_CONTEXT);
             extJaxbContext = JAXBContext.newInstance(EXT_SCHEMA_CONTEXT);
 
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

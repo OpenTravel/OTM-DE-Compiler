@@ -91,37 +91,34 @@ public class VersionHandlerFactory {
      * @param model  the model instance for which to return a cloner 
      * @return ModelElementCloner
      */
-    public ModelElementCloner getCloner(TLModel model) {
-    	ModelElementCloner cloner = null;
-    	
-    	if (model != null) {
-        	cloner = clonerRegistry.get( model );
-    		
-        	if (cloner == null) {
-        		cloner = new ModelElementCloner( model );
-        		clonerRegistry.put( model, cloner );
-        	}
-    	}
-    	return cloner;
-    }
+	public ModelElementCloner getCloner(TLModel model) {
+		ModelElementCloner cloner = null;
+		
+		if (model != null) {
+			clonerRegistry.computeIfAbsent( model,
+					m -> clonerRegistry.put( m, new ModelElementCloner( m ) ) );
+			cloner = clonerRegistry.get(model);
+		}
+		return cloner;
+	}
     
 	/**
 	 * Initializes the mappings of <code>Versioned</code> objects to
 	 * <code>VersionHandler</code> implementation classes.
 	 */
 	static {
-		Map<Class<?>,Class<?>> _handlerMappings = new HashMap<>();
+		Map<Class<?>,Class<?>> mappings = new HashMap<>();
 		
-		_handlerMappings.put( TLBusinessObject.class, TLBusinessObjectVersionHandler.class );
-		_handlerMappings.put( TLCoreObject.class, TLCoreObjectVersionHandler.class );
-		_handlerMappings.put( TLChoiceObject.class, TLChoiceObjectVersionHandler.class );
-		_handlerMappings.put( TLOperation.class, TLOperationVersionHandler.class );
-		_handlerMappings.put( TLResource.class, TLResourceVersionHandler.class );
-		_handlerMappings.put( TLValueWithAttributes.class, TLValueWithAttributesVersionHandler.class );
-		_handlerMappings.put( TLOpenEnumeration.class, TLOpenEnumerationVersionHandler.class );
-		_handlerMappings.put( TLClosedEnumeration.class, TLClosedEnumerationVersionHandler.class );
-		_handlerMappings.put( TLSimple.class, TLSimpleVersionHandler.class );
-		handlerMappings = Collections.unmodifiableMap( _handlerMappings );
+		mappings.put( TLBusinessObject.class, TLBusinessObjectVersionHandler.class );
+		mappings.put( TLCoreObject.class, TLCoreObjectVersionHandler.class );
+		mappings.put( TLChoiceObject.class, TLChoiceObjectVersionHandler.class );
+		mappings.put( TLOperation.class, TLOperationVersionHandler.class );
+		mappings.put( TLResource.class, TLResourceVersionHandler.class );
+		mappings.put( TLValueWithAttributes.class, TLValueWithAttributesVersionHandler.class );
+		mappings.put( TLOpenEnumeration.class, TLOpenEnumerationVersionHandler.class );
+		mappings.put( TLClosedEnumeration.class, TLClosedEnumerationVersionHandler.class );
+		mappings.put( TLSimple.class, TLSimpleVersionHandler.class );
+		handlerMappings = Collections.unmodifiableMap( mappings );
 	}
 	
 }

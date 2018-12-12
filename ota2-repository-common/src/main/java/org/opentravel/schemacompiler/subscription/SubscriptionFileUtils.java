@@ -150,7 +150,9 @@ public class SubscriptionFileUtils {
 			if (!success) {
 				try {
 					fileManager.rollbackChangeSet();
-				} catch (Throwable t) {}
+				} catch (Exception e) {
+					// Ignore error and continue
+				}
 			}
 		}
     }
@@ -169,7 +171,7 @@ public class SubscriptionFileUtils {
 			File folderLocation = manager.getFileManager().getNamespaceFolder( baseNS, version );
 	    	String filename = (libraryName == null) ? NS_SUBSCRIPTION_FILENAME : (libraryName + LIBRARY_SUBSCRIPTION_SUFFIX);
 	    	
-	    	return new File( folderLocation, "/" + filename );
+	    	return new File( folderLocation, File.separatorChar + filename );
 			
 		} catch (RepositoryException e) {
 			throw new IOException("Unable to identify namespace folder location.", e);
@@ -218,7 +220,7 @@ public class SubscriptionFileUtils {
                         public String getPreferredPrefix(String namespaceUri, String suggestion, boolean requirePrefix) {
                             return REPOSITORY_EXT_NAMESPACE.equals( namespaceUri ) ? "r" : suggestion;
                         }
-                        public String[] getPreDeclaredNamespaceUris() {
+                        @Override public String[] getPreDeclaredNamespaceUris() {
                             return new String[] { REPOSITORY_EXT_NAMESPACE };
                         }
                     });
@@ -241,8 +243,8 @@ public class SubscriptionFileUtils {
             schemaFactory.setResourceResolver( new ClasspathResourceResolver() );
             validationSchema = schemaFactory.newSchema( new StreamSource( schemaStream ) );
 
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

@@ -167,12 +167,8 @@ public class IndexBuilder {
 			char ch = (name.length() == 0) ? '*' : Character.toUpperCase(name
 					.charAt(0));
 			Character unicode = Character.valueOf(ch);
-			List<LibraryMember> list = indexmap.get(unicode);
-			if (list == null) {
-				list = new ArrayList<>();
-				indexmap.put(unicode, list);
-			}
-			list.add(member);
+			indexmap.computeIfAbsent(unicode, u -> indexmap.put( u, new ArrayList<>() ));
+			indexmap.get(unicode).add(member);
 		}
 	}
 

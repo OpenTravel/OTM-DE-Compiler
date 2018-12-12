@@ -40,9 +40,9 @@ public class LibraryFrameWriterTest extends AbstractWriterTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		AbstractWriterTest.setUpBeforeClass();
-		library = (TLLibrary) config.model.getUserDefinedLibraries().get(0);
+		library = (TLLibrary) config.getModel().getUserDefinedLibraries().get(0);
 		LibraryFrameWriter.generate(config, library);
-		String filePath = config.destDirName + DirectoryManager.getDirectoryPath(AbstractDocumentationBuilder.getLibraryName(library)) + LibraryFrameWriter.OUTPUT_FILE_NAME;
+		String filePath = config.getDestDirName() + DirectoryManager.getDirectoryPath(AbstractDocumentationBuilder.getLibraryName(library)) + LibraryFrameWriter.OUTPUT_FILE_NAME;
 		byte[] encoded = Files.readAllBytes(Paths.get(filePath));
 		new String(encoded);
 	}

@@ -66,31 +66,31 @@ public abstract class TLModelElement implements ModelElement {
      * 
      * @param event  the event to publish
      */
-    protected void publishEvent(ModelEvent<?> event) {
-        TLModel owningModel = getOwningModel();
-
-        if (owningModel != null) {
-            owningModel.publishEvent(event);
-        }
-        
-        if ((owningModel == null) || owningModel.isListenersEnabled()) {
-            if (event instanceof ValueChangeEvent) {
-            	List<ModelElementListener> _listeners = new ArrayList<>( listeners );
-            	
-            	for (ModelElementListener listener : _listeners) {
-            		listener.processValueChangeEvent( (ValueChangeEvent<?,?>) event );
-            	}
-            	
-            } else if (event instanceof OwnershipEvent) {
-            	List<ModelElementListener> _listeners = new ArrayList<>( listeners );
-            	
-            	for (ModelElementListener listener : _listeners) {
-            		listener.processOwnershipEvent( (OwnershipEvent<?,?>) event );
-            	}
-            }
-        }
-    }
-
+	protected void publishEvent(ModelEvent<?> event) {
+		TLModel owningModel = getOwningModel();
+		
+		if (owningModel != null) {
+			owningModel.publishEvent(event);
+		}
+		
+		if ((owningModel == null) || owningModel.isListenersEnabled()) {
+			if (event instanceof ValueChangeEvent) {
+				List<ModelElementListener> tempListeners = new ArrayList<>(listeners);
+				
+				for (ModelElementListener listener : tempListeners) {
+					listener.processValueChangeEvent((ValueChangeEvent<?, ?>) event);
+				}
+				
+			} else if (event instanceof OwnershipEvent) {
+				List<ModelElementListener> tempListeners = new ArrayList<>(listeners);
+				
+				for (ModelElementListener listener : tempListeners) {
+					listener.processOwnershipEvent((OwnershipEvent<?, ?>) event);
+				}
+			}
+		}
+	}
+	
     /**
      * @see org.opentravel.schemacompiler.model.ModelElement#cloneElement()
      */

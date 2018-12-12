@@ -15,6 +15,7 @@
  */
 package org.opentravel.schemacompiler.model;
 
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -455,9 +456,9 @@ public class TLModel implements Validatable {
     @SuppressWarnings("unchecked")
     protected <E extends ModelEvent<?>> void publishEvent(E event) {
         if ((event != null) && listenersEnabled) {
-        	List<ModelEventListener<?,?>> _listeners = new ArrayList<>( listeners );
+        	List<ModelEventListener<?,?>> tempListeners = new ArrayList<>( listeners );
         	
-            for (ModelEventListener<?, ?> listener : _listeners) {
+            for (ModelEventListener<?, ?> listener : tempListeners) {
                 if (event.canBeProcessedBy(listener)) {
                     ((ModelEventListener<E, ?>) listener).processModelEvent(event);
                 }
@@ -504,13 +505,18 @@ public class TLModel implements Validatable {
                         "A library with the requested name + namespace values already exists in the model.");
 
             } else {
-                boolean urlMatch = (proposedUrl == null) ? (memberLib.getLibraryUrl() == null)
-                        : proposedUrl.equals(memberLib.getLibraryUrl());
-
-                if (urlMatch) {
-                    throw new IllegalArgumentException(
-                            "A library with the requested resource URL location already exists in the model.");
-                }
+				try {
+					boolean urlMatch = (proposedUrl == null) ? (memberLib.getLibraryUrl() == null)
+					        : proposedUrl.toURI().equals(memberLib.getLibraryUrl().toURI());
+					
+	                if (urlMatch) {
+	                    throw new IllegalArgumentException(
+	                            "A library with the requested resource URL location already exists in the model.");
+	                }
+	                
+				} catch (URISyntaxException e) {
+					throw new IllegalArgumentException("Invalid library URL.", e);
+				}
             }
         }
     }

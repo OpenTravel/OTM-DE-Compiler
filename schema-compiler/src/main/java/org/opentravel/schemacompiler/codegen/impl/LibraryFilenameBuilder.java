@@ -105,8 +105,8 @@ public class LibraryFilenameBuilder<L extends AbstractLibrary> implements
         				boolean changesMade = false;
         				
         				for (FilenameDetails fd : detailsList) {
-        					if (!fd.nsComponents.isEmpty()) {
-            					fd.libraryFilename = fd.library.getName() + "_" + fd.nsComponents.remove( 0 );
+        					if (!fd.getNsComponents().isEmpty()) {
+            					fd.setLibraryFilename(fd.getLibrary().getName() + "_" + fd.getNsComponents().remove( 0 ));
         						changesMade = true;
         					}
         				}
@@ -122,7 +122,7 @@ public class LibraryFilenameBuilder<L extends AbstractLibrary> implements
         	} while (conflictsExist);
         	
         	for (FilenameDetails fd : filenameDetails) {
-        		filenameMap.put( (L) fd.library, fd.getFilename() );
+        		filenameMap.put( (L) fd.getLibrary(), fd.getFilename() );
         	}
     	}
     	return filenameMap;
@@ -131,52 +131,124 @@ public class LibraryFilenameBuilder<L extends AbstractLibrary> implements
     /**
      * Encapsulates the various details of a library's filename (used during initialization).
      */
-    private static class FilenameDetails {
-    	
-    	public AbstractLibrary library;
-    	public List<String> nsComponents = new ArrayList<>();
-    	public String libraryFilename;
-    	public String versionSuffix;
-    	
-    	/**
-    	 * Constructor that assigns the initial values for each component of the filename
-    	 * details.
-    	 * 
-    	 * @param library  the library to which a filename will be assigned
-    	 */
-    	public FilenameDetails(AbstractLibrary library) {
-    		String baseNS;
-    		
-    		this.library = library;
-    		this.libraryFilename = library.getName();
-    		
-            if (library instanceof TLLibrary) {
-            	TLLibrary tlLibrary = (TLLibrary) library;
-            	
-            	baseNS = tlLibrary.getBaseNamespace();
-                this.versionSuffix = "_" + tlLibrary.getVersion().replaceAll("\\.", "_");
-                
-            } else {
-            	baseNS = library.getNamespace();
-            	this.versionSuffix = "";
-            }
-            
-            if (baseNS.endsWith("/")) {
-            	baseNS = baseNS.substring( 0, baseNS.length() - 1 );
-            }
-            this.nsComponents = new ArrayList<>( Arrays.asList( baseNS.split( "/" ) ) );
-            Collections.reverse( this.nsComponents );
-    	}
-    	
-    	/**
-    	 * Returns the filename as currently specified by these details.
-    	 * 
-    	 * @return String
-    	 */
-    	public String getFilename() {
-    		return libraryFilename + versionSuffix;
-    	}
-    	
-    }
+	private static class FilenameDetails {
+		
+		private AbstractLibrary library;
+		private List<String> nsComponents = new ArrayList<>();
+		private String libraryFilename;
+		private String versionSuffix;
+		
+		/**
+		 * Constructor that assigns the initial values for each component of the
+		 * filename details.
+		 * 
+		 * @param library the library to which a filename will be assigned
+		 */
+		public FilenameDetails(AbstractLibrary library) {
+			String baseNS;
+			
+			this.setLibrary(library);
+			this.setLibraryFilename(library.getName());
+			
+			if (library instanceof TLLibrary) {
+				TLLibrary tlLibrary = (TLLibrary) library;
+				
+				baseNS = tlLibrary.getBaseNamespace();
+				this.setVersionSuffix("_" + tlLibrary.getVersion().replaceAll("\\.", "_"));
+				
+			} else {
+				baseNS = library.getNamespace();
+				this.setVersionSuffix("");
+			}
+			
+			if (baseNS.endsWith("/")) {
+				baseNS = baseNS.substring(0, baseNS.length() - 1);
+			}
+			this.setNsComponents(new ArrayList<>(Arrays.asList(baseNS.split("/"))));
+			Collections.reverse(this.getNsComponents());
+		}
+		
+		/**
+		 * Returns the filename as currently specified by these details.
+		 * 
+		 * @return String
+		 */
+		public String getFilename() {
+			return getLibraryFilename() + getVersionSuffix();
+		}
+
+		/**
+		 * Returns the value of the 'library' field.
+		 *
+		 * @return AbstractLibrary
+		 */
+		public AbstractLibrary getLibrary() {
+			return library;
+		}
+
+		/**
+		 * Assigns the value of the 'library' field.
+		 *
+		 * @param library  the field value to assign
+		 */
+		public void setLibrary(AbstractLibrary library) {
+			this.library = library;
+		}
+
+		/**
+		 * Returns the value of the 'nsComponents' field.
+		 *
+		 * @return List<String>
+		 */
+		public List<String> getNsComponents() {
+			return nsComponents;
+		}
+
+		/**
+		 * Assigns the value of the 'nsComponents' field.
+		 *
+		 * @param nsComponents  the field value to assign
+		 */
+		public void setNsComponents(List<String> nsComponents) {
+			this.nsComponents = nsComponents;
+		}
+
+		/**
+		 * Returns the value of the 'libraryFilename' field.
+		 *
+		 * @return String
+		 */
+		public String getLibraryFilename() {
+			return libraryFilename;
+		}
+
+		/**
+		 * Assigns the value of the 'libraryFilename' field.
+		 *
+		 * @param libraryFilename  the field value to assign
+		 */
+		public void setLibraryFilename(String libraryFilename) {
+			this.libraryFilename = libraryFilename;
+		}
+
+		/**
+		 * Returns the value of the 'versionSuffix' field.
+		 *
+		 * @return String
+		 */
+		public String getVersionSuffix() {
+			return versionSuffix;
+		}
+
+		/**
+		 * Assigns the value of the 'versionSuffix' field.
+		 *
+		 * @param versionSuffix  the field value to assign
+		 */
+		public void setVersionSuffix(String versionSuffix) {
+			this.versionSuffix = versionSuffix;
+		}
+		
+	}
     
 }

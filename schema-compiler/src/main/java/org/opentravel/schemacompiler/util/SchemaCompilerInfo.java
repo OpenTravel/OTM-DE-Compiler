@@ -38,25 +38,16 @@ public class SchemaCompilerInfo {
      * Default constructor.
      */
     private SchemaCompilerInfo() {
-        InputStream is = null;
-        try {
-            is = CompilerExtensionRegistry.loadResource(COMPILER_INFO_FILE);
-
+        try (InputStream is = CompilerExtensionRegistry.loadResource(COMPILER_INFO_FILE)) {
             if (is != null) {
                 Properties props = new Properties();
 
                 props.load(is);
                 compilerVersion = props.getProperty("compiler.version", compilerVersion);
             }
+            
         } catch (IOException e) {
             // No error - just use default values (should never happen)
-        } finally {
-            try {
-                if (is != null) {
-                    is.close();
-                }
-            } catch (Throwable t) {
-            }
         }
     }
 

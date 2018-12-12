@@ -150,7 +150,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         assertFalse(findings.hasFinding(FindingType.ERROR));
         assertNotNull(projectItem);
 
-        projectManager.lock(projectItem, project.getProjectFile().getParentFile());
+        projectManager.lock(projectItem);
 
         // Close the project and re-open to make sure the item's status is WIP (not locked)
         projectManager.closeProject(project);

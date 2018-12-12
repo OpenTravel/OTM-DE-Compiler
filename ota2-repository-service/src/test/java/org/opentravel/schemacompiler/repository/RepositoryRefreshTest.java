@@ -55,7 +55,7 @@ public class RepositoryRefreshTest extends RepositoryMultiUserTestBase {
 		ProjectItem item = findProjectItem( "Version_Test_1_0_0.otm" );
 		TLLibrary library = (TLLibrary) item.getContent();
 		
-		projectManager.get().lock( item, project.get().getProjectFile().getParentFile() );
+		projectManager.get().lock( item );
 		
 		// Update the library, save the project, and commit/unlock
 		library.setComments( TEST_COMMENTS );

@@ -48,7 +48,9 @@ import org.w3._2001.xmlschema.TopLevelSimpleType;
 public class TLCoreObjectCodegenTransformer extends
         AbstractXsdTransformer<TLCoreObject, CodegenArtifacts> {
 
-    /**
+	private static final String OPEN = "_Open";
+
+	/**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
      */
     @Override
@@ -95,7 +97,7 @@ public class TLCoreObjectCodegenTransformer extends
         XsdCodegenUtils.addAppInfo(source, complexType);
         simpleContent.setExtension(extension);
         extension.setBase(new QName(source.getNamespace(), source.getRoleEnumeration()
-                .getLocalName() + "_Open"));
+                .getLocalName() + OPEN));
         extension.getAttributeOrAttributeGroup().add(attribute);
         attribute.setName("extension");
         attribute.setType(enumExtension.toQName());
@@ -119,7 +121,7 @@ public class TLCoreObjectCodegenTransformer extends
         Restriction restriction = new Restriction();
 
         if (openEnumeration) {
-            rolesEnum.setName(source.getRoleEnumeration().getLocalName() + "_Open");
+            rolesEnum.setName(source.getRoleEnumeration().getLocalName() + OPEN);
             rolesEnum.setRestriction(restriction);
             restriction.setBase(new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "string"));
 
@@ -127,7 +129,7 @@ public class TLCoreObjectCodegenTransformer extends
             rolesEnum.setName(source.getRoleEnumeration().getLocalName() + "_Base");
             rolesEnum.setRestriction(restriction);
             restriction.setBase(new QName(source.getNamespace(), source.getRoleEnumeration()
-                    .getLocalName() + "_Open"));
+                    .getLocalName() + OPEN));
         }
 
         for (TLRole role : PropertyCodegenUtils.getInheritedRoles(source)) {

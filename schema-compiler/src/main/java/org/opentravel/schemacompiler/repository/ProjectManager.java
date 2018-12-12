@@ -76,6 +76,7 @@ import org.opentravel.schemacompiler.saver.LibraryModelSaver;
 import org.opentravel.schemacompiler.saver.LibrarySaveException;
 import org.opentravel.schemacompiler.transform.util.ModelReferenceResolver;
 import org.opentravel.schemacompiler.util.ExceptionUtils;
+import org.opentravel.schemacompiler.util.FileUtils;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
@@ -984,7 +985,7 @@ public final class ProjectManager {
             		throws LibraryLoaderException, RepositoryException {
         repositoryManager.resetDownloadCache();
         ValidationFindings loaderFindings = new ValidationFindings();
-        List<ProjectItem> projectItems = loadAllProjectItems(new ArrayList<File>(), items, project,
+        List<ProjectItem> pItems = loadAllProjectItems(new ArrayList<File>(), items, project,
                 loaderFindings, monitor);
 
         // Validate for errors/warnings if requested by the caller
@@ -993,7 +994,7 @@ public final class ProjectManager {
             findings.addAll(TLModelValidator.validateModel(model,
                     ValidatorFactory.COMPILE_RULE_SET_ID));
         }
-        return projectItems;
+        return pItems;
     }
 
     /**
@@ -1146,7 +1147,7 @@ public final class ProjectManager {
             ValidationFindings findings, LoaderProgressMonitor monitor)
             		throws LibraryLoaderException, RepositoryException {
         ValidationFindings loaderFindings = new ValidationFindings();
-        List<ProjectItem> projectItems = loadAllProjectItems(libraryFiles,
+        List<ProjectItem> pItems = loadAllProjectItems(libraryFiles,
                 new ArrayList<RepositoryItem>(), project, loaderFindings, monitor);
 
         // Validate for errors/warnings if requested by the caller
@@ -1155,7 +1156,7 @@ public final class ProjectManager {
             findings.addAll(TLModelValidator.validateModel(model,
                     ValidatorFactory.COMPILE_RULE_SET_ID));
         }
-        return projectItems;
+        return pItems;
     }
 
     /**
@@ -1394,8 +1395,7 @@ public final class ProjectManager {
      */
     public void publish(Collection<ProjectItem> items, Repository repository)
             throws PublishWithLocalDependenciesException, RepositoryException {
-        // Check repository state of each item to make sure it can be published; also make sure that
-        // the
+        // Check repository state of each item to make sure it can be published; also make sure that the
         // user has write access to each item's namespace in the target repository
         Set<String> authorizedNamespaces = new HashSet<>();
 
@@ -1507,10 +1507,8 @@ public final class ProjectManager {
                     // by the repository.
                     File backupFile = getBackupFile(contentFile);
 
-                    if (backupFile.exists()) { // delete the old backup, if one exists
-                        backupFile.delete();
-                    }
-                    contentFile.renameTo(backupFile);
+                    FileUtils.delete( backupFile ); // delete the old backup, if one exists
+                    FileUtils.renameTo( contentFile, backupFile );
 
                     currentItemSuccessful = true;
 
@@ -1520,11 +1518,9 @@ public final class ProjectManager {
 
                 } finally {
                     // Delete the temp file we created prior to publication
-                    if (tempFile != null)
-                        tempFile.delete();
+                    FileUtils.delete( tempFile );
 
-                    // If unsuccessful, we need to change the library's URL back to its original
-                    // value
+                    // If unsuccessful, we need to change the library's URL back to its original value
                     if (!currentItemSuccessful && (item.getContent() instanceof TLLibrary)) {
                         ((TLLibrary) item.getContent()).setLibraryUrl(URLUtils.toURL(contentFile));
                     }
@@ -1737,13 +1733,11 @@ public final class ProjectManager {
      * 
      * @param item
      *            the repository item to lock
-     * @param wipFolder
-     *            the folder location where the work-in-process file is to be created
      * @throws IllegalStateException
      *             thrown if the project item's state is not <code>MANAGED_UNLOCKED</code>
      * @throws RepositoryException
      */
-    public void lock(ProjectItem item, File wipFolder) throws RepositoryException {
+    public void lock(ProjectItem item) throws RepositoryException {
         boolean success = false;
         File backupFile = null;
         File wipFile = null;
@@ -1799,26 +1793,25 @@ public final class ProjectManager {
                             + item.getFilename(), e);
 
         } finally {
-            try {
-                if (!success) {
-                    // Roll back workspace file changes if we encountered an error
-                	if (wipFile != null) {
-                        if (wipFile.exists()) {
-                            wipFile.delete();
-                        }
-                        
-                        if (backupFile != null) {
-                            ProjectFileUtils.restoreBackupFile(backupFile, wipFile.getName());
-                        }
-                	}
-
-                } else {
-                    // Purge the backup file if the operation was successful
-                    if (backupFile != null)
-                        ProjectFileUtils.removeBackupFile(backupFile);
-                }
-            } catch (Exception e) {
-            }
+			try {
+				if (!success) {
+					// Roll back workspace file changes if we encountered an error
+					if (wipFile != null) {
+						FileUtils.delete( wipFile );
+						
+						if (backupFile != null) {
+							ProjectFileUtils.restoreBackupFile(backupFile, wipFile.getName());
+						}
+					}
+					
+				} else {
+					// Purge the backup file if the operation was successful
+					if (backupFile != null)
+						ProjectFileUtils.removeBackupFile(backupFile);
+				}
+			} catch (Exception e) {
+				// Ignore error and continue
+			}
         }
     }
 
@@ -1889,7 +1882,7 @@ public final class ProjectManager {
      * @throws IllegalStateException
      *             thrown if the project item's state is not <code>MANAGED_WIP</code>
      * @throws RepositoryException
-     * @Deprecated  use {@link #commit(ProjectItem, String)} instead
+     * @deprecated  use {@link #commit(ProjectItem, String)} instead
      */
     @Deprecated
     public void commit(ProjectItem item) throws RepositoryException {
@@ -2400,15 +2393,15 @@ public final class ProjectManager {
         	URL libraryUrl;
         	
         	if (jaxbItem instanceof UnmanagedProjectItemType) {
-        		UnmanagedProjectItemType _jaxbItem = (UnmanagedProjectItemType) jaxbItem;
+        		UnmanagedProjectItemType tempJaxbItem = (UnmanagedProjectItemType) jaxbItem;
         		File projectFolder = project.getProjectFile().getParentFile();
     			
-        		libraryUrl = URLUtils.getResolvedURL( _jaxbItem.getFileLocation(), URLUtils.toURL( projectFolder ) );
+        		libraryUrl = URLUtils.getResolvedURL( tempJaxbItem.getFileLocation(), URLUtils.toURL( projectFolder ) );
         		
         	} else { // must be a ManagedProjectItemType
-        		ManagedProjectItemType _jaxbItem = (ManagedProjectItemType) jaxbItem;
-    			RepositoryItem repositoryItem = repositoryManager.getRepositoryItem( _jaxbItem.getBaseNamespace(),
-    			        _jaxbItem.getFilename(), _jaxbItem.getVersion() );
+        		ManagedProjectItemType tempJaxbItem = (ManagedProjectItemType) jaxbItem;
+    			RepositoryItem repositoryItem = repositoryManager.getRepositoryItem( tempJaxbItem.getBaseNamespace(),
+    			        tempJaxbItem.getFilename(), tempJaxbItem.getVersion() );
     			
     			libraryUrl = repositoryManager.getContentLocation( repositoryItem );
         	}

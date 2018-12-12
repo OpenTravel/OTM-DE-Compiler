@@ -61,7 +61,8 @@ public class EntityNameResolver {
 	public QName getQualifiedName(String entityRef) {
 		int delimIdx = entityRef.indexOf(':');
 		QName qualifiedName = null;
-		String ns, localName;
+		String localName;
+		String ns;
 		
 		if (delimIdx < 0) {
 			ns = indexLibrary.getItemNamespace();
@@ -117,8 +118,8 @@ public class EntityNameResolver {
 			}
 			builtInTypeNames = Collections.unmodifiableSet( typeNames );
 			
-		} catch (Throwable t) {
-			throw new ExceptionInInitializerError( t );
+		} catch (Exception e) {
+			throw new ExceptionInInitializerError( e );
 		}
 	}
 	

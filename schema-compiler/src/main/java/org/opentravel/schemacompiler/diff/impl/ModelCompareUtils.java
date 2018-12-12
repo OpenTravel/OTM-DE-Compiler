@@ -62,6 +62,11 @@ public class ModelCompareUtils {
 	private static VersionSchemeFactory vsFactory = VersionSchemeFactory.getInstance();
 	
 	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private ModelCompareUtils() {}
+	
+	/**
 	 * Returns the built-in model entity for the 'xsd:boolean' simple type.
 	 * 
 	 * @param model  the model from which to return the boolean type entity
@@ -72,9 +77,8 @@ public class ModelCompareUtils {
 		
 		for (BuiltInLibrary library : model.getBuiltInLibraries()) {
 			if (library.getNamespace().equals( XMLConstants.W3C_XML_SCHEMA_NS_URI )) {
-				if ((xsdBoolean = library.getNamedMember( "boolean" )) != null) {
-					break;
-				}
+				xsdBoolean = library.getNamedMember( "boolean" );
+				if (xsdBoolean != null) break;
 			}
 		}
 		return xsdBoolean;
@@ -297,15 +301,15 @@ public class ModelCompareUtils {
 				for (int i = 0; i < nameVersions.size(); i++) {
 					VersionedQName vName = nameVersions.get( i );
 					
-					if (vName.name == name) {
+					if (vName.getName() == name) {
 						// If the name was the last item in the list, take the previous
 						// version; otherwise, always assume that the next later version
 						// is the closest match.
 						if (i == (nameVersions.size() - 1)) {
-							closestMatch = nameVersions.get( i - 1 ).name;
+							closestMatch = nameVersions.get( i - 1 ).getName();
 							
 						} else {
-							closestMatch = nameVersions.get( i + 1 ).name;
+							closestMatch = nameVersions.get( i + 1 ).getName();
 						}
 						break;
 					}
@@ -320,7 +324,7 @@ public class ModelCompareUtils {
 	 */
 	private static class VersionedQName implements Versioned {
 		
-		public QName name;
+		private QName name;
 		private String baseNS;
 		private String versionSchemeId;
 		private String versionId;
@@ -333,7 +337,7 @@ public class ModelCompareUtils {
 		 * @param versionScheme  the version scheme to use for processing and comparisons
 		 */
 		public VersionedQName(QName name, String versionScheme) {
-			this.name = name;
+			this.setName(name);
 			this.versionSchemeId = versionScheme;
 			
 			try {
@@ -354,7 +358,7 @@ public class ModelCompareUtils {
 		 */
 		@Override
 		public String getNamespace() {
-			return name.getNamespaceURI();
+			return getName().getNamespaceURI();
 		}
 
 		/**
@@ -362,7 +366,7 @@ public class ModelCompareUtils {
 		 */
 		@Override
 		public String getLocalName() {
-			return name.getLocalPart();
+			return getName().getLocalPart();
 		}
 
 		/**
@@ -442,6 +446,7 @@ public class ModelCompareUtils {
 		 */
 		@Override
 		public void addListener(ModelElementListener listener) {
+			// No action required
 		}
 
 		/**
@@ -449,6 +454,7 @@ public class ModelCompareUtils {
 		 */
 		@Override
 		public void removeListener(ModelElementListener listener) {
+			// No action required
 		}
 
 		/**
@@ -457,6 +463,24 @@ public class ModelCompareUtils {
 		@Override
 		public Collection<ModelElementListener> getListeners() {
 			return Collections.emptyList();
+		}
+
+		/**
+		 * Returns the value of the 'name' field.
+		 *
+		 * @return QName
+		 */
+		public QName getName() {
+			return name;
+		}
+
+		/**
+		 * Assigns the value of the 'name' field.
+		 *
+		 * @param name  the field value to assign
+		 */
+		public void setName(QName name) {
+			this.name = name;
 		}
 		
 	}

@@ -99,10 +99,11 @@ public class ModelCompareOptions {
 	 */
 	static {
 		try {
-			configureDefaultOptions( defaultOptions = new ModelCompareOptions() );
+			defaultOptions = new ModelCompareOptions();
+			configureDefaultOptions( defaultOptions );
 			
-		} catch (Throwable t) {
-			throw new ExceptionInInitializerError(t);
+		} catch (Exception e) {
+			throw new ExceptionInInitializerError(e);
 		}
 	}
 	

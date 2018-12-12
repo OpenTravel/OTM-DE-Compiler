@@ -96,13 +96,8 @@ public class MessageIdFactory {
      */
     private synchronized int getIdOrdinal(QName elementName) {
         synchronized (counterMap) {
-            IdCounter counter = counterMap.get(elementName);
-
-            if (counter == null) {
-                counter = new IdCounter();
-                counterMap.put(elementName, counter);
-            }
-            return counter.nextId();
+            counterMap.computeIfAbsent( elementName, n -> counterMap.put( n, new IdCounter() ) );
+            return counterMap.get(elementName).nextId();
         }
     }
 

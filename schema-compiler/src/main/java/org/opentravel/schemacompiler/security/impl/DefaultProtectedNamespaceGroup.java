@@ -21,7 +21,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
@@ -153,11 +152,8 @@ public class DefaultProtectedNamespaceGroup implements ProtectedNamespaceGroup {
      *             thrown if the credentials file cannot be accessed
      */
     private Properties loadCredentialsFile() throws IOException {
-        BufferedReader reader = null;
-
-        try {
+        try (BufferedReader reader = new BufferedReader(new FileReader(getCredentialsFile()))) {
             Properties credentials = new Properties();
-            reader = new BufferedReader(new FileReader(getCredentialsFile()));
             String line;
 
             while ((line = reader.readLine()) != null) {
@@ -171,13 +167,6 @@ public class DefaultProtectedNamespaceGroup implements ProtectedNamespaceGroup {
                 credentials.put(userId, encryptedPassword);
             }
             return credentials;
-
-        } finally {
-            try {
-                if (reader != null)
-                    reader.close();
-            } catch (Throwable t) {
-            }
         }
     }
 
@@ -216,7 +205,6 @@ public class DefaultProtectedNamespaceGroup implements ProtectedNamespaceGroup {
      * (no exception). This will have the effect of using the cached copy of the remote file
      */
     private void loadCredentialsFileFromRemoteHost() {
-        InputStream is = null;
         try {
             URLConnection cnx = credentialUrl.openConnection();
             File cacheFile = getCachedCredentialsFile();
@@ -248,29 +236,21 @@ public class DefaultProtectedNamespaceGroup implements ProtectedNamespaceGroup {
                     // not already exist
                     cacheFile.getParentFile().mkdirs();
                 }
-                BufferedReader reader = new BufferedReader(new InputStreamReader(
-                        is = cnx.getInputStream()));
-                
-                try (PrintWriter writer = new PrintWriter(new FileWriter(cacheFile))) {
-                    String line;
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(cnx.getInputStream()))) {
+                    try (PrintWriter writer = new PrintWriter(new FileWriter(cacheFile))) {
+                        String line;
 
-                    while ((line = reader.readLine()) != null) {
-                        writer.println(line);
+                        while ((line = reader.readLine()) != null) {
+                            writer.println(line);
+                        }
+                        writer.flush();
                     }
-                    writer.flush();
                 }
             }
 
         } catch (IOException e) {
             // Ignore exception - use the cached copy of the file if a remote connection cannot be
             // established
-
-        } finally {
-            try {
-                if (is != null)
-                    is.close();
-            } catch (Throwable t) {
-            }
         }
     }
 

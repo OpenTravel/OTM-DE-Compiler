@@ -188,13 +188,13 @@ public final class TLValidationBuilder extends ValidationBuilder<TLValidationBui
      * @return TLValidationBuilder
      */
     public TLValidationBuilder assertValidVersionScheme() {
-        String versionSchemeIdentifier = propertyValueAsString();
+        String versionSchemeId = propertyValueAsString();
         try {
-            if (versionSchemeIdentifier != null) {
-                VersionSchemeFactory.getInstance().getVersionScheme(versionSchemeIdentifier);
+            if (versionSchemeId != null) {
+                VersionSchemeFactory.getInstance().getVersionScheme(versionSchemeId);
             }
         } catch (VersionSchemeException e) {
-            addFinding(UNRECOGNIZED_VERSION_SCHEME, versionSchemeIdentifier);
+            addFinding(UNRECOGNIZED_VERSION_SCHEME, versionSchemeId);
         }
         return getThis();
     }
@@ -343,16 +343,18 @@ public final class TLValidationBuilder extends ValidationBuilder<TLValidationBui
 
         if ((modelElementTypes == null) || (modelElementTypes.length == 0)) {
             displayName = "[UNKNOWN TYPE(S)]";
+            
         } else if (modelElementTypes.length == 1) {
             try {
                 displayName = SchemaCompilerApplicationContext.getContext().getMessage(
                         modelElementTypes[0].getSimpleName() + ".displayName", null,
                         Locale.getDefault());
 
-            } catch (Throwable t) {
+            } catch (Exception e) {
                 displayName = (modelElementTypes[0] == null) ? "[UNKNOWN TYPE]"
                         : modelElementTypes[0].getSimpleName();
             }
+            
         } else {
             StringBuilder dnBuilder = new StringBuilder("[");
             boolean firstType = true;
@@ -368,7 +370,7 @@ public final class TLValidationBuilder extends ValidationBuilder<TLValidationBui
 
                     dnBuilder.append(elementName);
 
-                } catch (Throwable t) {
+                } catch (Exception e) {
                     dnBuilder.append((elementType == null) ? "[UNKNOWN TYPE]" : elementType
                             .getSimpleName());
                 }

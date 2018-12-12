@@ -73,6 +73,7 @@ public class ResourceCodegenUtils {
     private static final String URL_REGEX =
             "^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?";
     //        12            3  4          5       6   7        8 9
+    
     private static final Pattern URL_PATTERN = Pattern.compile( URL_REGEX );
     private static final int SCHEME_GROUP    = 2;
     private static final int AUTHORITY_GROUP = 4;
@@ -81,6 +82,11 @@ public class ResourceCodegenUtils {
     
 	private static final Set<Class<?>> eligibleParamTypes;
 	private static final Set<String> idRefTypeNames;
+	
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private ResourceCodegenUtils() {}
 	
 	/**
 	 * Returns the resource from which the given one extends.  If the given resource
@@ -511,13 +517,11 @@ public class ResourceCodegenUtils {
 		
 		for (QualifiedAction action : actionList) {
 			String actionId = action.getAction().getActionId();
-			Integer actionCount = actionCountsById.get( actionId );
+			Integer actionCount;
 			String suffix;
 			
-			if (actionCount == null) {
-				actionCount = 1;
-				actionCountsById.put( actionId, actionCount );
-			}
+			actionCountsById.computeIfAbsent( actionId, a -> actionCountsById.put( a, 1 ) );
+			actionCount = actionCountsById.get( actionId );
 			suffix = (actionCount == 1) ? "" : (actionCount + "");
 			action.setActionId( actionId + suffix );
 			actionCountsById.put( actionId, actionCount + 1 );
@@ -540,9 +544,8 @@ public class ResourceCodegenUtils {
 				TLAction extendedAction = extendedResource.getAction(actionId);
 				
 				if (extendedAction != null) {
-					if ((request = extendedAction.getRequest()) != null) {
-						break;
-					}
+					request = extendedAction.getRequest();
+					if (request != null) break;
 				}
 			}
 		} else {
@@ -887,8 +890,8 @@ public class ResourceCodegenUtils {
 			idrefNames.add( "IDREFS" );
 			idRefTypeNames = Collections.unmodifiableSet( idrefNames );
 			
-		} catch (Throwable t) {
-			throw new ExceptionInInitializerError(t);
+		} catch (Exception e) {
+			throw new ExceptionInInitializerError(e);
 		}
 	}
 	

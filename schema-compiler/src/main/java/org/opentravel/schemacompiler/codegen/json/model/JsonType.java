@@ -29,23 +29,24 @@ import org.opentravel.schemacompiler.model.XSDSimpleType;
  * Enumeration that represents the available types and data formats for a
  * JSON schema.
  */
+@java.lang.SuppressWarnings("squid:S1192") // Ignore constant warnings - enumerations cannot be refactored in this way
 public enum JsonType {
 	
-	jsonInteger  ( "integer", "int32"     ),
-	jsonLong     ( "integer", "int64"     ),
-	jsonFloat    ( "number",  "float"     ),
-	jsonDouble   ( "number",  "double"    ),
-	jsonString   ( "string",   null       ),
-	jsonByte     ( "string",  "byte"      ),
-	jsonBinary   ( "string",  "binary"    ),
-	jsonBoolean  ( "boolean",  null       ),
-	jsonDate     ( "string",  "date"      ),
-	jsonDateTime ( "string",  "date-time" ),
-	jsonPassword ( "string",  "password"  ),
-	jsonArray    ( "array",    null       ),
-	jsonObject   ( "object",   null       ),
-	jsonNull     ( "null",     null       ),
-	jsonRefs     ( "array",    null       );
+	JSON_INTEGER  ( "integer", "int32"     ),
+	JSON_LONG     ( "integer", "int64"     ),
+	JSON_FLOAT    ( "number",  "float"     ),
+	JSON_DOUBLE   ( "number",  "double"    ),
+	JSON_STRING   ( "string",   null       ),
+	JSON_BYTE     ( "string",  "byte"      ),
+	JSON_BINARY   ( "string",  "binary"    ),
+	JSON_BOOLEAN  ( "boolean",  null       ),
+	JSON_DATE     ( "string",  "date"      ),
+	JSON_DATETIME ( "string",  "date-time" ),
+	JSON_PASS     ( "string",  "password"  ),
+	JSON_ARRAY    ( "array",    null       ),
+	JSON_OBJECT   ( "object",   null       ),
+	JSON_NULL     ( "null",     null       ),
+	JSON_REFS     ( "array",    null       );
 	
 	private static Map<String,JsonType> xsdSimpleMap;
 	private String schemaType;
@@ -105,31 +106,31 @@ public enum JsonType {
 		try {
 			Map<String,JsonType> typeMappings = new HashMap<>();
 			
-			typeMappings.put( "anyURI", jsonString );
-			typeMappings.put( "boolean", jsonBoolean );
-			typeMappings.put( "date", jsonDate );
-			typeMappings.put( "dateTime", jsonDateTime );
-			typeMappings.put( "decimal", jsonFloat );
-			typeMappings.put( "double", jsonDouble );
-			typeMappings.put( "float", jsonFloat );
-			typeMappings.put( "duration", jsonString );
-			typeMappings.put( "ID", jsonString );
-			typeMappings.put( "IDREF", jsonString );
-			typeMappings.put( "IDREFS", jsonRefs );
-			typeMappings.put( "long", jsonLong );
-			typeMappings.put( "int", jsonInteger );
-			typeMappings.put( "integer", jsonInteger );
-			typeMappings.put( "positiveInteger", jsonInteger );
-			typeMappings.put( "QName", jsonString );
-			typeMappings.put( "string", jsonString );
-			typeMappings.put( "time", jsonString );
-			typeMappings.put( "language", jsonString );
-			typeMappings.put( "base64Binary", jsonString );
+			typeMappings.put( "anyURI", JSON_STRING );
+			typeMappings.put( "boolean", JSON_BOOLEAN );
+			typeMappings.put( "date", JSON_DATE );
+			typeMappings.put( "dateTime", JSON_DATETIME );
+			typeMappings.put( "decimal", JSON_FLOAT );
+			typeMappings.put( "double", JSON_DOUBLE );
+			typeMappings.put( "float", JSON_FLOAT );
+			typeMappings.put( "duration", JSON_STRING );
+			typeMappings.put( "ID", JSON_STRING );
+			typeMappings.put( "IDREF", JSON_STRING );
+			typeMappings.put( "IDREFS", JSON_REFS );
+			typeMappings.put( "long", JSON_LONG );
+			typeMappings.put( "int", JSON_INTEGER );
+			typeMappings.put( "integer", JSON_INTEGER );
+			typeMappings.put( "positiveInteger", JSON_INTEGER );
+			typeMappings.put( "QName", JSON_STRING );
+			typeMappings.put( "string", JSON_STRING );
+			typeMappings.put( "time", JSON_STRING );
+			typeMappings.put( "language", JSON_STRING );
+			typeMappings.put( "base64Binary", JSON_STRING );
 			
 			xsdSimpleMap = Collections.unmodifiableMap( typeMappings );
 			
-		} catch (Throwable t) {
-			throw new ExceptionInInitializerError( t );
+		} catch (Exception e) {
+			throw new ExceptionInInitializerError( e );
 		}
 	}
 	

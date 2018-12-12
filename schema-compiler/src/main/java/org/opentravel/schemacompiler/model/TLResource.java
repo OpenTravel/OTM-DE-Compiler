@@ -37,7 +37,7 @@ public class TLResource extends TLLibraryMember implements TLVersionedExtensionO
 	
 	private String name;
 	private String basePath;
-	private boolean _abstract;
+	private boolean isAbstract;
 	private boolean firstClass;
     private TLExtension extension;
 	private TLBusinessObject businessObjectRef;
@@ -53,7 +53,7 @@ public class TLResource extends TLLibraryMember implements TLVersionedExtensionO
 	 */
 	@Override
 	public String getLocalName() {
-		return name;
+		return getName();
 	}
 	
 	/**
@@ -180,24 +180,24 @@ public class TLResource extends TLLibraryMember implements TLVersionedExtensionO
 	}
 
 	/**
-	 * Returns the value of the '_abstract' field.
+	 * Returns the value of the 'isAbstract' field.
 	 *
 	 * @return boolean
 	 */
 	public boolean isAbstract() {
-		return _abstract;
+		return isAbstract;
 	}
 
 	/**
-	 * Assigns the value of the '_abstract' field.
+	 * Assigns the value of the 'isAbstract' field.
 	 *
-	 * @param _abstract  the field value to assign
+	 * @param isAbstract  the field value to assign
 	 */
-	public void setAbstract(boolean _abstract) {
+	public void setAbstract(boolean isAbstract) {
         ModelEvent<?> event = new ModelEventBuilder(ModelEventType.ABSTRACT_FLAG_MODIFIED, this)
-				.setOldValue(this._abstract).setNewValue(_abstract).buildEvent();
+				.setOldValue(this.isAbstract).setNewValue(isAbstract).buildEvent();
 
-		this._abstract = _abstract;
+		this.isAbstract = isAbstract;
         publishEvent(event);
 	}
 

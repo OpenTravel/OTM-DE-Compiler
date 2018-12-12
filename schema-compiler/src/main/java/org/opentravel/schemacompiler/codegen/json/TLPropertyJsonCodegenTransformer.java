@@ -133,15 +133,15 @@ public class TLPropertyJsonCodegenTransformer extends AbstractJsonSchemaTransfor
         if (isMultipleReference) { // Array of references
         	JsonSchema itemSchema = new JsonSchema();
         	
-        	itemSchema.setType( JsonType.jsonString );
-        	propertySchema.setType( JsonType.jsonArray );
+        	itemSchema.setType( JsonType.JSON_STRING );
+        	propertySchema.setType( JsonType.JSON_ARRAY );
         	propertySchema.setItems( new JsonSchemaReference( itemSchema ) );
-            entityInfo.setEntityType( JsonType.jsonString.getSchemaType() );
+            entityInfo.setEntityType( JsonType.JSON_STRING.getSchemaType() );
         	
         } else { // Single reference
-        	propertySchema.setType( JsonType.jsonString );
-            entityInfo.setEntityType( JsonType.jsonArray.getSchemaType() +
-            		"[" + JsonType.jsonString.getSchemaType() + "]" );
+        	propertySchema.setType( JsonType.JSON_STRING );
+            entityInfo.setEntityType( JsonType.JSON_ARRAY.getSchemaType() +
+            		"[" + JsonType.JSON_STRING.getSchemaType() + "]" );
         }
         jsonProperty.setSchema( new JsonSchemaReference( propertySchema ) );
         
@@ -194,7 +194,7 @@ public class TLPropertyJsonCodegenTransformer extends AbstractJsonSchemaTransfor
         	JsonSchemaReference itemSchemaRef = new JsonSchemaReference();
         	JsonSchema arraySchema = new JsonSchema();
         	
-        	arraySchema.setType( JsonType.jsonArray );
+        	arraySchema.setType( JsonType.JSON_ARRAY );
         	arraySchema.setMinItems( source.isMandatory() ? 1 : null );
         	arraySchema.setItems( itemSchemaRef );
         	schemaRef.setSchema( arraySchema );

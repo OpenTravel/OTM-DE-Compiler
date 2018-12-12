@@ -17,7 +17,6 @@ package org.opentravel.schemacompiler.console;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -72,7 +71,23 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class ViewItemController extends BaseController {
 
-    private static Log log = LogFactory.getLog(BrowseController.class);
+	private static final String FINDINGS = "findings";
+	private static final String INDIRECT_WHERE_USED = "indirectWhereUsed";
+	private static final String DIRECT_WHERE_USED = "directWhereUsed";
+	private static final String IMAGE_RESOLVER = "imageResolver";
+	private static final String DOC_HELPER = "docHelper";
+	private static final String ENTITIES_BY_REFERENCE = "entitiesByReference";
+	private static final String ENTITY_FACETS = "entityFacets";
+	private static final String PAGE_UTILS = "pageUtils";
+	private static final String LIBRARY = "library";
+	private static final String ENTITY = "entity";
+	private static final String LIBRARY_NOT_AUTHORIZED = "You are not authorized to view the requested library.";
+	private static final String ENTITY_NOT_AUTHORIZED = "You are not authorized to view the requested entity.";
+	private static final String ENTITY_NOT_FOUND = "The requested entity could not be found.";
+	private static final String ERROR_DISPLAYING_LIBRARY = "An error occured while displaying the library.";
+	private static final String ERROR_DISPLAYING_LIBRARY2 = "An error occured while displaying the library (see server log for details).";
+	
+	private static Log log = LogFactory.getLog(BrowseController.class);
 
     /**
      * Called by the Spring MVC controller to display the release view page.
@@ -96,44 +111,40 @@ public class ViewItemController extends BaseController {
             
             checkItemType( item, RepositoryItemType.RELEASE );
 
-            if (securityManager.isReadAuthorized(user, item)) {
-            	FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
-            	String releaseIndexId = IndexingUtils.getIdentityKey( item );
-            	ReleaseSearchResult release = searchService.getRelease( releaseIndexId, true );
-            	
-            	if (release == null) {
-            		throw new RepositoryException("The requested release cannot be displayed.");
-            	}
-            	List<ReleaseMemberItem> principalLibraries = getReleaseMembers(
-            			release.getItemContent().getPrincipalMembers(), searchService );
-            	List<ReleaseMemberItem> referencedLibraries = getReleaseMembers(
-            			release.getItemContent().getReferencedMembers(), searchService );
-            	
-            	Collections.sort( principalLibraries, new Comparator<ReleaseMemberItem>() {
-					public int compare(ReleaseMemberItem lib1, ReleaseMemberItem lib2) {
-						return lib1.getLibrary().getItemName().compareTo( lib2.getLibrary().getItemName() );
-					}
-            	});
-            	Collections.sort( referencedLibraries, new Comparator<ReleaseMemberItem>() {
-					public int compare(ReleaseMemberItem lib1, ReleaseMemberItem lib2) {
-						return lib1.getLibrary().getItemName().compareTo( lib2.getLibrary().getItemName() );
-					}
-            	});
-            	
-                model.addAttribute("imageResolver", new SearchResultImageResolver());
-                model.addAttribute("pageUtils", new PageUtils());
-                model.addAttribute("item", item);
-                model.addAttribute("release", release);
-                model.addAttribute("principalLibraries", principalLibraries);
-                model.addAttribute("referencedLibraries", referencedLibraries);
-            	
-            } else {
+			if (securityManager.isReadAuthorized(user, item)) {
+				FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
+				String releaseIndexId = IndexingUtils.getIdentityKey(item);
+				ReleaseSearchResult release = searchService.getRelease(releaseIndexId, true);
+				
+				if (release == null) {
+					throw new RepositoryException("The requested release cannot be displayed.");
+				}
+				List<ReleaseMemberItem> principalLibraries = getReleaseMembers(
+						release.getItemContent().getPrincipalMembers(), searchService);
+				List<ReleaseMemberItem> referencedLibraries = getReleaseMembers(
+						release.getItemContent().getReferencedMembers(), searchService);
+				
+				Collections.sort(principalLibraries, (ReleaseMemberItem lib1, ReleaseMemberItem lib2) ->
+					lib1.getLibrary().getItemName().compareTo(lib2.getLibrary().getItemName())
+				);
+				Collections.sort(referencedLibraries, (ReleaseMemberItem lib1, ReleaseMemberItem lib2) ->
+					lib1.getLibrary().getItemName().compareTo(lib2.getLibrary().getItemName())
+				);
+				
+				model.addAttribute(IMAGE_RESOLVER, new SearchResultImageResolver());
+				model.addAttribute(PAGE_UTILS, new PageUtils());
+				model.addAttribute("item", item);
+				model.addAttribute("release", release);
+				model.addAttribute("principalLibraries", principalLibraries);
+				model.addAttribute("referencedLibraries", referencedLibraries);
+				
+			} else {
                 setErrorMessage("You are not authorized to view the requested release.", model);
                 targetPage = new SearchController().defaultSearchPage( session, model);
             }
 
-        } catch (Throwable t) {
-            log.error("An error occured while displaying the release.", t);
+        } catch (Exception e) {
+            log.error("An error occured while displaying the release.", e);
             setErrorMessage("An error occured while displaying the release (see server log for details).", model);
             targetPage = new SearchController().defaultSearchPage( session, model);
         }
@@ -168,31 +179,27 @@ public class ViewItemController extends BaseController {
             
             checkItemType( item, RepositoryItemType.LIBRARY );
 
-            if (securityManager.isReadAuthorized(user, item)) {
-            	FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
-            	String libraryIndexId = IndexingUtils.getIdentityKey( item );
-            	List<EntitySearchResult> entityList = searchService.getEntities( libraryIndexId, false );
-            	
-            	Collections.sort( entityList, new Comparator<EntitySearchResult>() {
-					public int compare(EntitySearchResult entity1, EntitySearchResult entity2) {
-						return entity1.getItemName().compareTo( entity2.getItemName() );
-					}
-            	});
-                model.addAttribute("imageResolver", new SearchResultImageResolver());
-                model.addAttribute("pageUtils", new PageUtils());
-                model.addAttribute("entityList", entityList);
-                model.addAttribute("item", item);
-            	
-            } else {
-                setErrorMessage("You are not authorized to view the requested library.", model);
+			if (securityManager.isReadAuthorized(user, item)) {
+				FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
+				String libraryIndexId = IndexingUtils.getIdentityKey(item);
+				List<EntitySearchResult> entityList = searchService.getEntities(libraryIndexId, false);
+				
+				Collections.sort(entityList, (EntitySearchResult entity1, EntitySearchResult entity2) ->
+					entity1.getItemName().compareTo(entity2.getItemName())
+				);
+				model.addAttribute(IMAGE_RESOLVER, new SearchResultImageResolver());
+				model.addAttribute(PAGE_UTILS, new PageUtils());
+				model.addAttribute("entityList", entityList);
+				model.addAttribute("item", item);
+				
+			} else {
+                setErrorMessage(LIBRARY_NOT_AUTHORIZED, model);
                 targetPage = new SearchController().defaultSearchPage( session, model);
             }
 
-        } catch (Throwable t) {
-            log.error("An error occured while displaying the library.", t);
-            setErrorMessage(
-                    "An error occured while displaying the library (see server log for details).",
-                    model);
+        } catch (Exception e) {
+            log.error(ERROR_DISPLAYING_LIBRARY, e);
+            setErrorMessage(ERROR_DISPLAYING_LIBRARY2, model);
             targetPage = new SearchController().defaultSearchPage( session, model);
         }
 
@@ -237,20 +244,18 @@ public class ViewItemController extends BaseController {
                 purgeDirectWhereUsed( indirectWhereUsed, directWhereUsed );
                 
                 model.addAttribute("usesLibraries", usesLibraries);
-                model.addAttribute("directWhereUsed", directWhereUsed);
-                model.addAttribute("indirectWhereUsed", indirectWhereUsed);
+                model.addAttribute(DIRECT_WHERE_USED, directWhereUsed);
+                model.addAttribute(INDIRECT_WHERE_USED, indirectWhereUsed);
                 model.addAttribute("item", item);
             	
             } else {
-                setErrorMessage("You are not authorized to view the requested library.", model);
+                setErrorMessage(LIBRARY_NOT_AUTHORIZED, model);
                 targetPage = new SearchController().defaultSearchPage( session, model);
             }
 
-        } catch (Throwable t) {
-            log.error("An error occured while displaying the library.", t);
-            setErrorMessage(
-                    "An error occured while displaying the library (see server log for details).",
-                    model);
+        } catch (Exception e) {
+            log.error(ERROR_DISPLAYING_LIBRARY, e);
+            setErrorMessage(ERROR_DISPLAYING_LIBRARY2, model);
             targetPage = new SearchController().defaultSearchPage( session, model);
         }
 
@@ -289,19 +294,17 @@ public class ViewItemController extends BaseController {
                 String indexItemId = IndexingUtils.getIdentityKey( item );
                 List<ValidationResult> findings = searchService.getLibraryFindings( indexItemId );
                 
-                model.addAttribute("findings", findings);
+                model.addAttribute(FINDINGS, findings);
                 model.addAttribute("item", item);
             	
             } else {
-                setErrorMessage("You are not authorized to view the requested library.", model);
+                setErrorMessage(LIBRARY_NOT_AUTHORIZED, model);
                 targetPage = new SearchController().defaultSearchPage( session, model);
             }
 
-        } catch (Throwable t) {
-            log.error("An error occured while displaying the library.", t);
-            setErrorMessage(
-                    "An error occured while displaying the library (see server log for details).",
-                    model);
+        } catch (Exception e) {
+            log.error(ERROR_DISPLAYING_LIBRARY, e);
+            setErrorMessage(ERROR_DISPLAYING_LIBRARY2, model);
             targetPage = new SearchController().defaultSearchPage( session, model);
         }
 
@@ -341,18 +344,17 @@ public class ViewItemController extends BaseController {
             	List<ReleaseSearchResult> releaseList = searchService.getLibraryReleases( library, false );
             	
                 model.addAttribute("releaseList", releaseList);
-                model.addAttribute("pageUtils", new PageUtils());
+                model.addAttribute(PAGE_UTILS, new PageUtils());
                 model.addAttribute("item", item);
             	
             } else {
-                setErrorMessage("You are not authorized to view the requested library.", model);
+                setErrorMessage(LIBRARY_NOT_AUTHORIZED, model);
                 targetPage = new SearchController().defaultSearchPage( session, model);
             }
 
-        } catch (Throwable t) {
-            log.error("An error occured while displaying the library.", t);
-            setErrorMessage(
-                    "An error occured while displaying the library (see server log for details).", model);
+        } catch (Exception e) {
+            log.error(ERROR_DISPLAYING_LIBRARY, e);
+            setErrorMessage(ERROR_DISPLAYING_LIBRARY2, model);
             targetPage = new SearchController().defaultSearchPage( session, model);
         }
 
@@ -412,18 +414,17 @@ public class ViewItemController extends BaseController {
             	
                 model.addAttribute("history", history);
                 model.addAttribute("commitUsers", commitUsers);
-                model.addAttribute("pageUtils", new PageUtils());
+                model.addAttribute(PAGE_UTILS, new PageUtils());
                 model.addAttribute("item", item);
             	
             } else {
-                setErrorMessage("You are not authorized to view the requested library.", model);
+                setErrorMessage(LIBRARY_NOT_AUTHORIZED, model);
                 targetPage = new SearchController().defaultSearchPage( session, model);
             }
 
-        } catch (Throwable t) {
-            log.error("An error occured while displaying the library.", t);
-            setErrorMessage(
-                    "An error occured while displaying the library (see server log for details).", model);
+        } catch (Exception e) {
+            log.error(ERROR_DISPLAYING_LIBRARY, e);
+            setErrorMessage(ERROR_DISPLAYING_LIBRARY2, model);
             targetPage = new SearchController().defaultSearchPage( session, model);
         }
 
@@ -480,15 +481,13 @@ public class ViewItemController extends BaseController {
                 model.addAttribute("item", item);
                 
             } else {
-                setErrorMessage("You are not authorized to view the requested library.", model);
+                setErrorMessage(LIBRARY_NOT_AUTHORIZED, model);
                 targetPage = new SearchController().defaultSearchPage( session, model);
             }
 
-        } catch (Throwable t) {
-            log.error("An error occured while displaying the library.", t);
-            setErrorMessage(
-                    "An error occured while displaying the library (see server log for details).",
-                    model);
+        } catch (Exception e) {
+            log.error(ERROR_DISPLAYING_LIBRARY, e);
+            setErrorMessage(ERROR_DISPLAYING_LIBRARY2, model);
             targetPage = new SearchController().defaultSearchPage( session, model);
         }
 
@@ -530,28 +529,26 @@ public class ViewItemController extends BaseController {
                 	Map<String,EntitySearchResult> entitiesByReference = refFinder.buildEntityReferenceMap( searchService );
                 	List<FacetIdentityWrapper> entityFacets = buildFacetList( indexEntity.getItemContent() );
                 	
-                	model.addAttribute( "entity", indexEntity );
-                	model.addAttribute( "library", indexLibrary );
-                	model.addAttribute( "pageUtils", new PageUtils() );
-                	model.addAttribute( "entityFacets", entityFacets );
-                	model.addAttribute( "entitiesByReference", entitiesByReference );
-                	model.addAttribute( "docHelper", new DocumentationHelper( indexEntity ) );
-                    model.addAttribute( "imageResolver", new SearchResultImageResolver() );
+                	model.addAttribute( ENTITY, indexEntity );
+                	model.addAttribute( LIBRARY, indexLibrary );
+                	model.addAttribute( PAGE_UTILS, new PageUtils() );
+                	model.addAttribute( ENTITY_FACETS, entityFacets );
+                	model.addAttribute( ENTITIES_BY_REFERENCE, entitiesByReference );
+                	model.addAttribute( DOC_HELPER, new DocumentationHelper( indexEntity ) );
+                    model.addAttribute( IMAGE_RESOLVER, new SearchResultImageResolver() );
                 	
                 } else {
-                    setErrorMessage("You are not authorized to view the requested entity.", model);
+                    setErrorMessage(ENTITY_NOT_AUTHORIZED, model);
                     targetPage = new SearchController().defaultSearchPage( session, model);
                 }
             } else {
-                setErrorMessage("The requested entity could not be found.", model);
+                setErrorMessage(ENTITY_NOT_FOUND, model);
                 targetPage = new SearchController().defaultSearchPage( session, model);
             }
             
-        } catch (Throwable t) {
-            log.error("An error occured while displaying the library.", t);
-            setErrorMessage(
-                    "An error occured while displaying the library (see server log for details).",
-                    model);
+        } catch (Exception e) {
+            log.error(ERROR_DISPLAYING_LIBRARY, e);
+            setErrorMessage(ERROR_DISPLAYING_LIBRARY2, model);
         }
 
         if (targetPage == null) {
@@ -593,26 +590,24 @@ public class ViewItemController extends BaseController {
                     
                     purgeDirectWhereUsed( indirectWhereUsed, directWhereUsed );
                     
-                	model.addAttribute( "entity", indexEntity );
-                	model.addAttribute( "library", indexLibrary );
-                    model.addAttribute("directWhereUsed", directWhereUsed);
-                    model.addAttribute("indirectWhereUsed", indirectWhereUsed);
-                    model.addAttribute("imageResolver", new SearchResultImageResolver());
+                	model.addAttribute( ENTITY, indexEntity );
+                	model.addAttribute( LIBRARY, indexLibrary );
+                    model.addAttribute(DIRECT_WHERE_USED, directWhereUsed);
+                    model.addAttribute(INDIRECT_WHERE_USED, indirectWhereUsed);
+                    model.addAttribute(IMAGE_RESOLVER, new SearchResultImageResolver());
                 	
                 } else {
-                    setErrorMessage("You are not authorized to view the requested entity.", model);
+                    setErrorMessage(ENTITY_NOT_AUTHORIZED, model);
                     targetPage = new SearchController().defaultSearchPage( session, model);
                 }
             } else {
-                setErrorMessage("The requested entity could not be found.", model);
+                setErrorMessage(ENTITY_NOT_FOUND, model);
                 targetPage = new SearchController().defaultSearchPage( session, model);
             }
             
-        } catch (Throwable t) {
-            log.error("An error occured while displaying the library.", t);
-            setErrorMessage(
-                    "An error occured while displaying the library (see server log for details).",
-                    model);
+        } catch (Exception e) {
+            log.error(ERROR_DISPLAYING_LIBRARY, e);
+            setErrorMessage(ERROR_DISPLAYING_LIBRARY2, model);
         }
 
         if (targetPage == null) {
@@ -651,24 +646,22 @@ public class ViewItemController extends BaseController {
                 if (securityManager.isReadAuthorized( user, indexLibrary.getRepositoryItem() )) {
                     List<ValidationResult> findings = searchService.getEntityFindings( identityKey );
                     
-                    model.addAttribute( "findings", findings );
-                	model.addAttribute( "entity", indexEntity );
-                	model.addAttribute( "library", indexLibrary );
+                    model.addAttribute( FINDINGS, findings );
+                	model.addAttribute( ENTITY, indexEntity );
+                	model.addAttribute( LIBRARY, indexLibrary );
                 	
                 } else {
-                    setErrorMessage("You are not authorized to view the requested entity.", model);
+                    setErrorMessage(ENTITY_NOT_AUTHORIZED, model);
                     targetPage = new SearchController().defaultSearchPage( session, model);
                 }
             } else {
-                setErrorMessage("The requested entity could not be found.", model);
+                setErrorMessage(ENTITY_NOT_FOUND, model);
                 targetPage = new SearchController().defaultSearchPage( session, model);
             }
             
-        } catch (Throwable t) {
-            log.error("An error occured while displaying the library.", t);
-            setErrorMessage(
-                    "An error occured while displaying the library (see server log for details).",
-                    model);
+        } catch (Exception e) {
+            log.error(ERROR_DISPLAYING_LIBRARY, e);
+            setErrorMessage(ERROR_DISPLAYING_LIBRARY2, model);
         }
 
         if (targetPage == null) {

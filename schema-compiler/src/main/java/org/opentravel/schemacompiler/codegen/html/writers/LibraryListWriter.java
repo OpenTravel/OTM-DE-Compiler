@@ -53,8 +53,8 @@ public class LibraryListWriter extends PrintWriter {
      * @param configuration the current configuration of the doclet.
      */
     public LibraryListWriter(Configuration configuration) throws IOException {
-        super(Util.genWriter(configuration, configuration.destDirName,
-            DocletConstants.LIBRARY_LIST_FILE_NAME, configuration.docencoding));
+        super(Util.genWriter(configuration, configuration.getDestDirName(),
+            DocletConstants.LIBRARY_LIST_FILE_NAME, configuration.getDocencoding()));
     }
 
     /**
@@ -67,7 +67,7 @@ public class LibraryListWriter extends PrintWriter {
         LibraryListWriter packgen;
         try {
             packgen = new LibraryListWriter(configuration);
-            packgen.generateLibraryListFile(configuration.model);
+            packgen.generateLibraryListFile(configuration.getModel());
             packgen.close();
         } catch (IOException exc) {
             configuration.message.error("doclet.exception_encountered",

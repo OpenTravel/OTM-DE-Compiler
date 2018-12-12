@@ -108,8 +108,8 @@ public class FrameOutputWriter extends HtmlDocletWriter {
      */
     protected void generateFrameFile() {
         Content frameset = getFrameDetails();
-        if (configuration.windowtitle.length() > 0) {
-            printFramesetDocument(configuration.windowtitle,
+        if (configuration.getWindowtitle().length() > 0) {
+            printFramesetDocument(configuration.getWindowtitle(),
                     frameset);
         } else {
             printFramesetDocument(configuration.getText("doclet.Generated_Docs_Untitled"), frameset);
@@ -131,7 +131,7 @@ public class FrameOutputWriter extends HtmlDocletWriter {
                 getResource("doclet.Frame_Alert"));
         noframes.addContent(noframesHead);
         Content p = HtmlTree.p(getResource("doclet.Frame_Warning_Message",
-                getHyperLinkString(configuration.topFile,
+                getHyperLinkString(configuration.getTopFile(),
                 configuration.getText("doclet.Non_Frame_Version"))));
         noframes.addContent(p);
         contentTree.addContent(noframes);
@@ -187,7 +187,7 @@ public class FrameOutputWriter extends HtmlDocletWriter {
      * @param contentTree the content tree to which the information will be added
      */
     private void addClassFrameTag(Content contentTree) {
-        HtmlTree frame = HtmlTree.frame(configuration.topFile, "classFrame",
+        HtmlTree frame = HtmlTree.frame(configuration.getTopFile(), "classFrame",
                 configuration.getText("doclet.Library_member_descriptions"),
                 SCROLL_YES);
         contentTree.addContent(frame);

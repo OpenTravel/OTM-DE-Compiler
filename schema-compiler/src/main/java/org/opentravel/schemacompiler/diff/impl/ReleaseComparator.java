@@ -159,10 +159,10 @@ public class ReleaseComparator extends BaseComparator {
 		for (ChangeSetItem item : pendingChangeSets) {
 			LibraryChangeSet libraryChangeSet =
 					new LibraryComparator( getCompareOptions(), getNamespaceMappings() )
-							.compareLibraries( item.oldVersion, item.newVersion );
+							.compareLibraries( item.getOldVersion(), item.getNewVersion() );
 			
 			if (!libraryChangeSet.getChangeItems().isEmpty()) {
-				changeItems.add( new ReleaseChangeItem( changeSet, item.changeType, libraryChangeSet ) );
+				changeItems.add( new ReleaseChangeItem( changeSet, item.getChangeType(), libraryChangeSet ) );
 			}
 		}
 		
@@ -190,9 +190,9 @@ public class ReleaseComparator extends BaseComparator {
 	 */
 	private static class ChangeSetItem {
 		
-		public ReleaseChangeType changeType;
-		public TLLibrary oldVersion;
-		public TLLibrary newVersion;
+		private ReleaseChangeType changeType;
+		private TLLibrary oldVersion;
+		private TLLibrary newVersion;
 		
 		/**
 		 * Full constructor.
@@ -202,8 +202,62 @@ public class ReleaseComparator extends BaseComparator {
 		 * @param newVersion  the new version of the library
 		 */
 		public ChangeSetItem(ReleaseChangeType changeType, TLLibrary oldVersion, TLLibrary newVersion) {
+			this.setChangeType(changeType);
+			this.setOldVersion(oldVersion);
+			this.setNewVersion(newVersion);
+		}
+
+		/**
+		 * Returns the value of the 'changeType' field.
+		 *
+		 * @return ReleaseChangeType
+		 */
+		public ReleaseChangeType getChangeType() {
+			return changeType;
+		}
+
+		/**
+		 * Assigns the value of the 'changeType' field.
+		 *
+		 * @param changeType  the field value to assign
+		 */
+		public void setChangeType(ReleaseChangeType changeType) {
 			this.changeType = changeType;
+		}
+
+		/**
+		 * Returns the value of the 'oldVersion' field.
+		 *
+		 * @return TLLibrary
+		 */
+		public TLLibrary getOldVersion() {
+			return oldVersion;
+		}
+
+		/**
+		 * Assigns the value of the 'oldVersion' field.
+		 *
+		 * @param oldVersion  the field value to assign
+		 */
+		public void setOldVersion(TLLibrary oldVersion) {
 			this.oldVersion = oldVersion;
+		}
+
+		/**
+		 * Returns the value of the 'newVersion' field.
+		 *
+		 * @return TLLibrary
+		 */
+		public TLLibrary getNewVersion() {
+			return newVersion;
+		}
+
+		/**
+		 * Assigns the value of the 'newVersion' field.
+		 *
+		 * @param newVersion  the field value to assign
+		 */
+		public void setNewVersion(TLLibrary newVersion) {
 			this.newVersion = newVersion;
 		}
 		

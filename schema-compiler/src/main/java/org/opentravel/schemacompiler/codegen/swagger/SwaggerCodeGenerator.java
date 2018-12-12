@@ -60,6 +60,8 @@ import com.google.gson.JsonParser;
  */
 public class SwaggerCodeGenerator extends AbstractCodeGenerator<TLResource> {
 	
+	private static final String DEFINITIONS = "definitions";
+	
 	public static final String SWAGGER_FILENAME_EXT     = "swagger";
 	public static final String SWAGGER_DEFS_FILENAME_EXT = "defs.swagger";
 	
@@ -147,15 +149,15 @@ public class SwaggerCodeGenerator extends AbstractCodeGenerator<TLResource> {
 						CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT ) )) {
 			JsonObject swaggerDefs;
 			
-			if (swaggerJson.has( "definitions" )) {
-				swaggerDefs = swaggerJson.get( "definitions" ).getAsJsonObject();
+			if (swaggerJson.has( DEFINITIONS )) {
+				swaggerDefs = swaggerJson.get( DEFINITIONS ).getAsJsonObject();
 				
 			} else {
 				swaggerDefs = new JsonObject();
-				swaggerJson.add( "definitions", swaggerDefs );
+				swaggerJson.add( DEFINITIONS, swaggerDefs );
 			}
     		JsonObject builtInSchema = new JsonParser().parse( reader ).getAsJsonObject();
-			JsonObject builtInDefs = builtInSchema.get( "definitions" ).getAsJsonObject();
+			JsonObject builtInDefs = builtInSchema.get( DEFINITIONS ).getAsJsonObject();
     		
 			for (Entry<String,JsonElement> builtInDef : builtInDefs.entrySet()) {
 				swaggerDefs.add( builtInDef.getKey(), builtInDef.getValue() );

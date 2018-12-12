@@ -47,7 +47,7 @@ public class LibraryIndexFrameWriterTest extends AbstractWriterTest{
 	public void testItShouldAddNamespacesForLibraries() throws Exception {
 		String filename = LibraryIndexFrameWriter.DEFAULT_FILENAME;
 		LibraryIndexFrameWriter.generate(config);
-		byte[] encoded = Files.readAllBytes(Paths.get(config.destDirName + filename));
+		byte[] encoded = Files.readAllBytes(Paths.get(config.getDestDirName() + filename));
 		 String content = new String(encoded);
 		 List<TLLibrary> ns = config.getLibraries();
 		 assertTrue(ns.size() > 0);

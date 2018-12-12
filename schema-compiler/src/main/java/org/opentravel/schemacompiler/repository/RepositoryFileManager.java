@@ -67,7 +67,9 @@ import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
  */
 public abstract class RepositoryFileManager {
 
-    public static final String REPOSITORY_METADATA_FILENAME = "repository-metadata.xml";
+	private static final String METADATA_FILE_SUFFIX = "-info.xml";
+	
+	public static final String REPOSITORY_METADATA_FILENAME = "repository-metadata.xml";
     public static final String REPOSITORY_HOME_FOLDER = ".ota2/";
     public static final String REPOSITORY_LOCATION_FILENAME = "repository-location.txt";
     public static final String DEFAULT_REPOSITORY_LOCATION = "repository/";
@@ -377,7 +379,7 @@ public abstract class RepositoryFileManager {
 
             for (File nsFolder : namespaceFolders) {
                 for (File folderMember : nsFolder.listFiles()) {
-                    if (folderMember.isFile() && folderMember.getName().endsWith("-info.xml")) {
+                    if (folderMember.isFile() && folderMember.getName().endsWith(METADATA_FILE_SUFFIX)) {
                         try {
                             LibraryInfoType libraryMetadata = (LibraryInfoType) loadFile(folderMember);
 
@@ -659,7 +661,7 @@ public abstract class RepositoryFileManager {
                 // multiple
                 // ways (e.g. "v1", "v01", "v_1", etc.)
                 for (File versionMember : folderMember.listFiles()) {
-                    if (versionMember.getName().endsWith("-info.xml")) {
+                    if (versionMember.getName().endsWith(METADATA_FILE_SUFFIX)) {
                         try {
                             LibraryInfoType libraryMetadata = (LibraryInfoType) loadFile(versionMember);
                             String baseNS = libraryMetadata.getBaseNamespace();
@@ -1044,7 +1046,7 @@ public abstract class RepositoryFileManager {
         String baseFilename = (dotIdx < 0) ? libraryFilename : libraryFilename.subSequence(0,
                 dotIdx).toString();
 
-        return baseFilename + "-info.xml";
+        return baseFilename + METADATA_FILE_SUFFIX;
     }
 
     /**

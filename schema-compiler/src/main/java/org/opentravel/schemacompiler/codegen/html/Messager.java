@@ -70,15 +70,15 @@ public class Messager {
     
     /** The number of errors encountered so far.
      */
-    public int nerrors = 0;
+    private int nerrors = 0;
 
     /** The number of warnings encountered so far.
      */
-    public int nwarnings = 0;
+    private int nwarnings = 0;
     
     /** Switch: prompt user on each error.
      */
-    public boolean promptOnError;
+    private boolean promptOnError;
 
     public class ExitJavadoc extends Error {
         private static final long serialVersionUID = 0;
@@ -215,11 +215,11 @@ public class Messager {
      * @param msg message to print
      */
     public void printError(SourcePosition pos, String msg) {
-        if (log.isErrorEnabled() && (nerrors < maxErrors)) {
+        if (log.isErrorEnabled() && (getNerrors() < maxErrors)) {
             String prefix = (pos == null) ? programName : pos.toString();
             log.error( String.format("%s: %s - %s", prefix, getText("javadoc.error"), msg));
             prompt();
-            nerrors++;
+            setNerrors(getNerrors() + 1);
         }
     }
 
@@ -241,10 +241,10 @@ public class Messager {
      * @param msg message to print
      */
     public void printWarning(SourcePosition pos, String msg) {
-        if (log.isWarnEnabled() && (nwarnings < maxWarnings)) {
+        if (log.isWarnEnabled() && (getNwarnings() < maxWarnings)) {
             String prefix = (pos == null) ? programName : pos.toString();
             log.warn( String.format("%s: %s - %s", prefix, getText("javadoc.warning"), msg));
-            nwarnings++;
+            setNwarnings(getNwarnings() + 1);
         }
     }
 
@@ -417,25 +417,25 @@ public class Messager {
      * Return total number of errors, including those recorded
      * in the compilation log.
      */
-    public int nerrors() { return nerrors; }
+    public int nerrors() { return getNerrors(); }
 
     /**
      * Return total number of warnings, including those recorded
      * in the compilation log.
      */
-    public int nwarnings() { return nwarnings; }
+    public int nwarnings() { return getNwarnings(); }
 
     /**
      * Print exit message.
      */
     public void exitNotice() {
-        if (nerrors > 0) {
-            notice((nerrors > 1) ? "main.errors" : "main.error",
-                   "" + nerrors);
+        if (getNerrors() > 0) {
+            notice((getNerrors() > 1) ? "main.errors" : "main.error",
+                   "" + getNerrors());
         }
-        if (nwarnings > 0) {
-            notice((nwarnings > 1) ?  "main.warnings" : "main.warning",
-                   "" + nwarnings);
+        if (getNwarnings() > 0) {
+            notice((getNwarnings() > 1) ?  "main.warnings" : "main.warning",
+                   "" + getNwarnings());
         }
     }
 
@@ -451,7 +451,7 @@ public class Messager {
     /** Prompt user after an error.
      */
     public void prompt() {
-        if (promptOnError) {
+        if (isPromptOnError()) {
            log.error("resume.abort");// localize?
             try {
                 while (true) {
@@ -471,4 +471,58 @@ public class Messager {
             }
         }
     }
+
+	/**
+	 * Returns the value of the 'nerrors' field.
+	 *
+	 * @return int
+	 */
+	public int getNerrors() {
+		return nerrors;
+	}
+
+	/**
+	 * Assigns the value of the 'nerrors' field.
+	 *
+	 * @param nerrors  the field value to assign
+	 */
+	public void setNerrors(int nerrors) {
+		this.nerrors = nerrors;
+	}
+
+	/**
+	 * Returns the value of the 'nwarnings' field.
+	 *
+	 * @return int
+	 */
+	public int getNwarnings() {
+		return nwarnings;
+	}
+
+	/**
+	 * Assigns the value of the 'nwarnings' field.
+	 *
+	 * @param nwarnings  the field value to assign
+	 */
+	public void setNwarnings(int nwarnings) {
+		this.nwarnings = nwarnings;
+	}
+
+	/**
+	 * Returns the value of the 'promptOnError' field.
+	 *
+	 * @return boolean
+	 */
+	public boolean isPromptOnError() {
+		return promptOnError;
+	}
+
+	/**
+	 * Assigns the value of the 'promptOnError' field.
+	 *
+	 * @param promptOnError  the field value to assign
+	 */
+	public void setPromptOnError(boolean promptOnError) {
+		this.promptOnError = promptOnError;
+	}
 }

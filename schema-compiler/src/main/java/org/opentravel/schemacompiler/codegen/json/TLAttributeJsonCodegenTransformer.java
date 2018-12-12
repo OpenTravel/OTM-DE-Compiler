@@ -129,13 +129,13 @@ public class TLAttributeJsonCodegenTransformer extends AbstractJsonSchemaTransfo
         		JsonSchema attrSchema = new JsonSchema();
             	JsonSchema itemSchema = new JsonSchema();
             	
-            	itemSchema.setType( JsonType.jsonString );
-            	attrSchema.setType( JsonType.jsonArray );
+            	itemSchema.setType( JsonType.JSON_STRING );
+            	attrSchema.setType( JsonType.JSON_ARRAY );
             	attrSchema.setItems( new JsonSchemaReference( itemSchema ) );
         		attrSchemaRef.setSchema( attrSchema );
             	
             } else {
-            	JsonSchema attrSchema = jsonUtils.buildSimpleTypeSchema( JsonType.jsonString );
+            	JsonSchema attrSchema = jsonUtils.buildSimpleTypeSchema( JsonType.JSON_STRING );
             	
         		transformDocumentation( source, attrSchema );
         		attrSchema.getExampleItems().addAll( jsonUtils.getExampleInfo( source ) );
@@ -164,7 +164,7 @@ public class TLAttributeJsonCodegenTransformer extends AbstractJsonSchemaTransfo
                 	JsonSchema attrSchema = new JsonSchema();
     				
                 	schemaRef = new JsonSchemaReference();
-                	attrSchema.setType( JsonType.jsonArray );
+                	attrSchema.setType( JsonType.JSON_ARRAY );
                 	attrSchema.setItems( schemaRef );
                 	attrSchemaRef.setSchema( attrSchema );
     			}

@@ -41,7 +41,7 @@ public class ValidationFindings implements Serializable {
 	private static final long serialVersionUID = -7081558490066747720L;
 	
 	private Collection<ValidationFinding> allFindings = new TreeSet<>();
-    private Map<Validatable,List<String>> messageKeysBySourceObject = new HashMap<>();
+    private transient Map<Validatable,List<String>> messageKeysBySourceObject = new HashMap<>();
 
     /**
      * Returns true if no findings have been added to this collection.
@@ -195,7 +195,7 @@ public class ValidationFindings implements Serializable {
      *            the optional message parameters for the finding
      */
     public void addFinding(FindingType type, Validatable source, String messageKey,
-            Object... messageParams) {
+            Serializable... messageParams) {
         if (type == null) {
             throw new NullPointerException("Finding type cannot be null for validation findings.");
         }

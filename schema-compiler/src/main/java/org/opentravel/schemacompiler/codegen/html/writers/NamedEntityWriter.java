@@ -62,7 +62,7 @@ public class NamedEntityWriter<T extends NamedEntityDocumentationBuilder<?>>
 				+ ".html", DirectoryManager.getRelativePath(member
 				.getOwningLibrary()));
 		this.member = member;
-		configuration.currentMember = member;
+		configuration.setCurrentMember(member);
 		this.prev = prev;
 		this.next = next;
 	}
@@ -96,7 +96,7 @@ public class NamedEntityWriter<T extends NamedEntityDocumentationBuilder<?>>
 	 */
 	@Override
 	protected Content getNavLinkClassUse() {
-		Content linkContent = getHyperLink("class-use/" + filename, "", useLabel);
+		Content linkContent = getHyperLink("class-use/" + getFilename(), "", useLabel);
 		return HtmlTree.li(linkContent);
 	}
 
@@ -163,7 +163,7 @@ public class NamedEntityWriter<T extends NamedEntityDocumentationBuilder<?>>
 		LinkInfoImpl linkInfo = new LinkInfoImpl(
 				LinkInfoImpl.CONTEXT_CLASS_HEADER, member, false);
 		// Let's not link to ourselves in the header.
-		linkInfo.linkToSelf = false;
+		linkInfo.setLinkToSelf(false);
 		Content headerContent = new StringContent(member.getDocType()
 				.toString() + " " + member.getName());
 		Content heading = HtmlTree.heading(HtmlConstants.CLASS_PAGE_HEADING,

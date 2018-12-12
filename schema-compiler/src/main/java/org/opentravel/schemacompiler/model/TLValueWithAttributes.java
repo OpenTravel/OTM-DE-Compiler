@@ -161,7 +161,7 @@ public class TLValueWithAttributes extends TLLibraryMember implements Versioned,
      */
     @Override
     public XSDFacetProfile getXSDFacetProfile() {
-        return XSDFacetProfile.FP_unknown;
+        return XSDFacetProfile.FP_UNKNOWN;
     }
 
     /**

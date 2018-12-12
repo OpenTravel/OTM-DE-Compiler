@@ -82,8 +82,6 @@ public class Configuration {
 	 */
 	private static final String XSD_NAMESPACE = "http://www.w3.org/2001/XMLSchema";
 
-	private static Configuration instance = new Configuration();
-
 	/**
 	 * The build date. Note: For now, we will use a version number instead of a
 	 * date.
@@ -101,26 +99,28 @@ public class Configuration {
 	 */
 	public static final String CONSTANTS_FILE_NAME = "constant-values.html";
 
+	private static Configuration instance = new Configuration();
+
 	/**
 	 * Argument for command line option "-doctitle".
 	 */
-	public String doctitle = "";
+	private String doctitle = "";
 
 	/**
 	 * Argument for command line option "-windowtitle".
 	 */
-	public String windowtitle = "";
+	private String windowtitle = "";
 
 	/**
 	 * Argument for command line option "-stylesheetfile".
 	 */
-	public String stylesheetfile = "";
+	private String stylesheetfile = "";
 
 	/**
 	 * This is true if option "-overview" is used or option "-overview" is not
 	 * used and number of packages is more than one.
 	 */
-	public boolean createoverview = true;
+	private boolean createoverview = true;
 
 	/**
 	 * Unique Resource Handler for this package.
@@ -131,69 +131,69 @@ public class Configuration {
 	 * First file to appear in the right-hand frame in the generated
 	 * documentation.
 	 */
-	public String topFile = "";
+	private String topFile = "";
 
 	/**
 	 * The classdoc for the class file getting generated.
 	 */
-	public DocumentationBuilder currentMember = null;
+	private DocumentationBuilder currentMember = null;
 
 	/**
 	 * The Root of the generated Program Structure from the Doclet API.
 	 */
-	public TLModel model;
+	private TLModel model;
 
 	/**
 	 * Destination directory name, in which doclet will generate the entire
 	 * documentation. Default is current directory.
 	 */
-	public String destDirName = "";
+	private String destDirName = "";
 
 	/**
 	 * Encoding for this document. Default is default encoding for this
 	 * platform.
 	 */
-	public String docencoding = null;
+	private String docencoding = null;
 
 	/**
 	 * True if user wants to add member names as meta keywords. Set to false
 	 * because meta keywords are ignored in general by most Internet search
 	 * engines.
 	 */
-	public boolean keywords = false;
+	private boolean keywords = false;
 
-	public Messager messager = new Messager("OTM Documentation");
+	private Messager messager = new Messager("OTM Documentation");
 	
 	/**
      * True if command line option "-nohelp" is used. Default value is false.
      */
-    public boolean nohelp = true;
+    private boolean nohelp = true;
     
     /**
      * False if command line option "-noindex" is used. Default value is true.
      */
-    public boolean createindex = false;
+    private boolean createindex = false;
 
     /**
      * True if command line option "-use" is used. Default value is false.
      */
-    public boolean classuse = false;
+    private boolean classuse = false;
 
     /**
      * False if command line option "-notree" is used. Default value is true.
      */
-    public boolean createtree = false;
+    private boolean createtree = false;
     
     /**
      * True if command line option "-splitindex" is used. Default value is
      * false.
      */
-    public boolean splitindex = false;
+    private boolean splitindex = false;
     
     /**
      * Argument for command line option "-helpfile".
      */
-    public String helpfile = "";
+    private String helpfile = "";
 
 	/**
 	 * Set this to true if you would like to not emit any errors, warnings and
@@ -213,7 +213,7 @@ public class Configuration {
 	 */
 	private Configuration() {
 		message = new MessageRetriever(this, DOCLETS_RESOURCE);
-		topFile = "overview-summary.html";
+		setTopFile("overview-summary.html");
 	}
 
 	/**
@@ -323,7 +323,7 @@ public class Configuration {
 		if(XSD_NAMESPACE.equals(namespace)){
 			isGenerated = false;
 		}else if(!isGenerateBuiltins){
-			List<AbstractLibrary> libs = model.getLibrariesForNamespace(namespace);
+			List<AbstractLibrary> libs = getModel().getLibrariesForNamespace(namespace);
 			//only need one library to determine if its a builtin
 			// is this faster than traversing getBuiltinLibraries?
 			if(!libs.isEmpty() && libs.get(0) instanceof BuiltInLibrary){
@@ -349,7 +349,7 @@ public class Configuration {
 	}
 
 	public List<TLLibrary> getLibraries() {
-		return model.getUserDefinedLibraries();
+		return getModel().getUserDefinedLibraries();
 	}
 
 	/**
@@ -361,7 +361,7 @@ public class Configuration {
 	public void printError(String msg) {
 		if (silent)
 			return;
-		messager.printError(msg);
+		getMessager().printError(msg);
 	}
 
 	/**
@@ -373,7 +373,7 @@ public class Configuration {
 	public void printError(SourcePosition pos, String msg) {
 		if (silent)
 			return;
-		messager.printError(pos, msg);
+		getMessager().printError(pos, msg);
 	}
 
 	/**
@@ -385,7 +385,7 @@ public class Configuration {
 	public void printWarning(String msg) {
 		if (silent)
 			return;
-		messager.printWarning(msg);
+		getMessager().printWarning(msg);
 	}
 
 	/**
@@ -397,7 +397,7 @@ public class Configuration {
 	public void printWarning(SourcePosition pos, String msg) {
 		if (silent)
 			return;
-		messager.printWarning(pos, msg);
+		getMessager().printWarning(pos, msg);
 	}
 
 	/**
@@ -409,7 +409,7 @@ public class Configuration {
 	public void printNotice(String msg) {
 		if (silent)
 			return;
-		messager.printNotice(msg);
+		getMessager().printNotice(msg);
 	}
 
 	/**
@@ -421,7 +421,7 @@ public class Configuration {
 	public void printNotice(SourcePosition pos, String msg) {
 		if (silent)
 			return;
-		messager.printNotice(pos, msg);
+		getMessager().printNotice(pos, msg);
 	}
 
 	/**
@@ -485,6 +485,267 @@ public class Configuration {
 	 */
 	public void setExampleOptions(ExampleGeneratorOptions exampleOptions) {
 		this.exampleOptions = exampleOptions;
+	}
+
+	/**
+	 * Returns the value of the 'doctitle' field.
+	 *
+	 * @return String
+	 */
+	public String getDoctitle() {
+		return doctitle;
+	}
+
+	/**
+	 * Assigns the value of the 'doctitle' field.
+	 *
+	 * @param doctitle  the field value to assign
+	 */
+	public void setDoctitle(String doctitle) {
+		this.doctitle = doctitle;
+	}
+
+	/**
+	 * Returns the value of the 'windowtitle' field.
+	 *
+	 * @return String
+	 */
+	public String getWindowtitle() {
+		return windowtitle;
+	}
+
+	/**
+	 * Returns the value of the 'stylesheetfile' field.
+	 *
+	 * @return String
+	 */
+	public String getStylesheetfile() {
+		return stylesheetfile;
+	}
+
+	/**
+	 * Assigns the value of the 'stylesheetfile' field.
+	 *
+	 * @param stylesheetfile  the field value to assign
+	 */
+	public void setStylesheetfile(String stylesheetfile) {
+		this.stylesheetfile = stylesheetfile;
+	}
+
+	/**
+	 * Returns the value of the 'createoverview' field.
+	 *
+	 * @return boolean
+	 */
+	public boolean isCreateoverview() {
+		return createoverview;
+	}
+
+	/**
+	 * Assigns the value of the 'createoverview' field.
+	 *
+	 * @param createoverview  the field value to assign
+	 */
+	public void setCreateoverview(boolean createoverview) {
+		this.createoverview = createoverview;
+	}
+
+	/**
+	 * Returns the value of the 'topFile' field.
+	 *
+	 * @return String
+	 */
+	public String getTopFile() {
+		return topFile;
+	}
+
+	/**
+	 * Assigns the value of the 'topFile' field.
+	 *
+	 * @param topFile  the field value to assign
+	 */
+	public void setTopFile(String topFile) {
+		this.topFile = topFile;
+	}
+
+	/**
+	 * Returns the value of the 'currentMember' field.
+	 *
+	 * @return DocumentationBuilder
+	 */
+	public DocumentationBuilder getCurrentMember() {
+		return currentMember;
+	}
+
+	/**
+	 * Assigns the value of the 'currentMember' field.
+	 *
+	 * @param currentMember  the field value to assign
+	 */
+	public void setCurrentMember(DocumentationBuilder currentMember) {
+		this.currentMember = currentMember;
+	}
+
+	/**
+	 * Returns the value of the 'docencoding' field.
+	 *
+	 * @return String
+	 */
+	public String getDocencoding() {
+		return docencoding;
+	}
+
+	/**
+	 * Assigns the value of the 'docencoding' field.
+	 *
+	 * @param docencoding  the field value to assign
+	 */
+	public void setDocencoding(String docencoding) {
+		this.docencoding = docencoding;
+	}
+
+	/**
+	 * Returns the value of the 'keywords' field.
+	 *
+	 * @return boolean
+	 */
+	public boolean isKeywords() {
+		return keywords;
+	}
+
+	/**
+	 * Assigns the value of the 'keywords' field.
+	 *
+	 * @param keywords  the field value to assign
+	 */
+	public void setKeywords(boolean keywords) {
+		this.keywords = keywords;
+	}
+
+	/**
+	 * Returns the value of the 'messager' field.
+	 *
+	 * @return Messager
+	 */
+	public Messager getMessager() {
+		return messager;
+	}
+
+	/**
+	 * Assigns the value of the 'messager' field.
+	 *
+	 * @param messager  the field value to assign
+	 */
+	public void setMessager(Messager messager) {
+		this.messager = messager;
+	}
+
+	/**
+	 * Returns the value of the 'nohelp' field.
+	 *
+	 * @return boolean
+	 */
+	public boolean isNohelp() {
+		return nohelp;
+	}
+
+	/**
+	 * Assigns the value of the 'nohelp' field.
+	 *
+	 * @param nohelp  the field value to assign
+	 */
+	public void setNohelp(boolean nohelp) {
+		this.nohelp = nohelp;
+	}
+
+	/**
+	 * Returns the value of the 'createindex' field.
+	 *
+	 * @return boolean
+	 */
+	public boolean isCreateindex() {
+		return createindex;
+	}
+
+	/**
+	 * Assigns the value of the 'createindex' field.
+	 *
+	 * @param createindex  the field value to assign
+	 */
+	public void setCreateindex(boolean createindex) {
+		this.createindex = createindex;
+	}
+
+	/**
+	 * Returns the value of the 'classuse' field.
+	 *
+	 * @return boolean
+	 */
+	public boolean isClassuse() {
+		return classuse;
+	}
+
+	/**
+	 * Assigns the value of the 'classuse' field.
+	 *
+	 * @param classuse  the field value to assign
+	 */
+	public void setClassuse(boolean classuse) {
+		this.classuse = classuse;
+	}
+
+	/**
+	 * Returns the value of the 'createtree' field.
+	 *
+	 * @return boolean
+	 */
+	public boolean isCreatetree() {
+		return createtree;
+	}
+
+	/**
+	 * Assigns the value of the 'createtree' field.
+	 *
+	 * @param createtree  the field value to assign
+	 */
+	public void setCreatetree(boolean createtree) {
+		this.createtree = createtree;
+	}
+
+	/**
+	 * Returns the value of the 'splitindex' field.
+	 *
+	 * @return boolean
+	 */
+	public boolean isSplitindex() {
+		return splitindex;
+	}
+
+	/**
+	 * Assigns the value of the 'splitindex' field.
+	 *
+	 * @param splitindex  the field value to assign
+	 */
+	public void setSplitindex(boolean splitindex) {
+		this.splitindex = splitindex;
+	}
+
+	/**
+	 * Returns the value of the 'helpfile' field.
+	 *
+	 * @return String
+	 */
+	public String getHelpfile() {
+		return helpfile;
+	}
+
+	/**
+	 * Assigns the value of the 'helpfile' field.
+	 *
+	 * @param helpfile  the field value to assign
+	 */
+	public void setHelpfile(String helpfile) {
+		this.helpfile = helpfile;
 	}
 
 }

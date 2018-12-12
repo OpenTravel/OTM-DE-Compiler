@@ -37,7 +37,10 @@ import org.slf4j.LoggerFactory;
  */
 public class ObsoleteBuiltInValidationVisitor extends ObsoleteBuiltInVisitor {
 	
-    private static Logger log = LoggerFactory.getLogger( ObsoleteBuiltInValidationVisitor.class );
+	@SuppressWarnings("squid:S1075") // Invalid Sonar finding at this location
+	private static final String OTA_SIMPLE_TYPES_PATH = "/http/org/opentravel/www/otm/common/0.0.0/OTA_SimpleTypes_0_0_0.otm";
+	
+	private static Logger log = LoggerFactory.getLogger( ObsoleteBuiltInValidationVisitor.class );
     
 	/**
 	 * @see org.opentravel.schemacompiler.transform.util.ObsoleteBuiltInVisitor#loadObsoleteBuiltIn()
@@ -55,10 +58,10 @@ public class ObsoleteBuiltInValidationVisitor extends ObsoleteBuiltInVisitor {
 			ota2Simples = model.getLibrary( OBSOLETE_BUILTIN_NS, OBSOLETE_BUILTIN_NAME );
 			ota2Simples.setLibraryUrl( URLUtils.toURL( new File(
 					RepositoryManager.getDefault().getFileManager().getRepositoryLocation(),
-					"/http/org/opentravel/www/otm/common/0.0.0/OTA_SimpleTypes_0_0_0.otm" ) ) );
+					OTA_SIMPLE_TYPES_PATH ) ) );
 			
-		} catch (Throwable t) {
-			log.warn("Error loading obsolete built-in dependency from the local classpath.", t);
+		} catch (Exception e) {
+			log.warn("Error loading obsolete built-in dependency from the local classpath.", e);
 		}
 		return ota2Simples;
 	}

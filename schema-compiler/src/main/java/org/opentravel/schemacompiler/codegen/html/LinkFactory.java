@@ -61,7 +61,7 @@ public abstract class LinkFactory {
      * @return the output of the link.
      */
     public LinkOutput getLinkOutput(LinkInfo linkInfo) {
-      if (linkInfo.builder != null) {
+      if (linkInfo.getBuilder() != null) {
             //Just a class link
             return getObjectLink(linkInfo);
         } else {

@@ -48,7 +48,7 @@ public class HtmlDocletTest extends AbstractWriterTest {
 	 */
 	@Test
 	public void testGenerateOtherFiles() throws Exception {
-		config.stylesheetfile = "";
+		config.setStylesheetfile("");
 		doclet.generateOtherFiles(config.getModel());
 		File file = new File(config.getDestDirName()
 				+ HtmlDoclet.DEFAULT_STYLESHEET);

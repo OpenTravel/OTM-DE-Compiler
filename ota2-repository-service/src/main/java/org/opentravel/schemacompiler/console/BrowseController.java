@@ -54,7 +54,17 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class BrowseController extends BaseController {
 
-    private static Log log = LogFactory.getLog(BrowseController.class);
+	private static final String FILENAME = "filename";
+	private static final String BASE_NAMESPACE = "baseNamespace";
+	private static final String PAGE_UTILS = "pageUtils";
+	private static final String IMAGE_RESOLVER = "imageResolver";
+	private static final String BROWSE_ITEMS = "browseItems";
+	private static final String ERROR_DISPLAYING_PAGE = "An error occured while displaying the page (see server log for details).";
+	private static final String REDIRECT_SUBSCRIPTIONS = "redirect:/console/subscriptions.html";
+	private static final String REDIRECT_INDEX = "redirect:/console/index.html";
+	private static final String REDIRECT_BROWSE = "redirect:/console/browse.html";
+	
+	private static Log log = LogFactory.getLog(BrowseController.class);
     
     /**
      * Called by the Spring MVC controller to display the application browse page.
@@ -68,8 +78,8 @@ public class BrowseController extends BaseController {
      */
     @RequestMapping({ "/browse.html", "/browse.htm" })
     public String browsePage(
-            @RequestParam(value = "baseNamespace", required = false) String baseNamespace,
-            @RequestParam(value = "filename", required = false) String filename,
+            @RequestParam(value = BASE_NAMESPACE, required = false) String baseNamespace,
+            @RequestParam(value = FILENAME, required = false) String filename,
             HttpSession session, Model model) {
         try {
             RepositoryManager repositoryManager = getRepositoryManager();
@@ -144,15 +154,15 @@ public class BrowseController extends BaseController {
                     		securityManager.isAuthorized(user, parentNS, RepositoryPermission.WRITE));
                 }
             }
-            model.addAttribute("imageResolver", new SearchResultImageResolver());
-            model.addAttribute("pageUtils", new PageUtils());
-            model.addAttribute("baseNamespace", baseNamespace);
-            model.addAttribute("filename", filename);
-            model.addAttribute("browseItems", browseItems);
+            model.addAttribute(IMAGE_RESOLVER, new SearchResultImageResolver());
+            model.addAttribute(PAGE_UTILS, new PageUtils());
+            model.addAttribute(BASE_NAMESPACE, baseNamespace);
+            model.addAttribute(FILENAME, filename);
+            model.addAttribute(BROWSE_ITEMS, browseItems);
 
         } catch (Exception e) {
             log.error("An error occured while displaying the browse page.", e);
-            setErrorMessage("An error occured while displaying the page (see server log for details).", model);
+            setErrorMessage(ERROR_DISPLAYING_PAGE, model);
         }
         return applyCommonValues(model, "browse");
     }
@@ -169,7 +179,7 @@ public class BrowseController extends BaseController {
      */
     @RequestMapping({ "/createNamespace.html", "/createNamespace.htm" })
     public String createNamespace(
-            @RequestParam(value = "baseNamespace", required = true) String baseNamespace,
+            @RequestParam(value = BASE_NAMESPACE, required = true) String baseNamespace,
             @RequestParam(value = "nsExtension", required = false) String nsExtension,
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
         String targetPage = null;
@@ -180,8 +190,8 @@ public class BrowseController extends BaseController {
                 getRepositoryManager().createNamespace(newNS);
 				model.asMap().clear();
                 setStatusMessage("Namespace created successfully.", redirectAttrs);
-				redirectAttrs.addAttribute( "baseNamespace", baseNamespace );
-                targetPage = "redirect:/console/browse.html";
+				redirectAttrs.addAttribute( BASE_NAMESPACE, baseNamespace );
+                targetPage = REDIRECT_BROWSE;
 
             } catch (RepositoryException e) {
                 log.error("Error creating namespace: " + newNS, e);
@@ -190,7 +200,7 @@ public class BrowseController extends BaseController {
         }
 
         if (targetPage == null) {
-            model.addAttribute("baseNamespace", baseNamespace);
+            model.addAttribute(BASE_NAMESPACE, baseNamespace);
             model.addAttribute("nsExtension", nsExtension);
             targetPage = applyCommonValues(model, "createNamespace");
         }
@@ -209,7 +219,7 @@ public class BrowseController extends BaseController {
      */
     @RequestMapping({ "/deleteNamespace.html", "/deleteNamespace.htm" })
     public String deleteNamespace(
-            @RequestParam(value = "baseNamespace", required = true) String baseNamespace,
+            @RequestParam(value = BASE_NAMESPACE, required = true) String baseNamespace,
             @RequestParam(value = "confirmDelete", required = false) boolean confirmDelete,
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
         String targetPage = null;
@@ -222,8 +232,8 @@ public class BrowseController extends BaseController {
                 getRepositoryManager().deleteNamespace(baseNamespace);
 				model.asMap().clear();
                 setStatusMessage("Namespace deleted successfully.", redirectAttrs);
-				redirectAttrs.addAttribute( "baseNamespace", parentNS );
-                targetPage = "redirect:/console/browse.html";
+				redirectAttrs.addAttribute( BASE_NAMESPACE, parentNS );
+                targetPage = REDIRECT_BROWSE;
 
             } catch (RepositoryException e) {
                 log.error("Error deleting namespace: " + baseNamespace, e);
@@ -232,7 +242,7 @@ public class BrowseController extends BaseController {
         }
 
         if (targetPage == null) {
-            model.addAttribute("baseNamespace", baseNamespace);
+            model.addAttribute(BASE_NAMESPACE, baseNamespace);
             targetPage = applyCommonValues(model, "deleteNamespace");
         }
         return targetPage;
@@ -261,13 +271,13 @@ public class BrowseController extends BaseController {
             	
             } else {
             	setErrorMessage( "You must login in order to view your locked libraries.", redirectAttrs );
-            	return "redirect:/console/index.html";
+            	return REDIRECT_INDEX;
             }
             model.addAttribute("lockedLibraries", lockedLibraries);
             
         } catch (Exception e) {
             log.error("An error occured while displaying the locked libraries page.", e);
-            setErrorMessage("An error occured while displaying the page (see server log for details).", model);
+            setErrorMessage(ERROR_DISPLAYING_PAGE, model);
         }
         return applyCommonValues(model, "lockedLibraries");
     }
@@ -292,14 +302,14 @@ public class BrowseController extends BaseController {
             	subscriptions = searchService.getSubscriptions( user.getUserId() );
             } else {
             	setErrorMessage( "You must login in order to view your subscriptions.", redirectAttrs );
-            	return "redirect:/console/index.html";
+            	return REDIRECT_INDEX;
             }
             model.addAttribute("user", user);
             model.addAttribute("subscriptions", subscriptions);
             
         } catch (Exception e) {
             log.error("An error occured while displaying the subscriptions page.", e);
-            setErrorMessage("An error occured while displaying the page (see server log for details).", model);
+            setErrorMessage(ERROR_DISPLAYING_PAGE, model);
         }
         return applyCommonValues(model, "subscriptions");
     }
@@ -316,7 +326,7 @@ public class BrowseController extends BaseController {
      */
     @RequestMapping(value = { "/namespaceSubscription.html", "/namespaceSubscription.htm" })
     public String namespaceSubscription(
-            @RequestParam(value = "baseNamespace", required = false) String baseNamespace,
+            @RequestParam(value = BASE_NAMESPACE, required = false) String baseNamespace,
             @RequestParam(value = "cts", required = false) boolean cancelToSubscriptionPage,
             @RequestParam(value = "etLibraryPublish", required = false) boolean etLibraryPublish,
             @RequestParam(value = "etLibraryNewVersion", required = false) boolean etLibraryNewVersion,
@@ -368,7 +378,7 @@ public class BrowseController extends BaseController {
                 etLibraryMoveOrRename = eventTypes.contains( SubscriptionEventType.LIBRARY_MOVE_OR_RENAME );
                 etNamespaceAction = eventTypes.contains( SubscriptionEventType.NAMESPACE_ACTION );
             }
-            model.addAttribute("baseNamespace", baseNamespace);
+            model.addAttribute(BASE_NAMESPACE, baseNamespace);
             model.addAttribute("cts", cancelToSubscriptionPage);
             model.addAttribute("etLibraryPublish", etLibraryPublish);
             model.addAttribute("etLibraryNewVersion", etLibraryNewVersion);
@@ -394,11 +404,11 @@ public class BrowseController extends BaseController {
         		} catch (InterruptedException e) {
         			Thread.currentThread().interrupt();
         		}
-                targetPage = "redirect:/console/subscriptions.html";
+                targetPage = REDIRECT_SUBSCRIPTIONS;
                 
         	} else {
-        		redirectAttrs.addAttribute("baseNamespace", baseNamespace);
-        		targetPage = "redirect:/console/browse.html";
+        		redirectAttrs.addAttribute(BASE_NAMESPACE, baseNamespace);
+        		targetPage = REDIRECT_BROWSE;
         	}
         	
         } else {
@@ -419,10 +429,10 @@ public class BrowseController extends BaseController {
      */
     @RequestMapping(value = { "/librarySubscription.html", "/librarySubscription.htm" })
     public String librarySubscription(
-            @RequestParam(value = "baseNamespace", required = false) String baseNamespace,
+            @RequestParam(value = BASE_NAMESPACE, required = false) String baseNamespace,
             @RequestParam(value = "libraryName", required = false) String libraryName,
             @RequestParam(value = "version", required = false) String version,
-            @RequestParam(value = "filename", required = false) String filename,
+            @RequestParam(value = FILENAME, required = false) String filename,
             @RequestParam(value = "allVersions", required = false) boolean allVersions,
             @RequestParam(value = "etLibraryPublish", required = false) boolean etLibraryPublish,
             @RequestParam(value = "etLibraryNewVersion", required = false) boolean etLibraryNewVersion,
@@ -452,15 +462,15 @@ public class BrowseController extends BaseController {
             
         	if ((currentUser == null) || (currentUser == UserPrincipal.ANONYMOUS_USER)) {
                 setErrorMessage("You must be logged in to edit your subscription settings.", redirectAttrs);
-                return "redirect:/console/index.html";
+                return REDIRECT_INDEX;
                 
             } else if ((baseNamespace == null) || (libraryName == null)) {
                 setErrorMessage("Unable to edit subscription settings - library information not specified.", redirectAttrs);
-                return "redirect:/console/index.html";
+                return REDIRECT_INDEX;
                 
             } else if (item == null) {
                 setErrorMessage("The library associated with this subscription does not exist", redirectAttrs);
-                return "redirect:/console/subscriptions.html";
+                return REDIRECT_SUBSCRIPTIONS;
             	
             } else if (updateSubscription) {
             	List<SubscriptionEventType> eventTypes = new ArrayList<>();
@@ -498,10 +508,10 @@ public class BrowseController extends BaseController {
                 etLibraryMoveOrRename = eventTypes.contains( SubscriptionEventType.LIBRARY_MOVE_OR_RENAME );
             }
             model.addAttribute("item", item);
-            model.addAttribute("baseNamespace", baseNamespace);
+            model.addAttribute(BASE_NAMESPACE, baseNamespace);
             model.addAttribute("libraryName", libraryName);
             model.addAttribute("version", version);
-            model.addAttribute("filename", filename);
+            model.addAttribute(FILENAME, filename);
             model.addAttribute("allVersions", allVersions);
             model.addAttribute("etLibraryPublish", etLibraryPublish);
             model.addAttribute("etLibraryNewVersion", etLibraryNewVersion);
@@ -526,11 +536,11 @@ public class BrowseController extends BaseController {
         		} catch (InterruptedException e) {
         			Thread.currentThread().interrupt();
         		}
-                targetPage = "redirect:/console/subscriptions.html";
+                targetPage = REDIRECT_SUBSCRIPTIONS;
         		
         	} else {
-            	redirectAttrs.addAttribute("baseNamespace", baseNamespace);
-            	redirectAttrs.addAttribute("filename", filename);
+            	redirectAttrs.addAttribute(BASE_NAMESPACE, baseNamespace);
+            	redirectAttrs.addAttribute(FILENAME, filename);
             	redirectAttrs.addAttribute("version", version);
             	targetPage = "redirect:/console/libraryInfo.html";
         	}

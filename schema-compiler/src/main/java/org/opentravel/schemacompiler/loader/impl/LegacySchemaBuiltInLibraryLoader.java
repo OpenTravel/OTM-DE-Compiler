@@ -66,21 +66,19 @@ public class LegacySchemaBuiltInLibraryLoader extends AbstractBuiltInLibraryLoad
                     xsdLibrary.setPrefix(getLibraryDeclaration().getDefaultPrefix());
                 }
 
-                if (xsdLibrary != null) {
-                    SchemaDeclaration libraryDeclaration = getLibraryDeclaration();
+                SchemaDeclaration libraryDeclaration = getLibraryDeclaration();
 
-                    library = new BuiltInLibrary(schemaInfo.getJaxbArtifact().getTargetNamespace(),
-                            libraryDeclaration.getName(), libraryDeclaration.getDefaultPrefix(),
-                            inputSource.getLibraryURL(), xsdLibrary.getNamedMembers(),
-                            xsdLibrary.getNamespaceImports(), xsdLibrary.getIncludes(),
-                            getLibraryDeclaration(), xsdLibrary.getVersionScheme());
-                }
+                library = new BuiltInLibrary(schemaInfo.getJaxbArtifact().getTargetNamespace(),
+                        libraryDeclaration.getName(), libraryDeclaration.getDefaultPrefix(),
+                        inputSource.getLibraryURL(), xsdLibrary.getNamedMembers(),
+                        xsdLibrary.getNamespaceImports(), xsdLibrary.getIncludes(),
+                        getLibraryDeclaration(), xsdLibrary.getVersionScheme());
             }
-        } catch (Throwable t) {
-        	t.printStackTrace(System.out);
-            throw new LibraryLoaderException("Error constructing built-in library instance ("
-                    + inputSource.getLibraryURL() + ")");
-        }
+            
+		} catch (Exception e) {
+			throw new LibraryLoaderException(
+					"Error constructing built-in library instance (" + inputSource.getLibraryURL() + ")");
+		}
         return library;
     }
 

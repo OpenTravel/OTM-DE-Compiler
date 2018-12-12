@@ -101,8 +101,8 @@ public class ResourceFilenameBuilder implements CodeGenerationFilenameBuilder<TL
 	    				boolean changesMade = false;
 	    				
 	    				for (FilenameDetails fd : detailsList) {
-	    					if (!fd.nsComponents.isEmpty()) {
-	        					fd.resourceFilename = fd.resource.getName() + "_" + fd.nsComponents.remove( 0 );
+	    					if (!fd.getNsComponents().isEmpty()) {
+	        					fd.setResourceFilename(fd.getResource().getName() + "_" + fd.getNsComponents().remove( 0 ));
 	    						changesMade = true;
 	    					}
 	    				}
@@ -118,7 +118,7 @@ public class ResourceFilenameBuilder implements CodeGenerationFilenameBuilder<TL
 	    	} while (conflictsExist);
 	    	
 	    	for (FilenameDetails fd : filenameDetails) {
-	    		filenameMap.put( fd.resource, fd.getFilename() );
+	    		filenameMap.put( fd.getResource(), fd.getFilename() );
 	    	}
 		}
 		return filenameMap;
@@ -127,42 +127,114 @@ public class ResourceFilenameBuilder implements CodeGenerationFilenameBuilder<TL
     /**
      * Encapsulates the various details of a resource's filename (used during initialization).
      */
-    private static class FilenameDetails {
-    	
-    	public TLResource resource;
-    	public List<String> nsComponents = new ArrayList<>();
-    	public String resourceFilename;
-    	public String versionSuffix;
-    	
-    	/**
-    	 * Constructor that assigns the initial values for each component of the filename
-    	 * details.
-    	 * 
-    	 * @param resource  the resource to which a filename will be assigned
-    	 */
-    	public FilenameDetails(TLResource resource) {
-    		String baseNS = resource.getBaseNamespace();
-    		
-    		this.resource = resource;
-    		this.resourceFilename = resource.getName();
-            this.versionSuffix = "_" + resource.getVersion().replaceAll("\\.", "_");
-    		
-            if (baseNS.endsWith("/")) {
-            	baseNS = baseNS.substring( 0, baseNS.length() - 1 );
-            }
-            this.nsComponents = new ArrayList<>( Arrays.asList( baseNS.split( "/" ) ) );
-            Collections.reverse( this.nsComponents );
-    	}
-    	
-    	/**
-    	 * Returns the filename as currently specified by these details.
-    	 * 
-    	 * @return String
-    	 */
-    	public String getFilename() {
-    		return resourceFilename + versionSuffix;
-    	}
-    	
-    }
+	private static class FilenameDetails {
+		
+		private TLResource resource;
+		private List<String> nsComponents = new ArrayList<>();
+		private String resourceFilename;
+		private String versionSuffix;
+		
+		/**
+		 * Constructor that assigns the initial values for each component of the
+		 * filename details.
+		 * 
+		 * @param resource the resource to which a filename will be assigned
+		 */
+		public FilenameDetails(TLResource resource) {
+			String baseNS = resource.getBaseNamespace();
+			
+			this.setResource(resource);
+			this.setResourceFilename(resource.getName());
+			this.setVersionSuffix("_" + resource.getVersion().replaceAll("\\.", "_"));
+			
+			if (baseNS.endsWith("/")) {
+				baseNS = baseNS.substring(0, baseNS.length() - 1);
+			}
+			this.setNsComponents(new ArrayList<>(Arrays.asList(baseNS.split("/"))));
+			Collections.reverse(this.getNsComponents());
+		}
+		
+		/**
+		 * Returns the filename as currently specified by these details.
+		 * 
+		 * @return String
+		 */
+		public String getFilename() {
+			return getResourceFilename() + getVersionSuffix();
+		}
+
+		/**
+		 * Returns the value of the 'resource' field.
+		 *
+		 * @return TLResource
+		 */
+		public TLResource getResource() {
+			return resource;
+		}
+
+		/**
+		 * Assigns the value of the 'resource' field.
+		 *
+		 * @param resource  the field value to assign
+		 */
+		public void setResource(TLResource resource) {
+			this.resource = resource;
+		}
+
+		/**
+		 * Returns the value of the 'nsComponents' field.
+		 *
+		 * @return List<String>
+		 */
+		public List<String> getNsComponents() {
+			return nsComponents;
+		}
+
+		/**
+		 * Assigns the value of the 'nsComponents' field.
+		 *
+		 * @param nsComponents  the field value to assign
+		 */
+		public void setNsComponents(List<String> nsComponents) {
+			this.nsComponents = nsComponents;
+		}
+
+		/**
+		 * Returns the value of the 'resourceFilename' field.
+		 *
+		 * @return String
+		 */
+		public String getResourceFilename() {
+			return resourceFilename;
+		}
+
+		/**
+		 * Assigns the value of the 'resourceFilename' field.
+		 *
+		 * @param resourceFilename  the field value to assign
+		 */
+		public void setResourceFilename(String resourceFilename) {
+			this.resourceFilename = resourceFilename;
+		}
+
+		/**
+		 * Returns the value of the 'versionSuffix' field.
+		 *
+		 * @return String
+		 */
+		public String getVersionSuffix() {
+			return versionSuffix;
+		}
+
+		/**
+		 * Assigns the value of the 'versionSuffix' field.
+		 *
+		 * @param versionSuffix  the field value to assign
+		 */
+		public void setVersionSuffix(String versionSuffix) {
+			this.versionSuffix = versionSuffix;
+		}
+		
+	}
     
 }

@@ -21,11 +21,16 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Class that initiates the shutdown of the <code>IndexProcessManager</code> service.
  */
 public class ShutdownIndexingService {
 	
+    private static Log log = LogFactory.getLog( ShutdownIndexingService.class );
+    
 	/**
 	 * Main method invoked from the command-line.
 	 * 
@@ -40,8 +45,8 @@ public class ShutdownIndexingService {
 			jmxc.connect();
 			jmxc.getMBeanServerConnection().invoke(name, "shutdown", null, null);
 			
-		} catch (Throwable t) {
-			t.printStackTrace( System.out );
+		} catch (Exception e) {
+			log.error("Error attempting to shut down indexing service.", e);
 		}
 	}
 	

@@ -32,6 +32,11 @@ import org.opentravel.schemacompiler.model.TLProperty;
  */
 public class JsonSchemaNamingUtils {
 	
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private JsonSchemaNamingUtils() {}
+	
     /**
      * Returns the globally-accessible type name for the given entity in the XML schema output.
      * <p>

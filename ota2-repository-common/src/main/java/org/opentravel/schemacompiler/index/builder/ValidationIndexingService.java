@@ -59,6 +59,7 @@ import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.saver.LibrarySaveException;
 import org.opentravel.schemacompiler.transform.util.ModelReferenceResolver;
+import org.opentravel.schemacompiler.util.FileUtils;
 import org.opentravel.schemacompiler.validate.FindingMessageFormat;
 import org.opentravel.schemacompiler.validate.ValidationFinding;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
@@ -181,7 +182,7 @@ public class ValidationIndexingService implements IndexingTerms {
 			log.error("Error creating validation index for library: " + item.getFilename(), e);
 			
 		} finally {
-			if (projectFile != null) projectFile.delete();
+			FileUtils.delete( projectFile );
 		}
 	}
 	
@@ -193,7 +194,7 @@ public class ValidationIndexingService implements IndexingTerms {
 	 */
 	public IndexBuilder<ValidationFinding> getIndexBuilder() {
 		return new IndexBuilder<ValidationFinding>() {
-			public void performIndexingAction() {
+			@Override public void performIndexingAction() {
 				setCreateIndex( true );
 				super.performIndexingAction();
 			}
@@ -315,10 +316,14 @@ public class ValidationIndexingService implements IndexingTerms {
 		} finally {
 			try {
 				if (searcher != null) searchManager.release( searcher );
-			} catch (Throwable t) {}
+			} catch (Exception e) {
+				// Ignore error
+			}
 			try {
 				if (searchManager != null) searchManager.close();
-			} catch (Throwable t) {}
+			} catch (Exception e) {
+				// Ignore error
+			}
 		}
 	}
 	

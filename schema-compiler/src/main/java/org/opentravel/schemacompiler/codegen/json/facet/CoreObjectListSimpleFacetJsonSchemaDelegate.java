@@ -46,7 +46,7 @@ public class CoreObjectListSimpleFacetJsonSchemaDelegate extends TLListFacetJson
 		JsonSchema arraySchema = new JsonSchema();
         TLListFacet sourceFacet = getSourceFacet();
 		
-        arraySchema.setType( JsonType.jsonArray );
+        arraySchema.setType( JsonType.JSON_ARRAY );
 		arraySchema.setItems( itemSchemaRef );
         itemSchemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath( sourceFacet.getItemFacet(), sourceFacet ) );
 		definition.setName( getDefinitionName( sourceFacet ) );

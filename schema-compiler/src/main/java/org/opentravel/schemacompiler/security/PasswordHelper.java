@@ -60,7 +60,7 @@ public class PasswordHelper {
      *            the plain-text password to encrypt
      * @return String
      */
-    public static synchronized final String encrypt(String original) {
+    public static final synchronized String encrypt(String original) {
         try {
             return Base64.encodeBase64String(encryptionCipher.doFinal(original.getBytes()));
 
@@ -76,7 +76,7 @@ public class PasswordHelper {
      *            the encrypted password to decrypt
      * @return String
      */
-    public static synchronized final String decrypt(String encryptedPassword) {
+    public static final synchronized String decrypt(String encryptedPassword) {
         try {
             return new String(decryptionCipher.doFinal(Base64.decodeBase64(encryptedPassword)))
                     .trim();
@@ -155,23 +155,14 @@ public class PasswordHelper {
      * @throws IOException
      */
     private static BigInteger[] loadKeyFile(String fileLocation) throws IOException {
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new InputStreamReader(
-                    CompilerExtensionRegistry.loadResource(fileLocation)));
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                    CompilerExtensionRegistry.loadResource(fileLocation)))) {
             String modBase64 = reader.readLine();
             String expBase64 = reader.readLine();
             BigInteger modulus = new BigInteger(Base64.decodeBase64(modBase64));
             BigInteger exponent = new BigInteger(Base64.decodeBase64(expBase64));
 
             return new BigInteger[] { modulus, exponent };
-
-        } finally {
-            try {
-                if (reader != null)
-                    reader.close();
-            } catch (Throwable t) {
-            }
         }
     }
 
@@ -183,8 +174,8 @@ public class PasswordHelper {
             encryptionCipher = loadEncryptionCipher();
             decryptionCipher = loadDecryptionCipher();
 
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

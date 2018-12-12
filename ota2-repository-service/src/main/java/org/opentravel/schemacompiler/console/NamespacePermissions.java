@@ -18,6 +18,7 @@ package org.opentravel.schemacompiler.console;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -138,8 +139,8 @@ public class NamespacePermissions {
      * @return NamespaceAuthorizations
      */
     public NamespaceAuthorizations toJaxbAuthorizations() {
-        Map<RepositoryPermission,AuthorizationSpec> jaxbGrants = new HashMap<>();
-        Map<RepositoryPermission,AuthorizationSpec> jaxbDenies = new HashMap<>();
+        Map<RepositoryPermission,AuthorizationSpec> jaxbGrants = new EnumMap<>( RepositoryPermission.class );
+        Map<RepositoryPermission,AuthorizationSpec> jaxbDenies = new EnumMap<>( RepositoryPermission.class );
         NamespaceAuthorizations jaxbAuthorizations = new NamespaceAuthorizations();
 
         // Assemble the set of granted and denied permissions

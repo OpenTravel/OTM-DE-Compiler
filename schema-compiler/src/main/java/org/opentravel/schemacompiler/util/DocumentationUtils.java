@@ -197,8 +197,8 @@ public class DocumentationUtils {
 	 * @return TLDocumentationOwner
 	 */
 	public static TLDocumentationOwner getDocumentationOwner(String docPath, TLLibrary library) {
-		String[] _pathParts = ((docPath == null) || (docPath.length() <= 1)) ? new String[0] : docPath.split("\\|");
-		List<String> pathParts = new ArrayList<>( Arrays.asList( _pathParts ) );
+		String[] pathPartsArray = ((docPath == null) || (docPath.length() <= 1)) ? new String[0] : docPath.split("\\|");
+		List<String> pathParts = new ArrayList<>( Arrays.asList( pathPartsArray ) );
 		ModelElement currentElement = library;
 		TLDocumentationOwner docOwner = null;
 		
@@ -331,11 +331,11 @@ public class DocumentationUtils {
 	 */
 	private static String getIntegerListIdentity(List<Integer> intList) {
 		StringBuilder identity = new StringBuilder();
-		List<Integer> _list = new ArrayList<>( intList );
+		List<Integer> tempIntList = new ArrayList<>( intList );
 		
-		Collections.sort( _list );
+		Collections.sort( tempIntList );
 		
-		for (Integer value : _list) {
+		for (Integer value : tempIntList) {
 			identity.append(":" + value);
 		}
 		return identity.toString();

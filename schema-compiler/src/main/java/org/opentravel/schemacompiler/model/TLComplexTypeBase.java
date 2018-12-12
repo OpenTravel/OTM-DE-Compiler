@@ -33,6 +33,8 @@ import org.opentravel.schemacompiler.util.OTM16Upgrade;
 public abstract class TLComplexTypeBase extends TLLibraryMember implements TLPropertyType,
         TLVersionedExtensionOwner, TLDocumentationOwner, TLEquivalentOwner {
 
+	protected static final String FACETS_CANNOT_BE_MODIFIED = "Facets cannot be modified once their owner has been assigned to a model.";
+	
     private String name;
     private boolean notExtendable;
     private TLExtension extension;

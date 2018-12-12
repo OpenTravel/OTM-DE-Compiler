@@ -28,6 +28,7 @@ import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryHistoryItemType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryHistoryType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.ObjectFactory;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryItemIdentityType;
+import org.opentravel.schemacompiler.util.FileUtils;
 import org.opentravel.schemacompiler.xml.XMLGregorianCalendarConverter;
 
 /**
@@ -65,7 +66,8 @@ public class RepositoryHistoryManager {
 	protected void addToHistory(RepositoryItem item, Date effectiveOn, String remarks)
 			throws RepositoryException {
 		LibraryHistoryItemType newCommit = new LibraryHistoryItemType();
-		File historyFile = getHistoryFile( item ), hContentFile;
+		File historyFile = getHistoryFile( item );
+		File hContentFile;
 		LibraryHistoryType history = loadHistoryFile( historyFile );
 		String userId = manager.getFileManager().getCurrentUserId();
 		int commitNumber = 0;
@@ -138,11 +140,11 @@ public class RepositoryHistoryManager {
 				
 				if (hContentFile.exists()) {
 					manager.getFileManager().addToChangeSet( hContentFile );
-					hContentFile.delete();
+					FileUtils.delete( hContentFile );
 				}
 			}
 			manager.getFileManager().addToChangeSet( historyFile );
-			historyFile.delete();
+			FileUtils.delete( historyFile );
 		}
 	}
 	
@@ -253,6 +255,7 @@ public class RepositoryHistoryManager {
 	 *							return the history folder location
 	 * @return File
 	 */
+	@SuppressWarnings("squid:S1075") // Invalid Sonar code smell at this location
 	private File getHistoryFolder(File itemMetadataFile) {
 		return new File( itemMetadataFile.getParentFile(), "/history" );
 	}

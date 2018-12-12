@@ -58,6 +58,7 @@ import org.opentravel.schemacompiler.saver.LibrarySaveException;
 import org.opentravel.schemacompiler.saver.impl.Library15FileSaveHandler;
 import org.opentravel.schemacompiler.saver.impl.Library16FileSaveHandler;
 import org.opentravel.schemacompiler.security.LibraryCrcCalculator;
+import org.opentravel.schemacompiler.util.FileUtils;
 import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
 import org.opentravel.schemacompiler.util.URLUtils;
@@ -78,6 +79,8 @@ import org.opentravel.schemacompiler.validate.ValidationFindings;
  * contents of the OTA2.0 repository.
  */
 public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
+	
+	private static final String SNAPSHOT_SUFFIX = "#snapshot";
 	
 	private static final String DEFAULT_SNAPSHOT_SUFFIX  = "-snapshot";
 	private static final String PROVIDER_SNAPSHOT_SUFFIX = "-provider-snapshot";
@@ -262,7 +265,7 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 				// Delete any .bak files that might exist in the snapshot folder
 				for (File ssFile : snapshotLibraryFolder.listFiles()) {
 					if (ssFile.getName().endsWith(".bak")) {
-						ssFile.delete();
+						FileUtils.delete( ssFile );
 					}
 				}
 				
@@ -302,7 +305,7 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 			throws LibrarySaveException {
 		ProjectManager projectManager = originalProject.getProjectManager();
 		Project snapshotProject = projectManager.newProject(
-				snapshotProjectFile, originalProject.getProjectId() + "#snapshot",
+				snapshotProjectFile, originalProject.getProjectId() + SNAPSHOT_SUFFIX,
 				originalProject.getName(), originalProject.getDescription() );
 		
 		snapshotFolder.mkdirs();
@@ -323,7 +326,7 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 			ProjectManager projectManager, File snapshotProjectFile, File snapshotFolder)
 					throws LibrarySaveException {
 		Project snapshotProject = projectManager.newProject(
-				snapshotProjectFile, release.getBaseNamespace() + "#snapshot",
+				snapshotProjectFile, release.getBaseNamespace() + SNAPSHOT_SUFFIX,
 				release.getName(), release.getDescription() );
 		
 		snapshotFolder.mkdirs();
@@ -343,7 +346,7 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 	protected Project createSnapshotProject(ServiceAssembly assembly, ProjectManager projectManager,
 			File snapshotProjectFile, File snapshotFolder) throws LibrarySaveException {
 		Project snapshotProject = projectManager.newProject(
-				snapshotProjectFile, assembly.getBaseNamespace() + "#snapshot",
+				snapshotProjectFile, assembly.getBaseNamespace() + SNAPSHOT_SUFFIX,
 				assembly.getName(), null );
 		
 		snapshotFolder.mkdirs();
@@ -415,10 +418,8 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 	 */
 	protected void restoreBackup(File backup, File original) {
 		if (backup != null) {
-			if (original.exists()) {
-				delete( original );
-			}
-			backup.renameTo( original );
+			FileUtils.delete( original );
+			FileUtils.renameTo( backup, original );
 		}
 	}
 	
@@ -434,7 +435,7 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 					delete( folderItem );
 				}
 			}
-			fileOrFolder.delete();
+			FileUtils.delete( fileOrFolder );
 		}
 	}
 	
@@ -451,10 +452,7 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 		
 		backupFilename = ((extIdx < 0) ? backupFilename : backupFilename.substring( 0, extIdx ) ) + ".bak";
 		backupFile = new File( projectFile.getParentFile(), backupFilename );
-		
-		if (backupFile.exists()) {
-			backupFile.delete();
-		}
+		FileUtils.delete( backupFile );
 	}
 	
 	/**
@@ -492,9 +490,8 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
         		throw new MojoFailureException(
         				"The specified repository item does not exist or is not an OTM release.", e);
         		
-        	} catch (Throwable t) {
-        		throw new MojoFailureException(
-        				"Unknown error while accessing the OTM repository", t);
+        	} catch (Exception e) {
+        		throw new MojoFailureException("Unknown error while accessing the OTM repository", e);
         	}
         	
         } else {
@@ -530,6 +527,7 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 	 * 
 	 * @return File
 	 */
+	@SuppressWarnings("squid:S1075") // suppress warning for local project URI creation (support for testability)
 	protected File getSnapshotProjectFolder() {
 		File projectFolder;
 		

@@ -128,7 +128,9 @@ public class LibrarySearchResult extends SearchResult<TLLibrary> {
 		String searchIndexId = null;
 		
 		if ((typeReference != null) && (typeReference.length() > 0)) {
-			String prefix = null, localName = null, namespace = null;
+			String prefix = null;
+			String localName = null;
+			String namespace = null;
 			String[] refParts = typeReference.split( "\\:" );
 			
 			if (refParts.length == 1) {

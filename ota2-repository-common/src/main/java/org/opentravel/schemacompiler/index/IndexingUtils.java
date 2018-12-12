@@ -66,7 +66,17 @@ import org.opentravel.schemacompiler.validate.ValidationFinding;
  * Static utility methods used during the repository indexing and search result processing.
  */
 public class IndexingUtils {
+	
+	/**
+	 * 
+	 */
+	private static final String META_DATA_SUFFIX = ":meta-data";
 
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private IndexingUtils() {}
+	
 	/**
 	 * Returns the qualified identity key for the given OTM model entity.
 	 * 
@@ -105,7 +115,7 @@ public class IndexingUtils {
 		identityKey.append( entityNS ).append(":");
 		identityKey.append( entityLocalName );
 		if (!isSearchable) {
-			identityKey.append(":meta-data");
+			identityKey.append(META_DATA_SUFFIX);
 		}
 		return identityKey.toString();
 	}
@@ -120,7 +130,7 @@ public class IndexingUtils {
 	public static String getSearchableIdentityKey(String identityKey) {
 		String key = identityKey;
 		
-		if (key.endsWith(":meta-data")) {
+		if (key.endsWith(META_DATA_SUFFIX)) {
 			key = key.substring( 0, key.length() - 10 );
 		}
 		return key;
@@ -136,8 +146,8 @@ public class IndexingUtils {
 	public static String getNonSearchableIdentityKey(String identityKey) {
 		String key = identityKey;
 		
-		if (!key.endsWith(":meta-data")) {
-			key += ":meta-data";
+		if (!key.endsWith(META_DATA_SUFFIX)) {
+			key += META_DATA_SUFFIX;
 		}
 		return key;
 	}
@@ -366,7 +376,7 @@ public class IndexingUtils {
 	 */
 	public static QName getContextualFacetOwnerQName(TLContextualFacet facet) {
 		String ownerIndexId = facet.getOwningEntityName();
-		int delimIdx = ownerIndexId.lastIndexOf(":");
+		int delimIdx = ownerIndexId.lastIndexOf(':');
 		QName ownerName = null;
 		
 		if (delimIdx >= 0) {

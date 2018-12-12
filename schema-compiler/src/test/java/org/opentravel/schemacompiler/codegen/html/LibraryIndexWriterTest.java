@@ -41,10 +41,10 @@ public class LibraryIndexWriterTest extends AbstractWriterTest {
 		AbstractWriterTest.setUpBeforeClass();
 		String filename = LibraryIndexWriter.DEFAULT_FILENAME;
 
-		File f = new File(config.destDirName);
+		File f = new File(config.getDestDirName());
 		f.mkdir();
 		LibraryIndexWriter.generate(config);
-		byte[] encoded = Files.readAllBytes(Paths.get(config.destDirName
+		byte[] encoded = Files.readAllBytes(Paths.get(config.getDestDirName()
 				+ filename));
 		content = new String(encoded);
 	}
@@ -60,12 +60,12 @@ public class LibraryIndexWriterTest extends AbstractWriterTest {
 
 	@Test
 	public void testItShouldAddTitle() throws Exception {
-		assertTrue("No title.", content.contains(config.windowtitle));
+		assertTrue("No title.", content.contains(config.getWindowtitle()));
 	}
 
 	@Test
 	public void testItShouldAddProjectTitle() throws Exception {
-		assertTrue("No title.", content.contains(config.doctitle));
+		assertTrue("No title.", content.contains(config.getDoctitle()));
 	}
 
 }

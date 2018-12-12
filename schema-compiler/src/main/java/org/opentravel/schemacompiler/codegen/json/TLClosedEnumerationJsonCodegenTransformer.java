@@ -47,7 +47,7 @@ public class TLClosedEnumerationJsonCodegenTransformer extends AbstractJsonSchem
 		
 		transformDocumentation( source, schema );
         schema.setEntityInfo( jsonUtils.getEntityInfo( source ) );
-        schema.setType( JsonType.jsonString );
+        schema.setType( JsonType.JSON_STRING );
 		
         for (TLEnumValue modelEnum : EnumCodegenUtils.getInheritedValues( source )) {
         	enumValues.add( modelEnum.getLiteral() );

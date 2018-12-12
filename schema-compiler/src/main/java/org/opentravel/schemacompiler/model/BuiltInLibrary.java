@@ -38,7 +38,9 @@ import org.opentravel.schemacompiler.version.XSDVersionScheme;
  */
 public class BuiltInLibrary extends AbstractLibrary {
 
-    public enum BuiltInType { XSD_BUILTIN, TLLIBRARY_BUILTIN, SCHEMA_FOR_SCHEMAS_BUILTIN }
+	private static final String NOT_SUPPORTED_FOR_BUILT_INS = "Operation not supported for built-in libraries.";
+
+	public enum BuiltInType { XSD_BUILTIN, TLLIBRARY_BUILTIN, SCHEMA_FOR_SCHEMAS_BUILTIN }
 
     private static final Set<Class<?>> xsdMemberTypes;
 
@@ -172,7 +174,7 @@ public class BuiltInLibrary extends AbstractLibrary {
      */
     @Override
     public void setLibraryUrl(URL libraryUrl) {
-        throw new UnsupportedOperationException("Operation not supported for built-in libraries.");
+        throw new UnsupportedOperationException(NOT_SUPPORTED_FOR_BUILT_INS);
     }
 
     /**
@@ -180,7 +182,7 @@ public class BuiltInLibrary extends AbstractLibrary {
      */
     @Override
     public void setName(String name) {
-        throw new UnsupportedOperationException("Operation not supported for built-in libraries.");
+        throw new UnsupportedOperationException(NOT_SUPPORTED_FOR_BUILT_INS);
     }
 
     /**
@@ -188,7 +190,7 @@ public class BuiltInLibrary extends AbstractLibrary {
      */
     @Override
     public void setNamespace(String namespace) {
-        throw new UnsupportedOperationException("Operation not supported for built-in libraries.");
+        throw new UnsupportedOperationException(NOT_SUPPORTED_FOR_BUILT_INS);
     }
 
     /**
@@ -196,7 +198,7 @@ public class BuiltInLibrary extends AbstractLibrary {
      */
     @Override
     public List<TLInclude> getIncludes() {
-        throw new UnsupportedOperationException("Operation not supported for built-in libraries.");
+        throw new UnsupportedOperationException(NOT_SUPPORTED_FOR_BUILT_INS);
     }
 
     /**
@@ -204,7 +206,7 @@ public class BuiltInLibrary extends AbstractLibrary {
      */
     @Override
     public void addInclude(TLInclude include) {
-        throw new UnsupportedOperationException("Operation not supported for built-in libraries.");
+        throw new UnsupportedOperationException(NOT_SUPPORTED_FOR_BUILT_INS);
     }
 
     /**
@@ -213,7 +215,7 @@ public class BuiltInLibrary extends AbstractLibrary {
      */
     @Override
     public void addInclude(int index, TLInclude include) {
-        throw new UnsupportedOperationException("Operation not supported for built-in libraries.");
+        throw new UnsupportedOperationException(NOT_SUPPORTED_FOR_BUILT_INS);
     }
 
     /**
@@ -221,7 +223,7 @@ public class BuiltInLibrary extends AbstractLibrary {
      */
     @Override
     public void removeInclude(TLInclude include) {
-        throw new UnsupportedOperationException("Operation not supported for built-in libraries.");
+        throw new UnsupportedOperationException(NOT_SUPPORTED_FOR_BUILT_INS);
     }
 
     /**
@@ -229,7 +231,7 @@ public class BuiltInLibrary extends AbstractLibrary {
      */
     @Override
     public void moveUp(TLInclude include) {
-        throw new UnsupportedOperationException("Operation not supported for built-in libraries.");
+        throw new UnsupportedOperationException(NOT_SUPPORTED_FOR_BUILT_INS);
     }
 
     /**
@@ -237,7 +239,7 @@ public class BuiltInLibrary extends AbstractLibrary {
      */
     @Override
     public void moveDown(TLInclude include) {
-        throw new UnsupportedOperationException("Operation not supported for built-in libraries.");
+        throw new UnsupportedOperationException(NOT_SUPPORTED_FOR_BUILT_INS);
     }
 
     /**
@@ -245,7 +247,7 @@ public class BuiltInLibrary extends AbstractLibrary {
      */
     @Override
     public void sortIncludes(Comparator<TLInclude> comparator) {
-        throw new UnsupportedOperationException("Operation not supported for built-in libraries.");
+        throw new UnsupportedOperationException(NOT_SUPPORTED_FOR_BUILT_INS);
     }
 
     /**
@@ -253,7 +255,7 @@ public class BuiltInLibrary extends AbstractLibrary {
      */
     @Override
     public void addNamespaceImport(TLNamespaceImport namespaceImport) {
-        throw new UnsupportedOperationException("Operation not supported for built-in libraries.");
+        throw new UnsupportedOperationException(NOT_SUPPORTED_FOR_BUILT_INS);
     }
 
     /**
@@ -262,7 +264,7 @@ public class BuiltInLibrary extends AbstractLibrary {
      */
     @Override
     public void addNamespaceImport(int index, TLNamespaceImport namespaceImport) {
-        throw new UnsupportedOperationException("Operation not supported for built-in libraries.");
+        throw new UnsupportedOperationException(NOT_SUPPORTED_FOR_BUILT_INS);
     }
 
     /**
@@ -271,7 +273,7 @@ public class BuiltInLibrary extends AbstractLibrary {
      */
     @Override
     public void addNamespaceImport(String prefix, String namespace, String[] fileHints) {
-        throw new UnsupportedOperationException("Operation not supported for built-in libraries.");
+        throw new UnsupportedOperationException(NOT_SUPPORTED_FOR_BUILT_INS);
     }
 
     /**
@@ -279,7 +281,7 @@ public class BuiltInLibrary extends AbstractLibrary {
      */
     @Override
     public void removeNamespaceImport(TLNamespaceImport namespaceImport) {
-        throw new UnsupportedOperationException("Operation not supported for built-in libraries.");
+        throw new UnsupportedOperationException(NOT_SUPPORTED_FOR_BUILT_INS);
     }
 
     /**
@@ -287,7 +289,7 @@ public class BuiltInLibrary extends AbstractLibrary {
      */
     @Override
     public void removeNamespaceImport(String prefix) {
-        throw new UnsupportedOperationException("Operation not supported for built-in libraries.");
+        throw new UnsupportedOperationException(NOT_SUPPORTED_FOR_BUILT_INS);
     }
 
     /**
@@ -295,7 +297,7 @@ public class BuiltInLibrary extends AbstractLibrary {
      */
     @Override
     public void moveUp(TLNamespaceImport namespaceImport) {
-        throw new UnsupportedOperationException("Operation not supported for built-in libraries.");
+        throw new UnsupportedOperationException(NOT_SUPPORTED_FOR_BUILT_INS);
     }
 
     /**
@@ -303,7 +305,7 @@ public class BuiltInLibrary extends AbstractLibrary {
      */
     @Override
     public void moveDown(TLNamespaceImport namespaceImport) {
-        throw new UnsupportedOperationException("Operation not supported for built-in libraries.");
+        throw new UnsupportedOperationException(NOT_SUPPORTED_FOR_BUILT_INS);
     }
 
     /**
@@ -311,7 +313,7 @@ public class BuiltInLibrary extends AbstractLibrary {
      */
     @Override
     public void sortNamespaceImports(Comparator<TLNamespaceImport> comparator) {
-        throw new UnsupportedOperationException("Operation not supported for built-in libraries.");
+        throw new UnsupportedOperationException(NOT_SUPPORTED_FOR_BUILT_INS);
     }
 
     /**
@@ -319,7 +321,7 @@ public class BuiltInLibrary extends AbstractLibrary {
      */
     @Override
     public void addNamedMember(LibraryMember namedMember) {
-        throw new UnsupportedOperationException("Operation not supported for built-in libraries.");
+        throw new UnsupportedOperationException(NOT_SUPPORTED_FOR_BUILT_INS);
     }
 
     /**
@@ -327,7 +329,7 @@ public class BuiltInLibrary extends AbstractLibrary {
      */
     @Override
     public void removeNamedMember(LibraryMember namedMember) {
-        throw new UnsupportedOperationException("Operation not supported for built-in libraries.");
+        throw new UnsupportedOperationException(NOT_SUPPORTED_FOR_BUILT_INS);
     }
 
     /**

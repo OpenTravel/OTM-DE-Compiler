@@ -73,15 +73,15 @@ public abstract class HtmlDocWriter extends HtmlWriter {
     public HtmlDocWriter(Configuration configuration,
                          String filename) throws IOException {
         super(configuration,
-              null, configuration.destDirName + filename,
-              configuration.docencoding);
+              null, configuration.getDestDirName() + filename,
+              configuration.getDocencoding());
     }
 
     public HtmlDocWriter(Configuration configuration,
                          String path, String filename) throws IOException {
         super(configuration,
-              configuration.destDirName + path, filename,
-              configuration.docencoding);
+              configuration.getDestDirName() + path, filename,
+              configuration.getDocencoding());
     }
 
     /**

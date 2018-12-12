@@ -39,7 +39,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class LoginController extends BaseController {
 
-    private static Log log = LogFactory.getLog(LoginController.class);
+	private static final String USER = "user";
+	private static final String USER_ID = "userId";
+	private static final String ADMIN_AUTHORIZED = "isAdminAuthorized";
+	private static final String LOGIN_ERROR = "loginError";
+	private static final String REDIRECT_INDEX = "redirect:/console/index.html";
+	
+	private static Log log = LogFactory.getLog(LoginController.class);
 
     /**
      * Called by the Spring MVC controller to process a login request from a user.
@@ -70,13 +76,13 @@ public class LoginController extends BaseController {
         }
 
         if ((user != null) && !user.getUserId().equals(UserPrincipal.ANONYMOUS_USER_ID)) {
-            session.setAttribute("user", user);
-            session.setAttribute("isAdminAuthorized", securityManager.isAdministrator(user));
-            return "redirect:/console/index.html";
+            session.setAttribute(USER, user);
+            session.setAttribute(ADMIN_AUTHORIZED, securityManager.isAdministrator(user));
+            return REDIRECT_INDEX;
             
         } else { // authentication failed
-            model.addAttribute("loginError", true);
-            model.addAttribute("userId", userId);
+            model.addAttribute(LOGIN_ERROR, true);
+            model.addAttribute(USER_ID, userId);
             return new SearchController().defaultSearchPage(session, model);
         }
     }
@@ -92,9 +98,9 @@ public class LoginController extends BaseController {
      */
     @RequestMapping(method = RequestMethod.GET, value = { "/", "/logout.html", "/logout.htm" })
     public String logout(HttpSession session, Model model) {
-        session.removeAttribute("user");
-        session.removeAttribute("isAdminAuthorized");
-        return "redirect:/console/index.html";
+        session.removeAttribute(USER);
+        session.removeAttribute(ADMIN_AUTHORIZED);
+        return REDIRECT_INDEX;
     }
 
     /**
@@ -119,7 +125,7 @@ public class LoginController extends BaseController {
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
         boolean success = false;
         try {
-            UserPrincipal currentUser = (UserPrincipal) session.getAttribute("user");
+            UserPrincipal currentUser = (UserPrincipal) session.getAttribute(USER);
             String userId = (currentUser == null) ? null : currentUser.getUserId();
             
             emailAddress = trimString( emailAddress );
@@ -148,14 +154,14 @@ public class LoginController extends BaseController {
                     success = true;
                 }
                 if (!success) {
-                    model.addAttribute("userId", userId);
+                    model.addAttribute(USER_ID, userId);
                     model.addAttribute("lastName", lastName);
                     model.addAttribute("firstName", firstName);
                     model.addAttribute("emailAddress", emailAddress);
                 }
                 
             } else {
-                model.addAttribute("userId", userId);
+                model.addAttribute(USER_ID, userId);
                 model.addAttribute("lastName", currentUser.getLastName());
                 model.addAttribute("firstName", currentUser.getFirstName());
                 model.addAttribute("emailAddress", currentUser.getEmailAddress());
@@ -166,7 +172,7 @@ public class LoginController extends BaseController {
             setErrorMessage("Unable to update user profile.", model);
             log.error("Unable to update user profile.", e);
         }
-        return success ? "redirect:/console/index.html" : applyCommonValues(model, "editUserProfile");
+        return success ? REDIRECT_INDEX : applyCommonValues(model, "editUserProfile");
     }
 
     /**
@@ -189,7 +195,7 @@ public class LoginController extends BaseController {
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
         boolean success = false;
         try {
-            UserPrincipal currentUser = (UserPrincipal) session.getAttribute("user");
+            UserPrincipal currentUser = (UserPrincipal) session.getAttribute(USER);
 
             if (currentUser == null) {
                 setErrorMessage("You must be logged in to change your password.", model);
@@ -229,12 +235,12 @@ public class LoginController extends BaseController {
 
         } catch (RepositoryException e) {
             setErrorMessage("Unable to change your password - please contact your system administrator.", model);
-            log.error("Unable to change password for user: " + session.getAttribute("user"), e);
+            log.error("Unable to change password for user: " + session.getAttribute(USER), e);
         }
         if (success) {
             new BrowseController().browsePage(null, null, session, model);
         }
-        return success ? "redirect:/console/index.html" : applyCommonValues(model, "changePassword");
+        return success ? REDIRECT_INDEX : applyCommonValues(model, "changePassword");
     }
     
 }

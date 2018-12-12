@@ -43,10 +43,10 @@ public abstract class AbstractWriterTest {
 		Configuration.reset();
 		config = Configuration.getInstance();
 		config.setDestDirName(DEST_DIR + File.separator);
-		config.stylesheetfile = "stylesheet.css";
+		config.setStylesheetfile("stylesheet.css");
 		config.setModel(TestLibraryProvider.getModel());
-		config.windowtitle="TestProject";
-		config.doctitle="TestProject.otp";		
+		config.setWindowtitle("TestProject");
+		config.setDoctitle("TestProject.otp");		
 	}
 
 	/**

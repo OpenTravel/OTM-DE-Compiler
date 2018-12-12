@@ -34,7 +34,15 @@ import org.springframework.ui.Model;
  */
 public abstract class BaseController {
 
-    private RepositoryManager repositoryManager;
+    /**
+	 * 
+	 */
+	private static final String STATUS_MESSAGE = "statusMessage";
+	/**
+	 * 
+	 */
+	private static final String ERROR_MESSAGE = "errorMessage";
+	private RepositoryManager repositoryManager;
     private RepositorySecurityManager securityManager;
     @Autowired private HttpServletRequest servletRequest;
     
@@ -77,8 +85,8 @@ public abstract class BaseController {
      */
     protected String applyCommonValues(Model model, String targetPage) {
         if (servletRequest != null) {
-        	model.addAttribute( "errorMessage", servletRequest.getParameter( "errorMessage" ) );
-        	model.addAttribute( "statusMessage", servletRequest.getParameter( "statusMessage" ) );
+        	model.addAttribute( ERROR_MESSAGE, servletRequest.getParameter( ERROR_MESSAGE ) );
+        	model.addAttribute( STATUS_MESSAGE, servletRequest.getParameter( STATUS_MESSAGE ) );
         }
         model.addAttribute("isLocalUserManagement", isLocalUserManagement());
         return (targetPage == null) ? "homePage" : targetPage;
@@ -112,7 +120,7 @@ public abstract class BaseController {
      * @param model  the model to which the status message should be applied
      */
     protected void setStatusMessage(String statusMessage, Model model) {
-        model.addAttribute("statusMessage", statusMessage);
+        model.addAttribute(STATUS_MESSAGE, statusMessage);
     }
 
     /**
@@ -122,7 +130,7 @@ public abstract class BaseController {
      * @param model  the model to which the error message should be applied
      */
     protected void setErrorMessage(String errorMessage, Model model) {
-        model.addAttribute("errorMessage", errorMessage);
+        model.addAttribute(ERROR_MESSAGE, errorMessage);
     }
     
     /**

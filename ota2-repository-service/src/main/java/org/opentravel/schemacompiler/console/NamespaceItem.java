@@ -18,6 +18,8 @@ package org.opentravel.schemacompiler.console;
 import java.io.File;
 import java.util.Date;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opentravel.schemacompiler.index.LibrarySearchResult;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
@@ -32,6 +34,8 @@ import org.opentravel.schemacompiler.repository.RepositoryManager;
  */
 public class NamespaceItem {
 
+    private static Log log = LogFactory.getLog(NamespaceItem.class);
+    
     private String baseNamespace;
     private String filename;
     private String label;
@@ -208,8 +212,8 @@ public class NamespaceItem {
                 if ((metadataFile != null) && metadataFile.exists()) {
                     lastModified = new Date(metadataFile.lastModified());
                 }
-            } catch (Throwable t) {
-                t.printStackTrace(System.out);
+            } catch (Exception e) {
+                log.warn("Error calculating last modified date for item " + item.getFilename(), e);
             }
         }
         return lastModified;

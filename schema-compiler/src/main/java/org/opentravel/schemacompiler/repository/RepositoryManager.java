@@ -70,6 +70,7 @@ import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.TransformerFactory;
 import org.opentravel.schemacompiler.transform.symbols.DefaultTransformerContext;
 import org.opentravel.schemacompiler.util.ExceptionUtils;
+import org.opentravel.schemacompiler.util.FileUtils;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.version.VersionScheme;
@@ -85,7 +86,11 @@ import org.opentravel.schemacompiler.xml.XMLGregorianCalendarConverter;
  */
 public class RepositoryManager implements Repository {
 
-    private static final String CURRENT_USER_BASE_NAMESPACE = "http://opentravel.org/local/";
+	private static final String LISTENER_INVOCATION_ERROR = "Unexpected error during listener invocation.";
+	private static final String ROOT_NS_CONFLICT = "The root namespace cannot be created because it conflicts with an existing one.";
+	private static final String ROLLBACK_ERROR = "Error rolling back the active change set.";
+	
+	private static final String CURRENT_USER_BASE_NAMESPACE = "http://opentravel.org/local/";
     private static final String ENCRYPTED_PREFIX = "enc:";
     private static final int MAX_DISPLAY_NAME_LENGTH = 256;
     private static final Pattern REPOSITORY_ID_PATTERN = Pattern.compile("([A-Za-z0-9\\-._~!$&'()*+,;=]|%[0-9A-Fa-f]{2})*");
@@ -454,7 +459,7 @@ public class RepositoryManager implements Repository {
                     fileManager.rollbackChangeSet();
 
                 } catch (RepositoryException e) {
-                    log.warn("Error rolling back the active change set.", e);
+                    log.warn(ROLLBACK_ERROR, e);
                 }
             }
         }
@@ -494,7 +499,7 @@ public class RepositoryManager implements Repository {
                     fileManager.rollbackChangeSet();
 
                 } catch (RepositoryException e) {
-                    log.warn("Error rolling back the active change set.", e);
+                    log.warn(ROLLBACK_ERROR, e);
                 }
                 refreshLocalRepositoryInfo(true);
             }
@@ -534,7 +539,7 @@ public class RepositoryManager implements Repository {
                     fileManager.rollbackChangeSet();
 
                 } catch (RepositoryException e) {
-                    log.warn("Error rolling back the active change set.", e);
+                    log.warn(ROLLBACK_ERROR, e);
                 }
                 refreshLocalRepositoryInfo(true);
             }
@@ -576,7 +581,7 @@ public class RepositoryManager implements Repository {
                     fileManager.rollbackChangeSet();
 
                 } catch (RepositoryException e) {
-                    log.warn("Error rolling back the active change set.", e);
+                    log.warn(ROLLBACK_ERROR, e);
                 }
                 refreshLocalRepositoryInfo(true);
             }
@@ -625,7 +630,7 @@ public class RepositoryManager implements Repository {
                     fileManager.rollbackChangeSet();
 
                 } catch (RepositoryException e) {
-                    log.warn("Error rolling back the active change set.", e);
+                    log.warn(ROLLBACK_ERROR, e);
                 }
                 refreshLocalRepositoryInfo(true);
             }
@@ -1095,8 +1100,7 @@ public class RepositoryManager implements Repository {
 
             // Validation Check - Look for a file conflict with an existing namespace
             if (nsidFile.exists()) {
-                throw new RepositoryException(
-                        "The root namespace cannot be created because it conflicts with an existing one.");
+                throw new RepositoryException(ROOT_NS_CONFLICT);
             }
 
             // Validation Check - Check to see if the new root is a parent or child of an existing
@@ -1113,8 +1117,7 @@ public class RepositoryManager implements Repository {
                 File existingRootNSFolder = fileManager.getNamespaceFolder(existingRootNS, null);
 
                 if (rootNSTestPath.startsWith(existingRootNSFolder.getAbsolutePath())) {
-                    throw new RepositoryException(
-                            "The root namespace cannot be created because it conflicts with an existing one.");
+                    throw new RepositoryException(ROOT_NS_CONFLICT);
                 }
                 while ((existingRootNSFolder != null)
                         && !repositoryBaseFolder.equals(existingRootNSFolder.getAbsolutePath())) {
@@ -1123,8 +1126,7 @@ public class RepositoryManager implements Repository {
                 }
             }
             if (existingRootNSFolderPaths.contains(rootNSFolder.getAbsolutePath())) {
-                throw new RepositoryException(
-                        "The root namespace cannot be created because it conflicts with an existing one.");
+                throw new RepositoryException(ROOT_NS_CONFLICT);
             }
 
             // Create the new root namespace if all of the validation checks passed
@@ -1147,7 +1149,7 @@ public class RepositoryManager implements Repository {
                 		listener.onCreateRootNamespace( rootNamespace );
                 		
                 	} catch (Exception e) {
-                		log.warn("Unexpected error during listener invocation.", e);
+                		log.warn(LISTENER_INVOCATION_ERROR, e);
                 	}
                 }
                 
@@ -1155,7 +1157,7 @@ public class RepositoryManager implements Repository {
                 try {
                     fileManager.rollbackChangeSet();
                 } catch (Exception e) {
-                    log.error("Error rolling back the current change set.", e);
+                    log.error(ROLLBACK_ERROR, e);
                 }
             }
         }
@@ -1198,7 +1200,7 @@ public class RepositoryManager implements Repository {
                 		listener.onDeleteRootNamespace( rootNamespace );
                 		
                 	} catch (Exception e) {
-                		log.warn("Unexpected error during listener invocation.", e);
+                		log.warn(LISTENER_INVOCATION_ERROR, e);
                 	}
                 }
                 
@@ -1206,7 +1208,7 @@ public class RepositoryManager implements Repository {
                 try {
                     fileManager.rollbackChangeSet();
                 } catch (Exception e) {
-                    log.error("Error rolling back the current change set.", e);
+                    log.error(ROLLBACK_ERROR, e);
                 }
             }
         }
@@ -1244,7 +1246,7 @@ public class RepositoryManager implements Repository {
                 		listener.onCreateNamespace( baseNamespace );
                 		
                 	} catch (Exception e) {
-                		log.warn("Unexpected error during listener invocation.", e);
+                		log.warn(LISTENER_INVOCATION_ERROR, e);
                 	}
                 }
                 
@@ -1252,7 +1254,7 @@ public class RepositoryManager implements Repository {
                 try {
                     fileManager.rollbackChangeSet();
                 } catch (Exception e) {
-                    log.error("Error rolling back the current change set.", e);
+                    log.error(ROLLBACK_ERROR, e);
                 }
             }
         }
@@ -1283,7 +1285,7 @@ public class RepositoryManager implements Repository {
                 		listener.onDeleteNamespace( baseNamespace );
                 		
                 	} catch (Exception e) {
-                		log.warn("Unexpected error during listener invocation.", e);
+                		log.warn(LISTENER_INVOCATION_ERROR, e);
                 	}
                 }
                 
@@ -1291,7 +1293,7 @@ public class RepositoryManager implements Repository {
                 try {
                     fileManager.rollbackChangeSet();
                 } catch (Exception e) {
-                    log.error("Error rolling back the current change set.", e);
+                    log.error(ROLLBACK_ERROR, e);
                 }
             }
         }
@@ -1309,8 +1311,9 @@ public class RepositoryManager implements Repository {
         String targetNS = RepositoryNamespaceUtils.normalizeUri(namespace);
         RepositoryItem publishedItem = null;
         boolean success = false;
+        
         try (InputStream contentStream = unmanagedContent) {
-            log.info("Publishing '" + filename + "' to namespace '" + targetNS + "'");
+        		log.info(String.format("Publishing '%s' to namespace '%s'", filename, targetNS));
             fileManager.startChangeSet();
 
             // Check to see if the library has already been published to the repository
@@ -1392,7 +1395,7 @@ public class RepositoryManager implements Repository {
                 		listener.onPublish( publishedItem );
                 		
                 	} catch (Exception e) {
-                		log.warn("Unexpected error during listener invocation.", e);
+                		log.warn(LISTENER_INVOCATION_ERROR, e);
                 	}
                 }
                 
@@ -1400,7 +1403,7 @@ public class RepositoryManager implements Repository {
                 try {
                     fileManager.rollbackChangeSet();
                 } catch (Exception e) {
-                    log.error("Error rolling back the current change set.", e);
+                    log.error(ROLLBACK_ERROR, e);
                 }
             }
         }
@@ -1503,8 +1506,8 @@ public class RepositoryManager implements Repository {
 
         boolean success = false;
         try (InputStream contentStream = wipContent) {
-            log.info("Committing updated content '" + item.getFilename() + "' to namespace '"
-                    + item.getBaseNamespace() + "'");
+        		log.info(String.format("Committing updated content '%s' to namespace '%s'",
+        				item.getFilename(), item.getBaseNamespace()));
             fileManager.startChangeSet();
 
             // Overwrite the existing content with the WIP data
@@ -1521,8 +1524,8 @@ public class RepositoryManager implements Repository {
                     .toXMLGregorianCalendar(new Date()));
             fileManager.saveLibraryMetadata(libraryMetadata);
 
-            log.info("Successfully committed content '" + item.getFilename() + "' to namespace '"
-                    + baseNS + "'");
+            log.info(String.format("Successfully committed content '%s' to namespace '%s'",
+            		item.getFilename(), baseNS));
             success = true;
 
         } catch (IOException e) {
@@ -1540,7 +1543,7 @@ public class RepositoryManager implements Repository {
                     		listener.onCommit( item, remarks );
                     		
                     	} catch (Exception e) {
-                    		log.warn("Unexpected error during listener invocation.", e);
+                    		log.warn(LISTENER_INVOCATION_ERROR, e);
                     	}
                     }
                 }
@@ -1549,7 +1552,7 @@ public class RepositoryManager implements Repository {
                 try {
                     fileManager.rollbackChangeSet();
                 } catch (Exception e) {
-                    log.error("Error rolling back the current change set.", e);
+                    log.error(ROLLBACK_ERROR, e);
                 }
             }
         }
@@ -1601,7 +1604,7 @@ public class RepositoryManager implements Repository {
                 try {
                     fileManager.rollbackChangeSet();
                 } catch (Exception e) {
-                    log.error("Error rolling back the current change set.", e);
+                    log.error(ROLLBACK_ERROR, e);
                 }
             }
         }
@@ -1626,8 +1629,7 @@ public class RepositoryManager implements Repository {
         if (item.getRepository() == this) {
             boolean success = false;
             try {
-                log.info("Locking content for '" + item.getFilename() + "' to namespace '" + baseNS
-                        + "'");
+                log.info(String.format("Locking content for '%s' to namespace '%s'", item.getFilename(), baseNS));
                 fileManager.startChangeSet();
                 libraryMetadata.setState(RepositoryState.MANAGED_LOCKED);
                 libraryMetadata.setLockedBy(item.getLockedByUser());
@@ -1637,8 +1639,8 @@ public class RepositoryManager implements Repository {
                 fileManager.saveLibraryMetadata(libraryMetadata);
 
                 ((RepositoryItemImpl) item).setState(RepositoryItemState.MANAGED_WIP);
-                log.info("Successfully locked content for '" + item.getFilename()
-                        + "' to namespace '" + baseNS + "'");
+                log.info(String.format("Successfully locked content for '%s' to namespace '%s'",
+                		item.getFilename(), baseNS));
                 success = true;
 
             } finally {
@@ -1652,7 +1654,7 @@ public class RepositoryManager implements Repository {
                     		listener.onLock( item );
                     		
                     	} catch (Exception e) {
-                    		log.warn("Unexpected error during listener invocation.", e);
+                    		log.warn(LISTENER_INVOCATION_ERROR, e);
                     	}
                     }
                     
@@ -1660,7 +1662,7 @@ public class RepositoryManager implements Repository {
                     try {
                         fileManager.rollbackChangeSet();
                     } catch (Exception e) {
-                        log.error("Error rolling back the current change set.", e);
+                        log.error(ROLLBACK_ERROR, e);
                     }
                 }
             }
@@ -1712,10 +1714,8 @@ public class RepositoryManager implements Repository {
         File backupFile = new File(wipFile.getParentFile(),
                 ProjectFileUtils.getBackupFilename(wipFile));
 
-        if (backupFile.exists()) { // delete the old backup, if one exists
-            backupFile.delete();
-        }
-        wipFile.renameTo(backupFile);
+        FileUtils.delete( backupFile );
+        FileUtils.renameTo( wipFile, backupFile );
 	}
 
 	/**
@@ -1802,7 +1802,7 @@ public class RepositoryManager implements Repository {
                 		listener.onUnlock( item, (wipContent != null), remarks );
                 		
                 	} catch (Exception e) {
-                		log.warn("Unexpected error during listener invocation.", e);
+                		log.warn(LISTENER_INVOCATION_ERROR, e);
                 	}
                 }
                 
@@ -1810,7 +1810,7 @@ public class RepositoryManager implements Repository {
                 try {
                     fileManager.rollbackChangeSet();
                 } catch (Exception e) {
-                    log.error("Error rolling back the current change set.", e);
+                    log.error(ROLLBACK_ERROR, e);
                 }
             }
         }
@@ -1839,7 +1839,7 @@ public class RepositoryManager implements Repository {
                     "Unable to promote - the item's status is not yet assigned.");
         }
         
-        if (libraryContent.is16Library) {
+        if (libraryContent.isIs16Library()) {
             if (libraryMetadata.getStatus() == LibraryStatus.OBSOLETE) {
                 throw new RepositoryException(
                         "Unable to promote - only user-defined libraries that are not in OBSOLETE status can be promoted.");
@@ -1860,9 +1860,9 @@ public class RepositoryManager implements Repository {
                 // Change the status of the library metadata and content
                 TLLibraryStatus currentStatus = TLLibraryStatus.fromRepositoryStatus( libraryMetadata.getStatus() );
                 
-                targetStatus = libraryContent.is16Library ? currentStatus.nextStatus() : TLLibraryStatus.FINAL;
+                targetStatus = libraryContent.isIs16Library() ? currentStatus.nextStatus() : TLLibraryStatus.FINAL;
 
-                libraryContent.content.setStatus(targetStatus);
+                libraryContent.getContent().setStatus(targetStatus);
                 libraryMetadata.setStatus(targetStatus.toRepositoryStatus());
                 libraryMetadata.setLastUpdated(XMLGregorianCalendarConverter.toXMLGregorianCalendar(new Date()));
 
@@ -1879,8 +1879,8 @@ public class RepositoryManager implements Repository {
                     // its library content
                     ((RepositoryItemImpl) item).setStatus(targetStatus);
                 }
-                log.info("Successfully promoted managed item '" + item.getFilename()
-                        + "' to " + targetStatus + " status by " + fileManager.getCurrentUserId());
+                log.info(String.format("Successfully promoted managed item '%s' to %s status by %s",
+                		item.getFilename(), targetStatus, fileManager.getCurrentUserId()));
                 success = true;
 
             } catch (Exception e) {
@@ -1898,7 +1898,7 @@ public class RepositoryManager implements Repository {
                     		listener.onPromote( item, originalStatus );
                     		
                     	} catch (Exception e) {
-                    		log.warn("Unexpected error during listener invocation.", e);
+                    		log.warn(LISTENER_INVOCATION_ERROR, e);
                     	}
                     }
                     
@@ -1906,7 +1906,7 @@ public class RepositoryManager implements Repository {
                     try {
                         fileManager.rollbackChangeSet();
                     } catch (Exception e) {
-                        log.error("Error rolling back the current change set.", e);
+                        log.error(ROLLBACK_ERROR, e);
                     }
                 }
             }
@@ -1939,7 +1939,7 @@ public class RepositoryManager implements Repository {
                     "Unable to demote - the item's status is not yet assigned.");
         }
         
-        if (libraryContent.is16Library) {
+        if (libraryContent.isIs16Library()) {
             if (libraryMetadata.getStatus() == LibraryStatus.DRAFT) {
                 throw new RepositoryException(
                         "Unable to demote - only user-defined libraries that are not in DRAFT status can be demoted.");
@@ -1960,9 +1960,9 @@ public class RepositoryManager implements Repository {
                 // Change the status of the library metadata and content
                 TLLibraryStatus currentStatus = TLLibraryStatus.fromRepositoryStatus( libraryMetadata.getStatus() );
                 
-                targetStatus = libraryContent.is16Library ? currentStatus.previousStatus() : TLLibraryStatus.DRAFT;
+                targetStatus = libraryContent.isIs16Library() ? currentStatus.previousStatus() : TLLibraryStatus.DRAFT;
 
-                libraryContent.content.setStatus(targetStatus);
+                libraryContent.getContent().setStatus(targetStatus);
                 libraryMetadata.setStatus(targetStatus.toRepositoryStatus());
                 libraryMetadata.setLastUpdated(XMLGregorianCalendarConverter
                         .toXMLGregorianCalendar(new Date()));
@@ -1999,7 +1999,7 @@ public class RepositoryManager implements Repository {
                     		listener.onDemote( item, originalStatus );
                     		
                     	} catch (Exception e) {
-                    		log.warn("Unexpected error during listener invocation.", e);
+                    		log.warn(LISTENER_INVOCATION_ERROR, e);
                     	}
                     }
                     
@@ -2007,7 +2007,7 @@ public class RepositoryManager implements Repository {
                     try {
                         fileManager.rollbackChangeSet();
                     } catch (Exception e) {
-                        log.error("Error rolling back the current change set.", e);
+                        log.error(ROLLBACK_ERROR, e);
                     }
                 }
             }
@@ -2046,7 +2046,7 @@ public class RepositoryManager implements Repository {
                 // Change the status of the library metadata and content
                 LibraryContentWrapper libraryContent = loadOtmLibraryContent(contentFile);
 
-                libraryContent.content.setStatus(newStatus);
+                libraryContent.getContent().setStatus(newStatus);
                 libraryMetadata.setStatus(newStatus.toRepositoryStatus());
                 libraryMetadata.setLastUpdated(XMLGregorianCalendarConverter
                         .toXMLGregorianCalendar(new Date()));
@@ -2078,7 +2078,7 @@ public class RepositoryManager implements Repository {
                     		listener.onUpdateStatus( item, originalStatus );
                     		
                     	} catch (Exception e) {
-                    		log.warn("Unexpected error during listener invocation.", e);
+                    		log.warn(LISTENER_INVOCATION_ERROR, e);
                     	}
                     }
                     
@@ -2086,7 +2086,7 @@ public class RepositoryManager implements Repository {
                     try {
                         fileManager.rollbackChangeSet();
                     } catch (Exception e) {
-                        log.error("Error rolling back the current change set.", e);
+                        log.error(ROLLBACK_ERROR, e);
                     }
                 }
             }
@@ -2121,7 +2121,7 @@ public class RepositoryManager implements Repository {
                 LibraryContentWrapper libraryContent = loadOtmLibraryContent(contentFile);
 
                 // Set the library's status - just in case it is out of sync with the meta-data record
-                libraryContent.content.setStatus(TLLibraryStatus.fromRepositoryStatus(libraryMetadata.getStatus()));
+                libraryContent.getContent().setStatus(TLLibraryStatus.fromRepositoryStatus(libraryMetadata.getStatus()));
             	saveOtmLibraryContent( libraryContent );
 
                 libraryMetadata.setLastUpdated(XMLGregorianCalendarConverter
@@ -2150,7 +2150,7 @@ public class RepositoryManager implements Repository {
                     		listener.onRecalculateCrc( item );
                     		
                     	} catch (Exception e) {
-                    		log.warn("Unexpected error during listener invocation.", e);
+                    		log.warn(LISTENER_INVOCATION_ERROR, e);
                     	}
                     }
                     
@@ -2158,7 +2158,7 @@ public class RepositoryManager implements Repository {
                     try {
                         fileManager.rollbackChangeSet();
                     } catch (Exception e) {
-                        log.error("Error rolling back the current change set.", e);
+                        log.error(ROLLBACK_ERROR, e);
                     }
                 }
             }
@@ -2187,11 +2187,11 @@ public class RepositoryManager implements Repository {
                 fileManager.addToChangeSet(metadataFile);
                 fileManager.addToChangeSet(contentFile);
 
-                if (!metadataFile.delete()) {
+                if (!FileUtils.confirmDelete( metadataFile )) {
                     throw new RepositoryException("Unable to delete library meta-data file: "
                             + metadataFile.getAbsolutePath());
                 }
-                if (!contentFile.delete()) {
+                if (!FileUtils.confirmDelete( contentFile )) {
                     throw new RepositoryException("Unable to delete library content file: "
                             + contentFile.getAbsolutePath());
                 }
@@ -2213,7 +2213,7 @@ public class RepositoryManager implements Repository {
                     		listener.onDelete( item );
                     		
                     	} catch (Exception e) {
-                    		log.warn("Unexpected error during listener invocation.", e);
+                    		log.warn(LISTENER_INVOCATION_ERROR, e);
                     	}
                     }
                     
@@ -2221,7 +2221,7 @@ public class RepositoryManager implements Repository {
                     try {
                         fileManager.rollbackChangeSet();
                     } catch (Exception e) {
-                        log.error("Error rolling back the current change set.", e);
+                        log.error(ROLLBACK_ERROR, e);
                     }
                 }
             }
@@ -2589,39 +2589,95 @@ public class RepositoryManager implements Repository {
     			throws RepositoryException, LibrarySaveException {
         LibraryModelSaver modelSaver = new LibraryModelSaver();
         
-        if (libraryContent.is16Library) {
+        if (libraryContent.isIs16Library()) {
         	modelSaver.setSaveHandler( new Library16FileSaveHandler() );
         } else {
         	modelSaver.setSaveHandler( new Library15FileSaveHandler() );
         }
-        fileManager.addToChangeSet( libraryContent.contentFile );
+        fileManager.addToChangeSet( libraryContent.getContentFile() );
         modelSaver.getSaveHandler().setCreateBackupFile( false );
-        modelSaver.saveLibrary( libraryContent.content );
+        modelSaver.saveLibrary( libraryContent.getContent() );
     }
     
     /**
      * Wrapper class that contains the <code>TLLibrary</code> content as well as an
      * indicator of whether the library was originally saved in the 1.6 format.
      */
-    private class LibraryContentWrapper {
-    	
-    	public TLLibrary content;
-    	public File contentFile;
-    	public boolean is16Library;
-    	
-    	/**
-    	 * Full constructor.
-    	 * 
-    	 * @param content  the OTM library content
-    	 * @param contentFile  the original file from which the library content was loaded
-    	 * @param is16Library  flag indicating whether the library was originally saved in the 1.6 format
-    	 */
-    	public LibraryContentWrapper(TLLibrary content, File contentFile, boolean is16Library) {
-    		this.content = content;
-    		this.contentFile = contentFile;
-    		this.is16Library = is16Library;
-    	}
-    	
-    }
+	private class LibraryContentWrapper {
+		
+		private TLLibrary content;
+		private File contentFile;
+		private boolean is16Library;
+		
+		/**
+		 * Full constructor.
+		 * 
+		 * @param content the OTM library content
+		 * @param contentFile the original file from which the library content
+		 *            was loaded
+		 * @param is16Library flag indicating whether the library was originally
+		 *            saved in the 1.6 format
+		 */
+		public LibraryContentWrapper(TLLibrary content, File contentFile, boolean is16Library) {
+			this.setContent(content);
+			this.setContentFile(contentFile);
+			this.setIs16Library(is16Library);
+		}
+
+		/**
+		 * Returns the value of the 'content' field.
+		 *
+		 * @return TLLibrary
+		 */
+		public TLLibrary getContent() {
+			return content;
+		}
+
+		/**
+		 * Assigns the value of the 'content' field.
+		 *
+		 * @param content  the field value to assign
+		 */
+		public void setContent(TLLibrary content) {
+			this.content = content;
+		}
+
+		/**
+		 * Returns the value of the 'contentFile' field.
+		 *
+		 * @return File
+		 */
+		public File getContentFile() {
+			return contentFile;
+		}
+
+		/**
+		 * Assigns the value of the 'contentFile' field.
+		 *
+		 * @param contentFile  the field value to assign
+		 */
+		public void setContentFile(File contentFile) {
+			this.contentFile = contentFile;
+		}
+
+		/**
+		 * Returns the value of the 'is16Library' field.
+		 *
+		 * @return boolean
+		 */
+		public boolean isIs16Library() {
+			return is16Library;
+		}
+
+		/**
+		 * Assigns the value of the 'is16Library' field.
+		 *
+		 * @param is16Library  the field value to assign
+		 */
+		public void setIs16Library(boolean is16Library) {
+			this.is16Library = is16Library;
+		}
+		
+	}
     
 }

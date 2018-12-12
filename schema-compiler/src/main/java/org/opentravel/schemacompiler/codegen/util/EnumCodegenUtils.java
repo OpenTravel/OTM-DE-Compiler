@@ -36,6 +36,11 @@ import org.opentravel.schemacompiler.model.TLExtension;
 public class EnumCodegenUtils {
 	
 	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private EnumCodegenUtils() {}
+	
+	/**
 	 * Returns the list of declared and inherited enumeration values for the given
 	 * entity.
 	 * 

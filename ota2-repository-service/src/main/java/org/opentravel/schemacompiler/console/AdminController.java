@@ -58,6 +58,18 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class AdminController extends BaseController {
 
+	private static final String BASE_NAMESPACE = "baseNamespace";
+	private static final String FILENAME = "filename";
+	private static final String VERSION = "version";
+	private static final String EMAIL_ADDRESS = "emailAddress";
+	private static final String FIRST_NAME = "firstName";
+	private static final String LAST_NAME = "lastName";
+	private static final String USER_ID = "userId";
+	private static final String RI_DOES_NOT_EXIST = "The requested repository item does not exist.";
+	private static final String REDIRECT_LIBRARY_INFO = "redirect:/console/libraryInfo.html";
+	private static final String REDIRECT_ADMIN_USERS = "redirect:/console/adminUsers.html";
+	private static final String REDIRECT_ADMIN_GROUPS = "redirect:/console/adminGroups.html";
+
 	protected static Pattern emailPattern = Pattern.compile(
 			"^([\\!#\\$%&'\\*\\+/\\=?\\^`\\{\\|\\}~a-zA-Z0-9_-]+[\\.]?)+[\\!#\\$%&'\\*\\+/\\=?\\^`\\{\\|\\}~a-zA-Z0-9_-]+"
 			+ "@{1}((([0-9A-Za-z_-]+)([\\.]{1}[0-9A-Za-z_-]+)*\\.{1}([A-Za-z]){1,6})|(([0-9]{1,3}[\\.]{1}){3}([0-9]{1,3}){1}))$"
@@ -261,7 +273,7 @@ public class AdminController extends BaseController {
                     model);
 
         } finally {
-            model.addAttribute("baseNamespace", baseNamespace);
+            model.addAttribute(BASE_NAMESPACE, baseNamespace);
         }
         return applyCommonValues(session, model, "adminPermissions");
     }
@@ -330,7 +342,7 @@ public class AdminController extends BaseController {
             for (RepositoryPermission permissionOption : RepositoryPermission.values()) {
                 permissionOptions.add(permissionOption.toString());
             }
-            model.addAttribute("baseNamespace", baseNamespace);
+            model.addAttribute(BASE_NAMESPACE, baseNamespace);
             model.addAttribute("permissions", permissions);
             model.addAttribute("permissionOptions", permissionOptions);
             targetPage = applyCommonValues(session, model, "adminPermissionsEdit");
@@ -362,7 +374,7 @@ public class AdminController extends BaseController {
             baseNamespace = null;
         }
 
-        model.addAttribute("baseNamespace", baseNamespace);
+        model.addAttribute(BASE_NAMESPACE, baseNamespace);
         return applyCommonValues(session, model, "adminPermissionsTest");
     }
 
@@ -407,10 +419,10 @@ public class AdminController extends BaseController {
      */
     @RequestMapping(value = { "/adminUsersAddLocal.html", "/adminUsersAddLocal.htm" })
     public String adminUsersAddLocalPage(
-            @RequestParam(value = "userId", required = false) String userId,
-            @RequestParam(value = "lastName", required = false) String lastName,
-            @RequestParam(value = "firstName", required = false) String firstName,
-            @RequestParam(value = "emailAddress", required = false) String emailAddress,
+            @RequestParam(value = USER_ID, required = false) String userId,
+            @RequestParam(value = LAST_NAME, required = false) String lastName,
+            @RequestParam(value = FIRST_NAME, required = false) String firstName,
+            @RequestParam(value = EMAIL_ADDRESS, required = false) String emailAddress,
             @RequestParam(value = "password", required = false) String password,
             @RequestParam(value = "passwordConfirm", required = false) String passwordConfirm,
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
@@ -426,7 +438,7 @@ public class AdminController extends BaseController {
                 RepositorySecurityManager securityManager = RepositoryComponentFactory.getDefault().getSecurityManager();
                 
             	if (securityManager.getUser( userId ) != null) {
-                    setErrorMessage("A user with the ID '" + userId + "' already exists.", model);
+            		setErrorMessage(String.format("A user with the ID '%s' already exists.", userId), model);
             		
             	} else if ((lastName == null) || (lastName.length() == 0)) {
                     setErrorMessage("The last name is a required value.", model);
@@ -443,33 +455,35 @@ public class AdminController extends BaseController {
                 } else if (!password.equals(passwordConfirm)) {
                     setErrorMessage("The passwords do not match.", model);
 
-                } else { // everything is ok - add the user
-                	UserPrincipal newUser = new UserPrincipal();
-                	
-                	newUser.setUserId( userId );
-                	newUser.setLastName( lastName );
-                	newUser.setFirstName( firstName );
-                	newUser.setEmailAddress( emailAddress );
-                	
-                	securityManager.addUser( newUser );
-                	securityManager.setUserPassword( userId, password );
-                    setStatusMessage("User '" + userId + "' created successfully.", redirectAttrs);
-                    success = true;
-                }
+				} else { // everything is ok - add the user
+					UserPrincipal newUser = new UserPrincipal();
+					
+					newUser.setUserId(userId);
+					newUser.setLastName(lastName);
+					newUser.setFirstName(firstName);
+					newUser.setEmailAddress(emailAddress);
+					
+					securityManager.addUser(newUser);
+					securityManager.setUserPassword(userId, password);
+					setStatusMessage(String.format("User '%s' created successfully", userId), redirectAttrs);
+					success = true;
+				}
             }
             
             if (!success) {
-                model.addAttribute("userId", userId);
-                model.addAttribute("lastName", lastName);
-                model.addAttribute("firstName", firstName);
-                model.addAttribute("emailAddress", emailAddress);
+                model.addAttribute(USER_ID, userId);
+                model.addAttribute(LAST_NAME, lastName);
+                model.addAttribute(FIRST_NAME, firstName);
+                model.addAttribute(EMAIL_ADDRESS, emailAddress);
             }
             
         } catch (RepositoryException e) {
-            setErrorMessage("Unable to create user account: " + userId, model);
-            log.error("Unable to create user account: " + userId, e);
+        		String message = String.format("Unable to create user account: %s", userId);
+        		
+        		setErrorMessage(message, model);
+            log.error(message, e);
         }
-        return success ? "redirect:/console/adminUsers.html" : "adminUsersAddLocal";
+        return success ? REDIRECT_ADMIN_USERS : "adminUsersAddLocal";
     }
 
     /**
@@ -487,10 +501,10 @@ public class AdminController extends BaseController {
      */
     @RequestMapping(value = { "/adminUsersEditLocal.html", "/adminUsersEditLocal.htm" })
     public String adminUsersEditLocalPage(
-            @RequestParam(value = "userId", required = false) String userId,
-            @RequestParam(value = "lastName", required = false) String lastName,
-            @RequestParam(value = "firstName", required = false) String firstName,
-            @RequestParam(value = "emailAddress", required = false) String emailAddress,
+            @RequestParam(value = USER_ID, required = false) String userId,
+            @RequestParam(value = LAST_NAME, required = false) String lastName,
+            @RequestParam(value = FIRST_NAME, required = false) String firstName,
+            @RequestParam(value = EMAIL_ADDRESS, required = false) String emailAddress,
             @RequestParam(value = "updateUser", required = false) boolean updateUser,
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
     	String homeRedirect = checkAdminAccess( session, redirectAttrs );
@@ -516,37 +530,40 @@ public class AdminController extends BaseController {
             	} else if ((emailAddress != null) && !emailPattern.matcher( emailAddress ).matches()) {
                     setErrorMessage("The email provided is not a valid address.", model);
 
-                } else if (user != null) { // everything is ok - add the user
-                	user.setUserId( userId );
-                	user.setLastName( lastName );
-                	user.setFirstName( firstName );
-                	user.setEmailAddress( emailAddress );
-                	
-                	securityManager.updateUser( user );
-                    setStatusMessage("User '" + userId + "' updated successfully.", redirectAttrs);
-                    success = true;
-                }
+				} else if (user != null) { // everything is ok - add the user
+					user.setUserId(userId);
+					user.setLastName(lastName);
+					user.setFirstName(firstName);
+					user.setEmailAddress(emailAddress);
+					
+					securityManager.updateUser(user);
+					
+					setStatusMessage(String.format("User '%s' updated successfully.", userId), redirectAttrs);
+					success = true;
+				}
             	
                 if (!success) {
-                    model.addAttribute("userId", userId);
-                    model.addAttribute("lastName", lastName);
-                    model.addAttribute("firstName", firstName);
-                    model.addAttribute("emailAddress", emailAddress);
+                    model.addAttribute(USER_ID, userId);
+                    model.addAttribute(LAST_NAME, lastName);
+                    model.addAttribute(FIRST_NAME, firstName);
+                    model.addAttribute(EMAIL_ADDRESS, emailAddress);
                 }
                 
             } else if (user != null) {
-                model.addAttribute("userId", user.getUserId());
-                model.addAttribute("lastName", user.getLastName());
-                model.addAttribute("firstName", user.getFirstName());
-                model.addAttribute("emailAddress", user.getEmailAddress());
+                model.addAttribute(USER_ID, user.getUserId());
+                model.addAttribute(LAST_NAME, user.getLastName());
+                model.addAttribute(FIRST_NAME, user.getFirstName());
+                model.addAttribute(EMAIL_ADDRESS, user.getEmailAddress());
             }
             
             
         } catch (RepositoryException e) {
-            setErrorMessage("Unable to create user account: " + userId, model);
-            log.error("Unable to create user account: " + userId, e);
+        		String message = String.format("Unable to create user account: %s", userId);
+        		
+            setErrorMessage(message, model);
+            log.error(message, e);
         }
-        return success ? "redirect:/console/adminUsers.html" : "adminUsersEditLocal";
+        return success ? REDIRECT_ADMIN_USERS : "adminUsersEditLocal";
     }
 
     /**
@@ -566,7 +583,7 @@ public class AdminController extends BaseController {
     public String adminUsersAddDirectoryPage(
             @RequestParam(value = "searchFilter", required = false) String searchFilter,
             @RequestParam(value = "maxResults", required = false) Integer maxResults,
-            @RequestParam(value = "userId", required = false) String userId,
+            @RequestParam(value = USER_ID, required = false) String userId,
             @RequestParam(value = "createUser", required = false) boolean createUser,
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
     	String homeRedirect = checkAdminAccess( session, redirectAttrs );
@@ -610,7 +627,7 @@ public class AdminController extends BaseController {
             model.addAttribute("searchFilter", searchFilter);
             model.addAttribute("maxResults", maxResults);
         }
-        return success ? "redirect:/console/adminUsers.html" : "adminUsersAddDirectory";
+        return success ? REDIRECT_ADMIN_USERS : "adminUsersAddDirectory";
     }
     
     /**
@@ -626,7 +643,7 @@ public class AdminController extends BaseController {
      */
     @RequestMapping(value = { "/adminUsersDelete.html", "/adminUsersDelete.htm" })
     public String adminUsersDeletePage(
-            @RequestParam(value = "userId", required = true) String userId,
+            @RequestParam(value = USER_ID, required = true) String userId,
             @RequestParam(value = "confirmDelete", required = false) boolean confirmDelete,
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
     	String homeRedirect = checkAdminAccess( session, redirectAttrs );
@@ -643,14 +660,14 @@ public class AdminController extends BaseController {
                 setStatusMessage("User '" + userId + "' deleted successfully.", redirectAttrs);
 
             } else {
-                model.addAttribute("userId", userId);
+                model.addAttribute(USER_ID, userId);
             }
 
         } catch (RepositoryException e) {
             setErrorMessage("Unable to delete user account: " + userId, model);
             log.error("Unable to delete user account: " + userId, e);
         }
-        return confirmDelete ? "redirect:/console/adminUsers.html" : "adminUsersDelete";
+        return confirmDelete ? REDIRECT_ADMIN_USERS : "adminUsersDelete";
     }
 
     /**
@@ -667,7 +684,7 @@ public class AdminController extends BaseController {
      */
     @RequestMapping(value = { "/adminUsersChangePassword.html", "/adminUsersChangePassword.htm" })
     public String adminUsersChangePasswordPage(
-            @RequestParam(value = "userId", required = true) String userId,
+            @RequestParam(value = USER_ID, required = true) String userId,
             @RequestParam(value = "newPassword", required = false) String newPassword,
             @RequestParam(value = "newPasswordConfirm", required = false) String newPasswordConfirm,
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
@@ -700,13 +717,13 @@ public class AdminController extends BaseController {
                     success = true;
                 }
             }
-            model.addAttribute("userId", userId);
+            model.addAttribute(USER_ID, userId);
 
         } catch (RepositoryException e) {
             setErrorMessage("Unable to change password for user: " + userId, model);
             log.error("Unable to change password for user: " + userId, e);
         }
-        return success ? "redirect:/console/adminUsers.html" : "adminUsersChangePassword";
+        return success ? REDIRECT_ADMIN_USERS : "adminUsersChangePassword";
     }
 
     /**
@@ -786,8 +803,8 @@ public class AdminController extends BaseController {
                     }
                     groupList.add(newGroup);
                     groupsResource.saveGroupAssignments(groupList);
-                    setStatusMessage("Group '" + groupName + "' created successfully.", redirectAttrs);
-                    targetPage = "redirect:/console/adminGroups.html";
+                    setStatusMessage(String.format("Group '%s' created successfully.", groupName), redirectAttrs);
+                    targetPage = REDIRECT_ADMIN_GROUPS;
                 }
 
             } catch (RepositoryException e) {
@@ -839,7 +856,7 @@ public class AdminController extends BaseController {
                 }
                 groupsResource.saveGroupAssignments(groupList);
                 setStatusMessage("Group '" + groupName + "' deleted successfully.", redirectAttrs);
-                targetPage = "redirect:/console/adminGroups.html";
+                targetPage = REDIRECT_ADMIN_GROUPS;
 
             } catch (RepositoryException e) {
                 log.error("Error deleting user group.", e);
@@ -904,7 +921,7 @@ public class AdminController extends BaseController {
                 }
                 groupsResource.saveGroupAssignments(groupList);
                 setStatusMessage("Group '" + groupName + "' updated successfully.", redirectAttrs);
-                targetPage = "redirect:/console/adminGroups.html";
+                targetPage = REDIRECT_ADMIN_GROUPS;
 
             } catch (RepositoryException e) {
                 log.error("Error displaying or updating group assignments.", e);
@@ -983,9 +1000,9 @@ public class AdminController extends BaseController {
      */
     @RequestMapping({ "/adminDeleteItem.html", "/adminDeleteItem.htm" })
     public String adminDeleteItemPage(
-            @RequestParam(value = "baseNamespace", required = true) String baseNamespace,
-            @RequestParam(value = "filename", required = true) String filename,
-            @RequestParam(value = "version", required = true) String version,
+            @RequestParam(value = BASE_NAMESPACE, required = true) String baseNamespace,
+            @RequestParam(value = FILENAME, required = true) String filename,
+            @RequestParam(value = VERSION, required = true) String version,
             @RequestParam(value = "confirmDelete", required = false) boolean confirmDeletion,
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
     	String homeRedirect = checkAdminAccess( session, redirectAttrs );
@@ -1007,15 +1024,15 @@ public class AdminController extends BaseController {
                     searchService.deleteRepositoryItemIndex(item);
 
                     setStatusMessage("Repository item deleted successfully: " + filename, redirectAttrs);
-                    redirectAttrs.addAttribute("baseNamespace", baseNamespace);
+                    redirectAttrs.addAttribute(BASE_NAMESPACE, baseNamespace);
                     targetPage = "redirect:/console/browse.html";
 
                 } else {
                     setErrorMessage("You do not have permission to delete the repository item.", redirectAttrs);
-                    redirectAttrs.addAttribute("baseNamespace", baseNamespace);
-                    redirectAttrs.addAttribute("filename", filename);
-                    redirectAttrs.addAttribute("version", version);
-                    targetPage = "redirect:/console/libraryInfo.html";
+                    redirectAttrs.addAttribute(BASE_NAMESPACE, baseNamespace);
+                    redirectAttrs.addAttribute(FILENAME, filename);
+                    redirectAttrs.addAttribute(VERSION, version);
+                    targetPage = REDIRECT_LIBRARY_INFO;
                 }
                 
             } catch (Exception e) {
@@ -1023,10 +1040,10 @@ public class AdminController extends BaseController {
             	
                 log.error("Unable to delete the repository item.", e);
                 setErrorMessage("Unable to delete the repository item " + message, redirectAttrs);
-                redirectAttrs.addAttribute("baseNamespace", baseNamespace);
-                redirectAttrs.addAttribute("filename", filename);
-                redirectAttrs.addAttribute("version", version);
-                targetPage = "redirect:/console/libraryInfo.html";
+                redirectAttrs.addAttribute(BASE_NAMESPACE, baseNamespace);
+                redirectAttrs.addAttribute(FILENAME, filename);
+                redirectAttrs.addAttribute(VERSION, version);
+                targetPage = REDIRECT_LIBRARY_INFO;
             }
         }
         if (targetPage == null) {
@@ -1037,9 +1054,9 @@ public class AdminController extends BaseController {
                 targetPage = applyCommonValues(session, model, "adminDeleteItem");
 
             } catch (RepositoryException e) {
-                log.error("The requested repository item does not exist.", e);
-                setErrorMessage("The requested repository item does not exist.", redirectAttrs);
-                redirectAttrs.addAttribute("baseNamespace", baseNamespace);
+                log.error(RI_DOES_NOT_EXIST, e);
+                setErrorMessage(RI_DOES_NOT_EXIST, redirectAttrs);
+                redirectAttrs.addAttribute(BASE_NAMESPACE, baseNamespace);
                 targetPage = "redirect:/console/browse.html";
             }
         }
@@ -1061,9 +1078,9 @@ public class AdminController extends BaseController {
      */
     @RequestMapping({ "/adminPromoteItem.html", "/adminPromoteItem.htm" })
     public String adminPromoteItemPage(
-            @RequestParam(value = "baseNamespace", required = true) String baseNamespace,
-            @RequestParam(value = "filename", required = true) String filename,
-            @RequestParam(value = "version", required = true) String version,
+            @RequestParam(value = BASE_NAMESPACE, required = true) String baseNamespace,
+            @RequestParam(value = FILENAME, required = true) String filename,
+            @RequestParam(value = VERSION, required = true) String version,
             @RequestParam(value = "confirmPromote", required = false) boolean confirmPromote,
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
     	String homeRedirect = checkAdminAccess( session, redirectAttrs );
@@ -1097,10 +1114,10 @@ public class AdminController extends BaseController {
                 setErrorMessage("Unable to promote the repository item" + message, redirectAttrs);
 
             } finally {
-                redirectAttrs.addAttribute("baseNamespace", baseNamespace);
-                redirectAttrs.addAttribute("filename", filename);
-                redirectAttrs.addAttribute("version", version);
-                targetPage = "redirect:/console/libraryInfo.html";
+                redirectAttrs.addAttribute(BASE_NAMESPACE, baseNamespace);
+                redirectAttrs.addAttribute(FILENAME, filename);
+                redirectAttrs.addAttribute(VERSION, version);
+                targetPage = REDIRECT_LIBRARY_INFO;
             }
         }
         if (targetPage == null) {
@@ -1113,8 +1130,8 @@ public class AdminController extends BaseController {
                 targetPage = applyCommonValues(session, model, "adminPromoteItem");
 
             } catch (RepositoryException e) {
-                log.error("The requested repository item does not exist.", e);
-                setErrorMessage("The requested repository item does not exist.", model);
+                log.error(RI_DOES_NOT_EXIST, e);
+                setErrorMessage(RI_DOES_NOT_EXIST, model);
                 targetPage = new BrowseController().browsePage(baseNamespace, null, session, model);
             }
         }
@@ -1136,9 +1153,9 @@ public class AdminController extends BaseController {
      */
     @RequestMapping({ "/adminDemoteItem.html", "/adminDemoteItem.htm" })
     public String adminDemoteItemPage(
-            @RequestParam(value = "baseNamespace", required = true) String baseNamespace,
-            @RequestParam(value = "filename", required = true) String filename,
-            @RequestParam(value = "version", required = true) String version,
+            @RequestParam(value = BASE_NAMESPACE, required = true) String baseNamespace,
+            @RequestParam(value = FILENAME, required = true) String filename,
+            @RequestParam(value = VERSION, required = true) String version,
             @RequestParam(value = "confirmDemote", required = false) boolean confirmDemote,
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
     	String homeRedirect = checkAdminAccess( session, redirectAttrs );
@@ -1172,10 +1189,10 @@ public class AdminController extends BaseController {
                 setErrorMessage("Unable to demote the repository item" + message, redirectAttrs);
 
             } finally {
-                redirectAttrs.addAttribute("baseNamespace", baseNamespace);
-                redirectAttrs.addAttribute("filename", filename);
-                redirectAttrs.addAttribute("version", version);
-                targetPage = "redirect:/console/libraryInfo.html";
+                redirectAttrs.addAttribute(BASE_NAMESPACE, baseNamespace);
+                redirectAttrs.addAttribute(FILENAME, filename);
+                redirectAttrs.addAttribute(VERSION, version);
+                targetPage = REDIRECT_LIBRARY_INFO;
             }
         }
         if (targetPage == null) {
@@ -1188,8 +1205,8 @@ public class AdminController extends BaseController {
                 targetPage = applyCommonValues(session, model, "adminDemoteItem");
 
             } catch (RepositoryException e) {
-                log.error("The requested repository item does not exist.", e);
-                setErrorMessage("The requested repository item does not exist.", model);
+                log.error(RI_DOES_NOT_EXIST, e);
+                setErrorMessage(RI_DOES_NOT_EXIST, model);
                 targetPage = new BrowseController().browsePage(baseNamespace, null, session, model);
             }
         }
@@ -1211,9 +1228,9 @@ public class AdminController extends BaseController {
      */
     @RequestMapping({ "/adminUnlockItem.html", "/adminUnlockItem.htm" })
     public String adminUnlockItemPage(
-            @RequestParam(value = "baseNamespace", required = true) String baseNamespace,
-            @RequestParam(value = "filename", required = true) String filename,
-            @RequestParam(value = "version", required = true) String version,
+            @RequestParam(value = BASE_NAMESPACE, required = true) String baseNamespace,
+            @RequestParam(value = FILENAME, required = true) String filename,
+            @RequestParam(value = VERSION, required = true) String version,
             @RequestParam(value = "confirmUnlock", required = false) boolean confirmUnlock,
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
     	String homeRedirect = checkAdminAccess( session, redirectAttrs );
@@ -1247,10 +1264,10 @@ public class AdminController extends BaseController {
                 setErrorMessage("Unable to unlock the repository item" + message, redirectAttrs);
 
             } finally {
-                redirectAttrs.addAttribute("baseNamespace", baseNamespace);
-                redirectAttrs.addAttribute("filename", filename);
-                redirectAttrs.addAttribute("version", version);
-                targetPage = "redirect:/console/libraryInfo.html";
+                redirectAttrs.addAttribute(BASE_NAMESPACE, baseNamespace);
+                redirectAttrs.addAttribute(FILENAME, filename);
+                redirectAttrs.addAttribute(VERSION, version);
+                targetPage = REDIRECT_LIBRARY_INFO;
             }
         }
         if (targetPage == null) {
@@ -1262,8 +1279,8 @@ public class AdminController extends BaseController {
                 targetPage = applyCommonValues(session, model, "adminUnlockItem");
 
             } catch (RepositoryException e) {
-                log.error("The requested repository item does not exist.", e);
-                setErrorMessage("The requested repository item does not exist.", model);
+                log.error(RI_DOES_NOT_EXIST, e);
+                setErrorMessage(RI_DOES_NOT_EXIST, model);
                 targetPage = new BrowseController().browsePage(baseNamespace, null, session, model);
             }
         }
@@ -1285,9 +1302,9 @@ public class AdminController extends BaseController {
      */
     @RequestMapping({ "/adminRecalculateItemCrc.html", "/adminRecalculateItemCrc.htm" })
     public String adminRecalculateItemCrcPage(
-            @RequestParam(value = "baseNamespace", required = true) String baseNamespace,
-            @RequestParam(value = "filename", required = true) String filename,
-            @RequestParam(value = "version", required = true) String version,
+            @RequestParam(value = BASE_NAMESPACE, required = true) String baseNamespace,
+            @RequestParam(value = FILENAME, required = true) String filename,
+            @RequestParam(value = VERSION, required = true) String version,
             @RequestParam(value = "confirmRecalculate", required = false) boolean confirmRecalculate,
             HttpSession session, Model model, RedirectAttributes redirectAttrs) {
     	String homeRedirect = checkAdminAccess( session, redirectAttrs );
@@ -1327,10 +1344,10 @@ public class AdminController extends BaseController {
                 setErrorMessage("Unable to recalculate the repository item's CRC" + message, redirectAttrs);
 
             } finally {
-                redirectAttrs.addAttribute("baseNamespace", baseNamespace);
-                redirectAttrs.addAttribute("filename", filename);
-                redirectAttrs.addAttribute("version", version);
-                targetPage = "redirect:/console/libraryInfo.html";
+                redirectAttrs.addAttribute(BASE_NAMESPACE, baseNamespace);
+                redirectAttrs.addAttribute(FILENAME, filename);
+                redirectAttrs.addAttribute(VERSION, version);
+                targetPage = REDIRECT_LIBRARY_INFO;
             }
         }
         if (targetPage == null) {
@@ -1341,8 +1358,8 @@ public class AdminController extends BaseController {
                 targetPage = applyCommonValues(session, model, "adminRecalculateItemCrc");
 
             } catch (RepositoryException e) {
-                log.error("The requested repository item does not exist.", e);
-                setErrorMessage("The requested repository item does not exist.", model);
+                log.error(RI_DOES_NOT_EXIST, e);
+                setErrorMessage(RI_DOES_NOT_EXIST, model);
                 targetPage = new BrowseController().browsePage(baseNamespace, null, session, model);
             }
         }

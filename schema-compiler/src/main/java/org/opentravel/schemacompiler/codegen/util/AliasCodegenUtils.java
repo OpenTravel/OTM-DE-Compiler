@@ -33,7 +33,12 @@ import org.opentravel.schemacompiler.model.TLListFacet;
  * @author S. Livezey
  */
 public class AliasCodegenUtils {
-
+	
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private AliasCodegenUtils() {}
+	
     /**
      * Returns the corresponding alias from the source factet's owner.
      * 
@@ -64,25 +69,22 @@ public class AliasCodegenUtils {
             TLAliasOwner owner = (TLAliasOwner) sourceFacet.getOwningEntity();
             String aliasSuffix = "_" + sourceFacet.getFacetType().getIdentityName(facetName);
 
-            if (facetAlias.getName().endsWith(aliasSuffix)) {
-                if (owner instanceof TLAliasOwner) {
-                    for (TLAlias candidateAlias : owner.getAliases()) {
-                        String derivedAlias = candidateAlias.getName() + aliasSuffix;
+            if ((facetAlias.getName().endsWith(aliasSuffix)) && (owner instanceof TLAliasOwner)) {
+                for (TLAlias candidateAlias : owner.getAliases()) {
+                    String derivedAlias = candidateAlias.getName() + aliasSuffix;
 
-                        if (facetAlias.getName().equals(derivedAlias)) {
-                            ownerAlias = candidateAlias;
-                            break;
-                        }
+                    if (facetAlias.getName().equals(derivedAlias)) {
+                        ownerAlias = candidateAlias;
+                        break;
                     }
+                }
 
-                    // If a corresponding alias could not be located on the owner, we must assume
-                    // this
-                    // this to be an inherited alias; therefore we must return a ghost
-                    if (ownerAlias == null) {
-                        ownerAlias = new TLAlias();
-                        ownerAlias.setName(facetAlias.getName().replace(aliasSuffix, ""));
-                        ownerAlias.setOwningEntity(owner);
-                    }
+                // If a corresponding alias could not be located on the owner, we must assume this
+                // this to be an inherited alias; therefore we must return a ghost
+                if (ownerAlias == null) {
+                    ownerAlias = new TLAlias();
+                    ownerAlias.setName(facetAlias.getName().replace(aliasSuffix, ""));
+                    ownerAlias.setOwningEntity(owner);
                 }
             }
         }
@@ -246,23 +248,23 @@ public class AliasCodegenUtils {
      * @param facetAlias  the source list-facet alias
      * @return TLAlias
      */
-    public static TLAlias getItemFacetAlias(TLAlias listFacetAlias) {
-    	TLAliasOwner aliasOwner = listFacetAlias.getOwningEntity();
-    	String listFacetAliasName = listFacetAlias.getName();
-    	TLAlias itemFacetAlias = null;
-    	
-    	if (aliasOwner instanceof TLListFacet) {
-    		TLAbstractFacet _itemFacet = ((TLListFacet) aliasOwner).getItemFacet();
-    		
-    		if ((_itemFacet instanceof TLAliasOwner) &&
-    				(listFacetAliasName != null) && listFacetAliasName.endsWith("_List")) {
-    			TLAliasOwner itemFacet = (TLAliasOwner) _itemFacet;
-    			String itemFacetAliasName = listFacetAliasName.substring( 0, listFacetAliasName.length() - 5 );
-    			
-    			itemFacetAlias = itemFacet.getAlias( itemFacetAliasName );
-    		}
-    	}
-    	return itemFacetAlias;
-    }
+	public static TLAlias getItemFacetAlias(TLAlias listFacetAlias) {
+		TLAliasOwner aliasOwner = listFacetAlias.getOwningEntity();
+		String listFacetAliasName = listFacetAlias.getName();
+		TLAlias itemFacetAlias = null;
+		
+		if (aliasOwner instanceof TLListFacet) {
+			TLAbstractFacet listFacet = ((TLListFacet) aliasOwner).getItemFacet();
+			
+			if ((listFacet instanceof TLAliasOwner) && (listFacetAliasName != null)
+					&& listFacetAliasName.endsWith("_List")) {
+				TLAliasOwner itemFacet = (TLAliasOwner) listFacet;
+				String itemFacetAliasName = listFacetAliasName.substring(0, listFacetAliasName.length() - 5);
+				
+				itemFacetAlias = itemFacet.getAlias(itemFacetAliasName);
+			}
+		}
+		return itemFacetAlias;
+	}
     
 }

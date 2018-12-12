@@ -35,7 +35,12 @@ import org.opentravel.schemacompiler.repository.RepositorySecurityException;
 public abstract class RepositoryServiceExceptionMapper {
 
     private static Log log = LogFactory.getLog(RepositoryServiceExceptionMapper.class);
-
+    
+    /**
+     * Private constructor to prevent instantiation.
+     */
+    private RepositoryServiceExceptionMapper() {}
+    
     /**
      * Converts the given exception into an HTTP response that can be transmitted back to the web
      * service client.

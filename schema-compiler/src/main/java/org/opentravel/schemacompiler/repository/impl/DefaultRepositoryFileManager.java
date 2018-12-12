@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryFileManager;
+import org.opentravel.schemacompiler.util.FileUtils;
 
 /**
  * Default implementation of the <code>RepositoryFileManager</code> that employs a simple file
@@ -66,15 +67,15 @@ public class DefaultRepositoryFileManager extends RepositoryFileManager {
                 createBackupFile(file, backupFile);
 
                 if (log.isDebugEnabled()) {
-                    log.debug("Created backup file: " + file.getName() + " [Change Set - "
-                            + Thread.currentThread().getName() + "]");
+                		log.debug(String.format("Created backup file: %s [Change Set - %s]",
+                				file.getName(), Thread.currentThread().getName()));
                 }
             }
             super.addToChangeSet(file);
 
         } catch (IOException e) {
-            log.error("Error creating backup file: " + file.getName() + " [Change Set - "
-                    + Thread.currentThread().getName() + "]", e);
+        		log.error(String.format("Error creating backup file: %s [Change Set - %s]",
+        				file.getName(), Thread.currentThread().getName()));
             throw new RepositoryException("Error creating backup file: " + file.getName(), e);
         }
     }
@@ -94,8 +95,8 @@ public class DefaultRepositoryFileManager extends RepositoryFileManager {
                 removeBackupFile(backupFile);
 
                 if (log.isDebugEnabled()) {
-                    log.debug("Removed backup file: " + backupFile.getName() + " [Change Set - "
-                            + Thread.currentThread().getName() + "]");
+                		log.debug(String.format("Removed backup file: %s [Change Set - %s]",
+                				backupFile.getName(), Thread.currentThread().getName()));
                 }
             }
         }
@@ -154,36 +155,21 @@ public class DefaultRepositoryFileManager extends RepositoryFileManager {
      * @throws IOException
      *             thrown if the backup file cannot be created
      */
-    protected void createBackupFile(File originalFile, File backupFile) throws IOException {
-    	if (originalFile.isFile()) {
-            InputStream in = null;
-            OutputStream out = null;
-            try {
-                byte[] buffer = new byte[1024];
-                int bytesRead;
-
-                in = new FileInputStream(originalFile);
-                out = new FileOutputStream(backupFile);
-
-                while ((bytesRead = in.read(buffer)) >= 0) {
-                    out.write(buffer, 0, bytesRead);
-                }
-
-            } finally {
-                try {
-                    if (in != null)
-                        in.close();
-                } catch (Throwable t) {
-                }
-                try {
-                    if (out != null)
-                        out.close();
-                } catch (Throwable t) {
-                }
-            }
-    	}
-    }
-
+	protected void createBackupFile(File originalFile, File backupFile) throws IOException {
+		if (originalFile.isFile()) {
+			try (InputStream in = new FileInputStream(originalFile)) {
+				try (OutputStream out = new FileOutputStream(backupFile)) {
+					byte[] buffer = new byte[1024];
+					int bytesRead;
+					
+					while ((bytesRead = in.read(buffer)) >= 0) {
+						out.write(buffer, 0, bytesRead);
+					}
+				}
+			}
+		}
+	}
+	
     /**
      * Creates a backup of the specified original file on the local file system. If the backup file
      * does not exist, the original file is considered be newly created; in these cases the original
@@ -197,16 +183,12 @@ public class DefaultRepositoryFileManager extends RepositoryFileManager {
      *             thrown if the backup file cannot be restored
      */
     protected void restoreBackupFile(File backupFile, File originalFile) throws IOException {
-        if (originalFile.exists()) {
-            if (!originalFile.delete()) {
-                throw new IOException(
-                        "Unable to delete original file during restoration of backup: "
-                                + backupFile.getAbsolutePath());
-            }
+        if (originalFile.exists() && !FileUtils.confirmDelete(originalFile)) {
+            throw new IOException(
+                    "Unable to delete original file during restoration of backup: "
+                            + backupFile.getAbsolutePath());
         }
-        if (backupFile.exists()) {
-            backupFile.renameTo(originalFile);
-        }
+        FileUtils.renameTo( backupFile, originalFile );
     }
 
     /**
@@ -216,9 +198,7 @@ public class DefaultRepositoryFileManager extends RepositoryFileManager {
      *            the backup file to remove
      */
     protected void removeBackupFile(File backupFile) {
-        if ((backupFile != null) && backupFile.exists()) {
-            backupFile.delete();
-        }
+    		FileUtils.delete( backupFile );
     }
 
 }

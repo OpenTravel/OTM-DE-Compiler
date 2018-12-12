@@ -135,7 +135,7 @@ public class TLSimpleFacet extends TLAbstractFacet implements TLAttributeType, T
     public XSDFacetProfile getXSDFacetProfile() {
         return (simpleType instanceof TLAttributeType)
         		? XSDFacetProfileLocator.getXSDFacetProfile( (TLAttributeType) simpleType )
-        				: XSDFacetProfile.FP_unknown;
+        				: XSDFacetProfile.FP_UNKNOWN;
     }
 
     /**

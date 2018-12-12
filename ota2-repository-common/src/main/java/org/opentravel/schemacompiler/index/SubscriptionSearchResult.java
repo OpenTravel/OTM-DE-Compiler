@@ -74,6 +74,23 @@ public class SubscriptionSearchResult implements IndexingTerms, Comparable<Subsc
 	}
 
 	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return (userId == null) ? 0 : userId.hashCode();
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		return (obj instanceof SubscriptionSearchResult)
+				&& (compareTo( (SubscriptionSearchResult) obj) == 0);
+	}
+
+	/**
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
 	@Override

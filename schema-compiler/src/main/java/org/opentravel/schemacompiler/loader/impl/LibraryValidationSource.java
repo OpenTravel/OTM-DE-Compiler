@@ -63,7 +63,7 @@ public class LibraryValidationSource implements Validatable {
                 if (nameValue instanceof String) {
                     identity = (String) nameValue;
                 }
-            } catch (Throwable t) {
+            } catch (Exception e) {
                 // No Error - Return an unknown library identity
             }
         }

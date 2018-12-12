@@ -58,8 +58,9 @@ import org.springframework.jms.core.MessageCreator;
  * 
  * @author S. Livezey
  */
-public class JMSFreeTextSearchService extends FreeTextSearchService implements IndexingConstants {
+public class JMSFreeTextSearchService extends FreeTextSearchService {
 	
+	private static final String UNABLE_TO_SUBMIT = "Unable to submit indexing job for processing - service unavailable.";
 	private static final long JMS_LISTENER_RETRY_INTERVAL = 10000;
 	
     private static Log log = LogFactory.getLog(JMSFreeTextSearchService.class);
@@ -174,11 +175,12 @@ public class JMSFreeTextSearchService extends FreeTextSearchService implements I
 		   	    	metadataList.getLibraryInfo().add( RepositoryUtils.createItemMetadata( item ) );
 				}
 				m.marshal( objectFactory.createLibraryInfoList( metadataList ), writer );
-				sendIndexingJob( deleteIndex ? JOB_TYPE_DELETE_INDEX : JOB_TYPE_CREATE_INDEX, writer.toString() );
+				sendIndexingJob( deleteIndex ?
+						IndexingConstants.JOB_TYPE_DELETE_INDEX : IndexingConstants.JOB_TYPE_CREATE_INDEX, writer.toString() );
 				log.info("Submitted processing request for remote indexing job (" + itemsToIndex.size() + " entries).");
 				
 			} else {
-				log.info("Unable to submit indexing job for processing - service unavailable.");
+				log.info(UNABLE_TO_SUBMIT);
 			}
 			
 		} catch (JAXBException e) {
@@ -192,11 +194,11 @@ public class JMSFreeTextSearchService extends FreeTextSearchService implements I
 	@Override
 	protected void deleteSearchIndex() {
 		if (isIndexingServiceAvailable()) {
-			sendIndexingJob( JOB_TYPE_DELETE_ALL, null );
+			sendIndexingJob( IndexingConstants.JOB_TYPE_DELETE_ALL, null );
 	    	log.info("Submitted index deletion job.");
 			
 		} else {
-			log.info("Unable to submit indexing job for processing - service unavailable.");
+			log.info(UNABLE_TO_SUBMIT);
 		}
 	}
 	
@@ -212,11 +214,11 @@ public class JMSFreeTextSearchService extends FreeTextSearchService implements I
 				StringWriter writer = new StringWriter();
 				
 				m.marshal( extObjectFactory.createSubscriptionTarget( subscriptionTarget ), writer );
-				sendIndexingJob( JOB_TYPE_SUBSCRIPTION, writer.toString() );
+				sendIndexingJob( IndexingConstants.JOB_TYPE_SUBSCRIPTION, writer.toString() );
 				log.info("Submitted processing request for subscription indexing job.");
 				
 			} else {
-				log.info("Unable to submit indexing job for processing - service unavailable.");
+				log.info(UNABLE_TO_SUBMIT);
 			}
 			
 		} catch (JAXBException e) {
@@ -237,8 +239,8 @@ public class JMSFreeTextSearchService extends FreeTextSearchService implements I
 			public Message createMessage(Session session) throws JMSException {
 				TextMessage msg = session.createTextMessage();
 				
-				msg.setStringProperty( MSGPROP_JOB_TYPE, jobType );
-				msg.setIntProperty( MSGPROP_SELECTOR, SELECTOR_VALUE_JOBMSG );
+				msg.setStringProperty( IndexingConstants.MSGPROP_JOB_TYPE, jobType );
+				msg.setIntProperty( IndexingConstants.MSGPROP_SELECTOR, IndexingConstants.SELECTOR_VALUE_JOBMSG );
 				msg.setText( messageContent );
 				return msg;
 			}
@@ -270,7 +272,7 @@ public class JMSFreeTextSearchService extends FreeTextSearchService implements I
 						jmsConnection = indexingService.getConnectionFactory().createConnection();
 						jmsConnectionAvailable = true;
 						
-					} catch (Throwable t) {
+					} catch (Exception e) {
 						try {
 							if (initialStartup) {
 								log.info("Unable to establish connection to indexing agent - waiting to reconnect...");
@@ -280,13 +282,17 @@ public class JMSFreeTextSearchService extends FreeTextSearchService implements I
 							}
 							Thread.sleep( JMS_LISTENER_RETRY_INTERVAL );
 							
-						} catch (Throwable t2) {}
+						} catch (Exception e2) {
+							// Ignore and continue
+						}
 						
 					} finally {
 						if (jmsConnection != null) {
 							try {
 								jmsConnection.close();
-							} catch (Throwable t) {}
+							} catch (Exception e) {
+								// Ignore and continue
+							}
 						}
 					}
 				}
@@ -295,20 +301,20 @@ public class JMSFreeTextSearchService extends FreeTextSearchService implements I
 				
 				while (!shutdownRequested && jmsConnectionAvailable) {
 					try {
-						Message msg = indexingService.receiveSelected( SELECTOR_COMMITMSG );
+						Message msg = indexingService.receiveSelected( IndexingConstants.SELECTOR_COMMITMSG );
 						
 						if (msg != null) {
 							log.info("Commit notification received from indexing agent.");
 							refreshIndexReader();
 						}
 						
-					} catch (Throwable t) {
-						if (isConnectException( t )) {
+					} catch (Exception e) {
+						if (isConnectException( e )) {
 							log.warn("Indexing agent connection appears to be down - waiting to reconnect...");
 							jmsConnectionAvailable = false;
 							
 						} else {
-							log.error("Error receiving indexing job.", t);
+							log.error("Error receiving indexing job.", e);
 						}
 					}
 				}
@@ -329,9 +335,8 @@ public class JMSFreeTextSearchService extends FreeTextSearchService implements I
 			boolean isCE = false;
 			
 			while (!isCE && (t != null)) {
-				if (!(isCE = t.getClass().equals( ConnectException.class ))) {
-					t = t.getCause();
-				}
+				isCE = t.getClass().equals( ConnectException.class );
+				if (!isCE) t = t.getCause();
 			}
 			return isCE;
 		}

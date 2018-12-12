@@ -34,7 +34,9 @@ import org.opentravel.schemacompiler.model.TLProperty.PropertyListManager;
  */
 public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContextReferrer {
 
-    private AliasListManager aliasManager = new AliasListManager(this);
+	private static final String FACET_OPERATION_NOT_SUPPORTED = "Operation not supported for facets.";
+	
+	private AliasListManager aliasManager = new AliasListManager(this);
     private FacetAliasManager facetAliasManager = new FacetAliasManager();
     private AttributeListManager attributeManager = new AttributeListManager(this);
     private PropertyListManager elementManager = new PropertyListManager(this);
@@ -190,7 +192,7 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
      * @see org.opentravel.schemacompiler.model.TLAliasOwner#addAlias(org.opentravel.schemacompiler.model.TLAlias)
      */
     public void addAlias(TLAlias alias) {
-        throw new UnsupportedOperationException("Operation not supported for facets.");
+        throw new UnsupportedOperationException(FACET_OPERATION_NOT_SUPPORTED);
     }
 
     /**
@@ -199,14 +201,14 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
      */
     @Override
     public void addAlias(int index, TLAlias alias) {
-        throw new UnsupportedOperationException("Operation not supported for facets.");
+        throw new UnsupportedOperationException(FACET_OPERATION_NOT_SUPPORTED);
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLAliasOwner#removeAlias(org.opentravel.schemacompiler.model.TLAlias)
      */
     public void removeAlias(TLAlias alias) {
-        throw new UnsupportedOperationException("Operation not supported for facets.");
+        throw new UnsupportedOperationException(FACET_OPERATION_NOT_SUPPORTED);
     }
 
     /**
@@ -214,7 +216,7 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
      */
     @Override
     public void moveUp(TLAlias alias) {
-        throw new UnsupportedOperationException("Operation not supported for facets.");
+        throw new UnsupportedOperationException(FACET_OPERATION_NOT_SUPPORTED);
     }
 
     /**
@@ -222,7 +224,7 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
      */
     @Override
     public void moveDown(TLAlias alias) {
-        throw new UnsupportedOperationException("Operation not supported for facets.");
+        throw new UnsupportedOperationException(FACET_OPERATION_NOT_SUPPORTED);
     }
 
     /**
@@ -230,7 +232,7 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
      */
     @Override
     public void sortAliases(Comparator<TLAlias> comparator) {
-        throw new UnsupportedOperationException("Operation not supported for facets.");
+        throw new UnsupportedOperationException(FACET_OPERATION_NOT_SUPPORTED);
     }
 
     /**
@@ -526,6 +528,7 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
      */
     @Deprecated
     public void setLabel(String label) {
+    		// No action required for deprecated operation
     }
 
     /**

@@ -64,17 +64,15 @@ public class OTA2BuiltInLibraryLoader extends AbstractBuiltInLibraryLoader {
                     ota2Library.setPrefix(getLibraryDeclaration().getDefaultPrefix());
                 }
 
-                if (ota2Library != null) {
-                    library = new BuiltInLibrary(ota2Library.getNamespace(), ota2Library.getName(),
-                            ota2Library.getPrefix(), inputSource.getLibraryURL(),
-                            ota2Library.getNamedMembers(), ota2Library.getNamespaceImports(),
-                            ota2Library.getIncludes(), getLibraryDeclaration(),
-                            ota2Library.getVersionScheme());
-                }
+                library = new BuiltInLibrary(ota2Library.getNamespace(), ota2Library.getName(),
+                        ota2Library.getPrefix(), inputSource.getLibraryURL(),
+                        ota2Library.getNamedMembers(), ota2Library.getNamespaceImports(),
+                        ota2Library.getIncludes(), getLibraryDeclaration(),
+                        ota2Library.getVersionScheme());
             }
-        } catch (Throwable t) {
+        } catch (Exception e) {
             throw new LibraryLoaderException("Error constructing built-in library instance ("
-                    + inputSource.getLibraryURL() + ")", t);
+                    + inputSource.getLibraryURL() + ")", e);
         }
         return library;
     }

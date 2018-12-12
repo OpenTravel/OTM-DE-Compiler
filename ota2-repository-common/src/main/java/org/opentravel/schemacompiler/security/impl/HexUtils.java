@@ -25,7 +25,9 @@ import java.io.ByteArrayOutputStream;
  */
 public class HexUtils {
 
-    // Table for HEX to DEC byte translation
+	private static final String INVALID_HEXADECIMAL_STRING = "Invalid hexadecimal string - bad digit(s).";
+	
+	// Table for HEX to DEC byte translation
     private static final int[] DEC = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 00, 01, 02, 03, 04, 05, 06, 07, 8, 9, -1,
@@ -38,7 +40,12 @@ public class HexUtils {
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, };
-
+    
+    /**
+     * Private constructor to prevent instantiation.
+     */
+    private HexUtils() {}
+    
     /**
      * Convert a String of hexadecimal digits into the corresponding byte array by encoding each two
      * hexadecimal digits as a byte.
@@ -71,7 +78,7 @@ public class HexUtils {
             } else if ((c1 >= 'A') && (c1 <= 'F')) {
                 b += ((c1 - 'A' + 10) * 16);
             } else {
-                throw new IllegalArgumentException("Invalid hexadecimal string - bad digit(s).");
+                throw new IllegalArgumentException(INVALID_HEXADECIMAL_STRING);
             }
 
             if ((c2 >= '0') && (c2 <= '9')) {
@@ -81,7 +88,7 @@ public class HexUtils {
             } else if ((c2 >= 'A') && (c2 <= 'F')) {
                 b += (c2 - 'A' + 10);
             } else {
-                throw new IllegalArgumentException("Invalid hexadecimal string - bad digit(s).");
+                throw new IllegalArgumentException(INVALID_HEXADECIMAL_STRING);
             }
             baos.write(b);
         }
@@ -97,7 +104,7 @@ public class HexUtils {
      *            the byte array representation
      * @return String
      */
-    public static String convert(byte bytes[]) {
+    public static String convert(byte[] bytes) {
         StringBuilder sb = new StringBuilder(bytes.length * 2);
 
         for (int i = 0; i < bytes.length; i++) {
@@ -124,27 +131,27 @@ public class HexUtils {
             return 0;
         }
         if (DEC[hex[0]] < 0) {
-            throw new IllegalArgumentException("Invalid hexadecimal string - bad digit(s).");
+            throw new IllegalArgumentException(INVALID_HEXADECIMAL_STRING);
         }
 
         len = DEC[hex[0]];
         len = len << 4;
 
         if (DEC[hex[1]] < 0) {
-            throw new IllegalArgumentException("Invalid hexadecimal string - bad digit(s).");
+            throw new IllegalArgumentException(INVALID_HEXADECIMAL_STRING);
         }
 
         len += DEC[hex[1]];
         len = len << 4;
 
         if (DEC[hex[2]] < 0) {
-            throw new IllegalArgumentException("Invalid hexadecimal string - bad digit(s).");
+            throw new IllegalArgumentException(INVALID_HEXADECIMAL_STRING);
         }
         len += DEC[hex[2]];
         len = len << 4;
 
         if (DEC[hex[3]] < 0) {
-            throw new IllegalArgumentException("Invalid hexadecimal string - bad digit(s).");
+            throw new IllegalArgumentException(INVALID_HEXADECIMAL_STRING);
         }
         len += DEC[hex[3]];
 

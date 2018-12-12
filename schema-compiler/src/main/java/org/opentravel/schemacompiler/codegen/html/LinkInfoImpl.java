@@ -208,22 +208,22 @@ public class LinkInfoImpl extends LinkInfo {
 	/**
 	 * The integer indicating the location of the link.
 	 */
-	public int context;
+	private int context;
 
 	/**
 	 * The value of the marker #.
 	 */
-	public String where = "";
+	private String where = "";
 
 	/**
 	 * String style of text defined in style sheet.
 	 */
-	public String styleName = "";
+	private String styleName = "";
 
 	/**
 	 * The valueof the target.
 	 */
-	public String target = "";
+	private String target = "";
 
 	/**
 	 * Construct a LinkInfo object.
@@ -239,9 +239,9 @@ public class LinkInfoImpl extends LinkInfo {
 	 */
 	public LinkInfoImpl(int context, DocumentationBuilder builder,
 			String label, String target) {
-		this.builder = builder;
-		this.label = label;
-		this.target = target;
+		this.setBuilder(builder);
+		this.setLabel(label);
+		this.setTarget(target);
 		setContext(context);
 	}
 
@@ -263,11 +263,11 @@ public class LinkInfoImpl extends LinkInfo {
 	 */
 	public LinkInfoImpl(int context, DocumentationBuilder builder,
 			String where, String label, boolean isStrong, String styleName) {
-		this.builder = builder;
-		this.where = where;
-		this.label = label;
-		this.isStrong = isStrong;
-		this.styleName = styleName;
+		this.setBuilder(builder);
+		this.setWhere(where);
+		this.setLabel(label);
+		this.setStrong(isStrong);
+		this.setStyleName(styleName);
 		setContext(context);
 	}
 
@@ -287,10 +287,10 @@ public class LinkInfoImpl extends LinkInfo {
 	 */
 	public LinkInfoImpl(int context, DocumentationBuilder builder,
 			String where, String label, boolean isStrong) {
-		this.builder = builder;
-		this.where = where;
-		this.label = label;
-		this.isStrong = isStrong;
+		this.setBuilder(builder);
+		this.setWhere(where);
+		this.setLabel(label);
+		this.setStrong(isStrong);
 		setContext(context);
 	}
 
@@ -303,9 +303,9 @@ public class LinkInfoImpl extends LinkInfo {
 	 *            the label for the link.
 	 */
 	public LinkInfoImpl(DocumentationBuilder builder, String label) {
-		this.builder = builder;
-		this.label = label;
-		setContext(context);
+		this.setBuilder(builder);
+		this.setLabel(label);
+		setContext(getContext());
 	}
 
 	/**
@@ -320,8 +320,8 @@ public class LinkInfoImpl extends LinkInfo {
 	 */
 	public LinkInfoImpl(int context, DocumentationBuilder builder,
 			boolean isStrong) {
-		this.builder = builder;
-		this.isStrong = isStrong;
+		this.setBuilder(builder);
+		this.setStrong(isStrong);
 		setContext(context);
 	}
 
@@ -339,9 +339,9 @@ public class LinkInfoImpl extends LinkInfo {
 	 */
 	public LinkInfoImpl(int context, DocumentationBuilder builder,
 			String label, boolean isStrong) {
-		this.builder = builder;
-		this.label = label;
-		this.isStrong = isStrong;
+		this.setBuilder(builder);
+		this.setLabel(label);
+		this.setStrong(isStrong);
 		setContext(context);
 	}
 
@@ -354,39 +354,39 @@ public class LinkInfoImpl extends LinkInfo {
 	 *            the class to link to.
 	 */
 	public LinkInfoImpl(int context, DocumentationBuilder builder) {
-		this.builder = builder;
+		this.setBuilder(builder);
 		setContext(context);
 	}
 
 	public LinkInfoImpl(LibraryMember member, String label) {
-		this.builder = DocumentationBuilderFactory.getInstance()
-				.getDocumentationBuilder(member);
-		this.label = label;
-		setContext(context);
+		this.setBuilder(DocumentationBuilderFactory.getInstance()
+				.getDocumentationBuilder(member));
+		this.setLabel(label);
+		setContext(getContext());
 	}
 
 	public LinkInfoImpl(int context, LibraryMember member, String label,
 			boolean isStrong) {
-		this.builder = DocumentationBuilderFactory.getInstance()
-				.getDocumentationBuilder(member);
-		this.label = label;
-		this.isStrong = isStrong;
+		this.setBuilder(DocumentationBuilderFactory.getInstance()
+				.getDocumentationBuilder(member));
+		this.setLabel(label);
+		this.setStrong(isStrong);
 		setContext(context);
 	}
 
 	public LinkInfoImpl(int context, LibraryMember member, String label,
 			String target) {
-		this.builder = DocumentationBuilderFactory.getInstance()
-				.getDocumentationBuilder(member);
-		this.label = label;
-		this.target = target;
+		this.setBuilder(DocumentationBuilderFactory.getInstance()
+				.getDocumentationBuilder(member));
+		this.setLabel(label);
+		this.setTarget(target);
 		setContext(context);
 	}
 
 	public LinkInfoImpl(int contextPackage, LibraryMember member, boolean isStrong) {
-		this.builder = DocumentationBuilderFactory.getInstance()
-				.getDocumentationBuilder(member);
-		this.isStrong = isStrong;
+		this.setBuilder(DocumentationBuilderFactory.getInstance()
+				.getDocumentationBuilder(member));
+		this.setStrong(isStrong);
 		setContext(contextPackage);	
 		}
 
@@ -416,12 +416,12 @@ public class LinkInfoImpl extends LinkInfo {
 		case CONTEXT_METHOD_DOC_COPY:
 		case CONTEXT_FIELD_DOC_COPY:
 		case CONTEXT_CLASS_USE_HEADER:
-			includeTypeInClassLinkLabel = false;
+			setIncludeTypeInClassLinkLabel(false);
 			break;
 
 		case CONTEXT_ANNOTATION:
-			excludeTypeParameterLinks = true;
-			excludeTypeBounds = true;
+			setExcludeTypeParameterLinks(true);
+			setExcludeTypeBounds(true);
 			break;
 
 		case CONTEXT_IMPLEMENTED_INTERFACES:
@@ -430,30 +430,30 @@ public class LinkInfoImpl extends LinkInfo {
 		case CONTEXT_CLASS_TREE_PARENT:
 		case CONTEXT_TREE:
 		case CONTEXT_CLASS_SIGNATURE_PARENT_NAME:
-			excludeTypeParameterLinks = true;
-			excludeTypeBounds = true;
-			includeTypeInClassLinkLabel = false;
-			includeTypeAsSepLink = true;
+			setExcludeTypeParameterLinks(true);
+			setExcludeTypeBounds(true);
+			setIncludeTypeInClassLinkLabel(false);
+			setIncludeTypeAsSepLink(true);
 			break;
 
 		case CONTEXT_LIBRARY:
 		case CONTEXT_CLASS_USE:
 		case CONTEXT_CLASS_HEADER:
 		case CONTEXT_CLASS_SIGNATURE:
-			excludeTypeParameterLinks = true;
-			includeTypeAsSepLink = true;
-			includeTypeInClassLinkLabel = false;
+			setExcludeTypeParameterLinks(true);
+			setIncludeTypeAsSepLink(true);
+			setIncludeTypeInClassLinkLabel(false);
 			break;
 
 		case CONTEXT_MEMBER_TYPE_PARAMS:
-			includeTypeAsSepLink = true;
-			includeTypeInClassLinkLabel = false;
+			setIncludeTypeAsSepLink(true);
+			setIncludeTypeInClassLinkLabel(false);
 			break;
 
 		case CONTEXT_RETURN_TYPE:
 		case CONTEXT_SUMMARY_RETURN_TYPE:
 		case CONTEXT_EXECUTABLE_MEMBER_PARAM:
-			excludeTypeBounds = true;
+			setExcludeTypeBounds(true);
 			break;
 		default:
 			break;
@@ -469,10 +469,60 @@ public class LinkInfoImpl extends LinkInfo {
 	 *         desired place.
 	 */
 	public boolean isLinkable() {
-		return Util.isLinkable(builder, Configuration.getInstance());
+		return Util.isLinkable(getBuilder(), Configuration.getInstance());
 	}
 
-	public DocumentationBuilder getBuilder() {
-		return builder;
+	/**
+	 * Returns the value of the 'where' field.
+	 *
+	 * @return String
+	 */
+	public String getWhere() {
+		return where;
+	}
+
+	/**
+	 * Assigns the value of the 'where' field.
+	 *
+	 * @param where  the field value to assign
+	 */
+	public void setWhere(String where) {
+		this.where = where;
+	}
+
+	/**
+	 * Returns the value of the 'styleName' field.
+	 *
+	 * @return String
+	 */
+	public String getStyleName() {
+		return styleName;
+	}
+
+	/**
+	 * Assigns the value of the 'styleName' field.
+	 *
+	 * @param styleName  the field value to assign
+	 */
+	public void setStyleName(String styleName) {
+		this.styleName = styleName;
+	}
+
+	/**
+	 * Returns the value of the 'target' field.
+	 *
+	 * @return String
+	 */
+	public String getTarget() {
+		return target;
+	}
+
+	/**
+	 * Assigns the value of the 'target' field.
+	 *
+	 * @param target  the field value to assign
+	 */
+	public void setTarget(String target) {
+		this.target = target;
 	}
 }

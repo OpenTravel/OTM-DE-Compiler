@@ -225,7 +225,7 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
 		discriminator.setRequired( true );
 		discriminator.setName( DISCRIMINATOR_PROPERTY );
 		discriminator.setSchema( new JsonSchemaReference( schema ) );
-		schema.setType( JsonType.jsonString );
+		schema.setType( JsonType.JSON_STRING );
 		return discriminator;
 	}
 	

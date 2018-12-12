@@ -899,10 +899,7 @@ public abstract class ValidationBuilder<T extends ValidationBuilder<T>> {
 
             if (targetIdentity != null) {
                 for (E member : siblingMembers) {
-                    if (member == targetObject) {
-                        continue;
-                    }
-                    if (targetIdentity.equals(identityResolver.getIdentity(member))) {
+                    if ((member != targetObject) && targetIdentity.equals(identityResolver.getIdentity(member))) {
                         addFinding(ERROR_DUPLICATE_ELEMENT, targetIdentity);
                         break;
                     }
@@ -931,10 +928,10 @@ public abstract class ValidationBuilder<T extends ValidationBuilder<T>> {
         Date value = propertyValueAsDate();
 
         if ((value != null) && (limit != null)) {
-            Date _value = roundDate(value);
-            Date _limit = roundDate(limit);
+            Date tempValue = roundDate(value);
+            Date tempLimit = roundDate(limit);
 
-            if (!_value.before(_limit)) {
+            if (!tempValue.before(tempLimit)) {
                 addFinding(ERROR_MUST_BE_BEFORE, value, limit);
             }
         }
@@ -957,10 +954,10 @@ public abstract class ValidationBuilder<T extends ValidationBuilder<T>> {
         Date value = propertyValueAsDate();
 
         if ((value != null) && (limit != null)) {
-            Date _value = roundDate(value);
-            Date _limit = roundDate(limit);
+            Date tempValue = roundDate(value);
+            Date tempLimit = roundDate(limit);
 
-            if (_value.after(_limit)) {
+            if (tempValue.after(tempLimit)) {
                 addFinding(ERROR_MUST_BE_ON_OR_BEFORE, value, limit);
             }
         }
@@ -984,10 +981,10 @@ public abstract class ValidationBuilder<T extends ValidationBuilder<T>> {
         Date value = propertyValueAsDate();
 
         if ((value != null) && (limit != null)) {
-            Date _value = roundDate(value);
-            Date _limit = roundDate(limit);
+            Date tempValue = roundDate(value);
+            Date tempLimit = roundDate(limit);
 
-            if (!_value.after(_limit)) {
+            if (!tempValue.after(tempLimit)) {
                 addFinding(ERROR_MUST_BE_AFTER, value, limit);
             }
         }
@@ -1010,10 +1007,10 @@ public abstract class ValidationBuilder<T extends ValidationBuilder<T>> {
         Date value = propertyValueAsDate();
 
         if ((value != null) && (limit != null)) {
-            Date _value = roundDate(value);
-            Date _limit = roundDate(limit);
+            Date tempValue = roundDate(value);
+            Date tempLimit = roundDate(limit);
 
-            if (_value.before(_limit)) {
+            if (tempValue.before(tempLimit)) {
                 addFinding(ERROR_MUST_BE_ON_OR_AFTER, value, limit);
             }
         }
@@ -1141,12 +1138,12 @@ public abstract class ValidationBuilder<T extends ValidationBuilder<T>> {
      * assigned by the {@link #setSignificantDigitsForDecimalComparisons(int)} is used to determine
      * the significant timeframe for the comparison.
      * 
-     * @param a_double
+     * @param aDouble
      *            the floating-point value to round
      * @return double
      */
-    protected double roundDouble(double a_double) {
-        return ((double) Math.round(a_double * multiplierForDecimalComparisons))
+    protected double roundDouble(double aDouble) {
+        return ((double) Math.round(aDouble * multiplierForDecimalComparisons))
                 / multiplierForDecimalComparisons;
     }
 
@@ -1155,17 +1152,17 @@ public abstract class ValidationBuilder<T extends ValidationBuilder<T>> {
      * measure assigned by the {@link #setCalendarUnitsForDateComparisons(int)} is used to determine
      * the significant timeframe for the comparison.
      * 
-     * @param a_date
+     * @param aDate
      *            the date value to round
      * @return java.util.Date
      */
-    protected Date roundDate(Date a_date) {
-        Date result = a_date;
+    protected Date roundDate(Date aDate) {
+        Date result = aDate;
         try {
             DateFormat df = dateFormats.get(calendarUnitsForDateComparisons);
 
             if (df != null) {
-                result = df.parse(df.format(a_date));
+                result = df.parse(df.format(aDate));
             }
         } catch (Exception e) {
             // No error - return the original value

@@ -47,6 +47,7 @@ import org.opentravel.schemacompiler.repository.impl.ReleaseLibraryModuleLoader;
 import org.opentravel.schemacompiler.saver.LibrarySaveException;
 import org.opentravel.schemacompiler.transform.util.ModelReferenceResolver;
 import org.opentravel.schemacompiler.util.ExceptionUtils;
+import org.opentravel.schemacompiler.util.FileUtils;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationException;
@@ -63,7 +64,9 @@ import org.slf4j.LoggerFactory;
  */
 public class ReleaseManager implements LoaderValidationMessageKeys {
 	
-    private static final Logger log = LoggerFactory.getLogger( ReleaseManager.class );
+	private static final String INITIAL_VERSION = "1.0.0";
+	
+	private static final Logger log = LoggerFactory.getLogger( ReleaseManager.class );
     private static final VersionScheme versionScheme;
     
 	private Release release;
@@ -117,7 +120,7 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 		
 		release.setBaseNamespace( baseNamespace );
 		release.setName( name );
-		release.setVersion( "1.0.0" );
+		release.setVersion( INITIAL_VERSION );
 		release.setStatus( ReleaseStatus.DRAFT );
 		releaseFile = new File( folderLocation, fileUtils.getReleaseFilename( release ) );
 		release.setReleaseUrl( URLUtils.toURL( releaseFile ) );
@@ -179,7 +182,7 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 		
 		dummy.setBaseNamespace( "http://www.opentravel.org" );
 		dummy.setName( name );
-		dummy.setVersion( "1.0.0" );
+		dummy.setVersion( INITIAL_VERSION );
 		return new File( folderLocation, fileUtils.getReleaseFilename( dummy ) );
 	}
 	
@@ -579,10 +582,10 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
         	ReleaseStatus newStatus = ReleaseStatus.FULL;
         	
     		for (ReleaseMember member : release.getAllMembers()) {
-    			AbstractLibrary _library = getLibrary( member );
+    			AbstractLibrary memberLib = getLibrary( member );
     			
-    			if (_library instanceof TLLibrary) {
-    				TLLibrary library = (TLLibrary) _library;
+    			if (memberLib instanceof TLLibrary) {
+    				TLLibrary library = (TLLibrary) memberLib;
     				
     				switch (library.getStatus()) {
 						case DRAFT:
@@ -597,7 +600,7 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
     				}
     				statusMap.put( member, library.getStatus() );
     				
-    			} else if (_library == null) {
+    			} else if (memberLib == null) {
     	    		throw new RepositoryException(
     	    				"Unable to publish the release because one or more libraries could not be loaded: " +
     	    						releaseFile.getName());
@@ -632,7 +635,7 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
         			TLLibraryStatus.FINAL );
         	
         	release.setReleaseUrl( repositoryManager.getContentLocation( repoItem ) );
-        	releaseFile.delete();
+        	FileUtils.delete( releaseFile );
         	success = true;
     		return ReleaseItemImpl.newManagedItem( repoItem, this );
     		
@@ -794,7 +797,7 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
      * @return ReleaseManager
      * @throws LibrarySaveException  thrown if the new release copy cannot be saved
      */
-    public ReleaseManager copyRelease(String baeNamespace, String releaseName, File saveFolder,
+    public ReleaseManager copyRelease(String releaseName, File saveFolder,
     		ValidationFindings findings) throws RepositoryException, LibrarySaveException {
     	if (findings == null) findings = new ValidationFindings();
 		ReleaseManager newManager = new ReleaseManager( repositoryManager );
@@ -804,7 +807,7 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 			File newVersionFile;
 			
 			newRelease.setName( releaseName );
-			newRelease.setVersion( "1.0.0" );
+			newRelease.setVersion( INITIAL_VERSION );
 			newRelease.setStatus( ReleaseStatus.DRAFT );
 			newVersionFile = new File( saveFolder, fileUtils.getReleaseFilename( newRelease ) );
 			newRelease.setReleaseUrl( URLUtils.toURL( newVersionFile ) );

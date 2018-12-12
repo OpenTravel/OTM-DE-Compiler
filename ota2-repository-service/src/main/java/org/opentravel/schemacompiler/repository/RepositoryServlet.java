@@ -62,6 +62,7 @@ public class RepositoryServlet extends ServletContainer {
      * @see com.sun.jersey.spi.container.servlet.ServletContainer#init()
      */
     @Override
+    @SuppressWarnings("squid:S2696")
     public void init() throws ServletException {
         super.init();
         OTM16Upgrade.otm16Enabled = true;

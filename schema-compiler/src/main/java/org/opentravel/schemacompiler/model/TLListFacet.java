@@ -35,7 +35,9 @@ import org.opentravel.schemacompiler.util.XSDFacetProfileLocator;
  */
 public class TLListFacet extends TLAbstractFacet implements TLAttributeType, TLAliasOwner {
 
-    private AliasListManager aliasManager = new AliasListManager(this);
+	private static final String FACET_OPERATION_NOT_SUPPORTED = "Operation not supported for list facets.";
+	
+	private AliasListManager aliasManager = new AliasListManager(this);
     private TLAbstractFacet itemFacet;
 
     /**
@@ -74,7 +76,7 @@ public class TLListFacet extends TLAbstractFacet implements TLAttributeType, TLA
     public XSDFacetProfile getXSDFacetProfile() {
         return (itemFacet instanceof TLSimpleFacet)
         		? XSDFacetProfileLocator.getXSDFacetProfile((TLSimpleFacet) itemFacet)
-        				: XSDFacetProfile.FP_unknown;
+        				: XSDFacetProfile.FP_UNKNOWN;
     }
 
     /**
@@ -153,7 +155,7 @@ public class TLListFacet extends TLAbstractFacet implements TLAttributeType, TLA
      */
     @Override
     public void setFacetType(TLFacetType facetType) {
-        throw new UnsupportedOperationException("Operation not supported for list facets.");
+        throw new UnsupportedOperationException(FACET_OPERATION_NOT_SUPPORTED);
     }
 
     /**
@@ -161,7 +163,7 @@ public class TLListFacet extends TLAbstractFacet implements TLAttributeType, TLA
      */
     @Override
     public void setDocumentation(TLDocumentation documentation) {
-        throw new UnsupportedOperationException("Operation not supported for list facets.");
+        throw new UnsupportedOperationException(FACET_OPERATION_NOT_SUPPORTED);
     }
 
     /**
@@ -182,7 +184,7 @@ public class TLListFacet extends TLAbstractFacet implements TLAttributeType, TLA
      * @see org.opentravel.schemacompiler.model.TLAliasOwner#addAlias(org.opentravel.schemacompiler.model.TLAlias)
      */
     public void addAlias(TLAlias alias) {
-        throw new UnsupportedOperationException("Operation not supported for list facets.");
+        throw new UnsupportedOperationException(FACET_OPERATION_NOT_SUPPORTED);
     }
 
     /**
@@ -191,14 +193,14 @@ public class TLListFacet extends TLAbstractFacet implements TLAttributeType, TLA
      */
     @Override
     public void addAlias(int index, TLAlias alias) {
-        throw new UnsupportedOperationException("Operation not supported for list facets.");
+        throw new UnsupportedOperationException(FACET_OPERATION_NOT_SUPPORTED);
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLAliasOwner#removeAlias(org.opentravel.schemacompiler.model.TLAlias)
      */
     public void removeAlias(TLAlias alias) {
-        throw new UnsupportedOperationException("Operation not supported for list facets.");
+        throw new UnsupportedOperationException(FACET_OPERATION_NOT_SUPPORTED);
     }
 
     /**
@@ -206,7 +208,7 @@ public class TLListFacet extends TLAbstractFacet implements TLAttributeType, TLA
      */
     @Override
     public void moveUp(TLAlias alias) {
-        throw new UnsupportedOperationException("Operation not supported for list facets.");
+        throw new UnsupportedOperationException(FACET_OPERATION_NOT_SUPPORTED);
     }
 
     /**
@@ -214,7 +216,7 @@ public class TLListFacet extends TLAbstractFacet implements TLAttributeType, TLA
      */
     @Override
     public void moveDown(TLAlias alias) {
-        throw new UnsupportedOperationException("Operation not supported for list facets.");
+        throw new UnsupportedOperationException(FACET_OPERATION_NOT_SUPPORTED);
     }
 
     /**
@@ -222,7 +224,7 @@ public class TLListFacet extends TLAbstractFacet implements TLAttributeType, TLA
      */
     @Override
     public void sortAliases(Comparator<TLAlias> comparator) {
-        throw new UnsupportedOperationException("Operation not supported for list facets.");
+        throw new UnsupportedOperationException(FACET_OPERATION_NOT_SUPPORTED);
     }
 
     /**

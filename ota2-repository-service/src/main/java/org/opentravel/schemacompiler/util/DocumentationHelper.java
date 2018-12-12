@@ -170,16 +170,16 @@ public class DocumentationHelper {
 	 * @return String
 	 */
 	public String getDescription(Object entity) {
-		String description = null;
+		String desc = null;
 		
 		if (entity instanceof TLDocumentationOwner) {
 			TLDocumentation doc = ((TLDocumentationOwner) entity).getDocumentation();
 			
 			if (doc != null) {
-				description = PageUtils.trimString( doc.getDescription() );
+				desc = PageUtils.trimString( doc.getDescription() );
 			}
 		}
-		return description;
+		return desc;
 	}
 	
 	/**

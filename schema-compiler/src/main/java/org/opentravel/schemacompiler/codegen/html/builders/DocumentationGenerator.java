@@ -58,7 +58,7 @@ public class DocumentationGenerator implements CodeGenerator<TLModel> {
 				.getValue(CodeGenerationContext.CK_PROJECT_FILENAME);
 		if (title != null) {
 			config.setWindowtitle(title);
-			config.doctitle = title;
+			config.setDoctitle(title);
 		}
 		config.setModel(model);
 		HtmlDoclet.start(model);

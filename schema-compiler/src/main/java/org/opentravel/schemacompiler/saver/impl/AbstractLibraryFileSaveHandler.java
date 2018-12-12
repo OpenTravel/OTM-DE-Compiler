@@ -38,6 +38,7 @@ import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
 import org.opentravel.schemacompiler.loader.impl.LibraryValidationSource;
 import org.opentravel.schemacompiler.saver.LibrarySaveException;
 import org.opentravel.schemacompiler.saver.LibrarySaveHandler;
+import org.opentravel.schemacompiler.util.FileUtils;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
@@ -102,9 +103,8 @@ public abstract class AbstractLibraryFileSaveHandler<T> implements LibrarySaveHa
         File libraryFile = getFileForURL(libraryUrl);
         File backupFile = createBackupFile ? createBackupFile(libraryFile) : null;
         boolean success = false;
-        OutputStream out = null;
 
-        try {
+        try (OutputStream out = new FileOutputStream(libraryFile)){
             JAXBElement<T> documentElement = createLibraryElement(library);
             Marshaller marshaller = getJaxbContext().createMarshaller();
             Document domDocument = XMLPrettyPrinter.newDocument();
@@ -114,14 +114,10 @@ public abstract class AbstractLibraryFileSaveHandler<T> implements LibrarySaveHa
             marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper",
                     new LibrarySaveNamespacePrefixMapper());
             marshaller.setProperty("jaxb.schemaLocation", getLibrarySchemaLocation());
-            marshaller.marshal(documentElement, domDocument); // no schema validation during
-                                                              // file-save marshalling
+            marshaller.marshal(documentElement, domDocument); // no schema validation during file-save marshalling
 
             // Format the XML before saving it to a file
-            out = new FileOutputStream(libraryFile);
             new XMLPrettyPrinter(new LibraryLineBreakProcessor()).formatDocument(domDocument, out);
-            out.close();
-            out = null;
             success = true;
 
         } catch (IllegalArgumentException | JAXBException | IOException e) {
@@ -130,12 +126,6 @@ public abstract class AbstractLibraryFileSaveHandler<T> implements LibrarySaveHa
         } finally {
             if (!success && (backupFile != null)) {
                 restoreBackupFile(backupFile, libraryFile);
-            }
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (Throwable t) {
-                }
             }
         }
     }
@@ -213,11 +203,8 @@ public abstract class AbstractLibraryFileSaveHandler<T> implements LibrarySaveHa
                 filename = filename.substring(0, dotIdx);
             }
             backupFile = new File(libraryFile.getParentFile(), filename + ".bak");
-
-            if (backupFile.exists()) {
-                backupFile.delete();
-            }
-            libraryFile.renameTo(backupFile);
+            FileUtils.delete( backupFile );
+            FileUtils.renameTo( libraryFile, backupFile );
 
             if (libraryFile.exists()) {
                 // Something went wrong - attempt to backup failed for some reason
@@ -238,11 +225,8 @@ public abstract class AbstractLibraryFileSaveHandler<T> implements LibrarySaveHa
      */
     protected void restoreBackupFile(File backupFile, File libraryFile) {
         if ((backupFile != null) && backupFile.exists() && (libraryFile != null)) {
-            if (libraryFile.exists()) {
-                if (libraryFile.delete()) {
-                    backupFile.renameTo(libraryFile);
-                }
-            }
+        		FileUtils.delete( libraryFile );
+        		FileUtils.renameTo( backupFile, libraryFile );
         }
     }
 

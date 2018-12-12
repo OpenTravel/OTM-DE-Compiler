@@ -89,7 +89,7 @@ public class TLCoreObjectJsonCodegenTransformer extends AbstractJsonSchemaTransf
         
     	roleEnum.setName(  enumName );
         roleEnum.setSchema( new JsonSchemaReference( schema ) );
-    	schema.setType( JsonType.jsonString );
+    	schema.setType( JsonType.JSON_STRING );
         
         for (TLRole role : PropertyCodegenUtils.getInheritedRoles(source)) {
         	schema.getEnumValues().add( role.getName() );

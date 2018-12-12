@@ -32,7 +32,8 @@ import org.opentravel.schemacompiler.repository.RepositoryManager;
  */
 public class RepositorySubscriptionListener implements RepositoryListener {
 	
-    private static Log log = LogFactory.getLog( RepositorySubscriptionListener.class );
+	private static final String SUBSCRIBER_NOTIFICATION_ERROR = "Error during subscriber notification.";
+	private static Log log = LogFactory.getLog( RepositorySubscriptionListener.class );
     
 	private SubscriptionManager subscriptionManager;
 	private RepositoryManager repositoryManager;
@@ -74,8 +75,8 @@ public class RepositorySubscriptionListener implements RepositoryListener {
 		try {
 			subscriptionManager.notifySubscribedUsers( baseNamespace, RepositoryActionType.NS_CREATED );
 			
-		} catch (Throwable t) {
-			log.warn("Error during subscriber notification.", t);
+		} catch (Exception e) {
+			log.warn(SUBSCRIBER_NOTIFICATION_ERROR, e);
 		}
 	}
 
@@ -87,8 +88,8 @@ public class RepositorySubscriptionListener implements RepositoryListener {
 		try {
 			subscriptionManager.notifySubscribedUsers( baseNamespace, RepositoryActionType.NS_DELETED );
 			
-		} catch (Throwable t) {
-			log.warn("Error during subscriber notification.", t);
+		} catch (Exception e) {
+			log.warn(SUBSCRIBER_NOTIFICATION_ERROR, e);
 		}
 	}
 
@@ -114,8 +115,8 @@ public class RepositorySubscriptionListener implements RepositoryListener {
 			subscriptionManager.notifySubscribedUsers( item, (nsItems.size() == 1) ?
 						RepositoryActionType.PUBLISH : RepositoryActionType.NEW_VERSION, null );
 			
-		} catch (Throwable t) {
-			log.warn("Error during subscriber notification.", t);
+		} catch (Exception e) {
+			log.warn(SUBSCRIBER_NOTIFICATION_ERROR, e);
 		}
 	}
 
@@ -127,8 +128,8 @@ public class RepositorySubscriptionListener implements RepositoryListener {
 		try {
 			subscriptionManager.notifySubscribedUsers( item, RepositoryActionType.COMMIT, remarks );
 			
-		} catch (Throwable t) {
-			log.warn("Error during subscriber notification.", t);
+		} catch (Exception e) {
+			log.warn(SUBSCRIBER_NOTIFICATION_ERROR, e);
 		}
 	}
 
@@ -140,8 +141,8 @@ public class RepositorySubscriptionListener implements RepositoryListener {
 		try {
 			subscriptionManager.notifySubscribedUsers( item, RepositoryActionType.LOCK, null );
 			
-		} catch (Throwable t) {
-			log.warn("Error during subscriber notification.", t);
+		} catch (Exception e) {
+			log.warn(SUBSCRIBER_NOTIFICATION_ERROR, e);
 		}
 	}
 
@@ -156,8 +157,8 @@ public class RepositorySubscriptionListener implements RepositoryListener {
 			}
 			subscriptionManager.notifySubscribedUsers( item, RepositoryActionType.UNLOCK, remarks );
 			
-		} catch (Throwable t) {
-			log.warn("Error during subscriber notification.", t);
+		} catch (Exception e) {
+			log.warn(SUBSCRIBER_NOTIFICATION_ERROR, e);
 		}
 	}
 
@@ -170,8 +171,8 @@ public class RepositorySubscriptionListener implements RepositoryListener {
 			subscriptionManager.notifySubscribedUsers(
 					item, RepositoryActionType.PROMOTE, originalStatus.toString() );
 			
-		} catch (Throwable t) {
-			log.warn("Error during subscriber notification.", t);
+		} catch (Exception e) {
+			log.warn(SUBSCRIBER_NOTIFICATION_ERROR, e);
 		}
 	}
 
@@ -184,8 +185,8 @@ public class RepositorySubscriptionListener implements RepositoryListener {
 			subscriptionManager.notifySubscribedUsers(
 					item, RepositoryActionType.DEMOTE, originalStatus.toString() );
 			
-		} catch (Throwable t) {
-			log.warn("Error during subscriber notification.", t);
+		} catch (Exception e) {
+			log.warn(SUBSCRIBER_NOTIFICATION_ERROR, e);
 		}
 	}
 
@@ -205,8 +206,8 @@ public class RepositorySubscriptionListener implements RepositoryListener {
 						newStatus.toString() );
 			}
 			
-		} catch (Throwable t) {
-			log.warn("Error during subscriber notification.", t);
+		} catch (Exception e) {
+			log.warn(SUBSCRIBER_NOTIFICATION_ERROR, e);
 		}
 	}
 
@@ -218,8 +219,8 @@ public class RepositorySubscriptionListener implements RepositoryListener {
 		try {
 			subscriptionManager.notifySubscribedUsers( item, RepositoryActionType.CRC_UPDATED, null );
 			
-		} catch (Throwable t) {
-			log.warn("Error during subscriber notification.", t);
+		} catch (Exception e) {
+			log.warn(SUBSCRIBER_NOTIFICATION_ERROR, e);
 		}
 	}
 
@@ -231,8 +232,8 @@ public class RepositorySubscriptionListener implements RepositoryListener {
 		try {
 			subscriptionManager.notifySubscribedUsers( item, RepositoryActionType.DELETE, null );
 			
-		} catch (Throwable t) {
-			log.warn("Error during subscriber notification.", t);
+		} catch (Exception e) {
+			log.warn(SUBSCRIBER_NOTIFICATION_ERROR, e);
 		}
 	}
 	

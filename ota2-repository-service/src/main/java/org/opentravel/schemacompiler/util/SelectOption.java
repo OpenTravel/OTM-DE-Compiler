@@ -45,7 +45,7 @@ public class SelectOption {
 	 */
 	public static void setSelectedValue(List<SelectOption> options, String selectedValue) {
 		for (SelectOption option : options) {
-			option.setSelected( (selectedValue == null) ? false : selectedValue.equals( option.value ) );
+			option.setSelected( (selectedValue != null) && selectedValue.equals( option.value ) );
 		}
 	}
 	

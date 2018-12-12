@@ -124,8 +124,8 @@ public class ReleaseFileUtils extends AbstractFileUtils {
                 throw new LibraryLoaderException(e.getMessage(), e);
             }
 
-        } catch (Throwable t) {
-            throw new LibraryLoaderException("Unknown error while loading release.", t);
+        } catch (Exception e) {
+            throw new LibraryLoaderException("Unknown error while loading release.", e);
         }
         return release;
     }
@@ -142,7 +142,7 @@ public class ReleaseFileUtils extends AbstractFileUtils {
     	try {
     		return loadRelease( new StringReader( contentString ) );
     		
-    	} catch (JAXBException | IOException e) {
+    	} catch (JAXBException e) {
     		throw new LibraryLoaderException("Error loading OTM release content.", e);
     	}
     }
@@ -153,10 +153,9 @@ public class ReleaseFileUtils extends AbstractFileUtils {
      * @param reader  the reader from which to obtain the release content
      * @return Release
      * @throws JAXBException  thrown if the release content cannot be parsed
-     * @throws IOException  thrown if the release content cannot be accessed
      */
     @SuppressWarnings("unchecked")
-    private Release loadRelease(Reader reader) throws JAXBException, IOException {
+    private Release loadRelease(Reader reader) throws JAXBException {
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         unmarshaller.setSchema( releaseValidationSchema );
 
@@ -210,7 +209,9 @@ public class ReleaseFileUtils extends AbstractFileUtils {
                 try {
                     restoreBackupFile( backupFile, releaseFile.getName() );
                     
-                } catch (Throwable t) {}
+                } catch (Exception e) {
+                    // Ignore error and continue
+                }
             }
         }
     }
@@ -228,7 +229,7 @@ public class ReleaseFileUtils extends AbstractFileUtils {
 			marshalRelease( release, writer );
 	    	return writer.toString();
 	    	
-		} catch (JAXBException | IOException e) {
+		} catch (JAXBException e) {
     		throw new LibrarySaveException("Error marshalling OTM release content.", e);
 		}
     }
@@ -239,9 +240,8 @@ public class ReleaseFileUtils extends AbstractFileUtils {
      * @param release  the release to be marshalled
      * @param writer  the writer to which the marshalled content will be written
      * @throws JAXBException  thrown if the release content cannot be marshalled
-     * @throws IOException  thrown if the writer is not able to process content
      */
-    private void marshalRelease(Release release, Writer writer) throws JAXBException, IOException {
+    private void marshalRelease(Release release, Writer writer) throws JAXBException {
     	ReleaseType jaxbRelease = transformToJaxbRelease( release );
         Marshaller marshaller = jaxbContext.createMarshaller();
 
@@ -252,7 +252,7 @@ public class ReleaseFileUtils extends AbstractFileUtils {
                         return RELEASE_FILE_NAMESPACE.equals(namespaceUri) ?
                         		SchemaDeclarations.OTA2_RELEASE_SCHEMA.getDefaultPrefix() : suggestion;
                     }
-                    public String[] getPreDeclaredNamespaceUris() {
+                    @Override public String[] getPreDeclaredNamespaceUris() {
                         return new String[] { RELEASE_FILE_NAMESPACE };
                     }
                 });
@@ -471,8 +471,8 @@ public class ReleaseFileUtils extends AbstractFileUtils {
             releaseValidationSchema = schemaFactory.newSchema(new StreamSource(schemaStream));
 			jaxbContext = JAXBContext.newInstance( SCHEMA_CONTEXT );
 			
-		} catch (Throwable t) {
-			throw new ExceptionInInitializerError( t );
+		} catch (Exception e) {
+			throw new ExceptionInInitializerError( e );
 		}
 	}
 	

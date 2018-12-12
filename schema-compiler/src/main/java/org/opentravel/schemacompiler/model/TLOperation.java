@@ -33,7 +33,9 @@ import org.opentravel.schemacompiler.version.Versioned;
 public class TLOperation extends TLModelElement implements NamedEntity, TLFacetOwner, TLVersionedExtensionOwner,
 		TLDocumentationOwner, TLEquivalentOwner {
 
-    private TLService owningService;
+	private static final String FACETS_CANNOT_BE_MODIFIED = "Facets cannot be modified once their owner has been assigned to a model.";
+	
+	private TLService owningService;
     private String name;
     private TLDocumentation documentation;
     private EquivalentListManager equivalentManager = new EquivalentListManager(this);
@@ -346,8 +348,7 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
     public void setRequest(TLFacet request) {
         if (request != this.request) {
             if (getOwningModel() != null) {
-                throw new IllegalStateException(
-                        "Facets cannot be modified once their owner has been assigned to a model.");
+                throw new IllegalStateException(FACETS_CANNOT_BE_MODIFIED);
             }
             if (request != null) {
                 request.setFacetType(TLFacetType.REQUEST);
@@ -385,7 +386,7 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
         if (response != this.response) {
             if (getOwningModel() != null) {
                 throw new IllegalStateException(
-                        "Facets cannot be modified once their owner has been assigned to a model.");
+                        FACETS_CANNOT_BE_MODIFIED);
             }
             if (response != null) {
                 response.setFacetType(TLFacetType.RESPONSE);
@@ -423,7 +424,7 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
         if (notification != this.notification) {
             if (getOwningModel() != null) {
                 throw new IllegalStateException(
-                        "Facets cannot be modified once their owner has been assigned to a model.");
+                        FACETS_CANNOT_BE_MODIFIED);
             }
             if (notification != null) {
                 notification.setFacetType(TLFacetType.NOTIFICATION);

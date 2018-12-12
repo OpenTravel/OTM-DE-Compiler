@@ -222,7 +222,7 @@ public abstract class AbstractAuthenticationProvider implements AuthenticationPr
                             return REPOSITORY_EXT_NAMESPACE.equals( namespaceUri ) ? "r" : suggestion;
                         }
 
-                        public String[] getPreDeclaredNamespaceUris() {
+                        @Override public String[] getPreDeclaredNamespaceUris() {
                             return new String[] { REPOSITORY_EXT_NAMESPACE };
                         }
                     } );
@@ -238,7 +238,9 @@ public abstract class AbstractAuthenticationProvider implements AuthenticationPr
 		} finally {
             try {
                 if (!success) fileManager.rollbackChangeSet();
-            } catch (Throwable t) {}
+            } catch (Exception e) {
+                // Ignore error and continue
+            }
 		}
 	}
 
@@ -375,8 +377,8 @@ public abstract class AbstractAuthenticationProvider implements AuthenticationPr
             validationSchema = schemaFactory.newSchema( new StreamSource( schemaStream ) );
             jaxbContext = JAXBContext.newInstance( SCHEMA_CONTEXT );
 
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

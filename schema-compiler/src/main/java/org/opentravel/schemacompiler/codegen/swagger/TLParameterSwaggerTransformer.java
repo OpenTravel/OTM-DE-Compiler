@@ -80,7 +80,7 @@ public class TLParameterSwaggerTransformer extends AbstractSwaggerCodegenTransfo
 		
 		if (sourceField instanceof TLIndicator) {
 			schema = new JsonSchema();
-			schema.setType( JsonType.jsonBoolean );
+			schema.setType( JsonType.JSON_BOOLEAN );
 			
 		} else {
 			NamedEntity fieldType = null;
@@ -108,7 +108,7 @@ public class TLParameterSwaggerTransformer extends AbstractSwaggerCodegenTransfo
 				        for (TLEnumValue modelEnum : EnumCodegenUtils.getInheritedValues( closedEnum )) {
 				        	enumValues.add( modelEnum.getLiteral() );
 				        }
-						schema.setType( JsonType.jsonString );
+						schema.setType( JsonType.JSON_STRING );
 					}	
 				}
 			}
@@ -116,7 +116,7 @@ public class TLParameterSwaggerTransformer extends AbstractSwaggerCodegenTransfo
 		
 		// Last resort if we could not identify a type - use a string
 		if ((schema != null) && (schema.getType() == null)) {
-			schema.setType( JsonType.jsonString );
+			schema.setType( JsonType.JSON_STRING );
 		}
 		return schema;
 	}

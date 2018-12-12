@@ -455,13 +455,9 @@ public class EntityComparator extends BaseComparator {
 			String mappedNS = getNamespaceMappings().get( fieldOwner.getNamespace() );
 			QName ownerName = getAdjustedQName( new QName(
 					(mappedNS != null) ? mappedNS : fieldOwner.getNamespace(), fieldOwner.getLocalName() ) );
-			List<TLMemberField<?>> fields = fieldMap.get( ownerName );
 			
-			if (fields == null) {
-				fields = new ArrayList<>();
-				fieldMap.put( ownerName, fields );
-			}
-			fields.add( field );
+			fieldMap.computeIfAbsent( ownerName, n -> fieldMap.put( n, new ArrayList<>() ) );
+			fieldMap.get( ownerName ).add( field );
 		}
 		return fieldMap;
 	}

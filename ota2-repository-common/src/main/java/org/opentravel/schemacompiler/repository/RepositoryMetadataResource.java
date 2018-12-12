@@ -20,8 +20,6 @@ import java.io.IOException;
 
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryInfoType;
 import org.opentravel.schemacompiler.config.FileResource;
-import org.opentravel.schemacompiler.repository.RepositoryException;
-import org.opentravel.schemacompiler.repository.RepositoryFileManager;
 import org.opentravel.schemacompiler.repository.impl.DefaultRepositoryFileManager;
 
 /**
@@ -31,11 +29,11 @@ import org.opentravel.schemacompiler.repository.impl.DefaultRepositoryFileManage
  */
 public class RepositoryMetadataResource extends FileResource<RepositoryInfoType> {
 
-    public RepositoryFileManager fileManager;
+    private RepositoryFileManager fileManager;
 
     public RepositoryMetadataResource(File repositoryLocation) {
         super(repositoryLocation);
-        this.fileManager = new DefaultRepositoryFileManager(repositoryLocation);
+        this.setFileManager(new DefaultRepositoryFileManager(repositoryLocation));
         invalidateResource();
     }
 
@@ -47,8 +45,8 @@ public class RepositoryMetadataResource extends FileResource<RepositoryInfoType>
         try {
             RepositoryInfoType metadata = null;
 
-            if (fileManager != null) {
-                metadata = fileManager.loadRepositoryMetadata();
+            if (getFileManager() != null) {
+                metadata = getFileManager().loadRepositoryMetadata();
             }
             return metadata;
 
@@ -56,5 +54,23 @@ public class RepositoryMetadataResource extends FileResource<RepositoryInfoType>
             throw new IOException(e.getMessage());
         }
     }
+
+	/**
+	 * Returns the value of the 'fileManager' field.
+	 *
+	 * @return RepositoryFileManager
+	 */
+	public RepositoryFileManager getFileManager() {
+		return fileManager;
+	}
+
+	/**
+	 * Assigns the value of the 'fileManager' field.
+	 *
+	 * @param fileManager  the field value to assign
+	 */
+	public void setFileManager(RepositoryFileManager fileManager) {
+		this.fileManager = fileManager;
+	}
 
 }

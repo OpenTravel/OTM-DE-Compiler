@@ -72,6 +72,9 @@ import com.google.gson.JsonObject;
  */
 public class JsonSchemaCodegenUtils {
 	
+	private static final String DESCRIPTION = "description";
+	private static final String DEFINITIONS_PATH = "#/definitions/";
+
 	public static final String JSON_SCHEMA_FILENAME_EXT = "schema.json";
 	
 	private CodeGenerationTransformerContext context;
@@ -116,7 +119,7 @@ public class JsonSchemaCodegenUtils {
 		
 		if (itemSchema != null) {
 			attrSchema = new JsonSchema();
-			attrSchema.setType( JsonType.jsonArray );
+			attrSchema.setType( JsonType.JSON_ARRAY );
 			attrSchema.setItems( new JsonSchemaReference( itemSchema ) );
 		}
 		return attrSchema;
@@ -161,11 +164,11 @@ public class JsonSchemaCodegenUtils {
 		schema.setType( jsonType );
 		
 		// Special case for IDREFS; schema is an array of strings
-    	if (jsonType == JsonType.jsonRefs) {
+    	if (jsonType == JsonType.JSON_REFS) {
         	JsonSchema itemSchema = new JsonSchema();
     		
-        	schema.setType( JsonType.jsonArray );
-        	itemSchema.setType( JsonType.jsonString );
+        	schema.setType( JsonType.JSON_ARRAY );
+        	itemSchema.setType( JsonType.JSON_STRING );
         	schema.setItems( new JsonSchemaReference( itemSchema ));
     	}
     	return schema;
@@ -351,7 +354,7 @@ public class JsonSchemaCodegenUtils {
 			referencePath.append( filenameBuilder.buildFilename(
 					referencedEntity.getOwningLibrary(), JsonSchemaCodegenUtils.JSON_SCHEMA_FILENAME_EXT ) );
 		}
-		referencePath.append( "#/definitions/" );
+		referencePath.append( DEFINITIONS_PATH );
 		
 		if (typeNameBuilder != null) {
 			referencePath.append( typeNameBuilder.getJsonTypeName( referencedEntity ) );
@@ -379,9 +382,9 @@ public class JsonSchemaCodegenUtils {
 			String builtInLocation = XsdCodegenUtils.getBuiltInSchemaOutputLocation( context.getCodegenContext() );
 			
 			referencePath = builtInLocation + referencedFilename
-					+ "#/definitions/" + schemaDependency.getLocalName();
+					+ DEFINITIONS_PATH + schemaDependency.getLocalName();
 		} else {
-			referencePath = "#/definitions/" + schemaDependency.getLocalName();
+			referencePath = DEFINITIONS_PATH + schemaDependency.getLocalName();
 		}
 		return referencePath;
 	}
@@ -456,7 +459,7 @@ public class JsonSchemaCodegenUtils {
 				// we will move that property from the 'x-otm-documentation' element
 				// to the main schema properties
 				if (documentation.hasDescription()) {
-					JsonElement jsonDesc = jsonDoc.get( "description" );
+					JsonElement jsonDesc = jsonDoc.get( DESCRIPTION );
 					String firstDescription;
 					
 					if (jsonDesc instanceof JsonArray) {
@@ -464,14 +467,14 @@ public class JsonSchemaCodegenUtils {
 						firstDescription = descList.remove( 0 ).getAsString();
 						
 						if (descList.size() == 1) {
-							jsonDoc.remove( "description" );
-							targetJson.addProperty( "description", descList.get( 0 ).getAsString() );
+							jsonDoc.remove( DESCRIPTION );
+							targetJson.addProperty( DESCRIPTION, descList.get( 0 ).getAsString() );
 						}
 					} else {
 						firstDescription = jsonDesc.getAsString();
-						jsonDoc.remove( "description" );
+						jsonDoc.remove( DESCRIPTION );
 					}
-					targetJson.addProperty( "description", firstDescription );
+					targetJson.addProperty( DESCRIPTION, firstDescription );
 				}
 				if (!jsonDoc.entrySet().isEmpty()) {
 					otmAnnotations.add( "documentation", jsonDoc );
@@ -513,14 +516,17 @@ public class JsonSchemaCodegenUtils {
 		
 		try {
 			result = Integer.parseInt( numStr );
-		} catch (NumberFormatException e) {}
+		} catch (NumberFormatException e) {
+			// Ignore exception and return null
+		}
 		
 		try {
 			if (result == null) {
 				result = Double.parseDouble( numStr );
 			}
-		} catch (NumberFormatException e) {}
-		
+		} catch (NumberFormatException e) {
+			// Ignore exception and return null
+		}
 		return result;
 	}
 	

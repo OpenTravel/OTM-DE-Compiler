@@ -585,13 +585,9 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
 	protected void registerIdValue(NamedEntity identifiedEntity, String id) {
 		QName entityName = new QName(identifiedEntity.getNamespace(),
 				identifiedEntity.getLocalName());
-		List<String> idList = idRegistry.get(entityName);
-
-		if (idList == null) {
-			idList = new ArrayList<>();
-			idRegistry.put(entityName, idList);
-		}
-		idList.add(id);
+		
+		idRegistry.computeIfAbsent( entityName, en -> idRegistry.put( en, new ArrayList<>() ) );
+		idRegistry.get(entityName).add( id );
 	}
 	
 	/**

@@ -52,13 +52,13 @@ public class SimpleTypeInfo {
 	private static final String LOCAL_DATE_DESCRIPTION = "ISO date type without UTC offset or Z for Zulu restriction indicating it is representing Local Time.  Example: 2010-12-31";
 	private static final String LOCAL_TIME_DESCRIPTION = "ISO time type without UTC offset or Z for Zulu restriction indicating it is representing Local Time.  Example: 11:55:00";
 	
-	public static final JsonSchema UTC_DATETIME_JSON_SCHEMA   = newSchema( JsonType.jsonDateTime, UTC_DATETIME_DESCRIPTION, null, -1, -1 );
-	public static final JsonSchema UTC_DATE_JSON_SCHEMA       = newSchema( JsonType.jsonDate, UTC_DATE_DESCRIPTION, null, -1, -1 );
-	public static final JsonSchema UTC_TIME_JSON_SCHEMA       = newSchema( JsonType.jsonString, UTC_TIME_DESCRIPTION, "(([01]\\d|2[0-3])((:?)[0-5]\\d)?|24\\:?00)((:?)[0-5]\\d)?([\\.,]\\d+(?!:))?([zZ]|([\\+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?", -1, -1 );
-	public static final JsonSchema LOCAL_DATETIME_JSON_SCHEMA = newSchema( JsonType.jsonString, LOCAL_DATETIME_DESCRIPTION, "(\\d{4}-\\d{2}-\\d{2})T(([01]\\d|2[0-3])((:?)[0-5]\\d)?|24\\:?00)((:?)[0-5]\\d)?([\\.,]\\d+(?!:))?([zZ]|([\\+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?", -1, -1 );
-	public static final JsonSchema LOCAL_DATE_JSON_SCHEMA     = newSchema( JsonType.jsonString, LOCAL_DATE_DESCRIPTION, "(\\d{4}-\\d{2}-\\d{2})", -1, -1 );
-	public static final JsonSchema LOCAL_TIME_JSON_SCHEMA     = newSchema( JsonType.jsonString, LOCAL_TIME_DESCRIPTION, "(([01]\\d|2[0-3])((:?)[0-5]\\d)?|24\\:?00)((:?)[0-5]\\d)?([\\.,]\\d+(?!:))?", -1, -1 );
-	public static final JsonSchema ENUM_EXTENSION_SCHEMA      = newSchema( JsonType.jsonString, null, null, 1, 128 );
+	public static final JsonSchema UTC_DATETIME_JSON_SCHEMA   = newSchema( JsonType.JSON_DATETIME, UTC_DATETIME_DESCRIPTION, null, -1, -1 );
+	public static final JsonSchema UTC_DATE_JSON_SCHEMA       = newSchema( JsonType.JSON_DATE, UTC_DATE_DESCRIPTION, null, -1, -1 );
+	public static final JsonSchema UTC_TIME_JSON_SCHEMA       = newSchema( JsonType.JSON_STRING, UTC_TIME_DESCRIPTION, "(([01]\\d|2[0-3])((:?)[0-5]\\d)?|24\\:?00)((:?)[0-5]\\d)?([\\.,]\\d+(?!:))?([zZ]|([\\+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?", -1, -1 );
+	public static final JsonSchema LOCAL_DATETIME_JSON_SCHEMA = newSchema( JsonType.JSON_STRING, LOCAL_DATETIME_DESCRIPTION, "(\\d{4}-\\d{2}-\\d{2})T(([01]\\d|2[0-3])((:?)[0-5]\\d)?|24\\:?00)((:?)[0-5]\\d)?([\\.,]\\d+(?!:))?([zZ]|([\\+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?", -1, -1 );
+	public static final JsonSchema LOCAL_DATE_JSON_SCHEMA     = newSchema( JsonType.JSON_STRING, LOCAL_DATE_DESCRIPTION, "(\\d{4}-\\d{2}-\\d{2})", -1, -1 );
+	public static final JsonSchema LOCAL_TIME_JSON_SCHEMA     = newSchema( JsonType.JSON_STRING, LOCAL_TIME_DESCRIPTION, "(([01]\\d|2[0-3])((:?)[0-5]\\d)?|24\\:?00)((:?)[0-5]\\d)?([\\.,]\\d+(?!:))?", -1, -1 );
+	public static final JsonSchema ENUM_EXTENSION_SCHEMA      = newSchema( JsonType.JSON_STRING, null, null, 1, 128 );
 	
 	private static Map<String,JsonSchema> xsdSimplePrimitives;
 	
@@ -181,13 +181,13 @@ public class SimpleTypeInfo {
 								XMLConstants.W3C_XML_SCHEMA_NS_URI ).get( 0 );
 						
 						switch (simpleSchema.getType()) {
-							case jsonDateTime:
+							case JSON_DATETIME:
 								baseSimpleType = xsdLibrary.getNamedMember( "dateTime" );
 								break;
-							case jsonDate:
+							case JSON_DATE:
 								baseSimpleType = xsdLibrary.getNamedMember( "date" );
 								break;
-							case jsonString:
+							case JSON_STRING:
 								baseSimpleType = xsdLibrary.getNamedMember( "string" );
 								break;
 							default:

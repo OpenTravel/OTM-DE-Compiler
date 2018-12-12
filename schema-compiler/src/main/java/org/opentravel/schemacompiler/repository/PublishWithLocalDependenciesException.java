@@ -16,6 +16,7 @@
 package org.opentravel.schemacompiler.repository;
 
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Thrown by the <code>ProjectManager</code> when the user attempts to publish a library that has
@@ -30,8 +31,8 @@ public class PublishWithLocalDependenciesException extends Exception {
 
 	private static final long serialVersionUID = 3165044513260100326L;
 	
-	private Collection<ProjectItem> requestedPublications;
-    private Collection<ProjectItem> requiredPublications;
+	private final transient Collection<ProjectItem> requestedPublications;
+    private final transient Collection<ProjectItem> requiredPublications;
 
     /**
      * Constructor that specifies an exception message, as well as the lists of requested and
@@ -59,7 +60,7 @@ public class PublishWithLocalDependenciesException extends Exception {
      * @return Collection<ProjectItem>
      */
     public Collection<ProjectItem> getRequestedPublications() {
-        return requestedPublications;
+        return Collections.unmodifiableCollection( requestedPublications );
     }
 
     /**
@@ -69,7 +70,7 @@ public class PublishWithLocalDependenciesException extends Exception {
      * @return Collection<ProjectItem>
      */
     public Collection<ProjectItem> getRequiredPublications() {
-        return requiredPublications;
+        return Collections.unmodifiableCollection( requiredPublications );
     }
 
 }

@@ -26,17 +26,17 @@ import java.util.Map;
  */
 public enum XSDFacetProfile {
 	
-	FP_boolean(false, false, false, true, false, true, false, false, false, false, false, false),
-	FP_int(false, false, false, true, true, true, true, true, true, true, true, true),
-	FP_decimal(false, false, false, true, true, true, true, true, true, true, true, true),
-	FP_float(false, false, false, true, true, true, false, false, true, true, true, true),
-	FP_string(true, true, true, true, true, true, false, false, false, false, false, false),
-	FP_date(false, false, false, true, true, true, false, false, true, true, true, true),
-	FP_dateTime(false, false, false, true, true, true, false, false, true, true, true, true),
-	FP_time(false, false, false, true, true, true, false, false, true, true, true, true),
-	FP_duration(false, false, false, true, true, true, false, false, true, true, true, true),
-	FP_language(false, false, false, false, false, false, false, false, false, false, false, false),
-	FP_unknown(false, false, false, false, false, false, false, false, false, false, false, false);
+	FP_BOOLEAN(false, false, false, true, false, true, false, false, false, false, false, false),
+	FP_INT(false, false, false, true, true, true, true, true, true, true, true, true),
+	FP_DECIMAL(false, false, false, true, true, true, true, true, true, true, true, true),
+	FP_FLOAT(false, false, false, true, true, true, false, false, true, true, true, true),
+	FP_STRING(true, true, true, true, true, true, false, false, false, false, false, false),
+	FP_DATE(false, false, false, true, true, true, false, false, true, true, true, true),
+	FP_DATETIME(false, false, false, true, true, true, false, false, true, true, true, true),
+	FP_TIME(false, false, false, true, true, true, false, false, true, true, true, true),
+	FP_DURATION(false, false, false, true, true, true, false, false, true, true, true, true),
+	FP_LANGUAGE(false, false, false, false, false, false, false, false, false, false, false, false),
+	FP_UNKNOWN(false, false, false, false, false, false, false, false, false, false, false, false);
 	
 	private static final Map<String,XSDFacetProfile> w3cProfileMap = new HashMap<>();
 	
@@ -62,7 +62,7 @@ public enum XSDFacetProfile {
      */
     public static XSDFacetProfile toFacetProfile(String xmlSchemaType) {
         XSDFacetProfile result = w3cProfileMap.get( xmlSchemaType );
-        return (result != null) ? result : FP_unknown;
+        return (result != null) ? result : FP_UNKNOWN;
     }
 
     /**
@@ -93,6 +93,7 @@ public enum XSDFacetProfile {
      * @param maxExclusive
      *            value of the 'maxExclusiveSupported' property
      */
+    @SuppressWarnings("squid:S00107") // Number of params unavoidable since enum constructors are private
     private XSDFacetProfile(boolean length, boolean minLength, boolean maxLength, boolean pattern,
             boolean enumeration, boolean whiteSpace, boolean totalDigits, boolean fractionDigits,
             boolean minInclusive, boolean maxInclusive, boolean minExclusive, boolean maxExclusive) {
@@ -223,53 +224,53 @@ public enum XSDFacetProfile {
 	 */
 	static {
 		try {
-			w3cProfileMap.put("boolean", FP_boolean);
-			w3cProfileMap.put("byte", FP_int);
-			w3cProfileMap.put("short", FP_int);
-			w3cProfileMap.put("int", FP_int);
-			w3cProfileMap.put("integer", FP_int);
-			w3cProfileMap.put("long", FP_int);
-			w3cProfileMap.put("positiveInteger", FP_int);
-			w3cProfileMap.put("nonPositiveInteger", FP_int);
-			w3cProfileMap.put("negativeInteger", FP_int);
-			w3cProfileMap.put("nonNegativeInteger", FP_int);
-			w3cProfileMap.put("unsignedByte", FP_int);
-			w3cProfileMap.put("unsignedShort", FP_int);
-			w3cProfileMap.put("unsignedInt", FP_int);
-			w3cProfileMap.put("unsignedLong", FP_int);
-			w3cProfileMap.put("decimal", FP_decimal);
-			w3cProfileMap.put("float", FP_float);
-			w3cProfileMap.put("double", FP_float);
-			w3cProfileMap.put("string", FP_string);
-			w3cProfileMap.put("normalizedString", FP_string);
-			w3cProfileMap.put("token", FP_string);
-			w3cProfileMap.put("Name", FP_string);
-			w3cProfileMap.put("NCName", FP_string);
-			w3cProfileMap.put("NOTATION", FP_string);
-			w3cProfileMap.put("NMTOKEN", FP_string);
-			w3cProfileMap.put("NMTOKENS", FP_string);
-			w3cProfileMap.put("ENTITY", FP_string);
-			w3cProfileMap.put("ENTITIES", FP_string);
-			w3cProfileMap.put("date", FP_date);
-			w3cProfileMap.put("dateTime", FP_dateTime);
-			w3cProfileMap.put("time", FP_time);
-			w3cProfileMap.put("duration", FP_duration);
-			w3cProfileMap.put("gYear", FP_date);
-			w3cProfileMap.put("gYearMonth", FP_date);
-			w3cProfileMap.put("gMonthDay", FP_date);
-			w3cProfileMap.put("gMonth", FP_date);
-			w3cProfileMap.put("gDay", FP_date);
-			w3cProfileMap.put("ID", FP_string);
-			w3cProfileMap.put("IDREF", FP_string);
-			w3cProfileMap.put("IDREFS", FP_string);
-			w3cProfileMap.put("language", FP_language);
-			w3cProfileMap.put("QName", FP_string);
-			w3cProfileMap.put("anyURI", FP_string);
-			w3cProfileMap.put("hexBinary", FP_string);
-			w3cProfileMap.put("base64Binary", FP_string);
+			w3cProfileMap.put("boolean", FP_BOOLEAN);
+			w3cProfileMap.put("byte", FP_INT);
+			w3cProfileMap.put("short", FP_INT);
+			w3cProfileMap.put("int", FP_INT);
+			w3cProfileMap.put("integer", FP_INT);
+			w3cProfileMap.put("long", FP_INT);
+			w3cProfileMap.put("positiveInteger", FP_INT);
+			w3cProfileMap.put("nonPositiveInteger", FP_INT);
+			w3cProfileMap.put("negativeInteger", FP_INT);
+			w3cProfileMap.put("nonNegativeInteger", FP_INT);
+			w3cProfileMap.put("unsignedByte", FP_INT);
+			w3cProfileMap.put("unsignedShort", FP_INT);
+			w3cProfileMap.put("unsignedInt", FP_INT);
+			w3cProfileMap.put("unsignedLong", FP_INT);
+			w3cProfileMap.put("decimal", FP_DECIMAL);
+			w3cProfileMap.put("float", FP_FLOAT);
+			w3cProfileMap.put("double", FP_FLOAT);
+			w3cProfileMap.put("string", FP_STRING);
+			w3cProfileMap.put("normalizedString", FP_STRING);
+			w3cProfileMap.put("token", FP_STRING);
+			w3cProfileMap.put("Name", FP_STRING);
+			w3cProfileMap.put("NCName", FP_STRING);
+			w3cProfileMap.put("NOTATION", FP_STRING);
+			w3cProfileMap.put("NMTOKEN", FP_STRING);
+			w3cProfileMap.put("NMTOKENS", FP_STRING);
+			w3cProfileMap.put("ENTITY", FP_STRING);
+			w3cProfileMap.put("ENTITIES", FP_STRING);
+			w3cProfileMap.put("date", FP_DATE);
+			w3cProfileMap.put("dateTime", FP_DATETIME);
+			w3cProfileMap.put("time", FP_TIME);
+			w3cProfileMap.put("duration", FP_DURATION);
+			w3cProfileMap.put("gYear", FP_DATE);
+			w3cProfileMap.put("gYearMonth", FP_DATE);
+			w3cProfileMap.put("gMonthDay", FP_DATE);
+			w3cProfileMap.put("gMonth", FP_DATE);
+			w3cProfileMap.put("gDay", FP_DATE);
+			w3cProfileMap.put("ID", FP_STRING);
+			w3cProfileMap.put("IDREF", FP_STRING);
+			w3cProfileMap.put("IDREFS", FP_STRING);
+			w3cProfileMap.put("language", FP_LANGUAGE);
+			w3cProfileMap.put("QName", FP_STRING);
+			w3cProfileMap.put("anyURI", FP_STRING);
+			w3cProfileMap.put("hexBinary", FP_STRING);
+			w3cProfileMap.put("base64Binary", FP_STRING);
 			
-		} catch (Throwable t) {
-			throw new ExceptionInInitializerError( t );
+		} catch (Exception e) {
+			throw new ExceptionInInitializerError( e );
 		}
 	}
 	

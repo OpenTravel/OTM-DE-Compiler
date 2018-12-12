@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -83,7 +84,9 @@ import org.opentravel.schemacompiler.version.VersionSchemeFactory;
 @Path("/")
 public class RepositoryContentResource {
 
-    private static ObjectFactory objectFactory = new ObjectFactory();
+	private static final String USER_NOT_AUTHORIZED = "The user does not have permission to access the requested resource.";
+	
+	private static ObjectFactory objectFactory = new ObjectFactory();
     static Log log = LogFactory.getLog(RepositoryContentResource.class);
 
     private RepositoryMetadataResource repositoryMetadataResource;
@@ -423,20 +426,19 @@ public class RepositoryContentResource {
                     }
         		}
                 
-        	} else if (result instanceof EntitySearchResult) {
-        		if ((itemType == null) || (itemType == RepositoryItemType.LIBRARY)) {
-            		EntitySearchResult entityResult = (EntitySearchResult) result;
-            		LibrarySearchResult referencedLib = referencedLibrariesById.get( entityResult.getOwningLibraryId() );
-            		
-            		if (referencedLib != null) {
-            			RepositoryItem item = referencedLib.getRepositoryItem();
-            			
-                        if (isReadable(item, user, accessibleItemCache)) {
-                        	resultsList.getSearchResult().add(
-                        			objectFactory.createLibrarySearchResult(
-                        					createEntityMetadata( entityResult, item ) ) );
-                        }
-            		}
+        	} else if ((result instanceof EntitySearchResult) &&
+        			((itemType == null) || (itemType == RepositoryItemType.LIBRARY))) {
+        		EntitySearchResult entityResult = (EntitySearchResult) result;
+        		LibrarySearchResult referencedLib = referencedLibrariesById.get( entityResult.getOwningLibraryId() );
+        		
+        		if (referencedLib != null) {
+        			RepositoryItem item = referencedLib.getRepositoryItem();
+        			
+                    if (isReadable(item, user, accessibleItemCache)) {
+                    	resultsList.getSearchResult().add(
+                    			objectFactory.createLibrarySearchResult(
+                    					createEntityMetadata( entityResult, item ) ) );
+                    }
         		}
         	}
         }
@@ -514,8 +516,7 @@ public class RepositoryContentResource {
     		return objectFactory.createLibraryHistory( libraryHistory );
     		
     	} else {
-            throw new RepositorySecurityException(
-                    "The user does not have permission to access the requested resource.");
+            throw new RepositorySecurityException(USER_NOT_AUTHORIZED);
     	}
     }
     
@@ -836,6 +837,7 @@ public class RepositoryContentResource {
     @POST
     @Path("publish")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @SuppressWarnings("squid:S00107")
     public Response publishContent(@FormDataParam("fileContent") InputStream contentStream,
     		@FormDataParam("fileContent") FormDataContentDisposition contentDetail,
     		@FormDataParam("namespace") String namespace,
@@ -928,7 +930,7 @@ public class RepositoryContentResource {
 
             } else {
                 throw new RepositorySecurityException(
-                        "The user does not have permission to access the requested resource.");
+                        USER_NOT_AUTHORIZED);
             }
 
         } finally {
@@ -981,7 +983,7 @@ public class RepositoryContentResource {
 
             } else {
                 throw new RepositorySecurityException(
-                        "The user does not have permission to access the requested resource.");
+                        USER_NOT_AUTHORIZED);
             }
 
         } finally {
@@ -1038,7 +1040,7 @@ public class RepositoryContentResource {
 
             } else {
                 throw new RepositorySecurityException(
-                        "The user does not have permission to access the requested resource.");
+                        USER_NOT_AUTHORIZED);
             }
 
         } finally {
@@ -1090,7 +1092,7 @@ public class RepositoryContentResource {
 
             } else {
                 throw new RepositorySecurityException(
-                        "The user does not have permission to access the requested resource.");
+                        USER_NOT_AUTHORIZED);
             }
 
         } finally {
@@ -1309,7 +1311,7 @@ public class RepositoryContentResource {
 
             } else {
                 throw new RepositorySecurityException(
-                        "The user does not have permission to access the requested resource.");
+                        USER_NOT_AUTHORIZED);
             }
 
         } finally {
@@ -1351,7 +1353,7 @@ public class RepositoryContentResource {
 
             } else {
                 throw new RepositorySecurityException(
-                        "The user does not have permission to access the requested resource.");
+                        USER_NOT_AUTHORIZED);
             }
 
         } finally {
@@ -1398,7 +1400,7 @@ public class RepositoryContentResource {
 
             } else {
                 throw new RepositorySecurityException(
-                        "The user does not have permission to access the requested resource.");
+                        USER_NOT_AUTHORIZED);
             }
 
         } finally {
@@ -1451,7 +1453,7 @@ public class RepositoryContentResource {
         	
         } else {
             throw new RepositorySecurityException(
-                    "The user does not have permission to access the requested resource.");
+                    USER_NOT_AUTHORIZED);
         }
     }
     
@@ -1545,7 +1547,7 @@ public class RepositoryContentResource {
         Map<TLLibraryStatus,Boolean> cacheRecord = accessibleItemCache.get(item.getBaseNamespace());
 
         if (cacheRecord == null) {
-            cacheRecord = new HashMap<>();
+            cacheRecord = new EnumMap<>(TLLibraryStatus.class);
             accessibleItemCache.put(item.getBaseNamespace(), cacheRecord);
         }
         Boolean hasAccess = cacheRecord.get(item.getStatus());

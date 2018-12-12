@@ -118,8 +118,8 @@ public class ServiceAssemblyFileUtils extends AbstractFileUtils {
                 throw new LibraryLoaderException(e.getMessage(), e);
             }
 
-        } catch (Throwable t) {
-            throw new LibraryLoaderException("Unknown error while loading assembly.", t);
+        } catch (Exception e) {
+            throw new LibraryLoaderException("Unknown error while loading assembly.", e);
         }
         return assembly;
     }
@@ -136,7 +136,7 @@ public class ServiceAssemblyFileUtils extends AbstractFileUtils {
     	try {
     		return loadAssembly( new StringReader( contentString ) );
     		
-    	} catch (JAXBException | IOException | RepositoryException e) {
+    	} catch (JAXBException | RepositoryException e) {
     		throw new LibraryLoaderException("Error loading OTM release content.", e);
     	}
     }
@@ -147,13 +147,11 @@ public class ServiceAssemblyFileUtils extends AbstractFileUtils {
      * @param reader  the reader from which to obtain the assembly content
      * @return ServiceAssembly
      * @throws JAXBException  thrown if the assembly content cannot be parsed
-     * @throws IOException  thrown if the assembly content cannot be accessed
      * @throws RepositoryException  thrown if one or more of the assembly's constituent
      *								repository items cannot be resolved
      */
     @SuppressWarnings("unchecked")
-    private ServiceAssembly loadAssembly(Reader reader)
-    		throws JAXBException, IOException, RepositoryException {
+    private ServiceAssembly loadAssembly(Reader reader) throws JAXBException, RepositoryException {
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         unmarshaller.setSchema( releaseValidationSchema );
 
@@ -207,7 +205,9 @@ public class ServiceAssemblyFileUtils extends AbstractFileUtils {
                 try {
                     restoreBackupFile( backupFile, assemblyFile.getName() );
                     
-                } catch (Throwable t) {}
+                } catch (Exception e) {
+                    // Ignore error and continue
+                }
             }
         }
     }
@@ -218,10 +218,9 @@ public class ServiceAssemblyFileUtils extends AbstractFileUtils {
      * @param assembly  the assembly to be marshalled
      * @param writer  the writer to which the marshalled content will be written
      * @throws JAXBException  thrown if the assembly content cannot be marshalled
-     * @throws IOException  thrown if the writer is not able to process content
      */
-    private void marshalAssembly(ServiceAssembly assembly, Writer writer) throws JAXBException, IOException {
-    	AssemblyType jaxbAssembly = transformToJaxbAssembly( assembly );
+    private void marshalAssembly(ServiceAssembly assembly, Writer writer) throws JAXBException {
+    		AssemblyType jaxbAssembly = transformToJaxbAssembly( assembly );
         Marshaller marshaller = jaxbContext.createMarshaller();
 
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
@@ -231,7 +230,7 @@ public class ServiceAssemblyFileUtils extends AbstractFileUtils {
                         return ASSEMBLY_FILE_NAMESPACE.equals(namespaceUri) ?
                         		SchemaDeclarations.OTA2_ASSEMBLY_SCHEMA.getDefaultPrefix() : suggestion;
                     }
-                    public String[] getPreDeclaredNamespaceUris() {
+                    @Override public String[] getPreDeclaredNamespaceUris() {
                         return new String[] { ASSEMBLY_FILE_NAMESPACE };
                     }
                 });
@@ -376,8 +375,8 @@ public class ServiceAssemblyFileUtils extends AbstractFileUtils {
             releaseValidationSchema = schemaFactory.newSchema( new StreamSource( schemaStream ) );
 			jaxbContext = JAXBContext.newInstance( SCHEMA_CONTEXT );
 			
-		} catch (Throwable t) {
-			throw new ExceptionInInitializerError( t );
+		} catch (Exception e) {
+			throw new ExceptionInInitializerError( e );
 		}
 	}
 	

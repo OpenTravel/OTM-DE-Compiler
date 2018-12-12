@@ -61,7 +61,7 @@ public class RepositoryLockValidationTest extends RepositoryMultiUserTestBase {
 		ProjectItem item = findProjectItem( "Version_Test_1_0_0.otm" );
 		TLLibrary library = (TLLibrary) item.getContent();
 		
-		projectManager.get().lock( item, project.get().getProjectFile().getParentFile() );
+		projectManager.get().lock( item );
 		
 		// Update the library, save the project, and commit/unlock
 		library.setComments( TEST_DESCRIPTION1 );
@@ -76,7 +76,7 @@ public class RepositoryLockValidationTest extends RepositoryMultiUserTestBase {
 		// Attempt to lock; should fail because the local copy is out of sync with
 		// the remote repository
 		try {
-			projectManager.get().lock( item, project.get().getProjectFile().getParentFile() );
+			projectManager.get().lock( item );
 			fail("Expected exception not thrown for model lock attempt.");
 			
 		} catch (RepositoryOutOfSyncException e) {
@@ -85,7 +85,7 @@ public class RepositoryLockValidationTest extends RepositoryMultiUserTestBase {
 		
 		// Refresh the project items and re-attempt the lock
 		projectManager.get().refreshManagedProjectItems();
-		projectManager.get().lock( item, project.get().getProjectFile().getParentFile() );
+		projectManager.get().lock( item );
 		
 		TLLibrary library = (TLLibrary) item.getContent();
 		TLSimple simpleType = library.getSimpleType( "SimpleType_01_00" );

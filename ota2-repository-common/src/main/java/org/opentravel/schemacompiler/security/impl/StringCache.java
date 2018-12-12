@@ -231,7 +231,7 @@ public class StringCache {
                             ArrayList<ByteEntry> list = tempMap.get(key);
                             for (int i = 0; i < list.size() && n < size; i++) {
                                 ByteEntry entry = list.get(i);
-                                tempChunk.setBytes(entry.name, 0, entry.name.length);
+                                tempChunk.setBytes(entry.getName(), 0, entry.getName().length);
                                 int insertPos = findClosest(tempChunk, tempbcCache, n);
                                 if (insertPos == n) {
                                     tempbcCache[n + 1] = entry;
@@ -251,16 +251,16 @@ public class StringCache {
                         bcCount++;
                         // Allocate new ByteEntry for the lookup
                         ByteEntry entry = new ByteEntry();
-                        entry.value = value;
+                        entry.setValue(value);
                         int[] count = bcStats.get(entry);
                         if (count == null) {
                             int end = bc.getEnd();
                             int start = bc.getStart();
                             // Create byte array and copy bytes
-                            entry.name = new byte[bc.getLength()];
-                            System.arraycopy(bc.getBuffer(), start, entry.name, 0, end - start);
+                            entry.setName(new byte[bc.getLength()]);
+                            System.arraycopy(bc.getBuffer(), start, entry.getName(), 0, end - start);
                             // Set encoding
-                            entry.enc = bc.getEncoding();
+                            entry.setEnc(bc.getEncoding());
                             // Initialize occurrence count to one
                             count = new int[1];
                             count[0] = 1;
@@ -340,7 +340,7 @@ public class StringCache {
                             ArrayList<CharEntry> list = tempMap.get(key);
                             for (int i = 0; i < list.size() && n < size; i++) {
                                 CharEntry entry = list.get(i);
-                                tempChunk.setChars(entry.name, 0, entry.name.length);
+                                tempChunk.setChars(entry.getName(), 0, entry.getName().length);
                                 int insertPos = findClosest(tempChunk, tempccCache, n);
                                 if (insertPos == n) {
                                     tempccCache[n + 1] = entry;
@@ -360,14 +360,14 @@ public class StringCache {
                         ccCount++;
                         // Allocate new CharEntry for the lookup
                         CharEntry entry = new CharEntry();
-                        entry.value = value;
+                        entry.setValue(value);
                         int[] count = ccStats.get(entry);
                         if (count == null) {
                             int end = cc.getEnd();
                             int start = cc.getStart();
                             // Create char array and copy chars
-                            entry.name = new char[cc.getLength()];
-                            System.arraycopy(cc.getBuffer(), start, entry.name, 0, end - start);
+                            entry.setName(new char[cc.getLength()]);
+                            System.arraycopy(cc.getBuffer(), start, entry.getName(), 0, end - start);
                             // Initialize occurrence count to one
                             count = new int[1];
                             count[0] = 1;
@@ -433,11 +433,11 @@ public class StringCache {
      */
     protected static final String find(ByteChunk name) {
         int pos = findClosest(name, bcCache, bcCache.length);
-        if ((pos < 0) || (compare(name, bcCache[pos].name) != 0)
-                || !(name.getEncoding().equals(bcCache[pos].enc))) {
+        if ((pos < 0) || (compare(name, bcCache[pos].getName()) != 0)
+                || !(name.getEncoding().equals(bcCache[pos].getEnc()))) {
             return null;
         } else {
-            return bcCache[pos].value;
+            return bcCache[pos].getValue();
         }
     }
 
@@ -455,7 +455,7 @@ public class StringCache {
             return -1;
         }
 
-        if (compare(name, array[0].name) < 0) {
+        if (compare(name, array[0].getName()) < 0) {
             return -1;
         }
         if (b == 0) {
@@ -465,7 +465,7 @@ public class StringCache {
         int i = 0;
         while (true) {
             i = (b + a) / 2;
-            int result = compare(name, array[i].name);
+            int result = compare(name, array[i].getName());
             if (result == 1) {
                 a = i;
             } else if (result == 0) {
@@ -474,7 +474,7 @@ public class StringCache {
                 b = i;
             }
             if ((b - a) == 1) {
-                int result2 = compare(name, array[b].name);
+                int result2 = compare(name, array[b].getName());
                 if (result2 < 0) {
                     return a;
                 } else {
@@ -522,10 +522,10 @@ public class StringCache {
      */
     protected static final String find(CharChunk name) {
         int pos = findClosest(name, ccCache, ccCache.length);
-        if ((pos < 0) || (compare(name, ccCache[pos].name) != 0)) {
+        if ((pos < 0) || (compare(name, ccCache[pos].getName()) != 0)) {
             return null;
         } else {
-            return ccCache[pos].value;
+            return ccCache[pos].getValue();
         }
     }
 
@@ -543,7 +543,7 @@ public class StringCache {
             return -1;
         }
 
-        if (compare(name, array[0].name) < 0) {
+        if (compare(name, array[0].getName()) < 0) {
             return -1;
         }
         if (b == 0) {
@@ -553,7 +553,7 @@ public class StringCache {
         int i = 0;
         while (true) {
             i = (b + a) / 2;
-            int result = compare(name, array[i].name);
+            int result = compare(name, array[i].getName());
             if (result == 1) {
                 a = i;
             } else if (result == 0) {
@@ -562,7 +562,7 @@ public class StringCache {
                 b = i;
             }
             if ((b - a) == 1) {
-                int result2 = compare(name, array[b].name);
+                int result2 = compare(name, array[b].getName());
                 if (result2 < 0) {
                     return a;
                 } else {
@@ -577,21 +577,45 @@ public class StringCache {
 
     protected static class ByteEntry {
 
-        public byte[] name = null;
-        public String enc = null;
-        public String value = null;
+        private byte[] name = null;
+        private String enc = null;
+        private String value = null;
+
+		public byte[] getName() {
+			return name;
+		}
+
+		public void setName(byte[] name) {
+			this.name = name;
+		}
+
+		public String getEnc() {
+			return enc;
+		}
+
+		public void setEnc(String enc) {
+			this.enc = enc;
+		}
+
+		public String getValue() {
+			return value;
+		}
+
+		public void setValue(String value) {
+			this.value = value;
+		}
 
         public String toString() {
-            return value;
+            return getValue();
         }
 
         public int hashCode() {
-            return value.hashCode();
+            return getValue().hashCode();
         }
 
         public boolean equals(Object obj) {
             if (obj instanceof ByteEntry) {
-                return value.equals(((ByteEntry) obj).value);
+                return getValue().equals(((ByteEntry) obj).getValue());
             }
             return false;
         }
@@ -602,20 +626,36 @@ public class StringCache {
 
     protected static class CharEntry {
 
-        public char[] name = null;
-        public String value = null;
+        private char[] name = null;
+        private String value = null;
+
+		public char[] getName() {
+			return name;
+		}
+
+		public void setName(char[] name) {
+			this.name = name;
+		}
+
+		public String getValue() {
+			return value;
+		}
+
+		public void setValue(String value) {
+			this.value = value;
+		}
 
         public String toString() {
-            return value;
+            return getValue();
         }
 
         public int hashCode() {
-            return value.hashCode();
+            return getValue().hashCode();
         }
 
         public boolean equals(Object obj) {
             if (obj instanceof CharEntry) {
-                return value.equals(((CharEntry) obj).value);
+                return getValue().equals(((CharEntry) obj).getValue());
             }
             return false;
         }

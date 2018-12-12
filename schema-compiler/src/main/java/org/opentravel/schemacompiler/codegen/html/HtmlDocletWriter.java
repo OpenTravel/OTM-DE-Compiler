@@ -87,13 +87,13 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	 * string can be empty if the file getting generated is in the destination
 	 * directory.
 	 */
-	public String relativePath = "";
+	private String relativePath = "";
 
 	/**
 	 * Same as relativepath, but normalized to never be empty or end with a
 	 * slash.
 	 */
-	public String relativepathNoSlash = "";
+	private String relativepathNoSlash = "";
 
 	/**
 	 * Platform-dependent directory path from the current or the destination
@@ -101,18 +101,18 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	 * EXAMPLE, if the file getting generated is "java/lang/Object.html", then
 	 * the path string is "java/lang".
 	 */
-	public String path = "";
+	private String path = "";
 
 	/**
 	 * Name of the file getting generated. If the file getting generated is
 	 * "java/lang/Object.html", then the filename is "Object.html".
 	 */
-	public String filename = "";
+	private String filename = "";
 
 	/**
 	 * The display length used for indentation while generating the class page.
 	 */
-	public int displayLength = 0;
+	private int displayLength = 0;
 
 	/**
 	 * Constructor to construct the HtmlStandardWriter object.
@@ -124,7 +124,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 			throws IOException {
 		super(configuration, filename);
 		this.configuration = configuration;
-		this.filename = filename;
+		this.setFilename(filename);
 	}
 
 	/**
@@ -141,11 +141,11 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 			String filename, String relativePath) throws IOException {
 		super(configuration, path, filename);
 		this.configuration = configuration;
-		this.path = path;
-		this.relativePath = relativePath;
-		this.relativepathNoSlash = DirectoryManager
-				.getPathNoTrailingSlash(this.relativePath);
-		this.filename = filename;
+		this.setPath(path);
+		this.setRelativePath(relativePath);
+		this.setRelativepathNoSlash(DirectoryManager
+				.getPathNoTrailingSlash(this.getRelativePath()));
+		this.setFilename(filename);
 	}
 
 
@@ -319,8 +319,8 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	 * @return the window title string
 	 */
 	public String getWindowTitle(String title) {
-		if (configuration.windowtitle.length() > 0) {
-			title += " (" + configuration.windowtitle + ")";
+		if (configuration.getWindowtitle().length() > 0) {
+			title += " (" + configuration.getWindowtitle() + ")";
 		}
 		return title;
 	}
@@ -367,7 +367,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 		navList.setStyle(HtmlStyle.NAV_LIST);
 		navList.addAttr(HtmlAttr.TITLE,
 				configuration.getText("doclet.Navigation"));
-		if (configuration.createoverview) {
+		if (configuration.isCreateoverview()) {
 			navList.addContent(getNavLinkContents());
 		}
 		List<TLLibrary> libraries = configuration.getLibraries();
@@ -378,16 +378,16 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 			navList.addContent(getNavLinkLibrary());
 		}
 		navList.addContent(getNavLinkObject());
-		if (configuration.classuse) {
+		if (configuration.isClassuse()) {
 			navList.addContent(getNavLinkClassUse());
 		}
-		if (configuration.createtree) {
+		if (configuration.isCreatetree()) {
 			navList.addContent(getNavLinkTree());
 		}
-		if (configuration.createindex) {
+		if (configuration.isCreateindex()) {
 			navList.addContent(getNavLinkIndex());
 		}
-		if (!configuration.nohelp) {
+		if (!configuration.isNohelp()) {
 			navList.addContent(getNavLinkHelp());
 		}
 		navDiv.addContent(navList);
@@ -396,7 +396,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 		ulNav.addContent(getNavLinkNext());
 		Content subDiv = HtmlTree.div(HtmlStyle.SUB_NAV, ulNav);
 		Content ulFrames = HtmlTree.ul(HtmlStyle.NAV_LIST, getNavShowLists());
-		ulFrames.addContent(getNavHideLists(filename));
+		ulFrames.addContent(getNavHideLists(getFilename()));
 		subDiv.addContent(ulFrames);
 		HtmlTree ulAllClasses = HtmlTree.ul(HtmlStyle.NAV_LIST,
 				getNavLinkClassIndex());
@@ -441,7 +441,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	 * @return a content tree for the link
 	 */
 	protected Content getNavLinkContents() {
-		Content linkContent = getHyperLink(relativePath
+		Content linkContent = getHyperLink(getRelativePath()
 				+ "overview-summary.html", "", overviewLabel, "", "");
 		return HtmlTree.li(linkContent);
 	}
@@ -521,7 +521,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	 * @return a content tree for the link
 	 */
 	protected Content getNavShowLists(String link) {
-		Content framesContent = getHyperLink(link + "?" + path + filename, "",
+		Content framesContent = getHyperLink(link + "?" + getPath() + getFilename(), "",
 				framesLabel, "", "_top");
 		return HtmlTree.li(framesContent);
 	}
@@ -533,7 +533,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	 * @return a content tree for the link
 	 */
 	protected Content getNavShowLists() {
-		return getNavShowLists(relativePath + "index.html");
+		return getNavShowLists(getRelativePath() + "index.html");
 	}
 
 
@@ -560,7 +560,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	 */
 	protected Content getNavLinkTree() {
 		Content treeLinkContent;
-		treeLinkContent = getHyperLink(relativePath + "overview-tree.html", "",
+		treeLinkContent = getHyperLink(getRelativePath() + "overview-tree.html", "",
 				treeLabel, "", "");
 		return HtmlTree.li(treeLinkContent);
 	}
@@ -573,7 +573,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	 * @return a content tree for the link
 	 */
 	protected Content getNavLinkMainTree(String label) {
-		Content mainTreeContent = getHyperLink(relativePath
+		Content mainTreeContent = getHyperLink(getRelativePath()
 				+ "overview-tree.html", new StringContent(label));
 		return HtmlTree.li(mainTreeContent);
 	}
@@ -589,7 +589,6 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	}
 
 	/**
-	 *TODO keep this?
 	 * Get link for generated index. If the user has used "-splitindex" command
 	 * line option, then link to file "index-files/index-1.html" is generated
 	 * otherwise link to file "index-all.html" is generated.
@@ -601,7 +600,6 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	}
 
 	/**
-	 * TODO keep this?
 	 * Get link for generated class index.
 	 *
 	 * @return a content tree for the link
@@ -618,7 +616,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	 * @return a content tree for the link
 	 */
 	protected Content getNavLinkHelp() {
-		String helpfilenm = configuration.helpfile;
+		String helpfilenm = configuration.getHelpfile();
 		if (helpfilenm.equals("")) {
 			helpfilenm = "help-doc.html";
 		} else {
@@ -627,7 +625,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 				helpfilenm = helpfilenm.substring(lastsep + 1);
 			}
 		}
-		Content linkContent = getHyperLink(relativePath + helpfilenm, "",
+		Content linkContent = getHyperLink(getRelativePath() + helpfilenm, "",
 				helpLabel, "", "");
 		return HtmlTree.li(linkContent);
 	}
@@ -916,7 +914,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	 *            File name, to which path string is.
 	 */
 	protected String pathString(String pd, String name) {
-		StringBuilder buf = new StringBuilder(relativePath);
+		StringBuilder buf = new StringBuilder(getRelativePath());
 		
 		buf.append(DirectoryManager.getPathToLibrary(pd, name));
 		return buf.toString();
@@ -1025,9 +1023,9 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 					.toString();
 		} catch (NullPointerException npe) {
 			// TODO: This occurs numerous times during document generation
-			configuration.printNotice("Missing link for: " + linkInfo.label);
+			configuration.printNotice("Missing link for: " + linkInfo.getLabel());
 		}
-		displayLength += linkInfo.displayLength;
+		setDisplayLength(getDisplayLength() + linkInfo.getDisplayLength());
 		return link;
 	}
 
@@ -1059,8 +1057,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	 *            true if the label should be code font.
 	 */
 	public String getCrossClassLink(String qualifiedClassName,
-			String refMemName, String label, boolean strong, String style,
-			boolean code) {
+			String refMemName, String label, String style, boolean code) {
 		String packageName = qualifiedClassName == null ? "" : qualifiedClassName;
 		String className = "";
 		int periodIndex;
@@ -1497,7 +1494,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	}
 
 	public void printStyleSheetProperties() {
-		String fName = configuration.stylesheetfile;
+		String fName = configuration.getStylesheetfile();
 		
 		if (fName.length() > 0) {
 			File stylefile = new File(fName);
@@ -1506,7 +1503,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 		} else {
 			fName = "stylesheet.css";
 		}
-		fName = relativePath + fName;
+		fName = getRelativePath() + fName;
 		link("REL =\"stylesheet\" TYPE=\"text/css\" HREF=\"" + fName + "\" " + "TITLE=\"Style\"");
 	}
 
@@ -1517,7 +1514,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	 *         location
 	 */
 	public HtmlTree getStyleSheetProperties() {
-		String fName = configuration.stylesheetfile;
+		String fName = configuration.getStylesheetfile();
 		
 		if (fName.length() > 0) {
 			File stylefile = new File(fName);
@@ -1527,7 +1524,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 		} else {
 			fName = HtmlDoclet.DEFAULT_STYLESHEET;
 		}
-		fName = relativePath + fName;
+		fName = getRelativePath() + fName;
 		return HtmlTree.link("stylesheet", "text/css", fName, "Style");
 	}
 
@@ -1546,5 +1543,95 @@ public class HtmlDocletWriter extends HtmlDocWriter {
 	 */
 	public Configuration newConfiguration() {
 		return configuration;
+	}
+
+	/**
+	 * Returns the value of the 'relativePath' field.
+	 *
+	 * @return String
+	 */
+	public String getRelativePath() {
+		return relativePath;
+	}
+
+	/**
+	 * Assigns the value of the 'relativePath' field.
+	 *
+	 * @param relativePath  the field value to assign
+	 */
+	public void setRelativePath(String relativePath) {
+		this.relativePath = relativePath;
+	}
+
+	/**
+	 * Returns the value of the 'relativepathNoSlash' field.
+	 *
+	 * @return String
+	 */
+	public String getRelativepathNoSlash() {
+		return relativepathNoSlash;
+	}
+
+	/**
+	 * Assigns the value of the 'relativepathNoSlash' field.
+	 *
+	 * @param relativepathNoSlash  the field value to assign
+	 */
+	public void setRelativepathNoSlash(String relativepathNoSlash) {
+		this.relativepathNoSlash = relativepathNoSlash;
+	}
+
+	/**
+	 * Returns the value of the 'path' field.
+	 *
+	 * @return String
+	 */
+	public String getPath() {
+		return path;
+	}
+
+	/**
+	 * Assigns the value of the 'path' field.
+	 *
+	 * @param path  the field value to assign
+	 */
+	public void setPath(String path) {
+		this.path = path;
+	}
+
+	/**
+	 * Returns the value of the 'filename' field.
+	 *
+	 * @return String
+	 */
+	public String getFilename() {
+		return filename;
+	}
+
+	/**
+	 * Assigns the value of the 'filename' field.
+	 *
+	 * @param filename  the field value to assign
+	 */
+	public void setFilename(String filename) {
+		this.filename = filename;
+	}
+
+	/**
+	 * Returns the value of the 'displayLength' field.
+	 *
+	 * @return int
+	 */
+	public int getDisplayLength() {
+		return displayLength;
+	}
+
+	/**
+	 * Assigns the value of the 'displayLength' field.
+	 *
+	 * @param displayLength  the field value to assign
+	 */
+	public void setDisplayLength(int displayLength) {
+		this.displayLength = displayLength;
 	}
 }

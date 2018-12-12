@@ -137,8 +137,8 @@ public class TLOpenEnumerationCodegenTransformer extends
             otherEnum.setLiteral("Other_");
             OTHER_ENUM_VALUE = otherEnum;
 
-        } catch (Throwable t) {
-            throw new ExceptionInInitializerError(t);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 

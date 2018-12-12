@@ -93,6 +93,7 @@ import org.opentravel.schemacompiler.repository.RepositorySearchResult;
 import org.opentravel.schemacompiler.repository.RepositorySecurityException;
 import org.opentravel.schemacompiler.repository.RepositoryUnavailableException;
 import org.opentravel.schemacompiler.security.PasswordHelper;
+import org.opentravel.schemacompiler.util.FileUtils;
 import org.opentravel.schemacompiler.version.VersionScheme;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 import org.opentravel.schemacompiler.version.VersionSchemeFactory;
@@ -105,7 +106,19 @@ import org.opentravel.schemacompiler.xml.XMLGregorianCalendarConverter;
  */
 public class RemoteRepositoryClient implements RemoteRepository {
 
-    private static final String SERVICE_CONTEXT = "/service";
+	private static final String BASE_NAMESPACE = "baseNamespace";
+	private static final String NAMESPACE = "namespace";
+	private static final String LIBRARY_NAME = "libraryName";
+	private static final String VERSION = "version";
+	private static final String STATUS = "status";
+	private static final String FILE_CONTENT = "fileContent";
+	private static final String UTF_8 = "UTF-8";
+	private static final String REPOSITORY_UNAVAILABLE = "The remote repository is unavailable.";
+	private static final String SERVICE_RESPONSE_UNREADABLE = "The format of the service response is unreadable.";
+	private static final String METADATA_UNREADABLE = "The format of the library meta-data is unreadable.";
+	private static final String ROLLBACK_ERROR = "Error rolling back the current change set.";
+	
+	private static final String SERVICE_CONTEXT = "/service";
     private static final String REPOSITORY_METADATA_ENDPOINT = SERVICE_CONTEXT + "/repository-metadata";
     private static final String ALL_NAMSPACES_ENDPOINT = SERVICE_CONTEXT + "/all-namespaces";
     private static final String BASE_NAMSPACES_ENDPOINT = SERVICE_CONTEXT + "/base-namespaces";
@@ -388,8 +401,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
     public List<String> listNamespaceChildren(String baseNamespace) throws RepositoryException {
         try {
             String baseNS = RepositoryNamespaceUtils.normalizeUri(baseNamespace);
-            HttpGet request = newGetRequest(NAMESPACE_CHILDREN_ENDPOINT, new HttpGetParam(
-                    "baseNamespace", baseNS));
+            HttpGet request = newGetRequest(NAMESPACE_CHILDREN_ENDPOINT, new HttpGetParam(BASE_NAMESPACE, baseNS));
             HttpResponse response = executeWithAuthentication(request);
             Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext()
                     .createUnmarshaller();
@@ -401,10 +413,10 @@ public class RemoteRepositoryClient implements RemoteRepository {
             return nsList;
 
         } catch (JAXBException e) {
-            throw new RepositoryException("The format of the library meta-data is unreadable.", e);
+            throw new RepositoryException(METADATA_UNREADABLE, e);
 
         } catch (IOException e) {
-            throw new RepositoryException("The remote repository is unavailable.", e);
+            throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
         }
     }
 
@@ -427,10 +439,10 @@ public class RemoteRepositoryClient implements RemoteRepository {
             return nsList;
 
         } catch (JAXBException e) {
-            throw new RepositoryException("The format of the service response is unreadable.", e);
+            throw new RepositoryException(SERVICE_RESPONSE_UNREADABLE, e);
 
         } catch (IOException e) {
-            throw new RepositoryException("The remote repository is unavailable.", e);
+            throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
         }
     }
 
@@ -453,10 +465,10 @@ public class RemoteRepositoryClient implements RemoteRepository {
             return nsList;
 
         } catch (JAXBException e) {
-            throw new RepositoryException("The format of the service response is unreadable.", e);
+            throw new RepositoryException(SERVICE_RESPONSE_UNREADABLE, e);
 
         } catch (IOException e) {
-            throw new RepositoryException("The remote repository is unavailable.", e);
+            throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
         }
     }
 
@@ -498,10 +510,10 @@ public class RemoteRepositoryClient implements RemoteRepository {
             return itemList;
 
         } catch (JAXBException e) {
-            throw new RepositoryException("The format of the service response is unreadable.", e);
+            throw new RepositoryException(SERVICE_RESPONSE_UNREADABLE, e);
 
         } catch (IOException e) {
-            throw new RepositoryException("The remote repository is unavailable.", e);
+            throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
         }
     }
 
@@ -560,10 +572,10 @@ public class RemoteRepositoryClient implements RemoteRepository {
             return itemList;
 
         } catch (JAXBException e) {
-            throw new RepositoryException("The format of the service response is unreadable.", e);
+            throw new RepositoryException(SERVICE_RESPONSE_UNREADABLE, e);
 
         } catch (IOException e) {
-            throw new RepositoryException("The remote repository is unavailable.", e);
+            throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
         }
 	}
 
@@ -594,10 +606,10 @@ public class RemoteRepositoryClient implements RemoteRepository {
             return itemList;
 
         } catch (JAXBException e) {
-            throw new RepositoryException("The format of the library meta-data is unreadable.", e);
+            throw new RepositoryException(METADATA_UNREADABLE, e);
 
         } catch (IOException e) {
-            throw new RepositoryException("The remote repository is unavailable.", e);
+            throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
         }
     }
 
@@ -651,10 +663,10 @@ public class RemoteRepositoryClient implements RemoteRepository {
             return itemList;
 
         } catch (JAXBException e) {
-            throw new RepositoryException("The format of the library meta-data is unreadable.", e);
+            throw new RepositoryException(METADATA_UNREADABLE, e);
 
         } catch (IOException e) {
-            throw new RepositoryException("The remote repository is unavailable.", e);
+            throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
         }
 	}
 
@@ -698,10 +710,10 @@ public class RemoteRepositoryClient implements RemoteRepository {
             return itemList;
 
         } catch (JAXBException e) {
-            throw new RepositoryException("The format of the library meta-data is unreadable.", e);
+            throw new RepositoryException(METADATA_UNREADABLE, e);
 
         } catch (IOException e) {
-            throw new RepositoryException("The remote repository is unavailable.", e);
+            throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
         }
     }
 
@@ -801,10 +813,10 @@ public class RemoteRepositoryClient implements RemoteRepository {
             return RepositoryUtils.createItemHistory( jaxbElement.getValue(), manager );
 
         } catch (JAXBException e) {
-            throw new RepositoryException("The format of the library meta-data is unreadable.", e);
+            throw new RepositoryException(METADATA_UNREADABLE, e);
 
         } catch (IOException e) {
-            throw new RepositoryException("The remote repository is unavailable.", e);
+            throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
         }
 	}
 
@@ -838,10 +850,10 @@ public class RemoteRepositoryClient implements RemoteRepository {
             return itemList;
 
         } catch (JAXBException e) {
-            throw new RepositoryException("The format of the library meta-data is unreadable.", e);
+            throw new RepositoryException(METADATA_UNREADABLE, e);
 
         } catch (IOException e) {
-            throw new RepositoryException("The remote repository is unavailable.", e);
+            throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
         }
 	}
 
@@ -873,10 +885,10 @@ public class RemoteRepositoryClient implements RemoteRepository {
             return searchResults;
 
         } catch (JAXBException e) {
-            throw new RepositoryException("The format of the library meta-data is unreadable.", e);
+            throw new RepositoryException(METADATA_UNREADABLE, e);
 
         } catch (IOException e) {
-            throw new RepositoryException("The remote repository is unavailable.", e);
+            throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
         }
 	}
 
@@ -907,10 +919,10 @@ public class RemoteRepositoryClient implements RemoteRepository {
             return searchResults;
 
         } catch (JAXBException e) {
-            throw new RepositoryException("The format of the library meta-data is unreadable.", e);
+            throw new RepositoryException(METADATA_UNREADABLE, e);
 
         } catch (IOException e) {
-            throw new RepositoryException("The remote repository is unavailable.", e);
+            throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
         }
 	}
 
@@ -924,7 +936,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
         try {
             String baseNS = RepositoryNamespaceUtils.normalizeUri(baseNamespace);
             HttpGet request = newGetRequest(USER_AUTHORIZATION_ENDPOINT, new HttpGetParam(
-                    "baseNamespace", baseNS));
+                    BASE_NAMESPACE, baseNS));
 
             // Send the web service request and check the response
             log.info("Sending user-authorization request to HTTP endpoint: " + endpointUrl);
@@ -938,10 +950,10 @@ public class RemoteRepositoryClient implements RemoteRepository {
             return jaxbElement.getValue().getRepositoryPermission();
 
         } catch (JAXBException e) {
-            throw new RepositoryException("The format of the service response is unreadable.", e);
+            throw new RepositoryException(SERVICE_RESPONSE_UNREADABLE, e);
 
         } catch (IOException e) {
-            throw new RepositoryException("The remote repository is unavailable.", e);
+            throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
         }
     }
 
@@ -968,10 +980,10 @@ public class RemoteRepositoryClient implements RemoteRepository {
             return itemList;
 
         } catch (JAXBException e) {
-            throw new RepositoryException("The format of the library meta-data is unreadable.", e);
+            throw new RepositoryException(METADATA_UNREADABLE, e);
 
         } catch (IOException e) {
-            throw new RepositoryException("The remote repository is unavailable.", e);
+            throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
         }
 	}
 
@@ -993,7 +1005,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
             log.info("Create-root-namespace response received - Status OK");
 
         } catch (IOException e) {
-            throw new RepositoryException("The remote repository is unavailable.", e);
+            throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
         }
     }
 
@@ -1015,7 +1027,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
             log.info("Delete-root-namespace response received - Status OK");
 
         } catch (IOException e) {
-            throw new RepositoryException("The remote repository is unavailable.", e);
+            throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
         }
     }
 
@@ -1027,7 +1039,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
         try {
             String baseNS = RepositoryNamespaceUtils.normalizeUri(baseNamespace);
             HttpGet request = newGetRequest(CREATE_NAMESPACE_ENDPOINT, new HttpGetParam(
-                    "baseNamespace", baseNS));
+                    BASE_NAMESPACE, baseNS));
 
             // Send the web service request and check the response
             log.info("Sending create-namespace request to HTTP endpoint: " + endpointUrl);
@@ -1036,7 +1048,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
             log.info("Create-namespace response received - Status OK");
 
         } catch (IOException e) {
-            throw new RepositoryException("The remote repository is unavailable.", e);
+            throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
         }
     }
 
@@ -1048,7 +1060,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
         try {
             String baseNS = RepositoryNamespaceUtils.normalizeUri(baseNamespace);
             HttpGet request = newGetRequest(DELETE_NAMESPACE_ENDPOINT, new HttpGetParam(
-                    "baseNamespace", baseNS));
+                    BASE_NAMESPACE, baseNS));
 
             // Send the web service request and check the response
             log.info("Sending delete-namespace request to HTTP endpoint: " + endpointUrl);
@@ -1057,7 +1069,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
             log.info("Delete-namespace response received - Status OK");
 
         } catch (IOException e) {
-            throw new RepositoryException("The remote repository is unavailable.", e);
+            throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
         }
     }
 
@@ -1070,7 +1082,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
     public RepositoryItem publish(InputStream unmanagedContent, String filename,
             String libraryName, String namespace, String versionIdentifier, String versionScheme,
             TLLibraryStatus initialStatus) throws RepositoryException {
-        try {
+        try (InputStream contentStream = unmanagedContent) {
             // Build a repository item to represent the content that we are attempting to publish
             String targetNS = RepositoryNamespaceUtils.normalizeUri(namespace);
             RepositoryItemImpl item = new RepositoryItemImpl();
@@ -1097,12 +1109,12 @@ public class RemoteRepositoryClient implements RemoteRepository {
             if (versionScheme != null) {
                 mpEntity.addTextBody("versionScheme", versionScheme);
             }
-            mpEntity.addBinaryBody("fileContent", toByteArray(unmanagedContent),
+            mpEntity.addBinaryBody(FILE_CONTENT, toByteArray(contentStream),
                     ContentType.DEFAULT_BINARY, filename);
-            mpEntity.addTextBody("namespace", targetNS);
-            mpEntity.addTextBody("libraryName", libraryName);
-            mpEntity.addTextBody("version", versionIdentifier);
-            mpEntity.addTextBody("status", initialStatus.toRepositoryStatus().toString());
+            mpEntity.addTextBody(NAMESPACE, targetNS);
+            mpEntity.addTextBody(LIBRARY_NAME, libraryName);
+            mpEntity.addTextBody(VERSION, versionIdentifier);
+            mpEntity.addTextBody(STATUS, initialStatus.toRepositoryStatus().toString());
             postRequest.setEntity(mpEntity.build());
 
             log.info("Sending publish request to HTTP endpoint: " + endpointUrl);
@@ -1115,14 +1127,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
             throw new RepositoryException(e.getMessage(), e);
 
         } catch (IOException e) {
-            throw new RepositoryException("The remote repository is unavailable.", e);
-
-        } finally {
-            try {
-                if (unmanagedContent != null)
-                    unmanagedContent.close();
-            } catch (Throwable t) {
-            }
+            throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
         }
     }
 
@@ -1141,7 +1146,6 @@ public class RemoteRepositoryClient implements RemoteRepository {
      */
     @Override
     public void commit(RepositoryItem item, String remarks) throws RepositoryException {
-        InputStream wipContent = null;
         try {
             validateRepositoryItem(item);
 
@@ -1153,7 +1157,6 @@ public class RemoteRepositoryClient implements RemoteRepository {
                 throw new RepositoryException("The work-in-process file does not exist: "
                         + item.getFilename());
             }
-            wipContent = new FileInputStream(wipFile);
 
             // Build the HTTP request for the remote service
             RepositoryItemIdentityType itemIdentity = createItemIdentity(item);
@@ -1163,11 +1166,14 @@ public class RemoteRepositoryClient implements RemoteRepository {
             StringWriter xmlWriter = new StringWriter();
 
             marshaller.marshal(objectFactory.createRepositoryItemIdentity(itemIdentity), xmlWriter);
-            mpEntity.addTextBody("item", xmlWriter.toString(), ContentType.TEXT_XML);
-            mpEntity.addBinaryBody("fileContent", toByteArray(wipContent),
-                    ContentType.DEFAULT_BINARY, item.getFilename());
+            
+            try (InputStream wipContent = new FileInputStream(wipFile)) {
+                mpEntity.addTextBody("item", xmlWriter.toString(), ContentType.TEXT_XML);
+                mpEntity.addBinaryBody(FILE_CONTENT, toByteArray(wipContent),
+                        ContentType.DEFAULT_BINARY, item.getFilename());
+            }
             if (remarks != null) {
-            	mpEntity.addTextBody("remarks", remarks, ContentType.TEXT_PLAIN);
+            		mpEntity.addTextBody("remarks", remarks, ContentType.TEXT_PLAIN);
             }
 
             request.setEntity(mpEntity.build());
@@ -1182,17 +1188,10 @@ public class RemoteRepositoryClient implements RemoteRepository {
             downloadContent(item, true);
 
         } catch (JAXBException e) {
-            throw new RepositoryException("The format of the library meta-data is unreadable.", e);
+            throw new RepositoryException(METADATA_UNREADABLE, e);
 
         } catch (IOException e) {
-            throw new RepositoryException("The remote repository is unavailable.", e);
-
-        } finally {
-            try {
-                if (wipContent != null)
-                    wipContent.close();
-            } catch (Throwable t) {
-            }
+            throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
         }
     }
 
@@ -1203,22 +1202,21 @@ public class RemoteRepositoryClient implements RemoteRepository {
     @Override
     public void lock(RepositoryItem item) throws RepositoryException {
         boolean success = false;
-        try {
+        try (StringWriter xmlWriter = new StringWriter()) {
             validateRepositoryItem(item);
             manager.getFileManager().startChangeSet();
             
             // Before performing the lock, check to see if we need to refresh the
             // library from the remote repository
             if (isLocalContentStale( item )) {
-            	throw new RepositoryOutOfSyncException("Unable to lock '" + item.getFilename() +
-            			"' because the local copy is out of date (refresh required).");
+            		throw new RepositoryOutOfSyncException("Unable to lock '" + item.getFilename() +
+            				"' because the local copy is out of date (refresh required).");
             }
 
             // Build the HTTP request for the remote service
             RepositoryItemIdentityType itemIdentity = createItemIdentity(item);
             Marshaller marshaller = RepositoryFileManager.getSharedJaxbContext().createMarshaller();
             HttpPost request = newPostRequest(LOCK_ENDPOINT);
-            StringWriter xmlWriter = new StringWriter();
 
             marshaller.marshal(objectFactory.createRepositoryItemIdentity(itemIdentity), xmlWriter);
             request.setEntity(new StringEntity(xmlWriter.toString(), ContentType.TEXT_XML));
@@ -1229,8 +1227,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
 
             log.info("Lock response received - Status OK");
 
-            Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext()
-                    .createUnmarshaller();
+            Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
             JAXBElement<LibraryInfoType> jaxbElement = (JAXBElement<LibraryInfoType>) unmarshaller
                     .unmarshal(response.getEntity().getContent());
 
@@ -1243,10 +1240,10 @@ public class RemoteRepositoryClient implements RemoteRepository {
             success = true;
 
         } catch (JAXBException e) {
-            throw new RepositoryException("The format of the library meta-data is unreadable.", e);
+            throw new RepositoryException(METADATA_UNREADABLE, e);
 
         } catch (IOException e) {
-            throw new RepositoryException("The remote repository is unavailable.", e);
+            throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
 
         } finally {
             // Commit or roll back the changes based on the result of the operation
@@ -1256,7 +1253,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
                 try {
                     manager.getFileManager().rollbackChangeSet();
                 } catch (Exception e) {
-                    log.error("Error rolling back the current change set.", e);
+                    log.error(ROLLBACK_ERROR, e);
                 }
             }
         }
@@ -1269,7 +1266,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
     @Override
     @Deprecated
     public void unlock(RepositoryItem item, boolean commitWIP) throws RepositoryException {
-    	unlock(item, commitWIP, null);
+    		unlock(item, commitWIP, null);
     }
 
     /**
@@ -1278,9 +1275,8 @@ public class RemoteRepositoryClient implements RemoteRepository {
     @SuppressWarnings("unchecked")
 	@Override
 	public void unlock(RepositoryItem item, boolean commitWIP, String remarks) throws RepositoryException {
-        InputStream wipContent = null;
         boolean success = false;
-        try {
+        try (StringWriter xmlWriter = new StringWriter()) {
             validateRepositoryItem(item);
             manager.getFileManager().startChangeSet();
 
@@ -1288,26 +1284,22 @@ public class RemoteRepositoryClient implements RemoteRepository {
             RepositoryItemIdentityType itemIdentity = createItemIdentity(item);
             Marshaller marshaller = RepositoryFileManager.getSharedJaxbContext().createMarshaller();
             HttpPost request = newPostRequest(UNLOCK_ENDPOINT);
-
             MultipartEntityBuilder mpEntity = MultipartEntityBuilder.create();
-            StringWriter xmlWriter = new StringWriter();
 
-            if (commitWIP) {
-                File wipFile = manager.getFileManager().getLibraryWIPContentLocation(
-                        item.getBaseNamespace(), item.getFilename());
-
-                if (!wipFile.exists()) {
-                    throw new RepositoryException("The work-in-process file does not exist: "
-                            + item.getFilename());
-                }
-                wipContent = new FileInputStream(wipFile);
-                mpEntity.addBinaryBody("fileContent", toByteArray(wipContent),
-                        ContentType.DEFAULT_BINARY, item.getFilename());
-                
-                if (remarks != null) {
-                	mpEntity.addTextBody("remarks", remarks, ContentType.TEXT_PLAIN);
-                }
-            }
+			if (commitWIP) {
+				File wipFile = manager.getFileManager().getLibraryWIPContentLocation(item.getBaseNamespace(), item.getFilename());
+				
+				if (!wipFile.exists()) {
+					throw new RepositoryException("The work-in-process file does not exist: " + item.getFilename());
+				}
+				try (InputStream wipContent = new FileInputStream(wipFile)) {
+					mpEntity.addBinaryBody(FILE_CONTENT, toByteArray(wipContent), ContentType.DEFAULT_BINARY, item.getFilename());
+				}
+				
+				if (remarks != null) {
+					mpEntity.addTextBody("remarks", remarks, ContentType.TEXT_PLAIN);
+				}
+			}
             marshaller.marshal(objectFactory.createRepositoryItemIdentity(itemIdentity), xmlWriter);
             mpEntity.addTextBody("item", xmlWriter.toString(), ContentType.TEXT_XML);
             request.setEntity(mpEntity.build());
@@ -1318,8 +1310,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
 
             log.info("Lock response received - Status OK");
 
-            Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext()
-                    .createUnmarshaller();
+            Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
             JAXBElement<LibraryInfoType> jaxbElement = (JAXBElement<LibraryInfoType>) unmarshaller
                     .unmarshal(response.getEntity().getContent());
 
@@ -1331,26 +1322,18 @@ public class RemoteRepositoryClient implements RemoteRepository {
             ((RepositoryItemImpl) item).setLockedByUser(null);
 
             // Force a re-download of the updated content to make sure the local copy is
-            // synchronized
-            // with the remote repository.
+            // synchronized with the remote repository.
             downloadContent(item, true);
 
             success = true;
 
         } catch (JAXBException e) {
-            throw new RepositoryException("The format of the library meta-data is unreadable.", e);
+            throw new RepositoryException(METADATA_UNREADABLE, e);
 
         } catch (IOException e) {
-            throw new RepositoryException("The remote repository is unavailable.", e);
+            throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
 
         } finally {
-            // Close the WIP content input stream
-            try {
-                if (wipContent != null)
-                    wipContent.close();
-            } catch (Throwable t) {
-            }
-
             // Commit or roll back the changes based on the result of the operation
             if (success) {
                 manager.getFileManager().commitChangeSet();
@@ -1358,7 +1341,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
                 try {
                     manager.getFileManager().rollbackChangeSet();
                 } catch (Exception e) {
-                    log.error("Error rolling back the current change set.", e);
+                    log.error(ROLLBACK_ERROR, e);
                 }
             }
         }
@@ -1391,10 +1374,10 @@ public class RemoteRepositoryClient implements RemoteRepository {
             downloadContent(item, true);
 
         } catch (JAXBException e) {
-            throw new RepositoryException("The format of the library meta-data is unreadable.", e);
+            throw new RepositoryException(METADATA_UNREADABLE, e);
 
         } catch (IOException e) {
-            throw new RepositoryException("The remote repository is unavailable.", e);
+            throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
         }
     }
 
@@ -1424,10 +1407,10 @@ public class RemoteRepositoryClient implements RemoteRepository {
             downloadContent(item, true);
 
         } catch (JAXBException e) {
-            throw new RepositoryException("The format of the library meta-data is unreadable.", e);
+            throw new RepositoryException(METADATA_UNREADABLE, e);
 
         } catch (IOException e) {
-            throw new RepositoryException("The remote repository is unavailable.", e);
+            throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
         }
     }
 
@@ -1458,10 +1441,10 @@ public class RemoteRepositoryClient implements RemoteRepository {
             downloadContent(item, true);
 
         } catch (JAXBException e) {
-            throw new RepositoryException("The format of the library meta-data is unreadable.", e);
+            throw new RepositoryException(METADATA_UNREADABLE, e);
 
         } catch (IOException e) {
-            throw new RepositoryException("The remote repository is unavailable.", e);
+            throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
         }
 	}
 
@@ -1491,10 +1474,10 @@ public class RemoteRepositoryClient implements RemoteRepository {
             downloadContent(item, true);
 
         } catch (JAXBException e) {
-            throw new RepositoryException("The format of the library meta-data is unreadable.", e);
+            throw new RepositoryException(METADATA_UNREADABLE, e);
 
         } catch (IOException e) {
-            throw new RepositoryException("The remote repository is unavailable.", e);
+            throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
         }
     }
 
@@ -1527,14 +1510,14 @@ public class RemoteRepositoryClient implements RemoteRepository {
             File itemContent = manager.getFileManager().getLibraryContentLocation(
                     item.getBaseNamespace(), item.getFilename(), item.getVersion());
 
-            itemMetadata.delete();
-            itemContent.delete();
+            FileUtils.delete( itemMetadata );
+            FileUtils.delete( itemContent );
 
         } catch (JAXBException e) {
-            throw new RepositoryException("The format of the library meta-data is unreadable.", e);
+            throw new RepositoryException(METADATA_UNREADABLE, e);
 
         } catch (IOException e) {
-            throw new RepositoryException("The remote repository is unavailable.", e);
+            throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
         }
     }
 
@@ -1612,7 +1595,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
                     filename, versionIdentifier);
             boolean success = false;
 
-            try {
+            try (StringWriter xmlWriter = new StringWriter()) {
                 log.info("Downloading content from repository '" + id + "' - " + baseNS + "; "
                         + filename + "; " + versionIdentifier);
                 manager.getFileManager().startChangeSet();
@@ -1623,18 +1606,14 @@ public class RemoteRepositoryClient implements RemoteRepository {
                 RepositoryItemIdentityType itemIdentity = new RepositoryItemIdentityType();
                 Marshaller marshaller = RepositoryFileManager.getSharedJaxbContext()
                         .createMarshaller();
-                StringWriter xmlWriter = new StringWriter();
 
                 itemIdentity.setBaseNamespace(baseNS);
                 itemIdentity.setFilename(filename);
                 itemIdentity.setVersion(versionIdentifier);
 
-                marshaller.marshal(objectFactory.createRepositoryItemIdentity(itemIdentity),
-                        xmlWriter);
-                metadataRequest.setEntity(new StringEntity(xmlWriter.toString(),
-                        ContentType.TEXT_XML));
-                contentRequest.setEntity(new StringEntity(xmlWriter.toString(),
-                        ContentType.TEXT_XML));
+                marshaller.marshal(objectFactory.createRepositoryItemIdentity(itemIdentity), xmlWriter);
+                metadataRequest.setEntity(new StringEntity(xmlWriter.toString(), ContentType.TEXT_XML));
+                contentRequest.setEntity(new StringEntity(xmlWriter.toString(), ContentType.TEXT_XML));
 
                 // Send the requests for meta-data and content to the remote web service
                 HttpResponse metadataResponse = executeWithAuthentication(metadataRequest);
@@ -1671,15 +1650,15 @@ public class RemoteRepositoryClient implements RemoteRepository {
 
                 } else {
                     throw new RepositoryUnavailableException(
-                            "The remote repository is unavailable.", e);
+                            REPOSITORY_UNAVAILABLE, e);
                 }
 
             } catch (JAXBException e) {
-                throw new RepositoryException("The format of the library meta-data is unreadable.", e);
+                throw new RepositoryException(METADATA_UNREADABLE, e);
 
             } catch (IOException e) {
             	log.warn("The remote repository '" + id + "' is unavailable.");
-                throw new RepositoryException("The remote repository is unavailable.", e);
+                throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
 
             } finally {
                 // Commit or roll back the changes based on the result of the operation
@@ -1689,7 +1668,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
                     try {
                         manager.getFileManager().rollbackChangeSet();
                     } catch (Exception e) {
-                        log.error("Error rolling back the current change set.", e);
+                        log.error(ROLLBACK_ERROR, e);
                     }
                 }
                 downloadCache.add( cacheKey );
@@ -1737,10 +1716,10 @@ public class RemoteRepositoryClient implements RemoteRepository {
             return localLastUpdated.before( remoteLastUpdated );
             
         } catch (IOException e) {
-            throw new RepositoryUnavailableException( "The remote repository is unavailable.", e);
+            throw new RepositoryUnavailableException( REPOSITORY_UNAVAILABLE, e);
 
         } catch (JAXBException e) {
-            throw new RepositoryException("The format of the library meta-data is unreadable.", e);
+            throw new RepositoryException(METADATA_UNREADABLE, e);
         }
     }
 
@@ -1755,9 +1734,9 @@ public class RemoteRepositoryClient implements RemoteRepository {
 			RepositoryItemHistory history = getHistory( item );
 			LibraryStreamInputSource contentSource;
 			
-			contentUrl.append( "?basens=" ).append( URLEncoder.encode( item.getBaseNamespace(), "UTF-8" ) );
-			contentUrl.append( "&version=" ).append( URLEncoder.encode( item.getVersion(), "UTF-8" ) );
-			contentUrl.append( "&filename=" ).append( URLEncoder.encode( item.getFilename(), "UTF-8" ) );
+			contentUrl.append( "?basens=" ).append( URLEncoder.encode( item.getBaseNamespace(), UTF_8 ) );
+			contentUrl.append( "&version=" ).append( URLEncoder.encode( item.getVersion(), UTF_8 ) );
+			contentUrl.append( "&filename=" ).append( URLEncoder.encode( item.getFilename(), UTF_8 ) );
 			
 			effectiveDate = DateUtils.truncate( effectiveDate, Calendar.SECOND );
 			
@@ -1805,7 +1784,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
                     e);
 
         } catch (IOException e) {
-            throw new RepositoryException("The remote repository is unavailable.", e);
+            throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
         }
     }
 
@@ -1904,11 +1883,11 @@ public class RemoteRepositoryClient implements RemoteRepository {
 
         for (HttpGetParam urlParam : urlParams) {
             requestUrl.append(firstParam ? '?' : '&');
-            requestUrl.append(urlParam.paramName).append('=');
+            requestUrl.append(urlParam.getParamName()).append('=');
 
-            if (urlParam.paramValue != null) {
+            if (urlParam.getParamValue() != null) {
                 try {
-                    requestUrl.append(URLEncoder.encode(urlParam.paramValue, "UTF-8"));
+                    requestUrl.append(URLEncoder.encode(urlParam.getParamValue(), UTF_8));
 
                 } catch (UnsupportedEncodingException e) {
                     // No error - UTF-8 is always supported
@@ -1972,7 +1951,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
                     byteStream.write(buffer, 0, bytesRead);
                 }
                 responseStream.close();
-                errorMessage = new String(byteStream.toByteArray(), "UTF-8");
+                errorMessage = new String(byteStream.toByteArray(), UTF_8);
 
             } catch (IOException e) {
                 errorMessage = "Unknown repository error on the remote host.";
@@ -1987,13 +1966,49 @@ public class RemoteRepositoryClient implements RemoteRepository {
      */
     private class HttpGetParam {
 
-        public String paramName;
-        public String paramValue;
+        private String paramName;
+        private String paramValue;
 
         public HttpGetParam(String paramName, String paramValue) {
-            this.paramName = paramName;
-            this.paramValue = paramValue;
+            this.setParamName(paramName);
+            this.setParamValue(paramValue);
         }
+
+		/**
+		 * Returns the value of the 'paramName' field.
+		 *
+		 * @return String
+		 */
+		public String getParamName() {
+			return paramName;
+		}
+
+		/**
+		 * Assigns the value of the 'paramName' field.
+		 *
+		 * @param paramName  the field value to assign
+		 */
+		public void setParamName(String paramName) {
+			this.paramName = paramName;
+		}
+
+		/**
+		 * Returns the value of the 'paramValue' field.
+		 *
+		 * @return String
+		 */
+		public String getParamValue() {
+			return paramValue;
+		}
+
+		/**
+		 * Assigns the value of the 'paramValue' field.
+		 *
+		 * @param paramValue  the field value to assign
+		 */
+		public void setParamValue(String paramValue) {
+			this.paramValue = paramValue;
+		}
 
     }
 

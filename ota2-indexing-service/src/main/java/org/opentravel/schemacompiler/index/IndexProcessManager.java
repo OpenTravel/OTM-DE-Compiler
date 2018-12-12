@@ -96,8 +96,8 @@ public class IndexProcessManager {
 				}
 			}
 			
-		} catch (Throwable t) {
-			t.printStackTrace( System.out );
+		} catch (Exception e) {
+			log.error("Error launching index process manager.", e);
 		}
 	}
 	
@@ -238,7 +238,7 @@ public class IndexProcessManager {
 		
 		command.add( javaCmd );
 		if (agentJvmOpts != null) command.addAll( Arrays.asList( agentJvmOpts.split("\\s+") ) );
-		if (oomeOption != null) command.add( oomeOption );
+		command.add( oomeOption );
 		command.add( agentConfigLocation );
 		command.add( log4jConfig );
 		command.add( "-cp" );
@@ -311,8 +311,9 @@ public class IndexProcessManager {
 							while ((ch = reader.read()) >= 0) {
 								System.out.print((char) ch);
 							}
-						} catch (Throwable t) {
-							log.error("Error piping sub-process output.", t);
+							
+						} catch (Exception e) {
+							log.error("Error piping sub-process output.", e);
 						}
 					}
 					int exitCode = agentProcess.waitFor();

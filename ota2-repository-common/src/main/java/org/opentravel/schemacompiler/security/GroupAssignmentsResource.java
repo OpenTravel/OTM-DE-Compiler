@@ -169,15 +169,16 @@ public class GroupAssignmentsResource extends FileResource<Map<String, List<Stri
             fileManager.addToChangeSet(dataFile);
             fileUtils.saveGroupAssignments(dataFile, groupAssignments);
             fileManager.commitChangeSet();
+            success = true;
 
         } catch (IOException e) {
             throw new RepositoryException("Error saving the group assignments file.", e);
 
         } finally {
             try {
-                if (!success)
-                    fileManager.rollbackChangeSet();
-            } catch (Throwable t) {
+                if (!success) fileManager.rollbackChangeSet();
+            } catch (Exception e) {
+                // Ignore possible errrors and continue
             }
         }
     }

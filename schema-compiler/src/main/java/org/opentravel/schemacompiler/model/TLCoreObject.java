@@ -29,7 +29,7 @@ import org.opentravel.schemacompiler.version.Versioned;
  */
 public class TLCoreObject extends TLComplexTypeBase implements TLFacetOwner, TLAliasOwner, TLAttributeType {
 
-    protected AliasListManager aliasManager = new AliasListManager(this);
+	protected AliasListManager aliasManager = new AliasListManager(this);
     private TLRoleEnumeration roleEnumeration = new TLRoleEnumeration(this);
     private TLSimpleFacet simpleFacet;
     private TLFacet summaryFacet;
@@ -122,7 +122,7 @@ public class TLCoreObject extends TLComplexTypeBase implements TLFacetOwner, TLA
      */
     @Override
     public XSDFacetProfile getXSDFacetProfile() {
-        return (simpleFacet == null) ? XSDFacetProfile.FP_unknown : simpleFacet.getXSDFacetProfile();
+        return (simpleFacet == null) ? XSDFacetProfile.FP_UNKNOWN : simpleFacet.getXSDFacetProfile();
     }
 
     /**
@@ -227,8 +227,7 @@ public class TLCoreObject extends TLComplexTypeBase implements TLFacetOwner, TLA
     public void setSimpleFacet(TLSimpleFacet simpleFacet) {
         if (simpleFacet != this.simpleFacet) {
             if (getOwningModel() != null) {
-                throw new IllegalStateException(
-                        "Facets cannot be modified once their owner has been assigned to a model.");
+                throw new IllegalStateException(FACETS_CANNOT_BE_MODIFIED);
             }
             if (simpleFacet != null) {
                 simpleFacet.setFacetType(TLFacetType.SIMPLE);
@@ -281,7 +280,7 @@ public class TLCoreObject extends TLComplexTypeBase implements TLFacetOwner, TLA
         if (summaryFacet != this.summaryFacet) {
             if (getOwningModel() != null) {
                 throw new IllegalStateException(
-                        "Facets cannot be modified once their owner has been assigned to a model.");
+                        FACETS_CANNOT_BE_MODIFIED);
             }
             if (summaryFacet != null) {
                 summaryFacet.setFacetType(TLFacetType.SUMMARY);
@@ -322,7 +321,7 @@ public class TLCoreObject extends TLComplexTypeBase implements TLFacetOwner, TLA
         if (detailFacet != this.detailFacet) {
             if (getOwningModel() != null) {
                 throw new IllegalStateException(
-                        "Facets cannot be modified once their owner has been assigned to a model.");
+                        FACETS_CANNOT_BE_MODIFIED);
             }
             if (detailFacet != null) {
                 detailFacet.setFacetType(TLFacetType.DETAIL);

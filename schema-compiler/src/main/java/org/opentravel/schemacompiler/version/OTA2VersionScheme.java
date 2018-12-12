@@ -110,27 +110,27 @@ public class OTA2VersionScheme implements VersionScheme {
         Matcher m = versionedNamespacePattern.matcher(namespaceUri);
         boolean isPaddedVersionIds = m.matches() && isPaddedIdentifier(m.group(3));
         int[] versionParts = splitVersionIdentifier(versionIdentifier);
-        String[] _versionParts = new String[versionParts.length];
+        String[] versionPartsStr = new String[versionParts.length];
         String baseNamespace = m.matches() ? m.group(1) : namespaceUri;
         String versionPrefix = m.matches() ? m.group(2) : "/v";
         StringBuilder namespace = new StringBuilder();
 
         // Add padding to the version components if it existed in the original namespace URI
         for (int i = 0; i < versionParts.length; i++) {
-            _versionParts[i] = ((isPaddedVersionIds && (versionParts[i] < 10)) ? "0" : "")
+            versionPartsStr[i] = ((isPaddedVersionIds && (versionParts[i] < 10)) ? "0" : "")
                     + versionParts[i];
         }
 
         if (baseNamespace.endsWith("/")) {
             baseNamespace = baseNamespace.substring(0, baseNamespace.length() - 1);
         }
-        namespace.append(baseNamespace).append(versionPrefix).append(_versionParts[0]);
+        namespace.append(baseNamespace).append(versionPrefix).append(versionPartsStr[0]);
 
         if ((versionParts[1] > 0) || (versionParts[2] > 0)) {
-            namespace.append('_').append(_versionParts[1]);
+            namespace.append('_').append(versionPartsStr[1]);
         }
         if (versionParts[2] > 0) { // only include patch in the namespace URI if greater than zero
-            namespace.append('_').append(_versionParts[2]);
+            namespace.append('_').append(versionPartsStr[2]);
         }
         return namespace.toString();
     }
@@ -165,22 +165,22 @@ public class OTA2VersionScheme implements VersionScheme {
     @Override
     public String getPrefix(String prefix, String versionIdentifier) {
         int[] versionParts = splitVersionIdentifier(versionIdentifier);
-        String[] _versionParts = new String[versionParts.length];
+        String[] versionPartsStr = new String[versionParts.length];
         StringBuilder newPrefix = new StringBuilder();
         Matcher m;
 
         for (int i = 0; i < versionParts.length; i++) {
-            _versionParts[i] = ((versionParts[i] < 10) ? "0" : "") + versionParts[i];
+            versionPartsStr[i] = ((versionParts[i] < 10) ? "0" : "") + versionParts[i];
         }
         if ((m = prefixPattern.matcher(prefix)).matches()) {
             newPrefix.append(m.group(1));
         } else {
             newPrefix.append(prefix);
         }
-        newPrefix.append('-').append(_versionParts[0]).append(_versionParts[1]);
+        newPrefix.append('-').append(versionPartsStr[0]).append(versionPartsStr[1]);
 
         if (versionParts[2] > 0) {
-            newPrefix.append(_versionParts[2]);
+            newPrefix.append(versionPartsStr[2]);
         }
         return newPrefix.toString();
     }

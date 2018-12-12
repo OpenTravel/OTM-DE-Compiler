@@ -100,7 +100,7 @@ public class BusinessObjectUpdateFacetJsonSchemaDelegate extends TLFacetJsonSche
 		JsonDocumentation indicatorDoc = new JsonDocumentation();
 		JsonSchema indicatorSchema = new JsonSchema();
 		
-        indicatorSchema.setType( JsonType.jsonBoolean );
+        indicatorSchema.setType( JsonType.JSON_BOOLEAN );
         indicatorSchema.setDocumentation( indicatorDoc );
         indicatorDoc.setDescriptions( "Indicates whether an update to the '" + fieldName + "' field has been supplied." );
         updateIndicator.setName( indicatorName );
