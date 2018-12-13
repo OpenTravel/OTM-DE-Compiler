@@ -113,13 +113,11 @@ public class RepositoryLockManager {
      *             thrown if the current thread does not own a read lock on the resource
      */
     public void releaseReadLock(LockableResource resource) throws RepositoryException {
-        try {
-            getReadWriteLock(resource).readLock().unlock();
-
-        } catch (IllegalMonitorStateException e) {
-            throw new RepositoryException("Unable to release read lock for resource: "
-                    + resource.getResourceName(), e);
-        }
+		ReadWriteLock lock = getReadWriteLock( resource );
+		
+		synchronized (lock) {
+			lock.readLock().unlock();
+		}
     }
 
     /**
@@ -159,13 +157,11 @@ public class RepositoryLockManager {
      *             thrown if the current thread does not own a read lock on the resource
      */
     public void releaseWriteLock(LockableResource resource) throws RepositoryException {
-        try {
-            getReadWriteLock(resource).writeLock().unlock();
-
-        } catch (IllegalMonitorStateException e) {
-            throw new RepositoryException("Unable to release read lock for resource: "
-                    + resource.getResourceName(), e);
-        }
+    		ReadWriteLock lock = getReadWriteLock( resource );
+    		
+    		synchronized (lock) {
+    			lock.writeLock().unlock();
+    		}
     }
 
     /**
@@ -178,13 +174,8 @@ public class RepositoryLockManager {
      */
     private ReadWriteLock getReadWriteLock(LockableResource resource) {
         synchronized (lockRegistry) {
-            ReentrantReadWriteLock lock = lockRegistry.get(resource);
-
-            if (lock == null) {
-                lock = new ReentrantReadWriteLock(true);
-                lockRegistry.put(resource, lock);
-            }
-            return lock;
+            lockRegistry.computeIfAbsent( resource, r -> lockRegistry.put( r, new ReentrantReadWriteLock( true ) ) );
+            return lockRegistry.get(resource);
         }
     }
 

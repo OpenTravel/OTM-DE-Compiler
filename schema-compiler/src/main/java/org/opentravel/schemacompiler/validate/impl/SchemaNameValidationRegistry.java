@@ -119,7 +119,7 @@ public class SchemaNameValidationRegistry {
     public Collection<NamedEntity> findEntitiesBySchemaTypeName(QName schemaTypeName) {
         Collection<NamedEntity> entities = new HashSet<>();
 
-        if (entityTypeNames.containsKey(schemaTypeName)) {
+        if (typeNameEntities.containsKey(schemaTypeName)) {
             entities.addAll(typeNameEntities.get(schemaTypeName));
         }
         return entities;
@@ -204,14 +204,9 @@ public class SchemaNameValidationRegistry {
         }
         
         if (typeName != null) {
-            Set<NamedEntity> registeredEntities = typeNameEntities.get(typeName);
-
-            if (registeredEntities == null) {
-                registeredEntities = new HashSet<>();
-                typeNameEntities.put(typeName, registeredEntities);
-            }
-            registeredEntities.add(entity);
-            entityTypeNames.put(entity, typeName);
+        		typeNameEntities.computeIfAbsent( typeName, n -> typeNameEntities.put( n, new HashSet<>() ) );
+            typeNameEntities.get(typeName).add( entity );
+            entityTypeNames.put( entity, typeName );
         }
     }
 
@@ -304,23 +299,14 @@ public class SchemaNameValidationRegistry {
      * @param entity
      *            the entity to be added to the registry
      */
-    private void addElementNameToRegistry(QName elementName, NamedEntity entity) {
-        if ((elementName != null) && (entity != null) && hasGlobalType(entity)) {
-            Set<NamedEntity> registeredEntities = elementNameEntities.get(elementName);
-            Set<QName> elementNames = entityElementNames.get(entity);
-
-            if (registeredEntities == null) {
-                registeredEntities = new HashSet<>();
-                elementNameEntities.put(elementName, registeredEntities);
-            }
-            if (elementNames == null) {
-                elementNames = new HashSet<>();
-                entityElementNames.put(entity, elementNames);
-            }
-            registeredEntities.add(entity);
-            elementNames.add(elementName);
-        }
-    }
+	private void addElementNameToRegistry(QName elementName, NamedEntity entity) {
+		if ((elementName != null) && (entity != null) && hasGlobalType(entity)) {
+			elementNameEntities.computeIfAbsent( elementName, n -> elementNameEntities.put( n, new HashSet<>() ) );
+			entityElementNames.computeIfAbsent( entity, e -> entityElementNames.put( e, new HashSet<>() ) );
+			elementNameEntities.get(elementName).add( entity );
+			entityElementNames.get(entity).add( elementName );
+		}
+	}
     
     /**
      * Returns true if the given entity has a global schema type definition associated with it.

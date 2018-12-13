@@ -277,28 +277,27 @@ class EntityReferenceResolutionVisitor extends ModelElementVisitorAdapter {
 	 */
 	@Override
 	public boolean visitParameter(TLParameter parameter) {
-        if ((parameter.getOwner() != null) && (parameter.getOwner().getFacetRef() != null) &&
-        		(parameter.getFieldRef() == null) && (parameter.getFieldRefName() != null)) {
-        	TLFacet facetRef = parameter.getOwner().getFacetRef();
-        	String facetRefKey = facetRef.getNamespace() + ":" + facetRef.getLocalName();
-        	List<TLMemberField<?>> memberFields = inheritedFieldCache.get(facetRefKey);
-        	String fieldName = parameter.getFieldRefName();
-        	
-            if (memberFields == null) {
-            	memberFields = ResourceCodegenUtils.getAllParameterFields( facetRef );
-            	inheritedFieldCache.put(facetRefKey, memberFields);
-            }
-            
-            for (TLMemberField<?> memberField : memberFields) {
-            	if (fieldName.equals(memberField.getName())) {
-            		parameter.setFieldRef(memberField);
-            		break;
-            	}
-            }
-        }
-        return true;
+		if ((parameter.getOwner() != null) && (parameter.getOwner().getFacetRef() != null)
+				&& (parameter.getFieldRef() == null) && (parameter.getFieldRefName() != null)) {
+			TLFacet facetRef = parameter.getOwner().getFacetRef();
+			String facetRefKey = facetRef.getNamespace() + ":" + facetRef.getLocalName();
+			String fieldName = parameter.getFieldRefName();
+			List<TLMemberField<?>> memberFields;
+			
+			inheritedFieldCache.computeIfAbsent( facetRefKey,
+					k -> inheritedFieldCache.put( k, ResourceCodegenUtils.getAllParameterFields(facetRef) ) );
+			memberFields = inheritedFieldCache.get(facetRefKey);
+			
+			for (TLMemberField<?> memberField : memberFields) {
+				if (fieldName.equals(memberField.getName())) {
+					parameter.setFieldRef(memberField);
+					break;
+				}
+			}
+		}
+		return true;
 	}
-
+	
 	/**
 	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionFacet(org.opentravel.schemacompiler.model.TLActionFacet)
 	 */

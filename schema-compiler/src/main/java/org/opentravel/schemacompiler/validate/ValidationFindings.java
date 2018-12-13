@@ -206,16 +206,12 @@ public class ValidationFindings implements Serializable {
             throw new NullPointerException(
                     "The message key for validation findings cannot be a null or empty string.");
         }
+        messageKeysBySourceObject.computeIfAbsent( source, s -> messageKeysBySourceObject.put( s, new ArrayList<>() ) );
         List<String> messageKeys = messageKeysBySourceObject.get(source);
 
-        if ((messageKeys == null) || !messageKeys.contains(messageKey)) {
-            ValidationFinding message = new ValidationFinding(source, type, messageKey,
-                    messageParams);
+        if (!messageKeys.contains(messageKey)) {
+            ValidationFinding message = new ValidationFinding(source, type, messageKey, messageParams);
 
-            if (messageKeys == null) {
-                messageKeys = new ArrayList<>();
-                messageKeysBySourceObject.put(source, messageKeys);
-            }
             messageKeys.add(messageKey);
             allFindings.add(message);
         }

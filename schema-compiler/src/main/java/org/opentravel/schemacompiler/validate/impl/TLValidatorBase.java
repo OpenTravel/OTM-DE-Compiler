@@ -71,7 +71,12 @@ import org.opentravel.schemacompiler.version.Versioned;
  */
 public abstract class TLValidatorBase<T extends Validatable> implements Validator<T> {
 
-    public static final String TLMODEL_PREFIX = "org.opentravel.schemacompiler.";
+    /**
+	 * 
+	 */
+	private static final String PATH_TEMPLATE = "pathTemplate";
+
+	public static final String TLMODEL_PREFIX = "org.opentravel.schemacompiler.";
 
     protected static final String NAME_FILE_PATTERN = "[A-Za-z][A-Za-z0-9/\\.\\-_]*";
     protected static final String NAME_XML_PATTERN = "(?:[A-Za-z_][A-Za-z0-9\\.\\-_:#]*)?";
@@ -207,6 +212,18 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
     }
 
     /**
+     * Returns an entry from the validation context cache, or null if an entry with the specified
+     * key has not been defined.
+     * 
+     * @param cacheKey  the key for the validation cache entry to return
+     * @param entryType  the type of the entry to be created if it does not yet exist
+     * @return E
+     */
+    protected <E> E getContextCacheEntry(String cacheKey, Class<E> entryType) {
+        return (context == null) ? null : context.getContextCacheEntry(cacheKey, entryType);
+    }
+
+    /**
      * Assigns a key/value entry to the validation context cache.
      * 
      * @param cacheKey
@@ -269,11 +286,9 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
      */
     protected void checkEmptyValueType(TLExampleOwner exampleOwner, NamedEntity assignedType,
             String propertyName, ValidationBuilder<?> builder) {
-        if ((exampleOwner != null) && !exampleOwner.getExamples().isEmpty()) {
-            if (ValidatorUtils.isEmptyValueType(assignedType)) {
-                builder.addFinding(FindingType.WARNING, propertyName,
-                        WARNING_EXAMPLE_FOR_EMPTY_TYPE);
-            }
+        if ((exampleOwner != null) && !exampleOwner.getExamples().isEmpty()
+        			&& ValidatorUtils.isEmptyValueType(assignedType)) {
+            builder.addFinding(FindingType.WARNING, propertyName, WARNING_EXAMPLE_FOR_EMPTY_TYPE);
         }
     }
 
@@ -303,49 +318,47 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
      * @return V
      */
     @SuppressWarnings("unchecked")
-    protected <V extends Versioned> V getExtendedVersion(V versionedEntity) {
-        V candidateVersion = null;
-        V extendedVersion = null;
-
-        // Find the entity that is extended by the one passed to this method
-        if (versionedEntity instanceof TLExtensionOwner) {
-            TLExtension extension = ((TLExtensionOwner) versionedEntity).getExtension();
-            NamedEntity extendedEntity = (extension == null) ? null : extension.getExtendsEntity();
-
-            if ((extendedEntity != null)
-                    && versionedEntity.getClass().equals(extendedEntity.getClass())) {
-                candidateVersion = (V) extendedEntity;
-            }
-        } else if (versionedEntity instanceof TLValueWithAttributes) {
-            TLValueWithAttributes versionedVWA = (TLValueWithAttributes) versionedEntity;
-
-            if (versionedVWA.getParentType() instanceof TLValueWithAttributes) {
-                candidateVersion = (V) versionedVWA.getParentType();
-            }
-        } else if (versionedEntity instanceof TLSimple) {
-        	TLAttributeType parentType = ((TLSimple) versionedEntity).getParentType();
-        	
-        	if (parentType instanceof Versioned) {
-                candidateVersion = (V) parentType;
-        	}
-        }
-
-        // Determine whether the candidate is a version or non-version extension
-        if ((versionedEntity != null) && (candidateVersion != null)) {
-            if (versionedEntity.getBaseNamespace().equals(candidateVersion.getBaseNamespace())) {
-                String versionedEntityName = (versionedEntity instanceof TLOperation) ?
-                		((TLOperation) versionedEntity).getName() : versionedEntity.getLocalName();
-                String candidateName = (candidateVersion instanceof TLOperation) ?
-                		((TLOperation) candidateVersion).getName() : candidateVersion.getLocalName();
-
-                if (versionedEntityName.equals(candidateName)) {
-                    extendedVersion = candidateVersion;
-                }
-            }
-        }
-        return extendedVersion;
-    }
-
+	protected <V extends Versioned> V getExtendedVersion(V versionedEntity) {
+		V candidateVersion = null;
+		V extendedVersion = null;
+		
+		// Find the entity that is extended by the one passed to this method
+		if (versionedEntity instanceof TLExtensionOwner) {
+			TLExtension extension = ((TLExtensionOwner) versionedEntity).getExtension();
+			NamedEntity extendedEntity = (extension == null) ? null : extension.getExtendsEntity();
+			
+			if ((extendedEntity != null) && versionedEntity.getClass().equals(extendedEntity.getClass())) {
+				candidateVersion = (V) extendedEntity;
+			}
+		} else if (versionedEntity instanceof TLValueWithAttributes) {
+			TLValueWithAttributes versionedVWA = (TLValueWithAttributes) versionedEntity;
+			
+			if (versionedVWA.getParentType() instanceof TLValueWithAttributes) {
+				candidateVersion = (V) versionedVWA.getParentType();
+			}
+		} else if (versionedEntity instanceof TLSimple) {
+			TLAttributeType parentType = ((TLSimple) versionedEntity).getParentType();
+			
+			if (parentType instanceof Versioned) {
+				candidateVersion = (V) parentType;
+			}
+		}
+		
+		// Determine whether the candidate is a version or non-version extension
+		if ((versionedEntity != null) && (candidateVersion != null)
+				&& versionedEntity.getBaseNamespace().equals(candidateVersion.getBaseNamespace())) {
+			String versionedEntityName = (versionedEntity instanceof TLOperation)
+					? ((TLOperation) versionedEntity).getName() : versionedEntity.getLocalName();
+			String candidateName = (candidateVersion instanceof TLOperation)
+					? ((TLOperation) candidateVersion).getName() : candidateVersion.getLocalName();
+			
+			if (versionedEntityName.equals(candidateName)) {
+				extendedVersion = candidateVersion;
+			}
+		}
+		return extendedVersion;
+	}
+	
     /**
      * If the given entity is a minor version extension of another entity in the same base
      * namespace, this method will return true if the extended entity is in a later version than the
@@ -568,32 +581,31 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
             		getMajorVersionFamily((Versioned) entity) : new ArrayList<>();
 
             for (NamedEntity matchingEntity : matchingEntities) {
-                if (matchingEntity == entity) {
-                    continue;
-                }
-                NamedEntity conflictingEntity = null;
+                if (matchingEntity != entity) {
+                    NamedEntity conflictingEntity = null;
 
-                if ((entity instanceof Versioned) && (matchingEntity instanceof Versioned)
-                        && entity.getClass().equals(matchingEntity.getClass())) {
-                    // If both entities are versioned, we do NOT have a naming conflict if they are
-                    // members of the same family
-                    if (!versionFamily.contains(matchingEntity)) {
+                    if ((entity instanceof Versioned) && (matchingEntity instanceof Versioned)
+                            && entity.getClass().equals(matchingEntity.getClass())) {
+                        // If both entities are versioned, we do NOT have a naming conflict if they are
+                        // members of the same family
+                        if (!versionFamily.contains(matchingEntity)) {
+                            conflictingEntity = matchingEntity;
+                        }
+                    } else {
+                        // If one or both of the entities is not versioned, we have a naming conflict
                         conflictingEntity = matchingEntity;
                     }
-                } else {
-                    // If one or both of the entities is not versioned, we have a naming conflict
-                    conflictingEntity = matchingEntity;
-                }
 
-                if (conflictingEntity != null) {
-                    // NOTE: This validation check only reports errors for duplicate names in
-                    // DIFFERENT namespaces of a major-version chain. Duplicate symbols that occur
-                	// in the same namespace are reported by different validation checks.
-                    if (!conflictingEntity.getNamespace().equals(entity.getNamespace())) {
-                        builder.addFinding(FindingType.ERROR, "name",
-                                ERROR_DUPLICATE_MAJOR_VERSION_SYMBOL, localName);
+                    if (conflictingEntity != null) {
+                        // NOTE: This validation check only reports errors for duplicate names in
+                        // DIFFERENT namespaces of a major-version chain. Duplicate symbols that occur
+                    		// in the same namespace are reported by different validation checks.
+                        if (!conflictingEntity.getNamespace().equals(entity.getNamespace())) {
+                            builder.addFinding(FindingType.ERROR, "name",
+                                    ERROR_DUPLICATE_MAJOR_VERSION_SYMBOL, localName);
+                        }
+                        break;
                     }
-                    break;
                 }
             }
         }
@@ -643,31 +655,33 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
      */
     @SuppressWarnings("unchecked")
     private String getMajorVersionNamespace(TLLibrary library) {
-        Map<String, String> majorVersionNamespaceMappings = (Map<String, String>) getContextCacheEntry("majorVersionNamespaceMappings");
-
-        if (majorVersionNamespaceMappings == null) {
-            majorVersionNamespaceMappings = new HashMap<>();
-            setContextCacheEntry("majorVersionNamespaceMappings", majorVersionNamespaceMappings);
-        }
+        Map<String, String> majorVersionNamespaceMappings = (Map<String, String>) getContextCacheEntry("majorVersionNamespaceMappings", HashMap.class);
         String libraryNamespace = library.getNamespace();
-        String majorVersionNamespace = majorVersionNamespaceMappings.get(libraryNamespace);
-
-        if (majorVersionNamespace == null) {
-            try {
-                majorVersionNamespace = new MinorVersionHelper().getMajorVersionNamespace( library );
-
-            } catch (VersionSchemeException e) {
-                // Use default naming in case of a URI that does not match the default version
-                // scheme
-                majorVersionNamespace = libraryNamespace;
-
-            } finally {
-                majorVersionNamespaceMappings.put(libraryNamespace, majorVersionNamespace);
-            }
-        }
-        return majorVersionNamespace;
+        
+        majorVersionNamespaceMappings.computeIfAbsent( libraryNamespace, ns -> majorVersionNamespaceMappings.put( ns, getMajorVersionNS( library ) ) );
+        return majorVersionNamespaceMappings.get(libraryNamespace);
     }
-    
+	
+    /**
+     * Returns the major version namespace string for the given library.
+     * 
+     * @param library  the library for which to compute the namespace string
+     * @return String
+     */
+	private String getMajorVersionNS(TLLibrary library) {
+		String majorVersionNS;
+		
+        try {
+        		majorVersionNS = new MinorVersionHelper().getMajorVersionNamespace( library );
+
+        } catch (VersionSchemeException e) {
+            // Use default naming in case of a URI that does not match the default version
+            // scheme
+        		majorVersionNS = library.getNamespace();
+        }
+        return majorVersionNS;
+	}
+	
     /**
      * Validates all aspects of the given path template, including path parameters that must be declared
      * in the given parameter group.
@@ -676,31 +690,31 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
      * @param paramGroup  the parameter group that declares the path parameters of the template
      * @param builder  the validation builder that will receive any validation errors that are detected
      */
-    protected void validatePathTemplate(String pathTemplate, TLParamGroup paramGroup, ValidationBuilder<?> builder) {
-    	if ((pathTemplate == null) || (pathTemplate.length() == 0)) {
-    		return; // Do not validate if required information is not provided
-    	}
-    	ResourceUrlValidator urlValidator = new ResourceUrlValidator( true );
-    	
-    	if ((pathTemplate != null) && (pathTemplate.length() > 0)) {
-    		if (urlValidator.isValidPath( pathTemplate )) {
-    			List<String> missingParams = getMissingPathParams( pathTemplate, paramGroup, urlValidator );
-    			List<String> unusedParams = getUnusedPathParams( paramGroup, pathTemplate, urlValidator );
-    			
+	protected void validatePathTemplate(String pathTemplate, TLParamGroup paramGroup, ValidationBuilder<?> builder) {
+		if ((pathTemplate == null) || (pathTemplate.length() == 0)) {
+			return; // Do not validate if required information is not provided
+		}
+		ResourceUrlValidator urlValidator = new ResourceUrlValidator(true);
+		
+		if (pathTemplate.length() > 0) {
+			if (urlValidator.isValidPath(pathTemplate)) {
+				List<String> missingParams = getMissingPathParams(pathTemplate, paramGroup, urlValidator);
+				List<String> unusedParams = getUnusedPathParams(paramGroup, pathTemplate, urlValidator);
+				
 				if ((paramGroup != null) && !missingParams.isEmpty()) {
-	            	builder.addFinding( FindingType.ERROR, "pathTemplate", ERROR_UNDECLARED_PATH_PARAM,
-	            			toCsvString( missingParams ) );
+					builder.addFinding(FindingType.ERROR, PATH_TEMPLATE, ERROR_UNDECLARED_PATH_PARAM,
+							toCsvString(missingParams));
 				}
 				if (!unusedParams.isEmpty()) {
-	            	builder.addFinding( FindingType.ERROR, "pathTemplate", ERROR_UNUSED_PATH_PARAM,
-	            			toCsvString( unusedParams ) );
+					builder.addFinding(FindingType.ERROR, PATH_TEMPLATE, ERROR_UNUSED_PATH_PARAM,
+							toCsvString(unusedParams));
 				}
-    			
-    		} else {
-            	builder.addFinding( FindingType.ERROR, "pathTemplate", ERROR_INVALID_PATH_TEMPLATE, pathTemplate );
-    		}
-    	}
-    }
+				
+			} else {
+				builder.addFinding(FindingType.ERROR, PATH_TEMPLATE, ERROR_INVALID_PATH_TEMPLATE, pathTemplate);
+			}
+		}
+	}
     
 	/**
 	 * Returns the list of parameters from the given path template that do not have a corresponding

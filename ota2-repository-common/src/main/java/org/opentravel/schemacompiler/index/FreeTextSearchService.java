@@ -477,7 +477,7 @@ public abstract class FreeTextSearchService implements IndexingTerms {
 					searchResults.add( new EntitySearchResult( doc, this ) );
 				}
 			}
-	    	return searchResults;
+	    		return searchResults;
 	    	
 		} catch (ParseException e) {
 			throw new RepositoryException("Error in free-text search query.", e);
@@ -1142,18 +1142,16 @@ public abstract class FreeTextSearchService implements IndexingTerms {
     		String libraryName = doc.get( LIBRARY_NAME_FIELD );
     		String version = doc.get( VERSION_FIELD );
     		String resultKey = baseNamespace + ":" + libraryName + ":" + version;
-    		SubscriptionSearchResult searchResult = resultMap.get( resultKey );
     		
-    		if (searchResult == null) {
+    		resultMap.computeIfAbsent( resultKey, k -> {
     			SubscriptionTarget subscriptionTarget = new SubscriptionTarget();
     			
         		subscriptionTarget.setBaseNamespace( doc.get( BASE_NAMESPACE_FIELD ) );
         		subscriptionTarget.setLibraryName( doc.get( LIBRARY_NAME_FIELD ) );
         		subscriptionTarget.setVersion( doc.get( VERSION_FIELD ) );
-        		searchResult = new SubscriptionSearchResult( subscriptionTarget, userId );
-        		resultMap.put( resultKey, searchResult );
-    		}
-    		searchResult.getEventTypes().add( eventType );
+    			return resultMap.put( k, new SubscriptionSearchResult( subscriptionTarget, userId ) );
+    		} );
+    		resultMap.get( resultKey ).getEventTypes().add( eventType );
     	}
     	searchResults.addAll( resultMap.values() );
     	Collections.sort( searchResults );

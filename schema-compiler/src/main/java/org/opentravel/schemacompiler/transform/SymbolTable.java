@@ -180,23 +180,13 @@ public final class SymbolTable {
         if ((namespace == null)
                 || AnonymousEntityFilter.ANONYMOUS_PSEUDO_NAMESPACE.equals(namespace)) {
             // Add the entity to the collection of anonymous (no-namespace) names
-            List<Object> entityList = anonymousEntities.get(localName);
-
-            if (entityList == null) {
-                entityList = new ArrayList<>();
-                anonymousEntities.put(localName, entityList);
-            }
-            entityList.add(entity);
+            anonymousEntities.computeIfAbsent( localName, n -> anonymousEntities.put( n, new ArrayList<>() ) );
+            anonymousEntities.get(localName).add( entity );
 
         } else {
             // Add the entity to the symbol table maps
-            Map<String, Object> localSymbols = namespaceSymbols.get(namespace);
-
-            if (localSymbols == null) {
-                localSymbols = new HashMap<>();
-                namespaceSymbols.put(namespace, localSymbols);
-            }
-            localSymbols.put(localName, entity);
+            namespaceSymbols.computeIfAbsent( namespace, ns -> namespaceSymbols.put( ns, new HashMap<>() ) );
+            namespaceSymbols.get(namespace).put( localName, entity );
         }
 
         // Search for any entities that are derived from the concrete entity we just registered
@@ -242,6 +232,7 @@ public final class SymbolTable {
     /**
      * Displays the contents of this symbol table to standard output (debugging purposes only).
      */
+    @SuppressWarnings("squid:S106") // Suppress Sonar finding since this method is used for console debugging purposes
     public void displayTable() {
         System.out.println("Symbol Table:");
         

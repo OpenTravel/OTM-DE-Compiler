@@ -70,12 +70,9 @@ public class MapLibraryNamespaceResolver extends DefaultLibraryNamespaceResolver
         if (libraryUrl == null) {
             throw new NullPointerException("Library URL cannot be null.");
         }
+        namespaceMappings.computeIfAbsent( libraryNamespace, ns -> namespaceMappings.put( ns, new ArrayList<>() ) );
         List<URL> urlList = namespaceMappings.get(libraryNamespace);
 
-        if (urlList == null) {
-            urlList = new ArrayList<>();
-            namespaceMappings.put(libraryNamespace, urlList);
-        }
         if (!urlList.contains(libraryUrl)) {
             urlList.add(libraryUrl);
         }

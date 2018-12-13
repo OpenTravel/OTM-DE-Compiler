@@ -1180,13 +1180,8 @@ public abstract class ValidationBuilder<T extends ValidationBuilder<T>> {
      */
     protected Pattern getPattern(String regex) {
         synchronized (regexCache) {
-            Pattern pattern = regexCache.get(regex);
-
-            if (pattern == null) {
-                pattern = Pattern.compile(regex);
-                regexCache.put(regex, pattern);
-            }
-            return pattern;
+            regexCache.computeIfAbsent( regex, r -> regexCache.put( r, Pattern.compile( r ) ) );
+            return regexCache.get(regex);
         }
     }
 

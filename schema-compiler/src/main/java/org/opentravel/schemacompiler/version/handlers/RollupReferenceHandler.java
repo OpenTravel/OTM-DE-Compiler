@@ -249,7 +249,7 @@ public class RollupReferenceHandler {
         	TLParameter parameter = (TLParameter) entity;
             
             if ((parameter.getFieldRef() != null)
-                    && rollupReferences.isRollupLibrary( ((LibraryElement) parameter.getFieldRef()).getOwningLibrary() )) {
+                    && rollupReferences.isRollupLibrary( parameter.getFieldRef().getOwningLibrary() )) {
                 rollupReferences.addReference( parameter, (TLModelElement) parameter.getFieldRef() );
             }
             
@@ -341,17 +341,12 @@ public class RollupReferenceHandler {
          * @param referencingEntity  the entity that holds the reference
          * @param referencedEntity  the entity that is being referenced
          */
-        public void addReference(LibraryElement referencingEntity, Object referencedEntity) {
-        	if (referencedEntity != null) {
-            	List<Object> referencedEntities = rollupReferences.get(referencingEntity);
-            	
-            	if (referencedEntities == null) {
-            		referencedEntities = new ArrayList<>();
-            		rollupReferences.put(referencingEntity, referencedEntities);
-            	}
-            	referencedEntities.add(referencedEntity);
-        	}
-        }
+		public void addReference(LibraryElement referencingEntity, Object referencedEntity) {
+			if (referencedEntity != null) {
+				rollupReferences.computeIfAbsent(referencingEntity, e -> rollupReferences.put(e, new ArrayList<>()));
+				rollupReferences.get(referencingEntity).add(referencedEntity);
+			}
+		}
         
         /**
          * Returns true if the given entity has rollup references registered.

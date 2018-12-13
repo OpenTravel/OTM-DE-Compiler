@@ -232,9 +232,8 @@ public abstract class AbstractLibraryModuleLoader implements LibraryModuleLoader
                 for (int i = 0; i < getNamespaceCount(); i++) {
                     String namespaceURI = getNamespaceURI(i);
                     String namespacePrefix = getNamespacePrefix(i);
-                    if (namespacePrefixMappings.get(namespaceURI) == null) {
-                        namespacePrefixMappings.put(namespaceURI, namespacePrefix);
-                    }
+                    
+                    namespacePrefixMappings.putIfAbsent( namespaceURI, namespacePrefix );
                 }
             }
             return nextResult;

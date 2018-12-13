@@ -74,6 +74,27 @@ public class TLModelValidationContext implements ValidationContext {
     }
 
     /**
+     * Returns an entry from the validation context cache, or null if an entry with the specified
+     * key has not been defined.
+     * 
+     * @param cacheKey  the key for the validation cache entry to return
+     * @param entryType  the type of the entry to be created if it does not yet exist
+     * @return Object
+     */
+    @SuppressWarnings("unchecked")
+	public <T> T getContextCacheEntry(String cacheKey, Class<T> entryType) {
+    		validationCache.computeIfAbsent( cacheKey, k -> {
+			try {
+				return validationCache.put( k, entryType.newInstance() );
+				
+			} catch (InstantiationException | IllegalAccessException e) {
+				return null;
+			}
+    		} );
+        return (T) validationCache.get( cacheKey );
+    }
+
+    /**
      * Assigns a key/value entry to the validation context cache.
      * 
      * @param cacheKey

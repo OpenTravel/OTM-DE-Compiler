@@ -113,11 +113,10 @@ public class DefaultAuthorizationProvider implements AuthorizationProvider {
                     grantedPermission = RepositoryPermission.READ_FINAL;
                 }
 
-            } else if (deniedPermission == RepositoryPermission.WRITE) {
+            } else if ((deniedPermission == RepositoryPermission.WRITE)
+            		&& (grantedPermission == RepositoryPermission.WRITE)) {
                 // Denying Write means the maximum granted permission is Read-Draft
-                if (grantedPermission == RepositoryPermission.WRITE) {
-                    grantedPermission = RepositoryPermission.READ_DRAFT;
-                }
+                grantedPermission = RepositoryPermission.READ_DRAFT;
             }
         }
 
@@ -137,9 +136,8 @@ public class DefaultAuthorizationProvider implements AuthorizationProvider {
 
         if (repositoryLocation.isDirectory()) {
             for (File file : repositoryLocation.listFiles()) {
-                if (result = hasAuthorizationFile(file)) {
-                    break;
-                }
+            		result = hasAuthorizationFile(file);
+           		if (result) break;
             }
 
         } else if (repositoryLocation.getName().equals(SecurityFileUtils.AUTHORIZATION_FILENAME)) {
@@ -220,17 +218,30 @@ public class DefaultAuthorizationProvider implements AuthorizationProvider {
      * @param namespace
      *            the namespace for which to returnt he authorization resource
      * @return AuthorizationResource
-     * @throws RepositorySecurityException
-     *             thrown if the authorization resource file cannot be identified
      */
-    private synchronized AuthorizationResource getAuthorizationResource(String namespace)
-            throws RepositorySecurityException {
-        AuthorizationResource resource = authorizationCache.get(namespace);
-
-        if (resource == null) {
-            resource = new AuthorizationResource(fileUtils, namespace);
-            authorizationCache.put(namespace, resource);
-        }
+    private synchronized AuthorizationResource getAuthorizationResource(String namespace) {
+        authorizationCache.computeIfAbsent(namespace,
+        		ns -> authorizationCache.put( ns, newAuthResource( fileUtils, ns) ) );
+        return authorizationCache.get(namespace);
+    }
+    
+    /**
+     * Returns a new <code>AuthorizationResource</code>.  If an error occurs while
+     * creating it, a runtime exception will be thrown.
+     * 
+     * @param fileUtils  the file utilities to be used by the new resource
+     * @param namespace  the namespace to which the authorization resource applies
+     * @return AuthorizationResource
+     */
+    private AuthorizationResource newAuthResource(SecurityFileUtils fileUtils, String namespace) {
+        AuthorizationResource resource = null;
+        
+        try {
+			resource = new AuthorizationResource(fileUtils, namespace);
+			
+		} catch (RepositorySecurityException e) {
+			log.error("Error creating authorization resource", e);
+		}
         return resource;
     }
 
