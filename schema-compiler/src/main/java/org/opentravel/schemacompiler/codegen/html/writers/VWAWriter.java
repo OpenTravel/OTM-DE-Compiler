@@ -17,16 +17,15 @@ package org.opentravel.schemacompiler.codegen.html.writers;
 
 import java.io.IOException;
 
-import org.opentravel.schemacompiler.model.TLDocumentation;
-
+import org.opentravel.schemacompiler.codegen.html.Content;
 import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.builders.VWADocumentationBuilder;
-import org.opentravel.schemacompiler.codegen.html.Content;
 import org.opentravel.schemacompiler.codegen.html.writers.info.DocumentationInfoWriter;
 import org.opentravel.schemacompiler.codegen.html.writers.info.ExampleInfoWriter;
 import org.opentravel.schemacompiler.codegen.html.writers.info.InfoWriter;
 import org.opentravel.schemacompiler.codegen.html.writers.info.VWAAttributeInfoWriter;
 import org.opentravel.schemacompiler.codegen.html.writers.info.VWAIndicatorInfoWriter;
+import org.opentravel.schemacompiler.model.TLDocumentation;
 
 public class VWAWriter extends 
 	NamedEntityWriter<VWADocumentationBuilder> implements
@@ -39,7 +38,7 @@ public class VWAWriter extends
 	 */
 	public VWAWriter(VWADocumentationBuilder classDoc,
 			DocumentationBuilder prev,
-			DocumentationBuilder next) throws Exception {
+			DocumentationBuilder next) throws IOException {
 		super(classDoc, prev, next);
 	}
 	

@@ -54,8 +54,7 @@ public class BusinessObjectTransformer extends
         TLBusinessObject businessObject = new TLBusinessObject();
 
         businessObject.setName(trimString(source.getName()));
-        businessObject.setNotExtendable((source.isNotExtendable() == null) ? false : source
-                .isNotExtendable());
+        businessObject.setNotExtendable((source.isNotExtendable() != null) && source.isNotExtendable());
 
         if (source.getDocumentation() != null) {
             ObjectTransformer<Documentation, TLDocumentation, DefaultTransformerContext> docTransformer = getTransformerFactory()

@@ -15,15 +15,16 @@
  */
 package org.opentravel.schemacompiler.codegen.html.builders;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opentravel.schemacompiler.codegen.CodeGenerationException;
+import org.opentravel.schemacompiler.codegen.html.Content;
+import org.opentravel.schemacompiler.codegen.html.writers.EnumerationWriter;
 import org.opentravel.schemacompiler.model.TLAbstractEnumeration;
 import org.opentravel.schemacompiler.model.TLEnumValue;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
-
-import org.opentravel.schemacompiler.codegen.html.Content;
-import org.opentravel.schemacompiler.codegen.html.writers.EnumerationWriter;
 
 /**
  * @author Eric.Bronson
@@ -64,26 +65,31 @@ public class EnumerationDocumentationBuilder extends
 	}
 
 	@Override
-	public void build() throws Exception {
-		EnumerationWriter writer = new EnumerationWriter(this, prev, next);
-		Content contentTree = writer.getHeader();
-		Content classContentTree = writer.getContentHeader();
-		Content tree = writer.getMemberTree(classContentTree);
-		
-		Content classInfoTree = writer.getMemberInfoItemTree();
-		writer.addDocumentationInfo(classInfoTree);
-		tree.addContent(classInfoTree);
-		
-		classInfoTree = writer.getMemberInfoItemTree();
-		writer.addValueInfo(classInfoTree);
-		tree.addContent(classInfoTree);
-		
-		Content desc = writer.getMemberInfoTree(tree);
-		classContentTree.addContent(desc);
-		contentTree.addContent(classContentTree);
-		writer.addFooter(contentTree);
-		writer.printDocument(contentTree);
-		writer.close();
+	public void build() throws CodeGenerationException {
+		try {
+			EnumerationWriter writer = new EnumerationWriter(this, prev, next);
+			Content contentTree = writer.getHeader();
+			Content classContentTree = writer.getContentHeader();
+			Content tree = writer.getMemberTree(classContentTree);
+			
+			Content classInfoTree = writer.getMemberInfoItemTree();
+			writer.addDocumentationInfo(classInfoTree);
+			tree.addContent(classInfoTree);
+			
+			classInfoTree = writer.getMemberInfoItemTree();
+			writer.addValueInfo(classInfoTree);
+			tree.addContent(classInfoTree);
+			
+			Content desc = writer.getMemberInfoTree(tree);
+			classContentTree.addContent(desc);
+			contentTree.addContent(classContentTree);
+			writer.addFooter(contentTree);
+			writer.printDocument(contentTree);
+			writer.close();
+			
+		} catch (IOException e) {
+			throw new CodeGenerationException("Error creating doclet writer instance", e);
+		}
 	}
 
 	/**

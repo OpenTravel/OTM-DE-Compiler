@@ -15,6 +15,7 @@
  */
 package org.opentravel.schemacompiler.codegen.html.builders;
 
+import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.model.TLRoleEnumeration;
 
 /**
@@ -57,7 +58,7 @@ public class RoleEnumerationDocumentationBuilder implements DocumentationBuilder
 	}
 
 	@Override
-	public void build() throws Exception {
+	public void build() throws CodeGenerationException {
 		// No action required
 	}
 

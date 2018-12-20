@@ -33,7 +33,8 @@ public class ModelIntegrityChecker extends AbstractModelIntegrityChecker {
     /**
      * @see org.opentravel.schemacompiler.ic.AbstractModelIntegrityChecker#getListeners()
      */
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     protected List<ModelEventListener<?, ?>> getListeners() {
         List<ModelEventListener<?,?>> listeners = new ArrayList<>();
 

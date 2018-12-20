@@ -197,8 +197,9 @@ public class TLChoiceObject extends TLComplexTypeBase implements TLFacetOwner, T
     /**
 	 * @see org.opentravel.schemacompiler.model.TLAliasOwner#getAliasListManager()
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
-	public ChildEntityListManager<TLAlias, ?> getAliasListManager() {
+	public ChildEntityListManager<TLAlias,TLAliasOwner> getAliasListManager() {
 		return aliasManager;
 	}
 

@@ -52,7 +52,7 @@ public class ByteChunk {
          * to ignore the parameters, and mutate the chunk if it wishes to implement its own
          * buffering.
          */
-        public int realReadBytes(byte cbuf[], int off, int len) throws IOException;
+        public int realReadBytes(byte[] cbuf, int off, int len) throws IOException;
     }
 
     /**
@@ -63,7 +63,7 @@ public class ByteChunk {
          * Send the bytes ( usually the internal conversion buffer ). Expect 8k output if the buffer
          * is full.
          */
-        public void realWriteBytes(byte cbuf[], int off, int len) throws IOException;
+        public void realWriteBytes(byte[] cbuf, int off, int len) throws IOException;
     }
 
     // --------------------
@@ -113,14 +113,13 @@ public class ByteChunk {
     }
 
     public boolean isNull() {
-        return !isSet; // buff==null;
+        return !isSet;
     }
 
     /**
      * Resets the message buff to an uninitialized state.
      */
     public void recycle() {
-        // buff = null;
         enc = null;
         start = 0;
         end = 0;
@@ -196,7 +195,7 @@ public class ByteChunk {
     }
 
     public int getOffset() {
-        return start;
+        return getStart();
     }
 
     public void setOffset(int off) {
@@ -280,7 +279,7 @@ public class ByteChunk {
     /**
      * Add data to the buffer
      */
-    public void append(byte src[], int off, int len) throws IOException {
+    public void append(byte[] src, int off, int len) throws IOException {
         // will grow, up to limit
         makeSpace(len);
 
@@ -368,7 +367,7 @@ public class ByteChunk {
 
     }
 
-    public int substract(byte src[], int off, int len) throws IOException {
+    public int substract(byte[] src, int off, int len) throws IOException {
 
         if ((end - start) == 0) {
             if (in == null)
@@ -444,7 +443,6 @@ public class ByteChunk {
 
         System.arraycopy(buff, start, tmp, 0, end - start);
         buff = tmp;
-        tmp = null;
         end = end - start;
         start = 0;
     }
@@ -453,9 +451,7 @@ public class ByteChunk {
 
     @Override
     public String toString() {
-        if (null == buff) {
-            return "";
-        } else if (end - start == 0) {
+        if ((null == buff) || (end - start == 0)) {
             return "";
         }
         return StringCache.toString(this);
@@ -474,8 +470,6 @@ public class ByteChunk {
              * Most overhead is in creating char[] and copying, the internal implementation of new
              * String() is very close to what we do. The decoder is nice for large buffers and if we
              * don't go to String ( so we can take advantage of reduced GC)
-             * 
-             * // Method is commented out, in: return B2CConverter.decodeString( enc );
              */
         } catch (java.io.UnsupportedEncodingException e) {
             // Use the platform encoding in that case; the usage of a bad
@@ -546,8 +540,8 @@ public class ByteChunk {
         return isEquivalent(bb.getBytes(), bb.getStart(), bb.getLength());
     }
 
-    public boolean isEquivalent(byte b2[], int off2, int len2) {
-        byte b1[] = buff;
+    public boolean isEquivalent(byte[] b2, int off2, int len2) {
+        byte[] b1 = buff;
         if (b1 == null && b2 == null)
             return true;
 
@@ -569,9 +563,9 @@ public class ByteChunk {
         return isEquivalent(cc.getChars(), cc.getStart(), cc.getLength());
     }
 
-    public boolean isEquivalent(char c2[], int off2, int len2) {
+    public boolean isEquivalent(char[] c2, int off2, int len2) {
         // Works only for enc compatible with ASCII/UTF !!!
-        byte b1[] = buff;
+        byte[] b1 = buff;
         if (c2 == null && b1 == null)
             return true;
 
@@ -684,9 +678,9 @@ public class ByteChunk {
         return hashBytesIC(buff, start, end - start);
     }
 
-    private static int hashBytes(byte buff[], int start, int bytesLen) {
+    private static int hashBytes(byte[] buff, int start, int bytesLen) {
         int max = start + bytesLen;
-        byte bb[] = buff;
+        byte[] bb = buff;
         int code = 0;
         for (int i = start; i < max; i++) {
             code = code * 37 + bb[i];
@@ -694,9 +688,9 @@ public class ByteChunk {
         return code;
     }
 
-    private static int hashBytesIC(byte bytes[], int start, int bytesLen) {
+    private static int hashBytesIC(byte[] bytes, int start, int bytesLen) {
         int max = start + bytesLen;
-        byte bb[] = bytes;
+        byte[] bb = bytes;
         int code = 0;
         for (int i = start; i < max; i++) {
             code = code * 37 + Ascii.toLower(bb[i]);
@@ -737,7 +731,7 @@ public class ByteChunk {
      * @return The position of the first instance of the character or -1 if the character is not
      *         found.
      */
-    public static int indexOf(byte bytes[], int start, int end, char c) {
+    public static int indexOf(byte[] bytes, int start, int end, char c) {
         int offset = start;
 
         while (offset < end) {
@@ -763,7 +757,7 @@ public class ByteChunk {
      *            The byte to search for
      * @return The position of the first instance of the byte or -1 if the byte is not found.
      */
-    public static int findByte(byte bytes[], int start, int end, byte b) {
+    public static int findByte(byte[] bytes, int start, int end, byte b) {
         int offset = start;
         while (offset < end) {
             if (bytes[offset] == b) {
@@ -788,7 +782,7 @@ public class ByteChunk {
      *            The array of bytes to search for
      * @return The position of the first instance of the byte or -1 if the byte is not found.
      */
-    public static int findBytes(byte bytes[], int start, int end, byte b[]) {
+    public static int findBytes(byte[] bytes, int start, int end, byte[] b) {
         int blen = b.length;
         int offset = start;
         while (offset < end) {
@@ -816,7 +810,7 @@ public class ByteChunk {
      * @return The position of the first instance a byte that is not in the list of bytes to search
      *         for or -1 if no such byte is found.
      */
-    public static int findNotBytes(byte bytes[], int start, int end, byte b[]) {
+    public static int findNotBytes(byte[] bytes, int start, int end, byte[] b) {
         int blen = b.length;
         int offset = start;
         boolean found;

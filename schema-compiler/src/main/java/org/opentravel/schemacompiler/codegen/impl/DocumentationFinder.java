@@ -18,14 +18,15 @@ package org.opentravel.schemacompiler.codegen.impl;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.opentravel.schemacompiler.model.ModelElement;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAbstractEnumeration;
 import org.opentravel.schemacompiler.model.TLAttribute;
-import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLComplexTypeBase;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLDocumentationItem;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
+import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLOperation;
@@ -35,6 +36,7 @@ import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
+import org.opentravel.schemacompiler.util.ClassSpecificFunction;
 
 /**
  * Locates an appropriate <code>TLDocumentation</code> instance for a model element.  If
@@ -45,6 +47,11 @@ import org.opentravel.schemacompiler.model.TLValueWithAttributes;
  * @author S. Livezey
  */
 public class DocumentationFinder {
+	
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private DocumentationFinder() {}
 	
 	/**
 	 * Returns an appropriate documentation item for the given entity.  If no documentation
@@ -82,6 +89,21 @@ public class DocumentationFinder {
         return deprecated;
 	}
 	
+    private static ClassSpecificFunction<TLDocumentationOwner> docOwnerFunction =
+    		new ClassSpecificFunction<TLDocumentationOwner>()
+    		.addFunction( TLSimple.class, e -> nextDocOwner( e.getParentType() ) )
+    		.addFunction( TLAbstractEnumeration.class, e -> nextDocOwner( e.getExtension() ) )
+    		.addFunction( TLValueWithAttributes.class, e -> nextDocOwner( e.getParentType() ) )
+    		.addFunction( TLComplexTypeBase.class, e -> nextDocOwner( e.getExtension() ) )
+    		.addFunction( TLOperation.class, e -> nextDocOwner( e.getExtension() ) )
+    		.addFunction( TLResource.class, DocumentationFinder::nextDocOwner )
+    		.addFunction( TLFacet.class, e -> nextDocOwner( e.getOwningEntity() ) )
+    		.addFunction( TLListFacet.class, e -> nextDocOwner( e.getItemFacet() ) )
+    		.addFunction( TLSimpleFacet.class, e -> nextDocOwner( e.getSimpleType() ) )
+    		.addFunction( TLAttribute.class, e -> nextDocOwner( e.getType() ) )
+    		.addFunction( TLProperty.class, e -> nextDocOwner( e.getType() ) )
+    		.addFunction( TLParameter.class, e -> nextDocOwner( e.getFieldRef() ) );
+    
 	/**
 	 * Recursive method used to search for documentation.  This method includes protection
 	 * from infinite loops due to circular references.
@@ -101,84 +123,8 @@ public class DocumentationFinder {
 		if (doc == null) {
 			TLDocumentationOwner nextEntity = null;
 			
-			if (entity instanceof TLSimple) {
-				TLAttributeType parentType = ((TLSimple) entity).getParentType();
-				
-				if (parentType instanceof TLDocumentationOwner) {
-					nextEntity = (TLDocumentationOwner) parentType;
-				}
-				
-			} else if (entity instanceof TLAbstractEnumeration) {
-				TLAbstractEnumeration enumeration = (TLAbstractEnumeration) entity;
-				
-				if (enumeration.getExtension() instanceof TLDocumentationOwner) {
-					nextEntity = (TLDocumentationOwner) enumeration.getExtension().getExtendsEntity();
-				}
-				
-			} else if (entity instanceof TLValueWithAttributes) {
-				TLAttributeType parentType = ((TLValueWithAttributes) entity).getParentType();
-				
-				if (parentType instanceof TLDocumentationOwner) {
-					nextEntity = (TLDocumentationOwner) parentType;
-				}
-				
-			} else if (entity instanceof TLComplexTypeBase) { // cores and BO's
-				TLComplexTypeBase coreOrBO = (TLComplexTypeBase) entity;
-				
-				if (coreOrBO.getExtension() instanceof TLDocumentationOwner) {
-					nextEntity = (TLDocumentationOwner) coreOrBO.getExtension().getExtendsEntity();
-				}
-				
-			} else if (entity instanceof TLOperation) {
-				TLOperation operation = (TLOperation) entity;
-				
-				if (operation.getExtension() instanceof TLDocumentationOwner) {
-					nextEntity = (TLDocumentationOwner) operation.getExtension().getExtendsEntity();
-				}
-				
-			} else if (entity instanceof TLResource) {
-				TLResource resource = (TLResource) entity;
-				
-				if (resource.getBusinessObjectRef() != null) {
-					nextEntity = resource.getBusinessObjectRef();
-					
-				} else if (resource.getExtension() instanceof TLDocumentationOwner) {
-					nextEntity = (TLDocumentationOwner) resource.getExtension().getExtendsEntity();
-				}
-				
-			} else if (entity instanceof TLFacet) {
-				nextEntity = (TLDocumentationOwner) ((TLFacet) entity).getOwningEntity();
-				
-			} else if (entity instanceof TLListFacet) {
-				nextEntity = (TLDocumentationOwner) ((TLListFacet) entity).getItemFacet();
-				
-			} else if (entity instanceof TLSimpleFacet) {
-				NamedEntity simpleType = ((TLSimpleFacet) entity).getSimpleType();
-				
-				if (simpleType instanceof TLDocumentationOwner) {
-					nextEntity = (TLDocumentationOwner) simpleType;
-				}
-				
-			} else if (entity instanceof TLAttribute) {
-				NamedEntity attrType = ((TLAttribute) entity).getType();
-				
-				if (attrType instanceof TLDocumentationOwner) {
-					nextEntity = (TLDocumentationOwner) attrType;
-				}
-				
-			} else if (entity instanceof TLProperty) {
-				NamedEntity elementType = ((TLProperty) entity).getType();
-				
-				if (elementType instanceof TLDocumentationOwner) {
-					nextEntity = (TLDocumentationOwner) elementType;
-				}
-				
-			} else if (entity instanceof TLParameter) {
-				TLParameter param = (TLParameter) entity;
-				
-				if (param.getFieldRef() instanceof TLDocumentationOwner) {
-					nextEntity = (TLDocumentationOwner) param.getFieldRef();
-				}
+			if (docOwnerFunction.canApply( doc )) {
+				nextEntity = docOwnerFunction.apply( doc );
 			}
 			
 			if (nextEntity != null) {
@@ -191,6 +137,38 @@ public class DocumentationFinder {
 			}
 		}
 		return doc;
+	}
+	
+	/**
+	 * Returns the next documentation owner in the navigation cycle.
+	 * 
+	 * @param candidate  the next candidate documentation owner to check
+	 * @return TLDocumentationOwner
+	 */
+	private static TLDocumentationOwner nextDocOwner(ModelElement candidate) {
+		TLDocumentationOwner nextOwner = null;
+		
+		if (candidate instanceof TLResource) {
+			TLResource resource = (TLResource) candidate;
+			
+			if (resource.getBusinessObjectRef() != null) {
+				nextOwner = resource.getBusinessObjectRef();
+				
+			} else {
+				nextOwner = nextDocOwner( resource.getExtension() );
+			}
+			
+		} else if (candidate instanceof TLExtension) {
+			TLExtension extension = (TLExtension) candidate;
+			
+			if (extension.getExtendsEntity() instanceof TLDocumentationOwner) {
+				nextOwner = (TLDocumentationOwner) extension.getExtendsEntity();
+			}
+			
+		} else if (candidate instanceof TLDocumentationOwner) {
+			nextOwner = (TLDocumentationOwner) candidate;
+		}
+		return nextOwner;
 	}
 	
 	/**

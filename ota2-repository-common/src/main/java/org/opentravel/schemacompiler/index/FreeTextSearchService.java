@@ -392,10 +392,11 @@ public abstract class FreeTextSearchService implements IndexingTerms {
      * @return List<SearchResult<?>>
      * @throws RepositoryException  thrown if an error occurs while performing the search
      */
-    public List<SearchResult<?>> search(String freeText, TLLibraryStatus includeStatus,
-    		boolean latestVersionsOnly, boolean resolveContent) throws RepositoryException {
-    	try {
-			Query keywordQuery = new QueryParser( KEYWORDS_FIELD, new StandardAnalyzer()).parse( freeText + "~" );
+	@SuppressWarnings("unchecked")
+	public <T> List<SearchResult<T>> search(String freeText, TLLibraryStatus includeStatus, boolean latestVersionsOnly,
+			boolean resolveContent) throws RepositoryException {
+		try {
+			Query keywordQuery = new QueryParser(KEYWORDS_FIELD, new StandardAnalyzer()).parse(freeText + "~");
 			BooleanQuery statusQuery = null;
 			Query latestVersionQuery = null;
 			
@@ -405,22 +406,26 @@ public abstract class FreeTextSearchService implements IndexingTerms {
 				
 				switch (includeStatus) {
 					case UNDER_REVIEW:
-						statusQuery.add( new BooleanClause( new TermQuery(
-								new Term( STATUS_FIELD, TLLibraryStatus.UNDER_REVIEW.toString() ) ), Occur.SHOULD ));
-						statusQuery.add( new BooleanClause( new TermQuery(
-								new Term( STATUS_FIELD, TLLibraryStatus.FINAL.toString() ) ), Occur.SHOULD ));
-						statusQuery.add( new BooleanClause( new TermQuery(
-								new Term( STATUS_FIELD, TLLibraryStatus.OBSOLETE.toString() ) ), Occur.SHOULD ));
+						statusQuery.add(new BooleanClause(
+								new TermQuery(new Term(STATUS_FIELD, TLLibraryStatus.UNDER_REVIEW.toString())),
+								Occur.SHOULD));
+						statusQuery.add(new BooleanClause(
+								new TermQuery(new Term(STATUS_FIELD, TLLibraryStatus.FINAL.toString())), Occur.SHOULD));
+						statusQuery.add(new BooleanClause(
+								new TermQuery(new Term(STATUS_FIELD, TLLibraryStatus.OBSOLETE.toString())),
+								Occur.SHOULD));
 						break;
 					case FINAL:
-						statusQuery.add( new BooleanClause( new TermQuery(
-								new Term( STATUS_FIELD, TLLibraryStatus.FINAL.toString() ) ), Occur.SHOULD ));
-						statusQuery.add( new BooleanClause( new TermQuery(
-								new Term( STATUS_FIELD, TLLibraryStatus.OBSOLETE.toString() ) ), Occur.SHOULD ));
+						statusQuery.add(new BooleanClause(
+								new TermQuery(new Term(STATUS_FIELD, TLLibraryStatus.FINAL.toString())), Occur.SHOULD));
+						statusQuery.add(new BooleanClause(
+								new TermQuery(new Term(STATUS_FIELD, TLLibraryStatus.OBSOLETE.toString())),
+								Occur.SHOULD));
 						break;
 					case OBSOLETE:
-						statusQuery.add( new BooleanClause( new TermQuery(
-								new Term( STATUS_FIELD, TLLibraryStatus.OBSOLETE.toString() ) ), Occur.SHOULD ));
+						statusQuery.add(new BooleanClause(
+								new TermQuery(new Term(STATUS_FIELD, TLLibraryStatus.OBSOLETE.toString())),
+								Occur.SHOULD));
 						break;
 					default:
 						break;
@@ -447,44 +452,44 @@ public abstract class FreeTextSearchService implements IndexingTerms {
 				} else {
 					fieldName = LATEST_VERSION_FIELD;
 				}
-				latestVersionQuery = new TermQuery( new Term( fieldName, "true" ) );
+				latestVersionQuery = new TermQuery(new Term(fieldName, "true"));
 			}
 			
 			// Assemble the master search query
 			BooleanQuery masterQuery = newSearchIndexQuery();
 			
-			masterQuery.add( new BooleanClause( keywordQuery, Occur.MUST ) );
+			masterQuery.add(new BooleanClause(keywordQuery, Occur.MUST));
 			
 			if (statusQuery != null) {
-				masterQuery.add( new BooleanClause( statusQuery, Occur.MUST ) );
+				masterQuery.add(new BooleanClause(statusQuery, Occur.MUST));
 			}
 			if (latestVersionQuery != null) {
-				masterQuery.add( new BooleanClause( latestVersionQuery, Occur.MUST ) );
+				masterQuery.add(new BooleanClause(latestVersionQuery, Occur.MUST));
 			}
 			
 			// Execute the query and assemble the search results
-			List<SearchResult<?>> searchResults = new ArrayList<>();
-			List<Document> queryResults = executeQuery( masterQuery, resolveContent ? null : nonContentAttrs );
+			List<SearchResult<T>> searchResults = new ArrayList<>();
+			List<Document> queryResults = executeQuery(masterQuery, resolveContent ? null : nonContentAttrs);
 			
 			for (Document doc : queryResults) {
-				if (TLLibrary.class.getName().equals( doc.get( ENTITY_TYPE_FIELD ) )) {
-					searchResults.add( new LibrarySearchResult( doc, repositoryManager, this ) );
+				if (TLLibrary.class.getName().equals(doc.get(ENTITY_TYPE_FIELD))) {
+					searchResults.add((SearchResult<T>) new LibrarySearchResult(doc, repositoryManager, this));
 					
-				} else if (Release.class.getName().equals( doc.get( ENTITY_TYPE_FIELD ) )) {
-					searchResults.add( new ReleaseSearchResult( doc, this ) );
+				} else if (Release.class.getName().equals(doc.get(ENTITY_TYPE_FIELD))) {
+					searchResults.add((SearchResult<T>) new ReleaseSearchResult(doc, this));
 					
 				} else {
-					searchResults.add( new EntitySearchResult( doc, this ) );
+					searchResults.add((SearchResult<T>) new EntitySearchResult(doc, this));
 				}
 			}
-	    		return searchResults;
-	    	
+			return searchResults;
+			
 		} catch (ParseException e) {
 			throw new RepositoryException("Error in free-text search query.", e);
 		}
-    }
-    
-    /**
+	}
+	
+	   /**
      * Returns the library with the specified search index ID.
      * 
      * @param searchIndexId  the search index ID of the library to retrieve

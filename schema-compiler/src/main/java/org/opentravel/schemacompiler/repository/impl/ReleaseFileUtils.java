@@ -26,6 +26,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
@@ -317,8 +318,9 @@ public class ReleaseFileUtils extends AbstractFileUtils {
     		referencedMembers.getReleaseMember().add( transformToJaxbReleaseMember( member ) );
     	}
     	
-    	for (String optionKey : optionProps.keySet()) {
-    		String optionValue = optionProps.get( optionKey );
+    	for (Entry<String,String> entry : optionProps.entrySet()) {
+    		String optionKey = entry.getKey();
+    		String optionValue = entry.getValue();
     		
     		if (optionValue != null) {
     			CompileOptionType jaxbOption = new CompileOptionType();

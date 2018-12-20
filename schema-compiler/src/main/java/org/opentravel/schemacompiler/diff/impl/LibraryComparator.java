@@ -178,14 +178,13 @@ public class LibraryComparator extends BaseComparator {
 		Map<String,NamedEntity> entityMap = new HashMap<>();
 		
 		for (NamedEntity entity : library.getNamedMembers()) {
-			if ((entity instanceof TLContextualFacet)
-					&& ((TLContextualFacet) entity).isLocalFacet()) {
-				continue; // skip local contextual facets
+			if (((entity instanceof TLContextualFacet)
+					&& ((TLContextualFacet) entity).isLocalFacet())
+					|| (entity instanceof TLService)) {
+				continue; // skip local contextual facets and services
 			}
-			if (entity instanceof TLService) {
-				continue; // services handled below this loop
-				
-			} else if (entity instanceof TLResource) {
+		
+			if (entity instanceof TLResource) {
 				TLResource resource = (TLResource) entity;
 				
 				for (TLActionFacet actionFacet : resource.getActionFacets()) {

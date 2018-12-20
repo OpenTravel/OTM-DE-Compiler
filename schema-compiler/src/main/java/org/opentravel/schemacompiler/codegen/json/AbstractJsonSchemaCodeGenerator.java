@@ -111,50 +111,47 @@ public abstract class AbstractJsonSchemaCodeGenerator<S extends TLModelElement> 
      * @param context  the code generation context
      * @throws CodeGenerationException  thrown if one or more of the files cannot be copied
      */
-    protected void copyCompileTimeDependencies(CodeGenerationContext context)
-            throws CodeGenerationException {
-        try {
-            for (SchemaDeclaration schemaDeclaration : getCompileTimeDependencies()) {
-            	String sdFilename = schemaDeclaration.getFilename(CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT);
-            	
-                if (schemaDeclaration == SchemaDeclarations.SCHEMA_FOR_SCHEMAS) {
-                    continue;
-                }
-                if ((sdFilename == null) || !sdFilename.endsWith(".schema.json")) {
-                    continue;
-                }
-                File outputFolder = getOutputFolder(context, null);
-                String builtInFolder = getBuiltInSchemaOutputLocation(context);
-
-                if (builtInFolder != null) {
-                    outputFolder = new File(outputFolder, builtInFolder);
-                    if (!outputFolder.exists())
-                        outputFolder.mkdirs();
-                }
-
-                // Copy the contents of the file to the built-in folder location
-                File outputFile = new File(outputFolder, sdFilename);
-
-                if (!outputFile.exists()) {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(
-                            schemaDeclaration.getContent(CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT)));
-                    
-                    try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {
-                        String line = null;
-
-                        while ((line = reader.readLine()) != null) {
-                            writer.write(line);
-                            writer.write(LINE_SEPARATOR);
-                        }
-                    }
-                    reader.close();
-                }
-                addGeneratedFile(outputFile); // count dependency as generated - even if it already existed
-            }
-        } catch (IOException e) {
-            throw new CodeGenerationException(e);
-        }
-    }
+	protected void copyCompileTimeDependencies(CodeGenerationContext context) throws CodeGenerationException {
+		try {
+			for (SchemaDeclaration schemaDeclaration : getCompileTimeDependencies()) {
+				String sdFilename = schemaDeclaration.getFilename(CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT);
+				
+				if ((schemaDeclaration == SchemaDeclarations.SCHEMA_FOR_SCHEMAS) || (sdFilename == null)
+						|| !sdFilename.endsWith(".schema.json")) {
+					continue;
+				}
+				File outputFolder = getOutputFolder(context, null);
+				String builtInFolder = getBuiltInSchemaOutputLocation(context);
+				
+				if (builtInFolder != null) {
+					outputFolder = new File(outputFolder, builtInFolder);
+					if (!outputFolder.exists())
+						outputFolder.mkdirs();
+				}
+				
+				// Copy the contents of the file to the built-in folder location
+				File outputFile = new File(outputFolder, sdFilename);
+				
+				if (!outputFile.exists()) {
+					BufferedReader reader = new BufferedReader(new InputStreamReader(
+							schemaDeclaration.getContent(CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT)));
+					
+					try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {
+						String line = null;
+						
+						while ((line = reader.readLine()) != null) {
+							writer.write(line);
+							writer.write(LINE_SEPARATOR);
+						}
+					}
+					reader.close();
+				}
+				addGeneratedFile(outputFile); // count dependency as generated - even if it already existed
+			}
+		} catch (IOException e) {
+			throw new CodeGenerationException(e);
+		}
+	}
     
     /**
      * Performs the translation from meta-model element to a JSON schema object that will be used to

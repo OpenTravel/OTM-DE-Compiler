@@ -224,15 +224,19 @@ public class TLContextualFacet extends TLFacet implements LibraryMember, TLFacet
 
 	/**
 	 * @see org.opentravel.schemacompiler.model.TLFacet#getLabel()
+	 * 
+	 * @deprecated  use {@link #getName()} instead
 	 */
 	@Deprecated
 	@Override
 	public String getLabel() {
-		return name;
+		return getName();
 	}
 
 	/**
 	 * @see org.opentravel.schemacompiler.model.TLFacet#setLabel(java.lang.String)
+	 * 
+	 * @deprecated  use {@link #setName(String)} instead
 	 */
 	@Deprecated
 	@Override
@@ -295,7 +299,7 @@ public class TLContextualFacet extends TLFacet implements LibraryMember, TLFacet
      * @return TLContextualFacet
      */
     public TLContextualFacet getChildFacet(String name) {
-        return (TLContextualFacet) childFacetManager.getChild( name );
+        return childFacetManager.getChild( name );
     }
 
     /**

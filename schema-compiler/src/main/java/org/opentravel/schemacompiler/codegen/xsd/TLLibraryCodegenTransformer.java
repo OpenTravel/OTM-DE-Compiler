@@ -92,13 +92,12 @@ public class TLLibraryCodegenTransformer extends AbstractXsdTransformer<TLLibrar
         }
         
         // Add entries for all imports and includes
-        CodeGenerationFilenameBuilder<AbstractLibrary> filenameBuilder = (CodeGenerationFilenameBuilder<AbstractLibrary>) context
-                .getCodeGenerator().getFilenameBuilder();
+        CodeGenerationFilenameBuilder<?> filenameBuilder = context.getCodeGenerator().getFilenameBuilder();
         CodeGenerationFilter libraryFilter = new LibraryFilterBuilder(source).setGlobalFilter(
                 context.getCodeGenerator().getFilter()).buildFilter();
 
-        addImports(schema, source, filenameBuilder, libraryFilter);
-        addIncludes(schema, source, filenameBuilder, libraryFilter);
+        addImports(schema, source, (CodeGenerationFilenameBuilder<AbstractLibrary>) filenameBuilder, libraryFilter);
+        addIncludes(schema, source, (CodeGenerationFilenameBuilder<AbstractLibrary>) filenameBuilder, libraryFilter);
 
         return schema;
     }

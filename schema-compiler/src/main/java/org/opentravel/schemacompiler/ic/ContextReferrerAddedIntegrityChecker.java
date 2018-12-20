@@ -34,7 +34,7 @@ public class ContextReferrerAddedIntegrityChecker
         extends
         ContextAutoCreateIntegrityChecker<OwnershipEvent<TLModelElement, TLContextReferrer>, TLModelElement> {
 
-    private static ModelEventType[] ELIGIBLE_EVENT_TYPES = { ModelEventType.CUSTOM_FACET_ADDED,
+    private static final ModelEventType[] ELIGIBLE_EVENT_TYPES = { ModelEventType.CUSTOM_FACET_ADDED,
             ModelEventType.QUERY_FACET_ADDED, ModelEventType.EXAMPLE_ADDED,
             ModelEventType.EQUIVALENT_ADDED, ModelEventType.DOC_OTHER_DOCS_ADDED };
 
@@ -48,7 +48,7 @@ public class ContextReferrerAddedIntegrityChecker
         if (eligibleEvents.contains(event.getType())
                 && (event.getAffectedItem() instanceof TLContextReferrer)) {
             autoCreateContextDeclaration(getOwningLibrary(event.getSource()),
-                    ((TLContextReferrer) event.getAffectedItem()).getContext());
+                    event.getAffectedItem().getContext());
         }
     }
 

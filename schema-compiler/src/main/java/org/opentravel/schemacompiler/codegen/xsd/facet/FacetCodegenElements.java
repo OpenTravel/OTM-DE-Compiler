@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAlias;
@@ -115,20 +116,20 @@ public class FacetCodegenElements {
      * 
      * @return List<Element>
      */
-    public List<Element> getAllFacetElements() {
-    	List<Element> elementList = new ArrayList<>();
-    	
-    	for (NamedEntity entity : facetElements.keySet()) {
-    		if (!(entity instanceof TLAlias)) {
-    			elementList.addAll( facetElements.get( entity ) );
-    		}
-    	}
-    	for (NamedEntity entity : facetElements.keySet()) {
-    		if (entity instanceof TLAlias) {
-    			elementList.addAll( facetElements.get( entity ) );
-    		}
-    	}
-    	return elementList;
-    }
+	public List<Element> getAllFacetElements() {
+		List<Element> elementList = new ArrayList<>();
+		
+		for (Entry<NamedEntity,List<Element>> entry : facetElements.entrySet()) {
+			if (!(entry.getKey() instanceof TLAlias)) {
+				elementList.addAll( entry.getValue() );
+			}
+		}
+		for (Entry<NamedEntity,List<Element>> entry : facetElements.entrySet()) {
+			if (entry.getKey() instanceof TLAlias) {
+				elementList.addAll( entry.getValue() );
+			}
+		}
+		return elementList;
+	}
     
 }

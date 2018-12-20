@@ -44,6 +44,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
@@ -104,7 +105,7 @@ public class HtmlDoclet extends AbstractDoclet {
 	 *
 	 * @see com.sun.javadoc.RootDoc
 	 */
-	protected void generateOtherFiles(TLModel model) throws Exception {
+	protected void generateOtherFiles(TLModel model) throws CodeGenerationException {
 		Configuration conf = getConfiguration();
 		
 		if (conf.getTopFile().length() == 0) {
@@ -134,7 +135,7 @@ public class HtmlDoclet extends AbstractDoclet {
 		// and replace newline with platform-specific newline.
 		if (conf.getStylesheetfile().length() == 0) {
 			if(configdestdir.isEmpty()){
-				throw new RuntimeException("Style sheet output Directory not specified");
+				throw new CodeGenerationException("Style sheet output Directory not specified");
 			}
 			Util.copyFile(conf, DEFAULT_STYLESHEET, Util.RESOURCESDIR,
 					configdestdir, false, true);
@@ -144,7 +145,7 @@ public class HtmlDoclet extends AbstractDoclet {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected void generateLibraryFiles(TLModel model) throws Exception {
+	protected void generateLibraryFiles(TLModel model) throws CodeGenerationException {
 		List<TLLibrary> libraries = model.getUserDefinedLibraries();
 		Configuration conf = getConfiguration();
 		

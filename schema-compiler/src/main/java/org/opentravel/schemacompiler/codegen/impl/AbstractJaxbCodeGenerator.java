@@ -104,11 +104,8 @@ public abstract class AbstractJaxbCodeGenerator<S extends ModelElement> extends
             throws CodeGenerationException {
         try {
             for (SchemaDeclaration schemaDeclaration : getCompileTimeDependencies()) {
-                if (schemaDeclaration == SchemaDeclarations.SCHEMA_FOR_SCHEMAS) {
-                    continue;
-                }
-                if (!schemaDeclaration.getFilename(
-                		CodeGeneratorFactory.XSD_TARGET_FORMAT).endsWith(".xsd")) {
+                if ((schemaDeclaration == SchemaDeclarations.SCHEMA_FOR_SCHEMAS) ||
+                		!schemaDeclaration.getFilename(CodeGeneratorFactory.XSD_TARGET_FORMAT).endsWith(".xsd")) {
                     continue;
                 }
                 File outputFolder = getOutputFolder(context, null);
@@ -267,19 +264,30 @@ public abstract class AbstractJaxbCodeGenerator<S extends ModelElement> extends
             schema = (Schema) jaxbObject;
 
         } else if (jaxbObject instanceof TDefinitions) {
-            TDefinitions definitions = (TDefinitions) jaxbObject;
-
-            for (TDocumented wsdlElement : definitions.getAnyTopLevelOptionalElement()) {
-                if (wsdlElement instanceof TTypes) {
-                    for (Object wsdlType : ((TTypes) wsdlElement).getAny()) {
-                        if (wsdlType instanceof Schema) {
-                            schema = (Schema) wsdlType;
-                        }
-                    }
-                }
-            }
+            schema = getJaxbSchema((TDefinitions) jaxbObject);
         }
         return schema;
     }
+
+	/**
+	 * Returns the JAXB schema from the given <code>TDefinitions</code> structure.
+	 * 
+	 * @param definitions  the WSDL definitions structure
+	 * @return Schema
+	 */
+	private Schema getJaxbSchema(TDefinitions definitions) {
+		Schema schema = null;
+		
+		for (TDocumented wsdlElement : definitions.getAnyTopLevelOptionalElement()) {
+		    if (wsdlElement instanceof TTypes) {
+		        for (Object wsdlType : ((TTypes) wsdlElement).getAny()) {
+		            if (wsdlType instanceof Schema) {
+		                schema = (Schema) wsdlType;
+		            }
+		        }
+		    }
+		}
+		return schema;
+	}
 
 }

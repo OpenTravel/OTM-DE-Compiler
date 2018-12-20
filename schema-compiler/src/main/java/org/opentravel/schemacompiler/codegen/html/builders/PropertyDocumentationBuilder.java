@@ -15,6 +15,7 @@
  */
 package org.opentravel.schemacompiler.codegen.html.builders;
 
+import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.codegen.example.ExampleValueGenerator;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLListFacet;
@@ -71,7 +72,7 @@ public class PropertyDocumentationBuilder extends
 
 
 	@Override
-	public void build() throws Exception {
+	public void build() throws CodeGenerationException {
 		// No action required
 	}
 

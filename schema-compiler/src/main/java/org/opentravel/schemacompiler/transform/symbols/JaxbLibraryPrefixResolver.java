@@ -17,6 +17,7 @@ package org.opentravel.schemacompiler.transform.symbols;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.opentravel.schemacompiler.loader.LibraryModuleImport;
 import org.opentravel.schemacompiler.loader.LibraryModuleInfo;
@@ -74,24 +75,21 @@ public class JaxbLibraryPrefixResolver implements PrefixResolver {
      * @see org.opentravel.schemacompiler.transform.PrefixResolver#getPrefixForNamespace(java.lang.String)
      */
     @Override
-    public String getPrefixForNamespace(String namespace) {
-        String prefix = null;
-
-        if ((namespace != null)
-                && (namespace.equals(localNamespace) || namespace
-                        .equals(AnonymousEntityFilter.ANONYMOUS_PSEUDO_NAMESPACE))) {
-            prefix = "";
-        } else {
-            for (String p : prefixMappings.keySet()) {
-                String ns = prefixMappings.get(p);
-
-                if (ns.equals(namespace)) {
-                    prefix = p;
-                    break;
-                }
-            }
-        }
-        return prefix;
-    }
-
+	public String getPrefixForNamespace(String namespace) {
+		String prefix = null;
+		
+		if ((namespace != null) && (namespace.equals(localNamespace)
+				|| namespace.equals(AnonymousEntityFilter.ANONYMOUS_PSEUDO_NAMESPACE))) {
+			prefix = "";
+		} else {
+			for (Entry<String,String> entry : prefixMappings.entrySet()) {
+				if (entry.getValue().equals(namespace)) {
+					prefix = entry.getKey();
+					break;
+				}
+			}
+		}
+		return prefix;
+	}
+	
 }

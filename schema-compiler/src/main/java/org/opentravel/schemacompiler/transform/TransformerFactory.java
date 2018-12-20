@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
@@ -110,18 +111,19 @@ public class TransformerFactory<C extends ObjectTransformerContext> {
      * 
      * @return Map<Class<?>,Set<Class<?>>>
      */
-    public Map<Class<?>,Set<Class<?>>> getTypeMappings() {
-    	Map<Class<?>,Set<Class<?>>> mappings = new HashMap<>();
-    	
-    	for (Class<?> sourceType : sourceTypeMappings.keySet()) {
-    		Map<Class<?>,Class<?>> targetTypes = sourceTypeMappings.get( sourceType );
-    		
-    		if (targetTypes != null) {
-        		mappings.put( sourceType, new HashSet<>( targetTypes.keySet() ) );
-    		}
-    	}
-    	return Collections.unmodifiableMap( mappings );
-    }
+	public Map<Class<?>, Set<Class<?>>> getTypeMappings() {
+		Map<Class<?>, Set<Class<?>>> mappings = new HashMap<>();
+		
+		for (Entry<Class<?>, Map<Class<?>, Class<?>>> entry : sourceTypeMappings.entrySet()) {
+			Map<Class<?>, Class<?>> targetTypes = entry.getValue();
+			Class<?> sourceType = entry.getKey();
+			
+			if (targetTypes != null) {
+				mappings.put(sourceType, new HashSet<>(targetTypes.keySet()));
+			}
+		}
+		return Collections.unmodifiableMap(mappings);
+	}
 
     /**
      * Returns a target type that is mapped to the specified source object type. If multiple targets

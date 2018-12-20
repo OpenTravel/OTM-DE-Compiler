@@ -107,188 +107,231 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
                         XSDComplexType.class, XSDElement.class)
                 .setFindingType(FindingType.WARNING).assertNotDeprecated().assertNotObsolete();
 
-        /*
-         * Disabled warning for use of legacy IDREF(S)
-        if (ValidatorUtils.isLegacyIDREF(propertyType)) {
-            builder.addFinding(FindingType.WARNING, "type", WARNING_LEGACY_IDREF);
-        }
-        */
-
-        // For xsd:ID elements, make sure they are contained in the top-level facet
-        // if the owner is a core or business object
-        if (ValidatorUtils.isXsdID(target.getType()) && (target.getOwner() instanceof TLFacet)) {
-        	TLFacet facet = (TLFacet) target.getOwner();
-        	TLFacetOwner facetOwner = facet.getOwningEntity();
-        	
-        	if (facetOwner instanceof TLBusinessObject) {
-        		if ((facet.getFacetType() != TLFacetType.ID) && (facet.getFacetType() != TLFacetType.QUERY)) {
-                    builder.addFinding(FindingType.WARNING, "type", WARNING_ILLEGAL_BUSINESS_OBJECT_ID);
-        		}
-        	} else if (facetOwner instanceof TLCoreObject) {
-        		if (facet.getFacetType() != TLFacetType.SUMMARY) {
-                    builder.addFinding(FindingType.WARNING, "type", WARNING_ILLEGAL_CORE_OBJECT_ID);
-        		}
-        	} else if (facetOwner instanceof TLChoiceObject) {
-        		if (facet.getFacetType() != TLFacetType.SHARED) {
-                    builder.addFinding(FindingType.WARNING, "type", WARNING_ILLEGAL_CHOICE_OBJECT_ID);
-        		}
-        	}
-        }
-
-        if ((propertyType != null) && target.isReference() && !hasID(propertyType)) {
-            builder.addFinding(FindingType.ERROR, "type", ERROR_ILLEGAL_REFERENCE,
-                    target.getTypeName());
-        }
-
-        checkEmptyValueType(target, target.getType(), "type", builder);
-
-        if (CircularReferenceChecker.hasCircularReference(target)) {
-            builder.addFinding(FindingType.ERROR, "type", ERROR_ILLEGAL_CIRCULAR_REFERENCE,
-                    target.getTypeName());
-        }
-
-        builder.setProperty("equivalents", target.getEquivalents())
-                .setFindingType(FindingType.ERROR).assertNotNull().assertContainsNoNullElements();
-        
-        // Check for duplicate names of this element
-        if (target.getName() != null) {
-            DuplicateFieldChecker dupChecker = getDuplicateFieldChecker( target );
-            
-            if (dupChecker.isDuplicateName( target )) {
-            	builder.addFinding( FindingType.ERROR, "name", ValidationBuilder.ERROR_DUPLICATE_ELEMENT,
-            			target.getName() );
-            }
-        }
-
-        // Check for UPA violations
-        if (target.getName() != null) {
-            UPAViolationChecker upaChecker = getUPAViolationChecker( target );
-            
-            if (upaChecker.isUPAViolation( target )) {
-            	builder.addFinding( FindingType.ERROR, "name", ERROR_UPA_VIOLATION, target.getName() );
-            }
-        }
-
-        // Verify that properties of minor version extension are optional (with one exception - see below)
-        if (target.isMandatory() && isVersionExtension(getVersionedOwner(target))) {
-    		TLProperty eclipsedProperty = getEclipsedProperty( target );
-    		boolean isSpecialCase = false;
-    		
-    		// Mandatory elements are allowed on minor version extensions if the only change was to a
-    		// later version of the element's type.
-    		if ((eclipsedProperty != null) && (eclipsedProperty.getType() instanceof Versioned)) {
-    			try {
-        			Versioned priorVersionType = (Versioned) eclipsedProperty.getType();
-    				List<Versioned> laterMinorVersions =
-    						new MinorVersionHelper().getLaterMinorVersions( priorVersionType );
-        			
-    				isSpecialCase = (propertyType instanceof Versioned) &&
-    						laterMinorVersions.contains( (Versioned) propertyType );
-    				
-    			} catch (VersionSchemeException e) {
-    				// No error - assume not a special case and move on
-    			}
-    		}
-    		
-    		if (!isSpecialCase) {
-                builder.addFinding(FindingType.ERROR, "mandatory", ERROR_ILLEGAL_REQUIRED_ELEMENT);
-    		}
-        }
-        
-        // A warning will be issued for boolean properties (should be indicators)
-        if (ValidatorUtils.isBooleanType(propertyType)) {
-            builder.addFinding(FindingType.WARNING, "type", WARNING_BOOLEAN_TYPE_REFERENCE);
-        }
-
-        // Issue a warning for properties that reference complex types where the property name and
-        // the
-        // referenced type's name do not match (the only exception occurs when the referenced
-        // property
-        // belongs to a built-in library since it cannot be edited to add aliases).
-        if (propertyType != null) {
-            TLPropertyType resolvedPropertyType = (target.getOwner() == null) ? propertyType
-                    : PropertyCodegenUtils.resolvePropertyType(propertyType);
-
-            if (PropertyCodegenUtils.hasGlobalElement(resolvedPropertyType)) {
-            	QName referencedQName = PropertyCodegenUtils.getDefaultXmlElementName(
-                        resolvedPropertyType, target.isReference());
-                String referencedLocalName = (referencedQName == null) ?
-                		null : referencedQName.getLocalPart();
-                String propertyLocalName = target.getName();
-
-                if (!target.isReference()) {
-                    if ((propertyLocalName != null)
-                            && !propertyLocalName.equals(referencedLocalName)) {
-                        builder.addFinding(FindingType.WARNING, "name",
-                                ERROR_ELEMENT_REF_NAME_MISMATCH, referencedLocalName);
-                    }
-                } else {
-                    if ((propertyLocalName != null)
-                            && !propertyLocalName.equals(referencedLocalName)) {
-                        builder.addFinding(FindingType.WARNING, "name",
-                                WARNING_INVALID_REFERENCE_NAME, referencedLocalName);
-                    }
-                }
-            } else {
-                if (target.isReference() && (target.getName() != null)
-                        && !target.getName().endsWith("Ref")) {
-                    builder.addFinding(FindingType.WARNING, "name", WARNING_INVALID_REFERENCE_NAME,
-                    		target.getName() + "Ref");
-                }
-            }
-        }
-
-        // Issue a warning if an empty facet is referenced
-        if (propertyType instanceof TLAbstractFacet) {
-            TLAbstractFacet referencedFacet = (TLAbstractFacet) propertyType;
-            FacetCodegenDelegate<TLAbstractFacet> facetDelegate = new FacetCodegenDelegateFactory(
-                    null).getDelegate(referencedFacet);
-            boolean hasContent = (facetDelegate == null) ? referencedFacet.declaresContent()
-                    : facetDelegate.hasContent();
-
-            if (!hasContent) {
-                builder.addFinding(FindingType.WARNING, "type", ERROR_EMPTY_FACET_REFERENCED,
-                        referencedFacet.getFacetType().getIdentityName(), referencedFacet
-                                .getOwningEntity().getLocalName());
-            }
-        }
-
-        // Warn if a deprecated XSD date/time type is being referenced
-        TLPropertyOwner elementOwner = target.getOwner();
-        AbstractLibrary owningLibrary = (elementOwner == null) ? null : elementOwner.getOwningLibrary();
-        
-        validateDeprecatedDateTimeUsage( propertyType, owningLibrary, builder );
-        
-        // List facets can only be referenced if the core object defines one or more roles
-        boolean isListFacet = (propertyType instanceof TLListFacet)
-                || ((propertyType instanceof TLAlias) && (((TLAlias) propertyType)
-                        .getOwningEntity() instanceof TLListFacet));
-
-        if (isListFacet) {
-            TLListFacet listFacet = (propertyType instanceof TLListFacet) ? (TLListFacet) propertyType
-                    : (TLListFacet) ((TLAlias) propertyType).getOwningEntity();
-            TLCoreObject referencedCore = (TLCoreObject) listFacet.getOwningEntity();
-            int roleCount = referencedCore.getRoleEnumeration().getRoles().size();
-
-            if ((roleCount == 0) && !(listFacet.getItemFacet() instanceof TLSimpleFacet)) {
-                builder.addFinding(FindingType.ERROR, "type", ERROR_ILLEGAL_LIST_FACET_REFERENCE,
-                        referencedCore.getName());
-            }
-            if ((target.getRepeat() != 0) && (target.getRepeat() != roleCount)) {
-                String repeatValue = (target.getRepeat() < 0) ? "*" : (target.getRepeat() + "");
-                builder.addFinding(FindingType.WARNING, "repeat",
-                        WARNING_LIST_FACET_REPEAT_IGNORED, repeatValue);
-            }
-        }
-
-        // Issue a warning if one or more examples are provided for a complex property type
-        if (!(propertyType instanceof TLAttributeType) && (target.getExamples().size() > 0)) {
-            builder.addFinding(FindingType.WARNING, "examples", WARNING_UNNECESSARY_EXAMPLE,
-                    target.getTypeName());
-        }
-
-        return builder.getFindings();
+		validateIDFieldLocation(target, builder);
+		
+		if ((propertyType != null) && target.isReference() && !hasID(propertyType)) {
+			builder.addFinding(FindingType.ERROR, "type", ERROR_ILLEGAL_REFERENCE, target.getTypeName());
+		}
+		
+		checkEmptyValueType(target, target.getType(), "type", builder);
+		
+		if (CircularReferenceChecker.hasCircularReference(target)) {
+			builder.addFinding(FindingType.ERROR, "type", ERROR_ILLEGAL_CIRCULAR_REFERENCE, target.getTypeName());
+		}
+		
+		builder.setProperty("equivalents", target.getEquivalents()).setFindingType(FindingType.ERROR).assertNotNull()
+			.assertContainsNoNullElements();
+		
+		// Check for duplicate names of this element
+		if (target.getName() != null) {
+			DuplicateFieldChecker dupChecker = getDuplicateFieldChecker(target);
+			
+			if (dupChecker.isDuplicateName(target)) {
+				builder.addFinding(FindingType.ERROR, "name", ValidationBuilder.ERROR_DUPLICATE_ELEMENT,
+						target.getName());
+			}
+		}
+		
+		// Check for UPA violations
+		if (target.getName() != null) {
+			UPAViolationChecker upaChecker = getUPAViolationChecker(target);
+			
+			if (upaChecker.isUPAViolation(target)) {
+				builder.addFinding(FindingType.ERROR, "name", ERROR_UPA_VIOLATION, target.getName());
+			}
+		}
+		
+		validateMinorVersionProperty(target, builder, propertyType);
+		
+		// A warning will be issued for boolean properties (should be indicators)
+		if (ValidatorUtils.isBooleanType(propertyType)) {
+			builder.addFinding(FindingType.WARNING, "type", WARNING_BOOLEAN_TYPE_REFERENCE);
+		}
+		
+		validatePropertyName(target, builder, propertyType);
+		validateEmptyFacetReference(propertyType, builder);
+		
+		// Warn if a deprecated XSD date/time type is being referenced
+		TLPropertyOwner elementOwner = target.getOwner();
+		AbstractLibrary owningLibrary = (elementOwner == null) ? null : elementOwner.getOwningLibrary();
+		
+		validateDeprecatedDateTimeUsage(propertyType, owningLibrary, builder);
+		validateListFacetProperty(target, builder, propertyType);
+		
+		// Issue a warning if one or more examples are provided for a complex
+		// property type
+		if (!(propertyType instanceof TLAttributeType) && target.getExamples().isEmpty()) {
+			builder.addFinding(FindingType.WARNING, "examples", WARNING_UNNECESSARY_EXAMPLE, target.getTypeName());
+		}
+		
+		return builder.getFindings();
     }
+
+	/**
+	 * Issue a warning if an empty facet is referenced.
+	 * 
+	 * @param propertyType  the resolved type of the property being validated
+	 * @param builder  the validation builder where errors/warnings should be reported
+	 */
+	private void validateEmptyFacetReference(TLPropertyType propertyType, TLValidationBuilder builder) {
+		if (propertyType instanceof TLAbstractFacet) {
+			TLAbstractFacet referencedFacet = (TLAbstractFacet) propertyType;
+			FacetCodegenDelegate<TLAbstractFacet> facetDelegate = new FacetCodegenDelegateFactory(null)
+				.getDelegate(referencedFacet);
+			boolean hasContent = (facetDelegate == null) ? referencedFacet.declaresContent()
+					: facetDelegate.hasContent();
+			
+			if (!hasContent) {
+				builder.addFinding(FindingType.WARNING, "type", ERROR_EMPTY_FACET_REFERENCED,
+						referencedFacet.getFacetType().getIdentityName(),
+						referencedFacet.getOwningEntity().getLocalName());
+			}
+		}
+	}
+
+	/**
+	 * List facets can only be referenced if the core object defines one or more roles.
+	 * 
+	 * @param target  the target property being validated
+	 * @param builder  the validation builder where errors/warnings should be reported
+	 * @param propertyType  the resolved type of the property being validated
+	 */
+	private void validateListFacetProperty(TLProperty target, TLValidationBuilder builder,
+			TLPropertyType propertyType) {
+		boolean isListFacet = (propertyType instanceof TLListFacet) || ((propertyType instanceof TLAlias)
+				&& (((TLAlias) propertyType).getOwningEntity() instanceof TLListFacet));
+		
+		if (isListFacet) {
+			TLListFacet listFacet = (propertyType instanceof TLListFacet) ? (TLListFacet) propertyType
+					: (TLListFacet) ((TLAlias) propertyType).getOwningEntity();
+			TLCoreObject referencedCore = (TLCoreObject) listFacet.getOwningEntity();
+			int roleCount = referencedCore.getRoleEnumeration().getRoles().size();
+			
+			if ((roleCount == 0) && !(listFacet.getItemFacet() instanceof TLSimpleFacet)) {
+				builder.addFinding(FindingType.ERROR, "type", ERROR_ILLEGAL_LIST_FACET_REFERENCE,
+						referencedCore.getName());
+			}
+			if ((target.getRepeat() != 0) && (target.getRepeat() != roleCount)) {
+				String repeatValue = (target.getRepeat() < 0) ? "*" : (target.getRepeat() + "");
+				builder.addFinding(FindingType.WARNING, "repeat", WARNING_LIST_FACET_REPEAT_IGNORED, repeatValue);
+			}
+		}
+	}
+
+	/**
+	 * Issue a warning for properties that reference complex types where the property name
+	 * and the referenced type's name do not match (the only exception occurs when the referenced
+	 * property belongs to a built-in library since it cannot be edited to add aliases).
+	 * 
+	 * @param target  the target property being validated
+	 * @param builder  the validation builder where errors/warnings should be reported
+	 * @param propertyType  the resolved type of the property being validated
+	 */
+	private void validatePropertyName(TLProperty target, TLValidationBuilder builder, TLPropertyType propertyType) {
+		if (propertyType != null) {
+			TLPropertyType resolvedPropertyType = (target.getOwner() == null) ? propertyType
+					: PropertyCodegenUtils.resolvePropertyType(propertyType);
+			
+			if (PropertyCodegenUtils.hasGlobalElement(resolvedPropertyType)) {
+				validateManagedPropertyName(target, builder, resolvedPropertyType);
+				
+			} else {
+				if (target.isReference() && (target.getName() != null) && !target.getName().endsWith("Ref")) {
+					builder.addFinding(FindingType.WARNING, "name", WARNING_INVALID_REFERENCE_NAME,
+							target.getName() + "Ref");
+				}
+			}
+		}
+	}
+
+	/**
+	 * Issue a warning for properties that reference complex types where the property name
+	 * and the resolved type's name do not match.
+	 * 
+	 * @param target  the target property being validated
+	 * @param builder  the validation builder where errors/warnings should be reported
+	 * @param resolvedPropertyType  the resolved type of the property being validated
+	 */
+	private void validateManagedPropertyName(TLProperty target, TLValidationBuilder builder,
+			TLPropertyType resolvedPropertyType) {
+		QName referencedQName = PropertyCodegenUtils.getDefaultXmlElementName(resolvedPropertyType,
+				target.isReference());
+		String referencedLocalName = (referencedQName == null) ? null : referencedQName.getLocalPart();
+		String propertyLocalName = target.getName();
+		boolean referencedNameMatch = (propertyLocalName != null) && !propertyLocalName.equals(referencedLocalName);
+		
+		if (referencedNameMatch) {
+			if (!target.isReference()) {
+				builder.addFinding(FindingType.WARNING, "name", ERROR_ELEMENT_REF_NAME_MISMATCH,
+						referencedLocalName);
+			} else {
+				builder.addFinding(FindingType.WARNING, "name", WARNING_INVALID_REFERENCE_NAME,
+						referencedLocalName);
+			}
+		}
+	}
+
+	/**
+	 * Verify that properties of minor version extension are optional (with one exception - see
+	 * inline comments).
+	 * 
+	 * @param target  the target property being validated
+	 * @param builder  the validation builder where errors/warnings should be reported
+	 * @param propertyType  the resolved type of the property being validated
+	 */
+	private void validateMinorVersionProperty(TLProperty target, TLValidationBuilder builder,
+			TLPropertyType propertyType) {
+		if (target.isMandatory() && isVersionExtension(getVersionedOwner(target))) {
+			TLProperty eclipsedProperty = getEclipsedProperty(target);
+			boolean isSpecialCase = false;
+			
+			// Mandatory elements are allowed on minor version extensions if the
+			// only change was to a later version of the element's type.
+			if ((eclipsedProperty != null) && (eclipsedProperty.getType() instanceof Versioned)) {
+				try {
+					Versioned priorVersionType = (Versioned) eclipsedProperty.getType();
+					List<Versioned> laterMinorVersions = new MinorVersionHelper()
+						.getLaterMinorVersions(priorVersionType);
+					
+					isSpecialCase = (propertyType instanceof Versioned)
+							&& laterMinorVersions.contains((Versioned) propertyType);
+					
+				} catch (VersionSchemeException e) {
+					// No error - assume not a special case and move on
+				}
+			}
+			
+			if (!isSpecialCase) {
+				builder.addFinding(FindingType.ERROR, "mandatory", ERROR_ILLEGAL_REQUIRED_ELEMENT);
+			}
+		}
+	}
+
+	/**
+	 * For xsd:ID elements, make sure they are contained in the top-level facet if the
+	 * owner is a core or business object.
+	 * 
+	 * @param target  the target property being validated
+	 * @param builder  the validation builder where errors/warnings should be reported
+	 */
+	private void validateIDFieldLocation(TLProperty target, TLValidationBuilder builder) {
+		if (ValidatorUtils.isXsdID(target.getType()) && (target.getOwner() instanceof TLFacet)) {
+			TLFacet facet = (TLFacet) target.getOwner();
+			TLFacetOwner facetOwner = facet.getOwningEntity();
+			
+			if (facetOwner instanceof TLBusinessObject) {
+				if ((facet.getFacetType() != TLFacetType.ID) && (facet.getFacetType() != TLFacetType.QUERY)) {
+					builder.addFinding(FindingType.WARNING, "type", WARNING_ILLEGAL_BUSINESS_OBJECT_ID);
+				}
+			} else if (facetOwner instanceof TLCoreObject) {
+				if (facet.getFacetType() != TLFacetType.SUMMARY) {
+					builder.addFinding(FindingType.WARNING, "type", WARNING_ILLEGAL_CORE_OBJECT_ID);
+				}
+			} else if ((facetOwner instanceof TLChoiceObject) && (facet.getFacetType() != TLFacetType.SHARED)) {
+				builder.addFinding(FindingType.WARNING, "type", WARNING_ILLEGAL_CHOICE_OBJECT_ID);
+			}
+		}
+	}
 
     /**
      * Returns a <code>DuplicateFieldChecker</code> that can be used to identify duplicate
@@ -369,27 +412,39 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
                 entityFacet = ((TLBusinessObject) entity).getSummaryFacet();
             }
 
-            if (entityFacet != null) {
-                for (TLAttribute attribute : PropertyCodegenUtils
-                        .getInheritedAttributes(entityFacet)) {
-                    if (isIDType(attribute.getType())) {
-                        result = true;
-                        break;
-                    }
-                }
-                if (!result) {
-                    for (TLProperty property : PropertyCodegenUtils
-                            .getInheritedProperties(entityFacet)) {
-                        if (isIDType(property.getType())) {
-                            result = true;
-                            break;
-                        }
-                    }
-                }
-            }
+            result = hasIDField(entityFacet);
         }
         return result;
     }
+
+	/**
+	 * Returns true if the given facet has an attribute or element that is an
+	 * <code>xsd:ID</code>.
+	 * 
+	 * @param facet  the facet to check for legacy schema ID fields
+	 * @return boolean
+	 */
+	private static boolean hasIDField(TLFacet facet) {
+		boolean result = false;
+		
+		if (facet != null) {
+		    for (TLAttribute attribute : PropertyCodegenUtils.getInheritedAttributes(facet)) {
+		        if (isIDType(attribute.getType())) {
+		            result = true;
+		            break;
+		        }
+		    }
+		    if (!result) {
+		        for (TLProperty property : PropertyCodegenUtils.getInheritedProperties(facet)) {
+		            if (isIDType(property.getType())) {
+		                result = true;
+		                break;
+		            }
+		        }
+		    }
+		}
+		return result;
+	}
 
     /**
      * Returns true if the given type reference is 'xsd:ID'.

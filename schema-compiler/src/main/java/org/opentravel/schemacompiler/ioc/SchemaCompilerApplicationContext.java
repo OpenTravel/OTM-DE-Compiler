@@ -16,7 +16,6 @@
 package org.opentravel.schemacompiler.ioc;
 
 import org.opentravel.schemacompiler.ota2.OTA2CompilerConstants;
-import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
@@ -71,7 +70,8 @@ public final class SchemaCompilerApplicationContext implements ApplicationContex
      * @see org.springframework.context.ApplicationContextAware#setApplicationContext(org.springframework.context.ApplicationContext)
      */
     @Override
-    public void setApplicationContext(ApplicationContext ctx) throws BeansException {
+    @SuppressWarnings("squid:S2696")
+    public void setApplicationContext(ApplicationContext ctx) {
         context = ctx;
     }
 

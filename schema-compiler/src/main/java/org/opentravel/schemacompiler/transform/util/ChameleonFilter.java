@@ -127,53 +127,64 @@ public class ChameleonFilter implements AnonymousEntityFilter {
      * @param visitedLibraries
      *            the list of visited libraries
      */
-    private void findChameleonLibraryUrls(AbstractLibrary library, String targetNamespace,
-            Collection<URL> chameleonUrls, Set<AbstractLibrary> visitedLibraries) {
-    	if (library != null) {
-            if (isChameleon(library) && !chameleonUrls.contains(library.getLibraryUrl())) {
-                chameleonUrls.add(library.getLibraryUrl());
-            }
-            visitedLibraries.add(library);
+	private void findChameleonLibraryUrls(AbstractLibrary library, String targetNamespace,
+			Collection<URL> chameleonUrls, Set<AbstractLibrary> visitedLibraries) {
+		if (library != null) {
+			if (isChameleon(library) && !chameleonUrls.contains(library.getLibraryUrl())) {
+				chameleonUrls.add(library.getLibraryUrl());
+			}
+			visitedLibraries.add(library);
+			
+			// Built-in libraries do not support includes
+			if (!(library instanceof BuiltInLibrary) && (library.getOwningModel() != null)) {
+				TLModel model = library.getOwningModel();
+				
+				for (TLInclude include : library.getIncludes()) {
+					followIncludedLibraries(library, include, targetNamespace, chameleonUrls,
+							visitedLibraries, model);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Follows the given library include to determine if it (or any of its nested includes) are
+	 * chameleons.
+	 * 
+	 * @param library  the library currently being searched
+	 * @param include  the library include to be followed
+	 * @param targetNamespace  the target namespace of the include
+	 * @param chameleonUrls  the list of chameleon URLs that have been identified
+	 * @param visitedLibraries  list of libraries already visited (prevents infinite loops)
+	 * @param model  the model containing all libraries to be searched
+	 */
+	private void followIncludedLibraries(AbstractLibrary library, TLInclude include, String targetNamespace, Collection<URL> chameleonUrls,
+			Set<AbstractLibrary> visitedLibraries, TLModel model) {
+		try {
+		    URL includedUrl = URLUtils.getResolvedURL(include.getPath(),
+		            URLUtils.getParentURL(library.getLibraryUrl()));
+		    AbstractLibrary includedLibrary = model.getLibrary(includedUrl);
 
-            // Built-in libraries do not support includes
-            if (!(library instanceof BuiltInLibrary) && (library.getOwningModel() != null)) {
-                TLModel model = library.getOwningModel();
+		    // Skip include URL's that do not resolve to a valid library in the model; these
+		    // are most likely errors that will be detected by the validator.  Also, disregard
+		    // non-chameleon libraries that are assigned to a different namespace.  These are
+		    // errors that will be picked up by the validator
+		    if ((includedLibrary == null) ||
+		    		(!isChameleon(includedLibrary) && !includedLibrary.getNamespace().equals(targetNamespace))) {
+		        return;
+		    }
 
-                for (TLInclude include : library.getIncludes()) {
-                    try {
-                        URL includedUrl = URLUtils.getResolvedURL(include.getPath(),
-                                URLUtils.getParentURL(library.getLibraryUrl()));
-                        AbstractLibrary includedLibrary = model.getLibrary(includedUrl);
+		    // If we have not seen the included library before, recurse to determine if it
+		    // (or one of its includes) is a chameleon that should be considered.
+		    if (!visitedLibraries.contains(includedLibrary)) {
+		        findChameleonLibraryUrls(includedLibrary, targetNamespace, chameleonUrls,
+		                visitedLibraries);
+		    }
 
-                        // Skip include URL's that do not resolve to a valid library in the model; these
-                        // are most likely
-                        // errors that will be detected by the validator.
-                        if (includedLibrary == null) {
-                            continue;
-                        }
-
-                        // Disregard non-chameleon libraries that are assigned to a different namespace.
-                        // These are errors that will be picked up by the validator
-                        if (!isChameleon(includedLibrary)
-                                && !includedLibrary.getNamespace().equals(targetNamespace)) {
-                            continue;
-                        }
-
-                        // If we have not seen the included library before, recurse to determine if it
-                        // (or one of
-                        // its includes) is a chameleon that should be considered.
-                        if (!visitedLibraries.contains(includedLibrary)) {
-                            findChameleonLibraryUrls(includedLibrary, targetNamespace, chameleonUrls,
-                                    visitedLibraries);
-                        }
-
-                    } catch (MalformedURLException e) {
-                        // No error - just skip and move on to the next include
-                    }
-                }
-            }
-    	}
-    }
+		} catch (MalformedURLException e) {
+		    // No error - just skip and move on to the next include
+		}
+	}
 
     /**
      * Returns true if the given library should be considered a chameleon.

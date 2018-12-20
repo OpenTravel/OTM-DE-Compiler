@@ -26,6 +26,7 @@ import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLMemberField;
+import org.opentravel.schemacompiler.model.TLMemberFieldOwner;
 import org.opentravel.schemacompiler.model.TLProperty;
 
 /**
@@ -35,7 +36,7 @@ import org.opentravel.schemacompiler.model.TLProperty;
  */
 public class FieldComparisonFacade {
 	
-	private TLMemberField<?> field;
+	private TLMemberField<TLMemberFieldOwner> field;
 	private Class<?> memberType;
 	private String owningFacet;
 	private NamedEntity assignedType;
@@ -51,8 +52,9 @@ public class FieldComparisonFacade {
 	 * 
 	 * @param field  the attribute from which to create the facade
 	 */
+	@SuppressWarnings("unchecked")
 	public FieldComparisonFacade(TLMemberField<?> field) {
-		this.field = field;
+		this.field = (TLMemberField<TLMemberFieldOwner>) field;
 		
 		if (field instanceof TLAttribute) {
 			init( (TLAttribute) field );
@@ -131,10 +133,10 @@ public class FieldComparisonFacade {
 		String facetName = null;
 		
 		if (owner instanceof TLFacet) {
-			TLFacet owningFacet = (TLFacet) owner;
+			TLFacet fOwner = (TLFacet) owner;
 			
-			facetName = owningFacet.getFacetType().getIdentityName(
-					FacetCodegenUtils.getFacetName( owningFacet ) );
+			facetName = fOwner.getFacetType().getIdentityName(
+					FacetCodegenUtils.getFacetName( fOwner ) );
 		}
 		return facetName;
 	}
@@ -142,9 +144,9 @@ public class FieldComparisonFacade {
 	/**
 	 * Returns the value of the 'field' field.
 	 *
-	 * @return TLMemberField<?>
+	 * @return TLMemberField<TLMemberFieldOwner>
 	 */
-	public TLMemberField<?> getField() {
+	public TLMemberField<TLMemberFieldOwner> getField() {
 		return field;
 	}
 

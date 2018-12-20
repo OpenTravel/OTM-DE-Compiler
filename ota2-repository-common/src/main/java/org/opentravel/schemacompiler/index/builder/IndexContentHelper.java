@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.xml.XMLConstants;
@@ -47,6 +48,7 @@ import org.opentravel.schemacompiler.transform.TransformerFactory;
 import org.opentravel.schemacompiler.transform.symbols.DefaultTransformerContext;
 import org.opentravel.schemacompiler.transform.symbols.SymbolResolverTransformerContext;
 import org.opentravel.schemacompiler.util.ClasspathResourceResolver;
+import org.opentravel.schemacompiler.util.SchemaCompilerRuntimeException;
 import org.opentravel.schemacompiler.validate.impl.TLModelSymbolResolver;
 
 /**
@@ -196,7 +198,7 @@ public class IndexContentHelper {
 			
 		} else {
 			String entityType = (entityClass == null) ? "UNKNOWN" : entityClass.getSimpleName();
-			throw new Error("No entity class mapping defined for: " + entityType);
+			throw new SchemaCompilerRuntimeException("No entity class mapping defined for: " + entityType);
 		}
 		
 	}
@@ -232,7 +234,7 @@ public class IndexContentHelper {
 		Class<? extends NamedEntity> targetClass = (Class<? extends NamedEntity>) entityClassMappings.get( entityClass );
 		
 		if (targetClass == null) {
-			throw new Error("No entity class mapping defined for: " +
+			throw new SchemaCompilerRuntimeException("No entity class mapping defined for: " +
 					jaxbEntity.getClass().getSimpleName());
 		}
 		ObjectTransformer<Object,? extends NamedEntity,?> transformer =
@@ -347,22 +349,23 @@ public class IndexContentHelper {
 	 * @param factory  the transformer factory from which to obtain the type mappings
 	 * @param typeMappings  the type mappings to be populated
 	 */
-	private static void initializeTypeMappings(TransformerFactory<?> factory, Map<Class<?>,Class<?>> typeMappings) {
-        Map<Class<?>,Set<Class<?>>> factoryMappings = factory.getTypeMappings();
+	private static void initializeTypeMappings(TransformerFactory<?> factory, Map<Class<?>, Class<?>> typeMappings) {
+		Map<Class<?>, Set<Class<?>>> factoryMappings = factory.getTypeMappings();
 		
-        for (Class<?> sourceType : factoryMappings.keySet()) {
-        	Set<Class<?>> targetTypes = factoryMappings.get( sourceType );
-        	
-        	if (targetTypes.size() == 1) {
-        		typeMappings.put( sourceType, targetTypes.iterator().next() );
-        	} else {
-        		for (Class<?> targetType : targetTypes) {
-        			if (targetType.getPackage().getName().equals( LATEST_VERSION_PACKAGE )) {
-                		typeMappings.put( sourceType, targetType );
-        			}
-        		}
-        	}
-        }
+		for (Entry<Class<?>, Set<Class<?>>> entry : factoryMappings.entrySet()) {
+			Class<?> sourceType = entry.getKey();
+			Set<Class<?>> targetTypes = entry.getValue();
+			
+			if (targetTypes.size() == 1) {
+				typeMappings.put(sourceType, targetTypes.iterator().next());
+			} else {
+				for (Class<?> targetType : targetTypes) {
+					if (targetType.getPackage().getName().equals(LATEST_VERSION_PACKAGE)) {
+						typeMappings.put(sourceType, targetType);
+					}
+				}
+			}
+		}
 	}
 	
 }

@@ -19,42 +19,33 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.opentravel.schemacompiler.version.VersionScheme;
-import org.opentravel.schemacompiler.version.Versioned;
-
 /**
  * Version Schema for built-in xsd types.
  */
 public class XSDVersionScheme implements VersionScheme {
 
-    public static final String ID = "XSD";
-
-    private static String getVersion() {
-        return "1.0";
-    }
-
-    private static String getNamespace() {
-        return "http://www.w3.org/2001/XMLSchema";
-    }
+	private static final String XML_SCHEMA_NS = "http://www.w3.org/2001/XMLSchema";
+	private static final String V1_0 = "1.0";
+	public static final String ID = "XSD";
 
     @Override
     public String getVersionIdentifier(String majorVersion, String minorVersion, String patchLevel) {
-        return getVersion();
+        return V1_0;
     }
 
     @Override
     public String getVersionIdentifier(String namespaceUri) {
-        return getVersion();
+        return V1_0;
     }
 
     @Override
     public String setVersionIdentifier(String namespaceUri, String versionIdentifier) {
-        return getNamespace();
+        return XML_SCHEMA_NS;
     }
 
     @Override
     public String getDefaultVersionIdentifer() {
-        return getVersion();
+        return V1_0;
     }
 
     @Override
@@ -64,27 +55,27 @@ public class XSDVersionScheme implements VersionScheme {
 
     @Override
     public String getMajorVersion(String versionIdentifer) {
-        return getVersion();
+        return V1_0;
     }
 
     @Override
     public String getMinorVersion(String versionIdentifer) {
-        return getVersion();
+        return V1_0;
     }
 
     @Override
     public String getPatchLevel(String versionIdentifer) {
-        return getVersion();
+        return V1_0;
     }
 
     @Override
     public String getBaseNamespace(String namespaceUri) {
-        return getNamespace();
+        return XML_SCHEMA_NS;
     }
 
     @Override
     public String getMajorVersionNamespace(String namespaceUri) {
-        return getNamespace();
+        return XML_SCHEMA_NS;
     }
 
     @Override
@@ -126,32 +117,32 @@ public class XSDVersionScheme implements VersionScheme {
 
     @Override
     public String incrementMajorVersion(String versionIdentifer) {
-        return getVersion();
+        return V1_0;
     }
 
     @Override
     public String decrementMajorVersion(String versionIdentifer) {
-        return getVersion();
+        return V1_0;
     }
 
     @Override
     public String incrementMinorVersion(String versionIdentifer) {
-        return getVersion();
+        return V1_0;
     }
 
     @Override
     public String decrementMinorVersion(String versionIdentifer) {
-        return getVersion();
+        return V1_0;
     }
 
     @Override
     public String incrementPatchLevel(String versionIdentifer) {
-        return getVersion();
+        return V1_0;
     }
 
     @Override
     public String decrementPatchLevel(String versionIdentifer) {
-        return getVersion();
+        return V1_0;
     }
 
     @Override

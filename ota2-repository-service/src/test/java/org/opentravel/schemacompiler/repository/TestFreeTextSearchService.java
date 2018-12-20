@@ -47,7 +47,7 @@ public class TestFreeTextSearchService {
 
         // Search on the base namespace and make sure all three repository items are returned
         try {
-            List<SearchResult<?>> searchResults = service.search("version", null, false, false);
+            List<SearchResult<Object>> searchResults = service.search("version", null, false, false);
             Collection<String> filenames = getFilenames(searchResults);
 
             assertEquals(4, searchResults.size());
@@ -65,7 +65,7 @@ public class TestFreeTextSearchService {
         service.startService();
 
         try {
-            List<SearchResult<?>> searchResults = service.search("version", null, false, false);
+            List<SearchResult<Object>> searchResults = service.search("version", null, false, false);
             Collection<String> filenames = getFilenames(searchResults);
 
             assertEquals(4, searchResults.size());
@@ -97,7 +97,7 @@ public class TestFreeTextSearchService {
     @Test
     public void testContentKeywordSearch() throws Exception {
     	FreeTextSearchService service = initSearchService("testContentKeywordSearch");
-        List<SearchResult<?>> searchResults;
+        List<SearchResult<Object>> searchResults;
         Collection<String> filenames;
 
         try {
@@ -149,7 +149,7 @@ public class TestFreeTextSearchService {
         return service;
     }
 
-    private Collection<String> getFilenames(Collection<SearchResult<?>> searchResults) {
+    private Collection<String> getFilenames(Collection<SearchResult<Object>> searchResults) {
         Collection<String> filenames = new HashSet<String>();
 
         for (SearchResult<?> result : searchResults) {
@@ -163,7 +163,7 @@ public class TestFreeTextSearchService {
         return filenames;
     }
     
-    private List<LibrarySearchResult> getLibraryResults(List<SearchResult<?>> fullResults) {
+    private List<LibrarySearchResult> getLibraryResults(List<SearchResult<Object>> fullResults) {
     	List<LibrarySearchResult> libResults = new ArrayList<>();
     	
     	for (SearchResult<?> result : fullResults) {

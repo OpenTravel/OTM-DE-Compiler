@@ -35,6 +35,7 @@ import org.opentravel.schemacompiler.validate.ValidationFindings;
  */
 public class DocumentationCompileTask extends AbstractCompilerTask implements ExampleCompilerTaskOptions {
 
+	private static final String INDEX_HTML = "/index.html";
 	private static final String HTML = "HTML";
 
     private boolean generateMaxDetailsForExamples = true;
@@ -71,7 +72,7 @@ public class DocumentationCompileTask extends AbstractCompilerTask implements Ex
 	 */
 	public static File compileDocumentation(TLModel model, File outputFolder, ValidationFindings findings) throws SchemaCompilerException {
 		DocumentationCompileTask task = new DocumentationCompileTask();
-		File indexFile = new File( outputFolder, "/index.html" );
+		File indexFile = new File( outputFolder, INDEX_HTML );
 		
 		task.setOutputFolder( outputFolder.getAbsolutePath() );
 		ValidationFindings compilerFindings = task.compileOutput( model );
@@ -98,6 +99,7 @@ public class DocumentationCompileTask extends AbstractCompilerTask implements Ex
 	 *             thrown if an unexpected error occurs during the compilation
 	 *             process
 	 */
+	@Override
 	public ValidationFindings compileOutput(TLModel model)
 			throws SchemaCompilerException {
 		CodeGenerator<TLModel> docGenerator = CodeGeneratorFactory.getInstance().newCodeGenerator(HTML, TLModel.class);
@@ -125,6 +127,7 @@ public class DocumentationCompileTask extends AbstractCompilerTask implements Ex
     /**
      * @see org.opentravel.schemacompiler.task.AbstractCompilerTask#createContext()
      */
+	@Override
     protected CodeGenerationContext createContext() {
         CodeGenerationContext context = super.createContext();
 

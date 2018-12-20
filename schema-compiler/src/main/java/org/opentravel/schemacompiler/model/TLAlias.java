@@ -60,7 +60,7 @@ public class TLAlias extends TLModelElement implements TLPropertyType {
      */
     @Override
     public String getLocalName() {
-        return name;
+        return getName();
     }
 
     /**

@@ -31,7 +31,9 @@ import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
  */
 public class TLResourceCompileValidator extends TLResourceBaseValidator {
 
-    public static final String ERROR_INVALID_BASE_PATH             = "INVALID_BASE_PATH";
+	private static final String BASE_PATH = "basePath";
+	
+	public static final String ERROR_INVALID_BASE_PATH             = "INVALID_BASE_PATH";
     public static final String ERROR_PARAM_GROUPS_NOT_ALLOWED      = "PARAM_GROUPS_NOT_ALLOWED";
     public static final String ERROR_MULTIPLE_COMMON_ACTIONS       = "MULTIPLE_COMMON_ACTIONS";
     public static final String ERROR_PARENT_REFERENCES_REQUIRED    = "PARENT_REFERENCES_REQUIRED";
@@ -50,12 +52,12 @@ public class TLResourceCompileValidator extends TLResourceBaseValidator {
         
         // Different rules for abstract and non-abstract resources
         if (target.isAbstract()) {
-        	builder.setProperty("basePath", target.getBasePath()).setFindingType(FindingType.ERROR)
+        	builder.setProperty(BASE_PATH, target.getBasePath()).setFindingType(FindingType.ERROR)
             		.assertNullOrBlank();
         	builder.setProperty("businessObjectRef", target.getBusinessObjectRef()).setFindingType(FindingType.ERROR)
         			.assertNull();
         	
-        	if (target.getParamGroups().size() > 0) {
+        	if (!target.getParamGroups().isEmpty()) {
             	builder.addFinding( FindingType.ERROR, "paramGroups", ERROR_PARAM_GROUPS_NOT_ALLOWED );
         	}
         	
@@ -63,12 +65,12 @@ public class TLResourceCompileValidator extends TLResourceBaseValidator {
         	TLBusinessObject businessObjectRef = target.getBusinessObjectRef();
         	String basePath = target.getBasePath();
         	
-        	builder.setProperty("basePath", basePath).setFindingType(FindingType.ERROR)
+        	builder.setProperty(BASE_PATH, basePath).setFindingType(FindingType.ERROR)
         			.assertNotNullOrBlank();
         	
         	if ((basePath != null) &&
         			!(urlValidator.isValid( basePath ) || urlValidator.isValidPath( basePath ))) {
-            	builder.addFinding( FindingType.ERROR, "basePath", ERROR_INVALID_BASE_PATH, basePath );
+            	builder.addFinding( FindingType.ERROR, BASE_PATH, ERROR_INVALID_BASE_PATH, basePath );
         	}
         	if (!target.isFirstClass() && target.getParentRefs().isEmpty()) {
             	builder.addFinding( FindingType.ERROR, "firstClass", ERROR_PARENT_REFERENCES_REQUIRED );

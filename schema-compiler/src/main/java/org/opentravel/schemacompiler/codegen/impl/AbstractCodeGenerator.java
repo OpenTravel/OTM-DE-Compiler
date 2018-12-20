@@ -20,6 +20,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
@@ -38,8 +39,7 @@ import org.slf4j.helpers.NOPLogger;
  * <code>CodeGenerator</code> base class that provides validation and orchestration functions for
  * the code generation process.
  * 
- * @param <S>
- *            the source type for which output content will be generated
+ * @param <S>  the source type for which output content will be generated
  * @author S. Livezey
  */
 public abstract class AbstractCodeGenerator<S extends ModelElement> implements CodeGenerator<S> {
@@ -303,13 +303,13 @@ public abstract class AbstractCodeGenerator<S extends ModelElement> implements C
      * 
      * @return Collection<File>
      */
-    protected Collection<File> getGeneratedFiles() {
-        Collection<File> fileList = new ArrayList<>();
-
-        for (String filePath : generatedFiles.keySet()) {
-            fileList.add(generatedFiles.get(filePath));
-        }
-        return fileList;
-    }
-
+	protected Collection<File> getGeneratedFiles() {
+		Collection<File> fileList = new ArrayList<>();
+		
+		for (Entry<String, File> entry : generatedFiles.entrySet()) {
+			fileList.add( entry.getValue() );
+		}
+		return fileList;
+	}
+	
 }

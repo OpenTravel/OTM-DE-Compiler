@@ -107,24 +107,25 @@ public class DefaultCodeGenerationFilter implements CodeGenerationFilter {
     /**
      * Displays the contents of this filter to standard output for debugging purposes.
      */
-    public void display() {
-    	display( System.out );
-    }
+    @SuppressWarnings("squid:S106") // Invalid Sonar finding since this method is only used for console debugging
+	public void display() {
+		display(System.out);
+	}
     
     /**
      * Displays the contents of this filter for debugging purposes.
      * 
      * @param out  the stream to which debugging output should be directed
      */
-    public void display(PrintStream out) {
-    	out.println("CODE GENERATION FILTER:");
-    	
-    	for (AbstractLibrary l : allowedLibraries) {
-    		out.println("  LIBRARY: " + l.getName() + " / " + l.getNamespace());
-    	}
-    	for (LibraryElement e : allowedEntities) {
-    		out.println("  ENTITY : " + e.getValidationIdentity());
-    	}
-    }
+	public void display(PrintStream out) {
+		out.println("CODE GENERATION FILTER:");
+		
+		for (AbstractLibrary l : allowedLibraries) {
+			out.println("  LIBRARY: " + l.getName() + " / " + l.getNamespace());
+		}
+		for (LibraryElement e : allowedEntities) {
+			out.println("  ENTITY : " + e.getValidationIdentity());
+		}
+	}
     
 }

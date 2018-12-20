@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 /**
@@ -102,31 +103,32 @@ public final class SymbolTable {
      *            the entity for which to retrieve the namespace assignment
      * @return String
      */
-    public String getNamespaceForEntity(Object entity) {
-        String namespace = null;
-
-        for (String ns : namespaceSymbols.keySet()) {
-            Map<String, Object> localSymbols = namespaceSymbols.get(ns);
-
-            if (localSymbols.containsValue(entity)) {
-                namespace = ns;
-                break;
-            }
-        }
-
-        // If we couldn't find the entity in the list of named entities, check the anonymous
-        // entities for a match
-        if (namespace == null) {
-            for (List<Object> entityList : anonymousEntities.values()) {
-                if (entityList.contains(entity)) {
-                    namespace = AnonymousEntityFilter.ANONYMOUS_PSEUDO_NAMESPACE;
-                    break;
-                }
-            }
-        }
-        return namespace;
-    }
-
+	public String getNamespaceForEntity(Object entity) {
+		String namespace = null;
+		
+		for (Entry<String, Map<String, Object>> entry : namespaceSymbols.entrySet()) {
+			Map<String, Object> localSymbols = entry.getValue();
+			String ns = entry.getKey();
+			
+			if (localSymbols.containsValue(entity)) {
+				namespace = ns;
+				break;
+			}
+		}
+		
+		// If we couldn't find the entity in the list of named entities, check
+		// the anonymous entities for a match
+		if (namespace == null) {
+			for (List<Object> entityList : anonymousEntities.values()) {
+				if (entityList.contains(entity)) {
+					namespace = AnonymousEntityFilter.ANONYMOUS_PSEUDO_NAMESPACE;
+					break;
+				}
+			}
+		}
+		return namespace;
+	}
+	
     /**
      * Returns all namespaces that have associated entities in this symbol table.
      * 
@@ -233,18 +235,18 @@ public final class SymbolTable {
      * Displays the contents of this symbol table to standard output (debugging purposes only).
      */
     @SuppressWarnings("squid:S106") // Suppress Sonar finding since this method is used for console debugging purposes
-    public void displayTable() {
-        System.out.println("Symbol Table:");
-        
-        for (String ns : namespaceSymbols.keySet()) {
-            Map<String, Object> localNameMap = namespaceSymbols.get(ns);
-            System.out.println("  " + ns);
-
-            for (String localName : localNameMap.keySet()) {
-                Object obj = localNameMap.get(localName);
-
-                System.out.println("    " + localName + " -> " + obj.getClass().getSimpleName());
-            }
-        }
-    }
+	public void displayTable() {
+		System.out.println("Symbol Table:");
+		
+		for (Entry<String,Map<String,Object>> entry : namespaceSymbols.entrySet()) {
+			Map<String, Object> localNameMap = entry.getValue();
+			String ns = entry.getKey();
+			
+			System.out.println("  " + ns);
+			
+			for (Entry<String,Object> entry2 : localNameMap.entrySet()) {
+				System.out.println("    " + entry2.getKey() + " -> " + entry2.getValue().getClass().getSimpleName());
+			}
+		}
+	}
 }

@@ -15,9 +15,11 @@
  */
 package org.opentravel.schemacompiler.codegen.html.writers;
 
+import java.io.IOException;
+
+import org.opentravel.schemacompiler.codegen.html.Content;
 import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.builders.ServiceDocumentationBuilder;
-import org.opentravel.schemacompiler.codegen.html.Content;
 import org.opentravel.schemacompiler.codegen.html.writers.info.OperationInfoWriter;
 
 /**
@@ -34,7 +36,7 @@ public class ServiceWriter extends NamedEntityWriter<ServiceDocumentationBuilder
 	 */
 	public ServiceWriter(ServiceDocumentationBuilder member,
 			DocumentationBuilder prev,
-			DocumentationBuilder next) throws Exception {
+			DocumentationBuilder next) throws IOException {
 		super(member, prev, next);
 	}
 

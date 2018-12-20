@@ -44,52 +44,21 @@ public class RepositoryNamespaceUtils {
      */
     public static final String normalizeUri(String namespace) {
         int protocolSeparatorIdx = namespace.indexOf("://");
-        String uriProtocol = (protocolSeparatorIdx < 0) ? null : namespace.substring(0,
-                protocolSeparatorIdx);
-        String urlPath = (uriProtocol == null) ? namespace : namespace
-                .substring(protocolSeparatorIdx + 2);
+        String uriProtocol = (protocolSeparatorIdx < 0) ? null : namespace.substring(0, protocolSeparatorIdx);
+        String urlPath = (uriProtocol == null) ? namespace : namespace.substring(protocolSeparatorIdx + 2);
         String result = namespace;
 
         if ((urlPath.indexOf("/./") >= 0) || (urlPath.indexOf("/../") >= 0)
                 || (urlPath.indexOf("//") >= 0)) {
             StringBuilder targetUrl = new StringBuilder();
-            List<String> pathList = new ArrayList<>();
 
             if (uriProtocol != null) {
                 targetUrl.append(uriProtocol).append(":/");
             }
 
-            // Use the stack to resolve relative path references
-            boolean pathStarted = false;
-            Matcher m;
-
-            while ((m = pathPartPattern.matcher(urlPath)).find()) {
-                String pathPart = m.group(1);
-
-                if (pathPart.equals("/") && !pathStarted) {
-                    pathList.add(pathPart);
-
-                } else if (pathPart.equals("/.") || pathPart.equals("/")) {
-                    // no action - discard
-                    pathStarted = true;
-
-                } else if (pathPart.equals("/..")) {
-                    if (!pathList.isEmpty()) {
-                        pathList.remove(pathList.size() - 1);
-                    }
-                    pathStarted = true;
-
-                } else {
-                    pathList.add(pathPart);
-                    pathStarted = true;
-                }
-                urlPath = urlPath.substring(m.end(1));
-            }
-            if (urlPath.length() > 0) {
-                pathList.add(urlPath);
-            }
-
             // Append the remaining path parts to the target URL
+            List<String> pathList = resolveRelativePathReferences(urlPath);
+
             for (String pathPart : pathList) {
                 targetUrl.append(pathPart);
             }
@@ -104,6 +73,45 @@ public class RepositoryNamespaceUtils {
 
         return result;
     }
+
+	/**
+	 * Updates the URL path list to resolve relative path references.
+	 * 
+	 * @param urlPath  the URL path to be processed
+	 * @return List<String>
+	 */
+	private static List<String> resolveRelativePathReferences(String urlPath) {
+        List<String> pathList = new ArrayList<>();
+		boolean pathStarted = false;
+		Matcher m;
+
+		while ((m = pathPartPattern.matcher(urlPath)).find()) {
+		    String pathPart = m.group(1);
+
+		    if (pathPart.equals("/") && !pathStarted) {
+		        pathList.add(pathPart);
+
+		    } else if (pathPart.equals("/.") || pathPart.equals("/")) {
+		        // no action - discard
+		        pathStarted = true;
+
+		    } else if (pathPart.equals("/..")) {
+		        if (!pathList.isEmpty()) {
+		            pathList.remove(pathList.size() - 1);
+		        }
+		        pathStarted = true;
+
+		    } else {
+		        pathList.add(pathPart);
+		        pathStarted = true;
+		    }
+		    urlPath = urlPath.substring(m.end(1));
+		}
+		if (urlPath.length() > 0) {
+		    pathList.add(urlPath);
+		}
+		return pathList;
+	}
 
     /**
      * Appends the given child path to the base namespace URI.
@@ -160,20 +168,23 @@ public class RepositoryNamespaceUtils {
         if (!ns.endsWith("/"))
             ns += "/";
 
-        for (String rootNS : repository.listRootNamespaces()) {
-            if (!rootNS.endsWith("/"))
-                rootNS += "/";
-
-            if (rootNS.equals(ns)) {
-                isValidNS = isRootNS = true;
-                break;
-
-            } else if (ns.startsWith(rootNS)) {
-                isValidNS = true;
-                break;
-            }
-        }
-
+		for (String rootNS : repository.listRootNamespaces()) {
+			boolean done = false;
+			
+			if (!rootNS.endsWith("/"))
+				rootNS += "/";
+			
+			if (rootNS.equals(ns)) {
+				isValidNS = isRootNS = true;
+				done = true;
+				
+			} else if (ns.startsWith(rootNS)) {
+				isValidNS = true;
+				done = true;
+			}
+			if (done) break;
+		}
+		
         if (isRootNS) {
             parentNS = null;
 

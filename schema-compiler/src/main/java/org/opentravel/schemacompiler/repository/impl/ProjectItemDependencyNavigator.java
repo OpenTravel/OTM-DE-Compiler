@@ -125,31 +125,41 @@ public class ProjectItemDependencyNavigator extends DependencyNavigator {
                 TLLibrary currentVersion = (TLLibrary) library;
                 VersionScheme vScheme = VersionSchemeFactory.getInstance().getVersionScheme(
                         currentVersion.getVersionScheme());
-                List<String> versionChain = vScheme.getMajorVersionChain(currentVersion
-                        .getNamespace());
+                List<String> versionChain = vScheme.getMajorVersionChain(currentVersion.getNamespace());
 
-                for (int i = 1; i < versionChain.size(); i++) { // skip the first element since it
-                                                                // represents the current library's
-                                                                // version
-                    String previousVersionId = vScheme.getVersionIdentifier(versionChain.get(i));
-
-                    for (TLLibrary lib : currentVersion.getOwningModel().getUserDefinedLibraries()) {
-                        if (lib == currentVersion) {
-                            continue;
-                        }
-                        if (lib.getName().equals(currentVersion.getName())
-                                && lib.getVersion().equals(previousVersionId)
-                                && lib.getBaseNamespace().equals(currentVersion.getBaseNamespace())) {
-                            previousVersions.add(lib);
-                            break; // stop searching after the first match
-                        }
-                    }
-                }
+                getPreviousVersions(currentVersion, previousVersions, versionChain, vScheme);
+                
             } catch (VersionSchemeException e) {
                 // Ignore error and return null
             }
         }
         return previousVersions;
     }
+
+	/**
+	 * Searches the model and returns all previous versions of the current-version library.
+	 * 
+	 * @param currentVersion  the current version of the library
+	 * @param previousVersions  the list of previous versions being constructed
+	 * @param versionChain  the major version chain of version identifiers
+	 * @param vScheme  the library version scheme
+	 */
+	private void getPreviousVersions(TLLibrary currentVersion, List<AbstractLibrary> previousVersions,
+			List<String> versionChain, VersionScheme vScheme) {
+		for (int i = 1; i < versionChain.size(); i++) { // skip the first element since it
+		                                                // represents the current library's
+		                                                // version
+		    String previousVersionId = vScheme.getVersionIdentifier(versionChain.get(i));
+
+		    for (TLLibrary lib : currentVersion.getOwningModel().getUserDefinedLibraries()) {
+				if ((lib != currentVersion) && lib.getName().equals(currentVersion.getName())
+						&& lib.getVersion().equals(previousVersionId)
+						&& lib.getBaseNamespace().equals(currentVersion.getBaseNamespace())) {
+					previousVersions.add(lib);
+					break; // stop searching after the first match
+				}
+		    }
+		}
+	}
 
 }

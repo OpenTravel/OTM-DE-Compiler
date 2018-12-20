@@ -185,150 +185,170 @@ public class SchemaNameValidationRegistry {
     }
 
     /**
-     * Adds a registry entry for the given entity using its schema type name.
-     * 
-     * @param entity
-     *            the entity to be added to the registry
-     */
-    private void addTypeNameToRegistry(NamedEntity entity) {
-        QName typeName = null;
-        
-        if (hasGlobalType( entity )) {
-            if ((entity instanceof XSDComplexType) || (entity instanceof XSDSimpleType)) {
-                typeName = new QName(entity.getNamespace(), entity.getLocalName());
-
-            } else {
-            	String localTypeName = XsdCodegenUtils.getGlobalTypeName(entity);
-                typeName = (localTypeName == null) ? null : new QName(entity.getNamespace(), localTypeName);
-            }
-        }
-        
-        if (typeName != null) {
-        		typeNameEntities.computeIfAbsent( typeName, n -> typeNameEntities.put( n, new HashSet<>() ) );
-            typeNameEntities.get(typeName).add( entity );
-            entityTypeNames.put( entity, typeName );
-        }
-    }
-
-    /**
-     * Adds a registry entry for the given entity using all of the global element names (if any)
-     * that will be assigned during schema generation.
-     * 
-     * @param entity
-     *            the entity to be added to the registry
-     */
-    private void addElementNamesToRegistry(NamedEntity entity) {
-        if (entity instanceof TLFacet) {
-            TLFacet entityFacet = (TLFacet) entity;
-            boolean hasContent = new FacetCodegenDelegateFactory(null).getDelegate(entityFacet).hasContent();
-
-            if (hasContent && !XsdCodegenUtils.isSimpleCoreObject(entityFacet.getOwningEntity())) {
-                addElementNameToRegistry(XsdCodegenUtils.getGlobalElementName(entity), entity);
-            }
-
-        } else if (entity instanceof TLActionFacet) {
-        	// No additional member elements to add
-        	
-        } else if (entity instanceof TLAlias) {
-            TLAliasOwner aliasOwner = ((TLAlias) entity).getOwningEntity();
-
-            if (aliasOwner instanceof TLFacet) {
-                TLFacet aliasedFacet = (TLFacet) aliasOwner;
-                boolean hasContent = new FacetCodegenDelegateFactory(null)
-                        .getDelegate(aliasedFacet).hasContent();
-
-                if (hasContent
-                        && !XsdCodegenUtils.isSimpleCoreObject(aliasedFacet.getOwningEntity())) {
-                    addElementNameToRegistry(XsdCodegenUtils.getGlobalElementName(entity), entity);
-                }
-
-            } else { // Must be an alias of a business object or core that has a substitution group
-                TLFacet substitutableFacet = null;
-
-                if (aliasOwner instanceof TLCoreObject) {
-                    substitutableFacet = ((TLCoreObject) aliasOwner).getSummaryFacet();
-
-                } else if (aliasOwner instanceof TLBusinessObject) {
-                    substitutableFacet = ((TLBusinessObject) aliasOwner).getIdFacet();
-                    
-                } else if (aliasOwner instanceof TLChoiceObject) {
-                    substitutableFacet = ((TLChoiceObject) aliasOwner).getSharedFacet();
-                }
-                if (substitutableFacet != null) {
-                    String facetName = FacetCodegenUtils.getFacetName(substitutableFacet);
-                    TLAlias substitutableAlias = AliasCodegenUtils.getFacetAlias((TLAlias) entity,
-                            substitutableFacet.getFacetType(), facetName);
-
-                    if (substitutableAlias != null) {
-                        addElementNameToRegistry(
-                                XsdCodegenUtils.getSubstitutableElementName(substitutableAlias), entity);
-                    }
-                }
-                addElementNameToRegistry(XsdCodegenUtils.getSubstitutionGroupElementName(entity), entity);
-            }
-
-        } else if (XsdCodegenUtils.isSimpleCoreObject(entity)) {
-            addElementNameToRegistry(XsdCodegenUtils.getGlobalElementName(entity), entity);
-
-        } else { // Must be a business, core, or choice object that has a substitution group
-            TLFacet substitutableFacet = null;
-
-            if (entity instanceof TLCoreObject) {
-                substitutableFacet = ((TLCoreObject) entity).getSummaryFacet();
-
-            } else if (entity instanceof TLBusinessObject) {
-                substitutableFacet = ((TLBusinessObject) entity).getIdFacet();
-                
-            } else if (entity instanceof TLChoiceObject) {
-                substitutableFacet = ((TLChoiceObject) entity).getSharedFacet();
-            }
-            if (substitutableFacet != null) {
-                addElementNameToRegistry(
-                        XsdCodegenUtils.getSubstitutableElementName(substitutableFacet), entity);
-            }
-            addElementNameToRegistry(XsdCodegenUtils.getSubstitutionGroupElementName(entity),
-                    entity);
-        }
-    }
-
-    /**
-     * Adds the given entity to the registry using the specified XML element name.
-     * 
-     * @param elementName
-     *            the name of the schema element for the entity
-     * @param entity
-     *            the entity to be added to the registry
-     */
-	private void addElementNameToRegistry(QName elementName, NamedEntity entity) {
-		if ((elementName != null) && (entity != null) && hasGlobalType(entity)) {
-			elementNameEntities.computeIfAbsent( elementName, n -> elementNameEntities.put( n, new HashSet<>() ) );
-			entityElementNames.computeIfAbsent( entity, e -> entityElementNames.put( e, new HashSet<>() ) );
-			elementNameEntities.get(elementName).add( entity );
-			entityElementNames.get(entity).add( elementName );
-		}
-	}
-    
-    /**
-     * Returns true if the given entity has a global schema type definition associated with it.
-     * 
-     * @param entity  the entity to check
-     * @return boolean
-     */
-    private boolean hasGlobalType(NamedEntity entity) {
-    	boolean result = true;
-    	
-    	if (entity instanceof TLActionFacet) {
-    		NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( (TLActionFacet) entity );
-    		result = (payloadType == entity);
-    	}
-    	return result;
-    }
-
-    /**
      * Visitor that constructs the registry of all global type and element names in the model.
      */
     private class SchemaNameVisitor extends ModelElementVisitorAdapter {
 
+        /**
+         * Adds a registry entry for the given entity using its schema type name.
+         * 
+         * @param entity
+         *            the entity to be added to the registry
+         */
+        private void addTypeNameToRegistry(NamedEntity entity) {
+            QName typeName = null;
+            
+            if (hasGlobalType( entity )) {
+                if ((entity instanceof XSDComplexType) || (entity instanceof XSDSimpleType)) {
+                    typeName = new QName(entity.getNamespace(), entity.getLocalName());
+
+                } else {
+                	String localTypeName = XsdCodegenUtils.getGlobalTypeName(entity);
+                    typeName = (localTypeName == null) ? null : new QName(entity.getNamespace(), localTypeName);
+                }
+            }
+            
+            if (typeName != null) {
+            		typeNameEntities.computeIfAbsent( typeName, n -> typeNameEntities.put( n, new HashSet<>() ) );
+                typeNameEntities.get(typeName).add( entity );
+                entityTypeNames.put( entity, typeName );
+            }
+        }
+
+        /**
+         * Adds a registry entry for the given entity using all of the global element names (if any)
+         * that will be assigned during schema generation.
+         * 
+         * @param entity
+         *            the entity to be added to the registry
+         */
+        private void addElementNamesToRegistry(NamedEntity entity) {
+            if (entity instanceof TLFacet) {
+                TLFacet entityFacet = (TLFacet) entity;
+                boolean hasContent = new FacetCodegenDelegateFactory(null).getDelegate(entityFacet).hasContent();
+
+                if (hasContent && !XsdCodegenUtils.isSimpleCoreObject(entityFacet.getOwningEntity())) {
+                    addElementNameToRegistry(XsdCodegenUtils.getGlobalElementName(entity), entity);
+                }
+
+            } else if (entity instanceof TLActionFacet) {
+            	// No additional member elements to add
+            	
+            } else if (entity instanceof TLAlias) {
+                TLAliasOwner aliasOwner = ((TLAlias) entity).getOwningEntity();
+
+                if (aliasOwner instanceof TLFacet) {
+                    TLFacet aliasedFacet = (TLFacet) aliasOwner;
+                    boolean hasContent = new FacetCodegenDelegateFactory(null)
+                            .getDelegate(aliasedFacet).hasContent();
+
+                    if (hasContent
+                            && !XsdCodegenUtils.isSimpleCoreObject(aliasedFacet.getOwningEntity())) {
+                        addElementNameToRegistry(XsdCodegenUtils.getGlobalElementName(entity), entity);
+                    }
+
+                } else { // Must be an alias of a business object or core that has a substitution group
+                    addSubstitutableFacet(entity, aliasOwner);
+                }
+
+            } else if (XsdCodegenUtils.isSimpleCoreObject(entity)) {
+                addElementNameToRegistry(XsdCodegenUtils.getGlobalElementName(entity), entity);
+
+            } else { // Must be a business, core, or choice object that has a substitution group
+                addSubstitutableFacet(entity);
+            }
+        }
+
+		/**
+		 * For aliased entities that define a substitution group, this method adds the top-level
+		 * substitutable facet to the registry.
+		 * 
+		 * @param entity  the entity to be added
+		 */
+		private void addSubstitutableFacet(NamedEntity entity) {
+			TLFacet substitutableFacet = null;
+
+			if (entity instanceof TLCoreObject) {
+			    substitutableFacet = ((TLCoreObject) entity).getSummaryFacet();
+
+			} else if (entity instanceof TLBusinessObject) {
+			    substitutableFacet = ((TLBusinessObject) entity).getIdFacet();
+			    
+			} else if (entity instanceof TLChoiceObject) {
+			    substitutableFacet = ((TLChoiceObject) entity).getSharedFacet();
+			}
+			if (substitutableFacet != null) {
+			    addElementNameToRegistry(
+			            XsdCodegenUtils.getSubstitutableElementName(substitutableFacet), entity);
+			}
+			addElementNameToRegistry(XsdCodegenUtils.getSubstitutionGroupElementName(entity), entity);
+		}
+
+		/**
+		 * For aliased entities that define a substitution group, this method adds the top-level
+		 * substitutable facet to the registry.
+		 * 
+		 * @param entity  the entity to be added
+		 * @param aliasOwner  the alias owner that defines the substitution group
+		 */
+		private void addSubstitutableFacet(NamedEntity entity, TLAliasOwner aliasOwner) {
+			TLFacet substitutableFacet = null;
+
+			if (aliasOwner instanceof TLCoreObject) {
+			    substitutableFacet = ((TLCoreObject) aliasOwner).getSummaryFacet();
+
+			} else if (aliasOwner instanceof TLBusinessObject) {
+			    substitutableFacet = ((TLBusinessObject) aliasOwner).getIdFacet();
+			    
+			} else if (aliasOwner instanceof TLChoiceObject) {
+			    substitutableFacet = ((TLChoiceObject) aliasOwner).getSharedFacet();
+			}
+			if (substitutableFacet != null) {
+			    String facetName = FacetCodegenUtils.getFacetName(substitutableFacet);
+			    TLAlias substitutableAlias = AliasCodegenUtils.getFacetAlias((TLAlias) entity,
+			            substitutableFacet.getFacetType(), facetName);
+
+			    if (substitutableAlias != null) {
+			        addElementNameToRegistry(
+			                XsdCodegenUtils.getSubstitutableElementName(substitutableAlias), entity);
+			    }
+			}
+			addElementNameToRegistry(XsdCodegenUtils.getSubstitutionGroupElementName(entity), entity);
+		}
+
+        /**
+         * Adds the given entity to the registry using the specified XML element name.
+         * 
+         * @param elementName
+         *            the name of the schema element for the entity
+         * @param entity
+         *            the entity to be added to the registry
+         */
+		private void addElementNameToRegistry(QName elementName, NamedEntity entity) {
+			if ((elementName != null) && (entity != null) && hasGlobalType(entity)) {
+				elementNameEntities.computeIfAbsent(elementName, n -> elementNameEntities.put(n, new HashSet<>()));
+				entityElementNames.computeIfAbsent(entity, e -> entityElementNames.put(e, new HashSet<>()));
+				elementNameEntities.get(elementName).add(entity);
+				entityElementNames.get(entity).add(elementName);
+			}
+		}
+		
+	    /**
+	     * Returns true if the given entity has a global schema type definition associated with it.
+	     * 
+	     * @param entity  the entity to check
+	     * @return boolean
+	     */
+		private boolean hasGlobalType(NamedEntity entity) {
+			boolean result = true;
+			
+			if (entity instanceof TLActionFacet) {
+				NamedEntity payloadType = ResourceCodegenUtils.getPayloadType((TLActionFacet) entity);
+				result = (payloadType == entity);
+			}
+			return result;
+		}
+		
         /**
          * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitSimple(org.opentravel.schemacompiler.model.TLSimple)
          */

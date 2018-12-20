@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 
@@ -58,10 +59,10 @@ public class SchemaDeclaration {
      * @return InputStream
      * @throws IOException
      *             thrown if the schema's file location is null/empty or the file cannot be found
-     * @deprecated  use getContent(fileFormat) instead
+     * @Deprecated  use {@link #getContent(String)} instead
      */
-    public InputStream getContent() throws IOException {
-    	return getContent( CodeGeneratorFactory.XSD_TARGET_FORMAT );
+	public InputStream getContent() throws IOException {
+		return getContent(CodeGeneratorFactory.XSD_TARGET_FORMAT);
     }
 
     /**
@@ -106,11 +107,11 @@ public class SchemaDeclaration {
      * schema's location path).
      * 
      * @return String
-     * @deprecated  use getFilename(fileFormat) instead
+     * @Deprecated  use {@link #getFilename(String)} instead
      */
-    public String getFilename() {
-    	return getFilename( CodeGeneratorFactory.XSD_TARGET_FORMAT );
-    }
+	public String getFilename() {
+		return getFilename(CodeGeneratorFactory.XSD_TARGET_FORMAT);
+	}
     
     /**
      * Returns the name of the schema file with the specified file format (computed as
@@ -198,7 +199,7 @@ public class SchemaDeclaration {
      * Returns the classpath or file location of the schema (XSD file format).
      * 
      * @return String
-     * @deprecated  use getLocation(fileFormat) instead
+     * @Deprecated  use {@link #getLocation(String)} instead
      */
     public String getLocation() {
         return getLocation( CodeGeneratorFactory.XSD_TARGET_FORMAT );
@@ -221,8 +222,8 @@ public class SchemaDeclaration {
 	public List<SchemaLocation> getLocations() {
 		List<SchemaLocation> sLocs = new ArrayList<>();
 		
-		for (String fileFormat : locations.keySet()) {
-			sLocs.add( new SchemaLocation( fileFormat, locations.get( fileFormat) ) );
+		for (Entry<String,String> entry : locations.entrySet()) {
+			sLocs.add( new SchemaLocation( entry.getKey(), entry.getValue() ) );
 		}
 		return Collections.unmodifiableList( sLocs );
 	}

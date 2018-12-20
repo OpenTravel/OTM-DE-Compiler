@@ -69,7 +69,7 @@ public class ServiceAssemblyManager {
 	 * Constructor that provides the repository manager instance to use when accessing
 	 * remote content.
 	 */
-	public ServiceAssemblyManager(RepositoryManager repositoryManager) throws RepositoryException {
+	public ServiceAssemblyManager(RepositoryManager repositoryManager) {
 		this.repositoryManager = repositoryManager;
 		this.fileUtils = new ServiceAssemblyFileUtils( repositoryManager );
 	}
@@ -160,7 +160,7 @@ public class ServiceAssemblyManager {
 		findings.addAll( validateAssembly( assembly ) );
 		
 		if (!findings.hasFinding( FindingType.ERROR )) {
-			model = loadModel( assembly.getProviderApis(), findings );
+			model = loadModel( assembly.getProviderApis() );
 		}
 		return model;
 	}
@@ -183,7 +183,7 @@ public class ServiceAssemblyManager {
 		findings.addAll( validateAssembly( assembly ) );
 		
 		if (!findings.hasFinding( FindingType.ERROR )) {
-			model = loadModel( assembly.getConsumerApis(), findings );
+			model = loadModel( assembly.getConsumerApis() );
 		}
 		return model;
 	}
@@ -207,7 +207,7 @@ public class ServiceAssemblyManager {
 		findings.addAll( validateAssembly( assembly ) );
 		
 		if (!findings.hasFinding( FindingType.ERROR )) {
-			model = loadModel( assembly.getAllApis(), findings );
+			model = loadModel( assembly.getAllApis() );
 		}
 		return model;
 	}
@@ -217,12 +217,10 @@ public class ServiceAssemblyManager {
 	 * assembly has been pre-validated prior to calling this method.
 	 * 
 	 * @param assemblyItems  the list of assembly items to be loaded
-	 * @param findings  the validation findings that will be used to collect any errors or
-	 *					warnings that are detected during the load
 	 * @return TLModel
 	 * @throws SchemaCompilerException  thrown if an error occurs while loading the model
 	 */
-	private TLModel loadModel(List<ServiceAssemblyItem> assemblyItems, ValidationFindings findings)
+	private TLModel loadModel(List<ServiceAssemblyItem> assemblyItems)
 			throws SchemaCompilerException {
 		ReleaseManager releaseManager = new ReleaseManager( repositoryManager );
 		Map<ServiceAssemblyItem,Release> itemReleaseMap = new HashMap<>();
@@ -268,6 +266,21 @@ public class ServiceAssemblyManager {
 		ModelReferenceResolver.resolveReferences( model );
 		
 		// Finally, we need to identify and purge all unwanted resources from the model
+		purgeUnwantedResources(assemblyItems, itemReleaseMap, model);
+		
+		return model;
+	}
+
+	/**
+	 * Scans the given model and removes any resources that were not explicitly
+	 * called out in the service assembly.
+	 * 
+	 * @param assemblyItems  the list of service assembly items
+	 * @param itemReleaseMap  the map of assembly items to their corresponding releases
+	 * @param model  the model to be scanned for unwanted resources
+	 */
+	private void purgeUnwantedResources(List<ServiceAssemblyItem> assemblyItems,
+			Map<ServiceAssemblyItem, Release> itemReleaseMap, TLModel model) {
 		Set<TLResource> keepResources = new HashSet<>();
 		
 		for (ServiceAssemblyItem saItem : assemblyItems) {
@@ -276,26 +289,7 @@ public class ServiceAssemblyManager {
 					new ArrayList<>() : getLibraries( release , model );
 			QName resourceName = saItem.getResourceName();
 			
-			if (resourceName != null) {
-				// If a resource name is explicitly provided, only keep that resource from
-				// the associated release
-				for (TLLibrary library : saLibraries) {
-					if (library.getNamespace().equals( resourceName.getNamespaceURI())) {
-						TLResource resource = library.getResourceType( resourceName.getLocalPart() );
-						
-						if (resource != null) {
-							keepResources.add( resource );
-						}
-					}
-				}
-				
-			} else {
-				// If a resource name is not explicitly provided, keep all resources from
-				// the associated release
-				for (TLLibrary library : saLibraries) {
-					keepResources.addAll( library.getResourceTypes() );
-				}
-			}
+			keepResources.addAll( findRetainedResources( resourceName, saLibraries ) );
 		}
 		
 		// Purge all resource not identified for keeping
@@ -308,8 +302,42 @@ public class ServiceAssemblyManager {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Returns the list of all resources that should be retained from the given list of libraries.
+	 * 
+	 * @param resourceName  the qualified name of the resource to retain (may be null)
+	 * @param libraries  the list of libraries to search
+	 * @return Set<TLResource>
+	 */
+	private Set<TLResource> findRetainedResources(QName resourceName, List<TLLibrary> libraries) {
+		Set<TLResource> keepResources = new HashSet<>();
 		
-		return model;
+		if (resourceName != null) {
+			// If a resource name is explicitly provided, only keep that resource from
+			// the associated release
+			for (TLLibrary library : libraries) {
+				if (library.getNamespace().equals( resourceName.getNamespaceURI())) {
+					TLResource resource = library.getResourceType( resourceName.getLocalPart() );
+					
+					if (resource != null) {
+						keepResources.add( resource );
+					}
+				}
+			}
+			
+		} else {
+			// If a resource name is not explicitly provided, keep all resources from
+			// the associated release
+			for (TLLibrary library : libraries) {
+				keepResources.addAll( library.getResourceTypes() );
+			}
+		}
+		
+		// TODO: Need to make sure we also retain any extended or parent resources
+		
+		return keepResources;
 	}
 	
 	/**

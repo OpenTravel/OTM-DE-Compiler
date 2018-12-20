@@ -18,7 +18,6 @@ package org.opentravel.schemacompiler.extension;
 import java.io.InputStream;
 import java.util.Collection;
 
-import org.springframework.beans.BeansException;
 import org.springframework.context.support.GenericApplicationContext;
 
 /**
@@ -54,11 +53,8 @@ public interface CompilerExtensionProvider {
      *            the context into which the compiler extension beans should be loaded
      * @param extensionId
      *            the unique ID of the extension to load
-     * @throws BeansException
-     *             thrown if the application context configuration file(s) cannot be loaded
      */
-    public void loadCompilerExtension(GenericApplicationContext context, String extensionId)
-            throws BeansException;
+    public void loadCompilerExtension(GenericApplicationContext context, String extensionId);
 
     /**
      * Loads any compiler extensions that are not associated with a specific extension ID. These
@@ -68,10 +64,8 @@ public interface CompilerExtensionProvider {
      * 
      * @param context
      *            the context into which the compiler extension beans should be loaded
-     * @throws BeansException
      */
-    public void loadGeneralCompilerExtensions(GenericApplicationContext context)
-            throws BeansException;
+    public void loadGeneralCompilerExtensions(GenericApplicationContext context);
 
     /**
      * Returns an input stream to the specified classpath resource. This method is similar to

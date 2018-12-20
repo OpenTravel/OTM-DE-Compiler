@@ -56,9 +56,9 @@ public abstract class TLAbstractFacet extends TLModelElement implements TLProper
      */
     @Override
     public AbstractLibrary getOwningLibrary() {
-        TLFacetOwner owningEntity = getOwningEntity();
+        TLFacetOwner owner = getOwningEntity();
 
-        return (owningEntity == null) ? null : owningEntity.getOwningLibrary();
+        return (owner == null) ? null : owner.getOwningLibrary();
     }
 
     /**

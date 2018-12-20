@@ -111,22 +111,7 @@ public class LegacyTypeExampleProvider {
                 String typeName = (String) propertyNames.nextElement();
                 String propertyValue = exampleDataProps.getProperty(typeName);
 
-                if ((typeName == null) || typeName.equals(NAMESPACE_PROPERTY)) {
-                    this.namespace = propertyValue;
-
-                } else if (propertyValue != null) {
-                    String[] valueArray = propertyValue.split(",");
-
-                    if ((valueArray != null) && (valueArray.length > 0)) {
-                        List<String> exampleValues = exampleTypeMappings.get(typeName);
-
-                        if (exampleValues == null) {
-                            exampleValues = new ArrayList<>();
-                            exampleTypeMappings.put(typeName, exampleValues);
-                        }
-                        exampleValues.addAll(Arrays.asList(valueArray));
-                    }
-                }
+                addExampleTypeMappings(typeName, propertyValue);
             }
 
             if (this.namespace == null) {
@@ -140,5 +125,25 @@ public class LegacyTypeExampleProvider {
                             + exampleFileLocation);
         }
     }
+
+	/**
+	 * Adds new example type mappings using the information provided.
+	 * 
+	 * @param typeName  the type name for which to add example values
+	 * @param propertyValue  the property value containing one or more example values
+	 */
+	private void addExampleTypeMappings(String typeName, String propertyValue) {
+		if ((typeName == null) || typeName.equals(NAMESPACE_PROPERTY)) {
+		    this.namespace = propertyValue;
+
+		} else if (propertyValue != null) {
+		    String[] valueArray = propertyValue.split(",");
+
+		    if ((valueArray != null) && (valueArray.length > 0)) {
+		        exampleTypeMappings.computeIfAbsent( typeName, t -> exampleTypeMappings.put( t, new ArrayList<>() ) );
+		        exampleTypeMappings.get(typeName).addAll(Arrays.asList(valueArray));
+		    }
+		}
+	}
 
 }

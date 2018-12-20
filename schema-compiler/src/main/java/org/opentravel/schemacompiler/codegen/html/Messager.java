@@ -45,6 +45,7 @@ import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.opentravel.schemacompiler.util.SchemaCompilerRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -124,7 +125,7 @@ public class Messager {
                 messageRB = ResourceBundle.getBundle(
                           "org.opentravel.schemacompiler.codegen.html.resources.javadoc");
             } catch (MissingResourceException e) {
-                throw new Error("Fatal: Resource for javadoc is missing");
+                throw new SchemaCompilerRuntimeException("Fatal: Resource for javadoc is missing", e);
             }
         }
         return messageRB.getString(key);

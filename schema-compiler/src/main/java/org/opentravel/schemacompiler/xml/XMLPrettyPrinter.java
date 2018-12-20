@@ -25,6 +25,7 @@ import java.io.Writer;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.opentravel.schemacompiler.util.SchemaCompilerRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -129,7 +130,7 @@ public class XMLPrettyPrinter {
 
             } catch (UnsupportedEncodingException e) {
                 // Should never happen, but just in case...
-                throw new RuntimeException(e);
+                throw new SchemaCompilerRuntimeException(e);
             }
         }
 

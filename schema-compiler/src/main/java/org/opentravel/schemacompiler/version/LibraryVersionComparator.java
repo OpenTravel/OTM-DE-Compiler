@@ -67,18 +67,23 @@ public class LibraryVersionComparator implements Comparator<TLLibrary> {
      * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
      */
     @Override
-    public int compare(TLLibrary library1, TLLibrary library2) {
-        int result;
-
-        if ((library1 == null) || (library2 == null)) {
-            result = (library1 == null) ? ((library2 == null) ? 0 : 1) : -1;
-        } else {
-            result = versionComparator.compare(new LibraryVersionedDecorator(library1),
-                    new LibraryVersionedDecorator(library2));
-        }
-        return result;
-    }
-
+	public int compare(TLLibrary library1, TLLibrary library2) {
+		int result;
+		
+		if ((library1 == null) || (library2 == null)) {
+			if (library1 == null) {
+				result = (library2 == null) ? 0 : 1;
+			} else {
+				result = -1;
+			}
+			
+		} else {
+			result = versionComparator.compare(new LibraryVersionedDecorator(library1),
+					new LibraryVersionedDecorator(library2));
+		}
+		return result;
+	}
+	
     /**
      * Wrapper class used to apply the <code>Versioned</code> interface to a <code>TLLibrary</code>.
      */
@@ -133,8 +138,8 @@ public class LibraryVersionComparator implements Comparator<TLLibrary> {
          */
         @Override
         public boolean isLaterVersion(Versioned otherVersionedItem) {
-            return ((library == null) || (otherVersionedItem == null)) ? false : library
-                    .isLaterVersion(otherVersionedItem.getOwningLibrary());
+            return (library != null) && (otherVersionedItem != null) &&
+            		library.isLaterVersion(otherVersionedItem.getOwningLibrary());
         }
 
         /**
@@ -190,6 +195,7 @@ public class LibraryVersionComparator implements Comparator<TLLibrary> {
 		 */
 		@Override
 		public void addListener(ModelElementListener listener) {
+			// No action - listeners not supported by the decorator
 		}
 
 		/**
@@ -197,6 +203,7 @@ public class LibraryVersionComparator implements Comparator<TLLibrary> {
 		 */
 		@Override
 		public void removeListener(ModelElementListener listener) {
+			// No action - listeners not supported by the decorator
 		}
 
 		/**

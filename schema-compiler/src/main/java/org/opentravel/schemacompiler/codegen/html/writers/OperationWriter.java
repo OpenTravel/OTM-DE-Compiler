@@ -15,6 +15,8 @@
  */
 package org.opentravel.schemacompiler.codegen.html.writers;
 
+import java.io.IOException;
+
 import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.builders.OperationDocumentationBuilder;
 
@@ -26,7 +28,7 @@ public class OperationWriter extends FacetOwnerWriterImpl<OperationDocumentation
 
 	public OperationWriter(OperationDocumentationBuilder member,
 			DocumentationBuilder prev,
-			DocumentationBuilder next) throws Exception {
+			DocumentationBuilder next) throws IOException {
 		super(member, prev, next);
 	}
 

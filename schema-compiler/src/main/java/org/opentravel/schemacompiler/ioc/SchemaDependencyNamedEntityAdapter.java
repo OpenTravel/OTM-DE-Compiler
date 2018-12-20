@@ -92,6 +92,7 @@ public class SchemaDependencyNamedEntityAdapter implements NamedEntity {
 	 */
 	@Override
 	public void addListener(ModelElementListener listener) {
+		// No action required - listeners not supported
 	}
 
 	/**
@@ -99,6 +100,7 @@ public class SchemaDependencyNamedEntityAdapter implements NamedEntity {
 	 */
 	@Override
 	public void removeListener(ModelElementListener listener) {
+		// No action required - listeners not supported
 	}
 
 	/**

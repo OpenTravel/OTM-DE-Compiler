@@ -15,10 +15,15 @@
  */
 package org.opentravel.schemacompiler.codegen.html.builders;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.opentravel.schemacompiler.codegen.CodeGenerationException;
+import org.opentravel.schemacompiler.codegen.html.Configuration;
+import org.opentravel.schemacompiler.codegen.html.Content;
+import org.opentravel.schemacompiler.codegen.html.writers.LibraryWriter;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
@@ -28,9 +33,6 @@ import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLService;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
-import org.opentravel.schemacompiler.codegen.html.Configuration;
-import org.opentravel.schemacompiler.codegen.html.Content;
-import org.opentravel.schemacompiler.codegen.html.writers.LibraryWriter;
 
 /**
  * @author Eric.Bronson
@@ -142,30 +144,34 @@ public class LibraryDocumentationBuilder implements DocumentationBuilder {
 	}
 
 	@Override
-	public void build() throws Exception {
-		LibraryWriter writer = new LibraryWriter(Configuration.getInstance(),
-				this, prev, next);
-		Content content = writer.getHeader();
-		Content libraryTree = writer.getContentHeader();
-		writer.addObjectsSummary(libraryTree);
-		content.addContent(libraryTree);
-		writer.addFooter(content);
-		writer.printDocument(content);
-		writer.close();
-		DocumentationBuilder p;
-		DocumentationBuilder n;
-		ListIterator<DocumentationBuilder> objectIter = allObjects
-				.listIterator();
-		
-		while (objectIter.hasNext()) {
-			p = objectIter.hasPrevious() ? allObjects.get(objectIter
-					.previousIndex()) : null;
-			DocumentationBuilder builder = objectIter.next();
-			n = objectIter.hasNext() ? allObjects.get(objectIter.nextIndex())
-					: null;
-			builder.setPrevious(p);
-			builder.setNext(n);
-			builder.build();
+	public void build() throws CodeGenerationException {
+		try {
+			LibraryWriter writer = new LibraryWriter(Configuration.getInstance(), this, prev, next);
+			Content content = writer.getHeader();
+			Content libraryTree = writer.getContentHeader();
+			writer.addObjectsSummary(libraryTree);
+			content.addContent(libraryTree);
+			writer.addFooter(content);
+			writer.printDocument(content);
+			writer.close();
+			DocumentationBuilder p;
+			DocumentationBuilder n;
+			ListIterator<DocumentationBuilder> objectIter = allObjects
+					.listIterator();
+			
+			while (objectIter.hasNext()) {
+				p = objectIter.hasPrevious() ? allObjects.get(objectIter
+						.previousIndex()) : null;
+				DocumentationBuilder builder = objectIter.next();
+				n = objectIter.hasNext() ? allObjects.get(objectIter.nextIndex())
+						: null;
+				builder.setPrevious(p);
+				builder.setNext(n);
+				builder.build();
+			}
+			
+		} catch (IOException e) {
+			throw new CodeGenerationException("Error creating doclet writer", e);
 		}
 	}
 	

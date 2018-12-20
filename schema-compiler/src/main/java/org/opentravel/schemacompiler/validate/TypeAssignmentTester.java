@@ -52,7 +52,7 @@ public class TypeAssignmentTester {
 	private static final String SIMPLE_FACET_ERROR_PREFIX = "org.opentravel.schemacompiler.TLSimpleFacet.simpleType.";
 	private static final String VWA_ERROR_PREFIX          = "org.opentravel.schemacompiler.TLValueWithAttributes.parentType.";
 	
-	private static Collection<String> typeAssignmentErrorKeys = Arrays.asList( new String[] {
+	private static Collection<String> typeAssignmentErrorKeys = Arrays.asList(
 			// Attribute error codes
 			ATTRIBUTE_ERROR_PREFIX + TLValidationBuilder.INVALID_NAMED_ENTITY_REFERENCE,
 			ATTRIBUTE_ERROR_PREFIX + TLAttributeCompileValidator.ERROR_NON_SIMPLE_CORE_AS_ATTRIBUTE,
@@ -72,8 +72,8 @@ public class TypeAssignmentTester {
 			
 			// VWA error codes
 			VWA_ERROR_PREFIX + TLValidationBuilder.INVALID_NAMED_ENTITY_REFERENCE,
-			VWA_ERROR_PREFIX + TLValueWithAttributesCompileValidator.ERROR_ILLEGAL_EXTENSION_ATTRIBUTE,
-	});
+			VWA_ERROR_PREFIX + TLValueWithAttributesCompileValidator.ERROR_ILLEGAL_EXTENSION_ATTRIBUTE
+	);
 	
 	private TLModel model;
 	private String lastCompilerExtension;

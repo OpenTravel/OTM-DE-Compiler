@@ -692,101 +692,106 @@ public final class ProjectManager {
      * @throws LibraryLoaderException  thrown if the contents of a library cannot be loaded
      * @throws RepositoryException  thrown if one or more managed repository items cannot be accessed
      */
-    @SuppressWarnings("unchecked")
-	public List<ProjectItem> refreshManagedProjectItems(ValidationFindings findings) throws LibraryLoaderException, RepositoryException {
-        LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<>(model);
-    	LibraryRemovedIntegrityChecker removeProcessor = new LibraryRemovedIntegrityChecker();
-    	ValidationFindings loaderFindings = new ValidationFindings();
-    	Map<String,ProjectItem> refreshedItemMap = new HashMap<>();
-    	List<URL> refreshedLibraryUrls = new ArrayList<>();
-    	List<ProjectItem> refreshedItems = new ArrayList<>();
-    	
-    	modelLoader.setResolveModelReferences( false );
-    	
-    	// Scan for libraries (project items) that need to be refreshed
-    	for (ProjectItem item : projectItems) {
-    		try {
-        		RepositoryItemState itemState = item.getState();
-        		
-        		// Skip items that are locked for local edits; this includes unmanaged items
-        		// and managed items that are WIP
-        		if ((itemState == RepositoryItemState.UNMANAGED) || (itemState == RepositoryItemState.MANAGED_WIP)) {
-        			continue;
-        		}
-        		
-        		// Check the last-updated date on the remote repository item against the local copy
-        		if (repositoryManager.refreshLocalCopy( item )) {
-        			// NOTE: This has only refreshed the library content on the local file system; we
-        			//       still need to update the in-memory model
-        			URL libraryUrl = item.getContent().getLibraryUrl();
-        			
-        			refreshedLibraryUrls.add( libraryUrl );
-        			refreshedItemMap.put( libraryUrl.toExternalForm(), item );
-        		}
-    			
-            } catch (Exception e) {
+	public List<ProjectItem> refreshManagedProjectItems(ValidationFindings findings)
+			throws LibraryLoaderException, RepositoryException {
+		LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<>(model);
+		LibraryRemovedIntegrityChecker removeProcessor = new LibraryRemovedIntegrityChecker();
+		ValidationFindings loaderFindings = new ValidationFindings();
+		Map<String, ProjectItem> refreshedItemMap = new HashMap<>();
+		List<URL> refreshedLibraryUrls = new ArrayList<>();
+		List<ProjectItem> refreshedItems = new ArrayList<>();
+		
+		modelLoader.setResolveModelReferences(false);
+		
+		// Scan for libraries (project items) that need to be refreshed
+		for (ProjectItem item : projectItems) {
+			try {
+				RepositoryItemState itemState = item.getState();
+				
+				// Skip items that are locked for local edits; this includes
+				// unmanaged items
+				// and managed items that are WIP
+				if ((itemState == RepositoryItemState.UNMANAGED) || (itemState == RepositoryItemState.MANAGED_WIP)) {
+					continue;
+				}
+				
+				// Check the last-updated date on the remote repository item
+				// against the local copy
+				if (repositoryManager.refreshLocalCopy(item)) {
+					// NOTE: This has only refreshed the library content on the
+					// local file system; we
+					// still need to update the in-memory model
+					URL libraryUrl = item.getContent().getLibraryUrl();
+					
+					refreshedLibraryUrls.add(libraryUrl);
+					refreshedItemMap.put(libraryUrl.toExternalForm(), item);
+				}
+				
+			} catch (Exception e) {
 				loaderFindings.addFinding(FindingType.ERROR, new LibraryValidationSource(item.getContent()),
-						LoaderValidationMessageKeys.ERROR_UNKNOWN_EXCEPTION_DURING_MODULE_LOAD, URLUtils
-							.getShortRepresentation(item.getContent().getLibraryUrl()), ExceptionUtils
-							.getExceptionClass(e).getSimpleName(), ExceptionUtils.getExceptionMessage(e));
-            }
-    	}
-    	
-    	// Remove each refreshed library from the model
-    	for (ProjectItem item : refreshedItemMap.values()) {
-    		model.removeLibrary( item.getContent() );
-    		removeProcessor.processModelEvent( (OwnershipEvent<TLModel, AbstractLibrary>)
-    				new ModelEventBuilder( ModelEventType.LIBRARY_REMOVED, model )
-    						.setAffectedItem( item.getContent() ).buildEvent() );
-    	}
-    	
-		// Reload each affected library from the local file system and add it back into the model
-    	for (URL libraryUrl : refreshedLibraryUrls) {
-    		ProjectItemImpl refreshedItem = (ProjectItemImpl) refreshedItemMap.get( libraryUrl.toExternalForm() );
-    		List<Project> assignedProjects = refreshedItem.memberOfProjects();
-    		try {
-    			// Re-load the library into memory and replace the original content of the project item
-        		modelLoader.loadLibraryModel( new LibraryStreamInputSource(libraryUrl) );
-    			TLLibrary refreshedLibrary = (TLLibrary) model.getLibrary( libraryUrl );
-    			
-    			if (refreshedLibrary != null) {
-    				refreshedItem.setContent( refreshedLibrary );
-    			}
-    			refreshedItems.add( refreshedItem );
-    			
-    			// Look for new libraries added to the model as dependencies after the refresh
-    			for (AbstractLibrary library : model.getAllLibraries()) {
-    				if (library instanceof BuiltInLibrary) continue;
-    				
-    				if (getProjectItem( library ) == null) {
-    					ProjectItem newItem = findOrCreateProjectItem( library );
-    					
-    					for (Project project : assignedProjects) {
-    						project.add( newItem );
-    					}
-    					addProjectItem( newItem );
-    					refreshedItems.add( newItem );
-    				}
-    			}
-    			
-            } catch (Exception e) {
+						LoaderValidationMessageKeys.ERROR_UNKNOWN_EXCEPTION_DURING_MODULE_LOAD,
+						URLUtils.getShortRepresentation(item.getContent().getLibraryUrl()),
+						ExceptionUtils.getExceptionClass(e).getSimpleName(), ExceptionUtils.getExceptionMessage(e));
+			}
+		}
+		
+		// Remove each refreshed library from the model
+		for (ProjectItem item : refreshedItemMap.values()) {
+			model.removeLibrary(item.getContent());
+			removeProcessor.processModelEvent(new ModelEventBuilder(ModelEventType.LIBRARY_REMOVED, model)
+				.setAffectedItem(item.getContent()).buildOwnershipEvent());
+		}
+		
+		// Reload each affected library from the local file system and add it
+		// back into the model
+		for (URL libraryUrl : refreshedLibraryUrls) {
+			ProjectItemImpl refreshedItem = (ProjectItemImpl) refreshedItemMap.get(libraryUrl.toExternalForm());
+			List<Project> assignedProjects = refreshedItem.memberOfProjects();
+			try {
+				// Re-load the library into memory and replace the original
+				// content of the project item
+				modelLoader.loadLibraryModel(new LibraryStreamInputSource(libraryUrl));
+				TLLibrary refreshedLibrary = (TLLibrary) model.getLibrary(libraryUrl);
+				
+				if (refreshedLibrary != null) {
+					refreshedItem.setContent(refreshedLibrary);
+				}
+				refreshedItems.add(refreshedItem);
+				
+				// Look for new libraries added to the model as dependencies
+				// after the refresh
+				for (AbstractLibrary library : model.getAllLibraries()) {
+					if (library instanceof BuiltInLibrary)
+						continue;
+					
+					if (getProjectItem(library) == null) {
+						ProjectItem newItem = findOrCreateProjectItem(library);
+						
+						for (Project project : assignedProjects) {
+							project.add(newItem);
+						}
+						addProjectItem(newItem);
+						refreshedItems.add(newItem);
+					}
+				}
+				
+			} catch (Exception e) {
 				loaderFindings.addFinding(FindingType.ERROR, new LibraryValidationSource(refreshedItem.getContent()),
 						LoaderValidationMessageKeys.ERROR_UNKNOWN_EXCEPTION_DURING_MODULE_LOAD,
-							URLUtils .getShortRepresentation(libraryUrl),
-							ExceptionUtils.getExceptionClass(e).getSimpleName(),
-							ExceptionUtils.getExceptionMessage(e));
-            }
-    	}
-    	ModelReferenceResolver.resolveReferences(modelLoader.getLibraryModel());
-    	
-    	// Run a final validation check (if necessary)
-    	if (findings != null) {
-    		findings.addAll( TLModelValidator.validateModel(model, ValidatorFactory.COMPILE_RULE_SET_ID) );
-    		findings.addAll( loaderFindings );
-    	}
-    	return refreshedItems;
-    }
-
+						URLUtils.getShortRepresentation(libraryUrl),
+						ExceptionUtils.getExceptionClass(e).getSimpleName(), ExceptionUtils.getExceptionMessage(e));
+			}
+		}
+		ModelReferenceResolver.resolveReferences(modelLoader.getLibraryModel());
+		
+		// Run a final validation check (if necessary)
+		if (findings != null) {
+			findings.addAll(TLModelValidator.validateModel(model, ValidatorFactory.COMPILE_RULE_SET_ID));
+			findings.addAll(loaderFindings);
+		}
+		return refreshedItems;
+	}
+	
     /**
      * Returns the list of all items maintained by this project manager.
      * 

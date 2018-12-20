@@ -45,6 +45,7 @@ import org.opentravel.schemacompiler.model.TLEquivalentOwner;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLMemberField;
+import org.opentravel.schemacompiler.model.TLMemberFieldOwner;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 
@@ -363,14 +364,15 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
      * 
      * @return List<TLMemberField<?>>
      */
-    protected List<TLMemberField<?>> getMemberFields() {
-    	List<TLMemberField<?>> fieldList = new ArrayList<>();
-    	
-    	fieldList.addAll( getAttributes() );
-    	fieldList.addAll( getElements() );
-    	fieldList.addAll( getIndicators() );
-    	return fieldList;
-    }
+	@SuppressWarnings("unchecked")
+	protected <O extends TLMemberFieldOwner> List<TLMemberField<O>> getMemberFields() {
+		List<TLMemberField<O>> fieldList = new ArrayList<>();
+		
+		getAttributes().forEach( f -> fieldList.add( (TLMemberField<O>) f ) );
+		getElements().forEach( f -> fieldList.add( (TLMemberField<O>) f ) );
+		getIndicators().forEach( f -> fieldList.add( (TLMemberField<O>) f ) );
+		return fieldList;
+	}
     
     /**
      * Returns the list of attributes to be generated for the source facet.

@@ -15,14 +15,16 @@
  */
 package org.opentravel.schemacompiler.codegen.html.builders;
 
+import java.io.IOException;
+
+import org.opentravel.schemacompiler.codegen.CodeGenerationException;
+import org.opentravel.schemacompiler.codegen.html.Content;
+import org.opentravel.schemacompiler.codegen.html.writers.OperationWriter;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLOperation;
-
-import org.opentravel.schemacompiler.codegen.html.Content;
-import org.opentravel.schemacompiler.codegen.html.writers.OperationWriter;
 
 /**
  * @author Eric.Bronson
@@ -44,26 +46,31 @@ public class OperationDocumentationBuilder extends
 	}
 
 	@Override
-	public void build() throws Exception {
-		OperationWriter writer = new OperationWriter(this, prev, next);
-		Content contentTree = writer.getHeader();
-		Content classContentTree = writer.getContentHeader();
-		Content tree = writer.getMemberTree(classContentTree);
-		
-		Content classInfoTree = writer.getMemberInfoItemTree();
-		writer.addDocumentationInfo(classInfoTree);
-		tree.addContent(classInfoTree);
-		
-		classInfoTree = writer.getMemberInfoItemTree();
-		writer.addFacetInfo(classInfoTree);
-		tree.addContent(classInfoTree);
-		
-		classContentTree.addContent(tree);
-		contentTree.addContent(classContentTree);
-		writer.addFooter(contentTree);
-		writer.printDocument(contentTree);
-		writer.close();
-		super.build();
+	public void build() throws CodeGenerationException {
+		try {
+			OperationWriter writer = new OperationWriter(this, prev, next);
+			Content contentTree = writer.getHeader();
+			Content classContentTree = writer.getContentHeader();
+			Content tree = writer.getMemberTree(classContentTree);
+			
+			Content classInfoTree = writer.getMemberInfoItemTree();
+			writer.addDocumentationInfo(classInfoTree);
+			tree.addContent(classInfoTree);
+			
+			classInfoTree = writer.getMemberInfoItemTree();
+			writer.addFacetInfo(classInfoTree);
+			tree.addContent(classInfoTree);
+			
+			classContentTree.addContent(tree);
+			contentTree.addContent(classContentTree);
+			writer.addFooter(contentTree);
+			writer.printDocument(contentTree);
+			writer.close();
+			super.build();
+			
+		} catch (IOException e) {
+			throw new CodeGenerationException("Error creating doclet writer", e);
+		}
 	}
 
 	@Override

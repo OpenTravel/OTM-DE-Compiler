@@ -189,8 +189,9 @@ public class TLCoreObject extends TLComplexTypeBase implements TLFacetOwner, TLA
     /**
 	 * @see org.opentravel.schemacompiler.model.TLAliasOwner#getAliasListManager()
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
-	public ChildEntityListManager<TLAlias, ?> getAliasListManager() {
+	public ChildEntityListManager<TLAlias,TLAliasOwner> getAliasListManager() {
 		return aliasManager;
 	}
 

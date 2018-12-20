@@ -43,8 +43,7 @@ public class FacetContextualTransformer extends ComplexTypeTransformer<FacetCont
         }
         facet.setName(name);
         facet.setContext(trimString(source.getContext()));
-        facet.setNotExtendable((source.isNotExtendable() == null) ? false : source
-                .isNotExtendable());
+        facet.setNotExtendable((source.isNotExtendable() != null) && source.isNotExtendable());
 
         for (TLAttribute attribute : transformAttributes(source.getAttribute())) {
             facet.addAttribute(attribute);

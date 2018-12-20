@@ -15,19 +15,22 @@
  */
 package org.opentravel.schemacompiler.codegen.html.builders;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.opentravel.schemacompiler.codegen.CodeGenerationException;
+import org.opentravel.schemacompiler.codegen.html.Content;
+import org.opentravel.schemacompiler.codegen.html.writers.FacetWriter;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
+import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLProperty;
-import org.opentravel.schemacompiler.codegen.html.Content;
-import org.opentravel.schemacompiler.codegen.html.writers.FacetWriter;
 
 /**
  * @author Eric.Bronson
@@ -87,6 +90,7 @@ public class FacetDocumentationBuilder extends
 		if (superFacet == null) {
 			switch (t.getFacetType()) {
 				case CUSTOM:
+				case DETAIL:
 					superFacet = FacetCodegenUtils.getFacetOfType(facetOwner, TLFacetType.SUMMARY);
 					
 					if (!superFacet.declaresContent()) {
@@ -127,28 +131,6 @@ public class FacetDocumentationBuilder extends
 
 					}
 					break;
-				case DETAIL:
-					superFacet = FacetCodegenUtils.getFacetOfType(facetOwner, TLFacetType.SUMMARY);
-					
-					if (!superFacet.declaresContent()) {
-						TLFacetOwner ext = FacetCodegenUtils.getFacetOwnerExtension(facetOwner);
-						
-						while (ext != null) {
-							TLFacet extFacet = FacetCodegenUtils.getFacetOfType(ext, TLFacetType.SUMMARY);
-							
-							if (extFacet.declaresContent()) {
-								superFacet = extFacet;
-								ext = null;
-							} else {
-								ext = FacetCodegenUtils.getFacetOwnerExtension(ext);
-							}
-						}
-
-					}
-					if (!superFacet.declaresContent()) {
-						superFacet = FacetCodegenUtils.getFacetOfType(facetOwner, TLFacetType.ID);
-					}
-					break;
 				case SUMMARY:
 					superFacet = FacetCodegenUtils.getFacetOfType(facetOwner, TLFacetType.ID);
 					break;
@@ -177,8 +159,9 @@ public class FacetDocumentationBuilder extends
 		return DocumentationBuilderType.FACET;
 	}
 
-	public FacetOwnerDocumentationBuilder<?> getOwner() {
-		return owner;
+	@SuppressWarnings("unchecked")
+	public <T extends TLFacetOwner & TLDocumentationOwner> FacetOwnerDocumentationBuilder<T> getOwner() {
+		return (FacetOwnerDocumentationBuilder<T>) owner;
 	}
 
 	public List<PropertyDocumentationBuilder> getProperties() {
@@ -198,43 +181,48 @@ public class FacetDocumentationBuilder extends
 	}
 
 	@Override
-	public void build() throws Exception {
-		FacetWriter writer = new FacetWriter(this, prev, next);
-		Content contentTree = writer.getHeader();
-		writer.addMemberInheritanceTree(contentTree);
-		Content classContentTree = writer.getContentHeader();
-		Content tree = writer.getMemberTree(classContentTree);
+	public void build() throws CodeGenerationException {
+		try {
+			FacetWriter writer = new FacetWriter(this, prev, next);
+			Content contentTree = writer.getHeader();
+			writer.addMemberInheritanceTree(contentTree);
+			Content classContentTree = writer.getContentHeader();
+			Content tree = writer.getMemberTree(classContentTree);
 
-		Content classInfoTree = writer.getMemberInfoItemTree();
-		writer.addDocumentationInfo(classInfoTree);
-		tree.addContent(classInfoTree);
+			Content classInfoTree = writer.getMemberInfoItemTree();
+			writer.addDocumentationInfo(classInfoTree);
+			tree.addContent(classInfoTree);
 
-		classInfoTree = writer.getMemberInfoItemTree();
-		writer.addExampleInfo(classInfoTree);
-		tree.addContent(classInfoTree);
+			classInfoTree = writer.getMemberInfoItemTree();
+			writer.addExampleInfo(classInfoTree);
+			tree.addContent(classInfoTree);
 
-		classInfoTree = writer.getMemberInfoItemTree();
-		writer.addPropertyInfo(classInfoTree);
-		tree.addContent(classInfoTree);
+			classInfoTree = writer.getMemberInfoItemTree();
+			writer.addPropertyInfo(classInfoTree);
+			tree.addContent(classInfoTree);
 
-		classInfoTree = writer.getMemberInfoItemTree();
-		writer.addAttributeInfo(classInfoTree);
-		tree.addContent(classInfoTree);
+			classInfoTree = writer.getMemberInfoItemTree();
+			writer.addAttributeInfo(classInfoTree);
+			tree.addContent(classInfoTree);
 
-		classInfoTree = writer.getMemberInfoItemTree();
-		writer.addIndicatorInfo(classInfoTree);
-		tree.addContent(classInfoTree);
+			classInfoTree = writer.getMemberInfoItemTree();
+			writer.addIndicatorInfo(classInfoTree);
+			tree.addContent(classInfoTree);
 
-		classInfoTree = writer.getMemberInfoItemTree();
-		writer.addAliasInfo(classInfoTree);
-		tree.addContent(classInfoTree);
+			classInfoTree = writer.getMemberInfoItemTree();
+			writer.addAliasInfo(classInfoTree);
+			tree.addContent(classInfoTree);
 
-		Content desc = writer.getMemberInfoTree(tree);
-		classContentTree.addContent(desc);
-		contentTree.addContent(classContentTree);
-		writer.addFooter(contentTree);
-		writer.printDocument(contentTree);
-		writer.close();
+			Content desc = writer.getMemberInfoTree(tree);
+			classContentTree.addContent(desc);
+			contentTree.addContent(classContentTree);
+			writer.addFooter(contentTree);
+			writer.printDocument(contentTree);
+			writer.close();
+			
+		} catch (IOException e) {
+			throw new CodeGenerationException("Error creating doclet writer.", e);
+		}
 	}
 
 	/**

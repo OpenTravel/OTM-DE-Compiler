@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
@@ -36,6 +37,7 @@ import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.ioc.CompilerExtensionRegistry;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
+import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.loader.LibraryModelLoader;
 import org.opentravel.schemacompiler.loader.impl.CatalogLibraryNamespaceResolver;
 import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
@@ -64,6 +66,7 @@ import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
+import org.opentravel.schemacompiler.validate.ValidationException;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.ValidatorFactory;
 import org.opentravel.schemacompiler.validate.impl.TLModelValidator;
@@ -79,6 +82,10 @@ import org.opentravel.schemacompiler.validate.impl.TLModelValidator;
  */
 public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions {
 	
+	/**
+	 * 
+	 */
+	private static final String TWO_PARENTS_RELATIVE_PATH = "../../";
 	protected RepositoryManager repositoryManager;
     private Map<String,File> generatedFiles = new TreeMap<>();
     private List<AbstractLibrary> primaryLibraries = new ArrayList<>();
@@ -133,92 +140,137 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
      * @throws SchemaCompilerException
      *             thrown if an unexpected error occurs during the compilation process
      */
-    public ValidationFindings compileOutput(URL libraryOrProjectOrReleaseUrl) throws SchemaCompilerException {
-        Collection<TLLibrary> userDefinedLibraries = new ArrayList<>();
-        Collection<XSDLibrary> legacySchemas = new ArrayList<>();
-        ValidationFindings findings;
+	public ValidationFindings compileOutput(URL libraryOrProjectOrReleaseUrl) throws SchemaCompilerException {
+		Collection<TLLibrary> userDefinedLibraries = new ArrayList<>();
+		Collection<XSDLibrary> legacySchemas = new ArrayList<>();
+		ValidationFindings findings;
+		
+		if (isProjectFile(libraryOrProjectOrReleaseUrl)) {
+			findings = compileProject(libraryOrProjectOrReleaseUrl, userDefinedLibraries, legacySchemas);
+			
+		} else if (isReleaseFile(libraryOrProjectOrReleaseUrl)) {
+			findings = compileRelease(libraryOrProjectOrReleaseUrl, userDefinedLibraries, legacySchemas);
+			
+		} else { // Must be an OTM file
+			findings = compileLibrary(libraryOrProjectOrReleaseUrl, userDefinedLibraries, legacySchemas);
+		}
+		
+		// Proceed with compilation if no errors were detected during the load
+		if (!findings.hasFinding(FindingType.ERROR)) {
+			findings.addAll(compileOutput(userDefinedLibraries, legacySchemas));
+		}
+		return findings;
+	}
 
-        if (isProjectFile(libraryOrProjectOrReleaseUrl)) {
-            findings = new ValidationFindings();
-            ProjectManager projectManager = new ProjectManager(false);
-            Project project = projectManager.loadProject(
-            		URLUtils.toFile(libraryOrProjectOrReleaseUrl), findings);
-            
-            for (ProjectItem item : project.getProjectItems()) {
-                AbstractLibrary itemContent = item.getContent();
+	/**
+	 * Compiles the project at the URL provided.
+	 * 
+	 * @param projectUrl  the URL of the project to compile
+	 * @param userDefinedLibraries  the list of user-defined libraries in the model
+	 * @param legacySchemas  the list of legacy XML schemas in the model
+	 * @return ValidationFindings
+	 * @throws LibraryLoaderException  thrown if an error occurs while loading the library
+	 * @throws RepositoryException  thrown if a remote repository cannot be accessed
+	 */
+	private ValidationFindings compileProject(URL projectUrl, Collection<TLLibrary> userDefinedLibraries,
+			Collection<XSDLibrary> legacySchemas) throws LibraryLoaderException, RepositoryException {
+		ValidationFindings findings;
+		findings = new ValidationFindings();
+		ProjectManager projectManager = new ProjectManager(false);
+		Project project = projectManager.loadProject(URLUtils.toFile(projectUrl), findings);
+		
+		for (ProjectItem item : project.getProjectItems()) {
+			AbstractLibrary itemContent = item.getContent();
+			
+			if (project.getDefaultItem() == item) {
+				primaryLibraries.add(itemContent);
+			}
+			if (itemContent instanceof TLLibrary) {
+				userDefinedLibraries.add((TLLibrary) itemContent);
+				
+			} else if (itemContent instanceof XSDLibrary) {
+				legacySchemas.add((XSDLibrary) itemContent);
+			}
+		}
+		projectFilename = project.getProjectFile().getName();
+		return findings;
+	}
+	
+	/**
+	 * Compiles the library at the URL provided.
+	 * 
+	 * @param userDefinedLibraries  the list of user-defined libraries in the model
+	 * @param legacySchemas  the list of legacy XML schemas in the model
+	 * @return ValidationFindings
+	 * @throws LibraryLoaderException  thrown if an error occurs while loading the library
+	 */
+	private ValidationFindings compileLibrary(URL libraryUrl, Collection<TLLibrary> userDefinedLibraries,
+			Collection<XSDLibrary> legacySchemas) throws LibraryLoaderException {
+		ValidationFindings findings;
+		LibraryInputSource<InputStream> libraryInput = new LibraryStreamInputSource(libraryUrl);
+		LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<>();
+		String catalogLoc = getCatalogLocation();
+		TLModel model;
+		
+		if (catalogLoc != null) {
+			modelLoader.setNamespaceResolver(
+					new CatalogLibraryNamespaceResolver(TaskUtils.getPathFromOptionValue(catalogLoc)));
+		}
+		findings = modelLoader.loadLibraryModel(libraryInput);
+		model = modelLoader.getLibraryModel();
+		userDefinedLibraries.addAll(model.getUserDefinedLibraries());
+		legacySchemas.addAll(model.getLegacySchemaLibraries());
+		primaryLibraries.add(model.getLibrary(libraryUrl));
+		return findings;
+	}
 
-                if (project.getDefaultItem() == item) {
-                	primaryLibraries.add( itemContent );
-                }
-                if (itemContent instanceof TLLibrary) {
-                    userDefinedLibraries.add((TLLibrary) itemContent);
-
-                } else if (itemContent instanceof XSDLibrary) {
-                    legacySchemas.add((XSDLibrary) itemContent);
-                }
-            }
-            projectFilename = project.getProjectFile().getName();
-            
-        } else if (isReleaseFile(libraryOrProjectOrReleaseUrl)) {
-            findings = new ValidationFindings();
-        	ReleaseManager releaseManager = new ReleaseManager( repositoryManager );
-        	String outputFolder = getOutputFolder();
-        	
-        	releaseManager.loadRelease(
-        			URLUtils.toFile(libraryOrProjectOrReleaseUrl), findings );
-        	
-        	for (ReleaseMember member : releaseManager.getRelease().getPrincipalMembers()) {
-        		AbstractLibrary library = releaseManager.getLibrary( member );
-        		
-        		if (library != null) {
-        			primaryLibraries.add( library );
-        		}
-        	}
-        	
-        	for (ReleaseMember member : releaseManager.getRelease().getAllMembers()) {
-        		AbstractLibrary library = releaseManager.getLibrary( member );
-        		
-        		if (library != null) {
-                    if (library instanceof TLLibrary) {
-                        userDefinedLibraries.add((TLLibrary) library);
-
-                    } else if (library instanceof XSDLibrary) {
-                        legacySchemas.add((XSDLibrary) library);
-                    }
-        		}
-        	}
-        	
-        	// For a release, the release compiler options take precedence over any
-        	// other options assigned for this task.
-        	CompilerExtensionRegistry.setActiveExtension(
-        			releaseManager.getRelease().getCompileOptions().getBindingStyle() );
-        	applyTaskOptions( releaseManager.getRelease().getCompileOptions() );
-        	setOutputFolder( outputFolder );
-        	
-        } else { // Must be an OTM file
-            LibraryInputSource<InputStream> libraryInput =
-            		new LibraryStreamInputSource(libraryOrProjectOrReleaseUrl);
-            LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<>();
-            String catalogLocation = getCatalogLocation();
-            TLModel model;
-            
-            if (catalogLocation != null) {
-                modelLoader.setNamespaceResolver(new CatalogLibraryNamespaceResolver(TaskUtils
-                        .getPathFromOptionValue(catalogLocation)));
-            }
-            findings = modelLoader.loadLibraryModel(libraryInput);
-            model = modelLoader.getLibraryModel();
-            userDefinedLibraries.addAll(model.getUserDefinedLibraries());
-            legacySchemas.addAll(model.getLegacySchemaLibraries());
-            primaryLibraries.add( model.getLibrary(libraryOrProjectOrReleaseUrl) );
-        }
-
-        // Proceed with compilation if no errors were detected during the load
-        if (!findings.hasFinding(FindingType.ERROR)) {
-            findings.addAll(compileOutput(userDefinedLibraries, legacySchemas));
-        }
-        return findings;
-    }
+	/**
+	 * Compiles the release at the URL provided.
+	 * 
+	 * @param releaseUrl  the URL of the release to compile
+	 * @param userDefinedLibraries  the list of user-defined libraries in the model
+	 * @param legacySchemas  the list of legacy XML schemas in the model
+	 * @return ValidationFindings
+	 * @throws RepositoryException  thrown if a remote repository cannot be accessed
+	 */
+	private ValidationFindings compileRelease(URL releaseUrl, Collection<TLLibrary> userDefinedLibraries,
+			Collection<XSDLibrary> legacySchemas) throws RepositoryException {
+		ValidationFindings findings;
+		findings = new ValidationFindings();
+		ReleaseManager releaseManager = new ReleaseManager(repositoryManager);
+		String targetFolder = getOutputFolder();
+		
+		releaseManager.loadRelease(URLUtils.toFile(releaseUrl), findings);
+		
+		for (ReleaseMember member : releaseManager.getRelease().getPrincipalMembers()) {
+			AbstractLibrary library = releaseManager.getLibrary(member);
+			
+			if (library != null) {
+				primaryLibraries.add(library);
+			}
+		}
+		
+		for (ReleaseMember member : releaseManager.getRelease().getAllMembers()) {
+			AbstractLibrary library = releaseManager.getLibrary(member);
+			
+			if (library != null) {
+				if (library instanceof TLLibrary) {
+					userDefinedLibraries.add((TLLibrary) library);
+					
+				} else if (library instanceof XSDLibrary) {
+					legacySchemas.add((XSDLibrary) library);
+				}
+			}
+		}
+		
+		// For a release, the release compiler options take precedence over
+		// any other options assigned for this task.
+		CompilerExtensionRegistry.setActiveExtension(
+				releaseManager.getRelease().getCompileOptions().getBindingStyle());
+		applyTaskOptions(releaseManager.getRelease().getCompileOptions());
+		setOutputFolder(targetFolder);
+		return findings;
+	}
 
     /**
      * Validates an existing <code>Project</code> instance and compiles the output using the options
@@ -261,37 +313,36 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
      * @throws SchemaCompilerException
      *             thrown if an unexpected error occurs during the compilation process
      */
-    public ValidationFindings compileOutput(ReleaseManager releaseManager) throws SchemaCompilerException {
-        Collection<TLLibrary> userDefinedLibraries = new ArrayList<>();
-        Collection<XSDLibrary> legacySchemas = new ArrayList<>();
-        String outputFolder = getOutputFolder();
-        
-    	for (ReleaseMember member : releaseManager.getRelease().getPrincipalMembers()) {
-    		AbstractLibrary library = releaseManager.getLibrary( member );
-    		
-    		if (library != null) {
-    			primaryLibraries.add( library );
-    		}
-    	}
-    	
-    	for (ReleaseMember member : releaseManager.getRelease().getAllMembers()) {
-    		AbstractLibrary library = releaseManager.getLibrary( member );
-    		
-    		if (library != null) {
-                if (library instanceof TLLibrary) {
-                    userDefinedLibraries.add((TLLibrary) library);
-
-                } else if (library instanceof XSDLibrary) {
-                    legacySchemas.add((XSDLibrary) library);
-                }
-    		}
-    	}
-    	CompilerExtensionRegistry.setActiveExtension(
-    			releaseManager.getRelease().getCompileOptions().getBindingStyle() );
-    	applyTaskOptions( releaseManager.getRelease().getCompileOptions() );
-    	setOutputFolder( outputFolder );
-        return compileOutput(userDefinedLibraries, legacySchemas);
-    }
+	public ValidationFindings compileOutput(ReleaseManager releaseManager) throws SchemaCompilerException {
+		Collection<TLLibrary> userDefinedLibraries = new ArrayList<>();
+		Collection<XSDLibrary> legacySchemas = new ArrayList<>();
+		String targetFolder = getOutputFolder();
+		
+		for (ReleaseMember member : releaseManager.getRelease().getPrincipalMembers()) {
+			AbstractLibrary library = releaseManager.getLibrary(member);
+			
+			if (library != null) {
+				primaryLibraries.add(library);
+			}
+		}
+		
+		for (ReleaseMember member : releaseManager.getRelease().getAllMembers()) {
+			AbstractLibrary library = releaseManager.getLibrary(member);
+			
+			if (library != null) {
+				if (library instanceof TLLibrary) {
+					userDefinedLibraries.add((TLLibrary) library);
+					
+				} else if (library instanceof XSDLibrary) {
+					legacySchemas.add((XSDLibrary) library);
+				}
+			}
+		}
+		CompilerExtensionRegistry.setActiveExtension(releaseManager.getRelease().getCompileOptions().getBindingStyle());
+		applyTaskOptions(releaseManager.getRelease().getCompileOptions());
+		setOutputFolder(targetFolder);
+		return compileOutput(userDefinedLibraries, legacySchemas);
+	}
     
     /**
      * Loads the specified <code>Release</code> from an OTM repository and compiles the output using the options
@@ -512,8 +563,8 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
     public List<File> getGeneratedFiles() {
         List<File> fileList = new ArrayList<>();
 
-        for (String filePath : generatedFiles.keySet()) {
-            fileList.add(generatedFiles.get(filePath));
+        for (Entry<String,File> entry : generatedFiles.entrySet()) {
+            fileList.add( generatedFiles.get( entry.getKey() ) );
         }
         return Collections.unmodifiableList(fileList);
     }
@@ -562,79 +613,124 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
      * 			  indicates the output format of the generated EXAMPLE files (e.g. "XML" or "JSON")
      * @throws SchemaCompilerException
      */
-	protected void generateExampleArtifacts(Collection<TLLibrary> userDefinedLibraries,
-            CodeGenerationContext context, CodeGenerationFilenameBuilder<AbstractLibrary> filenameBuilder,
-            CodeGenerationFilter filter, String targetFormat) throws SchemaCompilerException {
+	protected void generateExampleArtifacts(Collection<TLLibrary> userDefinedLibraries, CodeGenerationContext context,
+			CodeGenerationFilenameBuilder<AbstractLibrary> filenameBuilder, CodeGenerationFilter filter,
+			String targetFormat) throws SchemaCompilerException {
 		CodeGenerator<TLModelElement> exampleGenerator = getExampleGenerator(targetFormat, filenameBuilder);
-        CodeGenerationContext exampleContext = context.getCopy();
-
-        // Generate examples for all model entities that are not excluded by the filter
-        for (TLLibrary library : userDefinedLibraries) {
-            if ((filter != null) && !filter.processLibrary(library)) {
-                continue;
-            }
-
-            // Generate EXAMPLE files for each member of the library
-            for (LibraryMember member : library.getNamedMembers()) {
-                if ((filter != null) && !filter.processEntity(member)) {
-                    continue;
-                }
-                if (member instanceof TLDocumentationPatch) {
-                	continue;
-                }
-                
-                exampleContext.setValue(CodeGenerationContext.CK_OUTPUT_FOLDER,
-                        getExampleOutputFolder(member, context));
-                exampleContext.setValue(CodeGenerationContext.CK_EXAMPLE_SCHEMA_RELATIVE_PATH,
-                        getSchemaRelativeFolderPath(member, exampleContext));
-
-                if (member instanceof TLService) {
-                    TLService service = (TLService) member;
-
-                    for (TLOperation operation : service.getOperations()) {
-                        if (operation.getRequest().declaresContent()) {
-							addGeneratedFiles(exampleGenerator.generateOutput(operation.getRequest(), exampleContext));
-                        }
-                        if (operation.getResponse().declaresContent()) {
-							addGeneratedFiles(exampleGenerator.generateOutput(operation.getResponse(), exampleContext));
-                        }
-                        if (operation.getNotification().declaresContent()) {
-							addGeneratedFiles(exampleGenerator.generateOutput(operation.getNotification(), exampleContext));
-                        }
-                    }
-                    
-                } else if (member instanceof TLResource) {
-                	TLResource resource = (TLResource) member;
-                	
-                	for (TLAction action : ResourceCodegenUtils.getInheritedActions( resource )) {
-                		TLActionRequest request = ResourceCodegenUtils.getDeclaredOrInheritedRequest( action );
-                		
-                		if (request != null) {
-                			NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( request.getPayloadType() );
-                			
-                			if ((payloadType != null) && ((filter == null) || filter.processEntity( payloadType ))) {
-        						addGeneratedFiles( exampleGenerator.generateOutput(
-        								(TLModelElement) payloadType, exampleContext ) );
-                			}
-                		}
-                		
-                		for (TLActionResponse response : ResourceCodegenUtils.getInheritedResponses( action )) {
-                			NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( response.getPayloadType() );
-                			
-                			if ((payloadType != null) && ((filter == null) || filter.processEntity( payloadType ))) {
-        						addGeneratedFiles( exampleGenerator.generateOutput(
-        								(TLModelElement) payloadType, exampleContext ) );
-                			}
-                		}
-                	}
-                	
+		CodeGenerationContext exampleContext = context.getCopy();
+		
+		// Generate examples for all model entities that are not excluded by the filter
+		for (TLLibrary library : userDefinedLibraries) {
+			if (processLibrary(library, filter)) {
+				continue;
+			}
+			
+			// Generate EXAMPLE files for each member of the library
+			for (LibraryMember member : library.getNamedMembers()) {
+				if (processEntity(member, filter) || (member instanceof TLDocumentationPatch)) {
+					continue;
+				}
+				
+				exampleContext.setValue(CodeGenerationContext.CK_OUTPUT_FOLDER,
+						getExampleOutputFolder(member, context));
+				exampleContext.setValue(CodeGenerationContext.CK_EXAMPLE_SCHEMA_RELATIVE_PATH,
+						getSchemaRelativeFolderPath(member, exampleContext));
+				
+				if (member instanceof TLService) {
+					generateServiceArtifacts((TLService) member, exampleGenerator, exampleContext);
+					
+				} else if (member instanceof TLResource) {
+					generateResourceArtifacts((TLResource) member, filter, exampleGenerator, exampleContext);
+					
 				} else {
 					addGeneratedFiles(exampleGenerator.generateOutput((TLModelElement) member, exampleContext));
-               	}
-            }
-        }
+				}
+			}
+		}
 	}
-                	
+	
+	/**
+	 * Returns true if the given library should be processed for code generation.
+	 * 
+	 * @param library  the library to check
+	 * @param filter  the code generation filter
+	 * @return boolean
+	 */
+	private boolean processLibrary(TLLibrary library, CodeGenerationFilter filter) {
+		return (filter != null) && !filter.processLibrary(library);
+	}
+	
+	/**
+	 * Returns true if the given library member should be processed for code generation.
+	 * 
+	 * @param member  the library member to check
+	 * @param filter  the code generation filter
+	 * @return boolean
+	 */
+	private boolean processEntity(LibraryMember member, CodeGenerationFilter filter) {
+		return (filter != null) && !filter.processEntity(member);
+	}
+
+	/**
+	 * Generates code output artifacts for the given service.
+	 * 
+	 * @param service  the service for which to generate output
+	 * @param exampleGenerator  the example generator to use during code generation
+	 * @param exampleContext  the example context to use during code generation
+	 * @throws ValidationException  thrown if one or more validation errors are detected
+	 * @throws CodeGenerationException  thrown if an error occurs while generating output
+	 */
+	private void generateServiceArtifacts(TLService service, CodeGenerator<TLModelElement> exampleGenerator,
+			CodeGenerationContext exampleContext) throws ValidationException, CodeGenerationException {
+		for (TLOperation operation : service.getOperations()) {
+			if (operation.getRequest().declaresContent()) {
+				addGeneratedFiles(exampleGenerator.generateOutput(operation.getRequest(), exampleContext));
+			}
+			if (operation.getResponse().declaresContent()) {
+				addGeneratedFiles(exampleGenerator.generateOutput(operation.getResponse(), exampleContext));
+			}
+			if (operation.getNotification().declaresContent()) {
+				addGeneratedFiles(
+						exampleGenerator.generateOutput(operation.getNotification(), exampleContext));
+			}
+		}
+	}
+
+	/**
+	 * @param resource  the resource for which to generate output artifacts.
+	 * 
+	 * @param filter  the filter to use during code generation
+	 * @param exampleGenerator  the example generator to use during code generation
+	 * @param exampleContext  the example context to use during code generation
+	 * @throws ValidationException  thrown if one or more validation errors are detected
+	 * @throws CodeGenerationException  thrown if an error occurs while generating output
+	 */
+	private void generateResourceArtifacts(TLResource resource, CodeGenerationFilter filter,
+			CodeGenerator<TLModelElement> exampleGenerator, CodeGenerationContext exampleContext)
+			throws ValidationException, CodeGenerationException {
+		for (TLAction action : ResourceCodegenUtils.getInheritedActions(resource)) {
+			TLActionRequest request = ResourceCodegenUtils.getDeclaredOrInheritedRequest(action);
+			
+			if (request != null) {
+				NamedEntity payloadType = ResourceCodegenUtils.getPayloadType(request.getPayloadType());
+				
+				if ((payloadType != null) && ((filter == null) || filter.processEntity(payloadType))) {
+					addGeneratedFiles(
+							exampleGenerator.generateOutput((TLModelElement) payloadType, exampleContext));
+				}
+			}
+			
+			for (TLActionResponse response : ResourceCodegenUtils.getInheritedResponses(action)) {
+				NamedEntity payloadType = ResourceCodegenUtils.getPayloadType(response.getPayloadType());
+				
+				if ((payloadType != null) && ((filter == null) || filter.processEntity(payloadType))) {
+					addGeneratedFiles(
+							exampleGenerator.generateOutput((TLModelElement) payloadType, exampleContext));
+				}
+			}
+		}
+	}
+
 	/**
 	 * Gets the EXAMPLE generator for the specified target output format.
 	 * 
@@ -687,7 +783,7 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
      */
     protected String getSchemaRelativeFolderPath(LibraryMember libraryMember,
             CodeGenerationContext context) {
-        return "../../";
+        return TWO_PARENTS_RELATIVE_PATH;
     }
 
     /**

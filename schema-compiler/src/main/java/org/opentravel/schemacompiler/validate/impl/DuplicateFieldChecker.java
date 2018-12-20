@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.opentravel.schemacompiler.model.TLAlias;
@@ -131,8 +132,10 @@ public class DuplicateFieldChecker {
 		}
 		
 		// Populate the list of duplicate names based on the occurrance count of each field name
-		for (String fieldName : fieldCounts.keySet()) {
-			if (fieldCounts.get( fieldName ) > 1) {
+		for (Entry<String,Integer> entry : fieldCounts.entrySet()) {
+			String fieldName = entry.getKey();
+			
+			if (entry.getValue() > 1) {
 				duplicateFieldNames.add( fieldName );
 			}
 		}

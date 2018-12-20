@@ -30,6 +30,7 @@ import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.util.ModelElementCloner;
+import org.opentravel.schemacompiler.util.SchemaCompilerRuntimeException;
 import org.opentravel.schemacompiler.version.Versioned;
 
 /**
@@ -80,7 +81,7 @@ public class VersionHandlerFactory {
 			return handler;
 			
 		} catch (InstantiationException | IllegalAccessException e) {
-			throw new RuntimeException("Error creating version handler instance.", e);
+			throw new SchemaCompilerRuntimeException("Error creating version handler instance.", e);
 		}
 	}
 	

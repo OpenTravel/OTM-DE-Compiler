@@ -230,8 +230,9 @@ public class TLListFacet extends TLAbstractFacet implements TLAttributeType, TLA
     /**
 	 * @see org.opentravel.schemacompiler.model.TLAliasOwner#getAliasListManager()
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
-	public ChildEntityListManager<TLAlias, ?> getAliasListManager() {
+	public ChildEntityListManager<TLAlias,TLAliasOwner> getAliasListManager() {
 		return aliasManager;
 	}
 

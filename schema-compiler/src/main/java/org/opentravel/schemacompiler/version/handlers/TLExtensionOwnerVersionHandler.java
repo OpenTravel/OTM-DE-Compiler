@@ -22,7 +22,6 @@ import java.util.Set;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLExtension;
-import org.opentravel.schemacompiler.model.TLExtensionOwner;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLVersionedExtensionOwner;
@@ -44,7 +43,7 @@ public abstract class TLExtensionOwnerVersionHandler<V extends TLVersionedExtens
 		NamedEntity extendedEntity = null;
 		
 		if (entity != null) {
-	        TLExtension extension = ((TLExtensionOwner) entity).getExtension();
+	        TLExtension extension = entity.getExtension();
 	        extendedEntity = (extension == null) ? null : extension.getExtendsEntity();
 		}
 		return extendedEntity;

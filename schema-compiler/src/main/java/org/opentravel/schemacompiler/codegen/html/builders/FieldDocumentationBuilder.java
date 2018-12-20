@@ -15,6 +15,7 @@
  */
 package org.opentravel.schemacompiler.codegen.html.builders;
 
+import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 
 /**
@@ -91,8 +92,9 @@ public abstract class FieldDocumentationBuilder<T extends TLDocumentationOwner>
 	/**
 	 * @return the owner
 	 */
-	public NamedEntityDocumentationBuilder<?> getOwner() {
-		return owner;
+	@SuppressWarnings("unchecked")
+	public <B extends NamedEntity & TLDocumentationOwner> NamedEntityDocumentationBuilder<B> getOwner() {
+		return (NamedEntityDocumentationBuilder<B>) owner;
 	}
 
 	/**

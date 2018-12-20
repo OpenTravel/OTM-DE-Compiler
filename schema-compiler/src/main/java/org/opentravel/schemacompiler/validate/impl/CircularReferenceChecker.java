@@ -47,7 +47,12 @@ import org.opentravel.schemacompiler.model.TLValueWithAttributes;
  * @author S. Livezey
  */
 public class CircularReferenceChecker {
-
+	
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private CircularReferenceChecker() {}
+	
     /**
      * Performs a recursive check to determine whether any circular references exist for the given
      * model element.
@@ -132,47 +137,58 @@ public class CircularReferenceChecker {
      * Recursive method that searches the dependency tree to identify circular references for the
      * given VWA.
      * 
-     * @param referencedEntity
-     *            the VWA to be analyzed
-     * @param originalEntity
-     *            the original VWA that is being checked for circular references
-     * @param visitedEntities
-     *            the set of VWA's that have already been checked
+     * @param referencedEntity  the VWA to be analyzed
+     * @param originalEntity  the original VWA that is being checked for circular references
+     * @param visitedEntities  the set of VWA's that have already been checked
      * @return boolean
      */
-    private static boolean checkCircularReference(TLValueWithAttributes referencedEntity,
-            TLValueWithAttributes originalEntity, Set<TLValueWithAttributes> visitedEntities) {
-        boolean result = false;
+	private static boolean checkCircularReference(TLValueWithAttributes referencedEntity,
+			TLValueWithAttributes originalEntity, Set<TLValueWithAttributes> visitedEntities) {
+		boolean result = false;
+		
+		if (referencedEntity != null) {
+			if (visitedEntities.contains(referencedEntity)) {
+				if (referencedEntity == originalEntity) {
+					result = true;
+				}
+				
+			} else {
+				visitedEntities.add(referencedEntity);
+				result = checkNestedCircularReferences(referencedEntity,
+						originalEntity, visitedEntities);
+			}
+		}
+		return result;
+	}
 
-        if (referencedEntity != null) {
-            if (visitedEntities.contains(referencedEntity)) {
-            	if (referencedEntity == originalEntity) {
-                    result = true;
-            	}
-
-            } else {
-                visitedEntities.add(referencedEntity);
-
-                if (referencedEntity.getParentType() instanceof TLValueWithAttributes) {
-                    result = checkCircularReference(
-                            (TLValueWithAttributes) referencedEntity.getParentType(),
-                            originalEntity, visitedEntities);
-                }
-                if (!result) {
-                    for (TLAttribute attribute : referencedEntity.getAttributes()) {
-                        if (attribute.getType() instanceof TLValueWithAttributes) {
-                            result = checkCircularReference(
-                                    (TLValueWithAttributes) attribute.getType(), originalEntity,
-                                    visitedEntities);
-                        }
-                        if (result) break;
-                    }
-                }
-            }
-        }
-        return result;
-    }
-
+	/**
+	 * Checks the VWA parent type and all attributes for circular references.
+	 * 
+     * @param referencedEntity  the VWA to be analyzed
+     * @param originalEntity  the original VWA that is being checked for circular references
+     * @param visitedEntities  the set of VWA's that have already been checked
+	 * @return boolean
+	 */
+	private static boolean checkNestedCircularReferences(TLValueWithAttributes referencedEntity,
+			TLValueWithAttributes originalEntity, Set<TLValueWithAttributes> visitedEntities) {
+		boolean result = false;
+		
+		if (referencedEntity.getParentType() instanceof TLValueWithAttributes) {
+			result = checkCircularReference((TLValueWithAttributes) referencedEntity.getParentType(),
+					originalEntity, visitedEntities);
+		}
+		if (!result) {
+			for (TLAttribute attribute : referencedEntity.getAttributes()) {
+				if (attribute.getType() instanceof TLValueWithAttributes) {
+					result = checkCircularReference((TLValueWithAttributes) attribute.getType(),
+							originalEntity, visitedEntities);
+				}
+				if (result) break;
+			}
+		}
+		return result;
+	}
+	
     /**
      * Performs a recursive check to determine whether any circular references exist in the
      * owning entity relationship of the given contextual facet.
@@ -228,7 +244,7 @@ public class CircularReferenceChecker {
      * @return boolean
      */
     public static boolean hasCircularReference(TLProperty element) {
-        return !element.isMandatory() ? false : checkCircularReference(element.getType(),
+        return element.isMandatory() && checkCircularReference(element.getType(),
                 element.getOwner(), new HashSet<TLPropertyType>());
     }
 
@@ -236,76 +252,102 @@ public class CircularReferenceChecker {
      * Recursive method that searches the dependency tree to identify circular references for the
      * owner of the given element type.
      * 
-     * @param elementType
-     *            the type of the model element that is being checked for circular references
-     * @param originalElementOwner
-     *            the original element's owner that is being checked for circular references
-     * @param visitedEntities
-     *            the set of extension owners that have already been checked
+     * @param elementType  the type of the model element that is being checked for circular references
+     * @param originalElementOwner  the original element's owner that is being checked for circular references
+     * @param visitedEntities  the set of extension owners that have already been checked
      * @return boolean
      */
-    private static boolean checkCircularReference(TLPropertyType elementType,
-            TLPropertyOwner originalElementOwner, Set<TLPropertyType> visitedEntities) {
-        boolean result = false;
+	private static boolean checkCircularReference(TLPropertyType elementType, TLPropertyOwner originalElementOwner,
+			Set<TLPropertyType> visitedEntities) {
+		boolean result = false;
+		
+		if ((elementType != null) && (originalElementOwner != null)) {
+			if (elementType.equals(originalElementOwner)) {
+				result = true;
+				
+			} else if (!visitedEntities.contains(elementType)) {
+				visitedEntities.add(elementType);
+				result = checkNestedCircularReference(elementType, originalElementOwner, visitedEntities);
+			}
+		}
+		return result;
+	}
 
-        if ((elementType != null) && (originalElementOwner != null)) {
-            if (elementType.equals(originalElementOwner)) {
-                result = true;
+	/**
+	 * Checks all member properties of the given element type for circular references.
+	 * 
+     * @param elementType  the type of the model element that is being checked for circular references
+     * @param originalElementOwner  the original element's owner that is being checked for circular references
+     * @param visitedEntities  the set of extension owners that have already been checked
+	 * @return boolean
+	 */
+	private static boolean checkNestedCircularReference(TLPropertyType elementType,
+			TLPropertyOwner originalElementOwner, Set<TLPropertyType> visitedEntities) {
+		List<TLProperty> referencedElements = null;
+		boolean result = false;
+		
+		// If the referenced type is an alias, find its owner
+		if (elementType instanceof TLAlias) {
+			TLAliasOwner aliasOwner = ((TLAlias) elementType).getOwningEntity();
+			
+			if (aliasOwner instanceof TLPropertyType) {
+				elementType = (TLPropertyType) aliasOwner;
+				visitedEntities.add(elementType);
+				
+			} else {
+				elementType = null;
+			}
+		}
+		
+		// If the referenced type is a business object or core, find its
+		// summary facet
+		if (elementType instanceof TLBusinessObject) {
+			elementType = ((TLBusinessObject) elementType).getSummaryFacet();
+			visitedEntities.add(elementType);
+			
+		} else if (elementType instanceof TLCoreObject) {
+			elementType = ((TLCoreObject) elementType).getSummaryFacet();
+			visitedEntities.add(elementType);
+		}
+		
+		// If the resolve element type is a TLFacet, obtain a list of
+		// its inherited properties
+		if (elementType instanceof TLFacet) {
+			referencedElements = PropertyCodegenUtils.getInheritedProperties((TLFacet) elementType);
+		}
+		
+		// If we are dealing with a complex facet type, check each inherited element for
+		// circular references
+		if (referencedElements != null) {
+			result = checkCircularReferences(referencedElements, originalElementOwner, visitedEntities);
+		}
+		return result;
+	}
 
-            } else if (!visitedEntities.contains(elementType)) {
-                List<TLProperty> referencedElements = null;
-
-                visitedEntities.add(elementType);
-
-                // If the referenced type is an alias, find its owner
-                if (elementType instanceof TLAlias) {
-                    TLAliasOwner aliasOwner = ((TLAlias) elementType).getOwningEntity();
-
-                    if (aliasOwner instanceof TLPropertyType) {
-                        elementType = (TLPropertyType) aliasOwner;
-                        visitedEntities.add(elementType);
-
-                    } else {
-                        elementType = null;
-                    }
-                }
-
-                // If the referenced type is a business object or core, find its summary facet
-                if (elementType instanceof TLBusinessObject) {
-                    elementType = ((TLBusinessObject) elementType).getSummaryFacet();
-                    visitedEntities.add(elementType);
-
-                } else if (elementType instanceof TLCoreObject) {
-                    elementType = ((TLCoreObject) elementType).getSummaryFacet();
-                    visitedEntities.add(elementType);
-                }
-
-                // If the resolve element type is a TLFacet, obtain a list of its inherited
-                // properties
-                if (elementType instanceof TLFacet) {
-                    referencedElements = PropertyCodegenUtils
-                            .getInheritedProperties((TLFacet) elementType);
-                }
-
-                // If we are dealing with a complex facet type, check each inherited element for
-                // circular references
-                if (referencedElements != null) {
-                    for (TLProperty referencedElement : referencedElements) {
-                        if (!referencedElement.isMandatory()) {
-                            continue; // optional elements cannot cause circular reference errors in
-                                      // complex types
-                        }
-                        result = checkCircularReference(referencedElement.getType(),
-                                originalElementOwner, visitedEntities);
-                        if (result)
-                            break; // stop looking if we found a circular reference
-                    }
-                }
-            }
-        }
-        return result;
-    }
-
+	/**
+	 * Checks each of the elements provided for circular references.
+	 * 
+	 * @param referencedElements  the list of referenced elements to check for circular references
+     * @param originalElementOwner  the original element's owner that is being checked for circular references
+     * @param visitedEntities  the set of extension owners that have already been checked
+	 * @return  boolean
+	 */
+	private static boolean checkCircularReferences(List<TLProperty> referencedElements,
+			TLPropertyOwner originalElementOwner, Set<TLPropertyType> visitedEntities) {
+		boolean result = false;
+		
+		for (TLProperty referencedElement : referencedElements) {
+			// optional elements cannot cause circular reference errors in complex types
+			if (referencedElement.isMandatory()) {
+				result = checkCircularReference(referencedElement.getType(), originalElementOwner,
+						visitedEntities);
+				if (result)
+					break; // stop looking if we found a circular reference
+			}
+		}
+		return result;
+	}
+	
     /**
      * Performs a recursive check to determine whether any circular extension references exist for
      * the owner of the given extension.

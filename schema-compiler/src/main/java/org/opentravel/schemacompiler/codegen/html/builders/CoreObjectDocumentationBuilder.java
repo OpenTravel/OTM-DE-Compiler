@@ -15,17 +15,18 @@
  */
 package org.opentravel.schemacompiler.codegen.html.builders;
 
+import java.io.IOException;
 import java.util.List;
 
+import org.opentravel.schemacompiler.codegen.CodeGenerationException;
+import org.opentravel.schemacompiler.codegen.html.Content;
+import org.opentravel.schemacompiler.codegen.html.writers.CoreObjectWriter;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLRole;
-
-import org.opentravel.schemacompiler.codegen.html.Content;
-import org.opentravel.schemacompiler.codegen.html.writers.CoreObjectWriter;
 
 /**
  * @author Eric.Bronson
@@ -87,37 +88,42 @@ public class CoreObjectDocumentationBuilder extends
 	}
 
 	@Override
-	public void build() throws Exception {
-		CoreObjectWriter writer = new CoreObjectWriter(this, prev, next);
-		Content contentTree = writer.getHeader();
-		writer.addMemberInheritanceTree(contentTree);
-		Content classContentTree = writer.getContentHeader();
-		Content tree = writer.getMemberTree(classContentTree);
+	public void build() throws CodeGenerationException {
+		try {
+			CoreObjectWriter writer = new CoreObjectWriter(this, prev, next);
+			Content contentTree = writer.getHeader();
+			writer.addMemberInheritanceTree(contentTree);
+			Content classContentTree = writer.getContentHeader();
+			Content tree = writer.getMemberTree(classContentTree);
 
-		Content classInfoTree = writer.getMemberInfoItemTree();
-		writer.addDocumentationInfo(classInfoTree);
-		tree.addContent(classInfoTree);
-
-		classInfoTree = writer.getMemberInfoItemTree();
-		writer.addFacetInfo(classInfoTree);
-		tree.addContent(classInfoTree);
-
-		classInfoTree = writer.getMemberInfoItemTree();
-		writer.addAliasInfo(classInfoTree);
-		tree.addContent(classInfoTree);
-		if (!roles.isEmpty()) {
-			classInfoTree = writer.getMemberInfoItemTree();
-			writer.addRoleInfo(classInfoTree);
+			Content classInfoTree = writer.getMemberInfoItemTree();
+			writer.addDocumentationInfo(classInfoTree);
 			tree.addContent(classInfoTree);
-		}
 
-		Content desc = writer.getMemberInfoTree(tree);
-		classContentTree.addContent(desc);
-		contentTree.addContent(classContentTree);
-		writer.addFooter(contentTree);
-		writer.printDocument(contentTree);
-		writer.close();
-		super.build();
+			classInfoTree = writer.getMemberInfoItemTree();
+			writer.addFacetInfo(classInfoTree);
+			tree.addContent(classInfoTree);
+
+			classInfoTree = writer.getMemberInfoItemTree();
+			writer.addAliasInfo(classInfoTree);
+			tree.addContent(classInfoTree);
+			if (!roles.isEmpty()) {
+				classInfoTree = writer.getMemberInfoItemTree();
+				writer.addRoleInfo(classInfoTree);
+				tree.addContent(classInfoTree);
+			}
+
+			Content desc = writer.getMemberInfoTree(tree);
+			classContentTree.addContent(desc);
+			contentTree.addContent(classContentTree);
+			writer.addFooter(contentTree);
+			writer.printDocument(contentTree);
+			writer.close();
+			super.build();
+			
+		} catch (IOException e) {
+			throw new CodeGenerationException("Error creating doclet writer", e);
+		}
 	}
 
 	/**

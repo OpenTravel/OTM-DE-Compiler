@@ -407,7 +407,7 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
                     AbstractLibrary includedLibrary = xsdLibrary.getOwningModel().getLibrary(
                             includedUrl);
 
-                    if ((includedLibrary != null) && (includedLibrary instanceof XSDLibrary)) {
+                    if (includedLibrary instanceof XSDLibrary) {
                         navigateXSDLibrary((XSDLibrary) includedLibrary);
                     }
                 }
@@ -420,7 +420,7 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
                         AbstractLibrary importedLibrary = xsdLibrary.getOwningModel().getLibrary(
                                 importedUrl);
 
-                        if ((importedLibrary != null) && (importedLibrary instanceof XSDLibrary)) {
+                        if (importedLibrary instanceof XSDLibrary) {
                             navigateXSDLibrary((XSDLibrary) importedLibrary);
                         }
                     }
@@ -622,10 +622,9 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
      *            the role entity to visit and navigate
      */
     protected void navigateRole(TLRole role) {
-        if (canVisit(role) && visitor.visitRole(role)) {
-            if (role.getRoleEnumeration() != null) {
-                navigateDependency(role.getRoleEnumeration().getOwningEntity());
-            }
+        if (canVisit(role) && visitor.visitRole(role)
+        			&& (role.getRoleEnumeration() != null)) {
+            navigateDependency(role.getRoleEnumeration().getOwningEntity());
         }
     }
 

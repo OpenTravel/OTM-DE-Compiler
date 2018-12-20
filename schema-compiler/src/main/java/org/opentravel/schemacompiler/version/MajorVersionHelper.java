@@ -28,7 +28,6 @@ import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.ic.ImportManagementIntegrityChecker;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryMember;
-import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLContext;
@@ -410,52 +409,64 @@ public final class MajorVersionHelper extends AbstractVersionHelper {
      * @throws VersionSchemeException
      *             thrown if the library's version scheme is not recognized
      */
-    private void rollupMinorVersionLibrary(TLLibrary majorVersionLibrary, TLLibrary minorVersionLibrary,
-            RollupReferenceHandler referenceHandler) throws VersionSchemeException {
-    	// Start by rolling up the contexts and the folder structure
-        for (TLContext context : minorVersionLibrary.getContexts()) {
-            if (majorVersionLibrary.getContext(context.getContextId()) == null) {
-            	ModelElementCloner cloner = getCloner( minorVersionLibrary.getOwningModel() );
-                majorVersionLibrary.addContext(cloner.clone(context));
-            }
-        }
-        copyLibraryFolders(minorVersionLibrary, majorVersionLibrary);
-        
-        // Collect the list of all versioned entities from the minor version library
-        List<TLContextualFacet> nonLocalFacets = new ArrayList<>();
-        List<Versioned> minorVersionList = new ArrayList<>();
-        
-        for (LibraryMember member : minorVersionLibrary.getNamedMembers()) {
-        	if (member instanceof Versioned) {
-            	minorVersionList.add( (Versioned) member );
-            	
-        	} else if (member instanceof TLContextualFacet) {
-        		TLContextualFacet ctxFacet = (TLContextualFacet) member;
-        		
-        		if (!ctxFacet.isLocalFacet()) {
-        			nonLocalFacets.add( ctxFacet );
-        		}
-        		
-        	}
-        }
-        if (minorVersionLibrary.getService() != null) {
-            for (TLOperation operation : minorVersionLibrary.getService().getOperations()) {
-            	minorVersionList.add( operation );
-            }
-        }
-        rollupNonLocalFacets( nonLocalFacets, majorVersionLibrary, referenceHandler );
-        
-        // Roll up all of the entities we just collected to the major version library
-        for (Versioned minorVersion : minorVersionList) {
-        	Versioned majorVersion = getVersionHandler( minorVersion )
-        			.rollupMinorVersion( minorVersion, majorVersionLibrary, referenceHandler );
-        	
-        	if (majorVersion instanceof LibraryMember) {
-        		assignTargetFolder( (LibraryMember) minorVersion, (LibraryMember) majorVersion );
-        	}
-        }
-    }
-    
+	private void rollupMinorVersionLibrary(TLLibrary majorVersionLibrary, TLLibrary minorVersionLibrary,
+			RollupReferenceHandler referenceHandler) throws VersionSchemeException {
+		// Start by rolling up the contexts and the folder structure
+		for (TLContext context : minorVersionLibrary.getContexts()) {
+			if (majorVersionLibrary.getContext(context.getContextId()) == null) {
+				ModelElementCloner cloner = getCloner(minorVersionLibrary.getOwningModel());
+				majorVersionLibrary.addContext(cloner.clone(context));
+			}
+		}
+		copyLibraryFolders(minorVersionLibrary, majorVersionLibrary);
+		
+		// Collect the list of all versioned entities from the minor version library
+		List<TLContextualFacet> nonLocalFacets = new ArrayList<>();
+		List<Versioned> minorVersionList = new ArrayList<>();
+		
+		collectVersionedEntities(minorVersionLibrary, nonLocalFacets, minorVersionList);
+		rollupNonLocalFacets(nonLocalFacets, majorVersionLibrary, referenceHandler);
+		
+		// Roll up all of the entities we just collected to the major version library
+		for (Versioned minorVersion : minorVersionList) {
+			Versioned majorVersion = getVersionHandler(minorVersion).rollupMinorVersion(minorVersion,
+					majorVersionLibrary, referenceHandler);
+			
+			if (majorVersion instanceof LibraryMember) {
+				assignTargetFolder((LibraryMember) minorVersion, (LibraryMember) majorVersion);
+			}
+		}
+	}
+
+	/**
+	 * Collect all versioned entities from the minor version library.
+	 * 
+	 * @param minorVersionLibrary  the minor version library from which to collect entities
+	 * @param nonLocalFacets  the list of non-local contextual facets being created
+	 * @param minorVersionList  the list of other minor version entities
+	 */
+	private void collectVersionedEntities(TLLibrary minorVersionLibrary, List<TLContextualFacet> nonLocalFacets,
+			List<Versioned> minorVersionList) {
+		for (LibraryMember member : minorVersionLibrary.getNamedMembers()) {
+			if (member instanceof Versioned) {
+				minorVersionList.add((Versioned) member);
+				
+			} else if (member instanceof TLContextualFacet) {
+				TLContextualFacet ctxFacet = (TLContextualFacet) member;
+				
+				if (!ctxFacet.isLocalFacet()) {
+					nonLocalFacets.add(ctxFacet);
+				}
+				
+			}
+		}
+		if (minorVersionLibrary.getService() != null) {
+			for (TLOperation operation : minorVersionLibrary.getService().getOperations()) {
+				minorVersionList.add(operation);
+			}
+		}
+	}
+	   
     /**
      * Returns the list all non-local contextual facets that are assigned to the business
      * and choice objects of the given library.  The resulting list will contain non-local
@@ -465,19 +476,19 @@ public final class MajorVersionHelper extends AbstractVersionHelper {
      * @param library  the library for which to return non-local facets of business/choice objects
      * @return List<TLContextualFacet>
      */
-    public List<TLContextualFacet> getNonLocalEntityFacets(TLLibrary library) {
-    	List<TLContextualFacet> nonLocalFacets = new ArrayList<>();
-    	
-    	for (TLBusinessObject entity : library.getBusinessObjectTypes()) {
-    		findNonLocalFacets( entity, TLFacetType.CUSTOM, library, nonLocalFacets, new HashSet<TLFacetOwner>() );
-    		findNonLocalFacets( entity, TLFacetType.QUERY, library, nonLocalFacets, new HashSet<TLFacetOwner>() );
-    		findNonLocalFacets( entity, TLFacetType.UPDATE, library, nonLocalFacets, new HashSet<TLFacetOwner>() );
-    	}
-    	for (TLChoiceObject entity : library.getChoiceObjectTypes()) {
-    		findNonLocalFacets( entity, TLFacetType.CHOICE, library, nonLocalFacets, new HashSet<TLFacetOwner>() );
-    	}
-    	return nonLocalFacets;
-    }
+	public List<TLContextualFacet> getNonLocalEntityFacets(TLLibrary library) {
+		List<TLContextualFacet> nonLocalFacets = new ArrayList<>();
+		
+		for (TLBusinessObject entity : library.getBusinessObjectTypes()) {
+			findNonLocalFacets(entity, TLFacetType.CUSTOM, library, nonLocalFacets, new HashSet<TLFacetOwner>());
+			findNonLocalFacets(entity, TLFacetType.QUERY, library, nonLocalFacets, new HashSet<TLFacetOwner>());
+			findNonLocalFacets(entity, TLFacetType.UPDATE, library, nonLocalFacets, new HashSet<TLFacetOwner>());
+		}
+		for (TLChoiceObject entity : library.getChoiceObjectTypes()) {
+			findNonLocalFacets(entity, TLFacetType.CHOICE, library, nonLocalFacets, new HashSet<TLFacetOwner>());
+		}
+		return nonLocalFacets;
+	}
     
     /**
      * Recursive routine that searches for all non-local contextual facets within the hierarchy of

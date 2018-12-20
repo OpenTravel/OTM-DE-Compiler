@@ -64,7 +64,7 @@ public class TLCoreObjectTransformer extends TLComplexTypeTransformer<TLCoreObje
             coreObject.setDocumentation(docTransformer.transform(source.getDocumentation()));
         }
 
-        if (source.getRoleEnumeration().getRoles().size() > 0) {
+        if (!source.getRoleEnumeration().getRoles().isEmpty()) {
             RoleList roleList = new RoleList();
 
             for (TLRole sourceRole : source.getRoleEnumeration().getRoles()) {

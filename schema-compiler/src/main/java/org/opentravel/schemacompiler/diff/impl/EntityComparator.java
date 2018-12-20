@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.Map.Entry;
 
 import javax.xml.namespace.QName;
 
@@ -35,7 +36,9 @@ import org.opentravel.schemacompiler.diff.ModelCompareOptions;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLMemberField;
+import org.opentravel.schemacompiler.model.TLMemberFieldOwner;
 import org.opentravel.schemacompiler.model.TLProperty;
+import org.opentravel.schemacompiler.util.SchemaCompilerRuntimeException;
 import org.opentravel.schemacompiler.version.VersionScheme;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 
@@ -256,19 +259,20 @@ public class EntityComparator extends BaseComparator {
 	 * items are appended to the list for any fields that are identified as being added, deleted,
 	 * or modified in the new version.
 	 * 
-	 * @param oldFields  the list of fields for the old entity version
-	 * @param newFields  the list of fields for the new entity version
+	 * @param list  the list of fields for the old entity version
+	 * @param list2  the list of fields for the new entity version
 	 * @param changeSet  the change set for the entity
 	 * @param isMinorVersionCompare  true if the second entity is a later minor version of the first
 	 */
-	private void compareMemberFields(List<TLMemberField<?>> oldFields, List<TLMemberField<?>> newFields,
+	@SuppressWarnings("unchecked")
+	private void compareMemberFields(List<TLMemberField<TLMemberFieldOwner>> list, List<TLMemberField<TLMemberFieldOwner>> list2,
 			EntityChangeSet changeSet, boolean isMinorVersionCompare) {
 		List<EntityChangeItem> changeItems = changeSet.getChangeItems();
 		ModelCompareOptions options = getCompareOptions();
 		Map<String,String> fieldNSMappings = options.isSuppressFieldVersionChanges() ?
 				getNamespaceMappings() : new HashMap<>();
-		Map<QName,List<TLMemberField<?>>> oldFieldMap = buildFieldMap( oldFields );
-		Map<QName,List<TLMemberField<?>>> newFieldMap = buildFieldMap( newFields );
+		Map<QName,List<TLMemberField<?>>> oldFieldMap = buildFieldMap( list );
+		Map<QName,List<TLMemberField<?>>> newFieldMap = buildFieldMap( list2 );
 		SortedSet<QName> oldFieldNames = new TreeSet<>( new QNameComparator() );
 		SortedSet<QName> newFieldNames = new TreeSet<>( new QNameComparator() );
 		List<EntityChangeItem> pendingChangeItems = new ArrayList<>();
@@ -308,15 +312,17 @@ public class EntityComparator extends BaseComparator {
 					// version.  Because all of the field names are identical in this situation,
 					// we need to re-categorize the fields by their owner's name to determine
 					// which ones were added, deleted, or changed.
-					Map<QName,List<TLMemberField<?>>> oldFieldsByOwner = buildFieldOwnerMap( oldVersionFields );
-					Map<QName,List<TLMemberField<?>>> newFieldsByOwner = buildFieldOwnerMap( newVersionFields );
+					Map<QName,List<TLMemberField<TLMemberFieldOwner>>> oldFieldsByOwner = buildFieldOwnerMap( oldVersionFields );
+					Map<QName,List<TLMemberField<TLMemberFieldOwner>>> newFieldsByOwner = buildFieldOwnerMap( newVersionFields );
 					
 					// Consider the field to be added if the owner is in the new version but not in the old
-					for (QName fieldOwner : newFieldsByOwner.keySet()) {
+					for (Entry<QName,List<TLMemberField<TLMemberFieldOwner>>> entry : newFieldsByOwner.entrySet()) {
+						QName fieldOwner = entry.getKey();
+						
 						if (!oldFieldsByOwner.containsKey( fieldOwner )) {
-							List<TLMemberField<?>> newVersionOwnerFields = newFieldsByOwner.get( fieldOwner );
+							List<TLMemberField<TLMemberFieldOwner>> newVersionOwnerFields = newFieldsByOwner.get( fieldOwner );
 							
-							for (TLMemberField<?> addedField : newVersionOwnerFields) {
+							for (TLMemberField<TLMemberFieldOwner> addedField : newVersionOwnerFields) {
 								pendingChangeItems.add( new EntityChangeItem(
 										changeSet, EntityChangeType.MEMBER_FIELD_ADDED, addedField ) );
 							}
@@ -324,11 +330,13 @@ public class EntityComparator extends BaseComparator {
 					}
 					
 					// Consider the field to be deleted if the owner is in the old version but not in the new
-					for (QName fieldOwner : oldFieldsByOwner.keySet()) {
+					for (Entry<QName,List<TLMemberField<TLMemberFieldOwner>>> entry : oldFieldsByOwner.entrySet()) {
+						QName fieldOwner = entry.getKey();
+						
 						if (!newFieldsByOwner.containsKey( fieldOwner )) {
-							List<TLMemberField<?>> oldVersionOwnerFields = oldFieldsByOwner.get( fieldOwner );
+							List<TLMemberField<TLMemberFieldOwner>> oldVersionOwnerFields = oldFieldsByOwner.get( fieldOwner );
 							
-							for (TLMemberField<?> deletedField : oldVersionOwnerFields) {
+							for (TLMemberField<TLMemberFieldOwner> deletedField : oldVersionOwnerFields) {
 								pendingChangeItems.add( new EntityChangeItem(
 										changeSet, EntityChangeType.MEMBER_FIELD_DELETED, deletedField ) );
 							}
@@ -338,10 +346,12 @@ public class EntityComparator extends BaseComparator {
 					
 					// Consider the field to be modified if it belongs to the same owner in both the old
 					// and new versions
-					for (QName fieldOwner : newFieldsByOwner.keySet()) {
+					for (Entry<QName,List<TLMemberField<TLMemberFieldOwner>>> entry : newFieldsByOwner.entrySet()) {
+						QName fieldOwner = entry.getKey();
+						
 						if (oldFieldsByOwner.containsKey( fieldOwner )) {
-							List<TLMemberField<?>> oldVersionOwnerFields = oldFieldsByOwner.get( fieldOwner );
-							List<TLMemberField<?>> newVersionOwnerFields = newFieldsByOwner.get( fieldOwner );
+							List<TLMemberField<TLMemberFieldOwner>> oldVersionOwnerFields = oldFieldsByOwner.get( fieldOwner );
+							List<TLMemberField<TLMemberFieldOwner>> newVersionOwnerFields = newFieldsByOwner.get( fieldOwner );
 							int maxLength = Math.max( oldVersionOwnerFields.size(), newVersionOwnerFields.size() );
 							
 							// Extreme Edge Case:  If there are multiple members of both list, make a guess that
@@ -353,11 +363,13 @@ public class EntityComparator extends BaseComparator {
 								
 								if (oldField == null) {
 									pendingChangeItems.add( new EntityChangeItem(
-											changeSet, EntityChangeType.MEMBER_FIELD_ADDED, newField ) );
+											changeSet, EntityChangeType.MEMBER_FIELD_ADDED,
+											(TLMemberField<TLMemberFieldOwner>) newField ) );
 									
 								} else if (newField == null) {
 									pendingChangeItems.add( new EntityChangeItem(
-											changeSet, EntityChangeType.MEMBER_FIELD_DELETED, oldField ) );
+											changeSet, EntityChangeType.MEMBER_FIELD_DELETED,
+											(TLMemberField<TLMemberFieldOwner>) oldField ) );
 									
 								} else {
 									FieldChangeSet fieldChangeSet = new FieldComparator( options, fieldNSMappings ).compareFields(
@@ -383,7 +395,8 @@ public class EntityComparator extends BaseComparator {
 				
 				for (TLMemberField<?> addedField : addedFields) {
 					changeItems.add( new EntityChangeItem(
-							changeSet, EntityChangeType.MEMBER_FIELD_ADDED, addedField ) );
+							changeSet, EntityChangeType.MEMBER_FIELD_ADDED,
+							(TLMemberField<TLMemberFieldOwner>) addedField ) );
 				}
 			}
 		}
@@ -396,7 +409,8 @@ public class EntityComparator extends BaseComparator {
 					
 					for (TLMemberField<?> deletedField : deletedFields) {
 						changeItems.add( new EntityChangeItem(
-								changeSet, EntityChangeType.MEMBER_FIELD_DELETED, deletedField ) );
+								changeSet, EntityChangeType.MEMBER_FIELD_DELETED,
+								(TLMemberField<TLMemberFieldOwner>) deletedField ) );
 					}
 				}
 			}
@@ -410,13 +424,13 @@ public class EntityComparator extends BaseComparator {
 	 * Constructs a field map that associates each field name with a list of declared
 	 * fields with that name.
 	 * 
-	 * @param fieldList  the list of fields from which to construct the map
+	 * @param list  the list of fields from which to construct the map
 	 * @return Map<QName,List<TLMemberField<?>>>
 	 */
-	private Map<QName,List<TLMemberField<?>>> buildFieldMap(List<TLMemberField<?>> fieldList) {
+	private Map<QName,List<TLMemberField<?>>> buildFieldMap(List<TLMemberField<TLMemberFieldOwner>> list) {
 		Map<QName,List<TLMemberField<?>>> fieldMap = new HashMap<>();
 		
-		for (TLMemberField<?> field : fieldList) {
+		for (TLMemberField<?> field : list) {
 			QName fieldName = new QName( ((NamedEntity) field.getOwner()).getNamespace(), field.getName() );
 			
 			if (field instanceof TLProperty) {
@@ -444,20 +458,21 @@ public class EntityComparator extends BaseComparator {
 	 * Constructs a field map that associates the name of each field owner with a list
 	 * of declared fields with that same owner.
 	 * 
-	 * @param fieldList  the list of fields from which to construct the map
+	 * @param oldVersionFields  the list of fields from which to construct the map
 	 * @return Map<QName,List<TLMemberField<?>>>
 	 */
-	private Map<QName,List<TLMemberField<?>>> buildFieldOwnerMap(List<TLMemberField<?>> fieldList) {
-		Map<QName,List<TLMemberField<?>>> fieldMap = new HashMap<>();
+	@SuppressWarnings("unchecked")
+	private Map<QName,List<TLMemberField<TLMemberFieldOwner>>> buildFieldOwnerMap(List<TLMemberField<?>> oldVersionFields) {
+		Map<QName,List<TLMemberField<TLMemberFieldOwner>>> fieldMap = new HashMap<>();
 		
-		for (TLMemberField<?> field : fieldList) {
+		for (TLMemberField<?> field : oldVersionFields) {
 			NamedEntity fieldOwner = (NamedEntity) field.getOwner();
 			String mappedNS = getNamespaceMappings().get( fieldOwner.getNamespace() );
 			QName ownerName = getAdjustedQName( new QName(
 					(mappedNS != null) ? mappedNS : fieldOwner.getNamespace(), fieldOwner.getLocalName() ) );
 			
 			fieldMap.computeIfAbsent( ownerName, n -> fieldMap.put( n, new ArrayList<>() ) );
-			fieldMap.get( ownerName ).add( field );
+			fieldMap.get( ownerName ).add( (TLMemberField<TLMemberFieldOwner>) field );
 		}
 		return fieldMap;
 	}
@@ -522,7 +537,7 @@ public class EntityComparator extends BaseComparator {
 				vScheme = vsFactory.getVersionScheme( vsFactory.getDefaultVersionScheme() );
 				
 			} catch (VersionSchemeException e1) {
-				throw new Error("Error - Default version scheme could not be identified.");
+				throw new SchemaCompilerRuntimeException("Error - Default version scheme could not be identified.");
 			}
 		}
 		return vScheme;

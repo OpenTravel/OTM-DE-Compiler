@@ -43,10 +43,10 @@ public class MultiVersionLibraryModuleLoader extends AbstractLibraryModuleLoader
     public MultiVersionLibraryModuleLoader() {
         // Assign the prioritized list of delegate module loaders
         if (OTM16Upgrade.otm16Enabled) {
-            moduleLoaders.add(new LibrarySchema1_6_ModuleLoader());
+            moduleLoaders.add(new LibrarySchema16ModuleLoader());
         }
-        moduleLoaders.add(new LibrarySchema1_5_ModuleLoader());
-        moduleLoaders.add(new LibrarySchema1_4_ModuleLoader());
+        moduleLoaders.add(new LibrarySchema15ModuleLoader());
+        moduleLoaders.add(new LibrarySchema14ModuleLoader());
     }
 
     /**

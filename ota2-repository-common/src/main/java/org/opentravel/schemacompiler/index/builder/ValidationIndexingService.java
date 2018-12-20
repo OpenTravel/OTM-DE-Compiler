@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -118,46 +119,9 @@ public class ValidationIndexingService implements IndexingTerms {
 				log.debug("Validating Library: " + item.getFilename());
 				manager.addManagedProjectItems( Arrays.asList( item ), project, findings );
 				
-				// Save each of the findings that were discovered; cross-reference by library and entity
+				// Save each of the findings that was discovered; cross-reference by library and entity
 				for (ValidationFinding finding : findings.getAllFindingsAsList()) {
-					TLModelElement targetEntity = IndexingUtils.getTargetEntity( finding.getSource() );
-					NamedEntity entity = (targetEntity instanceof NamedEntity) ? (NamedEntity) targetEntity : null;
-					TLLibrary library = (targetEntity instanceof TLLibrary) ? (TLLibrary) targetEntity : null;
-					
-					// Libraries will be saved as part of the validation finding if the target is an entity;
-					// therefore, we only need to save library findings if they are directed to the library
-					// itself adn not one of its member entities.
-					if (targetEntity instanceof TLLibrary) {
-						library = (TLLibrary) targetEntity;
-					}
-					
-					// Ignore the entity if it does not come from a TLLibrary
-					if ((entity != null) && !(entity.getOwningLibrary() instanceof TLLibrary)) {
-						entity = null; 
-					}
-					
-					if (library != null) {
-						String libraryIndexId = IndexingUtils.getIdentityKey( library );
-						List<ValidationFinding> libraryFindings = findingsByLibrary.get( libraryIndexId );
-						
-						if (libraryFindings == null) {
-							libraryFindings = new ArrayList<>();
-							findingsByLibrary.put( libraryIndexId, libraryFindings );
-						}
-						libraryFindings.add( finding );
-					}
-					if (entity != null) {
-						String libraryIndexId = IndexingUtils.getIdentityKey( (TLLibrary) entity.getOwningLibrary() );
-						String entityIndexId = IndexingUtils.getIdentityKey( entity );
-						List<ValidationFinding> entityFindings = findingsByEntity.get( entityIndexId );
-						
-						if (entityFindings == null) {
-							entityFindings = new ArrayList<>();
-							findingsByEntity.put( entityIndexId, entityFindings );
-						}
-						entityFindings.add( finding );
-						librariesByEntity.put( entityIndexId, libraryIndexId );
-					}
+					saveAndCrossReferenceFinding(finding);
 				}
 				
 				// Save the ID's of all libraries that were directly or indirectly loaded so we
@@ -183,6 +147,44 @@ public class ValidationIndexingService implements IndexingTerms {
 			
 		} finally {
 			FileUtils.delete( projectFile );
+		}
+	}
+
+	/**
+	 * Save the given validation finding, cross-referencing by library and entity.
+	 * 
+	 * @param finding  the validation finding to save
+	 */
+	private void saveAndCrossReferenceFinding(ValidationFinding finding) {
+		TLModelElement targetEntity = IndexingUtils.getTargetEntity( finding.getSource() );
+		NamedEntity entity = (targetEntity instanceof NamedEntity) ? (NamedEntity) targetEntity : null;
+		TLLibrary library = (targetEntity instanceof TLLibrary) ? (TLLibrary) targetEntity : null;
+		
+		// Libraries will be saved as part of the validation finding if the target is an entity.
+		// Therefore, we only need to save library findings if they are directed to the library
+		// itself adn not one of its member entities.
+		if (targetEntity instanceof TLLibrary) {
+			library = (TLLibrary) targetEntity;
+		}
+		
+		// Ignore the entity if it does not come from a TLLibrary
+		if ((entity != null) && !(entity.getOwningLibrary() instanceof TLLibrary)) {
+			entity = null; 
+		}
+		
+		if (library != null) {
+			String libraryIndexId = IndexingUtils.getIdentityKey( library );
+			
+			findingsByLibrary.computeIfAbsent( libraryIndexId, id -> findingsByLibrary.put( id, new ArrayList<>() ) );
+			findingsByLibrary.get( libraryIndexId ).add( finding );
+		}
+		if (entity != null) {
+			String libraryIndexId = IndexingUtils.getIdentityKey( (TLLibrary) entity.getOwningLibrary() );
+			String entityIndexId = IndexingUtils.getIdentityKey( entity );
+			
+			findingsByEntity.computeIfAbsent( entityIndexId, id -> findingsByEntity.put( id, new ArrayList<>() ) );
+			findingsByEntity.get( entityIndexId ).add( finding );
+			librariesByEntity.put( entityIndexId, libraryIndexId );
 		}
 	}
 	
@@ -215,16 +217,18 @@ public class ValidationIndexingService implements IndexingTerms {
 		try {
 			log.info("Saving validation findings to search index...");
 			
-			for (String libraryIndexId : findingsByLibrary.keySet()) {
-				List<ValidationFinding> findingList = findingsByLibrary.get( libraryIndexId );
+			for (Entry<String,List<ValidationFinding>> entry : findingsByLibrary.entrySet()) {
+				String libraryIndexId = entry.getKey();
+				List<ValidationFinding> findingList = entry.getValue();
 				
 				for (ValidationFinding finding : findingList) {
 					saveValidationFinding( finding, libraryIndexId, null );
 				}
 			}
 			
-			for (String entityIndexId : findingsByEntity.keySet()) {
-				List<ValidationFinding> findingList = findingsByEntity.get( entityIndexId );
+			for (Entry<String,List<ValidationFinding>> entry : findingsByEntity.entrySet()) {
+				String entityIndexId = entry.getKey();
+				List<ValidationFinding> findingList = entry.getValue();
 				String libraryIndexId = librariesByEntity.get( entityIndexId );
 				
 				for (ValidationFinding finding : findingList) {
@@ -252,9 +256,9 @@ public class ValidationIndexingService implements IndexingTerms {
 			String findingSource = finding.getSource().getValidationIdentity();
 			String identityKey = IndexingUtils.getIdentityKey( finding );
 			Document indexDoc = new Document();
-			Matcher m;
+			Matcher m = findingSourcePattern.matcher( findingSource );
 			
-			if ((m = findingSourcePattern.matcher( findingSource )).matches()) {
+			if (m.matches()) {
 				findingSource = m.group( 1 );
 			}
 			
@@ -285,45 +289,30 @@ public class ValidationIndexingService implements IndexingTerms {
 	 * @param libraryIndexId  the search index ID of the library for which to delete validation results
 	 */
 	public void deleteValidationResults(String libraryIndexId) {
-		SearcherManager searchManager = null;
-        IndexSearcher searcher = null;
-		
-		try {
-			Query query = new TermQuery( new Term( TARGET_LIBRARY_FIELD, libraryIndexId ) );
-			searchManager = new SearcherManager( indexWriter, true, new SearcherFactory() );
-			searcher = searchManager.acquire();
-            TopDocs searchResults = searcher.search( query, Integer.MAX_VALUE );
-            List<String> documentKeys = new ArrayList<>();
-            
-            for (ScoreDoc scoreDoc : searchResults.scoreDocs) {
-            	Document entityDoc = searcher.doc( scoreDoc.doc );
-            	IndexableField entityId = entityDoc.getField( IDENTITY_FIELD );
-            	
-            	if (entityId != null) {
-                	documentKeys.add( entityId.stringValue() );
-            	}
-            }
-            
-            // Delete all of the documents from the search index
-            for (String documentId : documentKeys) {
-        		log.info("Deleting index: " + documentId);
-    			indexWriter.deleteDocuments( new Term( IDENTITY_FIELD, documentId ) );
-            }
+		try (SearcherManager searchManager =
+				new SearcherManager( indexWriter, true, new SearcherFactory() )) {
+			Query query = new TermQuery(new Term(TARGET_LIBRARY_FIELD, libraryIndexId));
+			IndexSearcher searcher = searchManager.acquire();
+			TopDocs searchResults = searcher.search(query, Integer.MAX_VALUE);
+			List<String> documentKeys = new ArrayList<>();
+			
+			for (ScoreDoc scoreDoc : searchResults.scoreDocs) {
+				Document entityDoc = searcher.doc(scoreDoc.doc);
+				IndexableField entityId = entityDoc.getField(IDENTITY_FIELD);
+				
+				if (entityId != null) {
+					documentKeys.add(entityId.stringValue());
+				}
+			}
+			
+			// Delete all of the documents from the search index
+			for (String documentId : documentKeys) {
+				log.info("Deleting index: " + documentId);
+				indexWriter.deleteDocuments(new Term(IDENTITY_FIELD, documentId));
+			}
 			
 		} catch (IOException e) {
 			log.error("Error configuring search manager for index.", e);
-			
-		} finally {
-			try {
-				if (searcher != null) searchManager.release( searcher );
-			} catch (Exception e) {
-				// Ignore error
-			}
-			try {
-				if (searchManager != null) searchManager.close();
-			} catch (Exception e) {
-				// Ignore error
-			}
 		}
 	}
 	

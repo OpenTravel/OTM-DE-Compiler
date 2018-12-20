@@ -238,8 +238,9 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
     /**
 	 * @see org.opentravel.schemacompiler.model.TLAliasOwner#getAliasListManager()
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
-	public ChildEntityListManager<TLAlias, ?> getAliasListManager() {
+	public ChildEntityListManager<TLAlias,TLAliasOwner> getAliasListManager() {
 		return aliasManager;
 	}
 

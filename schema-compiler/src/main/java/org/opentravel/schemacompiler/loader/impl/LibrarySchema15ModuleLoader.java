@@ -26,8 +26,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.SchemaFactory;
 
-import org.opentravel.ns.ota2.librarymodel_v01_06.Library;
-import org.opentravel.ns.ota2.librarymodel_v01_06.NamespaceImport;
+import org.opentravel.ns.ota2.librarymodel_v01_05.Library;
+import org.opentravel.ns.ota2.librarymodel_v01_05.NamespaceImport;
 import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
@@ -48,16 +48,15 @@ import org.opentravel.schemacompiler.validate.ValidationFindings;
  * 
  * @author S. Livezey
  */
-public class LibrarySchema1_6_ModuleLoader extends AbstractLibraryModuleLoader {
+public class LibrarySchema15ModuleLoader extends AbstractLibraryModuleLoader {
 
-    public static final String SCHEMA_CONTEXT = ":org.w3._2001.xmlschema:org.opentravel.ns.ota2.librarymodel_v01_06";
+    public static final String SCHEMA_CONTEXT = ":org.w3._2001.xmlschema:org.opentravel.ns.ota2.librarymodel_v01_05";
 
     private static javax.xml.validation.Schema libraryValidationSchema;
     private static JAXBContext jaxbContext;
 
     /**
-     * @see org.opentravel.schemacompiler.loader.LibraryModuleLoader#loadLibrary(org.opentravel.schemacompiler.loader.LibraryInputSource,
-     *      org.opentravel.schemacompiler.validate.ValidationFindings)
+     * @see org.opentravel.schemacompiler.loader.LibraryModuleLoader#loadLibrary(org.opentravel.schemacompiler.loader.LibraryInputSource, org.opentravel.schemacompiler.validate.ValidationFindings)
      */
     public LibraryModuleInfo<Object> loadLibrary(LibraryInputSource<InputStream> inputSource,
             ValidationFindings validationFindings) throws LibraryLoaderException {
@@ -66,43 +65,12 @@ public class LibrarySchema1_6_ModuleLoader extends AbstractLibraryModuleLoader {
         try {
             Library jaxbLibrary;
 
-            try {
-                jaxbLibrary = (Library) loadLibrary(inputSource, validationFindings, jaxbContext,
-                        libraryValidationSchema);
-
-            } catch (JAXBException e) {
-                String urlString = (libraryUrl == null) ? "[MISSING URL]" : URLUtils
-                        .getShortRepresentation(libraryUrl);
-
-                // If we are not able to load the library with validation turned on, load it
-                // with validation disabled and issue a loader warning. If the content is still
-                // invalid with validation turned off, the file is completely unreadable. If that
-                // is the case, a JAXB exception will be thrown and the last catch BLOCK of this
-                // method will issue a loader validation error.
-                try {
-                    jaxbLibrary = (Library) loadLibrary(inputSource, validationFindings,
-                            jaxbContext, null);
-
-                    if (jaxbLibrary != null) {
-                        validationFindings.addFinding(FindingType.WARNING, new URLValidationSource(
-                                libraryUrl), WARNING_CORRUPT_LIBRARY_CONTENT, urlString,
-                                ExceptionUtils.getExceptionClass(e).getSimpleName(), ExceptionUtils
-                                        .getExceptionMessage(e));
-                    }
-                } catch (ClassCastException cce) {
-                    JAXBException je = new JAXBException(
-                            "The library file does not contain OTM v1.6 content.", cce);
-
-                    je.setLinkedException(cce);
-                    throw je;
-                }
-            }
+            jaxbLibrary = loadAndRetryOnFailure(inputSource, libraryUrl, validationFindings);
 
             // Before returning, we need to normalize the namespace and library name values
             // since they are used for name lookups
             if (jaxbLibrary != null) {
-                jaxbLibrary.setName((jaxbLibrary.getName() == null) ? null : jaxbLibrary.getName()
-                        .trim());
+                jaxbLibrary.setName((jaxbLibrary.getName() == null) ? null : jaxbLibrary.getName().trim());
                 jaxbLibrary.setNamespace((jaxbLibrary.getNamespace() == null) ? null : jaxbLibrary
                         .getNamespace().trim());
                 moduleInfo = buildModuleInfo(jaxbLibrary, libraryUrl);
@@ -119,6 +87,70 @@ public class LibrarySchema1_6_ModuleLoader extends AbstractLibraryModuleLoader {
         }
         return moduleInfo;
     }
+
+	/**
+	 * Attempts to load the library with XML validation enabled.  On failure, a reload will be
+	 * attempted with validation disabled.
+	 * 
+	 * @param inputSource  the input source for the library
+	 * @param libraryUrl  the URL of the library to be reloaded
+	 * @param validationFindings  validation findings to use for error/warning reports
+	 * @return Library
+	 * @throws LibraryLoaderException  thrown if the library cannot be reloaded
+	 * @throws JAXBException  thrown if the library content cannot be parsed
+	 */
+	private Library loadAndRetryOnFailure(LibraryInputSource<InputStream> inputSource, URL libraryUrl,
+			ValidationFindings validationFindings) throws LibraryLoaderException, JAXBException {
+		Library jaxbLibrary;
+		try {
+		    jaxbLibrary = (Library) loadLibrary(inputSource, validationFindings, jaxbContext,
+		            libraryValidationSchema);
+
+		} catch (JAXBException e) {
+		    jaxbLibrary = attemptReload(inputSource, libraryUrl, validationFindings, e);
+		}
+		return jaxbLibrary;
+	}
+
+	/**
+	 * Attempts to reload the library without XML validation enabled if the original load
+	 * failed.  If the content is still invalid with validation turned off, the file is
+	 * completely unreadable. If that is the case, a JAXB exception will be thrown.
+	 * 
+	 * @param inputSource  the input source for the library
+	 * @param libraryUrl  the URL of the library to be reloaded
+	 * @param validationFindings  validation findings to use for error/warning reports
+	 * @param originalException  the original exception that was thrown prior to this reload attempt
+	 * @return Library
+	 * @throws LibraryLoaderException  thrown if the library cannot be reloaded
+	 * @throws JAXBException  thrown if the library content cannot be parsed
+	 */
+	private Library attemptReload(LibraryInputSource<InputStream> inputSource, URL libraryUrl,
+			ValidationFindings validationFindings, JAXBException originalException)
+			throws LibraryLoaderException, JAXBException {
+		String urlString = (libraryUrl == null) ? "[MISSING URL]" : URLUtils.getShortRepresentation(libraryUrl);
+		Library jaxbLibrary = null;
+		
+		// If we are not able to load the library with validation turned on, load it
+		// with validation disabled and issue a loader warning. 
+		try {
+		    jaxbLibrary = (Library) loadLibrary(inputSource, validationFindings, jaxbContext, null);
+
+		    if (jaxbLibrary != null) {
+		        validationFindings.addFinding(FindingType.WARNING, new URLValidationSource(
+		                libraryUrl), WARNING_CORRUPT_LIBRARY_CONTENT, urlString,
+		                ExceptionUtils.getExceptionClass(originalException).getSimpleName(), ExceptionUtils
+		                        .getExceptionMessage(originalException));
+		    }
+		    
+		} catch (ClassCastException cce) {
+		    JAXBException je = new JAXBException("The library file does not contain OTM v1.4 content.", cce);
+
+		    je.setLinkedException(cce);
+		    throw je;
+		}
+		return jaxbLibrary;
+	}
 
     /**
      * Constructs the <code>LibraryModuleInfo</code> to be returned for the given schema.
@@ -149,7 +181,7 @@ public class LibrarySchema1_6_ModuleLoader extends AbstractLibraryModuleLoader {
         try {
             SchemaFactory schemaFactory = SchemaFactory
                     .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            InputStream schemaStream = SchemaDeclarations.OTA2_LIBRARY_SCHEMA_1_6.getContent(
+            InputStream schemaStream = SchemaDeclarations.OTA2_LIBRARY_SCHEMA_1_5.getContent(
             		CodeGeneratorFactory.XSD_TARGET_FORMAT);
 
             schemaFactory.setResourceResolver(new ClasspathResourceResolver());

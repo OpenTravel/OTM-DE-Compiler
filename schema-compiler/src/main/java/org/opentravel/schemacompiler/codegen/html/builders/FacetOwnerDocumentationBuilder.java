@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
@@ -51,7 +52,7 @@ public abstract class FacetOwnerDocumentationBuilder<T extends TLFacetOwner & TL
 	}
 	
 	@Override
-	public void build() throws Exception {
+	public void build() throws CodeGenerationException {
 		ListIterator<FacetDocumentationBuilder> facetIter = facets.listIterator();
 		FacetDocumentationBuilder prev;
 		FacetDocumentationBuilder next;

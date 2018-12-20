@@ -196,21 +196,6 @@ public class DependencyFilterBuilder {
     }
 
     /**
-     * Returns the list of built-in libraries that are dependencies of the given one. If no
-     * dependencies exist, this method will return an empty list.
-     * 
-     * @param library
-     *            the built-in library for which to return dependencies
-     * @return List<BuiltInLibrary>
-     */
-    private List<BuiltInLibrary> getBuiltInDependencies(BuiltInLibrary library) {
-        List<BuiltInLibrary> builtInDependencies = new ArrayList<>();
-
-        findBuiltInDependencies(library, builtInDependencies);
-        return builtInDependencies;
-    }
-
-    /**
      * Recursive method that locates all of the extended dependencies for a library.
      * 
      * @param library
@@ -292,9 +277,10 @@ public class DependencyFilterBuilder {
             AbstractLibrary library = entity.getOwningLibrary();
 
             if (library instanceof BuiltInLibrary) {
-                for (BuiltInLibrary dependency : getBuiltInDependencies((BuiltInLibrary) library)) {
-                    filter.addProcessedLibrary(dependency);
-                }
+                List<BuiltInLibrary> builtInDependencies = new ArrayList<>();
+
+                findBuiltInDependencies((BuiltInLibrary) library, builtInDependencies);
+                builtInDependencies.forEach( d -> filter.addProcessedLibrary( d ) );
             }
             filter.addProcessedLibrary(library);
             filter.addProcessedElement(entity);

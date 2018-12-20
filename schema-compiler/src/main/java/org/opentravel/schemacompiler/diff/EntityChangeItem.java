@@ -17,6 +17,7 @@
 package org.opentravel.schemacompiler.diff;
 
 import org.opentravel.schemacompiler.model.TLMemberField;
+import org.opentravel.schemacompiler.model.TLMemberFieldOwner;
 
 /**
  * Describes a single change identified during comparison of two OTM entities.
@@ -24,8 +25,8 @@ import org.opentravel.schemacompiler.model.TLMemberField;
 public class EntityChangeItem extends ChangeItem<EntityChangeType> {
 	
 	private EntityChangeSet changeSet;
-	private TLMemberField<?> addedField;
-	private TLMemberField<?> deletedField;
+	private TLMemberField<TLMemberFieldOwner> addedField;
+	private TLMemberField<TLMemberFieldOwner> deletedField;
 	private FieldChangeSet modifiedField;
 	
 	/**
@@ -35,7 +36,7 @@ public class EntityChangeItem extends ChangeItem<EntityChangeType> {
 	 * @param changeType  the type of entity change
 	 * @param affectedField  the field that was added or removed
 	 */
-	public EntityChangeItem(EntityChangeSet changeSet, EntityChangeType changeType, TLMemberField<?> affectedField) {
+	public EntityChangeItem(EntityChangeSet changeSet, EntityChangeType changeType, TLMemberField<TLMemberFieldOwner> affectedField) {
 		this.changeSet = changeSet;
 		this.changeType = changeType;
 		
@@ -90,18 +91,18 @@ public class EntityChangeItem extends ChangeItem<EntityChangeType> {
 	/**
 	 * Returns the field that was added.
 	 *
-	 * @return TLMemberField<?>
+	 * @return TLMemberField<TLMemberFieldOwner>
 	 */
-	public TLMemberField<?> getAddedField() {
+	public TLMemberField<TLMemberFieldOwner> getAddedField() {
 		return addedField;
 	}
 
 	/**
 	 * Returns the field that was deleted.
 	 *
-	 * @return TLMemberField<?>
+	 * @return TLMemberField<TLMemberFieldOwner>
 	 */
-	public TLMemberField<?> getDeletedField() {
+	public TLMemberField<TLMemberFieldOwner> getDeletedField() {
 		return deletedField;
 	}
 

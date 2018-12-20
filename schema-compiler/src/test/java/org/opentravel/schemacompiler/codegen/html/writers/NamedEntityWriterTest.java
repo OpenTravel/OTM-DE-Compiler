@@ -15,7 +15,8 @@
  */
 package org.opentravel.schemacompiler.codegen.html.writers;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -23,6 +24,11 @@ import java.util.Collections;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opentravel.schemacompiler.codegen.CodeGenerationException;
+import org.opentravel.schemacompiler.codegen.html.Content;
+import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder.DocumentationBuilderType;
+import org.opentravel.schemacompiler.codegen.html.builders.NamedEntityDocumentationBuilder;
+import org.opentravel.schemacompiler.event.ModelElementListener;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.NamedEntity;
@@ -30,10 +36,6 @@ import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
-import org.opentravel.schemacompiler.codegen.html.Content;
-import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder.DocumentationBuilderType;
-import org.opentravel.schemacompiler.codegen.html.builders.NamedEntityDocumentationBuilder;
-import org.opentravel.schemacompiler.event.ModelElementListener;
 
 /**
  * @author Eric.Bronson
@@ -58,7 +60,7 @@ public class NamedEntityWriterTest extends AbstractWriterTest {
 				new NamedEntityDocumentationBuilder<TestEntity>(entity) {
 
 					@Override
-					public void build() throws Exception {
+					public void build() throws CodeGenerationException {
 
 					}
 

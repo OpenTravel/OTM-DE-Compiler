@@ -60,6 +60,7 @@ import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.model.XSDComplexType;
 import org.opentravel.schemacompiler.model.XSDElement;
 import org.opentravel.schemacompiler.model.XSDSimpleType;
+import org.opentravel.schemacompiler.util.ClassSpecificFunction;
 import org.w3._2001.xmlschema.TopLevelSimpleType;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -195,14 +196,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 			ArrayNode arrayNode;
 			// second time through
 			if (parent.isObject()) {
-				JsonNode currentNode = parent.findValue(nodeName);
-				if (!currentNode.isArray()) {
-					arrayNode = nodeFactory.arrayNode();
-					((ObjectNode) parent).replace(nodeName, arrayNode);
-					arrayNode.add(currentNode);
-				} else {
-					arrayNode = (ArrayNode) currentNode;
-				}
+				arrayNode = toArrayNode(parent, nodeName);
 			} else { // more than twice
 				arrayNode = (ArrayNode) parent;
 			}
@@ -227,6 +221,28 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 				addRoleAttributes((TLCoreObject) listFacet.getOwningEntity());
 			}
 		}
+	}
+
+	/**
+	 * Converts the node with the specified name under the given parent from an
+	 * object/value node to a single-element array node that contains the value.
+	 * 
+	 * @param parent  the parent node that contains the one being modified
+	 * @param nodeName  the name of the node to convert to an array
+	 * @return ArrayNode
+	 */
+	private ArrayNode toArrayNode(JsonNode parent, String nodeName) {
+		ArrayNode arrayNode;
+		JsonNode currentNode = parent.findValue(nodeName);
+		
+		if (!currentNode.isArray()) {
+			arrayNode = nodeFactory.arrayNode();
+			((ObjectNode) parent).replace(nodeName, arrayNode);
+			arrayNode.add(currentNode);
+		} else {
+			arrayNode = (ArrayNode) currentNode;
+		}
+		return arrayNode;
 	}
 
 	/**
@@ -750,32 +766,8 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 	 */
 	private void createSimpleElement(NamedEntity elementType) {
 		if (context.getModelAttribute() != null) {
-			if (context.getNode() == null) {
-				throw new IllegalStateException(
-						"No element available for new attribute creation.");
-			}
-			JsonNode n;
+			createSimpleElementFromAttribute(elementType);
 			
-			if (context.getModelAttribute().isReference()) {
-				String value = generateExampleValue(elementType);
-				
-				if (context.getModelAttribute().getReferenceRepeat() > 1) {
-					n = getArrayNode(value); // should be an array
-				} else {
-					n = getTextNode(value);
-				}
-				
-			} else if ((elementType instanceof TLListFacet)
-					|| XsdCodegenUtils.isIdRefsType((TLPropertyType) elementType)
-					|| isSimpleList( elementType )) {
-				n = generateExampleValueArrayNode(context.getModelAttribute());
-			
-			} else {
-				n = generateExampleValueNode(context.getModelAttribute());
-			}
-			((ObjectNode) context.getNode()).set(
-					getAttributeName(context.getModelAttribute()), n);
-
 		} else {
 			String nodeName = getElementName(elementType).intern();
 			
@@ -787,40 +779,80 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 				
 			} else {
 				// If the element has not already been created, do it now
-				if (context.getNode() == null) {
-					TLProperty prop = context.getModelElement();
-					JsonNode newNode;
-					
-					if (prop.isReference()) {
-						String value = generateExampleValue(elementType);
-						
-						if (prop.getRepeat() > 1) {
-							newNode = getArrayNode(value); // should be an array
-						} else {
-							newNode = getTextNode(value);
-						}
-					} else {
-						newNode = getSimpleTypeNode(elementType);
-					}
-					context.setNode(newNode);
+				createSimpleElementFromProperty(elementType, nodeName);
+			}
+		}
+	}
 
-					// Assign the new DOM element as a child of the previous
-					// context
-					JsonNode currentNode = contextStack.peek().getNode();
-					
-					if (contextStack.isEmpty() || (currentNode == null)) {
-						node.set(nodeName, newNode);
-						
-					} else {
-						if (currentNode.isArray()) {
-							((ArrayNode) currentNode).add(newNode);
-						} else {
-							((ObjectNode) currentNode).set(nodeName, newNode);
-						}
-					}
-					// constructs a new DOM element with no content
+	/**
+	 * Creates a simple example element for the currently active model attribute.
+	 * 
+	 * @param elementType  specifies the type of element to use when the current context
+	 *            is null (i.e. when the new element will be the root of the XML
+	 *            document)
+	 */
+	private void createSimpleElementFromAttribute(NamedEntity elementType) {
+		if (context.getNode() == null) {
+			throw new IllegalStateException("No element available for new attribute creation.");
+		}
+		JsonNode n;
+		
+		if (context.getModelAttribute().isReference()) {
+			String value = generateExampleValue(elementType);
+			
+			if (context.getModelAttribute().getReferenceRepeat() > 1) {
+				n = getArrayNode(value); // should be an array
+			} else {
+				n = getTextNode(value);
+			}
+			
+		} else if ((elementType instanceof TLListFacet)
+				|| XsdCodegenUtils.isIdRefsType((TLPropertyType) elementType) || isSimpleList(elementType)) {
+			n = generateExampleValueArrayNode(context.getModelAttribute());
+			
+		} else {
+			n = generateExampleValueNode(context.getModelAttribute());
+		}
+		((ObjectNode) context.getNode()).set(getAttributeName(context.getModelAttribute()), n);
+	}
+	
+	/**
+	 * Creates a simple example element for the currently active model property.
+	 * 
+	 * @param elementType  specifies the type of element to use when the current context
+	 *            is null (i.e. when the new element will be the root of the XML
+	 *            document)
+	 * @param nodeName  the preferred name of the new node
+	 */
+	private void createSimpleElementFromProperty(NamedEntity elementType, String nodeName) {
+		if (context.getNode() == null) {
+			TLProperty prop = context.getModelElement();
+			JsonNode newNode;
+			
+			if (prop.isReference()) {
+				String value = generateExampleValue(elementType);
+				
+				if (prop.getRepeat() > 1) {
+					newNode = getArrayNode(value); // should be an array
+				} else {
+					newNode = getTextNode(value);
 				}
-
+			} else {
+				newNode = getSimpleTypeNode(elementType);
+			}
+			context.setNode(newNode);
+			
+			// Assign the new DOM element as a child of the previous context
+			JsonNode currentNode = contextStack.peek().getNode();
+			
+			if (contextStack.isEmpty() || (currentNode == null)) {
+				node.set(nodeName, newNode);
+				
+			} else if (currentNode.isArray()) {
+				((ArrayNode) currentNode).add(newNode);
+				
+			} else {
+				((ObjectNode) currentNode).set(nodeName, newNode);
 			}
 		}
 	}
@@ -860,51 +892,64 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
      * @param exampleStr  string representation of the exaple value to return
      * @return ValueNode
      */
-    private ValueNode getExampleValueNode(Object entity, String exampleStr) {
-    	Class<?> literalType = getLiteralType( entity );
-    	ValueNode exampleNode = null;
-    	
-    	exampleStr = (exampleStr == null) ? null : exampleStr.intern();
-    	
-    	if (literalType == null) {
-    		exampleNode = nodeFactory.textNode( exampleStr ); // unknown types as text nodes
-    		
-    	} else if (Number.class.isAssignableFrom( literalType )) {
-    		try {
-    	    	if (literalType.equals( Byte.class )) {
-    	    		exampleNode = nodeFactory.numberNode( Byte.parseByte( exampleStr ) );
-    	    		
-    	    	} else if (literalType.equals( Short.class )) {
-    	    		exampleNode = nodeFactory.numberNode( Short.parseShort( exampleStr ) );
-    	    		
-    	    	} else if (literalType.equals( Integer.class )) {
-    	    		exampleNode = nodeFactory.numberNode( Integer.parseInt( exampleStr ) );
-    	    		
-    	    	} else if (literalType.equals( Long.class )) {
-    	    		exampleNode = nodeFactory.numberNode( Long.parseLong( exampleStr ) );
-    	    		
-    	    	} else if (literalType.equals( Float.class )) {
-    	    		exampleNode = nodeFactory.numberNode( Float.parseFloat( exampleStr ) );
-    	    		
-    	    	} else if (literalType.equals( Double.class )) {
-    	    		exampleNode = nodeFactory.numberNode( Double.parseDouble( exampleStr ) );
-    	    		
-    	    	} else if (literalType.equals( BigDecimal.class )) {
-    	    		exampleNode = nodeFactory.numberNode( new BigDecimal( exampleStr ) );
-    	    	}
-    		} catch (NumberFormatException e) {
-    			exampleNode = nodeFactory.numberNode( 0 ); // assign zero on error
-    		}
-    				
-    	} else if (literalType.equals( Boolean.class )) {
-    		exampleNode = nodeFactory.booleanNode( Boolean.parseBoolean( exampleStr ) );
-    		
-    	} else { // Render strings or anything else as text nodes
-    		exampleNode = nodeFactory.textNode( exampleStr );
-    	}
-    	return exampleNode;
-    }
+	private ValueNode getExampleValueNode(Object entity, String exampleStr) {
+		Class<?> literalType = getLiteralType(entity);
+		ValueNode exampleNode = null;
+		
+		exampleStr = (exampleStr == null) ? null : exampleStr.intern();
+		
+		if (literalType == null) {
+			exampleNode = nodeFactory.textNode(exampleStr); // unknown types as
+															// text nodes
+			
+		} else if (Number.class.isAssignableFrom(literalType)) {
+			try {
+				if (literalType.equals(Byte.class)) {
+					exampleNode = nodeFactory.numberNode(Byte.parseByte(exampleStr));
+					
+				} else if (literalType.equals(Short.class)) {
+					exampleNode = nodeFactory.numberNode(Short.parseShort(exampleStr));
+					
+				} else if (literalType.equals(Integer.class)) {
+					exampleNode = nodeFactory.numberNode(Integer.parseInt(exampleStr));
+					
+				} else if (literalType.equals(Long.class)) {
+					exampleNode = nodeFactory.numberNode(Long.parseLong(exampleStr));
+					
+				} else if (literalType.equals(Float.class)) {
+					exampleNode = nodeFactory.numberNode(Float.parseFloat(exampleStr));
+					
+				} else if (literalType.equals(Double.class)) {
+					exampleNode = nodeFactory.numberNode(Double.parseDouble(exampleStr));
+					
+				} else if (literalType.equals(BigDecimal.class)) {
+					exampleNode = nodeFactory.numberNode(new BigDecimal(exampleStr));
+				}
+			} catch (NumberFormatException e) {
+				exampleNode = nodeFactory.numberNode(0); // assign zero on error
+			}
+			
+		} else if (literalType.equals(Boolean.class)) {
+			exampleNode = nodeFactory.booleanNode(Boolean.parseBoolean(exampleStr));
+			
+		} else { // Render strings or anything else as text nodes
+			exampleNode = nodeFactory.textNode(exampleStr);
+		}
+		return exampleNode;
+	}
     
+    private ClassSpecificFunction<Class<?>> literalTypeFunction = new ClassSpecificFunction<Class<?>>()
+    		.addFunction( TLAttribute.class, e -> getLiteralType( e.getType() ) )
+    		.addFunction( TLProperty.class, e -> getLiteralType( e.getType() ) )
+    		.addFunction( TLIndicator.class, e -> Boolean.class )
+    		.addFunction( TLSimple.class, e -> getLiteralType( e.getParentType() ) )
+    		.addFunction( TLSimpleFacet.class, e -> getLiteralType( e.getSimpleType() ) )
+    		.addFunction( TLAbstractEnumeration.class, e -> String.class )
+    		.addFunction( TLRoleEnumeration.class, e -> String.class )
+    		.addFunction( TLValueWithAttributes.class, e -> getLiteralType( e.getParentType() ) )
+    		.addFunction( TLCoreObject.class, e -> getLiteralType( e.getSimpleFacet() ) )
+    		.addFunction( XSDSimpleType.class, this::getXsdLiteralType );
+    		
     /**
      * Returns the type of the given entity as either a <code>java.lang.String</code>,
      * <code>java.lang.Number</code> (or a Number sub-class), or <code>java.lang.Boolean</code>.
@@ -912,85 +957,69 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
      * @param entity  the entity type to analyze
      * @return Class<?>
      */
-    private Class<?> getLiteralType(Object entity) {
-    	Class<?> literalType;
-    	
-    	if (entity instanceof TLAttribute) {
-    		literalType = getLiteralType( ((TLAttribute) entity).getType() );
-    		
-    	} else if (entity instanceof TLProperty) {
-    		literalType = getLiteralType( ((TLProperty) entity).getType() );
-    		
-    	} else if (entity instanceof TLIndicator) {
-    		literalType = Boolean.class;
-    		
-    	} else if (entity instanceof TLSimple) {
-    		literalType = getLiteralType( ((TLSimple) entity).getParentType() );
-    		
-    	} else if (entity instanceof TLSimpleFacet) {
-    		literalType = getLiteralType( ((TLSimpleFacet) entity).getSimpleType() );
-    		
-    	} else if (entity instanceof TLAbstractEnumeration) {
-    		literalType = String.class;
-    		
-    	} else if (entity instanceof TLRoleEnumeration) {
-    		literalType = String.class;
-    		
-    	} else if (entity instanceof TLValueWithAttributes) {
-    		literalType = getLiteralType( ((TLValueWithAttributes) entity).getParentType() );
-    		
-    	} else if (entity instanceof TLCoreObject) {
-    		literalType = getLiteralType( ((TLCoreObject) entity).getSimpleFacet() );
-    		
-    	} else if (entity instanceof XSDSimpleType) {
-    		XSDSimpleType xsdSimple = (XSDSimpleType) entity;
-    		
-    		if (XMLConstants.W3C_XML_SCHEMA_NS_URI.equals( xsdSimple.getNamespace() )) {
-    			try {
-        			switch (EnumXsdSimpleType.fromValue( xsdSimple.getLocalName() )) {
-						case BOOLEAN:
-		    				literalType = Boolean.class;
-							break;
-						case FLOAT:
-		    				literalType = Float.class;
-							break;
-						case DECIMAL:
-		    				literalType = BigDecimal.class;
-							break;
-						case DOUBLE:
-		    				literalType = Double.class;
-							break;
-						case INT:
-						case INTEGER:
-						case POSITIVE_INTEGER:
-		    				literalType = Integer.class;
-							break;
-						case LONG:
-		    				literalType = Long.class;
-							break;
-						default:
-		    				literalType = String.class;
-							break;
-        			}
-    				
-    			} catch (IllegalArgumentException e) {
-    				literalType = String.class;
-    			}
-    			
-    		} else {
-    			XSDSimpleType xsdBaseType = findParentType( xsdSimple );
-    			
-    			if (xsdBaseType == null) {
-    				literalType = String.class;
-    			} else {
-    				literalType = getLiteralType( xsdBaseType );
-    			}
-    		}
-    	} else {
-    		literalType = null;
-    	}
-    	return literalType;
-    }
+	private Class<?> getLiteralType(Object entity) {
+		Class<?> literalType;
+		
+		if (literalTypeFunction.canApply(entity)) {
+			literalType = literalTypeFunction.apply( entity );
+			
+		} else {
+			literalType = null;
+		}
+		return literalType;
+	}
+
+	/**
+	 * Returns the literal type for the given XSD simple type.
+	 * 
+	 * @param xsdSimple  the XSD simple type for which to return a literal
+	 * @return Class<?>
+	 */
+	private Class<?> getXsdLiteralType(XSDSimpleType xsdSimple) {
+		Class<?> literalType;
+		if (XMLConstants.W3C_XML_SCHEMA_NS_URI.equals(xsdSimple.getNamespace())) {
+			try {
+				switch (EnumXsdSimpleType.fromValue(xsdSimple.getLocalName())) {
+					case BOOLEAN:
+						literalType = Boolean.class;
+						break;
+					case FLOAT:
+						literalType = Float.class;
+						break;
+					case DECIMAL:
+						literalType = BigDecimal.class;
+						break;
+					case DOUBLE:
+						literalType = Double.class;
+						break;
+					case INT:
+					case INTEGER:
+					case POSITIVE_INTEGER:
+						literalType = Integer.class;
+						break;
+					case LONG:
+						literalType = Long.class;
+						break;
+					default:
+						literalType = String.class;
+						break;
+				}
+				
+			} catch (IllegalArgumentException e) {
+				literalType = String.class;
+			}
+			
+		} else {
+			XSDSimpleType xsdBaseType = findParentType(xsdSimple);
+			
+			if (xsdBaseType == null) {
+				literalType = String.class;
+			} else {
+				literalType = getLiteralType(xsdBaseType);
+			}
+		}
+		return literalType;
+	}
     
     /**
      * Attempts to locate the parent (base) type of the given <code>XSDSimpleType</code>
@@ -1080,31 +1109,7 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 		String elementName = null;
 
 		if (!PropertyCodegenUtils.hasGlobalElement(propertyType)) {
-			if (context.getModelAlias() != null) {
-				elementName = JsonSchemaNamingUtils.getGlobalPropertyName(context.getModelAlias());
-
-			} else if (propertyType instanceof TLListFacet) {
-				TLListFacet listFacetType = (TLListFacet) propertyType;
-
-				if (listFacetType.getFacetType() != TLFacetType.SIMPLE) {
-					elementName = JsonSchemaNamingUtils.getGlobalPropertyName(listFacetType.getItemFacet());
-				}
-			}
-
-			if (elementName == null) {
-				if ((property.getName() == null) || (property.getName().length() == 0)) {
-					elementName = propertyType.getLocalName();
-					
-				} else {
-					elementName = property.getName();
-				}
-			}
-
-			if (property.isReference() && !elementName.endsWith("Ref")) {
-				// probably a VWA reference, so we need to make sure the "Ref"
-				// suffix is appended
-				elementName += "Ref";
-			}
+			elementName = getPropertyLocalElementName(property, propertyType);
 			
 		} else if (isSubstitutionGroupReference(property)) {
 			elementName = property.getType().getLocalName();
@@ -1114,6 +1119,45 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 			
 		} else {
 			elementName = getContextElementName(propertyType, property.isReference());
+		}
+		return elementName;
+	}
+
+	/**
+	 * Returns the element name for properties that have been determined not to have
+	 * a corresponding global element name.
+	 * 
+	 * @param property  the property for which to return an element name
+	 * @param propertyType  the resolved property type
+	 * @return String
+	 */
+	private String getPropertyLocalElementName(TLProperty property, TLPropertyType propertyType) {
+		String elementName = null;
+		
+		if (context.getModelAlias() != null) {
+			elementName = JsonSchemaNamingUtils.getGlobalPropertyName(context.getModelAlias());
+
+		} else if (propertyType instanceof TLListFacet) {
+			TLListFacet listFacetType = (TLListFacet) propertyType;
+
+			if (listFacetType.getFacetType() != TLFacetType.SIMPLE) {
+				elementName = JsonSchemaNamingUtils.getGlobalPropertyName(listFacetType.getItemFacet());
+			}
+		}
+
+		if (elementName == null) {
+			if ((property.getName() == null) || (property.getName().length() == 0)) {
+				elementName = propertyType.getLocalName();
+				
+			} else {
+				elementName = property.getName();
+			}
+		}
+
+		if (property.isReference() && !elementName.endsWith("Ref")) {
+			// probably a VWA reference, so we need to make sure the "Ref"
+			// suffix is appended
+			elementName += "Ref";
 		}
 		return elementName;
 	}
@@ -1130,60 +1174,43 @@ public class JSONExampleVisitor extends AbstractExampleVisitor<JsonNode> {
 	 *            reference
 	 * @return String
 	 */
-	private String getContextElementName(NamedEntity elementType,
-			boolean isReferenceProperty) {
-		boolean useSubstitutableElementName = false;
+	private String getContextElementName(NamedEntity elementType, boolean isReferenceProperty) {
+        boolean useSubstitutableElementName = useSubstitutableElementName(elementType);
+        String elementName;
+
+		elementType = resolveBaseElementType(elementType);
+		elementName = lookupContextElementName(elementType, isReferenceProperty, useSubstitutableElementName);
+		return (elementName != null) ? elementName : elementType.getLocalName();
+	}
+
+	/**
+	 * Returns the global property name for the given element type using the information provided.
+	 * 
+	 * @param elementType  the element type for which to return the global property name
+	 * @param isReferenceProperty  flag indicating if the element is a reference property
+	 * @param useSubstitutableElementName  flag indicating whether to use the substutitable name of the element
+	 * @return String
+	 */
+	private String lookupContextElementName(NamedEntity elementType, boolean isReferenceProperty,
+			boolean useSubstitutableElementName) {
 		String elementName;
-
-		// Determine whether we should be using the substitutable or
-		// non-substitutable name for the
-		// element
-		if (!XsdCodegenUtils.isSimpleCoreObject(elementType)) {
-			if (context.getModelElement() != null) {
-				TLPropertyType modelPropertyType = context.getModelElement()
-						.getType();
-
-				if (modelPropertyType instanceof TLAlias) {
-					modelPropertyType = (TLPropertyType) ((TLAlias) modelPropertyType)
-							.getOwningEntity();
-				}
-				if ((modelPropertyType instanceof TLBusinessObject)
-						|| (modelPropertyType instanceof TLCoreObject)) {
-					useSubstitutableElementName = true;
-				}
-			} else { // no property - this is the root element of the document
-				if (elementType instanceof TLAlias) {
-					elementType = ((TLAlias) elementType).getOwningEntity();
-				}
-				
-				if ((elementType instanceof TLBusinessObject)
-						|| (elementType instanceof TLCoreObject)) {
-					useSubstitutableElementName = true;
-				}
-			}
-		}
-
-		// Lookup the correct name for the element depending upon its specific
-		// characteristics
+		
 		if (context.getModelAlias() != null) {
 			if (!isReferenceProperty && useSubstitutableElementName) {
-				elementName = JsonSchemaNamingUtils.getGlobalPropertyName((TLAlias) context
-								.getModelAlias());
-
+				elementName = JsonSchemaNamingUtils.getGlobalPropertyName((TLAlias) context.getModelAlias());
+				
 			} else {
-				elementName = JsonSchemaNamingUtils.getGlobalPropertyName(
-						context.getModelAlias(), isReferenceProperty);
+				elementName = JsonSchemaNamingUtils.getGlobalPropertyName(context.getModelAlias(), isReferenceProperty);
 			}
 		} else {
-			if (!isReferenceProperty && useSubstitutableElementName
-					&& (elementType instanceof TLFacet)) {
+			if (!isReferenceProperty && useSubstitutableElementName && (elementType instanceof TLFacet)) {
 				elementName = JsonSchemaNamingUtils.getGlobalPropertyName((TLFacet) elementType);
-
+				
 			} else {
 				elementName = JsonSchemaNamingUtils.getGlobalPropertyName(elementType, isReferenceProperty);
 			}
 		}
-		return (elementName != null) ? elementName : elementType.getLocalName();
+		return elementName;
 	}
 	
 	/**

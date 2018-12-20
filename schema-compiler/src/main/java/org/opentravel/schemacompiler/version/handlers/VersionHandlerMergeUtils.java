@@ -18,6 +18,7 @@ package org.opentravel.schemacompiler.version.handlers;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.opentravel.schemacompiler.codegen.util.EnumCodegenUtils;
@@ -107,27 +108,10 @@ public class VersionHandlerMergeUtils {
         Set<NamedEntity> existingSubstitutionGroups = new HashSet<>();
         Set<String> existingPropertyNames = new HashSet<>();
 
-        if (target instanceof TLFacet) {
-            List<TLProperty> existingProperties = PropertyCodegenUtils
-                    .getInheritedProperties( (TLFacet) target );
-
-            for (TLProperty property : existingProperties) {
-                TLPropertyType propertyType = PropertyCodegenUtils.resolvePropertyType( property.getType() );
-                
-                if (propertyType != null) {
-                    NamedEntity substitutionGroup = PropertyCodegenUtils.hasGlobalElement( propertyType ) ?
-                    		PropertyCodegenUtils.getInheritanceRoot( propertyType ) : null;
-
-                    if (substitutionGroup != null) {
-                        existingSubstitutionGroups.add( substitutionGroup );
-                    }
-                    if (property.getName() != null) {
-                        existingPropertyNames.add( property.getName() );
-                    }
-                }
-            }
-        }
-
+		if (target instanceof TLFacet) {
+			findExistingProperties((TLFacet) target, existingSubstitutionGroups, existingPropertyNames);
+		}
+		
         for (TLProperty sourceProperty : propertiesToMerge) {
             if (!existingPropertyNames.contains( sourceProperty.getName() )) {
                 TLPropertyType propertyType = PropertyCodegenUtils.resolvePropertyType( sourceProperty.getType() );
@@ -143,6 +127,36 @@ public class VersionHandlerMergeUtils {
             }
         }
     }
+
+	/**
+	 * Scans the the target facet in order to find existing properties that
+	 * will not need to be merged to the new version.
+	 * 
+	 * @param target  the target facet to scan
+	 * @param existingSubstitutionGroups  the set of existing substitution groups for the target owner
+	 * @param existingPropertyNames  the set of existing property names for the target owner
+	 */
+	private void findExistingProperties(TLFacet target, Set<NamedEntity> existingSubstitutionGroups,
+			Set<String> existingPropertyNames) {
+        List<TLProperty> existingProperties = PropertyCodegenUtils
+                .getInheritedProperties( (TLFacet) target );
+
+        for (TLProperty property : existingProperties) {
+            TLPropertyType propertyType = PropertyCodegenUtils.resolvePropertyType( property.getType() );
+            
+            if (propertyType != null) {
+                NamedEntity substitutionGroup = PropertyCodegenUtils.hasGlobalElement( propertyType ) ?
+                		PropertyCodegenUtils.getInheritanceRoot( propertyType ) : null;
+
+                if (substitutionGroup != null) {
+                    existingSubstitutionGroups.add( substitutionGroup );
+                }
+                if (property.getName() != null) {
+                    existingPropertyNames.add( property.getName() );
+                }
+            }
+        }
+	}
 
     /**
      * Merges the contents of the given list into the specified target entity. If any indicators
@@ -184,25 +198,26 @@ public class VersionHandlerMergeUtils {
      * @param sourceFacets  the collection of named source facets to be merged
      * @param referenceHandler  handler that stores reference information for the libraries being rolled up
      */
-    public void mergeFacets(Map<String,TLFacet> targetFacets, Map<String,TLFacet> sourceFacets,
-    		RollupReferenceHandler referenceHandler) {
-    	ModelElementCloner cloner = null;
-    	
-        for (String facetIdentity : sourceFacets.keySet()) {
-            TLFacet sourceFacet = sourceFacets.get( facetIdentity );
-            TLFacet targetFacet = targetFacets.get( facetIdentity );
-            
-            if (targetFacet.getDocumentation() == null) {
-                if (cloner == null) {
-                	cloner = getCloner( targetFacet ); // Initialize the first time through
-                }
-                targetFacet.setDocumentation( cloner.clone( sourceFacet.getDocumentation() ) );
-            }
-            mergeAttributes( targetFacet, sourceFacet.getAttributes(), referenceHandler );
-            mergeProperties( targetFacet, sourceFacet.getElements(), referenceHandler );
-            mergeIndicators( targetFacet, sourceFacet.getIndicators() );
-        }
-    }
+	public void mergeFacets(Map<String, TLFacet> targetFacets, Map<String, TLFacet> sourceFacets,
+			RollupReferenceHandler referenceHandler) {
+		ModelElementCloner cloner = null;
+		
+		for (Entry<String, TLFacet> entry : sourceFacets.entrySet()) {
+			String facetIdentity = entry.getKey();
+			TLFacet sourceFacet = entry.getValue();
+			TLFacet targetFacet = targetFacets.get(facetIdentity);
+			
+			if (targetFacet.getDocumentation() == null) {
+				if (cloner == null) {
+					cloner = getCloner(targetFacet); // Initialize the first time through
+				}
+				targetFacet.setDocumentation(cloner.clone(sourceFacet.getDocumentation()));
+			}
+			mergeAttributes(targetFacet, sourceFacet.getAttributes(), referenceHandler);
+			mergeProperties(targetFacet, sourceFacet.getElements(), referenceHandler);
+			mergeIndicators(targetFacet, sourceFacet.getIndicators());
+		}
+	 }
     
     /**
      * Adds the given facet to the identity map, using the full identity string of the facet as the

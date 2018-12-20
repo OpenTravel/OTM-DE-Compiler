@@ -50,6 +50,7 @@ import org.opentravel.schemacompiler.repository.RemoteRepository;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
+import org.opentravel.schemacompiler.util.SchemaCompilerRuntimeException;
 import org.opentravel.schemacompiler.util.URLUtils;
 
 /**
@@ -71,7 +72,7 @@ public class DisplayFormatter {
 			repositoryManager = RepositoryManager.getDefault();
 			
 		} catch (RepositoryException e) {
-			throw new RuntimeException("Unable to initialize repository manager.", e);
+			throw new SchemaCompilerRuntimeException("Unable to initialize repository manager.", e);
 		}
 	}
 	

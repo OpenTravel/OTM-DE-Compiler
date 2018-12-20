@@ -17,6 +17,7 @@ package org.opentravel.schemacompiler.codegen.swagger;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -101,7 +102,7 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
 			Map<TLHttpMethod,SwaggerOperation> methodMap = operationMap.get( pathTemplate );
 			
 			if (methodMap == null) {
-				methodMap = new HashMap<>();
+				methodMap = new EnumMap<>( TLHttpMethod.class );
 				pathList.add( pathTemplate );
 				operationMap.put( pathTemplate, methodMap );
 			}
@@ -180,18 +181,19 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
 		// Add definitions for all of the OTM entities that are within the
 		// scope of the current filter
 		for (TLLibrary library : model.getUserDefinedLibraries()) {
-			if (!filter.processLibrary( library )) continue;
+			if (!filter.processLibrary(library))
+				continue;
 			
-	        for (LibraryMember member : library.getNamedMembers()) {
-	        	if (member instanceof TLResource) {
-	        		for (TLActionFacet actionFacet : ((TLResource) member).getActionFacets()) {
-			        	transformEntity( actionFacet, definitions );
-	        		}
-	        		
-	        	} else {
-		        	transformEntity( member, definitions );
-	        	}
-	        }
+			for (LibraryMember member : library.getNamedMembers()) {
+				if (member instanceof TLResource) {
+					for (TLActionFacet actionFacet : ((TLResource) member).getActionFacets()) {
+						transformEntity(actionFacet, definitions);
+					}
+					
+				} else {
+					transformEntity(member, definitions);
+				}
+			}
 		}
 		return definitions;
 	}

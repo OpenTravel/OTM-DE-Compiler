@@ -57,8 +57,7 @@ public class CoreObjectTransformer extends
         final TLCoreObject coreObject = new TLCoreObject();
 
         coreObject.setName(trimString(source.getName()));
-        coreObject.setNotExtendable((source.isNotExtendable() == null) ? false : source
-                .isNotExtendable());
+        coreObject.setNotExtendable((source.isNotExtendable() != null) && source.isNotExtendable());
 
         if (source.getDocumentation() != null) {
             ObjectTransformer<Documentation, TLDocumentation, DefaultTransformerContext> docTransformer = getTransformerFactory()

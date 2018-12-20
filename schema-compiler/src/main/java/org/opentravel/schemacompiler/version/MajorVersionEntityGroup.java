@@ -131,6 +131,23 @@ public class MajorVersionEntityGroup implements Comparable<MajorVersionEntityGro
 	}
 	
 	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return (baseNamespace == null) ? 0 : baseNamespace.hashCode();
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		return (obj instanceof MajorVersionEntityGroup)
+				&& (compareTo( (MajorVersionEntityGroup) obj ) == 0);
+	}
+
+	/**
 	 * Returns the ordinal value for the major version in the given version identifer.
 	 * 
 	 * @param versionIdentifier  the version identifier for which to return the major version

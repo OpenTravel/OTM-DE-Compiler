@@ -15,20 +15,20 @@
  */
 package org.opentravel.schemacompiler.codegen.html.writers;
 
+import java.io.IOException;
 import java.util.List;
 
-import org.opentravel.schemacompiler.model.TLRole;
-
-import org.opentravel.schemacompiler.codegen.html.builders.CoreObjectDocumentationBuilder;
-import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.Configuration;
 import org.opentravel.schemacompiler.codegen.html.Content;
+import org.opentravel.schemacompiler.codegen.html.builders.CoreObjectDocumentationBuilder;
+import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlStyle;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTag;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTree;
 import org.opentravel.schemacompiler.codegen.html.markup.RawHtml;
 import org.opentravel.schemacompiler.codegen.html.writers.info.AbstractInfoWriter;
 import org.opentravel.schemacompiler.codegen.html.writers.info.InfoWriter;
+import org.opentravel.schemacompiler.model.TLRole;
 
 public class CoreObjectWriter 
 	extends ComplexObjectWriter<CoreObjectDocumentationBuilder> {
@@ -45,7 +45,7 @@ public class CoreObjectWriter
 	 */
 	public CoreObjectWriter(CoreObjectDocumentationBuilder coreObject,
 			DocumentationBuilder prev, DocumentationBuilder next)
-			throws Exception {
+			throws IOException {
 		super(coreObject, prev, next);		
 	}
 	

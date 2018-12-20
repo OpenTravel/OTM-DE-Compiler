@@ -15,9 +15,11 @@
  */
 package org.opentravel.schemacompiler.codegen.html.writers;
 
+import java.io.IOException;
+
+import org.opentravel.schemacompiler.codegen.html.Content;
 import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.builders.FacetOwnerDocumentationBuilder;
-import org.opentravel.schemacompiler.codegen.html.Content;
 import org.opentravel.schemacompiler.codegen.html.writers.info.FacetInfoWriter;
 
 /**
@@ -30,7 +32,7 @@ public class FacetOwnerWriterImpl<T extends FacetOwnerDocumentationBuilder<?>> e
 
 	public FacetOwnerWriterImpl(T member,
 			DocumentationBuilder prev,
-			DocumentationBuilder next) throws Exception {
+			DocumentationBuilder next) throws IOException {
 		super(member, prev, next);
 	}
 

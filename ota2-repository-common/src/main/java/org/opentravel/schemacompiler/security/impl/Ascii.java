@@ -22,7 +22,7 @@ package org.opentravel.schemacompiler.security.impl;
  * @author James Todd [gonzo@eng.sun.com]
  */
 public class Ascii {
-
+	
     /*
      * Character translation tables.
      */
@@ -39,7 +39,12 @@ public class Ascii {
     private static final boolean[] isLower = new boolean[256];
     private static final boolean[] isWhite = new boolean[256];
     private static final boolean[] isDigit = new boolean[256];
-
+    
+    /**
+     * Private constructor to prevent instantiation.
+     */
+    private Ascii() {}
+    
     /*
      * Initialize character translation and type tables.
      */
@@ -138,47 +143,49 @@ public class Ascii {
      *            the start offset of the bytes
      * @param len
      *            the length of the bytes
-     * @exception NumberFormatException
-     *                if the integer format was invalid
      */
-    public static int parseInt(byte[] b, int off, int len) throws NumberFormatException {
-        int c;
-
-        if (b == null || len <= 0 || !isDigit(c = b[off++])) {
-            throw new NumberFormatException();
-        }
-
-        int n = c - '0';
-
-        while (--len > 0) {
-            if (!isDigit(c = b[off++])) {
-                throw new NumberFormatException();
-            }
-            n = n * 10 + c - '0';
-        }
-
-        return n;
-    }
-
-    public static int parseInt(char[] b, int off, int len) throws NumberFormatException {
-        int c;
-
-        if (b == null || len <= 0 || !isDigit(c = b[off++])) {
-            throw new NumberFormatException();
-        }
-
-        int n = c - '0';
-
-        while (--len > 0) {
-            if (!isDigit(c = b[off++])) {
-                throw new NumberFormatException();
-            }
-            n = n * 10 + c - '0';
-        }
-
-        return n;
-    }
-
+	public static int parseInt(byte[] b, int off, int len) {
+		int c = (b == null) ? -1 : b[off++];
+		
+		if (b == null || len <= 0 || !isDigit(c)) {
+			throw new NumberFormatException();
+		}
+		
+		int n = c - '0';
+		
+		while (--len > 0) {
+			c = b[off++];
+			
+			if (!isDigit(c)) {
+				throw new NumberFormatException();
+			}
+			n = n * 10 + c - '0';
+		}
+		
+		return n;
+	}
+	
+	public static int parseInt(char[] b, int off, int len) {
+		int c = (b == null) ? -1 : b[off++];
+		
+		if (b == null || len <= 0 || !isDigit(c)) {
+			throw new NumberFormatException();
+		}
+		
+		int n = c - '0';
+		
+		while (--len > 0) {
+			c = b[off++];
+			
+			if (!isDigit(c)) {
+				throw new NumberFormatException();
+			}
+			n = n * 10 + c - '0';
+		}
+		
+		return n;
+	}
+	
     /**
      * Parses an unsigned long from the specified subarray of bytes.
      * 
@@ -191,58 +198,62 @@ public class Ascii {
      * @exception NumberFormatException
      *                if the long format was invalid
      */
-    public static long parseLong(byte[] b, int off, int len) throws NumberFormatException {
-        int c;
-
-        if (b == null || len <= 0 || !isDigit(c = b[off++])) {
-            throw new NumberFormatException();
-        }
-
-        long n = ((long) c) - ((long) '0');
-        long m;
-
-        while (--len > 0) {
-            if (!isDigit(c = b[off++])) {
-                throw new NumberFormatException();
-            }
-            m = n * 10 + c - '0';
-
-            if (m < n) {
-                // Overflow
-                throw new NumberFormatException();
-            } else {
-                n = m;
-            }
-        }
-
-        return n;
-    }
-
-    public static long parseLong(char[] b, int off, int len) throws NumberFormatException {
-        int c;
-
-        if (b == null || len <= 0 || !isDigit(c = b[off++])) {
-            throw new NumberFormatException();
-        }
-
-        long n = ((long) c) - ((long) '0');
-        long m;
-
-        while (--len > 0) {
-            if (!isDigit(c = b[off++])) {
-                throw new NumberFormatException();
-            }
-            m = n * 10 + c - '0';
-
-            if (m < n) {
-                // Overflow
-                throw new NumberFormatException();
-            } else {
-                n = m;
-            }
-        }
-
-        return n;
-    }
-
+	public static long parseLong(byte[] b, int off, int len) {
+		int c = (b == null) ? -1 : b[off++];
+		
+		if (b == null || len <= 0 || !isDigit(c)) {
+			throw new NumberFormatException();
+		}
+		
+		long n = ((long) c) - ((long) '0');
+		long m;
+		
+		while (--len > 0) {
+			c = b[off++];
+			
+			if (!isDigit(c)) {
+				throw new NumberFormatException();
+			}
+			m = n * 10 + c - '0';
+			
+			if (m < n) {
+				// Overflow
+				throw new NumberFormatException();
+			} else {
+				n = m;
+			}
+		}
+		
+		return n;
+	}
+	
+	public static long parseLong(char[] b, int off, int len) {
+		int c = (b == null) ? -1 : b[off++];
+		
+		if (b == null || len <= 0 || !isDigit(c)) {
+			throw new NumberFormatException();
+		}
+		
+		long n = ((long) c) - ((long) '0');
+		long m;
+		
+		while (--len > 0) {
+			c = b[off++];
+			
+			if (!isDigit(c)) {
+				throw new NumberFormatException();
+			}
+			m = n * 10 + c - '0';
+			
+			if (m < n) {
+				// Overflow
+				throw new NumberFormatException();
+			} else {
+				n = m;
+			}
+		}
+		
+		return n;
+	}
+	
 }

@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.naming.CommunicationException;
 import javax.naming.Context;
@@ -347,49 +348,43 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
 		List<UserPrincipal> userList = new ArrayList<>();
 		
 		if ((searchCriteria != null) && (searchCriteria.length() > 0)) {
-			List<String> searchAttributes = Arrays.asList( userLastNameAttribute, userFirstNameAttribute, userFullNameAttribute );
-			StringBuilder searchFilter = new StringBuilder("(&(objectCategory=person)(").append(userIdAttribute).append("=*)(|");
-            SearchControls constraints = new SearchControls();
+			List<String> searchAttributes = Arrays.asList(userLastNameAttribute, userFirstNameAttribute,userFullNameAttribute);
+			SearchControls constraints = new SearchControls();
+			String searchFilter = buildSearchFilter(searchCriteria, searchAttributes);
 			DirContext context = null;
 			
-			for (String searchAttr : searchAttributes) {
-				if ((searchAttr != null) && (searchAttr.length() > 0)) {
-					searchFilter.append("(").append( searchAttr ).append("=*").append( searchCriteria ).append("*)");
-				}
-			}
-			searchFilter.append( "))" );
-            constraints.setSearchScope(searchUserSubtree ?
-            		SearchControls.SUBTREE_SCOPE : SearchControls.ONELEVEL_SCOPE);
-            constraints.setTimeLimit(userSearchTimeout);
-            constraints.setCountLimit( maxResults );
-            constraints.setReturningAttributes( new String[] {
-            		userIdAttribute, userLastNameAttribute, userFirstNameAttribute, userEmailAttribute } );
-            
-            try {
-				context = openConnection( connectionPrincipal, connectionPassword );
-	           	NamingEnumeration<SearchResult> searchResults = context.search(userSearchBase,
-	           			searchFilter.toString(), constraints);
-	           	
-	           	while (searchResults.hasMore()) {
-	           		SearchResult resultItem = searchResults.next();
-	           		Attributes itemAttrs = resultItem.getAttributes();
-					String userId = getAttributeValue( itemAttrs, userIdAttribute );
-					String lastName = getAttributeValue( itemAttrs, userLastNameAttribute );
-					String firstName = getAttributeValue( itemAttrs, userFirstNameAttribute );
-					String email = getAttributeValue( itemAttrs, userEmailAttribute );
+			constraints.setSearchScope(
+					searchUserSubtree ? SearchControls.SUBTREE_SCOPE : SearchControls.ONELEVEL_SCOPE);
+			constraints.setTimeLimit(userSearchTimeout);
+			constraints.setCountLimit(maxResults);
+			constraints.setReturningAttributes(new String[] { userIdAttribute, userLastNameAttribute,
+					userFirstNameAttribute, userEmailAttribute });
+			
+			try {
+				context = openConnection(connectionPrincipal, connectionPassword);
+				NamingEnumeration<SearchResult> searchResults = context.search(
+						userSearchBase, searchFilter, constraints);
+				
+				while (searchResults.hasMore()) {
+					SearchResult resultItem = searchResults.next();
+					Attributes itemAttrs = resultItem.getAttributes();
+					String userId = getAttributeValue(itemAttrs, userIdAttribute);
+					String lastName = getAttributeValue(itemAttrs, userLastNameAttribute);
+					String firstName = getAttributeValue(itemAttrs, userFirstNameAttribute);
+					String email = getAttributeValue(itemAttrs, userEmailAttribute);
 					UserPrincipal user = new UserPrincipal();
 					
-					user.setUserId( userId );
-					user.setLastName( lastName );
-					user.setFirstName( firstName );
-					user.setEmailAddress( email );
-	           		userList.add( user );
-	           	}
-	           	
-            } catch (PartialResultException | SizeLimitExceededException e) {
-            	// Ignore - this means we have reached the end of the list and that any remaining
-            	// items are aliased referrals which cannot be resolved.
-            	
+					user.setUserId(userId);
+					user.setLastName(lastName);
+					user.setFirstName(firstName);
+					user.setEmailAddress(email);
+					userList.add(user);
+				}
+				
+			} catch (PartialResultException | SizeLimitExceededException e) {
+				// Ignore - this means we have reached the end of the list and that any remaining
+				// items are aliased referrals which cannot be resolved.
+				
 			} catch (NamingException e) {
 				throw new RepositoryException("Error encountered during directory search.", e);
 			}
@@ -397,6 +392,26 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
 		return userList;
 	}
 
+	/**
+	 * Constructs a JNDI search filter using the given search criteria and attributes.
+	 * 
+	 * @param searchCriteria  the JNDI search criteria
+	 * @param searchAttributes  the search attributes
+	 * @return String
+	 */
+	private String buildSearchFilter(String searchCriteria, List<String> searchAttributes) {
+		StringBuilder searchFilter = new StringBuilder("(&(objectCategory=person)(").append(userIdAttribute).append("=*)(|");
+		
+		for (String searchAttr : searchAttributes) {
+			if ((searchAttr != null) && (searchAttr.length() > 0)) {
+				searchFilter.append("(").append(searchAttr).append("=*").append(searchCriteria).append("*)");
+			}
+		}
+		searchFilter.append("))");
+		
+		return searchFilter.toString();
+	}
+	
 	/**
      * Contacts the remote directory to determine if the password provided is valid for the
      * specified userId.
@@ -409,66 +424,84 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
      * @throws NamingException
      *             thrown if an error occurs while communicating with the remote directory
      */
-    protected boolean checkCredentials(String userId, String authCredentials)
-            throws NamingException {
-        DirContext context = null;
-        boolean isValid = false;
-
-        try {
-            AuthenticationCacheEntry cacheEntry = getCachedAuthentication(userId);
-            boolean isAuthenticationCached = false;
-
-            if ((cacheEntry != null) && (authCredentials != null)
-                    && PasswordHelper.encrypt(authCredentials).equals(
-                            cacheEntry.getEncryptedPassword())) {
-                isAuthenticationCached = true;
-                isValid = cacheEntry.isAuthenticationSuccessful();
-            }
-
-            if (!isAuthenticationCached) {
-                // The cached authentication was expired or unavailable, so we need to perform
-                // a live authentication against the JNDI server.
-                context = openConnection(connectionPrincipal, connectionPassword);
-                String userPassword;
-
-                if (mode == AuthenticationMode.USER_LOOKUP) {
-                    userPassword = lookupUserPassword(userId, context);
-
-                    if (userPassword != null) {
-                        isValid = passwordValidator.isValidPassword(authCredentials, userPassword);
-                    }
-                    
-                } else { // AuthenticationMode.USER_SEARCH
-                    String userDn = findUserDn(userId, context);
-                    
-                    if (userDn != null) {
-                        try {
-                        	context.close(); // close the generic lookup context
-                        	context = openConnection(userDn, authCredentials);
-                            isValid = true;
-
-                        } catch (NamingException e) {
-                            // Ignore and return false
-                        }
-                    }
-                }
-
-                // Add these results to the cache so the results will be cached for the next inquiry
-                setCachedAuthentication(new AuthenticationCacheEntry(userId,
-                        PasswordHelper.encrypt(authCredentials), isValid));
-            }
-            return isValid;
-
-        } finally {
-            try {
-                if (context != null) context.close();
-                
-            } catch (Exception e) {
+	protected boolean checkCredentials(String userId, String authCredentials) throws NamingException {
+		DirContext context = null;
+		boolean isValid = false;
+		
+		try {
+			AuthenticationCacheEntry cacheEntry = getCachedAuthentication(userId);
+			boolean isAuthenticationCached = false;
+			
+			if ((cacheEntry != null) && (authCredentials != null)
+					&& PasswordHelper.encrypt(authCredentials).equals(cacheEntry.getEncryptedPassword())) {
+				isAuthenticationCached = true;
+				isValid = cacheEntry.isAuthenticationSuccessful();
+			}
+			
+			if (!isAuthenticationCached) {
+				// The cached authentication was expired or unavailable, so we
+				// need to perform
+				// a live authentication against the JNDI server.
+				context = openConnection(connectionPrincipal, connectionPassword);
+				String userPassword;
+				
+				if (mode == AuthenticationMode.USER_LOOKUP) {
+					userPassword = lookupUserPassword(userId, context);
+					
+					if (userPassword != null) {
+						isValid = passwordValidator.isValidPassword(authCredentials, userPassword);
+					}
+					
+				} else { // AuthenticationMode.USER_SEARCH
+					context = authenticateUser(userId, authCredentials, context);
+					isValid = (context != null);
+				}
+				
+				// Add these results to the cache so the results will be cached
+				// for the next inquiry
+				setCachedAuthentication(
+						new AuthenticationCacheEntry(userId, PasswordHelper.encrypt(authCredentials), isValid));
+			}
+			return isValid;
+			
+		} finally {
+			try {
+				if (context != null) context.close();
+				
+			} catch (Exception e) {
 				log.warn(ERROR_CLOSING_JNDI_CONTEXT, e);
-            }
-        }
-    }
+			}
+		}
+	}
 
+	/**
+	 * Authenticates the user by closing the given context and opening a new one, using
+	 * the credentials provided to perform the authentication.  If the operation was successful,
+	 * the new context will be returned.  On failure, this method will return null.
+	 * 
+	 * @param userId  the user ID to authenticate
+	 * @param authCredentials  the user's password to authenticate
+	 * @param context  the directory context to user for the user's DN lookup
+	 * @return DirContext
+	 * @throws NamingException  thrown if an error occurs during the user's DN lookup
+	 */
+	private DirContext authenticateUser(String userId, String authCredentials, DirContext context)
+			throws NamingException {
+		String userDn = findUserDn(userId, context);
+		
+		if (userDn != null) {
+			try {
+				context.close(); // close the generic lookup context
+				context = null;
+				context = openConnection(userDn, authCredentials);
+				
+			} catch (NamingException e) {
+				// Ignore and return false
+			}
+		}
+		return context;
+	}
+	
 	/**
      * Verifies that the user has a valid account in the directory.
      * 
@@ -520,11 +553,12 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
 		DirContext context = null;
 		
 		try {
-			for (String userId : userRegistry.keySet()) {
+			for (Entry<String,UserInfo> entry : userRegistry.entrySet()) {
+				String userId = entry.getKey();
 				Long profileCacheTimeout = profileCacheTimeouts.get( userId );
 				
 				if ((profileCacheTimeout == null) || (System.currentTimeMillis() > profileCacheTimeout)) {
-					UserInfo userInfo = userRegistry.get( userId );
+					UserInfo userInfo = entry.getValue();
 					
 					if (context == null) {
 						context = openConnection( connectionPrincipal, connectionPassword );
@@ -664,46 +698,60 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
      * @return String
      * @throws NamingException
      */
-    protected String findUserDn(String userId, DirContext context) throws NamingException {
-        String userDn = null;
+	protected String findUserDn(String userId, DirContext context) throws NamingException {
+		String userDn = null;
+		
+		for (MessageFormat userSearchPattern : userSearchPatterns) {
+			try {
+				String searchFilter = userSearchPattern.format(new String[] { userId });
+				SearchControls constraints = new SearchControls();
+				
+				constraints
+					.setSearchScope(searchUserSubtree ? SearchControls.SUBTREE_SCOPE : SearchControls.ONELEVEL_SCOPE);
+				constraints.setTimeLimit(userSearchTimeout);
+				
+				NamingEnumeration<SearchResult> results = context.search(userSearchBase, searchFilter, constraints);
+				SearchResult result = getUserSearchResult(userId, results);
+				
+				if (result != null) {
+					userDn = result.getNameInNamespace();
+					break;
+				}
+				
+			} catch (NameNotFoundException e) {
+				// Ignore and keep searching
+			}
+		}
+		return userDn;
+	}
+	
+	/**
+	 * Returns the first search result for the specified user.
+	 * 
+	 * @param userId  the user ID for which the search was conducted
+	 * @param results  the search results from which to return an item
+	 * @return SearchResult
+	 * @throws NamingException  thrown if an error occurs retrieving the result
+	 */
+	private SearchResult getUserSearchResult(String userId, NamingEnumeration<SearchResult> results)
+			throws NamingException {
+        SearchResult result = null;
+        
+		try {
+		    if ((results != null) && results.hasMore()) {
+		        result = results.next();
 
-        for (MessageFormat userSearchPattern : userSearchPatterns) {
-            try {
-                String searchFilter = userSearchPattern.format(new String[] { userId });
-                SearchControls constraints = new SearchControls();
-
-                constraints.setSearchScope(searchUserSubtree ?
-                		SearchControls.SUBTREE_SCOPE : SearchControls.ONELEVEL_SCOPE);
-                constraints.setTimeLimit(userSearchTimeout);
-
-                NamingEnumeration<SearchResult> results = context.search(userSearchBase, searchFilter, constraints);
-                SearchResult result = null;
-
-                try {
-                    if ((results != null) && results.hasMore()) {
-                        result = results.next();
-
-                        // Make sure only one entry exists for the requested user
-                        if (results.hasMore()) {
-                            log.warn("Multiple entries found for user: " + userId);
-                            result = null;
-                        }
-                    }
-                } catch (PartialResultException e) {
-                    // Ignore partial result errors - most likely due to ActiveDirectory referrals
-                }
-
-                if (result != null) {
-                	userDn = result.getNameInNamespace();
-                    break;
-                }
-
-            } catch (NameNotFoundException e) {
-                // Ignore and keep searching
-            }
-        }
-        return userDn;
-    }
+		        // Make sure only one entry exists for the requested user
+		        if (results.hasMore()) {
+		            log.warn("Multiple entries found for user: " + userId);
+		            result = null;
+		        }
+		    }
+		} catch (PartialResultException e) {
+		    // Ignore partial result errors - most likely due to ActiveDirectory referrals
+		}
+		return result;
+	}
 
     /**
      * Returns the specified attribute value from the list of attributes provided. If multiple
@@ -809,46 +857,62 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
         }
 
         // Finally, ensure that all required mode-specific settings have been provided
-        switch (mode) {
-            case USER_LOOKUP:
-                if ((connectionPrincipal == null) || (connectionPrincipal.length() == 0)) {
-                    throw new RepositorySecurityException(
-                            "The 'authentication.jndi.connectionPrincipal' property is a required value for the JNDI user-lookup mode.");
-                }
-                if ((connectionPassword == null) || (connectionPassword.length() == 0)) {
-                    throw new RepositorySecurityException(
-                            "The 'authentication.jndi.connectionPassword' property is a required value for the JNDI user-lookup mode.");
-                }
-                if (userPattern == null) {
-                    throw new RepositorySecurityException(
-                            "The 'authentication.jndi.userPattern' property is a required value for the JNDI user-lookup mode.");
-                }
-                if (passwordValidator == null) {
-                    throw new RepositorySecurityException(
-                            "The 'authentication.jndi.digestAlgorithm' property is a required value for the JNDI user-lookup mode.");
-                }
-                break;
-            case USER_SEARCH:
-                // userSearchBase, userSearchPatterns
-                if ((connectionPrincipal == null) || (connectionPrincipal.length() == 0)) {
-                    throw new RepositorySecurityException(
-                            "The 'authentication.jndi.connectionPrincipal' property is a required value for the JNDI user-lookup mode.");
-                }
-                if ((connectionPassword == null) || (connectionPassword.length() == 0)) {
-                    throw new RepositorySecurityException(
-                            "The 'authentication.jndi.connectionPassword' property is a required value for the JNDI user-lookup mode.");
-                }
-                if (userSearchBase == null) {
-                    throw new RepositorySecurityException(
-                            "The 'authentication.jndi.userSearchBase' property is a required value for the JNDI user-lookup mode.");
-                }
-                if ((userSearchPatterns == null) || (userSearchPatterns.length == 0)) {
-                    throw new RepositorySecurityException(
-                            "The 'authentication.jndi.userSearchPatterns' property is a required value for the JNDI user-lookup mode.");
-                }
-                break;
+        if (mode == AuthenticationMode.USER_LOOKUP) {
+            validateUserLookup();
+        	
+        } else if (mode == AuthenticationMode.USER_SEARCH) {
+            // userSearchBase, userSearchPatterns
+            validateUserSearch();
         }
     }
+
+	/**
+	 * Validates the USER_SEARCH configuration.
+	 * 
+	 * @throws RepositorySecurityException  thrown if a configuration error is detected
+	 */
+	private void validateUserSearch() throws RepositorySecurityException {
+		if ((connectionPrincipal == null) || (connectionPrincipal.length() == 0)) {
+		    throw new RepositorySecurityException(
+		            "The 'authentication.jndi.connectionPrincipal' property is a required value for the JNDI user-lookup mode.");
+		}
+		if ((connectionPassword == null) || (connectionPassword.length() == 0)) {
+		    throw new RepositorySecurityException(
+		            "The 'authentication.jndi.connectionPassword' property is a required value for the JNDI user-lookup mode.");
+		}
+		if (userSearchBase == null) {
+		    throw new RepositorySecurityException(
+		            "The 'authentication.jndi.userSearchBase' property is a required value for the JNDI user-lookup mode.");
+		}
+		if ((userSearchPatterns == null) || (userSearchPatterns.length == 0)) {
+		    throw new RepositorySecurityException(
+		            "The 'authentication.jndi.userSearchPatterns' property is a required value for the JNDI user-lookup mode.");
+		}
+	}
+
+	/**
+	 * Validates the USER_LOOKUP configuration.
+	 * 
+	 * @throws RepositorySecurityException  thrown if a configuration error is detected
+	 */
+	private void validateUserLookup() throws RepositorySecurityException {
+		if ((connectionPrincipal == null) || (connectionPrincipal.length() == 0)) {
+		    throw new RepositorySecurityException(
+		            "The 'authentication.jndi.connectionPrincipal' property is a required value for the JNDI user-lookup mode.");
+		}
+		if ((connectionPassword == null) || (connectionPassword.length() == 0)) {
+		    throw new RepositorySecurityException(
+		            "The 'authentication.jndi.connectionPassword' property is a required value for the JNDI user-lookup mode.");
+		}
+		if (userPattern == null) {
+		    throw new RepositorySecurityException(
+		            "The 'authentication.jndi.userPattern' property is a required value for the JNDI user-lookup mode.");
+		}
+		if (passwordValidator == null) {
+		    throw new RepositorySecurityException(
+		            "The 'authentication.jndi.digestAlgorithm' property is a required value for the JNDI user-lookup mode.");
+		}
+	}
 
     /**
      * Returns the fully qualified Java class name of the factory class used to acquire our JNDI

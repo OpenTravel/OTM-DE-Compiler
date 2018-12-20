@@ -158,94 +158,95 @@ public class FacetCodegenUtils {
      * @param facetName  the name of the contextual facet to return (only used for contextual facets)
      * @return TLFacet
      */
-    public static TLFacet getFacetOfType(TLFacetOwner owner, TLFacetType facetType, String facetName) {
-        TLFacet memberFacet;
-
-        if (owner instanceof TLBusinessObject) {
-            TLBusinessObject boOwner = (TLBusinessObject) owner;
-
-            switch (facetType) {
-                case ID:
-                    memberFacet = boOwner.getIdFacet();
-                    break;
-                case SUMMARY:
-                    memberFacet = boOwner.getSummaryFacet();
-                    break;
-                case DETAIL:
-                    memberFacet = boOwner.getDetailFacet();
-                    break;
-                case CUSTOM:
-                    memberFacet = findContextualFacet(boOwner.getCustomFacets(), facetName);
-                    break;
-                case QUERY:
-                    memberFacet = findContextualFacet(boOwner.getQueryFacets(), facetName);
-                    break;
-                case UPDATE:
-                    memberFacet = findContextualFacet(boOwner.getUpdateFacets(), facetName);
-                    break;
+	public static TLFacet getFacetOfType(TLFacetOwner owner, TLFacetType facetType, String facetName) {
+		TLFacet memberFacet;
+		
+		if (owner instanceof TLBusinessObject) {
+			TLBusinessObject boOwner = (TLBusinessObject) owner;
+			
+			switch (facetType) {
+				case ID:
+					memberFacet = boOwner.getIdFacet();
+					break;
+				case SUMMARY:
+					memberFacet = boOwner.getSummaryFacet();
+					break;
+				case DETAIL:
+					memberFacet = boOwner.getDetailFacet();
+					break;
+				case CUSTOM:
+					memberFacet = findContextualFacet(boOwner.getCustomFacets(), facetName);
+					break;
+				case QUERY:
+					memberFacet = findContextualFacet(boOwner.getQueryFacets(), facetName);
+					break;
+				case UPDATE:
+					memberFacet = findContextualFacet(boOwner.getUpdateFacets(), facetName);
+					break;
 				default:
 					memberFacet = null;
 					break;
-            }
-        } else if (owner instanceof TLCoreObject) {
-            TLCoreObject coreOwner = (TLCoreObject) owner;
-
-            switch (facetType) {
-            // NOTE: We are looking for a TLFacet, so the core's simple facet is not considered
-                case SUMMARY:
-                    memberFacet = coreOwner.getSummaryFacet();
-                    break;
-                case DETAIL:
-                    memberFacet = coreOwner.getDetailFacet();
-                    break;
+			}
+		} else if (owner instanceof TLCoreObject) {
+			TLCoreObject coreOwner = (TLCoreObject) owner;
+			
+			switch (facetType) {
+				// NOTE: We are looking for a TLFacet, so the core's simple
+				// facet is not considered
+				case SUMMARY:
+					memberFacet = coreOwner.getSummaryFacet();
+					break;
+				case DETAIL:
+					memberFacet = coreOwner.getDetailFacet();
+					break;
 				default:
 					memberFacet = null;
 					break;
-            }
-        } else if (owner instanceof TLChoiceObject) {
-        	TLChoiceObject choiceOwner = (TLChoiceObject) owner;
-        	
-        	switch (facetType) {
-        		case SHARED:
-        			memberFacet = choiceOwner.getSharedFacet();
-        			break;
-        		case CHOICE:
-        			memberFacet = findContextualFacet(choiceOwner.getChoiceFacets(), facetName);
-        			break;
+			}
+		} else if (owner instanceof TLChoiceObject) {
+			TLChoiceObject choiceOwner = (TLChoiceObject) owner;
+			
+			switch (facetType) {
+				case SHARED:
+					memberFacet = choiceOwner.getSharedFacet();
+					break;
+				case CHOICE:
+					memberFacet = findContextualFacet(choiceOwner.getChoiceFacets(), facetName);
+					break;
 				default:
 					memberFacet = null;
 					break;
-        	}
-        } else if (owner instanceof TLContextualFacet) {
-        	TLContextualFacet owningFacet = (TLContextualFacet) owner;
-        	
-        	if (owningFacet.getFacetType() == facetType) {
-        		memberFacet = findContextualFacet(owningFacet.getChildFacets(), facetName);
-        	} else {
-        		memberFacet = null;
-        	}
-        } else if (owner instanceof TLOperation) {
-            TLOperation opOwner = (TLOperation) owner;
-
-            switch (facetType) {
-                case REQUEST:
-                    memberFacet = opOwner.getRequest();
-                    break;
-                case RESPONSE:
-                    memberFacet = opOwner.getResponse();
-                    break;
-                case NOTIFICATION:
-                    memberFacet = opOwner.getNotification();
-                    break;
+			}
+		} else if (owner instanceof TLContextualFacet) {
+			TLContextualFacet owningFacet = (TLContextualFacet) owner;
+			
+			if (owningFacet.getFacetType() == facetType) {
+				memberFacet = findContextualFacet(owningFacet.getChildFacets(), facetName);
+			} else {
+				memberFacet = null;
+			}
+		} else if (owner instanceof TLOperation) {
+			TLOperation opOwner = (TLOperation) owner;
+			
+			switch (facetType) {
+				case REQUEST:
+					memberFacet = opOwner.getRequest();
+					break;
+				case RESPONSE:
+					memberFacet = opOwner.getResponse();
+					break;
+				case NOTIFICATION:
+					memberFacet = opOwner.getNotification();
+					break;
 				default:
 					memberFacet = null;
 					break;
-            }
-        } else {
-        	memberFacet = null;
-        }
-        return memberFacet;
-    }
+			}
+		} else {
+			memberFacet = null;
+		}
+		return memberFacet;
+	}
 
     /**
      * Returns the contextual facet from the list with the specified name. If no such facet exists,
@@ -420,46 +421,48 @@ public class FacetCodegenUtils {
      * @param visitedFacets  the collection of facets that have already been visited
      * @return List<TLFacet>
      */
-    private static void getLocalFacetHierarchy(TLFacet facet, List<TLFacet> localHierarchy, Set<TLFacet> visitedFacets) {
-    	if (!visitedFacets.contains( facet )) {
-    		visitedFacets.add( facet );
-    		
-            TLFacetOwner facetOwner = facet.getOwningEntity();
-
-            localHierarchy.add(facet); // start by including the facet that was passed to this method
-
-            if (facetOwner instanceof TLBusinessObject) {
-                switch (facet.getFacetType()) {
-                    case DETAIL:
-                    case CUSTOM:
-                        localHierarchy.add(0, getFacetOfType(facetOwner, TLFacetType.SUMMARY));
-                        localHierarchy.add(0, getFacetOfType(facetOwner, TLFacetType.ID));
-                        break;
-                    case SUMMARY:
-                        localHierarchy.add(0, getFacetOfType(facetOwner, TLFacetType.ID));
-                        break;
-    				default:
-    					break;
-                }
-            } else if (facetOwner instanceof TLCoreObject) {
-                if (facet.getFacetType() == TLFacetType.DETAIL) {
-                    localHierarchy.add(0, getFacetOfType(facetOwner, TLFacetType.SUMMARY));
-                }
-            } else if (facetOwner instanceof TLChoiceObject) {
-                if (facet.getFacetType() == TLFacetType.CHOICE) {
-                    localHierarchy.add(0, getFacetOfType(facetOwner, TLFacetType.SHARED));
-                }
-            } else if (facetOwner instanceof TLContextualFacet) {
-            	List<TLFacet> nestedHierarchy = new ArrayList<>();
-            	
-            	getLocalFacetHierarchy( (TLContextualFacet) facetOwner, nestedHierarchy, visitedFacets );
-            	localHierarchy.addAll( 0, nestedHierarchy );
-            	
-            } else if (facetOwner instanceof TLOperation) {
-                // No detail hierarchy within an operation's facets
-            }
-    	}
-    }
+	private static void getLocalFacetHierarchy(TLFacet facet, List<TLFacet> localHierarchy,
+			Set<TLFacet> visitedFacets) {
+		if (!visitedFacets.contains(facet)) {
+			visitedFacets.add(facet);
+			
+			TLFacetOwner facetOwner = facet.getOwningEntity();
+			
+			localHierarchy.add(facet); // start by including the facet that was
+									  // passed to this method
+			
+			if (facetOwner instanceof TLBusinessObject) {
+				switch (facet.getFacetType()) {
+					case DETAIL:
+					case CUSTOM:
+						localHierarchy.add(0, getFacetOfType(facetOwner, TLFacetType.SUMMARY));
+						localHierarchy.add(0, getFacetOfType(facetOwner, TLFacetType.ID));
+						break;
+					case SUMMARY:
+						localHierarchy.add(0, getFacetOfType(facetOwner, TLFacetType.ID));
+						break;
+					default:
+						break;
+				}
+				
+			} else if (facetOwner instanceof TLCoreObject) {
+				if (facet.getFacetType() == TLFacetType.DETAIL) {
+					localHierarchy.add(0, getFacetOfType(facetOwner, TLFacetType.SUMMARY));
+				}
+				
+			} else if (facetOwner instanceof TLChoiceObject) {
+				if (facet.getFacetType() == TLFacetType.CHOICE) {
+					localHierarchy.add(0, getFacetOfType(facetOwner, TLFacetType.SHARED));
+				}
+				
+			} else if (facetOwner instanceof TLContextualFacet) {
+				List<TLFacet> nestedHierarchy = new ArrayList<>();
+				
+				getLocalFacetHierarchy((TLContextualFacet) facetOwner, nestedHierarchy, visitedFacets);
+				localHierarchy.addAll(0, nestedHierarchy);
+			}
+		}
+	}
     
 	/**
 	 * Returns the list of available facets for the substitution group.
@@ -887,10 +890,10 @@ public class FacetCodegenUtils {
         } else if (hasRequest && hasResponse && !hasNotification) {
             opType = OperationType.REQUEST_RESPONSE;
 
-        } else if (hasRequest && !hasResponse && hasNotification) {
+        } else if (hasRequest && !hasResponse) {
             opType = OperationType.SOLICIT_NOTIFICATION;
 
-        } else if (hasRequest && hasResponse && hasNotification) {
+        } else if (hasRequest) {
             opType = OperationType.REQUEST_RESPONSE_WITH_NOTIFICATION;
 
         } else {

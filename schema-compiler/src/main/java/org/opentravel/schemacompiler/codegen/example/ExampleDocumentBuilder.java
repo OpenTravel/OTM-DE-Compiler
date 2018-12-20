@@ -151,46 +151,57 @@ public class ExampleDocumentBuilder extends ExampleBuilder<Document>{
      * @throws CodeGenerationException
      *             thrown if an error occurs during EXAMPLE content generation
      */
-    public Document buildTree() throws ValidationException, CodeGenerationException {
-        DOMExampleVisitor visitor = new DOMExampleVisitor(options.getExampleContext());
-        Document domDocument;
+	public Document buildTree() throws ValidationException, CodeGenerationException {
+		DOMExampleVisitor visitor = new DOMExampleVisitor(options.getExampleContext());
+		Document domDocument;
+		
+		validateModelElement();
+		ExampleNavigator.navigate(modelElement, visitor, options);
+		domDocument = visitor.getDocument();
+		
+		if (schemaLocationRequired()) {
+			Element rootElement = domDocument.getDocumentElement();
+			String schemaLocation = getSchemaLocation(visitor);
+			
+			// If any bound namespace were resolved to a schema location, assign
+			// the schema location value to the XML document
+			if (schemaLocation.length() > 0) {
+				rootElement.setAttributeNS(XMLConstants.XMLNS_ATTRIBUTE_NS_URI, "xmlns:xsi",
+						XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI);
+				rootElement.setAttributeNS(XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI, "xsi:schemaLocation",
+						schemaLocation);
+			}
+		}
+		return domDocument;
+	}
 
-        validateModelElement();
-        ExampleNavigator.navigate(modelElement, visitor, options);
-        domDocument = visitor.getDocument();
-
-        if (schemaLocationRequired()) {
-            Element rootElement = domDocument.getDocumentElement();
-            StringBuilder schemaLocation = new StringBuilder();
-
-            // Construct the xsi:schemaLocation string for the XML document
-            for (String boundNS : visitor.getBoundNamespaces()) {
-            	String sLoc;
-            	
-            	if (boundNS.equals( modelElement.getNamespace() )) {
-            		sLoc = getSchemaLocation( modelElement.getOwningLibrary() );
-            		
-            	} else {
-            		sLoc = getSchemaLocation( boundNS );
-            	}
-                if (sLoc != null) {
-                    if (schemaLocation.length() > 0)
-                        schemaLocation.append(" ");
-                    schemaLocation.append(boundNS).append(' ').append( sLoc );
-                }
-            }
-
-            // If any bound namespace were resolved to a schema location, assign the schema location
-            // value to the XML document
-            if (schemaLocation.length() > 0) {
-                rootElement.setAttributeNS(XMLConstants.XMLNS_ATTRIBUTE_NS_URI, "xmlns:xsi",
-                        XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI);
-                rootElement.setAttributeNS(XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI,
-                        "xsi:schemaLocation", schemaLocation.toString());
-            }
-        }
-        return domDocument;
-    }
+	/**
+	 * Construct the xsi:schemaLocation string for the XML document.
+	 * 
+	 * @param visitor  the visitor used to produce the DOM document
+	 * @return String
+	 */
+	private String getSchemaLocation(DOMExampleVisitor visitor) {
+		StringBuilder schemaLocation = new StringBuilder();
+		
+		for (String boundNS : visitor.getBoundNamespaces()) {
+			String sLoc;
+			
+			if (boundNS.equals(modelElement.getNamespace())) {
+				sLoc = getSchemaLocation(modelElement.getOwningLibrary());
+				
+			} else {
+				sLoc = getSchemaLocation(boundNS);
+			}
+			if (sLoc != null) {
+				if (schemaLocation.length() > 0) {
+					schemaLocation.append(" ");
+				}
+				schemaLocation.append(boundNS).append(' ').append(sLoc);
+			}
+		}
+		return schemaLocation.toString();
+	}
     
     /**
      * Returns true if an 'xsi:schemaLocation' attribute should be added to the

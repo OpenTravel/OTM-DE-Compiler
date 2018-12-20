@@ -15,22 +15,23 @@
  */
 package org.opentravel.schemacompiler.codegen.html.writers;
 
-import org.opentravel.schemacompiler.model.TLDocumentation;
+import java.io.IOException;
 
-import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
-import org.opentravel.schemacompiler.codegen.html.builders.NamedEntityDocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.Configuration;
 import org.opentravel.schemacompiler.codegen.html.Content;
+import org.opentravel.schemacompiler.codegen.html.DirectoryManager;
 import org.opentravel.schemacompiler.codegen.html.LinkInfoImpl;
+import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
+import org.opentravel.schemacompiler.codegen.html.builders.NamedEntityDocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlConstants;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlStyle;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTag;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTree;
 import org.opentravel.schemacompiler.codegen.html.markup.RawHtml;
 import org.opentravel.schemacompiler.codegen.html.markup.StringContent;
-import org.opentravel.schemacompiler.codegen.html.DirectoryManager;
 import org.opentravel.schemacompiler.codegen.html.writers.info.DocumentationInfoWriter;
 import org.opentravel.schemacompiler.codegen.html.writers.info.InfoWriter;
+import org.opentravel.schemacompiler.model.TLDocumentation;
 
 /**
  * @author Eric.Bronson
@@ -56,7 +57,7 @@ public class NamedEntityWriter<T extends NamedEntityDocumentationBuilder<?>>
 	 *            the class tree for the given class.
 	 */
 	public NamedEntityWriter(T member, DocumentationBuilder prev,
-			DocumentationBuilder next) throws Exception {
+			DocumentationBuilder next) throws IOException {
 		super(Configuration.getInstance(), DirectoryManager
 				.getDirectoryPath(member.getOwningLibrary()), member.getName()
 				+ ".html", DirectoryManager.getRelativePath(member

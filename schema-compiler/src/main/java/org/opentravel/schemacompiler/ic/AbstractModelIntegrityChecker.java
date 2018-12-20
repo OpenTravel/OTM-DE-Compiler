@@ -30,7 +30,7 @@ import org.opentravel.schemacompiler.event.ModelEventListener;
 public abstract class AbstractModelIntegrityChecker implements
         ModelEventListener<ModelEvent<Object>, Object> {
 
-    private List<ModelEventListener<?, ?>> listeners;
+    private List<ModelEventListener<ModelEvent<Object>, Object>> listeners;
 
     /**
      * Default constructor.
@@ -44,9 +44,9 @@ public abstract class AbstractModelIntegrityChecker implements
      * <code>TLModel</code> instance. By default, this method returns an empty list. Sub-classes
      * should override and add required listeners to the list.
      * 
-     * @return ModelEventListener<?,?>
+     * @return ModelEventListener<E,S>
      */
-    protected List<ModelEventListener<?, ?>> getListeners() {
+    protected <E extends ModelEvent<S>, S> List<ModelEventListener<E,S>> getListeners() {
         return new ArrayList<>();
     }
 

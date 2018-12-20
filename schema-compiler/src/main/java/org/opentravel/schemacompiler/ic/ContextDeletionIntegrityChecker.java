@@ -90,10 +90,7 @@ public class ContextDeletionIntegrityChecker extends
 
             if (deletedContextId != null) {
                 for (TLContext context : contextOwner.getContexts()) {
-                    if (context == deletedContext) {
-                        continue;
-                    }
-                    if (deletedContextId.equals(context.getContextId())) {
+                    if ((context != deletedContext) && deletedContextId.equals(context.getContextId())) {
                         result = true;
                         break;
                     }

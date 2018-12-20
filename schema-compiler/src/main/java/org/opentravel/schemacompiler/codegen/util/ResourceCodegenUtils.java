@@ -48,6 +48,7 @@ import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLMemberField;
+import org.opentravel.schemacompiler.model.TLMemberFieldOwner;
 import org.opentravel.schemacompiler.model.TLParamGroup;
 import org.opentravel.schemacompiler.model.TLParameter;
 import org.opentravel.schemacompiler.model.TLProperty;
@@ -201,7 +202,7 @@ public class ResourceCodegenUtils {
 	 * @throws IllegalArgumentException  thrown if the given facet does not belong
 	 *									 to a business object
 	 */
-	public static List<TLMemberField<?>> getEligibleParameterFields(TLFacet facet) {
+	public static <O extends TLMemberFieldOwner>List<TLMemberField<O>> getEligibleParameterFields(TLFacet facet) {
 		return getParameterFields( facet, false );
 	}
 	
@@ -216,7 +217,7 @@ public class ResourceCodegenUtils {
 	 * @throws IllegalArgumentException  thrown if the given facet does not belong
 	 *									 to a business object
 	 */
-	public static List<TLMemberField<?>> getAllParameterFields(TLFacet facet) {
+	public static <O extends TLMemberFieldOwner> List<TLMemberField<O>> getAllParameterFields(TLFacet facet) {
 		return getParameterFields( facet, true );
 	}
 	
@@ -229,8 +230,10 @@ public class ResourceCodegenUtils {
 	 * @throws IllegalArgumentException  thrown if the given facet does not belong
 	 *									 to a business object
 	 */
-	private static List<TLMemberField<?>> getParameterFields(TLFacet facet, boolean includeIneligibleFields) {
-		List<TLMemberField<?>> paramFields = new ArrayList<>();
+	@SuppressWarnings("unchecked")
+	private static <O extends TLMemberFieldOwner> List<TLMemberField<O>> getParameterFields(
+			TLFacet facet, boolean includeIneligibleFields) {
+		List<TLMemberField<O>> paramFields = new ArrayList<>();
 		List<TLFacet> paramFacets = new ArrayList<>();
 		Set<String> fieldNames = new HashSet<>();
 		
@@ -243,7 +246,7 @@ public class ResourceCodegenUtils {
 			
 			for (TLAttribute attribute : attributeList) {
 				if (!fieldNames.contains(attribute.getName())) {
-					paramFields.add(attribute);
+					paramFields.add((TLMemberField<O>) attribute);
 					fieldNames.add(attribute.getName());
 				}
 			}
@@ -256,19 +259,19 @@ public class ResourceCodegenUtils {
 						List<TLIndicator> vwaIndicators = PropertyCodegenUtils.getInheritedIndicators(vwa);
 						
 						if (!fieldNames.contains( element.getName() )) {
-							paramFields.add(element);
+							paramFields.add((TLMemberField<O>) element);
 							fieldNames.add(element.getName());
 						}
 						for (TLAttribute attribute : vwaAttributes) {
 							if (!(attribute.getType() instanceof TLValueWithAttributes) &&
 									!fieldNames.contains(attribute.getName())) {
-								paramFields.add(attribute);
+								paramFields.add((TLMemberField<O>) attribute);
 								fieldNames.add(attribute.getName());
 							}
 						}
 						for (TLIndicator indicator : vwaIndicators) {
 							if (!fieldNames.contains(indicator.getName())) {
-								paramFields.add(indicator);
+								paramFields.add((TLMemberField<O>) indicator);
 								fieldNames.add(indicator.getName());
 							}
 						}
@@ -278,7 +281,7 @@ public class ResourceCodegenUtils {
 						String elementName = (schemaName != null) ? schemaName.getLocalPart() : element.getName();
 						
 						if (!fieldNames.contains(elementName)) {
-							paramFields.add(element);
+							paramFields.add((TLMemberField<O>) element);
 							fieldNames.add(elementName);
 						}
 					}
@@ -286,7 +289,7 @@ public class ResourceCodegenUtils {
 			}
 			for (TLIndicator indicator : indicatorList) {
 				if (!fieldNames.contains(indicator.getName())) {
-					paramFields.add(indicator);
+					paramFields.add((TLMemberField<O>) indicator);
 					fieldNames.add(indicator.getName());
 				}
 			}

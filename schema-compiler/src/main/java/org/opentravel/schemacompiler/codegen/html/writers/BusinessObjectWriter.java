@@ -15,6 +15,8 @@
  */
 package org.opentravel.schemacompiler.codegen.html.writers;
 
+import java.io.IOException;
+
 import org.opentravel.schemacompiler.codegen.html.builders.BusinessObjectDocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
 
@@ -35,7 +37,7 @@ public class BusinessObjectWriter extends ComplexObjectWriter<BusinessObjectDocu
 	 */
 	public BusinessObjectWriter(BusinessObjectDocumentationBuilder businessObject,
 			DocumentationBuilder prev, DocumentationBuilder next)
-			throws Exception {
+			throws IOException {
 		super(businessObject, prev, next);
 	}
 

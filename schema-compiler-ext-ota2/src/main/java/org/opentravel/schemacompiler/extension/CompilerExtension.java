@@ -65,12 +65,7 @@ public final class CompilerExtension implements Comparable<CompilerExtension> {
 
         if (other != null) {
             if (this.rank == other.rank) {
-                if (this.extensionId == null) {
-                    result = (other.extensionId == null) ? 0 : -1;
-
-                } else {
-                    result = this.extensionId.compareTo(other.extensionId);
-                }
+                result = compareExtensionId(other);
             } else {
                 result = (this.rank < other.rank) ? -1 : 1;
             }
@@ -80,7 +75,41 @@ public final class CompilerExtension implements Comparable<CompilerExtension> {
         return result;
     }
 
+	/**
+	 * Compares the 'extensionId' of the other object with this one.
+	 * 
+	 * @param other  the other object being compared to this one
+	 * @return int
+	 */
+	private int compareExtensionId(CompilerExtension other) {
+		int result;
+		if (this.extensionId == null) {
+		    result = (other.extensionId == null) ? 0 : -1;
+
+		} else {
+		    result = this.extensionId.compareTo(other.extensionId);
+		}
+		return result;
+	}
+
     /**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return (extensionId == null) ? null : extensionId.hashCode();
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		return (obj instanceof CompilerExtension) &&
+				(compareTo((CompilerExtension) obj) == 0);
+	}
+
+	/**
      * @see java.lang.Object#toString()
      */
     @Override

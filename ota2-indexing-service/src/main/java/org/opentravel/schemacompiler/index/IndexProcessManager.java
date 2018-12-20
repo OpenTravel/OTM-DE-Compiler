@@ -88,16 +88,23 @@ public class IndexProcessManager {
 			launcherThread.start();
 			
 			while (launcherThread.isAlive()) {
-				try {
-					Thread.sleep(1000);
-					
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-				}
+				sleep1();
 			}
 			
 		} catch (Exception e) {
 			log.error("Error launching index process manager.", e);
+		}
+	}
+
+	/**
+	 * Causes the current thread to sleep for one second unless interrupted.
+	 */
+	private static void sleep1() {
+		try {
+			Thread.sleep(1000);
+			
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 		}
 	}
 	
@@ -201,94 +208,6 @@ public class IndexProcessManager {
 	}
 	
 	/**
-	 * Launches the given Java main class as an external sub-process.
-	 * 
-	 * @param mainClass  the main class to be executed externally
-	 * @return Process
-	 * @throws IOException  thrown if the external process cannot be launched
-	 */
-	private static Process launchJavaProcess(Class<?> mainClass) throws IOException {
-		boolean isWindows = SystemUtils.isWindows();
-		String javaCmd = System.getProperty("java.home") + File.separatorChar +
-				"bin" + File.separatorChar + "java";
-		String agentConfigLocation = System.getProperty( AGENT_CONFIG_SYSPROP );
-		String log4jConfig = "-Dlog4j.configuration=" + (isWindows ? "file:/" : "file://")
-				+ System.getProperty("user.dir") + "/conf/log4j-agent.properties";
-		String oomeOption = getJvmOptionForOutOfMemoryErrors();
-		String classpath = System.getProperty("java.class.path");
-		
-		if (agentConfigLocation == null) {
-			throw new FileNotFoundException("The location of the agent configuration file has not be specified "
-					+ "(use the 'ota2.index.agent.config' system property).");
-		}
-		agentConfigLocation = "-D" + AGENT_CONFIG_SYSPROP + "=" + agentConfigLocation;
-		
-		// For windows, we must wrap all of the path arguments in double quotes in case
-		// they contain spaces.
-		if (isWindows) {
-			javaCmd = "\"" + javaCmd + ".exe\"";
-			oomeOption = "\"" + oomeOption + "\"";
-			agentConfigLocation = "\"" + agentConfigLocation + "\"";
-			log4jConfig = "\"" + log4jConfig + "\"";
-			classpath = "\"" + classpath + "\"";
-		}
-		
-		// Build the list of parameters for the executable command
-		List<String> command = new ArrayList<>();
-		
-		command.add( javaCmd );
-		if (agentJvmOpts != null) command.addAll( Arrays.asList( agentJvmOpts.split("\\s+") ) );
-		command.add( oomeOption );
-		command.add( agentConfigLocation );
-		command.add( log4jConfig );
-		command.add( "-cp" );
-		command.add( classpath );
-		command.add( mainClass.getName() );
-		
-		log.info("Starting indexing agent process...");
-		return new ProcessBuilder()
-			.command( command )
-			.redirectOutput( Redirect.PIPE )
-			.start();
-	}
-	
-	/**
-	 * Returns the JVM option that will force a shutdown of the JVM if an
-	 * <code>OutOfMemoryError</code> is encountered in the child process.  The options
-	 * returned by this method reflect the logic implemented in the GemFire open source
-	 * server.
-	 * 
-	 * @return String
-	 */
-	private static String getJvmOptionForOutOfMemoryErrors() {
-		String jvmOption = "";
-		
-		if (SystemUtils.isHotSpotVM()) {
-			if (SystemUtils.isWindows()) {
-				// ProcessBuilder "on Windows" needs every word (space separated) to be
-				// a different element in the array/list. See #47312. Need to study why!
-				jvmOption = "-XX:OnOutOfMemoryError=taskkill /F /PID %p";
-				
-			} else { // All other platforms (Linux, Mac OS X, UNIX, etc)
-				jvmOption = "-XX:OnOutOfMemoryError=kill -KILL %p";
-			}
-			
-		} else if (SystemUtils.isJ9VM()) {
-			// NOTE IBM states the following IBM J9 JVM command-line option/switch has
-			// side-effects on "performance", as noted in the reference documentation...
-			// http://publib.boulder.ibm.com/infocenter/javasdk/v6r0/index.jsp?topic=/com.ibm.java.doc.diagnostics.60/diag/appendixes/cmdline/commands_jvm.html
-			jvmOption = "-Xcheck:memory";
-			
-		} else if (SystemUtils.isJRockitVM()) {
-			// NOTE the following Oracle JRockit JVM documentation was referenced to
-			// identify the appropriate JVM option to set when handling OutOfMemoryErrors.
-			// http://docs.oracle.com/cd/E13150_01/jrockit_jvm/jrockit/jrdocs/refman/optionXX.html
-			jvmOption = "-XXexitOnOutOfMemory";
-		}
-		return jvmOption;
-	}
-	
-	/**
 	 * Runner that handles the launching of agent processes.
 	 */
 	private static class AgentLauncher implements Runnable {
@@ -305,16 +224,7 @@ public class IndexProcessManager {
 					agentProcess = launchJavaProcess( IndexingAgent.class );
 					
 					if (DEBUG) {
-						try (Reader reader = new InputStreamReader( agentProcess.getInputStream() )) {
-							int ch;
-							
-							while ((ch = reader.read()) >= 0) {
-								System.out.print((char) ch);
-							}
-							
-						} catch (Exception e) {
-							log.error("Error piping sub-process output.", e);
-						}
+						redirectAgentProcessOutout();
 					}
 					int exitCode = agentProcess.waitFor();
 					
@@ -337,6 +247,113 @@ public class IndexProcessManager {
 				Thread.currentThread().interrupt();
 			}
 		}
+
+		/**
+		 * Redirects standard output from the agent sub-process to the standard output
+		 * of this process.
+		 */
+		@SuppressWarnings("squid:S106")
+		private void redirectAgentProcessOutout() {
+			try (Reader reader = new InputStreamReader( agentProcess.getInputStream() )) {
+				int ch;
+				
+				while ((ch = reader.read()) >= 0) {
+					System.out.print((char) ch);
+				}
+				
+			} catch (Exception e) {
+				log.error("Error piping sub-process output.", e);
+			}
+		}
+		
+		/**
+		 * Launches the given Java main class as an external sub-process.
+		 * 
+		 * @param mainClass  the main class to be executed externally
+		 * @return Process
+		 * @throws IOException  thrown if the external process cannot be launched
+		 */
+		private static Process launchJavaProcess(Class<?> mainClass) throws IOException {
+			boolean isWindows = SystemUtils.isWindows();
+			String javaCmd = System.getProperty("java.home") + File.separatorChar +
+					"bin" + File.separatorChar + "java";
+			String agentConfigLocation = System.getProperty( AGENT_CONFIG_SYSPROP );
+			String log4jConfig = "-Dlog4j.configuration=" + (isWindows ? "file:/" : "file://")
+					+ System.getProperty("user.dir") + "/conf/log4j-agent.properties";
+			String oomeOption = getJvmOptionForOutOfMemoryErrors();
+			String classpath = System.getProperty("java.class.path");
+			
+			if (agentConfigLocation == null) {
+				throw new FileNotFoundException("The location of the agent configuration file has not be specified "
+						+ "(use the 'ota2.index.agent.config' system property).");
+			}
+			agentConfigLocation = "-D" + AGENT_CONFIG_SYSPROP + "=" + agentConfigLocation;
+			
+			// For windows, we must wrap all of the path arguments in double quotes in case
+			// they contain spaces.
+			if (isWindows) {
+				javaCmd = "\"" + javaCmd + ".exe\"";
+				oomeOption = "\"" + oomeOption + "\"";
+				agentConfigLocation = "\"" + agentConfigLocation + "\"";
+				log4jConfig = "\"" + log4jConfig + "\"";
+				classpath = "\"" + classpath + "\"";
+			}
+			
+			// Build the list of parameters for the executable command
+			List<String> command = new ArrayList<>();
+			
+			command.add( javaCmd );
+			if (agentJvmOpts != null) command.addAll( Arrays.asList( agentJvmOpts.split("\\s+") ) );
+			command.add( oomeOption );
+			command.add( agentConfigLocation );
+			command.add( log4jConfig );
+			command.add( "-cp" );
+			command.add( classpath );
+			command.add( mainClass.getName() );
+			
+			log.info("Starting indexing agent process...");
+			return new ProcessBuilder()
+				.command( command )
+				.redirectOutput( Redirect.PIPE )
+				.start();
+		}
+		
+		/**
+		 * Returns the JVM option that will force a shutdown of the JVM if an
+		 * <code>OutOfMemoryError</code> is encountered in the child process.  The options
+		 * returned by this method reflect the logic implemented in the GemFire open source
+		 * server.
+		 * 
+		 * @return String
+		 */
+		private static String getJvmOptionForOutOfMemoryErrors() {
+			String jvmOption = "";
+			
+			if (SystemUtils.isHotSpotVM()) {
+				if (SystemUtils.isWindows()) {
+					// ProcessBuilder "on Windows" needs every word (space separated) to be
+					// a different element in the array/list. See #47312. Need to study why!
+					jvmOption = "-XX:OnOutOfMemoryError=taskkill /F /PID %p";
+					
+				} else { // All other platforms (Linux, Mac OS X, UNIX, etc)
+					jvmOption = "-XX:OnOutOfMemoryError=kill -KILL %p";
+				}
+				
+			} else if (SystemUtils.isJ9VM()) {
+				// NOTE IBM states the following IBM J9 JVM command-line option/switch has
+				// side-effects on "performance", as noted in the reference documentation...
+				// http://publib.boulder.ibm.com/infocenter/javasdk/v6r0/index.jsp?topic=/com.ibm.java.doc.diagnostics.60/diag/appendixes/cmdline/commands_jvm.html
+				jvmOption = "-Xcheck:memory";
+				
+			} else if (SystemUtils.isJRockitVM()) {
+				// NOTE the following Oracle JRockit JVM documentation was referenced to
+				// identify the appropriate JVM option to set when handling OutOfMemoryErrors.
+				// http://docs.oracle.com/cd/E13150_01/jrockit_jvm/jrockit/jrdocs/refman/optionXX.html
+				jvmOption = "-XXexitOnOutOfMemory";
+			}
+			return jvmOption;
+		}
+		
 	}
 	
 	/**

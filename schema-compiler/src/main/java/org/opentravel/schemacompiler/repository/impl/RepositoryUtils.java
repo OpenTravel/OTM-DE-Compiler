@@ -47,6 +47,7 @@ import org.opentravel.schemacompiler.repository.RepositoryItemCommit;
 import org.opentravel.schemacompiler.repository.RepositoryItemHistory;
 import org.opentravel.schemacompiler.repository.RepositoryItemState;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
+import org.opentravel.schemacompiler.util.SchemaCompilerRuntimeException;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.version.VersionScheme;
@@ -59,6 +60,11 @@ import org.opentravel.schemacompiler.version.VersionSchemeFactory;
  * @author S. Livezey
  */
 public class RepositoryUtils {
+	
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private RepositoryUtils() {}
 	
     /**
      * Creates a new repository item instance using information from the meta-data record provided.
@@ -344,7 +350,7 @@ public class RepositoryUtils {
 
         } catch (URISyntaxException e) {
             // Should never happen, but throw a runtime exception just in case
-            throw new RuntimeException(e);
+            throw new SchemaCompilerRuntimeException(e);
         }
     }
     

@@ -15,8 +15,6 @@
  */
 package org.opentravel.schemacompiler.repository.impl;
 
-import java.util.Locale;
-
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.NTCredentials;
@@ -29,10 +27,12 @@ import org.apache.http.impl.client.SystemDefaultCredentialsProvider;
  * @author Pawel Jedruch
  */
 public class NTLMSystemCredentialsProvider extends SystemDefaultCredentialsProvider {
-
+	
+	@Override
     public Credentials getCredentials(final AuthScope authscope) {
         Credentials credentials = super.getCredentials(authscope);
-        if (AuthSchemes.NTLM.toUpperCase(Locale.ENGLISH).equals(authscope.getScheme())) {
+        
+        if (AuthSchemes.NTLM.equalsIgnoreCase(authscope.getScheme())) {
             credentials = super.getCredentials(authscope);
             return traslateToNTLMCredentials(credentials);
         }

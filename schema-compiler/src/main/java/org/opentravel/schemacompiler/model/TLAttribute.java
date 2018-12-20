@@ -68,7 +68,7 @@ public class TLAttribute extends TLModelElement implements TLMemberField<TLAttri
     public TLModel getOwningModel() {
         TLModel owningModel = null;
 
-        if ((attributeOwner != null) && (attributeOwner instanceof TLModelElement)) {
+        if (attributeOwner instanceof TLModelElement) {
             owningModel = ((TLModelElement) attributeOwner).getOwningModel();
         }
         return owningModel;
@@ -105,21 +105,22 @@ public class TLAttribute extends TLModelElement implements TLMemberField<TLAttri
      * Returns the value of the 'attributeOwner' field.
      * 
      * @return TLAttributeOwner
+     * @deprecated  use {@link #getOwner()} instead
      */
     @Deprecated
     public TLAttributeOwner getAttributeOwner() {
-        return attributeOwner;
+        return getOwner();
     }
 
     /**
      * Assigns the value of the 'attributeOwner' field.
      * 
-     * @param attributeOwner
-     *            the field value to assign
+     * @param attributeOwner  the field value to assign
+     * @deprecated  use {@link #setOwner(TLAttributeOwner)} instead
      */
     @Deprecated
     public void setAttributeOwner(TLAttributeOwner attributeOwner) {
-        this.attributeOwner = attributeOwner;
+        setOwner( attributeOwner );
     }
 
     /**

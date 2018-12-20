@@ -301,8 +301,10 @@ public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> i
 		String identityKey = null;
 		
 		if ((typeReference != null) && (typeReference.length() > 0)) {
-			String prefix = null, localName = null, namespace = null;
 			String[] refParts = typeReference.split( "\\:" );
+			String prefix = null;
+			String namespace = null;
+			String localName = null;
 			
 			if (refParts.length == 1) {
 				localName = refParts[0];

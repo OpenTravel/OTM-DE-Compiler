@@ -15,6 +15,8 @@
  */
 package org.opentravel.schemacompiler.codegen.html.writers;
 
+import java.io.IOException;
+
 import org.opentravel.schemacompiler.codegen.html.builders.NamedEntityDocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.builders.SimpleDocumentationBuilder;
 
@@ -26,7 +28,7 @@ public class SimpleWriter extends NamedEntityWriter<SimpleDocumentationBuilder> 
 
 	public SimpleWriter(SimpleDocumentationBuilder member,
 			NamedEntityDocumentationBuilder<?> prev,
-			NamedEntityDocumentationBuilder<?> nextClass) throws Exception {
+			NamedEntityDocumentationBuilder<?> nextClass) throws IOException {
 		super(member, prev, nextClass);
 	}
 	

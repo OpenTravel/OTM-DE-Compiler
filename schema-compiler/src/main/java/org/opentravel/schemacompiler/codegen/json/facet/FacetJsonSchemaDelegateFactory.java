@@ -23,6 +23,7 @@ import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
+import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
@@ -55,77 +56,85 @@ public class FacetJsonSchemaDelegateFactory {
      * @return FacetJsonSchemaDelegate<F>
      */
     @SuppressWarnings("unchecked")
-    public <F extends TLAbstractFacet> FacetJsonSchemaDelegate<F> getDelegate(F facetInstance) {
-        TLFacetOwner facetOwner = facetInstance.getOwningEntity();
-        FacetJsonSchemaDelegate<F> delegate = null;
+	public <F extends TLAbstractFacet> FacetJsonSchemaDelegate<F> getDelegate(F facetInstance) {
+		TLFacetOwner facetOwner = facetInstance.getOwningEntity();
+		FacetJsonSchemaDelegate<F> delegate = null;
+		
+		if (facetOwner instanceof TLBusinessObject) {
+			if (facetInstance.getFacetType() == TLFacetType.UPDATE) {
+				delegate = (FacetJsonSchemaDelegate<F>) new BusinessObjectUpdateFacetJsonSchemaDelegate(
+						(TLFacet) facetInstance);
+				
+			} else {
+				delegate = (FacetJsonSchemaDelegate<F>) new TLFacetJsonSchemaDelegate((TLFacet) facetInstance);
+			}
+			
+		} else if (facetOwner instanceof TLCoreObject) {
+			delegate = getCoreObjectDelegate(facetInstance);
+			
+		} else if (facetOwner instanceof TLChoiceObject) {
+			delegate = (FacetJsonSchemaDelegate<F>) new TLFacetJsonSchemaDelegate((TLFacet) facetInstance);
+			
+		} else if (facetOwner instanceof TLContextualFacet) {
+			delegate = (FacetJsonSchemaDelegate<F>) new TLFacetJsonSchemaDelegate((TLFacet) facetInstance);
+			
+		} else if ((facetOwner instanceof TLOperation) || (facetInstance instanceof TLFacet)) {
+			delegate = (FacetJsonSchemaDelegate<F>) new OperationFacetJsonSchemaDelegate((TLFacet) facetInstance);
+		}
+		
+		if (delegate != null) {
+			delegate.setTransformerContext(transformerContext);
+		}
+		return delegate;
+	}
 
-        if (facetOwner instanceof TLBusinessObject) {
-            switch (facetInstance.getFacetType()) {
-                case UPDATE:
-                    delegate = (FacetJsonSchemaDelegate<F>) new BusinessObjectUpdateFacetJsonSchemaDelegate( (TLFacet) facetInstance );
-                    break;
-				default:
-		        	delegate = (FacetJsonSchemaDelegate<F>) new TLFacetJsonSchemaDelegate( (TLFacet) facetInstance );
+	/**
+	 * Returns a delegate for the core object facet instance provided.
+	 * 
+	 * @param coreFacet  the core object facet
+	 * @return FacetJsonSchemaDelegate<F>
+	 */
+	@SuppressWarnings("unchecked")
+	private <F extends TLAbstractFacet> FacetJsonSchemaDelegate<F> getCoreObjectDelegate(F coreFacet) {
+		FacetJsonSchemaDelegate<F> delegate = null;
+		
+		if (coreFacet instanceof TLFacet) {
+			TLFacet facet = (TLFacet) coreFacet;
+			
+			switch (coreFacet.getFacetType()) {
+				case SUMMARY:
+					delegate = (FacetJsonSchemaDelegate<F>) new CoreObjectSummaryFacetJsonSchemaDelegate(facet);
 					break;
-            }
-        	
-        } else if (facetOwner instanceof TLCoreObject) {
-            if (facetInstance instanceof TLFacet) {
-                TLFacet facet = (TLFacet) facetInstance;
-
-                switch (facetInstance.getFacetType()) {
-                    case SUMMARY:
-                        delegate = (FacetJsonSchemaDelegate<F>) new CoreObjectSummaryFacetJsonSchemaDelegate(facet);
-                        break;
-                    case DETAIL:
-                        delegate = (FacetJsonSchemaDelegate<F>) new CoreObjectFacetJsonSchemaDelegate(facet);
-                        break;
-					default:
-						break;
-                }
-            } else if (facetInstance instanceof TLListFacet) {
-                TLListFacet facet = (TLListFacet) facetInstance;
-
-                switch (facetInstance.getFacetType()) {
-                    case SIMPLE:
-                        delegate = (FacetJsonSchemaDelegate<F>) new CoreObjectListSimpleFacetJsonSchemaDelegate(facet);
-                        break;
-                    case SUMMARY:
-                    case DETAIL:
-                        delegate = (FacetJsonSchemaDelegate<F>) new CoreObjectListFacetJsonSchemaDelegate(facet);
-                        break;
-					default:
-						break;
-                }
-            } else if (facetInstance instanceof TLSimpleFacet) {
-                TLSimpleFacet facet = (TLSimpleFacet) facetInstance;
-
-                switch (facetInstance.getFacetType()) {
-                    case SIMPLE:
-                        delegate = (FacetJsonSchemaDelegate<F>) new TLSimpleFacetJsonSchemaDelegate(facet);
-                        break;
-					default:
-						break;
-                }
-            }
-        } else if (facetOwner instanceof TLChoiceObject) {
-        	delegate = (FacetJsonSchemaDelegate<F>) new TLFacetJsonSchemaDelegate( (TLFacet) facetInstance );
-        	
-        } else if (facetOwner instanceof TLContextualFacet) {
-        	delegate = (FacetJsonSchemaDelegate<F>) new TLFacetJsonSchemaDelegate( (TLFacet) facetInstance );
-        	
-        } else if (facetOwner instanceof TLOperation) {
-            if (facetInstance instanceof TLFacet) {
-                TLFacet facet = (TLFacet) facetInstance;
-
-                delegate = (FacetJsonSchemaDelegate<F>) new OperationFacetJsonSchemaDelegate(facet);
-            }
-        }
-
-        if (delegate != null) {
-            delegate.setTransformerContext(transformerContext);
-        }
-        return delegate;
-    }
-
+				case DETAIL:
+					delegate = (FacetJsonSchemaDelegate<F>) new CoreObjectFacetJsonSchemaDelegate(facet);
+					break;
+				default:
+					break;
+			}
+			
+		} else if (coreFacet instanceof TLListFacet) {
+			TLListFacet facet = (TLListFacet) coreFacet;
+			
+			switch (coreFacet.getFacetType()) {
+				case SIMPLE:
+					delegate = (FacetJsonSchemaDelegate<F>) new CoreObjectListSimpleFacetJsonSchemaDelegate(facet);
+					break;
+				case SUMMARY:
+				case DETAIL:
+					delegate = (FacetJsonSchemaDelegate<F>) new CoreObjectListFacetJsonSchemaDelegate(facet);
+					break;
+				default:
+					break;
+			}
+			
+		} else if (coreFacet instanceof TLSimpleFacet) {
+			TLSimpleFacet facet = (TLSimpleFacet) coreFacet;
+			
+			if (coreFacet.getFacetType() == TLFacetType.SIMPLE) {
+				delegate = (FacetJsonSchemaDelegate<F>) new TLSimpleFacetJsonSchemaDelegate(facet);
+			}
+		}
+		return delegate;
+	}
+	
 }

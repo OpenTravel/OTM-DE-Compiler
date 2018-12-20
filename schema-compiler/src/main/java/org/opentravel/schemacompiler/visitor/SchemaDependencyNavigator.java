@@ -432,7 +432,7 @@ public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
                     URL includedUrl = getReferencedLibraryURL(include.getPath(), xsdLibrary);
                     AbstractLibrary includedLibrary = xsdLibrary.getOwningModel().getLibrary(includedUrl);
 
-                    if ((includedLibrary != null) && (includedLibrary instanceof XSDLibrary)) {
+                    if (includedLibrary instanceof XSDLibrary) {
                         navigateXSDLibrary((XSDLibrary) includedLibrary);
                     }
                 }
@@ -444,7 +444,7 @@ public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
                         URL importedUrl = getReferencedLibraryURL(fileHint, xsdLibrary);
                         AbstractLibrary importedLibrary = xsdLibrary.getOwningModel().getLibrary(importedUrl);
 
-                        if ((importedLibrary != null) && (importedLibrary instanceof XSDLibrary)) {
+                        if (importedLibrary instanceof XSDLibrary) {
                             navigateXSDLibrary((XSDLibrary) importedLibrary);
                         }
                     }
@@ -553,29 +553,21 @@ public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
         	navigateFacetMembers(facet);
         	
         	if (facetOwner instanceof TLCoreObject) {
-        		switch (facetType) {
-        			case DETAIL:
-        				if (alias != null) {
-        					navigateAlias( AliasCodegenUtils.getSiblingAlias( alias, TLFacetType.SUMMARY ) );
-        				} else {
-            				navigateFacet( ((TLCoreObject) facetOwner).getSummaryFacet(), null );
-        				}
-                		break;
-        			default:
-        				break;
+        		if (facetType == TLFacetType.DETAIL) {
+    				if (alias != null) {
+    					navigateAlias( AliasCodegenUtils.getSiblingAlias( alias, TLFacetType.SUMMARY ) );
+    				} else {
+        				navigateFacet( ((TLCoreObject) facetOwner).getSummaryFacet(), null );
+    				}
         		}
         		
         	} else if (facetOwner instanceof TLChoiceObject) {
-        		switch (facetType) {
-        			case CHOICE:
-        				if (alias != null) {
-        					navigateAlias( AliasCodegenUtils.getSiblingAlias( alias, TLFacetType.SHARED ) );
-        				} else {
-            				navigateFacet( ((TLChoiceObject) facetOwner).getSharedFacet(), null );
-        				}
-                		break;
-        			default:
-        				break;
+        		if (facetType == TLFacetType.CHOICE) {
+    				if (alias != null) {
+    					navigateAlias( AliasCodegenUtils.getSiblingAlias( alias, TLFacetType.SHARED ) );
+    				} else {
+        				navigateFacet( ((TLChoiceObject) facetOwner).getSharedFacet(), null );
+    				}
         		}
         		
         	} else if (facetOwner instanceof TLBusinessObject) {

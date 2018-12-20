@@ -47,10 +47,8 @@ public class PropertyTransformer extends
 
         property.setName(trimString(source.getName()));
         property.setRepeat(convertRepeatValue(trimString(source.getRepeat())));
-        property.setMandatory((source.isMandatory() == null) ? false : source.isMandatory()
-                .booleanValue());
-        property.setReference((source.isReference() == null) ? false : source.isReference()
-                .booleanValue());
+        property.setMandatory((source.isMandatory() != null) && source.isMandatory());
+        property.setReference((source.isReference() != null) && source.isReference());
         property.setTypeName(trimString(propertyTypeName));
 
         if (source.getDocumentation() != null) {

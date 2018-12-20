@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.opentravel.schemacompiler.model.AbstractLibrary;
@@ -101,32 +102,32 @@ public class ChameleonTypeChecker {
      * 
      * @return Collection<String>
      */
-    private Collection<String> scanForDuplicateSymbols() {
-        Set<String> duplicateSymbols = new HashSet<>();
-
-        for (String namespace : chameleonSchemaMappings.keySet()) {
-            List<XSDLibrary> chameleonSchemas = chameleonSchemaMappings.get(namespace);
-            Set<String> chameleonTypes = new HashSet<>();
-            Set<String> chameleonElements = new HashSet<>();
-            Set<String> duplicateTypes = new HashSet<>();
-            Set<String> duplicateElements = new HashSet<>();
-
-            for (XSDLibrary chameleonSchema : chameleonSchemas) {
-                for (LibraryMember member : chameleonSchema.getNamedMembers()) {
-                    if ((member instanceof XSDSimpleType) || (member instanceof XSDComplexType)) {
-                        checkForDuplicate(member, chameleonTypes, duplicateTypes);
-
-                    } else if (member instanceof XSDElement) {
-                        checkForDuplicate(member, chameleonElements, duplicateElements);
-                    }
-                }
-            }
-            duplicateSymbols.addAll(duplicateTypes);
-            duplicateSymbols.addAll(duplicateElements);
-        }
-        return duplicateSymbols;
-    }
-
+	private Collection<String> scanForDuplicateSymbols() {
+		Set<String> duplicateSymbols = new HashSet<>();
+		
+		for (Entry<String, List<XSDLibrary>> entry : chameleonSchemaMappings.entrySet()) {
+			List<XSDLibrary> chameleonSchemas = entry.getValue();
+			Set<String> chameleonTypes = new HashSet<>();
+			Set<String> chameleonElements = new HashSet<>();
+			Set<String> duplicateTypes = new HashSet<>();
+			Set<String> duplicateElements = new HashSet<>();
+			
+			for (XSDLibrary chameleonSchema : chameleonSchemas) {
+				for (LibraryMember member : chameleonSchema.getNamedMembers()) {
+					if ((member instanceof XSDSimpleType) || (member instanceof XSDComplexType)) {
+						checkForDuplicate(member, chameleonTypes, duplicateTypes);
+						
+					} else if (member instanceof XSDElement) {
+						checkForDuplicate(member, chameleonElements, duplicateElements);
+					}
+				}
+			}
+			duplicateSymbols.addAll(duplicateTypes);
+			duplicateSymbols.addAll(duplicateElements);
+		}
+		return duplicateSymbols;
+	}
+	
     /**
      * Checks to see if the 'allMembers' set already contains a name that matches the given library
      * member. If so, the name will be added to the list of duplicates.

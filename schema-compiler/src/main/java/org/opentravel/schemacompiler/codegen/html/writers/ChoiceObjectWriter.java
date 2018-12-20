@@ -15,6 +15,8 @@
  */
 package org.opentravel.schemacompiler.codegen.html.writers;
 
+import java.io.IOException;
+
 import org.opentravel.schemacompiler.codegen.html.builders.ChoiceObjectDocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
 
@@ -36,7 +38,7 @@ public class ChoiceObjectWriter extends ComplexObjectWriter<ChoiceObjectDocument
 	 */
 	public ChoiceObjectWriter(ChoiceObjectDocumentationBuilder choiceObject,
 			DocumentationBuilder prev, DocumentationBuilder next)
-			throws Exception {
+			throws IOException {
 		super(choiceObject, prev, next);
 	}
 

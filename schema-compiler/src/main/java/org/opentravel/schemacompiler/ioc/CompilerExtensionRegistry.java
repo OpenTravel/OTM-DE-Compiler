@@ -23,6 +23,7 @@ import java.util.ServiceLoader;
 
 import org.opentravel.schemacompiler.extension.CompilerExtension;
 import org.opentravel.schemacompiler.extension.CompilerExtensionProvider;
+import org.opentravel.schemacompiler.util.SchemaCompilerRuntimeException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
@@ -123,9 +124,7 @@ public class CompilerExtensionRegistry {
             // resource. This may be necessary if it was contributed as part of a general
             // extension that is not associated with the active extension ID.
             for (CompilerExtensionProvider p : ServiceLoader.load(CompilerExtensionProvider.class)) {
-                if (p == activeProvider)
-                    continue;
-                if ((is = p.getExtensionResource(resourcePath)) != null) {
+                if ((p != activeProvider) && ((is = p.getExtensionResource(resourcePath)) != null)) {
                     break;
                 }
             }
@@ -162,7 +161,7 @@ public class CompilerExtensionRegistry {
             activeExtensionId = extensionId;
 
         } catch (BeansException e) {
-            throw new RuntimeException("Unable to load compiler extension: " + extensionId, e);
+            throw new SchemaCompilerRuntimeException("Unable to load compiler extension: " + extensionId, e);
         }
     }
 

@@ -54,7 +54,7 @@ public class ChoiceObjectTransformer extends
         TLChoiceObject choiceObject = new TLChoiceObject();
 
         choiceObject.setName(trimString(source.getName()));
-        choiceObject.setNotExtendable((source.isNotExtendable() == null) ? false : source.isNotExtendable());
+        choiceObject.setNotExtendable((source.isNotExtendable() != null) && source.isNotExtendable());
 
         if (source.getDocumentation() != null) {
             ObjectTransformer<Documentation, TLDocumentation, DefaultTransformerContext> docTransformer = getTransformerFactory()

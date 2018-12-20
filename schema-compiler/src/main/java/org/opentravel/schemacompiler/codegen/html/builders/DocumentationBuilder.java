@@ -15,6 +15,8 @@
  */
 package org.opentravel.schemacompiler.codegen.html.builders;
 
+import org.opentravel.schemacompiler.codegen.CodeGenerationException;
+
 /**
  * @author Eric.Bronson
  *
@@ -33,7 +35,7 @@ public interface DocumentationBuilder {
 	
 	public void setPrevious(DocumentationBuilder prev);
 	
-	public void build() throws Exception;
+	public void build() throws CodeGenerationException;
 	
 	public String getDescription();
 	

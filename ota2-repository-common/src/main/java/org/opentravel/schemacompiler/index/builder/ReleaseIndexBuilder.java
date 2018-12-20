@@ -146,10 +146,7 @@ public class ReleaseIndexBuilder extends IndexBuilder<RepositoryItem> {
 		boolean result = true;
 		
 		for (RepositoryItem itemVersion : getRepositoryManager().listItems( baseNS, TLLibraryStatus.DRAFT, false )) {
-			if (!releaseName.equals( itemVersion.getLibraryName() )) {
-				continue;
-				
-			} else {
+			if (releaseName.equals( itemVersion.getLibraryName() )) {
 				// Listed items are sorted in descending version order.  If the first item we encounter
 				// is not the one we are indexing, then the source item is not the latest version.
 				result = item.getVersion().equals( itemVersion.getVersion() );

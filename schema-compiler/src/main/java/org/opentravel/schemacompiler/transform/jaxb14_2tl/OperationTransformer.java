@@ -50,8 +50,7 @@ public class OperationTransformer extends
         final TLOperation operation = new TLOperation();
 
         operation.setName(trimString(source.getName()));
-        operation.setNotExtendable((source.isNotExtendable() == null) ? false : source
-                .isNotExtendable());
+        operation.setNotExtendable((source.isNotExtendable() != null) && source.isNotExtendable());
 
         if (source.getDocumentation() != null) {
             ObjectTransformer<Documentation, TLDocumentation, DefaultTransformerContext> docTransformer = getTransformerFactory()

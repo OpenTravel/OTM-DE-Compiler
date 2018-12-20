@@ -91,7 +91,7 @@ public class IndexBuilderFactory {
 	 * @param createIndex  flag indicating whether the index for the source item is to be created or deleted
 	 * @return IndexDocumentBuilder<T>
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings( {"unchecked", "squid:S1905"} )
 	private <T> IndexBuilder<T> newIndexBuilder(T sourceObject, boolean createIndex) {
 		if (sourceObject == null) {
 			throw new NullPointerException("Index source object cannot be null.");

@@ -46,8 +46,8 @@ public class AttributeTransformer extends
         final TLAttribute attribute = new TLAttribute();
 
         attribute.setName(trimString(source.getName()));
-        attribute.setMandatory((source.isMandatory() == null) ? false : source.isMandatory().booleanValue());
-        attribute.setReference((source.isReference() == null) ? false : source.isReference().booleanValue());
+        attribute.setMandatory((source.isMandatory() != null) && source.isMandatory());
+        attribute.setReference((source.isReference() != null) && source.isReference());
         attribute.setReferenceRepeat(PropertyTransformer.convertRepeatValue(source.getReferenceRepeat()));
         attribute.setTypeName(trimString(attributeTypeName));
 

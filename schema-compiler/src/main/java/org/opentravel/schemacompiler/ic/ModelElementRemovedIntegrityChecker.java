@@ -33,7 +33,7 @@ import org.opentravel.schemacompiler.model.TLModelElement;
 public class ModelElementRemovedIntegrityChecker<S extends TLModelElement> extends
         EntityRemovedIntegrityChecker<S, TLModelElement> {
 
-    private static ModelEventType[] ELIGIBLE_EVENT_TYPES = { ModelEventType.MEMBER_REMOVED,
+    private static final ModelEventType[] ELIGIBLE_EVENT_TYPES = { ModelEventType.MEMBER_REMOVED,
             ModelEventType.ROLE_REMOVED, ModelEventType.ALIAS_REMOVED,
             ModelEventType.OPERATION_REMOVED, ModelEventType.CUSTOM_FACET_REMOVED,
             ModelEventType.QUERY_FACET_REMOVED, ModelEventType.ACTION_FACET_REMOVED,

@@ -15,6 +15,7 @@
  */
 package org.opentravel.schemacompiler.codegen.html;
 
+import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.codegen.html.writers.LibraryListWriter;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.slf4j.Logger;
@@ -107,7 +108,7 @@ public abstract class AbstractDoclet {
      *
      * @see org.opentravel.schemacompiler.codegen.html.RootDoc
      */
-    private void startGeneration(TLModel model) throws Exception {
+    private void startGeneration(TLModel model) throws CodeGenerationException {
         if (model.getUserDefinedLibraries().isEmpty()) {
             configuration.message.notice("doclet.No_Libraries_To_Document");
             return;
@@ -124,15 +125,15 @@ public abstract class AbstractDoclet {
     /**
      * 
      * @param manager
-     * @throws Exception 
+     * @throws CodeGenerationException 
      */
-    protected abstract void generateOtherFiles(TLModel model) throws Exception;
+    protected abstract void generateOtherFiles(TLModel model) throws CodeGenerationException;
   
     /**
      * Generate the library documentation.
      *
      */
-    protected abstract void generateLibraryFiles(TLModel model) throws Exception;
+    protected abstract void generateLibraryFiles(TLModel model) throws CodeGenerationException;
 
 
 }

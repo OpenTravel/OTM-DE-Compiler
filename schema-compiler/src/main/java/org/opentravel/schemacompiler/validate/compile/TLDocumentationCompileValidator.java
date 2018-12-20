@@ -66,52 +66,21 @@ public class TLDocumentationCompileValidator extends TLValidatorBase<TLDocumenta
         validateMaxLength(target.getOtherDocs(), "otherDocs.text", builder);
 
         for (TLAdditionalDocumentationItem otherDoc : target.getOtherDocs()) {
-            if (otherDoc != null) {
-                // Make sure that the context value is among the declared contexts for the owning
-                // library
-                if ((otherDoc.getContext() != null) && (otherDoc.getContext().length() > 0)) {
-                    AbstractLibrary owningLibrary = target.getOwningLibrary();
+            if ((otherDoc != null) && (otherDoc.getContext() != null) && (otherDoc.getContext().length() > 0)) {
+                // Make sure that the context value is among the declared contexts for the owning library
+                AbstractLibrary owningLibrary = target.getOwningLibrary();
 
-                    if (owningLibrary instanceof TLLibrary) {
-                        TLLibrary library = (TLLibrary) owningLibrary;
+                if (owningLibrary instanceof TLLibrary) {
+                    TLLibrary library = (TLLibrary) owningLibrary;
 
-                        if (library.getContext(otherDoc.getContext()) == null) {
-                            builder.addFinding(FindingType.ERROR, "otherDocs.context",
-                                    TLContextCompileValidator.ERROR_INVALID_CONTEXT,
-                                    otherDoc.getContext());
-                        }
+                    if (library.getContext(otherDoc.getContext()) == null) {
+                        builder.addFinding(FindingType.ERROR, "otherDocs.context",
+                                TLContextCompileValidator.ERROR_INVALID_CONTEXT,
+                                otherDoc.getContext());
                     }
                 }
             }
         }
-
-        /*
-         * Supress warning messages until the editor GUI can be used to correct the problem.
-         * 
-         * if (hasBlankDocumentation(target.getDeprecations())) {
-         * builder.addFinding(FindingType.WARNING, "deprecations.text",
-         * TLValidationBuilder.ERROR_NULL_OR_BLANK); }
-         * 
-         * if (hasBlankDocumentation(target.getDescriptions())) {
-         * builder.addFinding(FindingType.WARNING, "descriptions.text",
-         * TLValidationBuilder.ERROR_NULL_OR_BLANK); }
-         * 
-         * if (hasBlankDocumentation(target.getReferences())) {
-         * builder.addFinding(FindingType.WARNING, "references.text",
-         * TLValidationBuilder.ERROR_NULL_OR_BLANK); }
-         * 
-         * if (hasBlankDocumentation(target.getImplementers())) {
-         * builder.addFinding(FindingType.WARNING, "implementers.text",
-         * TLValidationBuilder.ERROR_NULL_OR_BLANK); }
-         * 
-         * if (hasBlankDocumentation(target.getMoreInfos())) {
-         * builder.addFinding(FindingType.WARNING, "moreInfos.text",
-         * TLValidationBuilder.ERROR_NULL_OR_BLANK); }
-         * 
-         * if (hasBlankDocumentation(target.getOtherDocs())) {
-         * builder.addFinding(FindingType.WARNING, "otherDocs.text",
-         * TLValidationBuilder.ERROR_NULL_OR_BLANK); }
-         */
 
         return builder.getFindings();
     }
@@ -128,10 +97,7 @@ public class TLDocumentationCompileValidator extends TLValidatorBase<TLDocumenta
         boolean hasBlankItem = false;
 
         for (TLDocumentationItem docItem : docItems) {
-            if (docItem == null) {
-                continue;
-            }
-            if ((docItem.getText() == null) || docItem.getText().equals("")) {
+            if ((docItem != null) && ((docItem.getText() == null) || docItem.getText().equals(""))) {
                 hasBlankItem = true;
                 break;
             }

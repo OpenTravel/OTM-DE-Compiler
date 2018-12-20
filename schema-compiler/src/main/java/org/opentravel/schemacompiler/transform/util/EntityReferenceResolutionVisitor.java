@@ -33,6 +33,7 @@ import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLMemberField;
+import org.opentravel.schemacompiler.model.TLMemberFieldOwner;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLParamGroup;
@@ -58,7 +59,7 @@ import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
 class EntityReferenceResolutionVisitor extends ModelElementVisitorAdapter {
 	
     private SymbolResolver symbolResolver;
-    private Map<String,List<TLMemberField<?>>> inheritedFieldCache = new HashMap<>();
+    private Map<String,List<TLMemberField<TLMemberFieldOwner>>> inheritedFieldCache = new HashMap<>();
     
     /**
      * Constructor that assigns the model being navigated.
@@ -282,10 +283,11 @@ class EntityReferenceResolutionVisitor extends ModelElementVisitorAdapter {
 			TLFacet facetRef = parameter.getOwner().getFacetRef();
 			String facetRefKey = facetRef.getNamespace() + ":" + facetRef.getLocalName();
 			String fieldName = parameter.getFieldRefName();
-			List<TLMemberField<?>> memberFields;
+			List<TLMemberField<TLMemberFieldOwner>> memberFields;
 			
 			inheritedFieldCache.computeIfAbsent( facetRefKey,
-					k -> inheritedFieldCache.put( k, ResourceCodegenUtils.getAllParameterFields(facetRef) ) );
+					k -> inheritedFieldCache.put( k, (List<TLMemberField<TLMemberFieldOwner>>)
+							ResourceCodegenUtils.getAllParameterFields(facetRef) ) );
 			memberFields = inheritedFieldCache.get(facetRefKey);
 			
 			for (TLMemberField<?> memberField : memberFields) {

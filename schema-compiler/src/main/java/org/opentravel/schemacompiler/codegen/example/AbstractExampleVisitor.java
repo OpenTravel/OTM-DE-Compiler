@@ -28,6 +28,7 @@ import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
+import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.codegen.wsdl.CodeGenerationWsdlBindings;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
 import org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate;
@@ -51,6 +52,7 @@ import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLPatchableFacet;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLPropertyOwner;
+import org.opentravel.schemacompiler.model.TLPropertyType;
 import org.opentravel.schemacompiler.model.TLRole;
 import org.opentravel.schemacompiler.model.TLRoleEnumeration;
 import org.opentravel.schemacompiler.model.TLSimple;
@@ -59,6 +61,7 @@ import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.model.XSDComplexType;
 import org.opentravel.schemacompiler.model.XSDElement;
 import org.opentravel.schemacompiler.model.XSDSimpleType;
+import org.opentravel.schemacompiler.util.ClassSpecificFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -102,6 +105,26 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
         }
     }
 
+    private ClassSpecificFunction<String> exampleValueFunction = new ClassSpecificFunction<String>()
+    		.addFunction( TLSimple.class, e -> exampleValueGenerator.getExampleValue( e ) )
+    		.addFunction( TLSimpleFacet.class, e -> exampleValueGenerator.getExampleValue( e ) )
+    		.addFunction( XSDSimpleType.class, e -> exampleValueGenerator.getExampleValue( e ) )
+    		.addFunction( TLOpenEnumeration.class, e -> exampleValueGenerator.getExampleValue( e ) )
+    		.addFunction( TLRoleEnumeration.class, e -> exampleValueGenerator.getExampleValue( e ) )
+    		.addFunction( TLClosedEnumeration.class, e -> exampleValueGenerator.getExampleValue( e ) )
+    		.addFunction( TLValueWithAttributes.class, e -> exampleValueGenerator.getExampleValue( e ) )
+    		.addFunction( TLCoreObject.class, e -> exampleValueGenerator.getExampleValue( e.getSimpleFacet() ) );
+    		
+    private ClassSpecificFunction<Integer> fractionDigitsFunction = new ClassSpecificFunction<Integer>()
+    		.addFunction( TLSimple.class, this::getFractionDigits )
+    		.addFunction( TLSimpleFacet.class, this::getFractionDigits )
+    		.addFunction( XSDSimpleType.class, e -> -1 )
+    		.addFunction( TLOpenEnumeration.class, e -> -1 )
+    		.addFunction( TLRoleEnumeration.class, e -> -1 )
+    		.addFunction( TLClosedEnumeration.class, e -> -1 )
+    		.addFunction( TLValueWithAttributes.class, this::getFractionDigits )
+    		.addFunction( TLCoreObject.class, e -> -1 );
+    
     /**
      * Generates an EXAMPLE value for the given model entity (if possible).
      * 
@@ -109,75 +132,51 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      *            the entity for which to generate an EXAMPLE
      * @return String
      */
-    protected String generateExampleValue(Object entity) {
-        String exampleValue = null;
-    	int fractionDigits = -1;
-
-        if (entity instanceof TLSimple) {
-            exampleValue = exampleValueGenerator.getExampleValue((TLSimple) entity);
-            fractionDigits = getFractionDigits( entity );
-
-        } else if (entity instanceof TLSimpleFacet) {
-            exampleValue = exampleValueGenerator.getExampleValue((TLSimpleFacet) entity);
-            fractionDigits = getFractionDigits( entity );
-
-        } else if (entity instanceof XSDSimpleType) {
-            exampleValue = exampleValueGenerator.getExampleValue((XSDSimpleType) entity);
-
-        } else if (entity instanceof TLOpenEnumeration) {
-            exampleValue = exampleValueGenerator.getExampleValue((TLOpenEnumeration) entity);
-
-        } else if (entity instanceof TLRoleEnumeration) {
-            exampleValue = exampleValueGenerator.getExampleValue((TLRoleEnumeration) entity);
-
-        } else if (entity instanceof TLClosedEnumeration) {
-            exampleValue = exampleValueGenerator.getExampleValue((TLClosedEnumeration) entity);
-
-        } else if (entity instanceof TLValueWithAttributes) {
-            exampleValue = exampleValueGenerator.getExampleValue((TLValueWithAttributes) entity);
-            fractionDigits = getFractionDigits( entity );
-            
-        } else if (entity instanceof TLCoreObject) {
-            exampleValue = exampleValueGenerator.getExampleValue(((TLCoreObject) entity).getSimpleFacet());
-
-        } else if (entity instanceof TLAttribute) {
-        	TLAttributeOwner owner = ((TLAttribute) entity).getOwner();
-        	NamedEntity contextFacet = getContextFacet();
-        	
-        	if (contextFacet != null) {
-                exampleValue = exampleValueGenerator.getExampleValue((TLAttribute) entity, contextFacet);
-        	} else {
-                exampleValue = exampleValueGenerator.getExampleValue((TLAttribute) entity, owner);
-        	}
-            fractionDigits = getFractionDigits( entity );
-
-        } else if (entity instanceof TLProperty) {
-        	TLPropertyOwner owner = ((TLProperty) entity).getOwner();
-        	NamedEntity contextFacet = getContextFacet();
-        	
-        	if (contextFacet != null) {
-                exampleValue = exampleValueGenerator.getExampleValue((TLProperty) entity, contextFacet);
-        	} else {
-                exampleValue = exampleValueGenerator.getExampleValue((TLProperty) entity, owner);
-        	}
-            fractionDigits = getFractionDigits( entity );
-        }
-        
-        // For decimal values that specify a fraction-digits constraint, adjust the string
-        // to be compliant with that constraint
-        if (fractionDigits >= 0) {
-        	try {
-            	exampleValue = new BigDecimal( exampleValue ).setScale(
-            			fractionDigits, RoundingMode.HALF_UP ).toString();
-        		
-        	} catch (NumberFormatException e) {
-        		// Ignore error - EXAMPLE string will remain unchanged
-        	}
-        }
-        
-        lastExampleValue = (exampleValue == null) ? null : exampleValue.intern();
+	protected String generateExampleValue(Object entity) {
+		String exampleValue = null;
+		int fractionDigits = -1;
+		
+		if (exampleValueFunction.canApply( entity )) {
+			exampleValue = exampleValueFunction.apply( entity );
+			fractionDigits = fractionDigitsFunction.apply( entity );
+			
+		} else if (entity instanceof TLAttribute) {
+			TLAttributeOwner owner = ((TLAttribute) entity).getOwner();
+			NamedEntity contextFacet = getContextFacet();
+			
+			if (contextFacet != null) {
+				exampleValue = exampleValueGenerator.getExampleValue((TLAttribute) entity, contextFacet);
+			} else {
+				exampleValue = exampleValueGenerator.getExampleValue((TLAttribute) entity, owner);
+			}
+			fractionDigits = getFractionDigits(entity);
+			
+		} else if (entity instanceof TLProperty) {
+			TLPropertyOwner owner = ((TLProperty) entity).getOwner();
+			NamedEntity contextFacet = getContextFacet();
+			
+			if (contextFacet != null) {
+				exampleValue = exampleValueGenerator.getExampleValue((TLProperty) entity, contextFacet);
+			} else {
+				exampleValue = exampleValueGenerator.getExampleValue((TLProperty) entity, owner);
+			}
+			fractionDigits = getFractionDigits(entity);
+		}
+		
+		// For decimal values that specify a fraction-digits constraint, adjust
+		// the string to be compliant with that constraint
+		if (fractionDigits >= 0) {
+			try {
+				exampleValue = new BigDecimal(exampleValue).setScale(fractionDigits, RoundingMode.HALF_UP).toString();
+				
+			} catch (NumberFormatException e) {
+				// Ignore error - EXAMPLE string will remain unchanged
+			}
+		}
+		
+		lastExampleValue = (exampleValue == null) ? null : exampleValue.intern();
 		return lastExampleValue;
-    }
+	}
     
     /**
      * Returns the context facet that is the current owner (or possibly an alias of the owner) for all
@@ -187,46 +186,55 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      * @return TLFacet
      */
 	protected NamedEntity getContextFacet() {
-		NamedEntity elementType = (context.modelElement == null) ? null
-				: context.modelElement.getType();
+		NamedEntity elementType = (context.modelElement == null) ? null : context.modelElement.getType();
 		NamedEntity contextFacet;
 
 		if (elementType instanceof TLExtensionPointFacet) {
-			contextFacet = null; // No inheritance or aliases for extension
-									// point facets
+			contextFacet = null; // No inheritance or aliases for extension point facets
 
 		} else if (elementType instanceof TLValueWithAttributes) {
 			contextFacet = elementType;
 
 		} else {
-			ExampleContext facetContext = context;
+			contextFacet = getDefaultContextFacet();
+		}
+		return contextFacet;
+	}
 
-			// If we are currently processing an attribute value, the facet context will be the
-			// current one. If we are processing an element value, the facet context will be
-			// on top of the context stack.
-			if ((facetContext.modelAttribute == null) && !contextStack.isEmpty()) {
-				facetContext = contextStack.peek();
+	/**
+	 * Returns the default context facet, presuming that the edge conditions have been
+	 * eliminated prior to this method call.
+	 * 
+	 * @return NamedEntity
+	 */
+	private NamedEntity getDefaultContextFacet() {
+		NamedEntity contextFacet;
+		ExampleContext facetContext = context;
+
+		// If we are currently processing an attribute value, the facet context will be the
+		// current one. If we are processing an element value, the facet context will be
+		// on top of the context stack.
+		if ((facetContext.modelAttribute == null) && !contextStack.isEmpty()) {
+			facetContext = contextStack.peek();
+		}
+
+		if (facetContext.modelAlias != null) {
+			TLAlias facetAlias = facetContext.modelAlias;
+
+			if (facetAlias.getOwningEntity() instanceof TLListFacet) {
+				TLAlias coreAlias = AliasCodegenUtils.getOwnerAlias(facetAlias);
+
+				facetAlias = AliasCodegenUtils.getFacetAlias(coreAlias,
+						((TLListFacet) facetAlias.getOwningEntity())
+								.getItemFacet().getFacetType());
 			}
+			contextFacet = facetAlias;
 
-			if (facetContext.modelAlias != null) {
-				TLAlias facetAlias = facetContext.modelAlias;
-
-				if (facetAlias.getOwningEntity() instanceof TLListFacet) {
-					TLAlias coreAlias = AliasCodegenUtils
-							.getOwnerAlias(facetAlias);
-
-					facetAlias = AliasCodegenUtils.getFacetAlias(coreAlias,
-							((TLListFacet) facetAlias.getOwningEntity())
-									.getItemFacet().getFacetType());
-				}
-				contextFacet = facetAlias;
-
-			} else if (facetContext.getModelActionFacet() != null) {
-				contextFacet = facetContext.getModelActionFacet();
-				
-			} else {
-				contextFacet = facetStack.isEmpty() ? null : facetStack.peek();
-			}
+		} else if (facetContext.getModelActionFacet() != null) {
+			contextFacet = facetContext.getModelActionFacet();
+			
+		} else {
+			contextFacet = facetStack.isEmpty() ? null : facetStack.peek();
 		}
 		return contextFacet;
 	}
@@ -667,33 +675,33 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      * @param entity  the entity type to analyze
      * @return int
      */
-    private int getFractionDigits(Object entity) {
-    	int fractionDigits = -1;
-    	
-    	while (entity != null) {
-    		if (entity instanceof TLSimple) {
-    			TLSimple simpleEntity = (TLSimple) entity;
-    			
-    			if (simpleEntity.getFractionDigits() >= 0) {
-    				fractionDigits = simpleEntity.getFractionDigits();
-    				break;
-    				
-    			} else {
-        			entity = simpleEntity.getParentType();
-    			}
-    			
-    		} else if (entity instanceof TLAttribute) {
-    			entity = ((TLAttribute) entity).getType();
-    			
-    		} else if (entity instanceof TLProperty) {
-    			entity = ((TLProperty) entity).getType();
-    			
-    		} else {
-    			entity = null;
-    		}
-    	}
-    	return fractionDigits;
-    }
+	private int getFractionDigits(Object entity) {
+		int fractionDigits = -1;
+		
+		while (entity != null) {
+			if (entity instanceof TLSimple) {
+				TLSimple simpleEntity = (TLSimple) entity;
+				
+				if (simpleEntity.getFractionDigits() >= 0) {
+					fractionDigits = simpleEntity.getFractionDigits();
+					break;
+					
+				} else {
+					entity = simpleEntity.getParentType();
+				}
+				
+			} else if (entity instanceof TLAttribute) {
+				entity = ((TLAttribute) entity).getType();
+				
+			} else if (entity instanceof TLProperty) {
+				entity = ((TLProperty) entity).getType();
+				
+			} else {
+				entity = null;
+			}
+		}
+		return fractionDigits;
+	}
     
     /**
      * Returns true if the visitor is configured to log debugging output.
@@ -701,9 +709,62 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
      * @return boolean
      */
     private boolean debugLogging() {
-    	return DEBUG;
+    		return DEBUG;
     }
     
+	/**
+	 * Resolves the base element type for the given named entity.
+	 * 
+	 * @param elementType  the element type to be resolved
+	 * @return NamedEntity
+	 */
+	protected NamedEntity resolveBaseElementType(NamedEntity elementType) {
+		if (!XsdCodegenUtils.isSimpleCoreObject(elementType) && (context.getModelElement() == null)) {
+			if (elementType instanceof TLAlias) {
+				elementType = ((TLAlias) elementType).getOwningEntity();
+			}
+			if (elementType instanceof TLFacet) {
+				TLFacet elementTypeFacet = (TLFacet) elementType;
+				
+				if (elementTypeFacet.getFacetType() == TLFacetType.SUMMARY) {
+					elementType = elementTypeFacet.getOwningEntity();
+				}
+			}
+		}
+		return elementType;
+	}
+
+	/**
+	 * Determine whether we should be using the substitutable or non-substitutable name for the element.
+	 * 
+	 * @param elementType  the type of element for which the determination should be made
+	 * @return boolean
+	 */
+	protected boolean useSubstitutableElementName(NamedEntity elementType) {
+		boolean useSubstitutableElementName = false;
+		
+		if (!XsdCodegenUtils.isSimpleCoreObject(elementType)) {
+			if (context.getModelElement() != null) {
+				TLPropertyType modelPropertyType = context.getModelElement().getType();
+				
+				if (modelPropertyType instanceof TLAlias) {
+					modelPropertyType = (TLPropertyType) ((TLAlias) modelPropertyType).getOwningEntity();
+				}
+				if ((modelPropertyType instanceof TLBusinessObject) || (modelPropertyType instanceof TLCoreObject)) {
+					useSubstitutableElementName = true;
+				}
+				
+			} else { // no property - this is the root element of the document
+				NamedEntity tempElementType = resolveBaseElementType( elementType );
+				
+				if ((tempElementType instanceof TLBusinessObject) || (tempElementType instanceof TLCoreObject)) {
+					useSubstitutableElementName = true;
+				}
+			}
+		}
+		return useSubstitutableElementName;
+	}
+
  	/**
  	 * Handles the deferred assignment of 'IDREF' and 'IDREFS' values as a
  	 * post-processing step of the EXAMPLE generation process.
@@ -818,99 +879,103 @@ public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
  		 * Adds the names of of the given entity and all of its applicable
  		 * facets to the list of names provided.
  		 * 
- 		 * @param entityRef
- 		 *            the referenced entity from which to collect names
- 		 * @param entityNames
- 		 *            the list of entity names to be appended
+ 		 * @param entityRef  the referenced entity from which to collect names
+ 		 * @param entityNames  the list of entity names to be appended
  		 */
- 		private void addEntityNames(NamedEntity entityRef,
- 				List<QName> entityNames) {
+ 		private void addEntityNames(NamedEntity entityRef, List<QName> entityNames) {
  			// Always include the entity whose name was referenced directly
- 			entityNames.add(new QName(entityRef.getNamespace(), entityRef
- 					.getLocalName()));
+ 			entityNames.add(new QName(entityRef.getNamespace(), entityRef .getLocalName()));
 
- 			// If the entity is a Core, Business Object, or Choice (or a Core/BO/Choice alias),
- 			// we can include the names of its non-query facets in the list of eligible entities
  			if (entityRef instanceof TLAlias) {
- 				TLAlias entityAlias = (TLAlias) entityRef;
- 				NamedEntity owner = entityAlias.getOwningEntity();
-
- 				if (owner instanceof TLBusinessObject) {
- 					TLBusinessObject entity = (TLBusinessObject) owner;
- 					TLAlias idAlias = AliasCodegenUtils.getFacetAlias(entityAlias, TLFacetType.ID);
- 					TLAlias summaryAlias = AliasCodegenUtils.getFacetAlias(entityAlias, TLFacetType.SUMMARY);
- 					TLAlias detailAlias = AliasCodegenUtils.getFacetAlias(entityAlias, TLFacetType.DETAIL);
-
- 					entityNames.add(new QName(idAlias.getNamespace(), idAlias.getLocalName()));
- 					entityNames.add(new QName(summaryAlias.getNamespace(), summaryAlias.getLocalName()));
-
- 					for (TLFacet customFacet : entity.getCustomFacets()) {
- 						TLAlias customAlias = AliasCodegenUtils.getFacetAlias(
- 								entityAlias, TLFacetType.CUSTOM, FacetCodegenUtils.getFacetName(customFacet));
-
- 						entityNames.add(new QName(customAlias.getNamespace(), customAlias.getLocalName()));
- 					}
- 					entityNames.add(new QName(detailAlias.getNamespace(), detailAlias.getLocalName()));
-
- 				} else if (owner instanceof TLCoreObject) {
- 					TLAlias summaryAlias = AliasCodegenUtils.getFacetAlias(entityAlias, TLFacetType.SUMMARY);
- 					TLAlias detailAlias = AliasCodegenUtils.getFacetAlias(entityAlias, TLFacetType.DETAIL);
-
- 					entityNames.add(new QName(summaryAlias.getNamespace(), summaryAlias.getLocalName()));
- 					entityNames.add(new QName(detailAlias.getNamespace(), detailAlias.getLocalName()));
- 					
- 				} else if (owner instanceof TLChoiceObject) {
- 					TLChoiceObject entity = (TLChoiceObject) owner;
- 					TLAlias sharedAlias = AliasCodegenUtils.getFacetAlias(entityAlias, TLFacetType.SHARED);
-
- 					entityNames.add(new QName(sharedAlias.getNamespace(), sharedAlias.getLocalName()));
-
- 					for (TLFacet choiceFacet : entity.getChoiceFacets()) {
- 						TLAlias choiceAlias = AliasCodegenUtils.getFacetAlias(
- 								entityAlias, TLFacetType.CHOICE,FacetCodegenUtils.getFacetName(choiceFacet));
-
- 						entityNames.add(new QName(choiceAlias.getNamespace(), choiceAlias.getLocalName()));
- 					}
- 				}
+ 				addAliasEntityNames((TLAlias) entityRef, entityNames);
  				
  			} else {
- 				if (entityRef instanceof TLBusinessObject) {
- 					TLBusinessObject entity = (TLBusinessObject) entityRef;
-
- 					entityNames.add(new QName(entity.getIdFacet().getNamespace(),
- 							entity.getIdFacet().getLocalName()));
- 					entityNames.add(new QName(entity.getSummaryFacet().getNamespace(),
- 							entity.getSummaryFacet().getLocalName()));
-
- 					for (TLFacet customFacet : entity.getCustomFacets()) {
- 						entityNames.add(new QName(customFacet.getNamespace(),
- 								customFacet.getLocalName()));
- 					}
- 					entityNames.add(new QName(entity.getDetailFacet().getNamespace(),
- 							entity.getDetailFacet().getLocalName()));
-
- 				} else if (entityRef instanceof TLCoreObject) {
- 					TLCoreObject entity = (TLCoreObject) entityRef;
-
- 					entityNames.add(new QName(entity.getSummaryFacet().getNamespace(),
- 							entity.getSummaryFacet().getLocalName()));
- 					entityNames.add(new QName(entity.getDetailFacet().getNamespace(),
- 							entity.getDetailFacet().getLocalName()));
- 					
- 				} else if (entityRef instanceof TLChoiceObject) {
- 					TLChoiceObject entity = (TLChoiceObject) entityRef;
-
- 					entityNames.add(new QName(entity.getSharedFacet().getNamespace(),
- 							entity.getSharedFacet().getLocalName()));
-
- 					for (TLFacet choiceFacet : entity.getChoiceFacets()) {
- 						entityNames.add(new QName(choiceFacet.getNamespace(),
- 								choiceFacet.getLocalName()));
- 					}
- 					
- 				}
+ 				addNonAliasEntityNames(entityRef, entityNames);
  			}
  		}
+
+		/**
+		 * Adds entity names for the given entity based on its specific type.
+		 * 
+		 * @param entityRef  the entity for which to add names
+		 * @param entityNames  the list of entity names to be appended
+		 */
+		private void addNonAliasEntityNames(NamedEntity entityRef, List<QName> entityNames) {
+			if (entityRef instanceof TLBusinessObject) {
+				TLBusinessObject entity = (TLBusinessObject) entityRef;
+				
+				entityNames.add(new QName(entity.getIdFacet().getNamespace(), entity.getIdFacet().getLocalName()));
+				entityNames.add(new QName(entity.getSummaryFacet().getNamespace(), entity.getSummaryFacet().getLocalName()));
+				
+				for (TLFacet customFacet : entity.getCustomFacets()) {
+					entityNames.add(new QName(customFacet.getNamespace(), customFacet.getLocalName()));
+				}
+				entityNames.add(new QName(entity.getDetailFacet().getNamespace(), entity.getDetailFacet().getLocalName()));
+				
+			} else if (entityRef instanceof TLCoreObject) {
+				TLCoreObject entity = (TLCoreObject) entityRef;
+				
+				entityNames.add(new QName(entity.getSummaryFacet().getNamespace(), entity.getSummaryFacet().getLocalName()));
+				entityNames.add(new QName(entity.getDetailFacet().getNamespace(), entity.getDetailFacet().getLocalName()));
+				
+			} else if (entityRef instanceof TLChoiceObject) {
+				TLChoiceObject entity = (TLChoiceObject) entityRef;
+				
+				entityNames.add(new QName(entity.getSharedFacet().getNamespace(), entity.getSharedFacet().getLocalName()));
+				
+				for (TLFacet choiceFacet : entity.getChoiceFacets()) {
+					entityNames.add(new QName(choiceFacet.getNamespace(), choiceFacet.getLocalName()));
+				}
+			}
+		}
+		
+		/**
+		 * Adds entity names for the given alias based on its underlying entity type.
+		 * 
+		 * @param entityAlias  the alias for which to add entity names
+		 * @param entityNames  the list of entity names to be appended
+		 */
+		private void addAliasEntityNames(TLAlias entityAlias, List<QName> entityNames) {
+			NamedEntity owner = entityAlias.getOwningEntity();
+
+			if (owner instanceof TLBusinessObject) {
+				TLBusinessObject entity = (TLBusinessObject) owner;
+				TLAlias idAlias = AliasCodegenUtils.getFacetAlias(entityAlias, TLFacetType.ID);
+				TLAlias summaryAlias = AliasCodegenUtils.getFacetAlias(entityAlias, TLFacetType.SUMMARY);
+				TLAlias detailAlias = AliasCodegenUtils.getFacetAlias(entityAlias, TLFacetType.DETAIL);
+
+				entityNames.add(new QName(idAlias.getNamespace(), idAlias.getLocalName()));
+				entityNames.add(new QName(summaryAlias.getNamespace(), summaryAlias.getLocalName()));
+
+				for (TLFacet customFacet : entity.getCustomFacets()) {
+					TLAlias customAlias = AliasCodegenUtils.getFacetAlias(
+							entityAlias, TLFacetType.CUSTOM, FacetCodegenUtils.getFacetName(customFacet));
+
+					entityNames.add(new QName(customAlias.getNamespace(), customAlias.getLocalName()));
+				}
+				entityNames.add(new QName(detailAlias.getNamespace(), detailAlias.getLocalName()));
+
+			} else if (owner instanceof TLCoreObject) {
+				TLAlias summaryAlias = AliasCodegenUtils.getFacetAlias(entityAlias, TLFacetType.SUMMARY);
+				TLAlias detailAlias = AliasCodegenUtils.getFacetAlias(entityAlias, TLFacetType.DETAIL);
+
+				entityNames.add(new QName(summaryAlias.getNamespace(), summaryAlias.getLocalName()));
+				entityNames.add(new QName(detailAlias.getNamespace(), detailAlias.getLocalName()));
+				
+			} else if (owner instanceof TLChoiceObject) {
+				TLChoiceObject entity = (TLChoiceObject) owner;
+				TLAlias sharedAlias = AliasCodegenUtils.getFacetAlias(entityAlias, TLFacetType.SHARED);
+
+				entityNames.add(new QName(sharedAlias.getNamespace(), sharedAlias.getLocalName()));
+
+				for (TLFacet choiceFacet : entity.getChoiceFacets()) {
+					TLAlias choiceAlias = AliasCodegenUtils.getFacetAlias(
+							entityAlias, TLFacetType.CHOICE,FacetCodegenUtils.getFacetName(choiceFacet));
+
+					entityNames.add(new QName(choiceAlias.getNamespace(), choiceAlias.getLocalName()));
+				}
+			}
+		}
 
  	}
  	

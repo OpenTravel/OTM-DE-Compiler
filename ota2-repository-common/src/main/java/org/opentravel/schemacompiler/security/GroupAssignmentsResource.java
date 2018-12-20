@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.opentravel.ns.ota2.security_v01_00.Group;
 import org.opentravel.ns.ota2.security_v01_00.GroupAssignments;
@@ -64,27 +65,28 @@ public class GroupAssignmentsResource extends FileResource<Map<String, List<Stri
      *            the ID of the user for which to return group assignments
      * @return String[]
      */
-    public String[] getAssignedGroups(String userId) {
-        Map<String, List<String>> groupAssignments = getResource();
-        List<String> assignedGroups = new ArrayList<>();
-
-        for (String groupName : groupAssignments.keySet()) {
-            List<String> memberIds = new ArrayList<>( groupAssignments.get(groupName) );
-            boolean memberOfGroup = false;
-            
-            for (String memberId : memberIds) {
-            	if (memberId.equalsIgnoreCase( userId )) {
-            		memberOfGroup = true;
-            		break;
-            	}
-            }
-            if (memberOfGroup) {
-                assignedGroups.add(groupName);
-            }
-        }
-        return assignedGroups.toArray(new String[assignedGroups.size()]);
-    }
-
+	public String[] getAssignedGroups(String userId) {
+		Map<String, List<String>> groupAssignments = getResource();
+		List<String> assignedGroups = new ArrayList<>();
+		
+		for (Entry<String, List<String>> entry : groupAssignments.entrySet()) {
+			List<String> memberIds = new ArrayList<>(entry.getValue());
+			String groupName = entry.getKey();
+			boolean memberOfGroup = false;
+			
+			for (String memberId : memberIds) {
+				if (memberId.equalsIgnoreCase(userId)) {
+					memberOfGroup = true;
+					break;
+				}
+			}
+			if (memberOfGroup) {
+				assignedGroups.add(groupName);
+			}
+		}
+		return assignedGroups.toArray(new String[assignedGroups.size()]);
+	}
+	
     /**
      * Returns the list of all group names defined in the group assignments file.
      * 
@@ -105,20 +107,22 @@ public class GroupAssignmentsResource extends FileResource<Map<String, List<Stri
      *            the name of the group for which to return a list of members
      * @return String[]
      */
-    public String[] getAssignedUsers(String groupName) {
-        Map<String, List<String>> groupAssignments = getResource();
-        List<String> groupMembers = new ArrayList<>();
-
-        for (String _groupName : groupAssignments.keySet()) {
-            if (groupName.equals(_groupName)) {
-                groupMembers = groupAssignments.get(_groupName);
-                break;
-            }
-        }
-        Collections.sort(groupMembers);
-        return groupMembers.toArray(new String[groupMembers.size()]);
-    }
-
+	public String[] getAssignedUsers(String groupName) {
+		Map<String, List<String>> groupAssignments = getResource();
+		List<String> groupMembers = new ArrayList<>();
+		
+		for (Entry<String, List<String>> entry : groupAssignments.entrySet()) {
+			String gName = entry.getKey();
+			
+			if (groupName.equals(gName)) {
+				groupMembers = entry.getValue();
+				break;
+			}
+		}
+		Collections.sort(groupMembers);
+		return groupMembers.toArray(new String[groupMembers.size()]);
+	}
+	
     /**
      * @see org.opentravel.schemacompiler.config.FileResource#getDefaultResourceValue()
      */

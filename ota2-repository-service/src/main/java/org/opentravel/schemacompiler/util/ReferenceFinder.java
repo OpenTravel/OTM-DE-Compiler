@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.xml.namespace.QName;
 
@@ -88,8 +89,9 @@ public class ReferenceFinder {
 		}
 		
 		// Build the final map of entities mapped to the original type reference names
-		for (String entityRef : referencesToIndexIds.keySet()) {
-			String referenceIndexId = referencesToIndexIds.get( entityRef );
+		for (Entry<String,String> entry : referencesToIndexIds.entrySet()) {
+			String entityRef = entry.getKey();
+			String referenceIndexId = entry.getValue();
 			EntitySearchResult indexEntity = entitiesByReferenceId.get( referenceIndexId );
 			
 			if (indexEntity != null) {

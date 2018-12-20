@@ -64,7 +64,7 @@ public class RepositoryAvailabilityChecker {
 	 * 
 	 * @param repositoryManager  the repository manager for which to return an availability checker
 	 */
-	public synchronized static RepositoryAvailabilityChecker getInstance(RepositoryManager repositoryManager) {
+	public static synchronized RepositoryAvailabilityChecker getInstance(RepositoryManager repositoryManager) {
 		RepositoryAvailabilityChecker availabilityChecker = instanceCache.get( repositoryManager );
 		
 		if (availabilityChecker == null) {
@@ -123,29 +123,40 @@ public class RepositoryAvailabilityChecker {
 		Set<String> repositoryIds = new HashSet<>();
 		
 		for (TLLibrary library : model.getUserDefinedLibraries()) {
-			if (URLUtils.isFileURL( library.getLibraryUrl() )) {
-				File libraryFile = URLUtils.toFile( library.getLibraryUrl() );
-				try {
-					RepositoryItem item = repositoryManager.getRepositoryItem( libraryFile );
-					
-					if (item != null) {
-						repositoryIds.add( item.getRepository().getId() );
-					}
-					
-				} catch (RepositoryException e) {
-					// No error - skip this item
+			addRepositoryId( library, repositoryIds );
+		}
+		return pingAllRepositories( repositoryIds, true );
+	}
+
+	/**
+	 * If the library is repository-managed, adds the ID of the controlling repository
+	 * to the list of ID's provided.
+	 * 
+	 * @param library  the library whose owning repository will be added
+	 * @param repositoryIds  the collection of ID's to which the repository will be added
+	 */
+	private void addRepositoryId(TLLibrary library, Set<String> repositoryIds) {
+		if (URLUtils.isFileURL( library.getLibraryUrl() )) {
+			File libraryFile = URLUtils.toFile( library.getLibraryUrl() );
+			try {
+				RepositoryItem item = repositoryManager.getRepositoryItem( libraryFile );
+				
+				if (item != null) {
+					repositoryIds.add( item.getRepository().getId() );
 				}
 				
-			} else {
-				for (RemoteRepository remoteRepository : repositoryManager.listRemoteRepositories()) {
-					if (library.getLibraryUrl().toExternalForm().startsWith( remoteRepository.getEndpointUrl() )) {
-						repositoryIds.add( remoteRepository.getId() );
-						break;
-					}
+			} catch (RepositoryException e) {
+				// No error - skip this item
+			}
+			
+		} else {
+			for (RemoteRepository remoteRepository : repositoryManager.listRemoteRepositories()) {
+				if (library.getLibraryUrl().toExternalForm().startsWith( remoteRepository.getEndpointUrl() )) {
+					repositoryIds.add( remoteRepository.getId() );
+					break;
 				}
 			}
 		}
-		return pingAllRepositories( repositoryIds, true );
 	}
 	
 	/**

@@ -42,10 +42,11 @@ public class CodeGenerationTransformerContext extends DefaultTransformerContext 
     /**
      * Returns the code generator instance associated with this context.
      * 
-     * @return CodeGenerator<?>
+     * @return CodeGenerator<S>
      */
-    public CodeGenerator<?> getCodeGenerator() {
-        return codeGenerator;
+    @SuppressWarnings("unchecked")
+	public <S> CodeGenerator<S> getCodeGenerator() {
+        return (CodeGenerator<S>) codeGenerator;
     }
 
     /**

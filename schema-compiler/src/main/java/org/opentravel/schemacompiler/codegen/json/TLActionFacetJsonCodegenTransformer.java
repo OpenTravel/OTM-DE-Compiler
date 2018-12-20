@@ -35,6 +35,7 @@ import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLMemberField;
+import org.opentravel.schemacompiler.model.TLMemberFieldOwner;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 
@@ -187,13 +188,15 @@ public class TLActionFacetJsonCodegenTransformer extends AbstractJsonSchemaTrans
 		/**
 		 * @see org.opentravel.schemacompiler.codegen.json.facet.TLFacetJsonSchemaDelegate#getMemberFields()
 		 */
+		@SuppressWarnings("unchecked")
 		@Override
-		protected List<TLMemberField<?>> getMemberFields() {
+		protected <O extends TLMemberFieldOwner> List<TLMemberField<O>> getMemberFields() {
 			TLFacetType facetType = getSourceFacet().getFacetType();
-			List<TLMemberField<?>> fieldList = super.getMemberFields();
+			List<TLMemberField<O>> fieldList = super.getMemberFields();
 			
 			if ((facetType == TLFacetType.SUMMARY) || (facetType == TLFacetType.SHARED)) {
-				fieldList.add( 0, ResourceCodegenUtils.createBusinessObjectElement( actionFacet, getSourceFacet() ) );
+				fieldList.add( 0, (TLMemberField<O>)
+						ResourceCodegenUtils.createBusinessObjectElement( actionFacet, getSourceFacet() ) );
 			}
 			return fieldList;
 		}

@@ -15,13 +15,14 @@
  */
 package org.opentravel.schemacompiler.codegen.html.writers;
 
+import java.io.IOException;
 import java.util.List;
 
+import org.opentravel.schemacompiler.codegen.html.Configuration;
+import org.opentravel.schemacompiler.codegen.html.Content;
 import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.builders.EnumValueDocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.builders.EnumerationDocumentationBuilder;
-import org.opentravel.schemacompiler.codegen.html.Configuration;
-import org.opentravel.schemacompiler.codegen.html.Content;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlStyle;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTag;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTree;
@@ -43,7 +44,7 @@ public class EnumerationWriter extends NamedEntityWriter<EnumerationDocumentatio
 	 */
 	public EnumerationWriter(EnumerationDocumentationBuilder member,
 			DocumentationBuilder prev,
-			DocumentationBuilder next) throws Exception {
+			DocumentationBuilder next) throws IOException {
 		super(member, prev, next);
 	}
 

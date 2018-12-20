@@ -64,7 +64,7 @@ public abstract class TLAbstractEnumeration extends TLLibraryMember implements T
      */
     @Override
     public String getLocalName() {
-        return name;
+        return getName();
     }
 
     /**

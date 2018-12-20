@@ -27,6 +27,7 @@ import org.opentravel.schemacompiler.repository.ReleaseManager;
 import org.opentravel.schemacompiler.repository.Repository;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryItemState;
+import org.opentravel.schemacompiler.util.SchemaCompilerRuntimeException;
 import org.opentravel.schemacompiler.version.VersionSchemeFactory;
 
 /**
@@ -247,7 +248,7 @@ public class ReleaseItemImpl extends RepositoryItemImpl implements ReleaseItem {
 
             } catch (URISyntaxException e) {
                 // Should never happen; throw a runtime exception just in case
-                throw new RuntimeException(e);
+                throw new SchemaCompilerRuntimeException(e);
             }
         } else {
             uri = super.toURI(fullyQualified);

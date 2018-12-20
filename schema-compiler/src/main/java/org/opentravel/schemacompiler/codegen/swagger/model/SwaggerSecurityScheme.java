@@ -60,30 +60,36 @@ public class SwaggerSecurityScheme {
 			}
 			
 		} else if (type == SwaggerSecurityType.OAUTH2) {
-			if (flow != null) {
-				json.addProperty( "flow", flow.getDisplayValue() );
-			}
-			if ((flow == SwaggerOAuth2Flow.IMPLICIT) || (flow == SwaggerOAuth2Flow.ACCESS_CODE)) {
-				if (authorizationUrl != null) {
-					json.addProperty( "authorizationUrl", authorizationUrl );
-				}
-			}
-			if ((flow == SwaggerOAuth2Flow.PASSWORD) || (flow == SwaggerOAuth2Flow.APPLICATION)
-					|| (flow == SwaggerOAuth2Flow.ACCESS_CODE)) {
-				if (tokenUrl != null) {
-					json.addProperty( "tokenUrl", tokenUrl );
-				}
-			}
-			if (!scopes.isEmpty() && (type == SwaggerSecurityType.OAUTH2)) {
-				JsonObject jsonScopes = new JsonObject();
-				
-				for (SwaggerSecurityScope scope : scopes) {
-					jsonScopes.addProperty( scope.getName(), scope.getDescription() );
-				}
-				json.add( "scopes", jsonScopes );
-			}
+			buildOAuth2Json( json );
 		}
 		return json;
+	}
+
+	/**
+	 * Populates the OAuth2 content into the JSON object provided.
+	 * 
+	 * @param json  the JSON object to be populated
+	 */
+	private void buildOAuth2Json(JsonObject json) {
+		if (flow != null) {
+			json.addProperty( "flow", flow.getDisplayValue() );
+		}
+		if (((flow == SwaggerOAuth2Flow.IMPLICIT) || (flow == SwaggerOAuth2Flow.ACCESS_CODE)
+				&& (authorizationUrl != null))) {
+			json.addProperty( "authorizationUrl", authorizationUrl );
+		}
+		if (((flow == SwaggerOAuth2Flow.PASSWORD) || (flow == SwaggerOAuth2Flow.APPLICATION)
+				|| (flow == SwaggerOAuth2Flow.ACCESS_CODE)) && (tokenUrl != null)) {
+			json.addProperty( "tokenUrl", tokenUrl );
+		}
+		if (!scopes.isEmpty() && (type == SwaggerSecurityType.OAUTH2)) {
+			JsonObject jsonScopes = new JsonObject();
+			
+			for (SwaggerSecurityScope scope : scopes) {
+				jsonScopes.addProperty( scope.getName(), scope.getDescription() );
+			}
+			json.add( "scopes", jsonScopes );
+		}
 	}
 	
 	/**

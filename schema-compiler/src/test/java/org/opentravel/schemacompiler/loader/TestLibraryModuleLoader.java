@@ -25,8 +25,8 @@ import java.io.InputStream;
 import java.util.List;
 
 import org.junit.Test;
-import org.opentravel.schemacompiler.loader.impl.LibrarySchema1_5_ModuleLoader;
-import org.opentravel.schemacompiler.loader.impl.LibrarySchema1_6_ModuleLoader;
+import org.opentravel.schemacompiler.loader.impl.LibrarySchema15ModuleLoader;
+import org.opentravel.schemacompiler.loader.impl.LibrarySchema16ModuleLoader;
 import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
 import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.util.SchemaCompilerTestUtils;
@@ -47,7 +47,7 @@ public class TestLibraryModuleLoader {
         File libraryFile = new File(SchemaCompilerTestUtils.getBaseLibraryLocation()
                 + "/test-package_v1/library_1_p1.xml");
         LibraryModuleLoader<InputStream> moduleLoader = OTM16Upgrade.otm16Enabled ?
-        		new LibrarySchema1_6_ModuleLoader() : new LibrarySchema1_5_ModuleLoader();
+        		new LibrarySchema16ModuleLoader() : new LibrarySchema15ModuleLoader();
         ValidationFindings findings = new ValidationFindings();
 
         LibraryModuleInfo<Object> libraryInfo = moduleLoader.loadLibrary(
@@ -66,7 +66,7 @@ public class TestLibraryModuleLoader {
     public void testLoadLibrariesByInputSourceWithInvalidUrl() throws Exception {
         File libraryFile = new File(SchemaCompilerTestUtils.getBaseLibraryLocation()
                 + "/test-package_v1/library_xyz.xml");
-        LibraryModuleLoader<InputStream> moduleLoader = new LibrarySchema1_5_ModuleLoader();
+        LibraryModuleLoader<InputStream> moduleLoader = new LibrarySchema15ModuleLoader();
         ValidationFindings findings = new ValidationFindings();
 
         LibraryModuleInfo<Object> libraryInfo = moduleLoader.loadLibrary(
@@ -83,7 +83,7 @@ public class TestLibraryModuleLoader {
 
     @Test
     public void testLoadLibrariesWithNullInputSource() throws Exception {
-        LibraryModuleLoader<InputStream> moduleLoader = new LibrarySchema1_5_ModuleLoader();
+        LibraryModuleLoader<InputStream> moduleLoader = new LibrarySchema15ModuleLoader();
         ValidationFindings findings = new ValidationFindings();
 
         LibraryModuleInfo<Object> libraryInfo = moduleLoader.loadLibrary(null, findings);

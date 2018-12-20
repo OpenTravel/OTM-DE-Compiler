@@ -60,54 +60,15 @@ import org.opentravel.schemacompiler.codegen.html.Util;
  */
 public class HtmlWriter extends PrintWriter {
 
-    /**
-	 * 
-	 */
 	private static final String WIDTH = "\" WIDTH=\"";
-
-	/**
-	 * 
-	 */
 	private static final String VALIGN2 = "\" VALIGN=\"";
-
-	/**
-	 * 
-	 */
 	private static final String SUMMARY = "\" SUMMARY=\"\">";
-
-	/**
-	 * 
-	 */
 	private static final String CLASS = "\" CLASS=\"";
-
-	/**
-	 * 
-	 */
 	private static final String CELLSPACING2 = "\" CELLSPACING=\"";
-
-	/**
-	 * 
-	 */
 	private static final String CELLPADDING2 = "\" CELLPADDING=\"";
-
-	/**
-	 * 
-	 */
 	private static final String TH_ALIGN = "<TH ALIGN=\"";
-
-	/**
-	 * 
-	 */
 	private static final String TD_ALIGN = "<TD ALIGN=\"";
-
-	/**
-	 * 
-	 */
 	private static final String TABLE_BORDER = "<TABLE BORDER=\"";
-
-	/**
-	 * 
-	 */
 	private static final String INDENT_CLOSE_BRACE = "    }";
 
 	/**

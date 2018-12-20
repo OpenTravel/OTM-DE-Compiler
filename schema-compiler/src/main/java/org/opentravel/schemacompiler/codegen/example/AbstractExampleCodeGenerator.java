@@ -61,7 +61,7 @@ public abstract class AbstractExampleCodeGenerator extends
 	 *            the code generation context
 	 * @return ExampleGeneratorOptions
 	 */
-	protected ExampleGeneratorOptions getOptions(CodeGenerationContext context) {
+	public ExampleGeneratorOptions getOptions(CodeGenerationContext context) {
 		ExampleGeneratorOptions options = new ExampleGeneratorOptions();
 		String detailLevel = context.getValue(CodeGenerationContext.CK_EXAMPLE_DETAIL_LEVEL);
 		String exampleContext = context.getValue(CodeGenerationContext.CK_EXAMPLE_CONTEXT);
@@ -69,10 +69,8 @@ public abstract class AbstractExampleCodeGenerator extends
 		Integer maxDepth = context.getIntValue(CodeGenerationContext.CK_EXAMPLE_MAX_DEPTH);
         Boolean suppressOptionalFields = context.getBooleanValue(CodeGenerationContext.CK_SUPPRESS_OPTIONAL_FIELDS);
 
-		if (detailLevel != null) {
-			if (detailLevel.equalsIgnoreCase("MINIMUM")) {
-				options.setDetailLevel(DetailLevel.MINIMUM);
-			}
+		if ((detailLevel != null) && detailLevel.equalsIgnoreCase("MINIMUM")) {
+			options.setDetailLevel(DetailLevel.MINIMUM);
 		}
 		if (exampleContext != null) {
 			options.setExampleContext(exampleContext);
@@ -94,11 +92,9 @@ public abstract class AbstractExampleCodeGenerator extends
 	 *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
 	 */
 	@Override
-	protected File getOutputFile(TLModelElement source,
-			CodeGenerationContext context) {
+	protected File getOutputFile(TLModelElement source, CodeGenerationContext context) {
 		if (source == null) {
-			throw new NullPointerException(
-					"Source model element cannot be null.");
+			throw new NullPointerException("Source model element cannot be null.");
 		}
 		AbstractLibrary library = getLibrary(source);
 		URL libraryUrl = (library == null) ? null : library.getLibraryUrl();
@@ -113,33 +109,29 @@ public abstract class AbstractExampleCodeGenerator extends
 	 */
 	@Override
 	protected CodeGenerationFilenameBuilder<TLModelElement> getDefaultFilenameBuilder() {
-		return new CodeGenerationFilenameBuilder<TLModelElement>() {
+		return (item, fExt) -> {
+			String fileExt = ((fExt == null) || (fExt.length() == 0)) ? "" : ("." + fExt);
+			String itemName;
 
-			public String buildFilename(TLModelElement item, String fileExtension) {
-				String fileExt = ((fileExtension == null) || (fileExtension.length() == 0)) ? "" : ("." + fileExtension);
-				String itemName;
+			if ((item instanceof TLFacet)
+					&& (((TLFacet) item).getOwningEntity() instanceof TLOperation)) {
+				TLFacet facetItem = (TLFacet) item;
+				itemName = ((TLOperation) facetItem.getOwningEntity()).getName()
+						+ facetItem.getFacetType().getIdentityName();
 
-				if ((item instanceof TLFacet)
-						&& (((TLFacet) item).getOwningEntity() instanceof TLOperation)) {
-					TLFacet facetItem = (TLFacet) item;
-					itemName = ((TLOperation) facetItem.getOwningEntity()).getName()
-							+ facetItem.getFacetType().getIdentityName();
-
-				} else if (item instanceof NamedEntity) {
-					NamedEntity entity = (NamedEntity) item;
-					
-					if (PropertyCodegenUtils.hasGlobalElement(entity)) {
-						itemName = XsdCodegenUtils.getGlobalElementName(entity).getLocalPart();
-					} else {
-						itemName = entity.getLocalName();
-					}
-					
+			} else if (item instanceof NamedEntity) {
+				NamedEntity entity = (NamedEntity) item;
+				
+				if (PropertyCodegenUtils.hasGlobalElement(entity)) {
+					itemName = XsdCodegenUtils.getGlobalElementName(entity).getLocalPart();
 				} else {
-					itemName = "";
+					itemName = entity.getLocalName();
 				}
-				return itemName.replaceAll("_", "") + fileExt;
+				
+			} else {
+				itemName = "";
 			}
-
+			return itemName.replaceAll("_", "") + fileExt;
 		};
 	}
 

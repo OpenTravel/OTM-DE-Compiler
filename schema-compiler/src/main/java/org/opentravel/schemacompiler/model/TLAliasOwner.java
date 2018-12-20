@@ -102,6 +102,6 @@ public interface TLAliasOwner extends NamedEntity {
      * 
      * @return ChildEntityListManager<TLAlias,?>
      */
-    public ChildEntityListManager<TLAlias,?> getAliasListManager();
+    public <O> ChildEntityListManager<TLAlias,O> getAliasListManager();
     
 }

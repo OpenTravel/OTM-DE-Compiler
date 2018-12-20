@@ -327,7 +327,7 @@ public class RepositoryContentResource {
 
         Map<String,Map<TLLibraryStatus,Boolean>> accessibleItemCache = new HashMap<>();
         TLLibraryStatus searchStatus = includeDraftVersions ? null : TLLibraryStatus.FINAL;
-        List<SearchResult<?>> searchResults = FreeTextSearchServiceFactory.getInstance().search(
+        List<SearchResult<Object>> searchResults = FreeTextSearchServiceFactory.getInstance().search(
                 freeTextQuery, searchStatus, latestVersionsOnly, false );
         UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
         LibraryInfoListType metadataList = new LibraryInfoListType();
@@ -374,7 +374,7 @@ public class RepositoryContentResource {
         Map<String,Map<TLLibraryStatus,Boolean>> accessibleItemCache = new HashMap<>();
         TLLibraryStatus searchStatus = getStatus( includeStatusStr );
         RepositoryItemType itemType = getItemType( itemTypeStr );
-        List<SearchResult<?>> searchResults = FreeTextSearchServiceFactory.getInstance().search(
+        List<SearchResult<Object>> searchResults = FreeTextSearchServiceFactory.getInstance().search(
                 freeTextQuery, searchStatus, latestVersionsOnly, false );
         UserPrincipal user = securityManager.authenticateUser(authorizationHeader);
         SearchResultsListType resultsList = new SearchResultsListType();

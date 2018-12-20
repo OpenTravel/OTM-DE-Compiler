@@ -70,8 +70,8 @@ public class SchemaTransformer extends
 
         for (OpenAttrs sourceMember : source.getSimpleTypeOrComplexTypeOrGroup()) {
             Set<Class<?>> targetTypes = getTransformerFactory().findTargetTypes(sourceMember);
-            Class<LibraryMember> targetType = (Class<LibraryMember>) ((targetTypes.size() == 0) ? null
-                    : targetTypes.iterator().next());
+            Class<LibraryMember> targetType = (Class<LibraryMember>)
+            		(targetTypes.isEmpty() ? null : targetTypes.iterator().next());
 
             if (targetType != null) {
                 ObjectTransformer<OpenAttrs, LibraryMember, DefaultTransformerContext> memberTransformer = getTransformerFactory()

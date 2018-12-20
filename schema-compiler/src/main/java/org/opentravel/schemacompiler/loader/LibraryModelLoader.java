@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.xml.XMLConstants;
@@ -359,31 +360,31 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
      * 
      * @return ValidationFindings
      */
-    public ValidationFindings getLoaderFindings() {
-        ValidationFindings findings = new ValidationFindings();
-
-        // Add the namespace/file import findings that are still valid
-        Set<String> validLibraryKeys = new HashSet<>();
-
-        for (AbstractLibrary library : libraryModel.getAllLibraries()) {
-            if (library instanceof BuiltInLibrary)
-                continue;
-            validLibraryKeys.add(new URLValidationSource(library.getLibraryUrl())
-                    .getValidationIdentity());
-
-        }
-        for (String importFindingKey : importLoaderFindings.keySet()) {
-            if (!validLibraryKeys.contains(importFindingKey)) {
-                findings.addFinding(importLoaderFindings.get(importFindingKey));
-            }
-        }
-
-        // Add the non-import loader findings as-is
-        findings.addAll(loaderFindings);
-
-        return findings;
-    }
-
+	public ValidationFindings getLoaderFindings() {
+		ValidationFindings findings = new ValidationFindings();
+		
+		// Add the namespace/file import findings that are still valid
+		Set<String> validLibraryKeys = new HashSet<>();
+		
+		for (AbstractLibrary library : libraryModel.getAllLibraries()) {
+			if (library instanceof BuiltInLibrary) continue;
+			validLibraryKeys.add(new URLValidationSource(library.getLibraryUrl()).getValidationIdentity());
+			
+		}
+		for (Entry<String, ValidationFinding> entry : importLoaderFindings.entrySet()) {
+			String importFindingKey = entry.getKey();
+			
+			if (!validLibraryKeys.contains(importFindingKey)) {
+				findings.addFinding( entry.getValue() );
+			}
+		}
+		
+		// Add the non-import loader findings as-is
+		findings.addAll(loaderFindings);
+		
+		return findings;
+	}
+	
     /**
      * Recursive method that loads the library at the specified URL and all of its dependent
      * modules.
@@ -911,46 +912,47 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
         }
 
         // Resolve element references within each respective namespace
-        for (String namespace : schemasByNamespace.keySet()) {
-            Map<String,XSDComplexType> typesByName = new HashMap<>();
-            List<XSDElement> elementList = new ArrayList<>();
-
-            // Organize collections of all types and elements within this namespace
-            for (XSDLibrary schema : schemasByNamespace.get(namespace)) {
-                for (LibraryMember member : schema.getNamedMembers()) {
-                    if (member instanceof XSDComplexType) {
-                        typesByName.put(member.getLocalName(), (XSDComplexType) member);
-                    } else if (member instanceof XSDElement) {
-                        elementList.add((XSDElement) member);
-                    }
-                }
-            }
-
-            // Search for elements that reference a complex type in the 'typesByName' map
-            for (XSDElement element : elementList) {
-                TopLevelElement jaxbElement = element.getJaxbElement();
-
-                if ((element.getName() == null) || (jaxbElement.getType() == null)
-                        || !namespace.equals(jaxbElement.getType().getNamespaceURI())) {
-                    // If this element references an anonymous type or a type in another namespace,
-                    // we can skip it
-                    // since it is not considered to be an alias
-                    continue;
-                }
-                String referencedTypeName = jaxbElement.getType().getLocalPart();
-                XSDComplexType referencedType = typesByName.get(referencedTypeName);
-
-                // If we found a referenced type definition in this namespace, register the element
-                // as an alias
-                if (referencedType != null) {
-                    if (element.getName().equals(referencedType.getName())) {
-                        referencedType.setIdentityAlias(element);
-
-                    } else {
-                        referencedType.addAlias(element);
-                    }
-                }
-            }
+		for (Entry<String, List<XSDLibrary>> entry : schemasByNamespace.entrySet()) {
+			Map<String, XSDComplexType> typesByName = new HashMap<>();
+			List<XSDElement> elementList = new ArrayList<>();
+			String namespace = entry.getKey();
+			
+			// Organize collections of all types and elements within this namespace
+			for (XSDLibrary schema : entry.getValue()) {
+				for (LibraryMember member : schema.getNamedMembers()) {
+					if (member instanceof XSDComplexType) {
+						typesByName.put(member.getLocalName(), (XSDComplexType) member);
+					} else if (member instanceof XSDElement) {
+						elementList.add((XSDElement) member);
+					}
+				}
+			}
+			
+			// Search for elements that reference a complex type in the
+			// 'typesByName' map
+			for (XSDElement element : elementList) {
+				TopLevelElement jaxbElement = element.getJaxbElement();
+				
+				if ((element.getName() == null) || (jaxbElement.getType() == null)
+						|| !namespace.equals(jaxbElement.getType().getNamespaceURI())) {
+					// If this element references an anonymous type or a type in another
+					// namespace, we can skip it since it is not considered to be an alias
+					continue;
+				}
+				String referencedTypeName = jaxbElement.getType().getLocalPart();
+				XSDComplexType referencedType = typesByName.get(referencedTypeName);
+				
+				// If we found a referenced type definition in this namespace,
+				// register the element as an alias
+				if (referencedType != null) {
+					if (element.getName().equals(referencedType.getName())) {
+						referencedType.setIdentityAlias(element);
+						
+					} else {
+						referencedType.addAlias(element);
+					}
+				}
+			}
         }
     }
 
@@ -1209,15 +1211,6 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
 		}
 
 		/**
-		 * Assigns the value of the 'libraryUrlMappings' field.
-		 *
-		 * @param libraryUrlMappings  the field value to assign
-		 */
-		public void setLibraryUrlMappings(Map<String,LibraryModuleInfo<Object>> libraryUrlMappings) {
-			this.libraryUrlMappings = libraryUrlMappings;
-		}
-
-		/**
 		 * Returns the value of the 'schemaUrlMappings' field.
 		 *
 		 * @return Map<String,LibraryModuleInfo<Schema>>
@@ -1227,30 +1220,12 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
 		}
 
 		/**
-		 * Assigns the value of the 'schemaUrlMappings' field.
-		 *
-		 * @param schemaUrlMappings  the field value to assign
-		 */
-		public void setSchemaUrlMappings(Map<String,LibraryModuleInfo<Schema>> schemaUrlMappings) {
-			this.schemaUrlMappings = schemaUrlMappings;
-		}
-
-		/**
 		 * Returns the value of the 'validationFindings' field.
 		 *
 		 * @return ValidationFindings
 		 */
 		public ValidationFindings getValidationFindings() {
 			return validationFindings;
-		}
-
-		/**
-		 * Assigns the value of the 'validationFindings' field.
-		 *
-		 * @param validationFindings  the field value to assign
-		 */
-		public void setValidationFindings(ValidationFindings validationFindings) {
-			this.validationFindings = validationFindings;
 		}
 
     }

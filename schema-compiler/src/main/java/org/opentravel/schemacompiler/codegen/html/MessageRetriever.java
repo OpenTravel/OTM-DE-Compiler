@@ -43,6 +43,8 @@ import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.opentravel.schemacompiler.util.SchemaCompilerRuntimeException;
+
 
 
 /**
@@ -106,8 +108,8 @@ public class MessageRetriever {
             try {
                 messageRB = ResourceBundle.getBundle(resourcelocation);
             } catch (MissingResourceException e) {
-                throw new Error("Fatal: Resource (" + resourcelocation +
-                                    ") for javadoc doclets is missing.");
+                throw new SchemaCompilerRuntimeException(
+                		"Fatal: Resource (" + resourcelocation + ") for javadoc doclets is missing.");
             }
         }
         String messageText;

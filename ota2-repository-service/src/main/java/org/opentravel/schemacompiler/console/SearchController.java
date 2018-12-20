@@ -118,7 +118,7 @@ public class SearchController extends BaseController {
 			
 			if (searchService != null) {
 				try {
-					List<SearchResult<?>> results = searchService.search(keywords, searchStatus, latestVersions, false);
+					List<SearchResult<Object>> results = searchService.search(keywords, searchStatus, latestVersions, false);
 					RepositorySecurityManager securityManager = getSecurityManager();
 					UserPrincipal user = getCurrentUser(session);
 					

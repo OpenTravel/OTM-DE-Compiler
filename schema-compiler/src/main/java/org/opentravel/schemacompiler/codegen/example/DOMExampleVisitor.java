@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.xml.XMLConstants;
@@ -40,7 +41,6 @@ import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLAttributeOwner;
 import org.opentravel.schemacompiler.model.TLAttributeType;
-import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
@@ -630,50 +630,56 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
 	 *            is null (i.e. when the new element will be the root of the XML
 	 *            document)
      */
-    private void createSimpleElement(NamedEntity elementType) {
-        if (context.getModelAttribute() != null) {
-			if (context.getNode() == null) {
-				throw new IllegalStateException(
-						"No element available for new attribute creation.");
-            }
+	private void createSimpleElement(NamedEntity elementType) {
+		if (context.getModelAttribute() != null) {
+			createSimpleAttribute(elementType);
 			
-			if (context.getModelAttribute().isReference()) {
-				context.getNode().setAttribute(
-						getAttributeName(context.getModelAttribute()).intern(),
-	                    generateExampleValue(elementType));
+		} else {
+			if (contextStack.isEmpty() && (context.getNode() == null)) {
+				Element rootElement = createXmlElement(elementType.getNamespace(), elementType.getLocalName(),
+						elementType);
+				
+				rootElement.setTextContent(generateExampleValue(elementType));
+				context.setNode(rootElement);
+				domDocument.appendChild(rootElement);
 				
 			} else {
-				context.getNode().setAttribute(
-						getAttributeName(context.getModelAttribute()).intern(),
-	                    generateExampleValue(context.getModelAttribute()));
-			}
-
-        } else {
-			if (contextStack.isEmpty() && (context.getNode() == null)) {
-				Element rootElement = createXmlElement(
-						elementType.getNamespace(), elementType.getLocalName(), elementType);
-
-                rootElement.setTextContent(generateExampleValue(elementType));
-				context.setNode(rootElement);
-                domDocument.appendChild(rootElement);
-                
-            } else {
-                // If the element has not already been created, do it now...
+				// If the element has not already been created, do it now...
 				if (context.getNode() == null) {
 					// Constructs a new DOM element with no content
-					createComplexElement(elementType); 
-                }
+					createComplexElement(elementType);
+				}
 				
-                if (context.getModelElement().isReference()) {
+				if (context.getModelElement().isReference()) {
 					context.getNode().setTextContent(generateExampleValue(elementType));
-
-                } else {
+					
+				} else {
 					context.getNode().setTextContent(generateExampleValue(context.getModelElement()));
-                }
-            }
-        }
-    }
+				}
+			}
+		}
+	}
 
+	/**
+	 * Creates a new attribute in the example content.
+	 * 
+	 * @param attributeType  the type of the attribute to be created
+	 */
+	private void createSimpleAttribute(NamedEntity attributeType) {
+		if (context.getNode() == null) {
+			throw new IllegalStateException("No element available for new attribute creation.");
+		}
+		
+		if (context.getModelAttribute().isReference()) {
+			context.getNode().setAttribute(getAttributeName(context.getModelAttribute()).intern(),
+					generateExampleValue(attributeType));
+			
+		} else {
+			context.getNode().setAttribute(getAttributeName(context.getModelAttribute()).intern(),
+					generateExampleValue(context.getModelAttribute()));
+		}
+	}
+	
     /**
      * Creates a DOM element using the property information provided.
      * 
@@ -685,84 +691,137 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
      * @return Element
      */
 	private Element createPropertyElement(TLProperty property, TLPropertyType propertyType) {
-        NamedEntity prefixEntity = null;
-        String elementNamespace = null;
-        String elementName = null;
-        
-        if (!PropertyCodegenUtils.hasGlobalElement(propertyType)) {
-            if (context.getModelAlias() != null) {
-				elementName = XsdCodegenUtils.getGlobalElementName(
-						context.getModelAlias()).getLocalPart();
-                elementNamespace = context.getModelAlias().getNamespace();
-                prefixEntity = context.getModelAlias();
-
-            } else if (propertyType instanceof TLListFacet) {
-                TLListFacet listFacetType = (TLListFacet) propertyType;
-
-                if (listFacetType.getFacetType() != TLFacetType.SIMPLE) {
-					elementName = XsdCodegenUtils.getGlobalElementName(
-							listFacetType.getItemFacet()).getLocalPart();
-                    elementNamespace = listFacetType.getNamespace();
-                    prefixEntity = listFacetType;
-                }
-            }
-
-            if (elementName == null) {
-				if ((property.getName() == null) || (property.getName().length() == 0)) {
-                    elementName = propertyType.getLocalName();
-                } else {
-                    elementName = property.getName();
-                }
-
-				// The element may be inherited, so to obtain the proper namespace we need
-				// to use the most recently encountered facet (i.e. the top of the facet
-				// stack)
-
-                if (facetStack.isEmpty()) {
-					elementNamespace = property.getOwner().getNamespace();
-					prefixEntity = property.getOwner();
-					
-                } else {
-                    TLPropertyOwner propertyOwner;
-
-                    if (facetStack.peek() == propertyType) {
-						// If the top of the facet stack is our property type, we need to go up
-                    	// one more level to find the facet that declared (or inherited) this
-						// property.
-                        if (facetStack.size() > 1) {
-                        	TLPropertyOwner top = facetStack.pop();
-                        	
-							propertyOwner = facetStack.peek();
-							facetStack.push( top );
-                        } else {
-							propertyOwner = property.getOwner();
-                        }
-                    } else {
-                        propertyOwner = facetStack.peek();
-                    }
-                    
-                    if (propertyOwner instanceof TLFacet) {
-                        prefixEntity = findDeclaringFacet( property, (TLFacet) propertyOwner );
-                    } else {
-                        prefixEntity = propertyOwner;
-                    }
-                    elementNamespace = prefixEntity.getNamespace();
-                }
-            }
-
-            if (property.isReference() && !elementName.endsWith("Ref")) {
+		NamedEntity prefixEntity = null;
+		String elementNamespace = null;
+		String elementName = null;
+		
+		if (!PropertyCodegenUtils.hasGlobalElement(propertyType)) {
+			if (context.getModelAlias() != null) {
+				elementName = XsdCodegenUtils.getGlobalElementName(context.getModelAlias()).getLocalPart();
+				elementNamespace = context.getModelAlias().getNamespace();
+				prefixEntity = context.getModelAlias();
+				
+			} else if (propertyType instanceof TLListFacet) {
+				TLListFacet listFacetType = (TLListFacet) propertyType;
+				
+				if (listFacetType.getFacetType() != TLFacetType.SIMPLE) {
+					elementName = XsdCodegenUtils.getGlobalElementName(listFacetType.getItemFacet()).getLocalPart();
+					elementNamespace = listFacetType.getNamespace();
+					prefixEntity = listFacetType;
+				}
+			}
+			
+			if (elementName == null) {
+				// The element may be inherited, so to obtain the proper namespace we need to
+				// use the most recently encountered facet (i.e. the top of the facet stack).
+				elementName = getPropertyElementName(property, propertyType);
+				prefixEntity = getPrefixEntity(property, propertyType);
+				elementNamespace = getElementNamespace(property, prefixEntity);
+			}
+			
+			if (property.isReference() && !elementName.endsWith("Ref")) {
 				// probably a VWA reference, so we need to make sure the "Ref"
 				// suffix is appended
-                elementName += "Ref";
-            }
-
-        } else {
-            prefixEntity = propertyType;
-            elementNamespace = propertyType.getNamespace();
+				elementName += "Ref";
+			}
+			
+		} else {
+			prefixEntity = propertyType;
+			elementNamespace = propertyType.getNamespace();
 			elementName = getContextElementName(propertyType, property.isReference());
-        }
-        return createXmlElement(elementNamespace, elementName, prefixEntity);
-    }
+		}
+		return createXmlElement(elementNamespace, elementName, prefixEntity);
+	}
+
+	/**
+	 * Returns the entity to use for deriving the correct namespace and prefix to use when
+	 * rendering example content for the given property.
+	 * 
+	 * @param property  the property for which to return the prefix entity
+	 * @param propertyType  the resolved type of the property
+	 * @return NamedEntity
+	 */
+	private NamedEntity getPrefixEntity(TLProperty property, TLPropertyType propertyType) {
+		NamedEntity prefixEntity;
+		
+		if (facetStack.isEmpty()) {
+			prefixEntity = property.getOwner();
+			
+		} else {
+			TLPropertyOwner propertyOwner = getPropertyOwner(property, propertyType);
+			
+			if (propertyOwner instanceof TLFacet) {
+				prefixEntity = findDeclaringFacet(property, (TLFacet) propertyOwner);
+			} else {
+				prefixEntity = propertyOwner;
+			}
+		}
+		return prefixEntity;
+	}
+	
+	/**
+	 * Returns the correct element namespace for the given property.
+	 * 
+	 * @param property  the property for which to return the XML element namespace
+	 * @param prefixEntity  the prefix entity from which the namespace might be obtained 
+	 * @return String
+	 */
+	private String getElementNamespace(TLProperty property, NamedEntity prefixEntity) {
+		String elementNamespace;
+		
+		if (facetStack.isEmpty()) {
+			elementNamespace = property.getOwner().getNamespace();
+			
+		} else {
+			elementNamespace = prefixEntity.getNamespace();
+		}
+		return elementNamespace;
+	}
+
+	/**
+	 * Identifies the property owner from the current contents of the facet stack.
+	 * 
+	 * @param property  the property for which to return the contextual owner
+	 * @param propertyType  the resolved type of the property
+	 * @return TLPropertyOwner
+	 */
+	private TLPropertyOwner getPropertyOwner(TLProperty property, TLPropertyType propertyType) {
+		TLPropertyOwner propertyOwner;
+		
+		if (facetStack.peek() == propertyType) {
+			// If the top of the facet stack is our property type, we need to go up one
+			// more level to find the facet that declared (or inherited) this property.
+			if (facetStack.size() > 1) {
+				TLPropertyOwner top = facetStack.pop();
+				
+				propertyOwner = facetStack.peek();
+				facetStack.push(top);
+				
+			} else {
+				propertyOwner = property.getOwner();
+			}
+		} else {
+			propertyOwner = facetStack.peek();
+		}
+		return propertyOwner;
+	}
+	
+	/**
+	 * Returns the correct XML element name for the given property.
+	 * 
+	 * @param property  the property for which to return the element name
+	 * @param propertyType  the resolved type of the property
+	 * @return String
+	 */
+	private String getPropertyElementName(TLProperty property, TLPropertyType propertyType) {
+		String elementName;
+		if ((property.getName() == null) || (property.getName().length() == 0)) {
+		    elementName = propertyType.getLocalName();
+		} else {
+		    elementName = property.getName();
+		}
+		return elementName;
+	}
 	
 	/**
 	 * Returns the facet in the given one's local hierarchy that declared or inherited
@@ -801,71 +860,50 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
      */
 	private String getContextElementName(NamedEntity elementType,
 			boolean isReferenceProperty) {
-        boolean useSubstitutableElementName = false;
+        boolean useSubstitutableElementName = useSubstitutableElementName(elementType);
         QName elementQName;
 
-		// Determine whether we should be using the substitutable or
-		// non-substitutable name for the element
-        if (!XsdCodegenUtils.isSimpleCoreObject(elementType)) {
-            if (context.getModelElement() != null) {
-				TLPropertyType modelPropertyType = context.getModelElement().getType();
-
-                if (modelPropertyType instanceof TLAlias) {
-                    modelPropertyType = (TLPropertyType) ((TLAlias) modelPropertyType)
-                            .getOwningEntity();
-                }
-                if ((modelPropertyType instanceof TLBusinessObject)
-                        || (modelPropertyType instanceof TLCoreObject)) {
-                    useSubstitutableElementName = true;
-                }
-            } else { // no property - this is the root element of the document
-                if (elementType instanceof TLAlias) {
-                    elementType = ((TLAlias) elementType).getOwningEntity();
-                }
-                if (elementType instanceof TLFacet) {
-                    TLFacet elementTypeFacet = (TLFacet) elementType;
-
-                    if (elementTypeFacet.getFacetType() == TLFacetType.SUMMARY) {
-                        elementType = elementTypeFacet.getOwningEntity();
-                    }
-                }
-                if ((elementType instanceof TLBusinessObject)
-                        || (elementType instanceof TLCoreObject)) {
-                    useSubstitutableElementName = true;
-                }
-            }
-        }
-
-		// Lookup the correct name for the element depending upon its specific
-		// characteristics
-        if (context.getModelAlias() != null) {
-            if (!isReferenceProperty && useSubstitutableElementName) {
-				elementQName = XsdCodegenUtils
-						.getSubstitutableElementName((TLAlias) context
-                        .getModelAlias());
-
-            } else {
-                elementQName = PropertyCodegenUtils.getDefaultXmlElementName(
-                        context.getModelAlias(), isReferenceProperty);
-            }
-        } else {
-            if (!isReferenceProperty && useSubstitutableElementName
-                    && (elementType instanceof TLFacet)) {
-				elementQName = XsdCodegenUtils
-						.getSubstitutableElementName((TLFacet) elementType);
-
-            } else if (elementType instanceof TLActionFacet) {
-				elementQName = XsdCodegenUtils.getPayloadElementName(
-						(TLActionFacet) elementType, (TLFacet) facetStack.peek() );
-				
-            } else {
-				elementQName = PropertyCodegenUtils.getDefaultXmlElementName(
-						elementType, isReferenceProperty);
-            }
-        }
-		return (elementQName != null) ? elementQName.getLocalPart()
-				: elementType.getLocalName();
+		elementType = resolveBaseElementType(elementType);
+        elementQName = lookupContextElementName(elementType, isReferenceProperty, useSubstitutableElementName);
+		return (elementQName != null) ? elementQName.getLocalPart() : elementType.getLocalName();
     }
+
+	/**
+	 * Lookup the correct name for the element depending upon its specific characteristics.
+	 * 
+	 * @param elementType  specifies the type of element to use when the current context
+	 *            is null or the given entity does not have a pre-defined global
+	 *            element
+	 * @param isReferenceProperty  indicates whether the element type is assigned by value or
+	 *            reference
+	 * @param useSubstitutableElementName  indicates whether the element's substitutable name should be used
+	 * @return QName
+	 */
+	private QName lookupContextElementName(NamedEntity elementType, boolean isReferenceProperty,
+			boolean useSubstitutableElementName) {
+		QName elementQName;
+		if (context.getModelAlias() != null) {
+			if (!isReferenceProperty && useSubstitutableElementName) {
+				elementQName = XsdCodegenUtils.getSubstitutableElementName((TLAlias) context.getModelAlias());
+				
+			} else {
+				elementQName = PropertyCodegenUtils.getDefaultXmlElementName(context.getModelAlias(),
+						isReferenceProperty);
+			}
+		} else {
+			if (!isReferenceProperty && useSubstitutableElementName && (elementType instanceof TLFacet)) {
+				elementQName = XsdCodegenUtils.getSubstitutableElementName((TLFacet) elementType);
+				
+			} else if (elementType instanceof TLActionFacet) {
+				elementQName = XsdCodegenUtils.getPayloadElementName((TLActionFacet) elementType,
+						(TLFacet) facetStack.peek());
+				
+			} else {
+				elementQName = PropertyCodegenUtils.getDefaultXmlElementName(elementType, isReferenceProperty);
+			}
+		}
+		return elementQName;
+	}
 
     /**
 	 * Constructs a DOM element using the information provided. In addition to
@@ -903,38 +941,51 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
      */
 	private Element createXmlElement(String namespace, String localName,
 			String preferredPrefix) {
+		namespaceMappings.computeIfAbsent( namespace, ns -> addUniquePrefix( ns, preferredPrefix ) );
         Element element = domDocument.createElementNS(namespace.intern(), localName.intern());
         String prefix = namespaceMappings.get(namespace);
-
-        if (prefix == null) {
-            Element rootElement = domDocument.getDocumentElement();
-            if (rootElement == null)
-                rootElement = element;
-
-			if (!namespace.equals(rootElement.getNamespaceURI())) {
-                // Identify a unique prefix for this namespace
-                prefix = preferredPrefix;
-                if (prefix == null)
-                    prefix = "ns1";
-
-                if (namespaceMappings.containsValue(prefix)) {
-                    String prefixStr = prefix.equals("ns1") ? "ns" : prefix;
-                    int nsCounter = 0;
-
-                    while (namespaceMappings.containsValue(prefix)) {
-                        prefix = prefixStr + (nsCounter++);
-                    }
-                }
-                namespaceMappings.put(namespace, prefix);
-				rootElement.setAttributeNS(XMLConstants.XMLNS_ATTRIBUTE_NS_URI,
-						"xmlns:" + prefix, namespace);
-            }
+        Element rootElement = domDocument.getDocumentElement();
+        
+        if (rootElement == null) {
+            rootElement = element;
+        }
+        
+		if (!namespace.equals(rootElement.getNamespaceURI())) {
+			rootElement.setAttributeNS(XMLConstants.XMLNS_ATTRIBUTE_NS_URI,
+					"xmlns:" + prefix, namespace);
         }
         element.setPrefix(prefix);
 
         return element;
     }
 
+	/**
+	 * Ensures that a unique prefix has been added to the mappings for the
+	 * spefified namespace.
+	 * 
+	 * @param namespace  the namespace for which to declare a unique prefix
+	 * @param preferredPrefix  the preferred prefix to use for the namespace
+	 * @return String
+	 */
+	private String addUniquePrefix(String namespace, String preferredPrefix) {
+		String prefix = preferredPrefix;
+		
+		if (prefix == null) {
+		    prefix = "ns1";
+		}
+		
+		if (namespaceMappings.containsValue(prefix)) {
+		    String prefixStr = prefix.equals("ns1") ? "ns" : prefix;
+		    int nsCounter = 0;
+
+		    while (namespaceMappings.containsValue(prefix)) {
+		        prefix = prefixStr + (nsCounter++);
+		    }
+		}
+		namespaceMappings.put(namespace, prefix);
+		return prefix;
+	}
+	
     /**
 	 * Adds an EXAMPLE role value for the given core object and each of the
 	 * extended objects that it inherits role attributes from.
@@ -968,31 +1019,29 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
      */
 	protected void addOperationPayloadContent(TLFacet operationFacet) {
 		Element domElement = context.getNode();
-
-        if ((domElement != null) && (wsdlBindings != null)) {
-        	Map<String,String> nsMappings = new HashMap<>();
-			Element rootElement = domElement.getOwnerDocument()
-					.getDocumentElement();
-        	
-			wsdlBindings.addPayloadExampleContent(domElement, nsMappings,
-					operationFacet);
-            
-            for (String ns : nsMappings.keySet()) {
-            	String origPrefix = nsMappings.get( ns );
-            	String prefix = origPrefix;
-            	int counter = 1;
-            	
-            	while (namespaceMappings.containsValue( prefix )) {
-            		prefix = origPrefix + counter;
-            		counter++;
-            	}
-            	namespaceMappings.put( ns, prefix );
-				rootElement.setAttributeNS(XMLConstants.XMLNS_ATTRIBUTE_NS_URI,
-						"xmlns:" + prefix, ns);
-            }
-            applyElementPrefixes( domElement );
-        }
-    }
+		
+		if ((domElement != null) && (wsdlBindings != null)) {
+			Map<String, String> nsMappings = new HashMap<>();
+			Element rootElement = domElement.getOwnerDocument().getDocumentElement();
+			
+			wsdlBindings.addPayloadExampleContent(domElement, nsMappings, operationFacet);
+			
+			for (Entry<String,String> entry : nsMappings.entrySet()) {
+				String ns = entry.getKey();
+				String origPrefix = entry.getValue();
+				String prefix = origPrefix;
+				int counter = 1;
+				
+				while (namespaceMappings.containsValue(prefix)) {
+					prefix = origPrefix + counter;
+					counter++;
+				}
+				namespaceMappings.put(ns, prefix);
+				rootElement.setAttributeNS(XMLConstants.XMLNS_ATTRIBUTE_NS_URI, "xmlns:" + prefix, ns);
+			}
+			applyElementPrefixes(domElement);
+		}
+	}
     
     /**
 	 * Recursively applies a namespace prefix to the given element and all of

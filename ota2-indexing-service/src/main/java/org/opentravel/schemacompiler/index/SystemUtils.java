@@ -17,8 +17,7 @@
 package org.opentravel.schemacompiler.index;
 
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
 import java.util.StringTokenizer;
 
 /**
@@ -43,6 +42,11 @@ public class SystemUtils {
 	public static final String LINUX_OS_NAME = "Linux";
 	public static final String MAC_OSX_NAME = "Mac";
 	public static final String WINDOWS_OS_NAME = "Windows";
+	
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private SystemUtils() {}
 	
 	/**
 	 * Utility method to determine whether the installed Java Runtime
@@ -185,10 +189,9 @@ public class SystemUtils {
 	 * 
 	 * @param location the directory or jar name to test for
 	 * @return true if location is in the JVM classpath
-	 * @throws MalformedURLException
 	 */
-	public static boolean isInClassPath(String location) throws MalformedURLException {
-		return isInClassPath(new File(location).toURI().toURL());
+	public static boolean isInClassPath(String location) {
+		return isInClassPath(new File(location).toURI());
 	}
 	
 	/**
@@ -198,14 +201,15 @@ public class SystemUtils {
 	 * 
 	 * @param location the directory or jar URL to test for
 	 * @return true if location is in the JVM classpath
-	 * @throws MalformedURLException
 	 */
-	public static boolean isInClassPath(URL location) throws MalformedURLException {
+	public static boolean isInClassPath(URI location) {
 		String classPath = System.getProperty("java.class.path");
 		StringTokenizer st = new StringTokenizer(classPath, File.pathSeparator);
+		
 		while (st.hasMoreTokens()) {
 			String path = st.nextToken();
-			if (location.equals(new File(path).toURI().toURL())) {
+			
+			if (location.equals(new File(path).toURI())) {
 				return true;
 			}
 		}

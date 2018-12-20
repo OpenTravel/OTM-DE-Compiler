@@ -99,32 +99,45 @@ public class LibraryStreamInputSource implements LibraryInputSource<InputStream>
 	/**
      * @see org.opentravel.schemacompiler.loader.LibraryInputSource#getLibraryContent()
      */
-    public InputStream getLibraryContent() {
-        InputStream contentStream = null;
+	public InputStream getLibraryContent() {
+		InputStream contentStream = null;
+		
+		try {
+			if (schemaDeclaration != null) {
+				contentStream = schemaDeclaration.getContent(CodeGeneratorFactory.XSD_TARGET_FORMAT);
+			}
+			if ((contentStream == null) && (libraryUrl != null)) {
+				contentStream = getContentStream();
+			}
+			
+		} catch (IOException e) {
+			// No action - the contract requires that we eat this exception and return null
+		}
+		return contentStream;
+	}
 
-        try {
-            if (schemaDeclaration != null) {
-                contentStream = schemaDeclaration.getContent(CodeGeneratorFactory.XSD_TARGET_FORMAT);
-            }
-            if ((contentStream == null) && (libraryUrl != null)) {
-                if (URLUtils.isFileURL(libraryUrl)) {
-                    try {
-                        contentStream = new FileInputStream(URLUtils.toFile(libraryUrl));
-
-                    } catch (IllegalArgumentException e) {
-                        // No action - use the URL.openStream() method to obtain a connection
-                    }
-                }
-                if (contentStream == null) {
-                	contentStream = new FileInputStream( cacheRemoteFile( libraryUrl ) );
-                }
-            }
-
-        } catch (IOException e) {
-            // No action - the contract requires that we eat this exception and return null
-        }
-        return contentStream;
-    }
+	/**
+	 * Returns a readable input stream for the library URL.
+	 * 
+	 * @return InputStream
+	 * @throws IOException  thrown if the input stream cannot be opened
+	 */
+	private InputStream getContentStream() throws IOException {
+		InputStream contentStream = null;
+		
+		if (URLUtils.isFileURL(libraryUrl)) {
+			try {
+				contentStream = new FileInputStream(URLUtils.toFile(libraryUrl));
+				
+			} catch (IllegalArgumentException e) {
+				// No action - use the URL.openStream() method to obtain a connection
+			}
+		}
+		if (contentStream == null) {
+			contentStream = new FileInputStream(cacheRemoteFile(libraryUrl));
+		}
+		return contentStream;
+	}
     
     /**
      * Downloads the contents of the given URL to a local file (if not done already)
@@ -134,39 +147,50 @@ public class LibraryStreamInputSource implements LibraryInputSource<InputStream>
      * @return File
      * @throws IOException  thrown if the URL cannot be read from or the cache file written to
      */
-    private synchronized File cacheRemoteFile(URL libraryUrl) throws IOException {
-    	File cacheFile = urlCache.get( libraryUrl.toExternalForm() );
-    	
-    	if (cacheFile == null) {
-        	URLConnection urlConnection = libraryUrl.openConnection();
-        	File tempFolder = new File( System.getProperty("java.io.tmpdir"), "/.ota2" );
-        	tempFolder.mkdirs();
-        	File tempFile = File.createTempFile( "lib", ".otm", tempFolder );
-        	tempFile.deleteOnExit();
-        	
-        	if (credentials != null) {
-        		String authHeaderStr = credentials.getUserPrincipal().getName() + ":" + credentials.getPassword();
-            	byte[] authHeaderBytes = Base64.encodeBase64( authHeaderStr.getBytes() );
-            	String authHeader = "Basic " + new String( authHeaderBytes );
-            	
-            	urlConnection.setRequestProperty( "Authorization", authHeader );
-        	}
-        	
-        	try (OutputStream out = new FileOutputStream( tempFile )) {
-            	try (InputStream contentStream = urlConnection.getInputStream()) {
-            		byte[] buffer = new byte[ 1024 ];
-            		int bytesRead;
-            		
-            		while ((bytesRead = contentStream.read( buffer, 0, buffer.length )) >= 0) {
-            			out.write( buffer, 0, bytesRead );
-            		}
-            	}
-        	}
-        	urlCache.put( libraryUrl.toExternalForm(), tempFile );
-        	cacheFile = tempFile;
-    	}
-    	return cacheFile;
-    	
-    }
+    @SuppressWarnings("squid:S1075") // Invalid Sonar finding
+	private synchronized File cacheRemoteFile(URL libraryUrl) throws IOException {
+		File cacheFile = urlCache.get(libraryUrl.toExternalForm());
+		
+		if (cacheFile == null) {
+			URLConnection urlConnection = libraryUrl.openConnection();
+			File tempFolder = new File(System.getProperty("java.io.tmpdir"), "/.ota2");
+			tempFolder.mkdirs();
+			File tempFile = File.createTempFile("lib", ".otm", tempFolder);
+			tempFile.deleteOnExit();
+			
+			if (credentials != null) {
+				String authHeaderStr = credentials.getUserPrincipal().getName() + ":" + credentials.getPassword();
+				byte[] authHeaderBytes = Base64.encodeBase64(authHeaderStr.getBytes());
+				String authHeader = "Basic " + new String(authHeaderBytes);
+				
+				urlConnection.setRequestProperty("Authorization", authHeader);
+			}
+			
+			downloadToTempFile(urlConnection, tempFile);
+			urlCache.put(libraryUrl.toExternalForm(), tempFile);
+			cacheFile = tempFile;
+		}
+		return cacheFile;
+	}
+
+	/**
+	 * Downloads content from the URL connection to the specified temp file.
+	 * 
+	 * @param cnx  the URL connection from which to download content
+	 * @param tempFile  the temp file where downloaded content will be stored
+	 * @throws IOException  throw if content cannot be downloaded for any reason
+	 */
+	private void downloadToTempFile(URLConnection cnx, File tempFile) throws IOException {
+		try (OutputStream out = new FileOutputStream(tempFile)) {
+			try (InputStream contentStream = cnx.getInputStream()) {
+				byte[] buffer = new byte[1024];
+				int bytesRead;
+				
+				while ((bytesRead = contentStream.read(buffer, 0, buffer.length)) >= 0) {
+					out.write(buffer, 0, bytesRead);
+				}
+			}
+		}
+	}
     
 }

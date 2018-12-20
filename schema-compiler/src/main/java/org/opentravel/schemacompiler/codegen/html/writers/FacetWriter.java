@@ -17,9 +17,9 @@ package org.opentravel.schemacompiler.codegen.html.writers;
 
 import java.io.IOException;
 
+import org.opentravel.schemacompiler.codegen.html.Content;
 import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.builders.FacetDocumentationBuilder;
-import org.opentravel.schemacompiler.codegen.html.Content;
 import org.opentravel.schemacompiler.codegen.html.writers.info.AliasInfoWriter;
 import org.opentravel.schemacompiler.codegen.html.writers.info.ExampleInfoWriter;
 import org.opentravel.schemacompiler.codegen.html.writers.info.FacetAttributeInfoWriter;
@@ -42,7 +42,7 @@ public class FacetWriter extends
 	 */
 	public FacetWriter(FacetDocumentationBuilder classDoc,
 			DocumentationBuilder prev,
-			DocumentationBuilder next) throws Exception {
+			DocumentationBuilder next) throws IOException {
 		super(classDoc, prev, next);
 	}
 

@@ -551,12 +551,12 @@ public abstract class AbstractLibrary extends TLModelElement {
      * @see org.opentravel.schemacompiler.version.Versioned#getVersion()
      */
     public String getVersion() {
-        String namespace = getNamespace();
+        String ns = getNamespace();
         String version;
 
         if (vScheme != null) {
-            version = ((namespace == null) || namespace.equals("")) ? vScheme
-                    .getDefaultVersionIdentifer() : vScheme.getVersionIdentifier(namespace);
+            version = ((ns == null) || ns.equals("")) ? vScheme
+                    .getDefaultVersionIdentifer() : vScheme.getVersionIdentifier(ns);
         } else {
             version = null;
         }
@@ -577,9 +577,9 @@ public abstract class AbstractLibrary extends TLModelElement {
      *             method call
      */
     public void setVersion(String version) {
-        String namespace = getNamespace();
+        String ns = getNamespace();
 
-        if ((namespace == null) || namespace.equals("")) {
+        if ((ns == null) || ns.equals("")) {
             throw new IllegalStateException(
                     "Library versions cannot be set before a valid namespace has been assigned.");
         }
@@ -591,7 +591,7 @@ public abstract class AbstractLibrary extends TLModelElement {
             throw new IllegalArgumentException("Invalid version identifier for version scheme "
                     + versionScheme + ": '" + version + "'");
         }
-        setNamespace(vScheme.setVersionIdentifier(namespace, version));
+        setNamespace(vScheme.setVersionIdentifier(ns, version));
     }
 
     /**

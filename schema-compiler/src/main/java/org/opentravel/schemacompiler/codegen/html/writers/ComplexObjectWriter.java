@@ -15,6 +15,7 @@
  */
 package org.opentravel.schemacompiler.codegen.html.writers;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.opentravel.schemacompiler.codegen.html.Content;
@@ -33,7 +34,7 @@ public class ComplexObjectWriter<T extends ComplexTypeDocumentationBuilder<?>> e
 
 	public ComplexObjectWriter(T member,
 			DocumentationBuilder prev,
-			DocumentationBuilder next) throws Exception {
+			DocumentationBuilder next) throws IOException {
 		super(member, prev, next);
 	}
 

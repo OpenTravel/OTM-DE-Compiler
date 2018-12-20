@@ -23,6 +23,7 @@ import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
+import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
@@ -59,122 +60,160 @@ public class FacetCodegenDelegateFactory {
      * @return FacetCodegenDelegate<F>
      */
     @SuppressWarnings("unchecked")
-    public <F extends TLAbstractFacet> FacetCodegenDelegate<F> getDelegate(F facetInstance) {
-        TLFacetOwner facetOwner = facetInstance.getOwningEntity();
-        FacetCodegenDelegate<F> delegate = null;
-
-        if (facetOwner instanceof TLBusinessObject) {
-            if (facetInstance instanceof TLFacet) {
-                TLFacet facet = (TLFacet) facetInstance;
-
-                switch (facetInstance.getFacetType()) {
-                    case ID:
-                        delegate = (FacetCodegenDelegate<F>) new BusinessObjectIDFacetCodegenDelegate(facet);
-                        break;
-                    case SUMMARY:
-                        delegate = (FacetCodegenDelegate<F>) new BusinessObjectSummaryFacetCodegenDelegate(facet);
-                        break;
-                    case DETAIL:
-                        delegate = (FacetCodegenDelegate<F>) new BusinessObjectDetailFacetCodegenDelegate(facet);
-                        break;
-                    case CUSTOM:
-                        delegate = (FacetCodegenDelegate<F>) new BusinessObjectCustomFacetCodegenDelegate(facet);
-                        break;
-                    case QUERY:
-                        delegate = (FacetCodegenDelegate<F>) new BusinessObjectQueryFacetCodegenDelegate(facet);
-                        break;
-                    case UPDATE:
-                        delegate = (FacetCodegenDelegate<F>) new BusinessObjectUpdateFacetCodegenDelegate(facet);
-                        break;
-					default:
-						break;
-                }
-            }
-        } else if (facetOwner instanceof TLCoreObject) {
-            if (facetInstance instanceof TLFacet) {
-                TLFacet facet = (TLFacet) facetInstance;
-
-                switch (facetInstance.getFacetType()) {
-                    case SUMMARY:
-                        delegate = (FacetCodegenDelegate<F>) new CoreObjectSummaryFacetCodegenDelegate(facet);
-                        break;
-                    case DETAIL:
-                        delegate = (FacetCodegenDelegate<F>) new CoreObjectDetailFacetCodegenDelegate(facet);
-                        break;
-					default:
-						break;
-                }
-            } else if (facetInstance instanceof TLListFacet) {
-                TLListFacet facet = (TLListFacet) facetInstance;
-
-                switch (facetInstance.getFacetType()) {
-                    case SIMPLE:
-                        delegate = (FacetCodegenDelegate<F>) new CoreObjectListSimpleFacetCodegenDelegate(facet);
-                        break;
-                    case SUMMARY:
-                    case DETAIL:
-                        delegate = (FacetCodegenDelegate<F>) new CoreObjectListFacetCodegenDelegate(facet);
-                        break;
-					default:
-						break;
-                }
-            } else if (facetInstance instanceof TLSimpleFacet) {
-                TLSimpleFacet facet = (TLSimpleFacet) facetInstance;
-
-                switch (facetInstance.getFacetType()) {
-                    case SIMPLE:
-                        delegate = (FacetCodegenDelegate<F>) new TLSimpleFacetCodegenDelegate(facet);
-                        break;
-					default:
-						break;
-                }
-            }
-        } else if (facetOwner instanceof TLChoiceObject) {
-            if (facetInstance instanceof TLFacet) {
-                TLFacet facet = (TLFacet) facetInstance;
-
-                switch (facetInstance.getFacetType()) {
-                    case SHARED:
-                        delegate = (FacetCodegenDelegate<F>) new ChoiceObjectSharedFacetCodegenDelegate(facet);
-                        break;
-                    case CHOICE:
-                        delegate = (FacetCodegenDelegate<F>) new ChoiceObjectChoiceFacetCodegenDelegate(facet);
-                        break;
-					default:
-						break;
-                }
-            }
-        } else if (facetOwner instanceof TLContextualFacet) {
-        	TLContextualFacet facet = (TLContextualFacet) facetInstance;
-
-            switch (facetInstance.getFacetType()) {
-                case CUSTOM:
-                    delegate = (FacetCodegenDelegate<F>) new BusinessObjectCustomFacetCodegenDelegate(facet);
-                    break;
-                case QUERY:
-                    delegate = (FacetCodegenDelegate<F>) new BusinessObjectQueryFacetCodegenDelegate(facet);
-                    break;
-                case UPDATE:
-                    delegate = (FacetCodegenDelegate<F>) new BusinessObjectUpdateFacetCodegenDelegate(facet);
-                    break;
-                case CHOICE:
-                    delegate = (FacetCodegenDelegate<F>) new ChoiceObjectChoiceFacetCodegenDelegate(facet);
-                    break;
+	public <F extends TLAbstractFacet> FacetCodegenDelegate<F> getDelegate(F facetInstance) {
+		TLFacetOwner facetOwner = facetInstance.getOwningEntity();
+		FacetCodegenDelegate<F> delegate = null;
+		
+		if (facetOwner instanceof TLBusinessObject) {
+			delegate = getBusinessObjectFacet(facetInstance);
+			
+		} else if (facetOwner instanceof TLCoreObject) {
+			delegate = getCoreObjectDelegate(facetInstance);
+			
+		} else if (facetOwner instanceof TLChoiceObject) {
+			delegate = getChoiceObjectFacet(facetInstance);
+			
+		} else if (facetOwner instanceof TLContextualFacet) {
+			TLContextualFacet facet = (TLContextualFacet) facetInstance;
+			
+			switch (facetInstance.getFacetType()) {
+				case CUSTOM:
+					delegate = (FacetCodegenDelegate<F>) new BusinessObjectCustomFacetCodegenDelegate(facet);
+					break;
+				case QUERY:
+					delegate = (FacetCodegenDelegate<F>) new BusinessObjectQueryFacetCodegenDelegate(facet);
+					break;
+				case UPDATE:
+					delegate = (FacetCodegenDelegate<F>) new BusinessObjectUpdateFacetCodegenDelegate(facet);
+					break;
+				case CHOICE:
+					delegate = (FacetCodegenDelegate<F>) new ChoiceObjectChoiceFacetCodegenDelegate(facet);
+					break;
 				default:
 					break;
-            }
-        } else if (facetOwner instanceof TLOperation) {
-            if (facetInstance instanceof TLFacet) {
-                TLFacet facet = (TLFacet) facetInstance;
+			}
+			
+		} else if ((facetOwner instanceof TLOperation) && (facetInstance instanceof TLFacet)) {
+			delegate = (FacetCodegenDelegate<F>) new OperationFacetCodegenDelegate((TLFacet) facetInstance);
+		}
+		
+		if (delegate != null) {
+			delegate.setTransformerContext(transformerContext);
+		}
+		return delegate;
+	}
 
-                delegate = (FacetCodegenDelegate<F>) new OperationFacetCodegenDelegate(facet);
-            }
-        }
+	/**
+	 * Returns a delegate for the given core object facet.
+	 * 
+	 * @param boFacet  the business object facet instance
+	 * @return FacetCodegenDelegate<F>
+	 */
+	@SuppressWarnings("unchecked")
+	private <F extends TLAbstractFacet> FacetCodegenDelegate<F> getBusinessObjectFacet(F boFacet) {
+		FacetCodegenDelegate<F> delegate = null;
+		
+		if (boFacet instanceof TLFacet) {
+			TLFacet facet = (TLFacet) boFacet;
+			
+			switch (boFacet.getFacetType()) {
+				case ID:
+					delegate = (FacetCodegenDelegate<F>) new BusinessObjectIDFacetCodegenDelegate(facet);
+					break;
+				case SUMMARY:
+					delegate = (FacetCodegenDelegate<F>) new BusinessObjectSummaryFacetCodegenDelegate(facet);
+					break;
+				case DETAIL:
+					delegate = (FacetCodegenDelegate<F>) new BusinessObjectDetailFacetCodegenDelegate(facet);
+					break;
+				case CUSTOM:
+					delegate = (FacetCodegenDelegate<F>) new BusinessObjectCustomFacetCodegenDelegate(facet);
+					break;
+				case QUERY:
+					delegate = (FacetCodegenDelegate<F>) new BusinessObjectQueryFacetCodegenDelegate(facet);
+					break;
+				case UPDATE:
+					delegate = (FacetCodegenDelegate<F>) new BusinessObjectUpdateFacetCodegenDelegate(facet);
+					break;
+				default:
+					break;
+			}
+		}
+		return delegate;
+	}
 
-        if (delegate != null) {
-            delegate.setTransformerContext(transformerContext);
-        }
-        return delegate;
-    }
+	/**
+	 * Returns a delegate for the given core object facet.
+	 * 
+	 * @param coreFacet  the core object facet for which to return a delegate
+	 * @return FacetCodegenDelegate<F>
+	 */
+	@SuppressWarnings("unchecked")
+	private <F extends TLAbstractFacet> FacetCodegenDelegate<F> getCoreObjectDelegate(F coreFacet) {
+		FacetCodegenDelegate<F> delegate = null;
+		
+		if (coreFacet instanceof TLFacet) {
+			TLFacet facet = (TLFacet) coreFacet;
+			
+			switch (coreFacet.getFacetType()) {
+				case SUMMARY:
+					delegate = (FacetCodegenDelegate<F>) new CoreObjectSummaryFacetCodegenDelegate(facet);
+					break;
+				case DETAIL:
+					delegate = (FacetCodegenDelegate<F>) new CoreObjectDetailFacetCodegenDelegate(facet);
+					break;
+				default:
+					break;
+			}
+		} else if (coreFacet instanceof TLListFacet) {
+			TLListFacet facet = (TLListFacet) coreFacet;
+			
+			switch (coreFacet.getFacetType()) {
+				case SIMPLE:
+					delegate = (FacetCodegenDelegate<F>) new CoreObjectListSimpleFacetCodegenDelegate(facet);
+					break;
+				case SUMMARY:
+				case DETAIL:
+					delegate = (FacetCodegenDelegate<F>) new CoreObjectListFacetCodegenDelegate(facet);
+					break;
+				default:
+					break;
+			}
+		} else if (coreFacet instanceof TLSimpleFacet) {
+			TLSimpleFacet facet = (TLSimpleFacet) coreFacet;
+			
+			if (coreFacet.getFacetType() == TLFacetType.SIMPLE) {
+				delegate = (FacetCodegenDelegate<F>) new TLSimpleFacetCodegenDelegate(facet);
+			}
+		}
+		return delegate;
+	}
+	
+	/**
+	 * Returns a delegate for the given choice object facet.
+	 * 
+	 * @param choiceFacet  the choice object facet instance
+	 * @return FacetCodegenDelegate<F>
+	 */
+	@SuppressWarnings("unchecked")
+	private <F extends TLAbstractFacet> FacetCodegenDelegate<F> getChoiceObjectFacet(F choiceFacet) {
+		FacetCodegenDelegate<F> delegate = null;
+		
+		if (choiceFacet instanceof TLFacet) {
+			TLFacet facet = (TLFacet) choiceFacet;
+			
+			switch (choiceFacet.getFacetType()) {
+				case SHARED:
+					delegate = (FacetCodegenDelegate<F>) new ChoiceObjectSharedFacetCodegenDelegate(facet);
+					break;
+				case CHOICE:
+					delegate = (FacetCodegenDelegate<F>) new ChoiceObjectChoiceFacetCodegenDelegate(facet);
+					break;
+				default:
+					break;
+			}
+		}
+		return delegate;
+	}
 
 }

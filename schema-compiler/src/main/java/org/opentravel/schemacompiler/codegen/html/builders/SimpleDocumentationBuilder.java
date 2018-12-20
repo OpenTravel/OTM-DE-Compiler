@@ -15,11 +15,13 @@
  */
 package org.opentravel.schemacompiler.codegen.html.builders;
 
-import org.opentravel.schemacompiler.model.TLAttributeType;
-import org.opentravel.schemacompiler.model.TLSimple;
+import java.io.IOException;
 
+import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.codegen.html.Content;
 import org.opentravel.schemacompiler.codegen.html.writers.NamedEntityWriter;
+import org.opentravel.schemacompiler.model.TLAttributeType;
+import org.opentravel.schemacompiler.model.TLSimple;
 
 /**
  * @author Eric.Bronson
@@ -42,22 +44,27 @@ public class SimpleDocumentationBuilder extends
 	}
 
 	@Override
-	public void build() throws Exception {
-		NamedEntityWriter<SimpleDocumentationBuilder> writer = new NamedEntityWriter<>(this, prev, next);
-		Content contentTree = writer.getHeader();
-		writer.addMemberInheritanceTree(contentTree);
-		Content classContentTree = writer.getContentHeader();
-		Content tree = writer.getMemberTree(classContentTree);
+	public void build() throws CodeGenerationException {
+		try {
+			NamedEntityWriter<SimpleDocumentationBuilder> writer = new NamedEntityWriter<>(this, prev, next);
+			Content contentTree = writer.getHeader();
+			writer.addMemberInheritanceTree(contentTree);
+			Content classContentTree = writer.getContentHeader();
+			Content tree = writer.getMemberTree(classContentTree);
 
-		Content classInfoTree = writer.getMemberInfoItemTree();
-		writer.addDocumentationInfo(classInfoTree);
-		tree.addContent(classInfoTree);
+			Content classInfoTree = writer.getMemberInfoItemTree();
+			writer.addDocumentationInfo(classInfoTree);
+			tree.addContent(classInfoTree);
 
-		classContentTree.addContent(tree);
-		contentTree.addContent(classContentTree);
-		writer.addFooter(contentTree);
-		writer.printDocument(contentTree);
-		writer.close();
+			classContentTree.addContent(tree);
+			contentTree.addContent(classContentTree);
+			writer.addFooter(contentTree);
+			writer.printDocument(contentTree);
+			writer.close();
+			
+		} catch (IOException e) {
+			throw new CodeGenerationException("Error creating doclet writer", e);
+		}
 	}
 
 	@Override

@@ -190,35 +190,29 @@ public class DefaultLibraryNamespaceResolver implements LibraryNamespaceResolver
      *            the path and name of the file to be resolved
      * @return URL
      */
-    protected URL resolveFromExistingProjectItems(String namespace, String filePath) {
-        URL referencedUrl = null;
-
-        if (projectManager != null) {
-            int separatorIdx = filePath.lastIndexOf('/');
-            String libraryFilename = (separatorIdx < 0) ? filePath : filePath
-                    .substring(separatorIdx + 1);
-
-            // Search the list of known repository items for a match to this file hint
-            for (ProjectItem item : projectManager.getAllProjectItems()) {
-                // Skip project items that have errors or cannot be resolved
-                if ((item == null) || (item.getNamespace() == null) || (item.getFilename() == null)) {
-                    continue;
-                }
-                // Skip project items that are unmanaged
-                if (item.getState() == RepositoryItemState.UNMANAGED) {
-                    continue;
-                }
-                // Skip project items that do not match this namespace/file-hint combination
-                if (!item.getNamespace().equals(namespace)
-                        || !item.getFilename().equals(libraryFilename)) {
-                    continue;
-                }
-                referencedUrl = item.getContent().getLibraryUrl();
-            }
-        }
-        return referencedUrl;
-    }
-
+	protected URL resolveFromExistingProjectItems(String namespace, String filePath) {
+		URL referencedUrl = null;
+		
+		if (projectManager != null) {
+			int separatorIdx = filePath.lastIndexOf('/');
+			String libraryFilename = (separatorIdx < 0) ? filePath : filePath.substring(separatorIdx + 1);
+			
+			// Search the list of known repository items for a match to this file hint
+			for (ProjectItem item : projectManager.getAllProjectItems()) {
+				// Skip project items that have errors or cannot be resolved, project items that are
+				// unmanaged, or project items that do not match this namespace/file-hint combination
+				if ((item == null) || (item.getNamespace() == null) || (item.getFilename() == null)
+						|| (item.getState() == RepositoryItemState.UNMANAGED)
+						|| !item.getNamespace().equals(namespace)
+						|| !item.getFilename().equals(libraryFilename)) {
+					continue;
+				}
+				referencedUrl = item.getContent().getLibraryUrl();
+			}
+		}
+		return referencedUrl;
+	}
+	
     /**
      * Attempts to resolve a URL for the given namespace and file path as a repository URI. If the
      * file path is not a repository URI, this method will return null.
@@ -251,11 +245,7 @@ public class DefaultLibraryNamespaceResolver implements LibraryNamespaceResolver
                         repositoryUrlCache.put( cacheKey, referencedUrl.toExternalForm() );
                     }
             	}
-            } catch (MalformedURLException e) {
-                // Should never happen - return null
-            } catch (RepositoryException e) {
-                // No error - return null
-            } catch (URISyntaxException e) {
+            } catch (MalformedURLException | URISyntaxException | RepositoryException e) {
                 // No error - return null
             }
 

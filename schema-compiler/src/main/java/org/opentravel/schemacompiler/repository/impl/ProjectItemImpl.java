@@ -30,6 +30,7 @@ import org.opentravel.schemacompiler.repository.ProjectManager;
 import org.opentravel.schemacompiler.repository.Repository;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryItemState;
+import org.opentravel.schemacompiler.util.SchemaCompilerRuntimeException;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 import org.opentravel.schemacompiler.version.VersionSchemeFactory;
 
@@ -403,7 +404,7 @@ public class ProjectItemImpl extends RepositoryItemImpl implements ProjectItem {
 
             } catch (URISyntaxException e) {
                 // Should never happen; throw a runtime exception just in case
-                throw new RuntimeException(e);
+                throw new SchemaCompilerRuntimeException(e);
             }
         } else {
             uri = super.toURI(fullyQualified);
