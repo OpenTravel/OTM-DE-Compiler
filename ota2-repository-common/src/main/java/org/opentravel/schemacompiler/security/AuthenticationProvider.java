@@ -29,8 +29,6 @@ import org.opentravel.schemacompiler.repository.RepositorySecurityException;
  */
 public interface AuthenticationProvider {
 
-	public static final String REPOSITORY_USERS_FILE = "repository-users.xml";
-	
     /**
      * Returns true if the given user is an authorized user of this repository and the password is
      * verified as being valid.

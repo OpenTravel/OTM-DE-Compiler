@@ -21,7 +21,6 @@ import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.base.TLOperationBaseValidator;
-import org.opentravel.schemacompiler.validate.impl.IdentityResolver;
 import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
 
 /**
@@ -48,11 +47,7 @@ public class TLOperationCompileValidator extends TLOperationBaseValidator {
 
         builder.setProperty("name", target.getOwningService().getOperations())
                 .setFindingType(FindingType.ERROR)
-                .assertNoDuplicates(new IdentityResolver<TLOperation>() {
-                    public String getIdentity(TLOperation operation) {
-                        return (operation == null) ? null : operation.getName();
-                    }
-                });
+                .assertNoDuplicates( e -> (e == null) ? null : ((TLOperation) e).getName() );
 
         if (FacetCodegenUtils.getOperationType(target) == OperationType.INVALID) {
             builder.addFinding(FindingType.ERROR, "operationType", ERROR_INVALID_OPERATION);

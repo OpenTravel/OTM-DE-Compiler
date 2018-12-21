@@ -25,7 +25,12 @@ import javax.xml.bind.JAXBException;
  * @author S. Livezey
  */
 public class ExceptionUtils {
-
+	
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private ExceptionUtils() {}
+	
     /**
      * Returns the class of the exception for the given throwable.
      * <code>InvocationTargetException</code> instances are recursed to their caused-by exceptions.

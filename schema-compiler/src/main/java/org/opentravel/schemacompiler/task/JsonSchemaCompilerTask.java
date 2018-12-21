@@ -59,17 +59,8 @@ public class JsonSchemaCompilerTask extends AbstractSchemaCompilerTask {
 	protected void generateOutput(Collection<TLLibrary> userDefinedLibraries, Collection<XSDLibrary> legacySchemas)
 			throws SchemaCompilerException {
         CodeGenerationContext context = createContext();
-//        AbstractLibrary primaryLibrary = getPrimaryLibrary();
         CodeGenerationFilter filter = null;
         
-        // Generate schemas for all of the user-defined libraries
-        /* TODO: Re-enable filter code once GUI has been implemented 
-        if (primaryLibrary != null) {
-        	filter = new DependencyFilterBuilder()
-        			.setIncludeExtendedLegacySchemas( true )
-        			.addLibrary( primaryLibrary ).buildFilter();
-        }
-        */
         compileJsonSchemas(userDefinedLibraries, legacySchemas, context, null, filter);
 
         // Generate EXAMPLE files if required

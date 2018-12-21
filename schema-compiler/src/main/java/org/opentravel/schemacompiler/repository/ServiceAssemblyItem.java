@@ -41,10 +41,10 @@ public class ServiceAssemblyItem implements Validatable {
 	@Override
 	public String getValidationIdentity() {
         StringBuilder identity = new StringBuilder();
-        ServiceAssembly owner = getOwner();
+        ServiceAssembly owningAssembly = getOwner();
 
-        if (owner != null) {
-            identity.append( owner.getValidationIdentity() ).append(" : ");
+        if (owningAssembly != null) {
+            identity.append( owningAssembly.getValidationIdentity() ).append(" : ");
         }
         if ((releaseItem == null) || (releaseItem.getFilename() == null)) {
             identity.append( "[Unidentified Assembly Item Type]" );

@@ -153,7 +153,7 @@ public class TLValueWithAttributes extends TLLibraryMember implements Versioned,
      */
     @Override
     public String getLocalName() {
-        return name;
+        return getName();
     }
 
     /**
@@ -394,24 +394,26 @@ public class TLValueWithAttributes extends TLLibraryMember implements Versioned,
     /**
 	 * @see org.opentravel.schemacompiler.model.TLMemberFieldOwner#getMemberFields()
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
-	public List<TLMemberField<?>> getMemberFields() {
-		List<TLMemberField<?>> memberFields = new ArrayList<>();
+	public <O extends TLMemberFieldOwner> List<TLMemberField<O>> getMemberFields() {
+		List<TLMemberField<O>> memberFields = new ArrayList<>();
 		
-		memberFields.addAll( getAttributes() );
-		memberFields.addAll( getIndicators() );
+		getAttributes().forEach( f -> memberFields.add( (TLMemberField<O>) f ) );
+		getIndicators().forEach( f -> memberFields.add( (TLMemberField<O>) f ) );
 		return memberFields;
 	}
 
 	/**
 	 * @see org.opentravel.schemacompiler.model.TLMemberFieldOwner#getMemberField(java.lang.String)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
-	public TLMemberField<?> getMemberField(String fieldName) {
-		TLMemberField<?> memberField = getAttribute( fieldName );
+	public <O extends TLMemberFieldOwner> TLMemberField<O> getMemberField(String fieldName) {
+		TLMemberField<O> memberField = (TLMemberField<O>) getAttribute( fieldName );
 		
 		if (memberField == null) {
-			memberField = getIndicator( fieldName );
+			memberField = (TLMemberField<O>) getIndicator( fieldName );
 		}
 		return memberField;
 	}

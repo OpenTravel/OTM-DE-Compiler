@@ -104,6 +104,7 @@ public class SvnserveProcess {
         start();
     }
 
+    @SuppressWarnings("squid:S2925") // Ignore Sonar warning
     private void start() {
         svnserve();
         try {

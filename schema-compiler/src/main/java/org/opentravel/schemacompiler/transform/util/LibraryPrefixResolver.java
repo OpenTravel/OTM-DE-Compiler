@@ -82,10 +82,10 @@ public class LibraryPrefixResolver implements PrefixResolver {
         String namespace = null;
 
         if ((prefix != null) && (model != null)) {
-            for (AbstractLibrary library : model.getAllLibraries()) {
-                if (prefix.equals(library.getPrefix())) {
+            for (AbstractLibrary lib : model.getAllLibraries()) {
+                if (prefix.equals(lib.getPrefix())) {
                     if (namespace == null) {
-                        namespace = library.getNamespace();
+                        namespace = lib.getNamespace();
                     } else {
                         // break and return null if the prefix maps to more than one namespace
                         namespace = null;

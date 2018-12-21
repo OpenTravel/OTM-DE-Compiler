@@ -19,7 +19,6 @@ import org.opentravel.schemacompiler.codegen.util.EnumCodegenUtils;
 import org.opentravel.schemacompiler.model.TLEnumValue;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
-import org.opentravel.schemacompiler.validate.impl.IdentityResolver;
 import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
 import org.opentravel.schemacompiler.validate.impl.TLValidatorBase;
 
@@ -42,11 +41,7 @@ public class TLEnumValueCompileValidator extends TLValidatorBase<TLEnumValue> {
 
         builder.setProperty("literal", EnumCodegenUtils.getInheritedValues(target.getOwningEnum()))
                 .setFindingType(FindingType.ERROR)
-                .assertNoDuplicates(new IdentityResolver<TLEnumValue>() {
-                    public String getIdentity(TLEnumValue enumValue) {
-                        return (enumValue == null) ? null : enumValue.getLiteral();
-                    }
-                });
+                .assertNoDuplicates( e -> (e == null) ? null : ((TLEnumValue) e).getLiteral() );
 
         builder.setProperty("equivalents", target.getEquivalents())
                 .setFindingType(FindingType.ERROR).assertNotNull().assertContainsNoNullElements();

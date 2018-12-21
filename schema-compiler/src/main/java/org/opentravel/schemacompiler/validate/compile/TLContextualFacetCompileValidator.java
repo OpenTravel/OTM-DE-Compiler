@@ -31,7 +31,6 @@ import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.base.TLContextualFacetBaseValidator;
 import org.opentravel.schemacompiler.validate.impl.CircularReferenceChecker;
-import org.opentravel.schemacompiler.validate.impl.IdentityResolver;
 import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
 import org.opentravel.schemacompiler.validate.impl.ValidatorUtils;
 
@@ -42,7 +41,9 @@ import org.opentravel.schemacompiler.validate.impl.ValidatorUtils;
  */
 public class TLContextualFacetCompileValidator extends TLContextualFacetBaseValidator {
 	
-    public static final String ERROR_INVALID_CIRCULAR_REFERENCE     = "INVALID_CIRCULAR_REFERENCE";
+	private static final String OWNING_ENTITY = "owningEntity";
+	
+	public static final String ERROR_INVALID_CIRCULAR_REFERENCE     = "INVALID_CIRCULAR_REFERENCE";
     public static final String ERROR_INVALID_FACET_TYPE             = "INVALID_FACET_TYPE";
     public static final String ERROR_OTM_16_OWNING_LIBRARY_MISMATCH = "OTM_16_OWNING_LIBRARY_MISMATCH";
     public static final String ERROR_OTM_16_INVALID_OWNER           = "OTM_16_INVALID_OWNER";
@@ -54,88 +55,79 @@ public class TLContextualFacetCompileValidator extends TLContextualFacetBaseVali
 	protected ValidationFindings validateFields(TLContextualFacet target) {
 		boolean specialCaseQueryFacet = (target.getFacetType() == TLFacetType.QUERY)
 				&& !(target.getOwningEntity() instanceof TLContextualFacet);
-        TLValidationBuilder builder = newValidationBuilder(target);
-        TLFacetType impliedType = getImpliedFacetType( target );
-        TLFacetOwner owningEntity = target.getOwningEntity();
-        
-        builder.setEntityReferenceProperty("owningEntity", target.getOwningEntity(), target.getOwningEntityName())
-        		.setFindingType(FindingType.ERROR).assertNotNull().assertValidEntityReference(
-            			TLBusinessObject.class, TLChoiceObject.class, TLContextualFacet.class)
-                .setFindingType(FindingType.WARNING).assertNotDeprecated().assertNotObsolete();
-        
-        if (CircularReferenceChecker.hasCircularReference(target)) {
-            builder.addFinding(FindingType.ERROR, "owningEntity", ERROR_INVALID_CIRCULAR_REFERENCE);
-        }
-
-        if (!specialCaseQueryFacet) {
-            builder.setProperty("facetName", target.getName()).setFindingType(FindingType.ERROR)
-            		.assertNotNullOrBlank().assertPatternMatch(NAME_XML_PATTERN);
-        }
-
-        builder.setProperty("facetType", target.getFacetType()).setFindingType(FindingType.ERROR)
-        		.assertNotNull();
-        
-        if ((impliedType != null) && (impliedType != target.getFacetType())) {
-        	if (owningEntity instanceof TLBusinessObject) {
-                builder.addFinding(FindingType.ERROR, "businessObject.findingType",
-                		ERROR_INVALID_FACET_TYPE, target.getFacetType().getIdentityName(),
-                		impliedType.getIdentityName());
-        		
-        	} else if (owningEntity instanceof TLChoiceObject) {
-                builder.addFinding(FindingType.ERROR, "choiceObject.findingType",
-                		ERROR_INVALID_FACET_TYPE, target.getFacetType().getIdentityName());
-        		
-        	} else if (owningEntity instanceof TLContextualFacet) {
-                builder.addFinding(FindingType.ERROR, "contextualFacet.findingType",
-                		ERROR_INVALID_FACET_TYPE, target.getFacetType().getIdentityName(),
-                		impliedType.getIdentityName());
-        	}
-        }
-        
-        if (impliedType != null) {
-            builder.setProperty("identity", getSiblingFacets(target, impliedType))
-    		.setFindingType(FindingType.ERROR)
-    		.assertNoDuplicates(new IdentityResolver<TLContextualFacet>() {
-    			public String getIdentity(TLContextualFacet entity) {
-    				return entity.getFacetType().getIdentityName(entity.getName());
-    			}
-    		});
-        }
-        
-        builder.setProperty("aliases", target.getAliases()).setFindingType(FindingType.ERROR)
-        		.assertNotNull().assertContainsNoNullElements();
-
-        builder.setProperty("attributes", target.getAttributes()).setFindingType(FindingType.ERROR)
-        		.assertNotNull().assertContainsNoNullElements();
-
-        builder.setProperty("elements", target.getElements()).setFindingType(FindingType.ERROR)
-        		.assertNotNull().assertContainsNoNullElements();
-
-        builder.setProperty("indicators", target.getIndicators()).setFindingType(FindingType.ERROR)
-        		.assertNotNull().assertContainsNoNullElements();
-
-        if (ValidatorUtils.hasMultipleIdMembers(target)) {
-            builder.addFinding(FindingType.ERROR, "members",
-            		TLFacetCompileValidator.ERROR_MULTIPLE_ID_MEMBERS);
-        }
-
-        builder.setProperty("members", ValidatorUtils.getMembers(target))
-        		.setFindingType(FindingType.WARNING)
-                .assertMinimumSize(1);
-        
-        checkSchemaNamingConflicts(target, builder);
-        
-        if (!OTM16Upgrade.otm16Enabled) {
-        	
-        	if ((owningEntity != null) && (target.getOwningLibrary() != owningEntity.getOwningLibrary())) {
-                builder.addFinding(FindingType.ERROR, "owningLibrary", ERROR_OTM_16_OWNING_LIBRARY_MISMATCH);
-        	}
-        	
-        	if (owningEntity instanceof TLContextualFacet) {
-                builder.addFinding(FindingType.ERROR, "owningEntity", ERROR_OTM_16_INVALID_OWNER);
-        	}
-        }
-        return builder.getFindings();
+		TLValidationBuilder builder = newValidationBuilder(target);
+		TLFacetType impliedType = getImpliedFacetType(target);
+		TLFacetOwner owningEntity = target.getOwningEntity();
+		
+		builder.setEntityReferenceProperty(OWNING_ENTITY, target.getOwningEntity(), target.getOwningEntityName())
+			.setFindingType(FindingType.ERROR).assertNotNull()
+			.assertValidEntityReference(TLBusinessObject.class, TLChoiceObject.class, TLContextualFacet.class)
+			.setFindingType(FindingType.WARNING).assertNotDeprecated().assertNotObsolete();
+		
+		if (CircularReferenceChecker.hasCircularReference(target)) {
+			builder.addFinding(FindingType.ERROR, OWNING_ENTITY, ERROR_INVALID_CIRCULAR_REFERENCE);
+		}
+		
+		if (!specialCaseQueryFacet) {
+			builder.setProperty("facetName", target.getName()).setFindingType(FindingType.ERROR).assertNotNullOrBlank()
+				.assertPatternMatch(NAME_XML_PATTERN);
+		}
+		
+		builder.setProperty("facetType", target.getFacetType()).setFindingType(FindingType.ERROR).assertNotNull();
+		
+		if ((impliedType != null) && (impliedType != target.getFacetType())) {
+			if (owningEntity instanceof TLBusinessObject) {
+				builder.addFinding(FindingType.ERROR, "businessObject.findingType", ERROR_INVALID_FACET_TYPE,
+						target.getFacetType().getIdentityName(), impliedType.getIdentityName());
+				
+			} else if (owningEntity instanceof TLChoiceObject) {
+				builder.addFinding(FindingType.ERROR, "choiceObject.findingType", ERROR_INVALID_FACET_TYPE,
+						target.getFacetType().getIdentityName());
+				
+			} else if (owningEntity instanceof TLContextualFacet) {
+				builder.addFinding(FindingType.ERROR, "contextualFacet.findingType", ERROR_INVALID_FACET_TYPE,
+						target.getFacetType().getIdentityName(), impliedType.getIdentityName());
+			}
+		}
+		
+		if (impliedType != null) {
+			builder.setProperty("identity", getSiblingFacets(target, impliedType))
+				.setFindingType(FindingType.ERROR)
+				.assertNoDuplicates( e -> ((TLContextualFacet) e).getFacetType().getIdentityName(((TLContextualFacet) e).getName() ) );
+		}
+		
+		builder.setProperty("aliases", target.getAliases()).setFindingType(FindingType.ERROR).assertNotNull()
+			.assertContainsNoNullElements();
+		
+		builder.setProperty("attributes", target.getAttributes()).setFindingType(FindingType.ERROR).assertNotNull()
+			.assertContainsNoNullElements();
+		
+		builder.setProperty("elements", target.getElements()).setFindingType(FindingType.ERROR).assertNotNull()
+			.assertContainsNoNullElements();
+		
+		builder.setProperty("indicators", target.getIndicators()).setFindingType(FindingType.ERROR).assertNotNull()
+			.assertContainsNoNullElements();
+		
+		if (ValidatorUtils.hasMultipleIdMembers(target)) {
+			builder.addFinding(FindingType.ERROR, "members", TLFacetCompileValidator.ERROR_MULTIPLE_ID_MEMBERS);
+		}
+		
+		builder.setProperty("members", ValidatorUtils.getMembers(target)).setFindingType(FindingType.WARNING)
+			.assertMinimumSize(1);
+		
+		checkSchemaNamingConflicts(target, builder);
+		
+		if (!OTM16Upgrade.otm16Enabled) {
+			
+			if ((owningEntity != null) && (target.getOwningLibrary() != owningEntity.getOwningLibrary())) {
+				builder.addFinding(FindingType.ERROR, "owningLibrary", ERROR_OTM_16_OWNING_LIBRARY_MISMATCH);
+			}
+			
+			if (owningEntity instanceof TLContextualFacet) {
+				builder.addFinding(FindingType.ERROR, OWNING_ENTITY, ERROR_OTM_16_INVALID_OWNER);
+			}
+		}
+		return builder.getFindings();
 	}
 	
 	/**

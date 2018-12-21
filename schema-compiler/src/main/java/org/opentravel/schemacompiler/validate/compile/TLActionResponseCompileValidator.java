@@ -39,7 +39,10 @@ import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
  */
 public class TLActionResponseCompileValidator extends TLActionResponseBaseValidator {
 
-    public static final String ERROR_INVALID_STATUS_CODES     = "INVALID_STATUS_CODES";
+	private static final String PAYLOAD_TYPE = "payloadType";
+	private static final String MIME_TYPES = "mimeTypes";
+	
+	public static final String ERROR_INVALID_STATUS_CODES     = "INVALID_STATUS_CODES";
     public static final String ERROR_INVALID_ACTION_FACET_REF = "INVALID_ACTION_FACET_REF";
     public static final String ERROR_INVALID_RESPONSE_PAYLOAD = "INVALID_RESPONSE_PAYLOAD";
     
@@ -63,26 +66,26 @@ public class TLActionResponseCompileValidator extends TLActionResponseBaseValida
     		if (payloadType instanceof TLActionFacet) {
         		if ((owningResource != null) &&
         				!isDeclaredOrInheritedFacet( owningResource, (TLActionFacet) payloadType )) {
-                	builder.addFinding( FindingType.ERROR, "payloadType", ERROR_INVALID_ACTION_FACET_REF,
+                	builder.addFinding( FindingType.ERROR, PAYLOAD_TYPE, ERROR_INVALID_ACTION_FACET_REF,
                 			payloadType.getLocalName() );
         		}
     		} else if (!isValidResponsePayload( payloadType )){
-            	builder.addFinding(FindingType.ERROR, "payloadType", ERROR_INVALID_RESPONSE_PAYLOAD,
+            	builder.addFinding(FindingType.ERROR, PAYLOAD_TYPE, ERROR_INVALID_RESPONSE_PAYLOAD,
             			payloadType.getLocalName() );
     		}
-            builder.setProperty("mimeTypes", target.getMimeTypes()).setFindingType(FindingType.ERROR)
+            builder.setProperty(MIME_TYPES, target.getMimeTypes()).setFindingType(FindingType.ERROR)
             		.assertMinimumSize( 1 );
         	
     	} else {
     		String payloadTypeName = target.getPayloadTypeName();
     		
     		if ((payloadTypeName != null) && (payloadTypeName.length() > 0)) {
-            	builder.addFinding(FindingType.ERROR, "payloadType",
+            	builder.addFinding(FindingType.ERROR, PAYLOAD_TYPE,
             			TLValidationBuilder.UNRESOLVED_NAMED_ENTITY_REFERENCE, payloadTypeName );
-                builder.setProperty("mimeTypes", target.getMimeTypes()).setFindingType(FindingType.ERROR)
+                builder.setProperty(MIME_TYPES, target.getMimeTypes()).setFindingType(FindingType.ERROR)
                 		.assertMinimumSize( 1 );
     		} else {
-                builder.setProperty("mimeTypes", target.getMimeTypes()).setFindingType(FindingType.WARNING)
+                builder.setProperty(MIME_TYPES, target.getMimeTypes()).setFindingType(FindingType.WARNING)
                 		.assertMaximumSize( 0 );
     		}
     	}

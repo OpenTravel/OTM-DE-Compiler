@@ -40,7 +40,9 @@ import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
  */
 public class TLLibraryCompileValidator extends TLLibraryBaseValidator {
 
-    public static final String ERROR_DUPLICATE_SERVICE_NAME = "DUPLICATE_SERVICE_NAME";
+	private static final String NAMED_MEMBERS = "namedMembers";
+	
+	public static final String ERROR_DUPLICATE_SERVICE_NAME = "DUPLICATE_SERVICE_NAME";
     public static final String ERROR_DUPLICATE_IMPORT_PREFIX = "DUPLICATE_IMPORT_PREFIX";
     public static final String ERROR_DUPLICATE_CHAMELEON_SYMBOLS = "DUPLICATE_CHAMELEON_SYMBOLS";
 
@@ -72,7 +74,7 @@ public class TLLibraryCompileValidator extends TLLibraryBaseValidator {
         builder.setProperty("includes", target.getIncludes()).setFindingType(FindingType.ERROR)
                 .assertContainsNoNullElements();
 
-        builder.setProperty("namedMembers", target.getNamedMembers())
+        builder.setProperty(NAMED_MEMBERS, target.getNamedMembers())
                 .setFindingType(FindingType.ERROR).assertContainsNoNullElements();
 
         // Validate each of the namespace imports
@@ -110,7 +112,7 @@ public class TLLibraryCompileValidator extends TLLibraryBaseValidator {
                 .findDuplicateChameleonSymbols(target);
 
         if (!duplicateSymbols.isEmpty()) {
-            builder.addFinding(FindingType.ERROR, "namedMembers",
+            builder.addFinding(FindingType.ERROR, NAMED_MEMBERS,
                     ERROR_DUPLICATE_CHAMELEON_SYMBOLS, getCommaDelimitedString(duplicateSymbols));
         }
         return builder.getFindings();
@@ -138,7 +140,7 @@ public class TLLibraryCompileValidator extends TLLibraryBaseValidator {
                     continue;
                 }
                 if (service.getLocalName().equals(nsService.getLocalName())) {
-                    builder.addFinding(FindingType.ERROR, "namedMembers",
+                    builder.addFinding(FindingType.ERROR, NAMED_MEMBERS,
                             ERROR_DUPLICATE_SERVICE_NAME, service.getLocalName(),
                             service.getNamespace());
                 }

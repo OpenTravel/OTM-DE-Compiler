@@ -24,6 +24,11 @@ import java.io.File;
  */
 public class TaskUtils {
 
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private TaskUtils() {}
+	
     /**
      * Returns the file represented by the given option value, resolving relative paths from the
      * user's current working directory.

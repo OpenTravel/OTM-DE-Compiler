@@ -1588,8 +1588,10 @@ public class RepositoryManager implements Repository {
             File wipContentFile = fileManager.getLibraryWIPContentLocation(item.getBaseNamespace(),
                     item.getFilename());
 
-            fileManager.saveFile(wipContentFile, new FileInputStream(repositoryContentFile));
-            success = true;
+            try (InputStream fis = new FileInputStream(repositoryContentFile)) {
+                fileManager.saveFile(wipContentFile, fis);
+                success = true;
+            }
 
         } catch (IOException e) {
             throw new RepositoryException("Unable to revert the repository item: "

@@ -105,14 +105,7 @@ public class XSDVersionScheme implements VersionScheme {
 
     @Override
     public Comparator<Versioned> getComparator(boolean sortAscending) {
-        return new Comparator<Versioned>() {
-
-            @Override
-            public int compare(Versioned o1, Versioned o2) {
-                return 0;
-            }
-
-        };
+    		return (o1, o2) -> 0;
     }
 
     @Override

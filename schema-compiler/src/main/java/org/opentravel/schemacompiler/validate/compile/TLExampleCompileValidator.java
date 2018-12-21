@@ -38,7 +38,6 @@ import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.model.XSDSimpleType;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
-import org.opentravel.schemacompiler.validate.impl.IdentityResolver;
 import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
 import org.opentravel.schemacompiler.validate.impl.TLValidatorBase;
 
@@ -49,7 +48,10 @@ import org.opentravel.schemacompiler.validate.impl.TLValidatorBase;
  */
 public class TLExampleCompileValidator extends TLValidatorBase<TLExample> {
 
-    public static final String ERROR_NON_NUMERIC_EXAMPLE = "NON_NUMERIC_EXAMPLE";
+	private static final String VALUE = "value";
+	private static final String CONTEXT = "context";
+	
+	public static final String ERROR_NON_NUMERIC_EXAMPLE = "NON_NUMERIC_EXAMPLE";
     public static final String ERROR_EXCEEDS_FRACTION_DIGITS = "EXCEEDS_FRACTION_DIGITS";
     public static final String ERROR_EXCEEDS_TOTAL_DIGITS = "EXCEEDS_TOTAL_DIGITS";
     public static final String ERROR_INVALID_DATE = "INVALID_DATE";
@@ -66,7 +68,7 @@ public class TLExampleCompileValidator extends TLValidatorBase<TLExample> {
         TLValidationBuilder builder = newValidationBuilder(target);
         NamedEntity exampleType = getSimpleType(target);
 
-        builder.setProperty("context", target.getContext()).setFindingType(FindingType.ERROR)
+        builder.setProperty(CONTEXT, target.getContext()).setFindingType(FindingType.ERROR)
                 .assertNotNullOrBlank();
 
         if ((exampleType != null) && (target.getValue() != null)) {
@@ -74,7 +76,7 @@ public class TLExampleCompileValidator extends TLValidatorBase<TLExample> {
 
             for (String exampleValue : exampleValues) {
 
-                builder.setProperty("value", exampleValue).setFindingType(FindingType.WARNING);
+                builder.setProperty(VALUE, exampleValue).setFindingType(FindingType.WARNING);
 
                 if (exampleType instanceof TLSimple) { // Validate against a TLSimple data type
                     TLSimple simpleType = (TLSimple) exampleType;
@@ -96,7 +98,7 @@ public class TLExampleCompileValidator extends TLValidatorBase<TLExample> {
                     }
                     if ((simpleType.getFractionDigits() >= 0) || (simpleType.getTotalDigits() >= 0)) {
                         if (!isNumericValue(exampleValue)) {
-                            builder.addFinding(FindingType.WARNING, "value",
+                            builder.addFinding(FindingType.WARNING, VALUE,
                                     ERROR_NON_NUMERIC_EXAMPLE, exampleValue);
 
                         } else {
@@ -105,11 +107,11 @@ public class TLExampleCompileValidator extends TLValidatorBase<TLExample> {
 
                             if ((fractionDigits >= 0)
                                     && (getFractionDigits(exampleValue) > fractionDigits)) {
-                                builder.addFinding(FindingType.WARNING, "value",
+                                builder.addFinding(FindingType.WARNING, VALUE,
                                         ERROR_EXCEEDS_FRACTION_DIGITS, exampleValue, fractionDigits);
                             }
                             if ((totalDigits >= 0) && (getTotalDigits(exampleValue) > totalDigits)) {
-                                builder.addFinding(FindingType.WARNING, "value",
+                                builder.addFinding(FindingType.WARNING, VALUE,
                                         ERROR_EXCEEDS_TOTAL_DIGITS, exampleValue, totalDigits);
                             }
                         }
@@ -123,7 +125,7 @@ public class TLExampleCompileValidator extends TLValidatorBase<TLExample> {
                             DatatypeConverter.parseDate(exampleValue);
 
                         } catch (IllegalArgumentException e) {
-                            builder.addFinding(FindingType.WARNING, "value", ERROR_INVALID_DATE,
+                            builder.addFinding(FindingType.WARNING, VALUE, ERROR_INVALID_DATE,
                                     exampleValue);
                         }
                     } else if (isXmlSchemaType(simpleType, "time")) {
@@ -131,7 +133,7 @@ public class TLExampleCompileValidator extends TLValidatorBase<TLExample> {
                             DatatypeConverter.parseTime(exampleValue);
 
                         } catch (IllegalArgumentException e) {
-                            builder.addFinding(FindingType.WARNING, "value", ERROR_INVALID_TIME,
+                            builder.addFinding(FindingType.WARNING, VALUE, ERROR_INVALID_TIME,
                                     exampleValue);
                         }
                     } else if (isXmlSchemaType(simpleType, "dateTime")) {
@@ -139,7 +141,7 @@ public class TLExampleCompileValidator extends TLValidatorBase<TLExample> {
                             DatatypeConverter.parseDateTime(exampleValue);
 
                         } catch (IllegalArgumentException e) {
-                            builder.addFinding(FindingType.WARNING, "value",
+                            builder.addFinding(FindingType.WARNING, VALUE,
                                     ERROR_INVALID_DATETIME, exampleValue);
                         }
                     }
@@ -147,13 +149,9 @@ public class TLExampleCompileValidator extends TLValidatorBase<TLExample> {
             }
         }
 
-        builder.setProperty("context", target.getOwningEntity().getExamples())
+        builder.setProperty(CONTEXT, target.getOwningEntity().getExamples())
                 .setFindingType(FindingType.ERROR)
-                .assertNoDuplicates(new IdentityResolver<TLExample>() {
-                    public String getIdentity(TLExample entity) {
-                        return (entity == null) ? null : entity.getContext();
-                    }
-                });
+                .assertNoDuplicates( e -> (e == null) ? null : ((TLExample) e).getContext() );
 
         // Make sure that the context value is among the declared contexts for the owning library
         if ((target.getContext() != null) && (target.getContext().length() > 0)) {
@@ -163,7 +161,7 @@ public class TLExampleCompileValidator extends TLValidatorBase<TLExample> {
                 TLLibrary library = (TLLibrary) owningLibrary;
 
                 if (library.getContext(target.getContext()) == null) {
-                    builder.addFinding(FindingType.ERROR, "context",
+                    builder.addFinding(FindingType.ERROR, CONTEXT,
                             TLContextCompileValidator.ERROR_INVALID_CONTEXT, target.getContext());
                 }
             }
@@ -233,9 +231,9 @@ public class TLExampleCompileValidator extends TLValidatorBase<TLExample> {
 
             if (pattern != null) {
                 Pattern splitPattern = Pattern.compile("(" + pattern + ")\\s*");
-                Matcher m;
+                Matcher m = splitPattern.matcher(target.getValue());
 
-                if ((m = splitPattern.matcher(target.getValue())).matches()) {
+                if (m.matches()) {
                     List<String> valueList = new ArrayList<>();
                     valueList.add(m.group(1));
 

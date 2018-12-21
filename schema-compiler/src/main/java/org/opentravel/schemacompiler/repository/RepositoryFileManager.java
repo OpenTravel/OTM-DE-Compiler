@@ -53,6 +53,7 @@ import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryInfoType;
 import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
 import org.opentravel.schemacompiler.util.ClasspathResourceResolver;
+import org.opentravel.schemacompiler.util.FileUtils;
 import org.opentravel.schemacompiler.xml.XMLGregorianCalendarConverter;
 
 import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
@@ -862,7 +863,7 @@ public abstract class RepositoryFileManager {
 
                 addToChangeSet(nsidFile);
 
-                if (nsidFile.exists() && !nsidFile.delete()) {
+                if (!FileUtils.confirmDelete( nsidFile )) {
                     throw new RepositoryException("Unable to remove namespace file: "
                             + nsidFile.getAbsolutePath());
                 }

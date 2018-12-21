@@ -274,8 +274,10 @@ public class ObsoleteBuiltInVisitor extends ModelElementVisitorAdapter {
 				}
 				
 			} else {
-				log.warn("Unable to resolve built-in reference '" +
-						referenceLocalName + "' in library " + owningLibrary.getName());
+				if (log.isWarnEnabled()) {
+					log.warn( String.format( "Unable to resolve built-in reference '%s' in library %s",
+							referenceLocalName, owningLibrary.getName() ) );
+				}
 			}
 		}
 		

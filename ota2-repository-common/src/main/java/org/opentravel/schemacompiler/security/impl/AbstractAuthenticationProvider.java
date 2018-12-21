@@ -56,6 +56,7 @@ public abstract class AbstractAuthenticationProvider implements AuthenticationPr
     private static final String SCHEMA_CONTEXT = ":org.w3._2001.xmlschema:org.opentravel.ns.ota2.repositoryinfoext_v01_00";
     private static final String REPOSITORY_EXT_NAMESPACE = "http://www.OpenTravel.org/ns/OTA2/RepositoryInfoExt_v01_00";
     private static final String REPOSITORY_EXT_SCHEMA_LOCATION = "/schemas/OTA2_RepositoryExt_v1.0.0.xsd";
+	public static final String REPOSITORY_USERS_FILE = "repository-users.xml";
 
     private static javax.xml.validation.Schema validationSchema;
     private static ObjectFactory objectFactory = new ObjectFactory();

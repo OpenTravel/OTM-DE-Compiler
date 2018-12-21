@@ -19,7 +19,6 @@ import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAliasOwner;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
-import org.opentravel.schemacompiler.validate.impl.IdentityResolver;
 import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
 import org.opentravel.schemacompiler.validate.impl.TLValidatorBase;
 
@@ -46,11 +45,7 @@ public class TLAliasCompileValidator extends TLValidatorBase<TLAlias> {
         if (owner != null) {
             builder.setProperty("name", target.getOwningEntity().getAliases())
                     .setFindingType(FindingType.ERROR)
-                    .assertNoDuplicates(new IdentityResolver<TLAlias>() {
-                        public String getIdentity(TLAlias alias) {
-                            return (alias == null) ? null : alias.getName();
-                        }
-                    });
+                    .assertNoDuplicates( e -> (e == null) ? null : ((TLAlias) e).getName() );
 
             // Add an error if the alias name is the same as that of its owner
             if ((target.getName() != null)

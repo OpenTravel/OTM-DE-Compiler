@@ -28,7 +28,6 @@ import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.base.TLActionBaseValidator;
-import org.opentravel.schemacompiler.validate.impl.IdentityResolver;
 import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
 
 /**
@@ -38,7 +37,9 @@ import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
  */
 public class TLActionCompileValidator extends TLActionBaseValidator {
 
-    public static final String ERROR_MISSING_REQUIRED_REQUEST   = "MISSING_REQUIRED_REQUEST";
+	private static final String RESPONSES = "responses";
+	
+	public static final String ERROR_MISSING_REQUIRED_REQUEST   = "MISSING_REQUIRED_REQUEST";
     public static final String ERROR_CONFLICTING_STATUS_CODES   = "CONFLICTING_STATUS_CODES";
     public static final String ERROR_MULTIPLE_DEFAULT_RESPONSES = "MULTIPLE_DEFAULT_RESPONSES";
     public static final String WARNING_IGNORING_REQUEST         = "IGNORING_REQUEST";
@@ -58,11 +59,7 @@ public class TLActionCompileValidator extends TLActionBaseValidator {
 
         builder.setProperty("actionId", target.getOwner().getActions())
         		.setFindingType(FindingType.ERROR)
-        		.assertNoDuplicates(new IdentityResolver<TLAction>() {
-        			public String getIdentity(TLAction entity) {
-        				return entity.getActionId();
-        			}
-        		});
+        		.assertNoDuplicates( e -> ((TLAction) e).getActionId() );
         
     	if (target.isCommonAction()) {
     		if (request != null) {
@@ -74,17 +71,17 @@ public class TLActionCompileValidator extends TLActionBaseValidator {
     		}
     	}
     	
-        builder.setProperty("responses", ResourceCodegenUtils.getInheritedResponses( target ))
+        builder.setProperty(RESPONSES, ResourceCodegenUtils.getInheritedResponses( target ))
         		.setFindingType(FindingType.ERROR)
         		.assertMinimumSize( 1 );
         
         if (!duplicateResponseCodes.isEmpty()) {
-        	builder.addFinding( FindingType.ERROR, "responses", ERROR_CONFLICTING_STATUS_CODES,
+        	builder.addFinding( FindingType.ERROR, RESPONSES, ERROR_CONFLICTING_STATUS_CODES,
         			toCsvString( duplicateResponseCodes ) );
         }
         
         if (getDefaultResponses( responses ).size() > 1) {
-        	builder.addFinding( FindingType.ERROR, "responses", ERROR_MULTIPLE_DEFAULT_RESPONSES );
+        	builder.addFinding( FindingType.ERROR, RESPONSES, ERROR_MULTIPLE_DEFAULT_RESPONSES );
         }
         return builder.getFindings();
 	}

@@ -48,30 +48,31 @@ public class TLLibraryBaseValidator extends TLValidatorBase<TLLibrary> {
      * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateChildren(org.opentravel.schemacompiler.validate.Validatable)
      */
     @Override
-    protected ValidationFindings validateChildren(TLLibrary target) {
-        Validator<TLContext> contextValidator = getValidatorFactory().getValidatorForClass(TLContext.class);
-        Validator<TLInclude> includeValidator = getValidatorFactory().getValidatorForClass(TLInclude.class);
-        TLValidationBuilder builder = newValidationBuilder(target);
-
-        for (TLContext context : target.getContexts()) {
-            builder.addFindings(contextValidator.validate(context));
-        }
-
-        for (TLInclude include : target.getIncludes()) {
-            builder.addFindings(includeValidator.validate(include));
-        }
-
-        // Now validate each individual member with its own validator
-        for (LibraryMember member : target.getNamedMembers()) {
-        	if (isLocalContextualFacet(member)) continue;
-            Validator<LibraryMember> childValidator = getValidatorFactory().getValidatorForTarget(member);
-
-            if (childValidator != null) {
-                builder.addFindings(childValidator.validate(member));
-            }
-        }
-        return builder.getFindings();
-    }
+	protected ValidationFindings validateChildren(TLLibrary target) {
+		Validator<TLContext> contextValidator = getValidatorFactory().getValidatorForClass(TLContext.class);
+		Validator<TLInclude> includeValidator = getValidatorFactory().getValidatorForClass(TLInclude.class);
+		TLValidationBuilder builder = newValidationBuilder(target);
+		
+		for (TLContext context : target.getContexts()) {
+			builder.addFindings(contextValidator.validate(context));
+		}
+		
+		for (TLInclude include : target.getIncludes()) {
+			builder.addFindings(includeValidator.validate(include));
+		}
+		
+		// Now validate each individual member with its own validator
+		for (LibraryMember member : target.getNamedMembers()) {
+			if (!isLocalContextualFacet(member)) {
+				Validator<LibraryMember> childValidator = getValidatorFactory().getValidatorForTarget(member);
+				
+				if (childValidator != null) {
+					builder.addFindings(childValidator.validate(member));
+				}
+			}
+		}
+		return builder.getFindings();
+	}
     
     /**
      * Returns true if the given library member is a contextual facet that is local

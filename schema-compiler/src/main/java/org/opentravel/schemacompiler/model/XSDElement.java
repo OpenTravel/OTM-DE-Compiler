@@ -79,7 +79,7 @@ public class XSDElement extends TLLibraryMember implements TLPropertyType {
      */
     @Override
     public String getLocalName() {
-        return name;
+        return getName();
     }
 
     /**

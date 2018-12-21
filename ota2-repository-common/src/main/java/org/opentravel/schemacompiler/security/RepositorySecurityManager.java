@@ -30,8 +30,6 @@ import org.opentravel.schemacompiler.repository.RepositorySecurityException;
  */
 public interface RepositorySecurityManager {
 
-    public static final String ADMINISTRATORS_GROUP_NAME = "Administrators";
-    
     /**
      * Returns the user with the specified ID or null if such a user does not exist.
      * 

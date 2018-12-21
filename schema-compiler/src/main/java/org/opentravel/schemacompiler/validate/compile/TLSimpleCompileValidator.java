@@ -37,7 +37,15 @@ import org.w3._2001.xmlschema.TopLevelSimpleType;
  */
 public class TLSimpleCompileValidator extends TLSimpleBaseValidator {
 
-    public static final String ERROR_INVALID_LIST_OF_LISTS = "INVALID_LIST_OF_LISTS";
+	private static final String CONSTRAINT_FACET = "constraintFacet";
+	private static final String PATTERN = "pattern";
+	private static final String PARENT_TYPE = "parentType";
+	private static final String MIN_LENGTH = "minLength";
+	private static final String MAX_LENGTH = "maxLength";
+	private static final String MIN_INCLUSIVE = "minInclusive";
+	private static final String MAX_INCLUSIVE = "maxInclusive";
+	
+	public static final String ERROR_INVALID_LIST_OF_LISTS = "INVALID_LIST_OF_LISTS";
     public static final String ERROR_INVALID_PATTERN = "INVALID_PATTERN";
     public static final String ERROR_INVALID_RESTRICTION = "INVALID_RESTRICTION";
     public static final String ERROR_RESTRICTION_NOT_APPLICABLE = "RESTRICTION_NOT_APPLICABLE";
@@ -57,7 +65,7 @@ public class TLSimpleCompileValidator extends TLSimpleBaseValidator {
         builder.setProperty("name", target.getName()).setFindingType(FindingType.ERROR)
                 .assertNotNullOrBlank().assertPatternMatch(NAME_XML_PATTERN);
 
-        builder.setEntityReferenceProperty("parentType", target.getParentType(),
+        builder.setEntityReferenceProperty(PARENT_TYPE, target.getParentType(),
                 target.getParentTypeName()).setFindingType(FindingType.ERROR).assertNotNull()
                 .setFindingType(FindingType.WARNING).assertNotDeprecated().assertNotObsolete();
         
@@ -78,12 +86,12 @@ public class TLSimpleCompileValidator extends TLSimpleBaseValidator {
         if (!target.isListTypeInd()) {
             // Validate restriction parameters if the target is not a simple-list
             if (target.getMinLength() >= 0) {
-                builder.setProperty("minLength", target.getMinLength())
+                builder.setProperty(MIN_LENGTH, target.getMinLength())
                         .setFindingType(FindingType.ERROR).assertGreaterThanOrEqual(0);
             }
 
             if (target.getMaxLength() >= 0) {
-                builder.setProperty("maxLength", target.getMaxLength())
+                builder.setProperty(MAX_LENGTH, target.getMaxLength())
                         .setFindingType(FindingType.ERROR)
                         .assertGreaterThanOrEqual(Math.max(0, target.getMinLength()));
             }
@@ -93,61 +101,61 @@ public class TLSimpleCompileValidator extends TLSimpleBaseValidator {
                     Pattern.compile(target.getPattern());
 
                 } catch (PatternSyntaxException e) {
-                    builder.addFinding(FindingType.ERROR, "pattern", ERROR_INVALID_PATTERN,
+                    builder.addFinding(FindingType.ERROR, PATTERN, ERROR_INVALID_PATTERN,
                             target.getPattern());
                 }
             }
 
             if ((minInclusive != null) && (minExclusive != null)) {
-                builder.addFinding(FindingType.ERROR, "minInclusive", ERROR_INVALID_RESTRICTION);
+                builder.addFinding(FindingType.ERROR, MIN_INCLUSIVE, ERROR_INVALID_RESTRICTION);
             }
 
             if ((maxInclusive != null) && (maxExclusive != null)) {
-                builder.addFinding(FindingType.ERROR, "maxInclusive", ERROR_INVALID_RESTRICTION);
+                builder.addFinding(FindingType.ERROR, MAX_INCLUSIVE, ERROR_INVALID_RESTRICTION);
             }
             
             // Validate that any constraints are valid according to the facet profile
             XSDFacetProfile facetProfile = target.getXSDFacetProfile();
             
             if ((target.getMinLength() > 0) && !facetProfile.isMinLengthSupported()) {
-                builder.addFinding(FindingType.ERROR, "constraintFacet", ERROR_RESTRICTION_NOT_APPLICABLE, "minLength");
+                builder.addFinding(FindingType.ERROR, CONSTRAINT_FACET, ERROR_RESTRICTION_NOT_APPLICABLE, MIN_LENGTH);
             }
             if ((target.getMaxLength() > 0) && !facetProfile.isMaxLengthSupported()) {
-                builder.addFinding(FindingType.ERROR, "constraintFacet", ERROR_RESTRICTION_NOT_APPLICABLE, "maxLength");
+                builder.addFinding(FindingType.ERROR, CONSTRAINT_FACET, ERROR_RESTRICTION_NOT_APPLICABLE, MAX_LENGTH);
             }
             if ((target.getPattern() != null) && !facetProfile.isPatternSupported()) {
-                builder.addFinding(FindingType.ERROR, "constraintFacet", ERROR_RESTRICTION_NOT_APPLICABLE, "pattern");
+                builder.addFinding(FindingType.ERROR, CONSTRAINT_FACET, ERROR_RESTRICTION_NOT_APPLICABLE, PATTERN);
             }
             if ((target.getFractionDigits() > 0) && !facetProfile.isFractionDigitsSupported()) {
-                builder.addFinding(FindingType.ERROR, "constraintFacet", ERROR_RESTRICTION_NOT_APPLICABLE, "fractionDigits");
+                builder.addFinding(FindingType.ERROR, CONSTRAINT_FACET, ERROR_RESTRICTION_NOT_APPLICABLE, "fractionDigits");
             }
             if ((target.getTotalDigits() > 0) && !facetProfile.isTotalDigitsSupported()) {
-                builder.addFinding(FindingType.ERROR, "constraintFacet", ERROR_RESTRICTION_NOT_APPLICABLE, "totalDigits");
+                builder.addFinding(FindingType.ERROR, CONSTRAINT_FACET, ERROR_RESTRICTION_NOT_APPLICABLE, "totalDigits");
             }
             if ((target.getMinInclusive() != null) && !facetProfile.isMinInclusiveSupported()) {
-                builder.addFinding(FindingType.ERROR, "constraintFacet", ERROR_RESTRICTION_NOT_APPLICABLE, "minInclusive");
+                builder.addFinding(FindingType.ERROR, CONSTRAINT_FACET, ERROR_RESTRICTION_NOT_APPLICABLE, MIN_INCLUSIVE);
             }
             if ((target.getMaxInclusive() != null) && !facetProfile.isMaxInclusiveSupported()) {
-                builder.addFinding(FindingType.ERROR, "constraintFacet", ERROR_RESTRICTION_NOT_APPLICABLE, "maxInclusive");
+                builder.addFinding(FindingType.ERROR, CONSTRAINT_FACET, ERROR_RESTRICTION_NOT_APPLICABLE, MAX_INCLUSIVE);
             }
             if ((target.getMinExclusive() != null) && !facetProfile.isMinExclusiveSupported()) {
-                builder.addFinding(FindingType.ERROR, "constraintFacet", ERROR_RESTRICTION_NOT_APPLICABLE, "minExclusive");
+                builder.addFinding(FindingType.ERROR, CONSTRAINT_FACET, ERROR_RESTRICTION_NOT_APPLICABLE, "minExclusive");
             }
             if ((target.getMaxExclusive() != null) && !facetProfile.isMaxExclusiveSupported()) {
-                builder.addFinding(FindingType.ERROR, "constraintFacet", ERROR_RESTRICTION_NOT_APPLICABLE, "maxExclusive");
+                builder.addFinding(FindingType.ERROR, CONSTRAINT_FACET, ERROR_RESTRICTION_NOT_APPLICABLE, "maxExclusive");
             }
 
         } else {
             // Warn if restriction value(s) are provided for a simple-list type
-            builder.setProperty("minLength", target.getMinLength())
+            builder.setProperty(MIN_LENGTH, target.getMinLength())
                     .setFindingType(FindingType.WARNING).assertLessThanOrEqual(0);
-            builder.setProperty("maxLength", target.getMaxLength())
+            builder.setProperty(MAX_LENGTH, target.getMaxLength())
                     .setFindingType(FindingType.WARNING).assertLessThanOrEqual(0);
-            builder.setProperty("pattern", target.getPattern()).setFindingType(FindingType.WARNING)
+            builder.setProperty(PATTERN, target.getPattern()).setFindingType(FindingType.WARNING)
                     .assertNullOrBlank();
-            builder.setProperty("minInclusive", target.getMinInclusive())
+            builder.setProperty(MIN_INCLUSIVE, target.getMinInclusive())
                     .setFindingType(FindingType.WARNING).assertNullOrBlank();
-            builder.setProperty("maxInclusive", target.getMaxInclusive())
+            builder.setProperty(MAX_INCLUSIVE, target.getMaxInclusive())
                     .setFindingType(FindingType.WARNING).assertNullOrBlank();
             builder.setProperty("minExclusive", target.getMinExclusive())
                     .setFindingType(FindingType.WARNING).assertNullOrBlank();
@@ -159,13 +167,13 @@ public class TLSimpleCompileValidator extends TLSimpleBaseValidator {
                     .setFindingType(FindingType.WARNING).assertLessThanOrEqual(0);
         }
 
-        checkEmptyValueType(target, target.getParentType(), "parentType", builder);
+        checkEmptyValueType(target, target.getParentType(), PARENT_TYPE, builder);
 
         builder.setProperty("equivalents", target.getEquivalents())
                 .setFindingType(FindingType.ERROR).assertNotNull().assertContainsNoNullElements();
 
         if (CircularReferenceChecker.hasCircularReference(target)) {
-            builder.addFinding(FindingType.ERROR, "parentType", ERROR_INVALID_CIRCULAR_REFERENCE);
+            builder.addFinding(FindingType.ERROR, PARENT_TYPE, ERROR_INVALID_CIRCULAR_REFERENCE);
         }
 
         checkSchemaNamingConflicts(target, builder);

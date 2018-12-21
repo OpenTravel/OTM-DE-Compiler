@@ -59,15 +59,11 @@ public class TLModelSymbolResolver extends AbstractSymbolResolver {
         Object entity = modelSymbols.getEntity(namespace, localName);
 
         // If we cannot identify an entity in the requested namespace, attempt to search the
-        // anonymous entities for a match
-        if (entity == null) {
-
-            // Only attempt anonymous lookups if we are searching the namespace that is
-            // currently considered to be the local one
-            if ((namespace != null) && (prefixResolver != null)
-                    && namespace.equals(prefixResolver.getLocalNamespace())) {
-                entity = resolveAnonymousEntity(localName, modelSymbols);
-            }
+        // anonymous entities for a match.  Only attempt anonymous lookups if we are searching
+        // the namespace that is currently considered to be the local one
+        if ((entity == null) && (namespace != null) && (prefixResolver != null)
+                && namespace.equals(prefixResolver.getLocalNamespace())) {
+            entity = resolveAnonymousEntity(localName, modelSymbols);
         }
         return entity;
     }

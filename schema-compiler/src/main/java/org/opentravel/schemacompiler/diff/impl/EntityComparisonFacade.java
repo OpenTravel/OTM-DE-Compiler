@@ -185,7 +185,6 @@ public class EntityComparisonFacade {
 	 * 
 	 * @param entity  the entity from which to create the facade
 	 */
-	@SuppressWarnings("unchecked")
 	private void init(TLValueWithAttributes entity) {
 		List<TLValueWithAttributes> versionChain = getMinorVersions( entity );
 		
@@ -244,7 +243,6 @@ public class EntityComparisonFacade {
 	 * 
 	 * @param entity  the entity from which to create the facade
 	 */
-	@SuppressWarnings("unchecked")
 	private void init(TLBusinessObject entity) {
 		List<TLBusinessObject> versionChain = getMinorVersions( entity );
 		
@@ -321,7 +319,6 @@ public class EntityComparisonFacade {
 	 * 
 	 * @param entity  the entity from which to create the facade
 	 */
-	@SuppressWarnings("unchecked")
 	private void init(TLOperation entity) {
 		List<TLOperation> versionChain = getMinorVersions( entity );
 		
@@ -370,7 +367,6 @@ public class EntityComparisonFacade {
 	 * 
 	 * @param entity  the entity from which to create the facade
 	 */
-	@SuppressWarnings("unchecked")
 	private void init(TLExtensionPointFacet entity) {
 		this.entityType = entity.getClass();
 		this.owningLibrary = (TLLibrary) entity.getOwningLibrary();
@@ -449,7 +445,6 @@ public class EntityComparisonFacade {
 	 * 
 	 * @param entity  the core object whose fields are to be added
 	 */
-	@SuppressWarnings("unchecked")
 	private void addCoreObjectFields(TLCoreObject entity) {
 		List<TLCoreObject> versionChain = getMinorVersions( entity );
 		
@@ -468,7 +463,6 @@ public class EntityComparisonFacade {
 	 * 
 	 * @param entity  the choice object whose fields are to be added
 	 */
-	@SuppressWarnings("unchecked")
 	private void addChoiceObjectFields(TLChoiceObject entity) {
 		List<TLChoiceObject> versionChain = getMinorVersions( entity );
 		
@@ -488,7 +482,6 @@ public class EntityComparisonFacade {
 	 * @param facetList  the list of contextual facets to process
 	 * @param visitedFacets  the collection of facets already visited (prevents infinite loops)
 	 */
-	@SuppressWarnings("unchecked")
 	private void addContextualFacetFields(List<TLContextualFacet> facetList, Set<TLContextualFacet> visitedFacets) {
 		for (TLContextualFacet facet : facetList) {
 			if (!visitedFacets.contains( facet )) {

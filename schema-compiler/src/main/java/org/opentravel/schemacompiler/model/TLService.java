@@ -84,7 +84,7 @@ public class TLService extends TLLibraryMember implements NamedEntity, TLDocumen
      */
     @Override
     public String getLocalName() {
-        return name;
+        return getName();
     }
 
     /**

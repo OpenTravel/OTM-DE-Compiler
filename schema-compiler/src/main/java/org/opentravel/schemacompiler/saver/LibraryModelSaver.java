@@ -55,8 +55,9 @@ public final class LibraryModelSaver {
      * 
      * @return LibrarySaveHandler
      */
-    public LibrarySaveHandler<?> getSaveHandler() {
-        return saveHandler;
+    @SuppressWarnings("unchecked")
+	public <T> LibrarySaveHandler<T> getSaveHandler() {
+        return (LibrarySaveHandler<T>) saveHandler;
     }
 
     /**
@@ -135,15 +136,13 @@ public final class LibraryModelSaver {
 
         context.setSymbolResolver(symbolResolver);
 
-        if (library != null) {
-            if (library.isReadOnly()) {
-                throw new LibrarySaveException("Unable to save library '" + library.getName()
-                        + "' because it is read-only.");
-            }
-            symbolResolver.setPrefixResolver(new LibraryPrefixResolver(library));
-            symbolResolver.setAnonymousEntityFilter(new ChameleonFilter(library));
-            findings.addAll( saveLibrary(library, context) );
+        if (library.isReadOnly()) {
+            throw new LibrarySaveException("Unable to save library '" + library.getName()
+                    + "' because it is read-only.");
         }
+        symbolResolver.setPrefixResolver(new LibraryPrefixResolver(library));
+        symbolResolver.setAnonymousEntityFilter(new ChameleonFilter(library));
+        findings.addAll( saveLibrary(library, context) );
         return findings;
     }
 
@@ -157,7 +156,6 @@ public final class LibraryModelSaver {
      * @throws LibrarySaveException
      *             thrown if a problem occurs during the save operation
      */
-    @SuppressWarnings("unchecked")
 	private <T> ValidationFindings saveLibrary(TLLibrary library,
             SymbolResolverTransformerContext transformContext) throws LibrarySaveException {
         // Do some preliminary validation checks before proceeding
@@ -172,7 +170,7 @@ public final class LibraryModelSaver {
         }
 
         // Transform the library to JAXB and use the handler to save the file
-        LibrarySaveHandler<T> handler = (LibrarySaveHandler<T>) getSaveHandler();
+        LibrarySaveHandler<T> handler = getSaveHandler();
         TransformerFactory<SymbolResolverTransformerContext> factory = TransformerFactory
                 .getInstance(SchemaCompilerApplicationContext.SAVER_TRANSFORMER_FACTORY,
                         transformContext);

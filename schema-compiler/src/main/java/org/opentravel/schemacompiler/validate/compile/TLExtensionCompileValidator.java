@@ -42,7 +42,9 @@ import org.opentravel.schemacompiler.validate.impl.TLValidatorBase;
  */
 public class TLExtensionCompileValidator extends TLValidatorBase<TLExtension> {
 
-    public static final String ERROR_INVALID_CIRCULAR_EXTENSION = "INVALID_CIRCULAR_EXTENSION";
+	private static final String EXTENDS_ENTITY = "extendsEntity";
+	
+	public static final String ERROR_INVALID_CIRCULAR_EXTENSION = "INVALID_CIRCULAR_EXTENSION";
     public static final String ERROR_INVALID_LOCAL_FACET_EXTENSION = "INVALID_LOCAL_FACET_EXTENSION";
     public static final String ERROR_NESTED_FACET_EXTENSION = "NESTED_FACET_EXTENSION";
     public static final String ERROR_ILLEGAL_EXTENSION = "ILLEGAL_EXTENSION";
@@ -57,7 +59,7 @@ public class TLExtensionCompileValidator extends TLValidatorBase<TLExtension> {
         NamedEntity extendsEntity = target.getExtendsEntity();
         TLExtensionOwner extensionOwner = target.getOwner();
 
-        builder.setEntityReferenceProperty("extendsEntity", target.getExtendsEntity(),
+        builder.setEntityReferenceProperty(EXTENDS_ENTITY, target.getExtendsEntity(),
                 target.getExtendsEntityName()).setFindingType(FindingType.ERROR).assertNotNull()
                 .setFindingType(FindingType.WARNING).assertNotDeprecated().assertNotObsolete();
 
@@ -92,7 +94,7 @@ public class TLExtensionCompileValidator extends TLValidatorBase<TLExtension> {
 
                 if ((extendsEntity instanceof TLFacet) && (localNamespace != null)
                         && localNamespace.equals(extendsEntityNamespace)) {
-                    builder.addFinding(FindingType.ERROR, "extendsEntity",
+                    builder.addFinding(FindingType.ERROR, EXTENDS_ENTITY,
                             ERROR_INVALID_LOCAL_FACET_EXTENSION);
                 }
                 
@@ -101,7 +103,7 @@ public class TLExtensionCompileValidator extends TLValidatorBase<TLExtension> {
                 	TLFacetOwner extendsEntityFacetOwner = ((TLContextualFacet) extendsEntity).getOwningEntity();
                 	
                 	if (extendsEntityFacetOwner instanceof TLContextualFacet) {
-                        builder.addFinding(FindingType.ERROR, "extendsEntity", ERROR_NESTED_FACET_EXTENSION);
+                        builder.addFinding(FindingType.ERROR, EXTENDS_ENTITY, ERROR_NESTED_FACET_EXTENSION);
                 	}
                 }
             }
@@ -118,12 +120,12 @@ public class TLExtensionCompileValidator extends TLValidatorBase<TLExtension> {
         // Assert that the entity being extended is, in fact, marked as being extendable (XP-facets
         // only)
         if ((extensionOwner instanceof TLExtensionPointFacet) && !isExtendableEntity(extendsEntity)) {
-            builder.addFinding(FindingType.ERROR, "extendsEntity", ERROR_ILLEGAL_EXTENSION,
+            builder.addFinding(FindingType.ERROR, EXTENDS_ENTITY, ERROR_ILLEGAL_EXTENSION,
                     target.getExtendsEntityName());
         }
 
         if (CircularReferenceChecker.hasCircularExtension(target)) {
-            builder.addFinding(FindingType.ERROR, "extendsEntity", ERROR_INVALID_CIRCULAR_EXTENSION);
+            builder.addFinding(FindingType.ERROR, EXTENDS_ENTITY, ERROR_INVALID_CIRCULAR_EXTENSION);
         }
 
         return builder.getFindings();

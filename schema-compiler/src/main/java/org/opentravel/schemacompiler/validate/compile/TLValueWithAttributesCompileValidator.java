@@ -47,7 +47,10 @@ import org.opentravel.schemacompiler.validate.impl.ValidatorUtils;
  */
 public class TLValueWithAttributesCompileValidator extends TLValueWithAttributesBaseValidator {
 
-    public static final String ERROR_ILLEGAL_EXTENSION_ATTRIBUTE = "ILLEGAL_EXTENSION_ATTRIBUTE";
+	private static final String PARENT_TYPE = "parentType";
+	private static final String ATTRIBUTES = "attributes";
+	
+	public static final String ERROR_ILLEGAL_EXTENSION_ATTRIBUTE = "ILLEGAL_EXTENSION_ATTRIBUTE";
     public static final String ERROR_EXTENSION_NAME_CONFLICT = "EXTENSION_NAME_CONFLICT";
     public static final String ERROR_INHERITANCE_TYPE_CONFLICT = "INHERITANCE_TYPE_CONFLICT";
     public static final String ERROR_INVALID_CIRCULAR_REFERENCE = "INVALID_CIRCULAR_REFERENCE";
@@ -65,12 +68,12 @@ public class TLValueWithAttributesCompileValidator extends TLValueWithAttributes
                 .assertNotNullOrBlank().assertPatternMatch(NAME_XML_PATTERN);
 
         if ((target.getParentType() == null) && (target.getParentTypeName() != null)) {
-            builder.addFinding(FindingType.ERROR, "parentType",
+            builder.addFinding(FindingType.ERROR, PARENT_TYPE,
                     TLValidationBuilder.UNRESOLVED_NAMED_ENTITY_REFERENCE,
                     target.getParentTypeName());
         }
 
-        builder.setEntityReferenceProperty("parentType", target.getParentType(),
+        builder.setEntityReferenceProperty(PARENT_TYPE, target.getParentType(),
                 target.getParentTypeName())
                 .setFindingType(FindingType.ERROR)
                 .assertValidEntityReference(TLSimple.class, TLClosedEnumeration.class,
@@ -80,16 +83,16 @@ public class TLValueWithAttributesCompileValidator extends TLValueWithAttributes
                 .assertNotDeprecated()
                 .assertNotObsolete();
 
-        builder.setProperty("attributes", target.getAttributes()).setFindingType(FindingType.ERROR)
+        builder.setProperty(ATTRIBUTES, target.getAttributes()).setFindingType(FindingType.ERROR)
                 .assertNotNull().assertContainsNoNullElements();
 
-        builder.setProperty("attributes", inheritedMembers).setFindingType(FindingType.WARNING)
+        builder.setProperty(ATTRIBUTES, inheritedMembers).setFindingType(FindingType.WARNING)
                 .assertMinimumSize(1);
 
         builder.setProperty("indicators", target.getIndicators()).setFindingType(FindingType.ERROR)
                 .assertNotNull().assertContainsNoNullElements();
 
-        checkEmptyValueType(target, target.getParentType(), "parentType", builder);
+        checkEmptyValueType(target, target.getParentType(), PARENT_TYPE, builder);
 
         builder.setProperty("equivalents", target.getEquivalents())
                 .setFindingType(FindingType.ERROR).assertNotNull().assertContainsNoNullElements();
@@ -99,7 +102,7 @@ public class TLValueWithAttributesCompileValidator extends TLValueWithAttributes
         }
 
         if (parentTypeIsOpenEnumeration(target) && hasExtensionAttribute(inheritedMembers)) {
-            builder.addFinding(FindingType.ERROR, "parentType", ERROR_ILLEGAL_EXTENSION_ATTRIBUTE);
+            builder.addFinding(FindingType.ERROR, PARENT_TYPE, ERROR_ILLEGAL_EXTENSION_ATTRIBUTE);
         }
 
         // Check to see if any of the declared attribute/indicator names conflict with the
@@ -122,7 +125,7 @@ public class TLValueWithAttributesCompileValidator extends TLValueWithAttributes
         }
         for (String openEnumAttrName : openEnumerationAttributes) {
             if (attributeNames.contains(openEnumAttrName + "Extension")) {
-                builder.addFinding(FindingType.ERROR, "attributes",
+                builder.addFinding(FindingType.ERROR, ATTRIBUTES,
                         ERROR_ILLEGAL_EXTENSION_ATTRIBUTE, openEnumAttrName);
                 break;
             }
@@ -143,7 +146,7 @@ public class TLValueWithAttributesCompileValidator extends TLValueWithAttributes
 
             } else if (existingType != attribute.getType()) { // Make sure the attribute types are
                                                               // identical
-                builder.addFinding(FindingType.ERROR, "attributes",
+                builder.addFinding(FindingType.ERROR, ATTRIBUTES,
                         ERROR_INHERITANCE_TYPE_CONFLICT, attribute.getName());
                 break; // stop after the first duplicate
             }
@@ -151,7 +154,7 @@ public class TLValueWithAttributesCompileValidator extends TLValueWithAttributes
 
         // Check for circular references
         if (CircularReferenceChecker.hasCircularReference(target)) {
-            builder.addFinding(FindingType.ERROR, "parentType", ERROR_INVALID_CIRCULAR_REFERENCE);
+            builder.addFinding(FindingType.ERROR, PARENT_TYPE, ERROR_INVALID_CIRCULAR_REFERENCE);
         }
 
         checkSchemaNamingConflicts(target, builder);

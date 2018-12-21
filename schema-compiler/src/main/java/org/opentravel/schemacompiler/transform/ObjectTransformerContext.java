@@ -28,7 +28,7 @@ public interface ObjectTransformerContext {
      * 
      * @return TransformerFactory<?>
      */
-    public TransformerFactory<?> getTransformerFactory();
+    public <C extends ObjectTransformerContext> TransformerFactory<C> getTransformerFactory();
 
     /**
      * Assigns the factory instance to be associated with this context.

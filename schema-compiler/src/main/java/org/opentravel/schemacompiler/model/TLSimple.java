@@ -158,7 +158,7 @@ public class TLSimple extends TLLibraryMember implements Versioned, TLAttributeT
      */
     @Override
     public String getLocalName() {
-        return name;
+        return getName();
     }
 
     /**

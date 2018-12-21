@@ -98,10 +98,8 @@ public abstract class FacetCodegenDelegate<F extends TLAbstractFacet> {
      * 
      * @return TransformerFactory<CodeGenerationTransformerContext>
      */
-    @SuppressWarnings("unchecked")
     protected TransformerFactory<CodeGenerationTransformerContext> getTransformerFactory() {
-        return (TransformerFactory<CodeGenerationTransformerContext>) transformerContext
-                .getTransformerFactory();
+        return transformerContext.getTransformerFactory();
     }
 
     /**

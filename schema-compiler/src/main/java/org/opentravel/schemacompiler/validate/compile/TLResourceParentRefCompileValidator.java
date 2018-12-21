@@ -34,7 +34,10 @@ import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
  */
 public class TLResourceParentRefCompileValidator extends TLResourceParentRefBaseValidator {
 
-    public static final String ERROR_INVALID_ABSTRACT_PARENT     = "INVALID_ABSTRACT_PARENT";
+	private static final String PARENT_RESOURCE = "parentResource";
+	private static final String PARENT_PARAM_GROUP = "parentParamGroup";
+	
+	public static final String ERROR_INVALID_ABSTRACT_PARENT     = "INVALID_ABSTRACT_PARENT";
     public static final String ERROR_INVALID_PARAM_GROUP         = "INVALID_PARAM_GROUP";
     public static final String ERROR_ID_PARAM_GROUP_REQUIRED     = "ID_PARAM_GROUP_REQUIRED";
     public static final String ERROR_CONFLICTING_PATH_TEMPLATE   = "CONFLICTING_PATH_TEMPLATE";
@@ -45,51 +48,50 @@ public class TLResourceParentRefCompileValidator extends TLResourceParentRefBase
 	 */
 	@Override
 	protected ValidationFindings validateFields(TLResourceParentRef target) {
-        TLValidationBuilder builder = newValidationBuilder(target);
-        TLResource parentResource = target.getParentResource();
-        TLParamGroup parentParamGroup = target.getParentParamGroup();
-        
-    	builder.setEntityReferenceProperty("parentResource", parentResource,
-    			target.getParentResourceName()).setFindingType(FindingType.ERROR)
-				.assertNotNull();
-    	
-    	if ((parentResource != null) && parentResource.isAbstract()) {
-        	builder.addFinding( FindingType.ERROR, "parentResource", ERROR_INVALID_ABSTRACT_PARENT );
-    	}
-
-        if (CircularReferenceChecker.hasCircularParentRef(target)) {
-            builder.addFinding(FindingType.ERROR, "parentResource", ERROR_INVALID_CIRCULAR_PARENT_REF);
-        }
-    	
-    	if (parentParamGroup == null) {
-    		String paramGroupName = target.getParentParamGroupName();
-    		
-            if ((paramGroupName == null) || paramGroupName.equals("")) {
-                builder.addFinding( FindingType.ERROR, "parentParamGroup",
-                		TLValidationBuilder.MISSING_NAMED_ENTITY_REFERENCE );
-            } else {
-            	builder.addFinding(FindingType.ERROR, "parentParamGroup",
-            			TLValidationBuilder.UNRESOLVED_NAMED_ENTITY_REFERENCE, paramGroupName );
-            }
-    	} else if (parentResource != null) {
-    		List<TLParamGroup> inheritedParamGroup = ResourceCodegenUtils.getInheritedParamGroups( parentResource );
-    		
-    		if (!inheritedParamGroup.contains( parentParamGroup )) {
-            	builder.addFinding( FindingType.ERROR, "parentParamGroup", ERROR_INVALID_PARAM_GROUP,
-            			parentParamGroup.getName() );
-    		}
-    		if (!parentParamGroup.isIdGroup()) {
-            	builder.addFinding( FindingType.ERROR, "parentParamGroup", ERROR_ID_PARAM_GROUP_REQUIRED,
-            			parentParamGroup.getName() );
-    		}
-    	}
-    	
-    	builder.setProperty("pathTemplate", target.getPathTemplate()).setFindingType(FindingType.ERROR)
-    			.assertNotNullOrBlank();
-    	validatePathTemplate( target.getPathTemplate(), parentParamGroup, builder );
-    	checkConflictingPathTemplate( target, builder );
-    	
-    	return builder.getFindings();
+		TLValidationBuilder builder = newValidationBuilder(target);
+		TLResource parentResource = target.getParentResource();
+		TLParamGroup parentParamGroup = target.getParentParamGroup();
+		
+		builder.setEntityReferenceProperty(PARENT_RESOURCE, parentResource, target.getParentResourceName())
+			.setFindingType(FindingType.ERROR).assertNotNull();
+		
+		if ((parentResource != null) && parentResource.isAbstract()) {
+			builder.addFinding(FindingType.ERROR, PARENT_RESOURCE, ERROR_INVALID_ABSTRACT_PARENT);
+		}
+		
+		if (CircularReferenceChecker.hasCircularParentRef(target)) {
+			builder.addFinding(FindingType.ERROR, PARENT_RESOURCE, ERROR_INVALID_CIRCULAR_PARENT_REF);
+		}
+		
+		if (parentParamGroup == null) {
+			String paramGroupName = target.getParentParamGroupName();
+			
+			if ((paramGroupName == null) || paramGroupName.equals("")) {
+				builder.addFinding(FindingType.ERROR, PARENT_PARAM_GROUP,
+						TLValidationBuilder.MISSING_NAMED_ENTITY_REFERENCE);
+			} else {
+				builder.addFinding(FindingType.ERROR, PARENT_PARAM_GROUP,
+						TLValidationBuilder.UNRESOLVED_NAMED_ENTITY_REFERENCE, paramGroupName);
+			}
+		} else if (parentResource != null) {
+			List<TLParamGroup> inheritedParamGroup = ResourceCodegenUtils.getInheritedParamGroups(parentResource);
+			
+			if (!inheritedParamGroup.contains(parentParamGroup)) {
+				builder.addFinding(FindingType.ERROR, PARENT_PARAM_GROUP, ERROR_INVALID_PARAM_GROUP,
+						parentParamGroup.getName());
+			}
+			if (!parentParamGroup.isIdGroup()) {
+				builder.addFinding(FindingType.ERROR, PARENT_PARAM_GROUP, ERROR_ID_PARAM_GROUP_REQUIRED,
+						parentParamGroup.getName());
+			}
+		}
+		
+		builder.setProperty("pathTemplate", target.getPathTemplate()).setFindingType(FindingType.ERROR)
+			.assertNotNullOrBlank();
+		validatePathTemplate(target.getPathTemplate(), parentParamGroup, builder);
+		checkConflictingPathTemplate(target, builder);
+		
+		return builder.getFindings();
 	}
 	
 	/**

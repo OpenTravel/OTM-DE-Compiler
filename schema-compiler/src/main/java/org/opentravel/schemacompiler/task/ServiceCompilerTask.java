@@ -16,6 +16,7 @@
 package org.opentravel.schemacompiler.task;
 
 import java.io.File;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.List;
@@ -70,44 +71,54 @@ public class ServiceCompilerTask extends AbstractSchemaCompilerTask
      *      java.util.Collection)
      */
     @Override
-    protected void generateOutput(Collection<TLLibrary> userDefinedLibraries,
-            Collection<XSDLibrary> legacySchemas) throws SchemaCompilerException {
-        CodeGenerationContext modelContext = createContext();
-        CodeGenerationContext serviceContext = modelContext.getCopy();
-        URL selectedLibraryUrl = getServiceLibraryUrl();
-
-        for (TLLibrary library : userDefinedLibraries) {
-            if ((selectedLibraryUrl != null) && !selectedLibraryUrl.equals(library.getLibraryUrl())) {
-                continue;
-            }
-            TLService service = library.getService();
-
-            if ((service != null) && isLatestServiceVersion(service)) {
-                CodeGenerationFilter filter = new DependencyFilterBuilder()
-                		.setIncludeExtendedLegacySchemas(true).addLibraryMember(service).buildFilter();
-                serviceContext.setValue(CodeGenerationContext.CK_OUTPUT_FOLDER,
-                        getServiceOutputFolder(service, modelContext));
-
-                // Generate the WSDL document
-                CodeGenerator<TLService> serviceWsdlGenerator = CodeGeneratorFactory.getInstance()
-                        .newCodeGenerator(CodeGeneratorFactory.WSDL_TARGET_FORMAT, TLService.class);
-                addGeneratedFiles(serviceWsdlGenerator.generateOutput(service, serviceContext));
-
-                // Generate the trimmed XML schema documents for the service
-                compileXmlSchemas(userDefinedLibraries, legacySchemas, serviceContext,
-                        new LibraryTrimmedFilenameBuilder(service), filter);
-
-                // Generate EXAMPLE files if required; examples are only created for the operation
-                // messages (not the contents of the trimmed schemas)
-                if (isGenerateExamples()) {
-                    generateExampleArtifacts(userDefinedLibraries, serviceContext,
-                            new LibraryTrimmedFilenameBuilder(service),
-                            createExampleFilter(service), CodeGeneratorFactory.XML_TARGET_FORMAT);
-                }
-            }
-        }
-    }
-
+	protected void generateOutput(Collection<TLLibrary> userDefinedLibraries, Collection<XSDLibrary> legacySchemas)
+			throws SchemaCompilerException {
+		CodeGenerationContext modelContext = createContext();
+		CodeGenerationContext serviceContext = modelContext.getCopy();
+		URL selectedLibraryUrl = getServiceLibraryUrl();
+		
+		for (TLLibrary library : userDefinedLibraries) {
+			boolean skip = false;
+			
+			try {
+				if ((selectedLibraryUrl != null)
+						&& !selectedLibraryUrl.toURI().equals(library.getLibraryUrl().toURI())) {
+					skip = true;
+				}
+				
+			} catch (URISyntaxException e) {
+				skip = true;
+			}
+			if (skip) continue;
+			
+			TLService service = library.getService();
+			
+			if ((service != null) && isLatestServiceVersion(service)) {
+				CodeGenerationFilter filter = new DependencyFilterBuilder().setIncludeExtendedLegacySchemas(true)
+					.addLibraryMember(service).buildFilter();
+				serviceContext.setValue(CodeGenerationContext.CK_OUTPUT_FOLDER,
+						getServiceOutputFolder(service, modelContext));
+				
+				// Generate the WSDL document
+				CodeGenerator<TLService> serviceWsdlGenerator = CodeGeneratorFactory.getInstance()
+					.newCodeGenerator(CodeGeneratorFactory.WSDL_TARGET_FORMAT, TLService.class);
+				addGeneratedFiles(serviceWsdlGenerator.generateOutput(service, serviceContext));
+				
+				// Generate the trimmed XML schema documents for the service
+				compileXmlSchemas(userDefinedLibraries, legacySchemas, serviceContext,
+						new LibraryTrimmedFilenameBuilder(service), filter);
+				
+				// Generate EXAMPLE files if required; examples are only created
+				// for the operation messages (not the contents of the trimmed schemas)
+				if (isGenerateExamples()) {
+					generateExampleArtifacts(userDefinedLibraries, serviceContext,
+							new LibraryTrimmedFilenameBuilder(service), createExampleFilter(service),
+							CodeGeneratorFactory.XML_TARGET_FORMAT);
+				}
+			}
+		}
+	}
+	
     /**
      * Returns the location of the output folder for the specified service.
      * 
@@ -250,6 +261,7 @@ public class ServiceCompilerTask extends AbstractSchemaCompilerTask
     /**
      * @see org.opentravel.schemacompiler.task.AbstractCompilerTask#createContext()
      */
+    @Override
     protected CodeGenerationContext createContext() {
         CodeGenerationContext context = super.createContext();
 

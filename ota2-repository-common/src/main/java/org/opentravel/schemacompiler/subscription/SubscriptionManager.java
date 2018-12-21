@@ -73,6 +73,7 @@ public class SubscriptionManager {
 	
 	private static final String ERROR_LOADING_CONTENT = "Error loading subscription list content.";
 
+	public static final boolean DEBUG_MODE = false;
 	public static final String REMARK_UNLOCK_REVERT = "__%%_UNLOCK__REVERT_%%__";
 	
 	private static final long DEFAULT_NOTIFICATION_DELAY = 5000; // 5 sec
@@ -82,7 +83,6 @@ public class SubscriptionManager {
 	
     private static Log log = LogFactory.getLog( SubscriptionManager.class );
     private static VelocityEngine velocityEngine;
-	public static final boolean debugMode = false;
     
 	private Map<String,SubscriptionResource> namespaceCache = new HashMap<>();
 	private Map<String,SubscriptionResource> allVersionsCache = new HashMap<>();
@@ -405,7 +405,7 @@ public class SubscriptionManager {
 			}
 			String userId = manager.getFileManager().getCurrentUserId();
 			
-			if (debugMode) {
+			if (DEBUG_MODE) {
 				processNotificationJob( new NotificationJob( action, userId, affectedNamespace, null ) );
 				
 			} else {
@@ -439,7 +439,7 @@ public class SubscriptionManager {
 			}
 			String userId = manager.getFileManager().getCurrentUserId();
 			
-			if (debugMode) {
+			if (DEBUG_MODE) {
 				processNotificationJob( new NotificationJob( action, userId, item, remarks ) );
 				
 			} else {

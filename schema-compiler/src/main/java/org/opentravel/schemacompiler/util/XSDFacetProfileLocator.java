@@ -31,6 +31,11 @@ import org.opentravel.schemacompiler.model.XSDFacetProfile;
 public class XSDFacetProfileLocator {
 	
 	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private XSDFacetProfileLocator() {}
+	
+	/**
 	 * Returns the facet profile for the given entity type.
 	 * 
 	 * @param entity  the entity for which to return the facet profile

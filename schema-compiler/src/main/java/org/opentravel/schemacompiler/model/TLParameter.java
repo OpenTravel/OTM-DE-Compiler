@@ -105,8 +105,9 @@ public class TLParameter extends TLModelElement implements TLDocumentationOwner,
 	 *
 	 * @return TLMemberField<?>
 	 */
-	public TLMemberField<?> getFieldRef() {
-		return fieldRef;
+	@SuppressWarnings("unchecked")
+	public <O extends TLMemberFieldOwner> TLMemberField<O> getFieldRef() {
+		return (TLMemberField<O>) fieldRef;
 	}
 
 	/**

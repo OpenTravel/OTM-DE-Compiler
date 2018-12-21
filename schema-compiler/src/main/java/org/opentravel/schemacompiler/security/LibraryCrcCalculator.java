@@ -88,7 +88,12 @@ import org.opentravel.schemacompiler.visitor.ModelNavigator;
  * @author S. Livezey
  */
 public class LibraryCrcCalculator {
-
+	
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private LibraryCrcCalculator() {}
+	
     /**
      * Returns true if a CRC value is required for the given library. CRC's are required for all
      * libraries that are assigned a status later than 'DRAFT' in the library status lifecycle.

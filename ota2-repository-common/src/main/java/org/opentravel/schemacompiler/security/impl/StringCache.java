@@ -229,7 +229,7 @@ public class StringCache {
                         while (n < size) {
                             Object key = tempMap.lastKey();
                             ArrayList<ByteEntry> list = tempMap.get(key);
-                            for (int i = 0; i < list.size() && n < size; i++) {
+                            for (int i = 0; i < list.size() && n < size; i++, n++) {
                                 ByteEntry entry = list.get(i);
                                 tempChunk.setBytes(entry.getName(), 0, entry.getName().length);
                                 int insertPos = findClosest(tempChunk, tempbcCache, n);
@@ -240,7 +240,6 @@ public class StringCache {
                                             insertPos + 2, n - insertPos - 1);
                                     tempbcCache[insertPos + 1] = entry;
                                 }
-                                n++;
                             }
                             tempMap.remove(key);
                         }
@@ -338,7 +337,7 @@ public class StringCache {
                         while (n < size) {
                             Object key = tempMap.lastKey();
                             ArrayList<CharEntry> list = tempMap.get(key);
-                            for (int i = 0; i < list.size() && n < size; i++) {
+                            for (int i = 0; i < list.size() && n < size; i++, n++) {
                                 CharEntry entry = list.get(i);
                                 tempChunk.setChars(entry.getName(), 0, entry.getName().length);
                                 int insertPos = findClosest(tempChunk, tempccCache, n);
@@ -349,7 +348,6 @@ public class StringCache {
                                             insertPos + 2, n - insertPos - 1);
                                     tempccCache[insertPos + 1] = entry;
                                 }
-                                n++;
                             }
                             tempMap.remove(key);
                         }

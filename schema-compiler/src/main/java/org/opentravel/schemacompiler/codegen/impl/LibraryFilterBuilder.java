@@ -189,9 +189,9 @@ public class LibraryFilterBuilder {
         private void visitSchemaDependency(SchemaDependency dependency, TLModel model) {
             QName dependencyQName = dependency.toQName();
 
-            for (BuiltInLibrary library : model.getBuiltInLibraries()) {
-                if (library.getNamespace().equals(dependencyQName.getNamespaceURI())) {
-                	NamedEntity builtInType = library.getNamedMember(dependencyQName
+            for (BuiltInLibrary lib : model.getBuiltInLibraries()) {
+                if (lib.getNamespace().equals(dependencyQName.getNamespaceURI())) {
+                	NamedEntity builtInType = lib.getNamedMember(dependencyQName
                             .getLocalPart());
 
                     if (builtInType != null) {

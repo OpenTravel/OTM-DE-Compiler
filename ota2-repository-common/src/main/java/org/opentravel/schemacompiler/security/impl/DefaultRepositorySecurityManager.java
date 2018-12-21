@@ -42,6 +42,8 @@ import org.opentravel.schemacompiler.security.UserPrincipal;
  */
 public class DefaultRepositorySecurityManager implements RepositorySecurityManager {
 
+    public static final String ADMINISTRATORS_GROUP_NAME = "Administrators";
+    
     private AuthenticationProvider authenticationProvider;
     private GroupAssignmentsResource groupAssignmentsResource;
     private AuthorizationProvider authorizationProvider;

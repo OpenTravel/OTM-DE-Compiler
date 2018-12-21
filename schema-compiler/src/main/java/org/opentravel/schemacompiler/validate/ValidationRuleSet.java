@@ -65,6 +65,7 @@ public class ValidationRuleSet {
      * 
      * @return List<ValidatorMapping<?>>
      */
+    @SuppressWarnings("squid:S1452") // Unable to avoid generic return type for this method
     public List<ValidatorMapping<?>> getValidatorMappings() {
         return validatorMappings;
     }

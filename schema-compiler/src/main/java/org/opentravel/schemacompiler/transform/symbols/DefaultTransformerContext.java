@@ -34,9 +34,10 @@ public class DefaultTransformerContext implements ObjectTransformerContext {
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformerContext#getTransformerFactory()
      */
-    @Override
-    public TransformerFactory<?> getTransformerFactory() {
-        return factory;
+    @SuppressWarnings("unchecked")
+	@Override
+    public <C extends ObjectTransformerContext> TransformerFactory<C> getTransformerFactory() {
+        return (TransformerFactory<C>) factory;
     }
 
     /**

@@ -29,7 +29,7 @@ public interface TLMemberFieldOwner {
 	 * 
 	 * @return List<TLMemberField<?>>
 	 */
-	public List<TLMemberField<?>> getMemberFields();
+	public <O extends TLMemberFieldOwner> List<TLMemberField<O>> getMemberFields();
 	
 	/**
 	 * Returns the member field with the specified name.
@@ -37,6 +37,6 @@ public interface TLMemberFieldOwner {
 	 * @param fieldName  the name of the field to return
 	 * @return
 	 */
-	public TLMemberField<?> getMemberField(String fieldName);
+	public <O extends TLMemberFieldOwner> TLMemberField<O> getMemberField(String fieldName);
 	
 }

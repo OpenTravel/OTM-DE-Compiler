@@ -81,7 +81,7 @@ public class XSDSimpleType extends TLLibraryMember implements TLAttributeType {
      */
     @Override
     public String getLocalName() {
-        return name;
+        return getName();
     }
 
     /**

@@ -36,11 +36,11 @@ public class TLContext extends TLModelElement implements TLDocumentationOwner {
      */
     @Override
     public String getValidationIdentity() {
-        AbstractLibrary owningLibrary = getOwningLibrary();
+        AbstractLibrary owningLib = getOwningLibrary();
         StringBuilder identity = new StringBuilder();
 
-        if (owningLibrary != null) {
-            identity.append(owningLibrary.getValidationIdentity()).append(" : ");
+        if (owningLib != null) {
+            identity.append(owningLib.getValidationIdentity()).append(" : ");
         }
         if (contextId == null) {
             identity.append("[Unnamed Context Declaration]");

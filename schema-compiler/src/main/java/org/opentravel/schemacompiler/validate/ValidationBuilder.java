@@ -894,7 +894,7 @@ public abstract class ValidationBuilder<T extends ValidationBuilder<T>> {
     @SuppressWarnings("unchecked")
     public <E> T assertNoDuplicates(IdentityResolver<E> identityResolver) {
         try {
-            Collection<E> siblingMembers = (Collection<E>) propertyValueAsCollection();
+            Collection<E> siblingMembers = propertyValueAsCollection();
             String targetIdentity = identityResolver.getIdentity((E) targetObject);
 
             if (targetIdentity != null) {
@@ -1086,9 +1086,10 @@ public abstract class ValidationBuilder<T extends ValidationBuilder<T>> {
      * @throws IllegalArgumentException
      *             thrown if the current property value is not a date value
      */
-    protected Collection<?> propertyValueAsCollection() {
+    @SuppressWarnings("unchecked")
+	protected <E> Collection<E> propertyValueAsCollection() {
         if ((propertyValue == null) || (propertyValue instanceof Collection)) {
-            return (Collection<?>) propertyValue;
+            return (Collection<E>) propertyValue;
         } else {
             throw new IllegalArgumentException(
                     "The requested assertion only applies to collection values.");

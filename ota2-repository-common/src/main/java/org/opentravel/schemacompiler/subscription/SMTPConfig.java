@@ -65,8 +65,6 @@ public class SMTPConfig {
 		if (startTlsEnable) {
 			props.setProperty( "mail.smtp.starttls.enable", "true" );
 		}
-//		props.setProperty( "mail.smtp.socks.host", "HPVRPJIRA01V.resource.corp.lcl" );
-//		props.setProperty( "mail.smtp.socks.port", "8080" );
 		return props;
 	}
 	

@@ -152,6 +152,7 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
     /**
      * @see org.opentravel.schemacompiler.task.AbstractCompilerTask#createContext()
      */
+    @Override
     protected CodeGenerationContext createContext() {
         CodeGenerationContext context = super.createContext();
 

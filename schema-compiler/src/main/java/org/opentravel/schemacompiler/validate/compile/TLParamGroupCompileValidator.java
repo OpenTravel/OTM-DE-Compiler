@@ -28,7 +28,6 @@ import org.opentravel.schemacompiler.model.TLParamGroup;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.base.TLParamGroupBaseValidator;
-import org.opentravel.schemacompiler.validate.impl.IdentityResolver;
 import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
 
 /**
@@ -55,22 +54,16 @@ public class TLParamGroupCompileValidator extends TLParamGroupBaseValidator{
         
         builder.setProperty("name", target.getOwner().getParamGroups())
         		.setFindingType(FindingType.ERROR)
-        		.assertNoDuplicates(new IdentityResolver<TLParamGroup>() {
-        			public String getIdentity(TLParamGroup entity) {
-        				return entity.getName();
-        			}
-        		});
+        		.assertNoDuplicates( e -> ((TLParamGroup) e).getName() );
         
     	builder.setEntityReferenceProperty("facetRef", facetRef, target.getFacetRefName())
     			.setFindingType(FindingType.ERROR)
     			.assertNotNull();
         
-    	if ((facetRef != null) && (target.getOwner() != null) &&
-    			((boRef = target.getOwner().getBusinessObjectRef()) != null)) {
-    		
-    		if (!isDeclaredOrInheritedFacet(boRef, facetRef, boRef)) {
-            	builder.addFinding( FindingType.ERROR, "facetRef", ERROR_INVALID_FACET_REF, boRef.getLocalName() );
-    		}
+    	if ((facetRef != null) && (target.getOwner() != null)
+    			&& ((boRef = target.getOwner().getBusinessObjectRef()) != null)
+    			&& !isDeclaredOrInheritedFacet(boRef, facetRef, boRef)) {
+        	builder.addFinding( FindingType.ERROR, "facetRef", ERROR_INVALID_FACET_REF, boRef.getLocalName() );
     	}
     	
     	if (target.isIdGroup() && (facetRef != null) && (facetRef.getFacetType() == TLFacetType.QUERY)) {

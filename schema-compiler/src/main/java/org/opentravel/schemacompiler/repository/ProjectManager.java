@@ -152,9 +152,9 @@ public final class ProjectManager {
             this.model = model;
             this.model.addListener(new IncludeDependencyListener());
             this.model.addListener(new ImportDependencyListener());
-            this.projects.add(builtInProject = new BuiltInProject(this));
-            this.repositoryManager = (repositoryManager == null) ? RepositoryManager.getDefault()
-                    : repositoryManager;
+            this.builtInProject = new BuiltInProject(this);
+            this.projects.add(builtInProject);
+            this.repositoryManager = (repositoryManager == null) ? RepositoryManager.getDefault() : repositoryManager;
             this.autoSaveProjects = autoSaveProjects;
 
             instanceMap.put(model, this); // If a project manager was already associated with this
@@ -622,12 +622,11 @@ public final class ProjectManager {
             for (ProjectItem item : project.getProjectItems()) {
                 RepositoryItemState itemState = item.getState();
 
-                if ((itemState == RepositoryItemState.UNMANAGED)
-                        || (itemState == RepositoryItemState.MANAGED_WIP)) {
-                    if ((item.getContent() instanceof TLLibrary)
-                            && !((TLLibrary) item.getContent()).isReadOnly()) {
-                        libraryList.add((TLLibrary) item.getContent());
-                    }
+                if (((itemState == RepositoryItemState.UNMANAGED)
+                        || (itemState == RepositoryItemState.MANAGED_WIP))
+                					&& ((item.getContent() instanceof TLLibrary)
+                                        && !((TLLibrary) item.getContent()).isReadOnly())) {
+                    libraryList.add((TLLibrary) item.getContent());
                 }
             }
             findings.addAll(new LibraryModelSaver().saveLibraries(libraryList));
@@ -666,7 +665,8 @@ public final class ProjectManager {
         projects.clear();
         projectItems.clear();
         model.clearModel();
-        projects.add(builtInProject = new BuiltInProject(this));
+        builtInProject = new BuiltInProject(this);
+        projects.add(builtInProject);
     }
     
     /**

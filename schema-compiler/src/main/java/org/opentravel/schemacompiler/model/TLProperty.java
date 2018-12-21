@@ -100,10 +100,11 @@ public class TLProperty extends TLModelElement implements TLMemberField<TLProper
      * Returns the value of the 'propertyOwner' field.
      * 
      * @return TLPropertyOwner
+     * @deprecated  use {@link #getOwner()} instead
      */
     @Deprecated
     public TLPropertyOwner getPropertyOwner() {
-        return propertyOwner;
+        return getOwner();
     }
 
     /**
@@ -111,10 +112,11 @@ public class TLProperty extends TLModelElement implements TLMemberField<TLProper
      * 
      * @param propertyOwner
      *            the field value to assign
+     * @deprecated  use {@link #setOwner(TLPropertyOwner)} instead
      */
     @Deprecated
     public void setPropertyOwner(TLPropertyOwner propertyOwner) {
-        this.propertyOwner = propertyOwner;
+        setOwner( propertyOwner );
     }
 
     /**

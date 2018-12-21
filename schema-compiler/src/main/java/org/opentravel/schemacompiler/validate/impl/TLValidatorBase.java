@@ -71,9 +71,6 @@ import org.opentravel.schemacompiler.version.Versioned;
  */
 public abstract class TLValidatorBase<T extends Validatable> implements Validator<T> {
 
-    /**
-	 * 
-	 */
 	private static final String PATH_TEMPLATE = "pathTemplate";
 
 	public static final String TLMODEL_PREFIX = "org.opentravel.schemacompiler.";

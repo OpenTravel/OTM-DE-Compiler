@@ -17,8 +17,6 @@ package org.opentravel.schemacompiler.validate.compile;
 
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
-import org.opentravel.schemacompiler.model.TLChoiceObject;
-import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLFacetType;
@@ -67,12 +65,6 @@ public class TLFacetCompileValidator extends TLFacetBaseValidator {
 
         if (target.getOwningEntity() instanceof TLBusinessObject) {
             validateBusinessObjectFacet(target, builder);
-
-        } else if (target.getOwningEntity() instanceof TLChoiceObject) {
-            validateChoiceObjectFacet(target, builder);
-            
-        } else if (target.getOwningEntity() instanceof TLCoreObject) {
-            validateCoreObjectFacet(target, builder);
         }
 
         checkSchemaNamingConflicts(target, builder);
@@ -97,26 +89,6 @@ public class TLFacetCompileValidator extends TLFacetBaseValidator {
             builder.setProperty("ID.members", ValidatorUtils.getMembers(target, false))
                     .setFindingType(FindingType.ERROR).assertMinimumSize(1);
         }
-    }
-
-    /**
-     * Performs specialized checks for facets that are owned by choice objects.
-     * 
-     * @param target  the target facet to validate
-     * @param builder  the validation builder used to collect any findings that are discovered
-     */
-    private void validateChoiceObjectFacet(TLFacet target, TLValidationBuilder builder) {
-        // No business rules for core object facets at this time
-    }
-
-    /**
-     * Performs specialized checks for facets that are owned by core objects.
-     * 
-     * @param target  the target facet to validate
-     * @param builder  the validation builder used to collect any findings that are discovered
-     */
-    private void validateCoreObjectFacet(TLFacet target, TLValidationBuilder builder) {
-        // No business rules for core object facets at this time
     }
 
 }

@@ -69,7 +69,7 @@ public abstract class TLComplexTypeBase extends TLLibraryMember implements TLPro
      */
     @Override
     public String getLocalName() {
-        return name;
+        return getName();
     }
 
     /**

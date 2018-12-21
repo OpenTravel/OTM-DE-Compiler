@@ -19,7 +19,6 @@ import org.opentravel.schemacompiler.model.TLContext;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.base.TLContextBaseValidator;
-import org.opentravel.schemacompiler.validate.impl.IdentityResolver;
 import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
 
 /**
@@ -46,19 +45,11 @@ public class TLContextCompileValidator extends TLContextBaseValidator {
 
         builder.setProperty("applicationContext", target.getOwningLibrary().getContexts())
                 .setFindingType(FindingType.ERROR)
-                .assertNoDuplicates(new IdentityResolver<TLContext>() {
-                    public String getIdentity(TLContext entity) {
-                        return (entity == null) ? null : entity.getApplicationContext();
-                    }
-                });
+                .assertNoDuplicates( e -> (e == null) ? null : ((TLContext) e).getApplicationContext() );
 
         builder.setProperty("contextId", target.getOwningLibrary().getContexts())
                 .setFindingType(FindingType.ERROR)
-                .assertNoDuplicates(new IdentityResolver<TLContext>() {
-                    public String getIdentity(TLContext entity) {
-                        return (entity == null) ? null : entity.getContextId();
-                    }
-                });
+                .assertNoDuplicates( e -> (e == null) ? null : ((TLContext) e).getContextId() );
 
         return builder.getFindings();
     }

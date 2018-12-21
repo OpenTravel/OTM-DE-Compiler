@@ -20,6 +20,11 @@ package org.opentravel.schemacompiler.util;
  */
 public class OTM16Upgrade {
 	
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private OTM16Upgrade() {}
+	
 	public static boolean otm16Enabled = true;
 	
 }

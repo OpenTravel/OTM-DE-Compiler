@@ -159,20 +159,17 @@ public class JsonSchemaBuiltInCodeGenerator extends AbstractCodeGenerator<BuiltI
 	 */
 	@Override
 	public CodeGenerationFilenameBuilder<BuiltInLibrary> getFilenameBuilder() {
-		return new CodeGenerationFilenameBuilder<BuiltInLibrary>() {
-			public String buildFilename(BuiltInLibrary item, String fileExtension) {
-		        String fileExt = (fileExtension.length() == 0) ? "" : ("." + fileExtension);
-		        String filename = item.getName();
+		return (item, fileExtension) -> {
+	        String fileExt = (fileExtension.length() == 0) ? "" : ("." + fileExtension);
+	        String filename = item.getName();
 
-		        if (filename.toLowerCase().endsWith(".xsd")) {
-		        	filename = filename.substring( 0, filename.length() - 4 );
-		        }
-		        if (!filename.toLowerCase().endsWith(fileExt)) {
-		            filename += fileExt;
-		        }
-		        return filename;
-			}
-			
+	        if (filename.toLowerCase().endsWith(".xsd")) {
+	        	filename = filename.substring( 0, filename.length() - 4 );
+	        }
+	        if (!filename.toLowerCase().endsWith(fileExt)) {
+	            filename += fileExt;
+	        }
+	        return filename;
 		};
 	}
 

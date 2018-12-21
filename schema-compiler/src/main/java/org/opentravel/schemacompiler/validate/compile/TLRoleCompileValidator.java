@@ -19,7 +19,6 @@ import org.opentravel.schemacompiler.model.TLRole;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.base.TLRoleBaseValidator;
-import org.opentravel.schemacompiler.validate.impl.IdentityResolver;
 import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
 
 /**
@@ -41,11 +40,7 @@ public class TLRoleCompileValidator extends TLRoleBaseValidator {
 
         builder.setProperty("name", target.getRoleEnumeration().getRoles())
                 .setFindingType(FindingType.ERROR)
-                .assertNoDuplicates(new IdentityResolver<TLRole>() {
-                    public String getIdentity(TLRole role) {
-                        return (role == null) ? null : role.getName();
-                    }
-                });
+                .assertNoDuplicates( e -> (e == null) ? null : ((TLRole) e).getName() );
 
         return builder.getFindings();
     }

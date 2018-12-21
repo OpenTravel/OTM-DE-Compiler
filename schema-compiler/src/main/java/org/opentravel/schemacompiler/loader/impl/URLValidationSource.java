@@ -83,7 +83,7 @@ public class URLValidationSource implements Validatable {
      */
     @Override
     public int hashCode() {
-        return (url == null) ? 0 : url.hashCode();
+        return (url == null) ? 0 : url.toExternalForm().hashCode();
     }
 
 }

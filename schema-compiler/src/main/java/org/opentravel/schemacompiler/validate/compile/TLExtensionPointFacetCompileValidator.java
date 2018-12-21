@@ -35,7 +35,9 @@ import org.opentravel.schemacompiler.version.VersionSchemeException;
  */
 public class TLExtensionPointFacetCompileValidator extends TLExtensionPointFacetBaseValidator {
 
-    public static final String ERROR_MULTIPLE_ID_MEMBERS = "MULTIPLE_ID_MEMBERS";
+	private static final String EXTENDS_ENTITY = "extendsEntity";
+	
+	public static final String ERROR_MULTIPLE_ID_MEMBERS = "MULTIPLE_ID_MEMBERS";
     public static final String ERROR_ILLEGAL_PATCH1 = "ILLEGAL_PATCH1";
     public static final String ERROR_ILLEGAL_PATCH2 = "ILLEGAL_PATCH2";
 
@@ -48,7 +50,7 @@ public class TLExtensionPointFacetCompileValidator extends TLExtensionPointFacet
         TLExtension extension = target.getExtension();
 
         if (extension == null) {
-            builder.addFinding(FindingType.ERROR, "extendsEntity",
+            builder.addFinding(FindingType.ERROR, EXTENDS_ENTITY,
                     TLValidationBuilder.ERROR_NULL_VALUE);
         }
 
@@ -80,7 +82,7 @@ public class TLExtensionPointFacetCompileValidator extends TLExtensionPointFacet
                             isLegalPatch = (extension.getExtendsEntity().getOwningLibrary() == minorVersionLibrary);
                         }
                         if (!isLegalPatch) {
-                            builder.addFinding(FindingType.ERROR, "extendsEntity",
+                            builder.addFinding(FindingType.ERROR, EXTENDS_ENTITY,
                                     ERROR_ILLEGAL_PATCH2, extension.getExtendsEntityName(),
                                     patchedVersionId);
                         }
@@ -88,7 +90,7 @@ public class TLExtensionPointFacetCompileValidator extends TLExtensionPointFacet
                         if (helper.getPatchedVersion(target) != null) { // is the patched entity
                                                                         // assigned to the same base
                                                                         // namespace?
-                            builder.addFinding(FindingType.ERROR, "extendsEntity",
+                            builder.addFinding(FindingType.ERROR, EXTENDS_ENTITY,
                                     ERROR_ILLEGAL_PATCH1);
                         }
                     }

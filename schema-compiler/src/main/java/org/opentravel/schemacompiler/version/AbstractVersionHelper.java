@@ -75,7 +75,9 @@ import org.opentravel.schemacompiler.version.handlers.VersionHandlerMergeUtils;
  */
 public abstract class AbstractVersionHelper {
 
-    private VersionHandlerFactory handlerFactory = new VersionHandlerFactory();
+	private static final String NO_OWNING_MODEL = "The given library is not associated with an owning model instance: ";
+	
+	private VersionHandlerFactory handlerFactory = new VersionHandlerFactory();
 	private Project activeProject;
 
     /**
@@ -118,8 +120,7 @@ public abstract class AbstractVersionHelper {
 
         if (library.getOwningModel() == null) {
             throw new IllegalStateException(
-                    "The given library is not associated with an owning model instance: "
-                            + library.getLibraryUrl().toExternalForm());
+                    NO_OWNING_MODEL + library.getLibraryUrl().toExternalForm());
         }
 
         // Find all prior patch versions
@@ -222,13 +223,13 @@ public abstract class AbstractVersionHelper {
      * @throws IllegalStateException
      *             thrown if the given library is not associated with a TLModel instance
      */
+    @SuppressWarnings("squid:S2692") // False Sonar finding - code works as intended
     List<TLLibrary> getLaterMinorVersions(TLLibrary library) throws VersionSchemeException {
         List<TLLibrary> minorVersionList = new ArrayList<>();
 
         if (library.getOwningModel() == null) {
             throw new IllegalStateException(
-                    "The given library is not associated with an owning model instance: "
-                            + library.getLibraryUrl().toExternalForm());
+                    NO_OWNING_MODEL + library.getLibraryUrl().toExternalForm());
         }
 
         if (library.getNamespace() != null) {
@@ -263,6 +264,7 @@ public abstract class AbstractVersionHelper {
      * @throws IllegalStateException
      *             thrown if the given library is not associated with a TLModel instance
      */
+    @SuppressWarnings("squid:S2692") // False Sonar finding - code works as intended
     List<TLLibrary> getLaterPatchVersions(TLLibrary library) throws VersionSchemeException {
         List<TLLibrary> patchVersionList = new ArrayList<>();
 
@@ -272,8 +274,7 @@ public abstract class AbstractVersionHelper {
 
             if (library.getOwningModel() == null) {
                 throw new IllegalStateException(
-                        "The given library is not associated with an owning model instance: "
-                                + library.getLibraryUrl().toExternalForm());
+                        NO_OWNING_MODEL + library.getLibraryUrl().toExternalForm());
             }
 
             if (!versionScheme.isPatchVersion(library.getNamespace())) {
@@ -320,6 +321,7 @@ public abstract class AbstractVersionHelper {
      * @throws VersionSchemeException
      *             thrown if the entity's version scheme is not recognized
      */
+    @SuppressWarnings("squid:S2692") // False Sonar finding - code works as intended
     Versioned getPatchedVersion(TLExtensionPointFacet xpFacet) throws VersionSchemeException {
         NamedEntity extendedEntity = (xpFacet.getExtension() == null) ? null : xpFacet
                 .getExtension().getExtendsEntity();
@@ -1204,6 +1206,7 @@ public abstract class AbstractVersionHelper {
 		 */
 		@Override
 		public void addListener(ModelElementListener listener) {
+			// No action required - listeners not supported
 		}
 
 		/**
@@ -1211,6 +1214,7 @@ public abstract class AbstractVersionHelper {
 		 */
 		@Override
 		public void removeListener(ModelElementListener listener) {
+			// No action required - listeners not supported
 		}
 
 		/**

@@ -167,12 +167,12 @@ public class OTA2VersionScheme implements VersionScheme {
         int[] versionParts = splitVersionIdentifier(versionIdentifier);
         String[] versionPartsStr = new String[versionParts.length];
         StringBuilder newPrefix = new StringBuilder();
-        Matcher m;
+        Matcher m = prefixPattern.matcher(prefix);
 
         for (int i = 0; i < versionParts.length; i++) {
             versionPartsStr[i] = ((versionParts[i] < 10) ? "0" : "") + versionParts[i];
         }
-        if ((m = prefixPattern.matcher(prefix)).matches()) {
+        if (m.matches()) {
             newPrefix.append(m.group(1));
         } else {
             newPrefix.append(prefix);

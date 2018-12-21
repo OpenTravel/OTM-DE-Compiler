@@ -76,6 +76,7 @@ public class TLFolder extends TLModelElement implements TLFolderOwner {
 		while (f != null) {
 			String fName = "/" + ((f.name == null) ? "???" : f.name);
 			identity.insert( 0, fName );
+			f = f.getParentFolder();
 		}
         if (owningLibrary != null) {
             identity.insert( 0, owningLibrary.getValidationIdentity() + " : " );

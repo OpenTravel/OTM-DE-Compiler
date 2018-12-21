@@ -57,7 +57,12 @@ import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
  * @author S. Livezey
  */
 public class TLModelCompileValidator {
-
+	
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private TLModelCompileValidator() {}
+	
     /**
      * Utility method that validates all elements of the given model using the default rule set for
      * library compilation.

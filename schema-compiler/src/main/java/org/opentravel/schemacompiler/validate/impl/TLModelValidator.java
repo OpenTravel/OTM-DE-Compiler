@@ -28,7 +28,12 @@ import org.opentravel.schemacompiler.validate.ValidatorFactory;
  * @author S. Livezey
  */
 public class TLModelValidator {
-
+	
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private TLModelValidator() {}
+	
     /**
      * Utility method that validates all elements of the given model using the specified rule set
      * from the application context file.

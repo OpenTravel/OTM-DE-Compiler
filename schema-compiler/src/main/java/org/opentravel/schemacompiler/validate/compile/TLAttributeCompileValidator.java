@@ -150,77 +150,67 @@ public class TLAttributeCompileValidator extends TLAttributeBaseValidator {
      * @param target  the target attribute being validated
      * @param builder  the validation builder where all findings should be reported
      */
-    private void validateStandardType(TLAttribute target, TLValidationBuilder builder) {
-    	TLPropertyType attributeType = target.getType();
-    	
-        builder.setEntityReferenceProperty("type", attributeType, target.getTypeName())
-        		.assertValidEntityReference(TLClosedEnumeration.class, TLOpenEnumeration.class,
-        				TLRoleEnumeration.class, TLValueWithAttributes.class, TLSimple.class,
-        				TLCoreObject.class, TLSimpleFacet.class, TLListFacet.class, XSDSimpleType.class);
-
-        // VWA and open enumeration attributes are only allowed when the attribute's owner is a VWA
-        if (!(target.getOwner() instanceof TLValueWithAttributes)) {
-            if (attributeType instanceof TLValueWithAttributes) {
-                builder.addFinding(FindingType.ERROR, "type", ERROR_ILLEGAL_VWA_ATTRIBUTE);
-            } else if (attributeType instanceof TLOpenEnumeration) {
-                builder.addFinding(FindingType.ERROR, "type", ERROR_ILLEGAL_OPEN_ENUM_ATTRIBUTE);
-            }
-        }
-
-        checkEmptyValueType(target, attributeType, "type", builder);
-
-        // A warning will be issued for boolean attributes (should be indicators)
-        if (ValidatorUtils.isBooleanType(target.getType())) {
-            builder.addFinding(FindingType.WARNING, "type", WARNING_BOOLEAN_TYPE_REFERENCE);
-        }
-
-        // Cores are only allowed as attribute types if they publish a simple facet
-        if (attributeType instanceof TLCoreObject) {
-            TLCoreObject coreObject = (TLCoreObject) target.getType();
-
-            if (!coreObject.getSimpleFacet().declaresContent()) {
-                builder.addFinding(FindingType.ERROR, "type", ERROR_NON_SIMPLE_CORE_AS_ATTRIBUTE,
-                        coreObject.getLocalName());
-            }
-        }
-
-        /*
-         * Disabled warning for use of legacy IDREF(S)
-        if (ValidatorUtils.isLegacyIDREF(attributeType)) {
-        	if (OTM16Upgrade.otm16Enabled) {
-                builder.addFinding(FindingType.WARNING, "type", WARNING_LEGACY_IDREF);
-        	}
-        }
-         */
-        
-        // For xsd:ID attributes, make sure they are contained in the top-level facet
-        // if the owner is a core or business object
-        if (ValidatorUtils.isXsdID(attributeType) && (target.getOwner() instanceof TLFacet)) {
-        	TLFacet facet = (TLFacet) target.getOwner();
-        	TLFacetOwner facetOwner = facet.getOwningEntity();
-        	
-        	if (facetOwner instanceof TLBusinessObject) {
-        		if ((facet.getFacetType() != TLFacetType.ID) && (facet.getFacetType() != TLFacetType.QUERY)) {
-                    builder.addFinding(FindingType.WARNING, "type", WARNING_ILLEGAL_BUSINESS_OBJECT_ID);
-        		}
-        	} else if (facetOwner instanceof TLCoreObject) {
-        		if (facet.getFacetType() != TLFacetType.SUMMARY) {
-                    builder.addFinding(FindingType.WARNING, "type", WARNING_ILLEGAL_CORE_OBJECT_ID);
-        		}
-        	}
-        }
-        
-        // The reference-repeat value is meaningless for non-reference attributes
-        builder.setProperty("referenceRepeat", target.getReferenceRepeat())
-        		.setFindingType(FindingType.WARNING)
-        		.assertEquals(0);
-        
-        // Warn if a deprecated XSD date/time type is being referenced
-        TLAttributeOwner attrOwner = target.getOwner();
-        AbstractLibrary owningLibrary = (attrOwner == null) ? null : attrOwner.getOwningLibrary();
-        
-        validateDeprecatedDateTimeUsage( attributeType, owningLibrary, builder );
-    }
+	private void validateStandardType(TLAttribute target, TLValidationBuilder builder) {
+		TLPropertyType attributeType = target.getType();
+		
+		builder.setEntityReferenceProperty("type", attributeType, target.getTypeName()).assertValidEntityReference(
+				TLClosedEnumeration.class, TLOpenEnumeration.class, TLRoleEnumeration.class,
+				TLValueWithAttributes.class, TLSimple.class, TLCoreObject.class, TLSimpleFacet.class, TLListFacet.class,
+				XSDSimpleType.class);
+		
+		// VWA and open enumeration attributes are only allowed when the
+		// attribute's owner is a VWA
+		if (!(target.getOwner() instanceof TLValueWithAttributes)) {
+			if (attributeType instanceof TLValueWithAttributes) {
+				builder.addFinding(FindingType.ERROR, "type", ERROR_ILLEGAL_VWA_ATTRIBUTE);
+			} else if (attributeType instanceof TLOpenEnumeration) {
+				builder.addFinding(FindingType.ERROR, "type", ERROR_ILLEGAL_OPEN_ENUM_ATTRIBUTE);
+			}
+		}
+		
+		checkEmptyValueType(target, attributeType, "type", builder);
+		
+		// A warning will be issued for boolean attributes (should be indicators)
+		if (ValidatorUtils.isBooleanType(target.getType())) {
+			builder.addFinding(FindingType.WARNING, "type", WARNING_BOOLEAN_TYPE_REFERENCE);
+		}
+		
+		// Cores are only allowed as attribute types if they publish a simple facet
+		if (attributeType instanceof TLCoreObject) {
+			TLCoreObject coreObject = (TLCoreObject) target.getType();
+			
+			if (!coreObject.getSimpleFacet().declaresContent()) {
+				builder.addFinding(FindingType.ERROR, "type", ERROR_NON_SIMPLE_CORE_AS_ATTRIBUTE,
+						coreObject.getLocalName());
+			}
+		}
+		
+		// For xsd:ID attributes, make sure they are contained in the top-level facet
+		// if the owner is a core or business object
+		if (ValidatorUtils.isXsdID(attributeType) && (target.getOwner() instanceof TLFacet)) {
+			TLFacet facet = (TLFacet) target.getOwner();
+			TLFacetOwner facetOwner = facet.getOwningEntity();
+			
+			if (facetOwner instanceof TLBusinessObject) {
+				if ((facet.getFacetType() != TLFacetType.ID) && (facet.getFacetType() != TLFacetType.QUERY)) {
+					builder.addFinding(FindingType.WARNING, "type", WARNING_ILLEGAL_BUSINESS_OBJECT_ID);
+				}
+			} else if ((facetOwner instanceof TLCoreObject) && (facet.getFacetType() != TLFacetType.SUMMARY)) {
+				builder.addFinding(FindingType.WARNING, "type", WARNING_ILLEGAL_CORE_OBJECT_ID);
+			}
+		}
+		
+		// The reference-repeat value is meaningless for non-reference
+		// attributes
+		builder.setProperty("referenceRepeat", target.getReferenceRepeat())
+			.setFindingType(FindingType.WARNING).assertEquals(0);
+		
+		// Warn if a deprecated XSD date/time type is being referenced
+		TLAttributeOwner attrOwner = target.getOwner();
+		AbstractLibrary owningLibrary = (attrOwner == null) ? null : attrOwner.getOwningLibrary();
+		
+		validateDeprecatedDateTimeUsage(attributeType, owningLibrary, builder);
+	}
     
     /**
      * Performs attribute type validation for non-reference attributes.

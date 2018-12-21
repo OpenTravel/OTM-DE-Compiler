@@ -70,58 +70,60 @@ public class SwaggerCompilerTask extends AbstractSchemaCompilerTask
 	@Override
 	protected void generateOutput(Collection<TLLibrary> userDefinedLibraries, Collection<XSDLibrary> legacySchemas)
 			throws SchemaCompilerException {
-        CodeGenerationContext modelContext = createContext();
-        CodeGenerationContext resourceContext = modelContext.getCopy();
-        
-        for (TLLibrary library : userDefinedLibraries) {
-        	for (TLResource resource : library.getResourceTypes()) {
-        		if (resource.isAbstract()) continue;
-                resourceContext.setValue( CodeGenerationContext.CK_ENABLE_SINGLE_FILE_SWAGGER, "false" );
-                resourceContext.setValue( CodeGenerationContext.CK_OUTPUT_FOLDER,
-                        getResourceOutputFolder( resource, modelContext, false ) );
-        		
-                // Generate the Swagger document
-                CodeGenerator<TLResource> swaggerGenerator = CodeGeneratorFactory.getInstance()
-                        .newCodeGenerator( CodeGeneratorFactory.SWAGGER_TARGET_FORMAT, TLResource.class );
-                Collection<File> swaggerFiles = swaggerGenerator.generateOutput( resource, resourceContext );
-                
-                if (!swaggerFiles.isEmpty()) {
-                    addGeneratedFiles( swaggerFiles );
-
-                    // Generate the trimmed XML & JSON schema documents for the service
-                    compileXmlSchemas( userDefinedLibraries, legacySchemas, resourceContext,
-                            new LibraryTrimmedFilenameBuilder( null ),
-                            createSchemaFilter( resource, TLMimeType.TEXT_XML, TLMimeType.APPLICATION_XML ) );
-                    compileJsonSchemas( userDefinedLibraries, legacySchemas, resourceContext,
-                            new LibraryTrimmedFilenameBuilder( null ),
-                            createSchemaFilter( resource, TLMimeType.TEXT_JSON, TLMimeType.APPLICATION_JSON ) );
-                    
-                    // Generate EXAMPLE files if required; examples are only created for the operation
-                    // messages (not the contents of the trimmed schemas)
-                    if (isGenerateExamples()) {
-                        generateExampleArtifacts(userDefinedLibraries, resourceContext,
-                                new LibraryTrimmedFilenameBuilder( null ),
-                                createExampleFilter( resource, TLMimeType.TEXT_XML, TLMimeType.APPLICATION_XML ),
-                                CodeGeneratorFactory.XML_TARGET_FORMAT );
-                        generateExampleArtifacts(userDefinedLibraries, resourceContext,
-                                new LibraryTrimmedFilenameBuilder( null ),
-                                createExampleFilter( resource, TLMimeType.TEXT_JSON, TLMimeType.APPLICATION_JSON ),
-                                CodeGeneratorFactory.JSON_TARGET_FORMAT );
-                    }
-                }
-                
-                // Also generate a standalone Swagger document that contains all of the JSON
-                // definitions that are normally broken out into separate JSON schemas.
-                resourceContext.setValue( CodeGenerationContext.CK_ENABLE_SINGLE_FILE_SWAGGER, "true" );
-                resourceContext.setValue( CodeGenerationContext.CK_OUTPUT_FOLDER,
-                        getResourceOutputFolder( resource, modelContext, true ) );
-                swaggerGenerator.setFilter( createSchemaFilter(
-                		resource, TLMimeType.TEXT_JSON, TLMimeType.APPLICATION_JSON ) );
-                addGeneratedFiles( swaggerGenerator.generateOutput( resource, resourceContext ) );
-        	}
-        }
+		CodeGenerationContext modelContext = createContext();
+		CodeGenerationContext resourceContext = modelContext.getCopy();
+		
+		for (TLLibrary library : userDefinedLibraries) {
+			for (TLResource resource : library.getResourceTypes()) {
+				if (resource.isAbstract()) continue;
+				resourceContext.setValue(CodeGenerationContext.CK_ENABLE_SINGLE_FILE_SWAGGER, "false");
+				resourceContext.setValue(CodeGenerationContext.CK_OUTPUT_FOLDER,
+						getResourceOutputFolder(resource, modelContext, false));
+				
+				// Generate the Swagger document
+				CodeGenerator<TLResource> swaggerGenerator = CodeGeneratorFactory.getInstance()
+					.newCodeGenerator(CodeGeneratorFactory.SWAGGER_TARGET_FORMAT, TLResource.class);
+				Collection<File> swaggerFiles = swaggerGenerator.generateOutput(resource, resourceContext);
+				
+				if (!swaggerFiles.isEmpty()) {
+					addGeneratedFiles(swaggerFiles);
+					
+					// Generate the trimmed XML & JSON schema documents for the
+					// service
+					compileXmlSchemas(userDefinedLibraries, legacySchemas, resourceContext,
+							new LibraryTrimmedFilenameBuilder(null),
+							createSchemaFilter(resource, TLMimeType.TEXT_XML, TLMimeType.APPLICATION_XML));
+					compileJsonSchemas(userDefinedLibraries, legacySchemas, resourceContext,
+							new LibraryTrimmedFilenameBuilder(null),
+							createSchemaFilter(resource, TLMimeType.TEXT_JSON, TLMimeType.APPLICATION_JSON));
+					
+					// Generate EXAMPLE files if required; examples are only
+					// created for the operation
+					// messages (not the contents of the trimmed schemas)
+					if (isGenerateExamples()) {
+						generateExampleArtifacts(userDefinedLibraries, resourceContext,
+								new LibraryTrimmedFilenameBuilder(null),
+								createExampleFilter(resource, TLMimeType.TEXT_XML, TLMimeType.APPLICATION_XML),
+								CodeGeneratorFactory.XML_TARGET_FORMAT);
+						generateExampleArtifacts(userDefinedLibraries, resourceContext,
+								new LibraryTrimmedFilenameBuilder(null),
+								createExampleFilter(resource, TLMimeType.TEXT_JSON, TLMimeType.APPLICATION_JSON),
+								CodeGeneratorFactory.JSON_TARGET_FORMAT);
+					}
+				}
+				
+				// Also generate a standalone Swagger document that contains all of the
+				// JSON definitions that are normally broken out into separate JSON schemas.
+				resourceContext.setValue(CodeGenerationContext.CK_ENABLE_SINGLE_FILE_SWAGGER, "true");
+				resourceContext.setValue(CodeGenerationContext.CK_OUTPUT_FOLDER,
+						getResourceOutputFolder(resource, modelContext, true));
+				swaggerGenerator
+					.setFilter(createSchemaFilter(resource, TLMimeType.TEXT_JSON, TLMimeType.APPLICATION_JSON));
+				addGeneratedFiles(swaggerGenerator.generateOutput(resource, resourceContext));
+			}
+		}
 	}
-
+	
     /**
      * Returns the location of the output folder for the specified resource.
      * 

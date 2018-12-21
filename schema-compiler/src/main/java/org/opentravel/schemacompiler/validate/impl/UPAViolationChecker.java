@@ -32,7 +32,6 @@ import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
-import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLIndicatorOwner;
 import org.opentravel.schemacompiler.model.TLModelElement;
@@ -244,18 +243,18 @@ public class UPAViolationChecker {
 				if (elementType instanceof TLCoreObject) {
 					TLCoreObject core = (TLCoreObject) elementType;
 					
-					addElementName( core.getSummaryFacet(), core, ownerAlias, elementNames );
-					addElementName( core.getDetailFacet(), core, ownerAlias, elementNames );
+					addElementName( core.getSummaryFacet(), ownerAlias, elementNames );
+					addElementName( core.getDetailFacet(), ownerAlias, elementNames );
 					
 				} else { // instanceof TLBusinessObject
 					TLBusinessObject bo = (TLBusinessObject) elementType;
 					
-					addElementName( bo.getIdFacet(), bo, ownerAlias, elementNames );
-					addElementName( bo.getSummaryFacet(), bo, ownerAlias, elementNames );
-					addElementName( bo.getDetailFacet(), bo, ownerAlias, elementNames );
+					addElementName( bo.getIdFacet(), ownerAlias, elementNames );
+					addElementName( bo.getSummaryFacet(), ownerAlias, elementNames );
+					addElementName( bo.getDetailFacet(), ownerAlias, elementNames );
 					
 					for (TLFacet customFacet : bo.getCustomFacets()) {
-						addElementName( customFacet, bo, ownerAlias, elementNames );
+						addElementName( customFacet, ownerAlias, elementNames );
 					}
 				}
 				
@@ -277,11 +276,10 @@ public class UPAViolationChecker {
 	 * will be added.
 	 * 
 	 * @param facet  the facet for which to return a name
-	 * @param facetOwner  the business/core object that owns or inherits the given facet
 	 * @param ownerAlias  the owner alias (optional) that specifies which facet alias to return
 	 * @param elementNames  the collection of names to which the facet name should be added
 	 */
-	private void addElementName(TLFacet facet, TLFacetOwner facetOwner, TLAlias ownerAlias, Set<QName> elementNames) {
+	private void addElementName(TLFacet facet, TLAlias ownerAlias, Set<QName> elementNames) {
 		QName elementName = null;
 		
 		if (facetDelegateFactory.getDelegate( facet ).hasContent()) {

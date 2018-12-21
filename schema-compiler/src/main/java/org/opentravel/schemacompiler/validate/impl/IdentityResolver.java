@@ -23,6 +23,7 @@ package org.opentravel.schemacompiler.validate.impl;
  *            the entity type for which names will be resolved
  * @author S. Livezey
  */
+@FunctionalInterface
 public interface IdentityResolver<E> {
 
     /**

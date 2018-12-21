@@ -161,6 +161,7 @@ public class JettyTestServer {
     /**
      * Indexes the contents of the server's test repository.
      */
+    @SuppressWarnings("squid:S2925") // Ignore Sonar warning
     private void indexTestRepository() throws Exception {
         FreeTextSearchService service = FreeTextSearchServiceFactory.getInstance();
 

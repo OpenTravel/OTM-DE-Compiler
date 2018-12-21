@@ -34,7 +34,9 @@ import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
  */
 public class TLSimpleFacetCompileValidator extends TLSimpleFacetBaseValidator {
 
-    public static final String ERROR_INVALID_SIMPLE_CORE_VERSION = "INVALID_SIMPLE_CORE_VERSION";
+	private static final String SIMPLE_TYPE = "simpleType";
+	
+	public static final String ERROR_INVALID_SIMPLE_CORE_VERSION = "INVALID_SIMPLE_CORE_VERSION";
     public static final String ERROR_INVALID_CIRCULAR_REFERENCE = "INVALID_CIRCULAR_REFERENCE";
 
     /**
@@ -44,7 +46,7 @@ public class TLSimpleFacetCompileValidator extends TLSimpleFacetBaseValidator {
     protected ValidationFindings validateFields(TLSimpleFacet target) {
         TLValidationBuilder builder = newValidationBuilder(target);
 
-        builder.setEntityReferenceProperty("simpleType", target.getSimpleType(),
+        builder.setEntityReferenceProperty(SIMPLE_TYPE, target.getSimpleType(),
                 target.getSimpleTypeName())
                 .setFindingType(FindingType.ERROR)
                 .assertValidEntityReference(TLCoreObject.class, TLSimpleFacet.class,
@@ -52,7 +54,7 @@ public class TLSimpleFacetCompileValidator extends TLSimpleFacetBaseValidator {
                 .setFindingType(FindingType.WARNING)
                 .assertNotNull().assertNotDeprecated().assertNotObsolete();
 
-        checkEmptyValueType(target, target.getSimpleType(), "simpleType", builder);
+        checkEmptyValueType(target, target.getSimpleType(), SIMPLE_TYPE, builder);
 
         builder.setProperty("equivalents", target.getEquivalents())
                 .setFindingType(FindingType.ERROR).assertNotNull().assertContainsNoNullElements();
@@ -64,13 +66,13 @@ public class TLSimpleFacetCompileValidator extends TLSimpleFacetBaseValidator {
 
             if ((extendedCore != null)
                     && (extendedCore.getSimpleFacet().getSimpleType() != target.getSimpleType())) {
-                builder.addFinding(FindingType.ERROR, "simpleType",
+                builder.addFinding(FindingType.ERROR, SIMPLE_TYPE,
                         ERROR_INVALID_SIMPLE_CORE_VERSION);
             }
         }
 
         if (CircularReferenceChecker.hasCircularReference(target)) {
-            builder.addFinding(FindingType.ERROR, "simpleType", ERROR_INVALID_CIRCULAR_REFERENCE);
+            builder.addFinding(FindingType.ERROR, SIMPLE_TYPE, ERROR_INVALID_CIRCULAR_REFERENCE);
         }
 
         checkSchemaNamingConflicts(target, builder);

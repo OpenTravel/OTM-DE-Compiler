@@ -40,7 +40,13 @@ import org.opentravel.schemacompiler.version.VersionSchemeException;
  */
 public class TLActionRequestCompileValidator extends TLActionRequestBaseValidator {
 
-    public static final String ERROR_PARAM_GROUP_REQUIRED        = "PARAM_GROUP_REQUIRED";
+	private static final String PAYLOAD_TYPE = "payloadType";
+	private static final String PATH_TEMPLATE2 = "pathTemplate";
+	private static final String PARAM_GROUP = "paramGroup";
+	private static final String MIME_TYPES = "mimeTypes";
+	private static final String HTTP_METHOD = "httpMethod";
+	
+	public static final String ERROR_PARAM_GROUP_REQUIRED        = "PARAM_GROUP_REQUIRED";
     public static final String ERROR_INVALID_PARAM_GROUP         = "INVALID_PARAM_GROUP";
     public static final String ERROR_CONFLICTING_PATH_TEMPLATE   = "CONFLICTING_PATH_TEMPLATE";
     public static final String ERROR_MINOR_VERSION_PATH_TEMPLATE = "MINOR_VERSION_PATH_TEMPLATE";
@@ -60,26 +66,26 @@ public class TLActionRequestCompileValidator extends TLActionRequestBaseValidato
         TLParamGroup paramGroup = target.getParamGroup();
         TLValidationBuilder builder = newValidationBuilder(target);
         
-        builder.setProperty("httpMethod", target.getHttpMethod())
+        builder.setProperty(HTTP_METHOD, target.getHttpMethod())
         		.setFindingType(FindingType.ERROR).assertNotNull();
         
         if (target.getHttpMethod() == TLHttpMethod.PATCH) {
-        	builder.addFinding( FindingType.WARNING, "httpMethod", WARNING_PATCH_PARTIAL_SUPPORT );
+        	builder.addFinding( FindingType.WARNING, HTTP_METHOD, WARNING_PATCH_PARTIAL_SUPPORT );
         }
         if ((target.getHttpMethod() == TLHttpMethod.HEAD) || (target.getHttpMethod() == TLHttpMethod.OPTIONS)) {
-        	builder.addFinding( FindingType.WARNING, "httpMethod", WARNING_DISCOURAGED_HTTP_METHOD, target.getHttpMethod() );
+        	builder.addFinding( FindingType.WARNING, HTTP_METHOD, WARNING_DISCOURAGED_HTTP_METHOD, target.getHttpMethod() );
         }
         
     	if (paramGroup == null) {
     		String paramGroupName = target.getParamGroupName();
     		
             if ((paramGroupName != null) && !paramGroupName.equals("")) {
-            	builder.addFinding(FindingType.ERROR, "paramGroup",
+            	builder.addFinding(FindingType.ERROR, PARAM_GROUP,
             			TLValidationBuilder.UNRESOLVED_NAMED_ENTITY_REFERENCE, paramGroupName );
             	
             } else if ((target.getPathTemplate() != null) &&
                 	!urlValidator.getPathParameters( target.getPathTemplate() ).isEmpty()) {
-               	builder.addFinding( FindingType.ERROR, "paramGroup", ERROR_PARAM_GROUP_REQUIRED );
+               	builder.addFinding( FindingType.ERROR, PARAM_GROUP, ERROR_PARAM_GROUP_REQUIRED );
             }
             
     	} else if (owningResource != null) {
@@ -87,12 +93,12 @@ public class TLActionRequestCompileValidator extends TLActionRequestBaseValidato
     				ResourceCodegenUtils.getInheritedParamGroups( owningResource );
     		
     		if (!inheritedParamGroup.contains( paramGroup )) {
-            	builder.addFinding( FindingType.ERROR, "paramGroup", ERROR_INVALID_PARAM_GROUP,
+            	builder.addFinding( FindingType.ERROR, PARAM_GROUP, ERROR_INVALID_PARAM_GROUP,
             			paramGroup.getName() );
     		}
     	}
     	
-    	builder.setProperty("pathTemplate", target.getPathTemplate()).setFindingType(FindingType.ERROR)
+    	builder.setProperty(PATH_TEMPLATE2, target.getPathTemplate()).setFindingType(FindingType.ERROR)
     			.assertNotNullOrBlank();
     	validatePathTemplate( target.getPathTemplate(), target.getParamGroup(), builder );
     	checkConflictingPathTemplate( target, builder );
@@ -102,27 +108,25 @@ public class TLActionRequestCompileValidator extends TLActionRequestBaseValidato
     		TLActionFacet payloadType = target.getPayloadType();
     		
         	if (target.getHttpMethod() == TLHttpMethod.GET) {
-            	builder.addFinding( FindingType.ERROR, "payloadType", ERROR_GET_REQUEST_PAYLOAD );
+            	builder.addFinding( FindingType.ERROR, PAYLOAD_TYPE, ERROR_GET_REQUEST_PAYLOAD );
         	}
-        	if (owningResource != null) {
-        		if (!isDeclaredOrInheritedFacet( owningResource, payloadType )) {
-                	builder.addFinding( FindingType.ERROR, "payloadType", ERROR_INVALID_ACTION_FACET_REF,
-                			payloadType.getName() );
-        		}
+        	if ((owningResource != null) && !isDeclaredOrInheritedFacet( owningResource, payloadType )) {
+            	builder.addFinding( FindingType.ERROR, PAYLOAD_TYPE, ERROR_INVALID_ACTION_FACET_REF,
+            			payloadType.getName() );
         	}
-            builder.setProperty("mimeTypes", target.getMimeTypes()).setFindingType(FindingType.ERROR)
+            builder.setProperty(MIME_TYPES, target.getMimeTypes()).setFindingType(FindingType.ERROR)
             		.assertMinimumSize( 1 );
         	
     	} else {
     		String payloadTypeName = target.getPayloadTypeName();
     		
     		if ((payloadTypeName != null) && (payloadTypeName.length() > 0)) {
-            	builder.addFinding(FindingType.ERROR, "payloadType",
+            	builder.addFinding(FindingType.ERROR, PAYLOAD_TYPE,
             			TLValidationBuilder.UNRESOLVED_NAMED_ENTITY_REFERENCE, payloadTypeName );
-                builder.setProperty("mimeTypes", target.getMimeTypes()).setFindingType(FindingType.ERROR)
+                builder.setProperty(MIME_TYPES, target.getMimeTypes()).setFindingType(FindingType.ERROR)
                 		.assertMinimumSize( 1 );
     		} else {
-                builder.setProperty("mimeTypes", target.getMimeTypes()).setFindingType(FindingType.WARNING)
+                builder.setProperty(MIME_TYPES, target.getMimeTypes()).setFindingType(FindingType.WARNING)
                 		.assertMaximumSize( 0 );
     		}
     	}
@@ -153,7 +157,7 @@ public class TLActionRequestCompileValidator extends TLActionRequestBaseValidato
             	String testPath = buildTestPath( request.getPathTemplate() );
             	
             	if (targetTestPath.equals( testPath )) {
-                	builder.addFinding( FindingType.ERROR, "pathTemplate", ERROR_CONFLICTING_PATH_TEMPLATE,
+                	builder.addFinding( FindingType.ERROR, PATH_TEMPLATE2, ERROR_CONFLICTING_PATH_TEMPLATE,
                 			target.getPathTemplate(), target.getHttpMethod() );
             	}
             }
@@ -197,7 +201,7 @@ public class TLActionRequestCompileValidator extends TLActionRequestBaseValidato
         	// did not change.
         	if ((priorVersionRequest != null) &&
         			!targetPathTemplate.equals( priorVersionRequest.getPathTemplate() )) {
-            	builder.addFinding( FindingType.ERROR, "pathTemplate", ERROR_MINOR_VERSION_PATH_TEMPLATE,
+            	builder.addFinding( FindingType.ERROR, PATH_TEMPLATE2, ERROR_MINOR_VERSION_PATH_TEMPLATE,
             			target.getPathTemplate() );
         	}
         }

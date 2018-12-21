@@ -23,7 +23,12 @@ import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
  * @author S. Livezey
  */
 public class TaskFactory {
-
+	
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private TaskFactory() {}
+	
     /**
      * Retrieves a pre-configured task from the application context using the simple name of the
      * given class. The type of the task that is registered in the Spring application context must

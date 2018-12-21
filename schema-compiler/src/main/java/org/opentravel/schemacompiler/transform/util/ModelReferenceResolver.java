@@ -36,6 +36,11 @@ public final class ModelReferenceResolver {
 	private static Class<? extends ObsoleteBuiltInVisitor> obsoleteBuiltInVisitorType = ObsoleteBuiltInVisitor.class;
 	
 	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private ModelReferenceResolver() {}
+	
+	/**
 	 * Resolves all entity references within the given OTM model.
 	 * 
 	 * @param model  the model for which to resolve references

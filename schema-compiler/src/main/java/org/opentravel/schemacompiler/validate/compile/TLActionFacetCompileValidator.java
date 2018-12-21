@@ -25,7 +25,6 @@ import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.base.TLActionFacetBaseValidator;
-import org.opentravel.schemacompiler.validate.impl.IdentityResolver;
 import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
 
 /**
@@ -35,7 +34,9 @@ import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
  */
 public class TLActionFacetCompileValidator extends TLActionFacetBaseValidator{
 
-    public static final String ERROR_NOT_ALLOWED_FOR_ABSTRACT = "NOT_ALLOWED_FOR_ABSTRACT";
+	private static final String REFERENCE_FACET_NAME = "referenceFacetName";
+	
+	public static final String ERROR_NOT_ALLOWED_FOR_ABSTRACT = "NOT_ALLOWED_FOR_ABSTRACT";
     public static final String ERROR_INVALID_REFERENCE_TYPE   = "INVALID_REFERENCE_TYPE";
     public static final String ERROR_INVALID_FACET_REFERENCE  = "INVALID_FACET_REFERENCE";
     
@@ -49,73 +50,60 @@ public class TLActionFacetCompileValidator extends TLActionFacetBaseValidator{
 		NamedEntity basePayload = target.getBasePayload();
 		TLResource owner = target.getOwningResource();
 		
-		builder.setProperty("name", target.getName()).setFindingType(FindingType.ERROR)
-				.assertNotNullOrBlank().assertPatternMatch(NAME_XML_PATTERN);
+		builder.setProperty("name", target.getName()).setFindingType(FindingType.ERROR).assertNotNullOrBlank()
+			.assertPatternMatch(NAME_XML_PATTERN);
 		
-        builder.setProperty("name", owner.getActionFacets())
-        		.setFindingType(FindingType.ERROR)
-        		.assertNoDuplicates(new IdentityResolver<TLActionFacet>() {
-        			public String getIdentity(TLActionFacet entity) {
-        				return entity.getName();
-        			}
-        		});
-        
-		builder.setProperty("referenceType", target.getReferenceType())
-				.setFindingType(FindingType.ERROR)
-				.assertNotNull();
-        
-		if ((target.getReferenceType() != null) && (owner != null) && owner.isAbstract()) {
-			if ((referenceFacetName != null) && (referenceFacetName.length() > 0)) {
-	        	builder.addFinding( FindingType.ERROR, "referenceFacetName", ERROR_NOT_ALLOWED_FOR_ABSTRACT );
-			}
+		builder.setProperty("name", owner.getActionFacets()).setFindingType(FindingType.ERROR)
+			.assertNoDuplicates(e -> ((TLActionFacet) e).getName());
+		
+		builder.setProperty("referenceType", target.getReferenceType()).setFindingType(FindingType.ERROR)
+			.assertNotNull();
+		
+		if ((target.getReferenceType() != null) && owner.isAbstract() && (referenceFacetName != null)
+				&& (referenceFacetName.length() > 0)) {
+			builder.addFinding(FindingType.ERROR, REFERENCE_FACET_NAME, ERROR_NOT_ALLOWED_FOR_ABSTRACT);
 		}
 		
 		if (target.getReferenceType() == TLReferenceType.NONE) {
-			builder.setProperty("referenceFacetName", target.getReferenceFacetName())
-					.setFindingType(FindingType.WARNING)
-					.assertNullOrBlank();
-			builder.setProperty("referenceRepeat", target.getReferenceRepeat())
-					.setFindingType(FindingType.WARNING)
-					.assertLessThanOrEqual(1);
+			builder.setProperty(REFERENCE_FACET_NAME, target.getReferenceFacetName())
+				.setFindingType(FindingType.WARNING).assertNullOrBlank();
+			builder.setProperty("referenceRepeat", target.getReferenceRepeat()).setFindingType(FindingType.WARNING)
+				.assertLessThanOrEqual(1);
 			
 			if (target.getBasePayload() == null) {
-	        	builder.addFinding( FindingType.ERROR, "referenceType", ERROR_INVALID_REFERENCE_TYPE );
+				builder.addFinding(FindingType.ERROR, "referenceType", ERROR_INVALID_REFERENCE_TYPE);
 			}
 			
-		} else if (target.getReferenceType() != null) {
-			if (!owner.isAbstract() && (owner.getBusinessObjectRef() != null)
-					&& (referenceFacetName != null)
-					&& (ResourceCodegenUtils.getReferencedFacet(
-							owner.getBusinessObjectRef(), referenceFacetName) == null)) {
-	        	builder.addFinding( FindingType.ERROR, "referenceFacetName", ERROR_INVALID_FACET_REFERENCE,
-	        			target.getReferenceFacetName(), owner.getBusinessObjectRef().getLocalName() );
-			}
+		} else if ((target.getReferenceType() != null) && !owner.isAbstract()
+					&& (owner.getBusinessObjectRef() != null) && (referenceFacetName != null)
+					&& (ResourceCodegenUtils.getReferencedFacet(owner.getBusinessObjectRef(),
+							referenceFacetName) == null)) {
+			builder.addFinding(FindingType.ERROR, REFERENCE_FACET_NAME, ERROR_INVALID_FACET_REFERENCE,
+					target.getReferenceFacetName(), owner.getBusinessObjectRef().getLocalName());
 		}
 		
 		if (basePayload != null) {
-			NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( target );
+			NamedEntity payloadType = ResourceCodegenUtils.getPayloadType(target);
 			
-	        builder.setEntityReferenceProperty("basePayload", basePayload,
-	                target.getBasePayloadName()).setFindingType(FindingType.ERROR)
-	                .assertValidEntityReference(TLCoreObject.class, TLChoiceObject.class)
-	                .setFindingType(FindingType.WARNING)
-	                .assertNotNull().assertNotDeprecated().assertNotObsolete();
+			builder.setEntityReferenceProperty("basePayload", basePayload, target.getBasePayloadName())
+				.setFindingType(FindingType.ERROR).assertValidEntityReference(TLCoreObject.class, TLChoiceObject.class)
+				.setFindingType(FindingType.WARNING).assertNotNull().assertNotDeprecated().assertNotObsolete();
 			
-	        // If the payload type is not an existing core/choice object, make sure the
-	        // action facet's name does not conflict with another entity
-	        if (payloadType == target) {
-	    		checkSchemaNamingConflicts(target, builder);
-	        }
-	        
+			// If the payload type is not an existing core/choice object, make
+			// sure the action facet's name does not conflict with another entity
+			if (payloadType == target) {
+				checkSchemaNamingConflicts(target, builder);
+			}
+			
 		} else {
 			String basePayloadName = target.getBasePayloadName();
 			
 			if ((basePayloadName != null) && !basePayloadName.equals("")) {
-				builder.addFinding( FindingType.ERROR, "basePayload",
-						TLValidationBuilder.UNRESOLVED_NAMED_ENTITY_REFERENCE, basePayloadName );
+				builder.addFinding(FindingType.ERROR, "basePayload",
+						TLValidationBuilder.UNRESOLVED_NAMED_ENTITY_REFERENCE, basePayloadName);
 			}
 		}
 		return builder.getFindings();
 	}
-
+	
 }
