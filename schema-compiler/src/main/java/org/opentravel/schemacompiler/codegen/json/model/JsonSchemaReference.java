@@ -26,7 +26,7 @@ import com.google.gson.JsonObject;
  * Encapsulates a reference to another JSON schema.  Reference may be either by-value
  * (included directly in the parent schema) or by-reference as a relative path.
  */
-public class JsonSchemaReference  implements JsonDocumentationOwner {
+public class JsonSchemaReference  implements JsonDocumentationOwner, JsonModelObject {
 	
 	private JsonSchema schema;
 	private String schemaPath;
@@ -141,9 +141,7 @@ public class JsonSchemaReference  implements JsonDocumentationOwner {
 	}
 
 	/**
-	 * Returns the <code>JsonObject</code> representation of this type.
-	 * 
-	 * @return JsonObject
+	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonModelObject#toJson()
 	 */
 	public JsonObject toJson() {
 		JsonObject schemaRef;

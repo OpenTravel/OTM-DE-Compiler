@@ -27,6 +27,7 @@ import org.opentravel.schemacompiler.codegen.html.writers.info.AliasInfoWriter;
  * @author Eric.Bronson
  *
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class ComplexObjectWriter<T extends ComplexTypeDocumentationBuilder<?>> extends FacetOwnerWriterImpl<T> implements
 		AliasOwnerWriter{
 

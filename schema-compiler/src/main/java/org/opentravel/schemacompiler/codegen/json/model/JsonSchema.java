@@ -27,7 +27,7 @@ import com.google.gson.JsonPrimitive;
 /**
  * Class that defines the meta-model for a JSON schema.
  */
-public class JsonSchema implements JsonDocumentationOwner {
+public class JsonSchema implements JsonDocumentationOwner, JsonModelObject {
 	
 	public static final String JSON_SCHEMA_CURRENT = "http://json-schema.org/schema#";
 	public static final String JSON_SCHEMA_DRAFT4  = "http://json-schema.org/draft-04/schema#";
@@ -604,60 +604,95 @@ public class JsonSchema implements JsonDocumentationOwner {
 	}
 
 	/**
-	 * Returns the <code>JsonObject</code> representation of this type.
-	 * 
-	 * @return JsonObject
+	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonModelObject#toJson()
 	 */
 	public JsonObject toJson() {
-		List<String> requiredProperties = new ArrayList<>();
 		JsonObject jsonSchema = new JsonObject();
 		
-		if (id != null) {
-			jsonSchema.addProperty( "id", id );
-		}
-		if (schemaSpec != null) {
-			jsonSchema.addProperty( "$schema", schemaSpec );
-		}
-		if (title != null) {
-			jsonSchema.addProperty( "title", title );
-		}
-		if (libraryInfo != null) {
-			jsonSchema.add( "x-otm-library", libraryInfo.toJson() );
-		}
-		if (entityInfo != null) {
-			jsonSchema.add( "x-otm-entity", entityInfo.toJson() );
-		}
-		
+		addProperty( jsonSchema, "id", id );
+		addProperty( jsonSchema, "$schema", schemaSpec );
+		addProperty( jsonSchema, "title", title );
+		addJsonProperty( jsonSchema, "x-otm-library", libraryInfo );
+		addJsonProperty( jsonSchema, "x-otm-entity", entityInfo );
 		JsonSchemaCodegenUtils.createOtmAnnotations( jsonSchema, this );
 		
 		if (!definitions.isEmpty()) {
 			JsonObject schemaDefs = new JsonObject();
 			
-			for (JsonSchemaNamedReference definition : definitions) {
-				schemaDefs.add( definition.getName(), definition.getSchema().toJson() );
-			}
+			addJsonProperties( schemaDefs, definitions );
 			jsonSchema.add( "definitions", schemaDefs );
 		}
+		
+		propertiesToJson( jsonSchema );
+		addProperty( jsonSchema, "discriminator", discriminator );
+		addJsonProperty( jsonSchema, "additionalProperties", additionalProperties );
+		
+		if (type != null) {
+			jsonSchema.addProperty( "type", type.getSchemaType() );
+			
+			if (type.getFormat() != null) {
+				jsonSchema.addProperty( "format", type.getFormat() );
+			}
+		}
+		
+		addProperty( jsonSchema, "multipleOf", multipleOf );
+		addProperty( jsonSchema, "maximum", maximum );
+		addProperty( jsonSchema, "exclusiveMaximum", exclusiveMaximum );
+		addProperty( jsonSchema, "minimum", minimum );
+		addProperty( jsonSchema, "exclusiveMinimum", exclusiveMinimum );
+		addProperty( jsonSchema, "maxLength", maxLength );
+		addProperty( jsonSchema, "minLength", minLength );
+		addProperty( jsonSchema, "pattern", pattern );
+		
+		if (!enumValues.isEmpty()) {
+			JsonArray enumArray = new JsonArray();
+			
+			for (String enumValue : enumValues) {
+				enumArray.add( new JsonPrimitive( enumValue ) );
+			}
+			jsonSchema.add( "enum", enumArray );
+		}
+		
+		addJsonProperty( jsonSchema, "items", items );
+		addProperty( jsonSchema, "maxItems", maxItems );
+		addProperty( jsonSchema, "minItems", minItems );
+		addProperty( jsonSchema, "uniqueItems", uniqueItems );
+		addJsonProperty( jsonSchema, "additionalItems", additionalItems );
+		
+		addJsonProperty( jsonSchema, "allOf", allOf );
+		addJsonProperty( jsonSchema, "anyOf", anyOf );
+		addJsonProperty( jsonSchema, "oneOf", oneOf );
+		addJsonProperty( jsonSchema, "not", not );
+		
+		addJsonProperties( jsonSchema, dependencies );
+		
+		return jsonSchema;
+	}
+
+	/**
+	 * Provides the JSON schema content for all properties and pattern properties.
+	 * 
+	 * @param jsonSchema  the JSON schema output being generated
+	 */
+	private void propertiesToJson(JsonObject jsonSchema) {
+		List<String> requiredProperties = new ArrayList<>();
+		
 		if (!properties.isEmpty()) {
 			JsonObject schemaProps = new JsonObject();
 			
-			for (JsonSchemaNamedReference property : properties) {
-				if (property.isRequired()) {
-					requiredProperties.add( property.getName() );
-				}
-				schemaProps.add( property.getName(), property.getSchema().toJson() );
-			}
+			properties.forEach( p -> {
+				if (p.isRequired()) requiredProperties.add( p.getName() );
+			});
+			addJsonProperties( schemaProps, properties );
 			jsonSchema.add( "properties", schemaProps );
 		}
 		if (!patternProperties.isEmpty()) {
 			JsonObject patternProps = new JsonObject();
 			
-			for (JsonSchemaNamedReference property : patternProperties) {
-				if (property.isRequired()) {
-					requiredProperties.add( property.getName() );
-				}
-				patternProps.add( property.getName(), property.getSchema().toJson() );
-			}
+			patternProperties.forEach( p -> {
+				if (p.isRequired()) requiredProperties.add( p.getName() );
+			});
+			addJsonProperties( patternProps, patternProperties );
 			jsonSchema.add( "patternProperties", patternProps );
 		}
 		if (!requiredProperties.isEmpty()) {
@@ -668,102 +703,6 @@ public class JsonSchema implements JsonDocumentationOwner {
 			}
 			jsonSchema.add( "required", requiredArray );
 		}
-		if (discriminator != null) {
-			jsonSchema.addProperty( "discriminator", discriminator );
-		}
-		if (additionalProperties != null) {
-			jsonSchema.add( "additionalProperties", additionalProperties.toJson() );
-		}
-		if (type != null) {
-			jsonSchema.addProperty( "type", type.getSchemaType() );
-			
-			if (type.getFormat() != null) {
-				jsonSchema.addProperty( "format", type.getFormat() );
-			}
-		}
-		if (multipleOf != null) {
-			jsonSchema.addProperty( "multipleOf", multipleOf );
-		}
-		if (maximum != null) {
-			jsonSchema.addProperty( "maximum", maximum );
-		}
-		if (exclusiveMaximum != null) {
-			jsonSchema.addProperty( "exclusiveMaximum", exclusiveMaximum );
-		}
-		if (minimum != null) {
-			jsonSchema.addProperty( "minimum", minimum );
-		}
-		if (exclusiveMinimum != null) {
-			jsonSchema.addProperty( "exclusiveMinimum", exclusiveMinimum );
-		}
-		if (maxLength != null) {
-			jsonSchema.addProperty( "maxLength", maxLength );
-		}
-		if (minLength != null) {
-			jsonSchema.addProperty( "minLength", minLength );
-		}
-		if (pattern != null) {
-			jsonSchema.addProperty( "pattern", pattern );
-		}
-		if (!enumValues.isEmpty()) {
-			JsonArray enumArray = new JsonArray();
-			
-			for (String enumValue : enumValues) {
-				enumArray.add( new JsonPrimitive( enumValue ) );
-			}
-			jsonSchema.add( "enum", enumArray );
-		}
-		if (items != null) {
-			jsonSchema.add( "items", items.toJson() );
-		}
-		if (maxItems != null) {
-			jsonSchema.addProperty( "maxItems", maxItems );
-		}
-		if (minItems != null) {
-			jsonSchema.addProperty( "minItems", minItems );
-		}
-		if (uniqueItems != null) {
-			jsonSchema.addProperty( "uniqueItems", uniqueItems );
-		}
-		if (additionalItems != null) {
-			jsonSchema.add( "additionalItems", additionalItems.toJson() );
-		}
-		if (!allOf.isEmpty()) {
-			JsonArray schemaAllOf = new JsonArray();
-			
-			for (JsonSchemaReference schemaRef : allOf) {
-				schemaAllOf.add( schemaRef.toJson() );
-			}
-			jsonSchema.add( "allOf", schemaAllOf );
-		}
-		if (!anyOf.isEmpty()) {
-			JsonArray schemaAnyOf = new JsonArray();
-			
-			for (JsonSchemaReference schemaRef : anyOf) {
-				schemaAnyOf.add( schemaRef.toJson() );
-			}
-			jsonSchema.add( "anyOf", schemaAnyOf );
-		}
-		if (!oneOf.isEmpty()) {
-			JsonArray schemaOneOf = new JsonArray();
-			
-			for (JsonSchemaReference schemaRef : oneOf) {
-				schemaOneOf.add( schemaRef.toJson() );
-			}
-			jsonSchema.add( "oneOf", schemaOneOf );
-		}
-		if (not != null) {
-			jsonSchema.add( "not", not.toJson() );
-		}
-		if (!dependencies.isEmpty()) {
-			JsonObject schemaDependencies = new JsonObject();
-			
-			for (JsonSchemaNamedReference dependency : dependencies) {
-				schemaDependencies.add( dependency.getName(), dependency.getSchema().toJson() );
-			}
-			jsonSchema.add( "dependencies", schemaDependencies );
-		}
-		return jsonSchema;
 	}
 	
 }

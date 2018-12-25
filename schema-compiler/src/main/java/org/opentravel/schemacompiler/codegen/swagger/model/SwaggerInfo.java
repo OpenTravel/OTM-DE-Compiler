@@ -23,13 +23,14 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonContextualValue;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentationOwner;
 import org.opentravel.schemacompiler.codegen.json.model.JsonLibraryInfo;
+import org.opentravel.schemacompiler.codegen.json.model.JsonModelObject;
 
 import com.google.gson.JsonObject;
 
 /**
  * Class that defines the meta-model for a Swagger Info object.
  */
-public class SwaggerInfo implements JsonDocumentationOwner {
+public class SwaggerInfo implements JsonDocumentationOwner, JsonModelObject {
 	
 	private String title;
 	private JsonLibraryInfo libraryInfo;
@@ -182,32 +183,18 @@ public class SwaggerInfo implements JsonDocumentationOwner {
 	}
 
 	/**
-	 * Returns the <code>JsonObject</code> representation of this Swagger
-	 * model element.
-	 * 
-	 * @return JsonObject
+	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonModelObject#toJson()
 	 */
 	public JsonObject toJson() {
 		JsonObject json = new JsonObject();
 		
-		json.addProperty( "title", (title != null) ? title : "unknown" );
-		
-		if (libraryInfo != null) {
-			json.add( "x-otm-library", libraryInfo.toJson() );
-		}
-		
+		addProperty( json, "title", (title != null) ? title : "unknown" );
+		addJsonProperty( json, "x-otm-library", libraryInfo );
 		JsonSchemaCodegenUtils.createOtmAnnotations( json, this );
-		
-		if (termsOfService != null) {
-			json.addProperty( "termsOfService", termsOfService );
-		}
-		if (contact != null) {
-			json.add( "contact", contact.toJson() );
-		}
-		if (license != null) {
-			json.add( "license", license.toJson() );
-		}
-		json.addProperty( "version", (version != null) ? version : "unknown" );
+		addProperty( json, "termsOfService", termsOfService );
+		addJsonProperty( json, "contact", contact );
+		addJsonProperty( json, "license", license );
+		addProperty( json, "version", (version != null) ? version : "unknown" );
 		return json;
 	}
 

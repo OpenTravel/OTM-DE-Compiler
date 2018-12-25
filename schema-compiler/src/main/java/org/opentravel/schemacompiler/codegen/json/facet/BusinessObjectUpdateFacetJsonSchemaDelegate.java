@@ -57,29 +57,11 @@ public class BusinessObjectUpdateFacetJsonSchemaDelegate extends TLFacetJsonSche
 		
 		// Add 'update' indicators for optional elements and attributes
 		for (TLAttribute attribute : attributeList) {
-			if (!attribute.isMandatory()) {
-				String indicatorName = XsdCodegenUtils.getUpdateIndicatorName( attribute );
-				String fieldName = attribute.getName();
-				
-				if (attribute.isReference()) {
-					QName elementName = XsdCodegenUtils.getGlobalElementName( attribute.getType() );
-					
-					if (elementName != null) {
-						fieldName = elementName.getLocalPart();
-					}
-				}
-				addUpdateIndicator( indicatorName, fieldName, definitions );
-			}
+			createDefinition(attribute, definitions);
 		}
 		
 		for (TLProperty element : elementList) {
-			if (!element.isMandatory()) {
-				String indicatorName = XsdCodegenUtils.getUpdateIndicatorName( element );
-				QName elementName = XsdCodegenUtils.getGlobalElementName( element.getType() );
-				String fieldName = (elementName != null) ? elementName.getLocalPart() : element.getName();
-				
-				addUpdateIndicator( indicatorName, fieldName, definitions );
-			}
+			createDefinition(element, definitions);
 		}
 		
 		// Add all of the standard attributes/indicators defined in the model
@@ -87,7 +69,45 @@ public class BusinessObjectUpdateFacetJsonSchemaDelegate extends TLFacetJsonSche
 		
 		return definitions;
 	}
+
+	/**
+	 * Creates the JSON schema definition from the OTM attribute provided.
+	 * 
+	 * @param attribute  the OTM attribute for which to generate the schema definition
+	 * @param definitions  the JSON schema definitions being constructed
+	 */
+	private void createDefinition(TLAttribute attribute, List<JsonSchemaNamedReference> definitions) {
+		if (!attribute.isMandatory()) {
+			String indicatorName = XsdCodegenUtils.getUpdateIndicatorName( attribute );
+			String fieldName = attribute.getName();
+			
+			if (attribute.isReference()) {
+				QName elementName = XsdCodegenUtils.getGlobalElementName( attribute.getType() );
+				
+				if (elementName != null) {
+					fieldName = elementName.getLocalPart();
+				}
+			}
+			addUpdateIndicator( indicatorName, fieldName, definitions );
+		}
+	}
 	
+	/**
+	 * Creates the JSON schema definition from the OTM element provided.
+	 * 
+	 * @param element  the OTM element for which to generate the schema definition
+	 * @param definitions  the JSON schema definitions being constructed
+	 */
+	private void createDefinition(TLProperty element, List<JsonSchemaNamedReference> definitions) {
+		if (!element.isMandatory()) {
+			String indicatorName = XsdCodegenUtils.getUpdateIndicatorName( element );
+			QName elementName = XsdCodegenUtils.getGlobalElementName( element.getType() );
+			String fieldName = (elementName != null) ? elementName.getLocalPart() : element.getName();
+			
+			addUpdateIndicator( indicatorName, fieldName, definitions );
+		}
+	}
+
 	/**
 	 * Adds an 'update' indicator for the optional field with the given name.
 	 * 

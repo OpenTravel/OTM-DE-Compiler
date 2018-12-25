@@ -24,6 +24,7 @@ import org.opentravel.schemacompiler.codegen.html.builders.OperationDocumentatio
  * @author Eric.Bronson
  *
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class OperationWriter extends FacetOwnerWriterImpl<OperationDocumentationBuilder> {
 
 	public OperationWriter(OperationDocumentationBuilder member,

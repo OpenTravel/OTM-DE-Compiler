@@ -44,10 +44,10 @@ import java.io.IOException;
 
 import org.opentravel.schemacompiler.codegen.html.Configuration;
 import org.opentravel.schemacompiler.codegen.html.Content;
-import org.opentravel.schemacompiler.codegen.html.HtmlDocletWriter;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlStyle;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTag;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTree;
+import org.opentravel.schemacompiler.codegen.html.markup.HtmlWriter;
 
 
 /**
@@ -65,7 +65,7 @@ import org.opentravel.schemacompiler.codegen.html.markup.HtmlTree;
  * @author Atul M Dambalkar
  * @author Bhavesh Patel (Modified)
  */
-public class SubWriterHolderWriter extends HtmlDocletWriter {
+public class SubWriterHolderWriter extends HtmlWriter {
 
     public SubWriterHolderWriter(Configuration configuration,
                                  String filename) throws IOException {

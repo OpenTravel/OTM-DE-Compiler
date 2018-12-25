@@ -23,6 +23,8 @@ import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
 import org.opentravel.schemacompiler.codegen.json.model.JsonContextualValue;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentationOwner;
+import org.opentravel.schemacompiler.codegen.json.model.JsonModelObject;
+import org.opentravel.schemacompiler.codegen.json.model.JsonNamedProperty;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 
@@ -32,7 +34,7 @@ import com.google.gson.JsonObject;
 /**
  * Class that defines the meta-model for a Swagger Parameter object.
  */
-public class SwaggerParameter implements JsonDocumentationOwner {
+public class SwaggerParameter implements JsonDocumentationOwner, JsonNamedProperty, JsonModelObject {
 	
 	private String name;
 	private SwaggerParamType in;
@@ -189,36 +191,39 @@ public class SwaggerParameter implements JsonDocumentationOwner {
 	}
 	
 	/**
-	 * Returns the <code>JsonObject</code> representation of this Swagger
-	 * model element.
-	 * 
-	 * @return JsonObject
+	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonNamedProperty#getPropertyName()
+	 */
+	@Override
+	public String getPropertyName() {
+		return getName();
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonNamedProperty#getPropertyValue()
+	 */
+	@Override
+	public JsonModelObject getPropertyValue() {
+		return this;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonModelObject#toJson()
 	 */
 	public JsonObject toJson() {
 		JsonObject json = new JsonObject();
 		
-		if (name != null) {
-			json.addProperty( "name", name );
-		}
+		addProperty( json, "name", name );
+		
 		if (in != null) {
 			json.addProperty( "in", in.getInValue() );
 		}
 		
 		JsonSchemaCodegenUtils.createOtmAnnotations( json, this );
-		
-		if (in == SwaggerParamType.PATH) {
-			json.addProperty( "required", true );
-		} else {
-			json.addProperty( "required", required );
-		}
+		addProperty( json, "required", (in == SwaggerParamType.PATH) || required );
 		
 		if (in == SwaggerParamType.BODY) {
-			if (requestSchema != null) {
-				json.add( "schema", requestSchema.toJson() );
-			}
-			if (requestXmlSchema != null) {
-				json.add( "x-xml-schema", requestXmlSchema.toJson() );
-			}
+			addJsonProperty( json, "schema", requestSchema );
+			addJsonProperty( json, "x-xml-schema", requestXmlSchema );
 			
 		} else if (type != null) {
 			JsonObject typeSchema = type.toJson();

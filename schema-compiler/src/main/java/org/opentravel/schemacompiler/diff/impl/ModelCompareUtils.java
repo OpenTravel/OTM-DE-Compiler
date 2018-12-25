@@ -298,22 +298,36 @@ public class ModelCompareUtils {
 				Collections.sort( nameVersions, new OTA2VersionComparator( true ) );
 				
 				// Locate the original name in the sorted list
-				for (int i = 0; i < nameVersions.size(); i++) {
-					VersionedQName vName = nameVersions.get( i );
+				closestMatch = findClosestMatch(name, nameVersions);
+			}
+		}
+		return closestMatch;
+	}
+
+	/**
+	 * Finds the closest match to the given name from the list of name versions provided.
+	 * 
+	 * @param name  the name for which to find the closest match
+	 * @param nameVersions  the list of name versions to search
+	 * @return QName
+	 */
+	private static QName findClosestMatch(QName name, List<VersionedQName> nameVersions) {
+		QName closestMatch = null;
+		
+		for (int i = 0; i < nameVersions.size(); i++) {
+			VersionedQName vName = nameVersions.get( i );
+			
+			if (vName.getName() == name) {
+				// If the name was the last item in the list, take the previous
+				// version; otherwise, always assume that the next later version
+				// is the closest match.
+				if (i == (nameVersions.size() - 1)) {
+					closestMatch = nameVersions.get( i - 1 ).getName();
 					
-					if (vName.getName() == name) {
-						// If the name was the last item in the list, take the previous
-						// version; otherwise, always assume that the next later version
-						// is the closest match.
-						if (i == (nameVersions.size() - 1)) {
-							closestMatch = nameVersions.get( i - 1 ).getName();
-							
-						} else {
-							closestMatch = nameVersions.get( i + 1 ).getName();
-						}
-						break;
-					}
+				} else {
+					closestMatch = nameVersions.get( i + 1 ).getName();
 				}
+				break;
 			}
 		}
 		return closestMatch;

@@ -78,14 +78,6 @@ public class EntityComparator extends BaseComparator {
 		AbstractLibrary owningLibrary = oldEntity.getOwningLibrary();
 		String vScheme = (owningLibrary == null) ? null : owningLibrary.getVersionScheme();
 		boolean isMinorVersionCompare = isMinorVersionCompare( oldEntity, newEntity, vScheme );
-		QName oldParentTypeName = getEntityName( oldEntity.getParentType() );
-		QName newParentTypeName = getEntityName( newEntity.getParentType() );
-		QName oldExtendsTypeName = getEntityName( oldEntity.getExtendsType() );
-		QName newExtendsTypeName = getEntityName( newEntity.getExtendsType() );
-		QName oldBasePayloadTypeName = getEntityName( oldEntity.getBasePayloadType() );
-		QName newBasePayloadTypeName = getEntityName( newEntity.getBasePayloadType() );
-		QName oldSimpleCoreTypeName = getEntityName( oldEntity.getSimpleCoreType() );
-		QName newSimpleCoreTypeName = getEntityName( newEntity.getSimpleCoreType() );
 		
 		if (valueChanged( oldEntity.getEntityType(), newEntity.getEntityType() )) {
 			changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.ENTITY_TYPE_CHANGED,
@@ -99,6 +91,57 @@ public class EntityComparator extends BaseComparator {
 		if (valueChanged( oldEntity.getDocumentation(), newEntity.getDocumentation() )) {
 			changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.DOCUMENTATION_CHANGED, null, null ) );
 		}
+		
+		compareEntityRelationships(oldEntity, newEntity, changeSet, changeItems, vScheme);
+		
+		compareActionFacetProperties(oldEntity, newEntity, changeSet, changeItems, vScheme);
+		
+		compareSimpleTypeConstraints(oldEntity, newEntity, changeSet, changeItems);
+		
+		compareListContents( oldEntity.getAliasNames(), newEntity.getAliasNames(),
+				EntityChangeType.ALIAS_ADDED, EntityChangeType.ALIAS_DELETED, changeSet,
+				isMinorVersionCompare );
+		compareListContents( oldEntity.getFacetNames(), newEntity.getFacetNames(),
+				EntityChangeType.FACET_ADDED, EntityChangeType.FACET_DELETED, changeSet,
+				isMinorVersionCompare );
+		compareListContents( oldEntity.getRoleNames(), newEntity.getRoleNames(),
+				EntityChangeType.ROLE_ADDED, EntityChangeType.ROLE_DELETED, changeSet,
+				isMinorVersionCompare );
+		compareListContents( oldEntity.getEnumValues(), newEntity.getEnumValues(),
+				EntityChangeType.ENUM_VALUE_ADDED, EntityChangeType.ENUM_VALUE_DELETED, changeSet,
+				isMinorVersionCompare );
+		
+		compareMemberFields( oldEntity.getMemberFields(), newEntity.getMemberFields(), changeSet,
+				isMinorVersionCompare );
+		
+		compareListContents( oldEntity.getEquivalents(), newEntity.getEquivalents(),
+				EntityChangeType.EQUIVALENT_ADDED, EntityChangeType.EQUIVALENT_DELETED, changeSet,
+				isMinorVersionCompare );
+		compareListContents( oldEntity.getExamples(), newEntity.getExamples(),
+				EntityChangeType.EXAMPLE_ADDED, EntityChangeType.EXAMPLE_DELETED, changeSet,
+				isMinorVersionCompare );
+		
+		return changeSet;
+	}
+
+	/**
+	 * Compares the relationships between the old and new-version entities.
+	 * 
+	 * @param oldEntity  the old-version entity being compared
+	 * @param newEntity  the new-version entity being compared
+	 * @param changeSet  the change set to which all new change items will be assigned
+	 * @param changeItems  the list of change items being constructed
+	 * @param vScheme  the version scheme of the entities being compared
+	 */
+	private void compareEntityRelationships(EntityComparisonFacade oldEntity, EntityComparisonFacade newEntity,
+			EntityChangeSet changeSet, List<EntityChangeItem> changeItems, String vScheme) {
+		QName oldParentTypeName = getEntityName( oldEntity.getParentType() );
+		QName newParentTypeName = getEntityName( newEntity.getParentType() );
+		QName oldExtendsTypeName = getEntityName( oldEntity.getExtendsType() );
+		QName newExtendsTypeName = getEntityName( newEntity.getExtendsType() );
+		QName oldSimpleCoreTypeName = getEntityName( oldEntity.getSimpleCoreType() );
+		QName newSimpleCoreTypeName = getEntityName( newEntity.getSimpleCoreType() );
+		
 		if (valueChanged( oldParentTypeName, newParentTypeName )) {
 			if (isVersionChange( oldParentTypeName, newParentTypeName, vScheme )) {
 				changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.PARENT_TYPE_VERSION_CHANGED,
@@ -121,6 +164,34 @@ public class EntityComparator extends BaseComparator {
 						formatter.getEntityDisplayName( newEntity.getExtendsType() ) ) );
 			}
 		}
+		
+		if (valueChanged( oldSimpleCoreTypeName, newSimpleCoreTypeName )) {
+			if (isVersionChange( oldSimpleCoreTypeName, newSimpleCoreTypeName, vScheme )) {
+				changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.SIMPLE_CORE_TYPE_VERSION_CHANGED,
+						oldEntity.getOwningLibrary().getVersion(), newEntity.getOwningLibrary().getVersion() ) );
+				
+			} else {
+				changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.SIMPLE_CORE_TYPE_CHANGED,
+						formatter.getEntityDisplayName( oldEntity.getSimpleCoreType() ),
+						formatter.getEntityDisplayName( newEntity.getSimpleCoreType() ) ) );
+			}
+		}
+	}
+
+	/**
+	 * Compares the entity properties that are specific to resource action facets.
+	 * 
+	 * @param oldEntity  the old-version entity being compared
+	 * @param newEntity  the new-version entity being compared
+	 * @param changeSet  the change set to which all new change items will be assigned
+	 * @param changeItems  the list of change items being constructed
+	 * @param vScheme  the version scheme of the entities being compared
+	 */
+	private void compareActionFacetProperties(EntityComparisonFacade oldEntity, EntityComparisonFacade newEntity,
+			EntityChangeSet changeSet, List<EntityChangeItem> changeItems, String vScheme) {
+		QName oldBasePayloadTypeName = getEntityName( oldEntity.getBasePayloadType() );
+		QName newBasePayloadTypeName = getEntityName( newEntity.getBasePayloadType() );
+		
 		if (valueChanged( oldBasePayloadTypeName, newBasePayloadTypeName )) {
 			if (isVersionChange( oldBasePayloadTypeName, newBasePayloadTypeName, vScheme )) {
 				changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.BASE_PAYLOAD_VERSION_CHANGED,
@@ -144,17 +215,18 @@ public class EntityComparator extends BaseComparator {
 			changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.REFERENCE_REPEAT_CHANGED,
 					oldEntity.getReferenceRepeat() + "", newEntity.getReferenceRepeat() + "" ) );
 		}
-		if (valueChanged( oldSimpleCoreTypeName, newSimpleCoreTypeName )) {
-			if (isVersionChange( oldSimpleCoreTypeName, newSimpleCoreTypeName, vScheme )) {
-				changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.SIMPLE_CORE_TYPE_VERSION_CHANGED,
-						oldEntity.getOwningLibrary().getVersion(), newEntity.getOwningLibrary().getVersion() ) );
-				
-			} else {
-				changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.SIMPLE_CORE_TYPE_CHANGED,
-						formatter.getEntityDisplayName( oldEntity.getSimpleCoreType() ),
-						formatter.getEntityDisplayName( newEntity.getSimpleCoreType() ) ) );
-			}
-		}
+	}
+
+	/**
+	 * Compares the entity properties that relate to simple type constraints.
+	 * 
+	 * @param oldEntity  the old-version entity being compared
+	 * @param newEntity  the new-version entity being compared
+	 * @param changeSet  the change set to which all new change items will be assigned
+	 * @param changeItems  the list of change items being constructed
+	 */
+	private void compareSimpleTypeConstraints(EntityComparisonFacade oldEntity, EntityComparisonFacade newEntity,
+			EntityChangeSet changeSet, List<EntityChangeItem> changeItems) {
 		if (oldEntity.isSimpleList() != newEntity.isSimpleList()) {
 			EntityChangeType changeType = newEntity.isSimpleList() ?
 					EntityChangeType.CHANGED_TO_SIMPLE_LIST : EntityChangeType.CHANGED_TO_SIMPLE_NON_LIST;
@@ -196,31 +268,6 @@ public class EntityComparator extends BaseComparator {
 			changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.MAX_EXCLUSIVE_CONSTRAINT_CHANGED,
 					oldEntity.getMaxExclusiveConstraint(), newEntity.getMaxExclusiveConstraint() ) );
 		}
-		
-		compareListContents( oldEntity.getAliasNames(), newEntity.getAliasNames(),
-				EntityChangeType.ALIAS_ADDED, EntityChangeType.ALIAS_DELETED, changeSet,
-				isMinorVersionCompare );
-		compareListContents( oldEntity.getFacetNames(), newEntity.getFacetNames(),
-				EntityChangeType.FACET_ADDED, EntityChangeType.FACET_DELETED, changeSet,
-				isMinorVersionCompare );
-		compareListContents( oldEntity.getRoleNames(), newEntity.getRoleNames(),
-				EntityChangeType.ROLE_ADDED, EntityChangeType.ROLE_DELETED, changeSet,
-				isMinorVersionCompare );
-		compareListContents( oldEntity.getEnumValues(), newEntity.getEnumValues(),
-				EntityChangeType.ENUM_VALUE_ADDED, EntityChangeType.ENUM_VALUE_DELETED, changeSet,
-				isMinorVersionCompare );
-		
-		compareMemberFields( oldEntity.getMemberFields(), newEntity.getMemberFields(), changeSet,
-				isMinorVersionCompare );
-		
-		compareListContents( oldEntity.getEquivalents(), newEntity.getEquivalents(),
-				EntityChangeType.EQUIVALENT_ADDED, EntityChangeType.EQUIVALENT_DELETED, changeSet,
-				isMinorVersionCompare );
-		compareListContents( oldEntity.getExamples(), newEntity.getExamples(),
-				EntityChangeType.EXAMPLE_ADDED, EntityChangeType.EXAMPLE_DELETED, changeSet,
-				isMinorVersionCompare );
-		
-		return changeSet;
 	}
 	
 	/**
@@ -264,7 +311,6 @@ public class EntityComparator extends BaseComparator {
 	 * @param changeSet  the change set for the entity
 	 * @param isMinorVersionCompare  true if the second entity is a later minor version of the first
 	 */
-	@SuppressWarnings("unchecked")
 	private void compareMemberFields(List<TLMemberField<TLMemberFieldOwner>> list, List<TLMemberField<TLMemberFieldOwner>> list2,
 			EntityChangeSet changeSet, boolean isMinorVersionCompare) {
 		List<EntityChangeItem> changeItems = changeSet.getChangeItems();
@@ -316,72 +362,15 @@ public class EntityComparator extends BaseComparator {
 					Map<QName,List<TLMemberField<TLMemberFieldOwner>>> newFieldsByOwner = buildFieldOwnerMap( newVersionFields );
 					
 					// Consider the field to be added if the owner is in the new version but not in the old
-					for (Entry<QName,List<TLMemberField<TLMemberFieldOwner>>> entry : newFieldsByOwner.entrySet()) {
-						QName fieldOwner = entry.getKey();
-						
-						if (!oldFieldsByOwner.containsKey( fieldOwner )) {
-							List<TLMemberField<TLMemberFieldOwner>> newVersionOwnerFields = newFieldsByOwner.get( fieldOwner );
-							
-							for (TLMemberField<TLMemberFieldOwner> addedField : newVersionOwnerFields) {
-								pendingChangeItems.add( new EntityChangeItem(
-										changeSet, EntityChangeType.MEMBER_FIELD_ADDED, addedField ) );
-							}
-						}
-					}
+					findAddedNamespaceFields(oldFieldsByOwner, newFieldsByOwner, changeSet, pendingChangeItems);
 					
 					// Consider the field to be deleted if the owner is in the old version but not in the new
-					for (Entry<QName,List<TLMemberField<TLMemberFieldOwner>>> entry : oldFieldsByOwner.entrySet()) {
-						QName fieldOwner = entry.getKey();
-						
-						if (!newFieldsByOwner.containsKey( fieldOwner )) {
-							List<TLMemberField<TLMemberFieldOwner>> oldVersionOwnerFields = oldFieldsByOwner.get( fieldOwner );
-							
-							for (TLMemberField<TLMemberFieldOwner> deletedField : oldVersionOwnerFields) {
-								pendingChangeItems.add( new EntityChangeItem(
-										changeSet, EntityChangeType.MEMBER_FIELD_DELETED, deletedField ) );
-							}
-							
-						}
-					}
+					findDeletedNamspaceFields(oldFieldsByOwner, newFieldsByOwner, changeSet, pendingChangeItems);
 					
 					// Consider the field to be modified if it belongs to the same owner in both the old
 					// and new versions
-					for (Entry<QName,List<TLMemberField<TLMemberFieldOwner>>> entry : newFieldsByOwner.entrySet()) {
-						QName fieldOwner = entry.getKey();
-						
-						if (oldFieldsByOwner.containsKey( fieldOwner )) {
-							List<TLMemberField<TLMemberFieldOwner>> oldVersionOwnerFields = oldFieldsByOwner.get( fieldOwner );
-							List<TLMemberField<TLMemberFieldOwner>> newVersionOwnerFields = newFieldsByOwner.get( fieldOwner );
-							int maxLength = Math.max( oldVersionOwnerFields.size(), newVersionOwnerFields.size() );
-							
-							// Extreme Edge Case:  If there are multiple members of both list, make a guess that
-							// the fields are 1:1 correlations to one another.  Any "extra" fields will be considered
-							// as added or deleted.
-							for (int i = 0; i < maxLength; i++) {
-								TLMemberField<?> oldField = (i >= oldVersionOwnerFields.size()) ? null : oldVersionOwnerFields.get( i );
-								TLMemberField<?> newField = (i >= newVersionOwnerFields.size()) ? null : newVersionOwnerFields.get( i );
-								
-								if (oldField == null) {
-									pendingChangeItems.add( new EntityChangeItem(
-											changeSet, EntityChangeType.MEMBER_FIELD_ADDED,
-											(TLMemberField<TLMemberFieldOwner>) newField ) );
-									
-								} else if (newField == null) {
-									pendingChangeItems.add( new EntityChangeItem(
-											changeSet, EntityChangeType.MEMBER_FIELD_DELETED,
-											(TLMemberField<TLMemberFieldOwner>) oldField ) );
-									
-								} else {
-									FieldChangeSet fieldChangeSet = new FieldComparator( options, fieldNSMappings ).compareFields(
-											new FieldComparisonFacade( oldField ), new FieldComparisonFacade( newField ) );
-									
-									if (!fieldChangeSet.getChangeItems().isEmpty()) {
-										pendingChangeItems.add( new EntityChangeItem( changeSet, fieldChangeSet ) );
-									}
-								}
-							}
-						}
-					}
+					findModifiedNamespaceFields(changeSet, oldFieldsByOwner, newFieldsByOwner,
+							options, fieldNSMappings, pendingChangeItems);
 				}
 				newFieldNames.remove( newFieldName );
 				iterator.remove();
@@ -389,6 +378,30 @@ public class EntityComparator extends BaseComparator {
 		}
 		
 		// Look for fields that were added in the new version
+		findAddedFields(oldFieldMap, newFieldMap, changeSet, changeItems, newFieldNames);
+		
+		// Look for fields that were deleted from the old version (does not apply for minor versions)
+		if (!isMinorVersionCompare) {
+			findDeletedFields(oldFieldMap, newFieldMap, changeSet, changeItems, oldFieldNames);
+		}
+		
+		// Append any pending change items that were discovered earlier in the process
+		changeItems.addAll( pendingChangeItems );
+	}
+
+	/**
+	 * Searches the list of old and new fields to determine which ones have been added.
+	 * 
+	 * @param oldFieldMap  the map of old version fields by qualified name
+	 * @param newFieldMap  the map of new version fields by qualified name
+	 * @param changeSet  the change set to which all new change items will be assigned
+	 * @param changeItems  the list of change items being constructed
+	 * @param newFieldNames  the set of all unique new-version field names
+	 */
+	@SuppressWarnings("unchecked")
+	private void findAddedFields(Map<QName, List<TLMemberField<?>>> oldFieldMap,
+			Map<QName, List<TLMemberField<?>>> newFieldMap, EntityChangeSet changeSet,
+			List<EntityChangeItem> changeItems, SortedSet<QName> newFieldNames) {
 		for (QName fieldName : newFieldNames) {
 			if (!oldFieldMap.containsKey( fieldName )) {
 				List<TLMemberField<?>> addedFields = newFieldMap.get( fieldName );
@@ -400,24 +413,156 @@ public class EntityComparator extends BaseComparator {
 				}
 			}
 		}
-		
-		// Look for fields that were deleted from the old version (does not apply for minor versions)
-		if (!isMinorVersionCompare) {
-			for (QName fieldName : oldFieldNames) {
-				if (!newFieldMap.containsKey( fieldName )) {
-					List<TLMemberField<?>> deletedFields = oldFieldMap.get( fieldName );
-					
-					for (TLMemberField<?> deletedField : deletedFields) {
-						changeItems.add( new EntityChangeItem(
-								changeSet, EntityChangeType.MEMBER_FIELD_DELETED,
-								(TLMemberField<TLMemberFieldOwner>) deletedField ) );
-					}
+	}
+
+	/**
+	 * Searches the list of old and new fields to determine which ones have been added.
+	 * 
+	 * @param oldFieldMap  the map of old version fields by qualified name
+	 * @param newFieldMap  the map of new version fields by qualified name
+	 * @param changeSet  the change set to which all new change items will be assigned
+	 * @param changeItems  the list of change items being constructed
+	 * @param oldFieldNames  the set of all unique old-version field names
+	 */
+	@SuppressWarnings("unchecked")
+	private void findDeletedFields(Map<QName, List<TLMemberField<?>>> oldFieldMap,
+			Map<QName, List<TLMemberField<?>>> newFieldMap, EntityChangeSet changeSet,
+			List<EntityChangeItem> changeItems, SortedSet<QName> oldFieldNames) {
+		for (QName fieldName : oldFieldNames) {
+			if (!newFieldMap.containsKey( fieldName )) {
+				List<TLMemberField<?>> deletedFields = oldFieldMap.get( fieldName );
+				
+				for (TLMemberField<?> deletedField : deletedFields) {
+					changeItems.add( new EntityChangeItem(
+							changeSet, EntityChangeType.MEMBER_FIELD_DELETED,
+							(TLMemberField<TLMemberFieldOwner>) deletedField ) );
 				}
 			}
 		}
-		
-		// Append any pending change items that were discovered earlier in the process
-		changeItems.addAll( pendingChangeItems );
+	}
+
+	/**
+	 * Searches the collections of old and new fields to determine which fields have been added.
+	 * 
+	 * @param oldFieldsByOwner  the map that correlates old fields by their owning entity name
+	 * @param newFieldsByOwner  the map that correlates new fields by their owning entity name
+	 * @param changeSet  the change set to which all new change items will be assigned
+	 * @param pendingChangeItems  the list of change items being constructed
+	 */
+	private void findAddedNamespaceFields(Map<QName, List<TLMemberField<TLMemberFieldOwner>>> oldFieldsByOwner,
+			Map<QName, List<TLMemberField<TLMemberFieldOwner>>> newFieldsByOwner, EntityChangeSet changeSet,
+			List<EntityChangeItem> pendingChangeItems) {
+		for (Entry<QName,List<TLMemberField<TLMemberFieldOwner>>> entry : newFieldsByOwner.entrySet()) {
+			QName fieldOwner = entry.getKey();
+			
+			if (!oldFieldsByOwner.containsKey( fieldOwner )) {
+				List<TLMemberField<TLMemberFieldOwner>> newVersionOwnerFields = newFieldsByOwner.get( fieldOwner );
+				
+				for (TLMemberField<TLMemberFieldOwner> addedField : newVersionOwnerFields) {
+					pendingChangeItems.add( new EntityChangeItem(
+							changeSet, EntityChangeType.MEMBER_FIELD_ADDED, addedField ) );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Searches the collections of old and new fields to determine which fields have been deleted.
+	 * 
+	 * @param oldFieldsByOwner  the map that correlates old fields by their owning entity name
+	 * @param newFieldsByOwner  the map that correlates new fields by their owning entity name
+	 * @param changeSet  the change set to which all new change items will be assigned
+	 * @param pendingChangeItems  the list of change items being constructed
+	 */
+	private void findDeletedNamspaceFields(Map<QName, List<TLMemberField<TLMemberFieldOwner>>> oldFieldsByOwner,
+			Map<QName, List<TLMemberField<TLMemberFieldOwner>>> newFieldsByOwner, EntityChangeSet changeSet,
+			List<EntityChangeItem> pendingChangeItems) {
+		for (Entry<QName,List<TLMemberField<TLMemberFieldOwner>>> entry : oldFieldsByOwner.entrySet()) {
+			QName fieldOwner = entry.getKey();
+			
+			if (!newFieldsByOwner.containsKey( fieldOwner )) {
+				List<TLMemberField<TLMemberFieldOwner>> oldVersionOwnerFields = oldFieldsByOwner.get( fieldOwner );
+				
+				for (TLMemberField<TLMemberFieldOwner> deletedField : oldVersionOwnerFields) {
+					pendingChangeItems.add( new EntityChangeItem(
+							changeSet, EntityChangeType.MEMBER_FIELD_DELETED, deletedField ) );
+				}
+				
+			}
+		}
+	}
+
+	/**
+	 * Searches the given collections of old and new fields to determine which have been modified
+	 * and, in some extreme edge cases, which duplicate fields are really additions or deletions.
+	 * 
+	 * @param changeSet  the change set to which all new change items will be assigned
+	 * @param oldFieldsByOwner  the map that correlates old fields by their owning entity name
+	 * @param newFieldsByOwner  the map that correlates new fields by their owning entity name
+	 * @param options  the model comparison options
+	 * @param fieldNSMappings  map that correlates a field name with its namespace assignment
+	 * @param pendingChangeItems  the list of change items being constructed
+	 */
+	private void findModifiedNamespaceFields(EntityChangeSet changeSet,
+			Map<QName, List<TLMemberField<TLMemberFieldOwner>>> oldFieldsByOwner,
+			Map<QName, List<TLMemberField<TLMemberFieldOwner>>> newFieldsByOwner, ModelCompareOptions options,
+			Map<String, String> fieldNSMappings, List<EntityChangeItem> pendingChangeItems) {
+		for (Entry<QName,List<TLMemberField<TLMemberFieldOwner>>> entry : newFieldsByOwner.entrySet()) {
+			QName fieldOwner = entry.getKey();
+			
+			if (oldFieldsByOwner.containsKey( fieldOwner )) {
+				List<TLMemberField<TLMemberFieldOwner>> oldVersionOwnerFields = oldFieldsByOwner.get( fieldOwner );
+				List<TLMemberField<TLMemberFieldOwner>> newVersionOwnerFields = newFieldsByOwner.get( fieldOwner );
+				int maxLength = Math.max( oldVersionOwnerFields.size(), newVersionOwnerFields.size() );
+				
+				// Extreme Edge Case:  If there are multiple members of both list, make a guess that
+				// the fields are 1:1 correlations to one another.  Any "extra" fields will be considered
+				// as added or deleted.
+				for (int i = 0; i < maxLength; i++) {
+					TLMemberField<?> oldField = (i >= oldVersionOwnerFields.size()) ? null : oldVersionOwnerFields.get( i );
+					TLMemberField<?> newField = (i >= newVersionOwnerFields.size()) ? null : newVersionOwnerFields.get( i );
+					
+					performFieldComparison(oldField, newField, changeSet,
+							options, fieldNSMappings, pendingChangeItems);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Performs a comparison of the given new and old field.  At this point, the fields are known
+	 * to be different.  This method makes the final determination as to whether a field was added,
+	 * deleted, or modified.
+	 * 
+	 * @param oldField  the old field being compared (may be null)
+	 * @param newField  the new field being compared (may be null)
+	 * @param changeSet  the change set to which each new change item will belong
+	 * @param options  the model comparison options
+	 * @param fieldNSMappings  map that correlates a field name with its namespace assignment
+	 * @param pendingChangeItems  the list of change items being constructed
+	 */
+	@SuppressWarnings("unchecked")
+	private void performFieldComparison(TLMemberField<?> oldField, TLMemberField<?> newField,
+			EntityChangeSet changeSet, ModelCompareOptions options, Map<String, String> fieldNSMappings,
+			List<EntityChangeItem> pendingChangeItems) {
+		if (oldField == null) {
+			pendingChangeItems.add( new EntityChangeItem(
+					changeSet, EntityChangeType.MEMBER_FIELD_ADDED,
+					(TLMemberField<TLMemberFieldOwner>) newField ) );
+			
+		} else if (newField == null) {
+			pendingChangeItems.add( new EntityChangeItem(
+					changeSet, EntityChangeType.MEMBER_FIELD_DELETED,
+					(TLMemberField<TLMemberFieldOwner>) oldField ) );
+			
+		} else {
+			FieldChangeSet fieldChangeSet = new FieldComparator( options, fieldNSMappings ).compareFields(
+					new FieldComparisonFacade( oldField ), new FieldComparisonFacade( newField ) );
+			
+			if (!fieldChangeSet.getChangeItems().isEmpty()) {
+				pendingChangeItems.add( new EntityChangeItem( changeSet, fieldChangeSet ) );
+			}
+		}
 	}
 	
 	/**

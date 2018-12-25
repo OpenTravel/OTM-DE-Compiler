@@ -15,12 +15,14 @@
  */
 package org.opentravel.schemacompiler.codegen.swagger.model;
 
+import org.opentravel.schemacompiler.codegen.json.model.JsonModelObject;
+
 import com.google.gson.JsonObject;
 
 /**
  * Class that defines the OTM resource information for a Swagger document.
  */
-public class SwaggerOtmResource {
+public class SwaggerOtmResource implements JsonModelObject {
 	
 	private String namespace;
 	private String localName;
@@ -62,20 +64,13 @@ public class SwaggerOtmResource {
 	}
 	
 	/**
-	 * Returns the <code>JsonObject</code> representation of this Swagger
-	 * model element.
-	 * 
-	 * @return JsonObject
+	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonModelObject#toJson()
 	 */
 	public JsonObject toJson() {
 		JsonObject json = new JsonObject();
 		
-		if (namespace != null) {
-			json.addProperty( "namespace", namespace );
-		}
-		if (localName != null) {
-			json.addProperty( "localName", localName );
-		}
+		addProperty( json, "namespace", namespace );
+		addProperty( json, "localName", localName );
 		return json;
 	}
 	

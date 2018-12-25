@@ -79,14 +79,6 @@ public class ResourceComparator extends BaseComparator {
 		String versionScheme = (owningLibrary == null) ? null : owningLibrary.getVersionScheme();
 		boolean isMinorVersionCompare = isMinorVersionCompare( new EntityComparisonFacade( oldResource ),
 				new EntityComparisonFacade( newResource ), versionScheme );
-		NamedEntity oldExtendsType = (oldResource.getExtension() == null) ? null : oldResource.getExtension().getExtendsEntity();
-		NamedEntity newExtendsType = (newResource.getExtension() == null) ? null : newResource.getExtension().getExtendsEntity();
-		QName oldExtendsTypeName = (oldExtendsType == null) ? null : getEntityName( oldExtendsType );
-		QName newExtendsTypeName = (newExtendsType == null) ? null : getEntityName( newExtendsType );
-		NamedEntity oldBORefType = (oldResource.getExtension() == null) ? null : oldResource.getBusinessObjectRef();
-		NamedEntity newBORefType = (newResource.getExtension() == null) ? null : newResource.getBusinessObjectRef();
-		QName oldBORefTypeName = (oldBORefType == null) ? null : getEntityName( oldBORefType );
-		QName newBORefTypeName = (newBORefType == null) ? null : getEntityName( newBORefType );
 		
 		if (valueChanged( oldResource.getName(), newResource.getName() )) {
 			changeItems.add( new ResourceChangeItem( changeSet,
@@ -112,6 +104,41 @@ public class ResourceComparator extends BaseComparator {
 					ResourceChangeType.FIRST_CLASS_IND_CHANGED,
 					oldResource.isFirstClass() + "", newResource.isFirstClass() + "" ) );
 		}
+		
+		compareRelationships(oldResource, newResource, changeSet, changeItems, versionScheme);
+		
+		compareParentRefs(oldResource, newResource, changeSet, changeItems, isMinorVersionCompare);
+		
+		compareParamGroups(oldResource, newResource, changeSet, changeItems, isMinorVersionCompare);
+		
+		compareActionFacets(oldResource, newResource, changeSet, changeItems, isMinorVersionCompare);
+		
+		compareResourceActions(oldResource, newResource, changeSet, changeItems, isMinorVersionCompare);
+		
+		return changeSet;
+	}
+
+	/**
+	 * Compares the extension and business object reference relationships of the old and
+	 * new resource versions.
+	 * 
+	 * @param oldResource  the old-version resource to compare
+	 * @param newResource  the new-version resource to compare
+	 * @param changeSet  the change set to which all new change items will be assigned
+	 * @param changeItems  the list of change items being constructed
+	 * @param versionScheme  the version scheme of the old and new resources
+	 */
+	private void compareRelationships(TLResource oldResource, TLResource newResource, ResourceChangeSet changeSet,
+			List<ResourceChangeItem> changeItems, String versionScheme) {
+		NamedEntity oldExtendsType = oldResource.getExtension().getExtendsEntity();
+		NamedEntity oldBORefType = oldResource.getBusinessObjectRef();
+		NamedEntity newExtendsType = newResource.getExtension().getExtendsEntity();
+		NamedEntity newBORefType = newResource.getBusinessObjectRef();
+		QName oldExtendsTypeName = (oldExtendsType == null) ? null : getEntityName( oldExtendsType );
+		QName newExtendsTypeName = (newExtendsType == null) ? null : getEntityName( newExtendsType );
+		QName oldBORefTypeName = (oldBORefType == null) ? null : getEntityName( oldBORefType );
+		QName newBORefTypeName = (newBORefType == null) ? null : getEntityName( newBORefType );
+		
 		if (valueChanged( oldExtendsTypeName, newExtendsTypeName )) {
 			if (isVersionChange( oldExtendsTypeName, newExtendsTypeName, versionScheme )) {
 				changeItems.add( new ResourceChangeItem( changeSet,
@@ -140,8 +167,19 @@ public class ResourceComparator extends BaseComparator {
 						formatter.getEntityDisplayName( newBORefType ) ) );
 			}
 		}
-		
-		// Look for added, removed, and changed TLResourceParentReference
+	}
+
+	/**
+	 * Compares the parent references of the old and new resource versions.
+	 * 
+	 * @param oldResource  the old-version resource to compare
+	 * @param newResource  the new-version resource to compare
+	 * @param changeSet  the change set to which all new change items will be assigned
+	 * @param changeItems  the list of change items being constructed
+	 * @param isMinorVersionCompare  true if the new version is a later minor version of the old one
+	 */
+	private void compareParentRefs(TLResource oldResource, TLResource newResource, ResourceChangeSet changeSet,
+			List<ResourceChangeItem> changeItems, boolean isMinorVersionCompare) {
 		for (TLResourceParentRef newParentRef : newResource.getParentRefs()) {
 			String newParentRefName = newParentRef.getParentResource().getName() +
 					"/" + newParentRef.getParentParamGroup().getName();
@@ -172,8 +210,19 @@ public class ResourceComparator extends BaseComparator {
 				}
 			}
 		}
-		
-		// Look for added, removed, and changed TLParamGroup
+	}
+
+	/**
+	 * Compares the parameter groups of the old and new resource versions.
+	 * 
+	 * @param oldResource  the old-version resource to compare
+	 * @param newResource  the new-version resource to compare
+	 * @param changeSet  the change set to which all new change items will be assigned
+	 * @param changeItems  the list of change items being constructed
+	 * @param isMinorVersionCompare  true if the new version is a later minor version of the old one
+	 */
+	private void compareParamGroups(TLResource oldResource, TLResource newResource, ResourceChangeSet changeSet,
+			List<ResourceChangeItem> changeItems, boolean isMinorVersionCompare) {
 		for (TLParamGroup newParamGroup : newResource.getParamGroups()) {
 			String newParamGroupName = newParamGroup.getName();
 			TLParamGroup oldParamGroup = oldResource.getParamGroup( newParamGroupName );
@@ -202,8 +251,19 @@ public class ResourceComparator extends BaseComparator {
 				}
 			}
 		}
-		
-		// Look for added, removed, and changed TLActionFacet
+	}
+
+	/**
+	 * Compares the action facets of the old and new resource versions.
+	 * 
+	 * @param oldResource  the old-version resource to compare
+	 * @param newResource  the new-version resource to compare
+	 * @param changeSet  the change set to which all new change items will be assigned
+	 * @param changeItems  the list of change items being constructed
+	 * @param isMinorVersionCompare  true if the new version is a later minor version of the old one
+	 */
+	private void compareActionFacets(TLResource oldResource, TLResource newResource, ResourceChangeSet changeSet,
+			List<ResourceChangeItem> changeItems, boolean isMinorVersionCompare) {
 		for (TLActionFacet newActionFacet : newResource.getActionFacets()) {
 			String newActionFacetName = newActionFacet.getName();
 			TLActionFacet oldActionFacet = oldResource.getActionFacet( newActionFacetName );
@@ -233,8 +293,19 @@ public class ResourceComparator extends BaseComparator {
 				}
 			}
 		}
-		
-		// Look for added, removed, and changed TLAction
+	}
+
+	/**
+	 * Compares the actions of the old and new resource versions.
+	 * 
+	 * @param oldResource  the old-version resource to compare
+	 * @param newResource  the new-version resource to compare
+	 * @param changeSet  the change set to which all new change items will be assigned
+	 * @param changeItems  the list of change items being constructed
+	 * @param isMinorVersionCompare  true if the new version is a later minor version of the old one
+	 */
+	private void compareResourceActions(TLResource oldResource, TLResource newResource, ResourceChangeSet changeSet,
+			List<ResourceChangeItem> changeItems, boolean isMinorVersionCompare) {
 		for (TLAction newAction : newResource.getActions()) {
 			String newActionName = newAction.getActionId();
 			TLAction oldAction = oldResource.getAction( newActionName );
@@ -263,8 +334,6 @@ public class ResourceComparator extends BaseComparator {
 				}
 			}
 		}
-		
-		return changeSet;
 	}
 	
 	/**
@@ -406,24 +475,63 @@ public class ResourceComparator extends BaseComparator {
 		List<ResourceChangeItem> changeItems = changeSet.getChangeItems();
 		AbstractLibrary owningLibrary = oldAction.getOwningLibrary();
 		String versionScheme = (owningLibrary == null) ? null : owningLibrary.getVersionScheme();
-		TLActionRequest oldRequest = oldAction.getRequest();
-		TLActionRequest newRequest = newAction.getRequest();
-		NamedEntity oldPayloadType = (oldRequest == null) ? null : oldRequest.getPayloadType();
-		NamedEntity newPayloadType = (newRequest == null) ? null : newRequest.getPayloadType();
-		QName oldPayloadTypeName = (oldPayloadType == null) ? null : getEntityName( oldPayloadType );
-		QName newPayloadTypeName = (newPayloadType == null) ? null : getEntityName( newPayloadType );
-		TLHttpMethod oldHttpMethod = (oldRequest == null) ? null : oldRequest.getHttpMethod();
-		TLHttpMethod newHttpMethod = (newRequest == null) ? null : newRequest.getHttpMethod();
-		String oldPathTemplate = (oldRequest == null) ? "" : oldRequest.getPathTemplate();
-		String newPathTemplate = (newRequest == null) ? "" : newRequest.getPathTemplate();
-		String oldParamGroupName = (oldRequest == null) ? "" : oldRequest.getParamGroupName();
-		String newParamGroupName = (newRequest == null) ? "" : newRequest.getParamGroupName();
 		
 		if (oldAction.isCommonAction() != newAction.isCommonAction() ) {
 			changeItems.add( new ResourceChangeItem( resourceChangeSet,
 					ResourceChangeType.COMMON_ACTION_IND_CHANGED,
 					oldAction.isCommonAction() + "", newAction.isCommonAction() + "" ) );
 		}
+		
+		if (valueChanged( oldAction.getDocumentation(), newAction.getDocumentation() )) {
+			changeItems.add( new ResourceChangeItem( resourceChangeSet,
+					ResourceChangeType.DOCUMENTATION_CHANGED, null, null ) );
+		}
+		
+		compareActionRequests(oldAction, newAction, resourceChangeSet, changeItems, versionScheme);
+		
+		compareActionResponses(oldAction, newAction, resourceChangeSet, changeItems, isMinorVersionCompare);
+		
+		return changeSet;
+	}
+
+	/**
+	 * Compares the request properties of the old and new version actions.
+	 * 
+	 * @param oldAction  the old version action to compare
+	 * @param newAction  the new version action to compare
+	 * @param resourceChangeSet  the change set to which all new change items will be assigned
+	 * @param changeItems  the list of change items being constructed
+	 * @param versionScheme  the version scheme of the old and new actions
+	 */
+	private void compareActionRequests(TLAction oldAction, TLAction newAction, ResourceChangeSet resourceChangeSet,
+			List<ResourceChangeItem> changeItems, String versionScheme) {
+		TLActionRequest oldRequest = oldAction.getRequest();
+		TLActionRequest newRequest = newAction.getRequest();
+		String oldParamGroupName = "";
+		String newParamGroupName = "";
+		NamedEntity oldPayloadType = null;
+		NamedEntity newPayloadType = null;
+		TLHttpMethod oldHttpMethod = null;
+		TLHttpMethod newHttpMethod = null;
+		String oldPathTemplate = "";
+		String newPathTemplate = "";
+		
+		if (oldRequest != null) {
+			oldParamGroupName = oldRequest.getParamGroupName();
+			oldPayloadType = oldRequest.getPayloadType();
+			oldHttpMethod = oldRequest.getHttpMethod();
+			oldPathTemplate = oldRequest.getPathTemplate();
+		}
+		
+		if (newRequest != null) {
+			newParamGroupName = newRequest.getParamGroupName();
+			newPayloadType = newRequest.getPayloadType();
+			newHttpMethod = newRequest.getHttpMethod();
+			newPathTemplate = newRequest.getPathTemplate();
+		}
+		QName oldPayloadTypeName = (oldPayloadType == null) ? null : getEntityName( oldPayloadType );
+		QName newPayloadTypeName = (newPayloadType == null) ? null : getEntityName( newPayloadType );
+		
 		if (oldHttpMethod != newHttpMethod) {
 			changeItems.add( new ResourceChangeItem( resourceChangeSet,
 					ResourceChangeType.REQUEST_METHOD_CHANGED,
@@ -460,13 +568,19 @@ public class ResourceComparator extends BaseComparator {
 					ResourceChangeType.REQUEST_MIME_TYPE_ADDED, ResourceChangeType.REQUEST_MIME_TYPE_DELETED,
 					changeItems, resourceChangeSet, false);
 		}
-		
-		if (valueChanged( oldAction.getDocumentation(), newAction.getDocumentation() )) {
-			changeItems.add( new ResourceChangeItem( resourceChangeSet,
-					ResourceChangeType.DOCUMENTATION_CHANGED, null, null ) );
-		}
-		
-		// Look for added, removed, and changed TLActionResponse
+	}
+	
+	/**
+	 * Compares the responses from the old and new version actions.
+	 * 
+	 * @param oldAction  the old version action to compare
+	 * @param newAction  the new version action to compare
+	 * @param resourceChangeSet  the change set to which all new change items will be assigned
+	 * @param changeItems  the list of change items being constructed
+	 * @param isMinorVersionCompare  true if the new version is a later minor version of the old one
+	 */
+	private void compareActionResponses(TLAction oldAction, TLAction newAction, ResourceChangeSet resourceChangeSet,
+			List<ResourceChangeItem> changeItems, boolean isMinorVersionCompare) {
 		for (TLActionResponse newResponse : newAction.getResponses()) {
 			String newResponseName = getResponseId( newResponse );
 			TLActionResponse oldResponse = getResponse( oldAction, newResponseName );
@@ -496,10 +610,8 @@ public class ResourceComparator extends BaseComparator {
 				}
 			}
 		}
-		
-		return changeSet;
 	}
-	
+
 	/**
 	 * Compares two versions of the same OTM resource action response.
 	 * 

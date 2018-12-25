@@ -30,8 +30,8 @@ import org.opentravel.schemacompiler.codegen.html.writers.info.AbstractInfoWrite
 import org.opentravel.schemacompiler.codegen.html.writers.info.InfoWriter;
 import org.opentravel.schemacompiler.model.TLRole;
 
-public class CoreObjectWriter 
-	extends ComplexObjectWriter<CoreObjectDocumentationBuilder> {
+@SuppressWarnings("squid:MaximumInheritanceDepth")
+public class CoreObjectWriter extends ComplexObjectWriter<CoreObjectDocumentationBuilder> {
 	
 	/**
 	 * @param coreObject

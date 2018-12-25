@@ -21,7 +21,7 @@ import com.google.gson.JsonObject;
  * Provides JSON schema documentation about the OTM named entity from which the schema
  * was generated.
  */
-public class JsonEntityInfo {
+public class JsonEntityInfo implements JsonModelObject {
 	
 	private String entityType;
 	private String entityName;
@@ -63,19 +63,13 @@ public class JsonEntityInfo {
 	}
 	
 	/**
-	 * Returns this instance as a <code>JsonObject</code>.
-	 * 
-	 * @return JsonObject
+	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonModelObject#toJson()
 	 */
 	public JsonObject toJson() {
 		JsonObject entityInfo = new JsonObject();
 		
-		if (entityType != null) {
-			entityInfo.addProperty( "EntityType", entityType );
-		}
-		if (entityName != null) {
-			entityInfo.addProperty( "EntityName", entityName );
-		}
+		addProperty( entityInfo, "EntityType", entityType );
+		addProperty( entityInfo, "EntityName", entityName );
 		return entityInfo;
 	}
 	

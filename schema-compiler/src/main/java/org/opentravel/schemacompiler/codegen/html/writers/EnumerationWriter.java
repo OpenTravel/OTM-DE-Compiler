@@ -34,6 +34,7 @@ import org.opentravel.schemacompiler.codegen.html.writers.info.InfoWriter;
  * @author Eric.Bronson
  *
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class EnumerationWriter extends NamedEntityWriter<EnumerationDocumentationBuilder> {
 
 	/**

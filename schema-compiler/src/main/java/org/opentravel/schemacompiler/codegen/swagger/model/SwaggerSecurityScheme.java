@@ -19,12 +19,14 @@ package org.opentravel.schemacompiler.codegen.swagger.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opentravel.schemacompiler.codegen.json.model.JsonModelObject;
+
 import com.google.gson.JsonObject;
 
 /**
  * Defines a security scheme for a Swagger API specification document.
  */
-public class SwaggerSecurityScheme {
+public class SwaggerSecurityScheme implements JsonModelObject {
 	
 	private String name;
 	private SwaggerSecurityType type;
@@ -37,10 +39,7 @@ public class SwaggerSecurityScheme {
 	private List<SwaggerSecurityScope> scopes = new ArrayList<>();
 	
 	/**
-	 * Returns the <code>JsonObject</code> representation of this Swagger
-	 * model element.
-	 * 
-	 * @return JsonObject
+	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonModelObject#toJson()
 	 */
 	public JsonObject toJson() {
 		JsonObject json = new JsonObject();
@@ -48,13 +47,11 @@ public class SwaggerSecurityScheme {
 		if (type != null) {
 			json.addProperty( "type", type.getDisplayValue() );
 		}
-		if (description != null) {
-			json.addProperty( "description", description );
-		}
+		addProperty( json, "description", description );
+		
 		if (type == SwaggerSecurityType.API_KEY) {
-			if (parameterName != null) {
-				json.addProperty( "name", parameterName );
-			}
+			addProperty( json, "name", parameterName );
+			
 			if (in != null) {
 				json.addProperty( "in", in.getDisplayValue() );
 			}

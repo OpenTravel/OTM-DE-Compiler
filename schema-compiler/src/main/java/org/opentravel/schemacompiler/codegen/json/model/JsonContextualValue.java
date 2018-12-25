@@ -20,7 +20,7 @@ import com.google.gson.JsonObject;
 /**
  * Represents a single contextual value within the JSON schema documentation.
  */
-public class JsonContextualValue {
+public class JsonContextualValue implements JsonModelObject {
 	
 	private String context;
 	private String value;
@@ -62,15 +62,13 @@ public class JsonContextualValue {
 	}
 	
 	/**
-	 * Returns the <code>JsonObject</code> representation of this contextual value.
-	 * 
-	 * @return JsonObject
+	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonModelObject#toJson()
 	 */
 	public JsonObject toJson() {
 		JsonObject jsonObj = new JsonObject();
 		
-		jsonObj.addProperty( "context", context );
-		jsonObj.addProperty( "value", value );
+		addProperty( jsonObj, "context", context );
+		addProperty( jsonObj, "value", value );
 		return jsonObj;
 	}
 	

@@ -26,6 +26,7 @@ import org.opentravel.schemacompiler.codegen.html.writers.info.FacetInfoWriter;
  * @author Eric.Bronson
  *
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class FacetOwnerWriterImpl<T extends FacetOwnerDocumentationBuilder<?>> extends NamedEntityWriter<T> implements
 		FacetOwnerWriter {
 

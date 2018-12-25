@@ -51,15 +51,7 @@ public class AliasCodegenUtils {
 
         // If the alias is for a list facet, find the corresponding alias on its item facet
         if (facetAlias.getOwningEntity() instanceof TLListFacet) {
-            TLListFacet listFacet = (TLListFacet) facetAlias.getOwningEntity();
-            String itemFacetAliasName = facetAlias.getName();
-
-            if (itemFacetAliasName.endsWith("_List")) {
-                // Truncate the "_List" from the name to obtain the item facet alias name
-                itemFacetAliasName = itemFacetAliasName.substring(0,
-                        itemFacetAliasName.length() - 5);
-            }
-            facetAlias = ((TLFacet) listFacet.getItemFacet()).getAlias(itemFacetAliasName);
+            facetAlias = getItemFacetAlias(facetAlias, (TLListFacet) facetAlias.getOwningEntity());
         }
 
         // Locate the corresponding alias on the facet owner
@@ -90,6 +82,25 @@ public class AliasCodegenUtils {
         }
         return ownerAlias;
     }
+
+	/**
+	 * Returns the corresponding alias from the given list facet's item facet.
+	 * 
+	 * @param facetAlias  the original facet alias (for the list facet)
+	 * @param listFacet  the list facet to which the given alias applies
+	 * @return TLAlias
+	 */
+	private static TLAlias getItemFacetAlias(TLAlias facetAlias, TLListFacet listFacet) {
+		String itemFacetAliasName = facetAlias.getName();
+
+		if (itemFacetAliasName.endsWith("_List")) {
+		    // Truncate the "_List" from the name to obtain the item facet alias name
+		    itemFacetAliasName = itemFacetAliasName.substring(0,
+		            itemFacetAliasName.length() - 5);
+		}
+		facetAlias = ((TLFacet) listFacet.getItemFacet()).getAlias(itemFacetAliasName);
+		return facetAlias;
+	}
     
     /**
      * Returns the top-level alias whose owner is not a <code>TLContextualFacet</code>.
@@ -124,55 +135,70 @@ public class AliasCodegenUtils {
      *            the type of facet from which the sibling alias should be retrieved
      * @return TLAlias
      */
-    public static TLAlias getSiblingAlias(TLAlias facetAlias, TLFacetType siblingFacetType) {
-        TLAlias siblingAlias = null;
+	public static TLAlias getSiblingAlias(TLAlias facetAlias, TLFacetType siblingFacetType) {
+		TLAlias siblingAlias = null;
+		
+		if (facetAlias.getOwningEntity() instanceof TLFacet) {
+			TLFacet sourceFacet = (TLFacet) facetAlias.getOwningEntity();
+			
+			siblingAlias = findSiblingAlias(sourceFacet, facetAlias, siblingFacetType);
+		}
+		return siblingAlias;
+	}
 
-        if (facetAlias.getOwningEntity() instanceof TLFacet) {
-            TLFacet sourceFacet = (TLFacet) facetAlias.getOwningEntity();
-            String facetName = FacetCodegenUtils.getFacetName(sourceFacet);
-            String aliasSuffix = "_" + sourceFacet.getFacetType().getIdentityName(facetName);
-
-            if (facetAlias.getName().endsWith(aliasSuffix)) {
-                String aliasPrefix = facetAlias.getName().replace(aliasSuffix, "");
-                TLFacet siblingFacet = FacetCodegenUtils.getFacetOfType(
-                        sourceFacet.getOwningEntity(), siblingFacetType, facetName);
-
-                // First, find the sibling facet; if one cannot be located, create a ghost facet
-                if (siblingFacet == null) {
-                    siblingFacet = new TLFacet();
-                    siblingFacet.setOwningEntity(sourceFacet.getOwningEntity());
-                    siblingFacet.setFacetType(siblingFacetType);
-                    
-                    if (facetName != null) {
-                    	((TLContextualFacet) siblingFacet).setName(facetName);
-                    }
-                }
-
-                // Next, find the corresponding alias on the sibling facet; if one cannot be
-                // located, create a ghost alias (yes, this means we can have ghost aliases
-                // for ghost facets)
-                String siblingSuffix = "_" + siblingFacet.getFacetType().getIdentityName(facetName);
-                String derivedAlias = aliasPrefix + siblingSuffix;
-
-                for (TLAlias candidateAlias : siblingFacet.getAliases()) {
-                    if (candidateAlias.getName().equals(derivedAlias)) {
-                        siblingAlias = candidateAlias;
-                        break;
-                    }
-                }
-
-                // If a corresponding alias could not be located on the sibling facet, we must
-                // assume this
-                // this to be an inherited alias; therefore we must return a ghost
-                if (siblingAlias == null) {
-                    siblingAlias = new TLAlias();
-                    siblingAlias.setName(derivedAlias);
-                    siblingAlias.setOwningEntity(siblingFacet);
-                }
-            }
-        }
-        return siblingAlias;
-    }
+	/**
+	 * Finds the corresponding sibling alias from the source facet provided.
+	 * 
+	 * @param sourceFacet  the source facet from which to return the sibling alias
+	 * @param facetAlias  the original facet alias for which to return a sibling
+	 * @param siblingFacetType  the facet type of the sibling
+	 * @return TLALias
+	 */
+	private static TLAlias findSiblingAlias(TLFacet sourceFacet, TLAlias facetAlias, TLFacetType siblingFacetType) {
+		String facetName = FacetCodegenUtils.getFacetName(sourceFacet);
+		String aliasSuffix = "_" + sourceFacet.getFacetType().getIdentityName(facetName);
+		TLAlias siblingAlias = null;
+		
+		if (facetAlias.getName().endsWith(aliasSuffix)) {
+			String aliasPrefix = facetAlias.getName().replace(aliasSuffix, "");
+			TLFacet siblingFacet = FacetCodegenUtils.getFacetOfType(
+					sourceFacet.getOwningEntity(), siblingFacetType, facetName);
+			
+			// First, find the sibling facet; if one cannot be located,
+			// create a ghost facet
+			if (siblingFacet == null) {
+				siblingFacet = new TLFacet();
+				siblingFacet.setOwningEntity(sourceFacet.getOwningEntity());
+				siblingFacet.setFacetType(siblingFacetType);
+				
+				if (facetName != null) {
+					((TLContextualFacet) siblingFacet).setName(facetName);
+				}
+			}
+			
+			// Next, find the corresponding alias on the sibling facet; if one cannot be
+			// located, create a ghost alias (yes, this means we can have ghost aliases
+			// for ghost facets)
+			String siblingSuffix = "_" + siblingFacet.getFacetType().getIdentityName(facetName);
+			String derivedAlias = aliasPrefix + siblingSuffix;
+			
+			for (TLAlias candidateAlias : siblingFacet.getAliases()) {
+				if (candidateAlias.getName().equals(derivedAlias)) {
+					siblingAlias = candidateAlias;
+					break;
+				}
+			}
+			
+			// If a corresponding alias could not be located on the sibling facet, we must
+			// assume this this to be an inherited alias; therefore we must return a ghost.
+			if (siblingAlias == null) {
+				siblingAlias = new TLAlias();
+				siblingAlias.setName(derivedAlias);
+				siblingAlias.setOwningEntity(siblingFacet);
+			}
+		}
+		return siblingAlias;
+	}
 
     /**
      * Returns the corresponding alias from the facet of the specified type.

@@ -40,6 +40,7 @@
 package org.opentravel.schemacompiler.codegen.html;
 
 import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
+import org.opentravel.schemacompiler.codegen.html.markup.HtmlWriter;
 
 /**
  * A factory that returns a link given the information about it.
@@ -51,9 +52,9 @@ public class LinkFactoryImpl extends LinkFactory {
 
 	private static final String HTML_FILE_EXT = ".html";
 	
-	private HtmlDocletWriter mWriter;
+	private HtmlWriter mWriter;
 
-	public LinkFactoryImpl(HtmlDocletWriter writer) {
+	public LinkFactoryImpl(HtmlWriter writer) {
 		mWriter = writer;
 	}
 

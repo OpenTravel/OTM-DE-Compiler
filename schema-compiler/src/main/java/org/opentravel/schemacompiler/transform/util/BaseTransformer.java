@@ -51,9 +51,8 @@ public abstract class BaseTransformer<S, T, C extends ObjectTransformerContext> 
         this.context = context;
     }
 
-    @SuppressWarnings("unchecked")
     protected TransformerFactory<C> getTransformerFactory() {
-        return (context == null) ? null : ((TransformerFactory<C>) context.getTransformerFactory());
+        return (context == null) ? null : context.getTransformerFactory();
     }
 
     /**

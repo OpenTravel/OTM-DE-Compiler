@@ -18,7 +18,7 @@ package org.opentravel.schemacompiler.codegen.json.model;
 /**
  * Class used to represent a named reference to a JSON schema.
  */
-public class JsonSchemaNamedReference {
+public class JsonSchemaNamedReference implements JsonNamedProperty {
 	
 	private String name;
 	private JsonSchemaReference schema;
@@ -94,6 +94,22 @@ public class JsonSchemaNamedReference {
 	 */
 	public void setRequired(boolean required) {
 		this.required = required;
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonNamedProperty#getPropertyName()
+	 */
+	@Override
+	public String getPropertyName() {
+		return getName();
+	}
+
+	/**
+	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonNamedProperty#getPropertyValue()
+	 */
+	@Override
+	public JsonModelObject getPropertyValue() {
+		return getSchema();
 	}
 	
 }

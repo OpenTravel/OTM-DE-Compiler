@@ -85,6 +85,7 @@
 				<configuration>
 					<packagingExcludes>WEB-INF/web.xml</packagingExcludes>
 					<warName>${project.artifactId}</warName>
+					<attachClasses>true</attachClasses>
 				</configuration>
 			</plugin>
 			<plugin>

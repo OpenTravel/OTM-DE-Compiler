@@ -113,8 +113,7 @@ public class CodegenNamespacePrefixMapper extends NamespacePrefixMapper {
             String namespace = lib.getNamespace();
 
             // Skip libraries that are in the target or the XML schema namespaces; also skip
-            // chameleon
-            // libraries since they cannot be imported
+            // chameleon libraries since they cannot be imported
             if (namespace.equals(targetNamespace)
                     || namespace.equals(XMLConstants.W3C_XML_SCHEMA_NS_URI)
                     || AnonymousEntityFilter.ANONYMOUS_PSEUDO_NAMESPACE.equals(namespace)
@@ -136,26 +135,7 @@ public class CodegenNamespacePrefixMapper extends NamespacePrefixMapper {
             // Add a prefix mapping for this library's namespace if one is required and does not
             // already exist
             if (importRequired && !namespacePrefixMappings.containsKey(namespace)) {
-
-                // Identify a unique prefix for the imported namespace
-                String prefix = importPrefixMappings.get(namespace);
-
-                if (prefix == null) {
-                    prefix = (lib.getPrefix() == null) ? "ns1" : lib.getPrefix();
-                }
-                if (namespacePrefixMappings.containsValue(prefix)) {
-                    String prefixStart = getPrefixAlphaChars(prefix);
-                    int counter = 1;
-
-                    prefix = prefixStart + counter;
-
-                    while (namespacePrefixMappings.containsKey(prefix)) {
-                        prefix = prefixStart + (counter++);
-                    }
-                }
-
-                namespacePrefixMappings.put(namespace, prefix);
-                uriDeclarations.add(namespace);
+                addPrefixMapping(lib, namespace, importPrefixMappings);
             }
         }
 
@@ -164,6 +144,35 @@ public class CodegenNamespacePrefixMapper extends NamespacePrefixMapper {
             namespacePrefixMappings.put(library.getNamespace(), library.getPrefix());
         }
     }
+
+	/**
+	 * Adds a prefix mapping for the library's namespace.
+	 * 
+	 * @param lib  the library that will identify the prefix for the namespace
+	 * @param namespace  the namespace to add to the prefix mappings
+	 * @param importPrefixMappings  the prefix mappings structure being populated
+	 */
+	private void addPrefixMapping(AbstractLibrary lib, String namespace, Map<String, String> importPrefixMappings) {
+		// Identify a unique prefix for the imported namespace
+		String prefix = importPrefixMappings.get(namespace);
+
+		if (prefix == null) {
+		    prefix = (lib.getPrefix() == null) ? "ns1" : lib.getPrefix();
+		}
+		if (namespacePrefixMappings.containsValue(prefix)) {
+		    String prefixStart = getPrefixAlphaChars(prefix);
+		    int counter = 1;
+
+		    prefix = prefixStart + counter;
+
+		    while (namespacePrefixMappings.containsKey(prefix)) {
+		        prefix = prefixStart + (counter++);
+		    }
+		}
+
+		namespacePrefixMappings.put(namespace, prefix);
+		uriDeclarations.add(namespace);
+	}
 
     /**
      * Adds namespace/prefix mappings for compile-time dependencies that have been registered with

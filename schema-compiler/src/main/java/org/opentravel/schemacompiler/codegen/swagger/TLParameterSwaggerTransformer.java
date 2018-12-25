@@ -80,7 +80,7 @@ public class TLParameterSwaggerTransformer extends AbstractSwaggerCodegenTransfo
 		
 		if (sourceField instanceof TLIndicator) {
 			schema = new JsonSchema();
-			schema.setType( JsonType.JSON_BOOLEAN );
+			schema.setType(JsonType.JSON_BOOLEAN);
 			
 		} else {
 			NamedEntity fieldType = null;
@@ -92,31 +92,43 @@ public class TLParameterSwaggerTransformer extends AbstractSwaggerCodegenTransfo
 			}
 			
 			if (fieldType != null) {
-				SimpleTypeInfo simpleInfo = SimpleTypeInfo.newInstance( fieldType );
-		        JsonType jsonType = (simpleInfo == null) ? null : JsonType.valueOf( simpleInfo.getBaseSimpleType() );
-				
-				if (jsonType != null) {
-					schema = jsonUtils.buildSimpleTypeSchema( simpleInfo, jsonType );
-					
-				} else {
-					schema = new JsonSchema(); // default to an empty schema
-					
-					if (fieldType instanceof TLClosedEnumeration) {
-						TLClosedEnumeration closedEnum = (TLClosedEnumeration) fieldType;
-						List<String> enumValues = schema.getEnumValues();
-						
-				        for (TLEnumValue modelEnum : EnumCodegenUtils.getInheritedValues( closedEnum )) {
-				        	enumValues.add( modelEnum.getLiteral() );
-				        }
-						schema.setType( JsonType.JSON_STRING );
-					}	
-				}
+				schema = buildFieldSchema(fieldType);
 			}
 		}
 		
 		// Last resort if we could not identify a type - use a string
 		if ((schema != null) && (schema.getType() == null)) {
-			schema.setType( JsonType.JSON_STRING );
+			schema.setType(JsonType.JSON_STRING);
+		}
+		return schema;
+	}
+
+	/**
+	 * Builds a JSON schema for the given field type.
+	 * 
+	 * @param fieldType  the OTM entity type for which to create a schema
+	 * @return JsonSchema
+	 */
+	private JsonSchema buildFieldSchema(NamedEntity fieldType) {
+		SimpleTypeInfo simpleInfo = SimpleTypeInfo.newInstance(fieldType);
+		JsonType jsonType = (simpleInfo == null) ? null : JsonType.valueOf(simpleInfo.getBaseSimpleType());
+		JsonSchema schema;
+		
+		if (jsonType != null) {
+			schema = jsonUtils.buildSimpleTypeSchema(simpleInfo, jsonType);
+			
+		} else {
+			schema = new JsonSchema(); // default to an empty schema
+			
+			if (fieldType instanceof TLClosedEnumeration) {
+				TLClosedEnumeration closedEnum = (TLClosedEnumeration) fieldType;
+				List<String> enumValues = schema.getEnumValues();
+				
+				for (TLEnumValue modelEnum : EnumCodegenUtils.getInheritedValues(closedEnum)) {
+					enumValues.add(modelEnum.getLiteral());
+				}
+				schema.setType(JsonType.JSON_STRING);
+			}
 		}
 		return schema;
 	}

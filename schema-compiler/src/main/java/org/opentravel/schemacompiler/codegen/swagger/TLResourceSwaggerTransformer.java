@@ -148,7 +148,17 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
 			swaggerDoc.getDefinitions().addAll( buildJsonDefinitions( source.getOwningModel() ) );
 		}
 		
-		// Add any extensions provided by the Swagger code generation bindings
+		applyBindingStyle(swaggerDoc);
+		
+		return swaggerDoc;
+	}
+
+	/**
+	 * Add any extensions provided by the Swagger code generation binding style.
+	 * 
+	 * @param swaggerDoc  the swagger document to which binding styles will be applied
+	 */
+	private void applyBindingStyle(SwaggerDocument swaggerDoc) {
 		if (swaggerBindings != null) {
 			if (swaggerBindings.getSupportedSchemes() != null) {
 				for (SwaggerScheme scheme : swaggerBindings.getSupportedSchemes()) {
@@ -164,7 +174,6 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
 				swaggerDoc.getSecuritySchemes().addAll( swaggerBindings.getSecuritySchemes() );
 			}
 		}
-		return swaggerDoc;
 	}
 	
 	/**

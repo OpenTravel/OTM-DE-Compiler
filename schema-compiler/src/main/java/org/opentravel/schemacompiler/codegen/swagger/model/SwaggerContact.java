@@ -15,12 +15,14 @@
  */
 package org.opentravel.schemacompiler.codegen.swagger.model;
 
+import org.opentravel.schemacompiler.codegen.json.model.JsonModelObject;
+
 import com.google.gson.JsonObject;
 
 /**
  * Class that defines the meta-model for a Swagger Contact object.
  */
-public class SwaggerContact {
+public class SwaggerContact implements JsonModelObject {
 	
 	private String name;
 	private String url;
@@ -81,23 +83,14 @@ public class SwaggerContact {
 	}
 	
 	/**
-	 * Returns the <code>JsonObject</code> representation of this Swagger
-	 * model element.
-	 * 
-	 * @return JsonObject
+	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonModelObject#toJson()
 	 */
 	public JsonObject toJson() {
 		JsonObject json = new JsonObject();
 		
-		if (name != null) {
-			json.addProperty( "name", name );
-		}
-		if (url != null) {
-			json.addProperty( "url", url );
-		}
-		if (email != null) {
-			json.addProperty( "email", email );
-		}
+		addProperty( json, "name", name );
+		addProperty( json, "url", url );
+		addProperty( json, "email", email );
 		return json;
 	}
 

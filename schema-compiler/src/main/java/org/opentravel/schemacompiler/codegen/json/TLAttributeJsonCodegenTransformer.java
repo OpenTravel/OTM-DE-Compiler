@@ -110,75 +110,84 @@ public class TLAttributeJsonCodegenTransformer extends AbstractJsonSchemaTransfo
 	 * @param source  the source attribute from the OTM model
 	 */
 	private void setAttributeType(JsonSchemaReference attrSchemaRef, TLPropertyType attributeType, TLAttribute source) {
-		SimpleTypeInfo simpleInfo = SimpleTypeInfo.newInstance( attributeType );
-        JsonType jsonType = (simpleInfo == null) ? null : JsonType.valueOf( simpleInfo.getBaseSimpleType() );
-        
-        if (jsonType != null) {
-        	JsonSchema attrSchema = jsonUtils.buildSimpleTypeSchema( simpleInfo, jsonType );
-        	
-    		transformDocumentation( source, attrSchema );
-    		jsonUtils.applySimpleTypeDocumentation( attrSchema, source.getType() );
-    		attrSchema.getExampleItems().addAll( jsonUtils.getExampleInfo( source ) );
-    		attrSchema.getEquivalentItems().addAll( jsonUtils.getEquivalentInfo( source ) );
-    		attrSchemaRef.setSchema( attrSchema );
-    		
-        } else if (source.isReference()) {
-            boolean isMultipleReference = (source.getReferenceRepeat() > 1) || (source.getReferenceRepeat() < 0);
-        	
-            if (isMultipleReference) {
-        		JsonSchema attrSchema = new JsonSchema();
-            	JsonSchema itemSchema = new JsonSchema();
-            	
-            	itemSchema.setType( JsonType.JSON_STRING );
-            	attrSchema.setType( JsonType.JSON_ARRAY );
-            	attrSchema.setItems( new JsonSchemaReference( itemSchema ) );
-        		attrSchemaRef.setSchema( attrSchema );
-            	
-            } else {
-            	JsonSchema attrSchema = jsonUtils.buildSimpleTypeSchema( JsonType.JSON_STRING );
-            	
-        		transformDocumentation( source, attrSchema );
-        		attrSchema.getExampleItems().addAll( jsonUtils.getExampleInfo( source ) );
-        		attrSchema.getEquivalentItems().addAll( jsonUtils.getEquivalentInfo( source ) );
-        		attrSchemaRef.setSchema( attrSchema );
-            }
-            
-        } else if (attributeType instanceof XSDSimpleType) {
-        	JsonDocumentation doc = new JsonDocumentation();
-        	JsonSchema attrSchema = new JsonSchema();
-        	
-        	doc.setDescriptions( "Legacy XML schema reference - {" +
-        			attributeType.getNamespace() + "}" + attributeType.getLocalName() );
-        	attrSchema.setDocumentation( doc );
-        	attrSchemaRef.setSchema( attrSchema );
-        	
-        } else {
-        	JsonSchemaReference schemaRef = attrSchemaRef;
-        	
-    		transformDocumentation( source, schemaRef );
-    		schemaRef.getExampleItems().addAll( jsonUtils.getExampleInfo( source ) );
-    		schemaRef.getEquivalentItems().addAll( jsonUtils.getEquivalentInfo( source ) );
-    		
-    		if (simpleInfo != null) {
-    			if (simpleInfo.isListType()) {
-                	JsonSchema attrSchema = new JsonSchema();
-    				
-                	schemaRef = new JsonSchemaReference();
-                	attrSchema.setType( JsonType.JSON_ARRAY );
-                	attrSchema.setItems( schemaRef );
-                	attrSchemaRef.setSchema( attrSchema );
-    			}
-    			
-        		if (simpleInfo.getBaseSimpleType() != null) {
-                	schemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath(
-                			simpleInfo.getBaseSimpleType(), getMemberFieldOwner() ) );
-        			
-        		} else {
-                	schemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath(
-                			attributeType, getMemberFieldOwner() ) );
-        		}
-    		}
-        }
+		SimpleTypeInfo simpleInfo = SimpleTypeInfo.newInstance(attributeType);
+		JsonType jsonType = (simpleInfo == null) ? null : JsonType.valueOf(simpleInfo.getBaseSimpleType());
+		
+		if (jsonType != null) {
+			JsonSchema attrSchema = jsonUtils.buildSimpleTypeSchema(simpleInfo, jsonType);
+			
+			transformDocumentation(source, attrSchema);
+			jsonUtils.applySimpleTypeDocumentation(attrSchema, source.getType());
+			attrSchema.getExampleItems().addAll(jsonUtils.getExampleInfo(source));
+			attrSchema.getEquivalentItems().addAll(jsonUtils.getEquivalentInfo(source));
+			attrSchemaRef.setSchema(attrSchema);
+			
+		} else if (source.isReference()) {
+			setReferenceAttributeType(source, attrSchemaRef);
+			
+		} else if (attributeType instanceof XSDSimpleType) {
+			JsonDocumentation doc = new JsonDocumentation();
+			JsonSchema attrSchema = new JsonSchema();
+			
+			doc.setDescriptions("Legacy XML schema reference - {" + attributeType.getNamespace() + "}"
+					+ attributeType.getLocalName());
+			attrSchema.setDocumentation(doc);
+			attrSchemaRef.setSchema(attrSchema);
+			
+		} else {
+			JsonSchemaReference schemaRef = attrSchemaRef;
+			
+			transformDocumentation(source, schemaRef);
+			schemaRef.getExampleItems().addAll(jsonUtils.getExampleInfo(source));
+			schemaRef.getEquivalentItems().addAll(jsonUtils.getEquivalentInfo(source));
+			
+			if (simpleInfo != null) {
+				if (simpleInfo.isListType()) {
+					JsonSchema attrSchema = new JsonSchema();
+					
+					schemaRef = new JsonSchemaReference();
+					attrSchema.setType(JsonType.JSON_ARRAY);
+					attrSchema.setItems(schemaRef);
+					attrSchemaRef.setSchema(attrSchema);
+				}
+				
+				if (simpleInfo.getBaseSimpleType() != null) {
+					schemaRef.setSchemaPath(
+							jsonUtils.getSchemaReferencePath(simpleInfo.getBaseSimpleType(), getMemberFieldOwner()));
+					
+				} else {
+					schemaRef.setSchemaPath(jsonUtils.getSchemaReferencePath(attributeType, getMemberFieldOwner()));
+				}
+			}
+		}
+	}
+
+	/**
+	 * Assigns the JSON schema for a reference attribute.
+	 * 
+	 * @param source  the source attribute for which to generate the type assignment
+	 * @param attrSchemaRef  the JSON attribute schema reference
+	 */
+	private void setReferenceAttributeType(TLAttribute source, JsonSchemaReference attrSchemaRef) {
+		boolean isMultipleReference = (source.getReferenceRepeat() > 1) || (source.getReferenceRepeat() < 0);
+		
+		if (isMultipleReference) {
+			JsonSchema attrSchema = new JsonSchema();
+			JsonSchema itemSchema = new JsonSchema();
+			
+			itemSchema.setType(JsonType.JSON_STRING);
+			attrSchema.setType(JsonType.JSON_ARRAY);
+			attrSchema.setItems(new JsonSchemaReference(itemSchema));
+			attrSchemaRef.setSchema(attrSchema);
+			
+		} else {
+			JsonSchema attrSchema = jsonUtils.buildSimpleTypeSchema(JsonType.JSON_STRING);
+			
+			transformDocumentation(source, attrSchema);
+			attrSchema.getExampleItems().addAll(jsonUtils.getExampleInfo(source));
+			attrSchema.getEquivalentItems().addAll(jsonUtils.getEquivalentInfo(source));
+			attrSchemaRef.setSchema(attrSchema);
+		}
 	}
 	
 }

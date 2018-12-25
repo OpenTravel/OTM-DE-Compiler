@@ -68,7 +68,6 @@ public class ReleaseComparator extends BaseComparator {
 		SortedSet<QName> oldLibraryNames = new TreeSet<>( new QNameComparator() );
 		SortedSet<QName> newLibraryNames = new TreeSet<>( new QNameComparator() );
 		List<ChangeSetItem> pendingChangeSets = new ArrayList<>();
-		Iterator<QName> iterator;
 		
 		oldLibraryNames.addAll( oldLibraries.keySet() );
 		newLibraryNames.addAll( newLibraries.keySet() );
@@ -95,52 +94,11 @@ public class ReleaseComparator extends BaseComparator {
 					oldRelease.getDescription(), newRelease.getDescription() ) );
 		}
 		
-		// Identify libraries that were modified at the same version.  As we identify
-		// matching libraries, remove the names that were processed so they will not be
-		// considered in subsequent steps.
-		iterator = oldLibraryNames.iterator();
+		findModifiedSameVersionLibraries(oldLibraries, newLibraries, oldLibraryNames,
+				newLibraryNames, pendingChangeSets);
 		
-		while (iterator.hasNext()) {
-			QName libraryName = iterator.next();
-			
-			if (newLibraries.containsKey( libraryName )) {
-				TLLibrary oldLibrary = oldLibraries.get( libraryName );
-				TLLibrary newLibrary = newLibraries.get( libraryName );
-				
-				pendingChangeSets.add( new ChangeSetItem(
-						ReleaseChangeType.LIBRARY_CHANGED, oldLibrary, newLibrary ) );
-				newLibraryNames.remove( libraryName );
-				iterator.remove();
-			}
-		}
-		
-		// Identify libraries that were modified at a different version.  As we identify
-		// matching libraries, remove the names that were processed so they will not be
-		// considered in subsequent steps.
-		iterator = oldLibraryNames.iterator();
-		
-		while (iterator.hasNext()) {
-			QName libraryName = iterator.next();
-			TLLibrary oldLibrary = oldLibraries.get( libraryName );
-			String versionScheme = oldLibrary.getVersionScheme();
-			List<QName> newVersionMatches = ModelCompareUtils.findMatchingVersions(
-					libraryName, newLibraryNames, versionScheme );
-			
-			if (!newVersionMatches.isEmpty()) {
-				QName closestVersionMatch = ModelCompareUtils.findClosestVersion(
-						libraryName, newVersionMatches, versionScheme );
-				
-				if (closestVersionMatch != null) {
-					TLLibrary newLibrary = newLibraries.get( closestVersionMatch );
-					
-					addNamespaceMapping( oldLibrary.getNamespace(), newLibrary.getNamespace() );
-					pendingChangeSets.add( new ChangeSetItem(
-							ReleaseChangeType.LIBRARY_VERSION_CHANGED, oldLibrary, newLibrary ) );
-					newLibraryNames.remove( closestVersionMatch );
-					iterator.remove();
-				}
-			}
-		}
+		findModifiedUpversionedLibraries(oldLibraries, newLibraries, oldLibraryNames,
+				newLibraryNames, pendingChangeSets);
 		
 		// Any new names left over represent libraries that were added
 		for (QName newName : newLibraryNames) {
@@ -169,6 +127,79 @@ public class ReleaseComparator extends BaseComparator {
 		return changeSet;
 	}
 	
+	/**
+	 * Identify libraries that were modified at the same version.  As we identify
+	 * matching libraries, remove the names that were processed so they will not
+	 * be considered in subsequent checks.
+	 * 
+	 * @param oldLibraries  the libraries from the old-version project
+	 * @param newLibraries  the libraries from the new-version project
+	 * @param oldLibraryNames  the set of qualified names for the old-version libraries
+	 * @param newLibraryNames  the set of qualified names for the new-version libraries
+	 * @param pendingChangeSets  the list of pending change sets being constructed
+	 */
+	private void findModifiedSameVersionLibraries(Map<QName, TLLibrary> oldLibraries,
+			Map<QName, TLLibrary> newLibraries, SortedSet<QName> oldLibraryNames, SortedSet<QName> newLibraryNames,
+			List<ChangeSetItem> pendingChangeSets) {
+		Iterator<QName> iterator;
+		iterator = oldLibraryNames.iterator();
+		
+		while (iterator.hasNext()) {
+			QName libraryName = iterator.next();
+			
+			if (newLibraries.containsKey( libraryName )) {
+				TLLibrary oldLibrary = oldLibraries.get( libraryName );
+				TLLibrary newLibrary = newLibraries.get( libraryName );
+				
+				pendingChangeSets.add( new ChangeSetItem(
+						ReleaseChangeType.LIBRARY_CHANGED, oldLibrary, newLibrary ) );
+				newLibraryNames.remove( libraryName );
+				iterator.remove();
+			}
+		}
+	}
+	
+	/**
+	 * Identify libraries that were modified at a different version.  As we identify
+	 * matching libraries, remove the names that were processed so they will not be
+	 * considered in subsequent steps.
+	 * 
+	 * @param oldLibraries  the libraries from the old-version project
+	 * @param newLibraries  the libraries from the new-version project
+	 * @param oldLibraryNames  the set of qualified names for the old-version libraries
+	 * @param newLibraryNames  the set of qualified names for the new-version libraries
+	 * @param pendingChangeSets  the list of pending change sets being constructed
+	 */
+	private void findModifiedUpversionedLibraries(Map<QName, TLLibrary> oldLibraries,
+			Map<QName, TLLibrary> newLibraries, SortedSet<QName> oldLibraryNames, SortedSet<QName> newLibraryNames,
+			List<ChangeSetItem> pendingChangeSets) {
+		Iterator<QName> iterator;
+		iterator = oldLibraryNames.iterator();
+		
+		while (iterator.hasNext()) {
+			QName libraryName = iterator.next();
+			TLLibrary oldLibrary = oldLibraries.get( libraryName );
+			String versionScheme = oldLibrary.getVersionScheme();
+			List<QName> newVersionMatches = ModelCompareUtils.findMatchingVersions(
+					libraryName, newLibraryNames, versionScheme );
+			
+			if (!newVersionMatches.isEmpty()) {
+				QName closestVersionMatch = ModelCompareUtils.findClosestVersion(
+						libraryName, newVersionMatches, versionScheme );
+				
+				if (closestVersionMatch != null) {
+					TLLibrary newLibrary = newLibraries.get( closestVersionMatch );
+					
+					addNamespaceMapping( oldLibrary.getNamespace(), newLibrary.getNamespace() );
+					pendingChangeSets.add( new ChangeSetItem(
+							ReleaseChangeType.LIBRARY_VERSION_CHANGED, oldLibrary, newLibrary ) );
+					newLibraryNames.remove( closestVersionMatch );
+					iterator.remove();
+				}
+			}
+		}
+	}
+
 	/**
 	 * Constructs a map of QNames for each user-defined library in the release
 	 * using the namespace and library name as the key.

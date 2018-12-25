@@ -27,8 +27,8 @@ import org.opentravel.schemacompiler.codegen.html.writers.info.VWAAttributeInfoW
 import org.opentravel.schemacompiler.codegen.html.writers.info.VWAIndicatorInfoWriter;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 
-public class VWAWriter extends 
-	NamedEntityWriter<VWADocumentationBuilder> implements
+@SuppressWarnings("squid:MaximumInheritanceDepth")
+public class VWAWriter extends NamedEntityWriter<VWADocumentationBuilder> implements
 		FieldOwnerWriter {
 	
 	/**

@@ -50,22 +50,7 @@ public class JsonTypeNameBuilder {
 	 * @param filter  the code generation filter (may be null)
 	 */
 	public JsonTypeNameBuilder(TLModel model, CodeGenerationFilter filter) {
-		// Compute a unique prefix for every library in the model
-		for (AbstractLibrary library : model.getAllLibraries()) {
-			String libNS = library.getNamespace();
-			
-			if (!prefixRegistry.containsKey( libNS )) {
-				String basePrefix = library.getPrefix().replaceAll("-", "").toUpperCase();
-				String prefix = basePrefix;
-				int counter = 0;
-				
-				while (prefixRegistry.containsValue( prefix )) {
-					prefix = basePrefix + counterChars.charAt( counter );
-					counter++;
-				}
-				prefixRegistry.put( libNS,  prefix );
-			}
-		}
+		initLibraryPrefixes(model);
 		
 		// Search for local name collisions in the generated schemas
 		SymbolTable symbolTable = SymbolTableFactory.newSymbolTableFromModel( model );
@@ -81,6 +66,29 @@ public class JsonTypeNameBuilder {
 					}
 					allLocalNames.add( localName );
 				}
+			}
+		}
+	}
+
+	/**
+	 * Compute a unique prefix for every library in the model.
+	 * 
+	 * @param model  the model containing the libraries to be processed
+	 */
+	private void initLibraryPrefixes(TLModel model) {
+		for (AbstractLibrary library : model.getAllLibraries()) {
+			String libNS = library.getNamespace();
+			
+			if (!prefixRegistry.containsKey( libNS )) {
+				String basePrefix = library.getPrefix().replaceAll("-", "").toUpperCase();
+				String prefix = basePrefix;
+				int counter = 0;
+				
+				while (prefixRegistry.containsValue( prefix )) {
+					prefix = basePrefix + counterChars.charAt( counter );
+					counter++;
+				}
+				prefixRegistry.put( libNS,  prefix );
 			}
 		}
 	}

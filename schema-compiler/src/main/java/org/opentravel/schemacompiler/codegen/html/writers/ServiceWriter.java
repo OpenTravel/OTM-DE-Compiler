@@ -26,6 +26,7 @@ import org.opentravel.schemacompiler.codegen.html.writers.info.OperationInfoWrit
  * @author Eric.Bronson
  *
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class ServiceWriter extends NamedEntityWriter<ServiceDocumentationBuilder> {
 
 	/**

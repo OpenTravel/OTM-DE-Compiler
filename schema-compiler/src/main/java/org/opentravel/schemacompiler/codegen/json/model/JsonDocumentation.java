@@ -29,7 +29,7 @@ import com.google.gson.JsonObject;
 /**
  * Provides documentation properties for a JSON schema.
  */
-public class JsonDocumentation {
+public class JsonDocumentation implements JsonModelObject {
 	
 	private String[] descriptions = new String[0];
 	private List<String> deprecations = new ArrayList<>();
@@ -196,42 +196,16 @@ public class JsonDocumentation {
 	 * Returns a <code>JsonObject</code> representation of this documentation item.  If all
 	 * documentation entries are empty, this method will return null.
 	 * 
-	 * @return JsonObject
+	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonModelObject#toJson()
 	 */
 	public JsonObject toJson() {
 		JsonObject docItem = new JsonObject();
-		boolean hasDocumentation = false;
+		boolean hasDocumentation = buildJsonDescriptions(docItem);
 		
-		if ((descriptions != null) && (descriptions.length > 0)) {
-			List<String> nonEmptyDescriptions = new ArrayList<>();
-			
-			for (String description : descriptions) {
-				String trimmedDesc = (description == null) ? null : description.trim();
-				
-				if ((trimmedDesc != null) && (trimmedDesc.length() > 0)) {
-					nonEmptyDescriptions.add( StringEscapeUtils.escapeJson( trimmedDesc ) );
-				}
-			}
-			
-			if (!nonEmptyDescriptions.isEmpty()) {
-				if (nonEmptyDescriptions.size() == 1) {
-					docItem.addProperty( "description", nonEmptyDescriptions.get( 0 ) );
-					
-				} else {
-					JsonArray jsonDescriptions = new JsonArray();
-					
-					for (String desc : nonEmptyDescriptions) {
-						jsonDescriptions.add( desc );
-					}
-					docItem.add( "description", jsonDescriptions );
-				}
-				hasDocumentation = true;
-			}
-		}
-		hasDocumentation |= addOtmDocumentationItems( docItem, deprecations, "deprecations" );
-		hasDocumentation |= addOtmDocumentationItems( docItem, references, "references" );
-		hasDocumentation |= addOtmDocumentationItems( docItem, implementers, "implementers" );
-		hasDocumentation |= addOtmDocumentationItems( docItem, moreInfos, "more-info" );
+		hasDocumentation = addOtmDocumentationItems(docItem, deprecations, "deprecations") || hasDocumentation;
+		hasDocumentation = addOtmDocumentationItems(docItem, references, "references") || hasDocumentation;
+		hasDocumentation = addOtmDocumentationItems(docItem, implementers, "implementers") || hasDocumentation;
+		hasDocumentation = addOtmDocumentationItems(docItem, moreInfos, "more-info") || hasDocumentation;
 		
 		if (!otherDocContexts.isEmpty()) {
 			JsonArray jsonOtherDocs = new JsonArray();
@@ -239,14 +213,58 @@ public class JsonDocumentation {
 			for (String context : otherDocContexts) {
 				JsonObject jsonOtherDoc = new JsonObject();
 				
-				jsonOtherDoc.addProperty( "context", context );
-				jsonOtherDoc.addProperty( "text", otherDocTexts.get( context ) );
-				jsonOtherDocs.add( jsonOtherDoc );
+				addProperty(jsonOtherDoc, "context", context);
+				addProperty(jsonOtherDoc, "text", otherDocTexts.get(context));
+				jsonOtherDocs.add(jsonOtherDoc);
 			}
-			docItem.add( "other-docs", jsonOtherDocs );
+			docItem.add("other-docs", jsonOtherDocs);
 			hasDocumentation = true;
 		}
 		return hasDocumentation ? docItem : null;
+	}
+
+	/**
+	 * Adds all non-empty descriptions to the given JSON schema object.
+	 * 
+	 * @param docItem  the JSON object to which the description(s) will be added
+	 * @return  boolean
+	 */
+	private boolean buildJsonDescriptions(JsonObject docItem) {
+		boolean hasDocumentation = false;
+		
+		if ((descriptions != null) && (descriptions.length > 0)) {
+			List<String> nonEmptyDescriptions = getNonEmptyDescriptions();
+			
+			if (!nonEmptyDescriptions.isEmpty()) {
+				if (nonEmptyDescriptions.size() == 1) {
+					addProperty(docItem, "description", nonEmptyDescriptions.get(0));
+					
+				} else {
+					addProperty(docItem, "description", nonEmptyDescriptions);
+				}
+				hasDocumentation = true;
+			}
+		}
+		return hasDocumentation;
+	}
+
+	/**
+	 * Returns all non-empty description values.
+	 * 
+	 * @return List<String>
+	 */
+	private List<String> getNonEmptyDescriptions() {
+		List<String> nonEmptyDescriptions;
+		nonEmptyDescriptions = new ArrayList<>();
+		
+		for (String description : descriptions) {
+			String trimmedDesc = (description == null) ? null : description.trim();
+			
+			if ((trimmedDesc != null) && (trimmedDesc.length() > 0)) {
+				nonEmptyDescriptions.add(StringEscapeUtils.escapeJson(trimmedDesc));
+			}
+		}
+		return nonEmptyDescriptions;
 	}
 	
 	/**

@@ -128,45 +128,52 @@ public class FacetInfoWriter extends AbstractInheritedInfoWriter<FacetOwnerDocum
      * @param visibleMemberMap the map for the members to document.
      * @param summaryTreeList list of content trees to which the documentation will be added
      */
-    protected void addInheritedInfoSummary(Content summaryTree) {
-    	FacetOwnerDocumentationBuilder<?> ext = getParent(source);    	
-    	List<FacetDocumentationBuilder> facets = source.getFacets();
-    	while(ext != null){
-    		List<FacetDocumentationBuilder> extFacets = ext.getFacets();   		
-    		List<FacetDocumentationBuilder> inheritedFacets = new ArrayList<>();
-    		for(FacetDocumentationBuilder fdb : extFacets){
-    			boolean hasFacet = false;
-    			
-    			for(FacetDocumentationBuilder fdb2 : facets){   
-    				TLFacetType extFacetType = fdb.getType();
-    				if(extFacetType.equals(TLFacetType.ID) || extFacetType.equals(TLFacetType.SUMMARY) || extFacetType.equals(TLFacetType.DETAIL)){
-    					if(fdb2.getType().equals(extFacetType)){
-    						hasFacet = true;
-    					}
-    				}else{ // should be a custom or query
-    					String extFacetName = fdb.getName();
-    					//get the custom part
-    					String extName = extFacetName.substring(ext.getName().length());
-    					if(fdb2.getName().contains(extName)){
-    						hasFacet = true;
-    					}
-    				}
-    				if (hasFacet) break;
-    			}
-    			if(!hasFacet){
-    				inheritedFacets.add(fdb);
-    			}
-    		}
-    		
-    		if (!inheritedFacets.isEmpty()) {
-    			addInheritedInfoHeader(ext, summaryTree,
-						"doclet.Facets_Inherited_From");
+	protected void addInheritedInfoSummary(Content summaryTree) {
+		FacetOwnerDocumentationBuilder<?> ext = getParent(source);
+		
+		while (ext != null) {
+			List<FacetDocumentationBuilder> extFacets = ext.getFacets();
+			List<FacetDocumentationBuilder> inheritedFacets = new ArrayList<>();
+			
+			for (FacetDocumentationBuilder fdb : extFacets) {
+				if (!hasFacet(ext, fdb)) {
+					inheritedFacets.add(fdb);
+				}
+			}
+			
+			if (!inheritedFacets.isEmpty()) {
+				addInheritedInfoHeader(ext, summaryTree, "doclet.Facets_Inherited_From");
 				addInheritedInfo(inheritedFacets, ext, summaryTree);
-    		}
- 
-    		ext = getParent(ext);
-    	}
-    }
+			}
+			
+			ext = getParent(ext);
+		}
+	}
+	
+	private boolean hasFacet(FacetOwnerDocumentationBuilder<?> fodb, FacetDocumentationBuilder fdb) {
+		boolean hasFacet = false;
+		
+		for (FacetDocumentationBuilder fdb2 : source.getFacets()){   
+			TLFacetType extFacetType = fdb.getType();
+			
+			if (extFacetType.equals(TLFacetType.ID) || extFacetType.equals(TLFacetType.SUMMARY)
+					|| extFacetType.equals(TLFacetType.DETAIL)){
+				if(fdb2.getType().equals(extFacetType)){
+					hasFacet = true;
+				}
+			} else { // should be a custom or query
+				String extFacetName = fdb.getName();
+				//get the custom part
+				String extName = extFacetName.substring(fodb.getName().length());
+				
+				if(fdb2.getName().contains(extName)){
+					hasFacet = true;
+				}
+			}
+			if (hasFacet) break;
+		}
+		return hasFacet;
+	}
     
     
     protected FacetOwnerDocumentationBuilder<?> getParent(

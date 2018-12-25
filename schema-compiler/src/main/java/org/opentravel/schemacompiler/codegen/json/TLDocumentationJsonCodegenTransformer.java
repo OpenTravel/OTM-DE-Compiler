@@ -61,39 +61,50 @@ public class TLDocumentationJsonCodegenTransformer extends AbstractJsonSchemaTra
      * @param jsonDocs  the JSON schema documentation elements to merge
      * @return JsonDocumentation
      */
-    public static JsonDocumentation mergeDocumentation(JsonDocumentation... jsonDocs) {
-    	JsonDocumentation mergedDoc = new JsonDocumentation();
-    	List<String> descriptions = new ArrayList<>();
-    	
-    	for (JsonDocumentation jsonDoc : jsonDocs) {
-    		if (jsonDoc == null) {
-    			continue;
-    		}
-    		if ((jsonDoc.getDescriptions() != null) && (jsonDoc.getDescriptions().length > 0)) {
-    			descriptions.addAll( Arrays.asList( jsonDoc.getDescriptions() ) );
-    		}
-    		for (String deprecation : jsonDoc.getDeprecations()) {
-    			mergedDoc.addDeprecation( deprecation );
-    		}
-    		for (String reference : jsonDoc.getReferences()) {
-    			mergedDoc.addReference( reference );
-    		}
-    		for (String implementers : jsonDoc.getImplementers()) {
-    			mergedDoc.addImplementer( implementers );
-    		}
-    		for (String moreInfo : jsonDoc.getMoreInfos()) {
-    			mergedDoc.addMoreInfo( moreInfo );
-    		}
-    		for (String docContext : jsonDoc.getOtherDocumentationContexts()) {
-    			StringBuilder ctx = new StringBuilder( docContext );
-    			
-    			while (mergedDoc.getOtherDocumentationContexts().contains( docContext )) {
-    				ctx.append( "_" ).append( docContext );
-    			}
-    			mergedDoc.addOtherDocumentation( ctx.toString(), jsonDoc.getOtherDocumentation( ctx.toString() ) );
-    		}
-    	}
-    	return mergedDoc;
-    }
+	public static JsonDocumentation mergeDocumentation(JsonDocumentation... jsonDocs) {
+		JsonDocumentation mergedDoc = new JsonDocumentation();
+		List<String> descriptions = new ArrayList<>();
+		
+		for (JsonDocumentation jsonDoc : jsonDocs) {
+			mergeDocumentation(mergedDoc, descriptions, jsonDoc);
+		}
+		return mergedDoc;
+	}
+
+	/**
+	 * Merges the given JSON documentation into the existing merged JSON documentation structure.
+	 * 
+	 * @param mergedDoc  the merged JSON object that will receive all changes
+	 * @param descriptions  the descriptions to merge
+	 * @param jsonDoc  the JSON document containing non-description documentation to merge
+	 */
+	private static void mergeDocumentation(JsonDocumentation mergedDoc, List<String> descriptions,
+			JsonDocumentation jsonDoc) {
+		if (jsonDoc == null) return;
+		
+		if ((jsonDoc.getDescriptions() != null) && (jsonDoc.getDescriptions().length > 0)) {
+			descriptions.addAll(Arrays.asList(jsonDoc.getDescriptions()));
+		}
+		for (String deprecation : jsonDoc.getDeprecations()) {
+			mergedDoc.addDeprecation(deprecation);
+		}
+		for (String reference : jsonDoc.getReferences()) {
+			mergedDoc.addReference(reference);
+		}
+		for (String implementers : jsonDoc.getImplementers()) {
+			mergedDoc.addImplementer(implementers);
+		}
+		for (String moreInfo : jsonDoc.getMoreInfos()) {
+			mergedDoc.addMoreInfo(moreInfo);
+		}
+		for (String docContext : jsonDoc.getOtherDocumentationContexts()) {
+			StringBuilder ctx = new StringBuilder(docContext);
+			
+			while (mergedDoc.getOtherDocumentationContexts().contains(docContext)) {
+				ctx.append("_").append(docContext);
+			}
+			mergedDoc.addOtherDocumentation(ctx.toString(), jsonDoc.getOtherDocumentation(ctx.toString()));
+		}
+	}
     
 }

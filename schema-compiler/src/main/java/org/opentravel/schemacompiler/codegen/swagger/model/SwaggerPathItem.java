@@ -15,12 +15,14 @@
  */
 package org.opentravel.schemacompiler.codegen.swagger.model;
 
+import org.opentravel.schemacompiler.codegen.json.model.JsonModelObject;
+
 import com.google.gson.JsonObject;
 
 /**
  * Class that defines the meta-model for a Swagger Path Item object.
  */
-public class SwaggerPathItem {
+public class SwaggerPathItem implements JsonModelObject {
 	
 	private String pathTemplate;
 	private SwaggerOperation getOperation;
@@ -176,35 +178,18 @@ public class SwaggerPathItem {
 	}
 	
 	/**
-	 * Returns the <code>JsonObject</code> representation of this Swagger
-	 * model element.
-	 * 
-	 * @return JsonObject
+	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonModelObject#toJson()
 	 */
 	public JsonObject toJson() {
 		JsonObject json = new JsonObject();
 		
-		if (getOperation != null) {
-			json.add( "get", getOperation.toJson() );
-		}
-		if (putOperation != null) {
-			json.add( "put", putOperation.toJson() );
-		}
-		if (postOperation != null) {
-			json.add( "post", postOperation.toJson() );
-		}
-		if (deleteOperation != null) {
-			json.add( "delete", deleteOperation.toJson() );
-		}
-		if (optionsOperation != null) {
-			json.add( "options", optionsOperation.toJson() );
-		}
-		if (headOperation != null) {
-			json.add( "head", headOperation.toJson() );
-		}
-		if (patchOperation != null) {
-			json.add( "patch", patchOperation.toJson() );
-		}
+		addJsonProperty( json, "get", getOperation );
+		addJsonProperty( json, "put", putOperation );
+		addJsonProperty( json, "post", postOperation );
+		addJsonProperty( json, "delete", deleteOperation );
+		addJsonProperty( json, "options", optionsOperation );
+		addJsonProperty( json, "head", headOperation );
+		addJsonProperty( json, "patch", patchOperation );
 		return json;
 	}
 

@@ -23,6 +23,7 @@ import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
 import org.opentravel.schemacompiler.codegen.json.model.JsonContextualValue;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentationOwner;
+import org.opentravel.schemacompiler.codegen.json.model.JsonModelObject;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 
 import com.google.gson.JsonElement;
@@ -31,7 +32,7 @@ import com.google.gson.JsonObject;
 /**
  * Class that defines the meta-model for a Swagger Header object.
  */
-public class SwaggerHeader implements JsonDocumentationOwner {
+public class SwaggerHeader implements JsonDocumentationOwner, JsonModelObject {
 	
 	private String name;
 	private JsonDocumentation documentation;
@@ -108,10 +109,7 @@ public class SwaggerHeader implements JsonDocumentationOwner {
 	}
 
 	/**
-	 * Returns the <code>JsonObject</code> representation of this Swagger
-	 * model element.
-	 * 
-	 * @return JsonObject
+	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonModelObject#toJson()
 	 */
 	public JsonObject toJson() {
 		JsonObject json = new JsonObject();

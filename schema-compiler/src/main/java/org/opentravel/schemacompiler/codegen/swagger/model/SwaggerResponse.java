@@ -23,6 +23,7 @@ import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
 import org.opentravel.schemacompiler.codegen.json.model.JsonContextualValue;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentationOwner;
+import org.opentravel.schemacompiler.codegen.json.model.JsonModelObject;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 
 import com.google.gson.JsonObject;
@@ -30,7 +31,7 @@ import com.google.gson.JsonObject;
 /**
  * Class that defines the meta-model for a Swagger Response object.
  */
-public class SwaggerResponse implements JsonDocumentationOwner {
+public class SwaggerResponse implements JsonDocumentationOwner, JsonModelObject {
 	
 	private boolean defaultResponse;
 	private Integer statusCode;
@@ -155,10 +156,7 @@ public class SwaggerResponse implements JsonDocumentationOwner {
 	}
 
 	/**
-	 * Returns the <code>JsonObject</code> representation of this Swagger
-	 * model element.
-	 * 
-	 * @return JsonObject
+	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonModelObject#toJson()
 	 */
 	public JsonObject toJson() {
 		JsonObject json = new JsonObject();
@@ -168,18 +166,13 @@ public class SwaggerResponse implements JsonDocumentationOwner {
 		if (json.get( "description" ) == null) {
 			json.addProperty( "description", "" );
 		}
-		if (schema != null) {
-			json.add( "schema", schema.toJson() );
-		}
-		if (xmlSchema != null) {
-			json.add( "x-xml-schema", xmlSchema.toJson() );
-		}
+		addJsonProperty( json, "schema", schema );
+		addJsonProperty( json, "x-xml-schema", xmlSchema );
+		
 		if (!headers.isEmpty()) {
 			JsonObject headersJson = new JsonObject();
 			
-			for (SwaggerHeader header : headers) {
-				headersJson.add( header.getName(), header.toJson() );
-			}
+			addJsonProperty( headersJson, "headers", headers );
 			json.add( "headers", headersJson );
 		}
 		return json;

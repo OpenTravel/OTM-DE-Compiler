@@ -44,6 +44,7 @@ import java.io.IOException;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlConstants;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTag;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTree;
+import org.opentravel.schemacompiler.codegen.html.markup.HtmlWriter;
 
 
 
@@ -59,7 +60,7 @@ import org.opentravel.schemacompiler.codegen.html.markup.HtmlTree;
  *
  * @author Atul M Dambalkar
  */
-public class FrameOutputWriter extends HtmlDocletWriter {
+public class FrameOutputWriter extends HtmlWriter {
 
     /**
      * Number of packages specified on the command line.

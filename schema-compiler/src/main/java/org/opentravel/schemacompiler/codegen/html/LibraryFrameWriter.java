@@ -50,6 +50,7 @@ import org.opentravel.schemacompiler.codegen.html.markup.HtmlConstants;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlStyle;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTag;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTree;
+import org.opentravel.schemacompiler.codegen.html.markup.HtmlWriter;
 import org.opentravel.schemacompiler.codegen.html.markup.RawHtml;
 import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.TLAbstractEnumeration;
@@ -61,7 +62,7 @@ import org.opentravel.schemacompiler.model.TLService;
  * frame. This will list all the Class Kinds in the package. A click on any
  * class-kind will update the right-hand frame with the clicked class-kind page.
  */
-public class LibraryFrameWriter extends HtmlDocletWriter {
+public class LibraryFrameWriter extends HtmlWriter {
 
 	private TLLibrary library;
 

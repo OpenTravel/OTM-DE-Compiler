@@ -64,12 +64,6 @@ public class LibraryComparator extends BaseComparator {
 		String newStatus = (newLibrary.getStatus() == null) ? null : newLibrary.getStatus().toString();
 		Map<String,NamedEntity> oldEntities = buildEntityMap( oldLibrary );
 		Map<String,NamedEntity> newEntities = buildEntityMap( newLibrary );
-		SortedSet<String> oldEntityNames = new TreeSet<>( oldEntities.keySet() );
-		SortedSet<String> newEntityNames = new TreeSet<>( newEntities.keySet() );
-		Map<String,TLResource> oldResources = buildResourceMap( oldLibrary );
-		Map<String,TLResource> newResources = buildResourceMap( newLibrary );
-		SortedSet<String> oldResourceNames = new TreeSet<>( oldResources.keySet() );
-		SortedSet<String> newResourceNames = new TreeSet<>( newResources.keySet() );
 		LibraryChangeSet changeSet = new LibraryChangeSet( oldLibrary, newLibrary );
 		List<LibraryChangeItem> changeItems = changeSet.getChangeItems();
 		
@@ -98,6 +92,26 @@ public class LibraryComparator extends BaseComparator {
 			changeItems.add( new LibraryChangeItem( changeSet, LibraryChangeType.COMMENTS_CHANGED,
 					oldLibrary.getComments(), newLibrary.getComments() ) );
 		}
+		
+		compareLibraryMembers(oldEntities, newEntities, changeSet, changeItems);
+		
+		compareResourceMembers(oldLibrary, newLibrary, changeSet, changeItems);
+		
+		return changeSet;
+	}
+
+	/**
+	 * Compares the named entity members of the old and new library versions.
+	 * 
+	 * @param oldEntity  the old-version entity being compared
+	 * @param newEntity  the new-version entity being compared
+	 * @param changeSet  the change set to which all new change items will be assigned
+	 * @param changeItems  the list of change items being constructed
+	 */
+	private void compareLibraryMembers(Map<String, NamedEntity> oldEntities, Map<String, NamedEntity> newEntities,
+			LibraryChangeSet changeSet, List<LibraryChangeItem> changeItems) {
+		SortedSet<String> oldEntityNames = new TreeSet<>( oldEntities.keySet() );
+		SortedSet<String> newEntityNames = new TreeSet<>( newEntities.keySet() );
 		
 		// Identify new entities that were added
 		for (String newName : newEntityNames) {
@@ -131,6 +145,22 @@ public class LibraryComparator extends BaseComparator {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Compares the <code>TLResource</code> members of the old and new library versions.
+	 * 
+	 * @param oldLibrary  the old library version
+	 * @param newLibrary  the new library version
+	 * @param changeSet  the change set to which all new change items will be assigned
+	 * @param changeItems  the list of change items being constructed
+	 */
+	private void compareResourceMembers(TLLibrary oldLibrary, TLLibrary newLibrary, LibraryChangeSet changeSet,
+			List<LibraryChangeItem> changeItems) {
+		Map<String,TLResource> oldResources = buildResourceMap( oldLibrary );
+		Map<String,TLResource> newResources = buildResourceMap( newLibrary );
+		SortedSet<String> oldResourceNames = new TreeSet<>( oldResources.keySet() );
+		SortedSet<String> newResourceNames = new TreeSet<>( newResources.keySet() );
 		
 		// Identify new resources that were added
 		for (String newName : newResourceNames) {
@@ -163,10 +193,8 @@ public class LibraryComparator extends BaseComparator {
 				}
 			}
 		}
-		
-		return changeSet;
 	}
-	
+
 	/**
 	 * Constructs a map of all named entities in the library that associates the
 	 * entitys' local names with the entities themselves.

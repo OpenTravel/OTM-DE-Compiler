@@ -25,7 +25,7 @@ import com.google.gson.JsonObject;
  * Provides JSON schema documentation about the OTM library from which the schema
  * was generated.
  */
-public class JsonLibraryInfo {
+public class JsonLibraryInfo implements JsonModelObject {
 	
 	private DateFormat dateFormat = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss.SSSZ" );
 	// 2015-12-01T17:20:42.144-06:00
@@ -183,37 +183,20 @@ public class JsonLibraryInfo {
 	}
     
 	/**
-	 * Returns this instance as a <code>JsonObject</code>.
-	 * 
-	 * @return JsonObject
+	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonModelObject#toJson()
 	 */
 	public JsonObject toJson() {
 		JsonObject libraryInfo = new JsonObject();
 		
-		if (projectName != null) {
-			libraryInfo.addProperty( "ProjectName", projectName );
-		}
-		if (resourceName != null) {
-			libraryInfo.addProperty( "ResourceName", resourceName );
-		}
-		if (libraryName != null) {
-			libraryInfo.addProperty( "LibraryName", libraryName );
-		}
-		if (libraryVersion != null) {
-			libraryInfo.addProperty( "LibraryVersion", libraryVersion );
-		}
-		if (libraryStatus != null) {
-			libraryInfo.addProperty( "LibraryStatus", libraryStatus );
-		}
-		if (sourceFile != null) {
-			libraryInfo.addProperty( "SourceFile", sourceFile );
-		}
-		if (compilerVersion != null) {
-			libraryInfo.addProperty( "CompilerVersion", compilerVersion );
-		}
-		if (compileDate != null) {
-			libraryInfo.addProperty( "CompileDate", dateFormat.format( compileDate ) );
-		}
+		addProperty( libraryInfo, "ProjectName", projectName );
+		addProperty( libraryInfo, "ResourceName", resourceName );
+		addProperty( libraryInfo, "LibraryName", libraryName );
+		addProperty( libraryInfo, "LibraryVersion", libraryVersion );
+		addProperty( libraryInfo, "LibraryStatus", libraryStatus );
+		addProperty( libraryInfo, "SourceFile", sourceFile );
+		addProperty( libraryInfo, "CompilerVersion", compilerVersion );
+		addProperty( libraryInfo, "CompileDate",
+				(compileDate == null) ? null : dateFormat.format( compileDate ) );
 		return libraryInfo;
 	}
 	

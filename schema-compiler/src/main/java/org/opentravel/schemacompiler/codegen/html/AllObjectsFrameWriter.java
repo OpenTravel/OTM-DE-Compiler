@@ -47,6 +47,7 @@ import org.opentravel.schemacompiler.codegen.html.markup.HtmlConstants;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlStyle;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTag;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTree;
+import org.opentravel.schemacompiler.codegen.html.markup.HtmlWriter;
 import org.opentravel.schemacompiler.codegen.html.markup.RawHtml;
 import org.opentravel.schemacompiler.codegen.html.markup.StringContent;
 import org.opentravel.schemacompiler.model.LibraryMember;
@@ -61,7 +62,7 @@ import org.opentravel.schemacompiler.model.LibraryMember;
  * @author Doug Kramer
  * @author Bhavesh Patel (Modified)
  */
-public class AllObjectsFrameWriter extends HtmlDocletWriter {
+public class AllObjectsFrameWriter extends HtmlWriter {
 
     /**
      * The name of the output file with frames

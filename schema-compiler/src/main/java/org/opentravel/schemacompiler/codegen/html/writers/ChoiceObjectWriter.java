@@ -24,6 +24,7 @@ import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
  * @author jason.kramer
  *
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class ChoiceObjectWriter extends ComplexObjectWriter<ChoiceObjectDocumentationBuilder> {
 
 	/**

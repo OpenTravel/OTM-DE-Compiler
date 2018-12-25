@@ -23,6 +23,7 @@ import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
 import org.opentravel.schemacompiler.codegen.json.model.JsonContextualValue;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentationOwner;
+import org.opentravel.schemacompiler.codegen.json.model.JsonModelObject;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -30,7 +31,7 @@ import com.google.gson.JsonObject;
 /**
  * Class that defines the meta-model for a Swagger Operation object.
  */
-public class SwaggerOperation implements JsonDocumentationOwner {
+public class SwaggerOperation implements JsonDocumentationOwner, JsonModelObject {
 	
 	private String summary;
 	private JsonDocumentation documentation;
@@ -186,45 +187,22 @@ public class SwaggerOperation implements JsonDocumentationOwner {
 	}
 
 	/**
-	 * Returns the <code>JsonObject</code> representation of this Swagger
-	 * model element.
-	 * 
-	 * @return JsonObject
+	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonModelObject#toJson()
 	 */
 	public JsonObject toJson() {
 		JsonObject json = new JsonObject();
 		
-		if (summary != null) {
-			json.addProperty( "summary", summary );
-		}
-		
+		addProperty( json, "summary", summary );
 		JsonSchemaCodegenUtils.createOtmAnnotations( json, this );
+		addProperty( json, "operationId", operationId );
+		addProperty( json, "consumes", consumes );
+		addProperty( json, "produces", produces );
 		
-		if (operationId != null) {
-			json.addProperty( "operationId", operationId );
-		}
-		if (!consumes.isEmpty()) {
-			JsonArray jsonArray = new JsonArray();
-			
-			for (String value : consumes) {
-				jsonArray.add( value );
-			}
-			json.add( "consumes", jsonArray );
-		}
-		if (!produces.isEmpty()) {
-			JsonArray jsonArray = new JsonArray();
-			
-			for (String value : produces) {
-				jsonArray.add( value );
-			}
-			json.add( "produces", jsonArray );
-		}
 		if (!parameters.isEmpty()) {
 			JsonArray jsonArray = new JsonArray();
 			
-			for (SwaggerParameter param : parameters) {
-				jsonArray.add( param.toJson() );
-			}
+			parameters.forEach( p -> jsonArray.add( p.toJson() ) );
+			
 			if (!globalParameters.isEmpty()) {
 				for (SwaggerParameter param : globalParameters) {
 					JsonObject paramRef = new JsonObject();
@@ -247,14 +225,9 @@ public class SwaggerOperation implements JsonDocumentationOwner {
 			}
 			json.add( "responses", responsesJson );
 		}
-		if (!schemes.isEmpty()) {
-			JsonArray jsonArray = new JsonArray();
-			
-			for (String value : schemes) {
-				jsonArray.add( value );
-			}
-			json.add( "schemes", jsonArray );
-		}
+		
+		addProperty( json, "schemes", schemes );
+		
 		return json;
 	}
 

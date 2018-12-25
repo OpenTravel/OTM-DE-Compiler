@@ -45,25 +45,25 @@ public class LibraryFilenameBuilder<L extends AbstractLibrary> implements
      * @see org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder#buildFilename(org.opentravel.schemacompiler.model.TLModelElement,java.lang.String)
      */
     @Override
-    public String buildFilename(L item, String fileExtension) {
-    	synchronized (this) {
-    		if (baseFilenameMap == null) {
-    			TLModel model = (item == null) ? null : item.getOwningModel();
-    			
-				baseFilenameMap = initBaseFilenames( model );
-    		}
-    	}
-        String fileExt = (fileExtension.length() == 0) ? "" : ("." + fileExtension);
-    	String filename = baseFilenameMap.get( item );
-    	
-    	if (filename == null) {
-            filename = new FilenameDetails( item ).getFilename();
-    	}
-        if (!filename.toLowerCase().endsWith(fileExt)) {
-            filename += fileExt;
-        }
-        return filename;
-    }
+	public String buildFilename(L item, String fileExtension) {
+		synchronized (this) {
+			if (baseFilenameMap == null) {
+				TLModel model = (item == null) ? null : item.getOwningModel();
+				
+				baseFilenameMap = initBaseFilenames(model);
+			}
+		}
+		String fileExt = (fileExtension.length() == 0) ? "" : ("." + fileExtension);
+		String filename = baseFilenameMap.get(item);
+		
+		if (filename == null) {
+			filename = new FilenameDetails(item).getFilename();
+		}
+		if (!filename.toLowerCase().endsWith(fileExt)) {
+			filename += fileExt;
+		}
+		return filename;
+	}
     
     /**
      * Initializes the filenames that should be used for each library in the model.
@@ -72,61 +72,81 @@ public class LibraryFilenameBuilder<L extends AbstractLibrary> implements
      * @return Map<L,String>
      */
     @SuppressWarnings("unchecked")
-	private Map<L,String> initBaseFilenames(TLModel model) {
-    	Map<L,String> filenameMap = new HashMap<>();
-    	
-    	if (model != null) {
-        	Set<FilenameDetails> filenameDetails = new HashSet<>();
-        	boolean conflictsExist;
-        	
-        	// Build the initial list of filename details
-        	for (AbstractLibrary library : model.getAllLibraries()) {
-        		filenameDetails.add( new FilenameDetails( library ) );
-        	}
-        	
-        	// Check for conflicts and continue attempting to resolve until no more
-        	// conflicts exist, or no further options are available.
-        	do {
-        		Map<String,List<FilenameDetails>> detailsByFilename = new HashMap<>();
-        		
-        		for (FilenameDetails fd : filenameDetails) {
-        			List<FilenameDetails> detailsList = detailsByFilename.get( fd.getFilename() );
-        			
-        			if (detailsList == null) {
-        				detailsList = new ArrayList<>();
-        				detailsByFilename.put( fd.getFilename(), detailsList );
-        			}
-        			detailsList.add( fd );
-        		}
-        		conflictsExist = false;
-        		
-        		for (List<FilenameDetails> detailsList : detailsByFilename.values()) {
-        			if (detailsList.size() > 1) {
-        				boolean changesMade = false;
-        				
-        				for (FilenameDetails fd : detailsList) {
-        					if (!fd.getNsComponents().isEmpty()) {
-            					fd.setLibraryFilename(fd.getLibrary().getName() + "_" + fd.getNsComponents().remove( 0 ));
-        						changesMade = true;
-        					}
-        				}
-        				
-        				// If no more namespace options are available, allow the conflict to exist.  In this
-        				// situation, there are other errors in the model that should not have allowed us to
-        				// get this far.  Exiting at this point will prevent us from getting stuck in an
-        				// infinite loop.
-        				conflictsExist |= changesMade;
-        			}
-        		}
-        		
-        	} while (conflictsExist);
-        	
-        	for (FilenameDetails fd : filenameDetails) {
-        		filenameMap.put( (L) fd.getLibrary(), fd.getFilename() );
-        	}
-    	}
-    	return filenameMap;
-    }
+	private Map<L, String> initBaseFilenames(TLModel model) {
+		Map<L, String> filenameMap = new HashMap<>();
+		
+		if (model != null) {
+			Set<FilenameDetails> filenameDetails = new HashSet<>();
+			
+			// Build the initial list of filename details
+			for (AbstractLibrary library : model.getAllLibraries()) {
+				filenameDetails.add(new FilenameDetails(library));
+			}
+			
+			// Check for conflicts and continue attempting to resolve until no
+			// more conflicts exist, or no further options are available.
+			checkAndResolveConflicts(filenameDetails);
+			
+			for (FilenameDetails fd : filenameDetails) {
+				filenameMap.put((L) fd.getLibrary(), fd.getFilename());
+			}
+		}
+		return filenameMap;
+	}
+
+	/**
+	 * Checks the given list for conflicting filenames and resolves the conflicts
+	 * if any exist.
+	 * 
+	 * @param filenameDetails  the list of filename details for which to resolve conflicts
+	 */
+	private void checkAndResolveConflicts(Set<FilenameDetails> filenameDetails) {
+		boolean conflictsExist;
+		
+		do {
+			Map<String, List<FilenameDetails>> detailsByFilename = buildFilenameMap(filenameDetails);
+			
+			conflictsExist = false;
+			
+			for (List<FilenameDetails> detailsList : detailsByFilename.values()) {
+				if (detailsList.size() > 1) {
+					boolean changesMade = false;
+					
+					for (FilenameDetails fd : detailsList) {
+						if (!fd.getNsComponents().isEmpty()) {
+							fd.setLibraryFilename(fd.getLibrary().getName() + "_" + fd.getNsComponents().remove(0));
+							changesMade = true;
+						}
+					}
+					
+					// If no more namespace options are available, allow the conflict to exist. In this
+					// situation, there are other errors in the model that should not have allowed us to
+					// get this far. Exiting at this point will prevent us from getting stuck in an
+					// infinite loop.
+					conflictsExist |= changesMade;
+				}
+			}
+			
+		} while (conflictsExist);
+	}
+
+	/**
+	 * Builds a map that associates each filename with the filename details from
+	 * the set provided.
+	 * 
+	 * @param filenameDetails  the set of filename details
+	 * @return  Map<String, List<FilenameDetails>>
+	 */
+	private Map<String, List<FilenameDetails>> buildFilenameMap(Set<FilenameDetails> filenameDetails) {
+		Map<String, List<FilenameDetails>> detailsByFilename;
+		detailsByFilename = new HashMap<>();
+		
+		for (FilenameDetails fd : filenameDetails) {
+			detailsByFilename.computeIfAbsent( fd.getFilename(), fn -> detailsByFilename.put( fn, new ArrayList<>() ) );
+			detailsByFilename.get(fd.getFilename()).add( fd );
+		}
+		return detailsByFilename;
+	}
     
     /**
      * Encapsulates the various details of a library's filename (used during initialization).

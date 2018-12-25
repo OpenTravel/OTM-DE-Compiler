@@ -83,6 +83,7 @@ public class FacetDocumentationBuilder extends
 				facetOwner = t.getOwningEntity();
 			}
 		}
+		
 		if (facetOwner instanceof TLContextualFacet) {
 			superFacet = (TLContextualFacet) facetOwner;
 		}
@@ -91,45 +92,10 @@ public class FacetDocumentationBuilder extends
 			switch (t.getFacetType()) {
 				case CUSTOM:
 				case DETAIL:
-					superFacet = FacetCodegenUtils.getFacetOfType(facetOwner, TLFacetType.SUMMARY);
-					
-					if (!superFacet.declaresContent()) {
-						TLFacetOwner ext = FacetCodegenUtils.getFacetOwnerExtension(facetOwner);
-						
-						while (ext != null) {
-							TLFacet extFacet = FacetCodegenUtils.getFacetOfType(ext, TLFacetType.SUMMARY);
-							
-							if (extFacet.declaresContent()) {
-								superFacet = extFacet;
-								ext = null;
-							} else {
-								ext = FacetCodegenUtils.getFacetOwnerExtension(ext);
-							}
-						}
-
-					}
-					if (!superFacet.declaresContent()) {
-						superFacet = FacetCodegenUtils.getFacetOfType(facetOwner, TLFacetType.ID);
-					}
+					superFacet = getCustomOrDetailSuperfacet(facetOwner);
 					break;
 				case CHOICE:
-					superFacet = FacetCodegenUtils.getFacetOfType(facetOwner, TLFacetType.SHARED);
-					
-					if (!superFacet.declaresContent()) {
-						TLFacetOwner ext = FacetCodegenUtils.getFacetOwnerExtension(facetOwner);
-						
-						while (ext != null) {
-							TLFacet extFacet = FacetCodegenUtils.getFacetOfType(ext, TLFacetType.SUMMARY);
-							
-							if (extFacet.declaresContent()) {
-								superFacet = extFacet;
-								ext = null;
-							} else {
-								ext = FacetCodegenUtils.getFacetOwnerExtension(ext);
-							}
-						}
-
-					}
+					superFacet = getChoiceSuperfacet(facetOwner);
 					break;
 				case SUMMARY:
 					superFacet = FacetCodegenUtils.getFacetOfType(facetOwner, TLFacetType.ID);
@@ -137,6 +103,65 @@ public class FacetDocumentationBuilder extends
 				default:
 					break;
 			}
+		}
+		return superFacet;
+	}
+
+	/**
+	 * Returns the super-facet for the given custom or detail facet owner.
+	 * 
+	 * @param facetOwner  the owner of the custom or detail facet
+	 * @return TLFacet
+	 */
+	private TLFacet getCustomOrDetailSuperfacet(TLFacetOwner facetOwner) {
+		TLFacet superFacet;
+		superFacet = FacetCodegenUtils.getFacetOfType(facetOwner, TLFacetType.SUMMARY);
+		
+		if (!superFacet.declaresContent()) {
+			TLFacetOwner ext = FacetCodegenUtils.getFacetOwnerExtension(facetOwner);
+			
+			while (ext != null) {
+				TLFacet extFacet = FacetCodegenUtils.getFacetOfType(ext, TLFacetType.SUMMARY);
+				
+				if (extFacet.declaresContent()) {
+					superFacet = extFacet;
+					ext = null;
+				} else {
+					ext = FacetCodegenUtils.getFacetOwnerExtension(ext);
+				}
+			}
+
+		}
+		if (!superFacet.declaresContent()) {
+			superFacet = FacetCodegenUtils.getFacetOfType(facetOwner, TLFacetType.ID);
+		}
+		return superFacet;
+	}
+
+	/**
+	 * Returns the super-facet for the given choice facet owner.
+	 * 
+	 * @param facetOwner  the owner of the choice facet
+	 * @return TLFacet
+	 */
+	private TLFacet getChoiceSuperfacet(TLFacetOwner facetOwner) {
+		TLFacet superFacet;
+		superFacet = FacetCodegenUtils.getFacetOfType(facetOwner, TLFacetType.SHARED);
+		
+		if (!superFacet.declaresContent()) {
+			TLFacetOwner ext = FacetCodegenUtils.getFacetOwnerExtension(facetOwner);
+			
+			while (ext != null) {
+				TLFacet extFacet = FacetCodegenUtils.getFacetOfType(ext, TLFacetType.SUMMARY);
+				
+				if (extFacet.declaresContent()) {
+					superFacet = extFacet;
+					ext = null;
+				} else {
+					ext = FacetCodegenUtils.getFacetOwnerExtension(ext);
+				}
+			}
+
 		}
 		return superFacet;
 	}

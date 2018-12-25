@@ -18,6 +18,7 @@ package org.opentravel.schemacompiler.codegen.swagger.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opentravel.schemacompiler.codegen.json.model.JsonModelObject;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 
 import com.google.gson.JsonArray;
@@ -26,7 +27,7 @@ import com.google.gson.JsonObject;
 /**
  * Class that defines the meta-model for a Swagger document.
  */
-public class SwaggerDocument {
+public class SwaggerDocument implements JsonModelObject {
 	
 	public static final String SWAGGER_SPEC_V2 = "2.0";
 	
@@ -206,29 +207,18 @@ public class SwaggerDocument {
 	}
 	
 	/**
-	 * Returns the <code>JsonObject</code> representation of this Swagger
-	 * model element.
-	 * 
-	 * @return JsonObject
+	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonModelObject#toJson()
 	 */
 	public JsonObject toJson() {
 		JsonObject pathsJson = new JsonObject();
 		JsonObject json = new JsonObject();
 		
-		if (specVersion != null) {
-			json.addProperty( "swagger", specVersion );
-		}
-		if (otmResource != null) {
-			json.add( "x-otm-resource", otmResource.toJson() );
-		}
-		json.add( "info", (info != null) ? info.toJson() : new SwaggerInfo().toJson() );
+		addProperty( json, "swagger", specVersion );
+		addJsonProperty( json, "x-otm-resource", otmResource );
+		addJsonProperty( json, "info", (info != null) ? info : new SwaggerInfo() );
+		addProperty( json, "host", host );
+		addProperty( json, "basePath", basePath );
 		
-		if (host != null) {
-			json.addProperty( "host", host );
-		}
-		if (basePath != null) {
-			json.addProperty( "basePath", basePath );
-		}
 		if (!schemes.isEmpty()) {
 			JsonArray jsonArray = new JsonArray();
 			
@@ -239,22 +229,9 @@ public class SwaggerDocument {
 			}
 			json.add( "schemes", jsonArray );
 		}
-		if (!consumes.isEmpty()) {
-			JsonArray jsonArray = new JsonArray();
-			
-			for (String value : consumes) {
-				jsonArray.add( value );
-			}
-			json.add( "consumes", jsonArray );
-		}
-		if (!produces.isEmpty()) {
-			JsonArray jsonArray = new JsonArray();
-			
-			for (String value : produces) {
-				jsonArray.add( value );
-			}
-			json.add( "produces", jsonArray );
-		}
+		
+		addProperty( json, "consumes", consumes );
+		addProperty( json, "produces", produces );
 		
 		for (SwaggerPathItem pathItem : pathItems) {
 			pathsJson.add( pathItem.getPathTemplate(), pathItem.toJson() );
@@ -264,21 +241,28 @@ public class SwaggerDocument {
 		if (!definitions.isEmpty()) {
 			JsonObject defsJson = new JsonObject();
 			
-			for (JsonSchemaNamedReference definition : definitions) {
-				defsJson.add( definition.getName(), definition.getSchema().toJson() );
-			}
+			addJsonProperties( defsJson, definitions );
 			json.add( "definitions", defsJson );
 		}
 		
 		if (!globalParameters.isEmpty()) {
 			JsonObject paramsJson = new JsonObject();
 			
-			for (SwaggerParameter param : globalParameters) {
-				paramsJson.add( param.getName(), param.toJson() );
-			}
+			addJsonProperties( paramsJson, globalParameters );
 			json.add( "parameters", paramsJson );
 		}
 		
+		securitySchemesToJson(json);
+		return json;
+	}
+
+	/**
+	 * Adds information for each known security schema as properties of the given
+	 * <code>JsonObject</code>.
+	 * 
+	 * @param json  the JSON object being populated
+	 */
+	private void securitySchemesToJson(JsonObject json) {
 		if (!securitySchemes.isEmpty()) {
 			JsonObject securityDefsJson = new JsonObject();
 			JsonArray securityReqsJson = new JsonArray();
@@ -288,9 +272,7 @@ public class SwaggerDocument {
 				JsonArray scopeNames = new JsonArray();
 				
 				if (securityScheme.getType() == SwaggerSecurityType.OAUTH2) {
-					for (SwaggerSecurityScope scope : securityScheme.getScopes()) {
-						scopeNames.add( scope.getName() );
-					}
+					securityScheme.getScopes().forEach( s -> scopeNames.add( s.getName() ) );
 				}
 				securityReqirement.add( securityScheme.getName(), scopeNames );
 				securityReqsJson.add( securityReqirement );
@@ -299,7 +281,6 @@ public class SwaggerDocument {
 			json.add( "securityDefinitions", securityDefsJson );
 			json.add( "security", securityReqsJson );
 		}
-		return json;
 	}
 	
 }

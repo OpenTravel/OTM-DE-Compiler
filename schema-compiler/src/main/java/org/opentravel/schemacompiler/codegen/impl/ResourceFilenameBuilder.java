@@ -66,63 +66,94 @@ public class ResourceFilenameBuilder implements CodeGenerationFilenameBuilder<TL
      * @param model  the model that contains all resources to which names should be assigned
      * @return Map<TLResource,String>
      */
-	private Map<TLResource,String> initBaseFilenames(TLModel model) {
-		Map<TLResource,String> filenameMap = new HashMap<>();
+	private Map<TLResource, String> initBaseFilenames(TLModel model) {
+		Map<TLResource, String> filenameMap = new HashMap<>();
 		
 		if (model != null) {
-	    	Set<FilenameDetails> filenameDetails = new HashSet<>();
-	    	boolean conflictsExist;
-	    	
-	    	// Build the initial list of filename details
-	    	for (TLLibrary library : model.getUserDefinedLibraries()) {
-	    		for (TLResource resource : library.getResourceTypes()) {
-	        		filenameDetails.add( new FilenameDetails( resource ) );
-	    		}
-	    	}
-	    	
-	    	// Check for conflicts and continue attempting to resolve until no more
-	    	// conflicts exist, or no further options are available.
-	    	do {
-	    		Map<String,List<FilenameDetails>> detailsByFilename = new HashMap<>();
-	    		
-	    		for (FilenameDetails fd : filenameDetails) {
-	    			List<FilenameDetails> detailsList = detailsByFilename.get( fd.getFilename() );
-	    			
-	    			if (detailsList == null) {
-	    				detailsList = new ArrayList<>();
-	    				detailsByFilename.put( fd.getFilename(), detailsList );
-	    			}
-	    			detailsList.add( fd );
-	    		}
-	    		conflictsExist = false;
-	    		
-	    		for (List<FilenameDetails> detailsList : detailsByFilename.values()) {
-	    			if (detailsList.size() > 1) {
-	    				boolean changesMade = false;
-	    				
-	    				for (FilenameDetails fd : detailsList) {
-	    					if (!fd.getNsComponents().isEmpty()) {
-	        					fd.setResourceFilename(fd.getResource().getName() + "_" + fd.getNsComponents().remove( 0 ));
-	    						changesMade = true;
-	    					}
-	    				}
-	    				
-	    				// If no more namespace options are available, allow the conflict to exist.  In this
-	    				// situation, there are other errors in the model that should not have allowed us to
-	    				// get this far.  Exiting at this point will prevent us from getting stuck in an
-	    				// infinite loop.
-	    				conflictsExist |= changesMade;
-	    			}
-	    		}
-	    		
-	    	} while (conflictsExist);
-	    	
-	    	for (FilenameDetails fd : filenameDetails) {
-	    		filenameMap.put( fd.getResource(), fd.getFilename() );
-	    	}
+			Set<FilenameDetails> filenameDetails = buildFilenameDetails(model);
+			
+			// Check for conflicts and continue attempting to resolve until no
+			// more conflicts exist, or no further options are available.
+			checkAndResolveConflicts( filenameDetails );
+			
+			for (FilenameDetails fd : filenameDetails) {
+				filenameMap.put(fd.getResource(), fd.getFilename());
+			}
 		}
 		return filenameMap;
-    }
+	}
+
+	/**
+	 * Checks each of the filename details provided for naming conflicts and resolves
+	 * those conflicts if any exist.
+	 * 
+	 * @param filenameDetails  the filename details to check
+	 */
+	private void checkAndResolveConflicts(Set<FilenameDetails> filenameDetails) {
+		boolean conflictsExist;
+		do {
+			Map<String, List<FilenameDetails>> detailsByFilename;
+			
+			detailsByFilename = buildFilenameMap(filenameDetails);
+			conflictsExist = false;
+			
+			for (List<FilenameDetails> detailsList : detailsByFilename.values()) {
+				if (detailsList.size() > 1) {
+					boolean changesMade = false;
+					
+					for (FilenameDetails fd : detailsList) {
+						if (!fd.getNsComponents().isEmpty()) {
+							fd.setResourceFilename(
+									fd.getResource().getName() + "_" + fd.getNsComponents().remove(0));
+							changesMade = true;
+						}
+					}
+					
+					// If no more namespace options are available, allow the conflict to exist. In this
+					// situation, there are other errors in the model that should not have allowed us to
+					// get this far. Exiting at this point will prevent us from getting stuck in an
+					// infinite loop.
+					conflictsExist |= changesMade;
+				}
+			}
+			
+		} while (conflictsExist);
+	}
+
+	/**
+	 * Constructs a map that associates each filename with the details of that file.
+	 * 
+	 * @param filenameDetails  the collection of filename details to process
+	 * @return Map<String, List<FilenameDetails>>
+	 */
+	private Map<String, List<FilenameDetails>> buildFilenameMap(Set<FilenameDetails> filenameDetails) {
+		Map<String, List<FilenameDetails>> detailsByFilename;
+		detailsByFilename = new HashMap<>();
+		
+		for (FilenameDetails fd : filenameDetails) {
+			detailsByFilename.computeIfAbsent( fd.getFilename(), fn -> detailsByFilename.put( fn, new ArrayList<>() ) );
+			detailsByFilename.get(fd.getFilename()).add( fd );
+		}
+		return detailsByFilename;
+	}
+	
+	/**
+	 * Builds a set that contains filename information for all resources in the given model.
+	 * 
+	 * @param model  the model for which to create filename details
+	 * @return Set<FilenameDetails>
+	 */
+	private Set<FilenameDetails> buildFilenameDetails(TLModel model) {
+		Set<FilenameDetails> filenameDetails;
+		filenameDetails = new HashSet<>();
+		
+		for (TLLibrary library : model.getUserDefinedLibraries()) {
+			for (TLResource resource : library.getResourceTypes()) {
+				filenameDetails.add( new FilenameDetails( resource ) );
+			}
+		}
+		return filenameDetails;
+	}
     
     /**
      * Encapsulates the various details of a resource's filename (used during initialization).

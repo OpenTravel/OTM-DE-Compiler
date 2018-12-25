@@ -23,6 +23,7 @@ import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
 /**
  * Generate the BusinessObject Information Page.
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class BusinessObjectWriter extends ComplexObjectWriter<BusinessObjectDocumentationBuilder> {
 
 	/**

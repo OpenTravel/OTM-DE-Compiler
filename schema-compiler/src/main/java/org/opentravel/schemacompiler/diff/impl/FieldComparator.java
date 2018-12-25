@@ -57,8 +57,6 @@ public class FieldComparator extends BaseComparator {
 		int newRepeatCount = (newField.getRepeatCount() <= 1) ? 0 : newField.getRepeatCount();
 		FieldChangeSet changeSet = new FieldChangeSet( oldField.getField(), newField.getField() );
 		List<FieldChangeItem> changeItems = changeSet.getChangeItems();
-		QName oldAssignedTypeName = getEntityName( oldField.getAssignedType() );
-		QName newAssignedTypeName = getEntityName( newField.getAssignedType() );
 		
 		if (valueChanged( oldField.getMemberType(), newField.getMemberType() )) {
 			changeItems.add( new FieldChangeItem( changeSet, FieldChangeType.MEMBER_TYPE_CHANGED,
@@ -69,26 +67,9 @@ public class FieldComparator extends BaseComparator {
 			changeItems.add( new FieldChangeItem( changeSet, FieldChangeType.OWNING_FACET_CHANGED,
 					oldField.getOwningFacet(), newField.getOwningFacet() ) );
 		}
-		if (valueChanged( oldAssignedTypeName, newAssignedTypeName )) {
-			String versionScheme = getVersionScheme( oldField.getAssignedType() );
-			
-			if (versionScheme == null) {
-				versionScheme = getVersionScheme( newField.getAssignedType() );
-			}
-			
-			if (isVersionChange( oldAssignedTypeName, newAssignedTypeName, versionScheme )) {
-				if (!getCompareOptions().isSuppressFieldVersionChanges()) {
-					changeItems.add( new FieldChangeItem( changeSet, FieldChangeType.TYPE_VERSION_CHANGED,
-							getVersion( (NamedEntity) oldField.getAssignedType() ),
-							getVersion( (NamedEntity) newField.getAssignedType() ) ) );
-				}
-				
-			} else {
-				changeItems.add( new FieldChangeItem( changeSet, FieldChangeType.TYPE_CHANGED,
-						formatter.getEntityDisplayName( oldField.getAssignedType() ),
-						formatter.getEntityDisplayName( newField.getAssignedType() ) ) );
-			}
-		}
+		
+		compareAssignedType(oldField, newField, changeSet, changeItems);
+		
 		if (oldRepeatCount != newRepeatCount) {
 			changeItems.add( new FieldChangeItem( changeSet, FieldChangeType.CARDINALITY_CHANGE,
 					"" + oldRepeatCount, "" + newRepeatCount ) );
@@ -113,6 +94,41 @@ public class FieldComparator extends BaseComparator {
 				FieldChangeType.EXAMPLE_ADDED, FieldChangeType.EXAMPLE_DELETED, changeSet );
 		
 		return changeSet;
+	}
+
+	/**
+	 * Compares the type assignments of the old and new-version fields.
+	 * 
+	 * @param oldField  facade for the old field version
+	 * @param newField  facade for the new field version
+	 * @param changeSet  the change set to which any new change items will be assigned
+	 * @param changeItems  the list of change items being constructed
+	 */
+	private void compareAssignedType(FieldComparisonFacade oldField, FieldComparisonFacade newField,
+			FieldChangeSet changeSet, List<FieldChangeItem> changeItems) {
+		QName oldAssignedTypeName = getEntityName( oldField.getAssignedType() );
+		QName newAssignedTypeName = getEntityName( newField.getAssignedType() );
+		
+		if (valueChanged( oldAssignedTypeName, newAssignedTypeName )) {
+			String versionScheme = getVersionScheme( oldField.getAssignedType() );
+			
+			if (versionScheme == null) {
+				versionScheme = getVersionScheme( newField.getAssignedType() );
+			}
+			
+			if (isVersionChange( oldAssignedTypeName, newAssignedTypeName, versionScheme )) {
+				if (!getCompareOptions().isSuppressFieldVersionChanges()) {
+					changeItems.add( new FieldChangeItem( changeSet, FieldChangeType.TYPE_VERSION_CHANGED,
+							getVersion( (NamedEntity) oldField.getAssignedType() ),
+							getVersion( (NamedEntity) newField.getAssignedType() ) ) );
+				}
+				
+			} else {
+				changeItems.add( new FieldChangeItem( changeSet, FieldChangeType.TYPE_CHANGED,
+						formatter.getEntityDisplayName( oldField.getAssignedType() ),
+						formatter.getEntityDisplayName( newField.getAssignedType() ) ) );
+			}
+		}
 	}
 	
 	/**

@@ -43,12 +43,12 @@ package org.opentravel.schemacompiler.codegen.html;
 import java.io.IOException;
 import java.util.List;
 
-import org.opentravel.schemacompiler.model.TLLibrary;
-
+import org.opentravel.schemacompiler.codegen.html.markup.HtmlConstants;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlStyle;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTree;
-import org.opentravel.schemacompiler.codegen.html.markup.HtmlConstants;
+import org.opentravel.schemacompiler.codegen.html.markup.HtmlWriter;
 import org.opentravel.schemacompiler.codegen.html.markup.RawHtml;
+import org.opentravel.schemacompiler.model.TLLibrary;
 
 
 /**
@@ -57,7 +57,7 @@ import org.opentravel.schemacompiler.codegen.html.markup.RawHtml;
  * generate overview-frame.html as well as overview-summary.html.
  *
  */
-public abstract class AbstractNamespaceIndexWriter extends HtmlDocletWriter {
+public abstract class AbstractNamespaceIndexWriter extends HtmlWriter {
 
     /**
      * Array of Namespaces to be documented.

@@ -163,19 +163,35 @@ public abstract class BaseComparator {
 				changed = true;
 				
 			} else {
-				for (int i = 0; i < newSize; i++) {
-					TLDocumentationItem oldItem = oldItems.get( i );
-					TLDocumentationItem newItem = newItems.get( i );
-					String oldContext = (oldItem instanceof TLAdditionalDocumentationItem) ?
-							((TLAdditionalDocumentationItem) oldItem).getContext() : null;
-					String newContext = (oldItem instanceof TLAdditionalDocumentationItem) ?
-							((TLAdditionalDocumentationItem) newItem).getContext() : null;
-					
-					if (valueChanged( oldContext, newContext ) || valueChanged( oldItem.getText(), newItem.getText() )) {
-						changed = true;
-						break;
-					}
-				}
+				changed = valueChangedSameSize(oldItems, newItems);
+			}
+		}
+		return changed;
+	}
+
+	/**
+	 * Evaluates whether the given lists of documentation have been modified from the old version
+	 * to the new.  This method presumes that the two lists have already been determined to be of
+	 * equal size.
+	 * 
+	 * @param oldItems  the list of old documentation items
+	 * @param newItems  the list of new documentation items
+	 * @return boolean
+	 */
+	private boolean valueChangedSameSize(List<TLDocumentationItem> oldItems, List<TLDocumentationItem> newItems) {
+		boolean changed = false;
+		
+		for (int i = 0; i < oldItems.size(); i++) {
+			TLDocumentationItem oldItem = oldItems.get( i );
+			TLDocumentationItem newItem = newItems.get( i );
+			String oldContext = (oldItem instanceof TLAdditionalDocumentationItem) ?
+					((TLAdditionalDocumentationItem) oldItem).getContext() : null;
+			String newContext = (oldItem instanceof TLAdditionalDocumentationItem) ?
+					((TLAdditionalDocumentationItem) newItem).getContext() : null;
+			
+			if (valueChanged( oldContext, newContext ) || valueChanged( oldItem.getText(), newItem.getText() )) {
+				changed = true;
+				break;
 			}
 		}
 		return changed;

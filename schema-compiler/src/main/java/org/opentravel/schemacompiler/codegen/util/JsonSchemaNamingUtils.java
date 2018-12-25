@@ -17,6 +17,7 @@ package org.opentravel.schemacompiler.codegen.util;
 
 import javax.xml.namespace.QName;
 
+import org.opentravel.schemacompiler.model.ModelElement;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAliasOwner;
@@ -83,63 +84,82 @@ public class JsonSchemaNamingUtils {
      * @param modelEntity  the model entity for which to return the element name
      * @return String
      */
-    private static String getGlobalElementName(NamedEntity modelEntity) {
-    	QName elementName = null;
-    	
-    	if (modelEntity instanceof TLAlias) {
-    		TLAliasOwner aliasOwner = ((TLAlias) modelEntity).getOwningEntity();
-    		
-    		if (aliasOwner instanceof TLFacet) {
-    			elementName = XsdCodegenUtils.getSubstitutableElementName( (TLAlias) modelEntity );
-    			
-    		} else {
-        		TLFacet facet = null;
-        		
-        		if (aliasOwner instanceof TLBusinessObject) {
-        			facet = ((TLBusinessObject) aliasOwner).getIdFacet();
-        			
-        		} else if (aliasOwner instanceof TLCoreObject) {
-        			facet = ((TLCoreObject) aliasOwner).getSummaryFacet();
-        			
-        		} else if (aliasOwner instanceof TLChoiceObject) {
-        			facet = ((TLChoiceObject) aliasOwner).getSharedFacet();
-        		}
-        		
-        		if (facet != null) {
-        			TLAlias facetAlias = AliasCodegenUtils.getFacetAlias(
-        					(TLAlias) modelEntity, facet.getFacetType() );
-        			
-        			elementName = XsdCodegenUtils.getSubstitutableElementName( facetAlias );
-        		}
-    		}
-    		
-    		// Last resort since all aliases must have a global element name
-    		if (elementName == null) {
-        		elementName = XsdCodegenUtils.getGlobalElementName( modelEntity );
-    		}
-    		
-    	} else {
-    		TLFacet entityFacet = null;
-    		
-    		if (modelEntity instanceof TLFacet) {
-    			entityFacet = (TLFacet) modelEntity;
-    			
-    		} else if (modelEntity instanceof TLBusinessObject) {
-    			entityFacet = ((TLBusinessObject) modelEntity).getIdFacet();
-    			
-    		} else if (modelEntity instanceof TLCoreObject) {
-    			entityFacet = ((TLCoreObject) modelEntity).getSummaryFacet();
-    			
-    		} else if (modelEntity instanceof TLChoiceObject) {
-    			entityFacet = ((TLChoiceObject) modelEntity).getSharedFacet();
-    		}
-    		
-    		if (entityFacet != null) {
-    			elementName = XsdCodegenUtils.getSubstitutableElementName( entityFacet );
-    		}
-    	}
-    	return (elementName == null) ? null : elementName.getLocalPart();
-    }
+	private static String getGlobalElementName(NamedEntity modelEntity) {
+		QName elementName = null;
+		
+		if (modelEntity instanceof TLAlias) {
+			TLAlias alias = (TLAlias) modelEntity;
+			
+			elementName = getAliasGlobalElementName(alias);
+			
+			// Last resort since all aliases must have a global element name
+			if (elementName == null) {
+				elementName = XsdCodegenUtils.getGlobalElementName(modelEntity);
+			}
+			
+		} else {
+			TLFacet entityFacet = null;
+			
+			if (modelEntity instanceof TLFacet) {
+				entityFacet = (TLFacet) modelEntity;
+				
+			} else {
+				entityFacet = getRootFacet( modelEntity );
+			}
+			
+			if (entityFacet != null) {
+				elementName = XsdCodegenUtils.getSubstitutableElementName(entityFacet);
+			}
+		}
+		return (elementName == null) ? null : elementName.getLocalPart();
+	}
+
+	/**
+	 * Returns the global element name for the given alias.
+	 * 
+	 * @param alias  the alias for which to return a global element name
+	 * @return QName
+	 */
+	private static QName getAliasGlobalElementName(TLAlias alias) {
+		TLAliasOwner aliasOwner = alias.getOwningEntity();
+		QName elementName = null;
+		
+		if (aliasOwner instanceof TLFacet) {
+			elementName = XsdCodegenUtils.getSubstitutableElementName(alias);
+			
+		} else {
+			TLFacet facet = getRootFacet(aliasOwner);
+			
+			if (facet != null) {
+				TLAlias facetAlias = AliasCodegenUtils.getFacetAlias(alias, facet.getFacetType());
+				
+				elementName = XsdCodegenUtils.getSubstitutableElementName(facetAlias);
+			}
+		}
+		return elementName;
+	}
+
+	/**
+	 * Returns the top-level root facet of the substitution group, or null if the given
+	 * facet owner does not define a root-level facet.
+	 * 
+	 * @param facetOwner  the owner for which to return a root facet
+	 * @return  TLFacet
+	 */
+	private static TLFacet getRootFacet(ModelElement facetOwner) {
+		TLFacet facet = null;
+		
+		if (facetOwner instanceof TLBusinessObject) {
+			facet = ((TLBusinessObject) facetOwner).getIdFacet();
+			
+		} else if (facetOwner instanceof TLCoreObject) {
+			facet = ((TLCoreObject) facetOwner).getSummaryFacet();
+			
+		} else if (facetOwner instanceof TLChoiceObject) {
+			facet = ((TLChoiceObject) facetOwner).getSharedFacet();
+		}
+		return facet;
+	}
     
     /**
      * Returns the globally-accessible type name for the given entity in the XML schema output.

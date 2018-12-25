@@ -24,6 +24,7 @@ import org.opentravel.schemacompiler.codegen.html.builders.SimpleDocumentationBu
  * @author Eric.Bronson
  *
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class SimpleWriter extends NamedEntityWriter<SimpleDocumentationBuilder> {
 
 	public SimpleWriter(SimpleDocumentationBuilder member,
