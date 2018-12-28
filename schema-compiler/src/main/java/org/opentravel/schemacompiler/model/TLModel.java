@@ -505,22 +505,33 @@ public class TLModel implements Validatable {
                         "A library with the requested name + namespace values already exists in the model.");
 
             } else {
-				try {
-					boolean urlMatch = (proposedUrl == null) ? (memberLib.getLibraryUrl() == null)
-					        : proposedUrl.toURI().equals(memberLib.getLibraryUrl().toURI());
-					
-	                if (urlMatch) {
-	                    throw new IllegalArgumentException(
-	                            "A library with the requested resource URL location already exists in the model.");
-	                }
-	                
-				} catch (URISyntaxException e) {
-					throw new IllegalArgumentException("Invalid library URL.", e);
-				}
+				checkDuplicateUrl( proposedUrl, memberLib );
             }
         }
     }
 
+	/**
+	 * Checks to see if the proposed URL is a duplicate of the URL for the
+	 * current member library provided.
+	 * 
+	 * @param proposedUrl  the proposed URL for the new library
+	 * @param memberLib  the member library to check for duplication
+	 */
+	private void checkDuplicateUrl(URL proposedUrl, AbstractLibrary memberLib) {
+		try {
+			boolean urlMatch = (proposedUrl == null) ? (memberLib.getLibraryUrl() == null)
+			        : proposedUrl.toURI().equals(memberLib.getLibraryUrl().toURI());
+			
+		    if (urlMatch) {
+		        throw new IllegalArgumentException(
+		                "A library with the requested resource URL location already exists in the model.");
+		    }
+		    
+		} catch (URISyntaxException e) {
+			throw new IllegalArgumentException("Invalid library URL.", e);
+		}
+	}
+    
     /**
      * Automatically adds imports for all of the built-in libraries that have been regsitered with
      * this model.

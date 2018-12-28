@@ -70,55 +70,7 @@ public class TLAttributeCodegenTransformer extends
             }
             artifacts.addArtifact(attr);
             
-            if (source.isReference()) {
-                boolean isMultipleReference =
-                		(source.getReferenceRepeat() > 1) || (source.getReferenceRepeat() < 0);
-            	
-                attr.setType(new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI,
-                        isMultipleReference ? "IDREFS" : "IDREF"));
-                
-            } else if (attributeType instanceof TLCoreObject) {
-                // Special Case: For core objects, use the simple facet as the attribute type
-                TLCoreObject coreObject = (TLCoreObject) attributeType;
-                TLSimpleFacet coreSimple = coreObject.getSimpleFacet();
-
-                attr.setType(new QName(coreSimple.getNamespace(), XsdCodegenUtils
-                        .getGlobalTypeName(coreSimple)));
-
-            } else if (attributeType instanceof TLRole) {
-                // Special Case: For role assignments, use the core object's simple facet as the
-                // attribute type
-                TLCoreObject coreObject = ((TLRole) attributeType).getRoleEnumeration()
-                        .getOwningEntity();
-                TLSimpleFacet coreSimple = coreObject.getSimpleFacet();
-
-                attr.setType(new QName(coreSimple.getNamespace(), XsdCodegenUtils
-                        .getGlobalTypeName(coreSimple)));
-
-            } else if (attributeType instanceof TLOpenEnumeration) {
-                Attribute extensionAttr = new Attribute();
-
-                extensionAttr.setName(attr.getName() + "Extension");
-                extensionAttr.setType(SchemaDependency.getEnumExtension().toQName());
-                attr.setType(new QName(attributeType.getNamespace(),
-                        ((TLOpenEnumeration) attributeType).getLocalName() + "_Base"));
-                artifacts.addArtifact(extensionAttr);
-
-            } else if (attributeType instanceof TLRoleEnumeration) {
-                attr.setType(new QName(attributeType.getNamespace(),
-                        ((TLRoleEnumeration) attributeType).getLocalName() + "_Base"));
-            	
-            } else { // normal case
-                String attrTypeNS = attributeType.getNamespace();
-
-                if ((attrTypeNS == null)
-                        || attrTypeNS.equals(AnonymousEntityFilter.ANONYMOUS_PSEUDO_NAMESPACE)) {
-                    // If this type is from a chameleon schema, replace its namespace with that of the
-                    // local library
-                    attrTypeNS = source.getOwner().getNamespace();
-                }
-                attr.setType(new QName(attrTypeNS, XsdCodegenUtils.getGlobalTypeName(attributeType)));
-            }
+            setAttributeType( source, attributeType, artifacts, attr );
 
             if (source.isMandatory()) {
                 attr.setUse("required");
@@ -140,5 +92,66 @@ public class TLAttributeCodegenTransformer extends
         }
         return artifacts;
     }
+
+	/**
+	 * Assigns the type of the XML schema attribute provided.
+	 * 
+	 * @param source  the source model attribute being transformed
+	 * @param attributeType  the resolved type of the OTM attribute
+	 * @param artifacts  the collection of code generation artifacts for this transformation
+	 * @param attr  the XML schema attribute whose type is to be assigned
+	 */
+	private void setAttributeType(TLAttribute source, TLPropertyType attributeType, CodegenArtifacts artifacts,
+			Attribute attr) {
+		if (source.isReference()) {
+		    boolean isMultipleReference =
+		    		(source.getReferenceRepeat() > 1) || (source.getReferenceRepeat() < 0);
+			
+		    attr.setType(new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI,
+		            isMultipleReference ? "IDREFS" : "IDREF"));
+		    
+		} else if (attributeType instanceof TLCoreObject) {
+		    // Special Case: For core objects, use the simple facet as the attribute type
+		    TLCoreObject coreObject = (TLCoreObject) attributeType;
+		    TLSimpleFacet coreSimple = coreObject.getSimpleFacet();
+
+		    attr.setType(new QName(coreSimple.getNamespace(), XsdCodegenUtils
+		            .getGlobalTypeName(coreSimple)));
+
+		} else if (attributeType instanceof TLRole) {
+		    // Special Case: For role assignments, use the core object's simple facet as the
+		    // attribute type
+		    TLCoreObject coreObject = ((TLRole) attributeType).getRoleEnumeration()
+		            .getOwningEntity();
+		    TLSimpleFacet coreSimple = coreObject.getSimpleFacet();
+
+		    attr.setType(new QName(coreSimple.getNamespace(), XsdCodegenUtils
+		            .getGlobalTypeName(coreSimple)));
+
+		} else if (attributeType instanceof TLOpenEnumeration) {
+		    Attribute extensionAttr = new Attribute();
+
+		    extensionAttr.setName(attr.getName() + "Extension");
+		    extensionAttr.setType(SchemaDependency.getEnumExtension().toQName());
+		    attr.setType(new QName(attributeType.getNamespace(),
+		            ((TLOpenEnumeration) attributeType).getLocalName() + "_Base"));
+		    artifacts.addArtifact(extensionAttr);
+
+		} else if (attributeType instanceof TLRoleEnumeration) {
+		    attr.setType(new QName(attributeType.getNamespace(),
+		            ((TLRoleEnumeration) attributeType).getLocalName() + "_Base"));
+			
+		} else { // normal case
+		    String attrTypeNS = attributeType.getNamespace();
+
+		    if ((attrTypeNS == null)
+		            || attrTypeNS.equals(AnonymousEntityFilter.ANONYMOUS_PSEUDO_NAMESPACE)) {
+		        // If this type is from a chameleon schema, replace its namespace with that of the
+		        // local library
+		        attrTypeNS = source.getOwner().getNamespace();
+		    }
+		    attr.setType(new QName(attrTypeNS, XsdCodegenUtils.getGlobalTypeName(attributeType)));
+		}
+	}
 
 }

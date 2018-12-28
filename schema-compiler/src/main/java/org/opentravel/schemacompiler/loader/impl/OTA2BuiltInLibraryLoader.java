@@ -17,6 +17,8 @@ package org.opentravel.schemacompiler.loader.impl;
 
 import java.io.InputStream;
 
+import javax.xml.namespace.QName;
+
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
@@ -59,13 +61,15 @@ public class OTA2BuiltInLibraryLoader extends AbstractBuiltInLibraryLoader {
                 ObjectTransformer<Object, TLLibrary, DefaultTransformerContext> transformer = transformFactory
                         .getTransformer(libraryInfo.getJaxbArtifact(), TLLibrary.class);
                 TLLibrary ota2Library = transformer.transform(libraryInfo.getJaxbArtifact());
+                QName qualifiedName;
 
                 if (ota2Library.getPrefix() == null) {
                     ota2Library.setPrefix(getLibraryDeclaration().getDefaultPrefix());
                 }
 
-                library = new BuiltInLibrary(ota2Library.getNamespace(), ota2Library.getName(),
-                        ota2Library.getPrefix(), inputSource.getLibraryURL(),
+                qualifiedName = new QName( ota2Library.getNamespace(), ota2Library.getName(),
+                        ota2Library.getPrefix() );
+                library = new BuiltInLibrary(qualifiedName, inputSource.getLibraryURL(),
                         ota2Library.getNamedMembers(), ota2Library.getNamespaceImports(),
                         ota2Library.getIncludes(), getLibraryDeclaration(),
                         ota2Library.getVersionScheme());

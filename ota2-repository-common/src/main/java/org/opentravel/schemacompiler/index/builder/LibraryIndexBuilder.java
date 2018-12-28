@@ -76,74 +76,15 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
 	public void createIndex() {
 		RepositoryItem sourceObject = getSourceObject();
 		try {
-			String libraryName = sourceObject.getLibraryName();
-			String baseNS = sourceObject.getBaseNamespace();
-			Set<TLLibraryStatus> laterVersionStatuses = new HashSet<>();
-			boolean latestVersion = true;
-			boolean latestVersionAtUnderReview = true;
-			boolean latestVersionAtFinal = true;
-			boolean latestVersionAtObsolete = true;
-			
-			// Start by searching the other sibling versions of this library to calculate
-			// the 'latestVersion' values for the index.
-			for (RepositoryItem itemVersion : getRepositoryManager().listItems( baseNS, false, true )) {
-				if (libraryName.equals( itemVersion.getLibraryName() )) {
-					if (sourceObject.getVersion().equals( itemVersion.getVersion() )) {
-						latestVersion = isLatestVersionAtStatus(
-								sourceObject.getStatus(), TLLibraryStatus.DRAFT, laterVersionStatuses );
-						latestVersionAtUnderReview = isLatestVersionAtStatus(
-								sourceObject.getStatus(), TLLibraryStatus.UNDER_REVIEW, laterVersionStatuses );
-						latestVersionAtFinal = isLatestVersionAtStatus(
-								sourceObject.getStatus(), TLLibraryStatus.FINAL, laterVersionStatuses );
-						latestVersionAtObsolete = isLatestVersionAtStatus(
-								sourceObject.getStatus(), TLLibraryStatus.OBSOLETE, laterVersionStatuses );
-						break;
-						
-					} else {
-						laterVersionStatuses.add( itemVersion.getStatus() );
-					}
-				}
-			}
+			log.info("Indexing Library: " + sourceObject.getFilename());
 			
 			// Now we can begin creating the index...
+			Map<TLLibraryStatus,Boolean> latestVersionsByStatus = getLatestVersionsByStatus( sourceObject );
 			Set<String> keywords = getFreeTextKeywords();
 			LibraryInfoType libraryMetadata = loadLibraryMetadata( sourceObject );
 			Library jaxbLibrary = loadLibrary( sourceObject );
 			TLLibrary library = IndexContentHelper.transformLibrary( jaxbLibrary );
-			List<NamedEntity> entityList = new ArrayList<>();
-			
-			log.info("Indexing Library: " + sourceObject.getFilename());
-			
-			// Assemble a list of all entities in the library
-			for (NamedEntity entity : library.getNamedMembers()) {
-				if ((entity instanceof TLContextualFacet) && ((TLContextualFacet) entity).isLocalFacet()) {
-					continue; // skip local contextual facets since they will be indexed under their owner
-				}
-				if (entity instanceof TLService) {
-					for (TLOperation op : ((TLService) entity).getOperations()) {
-						entityList.add( op );
-					}
-				} else {
-					entityList.add( entity );
-				}
-			}
-			
-			// Create an index for each entity; keywords for this library include the keywords
-			// for each child entity.
-			for (NamedEntity entity : entityList) {
-				EntityIndexBuilder<NamedEntity> builder = (EntityIndexBuilder<NamedEntity>)
-						getFactory().newCreateIndexBuilder( entity );
-				
-				if (builder != null) {
-					builder.setLatestVersion( latestVersion );
-					builder.setLatestVersionAtUnderReview( latestVersionAtUnderReview );
-					builder.setLatestVersionAtFinal( latestVersionAtFinal );
-					builder.setLatestVersionAtObsolete( latestVersionAtObsolete );
-					builder.setLockedByUser( libraryMetadata.getLockedBy() );
-					builder.performIndexingAction();
-					keywords.addAll( builder.getFreeTextKeywords() );
-				}
-			}
+			addLibraryEntityKeywords( library, keywords, latestVersionsByStatus, libraryMetadata );
 			
 			// Add keywords from this library
 			addFreeTextKeywords( library.getName() );
@@ -160,14 +101,14 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
 			indexDoc.add( new StringField( ENTITY_TYPE_FIELD, TLLibrary.class.getName(), Field.Store.YES ) );
 			indexDoc.add( new StringField( ENTITY_NAME_FIELD, library.getName(), Field.Store.YES ) );
 			indexDoc.add( new StringField( ENTITY_NAMESPACE_FIELD, library.getNamespace(), Field.Store.YES ) );
-			indexDoc.add( new StringField( BASE_NAMESPACE_FIELD, baseNS, Field.Store.YES ) );
+			indexDoc.add( new StringField( BASE_NAMESPACE_FIELD, sourceObject.getBaseNamespace(), Field.Store.YES ) );
 			indexDoc.add( new StringField( FILENAME_FIELD, sourceObject.getFilename(), Field.Store.YES ) );
 			indexDoc.add( new StringField( VERSION_FIELD, sourceObject.getVersion(), Field.Store.YES ) );
 			indexDoc.add( new StringField( VERSION_SCHEME_FIELD, sourceObject.getVersionScheme(), Field.Store.YES ) );
-			indexDoc.add( new StringField( LATEST_VERSION_FIELD, latestVersion + "", Field.Store.NO ) );
-			indexDoc.add( new StringField( LATEST_VERSION_AT_UNDER_REVIEW_FIELD, latestVersionAtUnderReview + "", Field.Store.NO ) );
-			indexDoc.add( new StringField( LATEST_VERSION_AT_FINAL_FIELD, latestVersionAtFinal + "", Field.Store.NO ) );
-			indexDoc.add( new StringField( LATEST_VERSION_AT_OBSOLETE_FIELD, latestVersionAtObsolete + "", Field.Store.NO ) );
+			indexDoc.add( new StringField( LATEST_VERSION_FIELD, latestVersionsByStatus.get( TLLibraryStatus.DRAFT ) + "", Field.Store.NO ) );
+			indexDoc.add( new StringField( LATEST_VERSION_AT_UNDER_REVIEW_FIELD, latestVersionsByStatus.get( TLLibraryStatus.UNDER_REVIEW ) + "", Field.Store.NO ) );
+			indexDoc.add( new StringField( LATEST_VERSION_AT_FINAL_FIELD, latestVersionsByStatus.get( TLLibraryStatus.FINAL ) + "", Field.Store.NO ) );
+			indexDoc.add( new StringField( LATEST_VERSION_AT_OBSOLETE_FIELD, latestVersionsByStatus.get( TLLibraryStatus.OBSOLETE ) + "", Field.Store.NO ) );
 			indexDoc.add( new TextField( KEYWORDS_FIELD, getFreeTextSearchContent(), Field.Store.NO ) );
 			
 			if (library.getComments() != null) {
@@ -209,7 +150,83 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
 			log.error("Error creating index for repository item: " + sourceObject.getFilename(), e);
 		}
 	}
+
+	/**
+	 * Search the other sibling versions of this repository item to calculate the 'latestVersion' values
+	 * for the index.
+	 * 
+	 * @param sourceObject  the repository item for which to determine the latest version indicators by status
+	 * @return Map<TLLibraryStatus,Boolean>
+	 * @throws RepositoryException  thrown if the OTM repository cannot be accessed
+	 */
+	private Map<TLLibraryStatus,Boolean> getLatestVersionsByStatus(RepositoryItem sourceObject)
+			throws RepositoryException {
+		String libraryName = sourceObject.getLibraryName();
+		String baseNS = sourceObject.getBaseNamespace();
+		Set<TLLibraryStatus> laterVersionStatuses = new HashSet<>();
+		Map<TLLibraryStatus,Boolean> latestVersionsByStatus = new EnumMap<>( TLLibraryStatus.class );
+		
+		// Start by 
+		for (RepositoryItem itemVersion : getRepositoryManager().listItems( baseNS, false, true )) {
+			if (libraryName.equals( itemVersion.getLibraryName() )) {
+				if (sourceObject.getVersion().equals( itemVersion.getVersion() )) {
+					Arrays.asList( TLLibraryStatus.values() ).forEach( s ->
+						latestVersionsByStatus.put( s,
+								isLatestVersionAtStatus( sourceObject.getStatus(), s, laterVersionStatuses ) ) );
+					break;
+					
+				} else {
+					laterVersionStatuses.add( itemVersion.getStatus() );
+				}
+			}
+		}
+		return latestVersionsByStatus;
+	}
 	
+	/**
+	 * Adds keywords from the library's entity to the set provided.
+	 * 
+	 * @param library  the library from which to obtain the entity keywords
+	 * @param keywords  the set of keywords being constructed
+	 * @param latestVersionsByStatus  map that indicates the latest-version indicators by status
+	 * @param libraryMetadata  meta-data from the library that identifies the locked-by user
+	 */
+	private void addLibraryEntityKeywords(TLLibrary library, Set<String> keywords,
+			Map<TLLibraryStatus,Boolean> latestVersionsByStatus, LibraryInfoType libraryMetadata) {
+		List<NamedEntity> entityList = new ArrayList<>();
+		
+		// Assemble a list of all entities in the library
+		for (NamedEntity entity : library.getNamedMembers()) {
+			if ((entity instanceof TLContextualFacet) && ((TLContextualFacet) entity).isLocalFacet()) {
+				continue; // skip local contextual facets since they will be indexed under their owner
+			}
+			if (entity instanceof TLService) {
+				for (TLOperation op : ((TLService) entity).getOperations()) {
+					entityList.add( op );
+				}
+			} else {
+				entityList.add( entity );
+			}
+		}
+		
+		// Create an index for each entity; keywords for this library include the keywords
+		// for each child entity.
+		for (NamedEntity entity : entityList) {
+			EntityIndexBuilder<NamedEntity> builder = (EntityIndexBuilder<NamedEntity>)
+					getFactory().newCreateIndexBuilder( entity );
+			
+			if (builder != null) {
+				builder.setLatestVersion( latestVersionsByStatus.get( TLLibraryStatus.DRAFT ) );
+				builder.setLatestVersionAtUnderReview( latestVersionsByStatus.get( TLLibraryStatus.UNDER_REVIEW ) );
+				builder.setLatestVersionAtFinal( latestVersionsByStatus.get( TLLibraryStatus.FINAL ) );
+				builder.setLatestVersionAtObsolete( latestVersionsByStatus.get( TLLibraryStatus.OBSOLETE ) );
+				builder.setLockedByUser( libraryMetadata.getLockedBy() );
+				builder.performIndexingAction();
+				keywords.addAll( builder.getFreeTextKeywords() );
+			}
+		}
+	}
+
 	/**
 	 * Based on the statuses of later library versions, determines whether the given item's status is the
 	 * latest at its version level relative to the check version.

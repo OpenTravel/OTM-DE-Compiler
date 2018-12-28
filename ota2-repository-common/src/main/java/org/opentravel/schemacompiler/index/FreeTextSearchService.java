@@ -396,80 +396,11 @@ public abstract class FreeTextSearchService implements IndexingTerms {
 	public <T> List<SearchResult<T>> search(String freeText, TLLibraryStatus includeStatus, boolean latestVersionsOnly,
 			boolean resolveContent) throws RepositoryException {
 		try {
-			Query keywordQuery = new QueryParser(KEYWORDS_FIELD, new StandardAnalyzer()).parse(freeText + "~");
-			BooleanQuery statusQuery = null;
-			Query latestVersionQuery = null;
-			
-			// Construct the search query...
-			if (!latestVersionsOnly && (includeStatus != null) && (includeStatus != TLLibraryStatus.DRAFT)) {
-				statusQuery = new BooleanQuery();
-				
-				switch (includeStatus) {
-					case UNDER_REVIEW:
-						statusQuery.add(new BooleanClause(
-								new TermQuery(new Term(STATUS_FIELD, TLLibraryStatus.UNDER_REVIEW.toString())),
-								Occur.SHOULD));
-						statusQuery.add(new BooleanClause(
-								new TermQuery(new Term(STATUS_FIELD, TLLibraryStatus.FINAL.toString())), Occur.SHOULD));
-						statusQuery.add(new BooleanClause(
-								new TermQuery(new Term(STATUS_FIELD, TLLibraryStatus.OBSOLETE.toString())),
-								Occur.SHOULD));
-						break;
-					case FINAL:
-						statusQuery.add(new BooleanClause(
-								new TermQuery(new Term(STATUS_FIELD, TLLibraryStatus.FINAL.toString())), Occur.SHOULD));
-						statusQuery.add(new BooleanClause(
-								new TermQuery(new Term(STATUS_FIELD, TLLibraryStatus.OBSOLETE.toString())),
-								Occur.SHOULD));
-						break;
-					case OBSOLETE:
-						statusQuery.add(new BooleanClause(
-								new TermQuery(new Term(STATUS_FIELD, TLLibraryStatus.OBSOLETE.toString())),
-								Occur.SHOULD));
-						break;
-					default:
-						break;
-				}
-			}
-			if (latestVersionsOnly) {
-				String fieldName;
-				
-				if (includeStatus != null) {
-					switch (includeStatus) {
-						case UNDER_REVIEW:
-							fieldName = LATEST_VERSION_AT_UNDER_REVIEW_FIELD;
-							break;
-						case FINAL:
-							fieldName = LATEST_VERSION_AT_FINAL_FIELD;
-							break;
-						case OBSOLETE:
-							fieldName = LATEST_VERSION_AT_OBSOLETE_FIELD;
-							break;
-						default:
-							fieldName = LATEST_VERSION_FIELD;
-							break;
-					}
-				} else {
-					fieldName = LATEST_VERSION_FIELD;
-				}
-				latestVersionQuery = new TermQuery(new Term(fieldName, "true"));
-			}
-			
-			// Assemble the master search query
-			BooleanQuery masterQuery = newSearchIndexQuery();
-			
-			masterQuery.add(new BooleanClause(keywordQuery, Occur.MUST));
-			
-			if (statusQuery != null) {
-				masterQuery.add(new BooleanClause(statusQuery, Occur.MUST));
-			}
-			if (latestVersionQuery != null) {
-				masterQuery.add(new BooleanClause(latestVersionQuery, Occur.MUST));
-			}
+			BooleanQuery searchQuery = buildSearchQuery( freeText, includeStatus, latestVersionsOnly );
 			
 			// Execute the query and assemble the search results
 			List<SearchResult<T>> searchResults = new ArrayList<>();
-			List<Document> queryResults = executeQuery(masterQuery, resolveContent ? null : nonContentAttrs);
+			List<Document> queryResults = executeQuery(searchQuery, resolveContent ? null : nonContentAttrs);
 			
 			for (Document doc : queryResults) {
 				if (TLLibrary.class.getName().equals(doc.get(ENTITY_TYPE_FIELD))) {
@@ -487,6 +418,90 @@ public abstract class FreeTextSearchService implements IndexingTerms {
 		} catch (ParseException e) {
 			throw new RepositoryException("Error in free-text search query.", e);
 		}
+	}
+
+	/**
+	 * Builds a search query using the information provided.
+	 * 
+	 * @param freeText  the free text search keywords
+	 * @param includeStatus  the minimum library status to filter on (null for all statuses)
+	 * @param latestVersionsOnly  flag indicating whether only latest versions should be returned
+	 * @return BooleanQuery
+	 * @throws ParseException  thrown if an error occurs during query construction
+	 */
+	private BooleanQuery buildSearchQuery(String freeText, TLLibraryStatus includeStatus, boolean latestVersionsOnly)
+			throws ParseException {
+		BooleanQuery masterQuery;
+		Query keywordQuery = new QueryParser(KEYWORDS_FIELD, new StandardAnalyzer()).parse(freeText + "~");
+		BooleanQuery statusQuery = null;
+		Query latestVersionQuery = null;
+		
+		// Construct the search query...
+		if (!latestVersionsOnly && (includeStatus != null) && (includeStatus != TLLibraryStatus.DRAFT)) {
+			statusQuery = new BooleanQuery();
+			
+			switch (includeStatus) {
+				case UNDER_REVIEW:
+					statusQuery.add(new BooleanClause(
+							new TermQuery(new Term(STATUS_FIELD, TLLibraryStatus.UNDER_REVIEW.toString())),
+							Occur.SHOULD));
+					statusQuery.add(new BooleanClause(
+							new TermQuery(new Term(STATUS_FIELD, TLLibraryStatus.FINAL.toString())), Occur.SHOULD));
+					statusQuery.add(new BooleanClause(
+							new TermQuery(new Term(STATUS_FIELD, TLLibraryStatus.OBSOLETE.toString())),
+							Occur.SHOULD));
+					break;
+				case FINAL:
+					statusQuery.add(new BooleanClause(
+							new TermQuery(new Term(STATUS_FIELD, TLLibraryStatus.FINAL.toString())), Occur.SHOULD));
+					statusQuery.add(new BooleanClause(
+							new TermQuery(new Term(STATUS_FIELD, TLLibraryStatus.OBSOLETE.toString())),
+							Occur.SHOULD));
+					break;
+				case OBSOLETE:
+					statusQuery.add(new BooleanClause(
+							new TermQuery(new Term(STATUS_FIELD, TLLibraryStatus.OBSOLETE.toString())),
+							Occur.SHOULD));
+					break;
+				default:
+					break;
+			}
+		}
+		if (latestVersionsOnly) {
+			String fieldName;
+			
+			if (includeStatus != null) {
+				switch (includeStatus) {
+					case UNDER_REVIEW:
+						fieldName = LATEST_VERSION_AT_UNDER_REVIEW_FIELD;
+						break;
+					case FINAL:
+						fieldName = LATEST_VERSION_AT_FINAL_FIELD;
+						break;
+					case OBSOLETE:
+						fieldName = LATEST_VERSION_AT_OBSOLETE_FIELD;
+						break;
+					default:
+						fieldName = LATEST_VERSION_FIELD;
+						break;
+				}
+			} else {
+				fieldName = LATEST_VERSION_FIELD;
+			}
+			latestVersionQuery = new TermQuery(new Term(fieldName, "true"));
+		}
+		
+		// Assemble the master search query
+		masterQuery = newSearchIndexQuery();
+		masterQuery.add(new BooleanClause(keywordQuery, Occur.MUST));
+		
+		if (statusQuery != null) {
+			masterQuery.add(new BooleanClause(statusQuery, Occur.MUST));
+		}
+		if (latestVersionQuery != null) {
+			masterQuery.add(new BooleanClause(latestVersionQuery, Occur.MUST));
+		}
+		return masterQuery;
 	}
 	
 	   /**

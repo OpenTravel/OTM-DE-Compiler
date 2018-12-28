@@ -106,13 +106,9 @@ public class ResourceComparator extends BaseComparator {
 		}
 		
 		compareRelationships(oldResource, newResource, changeSet, changeItems, versionScheme);
-		
 		compareParentRefs(oldResource, newResource, changeSet, changeItems, isMinorVersionCompare);
-		
 		compareParamGroups(oldResource, newResource, changeSet, changeItems, isMinorVersionCompare);
-		
 		compareActionFacets(oldResource, newResource, changeSet, changeItems, isMinorVersionCompare);
-		
 		compareResourceActions(oldResource, newResource, changeSet, changeItems, isMinorVersionCompare);
 		
 		return changeSet;
@@ -130,9 +126,9 @@ public class ResourceComparator extends BaseComparator {
 	 */
 	private void compareRelationships(TLResource oldResource, TLResource newResource, ResourceChangeSet changeSet,
 			List<ResourceChangeItem> changeItems, String versionScheme) {
-		NamedEntity oldExtendsType = oldResource.getExtension().getExtendsEntity();
+		NamedEntity oldExtendsType = getExtendedEntity( oldResource );
 		NamedEntity oldBORefType = oldResource.getBusinessObjectRef();
-		NamedEntity newExtendsType = newResource.getExtension().getExtendsEntity();
+		NamedEntity newExtendsType = getExtendedEntity( newResource );
 		NamedEntity newBORefType = newResource.getBusinessObjectRef();
 		QName oldExtendsTypeName = (oldExtendsType == null) ? null : getEntityName( oldExtendsType );
 		QName newExtendsTypeName = (newExtendsType == null) ? null : getEntityName( newExtendsType );

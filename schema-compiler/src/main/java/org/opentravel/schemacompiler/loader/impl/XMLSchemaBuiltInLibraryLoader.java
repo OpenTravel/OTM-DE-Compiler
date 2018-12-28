@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.XMLConstants;
+import javax.xml.namespace.QName;
 
 import org.opentravel.ns.ota2.librarymodel_v01_04.EnumXsdSimpleType;
 import org.opentravel.schemacompiler.loader.BuiltInLibraryLoader;
@@ -65,8 +66,8 @@ public class XMLSchemaBuiltInLibraryLoader implements BuiltInLibraryLoader {
      */
     @Override
     public BuiltInLibrary loadBuiltInLibrary() throws LibraryLoaderException {
-        return new BuiltInLibrary(XMLConstants.W3C_XML_SCHEMA_NS_URI, XML_SCHEMA_LIBRARY_NAME,
-                defaultPrefix, XML_SCHEMA_LIBRARY_URL, XML_SCHEMA_LIBRARY_MEMBERS);
+        return new BuiltInLibrary( new QName( XMLConstants.W3C_XML_SCHEMA_NS_URI, XML_SCHEMA_LIBRARY_NAME,
+                defaultPrefix ), XML_SCHEMA_LIBRARY_URL, XML_SCHEMA_LIBRARY_MEMBERS);
     }
 
     /**

@@ -17,6 +17,8 @@ package org.opentravel.schemacompiler.loader.impl;
 
 import java.io.InputStream;
 
+import javax.xml.namespace.QName;
+
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.ioc.SchemaDeclaration;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
@@ -67,9 +69,10 @@ public class LegacySchemaBuiltInLibraryLoader extends AbstractBuiltInLibraryLoad
                 }
 
                 SchemaDeclaration libraryDeclaration = getLibraryDeclaration();
+                QName qualifiedName = new QName( schemaInfo.getJaxbArtifact().getTargetNamespace(),
+                		libraryDeclaration.getName(), libraryDeclaration.getDefaultPrefix() );
 
-                library = new BuiltInLibrary(schemaInfo.getJaxbArtifact().getTargetNamespace(),
-                        libraryDeclaration.getName(), libraryDeclaration.getDefaultPrefix(),
+                library = new BuiltInLibrary(qualifiedName,
                         inputSource.getLibraryURL(), xsdLibrary.getNamedMembers(),
                         xsdLibrary.getNamespaceImports(), xsdLibrary.getIncludes(),
                         getLibraryDeclaration(), xsdLibrary.getVersionScheme());

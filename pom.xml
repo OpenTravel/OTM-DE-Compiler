@@ -65,7 +65,7 @@
 		
 	    <!-- Sonar -->
 	    <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
-	    <sonar.jacoco.reportPath>${project.basedir}/test-aggregate/target/jacoco.exec</sonar.jacoco.reportPath>
+	    <sonar.jacoco.reportPaths>${project.basedir}/../test-aggregate/target/jacoco.exec</sonar.jacoco.reportPaths>
 	</properties>
 
 	<build>

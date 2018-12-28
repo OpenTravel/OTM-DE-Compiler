@@ -259,45 +259,11 @@ public class JMSFreeTextSearchService extends FreeTextSearchService {
 		 */
 		@Override
 		public void run() {
-			boolean initialStartup = true;
-			
 			while (!shutdownRequested) {
 				JmsTemplate indexingService = RepositoryComponentFactory.getDefault().getIndexingJmsService();
-				Connection jmsConnection = null;
 				
-				// Make sure the JMS provider is available; if not, continue to attempt a connection
-				// periodically before we start listening for messages.
-				while (!shutdownRequested && !jmsConnectionAvailable) {
-					try {
-						jmsConnection = indexingService.getConnectionFactory().createConnection();
-						jmsConnectionAvailable = true;
-						
-					} catch (Exception e) {
-						try {
-							if (initialStartup) {
-								log.info("Unable to establish connection to indexing agent - waiting to reconnect...");
-								initialStartup = false;
-							} else {
-								log.debug("Unable to establish connection to indexing agent - waiting to reconnect...");
-							}
-							Thread.sleep( JMS_LISTENER_RETRY_INTERVAL );
-							
-						} catch (Exception e2) {
-							// Ignore and continue
-						}
-						
-					} finally {
-						if (jmsConnection != null) {
-							try {
-								jmsConnection.close();
-							} catch (Exception e) {
-								// Ignore and continue
-							}
-						}
-					}
-				}
+				waitForJmsProvider( indexingService );
 				log.info("Indexing commit listener started.");
-				initialStartup = false;
 				
 				while (!shutdownRequested && jmsConnectionAvailable) {
 					try {
@@ -321,6 +287,41 @@ public class JMSFreeTextSearchService extends FreeTextSearchService {
 			}
 			log.info("Indexing commit listener shut down.");
 			shutdownRequested = false;
+		}
+
+		/**
+		 * Make sure the JMS provider is available; if not, continue to attempt a connection periodically
+		 * before we start listening for messages.
+		 * 
+		 * @param indexingService  the indexing service that will attempt to create the JMS connection
+		 */
+		private void waitForJmsProvider(JmsTemplate indexingService) {
+			Connection jmsConnection = null;
+			
+			while (!shutdownRequested && !jmsConnectionAvailable) {
+				try {
+					jmsConnection = indexingService.getConnectionFactory().createConnection();
+					jmsConnectionAvailable = true;
+					
+				} catch (Exception e) {
+					try {
+						log.info("Unable to establish connection to indexing agent - waiting to reconnect...");
+						Thread.sleep( JMS_LISTENER_RETRY_INTERVAL );
+						
+					} catch (Exception e2) {
+						// Ignore and continue
+					}
+					
+				} finally {
+					if (jmsConnection != null) {
+						try {
+							jmsConnection.close();
+						} catch (Exception e) {
+							// Ignore and continue
+						}
+					}
+				}
+			}
 		}
 		
 		/**

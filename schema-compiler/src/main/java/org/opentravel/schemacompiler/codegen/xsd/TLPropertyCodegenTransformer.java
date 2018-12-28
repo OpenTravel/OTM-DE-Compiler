@@ -109,8 +109,20 @@ public class TLPropertyCodegenTransformer extends
             element.setRef(propertyRef);
         }
 
-        // Assign the mix/max occurs for the generated element
-        if (source.isMandatory()) {
+        assignElementMinMaxValues( source, element );
+        XsdCodegenUtils.addExampleInfo(source, element);
+
+        return element;
+    }
+
+	/**
+	 * Assign the mix/max occurs for the generated element.
+	 * 
+	 * @param source  the source property being transformed
+	 * @param element  the XML schema element being generated
+	 */
+	private void assignElementMinMaxValues(TLProperty source, TopLevelElement element) {
+		if (source.isMandatory()) {
             element.setMinOccurs(BigInteger.valueOf(1));
         } else {
             element.setMinOccurs(BigInteger.valueOf(0));
@@ -127,10 +139,7 @@ public class TLPropertyCodegenTransformer extends
         } else {
             element.setMaxOccurs(PropertyCodegenUtils.getMaxOccurs(source));
         }
-        XsdCodegenUtils.addExampleInfo(source, element);
-
-        return element;
-    }
+	}
 
     /**
      * Performs the transformation of the property as an IDREF(S) element.

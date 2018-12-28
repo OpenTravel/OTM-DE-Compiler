@@ -30,6 +30,7 @@ import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAdditionalDocumentationItem;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLDocumentationItem;
+import org.opentravel.schemacompiler.model.TLExtensionOwner;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.version.VersionScheme;
@@ -347,4 +348,19 @@ public abstract class BaseComparator {
 		return entityName;
 	}
 	
+	/**
+	 * Returns the extended entity of the one provided or null if the given entity
+	 * does not extend another one.
+	 * 
+	 * @param entity  the entity for which to return the extension
+	 * @return NamedEntity
+	 */
+	protected NamedEntity getExtendedEntity(TLExtensionOwner entity) {
+		NamedEntity extendedEntity = null;
+		
+		if (entity.getExtension() != null) {
+			extendedEntity = entity.getExtension().getExtendsEntity();
+		}
+		return extendedEntity;
+	}
 }

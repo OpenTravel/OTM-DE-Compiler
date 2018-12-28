@@ -64,17 +64,7 @@ public class BusinessObjectUpdateFacetCodegenDelegate extends BusinessObjectFace
 		// Add 'update' indicators for optional elements and attributes
 		for (TLAttribute attribute : attributeList) {
 			if (!attribute.isMandatory()) {
-				String indicatorName = XsdCodegenUtils.getUpdateIndicatorName( attribute );
-				String fieldName = attribute.getName();
-				
-				if (attribute.isReference()) {
-					QName elementName = XsdCodegenUtils.getGlobalElementName( attribute.getType() );
-					
-					if (elementName != null) {
-						fieldName = elementName.getLocalPart();
-					}
-				}
-				addUpdateIndicator( indicatorName, fieldName, jaxbAttributes );
+				addUpdateIndicator( attribute, jaxbAttributes );
 			}
 		}
 		
@@ -92,6 +82,26 @@ public class BusinessObjectUpdateFacetCodegenDelegate extends BusinessObjectFace
 		jaxbAttributes.addAll( super.createJaxbAttributes( attributeList, indicatorList ) );
 		
 		return jaxbAttributes;
+	}
+
+	/**
+	 * Adds an update indicator for the model attribute provided.
+	 * 
+	 * @param attribute  the model attribute for which to add an update indicator
+	 * @param jaxbAttributes  the list of JAXB attributes to which the new indicator will be added
+	 */
+	private void addUpdateIndicator(TLAttribute attribute, List<Annotated> jaxbAttributes) {
+		String indicatorName = XsdCodegenUtils.getUpdateIndicatorName( attribute );
+		String fieldName = attribute.getName();
+		
+		if (attribute.isReference()) {
+			QName elementName = XsdCodegenUtils.getGlobalElementName( attribute.getType() );
+			
+			if (elementName != null) {
+				fieldName = elementName.getLocalPart();
+			}
+		}
+		addUpdateIndicator( indicatorName, fieldName, jaxbAttributes );
 	}
 	
 	/**

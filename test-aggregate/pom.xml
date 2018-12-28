@@ -78,6 +78,13 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>org/opentravel/ns/ota2/**</exclude>
+						<exclude>org/w3/_2001/xmlschema/**</exclude>
+						<exclude>org/xmlsoap/schemas/wsdl/**</exclude>
+					</excludes>
+				</configuration>
 				<executions>
 					<execution>
 						<id>report-merge</id>
@@ -104,6 +111,45 @@
 					</execution>
 				</executions>
 			</plugin>
+			<!--
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.0.2</version>
+				<executions>
+					<execution>
+						<id>copy-resources-1</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${basedir}/../schema-compiler/target</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.build.directory}/jacoco</directory>
+									<include></include>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copy-resources-2</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${basedir}/../ota2-repository-service/target</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.build.directory}/jacoco</directory>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			-->
 		</plugins>
 	</build>
 

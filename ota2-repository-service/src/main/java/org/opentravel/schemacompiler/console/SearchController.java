@@ -45,7 +45,7 @@ import org.opentravel.schemacompiler.repository.RepositoryComponentFactory;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
-import org.opentravel.schemacompiler.security.RepositorySecurityManager;
+import org.opentravel.schemacompiler.repository.RepositorySecurityException;
 import org.opentravel.schemacompiler.security.UserPrincipal;
 import org.opentravel.schemacompiler.util.MessageFormatter;
 import org.opentravel.schemacompiler.util.PageUtils;
@@ -119,42 +119,9 @@ public class SearchController extends BaseController {
 			if (searchService != null) {
 				try {
 					List<SearchResult<Object>> results = searchService.search(keywords, searchStatus, latestVersions, false);
-					RepositorySecurityManager securityManager = getSecurityManager();
 					UserPrincipal user = getCurrentUser(session);
 					
-					for (SearchResult<?> result : results) {
-						if (!isFilterMatch( result, nsFilter, entityType )) {
-							continue;
-						}
-						
-						if (result instanceof ReleaseSearchResult) {
-							ReleaseSearchResult release = (ReleaseSearchResult) result;
-							RepositoryItem releaseItem = RepositoryManager.getDefault().getRepositoryItem(
-									release.getBaseNamespace(), release.getFilename(), release.getVersion());
-							
-							if (securityManager.isReadAuthorized(user, releaseItem)) {
-								searchResults.add(result);
-							}
-							
-						} else if (result instanceof LibrarySearchResult) {
-							RepositoryItem item = ((LibrarySearchResult) result).getRepositoryItem();
-							
-							if (securityManager.isReadAuthorized(user, item)) {
-								searchResults.add(result);
-							}
-							
-						} else if (result instanceof EntitySearchResult) {
-							EntitySearchResult indexEntity = (EntitySearchResult) result;
-							RepositoryPermission checkPermission = ((indexEntity.getStatus() == TLLibraryStatus.FINAL)
-									|| (indexEntity.getStatus() == TLLibraryStatus.OBSOLETE))
-											? RepositoryPermission.READ_FINAL
-											: RepositoryPermission.READ_DRAFT;
-							
-							if (securityManager.isAuthorized(user, indexEntity.getItemNamespace(), checkPermission)) {
-								searchResults.add(result);
-							}
-						}
-					}
+					searchResults = prepareSearchResults( results, nsFilter, entityType, user );
 					
 				} catch (RepositoryException e) {
 					log.error("An error occured while performing the requested search.", e);
@@ -174,6 +141,69 @@ public class SearchController extends BaseController {
 		}
 		return applyCommonValues(model, "search");
     }
+
+	/**
+	 * Prepares the given free-text search results for display on the console web page.
+	 * 
+	 * @param nsFilter  the namespace filter for the search
+	 * @param entityType  the entity type being searched for
+	 * @param results  the search results from the free-text search index
+	 * @param user  the user who requested the search
+	 * @return List<SearchResult<?>>
+	 * @throws RepositoryException  thrown if an error occurs accessing the OTM repository
+	 */
+	private List<SearchResult<?>> prepareSearchResults(List<SearchResult<Object>> results, String nsFilter, Class<?> entityType,
+			UserPrincipal user) throws RepositoryException {
+		List<SearchResult<?>> searchResults = new ArrayList<>();
+		
+		for (SearchResult<?> result : results) {
+			if (!isFilterMatch( result, nsFilter, entityType )) {
+				continue;
+			}
+			
+			if (result instanceof ReleaseSearchResult) {
+				ReleaseSearchResult release = (ReleaseSearchResult) result;
+				RepositoryItem releaseItem = RepositoryManager.getDefault().getRepositoryItem(
+						release.getBaseNamespace(), release.getFilename(), release.getVersion());
+				
+				addIfReadAuthorized( result, releaseItem, searchResults, user );
+				
+			} else if (result instanceof LibrarySearchResult) {
+				RepositoryItem item = ((LibrarySearchResult) result).getRepositoryItem();
+				
+				addIfReadAuthorized( result, item, searchResults, user );
+				
+			} else if (result instanceof EntitySearchResult) {
+				EntitySearchResult indexEntity = (EntitySearchResult) result;
+				RepositoryPermission checkPermission = ((indexEntity.getStatus() == TLLibraryStatus.FINAL)
+						|| (indexEntity.getStatus() == TLLibraryStatus.OBSOLETE))
+								? RepositoryPermission.READ_FINAL
+								: RepositoryPermission.READ_DRAFT;
+				
+				if (getSecurityManager().isAuthorized(user, indexEntity.getItemNamespace(), checkPermission)) {
+					searchResults.add(result);
+				}
+			}
+		}
+		return searchResults;
+	}
+
+	/**
+	 * If the user has read access to the given repository item, the corresponding search result is added
+	 * to the list of results.
+	 * 
+	 * @param searchResult  the search result to be added
+	 * @param item  the repository item associated with the search result
+	 * @param searchResults  the list of search results being constructed
+	 * @param user  the user who initiated the search
+	 * @throws RepositorySecurityException  thrown if an error occurs while checking the user's access
+	 */
+	private void addIfReadAuthorized(SearchResult<?> searchResult, RepositoryItem item,
+			List<SearchResult<?>> searchResults, UserPrincipal user) throws RepositorySecurityException {
+		if (getSecurityManager().isReadAuthorized(user, item)) {
+			searchResults.add(searchResult);
+		}
+	}
     
     /**
      * Returns a default search page with no parameters specified by the user.

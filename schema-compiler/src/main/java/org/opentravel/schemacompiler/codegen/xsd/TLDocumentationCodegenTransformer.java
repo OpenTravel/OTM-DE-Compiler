@@ -99,21 +99,8 @@ public class TLDocumentationCodegenTransformer extends
 
             for (Object appInfoOrDocumentation : annotation.getAppinfoOrDocumentation()) {
                 if (appInfoOrDocumentation instanceof Documentation) {
-                    Documentation documentation = (Documentation) appInfoOrDocumentation;
-
-                    if (standardSources.contains(documentation.getSource())) {
-                        List<Documentation> docs = documentationBySource.get(documentation
-                                .getSource());
-
-                        if (docs == null) {
-                            docs = new ArrayList<>();
-                            documentationBySource.put(documentation.getSource(), docs);
-                        }
-                        docs.add(documentation);
-
-                    } else {
-                        otherDocumentations.add(documentation);
-                    }
+                    addSchemaDoc( (Documentation) appInfoOrDocumentation, documentationBySource, otherDocumentations );
+                    
                 } else if (appInfoOrDocumentation instanceof Appinfo) {
                     appInfos.add((Appinfo) appInfoOrDocumentation);
                 }
@@ -133,6 +120,30 @@ public class TLDocumentationCodegenTransformer extends
 
         return result;
     }
+
+	/**
+	 * Adds the given XML schema documentation to the collections provided.
+	 * 
+	 * @param documentation  the documentation to be added
+	 * @param documentationBySource  map that collates documentation elements by source
+	 * @param otherDocumentations  the list of all 'other' documentation elements
+	 */
+	private static void addSchemaDoc(Documentation documentation, Map<String,List<Documentation>> documentationBySource,
+			List<Documentation> otherDocumentations) {
+		if (standardSources.contains(documentation.getSource())) {
+		    List<Documentation> docs = documentationBySource.get(documentation
+		            .getSource());
+
+		    if (docs == null) {
+		        docs = new ArrayList<>();
+		        documentationBySource.put(documentation.getSource(), docs);
+		    }
+		    docs.add(documentation);
+
+		} else {
+		    otherDocumentations.add(documentation);
+		}
+	}
 
     /**
      * Constructs a new XML schema documentation element using the values provided.

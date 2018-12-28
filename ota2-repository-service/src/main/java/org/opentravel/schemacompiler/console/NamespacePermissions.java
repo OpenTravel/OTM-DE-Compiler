@@ -143,8 +143,31 @@ public class NamespacePermissions {
         Map<RepositoryPermission,AuthorizationSpec> jaxbDenies = new EnumMap<>( RepositoryPermission.class );
         NamespaceAuthorizations jaxbAuthorizations = new NamespaceAuthorizations();
 
-        // Assemble the set of granted and denied permissions
-        for (NamespacePermission nsPermission : permissions) {
+        findPermissions( jaxbGrants, jaxbDenies );
+
+        for (RepositoryPermission permission : RepositoryPermission.values()) {
+            AuthorizationSpec jaxbGrant = jaxbGrants.get(permission);
+            AuthorizationSpec jaxbDeny = jaxbDenies.get(permission);
+
+            if (jaxbGrant != null) {
+                jaxbAuthorizations.getGrant().add(jaxbGrant);
+            }
+            if (jaxbDeny != null) {
+                jaxbAuthorizations.getDeny().add(jaxbDeny);
+            }
+        }
+        return jaxbAuthorizations;
+    }
+
+	/**
+	 * Assemble the set of granted and denied permissions.
+	 * 
+	 * @param jaxbGrants  the map of permissions that have been granted
+	 * @param jaxbDenies  the map of permissions that have been granted
+	 */
+	private void findPermissions(Map<RepositoryPermission,AuthorizationSpec> jaxbGrants,
+			Map<RepositoryPermission,AuthorizationSpec> jaxbDenies) {
+		for (NamespacePermission nsPermission : permissions) {
             if (nsPermission.getGrantPermission() != null) {
                 AuthorizationSpec jaxbGrant = jaxbGrants.get(nsPermission.getGrantPermission());
 
@@ -166,20 +189,7 @@ public class NamespacePermissions {
                 jaxbDeny.getPrincipal().add(nsPermission.getPrincipal());
             }
         }
-
-        for (RepositoryPermission permission : RepositoryPermission.values()) {
-            AuthorizationSpec jaxbGrant = jaxbGrants.get(permission);
-            AuthorizationSpec jaxbDeny = jaxbDenies.get(permission);
-
-            if (jaxbGrant != null) {
-                jaxbAuthorizations.getGrant().add(jaxbGrant);
-            }
-            if (jaxbDeny != null) {
-                jaxbAuthorizations.getDeny().add(jaxbDeny);
-            }
-        }
-        return jaxbAuthorizations;
-    }
+	}
 
     /**
      * Initializes the permissions using data from the JAXB namespace authorizations file.
@@ -193,47 +203,10 @@ public class NamespacePermissions {
 
         if (jaxbPermissions != null) {
 
-            // Parse the list of granted permissions
-            for (AuthorizationSpec jaxbGrant : jaxbPermissions.getGrant()) {
-                for (String principalName : jaxbGrant.getPrincipal()) {
-                    NamespacePermission nsPermission = principalPermissions.get(principalName);
-
-                    if (nsPermission == null) {
-                        nsPermission = new NamespacePermission();
-                        nsPermission.setPrincipal(principalName);
-                        nsPermission.setGrantPermission(jaxbGrant.getPermission());
-                        principalNames.add(principalName);
-                        principalPermissions.put(principalName, nsPermission);
-
-                    } else {
-                        nsPermission.setGrantPermission(resolvePermission(
-                                nsPermission.getGrantPermission(), jaxbGrant.getPermission()));
-                    }
-                }
-            }
-
-            // Parse the list of denied permissions
-            for (AuthorizationSpec jaxbDeny : jaxbPermissions.getDeny()) {
-                for (String principalName : jaxbDeny.getPrincipal()) {
-                    NamespacePermission nsPermission = principalPermissions.get(principalName);
-
-                    if (nsPermission == null) {
-                        nsPermission = new NamespacePermission();
-                        nsPermission.setPrincipal(principalName);
-                        nsPermission.setDenyPermission(jaxbDeny.getPermission());
-                        principalNames.add(principalName);
-                        principalPermissions.put(principalName, nsPermission);
-
-                    } else {
-                        nsPermission.setDenyPermission(resolvePermission(
-                                nsPermission.getDenyPermission(), jaxbDeny.getPermission()));
-                    }
-                }
-            }
+            parsePermissions( jaxbPermissions, principalNames, principalPermissions );
 
             // Assemble the final list of permissions for this namespace. If permission(s) are
-            // defined for
-            // the anonymous user, make sure 'anonymous' is sorted to the front of the list.
+            // defined for the anonymous user, make sure 'anonymous' is sorted to the front of the list.
             Collections.sort(principalNames);
 
             if (principalNames.contains(UserPrincipal.ANONYMOUS_USER_ID)) {
@@ -246,6 +219,55 @@ public class NamespacePermissions {
             }
         }
     }
+
+	/**
+	 * Uses the given JAXB permission declarations to populate the list of principals and the
+	 * map of their corresponding permissions.
+	 * 
+	 * @param jaxbPermissions  the JAXB permissions being parsed
+	 * @param principalNames  the list of principal names found in the permission declarations
+	 * @param principalPermissions  the map of namespace permissions by principal names
+	 */
+	private void parsePermissions(NamespaceAuthorizations jaxbPermissions, List<String> principalNames,
+			Map<String,NamespacePermission> principalPermissions) {
+		// Parse the list of granted permissions
+		for (AuthorizationSpec jaxbGrant : jaxbPermissions.getGrant()) {
+		    for (String principalName : jaxbGrant.getPrincipal()) {
+		        NamespacePermission nsPermission = principalPermissions.get(principalName);
+
+		        if (nsPermission == null) {
+		            nsPermission = new NamespacePermission();
+		            nsPermission.setPrincipal(principalName);
+		            nsPermission.setGrantPermission(jaxbGrant.getPermission());
+		            principalNames.add(principalName);
+		            principalPermissions.put(principalName, nsPermission);
+
+		        } else {
+		            nsPermission.setGrantPermission(resolvePermission(
+		                    nsPermission.getGrantPermission(), jaxbGrant.getPermission()));
+		        }
+		    }
+		}
+
+		// Parse the list of denied permissions
+		for (AuthorizationSpec jaxbDeny : jaxbPermissions.getDeny()) {
+		    for (String principalName : jaxbDeny.getPrincipal()) {
+		        NamespacePermission nsPermission = principalPermissions.get(principalName);
+
+		        if (nsPermission == null) {
+		            nsPermission = new NamespacePermission();
+		            nsPermission.setPrincipal(principalName);
+		            nsPermission.setDenyPermission(jaxbDeny.getPermission());
+		            principalNames.add(principalName);
+		            principalPermissions.put(principalName, nsPermission);
+
+		        } else {
+		            nsPermission.setDenyPermission(resolvePermission(
+		                    nsPermission.getDenyPermission(), jaxbDeny.getPermission()));
+		        }
+		    }
+		}
+	}
 
     /**
      * Resolves the two permissions by returning the one that takes precedent (e.g. Read-Draft has

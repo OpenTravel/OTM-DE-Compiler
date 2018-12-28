@@ -59,6 +59,7 @@ import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
+import org.opentravel.schemacompiler.util.ClassSpecificFunction;
 import org.opentravel.schemacompiler.validate.Validatable;
 import org.opentravel.schemacompiler.validate.ValidationFinding;
 
@@ -67,33 +68,30 @@ import org.opentravel.schemacompiler.validate.ValidationFinding;
  */
 public class IndexingUtils {
 	
-	/**
-	 * 
-	 */
 	private static final String META_DATA_SUFFIX = ":meta-data";
-
+	
 	/**
 	 * Private constructor to prevent instantiation.
 	 */
-	private IndexingUtils() {}
+	private IndexingUtils() {
+	}
 	
 	/**
 	 * Returns the qualified identity key for the given OTM model entity.
 	 * 
-	 * @param entity  the named entity for which to return an identity key
+	 * @param entity the named entity for which to return an identity key
 	 * @return String
 	 */
 	public static String getIdentityKey(NamedEntity entity) {
 		return getIdentityKey( entity, true );
 	}
-
+	
 	/**
-	 * Returns the qualified identity key for the given OTM model entity.  If the
-	 * 'isSearchable' flag is true, the entity's index document will be included in
-	 * the searchable index records.
+	 * Returns the qualified identity key for the given OTM model entity. If the 'isSearchable' flag is true, the
+	 * entity's index document will be included in the searchable index records.
 	 * 
-	 * @param entity  the named entity for which to return an identity key
-	 * @param isSearchable  flag indicating whether the resulting index document should be searchable
+	 * @param entity the named entity for which to return an identity key
+	 * @param isSearchable flag indicating whether the resulting index document should be searchable
 	 * @return String
 	 */
 	public static String getIdentityKey(NamedEntity entity, boolean isSearchable) {
@@ -101,72 +99,71 @@ public class IndexingUtils {
 	}
 	
 	/**
-	 * Returns the qualified identity key for the OTM model entity with the given namespace
-	 * and local name.
+	 * Returns the qualified identity key for the OTM model entity with the given namespace and local name.
 	 * 
-	 * @param entityNS  the namespace of the OTM entity
-	 * @param entityLocalName  the local name of the OTM entity
-	 * @param isSearchable  flag indicating whether the resulting index document should be searchable
+	 * @param entityNS the namespace of the OTM entity
+	 * @param entityLocalName the local name of the OTM entity
+	 * @param isSearchable flag indicating whether the resulting index document should be searchable
 	 * @return String
 	 */
 	public static String getIdentityKey(String entityNS, String entityLocalName, boolean isSearchable) {
 		StringBuilder identityKey = new StringBuilder();
 		
-		identityKey.append( entityNS ).append(":");
+		identityKey.append( entityNS ).append( ":" );
 		identityKey.append( entityLocalName );
 		if (!isSearchable) {
-			identityKey.append(META_DATA_SUFFIX);
+			identityKey.append( META_DATA_SUFFIX );
 		}
 		return identityKey.toString();
 	}
-
+	
 	/**
-	 * Returns the searchable variant of the given identity key.  If the key is already
-	 * searchable, the original string is returned.
+	 * Returns the searchable variant of the given identity key. If the key is already searchable, the original string
+	 * is returned.
 	 * 
-	 * @param identityKey  the identity key to process
+	 * @param identityKey the identity key to process
 	 * @return String
 	 */
 	public static String getSearchableIdentityKey(String identityKey) {
 		String key = identityKey;
 		
-		if (key.endsWith(META_DATA_SUFFIX)) {
+		if (key.endsWith( META_DATA_SUFFIX )) {
 			key = key.substring( 0, key.length() - 10 );
 		}
 		return key;
 	}
-
+	
 	/**
-	 * Returns the non-searchable variant of the given identity key.  If the key is already
-	 * non-searchable, the original string is returned.
+	 * Returns the non-searchable variant of the given identity key. If the key is already non-searchable, the original
+	 * string is returned.
 	 * 
-	 * @param identityKey  the identity key to process
+	 * @param identityKey the identity key to process
 	 * @return String
 	 */
 	public static String getNonSearchableIdentityKey(String identityKey) {
 		String key = identityKey;
 		
-		if (!key.endsWith(META_DATA_SUFFIX)) {
+		if (!key.endsWith( META_DATA_SUFFIX )) {
 			key += META_DATA_SUFFIX;
 		}
 		return key;
 	}
-
+	
 	/**
 	 * Returns the qualified identity key for the search index term.
 	 * 
 	 * @return String
 	 */
 	public static String getIdentityKey(RepositoryItem item) {
-		boolean isLibrary = item.getFilename().toLowerCase().endsWith(".otm");
+		boolean isLibrary = item.getFilename().toLowerCase().endsWith( ".otm" );
 		StringBuilder identityKey = new StringBuilder();
 		
 		identityKey.append( isLibrary ? "LIB:" : "REL:" );
-		identityKey.append( item.getNamespace() ).append(":");
+		identityKey.append( item.getNamespace() ).append( ":" );
 		identityKey.append( item.getLibraryName() );
 		return identityKey.toString();
 	}
-
+	
 	/**
 	 * Returns the qualified identity key for the given library.
 	 * 
@@ -175,8 +172,8 @@ public class IndexingUtils {
 	public static String getIdentityKey(TLLibrary library) {
 		StringBuilder identityKey = new StringBuilder();
 		
-		identityKey.append("LIB:");
-		identityKey.append( library.getNamespace() ).append(":");
+		identityKey.append( "LIB:" );
+		identityKey.append( library.getNamespace() ).append( ":" );
 		identityKey.append( library.getName() );
 		return identityKey.toString();
 	}
@@ -190,13 +187,13 @@ public class IndexingUtils {
 		QName sourceQName = getQualifiedName( finding.getSource() );
 		StringBuilder identityKey = new StringBuilder();
 		
-		identityKey.append("F:");
+		identityKey.append( "F:" );
 		
 		if (sourceQName != null) {
-			identityKey.append( sourceQName.getNamespaceURI() ).append("|");
-			identityKey.append( sourceQName.getLocalPart() ).append("|");
+			identityKey.append( sourceQName.getNamespaceURI() ).append( "|" );
+			identityKey.append( sourceQName.getLocalPart() ).append( "|" );
 		}
-		identityKey.append( finding.getSource().getValidationIdentity() ).append("|");
+		identityKey.append( finding.getSource().getValidationIdentity() ).append( "|" );
 		identityKey.append( finding.getMessageKey() );
 		return identityKey.toString();
 	}
@@ -204,8 +201,8 @@ public class IndexingUtils {
 	/**
 	 * Returns the qualified identity key for the subscription target.
 	 * 
-	 * @param subscriptionTarget  the subscription target for which to return an identity key
-	 * @param eventType  the type of the subscription event to which the identity key will apply
+	 * @param subscriptionTarget the subscription target for which to return an identity key
+	 * @param eventType the type of the subscription event to which the identity key will apply
 	 * @return String
 	 */
 	public static String getIdentityKey(SubscriptionTarget subscriptionTarget, SubscriptionEventType eventType) {
@@ -223,12 +220,11 @@ public class IndexingUtils {
 		identityKey.append( ":" ).append( eventType.toString() );
 		return identityKey.toString();
 	}
-
+	
 	/**
-	 * Returns the qualified name of the library or named entity that is the target of
-	 * a validation finding.
+	 * Returns the qualified name of the library or named entity that is the target of a validation finding.
 	 * 
-	 * @param validatable  the source object for which to return a qualified name
+	 * @param validatable the source object for which to return a qualified name
 	 * @return QName
 	 */
 	public static QName getQualifiedName(Validatable validatable) {
@@ -246,141 +242,73 @@ public class IndexingUtils {
 		return objName;
 	}
 	
+    private static ClassSpecificFunction<TLModelElement> targetEntityFunction = new ClassSpecificFunction<TLModelElement>()
+    		.addFunction( TLLibrary.class, v -> v )
+    		.addFunction( TLContext.class, v -> v.getOwningLibrary() )
+    		.addFunction( TLInclude.class, v -> v.getOwningLibrary() )
+    		.addFunction( TLNamespaceImport.class, v -> v.getOwningLibrary() )
+    		.addFunction( TLService.class, v -> v.getOwningLibrary() )
+    		.addFunction( TLSimple.class, v -> v )
+    		.addFunction( TLValueWithAttributes.class, v -> v )
+    		.addFunction( TLClosedEnumeration.class, v -> v )
+    		.addFunction( TLOpenEnumeration.class, v -> v )
+    		.addFunction( TLChoiceObject.class, v -> v )
+    		.addFunction( TLCoreObject.class, v -> v )
+    		.addFunction( TLBusinessObject.class, v -> v )
+    		.addFunction( TLResource.class, v -> v )
+    		.addFunction( TLOperation.class, v -> v )
+    		.addFunction( TLExtensionPointFacet.class, v -> v )
+    		.addFunction( TLFacet.class, v -> getTargetEntity( v.getOwningEntity() ) )
+    		.addFunction( TLActionFacet.class, v -> getTargetEntity( v.getOwningResource() ) )
+    		.addFunction( TLSimpleFacet.class, v -> getTargetEntity( v.getOwningEntity() ) )
+    		.addFunction( TLListFacet.class, v -> getTargetEntity( v.getOwningEntity() ) )
+    		.addFunction( TLAlias.class, v -> getTargetEntity( v.getOwningEntity() ) )
+    		.addFunction( TLParamGroup.class, v -> getTargetEntity( v.getOwner() ) )
+    		.addFunction( TLParameter.class, v -> getTargetEntity( v.getOwner() ) )
+    		.addFunction( TLResourceParentRef.class, v -> getTargetEntity( v.getOwner() ) )
+    		.addFunction( TLAction.class, v -> getTargetEntity( v.getOwner() ) )
+    		.addFunction( TLActionRequest.class, v -> getTargetEntity( v.getOwner() ) )
+    		.addFunction( TLActionResponse.class, v -> getTargetEntity( v.getOwner() ) )
+    		.addFunction( TLExtension.class, v -> getTargetEntity( v.getOwner() ) )
+    		.addFunction( TLDocumentation.class, v -> getTargetEntity( v.getOwner() ) )
+    		.addFunction( TLEquivalent.class, v -> getTargetEntity( v.getOwningEntity() ) )
+    		.addFunction( TLExample.class, v -> getTargetEntity( v.getOwningEntity() ) )
+    		.addFunction( TLAttribute.class, v -> getTargetEntity( v.getOwner() ) )
+    		.addFunction( TLProperty.class, v -> getTargetEntity( v.getOwner() ) )
+    		.addFunction( TLIndicator.class, v -> getTargetEntity( v.getOwner() ) )
+    		.addFunction( TLEnumValue.class, v -> getTargetEntity( v.getOwningEnum() ) )
+    		.addFunction( TLRoleEnumeration.class, v -> getTargetEntity( v.getOwningEntity() ) )
+    		.addFunction( TLRole.class, v -> getTargetEntity( v.getRoleEnumeration() ) )
+    		;
 	/**
-	 * Returns the entity or library that will be the indexing target for the source
-	 * object of a validation finding.  For EXAMPLE, the owning entity of an attribute
-	 * finding would be the core object that declared the attribute.
+	 * Returns the entity or library that will be the indexing target for the source object of a validation finding. For
+	 * EXAMPLE, the owning entity of an attribute finding would be the core object that declared the attribute.
 	 * 
-	 * @param validatable  the object that is the source of a validation finding
+	 * @param validatable the object that is the source of a validation finding
 	 * @return TLModelElement
 	 */
 	public static TLModelElement getTargetEntity(Validatable validatable) {
 		TLModelElement targetEntity = null;
 		
-		if (validatable instanceof TLLibrary) {
-        	targetEntity = (TLLibrary) validatable;
-			
-        } else if (validatable instanceof TLContext) {
-        	targetEntity = ((TLContext) validatable).getOwningLibrary();
-
-        } else if (validatable instanceof TLInclude) {
-        	targetEntity = ((TLInclude) validatable).getOwningLibrary();
-
-        } else if (validatable instanceof TLNamespaceImport) {
-        	targetEntity = ((TLNamespaceImport) validatable).getOwningLibrary();
-
-        } else if (validatable instanceof TLService) {
-        	targetEntity = ((TLService) validatable).getOwningLibrary();
-
-		} else if (validatable instanceof TLSimple) {
-        	targetEntity = (TLSimple) validatable;
-
-        } else if (validatable instanceof TLValueWithAttributes) {
-        	targetEntity = (TLValueWithAttributes) validatable;
-
-        } else if (validatable instanceof TLClosedEnumeration) {
-        	targetEntity = (TLClosedEnumeration) validatable;
-
-        } else if (validatable instanceof TLOpenEnumeration) {
-        	targetEntity = (TLOpenEnumeration) validatable;
-
-        } else if (validatable instanceof TLChoiceObject) {
-        	targetEntity = (TLChoiceObject) validatable;
-
-        } else if (validatable instanceof TLCoreObject) {
-        	targetEntity = (TLCoreObject) validatable;
-
-        } else if (validatable instanceof TLBusinessObject) {
-        	targetEntity = (TLBusinessObject) validatable;
-
-        } else if (validatable instanceof TLResource) {
-        	targetEntity = (TLResource) validatable;
-
-        } else if (validatable instanceof TLOperation) {
-        	targetEntity = (TLOperation) validatable;
-
-        } else if (validatable instanceof TLExtensionPointFacet) {
-        	targetEntity = (TLExtensionPointFacet) validatable;
-
-        } else if (validatable instanceof TLFacet) {
-        	targetEntity = getTargetEntity( ((TLFacet) validatable).getOwningEntity() );
-
-        } else if (validatable instanceof TLActionFacet) {
-        	targetEntity = getTargetEntity( ((TLActionFacet) validatable).getOwningResource() );
-
-        } else if (validatable instanceof TLSimpleFacet) {
-        	targetEntity = getTargetEntity( ((TLSimpleFacet) validatable).getOwningEntity() );
-
-        } else if (validatable instanceof TLListFacet) {
-        	targetEntity = getTargetEntity( ((TLListFacet) validatable).getOwningEntity() );
-
-        } else if (validatable instanceof TLAlias) {
-        	targetEntity = getTargetEntity( ((TLAlias) validatable).getOwningEntity() );
-
-        } else if (validatable instanceof TLParamGroup) {
-        	targetEntity = getTargetEntity( ((TLParamGroup) validatable).getOwner() );
-
-        } else if (validatable instanceof TLParameter) {
-        	targetEntity = getTargetEntity( ((TLParameter) validatable).getOwner() );
-
-        } else if (validatable instanceof TLResourceParentRef) {
-        	targetEntity = getTargetEntity( ((TLResourceParentRef) validatable).getOwner() );
-
-        } else if (validatable instanceof TLAction) {
-        	targetEntity = getTargetEntity( ((TLAction) validatable).getOwner() );
-
-        } else if (validatable instanceof TLActionRequest) {
-        	targetEntity = getTargetEntity( ((TLActionRequest) validatable).getOwner() );
-
-        } else if (validatable instanceof TLActionResponse) {
-        	targetEntity = getTargetEntity( ((TLActionResponse) validatable).getOwner() );
-
-        } else if (validatable instanceof TLExtension) {
-        	targetEntity = getTargetEntity( ((TLExtension) validatable).getOwner() );
-
-        } else if (validatable instanceof TLDocumentation) {
-        	targetEntity = getTargetEntity( ((TLDocumentation) validatable).getOwner() );
-
-        } else if (validatable instanceof TLEquivalent) {
-        	targetEntity = getTargetEntity( ((TLEquivalent) validatable).getOwningEntity() );
-
-        } else if (validatable instanceof TLExample) {
-        	targetEntity = getTargetEntity( ((TLExample) validatable).getOwningEntity() );
-
-        } else if (validatable instanceof TLAttribute) {
-        	targetEntity = getTargetEntity( ((TLAttribute) validatable).getOwner() );
-
-        } else if (validatable instanceof TLProperty) {
-        	targetEntity = getTargetEntity( ((TLProperty) validatable).getOwner() );
-
-        } else if (validatable instanceof TLIndicator) {
-        	targetEntity = getTargetEntity( ((TLIndicator) validatable).getOwner() );
-
-        } else if (validatable instanceof TLEnumValue) {
-        	targetEntity = getTargetEntity( ((TLEnumValue) validatable).getOwningEnum() );
-
-        } else if (validatable instanceof TLRoleEnumeration) {
-        	targetEntity = getTargetEntity( ((TLRoleEnumeration) validatable).getOwningEntity() );
-
-        } else if (validatable instanceof TLRole) {
-        	targetEntity = getTargetEntity( ((TLRole) validatable).getRoleEnumeration() );
-        }
-        return targetEntity;
+		if (targetEntityFunction.canApply( validatable )) {
+			targetEntity = targetEntityFunction.apply( validatable );
+		}
+		return targetEntity;
 	}
 	
 	/**
 	 * Returns the qualified name of the given facets owning entity.
 	 * 
-	 * @param facet  the contextual facet for which to return the owner's qualified name
+	 * @param facet the contextual facet for which to return the owner's qualified name
 	 * @return QName
 	 */
 	public static QName getContextualFacetOwnerQName(TLContextualFacet facet) {
 		String ownerIndexId = facet.getOwningEntityName();
-		int delimIdx = ownerIndexId.lastIndexOf(':');
+		int delimIdx = ownerIndexId.lastIndexOf( ':' );
 		QName ownerName = null;
 		
 		if (delimIdx >= 0) {
-			ownerName = new QName( ownerIndexId.substring( 0, delimIdx), ownerIndexId.substring( delimIdx + 1 ) );
+			ownerName = new QName( ownerIndexId.substring( 0, delimIdx ), ownerIndexId.substring( delimIdx + 1 ) );
 		}
 		return ownerName;
 	}

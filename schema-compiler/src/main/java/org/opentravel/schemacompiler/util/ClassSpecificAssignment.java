@@ -17,28 +17,27 @@ package org.opentravel.schemacompiler.util;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
 
 /**
- * Provides a mechanism for defining and applying a <code>Function</code> on
+ * Provides a mechanism for defining and applying an <code>Assignment</code> on
  * a class-specific basis.
  *
- * @param <R>  the type of result to the function
+ * @param <V>  the type of the value being assigned
  */
-public class ClassSpecificFunction<R> {
+public class ClassSpecificAssignment<V> {
 	
-	private Map<Class<?>,Function<?,R>> functionMap = new HashMap<>();
+	private Map<Class<?>,Assignment<?,V>> assignmentMap = new HashMap<>();
 	
 	/**
-	 * Builder method that adds a new class-specific function definition.
+	 * Builder method that adds a new class-specific assignment definition.
 	 * 
 	 * @param clazz  the class to which the function will apply
-	 * @param function  the function to be applied for the class
+	 * @param assignment  the assignment to be applied for the class
 	 * @return ClassSpecificFunction<T,R>
 	 * @param <T>  the type of input to the function
 	 */
-	public <T> ClassSpecificFunction<R> addFunction(Class<T> clazz, Function<T,R> function) {
-		functionMap.put( clazz, function );
+	public <T> ClassSpecificAssignment<V> addAssignment(Class<T> clazz, Assignment<T,V> assignment) {
+		assignmentMap.put( clazz, assignment );
 		return this;
 	}
 	
@@ -53,38 +52,38 @@ public class ClassSpecificFunction<R> {
 		boolean applies = false;
 		
 		while (!applies && (clazz != null)) {
-			applies = functionMap.containsKey( obj.getClass() );
+			applies = assignmentMap.containsKey( obj.getClass() );
 			clazz = clazz.getSuperclass();
 		}
 		return applies;
 	}
 	
 	/**
-	 * Applies the function to the object provided.
+	 * Applies the assignment to the target object provided.
 	 * 
-	 * @param obj  the object to which the function should be applied
-	 * @return R
-	 * @param <T>  the type of input to the function
-	 * @throws IllegalArgumentException  thrown if a function is not defined for an object
+	 * @param targetObj  the target object to which the value should be assigned
+	 * @param value  the value to be assigned
+	 * @param <T>  the type the target object for the assignment
+	 * @throws IllegalArgumentException  thrown if an assignment is not defined for an object
 	 *									of the given type (use <code>canApply()</code> to avoid)
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> R apply(T obj) {
-		Class<?> clazz = (obj == null) ? null : obj.getClass();
-		Function<T,R> function = null;
+	public <T> void apply(T targetObj, V value) {
+		Class<?> clazz = (targetObj == null) ? null : targetObj.getClass();
+		Assignment<T,V> assignment = null;
 		
-		while ((function == null) && (clazz != null)) {
-			function = (Function<T,R>) functionMap.get( clazz );
+		while ((assignment == null) && (clazz != null)) {
+			assignment = (Assignment<T,V>) assignmentMap.get( clazz );
 			clazz = clazz.getSuperclass();
 		}
 		
-		if (function == null) {
-			String objType = (obj == null) ? "[NULL VALUE]" : obj.getClass().getName();
+		if (assignment == null) {
+			String objType = (targetObj == null) ? "[NULL VALUE]" : targetObj.getClass().getName();
 			
 			throw new IllegalArgumentException(
-					"Function not defined for object of type: " + objType);
+					"Assignment not defined for object of type: " + objType);
 		}
-		return function.apply( obj );
+		assignment.apply( targetObj, value );
 	}
 	
 }
