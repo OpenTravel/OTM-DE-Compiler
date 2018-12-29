@@ -32,6 +32,7 @@ public class SystemUtils {
 	public static final String IBM_J9_JVM_NAME = "J9";
 	public static final String JAVA_HOTSPOT_JVM_NAME = "HotSpot";
 	public static final String ORACLE_JROCKIT_JVM_NAME = "JRockit";
+	public static final String OPEN_JDK_JVM_NAME = "OpenJDK";
 	
 	// Java Virtual Machine (JVM) Vendor Names
 	public static final String APPLE_JVM_VENDOR_NAME = "Apple";
@@ -136,6 +137,18 @@ public class SystemUtils {
 	 */
 	public static boolean isJRockitVM() {
 		return isJVM(ORACLE_JROCKIT_JVM_NAME);
+	}
+	
+	/**
+	 * Utility method to determine whether the Java application process is
+	 * executing on the OpenJDK. Client or Server VM does not matter.
+	 * 
+	 * @return a boolean value indicating whether the Java application process
+	 *         is executing on the OpenJDK VM.
+	 * @see #isJVM(String)
+	 */
+	public static boolean isOpenJDKVM() {
+		return isJVM(OPEN_JDK_JVM_NAME);
 	}
 	
 	/**

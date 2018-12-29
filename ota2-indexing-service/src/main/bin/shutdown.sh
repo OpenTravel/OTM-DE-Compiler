@@ -18,6 +18,7 @@ SCRIPTDIR="$( cd "$( dirname "$0" )" && pwd )"
 
 JAVA_HOME=/opt/java
 JAVA_CLASSPATH=$(echo $SCRIPTDIR/lib/*.jar | tr ' ' ':')
+MANAGER_CONFIG=conf/indexing-manager.xml
 LOG4J_CONFIG=$SCRIPTDIR/conf/log4j-manager.properties
 
-$JAVA_HOME/bin/java -Dlog4j.configuration=file://$LOG4J_CONFIG -cp $JAVA_CLASSPATH org.opentravel.schemacompiler.index.ShutdownIndexingService "$@"
+$JAVA_HOME/bin/java -Dota2.index.manager.config=$MANAGER_CONFIG -Dlog4j.configuration=file://$LOG4J_CONFIG -cp $JAVA_CLASSPATH org.opentravel.schemacompiler.index.ShutdownIndexingService "$@"

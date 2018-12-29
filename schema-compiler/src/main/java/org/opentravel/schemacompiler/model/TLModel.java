@@ -15,7 +15,6 @@
  */
 package org.opentravel.schemacompiler.model;
 
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,6 +36,7 @@ import org.opentravel.schemacompiler.ic.NameChangeIntegrityChecker;
 import org.opentravel.schemacompiler.loader.BuiltInLibraryFactory;
 import org.opentravel.schemacompiler.transform.AnonymousEntityFilter;
 import org.opentravel.schemacompiler.transform.util.ModelReferenceResolver;
+import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.Validatable;
 
 /**
@@ -518,18 +518,24 @@ public class TLModel implements Validatable {
 	 * @param memberLib  the member library to check for duplication
 	 */
 	private void checkDuplicateUrl(URL proposedUrl, AbstractLibrary memberLib) {
-		try {
-			boolean urlMatch = (proposedUrl == null) ? (memberLib.getLibraryUrl() == null)
-			        : proposedUrl.toURI().equals(memberLib.getLibraryUrl().toURI());
+		URL memberUrl = memberLib.getLibraryUrl();
+		boolean urlMatch;
+		
+		if (proposedUrl == null) {
+			urlMatch = (memberUrl == null);
 			
-		    if (urlMatch) {
-		        throw new IllegalArgumentException(
-		                "A library with the requested resource URL location already exists in the model.");
-		    }
-		    
-		} catch (URISyntaxException e) {
-			throw new IllegalArgumentException("Invalid library URL.", e);
+		} else {
+			String proposedUrlStr = URLUtils.normalizeUrl( proposedUrl ).toExternalForm();
+			String memberUrlStr = (memberUrl == null) ?
+					"" : URLUtils.normalizeUrl( memberUrl ).toExternalForm();
+			
+			urlMatch = proposedUrlStr.equals( memberUrlStr );
 		}
+		
+	    if (urlMatch) {
+	        throw new IllegalArgumentException(
+	                "A library with the requested resource URL location already exists in the model.");
+	    }
 	}
     
     /**

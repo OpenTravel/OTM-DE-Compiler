@@ -39,6 +39,7 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.apache.activemq.broker.BrokerService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
@@ -60,12 +61,14 @@ public class IndexProcessManager {
 	public static final String MANAGER_JMXPORT_BEANID = "jmxPort";
 	public static final String AGENT_CONFIG_SYSPROP   = "ota2.index.agent.config";
 	public static final String AGENT_JVMOPTS_BEANID   = "agentJvmOpts";
+	public static final String AMQ_BROKER_BEANID      = "amqBroker";
 	
     private static final boolean DEBUG = false;
     
     private static Log log = LogFactory.getLog(IndexProcessManager.class);
     
     private static int jmxPort = -1;
+    private static BrokerService amqBroker;
     private static JMXConnectorServer jmxServer;
 	private static boolean shutdownRequested = false;
 	private static Thread launcherThread;
@@ -80,6 +83,7 @@ public class IndexProcessManager {
 	public static void main(String[] args) {
 		try {
 			initializeContext();
+			startActiveMQBroker();
 			startJMXServer();
 			log.info("Indexing process manager started.");
 			
@@ -182,6 +186,22 @@ public class IndexProcessManager {
 		
 		agentJvmOpts = (String) context.getBean( AGENT_JVMOPTS_BEANID );
 		jmxPort = (Integer) context.getBean( MANAGER_JMXPORT_BEANID );
+		amqBroker = (BrokerService) context.getBean( AMQ_BROKER_BEANID );
+	}
+	
+	/**
+	 * Starts the embedded ActiveMQ broker that will handle JMS messaging
+	 * between the indexing agent and the OTM repository server.
+	 * 
+	 * @throws IOException  thrown if the JMX service cannot be launched
+	 */
+	private static void startActiveMQBroker() throws IOException {
+		try {
+			amqBroker.start();
+			
+		} catch (Exception e) {
+			throw new IOException("Error starting embedded ActiveMQ broker", e);
+		}
 	}
 	
 	/**
@@ -199,6 +219,7 @@ public class IndexProcessManager {
 	        LocateRegistry.createRegistry( getJmxPort() );
 			jmxServer = JMXConnectorServerFactory.newJMXConnectorServer( jmxUrl, null, mbs );
 			jmxServer.start();
+			log.info("JMX server started at " + jmxUrl.toString());
 			
 		} catch (MalformedObjectNameException | InstanceAlreadyExistsException
 				| MBeanRegistrationException | NotCompliantMBeanException e) {
@@ -350,6 +371,10 @@ public class IndexProcessManager {
 				// identify the appropriate JVM option to set when handling OutOfMemoryErrors.
 				// http://docs.oracle.com/cd/E13150_01/jrockit_jvm/jrockit/jrdocs/refman/optionXX.html
 				jvmOption = "-XXexitOnOutOfMemory";
+				
+			} else if (SystemUtils.isOpenJDKVM()) {
+				// NOTE this option was added in Java™ SE Development Kit 8, Update 92 (JDK 8u92)
+				jvmOption = "-XX:+ExitOnOutOfMemoryError";
 			}
 			return jvmOption;
 		}
@@ -373,7 +398,9 @@ public class IndexProcessManager {
 		 */
 		@Override
 		public void shutdown() {
+			log.info("Shutdown request received");
 			IndexProcessManager.shutdown();
+			log.info("Shutdown complete");
 		}
 		
 	}

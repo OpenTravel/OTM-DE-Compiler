@@ -40,8 +40,10 @@ public class ShutdownIndexingService {
 		try {
 	        ObjectName name = new ObjectName( IndexProcessManagerMBean.MBEAN_NAME );
 			JMXServiceURL jmxUrl = new JMXServiceURL( IndexProcessManager.getJmxServerUrl() );
-			JMXConnector jmxc = JMXConnectorFactory.connect( jmxUrl, null );
+			JMXConnector jmxc;
 			
+			log.info("Shutting down index process manager...");
+			jmxc = JMXConnectorFactory.connect( jmxUrl, null );
 			jmxc.connect();
 			jmxc.getMBeanServerConnection().invoke(name, "shutdown", null, null);
 			
