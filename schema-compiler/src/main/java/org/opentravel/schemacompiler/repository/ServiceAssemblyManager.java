@@ -43,6 +43,9 @@ import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.ValidatorFactory;
 import org.opentravel.schemacompiler.validate.assembly.AssemblyValidationContext;
+import org.opentravel.schemacompiler.visitor.DependencyNavigator;
+import org.opentravel.schemacompiler.visitor.ModelElementVisitor;
+import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -316,13 +319,24 @@ public class ServiceAssemblyManager {
 		
 		if (resourceName != null) {
 			// If a resource name is explicitly provided, only keep that resource from
-			// the associated release
+			// the associated release (and all of its parents/extensions).
+			ModelElementVisitor visitor = new ModelElementVisitorAdapter() {
+				@Override public boolean visitResource(TLResource resource) {
+					keepResources.add( resource );
+					return true;
+				}
+			};
+			DependencyNavigator navigator = new DependencyNavigator( visitor );
+			
 			for (TLLibrary library : libraries) {
 				if (library.getNamespace().equals( resourceName.getNamespaceURI())) {
 					TLResource resource = library.getResourceType( resourceName.getLocalPart() );
 					
 					if (resource != null) {
-						keepResources.add( resource );
+						// Using the dependency navigator will allow us to keep the
+						// resource that was explicitly requested, plus all of its
+						// extension and parent-reference dependencies
+						navigator.navigate( resource );
 					}
 				}
 			}
@@ -334,9 +348,6 @@ public class ServiceAssemblyManager {
 				keepResources.addAll( library.getResourceTypes() );
 			}
 		}
-		
-		// TODO: Need to make sure we also retain any extended or parent resources
-		
 		return keepResources;
 	}
 	

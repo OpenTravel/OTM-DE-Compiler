@@ -50,6 +50,7 @@ import org.opentravel.schemacompiler.model.TLParamGroup;
 import org.opentravel.schemacompiler.model.TLParameter;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.model.TLResourceParentRef;
 import org.opentravel.schemacompiler.model.TLRole;
 import org.opentravel.schemacompiler.model.TLService;
 import org.opentravel.schemacompiler.model.TLSimple;
@@ -59,6 +60,7 @@ import org.opentravel.schemacompiler.model.XSDComplexType;
 import org.opentravel.schemacompiler.model.XSDElement;
 import org.opentravel.schemacompiler.model.XSDLibrary;
 import org.opentravel.schemacompiler.model.XSDSimpleType;
+import org.opentravel.schemacompiler.util.ClassSpecificAssignment;
 import org.opentravel.schemacompiler.util.URLUtils;
 
 /**
@@ -297,6 +299,9 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
             navigateBusinessObject(resource.getBusinessObjectRef());
             navigateExtension(resource.getExtension());
             
+            for (TLResourceParentRef parentRef : resource.getParentRefs()) {
+            	navigateResourceParentRef(parentRef);
+            }
             for (TLActionFacet actionFacet : resource.getActionFacets()) {
             	navigateActionFacet(actionFacet);
             }
@@ -307,6 +312,19 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
         addVisitedNode(resource);
     }
 
+
+    /**
+     * Called when a <code>TLResource</code> instance is encountered during model navigation.
+     * 
+     * @param resource
+     *            the resource entity to visit and navigate
+     */
+    protected void navigateResourceParentRef(TLResourceParentRef parentRef) {
+        if (canVisit(parentRef) && visitor.visitResourceParentRef(parentRef)) {
+        	navigateResource( parentRef.getParentResource() );
+        }
+    }
+    
     /**
      * Called when a <code>TLParamGroup</code> instance is encountered during model navigation.
      * 
@@ -402,32 +420,52 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
                 && visitor.visitLegacySchemaLibrary(xsdLibrary)) {
 
             for (TLInclude include : xsdLibrary.getIncludes()) {
-                if (include.getPath() != null) {
-                    URL includedUrl = getReferencedLibraryURL(include.getPath(), xsdLibrary);
-                    AbstractLibrary includedLibrary = xsdLibrary.getOwningModel().getLibrary(
-                            includedUrl);
-
-                    if (includedLibrary instanceof XSDLibrary) {
-                        navigateXSDLibrary((XSDLibrary) includedLibrary);
-                    }
-                }
+                navigateInclude(include, xsdLibrary);
             }
 
             for (TLNamespaceImport nsImport : xsdLibrary.getNamespaceImports()) {
-                if (nsImport.getFileHints() != null) {
-                    for (String fileHint : nsImport.getFileHints()) {
-                        URL importedUrl = getReferencedLibraryURL(fileHint, xsdLibrary);
-                        AbstractLibrary importedLibrary = xsdLibrary.getOwningModel().getLibrary(
-                                importedUrl);
-
-                        if (importedLibrary instanceof XSDLibrary) {
-                            navigateXSDLibrary((XSDLibrary) importedLibrary);
-                        }
-                    }
-                }
+                navigateImport(nsImport, xsdLibrary);
             }
         }
     }
+
+	/**
+	 * Navigates the library(ies) associated with the given include.
+	 * 
+	 * @param include  the include to navigate
+	 * @param xsdLibrary  the XSD library that owns the given include
+	 */
+	private void navigateInclude(TLInclude include, XSDLibrary xsdLibrary) {
+		if (include.getPath() != null) {
+		    URL includedUrl = getReferencedLibraryURL(include.getPath(), xsdLibrary);
+		    AbstractLibrary includedLibrary = xsdLibrary.getOwningModel().getLibrary(
+		            includedUrl);
+
+		    if (includedLibrary instanceof XSDLibrary) {
+		        navigateXSDLibrary((XSDLibrary) includedLibrary);
+		    }
+		}
+	}
+
+	/**
+	 * Navigates the library(ies) associated with the given import.
+	 * 
+	 * @param nsImport  the import to navigate
+	 * @param xsdLibrary  the XSD library that owns the given import
+	 */
+	private void navigateImport(TLNamespaceImport nsImport, XSDLibrary xsdLibrary) {
+		if (nsImport.getFileHints() != null) {
+		    for (String fileHint : nsImport.getFileHints()) {
+		        URL importedUrl = getReferencedLibraryURL(fileHint, xsdLibrary);
+		        AbstractLibrary importedLibrary = xsdLibrary.getOwningModel().getLibrary(
+		                importedUrl);
+
+		        if (importedLibrary instanceof XSDLibrary) {
+		            navigateXSDLibrary((XSDLibrary) importedLibrary);
+		        }
+		    }
+		}
+	}
 
     /**
      * Returns the full URL that is referenced by the specified relative URL path.
@@ -666,6 +704,27 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
         }
     }
 
+    private ClassSpecificAssignment<Object> navigateDependencyFunction = new ClassSpecificAssignment<Object>()
+    		.addAssignment( TLSimple.class, (e,v) -> navigateSimple( e ) )
+    		.addAssignment( TLValueWithAttributes.class, (e,v) -> navigateValueWithAttributes( e ) )
+    		.addAssignment( TLClosedEnumeration.class, (e,v) -> navigateClosedEnumeration( e ) )
+    		.addAssignment( TLOpenEnumeration.class, (e,v) -> navigateOpenEnumeration( e ) )
+    		.addAssignment( TLChoiceObject.class, (e,v) -> navigateChoiceObject( e ) )
+    		.addAssignment( TLCoreObject.class, (e,v) -> navigateCoreObject( e ) )
+    		.addAssignment( TLBusinessObject.class, (e,v) -> navigateBusinessObject( e ) )
+    		.addAssignment( TLResource.class, (e,v) -> navigateResource( e ) )
+    		.addAssignment( TLActionFacet.class, (e,v) -> navigateActionFacet( e ) )
+    		.addAssignment( XSDSimpleType.class, (e,v) -> navigateXSDSimpleType( e ) )
+    		.addAssignment( XSDComplexType.class, (e,v) -> navigateXSDComplexType( e ) )
+    		.addAssignment( XSDElement.class, (e,v) -> navigateXSDElement( e ) )
+    		.addAssignment( TLFacet.class, (e,v) -> navigateFacet( e ) )
+    		.addAssignment( TLSimpleFacet.class, (e,v) -> navigateSimpleFacet( e ) )
+    		.addAssignment( TLListFacet.class, (e,v) -> navigateListFacet( e ) )
+    		.addAssignment( TLAlias.class, (e,v) -> navigateAlias( e ) )
+    		.addAssignment( TLService.class, (e,v) -> navigateService( e ) )
+    		.addAssignment( TLOperation.class, (e,v) -> navigateOperation( e ) )
+    		.addAssignment( TLExtensionPointFacet.class, (e,v) -> navigateExtensionPointFacet( e ) );
+    
     /**
      * Navigates the given named entity and (if necessary) any of the entities it references as
      * dependencies.
@@ -674,63 +733,9 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
      *            the entity whose dependencies to navigate
      */
     public void navigateDependency(NamedEntity entity) {
-        if (entity instanceof TLSimple) {
-            navigateSimple((TLSimple) entity);
-
-        } else if (entity instanceof TLValueWithAttributes) {
-            navigateValueWithAttributes((TLValueWithAttributes) entity);
-
-        } else if (entity instanceof TLClosedEnumeration) {
-            navigateClosedEnumeration((TLClosedEnumeration) entity);
-
-        } else if (entity instanceof TLOpenEnumeration) {
-            navigateOpenEnumeration((TLOpenEnumeration) entity);
-
-        } else if (entity instanceof TLChoiceObject) {
-            navigateChoiceObject((TLChoiceObject) entity);
-
-        } else if (entity instanceof TLCoreObject) {
-            navigateCoreObject((TLCoreObject) entity);
-
-        } else if (entity instanceof TLBusinessObject) {
-            navigateBusinessObject((TLBusinessObject) entity);
-
-        } else if (entity instanceof TLResource) {
-            navigateResource((TLResource) entity);
-
-        } else if (entity instanceof TLActionFacet) {
-            navigateActionFacet((TLActionFacet) entity);
-
-        } else if (entity instanceof XSDSimpleType) {
-            navigateXSDSimpleType((XSDSimpleType) entity);
-
-        } else if (entity instanceof XSDComplexType) {
-            navigateXSDComplexType((XSDComplexType) entity);
-
-        } else if (entity instanceof XSDElement) {
-            navigateXSDElement((XSDElement) entity);
-
-        } else if (entity instanceof TLFacet) {
-            navigateFacet((TLFacet) entity);
-
-        } else if (entity instanceof TLSimpleFacet) {
-            navigateSimpleFacet((TLSimpleFacet) entity);
-
-        } else if (entity instanceof TLListFacet) {
-            navigateListFacet((TLListFacet) entity);
-
-        } else if (entity instanceof TLAlias) {
-            navigateAlias((TLAlias) entity);
-
-        } else if (entity instanceof TLService) {
-            navigateService((TLService) entity);
-
-        } else if (entity instanceof TLOperation) {
-            navigateOperation((TLOperation) entity);
-
-        } else if (entity instanceof TLExtensionPointFacet) {
-            navigateExtensionPointFacet((TLExtensionPointFacet) entity);
-        }
+    	if (navigateDependencyFunction.canApply( entity )) {
+    		navigateDependencyFunction.apply( entity, null );
+    	}
     }
 
 }
