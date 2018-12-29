@@ -550,6 +550,9 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
     		
     	} else if (isRepositoryFile( releaseFile )) {
     		throw new IllegalStateException("The release is already managed by a remote repository.");
+    		
+    	} else if (releaseContainsLockedItems()) {
+    		throw new IllegalStateException("The release contains one or more libraries that are locked for editing.");
     	}
     	
     	// Reload the release model just to be sure it is in-sync and contains no errors
@@ -1012,6 +1015,33 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
             }
         }
         return result;
+    }
+    
+    /**
+     * Returns true if the release is loaded and one or more of the libraries it contains
+     * are locked for editing.
+     * 
+     * @return boolean
+     * @throws RepositoryException  thrown if the remote repository cannot be accessed
+     */
+    private boolean releaseContainsLockedItems() throws RepositoryException {
+    	boolean result = false;
+    	
+    	if (release != null) {
+    		for (ReleaseMember member : release.getAllMembers()) {
+    			RepositoryItem memberItem = member.getRepositoryItem();
+    			RepositoryItem repoItem = repositoryManager.getRepositoryItem(
+    					memberItem.getBaseNamespace(), memberItem.getFilename(), memberItem.getVersion() );
+    			RepositoryItemState itemState = repoItem.getState();
+    			
+    			if ((itemState == RepositoryItemState.MANAGED_LOCKED)
+    					|| (itemState == RepositoryItemState.MANAGED_WIP)) {
+    				result = true;
+    				break;
+    			}
+    		}
+    	}
+    	return result;
     }
     
     /**
