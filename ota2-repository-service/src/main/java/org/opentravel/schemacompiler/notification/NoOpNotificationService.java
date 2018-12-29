@@ -25,6 +25,14 @@ import org.opentravel.schemacompiler.repository.RepositoryItem;
 public class NoOpNotificationService implements NotificationService {
 
 	/**
+	 * @see org.opentravel.schemacompiler.notification.NotificationService#startup()
+	 */
+	@Override
+	public void startup() {
+		// No action needed for the no-op service implementation
+	}
+
+	/**
 	 * @see org.opentravel.schemacompiler.notification.NotificationService#shutdown()
 	 */
 	@Override

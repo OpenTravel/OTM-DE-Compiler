@@ -52,16 +52,24 @@ public class NotificationServiceFactory {
 	 */
 	public static synchronized NotificationServiceFactory getInstance() {
 		if (instance == null) {
-			RepositoryManager manager = RepositoryComponentFactory.getDefault().getRepositoryManager();
-			
 			instance = new NotificationServiceFactory();
-			manager.addListener( repoListener );
 		}
 		return instance;
 	}
 	
 	/**
-	 * Permanently shuts down the factory and releases any system resources that
+	 * Starts the service and allocates any system resources that are required for
+	 * the implementation.
+	 */
+	public static synchronized void startup() {
+		RepositoryManager manager = RepositoryComponentFactory.getDefault().getRepositoryManager();
+		
+		getInstance().getService().startup();
+		manager.addListener( repoListener );
+	}
+	
+	/**
+	 * Shuts down the factory and releases any system resources that
 	 * are being held.
 	 */
 	public static synchronized void shutdown() {

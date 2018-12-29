@@ -301,6 +301,7 @@ public class JMSFreeTextSearchService extends FreeTextSearchService {
 			while (!shutdownRequested && !jmsConnectionAvailable) {
 				try {
 					jmsConnection = indexingService.getConnectionFactory().createConnection();
+					jmsConnection.start();
 					jmsConnectionAvailable = true;
 					
 				} catch (Exception e) {
@@ -310,15 +311,6 @@ public class JMSFreeTextSearchService extends FreeTextSearchService {
 						
 					} catch (Exception e2) {
 						// Ignore and continue
-					}
-					
-				} finally {
-					if (jmsConnection != null) {
-						try {
-							jmsConnection.close();
-						} catch (Exception e) {
-							// Ignore and continue
-						}
 					}
 				}
 			}

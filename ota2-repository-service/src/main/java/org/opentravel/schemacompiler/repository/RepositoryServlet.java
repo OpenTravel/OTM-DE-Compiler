@@ -68,11 +68,11 @@ public class RepositoryServlet extends ServletContainer {
         OTM16Upgrade.otm16Enabled = true;
         FreeTextSearchServiceFactory.registerServiceOwner(this);
         SubscriptionManager sManager = RepositoryComponentFactory.getDefault().getSubscriptionManager();
-        NotificationServiceFactory.getInstance(); // Initialize the notification service
         
         if (sManager != null) {
             sManager.startNotificationListener();
         }
+        NotificationServiceFactory.startup();
     }
 
     /**

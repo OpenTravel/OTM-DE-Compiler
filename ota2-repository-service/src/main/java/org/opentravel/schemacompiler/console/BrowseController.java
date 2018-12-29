@@ -83,7 +83,7 @@ public class BrowseController extends BaseController {
 			RepositoryManager repositoryManager = getRepositoryManager();
 			RepositorySecurityManager securityManager = getSecurityManager();
 			UserPrincipal user = getCurrentUser( session );
-			List<NamespaceItem> browseItems = new ArrayList<>();
+			List<NamespaceItem> browseItems;
 			
 			if (baseNamespace == null) { // display root namespaces
 				browseItems = getRootNSBrowseItems( user );
@@ -92,7 +92,7 @@ public class BrowseController extends BaseController {
 				browseItems = getDetailBrowseItems( baseNamespace, filename, model, user );
 				
 			} else { // display sub-namespaces and latest version of each library
-				getNamespaceBrowseItems( baseNamespace, user );
+				browseItems = getNamespaceBrowseItems( baseNamespace, user );
 			}
 			
 			if (baseNamespace != null) {

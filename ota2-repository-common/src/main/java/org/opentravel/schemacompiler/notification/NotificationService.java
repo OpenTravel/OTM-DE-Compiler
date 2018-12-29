@@ -25,7 +25,13 @@ import org.opentravel.schemacompiler.repository.RepositoryItem;
 public interface NotificationService {
 	
 	/**
-	 * Permanently shuts down the service and frees any system resources being held.
+	 * Starts the service and allocates any system resources that are required for
+	 * the implementation.
+	 */
+	public void startup();
+	
+	/**
+	 * Shuts down the service and frees any system resources being held.
 	 */
 	public void shutdown();
 	
