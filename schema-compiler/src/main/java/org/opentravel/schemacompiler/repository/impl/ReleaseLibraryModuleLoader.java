@@ -90,45 +90,58 @@ public class ReleaseLibraryModuleLoader implements LibraryModuleLoader<InputStre
 		LibraryInputSource<InputStream> inputSource = null;
 		
 		if (URLUtils.isFileURL( libraryUrl )) {
-			File libraryFile = URLUtils.toFile( libraryUrl );
-			
-			try {
-				RepositoryItem item = releaseManager.getRepositoryItem( libraryUrl );
-				
-				if (item != null) {
-					ReleaseMember principalMember = releaseManager.getPrincipalMember( item );
-					ReleaseMember referencedMember = releaseManager.getReferencedMember( item );
-					ReleaseMember member = (principalMember != null) ? principalMember : referencedMember;
-					
-					if (member == null) { // New referenced member for the release
-						member = new ReleaseMember();
-						member.setRepositoryItem( item );
-						setEffectiveDate( member );
-					}
-					
-					// Only need a date-effective input source if we have an effective date specified
-					// by the release
-					if (member.getEffectiveDate() != null) {
-						inputSource = releaseManager.getInputSource( member );
-					}
-					
-					if ((principalMember == null) && !referenceUrls.contains( libraryUrl.toExternalForm() )) {
-						referenceUrls.add( libraryUrl.toExternalForm() );
-						referencedMembers.add( member );
-					}
-				}
-				
-			} catch (RepositoryException e) {
-				log.warn("Unexpected exception while loading historical content: "
-						+ libraryFile.getName(), e);
-			}
-			
+			inputSource = buildInputSource(libraryUrl);
 		}
 		
 		// If the effective date is not adjusted by the release specification,
 		// use the delegate to create it.
 		if (inputSource == null) {
 			inputSource = delegate.newInputSource( libraryUrl );
+		}
+		return inputSource;
+	}
+
+	/**
+	 * Builds an input source for the library at the specified URL.  If effective dates
+	 * for the library are specified by the release manager, a historical URL will be
+	 * assigned in the input source that is returned.
+	 * 
+	 * @param libraryUrl  the URL of the library for which to create an input source
+	 * @return LibraryInputSource<InputStream>
+	 */
+	private LibraryInputSource<InputStream> buildInputSource(URL libraryUrl) {
+		LibraryInputSource<InputStream> inputSource = null;
+		File libraryFile = URLUtils.toFile( libraryUrl );
+		
+		try {
+			RepositoryItem item = releaseManager.getRepositoryItem( libraryUrl );
+			
+			if (item != null) {
+				ReleaseMember principalMember = releaseManager.getPrincipalMember( item );
+				ReleaseMember referencedMember = releaseManager.getReferencedMember( item );
+				ReleaseMember member = (principalMember != null) ? principalMember : referencedMember;
+				
+				if (member == null) { // New referenced member for the release
+					member = new ReleaseMember();
+					member.setRepositoryItem( item );
+					setEffectiveDate( member );
+				}
+				
+				// Only need a date-effective input source if we have an effective date specified
+				// by the release
+				if (member.getEffectiveDate() != null) {
+					inputSource = releaseManager.getInputSource( member );
+				}
+				
+				if ((principalMember == null) && !referenceUrls.contains( libraryUrl.toExternalForm() )) {
+					referenceUrls.add( libraryUrl.toExternalForm() );
+					referencedMembers.add( member );
+				}
+			}
+			
+		} catch (RepositoryException e) {
+			log.warn("Unexpected exception while loading historical content: "
+					+ libraryFile.getName(), e);
 		}
 		return inputSource;
 	}

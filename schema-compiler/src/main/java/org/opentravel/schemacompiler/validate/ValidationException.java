@@ -27,7 +27,7 @@ public class ValidationException extends SchemaCompilerException {
 
 	private static final long serialVersionUID = 3933016239871704438L;
 	
-	private final ValidationFindings findings;
+	private final transient ValidationFindings findings;
 
     /**
      * Constructor that assigns the validation findings to be thrown.

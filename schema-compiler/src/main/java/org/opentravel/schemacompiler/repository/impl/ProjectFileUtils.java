@@ -229,38 +229,61 @@ public class ProjectFileUtils extends AbstractFileUtils {
         jaxbProject.setDescription(project.getDescription());
         jaxbProject.setDefaultContextId(project.getDefaultContextId());
 
-        // Compile the list of project items to include in the file
         for (ProjectItem item : purgeImpliedManagedVersions(project.getProjectItems())) {
-            if (item.getState() == RepositoryItemState.UNMANAGED) {
-                UnmanagedProjectItemType jaxbItem = new UnmanagedProjectItemType();
-
-                jaxbItem.setDefaultItem((defaultItem == item) ? Boolean.TRUE : null);
-                jaxbItem.setFileLocation(URLUtils.getRelativeURL(projectFileUrl, item.getContent()
-                        .getLibraryUrl(), true));
-                jaxbProject.getProjectItemBase().add(
-                        objectFactory.createUnmanagedProjectItem(jaxbItem));
-
-            } else {
-                String repositoryId = (item.getRepository() == null) ? null : item.getRepository()
-                        .getId();
-                ManagedProjectItemType jaxbItem = new ManagedProjectItemType();
-
-                if (repositoryId != null) {
-                    repositoryIds.add(repositoryId);
-                }
-                jaxbItem.setDefaultItem((defaultItem == item) ? Boolean.TRUE : null);
-                jaxbItem.setRepository(repositoryId);
-                jaxbItem.setBaseNamespace(item.getBaseNamespace());
-                jaxbItem.setFilename(item.getFilename());
-                jaxbItem.setVersion(item.getVersion());
-                jaxbProject.getProjectItemBase().add(
-                        objectFactory.createManagedProjectItem(jaxbItem));
-            }
+            convertToJaxbProjectItem(item, jaxbProject, defaultItem, projectFileUrl, repositoryIds);
         }
+        assignFailedProjectItems(jaxbProject, project);
+        assignRepositoryReferences(jaxbProject, project, repositoryIds);
         
-        // Add any failed project items to the list so they will not be lost when the
-        // file is re-opened.
-        for (ProjectItemType failedItem : project.getFailedProjectItems()) {
+        return jaxbProject;
+    }
+
+	/**
+	 * Converts the given project item and adds it to the JAXB project.
+	 * 
+	 * @param item  the project item to convert
+	 * @param jaxbProject  the JAXB project to which the converted item will be added
+	 * @param defaultItem  the default item of the owning project
+	 * @param projectFileUrl  the URL where the project file will be saved
+	 * @param repositoryIds  the collection of all known repository IDs from the project
+	 */
+	private static void convertToJaxbProjectItem(ProjectItem item, ProjectType jaxbProject, ProjectItem defaultItem,
+			URL projectFileUrl, Set<String> repositoryIds) {
+		if (item.getState() == RepositoryItemState.UNMANAGED) {
+		    UnmanagedProjectItemType jaxbItem = new UnmanagedProjectItemType();
+
+		    jaxbItem.setDefaultItem((defaultItem == item) ? Boolean.TRUE : null);
+		    jaxbItem.setFileLocation(URLUtils.getRelativeURL(projectFileUrl, item.getContent()
+		            .getLibraryUrl(), true));
+		    jaxbProject.getProjectItemBase().add(
+		            objectFactory.createUnmanagedProjectItem(jaxbItem));
+
+		} else {
+		    String repositoryId = (item.getRepository() == null) ? null : item.getRepository().getId();
+		    ManagedProjectItemType jaxbItem = new ManagedProjectItemType();
+
+		    if (repositoryId != null) {
+		        repositoryIds.add(repositoryId);
+		    }
+		    jaxbItem.setDefaultItem((defaultItem == item) ? Boolean.TRUE : null);
+		    jaxbItem.setRepository(repositoryId);
+		    jaxbItem.setBaseNamespace(item.getBaseNamespace());
+		    jaxbItem.setFilename(item.getFilename());
+		    jaxbItem.setVersion(item.getVersion());
+		    jaxbProject.getProjectItemBase().add(
+		            objectFactory.createManagedProjectItem(jaxbItem));
+		}
+	}
+
+	/**
+	 * Add any failed project items to the JAXB project so they will not be lost
+	 * when the file is re-opened.
+	 * 
+	 * @param jaxbProject  the JAXB project being constructed
+	 * @param project  the project from which the JAXB instance is being created
+	 */
+	private static void assignFailedProjectItems(ProjectType jaxbProject, Project project) {
+		for (ProjectItemType failedItem : project.getFailedProjectItems()) {
         	if (failedItem instanceof UnmanagedProjectItemType) {
                 jaxbProject.getProjectItemBase().add( objectFactory.createUnmanagedProjectItem(
                 		(UnmanagedProjectItemType) failedItem ) );
@@ -271,9 +294,19 @@ public class ProjectFileUtils extends AbstractFileUtils {
         	}
         	failedItem.setDefaultItem( null );
         }
+	}
 
-        // If necessary, compile a list of repositories that are referenced and their endpoint URL's
-        ProjectManager projectManager = project.getProjectManager();
+	/**
+	 * Assign the repositories that are referenced and their endpoint URL's to the given
+	 * JAXB project.
+	 * 
+	 * @param jaxbProject  the JAXB project being constructed
+	 * @param project  the project from which the JAXB instance is being created
+	 * @param repositoryIds  the collection of all known repository IDs from the project
+	 */
+	private static void assignRepositoryReferences(ProjectType jaxbProject, Project project,
+			Set<String> repositoryIds) {
+		ProjectManager projectManager = project.getProjectManager();
         RepositoryManager repositoryManager = (projectManager == null) ? null : projectManager
                 .getRepositoryManager();
 
@@ -293,8 +326,7 @@ public class ProjectFileUtils extends AbstractFileUtils {
             }
             jaxbProject.setRepositoryReferences(repositoryRefs);
         }
-        return jaxbProject;
-    }
+	}
 
     /**
      * Purges any project items from the given list that are implied by the existence of later
@@ -312,50 +344,7 @@ public class ProjectFileUtils extends AbstractFileUtils {
             if (item.getState() == RepositoryItemState.UNMANAGED) {
                 continue; // only purge managed versions
             }
-            try {
-                VersionScheme vScheme = VersionSchemeFactory.getInstance().getVersionScheme(
-                        item.getVersionScheme());
-                List<String> itemVersionChain = vScheme.getMajorVersionChain(item.getNamespace());
-                boolean purgeCurrentItem = false;
-
-                // Determine if the current item is eclipsed by one of the existing keep item
-                for (ProjectItem keepItem : keepItems) {
-                    if (item.getLibraryName().equals(keepItem.getLibraryName())
-                            && item.getBaseNamespace().equals(keepItem.getBaseNamespace())) {
-                        List<String> keepItemChain = itemVersionChains.get(keepItem);
-
-                        if (isInVersionChain(item.getNamespace(), keepItemChain, vScheme)) {
-                            purgeCurrentItem = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (!purgeCurrentItem) {
-                    Iterator<ProjectItem> keepIterator = keepItems.iterator();
-
-                    // Discard any existing keep items that are eclipsed by the current item
-                    while (keepIterator.hasNext()) {
-                        ProjectItem keepItem = keepIterator.next();
-
-                        if (!item.getLibraryName().equals(keepItem.getLibraryName())
-                                || !item.getBaseNamespace().equals(keepItem.getBaseNamespace())) {
-                            continue; // purge candidates must have the same library name and base
-                                      // namespace
-                        }
-
-                        if (isInVersionChain(keepItem.getNamespace(), itemVersionChain, vScheme)) {
-                            keepIterator.remove();
-                        }
-                    }
-                    keepItems.add(item);
-                }
-                itemVersionChains.put(item, itemVersionChain);
-
-            } catch (VersionSchemeException e) {
-                // On error, we DO NOT want to purge the item from the list
-                keepItems.add(item);
-            }
+            addKeepItemIfNotEclipsed(item, keepItems, itemVersionChains);
         }
 
         // Scan the original list, and assemble the final list of items that should be included in
@@ -369,6 +358,76 @@ public class ProjectFileUtils extends AbstractFileUtils {
         }
         return result;
     }
+
+	/**
+	 * If the given project item is not eclisped by a later minor version, it
+	 * will be added to the given list of keep items.
+	 * 
+	 * @param item  the item to be kept if not eclipsed
+	 * @param keepItems  the list of keep items that have been discovered so far
+	 * @param itemVersionChains  the version identifier chain for each project item
+	 */
+	private static void addKeepItemIfNotEclipsed(ProjectItem item, List<ProjectItem> keepItems,
+			Map<ProjectItem, List<String>> itemVersionChains) {
+		try {
+		    VersionScheme vScheme = VersionSchemeFactory.getInstance().getVersionScheme(
+		            item.getVersionScheme());
+		    List<String> itemVersionChain = vScheme.getMajorVersionChain(item.getNamespace());
+		    boolean purgeCurrentItem = false;
+
+		    // Determine if the current item is eclipsed by one of the existing keep item
+		    for (ProjectItem keepItem : keepItems) {
+		        if (item.getLibraryName().equals(keepItem.getLibraryName())
+		                && item.getBaseNamespace().equals(keepItem.getBaseNamespace())) {
+		            List<String> keepItemChain = itemVersionChains.get(keepItem);
+
+		            if (isInVersionChain(item.getNamespace(), keepItemChain, vScheme)) {
+		                purgeCurrentItem = true;
+		                break;
+		            }
+		        }
+		    }
+
+		    if (!purgeCurrentItem) {
+		        keepProjectItem(item, keepItems, vScheme, itemVersionChain);
+		    }
+		    itemVersionChains.put(item, itemVersionChain);
+
+		} catch (VersionSchemeException e) {
+		    // On error, we DO NOT want to purge the item from the list
+		    keepItems.add(item);
+		}
+	}
+
+	/**
+	 * Adds the given project item to the given keep list and purges any existing
+	 * keep items that are eclipsed by the new one.
+	 * 
+	 * @param item  the project item to keep
+	 * @param keepItems  the list of keep items that have been discovered so far
+	 * @param vScheme  the version scheme of the project item
+	 * @param itemVersionChains  the version identifier chain for each project item
+	 */
+	private static void keepProjectItem(ProjectItem item, List<ProjectItem> keepItems, VersionScheme vScheme,
+			List<String> itemVersionChain) {
+		Iterator<ProjectItem> keepIterator = keepItems.iterator();
+
+		// Discard any existing keep items that are eclipsed by the current item
+		while (keepIterator.hasNext()) {
+		    ProjectItem keepItem = keepIterator.next();
+
+		    if (!item.getLibraryName().equals(keepItem.getLibraryName())
+		            || !item.getBaseNamespace().equals(keepItem.getBaseNamespace())) {
+		        continue; // purge candidates must have the same library name and base
+		                  // namespace
+		    }
+
+		    if (isInVersionChain(keepItem.getNamespace(), itemVersionChain, vScheme)) {
+		        keepIterator.remove();
+		    }
+		}
+		keepItems.add(item);
+	}
 
     /**
      * Returns true if the specified namespace is a member of the version chain provided.

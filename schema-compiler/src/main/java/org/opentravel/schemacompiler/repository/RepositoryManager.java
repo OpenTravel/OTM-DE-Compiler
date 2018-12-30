@@ -454,14 +454,7 @@ public class RepositoryManager implements Repository {
             success = true;
 
         } finally {
-            if (!success) {
-                try {
-                    fileManager.rollbackChangeSet();
-
-                } catch (RepositoryException e) {
-                    log.warn(ROLLBACK_ERROR, e);
-                }
-            }
+            rollbackOnFailure(success, false);
         }
 
         // Refresh the list of repositories information and return the newly-added item
@@ -494,15 +487,7 @@ public class RepositoryManager implements Repository {
             success = true;
 
         } finally {
-            if (!success) {
-                try {
-                    fileManager.rollbackChangeSet();
-
-                } catch (RepositoryException e) {
-                    log.warn(ROLLBACK_ERROR, e);
-                }
-                refreshLocalRepositoryInfo(true);
-            }
+            rollbackOnFailure(success, true);
         }
     }
 
@@ -534,15 +519,7 @@ public class RepositoryManager implements Repository {
             success = true;
 
         } finally {
-            if (!success) {
-                try {
-                    fileManager.rollbackChangeSet();
-
-                } catch (RepositoryException e) {
-                    log.warn(ROLLBACK_ERROR, e);
-                }
-                refreshLocalRepositoryInfo(true);
-            }
+            rollbackOnFailure(success, true);
         }
     }
 
@@ -576,15 +553,7 @@ public class RepositoryManager implements Repository {
             success = true;
 
         } finally {
-            if (!success) {
-                try {
-                    fileManager.rollbackChangeSet();
-
-                } catch (RepositoryException e) {
-                    log.warn(ROLLBACK_ERROR, e);
-                }
-                refreshLocalRepositoryInfo(true);
-            }
+            rollbackOnFailure(success, true);
         }
     }
 
@@ -625,15 +594,7 @@ public class RepositoryManager implements Repository {
             success = true;
 
         } finally {
-            if (!success) {
-                try {
-                    fileManager.rollbackChangeSet();
-
-                } catch (RepositoryException e) {
-                    log.warn(ROLLBACK_ERROR, e);
-                }
-                refreshLocalRepositoryInfo(true);
-            }
+            rollbackOnFailure(success, true);
         }
     }
 
@@ -753,8 +714,25 @@ public class RepositoryManager implements Repository {
             }
         }
         
-        // Sort the results by the item's name first, then by descending version number
-        List<String> libraryKeys = new ArrayList<>();
+        // 
+        sortRepositoryItems(itemList, libraryVersionMap, latestVersionsOnly);
+        return itemList;
+	}
+
+	/**
+	 * Sort the given list of repository items by the item's name first, then by
+	 * descending version number.
+	 * 
+	 * @param itemList  the list of repository items to be sorted
+	 * @param libraryVersionMap  map that collates library versions by name
+	 * @param latestVersionsOnly  flag indicating whether the list only contains
+	 *							  the latest version of each library
+	 * @throws RepositoryException  thrown if an error occurs while accessing the repository
+	 */
+	private void sortRepositoryItems(List<RepositoryItem> itemList,
+			Map<String, List<RepositoryItemVersionedWrapper>> libraryVersionMap, boolean latestVersionsOnly)
+			throws RepositoryException {
+		List<String> libraryKeys = new ArrayList<>();
 
         libraryKeys.addAll(libraryVersionMap.keySet());
         Collections.sort(libraryKeys);
@@ -784,13 +762,12 @@ public class RepositoryManager implements Repository {
                 }
             }
         }
-        return itemList;
 	}
 
 	/**
      * @see org.opentravel.schemacompiler.repository.Repository#search(java.lang.String, boolean, boolean)
      */
-    @SuppressWarnings("deprecation")
+	@SuppressWarnings("deprecation")
 	@Override
     public List<RepositoryItem> search(String freeTextQuery, boolean latestVersionsOnly,
             boolean includeDraftVersions) throws RepositoryException {
@@ -1139,27 +1116,7 @@ public class RepositoryManager implements Repository {
                     + fileManager.getCurrentUserId());
 
         } finally {
-            // Commit or roll back the changes based on the result of the operation
-            if (success) {
-                fileManager.commitChangeSet();
-                
-                // Notify listeners
-                for (RepositoryListener listener : listeners) {
-                	try {
-                		listener.onCreateRootNamespace( rootNamespace );
-                		
-                	} catch (Exception e) {
-                		log.warn(LISTENER_INVOCATION_ERROR, e);
-                	}
-                }
-                
-            } else {
-                try {
-                    fileManager.rollbackChangeSet();
-                } catch (Exception e) {
-                    log.error(ROLLBACK_ERROR, e);
-                }
-            }
+        	commitOrRollback( success, l -> l.onCreateRootNamespace( rootNamespace ) );
         }
     }
 
@@ -1190,27 +1147,7 @@ public class RepositoryManager implements Repository {
                     + fileManager.getCurrentUserId());
 
         } finally {
-            // Commit or roll back the changes based on the result of the operation
-            if (success) {
-                fileManager.commitChangeSet();
-                
-                // Notify listeners
-                for (RepositoryListener listener : listeners) {
-                	try {
-                		listener.onDeleteRootNamespace( rootNamespace );
-                		
-                	} catch (Exception e) {
-                		log.warn(LISTENER_INVOCATION_ERROR, e);
-                	}
-                }
-                
-            } else {
-                try {
-                    fileManager.rollbackChangeSet();
-                } catch (Exception e) {
-                    log.error(ROLLBACK_ERROR, e);
-                }
-            }
+        	commitOrRollback( success, l -> l.onDeleteRootNamespace( rootNamespace ) );
         }
     }
 
@@ -1236,27 +1173,7 @@ public class RepositoryManager implements Repository {
             log.info("Successfully created namespace: " + baseNS);
 
         } finally {
-            // Commit or roll back the changes based on the result of the operation
-            if (success) {
-                fileManager.commitChangeSet();
-                
-                // Notify listeners
-                for (RepositoryListener listener : listeners) {
-                	try {
-                		listener.onCreateNamespace( baseNamespace );
-                		
-                	} catch (Exception e) {
-                		log.warn(LISTENER_INVOCATION_ERROR, e);
-                	}
-                }
-                
-            } else {
-                try {
-                    fileManager.rollbackChangeSet();
-                } catch (Exception e) {
-                    log.error(ROLLBACK_ERROR, e);
-                }
-            }
+        	commitOrRollback( success, l -> l.onCreateNamespace( baseNamespace ) );
         }
     }
 
@@ -1275,27 +1192,7 @@ public class RepositoryManager implements Repository {
             log.info("Successfully deleted namespace: " + baseNS);
 
         } finally {
-            // Commit or roll back the changes based on the result of the operation
-            if (success) {
-                fileManager.commitChangeSet();
-                
-                // Notify listeners
-                for (RepositoryListener listener : listeners) {
-                	try {
-                		listener.onDeleteNamespace( baseNamespace );
-                		
-                	} catch (Exception e) {
-                		log.warn(LISTENER_INVOCATION_ERROR, e);
-                	}
-                }
-                
-            } else {
-                try {
-                    fileManager.rollbackChangeSet();
-                } catch (Exception e) {
-                    log.error(ROLLBACK_ERROR, e);
-                }
-            }
+        	commitOrRollback( success, l -> l.onDeleteNamespace( baseNamespace ) );
         }
     }
 
@@ -1334,17 +1231,7 @@ public class RepositoryManager implements Repository {
                 }
             }
 
-            try {
-                fileManager.loadLibraryMetadata(baseNamespace, filename, versionIdentifier);
-                throw new IllegalStateException();
-
-            } catch (IllegalStateException e) {
-                throw new RepositoryException("Unable to publish - the library '" + filename
-                        + "' has already been published to a repository.");
-
-            } catch (RepositoryException e) {
-                // Happy path - the item must not yet exist in the repository
-            }
+            checkDoesNotExist(baseNamespace, filename, versionIdentifier);
 
             // Create the namespace folder (if it does not already exist)
             fileManager.createNamespaceIdFiles(baseNamespace);
@@ -1385,29 +1272,35 @@ public class RepositoryManager implements Repository {
             throw new RepositoryException(e.getMessage(), e);
 
         } finally {
-            // Commit or roll back the changes based on the result of the operation
-            if (success) {
-                fileManager.commitChangeSet();
-                
-                // Notify listeners
-                for (RepositoryListener listener : listeners) {
-                	try {
-                		listener.onPublish( publishedItem );
-                		
-                	} catch (Exception e) {
-                		log.warn(LISTENER_INVOCATION_ERROR, e);
-                	}
-                }
-                
-            } else {
-                try {
-                    fileManager.rollbackChangeSet();
-                } catch (Exception e) {
-                    log.error(ROLLBACK_ERROR, e);
-                }
-            }
+            RepositoryItem pItem = publishedItem;
+            
+        	commitOrRollback( success, l -> l.onPublish( pItem ) );
         }
     }
+
+	/**
+	 * Verifies that a repository item matching the given criteria does not yet
+	 * exist.  If an existing match is found, an exception will be thrown.
+	 * 
+	 * @param baseNamespace  the base namespace of the repository item
+	 * @param filename  the filename of the repository item
+	 * @param version  the version identifier of the repository item
+	 * @throws RepositoryException
+	 */
+	private void checkDoesNotExist(String baseNamespace, String filename, String version)
+			throws RepositoryException {
+		try {
+		    fileManager.loadLibraryMetadata(baseNamespace, filename, version);
+		    throw new IllegalStateException();
+
+		} catch (IllegalStateException e) {
+		    throw new RepositoryException("Unable to publish - the library '" + filename
+		            + "' has already been published to a repository.");
+
+		} catch (RepositoryException e) {
+		    // Happy path - the item must not yet exist in the repository
+		}
+	}
 
     /**
      * @see org.opentravel.schemacompiler.repository.Repository#commit(org.opentravel.schemacompiler.repository.RepositoryItem)
@@ -1532,29 +1425,8 @@ public class RepositoryManager implements Repository {
         	throw new RepositoryException("Error reading from WIP content stream.", e);
         	
         } finally {
-            // Commit or roll back the changes based on the result of the operation
-            if (success) {
-                fileManager.commitChangeSet();
-                
-                // Notify listeners (if required)
-                if (notifyListeners) {
-                    for (RepositoryListener listener : listeners) {
-                    	try {
-                    		listener.onCommit( item, remarks );
-                    		
-                    	} catch (Exception e) {
-                    		log.warn(LISTENER_INVOCATION_ERROR, e);
-                    	}
-                    }
-                }
-                
-            } else {
-                try {
-                    fileManager.rollbackChangeSet();
-                } catch (Exception e) {
-                    log.error(ROLLBACK_ERROR, e);
-                }
-            }
+        	commitOrRollback( success,
+        			notifyListeners ? l -> l.onCommit( item, remarks ) : null );
         }
     }
 
@@ -1598,17 +1470,7 @@ public class RepositoryManager implements Repository {
                     + item.getFilename(), e);
 
         } finally {
-            // Commit or roll back the changes based on the result of the operation
-            if (success) {
-                fileManager.commitChangeSet();
-                
-            } else {
-                try {
-                    fileManager.rollbackChangeSet();
-                } catch (Exception e) {
-                    log.error(ROLLBACK_ERROR, e);
-                }
-            }
+        	commitOrRollback( success, null );
         }
     }
 
@@ -1646,27 +1508,7 @@ public class RepositoryManager implements Repository {
                 success = true;
 
             } finally {
-                // Commit or roll back the changes based on the result of the operation
-                if (success) {
-                    fileManager.commitChangeSet();
-                    
-                    // Notify listeners
-                    for (RepositoryListener listener : listeners) {
-                    	try {
-                    		listener.onLock( item );
-                    		
-                    	} catch (Exception e) {
-                    		log.warn(LISTENER_INVOCATION_ERROR, e);
-                    	}
-                    }
-                    
-                } else {
-                    try {
-                        fileManager.rollbackChangeSet();
-                    } catch (Exception e) {
-                        log.error(ROLLBACK_ERROR, e);
-                    }
-                }
+            	commitOrRollback( success, l -> l.onLock( item ) );
             }
 
         } else {
@@ -1794,27 +1636,7 @@ public class RepositoryManager implements Repository {
             success = true;
 
         } finally {
-            // Commit or roll back the changes based on the result of the operation
-            if (success) {
-                fileManager.commitChangeSet();
-                
-                // Notify listeners
-                for (RepositoryListener listener : listeners) {
-                	try {
-                		listener.onUnlock( item, (wipContent != null), remarks );
-                		
-                	} catch (Exception e) {
-                		log.warn(LISTENER_INVOCATION_ERROR, e);
-                	}
-                }
-                
-            } else {
-                try {
-                    fileManager.rollbackChangeSet();
-                } catch (Exception e) {
-                    log.error(ROLLBACK_ERROR, e);
-                }
-            }
+        	commitOrRollback( success, l -> l.onUnlock( item, (wipContent != null), remarks ) );
         }
     }
 
@@ -1832,27 +1654,7 @@ public class RepositoryManager implements Repository {
         TLLibraryStatus originalStatus = item.getStatus();
         TLLibraryStatus targetStatus = null;
         
-        if (libraryMetadata.getState() != RepositoryState.MANAGED_UNLOCKED) {
-            throw new RepositoryException(
-                    "Unable to promote - the item is currently locked for editing.");
-        }
-        if (libraryMetadata.getStatus() == null) {
-            throw new RepositoryException(
-                    "Unable to promote - the item's status is not yet assigned.");
-        }
-        
-        if (libraryContent.isIs16Library()) {
-            if (libraryMetadata.getStatus() == LibraryStatus.OBSOLETE) {
-                throw new RepositoryException(
-                        "Unable to promote - only user-defined libraries that are not in OBSOLETE status can be promoted.");
-            }
-        	
-        } else {
-            if (libraryMetadata.getStatus() != LibraryStatus.DRAFT) {
-                throw new RepositoryException(
-                        "Unable to promote - only user-defined libraries in DRAFT status can be promoted.");
-            }
-        }
+        validatePromote(libraryMetadata, libraryContent);
 
         if (item.getRepository() == this) {
             boolean success = false;
@@ -1890,33 +1692,46 @@ public class RepositoryManager implements Repository {
                         + item.getFilename(), e);
 
             } finally {
-                // Commit or roll back the changes based on the result of the operation
-                if (success) {
-                    fileManager.commitChangeSet();
-                    
-                    // Notify listeners
-                    for (RepositoryListener listener : listeners) {
-                    	try {
-                    		listener.onPromote( item, originalStatus );
-                    		
-                    	} catch (Exception e) {
-                    		log.warn(LISTENER_INVOCATION_ERROR, e);
-                    	}
-                    }
-                    
-                } else {
-                    try {
-                        fileManager.rollbackChangeSet();
-                    } catch (Exception e) {
-                        log.error(ROLLBACK_ERROR, e);
-                    }
-                }
+            	commitOrRollback( success, l -> l.onPromote( item, originalStatus ) );
             }
 
         } else {
             ((RemoteRepository) item.getRepository()).promote(item);
         }
     }
+
+	/**
+	 * Validates that the given library item can be promoted to the next status.  If
+	 * error conditions are discovered, and exception is thrown.
+	 * 
+	 * @param libraryMetadata  meta-data for the library to be validated
+	 * @param libraryContent  content for the library to be validated
+	 * @throws RepositoryException  thrown if the library cannot be promoted
+	 */
+	private void validatePromote(LibraryInfoType libraryMetadata, LibraryContentWrapper libraryContent)
+			throws RepositoryException {
+		if (libraryMetadata.getState() != RepositoryState.MANAGED_UNLOCKED) {
+            throw new RepositoryException(
+                    "Unable to promote - the item is currently locked for editing.");
+        }
+        if (libraryMetadata.getStatus() == null) {
+            throw new RepositoryException(
+                    "Unable to promote - the item's status is not yet assigned.");
+        }
+        
+        if (libraryContent.isIs16Library()) {
+            if (libraryMetadata.getStatus() == LibraryStatus.OBSOLETE) {
+                throw new RepositoryException(
+                        "Unable to promote - only user-defined libraries that are not in OBSOLETE status can be promoted.");
+            }
+        	
+        } else {
+            if (libraryMetadata.getStatus() != LibraryStatus.DRAFT) {
+                throw new RepositoryException(
+                        "Unable to promote - only user-defined libraries in DRAFT status can be promoted.");
+            }
+        }
+	}
 
     /**
      * @see org.opentravel.schemacompiler.repository.Repository#demote(org.opentravel.schemacompiler.repository.RepositoryItem)
@@ -1932,27 +1747,7 @@ public class RepositoryManager implements Repository {
         TLLibraryStatus originalStatus = item.getStatus();
         TLLibraryStatus targetStatus = null;
 
-        if (libraryMetadata.getState() != RepositoryState.MANAGED_UNLOCKED) {
-            throw new RepositoryException(
-                    "Unable to demote - the item is currently locked for editing.");
-        }
-        if (libraryMetadata.getStatus() == null) {
-            throw new RepositoryException(
-                    "Unable to demote - the item's status is not yet assigned.");
-        }
-        
-        if (libraryContent.isIs16Library()) {
-            if (libraryMetadata.getStatus() == LibraryStatus.DRAFT) {
-                throw new RepositoryException(
-                        "Unable to demote - only user-defined libraries that are not in DRAFT status can be demoted.");
-            }
-        	
-        } else {
-            if (libraryMetadata.getStatus() != LibraryStatus.FINAL) {
-                throw new RepositoryException(
-                        "Unable to demote - only user-defined libraries in FINAL status can be demoted.");
-            }
-        }
+        validateDemote(libraryMetadata, libraryContent);
 
         if (item.getRepository() == this) {
             boolean success = false;
@@ -1991,33 +1786,46 @@ public class RepositoryManager implements Repository {
                         + item.getFilename(), e);
 
             } finally {
-                // Commit or roll back the changes based on the result of the operation
-                if (success) {
-                    fileManager.commitChangeSet();
-                    
-                    // Notify listeners
-                    for (RepositoryListener listener : listeners) {
-                    	try {
-                    		listener.onDemote( item, originalStatus );
-                    		
-                    	} catch (Exception e) {
-                    		log.warn(LISTENER_INVOCATION_ERROR, e);
-                    	}
-                    }
-                    
-                } else {
-                    try {
-                        fileManager.rollbackChangeSet();
-                    } catch (Exception e) {
-                        log.error(ROLLBACK_ERROR, e);
-                    }
-                }
+            	commitOrRollback( success, l -> l.onDemote( item, originalStatus ) );
             }
 
         } else {
             ((RemoteRepository) item.getRepository()).demote(item);
         }
     }
+
+	/**
+	 * Validates that the given library item can be demoted to the previous status.  If
+	 * error conditions are discovered, and exception is thrown.
+	 * 
+	 * @param libraryMetadata  meta-data for the library to be validated
+	 * @param libraryContent  content for the library to be validated
+	 * @throws RepositoryException  thrown if the library cannot be demoted
+	 */
+	private void validateDemote(LibraryInfoType libraryMetadata, LibraryContentWrapper libraryContent)
+			throws RepositoryException {
+		if (libraryMetadata.getState() != RepositoryState.MANAGED_UNLOCKED) {
+            throw new RepositoryException(
+                    "Unable to demote - the item is currently locked for editing.");
+        }
+        if (libraryMetadata.getStatus() == null) {
+            throw new RepositoryException(
+                    "Unable to demote - the item's status is not yet assigned.");
+        }
+        
+        if (libraryContent.isIs16Library()) {
+            if (libraryMetadata.getStatus() == LibraryStatus.DRAFT) {
+                throw new RepositoryException(
+                        "Unable to demote - only user-defined libraries that are not in DRAFT status can be demoted.");
+            }
+        	
+        } else {
+            if (libraryMetadata.getStatus() != LibraryStatus.FINAL) {
+                throw new RepositoryException(
+                        "Unable to demote - only user-defined libraries in FINAL status can be demoted.");
+            }
+        }
+	}
     
     /**
 	 * @see org.opentravel.schemacompiler.repository.Repository#updateStatus(org.opentravel.schemacompiler.repository.RepositoryItem, org.opentravel.schemacompiler.model.TLLibraryStatus)
@@ -2070,27 +1878,7 @@ public class RepositoryManager implements Repository {
                         + item.getFilename(), e);
 
             } finally {
-                // Commit or roll back the changes based on the result of the operation
-                if (success) {
-                    fileManager.commitChangeSet();
-                    
-                    // Notify listeners
-                    for (RepositoryListener listener : listeners) {
-                    	try {
-                    		listener.onUpdateStatus( item, originalStatus );
-                    		
-                    	} catch (Exception e) {
-                    		log.warn(LISTENER_INVOCATION_ERROR, e);
-                    	}
-                    }
-                    
-                } else {
-                    try {
-                        fileManager.rollbackChangeSet();
-                    } catch (Exception e) {
-                        log.error(ROLLBACK_ERROR, e);
-                    }
-                }
+            	commitOrRollback( success, l -> l.onUpdateStatus( item, originalStatus ) );
             }
 
         } else {
@@ -2142,27 +1930,7 @@ public class RepositoryManager implements Repository {
                         + item.getFilename(), e);
 
             } finally {
-                // Commit or roll back the changes based on the result of the operation
-                if (success) {
-                    fileManager.commitChangeSet();
-                    
-                    // Notify listeners
-                    for (RepositoryListener listener : listeners) {
-                    	try {
-                    		listener.onRecalculateCrc( item );
-                    		
-                    	} catch (Exception e) {
-                    		log.warn(LISTENER_INVOCATION_ERROR, e);
-                    	}
-                    }
-                    
-                } else {
-                    try {
-                        fileManager.rollbackChangeSet();
-                    } catch (Exception e) {
-                        log.error(ROLLBACK_ERROR, e);
-                    }
-                }
+            	commitOrRollback( success, l -> l.onRecalculateCrc( item ) );
             }
 
         } else {
@@ -2205,27 +1973,7 @@ public class RepositoryManager implements Repository {
                 success = true;
 
             } finally {
-                // Commit or roll back the changes based on the result of the operation
-                if (success) {
-                    fileManager.commitChangeSet();
-                    
-                    // Notify listeners
-                    for (RepositoryListener listener : listeners) {
-                    	try {
-                    		listener.onDelete( item );
-                    		
-                    	} catch (Exception e) {
-                    		log.warn(LISTENER_INVOCATION_ERROR, e);
-                    	}
-                    }
-                    
-                } else {
-                    try {
-                        fileManager.rollbackChangeSet();
-                    } catch (Exception e) {
-                        log.error(ROLLBACK_ERROR, e);
-                    }
-                }
+            	commitOrRollback( success, l -> l.onDelete( item ) );
             }
 
         } else {
@@ -2464,32 +2212,7 @@ public class RepositoryManager implements Repository {
                     newRepositories.put(newRepository.getID(), newRepository);
                 }
 
-                // Refresh the remote repository content by updating, adding, and deleting as needed
-                Iterator<RemoteRepositoryClient> iterator = remoteRepositories.iterator();
-
-                while (iterator.hasNext()) {
-                    RemoteRepositoryClient oldRepository = iterator.next();
-
-                    if (!newRepositories.containsKey(oldRepository.getId())) {
-                        iterator.remove();
-                    }
-                }
-                for (RemoteRepositoryType newRepository : newRepositories.values()) {
-                    RemoteRepositoryClient oldRepository = oldRepositories.get(newRepository
-                            .getID());
-
-                    if (oldRepository == null) {
-                        oldRepository = new RemoteRepositoryClient(this);
-                        remoteRepositories.add(oldRepository);
-                    }
-                    try {
-                        copyRemoteRepositorySettings(newRepository, oldRepository);
-                        oldRepository.refreshRepositoryMetadata();
-
-                    } catch (RepositoryException e) {
-                        // Ignore and use locally-cached data
-                    }
-                }
+                updateRemoteRepositoryClients(oldRepositories, newRepositories);
 
                 // Update the remaining meta-data fields
                 this.localRepositoryId = repositoryInfo.getID();
@@ -2503,6 +2226,41 @@ public class RepositoryManager implements Repository {
                     + ExceptionUtils.getExceptionMessage(e));
         }
     }
+
+	/**
+	 * Refresh the remote repository content by updating, adding, and deleting as needed.
+	 * 
+	 * @param oldRepositories  the list of old repositories that need to be deleted
+	 * @param newRepositories  the list of new repositories that need to be added or updated
+	 */
+	private void updateRemoteRepositoryClients(Map<String, RemoteRepositoryClient> oldRepositories,
+			Map<String, RemoteRepositoryType> newRepositories) {
+		Iterator<RemoteRepositoryClient> iterator = remoteRepositories.iterator();
+
+		while (iterator.hasNext()) {
+		    RemoteRepositoryClient oldRepository = iterator.next();
+
+		    if (!newRepositories.containsKey(oldRepository.getId())) {
+		        iterator.remove();
+		    }
+		}
+		for (RemoteRepositoryType newRepository : newRepositories.values()) {
+		    RemoteRepositoryClient oldRepository = oldRepositories.get(newRepository
+		            .getID());
+
+		    if (oldRepository == null) {
+		        oldRepository = new RemoteRepositoryClient(this);
+		        remoteRepositories.add(oldRepository);
+		    }
+		    try {
+		        copyRemoteRepositorySettings(newRepository, oldRepository);
+		        oldRepository.refreshRepositoryMetadata();
+
+		    } catch (RepositoryException e) {
+		        // Ignore and use locally-cached data
+		    }
+		}
+	}
 
     /**
      * Copies all settings from the JAXB remote repository instance to the object used to represent
@@ -2601,6 +2359,79 @@ public class RepositoryManager implements Repository {
         modelSaver.saveLibrary( libraryContent.getContent() );
     }
     
+	/**
+	 * Rolls back the current change set if the success flag provided is
+	 * set to false.
+	 * 
+	 * @param success  flag indicating if the change set operation was successful
+	 * @param refreshAfterRollback  flag indicating whether the local repository
+	 *								info should be refreshed in the case of a rollback
+	 */
+	private void rollbackOnFailure(boolean success, boolean refreshAfterRollback) {
+		if (!success) {
+		    try {
+		        fileManager.rollbackChangeSet();
+
+		    } catch (RepositoryException e) {
+		        log.warn(ROLLBACK_ERROR, e);
+		    }
+		    
+		    if (refreshAfterRollback) {
+			    refreshLocalRepositoryInfo(true);
+		    }
+		}
+	}
+	
+	/**
+	 * If the change operation was successful, the active change set will be
+	 * committed.  If not, it will be rolled back.
+	 * 
+	 * @param success  flag indicating whether the change operation was successful
+	 * @param notification  the listener notification that should be published if a commit is performed
+	 * @throws RepositoryException  thrown if an error occurs while committing the change set
+	 */
+    private void commitOrRollback(boolean success, ListenerNotification notification)
+    		throws RepositoryException {
+        // Commit or roll back the changes based on the result of the operation
+        if (success) {
+            fileManager.commitChangeSet();
+            
+            // Notify listeners
+            if (notification != null) {
+                for (RepositoryListener listener : listeners) {
+                	try {
+                		notification.notifyListener( listener );
+                		
+                	} catch (Exception e) {
+                		log.warn(LISTENER_INVOCATION_ERROR, e);
+                	}
+                }
+            }
+            
+        } else {
+            try {
+                fileManager.rollbackChangeSet();
+            } catch (Exception e) {
+                log.error(ROLLBACK_ERROR, e);
+            }
+        }
+    }
+    
+	/**
+	 * Allows listener actions to be parameterized in method calls.
+	 */
+	@FunctionalInterface
+	private interface ListenerNotification {
+		
+		/**
+		 * Performs the necessary listener notification.
+		 * 
+		 * @param listener  the listener to be notified
+		 */
+		public void  notifyListener(RepositoryListener listener);
+		
+	}
+
     /**
      * Wrapper class that contains the <code>TLLibrary</code> content as well as an
      * indicator of whether the library was originally saved in the 1.6 format.

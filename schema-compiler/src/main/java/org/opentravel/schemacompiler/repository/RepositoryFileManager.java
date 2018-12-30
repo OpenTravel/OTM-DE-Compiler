@@ -380,23 +380,35 @@ public abstract class RepositoryFileManager {
 
             for (File nsFolder : namespaceFolders) {
                 for (File folderMember : nsFolder.listFiles()) {
-                    if (folderMember.isFile() && folderMember.getName().endsWith(METADATA_FILE_SUFFIX)) {
-                        try {
-                            LibraryInfoType libraryMetadata = (LibraryInfoType) loadFile(folderMember);
-
-                            if (baseNamespace.equals(libraryMetadata.getBaseNamespace())) {
-                                metadataList.add(libraryMetadata);
-                            }
-                        } catch (RepositoryException e) {
-                            log.warn("Unreadable library meta-data file: "
-                                    + folderMember.getAbsolutePath());
-                        }
-                    }
+                    loadIfMetadata(folderMember, baseNamespace, metadataList);
                 }
             }
         }
         return metadataList;
     }
+
+	/**
+	 * If the given folder member is a meta-data file, load it and add to the
+	 * list of meta-data records discovered so far.
+	 * 
+	 * @param folderMember  the file to check and load
+	 * @param baseNamespace  the base namespace represented by the file's folder location
+	 * @param metadataList  the list to which a new meta-data record will be added
+	 */
+	private void loadIfMetadata(File folderMember, String baseNamespace, List<LibraryInfoType> metadataList) {
+		if (folderMember.isFile() && folderMember.getName().endsWith(METADATA_FILE_SUFFIX)) {
+		    try {
+		        LibraryInfoType libraryMetadata = (LibraryInfoType) loadFile(folderMember);
+
+		        if (baseNamespace.equals(libraryMetadata.getBaseNamespace())) {
+		            metadataList.add(libraryMetadata);
+		        }
+		    } catch (RepositoryException e) {
+		        log.warn("Unreadable library meta-data file: "
+		                + folderMember.getAbsolutePath());
+		    }
+		}
+	}
 
     /**
      * Saves the given library meta-data record to the repository.
@@ -656,32 +668,38 @@ public abstract class RepositoryFileManager {
                 }
                 if (skip) continue;
 
-                // Find all of the version URI path segments from each file found in this folder
-                // (multiples
-                // are allowed since the version schemes can represent URI version identifiers in
-                // multiple
-                // ways (e.g. "v1", "v01", "v_1", etc.)
-                for (File versionMember : folderMember.listFiles()) {
-                    if (versionMember.getName().endsWith(METADATA_FILE_SUFFIX)) {
-                        try {
-                            LibraryInfoType libraryMetadata = (LibraryInfoType) loadFile(versionMember);
-                            String baseNS = libraryMetadata.getBaseNamespace();
-                            String versionNS = libraryMetadata.getNamespace();
-
-                            if (versionNS.length() > baseNS.length()) {
-                                childPaths.add(versionNS.substring(baseNS.length()));
-                            }
-
-                        } catch (RepositoryException e) {
-                            log.warn("Unreadable library meta-data file: "
-                                    + versionMember.getAbsolutePath());
-                        }
-                    }
-                }
+                getChildVersionPaths(folderMember, childPaths);
             }
         }
         return childPaths;
     }
+
+	/**
+	 * Find all of the version URI path segments from each file found in this folder (multiples
+	 * are allowed since the version schemes can represent URI version identifiers in multiple
+	 * ways (e.g. "v1", "v01", "v_1", etc.).
+	 * 
+	 * @param nsFolder  the namespace folder to search for child version paths
+	 * @param childPaths  the list of child version paths being collected
+	 */
+	private void getChildVersionPaths(File nsFolder, List<String> childPaths) {
+		for (File versionMember : nsFolder.listFiles()) {
+		    if (versionMember.getName().endsWith(METADATA_FILE_SUFFIX)) {
+		        try {
+		            LibraryInfoType libraryMetadata = (LibraryInfoType) loadFile(versionMember);
+		            String baseNS = libraryMetadata.getBaseNamespace();
+		            String versionNS = libraryMetadata.getNamespace();
+
+		            if (versionNS.length() > baseNS.length()) {
+		                childPaths.add(versionNS.substring(baseNS.length()));
+		            }
+
+		        } catch (RepositoryException e) {
+		            log.warn("Unreadable library meta-data file: " + versionMember.getAbsolutePath());
+		        }
+		    }
+		}
+	}
 
     /**
      * Returns the case-sensitive URI path segment for the given namespace folder.
@@ -749,75 +767,118 @@ public abstract class RepositoryFileManager {
         }
 
         while (ns != null) {
-            File nsFolder = getNamespaceFolder(ns, null);
-            File nsidFile = new File(nsFolder, NAMESPACE_ID_FILENAME);
-            String nsid = null;
-
-            // Identify the 'nsid' as the last segment of the URI path (or the root namespace
-            // itself)
-            if (rootNamespaces.contains(ns)) {
-                nsid = ns;
-                ns = null;
-
-            } else {
-                int slashIdx = ns.lastIndexOf('/');
-
-                if (slashIdx >= 0) {
-                    if (ns.length() > (slashIdx + 1)) {
-                        nsid = ns.substring(slashIdx + 1);
-                    } else {
-                        nsid = null;
-                    }
-                    ns = ns.substring(0, slashIdx);
-
-                } else {
-                    ns = null;
-                }
-            }
-
-            if (nsid != null) {
-                // Create any namespace folders that do not already exist
-            	if (!nsFolder.exists()) {
-                    nsFolder.mkdirs();
-                }
-                
-            	if (nsidFile.exists()) {
-            		// If the namespace file already exists, check it to make sure
-            		// we are matching on a case-sensitive basis
-            		try (BufferedReader reader = new BufferedReader(new FileReader(nsidFile))) {
-            			String existingNsid = reader.readLine();
-            			
-            			if (!nsid.equals(existingNsid)) {
-            				if (nsid.equalsIgnoreCase(existingNsid)) {
-                                throw new RepositoryException(
-                                        "The given URI conflicts with the case-sensitivity of an existing namespace: " +
-                                        		baseNamespace);
-                                
-            				} else { // failed for some other reason than case-sensitivity
-                                throw new RepositoryException(
-                                        "The given URI conflicts with an existing namespace: " + baseNamespace);
-            				}
-            			}
-            			
-            		} catch (IOException e) {
-                        throw new RepositoryException(
-                                "Unable to verify namespace identification file for URI: " + ns, e);
-            		}
-            		
-            	} else {
-                    // Save the root namespace file if one does not already exist
-                    try (Writer writer = new BufferedWriter(new FileWriter(nsidFile))) {
-                        addToChangeSet(nsidFile);
-                        writer.write(nsid);
-
-                    } catch (IOException e) {
-                        throw new RepositoryException(
-                                "Unable to create namespace identification file for URI: " + ns, e);
-                    }
-            	}
-            }
+            ns = createNamespaceIdFile(ns, baseNamespace, rootNamespaces);
         }
     }
+
+	/**
+	 * Creates a namespace ID file based upon the next path in the partial namespace
+	 * URI provided.
+	 * 
+	 * @param ns  the current partial namespace path being processed
+	 * @param baseNamespace  the base namespace for which ID files are being created
+	 * @param rootNamespaces  the list of all root namespaces in the repository
+	 * @return String
+	 * @throws RepositoryException  thrown if the expected namespace ID does not match that of the file
+	 */
+	private String createNamespaceIdFile(String ns, String baseNamespace, List<String> rootNamespaces)
+			throws RepositoryException {
+		File nsFolder = getNamespaceFolder(ns, null);
+		File nsidFile = new File(nsFolder, NAMESPACE_ID_FILENAME);
+		String nsid = null;
+
+		// Identify the 'nsid' as the last segment of the URI path (or the root namespace
+		// itself)
+		if (rootNamespaces.contains(ns)) {
+		    nsid = ns;
+		    ns = null;
+
+		} else {
+		    int slashIdx = ns.lastIndexOf('/');
+
+		    if (slashIdx >= 0) {
+		        if (ns.length() > (slashIdx + 1)) {
+		            nsid = ns.substring(slashIdx + 1);
+		        } else {
+		            nsid = null;
+		        }
+		        ns = ns.substring(0, slashIdx);
+
+		    } else {
+		        ns = null;
+		    }
+		}
+
+		if (nsid != null) {
+		    // Create any namespace folders that do not already exist
+			if (!nsFolder.exists()) {
+		        nsFolder.mkdirs();
+		    }
+		    
+			if (nsidFile.exists()) {
+				// If the namespace file already exists, check it to make sure
+				// we are matching on a case-sensitive basis
+				validateNamespacdID(nsid, nsidFile, baseNamespace, ns);
+				
+			} else {
+				// Save the root namespace file if one does not already exist
+		        createNamespaceIdFile(nsid, nsidFile, ns);
+			}
+		}
+		return ns;
+	}
+
+	/**
+	 * Verifies that the namespace ID contained within the specified file matches the
+	 * expected ID that is provided.
+	 * 
+	 * @param nsid  the namespace ID to be validated
+	 * @param nsidFile  the namespace ID file whose content should match the expected value
+	 * @param baseNamespace  the base namespace being validated
+	 * @param ns  the full namespace being validated
+	 * @throws RepositoryException  thrown if the expected namespace ID does not match that of the file
+	 */
+	private void validateNamespacdID(String nsid, File nsidFile, String baseNamespace, String ns)
+			throws RepositoryException {
+		try (BufferedReader reader = new BufferedReader(new FileReader(nsidFile))) {
+			String existingNsid = reader.readLine();
+			
+			if (!nsid.equals(existingNsid)) {
+				if (nsid.equalsIgnoreCase(existingNsid)) {
+		            throw new RepositoryException(
+		                    "The given URI conflicts with the case-sensitivity of an existing namespace: " +
+		                    		baseNamespace);
+		            
+				} else { // failed for some other reason than case-sensitivity
+		            throw new RepositoryException(
+		                    "The given URI conflicts with an existing namespace: " + baseNamespace);
+				}
+			}
+			
+		} catch (IOException e) {
+		    throw new RepositoryException(
+		            "Unable to verify namespace identification file for URI: " + ns, e);
+		}
+	}
+
+	/**
+	 * Creates a new namespace ID file using the information provided.
+	 * 
+	 * @param nsid  the namespace ID
+	 * @param nsidFile  the file to which the namespace ID should be saved
+	 * @param ns  the full namespace of which the ID is a sub-component
+	 * @throws RepositoryException  thrown if the file cannot be saved
+	 */
+	private void createNamespaceIdFile(String nsid, File nsidFile, String ns) throws RepositoryException {
+		try (Writer writer = new BufferedWriter(new FileWriter(nsidFile))) {
+		    addToChangeSet(nsidFile);
+		    writer.write(nsid);
+
+		} catch (IOException e) {
+		    throw new RepositoryException(
+		            "Unable to create namespace identification file for URI: " + ns, e);
+		}
+	}
 
     /**
      * Deletes the 'nsid.txt' file from the namespace folder of the repository if the following

@@ -15,7 +15,6 @@
  */
 package org.opentravel.schemacompiler.validate;
 
-import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.Locale;
 
@@ -27,14 +26,12 @@ import org.springframework.context.NoSuchMessageException;
  * 
  * @author S. Livezey
  */
-public class ValidationFinding implements Comparable<ValidationFinding>, Serializable {
+public class ValidationFinding implements Comparable<ValidationFinding> {
 
-	private static final long serialVersionUID = -9053514826770214089L;
-	
-	private transient Validatable source;
+	private Validatable source;
     private FindingType type;
     private String messageKey;
-    private Serializable[] messageParams;
+    private Object[] messageParams;
     private long findingTimestamp;
 
     /**
@@ -50,7 +47,7 @@ public class ValidationFinding implements Comparable<ValidationFinding>, Seriali
      * @param messageParams
      *            the message parameters for the finding
      */
-    public ValidationFinding(Validatable source, FindingType type, String messageKey, Serializable[] messageParams) {
+    public ValidationFinding(Validatable source, FindingType type, String messageKey, Object[] messageParams) {
         this(source, type, messageKey, messageParams, System.nanoTime());
     }
 
@@ -69,7 +66,7 @@ public class ValidationFinding implements Comparable<ValidationFinding>, Seriali
      *            the system timestamp (should be obtained using <code>System.nanoTime()</code>)
      */
     public ValidationFinding(Validatable source, FindingType type, String messageKey,
-            Serializable[] messageParams, long findingTimestamp) {
+            Object[] messageParams, long findingTimestamp) {
         this.source = source;
         this.type = type;
         this.messageKey = messageKey;

@@ -579,11 +579,46 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
     		throw new RepositoryException("Error creating release backup file: " + releaseFile.getName(), e);
     	}
     	
-    	// Update the release's status to BETA or FULL
-    	try {
+    	// Perform final updates before publishing
+    	prepareForPublication(releaseFile);
+    	
+    	// Publish the release and delete the local copy of the file (backup will remain)
+    	try (InputStream contentStream = new FileInputStream( releaseFile )) {
+        	RepositoryItem repoItem = repository.publish( contentStream,
+        			fileUtils.getReleaseFilename( release ), release.getName(), release.getNamespace(),
+        			release.getVersion(), VersionSchemeFactory.getInstance().getDefaultVersionScheme(),
+        			TLLibraryStatus.FINAL );
+        	
+        	release.setReleaseUrl( repositoryManager.getContentLocation( repoItem ) );
+        	FileUtils.delete( releaseFile );
+        	success = true;
+    		return ReleaseItemImpl.newManagedItem( repoItem, this );
+    		
+    	} catch (IOException e) {
+    		throw new RepositoryException("Unable to read from release data file: " + releaseFile.getName(), e);
+    		
+    	} finally {
+    		if (!success) {
+    			release.setReleaseUrl( originalUrl );
+    			release.setStatus( ReleaseStatus.DRAFT );
+    		}
+    	}
+    	
+    }
+
+	/**
+	 * Prior to publication, this method assigns the release status and the effective
+	 * dates for any draft libraries.  All changes are saved to the given release file.
+	 * 
+	 * @param releaseFile  the release file to prepare for publication
+	 * @throws RepositoryException  thrown if the updates to the release cannot be saved
+	 */
+	private void prepareForPublication(File releaseFile) throws RepositoryException {
+		try {
     		Map<ReleaseMember,TLLibraryStatus> statusMap = new HashMap<>();
         	ReleaseStatus newStatus = ReleaseStatus.FULL;
         	
+        	// Update the release's status to BETA or FULL
     		for (ReleaseMember member : release.getAllMembers()) {
     			AbstractLibrary memberLib = getLibrary( member );
     			
@@ -629,30 +664,7 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
     	} catch (LibrarySaveException e) {
     		throw new RepositoryException("Unable to read from release data file: " + releaseFile.getName(), e);
     	}
-    	
-    	// Publish the release and delete the local copy of the file (backup will remain)
-    	try (InputStream contentStream = new FileInputStream( releaseFile )) {
-        	RepositoryItem repoItem = repository.publish( contentStream,
-        			fileUtils.getReleaseFilename( release ), release.getName(), release.getNamespace(),
-        			release.getVersion(), VersionSchemeFactory.getInstance().getDefaultVersionScheme(),
-        			TLLibraryStatus.FINAL );
-        	
-        	release.setReleaseUrl( repositoryManager.getContentLocation( repoItem ) );
-        	FileUtils.delete( releaseFile );
-        	success = true;
-    		return ReleaseItemImpl.newManagedItem( repoItem, this );
-    		
-    	} catch (IOException e) {
-    		throw new RepositoryException("Unable to read from release data file: " + releaseFile.getName(), e);
-    		
-    	} finally {
-    		if (!success) {
-    			release.setReleaseUrl( originalUrl );
-    			release.setStatus( ReleaseStatus.DRAFT );
-    		}
-    	}
-    	
-    }
+	}
     
     /**
      * Unpublishes the release from the OTM repository (requires administrative access).  The
@@ -729,27 +741,8 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
     	if (findings == null) findings = new ValidationFindings();
 		File releaseFile = getReleaseFile();
 		
-		// Verify that a later version of this release does not already exist
-		if ((releaseFile != null) && isRepositoryFile( releaseFile )) {
-			List<RepositoryItem> itemList = repositoryManager.listItems(
-					release.getBaseNamespace(), TLLibraryStatus.FINAL, true, RepositoryItemType.RELEASE );
-			String releaseVersion = versionScheme.getMajorVersion( release.getVersion() );
-			
-			for (RepositoryItem item : itemList) {
-				if (item.getLibraryName().equals( release.getName() )) {
-					String itemVersion = versionScheme.getMajorVersion( item.getVersion() );
-					
-					try {
-						if (Integer.parseInt( itemVersion ) > Integer.parseInt( releaseVersion )) {
-							throw new RepositoryException(
-									"Cannot create a new version because a later version of this release already exists.");
-						}
-						
-					} catch (NumberFormatException e) {
-						throw new RepositoryException("Unrecognized version identifier", e);
-					}
-				}
-			}
+		if (isRepositoryFile( releaseFile )) {
+			validateLatestVersion();
 		}
 		
 		// Create the new release version and its new repository manager
@@ -768,6 +761,33 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 		}
 		return newManager;
     }
+
+	/**
+	 * Verify that a later version of the current managed release does not already exist.
+	 * 
+	 * @throws RepositoryException  thrown if a later version of the release already exists
+	 */
+	private void validateLatestVersion() throws RepositoryException {
+		List<RepositoryItem> itemList = repositoryManager.listItems(
+				release.getBaseNamespace(), TLLibraryStatus.FINAL, true, RepositoryItemType.RELEASE );
+		String releaseVersion = versionScheme.getMajorVersion( release.getVersion() );
+		
+		for (RepositoryItem item : itemList) {
+			if (item.getLibraryName().equals( release.getName() )) {
+				String itemVersion = versionScheme.getMajorVersion( item.getVersion() );
+				
+				try {
+					if (Integer.parseInt( itemVersion ) > Integer.parseInt( releaseVersion )) {
+						throw new RepositoryException(
+								"Cannot create a new version because a later version of this release already exists.");
+					}
+					
+				} catch (NumberFormatException e) {
+					throw new RepositoryException("Unrecognized version identifier", e);
+				}
+			}
+		}
+	}
     
 	/**
 	 * Returns the file handle for the location where a new release will be saved

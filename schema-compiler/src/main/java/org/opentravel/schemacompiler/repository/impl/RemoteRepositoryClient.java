@@ -1246,16 +1246,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
             throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
 
         } finally {
-            // Commit or roll back the changes based on the result of the operation
-            if (success) {
-                manager.getFileManager().commitChangeSet();
-            } else {
-                try {
-                    manager.getFileManager().rollbackChangeSet();
-                } catch (Exception e) {
-                    log.error(ROLLBACK_ERROR, e);
-                }
-            }
+            commitOrRollback(success);
         }
     }
 
@@ -1334,16 +1325,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
             throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
 
         } finally {
-            // Commit or roll back the changes based on the result of the operation
-            if (success) {
-                manager.getFileManager().commitChangeSet();
-            } else {
-                try {
-                    manager.getFileManager().rollbackChangeSet();
-                } catch (Exception e) {
-                    log.error(ROLLBACK_ERROR, e);
-                }
-            }
+            commitOrRollback(success);
         }
 	}
 
@@ -1639,19 +1621,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
                 isStaleContent = remoteLastUpdated.after( localLastUpdated );
 
             } catch (UnknownHostException e) {
-                // If the remote repository is inaccessible, it is only an error if we are
-                // downloading the files for the first time.
-                File repositoryMetadataFile = manager.getFileManager().getLibraryMetadataLocation(
-                        baseNS, filename, versionIdentifier);
-
-                if (repositoryMetadataFile.exists() && repositoryContentFile.exists()) {
-                    log.warn("Remote repository is unavailable - using cached copy of file '"
-                            + filename + "'.");
-
-                } else {
-                    throw new RepositoryUnavailableException(
-                            REPOSITORY_UNAVAILABLE, e);
-                }
+                handleUnknownHost(e, repositoryContentFile, baseNS, filename, versionIdentifier);
 
             } catch (JAXBException e) {
                 throw new RepositoryException(METADATA_UNREADABLE, e);
@@ -1661,21 +1631,57 @@ public class RemoteRepositoryClient implements RemoteRepository {
                 throw new RepositoryException(REPOSITORY_UNAVAILABLE, e);
 
             } finally {
-                // Commit or roll back the changes based on the result of the operation
-                if (success) {
-                    manager.getFileManager().commitChangeSet();
-                } else {
-                    try {
-                        manager.getFileManager().rollbackChangeSet();
-                    } catch (Exception e) {
-                        log.error(ROLLBACK_ERROR, e);
-                    }
-                }
+                commitOrRollback(success);
                 downloadCache.add( cacheKey );
             }
         }
         return isStaleContent;
     }
+
+	/**
+	 * If the remote repository is inaccessible, it is only an error if we are
+	 * downloading the files for the first time.
+	 * 
+	 * @param e  the unknown host exception
+	 * @param repositoryContentFile  the content file that could not be downloaded
+	 * @param baseNS  the base namespace of the item being downloaded
+	 * @param filename  the filename of the item being downloaded
+	 * @param versionIdentifier  the version identifier of the item being downloaded
+	 * @throws RepositoryException  thrown if the download is being attempted for the first time
+	 */
+	private void handleUnknownHost(UnknownHostException e, File repositoryContentFile, String baseNS, String filename,
+			String versionIdentifier) throws RepositoryException {
+		File repositoryMetadataFile = manager.getFileManager().getLibraryMetadataLocation(
+		        baseNS, filename, versionIdentifier);
+
+		if (repositoryMetadataFile.exists() && repositoryContentFile.exists()) {
+		    log.warn("Remote repository is unavailable - using cached copy of file '"
+		            + filename + "'.");
+
+		} else {
+		    throw new RepositoryUnavailableException(
+		            REPOSITORY_UNAVAILABLE, e);
+		}
+	}
+
+	/**
+	 * Commit or roll back the current change set based on the result of the current
+	 * operation.
+	 * 
+	 * @param success  flag indicating whether the current operation was successful
+	 * @throws RepositoryException  thrown if an error occurs while committing the current change set
+	 */
+	private void commitOrRollback(boolean success) throws RepositoryException {
+		if (success) {
+		    manager.getFileManager().commitChangeSet();
+		} else {
+		    try {
+		        manager.getFileManager().rollbackChangeSet();
+		    } catch (Exception e) {
+		        log.error(ROLLBACK_ERROR, e);
+		    }
+		}
+	}
     
     /**
      * Returns true if the copy of the item in the remote repository has been updated

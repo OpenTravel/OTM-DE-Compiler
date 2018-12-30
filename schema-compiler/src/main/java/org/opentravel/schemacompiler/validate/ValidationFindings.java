@@ -15,7 +15,6 @@
  */
 package org.opentravel.schemacompiler.validate;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -36,12 +35,10 @@ import java.util.TreeSet;
  * 
  * @author S. Livezey
  */
-public class ValidationFindings implements Serializable {
+public class ValidationFindings {
 
-	private static final long serialVersionUID = -7081558490066747720L;
-	
 	private Collection<ValidationFinding> allFindings = new TreeSet<>();
-    private transient Map<Validatable,List<String>> messageKeysBySourceObject = new HashMap<>();
+    private Map<Validatable,List<String>> messageKeysBySourceObject = new HashMap<>();
 
     /**
      * Returns true if no findings have been added to this collection.
@@ -195,7 +192,7 @@ public class ValidationFindings implements Serializable {
      *            the optional message parameters for the finding
      */
     public void addFinding(FindingType type, Validatable source, String messageKey,
-            Serializable... messageParams) {
+            Object... messageParams) {
         if (type == null) {
             throw new NullPointerException("Finding type cannot be null for validation findings.");
         }

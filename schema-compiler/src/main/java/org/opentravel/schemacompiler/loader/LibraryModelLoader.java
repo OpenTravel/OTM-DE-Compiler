@@ -31,6 +31,8 @@ import java.util.Set;
 
 import javax.xml.XMLConstants;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.loader.impl.DefaultLibraryNamespaceResolver;
 import org.opentravel.schemacompiler.loader.impl.LibraryValidationSource;
@@ -86,7 +88,9 @@ import org.w3._2001.xmlschema.TopLevelElement;
 public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys {
 
 	private static final String INVALID_NAMESPACE_URI = "Invalid namespace URI on import: ";
+	
 	private static final Logger log = LoggerFactory.getLogger(LibraryModelLoader.class);
+	private static final boolean ENFORCE_CRC_VALIDATION = false;
 
     /** Internal indicator used to define the possible types of loader operations. */
     private enum OperationType { CLIENT_REQUESTED, INCLUDE, IMPORT }
@@ -466,147 +470,216 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
 			if (jaxbArtifacts.getLibraryUrlMappings().containsKey(libraryUrl.toExternalForm())) {
 				return;
 			}
-			
 			jaxbArtifacts.addLibraryModule(libraryUrl, libraryInfo);
 			
 			// First, resolve includes from the library's local namespace
 			for (String include : libraryInfo.getIncludes()) {
-				try {
-					namespaceResolver.setContextLibrary(libraryInfo, libraryUrl);
-					
-					URI libraryNamespace = new URI(libraryInfo.getNamespace());
-					URL includeUrl = namespaceResolver.resovleLibraryInclude(libraryNamespace, include);
-					
-					if (includeUrl != null) {
-						LibraryInputSource<C> includeInputSource = moduleLoader.newInputSource(includeUrl);
-						
-						if (includeInputSource != null) {
-							loadModuleAndDependencies(includeInputSource, libraryInfo.getNamespace(),
-									OperationType.INCLUDE, jaxbArtifacts);
-						}
-					}
-					
-				} catch (URISyntaxException e) {
-					addLoaderFinding(FindingType.ERROR, new LibraryValidationSource(library),
-							ERROR_INVALID_URL_ON_INCLUDE, include);
-				}
+				resolveInclude(include, library, libraryInfo, libraryUrl, jaxbArtifacts);
 			}
 			
 			// Identify and load explicit imports from other namespaces
 			for (LibraryModuleImport nsImport : libraryInfo.getImports()) {
-				try {
-					if ((nsImport.getNamespace() != null) && (nsImport.getNamespace().length() > 0)) {
-						if (!isBuiltInNamespace(nsImport.getNamespace())
-								|| ((nsImport.getFileHints() != null) && !nsImport.getFileHints().isEmpty())) {
-							namespaceResolver.setContextLibrary(libraryInfo, libraryUrl);
-							
-							URI libraryNamespace = new URI(nsImport.getNamespace());
-							Collection<LibraryInputSource<C>> dlInputSources = getInputSources(libraryNamespace,
-									libraryInfo.getVersionScheme(), nsImport.getFileHints());
-							
-							if (!dlInputSources.isEmpty()) {
-								for (LibraryInputSource<C> dlInputSource : dlInputSources) {
-									loadModuleAndDependencies(dlInputSource, nsImport.getNamespace(),
-											OperationType.IMPORT, jaxbArtifacts);
-								}
-							} else {
-								addLoaderFinding(FindingType.WARNING, new LibraryValidationSource(library),
-										WARNING_UNRESOLVED_LIBRARY_NAMESPACE, nsImport.getNamespace());
-							}
-						}
-					} else {
-						addLoaderFinding(FindingType.ERROR, new LibraryValidationSource(library),
-								ERROR_MISSING_NAMESPACE_URI_ON_IMPORT, libraryInfo.getLibraryName());
-					}
-				} catch (URISyntaxException e) {
-					addLoaderFinding(FindingType.ERROR, new LibraryValidationSource(library),
-							ERROR_INVALID_NAMESPACE_URI_ON_IMPORT, nsImport.getNamespace());
-					log.debug(INVALID_NAMESPACE_URI + libraryInfo.getNamespace(), e);
-				} catch (Exception e) {
-					addLoaderFinding(FindingType.ERROR, new LibraryValidationSource(library),
-							ERROR_UNKNOWN_EXCEPTION_DURING_MODULE_LOAD, libraryInfo.getLibraryName(),
-							ExceptionUtils.getExceptionClass(e).getSimpleName(), ExceptionUtils.getExceptionMessage(e));
-					log.debug("Unexpected exception loading liberary module: " + libraryInfo.getLibraryName(), e);
+				resolveImport(nsImport, library, libraryInfo, libraryUrl, jaxbArtifacts);
+			}
+			
+			// Force-load any previous minor versions not loaded already
+			loadPreviousMinorVersions(library, libraryInfo, libraryUrl, jaxbArtifacts);
+		}
+	}
+
+	/**
+	 * Resolves the given include and loads any new library or schema dependencies that
+	 * are identified.
+	 * 
+	 * @param include  the library/schema include to be resolved
+	 * @param library  the library to which the include applies
+	 * @param libraryInfo  the JAXB meta-data for the library
+	 * @param libraryUrl  the URL location of the library
+	 * @param jaxbArtifacts  the JAXB artifacts that have been loaded so are
+	 * @throws LibraryLoaderException  thrown if an error occurs while loading dependencies
+	 */
+	private void resolveInclude(String include, Object library, LibraryModuleInfo<Object> libraryInfo, URL libraryUrl,
+			JAXBModelArtifacts jaxbArtifacts) throws LibraryLoaderException {
+		try {
+			namespaceResolver.setContextLibrary(libraryInfo, libraryUrl);
+			
+			URI libraryNamespace = new URI(libraryInfo.getNamespace());
+			URL includeUrl = namespaceResolver.resovleLibraryInclude(libraryNamespace, include);
+			
+			if (includeUrl != null) {
+				LibraryInputSource<C> includeInputSource = moduleLoader.newInputSource(includeUrl);
+				
+				if (includeInputSource != null) {
+					loadModuleAndDependencies(includeInputSource, libraryInfo.getNamespace(),
+							OperationType.INCLUDE, jaxbArtifacts);
 				}
 			}
 			
-			// Identify previous versions of the library that are required but
-			// were not directly loaded by import declarations
-			try {
-				// Start by identifying the repository (if any) from which the current library
-				// was loaded. We will assume that any other required versions will be managed
-				// by the same repository.
-				ProjectManager projectManager = ProjectManager.getProjectManager(libraryModel);
-				
-				if (projectManager == null) {
-					projectManager = new ProjectManager(libraryModel);
-				}
-				String repositoryId = projectManager.getRepositoryId(libraryUrl);
-				Repository owningRepository = (repositoryId == null) ? null
-						: projectManager.getRepositoryManager().getRepository(repositoryId);
-				
-				// Make a best-effort to identify the library version immediately prior to the current
-				// one. There is no need to identify all previous versions, because they will be discovered
-				// during the recursive loading process of the previous version.
-				VersionScheme vScheme = VersionSchemeFactory.getInstance()
-					.getVersionScheme(libraryInfo.getVersionScheme());
-				List<String> versionChain = vScheme.getMajorVersionChain(libraryInfo.getNamespace());
-				
-				// Skip the first element since it represents the current library's version
-				for (int i = 1; i < versionChain.size(); i++) {
-					String versionNS = versionChain.get(i);
-					boolean done = false;
-					
-					if (jaxbArtifacts.hasLibrary(versionNS, libraryInfo.getLibraryName())) {
-						// The previous version was already loaded using explicit import declarations
-						done = true;
-					}
-					try {
-						RepositoryItemImpl repositoryItem = new RepositoryItemImpl();
-						String fileHint;
-						
-						if (owningRepository != null) {
-							repositoryItem.setRepository(owningRepository);
-							repositoryItem.setNamespace(versionNS);
-							repositoryItem.setFilename(vScheme.getDefaultFileHint(versionNS, libraryInfo.getLibraryName()));
-							repositoryItem.setVersionScheme(libraryInfo.getVersionScheme());
-							fileHint = RepositoryUtils.newURI(repositoryItem, true).toString();
-							
-						} else {
-							fileHint = vScheme.getDefaultFileHint(versionNS, libraryInfo.getLibraryName());
-						}
-						
-						Collection<LibraryInputSource<C>> versionInputSources = getInputSources(new URI(versionNS),
-								libraryInfo.getVersionScheme(), fileHint);
-						
-						if (!versionInputSources.isEmpty()) {
-							for (LibraryInputSource<C> dlInputSource : versionInputSources) {
-								loadModuleAndDependencies(dlInputSource, versionNS, OperationType.IMPORT,
-										jaxbArtifacts);
-							}
-							// Stop after loading the version immediately prior to the current library
-							// (recursion will handle all of the prior versions in the chain).
-							done = true;
-						}
-						
-					} catch (URISyntaxException e) {
-						addLoaderFinding(FindingType.ERROR, new LibraryValidationSource(library),
-								ERROR_INVALID_NAMESPACE_URI_ON_IMPORT, versionNS);
-						log.debug(INVALID_NAMESPACE_URI + libraryInfo.getNamespace(), e);
-					} catch (Exception e) {
-						addLoaderFinding(FindingType.ERROR, new LibraryValidationSource(library),
-								ERROR_UNKNOWN_EXCEPTION_DURING_MODULE_LOAD, libraryInfo.getLibraryName(),
-								ExceptionUtils.getExceptionClass(e).getSimpleName(),
-								ExceptionUtils.getExceptionMessage(e));
-						log.debug("Unexpected exception loading liberary module: " + libraryInfo.getLibraryName(), e);
-					}
-					if (done) break;
-				}
-				
-			} catch (VersionSchemeException e) {
-				// Ignore error and continue with the load
-			}
+		} catch (URISyntaxException e) {
+			addLoaderFinding(FindingType.ERROR, new LibraryValidationSource(library),
+					ERROR_INVALID_URL_ON_INCLUDE, include);
 		}
+	}
+
+	/**
+	 * Resolves the given import and loads any new library or schema dependencies that
+	 * are identified.
+	 * 
+	 * @param nsImport  the namespace import to be resolved
+	 * @param library  the library to which the namespace import applies
+	 * @param libraryInfo  the JAXB meta-data for the library
+	 * @param libraryUrl  the URL location of the library
+	 * @param jaxbArtifacts  the JAXB artifacts that have been loaded so are
+	 */
+	private void resolveImport(LibraryModuleImport nsImport, Object library, LibraryModuleInfo<Object> libraryInfo,
+			URL libraryUrl, JAXBModelArtifacts jaxbArtifacts) {
+		try {
+			if (!StringUtils.isBlank(nsImport.getNamespace())) {
+				if (!isBuiltInNamespace(nsImport.getNamespace())
+						|| !CollectionUtils.isEmpty(nsImport.getFileHints())) {
+					namespaceResolver.setContextLibrary(libraryInfo, libraryUrl);
+					
+					URI libraryNamespace = new URI(nsImport.getNamespace());
+					Collection<LibraryInputSource<C>> dlInputSources = getInputSources(libraryNamespace,
+							libraryInfo.getVersionScheme(), nsImport.getFileHints());
+					
+					if (!dlInputSources.isEmpty()) {
+						for (LibraryInputSource<C> dlInputSource : dlInputSources) {
+							loadModuleAndDependencies(dlInputSource, nsImport.getNamespace(),
+									OperationType.IMPORT, jaxbArtifacts);
+						}
+					} else {
+						addLoaderFinding(FindingType.WARNING, new LibraryValidationSource(library),
+								WARNING_UNRESOLVED_LIBRARY_NAMESPACE, nsImport.getNamespace());
+					}
+				}
+			} else {
+				addLoaderFinding(FindingType.ERROR, new LibraryValidationSource(library),
+						ERROR_MISSING_NAMESPACE_URI_ON_IMPORT, libraryInfo.getLibraryName());
+			}
+		} catch (URISyntaxException e) {
+			addLoaderFinding(FindingType.ERROR, new LibraryValidationSource(library),
+					ERROR_INVALID_NAMESPACE_URI_ON_IMPORT, nsImport.getNamespace());
+			log.debug(INVALID_NAMESPACE_URI + libraryInfo.getNamespace(), e);
+		} catch (Exception e) {
+			addLoaderFinding(FindingType.ERROR, new LibraryValidationSource(library),
+					ERROR_UNKNOWN_EXCEPTION_DURING_MODULE_LOAD, libraryInfo.getLibraryName(),
+					ExceptionUtils.getExceptionClass(e).getSimpleName(), ExceptionUtils.getExceptionMessage(e));
+			log.debug("Unexpected exception loading liberary module: " + libraryInfo.getLibraryName(), e);
+		}
+	}
+
+	/**
+	 * Identify and load previous versions of the given library that are required but were
+	 * not directly loaded by import/include declarations.
+	 * 
+	 * @param library  the library for which to load prior minor versions
+	 * @param libraryInfo  the JAXB meta-data for the library
+	 * @param libraryUrl  the URL location of the library
+	 * @param jaxbArtifacts  the JAXB artifacts that have been loaded so are
+	 */
+	private void loadPreviousMinorVersions(Object library, LibraryModuleInfo<Object> libraryInfo, URL libraryUrl,
+			JAXBModelArtifacts jaxbArtifacts) {
+		try {
+			// Start by identifying the repository (if any) from which the current library
+			// was loaded. We will assume that any other required versions will be managed
+			// by the same repository.
+			ProjectManager projectManager = ProjectManager.getProjectManager(libraryModel);
+			
+			if (projectManager == null) {
+				projectManager = new ProjectManager(libraryModel);
+			}
+			String repositoryId = projectManager.getRepositoryId(libraryUrl);
+			Repository owningRepository = (repositoryId == null) ? null
+					: projectManager.getRepositoryManager().getRepository(repositoryId);
+			
+			// Make a best-effort to identify the library version immediately prior to the current
+			// one. There is no need to identify all previous versions, because they will be discovered
+			// during the recursive loading process of the previous version.
+			VersionScheme vScheme = VersionSchemeFactory.getInstance()
+				.getVersionScheme(libraryInfo.getVersionScheme());
+			List<String> versionChain = vScheme.getMajorVersionChain(libraryInfo.getNamespace());
+			
+			// Skip the first element since it represents the current library's version
+			for (int i = 1; i < versionChain.size(); i++) {
+				String versionNS = versionChain.get(i);
+				boolean done = false;
+				
+				if (jaxbArtifacts.hasLibrary(versionNS, libraryInfo.getLibraryName())) {
+					// The previous version was already loaded using explicit import declarations
+					done = true;
+				}
+				
+				if (!done) {
+					done = loadPriorMinorVersion(library, libraryInfo, jaxbArtifacts,
+							owningRepository, versionNS, vScheme);
+				}
+				
+				if (done) break;
+			}
+			
+		} catch (VersionSchemeException e) {
+			// Ignore error and continue with the load
+		}
+	}
+
+	/**
+	 * Loads the prior minor version of the library using the information provided.  Earlier
+	 * versions are loaded via the recursive loading process back to the earliest minor version
+	 * available.
+	 * 
+	 * @param library  the JAXB library for which to load the prior minor version
+	 * @param libraryInfo  the JAXB meta-data for the library
+	 * @param jaxbArtifacts  the JAXB artifacts that have been loaded so are
+	 * @param owningRepository  the repository from which the prior version should be loaded
+	 * @param versionNS  the namespace for the prior library version to load
+	 * @param vScheme  the version scheme of the library
+	 * @return boolean
+	 */
+	private boolean loadPriorMinorVersion(Object library, LibraryModuleInfo<Object> libraryInfo,
+			JAXBModelArtifacts jaxbArtifacts, Repository owningRepository, String versionNS, VersionScheme vScheme) {
+		boolean done = false;
+		
+		try {
+			RepositoryItemImpl repositoryItem = new RepositoryItemImpl();
+			String fileHint;
+			
+			if (owningRepository != null) {
+				repositoryItem.setRepository(owningRepository);
+				repositoryItem.setNamespace(versionNS);
+				repositoryItem.setFilename(vScheme.getDefaultFileHint(versionNS, libraryInfo.getLibraryName()));
+				repositoryItem.setVersionScheme(libraryInfo.getVersionScheme());
+				fileHint = RepositoryUtils.newURI(repositoryItem, true).toString();
+				
+			} else {
+				fileHint = vScheme.getDefaultFileHint(versionNS, libraryInfo.getLibraryName());
+			}
+			
+			Collection<LibraryInputSource<C>> versionInputSources = getInputSources(new URI(versionNS),
+					libraryInfo.getVersionScheme(), fileHint);
+			
+			if (!versionInputSources.isEmpty()) {
+				for (LibraryInputSource<C> dlInputSource : versionInputSources) {
+					loadModuleAndDependencies(dlInputSource, versionNS, OperationType.IMPORT,
+							jaxbArtifacts);
+				}
+				// Stop after loading the version immediately prior to the current library
+				// (recursion will handle all of the prior versions in the chain).
+				done = true;
+			}
+			
+		} catch (URISyntaxException e) {
+			addLoaderFinding(FindingType.ERROR, new LibraryValidationSource(library),
+					ERROR_INVALID_NAMESPACE_URI_ON_IMPORT, versionNS);
+			log.debug(INVALID_NAMESPACE_URI + libraryInfo.getNamespace(), e);
+		} catch (Exception e) {
+			addLoaderFinding(FindingType.ERROR, new LibraryValidationSource(library),
+					ERROR_UNKNOWN_EXCEPTION_DURING_MODULE_LOAD, libraryInfo.getLibraryName(),
+					ExceptionUtils.getExceptionClass(e).getSimpleName(),
+					ExceptionUtils.getExceptionMessage(e));
+			log.debug("Unexpected exception loading liberary module: " + libraryInfo.getLibraryName(), e);
+		}
+		return done;
 	}
 	
     /**
@@ -639,27 +712,13 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
             URL schemaUrl = inputSource.getLibraryURL();
             URL folderUrl = URLUtils.getParentURL(schemaUrl);
 
+            // Verify that the namespace of the module we are adding matches the expectations
             if (expectedNamespace != null) {
-                // Verify that the namespace of the module we are adding matches the expectations
-                boolean namespaceMatches = (expectedNamespace == null)
-                        || expectedNamespace.equals(schema.getTargetNamespace());
-                boolean chameleonInclude = (operationType == OperationType.INCLUDE)
-                        && (schema.getTargetNamespace() == null);
-                boolean chameleonImport = (operationType == OperationType.IMPORT)
-                        && (schema.getTargetNamespace() == null);
-
-                if (chameleonImport) {
-                    addLoaderFinding(FindingType.ERROR, new URLValidationSource(schemaUrl),
-                            ERROR_ILLEGAL_CHAMELEON_IMPORT, expectedNamespace);
-
-                } else if ((operationType != OperationType.CLIENT_REQUESTED) && !namespaceMatches
-                        && !chameleonInclude) {
-                    String errorKey = (operationType == OperationType.INCLUDE) ? ERROR_NAMESPACE_MISMATCH_ON_INCLUDE
-                            : ERROR_NAMESPACE_MISMATCH_ON_IMPORT;
-
-                    addLoaderFinding(FindingType.ERROR, new URLValidationSource(schemaUrl),
-                            errorKey, expectedNamespace, schema.getTargetNamespace());
-                    return; // return without adding the module to our JAXB artifacts
+            	boolean namespaceMismatch = validateSchemaNamespace(
+            			expectedNamespace, schema, schemaUrl, operationType );
+                
+                if (namespaceMismatch) {
+                	return;
                 }
             }
 
@@ -667,72 +726,141 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
             if (jaxbArtifacts.getSchemaUrlMappings().containsKey(schemaUrl.toExternalForm())) {
                 return;
             }
-
             jaxbArtifacts.addSchemaModule(schemaUrl, schemaInfo);
 
             // First, resolve includes from the schema's local namespace
             for (String include : schemaInfo.getIncludes()) {
-                try {
-                    namespaceResolver.setContextSchema(schemaInfo, schemaUrl);
-
-                    URL includeUrl = URLUtils.getResolvedURL(include, folderUrl);
-                    LibraryInputSource<C> includeInputSource = moduleLoader
-                            .newInputSource(includeUrl);
-
-                    loadModuleAndDependencies(includeInputSource, schema.getTargetNamespace(),
-                            OperationType.INCLUDE, jaxbArtifacts);
-
-                } catch (MalformedURLException e) {
-                    addLoaderFinding(FindingType.ERROR, new URLValidationSource(schemaUrl),
-                            ERROR_INVALID_URL_ON_INCLUDE, include);
-                }
+                resolveInclude(include, schema, schemaInfo, schemaUrl, folderUrl, jaxbArtifacts);
             }
 
             // Next, resolve imports from other namespaces
             for (LibraryModuleImport nsImport : schemaInfo.getImports()) {
-                try {
-                    if ((nsImport.getNamespace() != null) && (nsImport.getNamespace().length() > 0)) {
-                        if (!isBuiltInNamespace(nsImport.getNamespace())) {
-                            namespaceResolver.setContextSchema(schemaInfo, schemaUrl);
-
-                            URI libraryNamespace = new URI(nsImport.getNamespace());
-                            Collection<LibraryInputSource<C>> dlInputSources = getInputSources(
-                                    libraryNamespace, null, nsImport.getFileHints());
-
-                            if (!dlInputSources.isEmpty()) {
-                                for (LibraryInputSource<C> dlInputSource : dlInputSources) {
-                                    loadModuleAndDependencies(dlInputSource,
-                                            nsImport.getNamespace(), OperationType.IMPORT,
-                                            jaxbArtifacts);
-                                }
-                            } else {
-                                addLoaderFinding(FindingType.WARNING, new URLValidationSource(
-                                        schemaUrl), WARNING_UNRESOLVED_LIBRARY_NAMESPACE,
-                                        nsImport.getNamespace());
-                            }
-                        }
-                    } else {
-                        addLoaderFinding(FindingType.ERROR, new URLValidationSource(schemaUrl),
-                                ERROR_MISSING_NAMESPACE_URI_ON_IMPORT,
-                                URLUtils.getShortRepresentation(schemaUrl));
-                    }
-                } catch (URISyntaxException e) {
-                    addLoaderFinding(FindingType.ERROR, new URLValidationSource(schemaUrl),
-                            ERROR_INVALID_NAMESPACE_URI_ON_IMPORT, nsImport.getNamespace());
-                    log.debug(INVALID_NAMESPACE_URI + schema.getTargetNamespace(), e);
-                } catch (Exception e) {
-                    addLoaderFinding(FindingType.ERROR, new URLValidationSource(schemaUrl),
-                            ERROR_UNKNOWN_EXCEPTION_DURING_MODULE_LOAD,
-                            URLUtils.getShortRepresentation(schemaUrl), ExceptionUtils
-                                    .getExceptionClass(e).getSimpleName(),
-                            ExceptionUtils.getExceptionMessage(e));
-                    log.debug(
-                            "Unexpected exception loading schema module: "
-                                    + URLUtils.getShortRepresentation(schemaUrl), e);
-                }
+                resolveImport(nsImport, schema, schemaInfo, schemaUrl, jaxbArtifacts);
             }
         }
     }
+
+	/**
+	 * Verifies that the target namespace of the given schema matches the
+	 * one expected from the import or include that caused it to be loaded.
+	 * 
+	 * @param expectedNamespace  the expected namespace of the given schema
+	 * @param schema  the XML schema whose namespace is to be validated
+	 * @param schemaInfo  the JAXB meta-data for the XML schema
+	 * @param operationType  indicates the reason why the given schema was loaded
+	 * @return boolean
+	 */
+	private boolean validateSchemaNamespace(String expectedNamespace, Schema schema, URL schemaUrl,
+			OperationType operationType) {
+		boolean namespaceMatches = expectedNamespace.equals(schema.getTargetNamespace());
+		boolean chameleonInclude = (operationType == OperationType.INCLUDE)
+		        && (schema.getTargetNamespace() == null);
+		boolean chameleonImport = (operationType == OperationType.IMPORT)
+		        && (schema.getTargetNamespace() == null);
+		boolean namespaceMismatch = false;
+		
+		if (chameleonImport) {
+		    addLoaderFinding(FindingType.ERROR, new URLValidationSource(schemaUrl),
+		            ERROR_ILLEGAL_CHAMELEON_IMPORT, expectedNamespace);
+
+		} else if ((operationType != OperationType.CLIENT_REQUESTED) && !namespaceMatches
+		        && !chameleonInclude) {
+		    String errorKey = (operationType == OperationType.INCLUDE) ? ERROR_NAMESPACE_MISMATCH_ON_INCLUDE
+		            : ERROR_NAMESPACE_MISMATCH_ON_IMPORT;
+
+		    addLoaderFinding(FindingType.ERROR, new URLValidationSource(schemaUrl),
+		            errorKey, expectedNamespace, schema.getTargetNamespace());
+		    namespaceMismatch = true; // return without adding the module to our JAXB artifacts
+		}
+		return namespaceMismatch;
+	}
+
+	/**
+	 * Resolves the given import and loads any new schema dependencies that
+	 * are identified.
+	 * 
+	 * @param include  the schema include to be resolved
+	 * @param nsImport  the namespace import to be resolved
+	 * @param schema  the XML schema to which the import applies
+	 * @param schemaInfo  the JAXB meta-data for the XML schema
+	 * @param folderUrl  the URL of the folder where the schema is located
+	 * @param jaxbArtifacts  the JAXB artifacts that have been loaded so far
+	 * @throws LibraryLoaderException  thrown if an error occurs while loading dependencies
+	 */
+	private void resolveInclude(String include, Schema schema, LibraryModuleInfo<Schema> schemaInfo, URL schemaUrl,
+			URL folderUrl, JAXBModelArtifacts jaxbArtifacts) throws LibraryLoaderException {
+		try {
+		    namespaceResolver.setContextSchema(schemaInfo, schemaUrl);
+
+		    URL includeUrl = URLUtils.getResolvedURL(include, folderUrl);
+		    LibraryInputSource<C> includeInputSource = moduleLoader
+		            .newInputSource(includeUrl);
+
+		    loadModuleAndDependencies(includeInputSource, schema.getTargetNamespace(),
+		            OperationType.INCLUDE, jaxbArtifacts);
+
+		} catch (MalformedURLException e) {
+		    addLoaderFinding(FindingType.ERROR, new URLValidationSource(schemaUrl),
+		            ERROR_INVALID_URL_ON_INCLUDE, include);
+		}
+	}
+
+	/**
+	 * Resolves the given import and loads any new schema dependencies that
+	 * are identified.
+	 * 
+	 * @param nsImport  the namespace import to be resolved
+	 * @param schema  the XML schema to which the import applies
+	 * @param schemaInfo  the JAXB meta-data for the XML schema
+	 * @param schemaUrl  the URL location of the XML schema
+	 * @param jaxbArtifacts  the JAXB artifacts that have been loaded so far
+	 */
+	private void resolveImport(LibraryModuleImport nsImport, Schema schema, LibraryModuleInfo<Schema> schemaInfo,
+			URL schemaUrl, JAXBModelArtifacts jaxbArtifacts) {
+		try {
+		    if (!StringUtils.isEmpty(nsImport.getNamespace())) {
+		        if (!isBuiltInNamespace(nsImport.getNamespace())) {
+		            namespaceResolver.setContextSchema(schemaInfo, schemaUrl);
+
+		            URI libraryNamespace = new URI(nsImport.getNamespace());
+		            Collection<LibraryInputSource<C>> dlInputSources = getInputSources(
+		                    libraryNamespace, null, nsImport.getFileHints());
+
+		            if (!dlInputSources.isEmpty()) {
+		                for (LibraryInputSource<C> dlInputSource : dlInputSources) {
+		                    loadModuleAndDependencies(dlInputSource,
+		                            nsImport.getNamespace(), OperationType.IMPORT,
+		                            jaxbArtifacts);
+		                }
+		                
+		            } else {
+		                addLoaderFinding(FindingType.WARNING, new URLValidationSource(
+		                        schemaUrl), WARNING_UNRESOLVED_LIBRARY_NAMESPACE,
+		                        nsImport.getNamespace());
+		            }
+		        }
+		        
+		    } else {
+		        addLoaderFinding(FindingType.ERROR, new URLValidationSource(schemaUrl),
+		                ERROR_MISSING_NAMESPACE_URI_ON_IMPORT,
+		                URLUtils.getShortRepresentation(schemaUrl));
+		    }
+		    
+		} catch (URISyntaxException e) {
+		    addLoaderFinding(FindingType.ERROR, new URLValidationSource(schemaUrl),
+		            ERROR_INVALID_NAMESPACE_URI_ON_IMPORT, nsImport.getNamespace());
+		    log.debug(INVALID_NAMESPACE_URI + schema.getTargetNamespace(), e);
+		} catch (Exception e) {
+		    addLoaderFinding(FindingType.ERROR, new URLValidationSource(schemaUrl),
+		            ERROR_UNKNOWN_EXCEPTION_DURING_MODULE_LOAD,
+		            URLUtils.getShortRepresentation(schemaUrl), ExceptionUtils
+		                    .getExceptionClass(e).getSimpleName(),
+		            ExceptionUtils.getExceptionMessage(e));
+		    log.debug(
+		            "Unexpected exception loading schema module: "
+		                    + URLUtils.getShortRepresentation(schemaUrl), e);
+		}
+	}
 
     /**
      * Transforms each of the JAXB schema artifacts provided and incorporates them into the current
@@ -813,32 +941,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
 
                 modelLibrary.setLibraryUrl( lUrl );
 
-                // If a CRC was specified in the library, we need to verify it before incorporating
-                // the new library into the model
-                Long libraryCrcValue = LibraryCrcCalculator.getLibraryCrcValue(libraryInfo.getJaxbArtifact());
-                boolean isValidCrc = true;
-
-                /*
-                if ((libraryCrcValue != null) || LibraryCrcCalculator.isCrcRequired(modelLibrary)) {
-                    if (libraryCrcValue == null) {
-                        addLoaderFinding(FindingType.ERROR, new URLValidationSource(libraryUrl),
-                                ERROR_MISSING_CRC);
-                        isValidCrc = false; // CRC is required, but not provided by the library
-
-                    } else {
-                        long calculatedCrc = LibraryCrcCalculator.calculate(modelLibrary);
-
-                        if (libraryCrcValue.longValue() != calculatedCrc) {
-                            addLoaderFinding(FindingType.ERROR,
-                                    new URLValidationSource(libraryUrl), ERROR_INVALID_CRC);
-                            isValidCrc = false; // CRC is present, but does not match the calculated
-                                                // value
-                        }
-                    }
-                }
-                */
-
-                if (isValidCrc) {
+                if (validateLibraryCrc(libraryUrl, libraryInfo, modelLibrary)) {
                     // Only add the library to the model if a duplicate does not already exist
                     if (!libraryModel.hasLibrary(modelLibrary.getNamespace(),
                             modelLibrary.getName())) {
@@ -863,6 +966,42 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
             }
         }
     }
+
+	/**
+	 * Validates the CRC value for the library as a means of preventing manual edits.  If
+	 * CRC validation is disabled, this method will always return true.  Otherwise, false
+	 * will be returned in the event of an invalid CRC.
+	 * 
+	 * @param libraryUrl  the URL of the library being validated
+	 * @param libraryInfo  JAXB meta-data for the library
+	 * @param library  the library whose CRC value is to be validated
+	 * @return boolean
+	 */
+	private boolean validateLibraryCrc(String libraryUrl, LibraryModuleInfo<Object> libraryInfo, TLLibrary library) {
+		boolean isValidCrc = true;
+		
+		if (isCrcValidationEnforced()) {
+			Long libraryCrcValue = LibraryCrcCalculator.getLibraryCrcValue(libraryInfo.getJaxbArtifact());
+
+			if ((libraryCrcValue != null) || LibraryCrcCalculator.isCrcRequired(library)) {
+			    if (libraryCrcValue == null) {
+			        addLoaderFinding(FindingType.ERROR, new URLValidationSource(libraryUrl),
+			                ERROR_MISSING_CRC);
+			        isValidCrc = false; // CRC is required, but not provided by the library
+
+			    } else {
+			        long calculatedCrc = LibraryCrcCalculator.calculate(library);
+
+			        if (libraryCrcValue.longValue() != calculatedCrc) {
+			            addLoaderFinding(FindingType.ERROR,
+			                    new URLValidationSource(libraryUrl), ERROR_INVALID_CRC);
+			            isValidCrc = false; // CRC is present, but does not match the calculated value
+			        }
+			    }
+			}
+		}
+		return isValidCrc;
+	}
 
     /**
      * Completes the loading process by validating the model and capturing any errors/warnings that
@@ -900,61 +1039,81 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
         for (String namespace : libraryModel.getNamespaces()) {
             for (AbstractLibrary library : libraryModel.getLibrariesForNamespace(namespace)) {
                 if (library instanceof XSDLibrary) {
-                    List<XSDLibrary> schemaList = schemasByNamespace.get(namespace);
-
-                    if (schemaList == null) {
-                        schemaList = new ArrayList<>();
-                        schemasByNamespace.put(namespace, schemaList);
-                    }
-                    schemaList.add((XSDLibrary) library);
+                	schemasByNamespace.computeIfAbsent( namespace,
+                			ns -> schemasByNamespace.put( ns, new ArrayList<>() ) );
+                	schemasByNamespace.get( namespace ).add( (XSDLibrary) library );
                 }
             }
         }
 
         // Resolve element references within each respective namespace
 		for (Entry<String, List<XSDLibrary>> entry : schemasByNamespace.entrySet()) {
-			Map<String, XSDComplexType> typesByName = new HashMap<>();
-			List<XSDElement> elementList = new ArrayList<>();
 			String namespace = entry.getKey();
+			List<XSDLibrary> schemaList = entry.getValue();
 			
-			// Organize collections of all types and elements within this namespace
-			for (XSDLibrary schema : entry.getValue()) {
-				for (LibraryMember member : schema.getNamedMembers()) {
-					if (member instanceof XSDComplexType) {
-						typesByName.put(member.getLocalName(), (XSDComplexType) member);
-					} else if (member instanceof XSDElement) {
-						elementList.add((XSDElement) member);
-					}
-				}
-			}
-			
-			// Search for elements that reference a complex type in the
-			// 'typesByName' map
-			for (XSDElement element : elementList) {
-				TopLevelElement jaxbElement = element.getJaxbElement();
-				
-				if ((element.getName() == null) || (jaxbElement.getType() == null)
-						|| !namespace.equals(jaxbElement.getType().getNamespaceURI())) {
-					// If this element references an anonymous type or a type in another
-					// namespace, we can skip it since it is not considered to be an alias
-					continue;
-				}
-				String referencedTypeName = jaxbElement.getType().getLocalPart();
-				XSDComplexType referencedType = typesByName.get(referencedTypeName);
-				
-				// If we found a referenced type definition in this namespace,
-				// register the element as an alias
-				if (referencedType != null) {
-					if (element.getName().equals(referencedType.getName())) {
-						referencedType.setIdentityAlias(element);
-						
-					} else {
-						referencedType.addAlias(element);
-					}
-				}
-			}
+			resolveElementReferences(namespace, schemaList);
         }
     }
+
+	/**
+	 * Resolves all element references with each of the legacy schema libraries provided.
+	 * 
+	 * @param namespace  the namespace to which all of the schemas are assigned
+	 * @param schemaList  the list of legacy schemas to resolve
+	 */
+	private void resolveElementReferences(String namespace, List<XSDLibrary> schemaList) {
+		Map<String, XSDComplexType> typesByName = new HashMap<>();
+		List<XSDElement> elementList = new ArrayList<>();
+		
+		findCollatedTypesAndElements(schemaList, typesByName, elementList);
+		
+		// Search for elements that reference a complex type in the
+		// 'typesByName' map
+		for (XSDElement element : elementList) {
+			TopLevelElement jaxbElement = element.getJaxbElement();
+			
+			if ((element.getName() == null) || (jaxbElement.getType() == null)
+					|| !namespace.equals(jaxbElement.getType().getNamespaceURI())) {
+				// If this element references an anonymous type or a type in another
+				// namespace, we can skip it since it is not considered to be an alias
+				continue;
+			}
+			String referencedTypeName = jaxbElement.getType().getLocalPart();
+			XSDComplexType referencedType = typesByName.get(referencedTypeName);
+			
+			// If we found a referenced type definition in this namespace,
+			// register the element as an alias
+			if (referencedType != null) {
+				if (element.getName().equals(referencedType.getName())) {
+					referencedType.setIdentityAlias(element);
+					
+				} else {
+					referencedType.addAlias(element);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Organize collections of all types and elements within this namespace.
+	 * 
+	 * @param schemaList  the list of schemas whose members are to be collated
+	 * @param typesByName  the map to be populated that associates type names with types
+	 * @param elementList  the list of elements to be populated
+	 */
+	private void findCollatedTypesAndElements(List<XSDLibrary> schemaList, Map<String, XSDComplexType> typesByName,
+			List<XSDElement> elementList) {
+		for (XSDLibrary schema : schemaList) {
+			for (LibraryMember member : schema.getNamedMembers()) {
+				if (member instanceof XSDComplexType) {
+					typesByName.put(member.getLocalName(), (XSDComplexType) member);
+					
+				} else if (member instanceof XSDElement) {
+					elementList.add((XSDElement) member);
+				}
+			}
+		}
+	}
 
     /**
      * Returns an input source to used for accessing the content of the library module with the
@@ -1150,11 +1309,19 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
         }
 
     }
-
+    
+    /**
+     * Returns true if CRC validation should be enforced for user-defined libraries
+     * during the loading process.
+     * 
+     * @return boolean
+     */
+    private static boolean isCrcValidationEnforced() {
+    	return ENFORCE_CRC_VALIDATION;
+    }
+    
     /**
      * Container for all loader artifacts that have not yet been loaded into the main library model.
-     * 
-     * @author S. Livezey
      */
     private class JAXBModelArtifacts {
 
