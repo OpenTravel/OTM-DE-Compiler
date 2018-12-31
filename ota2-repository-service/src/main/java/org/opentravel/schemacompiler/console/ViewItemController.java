@@ -15,6 +15,10 @@
  */
 package org.opentravel.schemacompiler.console;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.Reader;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,6 +30,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionTarget;
@@ -50,6 +55,7 @@ import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryItemCommit;
 import org.opentravel.schemacompiler.repository.RepositoryItemHistory;
 import org.opentravel.schemacompiler.repository.RepositoryItemType;
+import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
 import org.opentravel.schemacompiler.security.RepositorySecurityManager;
 import org.opentravel.schemacompiler.security.UserPrincipal;
@@ -499,6 +505,67 @@ public class ViewItemController extends BaseController {
         return targetPage;
     }
 
+    /**
+     * Called by the Spring MVC controller to display the raw-content library
+     * page.
+     * 
+     * @param rootNamespace  the root namespace of the selected library
+     * @param path  the sub-namespace path relative to the base namespace
+     * @param filename  the filename of the selected library to view
+     * @param version  the version of the selected library to view
+     * @param session  the HTTP session that contains information about an authenticated user
+     * @param model  the model context to be used when rendering the page view
+     * @return String
+     */
+    @RequestMapping({ "/libraryRawContent.html", "/libraryRawContent.htm" })
+    public String libraryRawContent(@RequestParam(value = "baseNamespace") String baseNamespace,
+            @RequestParam(value = "filename") String filename,
+            @RequestParam(value = "version") String version, HttpSession session, Model model) {
+        String targetPage = null;
+        try {
+            RepositorySecurityManager securityManager = getSecurityManager();
+            UserPrincipal user = getCurrentUser(session);
+        	
+            // User must be an administrator to view raw OTM content
+            if (securityManager.isAdministrator( user )) {
+            	RepositoryManager repositoryManager = getRepositoryManager();
+                RepositoryItem item = repositoryManager.getRepositoryItem(baseNamespace, filename, version);
+            	File libraryFile = repositoryManager.getFileManager().getLibraryContentLocation(
+            			item.getBaseNamespace(), item.getFilename(), item.getVersion() );
+            	String libraryContent;
+            	
+            	// Load the raw library content from the OTM file
+            	try (StringWriter out = new StringWriter()) {
+            		try (Reader in = new FileReader( libraryFile )) {
+            			char[] buffer = new char[1024];
+            			int charsRead;
+            			
+            			while ((charsRead = in.read( buffer, 0, buffer.length )) >= 0) {
+            				out.write( buffer, 0, charsRead );
+            			}
+            		}
+            		libraryContent = StringEscapeUtils.escapeXml( out.toString() );
+            	}
+            	model.addAttribute( "libraryContent", libraryContent );
+                model.addAttribute("item", item);
+            	
+            } else {
+                setErrorMessage(LIBRARY_NOT_AUTHORIZED, model);
+                targetPage = new SearchController().defaultSearchPage( session, model);
+            }
+            
+        } catch (Exception e) {
+            log.error(ERROR_DISPLAYING_LIBRARY, e);
+            setErrorMessage(ERROR_DISPLAYING_LIBRARY2, model);
+            targetPage = new SearchController().defaultSearchPage( session, model);
+        }
+
+        if (targetPage == null) {
+            targetPage = applyCommonValues(model, "libraryRawContent");
+        }
+        return targetPage;
+    }
+    
     /**
      * Called by the Spring MVC controller to display the general-information library
      * page.

@@ -51,6 +51,11 @@
 	<c:param name="filename" value="${item.filename}" />
 	<c:param name="version" value="${item.version}" />
 </c:url>
+<c:url var="rawContentUrl" value="/console/libraryRawContent.html">
+	<c:param name="baseNamespace" value="${item.baseNamespace}" />
+	<c:param name="filename" value="${item.filename}" />
+	<c:param name="version" value="${item.version}" />
+</c:url>
 
 <h2 style="padding-bottom: 0;">Library: ${item.libraryName} <small>(${item.version})</small></h2>
 <h3 style="padding-top: 0;">Namespace: <a href="${namespaceUrl}">${item.namespace}</a></h3>
@@ -79,6 +84,12 @@
 	<c:set var="tabStyle" value="tablinks" />
 	<c:if test="${currentTab == 'INFO'}"><c:set var="tabStyle" value="tablinks activeTab" /></c:if>
 	<li><a href="${infoUrl}" class="${tabStyle}">General Info</a></li>
+	
+	<c:if test="${sessionScope.isAdminAuthorized}">
+		<c:set var="tabStyle" value="tablinks" />
+		<c:if test="${currentTab == 'RAW_CONTENT'}"><c:set var="tabStyle" value="tablinks activeTab" /></c:if>
+		<li><a href="${rawContentUrl}" class="${tabStyle}">Raw Content</a></li>
+	</c:if>
 </ul>
 <p/><br/>
 

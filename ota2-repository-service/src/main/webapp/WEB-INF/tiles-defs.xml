@@ -76,6 +76,10 @@
 		<put-attribute name="title" value="OTA2.0 Repository - Library Info" />
 		<put-attribute name="body" value="/WEB-INF/console/libraryInfo.jsp" />
 	</definition>
+	<definition name="libraryRawContent" extends="baseLayoutNoTitle">
+		<put-attribute name="title" value="OTA2.0 Repository - Raw Library Content" />
+		<put-attribute name="body" value="/WEB-INF/console/libraryRawContent.jsp" />
+	</definition>
 	<definition name="releaseView" extends="baseLayoutNoTitle">
 		<put-attribute name="title" value="OTA2.0 Repository - Release" />
 		<put-attribute name="body" value="/WEB-INF/console/releaseView.jsp" />
