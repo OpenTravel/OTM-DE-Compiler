@@ -47,6 +47,8 @@ public interface IndexingTerms {
 	public static final String FILENAME_FIELD           = "filename";
 	public static final String VERSION_SCHEME_FIELD     = "versionScheme";
 	public static final String REFERENCED_LIBRARY_FIELD = "referencedLibrary";
+	public static final String EXTERNAL_PRINCIPAL_FIELD = "externalPrincipal";
+	public static final String EXTERNAL_REFERENCE_FIELD = "externalReference";
 	public static final String PREFIX_MAPPING_FIELD     = "prefixMapping";
 	
 	// Fields used exclusively by OTM entities

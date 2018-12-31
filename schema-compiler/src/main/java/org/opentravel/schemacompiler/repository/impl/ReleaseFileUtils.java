@@ -149,22 +149,32 @@ public class ReleaseFileUtils extends AbstractFileUtils {
     }
     
     /**
+     * Loads the raw JAXB release from the given reader
+     * 
+     * @param reader  the reader from which to obtain the release content
+     * @return ReleaseType
+     * @throws JAXBException  thrown if the release content cannot be parsed
+     */
+    @SuppressWarnings("unchecked")
+    public ReleaseType loadRawRelease(Reader reader) throws JAXBException {
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        unmarshaller.setSchema( releaseValidationSchema );
+
+        JAXBElement<ReleaseType> documentElement =
+        		(JAXBElement<ReleaseType>) unmarshaller.unmarshal( reader );
+        
+        return documentElement.getValue();
+    }
+    
+    /**
      * Loads the OTM release from the given reader
      * 
      * @param reader  the reader from which to obtain the release content
      * @return Release
      * @throws JAXBException  thrown if the release content cannot be parsed
      */
-    @SuppressWarnings("unchecked")
     private Release loadRelease(Reader reader) throws JAXBException {
-        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-        unmarshaller.setSchema( releaseValidationSchema );
-
-        JAXBElement<ReleaseType> documentElement =
-        		(JAXBElement<ReleaseType>) unmarshaller.unmarshal( reader );
-        ReleaseType jaxbRelease = documentElement.getValue();
-        
-        return transformToOtmRelease( jaxbRelease );
+        return transformToOtmRelease( loadRawRelease( reader ) );
     }
     
     /**
@@ -218,20 +228,60 @@ public class ReleaseFileUtils extends AbstractFileUtils {
     }
     
     /**
-     * Marshals the given OTM release and returns the string content.
+     * Marshals the given JAXB release and returns the string content.
      * 
-     * @param release  the OTM release to be marshalled
-     * @throws LibrarySaveException  thrown if the release file cannot be marshalled
+     * @param release  the JAXB release to be marshalled
+     * @throws IOException  thrown if the release cannot be marshalled
      */
-    public String marshalReleaseContent(Release release) throws LibrarySaveException {
+    public String marshalReleaseContent(ReleaseType release) throws IOException {
     	try {
+            Marshaller marshaller = jaxbContext.createMarshaller();
         	StringWriter writer = new StringWriter();
         	
-			marshalRelease( release, writer );
+			marshaller.marshal( objectFactory.createRelease( release ), writer );
 	    	return writer.toString();
 	    	
 		} catch (JAXBException e) {
-    		throw new LibrarySaveException("Error marshalling OTM release content.", e);
+    		throw new IOException("Error marshalling OTM release content.", e);
+		}
+    }
+    
+    /**
+     * Marshals the given JAXB release member and returns the string content.
+     * 
+     * @param release  the JAXB release member to be marshalled
+     * @throws IOException  thrown if the release member cannot be marshalled
+     */
+    public String marshalReleaseMemberContent(ReleaseMemberType member) throws IOException {
+    	try {
+            Marshaller marshaller = jaxbContext.createMarshaller();
+        	StringWriter writer = new StringWriter();
+        	
+			marshaller.marshal( objectFactory.createReleaseMember( member ), writer );
+	    	return writer.toString();
+	    	
+		} catch (JAXBException e) {
+    		throw new IOException("Error marshalling OTM release member content.", e);
+		}
+    }
+    
+    /**
+     * Unmarshals the given JAXB release member from the string provided.
+     * 
+     * @param release  the JAXB release member to be marshalled
+     * @throws IOException  thrown if the release member cannot be marshalled
+     */
+    @SuppressWarnings("unchecked")
+	public ReleaseMemberType unmarshalReleaseMemberContent(String memberContent) throws IOException {
+    	try {
+            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+			JAXBElement<ReleaseMemberType> memberElement = (JAXBElement<ReleaseMemberType>)
+					unmarshaller.unmarshal( new StringReader( memberContent ) );
+			
+	    	return memberElement.getValue();
+	    	
+		} catch (JAXBException e) {
+    		throw new IOException("Error marshalling OTM release member content.", e);
 		}
     }
     

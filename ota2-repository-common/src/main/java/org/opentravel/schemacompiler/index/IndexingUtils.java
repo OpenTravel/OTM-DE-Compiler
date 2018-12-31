@@ -17,6 +17,7 @@ package org.opentravel.schemacompiler.index;
 
 import javax.xml.namespace.QName;
 
+import org.opentravel.ns.ota2.release_v01_00.ReleaseMemberType;
 import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionEventType;
 import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionTarget;
 import org.opentravel.schemacompiler.model.NamedEntity;
@@ -161,6 +162,21 @@ public class IndexingUtils {
 		identityKey.append( isLibrary ? "LIB:" : "REL:" );
 		identityKey.append( item.getNamespace() ).append( ":" );
 		identityKey.append( item.getLibraryName() );
+		return identityKey.toString();
+	}
+	
+	/**
+	 * Returns the qualified identity key library associated with the given
+	 * release member.
+	 * 
+	 * @return String
+	 */
+	public static String getIdentityKey(ReleaseMemberType member) {
+		StringBuilder identityKey = new StringBuilder();
+		
+		identityKey.append( "LIB:" );
+		identityKey.append( member.getNamespace() ).append( ":" );
+		identityKey.append( member.getLibraryName() );
 		return identityKey.toString();
 	}
 	

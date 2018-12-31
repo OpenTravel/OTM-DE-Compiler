@@ -21,6 +21,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
+import javax.xml.datatype.XMLGregorianCalendar;
+
 import org.opentravel.schemacompiler.console.NamespaceItem;
 import org.opentravel.schemacompiler.index.EntitySearchResult;
 import org.opentravel.schemacompiler.model.NamedEntity;
@@ -30,6 +32,7 @@ import org.opentravel.schemacompiler.model.TLExtensionOwner;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryItemType;
+import org.opentravel.schemacompiler.xml.XMLGregorianCalendarConverter;
 
 /**
  * Utility methods used to assist with the rendering of JSP pages.
@@ -155,6 +158,16 @@ public class PageUtils {
      */
     public String formatDateTime(Date dateTime) {
     	return (dateTime == null) ? "&nbsp;" : dateTimeFormat.format( dateTime ).replaceAll( "\\s+", "\\&nbsp\\;");
+    }
+    
+    /**
+     * Formats the given XML date-time value for display.
+     * 
+     * @param dateTime  the date-time value to be displayed
+     * @return String
+     */
+    public String formatDateTime(XMLGregorianCalendar dateTime) {
+    	return (dateTime == null) ? "&nbsp;" : formatDateTime( XMLGregorianCalendarConverter.toJavaDate( dateTime ) );
     }
     
 	/**

@@ -15,6 +15,7 @@
  */
 package org.opentravel.schemacompiler.index;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.util.BytesRef;
+import org.opentravel.ns.ota2.release_v01_00.ReleaseMemberType;
 import org.opentravel.ns.ota2.release_v01_00.ReleaseStatus;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.repository.Release;
@@ -43,6 +45,8 @@ public class ReleaseSearchResult extends SearchResult<Release> {
     private String version;
 	private ReleaseStatus status;
 	private List<String> referencedLibraryIds = new ArrayList<>();
+	private List<ReleaseMemberType> externalPrincipals = new ArrayList<>();
+	private List<ReleaseMemberType> externalReferences = new ArrayList<>();
 	
 	/**
 	 * Constructor that initializes the search result contents from the given
@@ -53,6 +57,7 @@ public class ReleaseSearchResult extends SearchResult<Release> {
 	 */
 	public ReleaseSearchResult(Document doc, FreeTextSearchService searchService) {
 		super( doc, searchService );
+		ReleaseFileUtils fileUtils = new ReleaseFileUtils( null );
 		String statusStr = doc.get( STATUS_FIELD );
 		
 		if (statusStr != null) {
@@ -71,8 +76,33 @@ public class ReleaseSearchResult extends SearchResult<Release> {
 		this.version = doc.get( VERSION_FIELD );
 		this.referencedLibraryIds.addAll( Arrays.asList( doc.getValues( REFERENCED_LIBRARY_FIELD ) ) );
 		
+		for (String memberContent : doc.getValues( EXTERNAL_PRINCIPAL_FIELD )) {
+			addReleaseMember(memberContent, externalPrincipals, fileUtils);
+		}
+		for (String memberContent : doc.getValues( EXTERNAL_REFERENCE_FIELD )) {
+			addReleaseMember(memberContent, externalReferences, fileUtils);
+		}
+		
 		if (doc.getBinaryValue( CONTENT_DATA_FIELD ) != null) {
 			initializeItemContent( doc );
+		}
+	}
+
+	/**
+	 * Unmarshalls the release member content string provided and adds the member to
+	 * the list provided.
+	 * 
+	 * @param memberContent  the release member content string
+	 * @param memberList  the list to which the release member will be added
+	 * @param fileUtils  the file utilities to use when unmarshalling the release member
+	 */
+	private void addReleaseMember(String memberContent, List<ReleaseMemberType> memberList,
+			ReleaseFileUtils fileUtils) {
+		try {
+			memberList.add( fileUtils.unmarshalReleaseMemberContent( memberContent ) );
+			
+		} catch (IOException e) {
+			// Ignore error and continue
 		}
 	}
 
@@ -156,6 +186,24 @@ public class ReleaseSearchResult extends SearchResult<Release> {
 	 */
 	public List<String> getReferencedLibraryIds() {
 		return referencedLibraryIds;
+	}
+
+	/**
+	 * Returns the list of principal members that are owned by remote repositories.
+	 *
+	 * @return List<ReleaseMemberType>
+	 */
+	public List<ReleaseMemberType> getExternalPrincipals() {
+		return externalPrincipals;
+	}
+
+	/**
+	 * Returns the list of referenced members that are owned by remote repositories.
+	 *
+	 * @return List<ReleaseMemberType>
+	 */
+	public List<ReleaseMemberType> getExternalReferences() {
+		return externalReferences;
 	}
 	
 }

@@ -110,7 +110,7 @@ public class ViewItemController extends BaseController {
             RepositoryItem item = getRepositoryManager().getRepositoryItem(baseNamespace, filename, version);
             
             checkItemType( item, RepositoryItemType.RELEASE );
-
+            
 			if (securityManager.isReadAuthorized(user, item)) {
 				FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
 				String releaseIndexId = IndexingUtils.getIdentityKey(item);
@@ -137,6 +137,8 @@ public class ViewItemController extends BaseController {
 				model.addAttribute("release", release);
 				model.addAttribute("principalLibraries", principalLibraries);
 				model.addAttribute("referencedLibraries", referencedLibraries);
+				model.addAttribute("externalPrincipals", release.getExternalPrincipals());
+				model.addAttribute("externalReferences", release.getExternalReferences());
 				
 			} else {
                 setErrorMessage("You are not authorized to view the requested release.", model);

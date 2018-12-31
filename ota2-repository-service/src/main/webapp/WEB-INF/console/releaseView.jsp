@@ -72,11 +72,11 @@
 
 <table id="itemtable" style="width:100%;float:left;">
 	<tr>
-		<th width="40%">Referenced Libraries</th>
+		<th width="40%">Principal Libraries</th>
 		<th width="30%">Status</th>
 		<th width="30%">Effective Date</th>
 	</tr>
-	<c:if test="${principalLibraries.isEmpty()}">
+	<c:if test="${principalLibraries.isEmpty() && externalPrincipals.isEmpty()}">
 		<tr class="d0">
 			<td colspan="2">No principal libraries defined for this release</td>
 		</tr>
@@ -116,6 +116,33 @@
 			</c:otherwise>
 		</c:choose>
 	</c:forEach>
+	<c:forEach var="externalLib" items="${externalPrincipals}">
+		<tr class="${rowStyle}">
+			<td>
+				<img src="${pageContext.request.contextPath}/images/library.png" />&nbsp;${externalLib.libraryName}
+				<br><small>${externalLib.namespace} [${externalLib.repositoryID}]</small>
+			</td>
+			<td>&nbsp;</td>
+			<td>
+				<c:choose>
+					<c:when test="${externalLib.effectiveDate != null}">
+						${pageUtils.formatXmlDateTime( externalLib.effectiveDate )}
+					</c:when>
+					<c:otherwise>
+						Latest Commit
+					</c:otherwise>
+				</c:choose>
+			</td>
+		</tr>
+		<c:choose>
+			<c:when test="${rowStyle=='d0'}">
+				<c:set var="rowStyle" value="d1" />
+			</c:when>
+			<c:otherwise>
+				<c:set var="rowStyle" value="d0" />
+			</c:otherwise>
+		</c:choose>
+	</c:forEach>
 </table>
 
 
@@ -125,7 +152,7 @@
 		<th width="30%">Status</th>
 		<th width="30%">Effective Date</th>
 	</tr>
-	<c:if test="${referencedLibraries.isEmpty()}">
+	<c:if test="${referencedLibraries.isEmpty() && externalReferences.isEmpty()}">
 		<tr class="d0">
 			<td colspan="2">No referenced libraries defined for this release</td>
 		</tr>
@@ -149,6 +176,33 @@
 				<c:choose>
 					<c:when test="${library.effectiveDate != null}">
 						${pageUtils.formatDateTime( library.effectiveDate )}
+					</c:when>
+					<c:otherwise>
+						Latest Commit
+					</c:otherwise>
+				</c:choose>
+			</td>
+		</tr>
+		<c:choose>
+			<c:when test="${rowStyle=='d0'}">
+				<c:set var="rowStyle" value="d1" />
+			</c:when>
+			<c:otherwise>
+				<c:set var="rowStyle" value="d0" />
+			</c:otherwise>
+		</c:choose>
+	</c:forEach>
+	<c:forEach var="externalLib" items="${externalReferences}">
+		<tr class="${rowStyle}">
+			<td>
+				<img src="${pageContext.request.contextPath}/images/library.png" />&nbsp;${externalLib.libraryName}
+				<br><small>${externalLib.namespace} [${externalLib.repositoryID}]</small>
+			</td>
+			<td>&nbsp;</td>
+			<td>
+				<c:choose>
+					<c:when test="${externalLib.effectiveDate != null}">
+						${pageUtils.formatXmlDateTime( externalLib.effectiveDate )}
 					</c:when>
 					<c:otherwise>
 						Latest Commit
