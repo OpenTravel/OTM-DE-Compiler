@@ -198,22 +198,7 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
 					}
 					
 				} else if (release != null) {
-					try {
-						releaseItem = RepositoryManager.getDefault().getRepositoryItem(release.getBaseNamespace(),
-								release.getFilename(), release.getVersion());
-						
-						if (!RepositoryItemType.RELEASE.isItemType(releaseItem.getFilename())) {
-							throw new RepositoryException("The specified repository item is not an OTM release: "
-									+ releaseItem.getFilename());
-						}
-						
-					} catch (RepositoryException e) {
-						throw new MojoFailureException(
-								"The specified repository item does not exist or is not an OTM release.", e);
-						
-					} catch (Exception e) {
-						throw new MojoExecutionException("Unknown error while accessing the OTM repository", e);
-					}
+					releaseItem = getReleaseItem();
 					
 				} else {
 					throw new MojoFailureException("Either a libraryFile or a release must be specified.");
@@ -247,28 +232,67 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
 					log.info("Compiling OTA2 Release: " + releaseItem.getFilename());
 					findings = compilerTask.compileOutput(releaseItem);
 				}
-				
-				if (findings != null) {
-					if (findings.hasFinding()) {
-						String[] messages = findings.getAllValidationMessages(FindingMessageFormat.IDENTIFIED_FORMAT);
-						
-						log.info("Errors/warnings detected during compilation:");
-						for (String message : messages) {
-							log.info(message);
-						}
-					}
-					
-					if (!findings.hasFinding(FindingType.ERROR)) {
-						log.info("Library compilation completed successfully.");
-					} else {
-						throw new MojoFailureException("Schema compilation aborted due to errors.");
-					}
-				}
+				displayValidationFindings( findings );
 				
 			} catch (Exception e) {
 				throw new MojoExecutionException("Error during OTA2 library compilation.", e);
 			}
 		}
+	}
+
+	/**
+	 * Displays the validation findings and throws an exception if any errors exist.
+	 * 
+	 * @param findings  the validation findings to display
+	 * @throws MojoFailureException  thrown if one or more errors exist
+	 */
+	private void displayValidationFindings(ValidationFindings findings) throws MojoFailureException {
+		Log log = getLog();
+		
+		if (findings != null) {
+			if (findings.hasFinding()) {
+				String[] messages = findings.getAllValidationMessages(FindingMessageFormat.IDENTIFIED_FORMAT);
+				
+				log.info("Errors/warnings detected during compilation:");
+				for (String message : messages) {
+					log.info(message);
+				}
+			}
+			
+			if (!findings.hasFinding(FindingType.ERROR)) {
+				log.info("Library compilation completed successfully.");
+			} else {
+				throw new MojoFailureException("Schema compilation aborted due to errors.");
+			}
+		}
+	}
+
+	/**
+	 * Returns the repository item for the release to be loaded.
+	 * 
+	 * @return RepositoryItem
+	 * @throws MojoFailureException  thrown if the specified release does not exist
+	 * @throws MojoExecutionException  thrown if an error occurs while accessing the OTM repository
+	 */
+	private RepositoryItem getReleaseItem() throws MojoFailureException, MojoExecutionException {
+		RepositoryItem releaseItem;
+		try {
+			releaseItem = RepositoryManager.getDefault().getRepositoryItem(release.getBaseNamespace(),
+					release.getFilename(), release.getVersion());
+			
+			if (!RepositoryItemType.RELEASE.isItemType(releaseItem.getFilename())) {
+				throw new RepositoryException("The specified repository item is not an OTM release: "
+						+ releaseItem.getFilename());
+			}
+			
+		} catch (RepositoryException e) {
+			throw new MojoFailureException(
+					"The specified repository item does not exist or is not an OTM release.", e);
+			
+		} catch (Exception e) {
+			throw new MojoExecutionException("Unknown error while accessing the OTM repository", e);
+		}
+		return releaseItem;
 	}
 	
     /**

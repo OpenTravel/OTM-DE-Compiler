@@ -95,25 +95,8 @@ public class TLLibraryTransformer extends
             target.getIncludes().addAll(getIncludePaths(source.getIncludes()));
         }
 
-        // Perform transforms of all namespace import elements
         for (TLNamespaceImport modelImport : source.getNamespaceImports()) {
-            NamespaceImport jaxbImport = new NamespaceImport();
-
-            if ((modelImport.getFileHints() != null) && !modelImport.getFileHints().isEmpty()) {
-                StringBuilder fileHints = new StringBuilder();
-
-                for (String fileHint : modelImport.getFileHints()) {
-                    if (fileHint != null) {
-                        if (fileHints.length() > 0)
-                            fileHints.append(' ');
-                        fileHints.append(fileHint);
-                    }
-                }
-                jaxbImport.setFileHints(fileHints.toString());
-            }
-            jaxbImport.setPrefix(trimString(modelImport.getPrefix()));
-            jaxbImport.setNamespace(trimString(modelImport.getNamespace()));
-            target.getImport().add(jaxbImport);
+            transformImport( modelImport, target );
         }
 
         // Perform transforms for all library members
@@ -135,6 +118,32 @@ public class TLLibraryTransformer extends
         }
         return target;
     }
+
+	/**
+	 * Transforms the given namespace import.
+	 * 
+	 * @param source  the source library being transformed
+	 * @param target  the target JAXB library instance
+	 */
+	private void transformImport(TLNamespaceImport modelImport, Library target) {
+		NamespaceImport jaxbImport = new NamespaceImport();
+
+		if ((modelImport.getFileHints() != null) && !modelImport.getFileHints().isEmpty()) {
+		    StringBuilder fileHints = new StringBuilder();
+
+		    for (String fileHint : modelImport.getFileHints()) {
+		        if (fileHint != null) {
+		            if (fileHints.length() > 0)
+		                fileHints.append(' ');
+		            fileHints.append(fileHint);
+		        }
+		    }
+		    jaxbImport.setFileHints(fileHints.toString());
+		}
+		jaxbImport.setPrefix(trimString(modelImport.getPrefix()));
+		jaxbImport.setNamespace(trimString(modelImport.getNamespace()));
+		target.getImport().add(jaxbImport);
+	}
 
     /**
      * Extracts the list of include paths from the given list of <code>TLInclude</code> entities and

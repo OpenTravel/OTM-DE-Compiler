@@ -88,48 +88,61 @@ public class FileHintUtils {
             List<String> badHints = new ArrayList<>();
 
             for (String hint : hints) {
-                try {
-                    File hintFile = URLUtils.toFile(URLUtils.getResolvedURL(hint, libraryUrl));
-
-                    if (hintFile.exists() || (badHints.isEmpty() && hasFileExtension(hint))) {
-                        resolvedHints.addAll(badHints);
-                        resolvedHints.add(hint);
-                        badHints.clear();
-
-                    } else if (!badHints.isEmpty()) {
-                        StringBuilder sbCompoundHint = new StringBuilder();
-
-                        for (String badHint : badHints) {
-                            sbCompoundHint.append(badHint).append(" ");
-                        }
-                        sbCompoundHint.append(hint);
-
-                        String compoundHint = sbCompoundHint.toString();
-                        hintFile = URLUtils.toFile(URLUtils
-                                .getResolvedURL(compoundHint, libraryUrl));
-
-                        if (hintFile.exists() || hasFileExtension(compoundHint)) {
-                            resolvedHints.add(compoundHint);
-                            badHints.clear();
-
-                        } else {
-                            badHints.add(hint);
-                        }
-                    } else {
-                        badHints.add(hint);
-                    }
-
-                } catch (Exception e) {
-                    // Ignore and just return the hint as-is
-                    resolvedHints.addAll(badHints);
-                    resolvedHints.add(hint);
-                    badHints.clear();
-                }
+                resolveFileHint( hint, libraryUrl, resolvedHints, badHints );
             }
             resolvedHints.addAll(badHints);
         }
         return resolvedHints;
     }
+
+	/**
+	 * Resolves the given file hint.
+	 * 
+	 * @param hint  the file hint to be resolved
+	 * @param libraryUrl  the library URL from which the hint's relative path will be resolved
+	 * @param resolvedHints  the list of hints resolved so far
+	 * @param badHints  the list of hints that could not be resolved
+	 */
+	private static void resolveFileHint(String hint, URL libraryUrl, List<String> resolvedHints,
+			List<String> badHints) {
+		try {
+		    File hintFile = URLUtils.toFile(URLUtils.getResolvedURL(hint, libraryUrl));
+
+		    if (hintFile.exists() || (badHints.isEmpty() && hasFileExtension(hint))) {
+		        resolvedHints.addAll(badHints);
+		        resolvedHints.add(hint);
+		        badHints.clear();
+
+		    } else if (!badHints.isEmpty()) {
+		        StringBuilder sbCompoundHint = new StringBuilder();
+
+		        for (String badHint : badHints) {
+		            sbCompoundHint.append(badHint).append(" ");
+		        }
+		        sbCompoundHint.append(hint);
+
+		        String compoundHint = sbCompoundHint.toString();
+		        hintFile = URLUtils.toFile(URLUtils
+		                .getResolvedURL(compoundHint, libraryUrl));
+
+		        if (hintFile.exists() || hasFileExtension(compoundHint)) {
+		            resolvedHints.add(compoundHint);
+		            badHints.clear();
+
+		        } else {
+		            badHints.add(hint);
+		        }
+		    } else {
+		        badHints.add(hint);
+		    }
+
+		} catch (Exception e) {
+		    // Ignore and just return the hint as-is
+		    resolvedHints.addAll(badHints);
+		    resolvedHints.add(hint);
+		    badHints.clear();
+		}
+	}
 
     /**
      * Returns true if the given file hint has a file extension component.

@@ -111,106 +111,148 @@ public class SimpleTypeInfo {
 	 * @param visitedEntities  the set of qualified names of entities aready visited
 	 */
 	private void findConstraints(NamedEntity simpleType, Set<String> visitedEntities) {
-		if (simpleType != null) {
-			String simpleTypeKey = simpleType.getNamespace() + ":" + simpleType.getLocalName();
-			
-			if (!visitedEntities.contains( simpleTypeKey )) {
-				if (simpleType instanceof TLSimple) {
-					TLSimple simple = (TLSimple) simpleType;
-					
-					if ((pattern == null) && (simple.getPattern() != null)) {
-						pattern = simple.getPattern();
-					}
-					if ((minLength < 0) && (simple.getMinLength() >= 0)) {
-						minLength = simple.getMinLength();
-					}
-					if ((maxLength < 0) && (simple.getMaxLength() >= 0)) {
-						maxLength = simple.getMaxLength();
-					}
-					if ((fractionDigits < 0) && (simple.getFractionDigits() >= 0)) {
-						fractionDigits = simple.getFractionDigits();
-					}
-					if ((totalDigits < 0) && (simple.getTotalDigits() >= 0)) {
-						totalDigits = simple.getTotalDigits();
-					}
-					if ((minInclusive == null) && (simple.getMinInclusive() != null)) {
-						minInclusive = simple.getMinInclusive();
-					}
-					if ((maxInclusive == null) && (simple.getMaxInclusive() != null)) {
-						maxInclusive = simple.getMaxInclusive();
-					}
-					if ((minExclusive == null) && (simple.getMinExclusive() != null)) {
-						minExclusive = simple.getMinExclusive();
-					}
-					if ((maxExclusive == null) && (simple.getMaxExclusive() != null)) {
-						maxExclusive = simple.getMaxExclusive();
-					}
-					listTypeInd |= simple.isListTypeInd();
-					
-					findConstraints( simple.getParentType(),  visitedEntities );
-					
-					// Work-around for OTM-DE since it represents XSDSimple types as TLSimples (reason unknown)
-					if (simple.getParentType() == null) {
-						baseSimpleType = simple;
-					}
-					
-				} else if (simpleType instanceof TLValueWithAttributes) {
-					findConstraints( ((TLValueWithAttributes) simpleType).getParentType(), visitedEntities );
-					
-				} else if (simpleType instanceof TLCoreObject) {
-					findConstraints( ((TLCoreObject) simpleType).getSimpleFacet(), visitedEntities );
-					
-				} else if (simpleType instanceof TLSimpleFacet) {
-					findConstraints( ((TLSimpleFacet) simpleType).getSimpleType(), visitedEntities );
-					
-				} else if (simpleType instanceof TLListFacet) {
-					TLListFacet listFacet = (TLListFacet) simpleType;
-					
-					if (listFacet.getFacetType() == TLFacetType.SIMPLE) {
-						findConstraints( ((TLListFacet) simpleType).getItemFacet(), visitedEntities );
-					}
-					
-				} else if (simpleType instanceof TLClosedEnumeration) {
-					baseSimpleType = simpleType;
-					
-				} else if (simpleType instanceof XSDSimpleType) {
-					JsonSchema simpleSchema = xsdSimplePrimitives.get( simpleType.getLocalName() );
-					
-					if (simpleSchema != null) {
-						AbstractLibrary xsdLibrary = simpleType.getOwningModel().getLibrariesForNamespace(
-								XMLConstants.W3C_XML_SCHEMA_NS_URI ).get( 0 );
-						
-						switch (simpleSchema.getType()) {
-							case JSON_DATETIME:
-								baseSimpleType = xsdLibrary.getNamedMember( "dateTime" );
-								break;
-							case JSON_DATE:
-								baseSimpleType = xsdLibrary.getNamedMember( "date" );
-								break;
-							case JSON_STRING:
-								baseSimpleType = xsdLibrary.getNamedMember( "string" );
-								break;
-							default:
-								baseSimpleType = simpleType;
-								break;
-						}
-						
-						if (pattern == null) {
-							pattern = simpleSchema.getPattern();
-						}
-						if ((minLength < 0) && (simpleSchema.getMinLength() != null)) {
-							minLength = simpleSchema.getMinLength();
-						}
-						if ((maxLength < 0) && (simpleSchema.getMaxLength() != null)) {
-							maxLength = simpleSchema.getMaxLength();
-						}
-						
-					} else {
-						baseSimpleType = simpleType;
-					}
+		String simpleTypeKey;
+		
+		if (simpleType == null) {
+			return;
+		}
+		simpleTypeKey = simpleType.getNamespace() + ":" + simpleType.getLocalName();
+		
+		if (!visitedEntities.contains( simpleTypeKey )) {
+			if (simpleType instanceof TLSimple) {
+				findTLSimpleConstraints( (TLSimple) simpleType, visitedEntities );
+				
+			} else if (simpleType instanceof TLValueWithAttributes) {
+				findConstraints( ((TLValueWithAttributes) simpleType).getParentType(), visitedEntities );
+				
+			} else if (simpleType instanceof TLCoreObject) {
+				findConstraints( ((TLCoreObject) simpleType).getSimpleFacet(), visitedEntities );
+				
+			} else if (simpleType instanceof TLSimpleFacet) {
+				findConstraints( ((TLSimpleFacet) simpleType).getSimpleType(), visitedEntities );
+				
+			} else if (simpleType instanceof TLListFacet) {
+				TLListFacet listFacet = (TLListFacet) simpleType;
+				
+				if (listFacet.getFacetType() == TLFacetType.SIMPLE) {
+					findConstraints( ((TLListFacet) simpleType).getItemFacet(), visitedEntities );
 				}
-				visitedEntities.add( simpleTypeKey );
+				
+			} else if (simpleType instanceof TLClosedEnumeration) {
+				baseSimpleType = simpleType;
+				
+			} else if (simpleType instanceof XSDSimpleType) {
+				findXsdSimpleConstraints( (XSDSimpleType) simpleType );
 			}
+			visitedEntities.add( simpleTypeKey );
+		}
+	}
+
+	/**
+	 * Initializes constraints from the given OTM simple type.
+	 * 
+	 * @param simple  the OTM simple type for which to find constraints
+	 * @param visitedEntities  the set of qualified names of entities aready visited
+	 */
+	private void findTLSimpleConstraints(TLSimple simple, Set<String> visitedEntities) {
+		if (notInitialized( pattern, simple.getPattern() )) {
+			pattern = simple.getPattern();
+		}
+		if (notInitialized( minLength, simple.getMinLength() )) {
+			minLength = simple.getMinLength();
+		}
+		if (notInitialized( maxLength, simple.getMaxLength() )) {
+			maxLength = simple.getMaxLength();
+		}
+		if (notInitialized( fractionDigits, simple.getFractionDigits() )) {
+			fractionDigits = simple.getFractionDigits();
+		}
+		if (notInitialized( totalDigits, simple.getTotalDigits() )) {
+			totalDigits = simple.getTotalDigits();
+		}
+		if (notInitialized( minInclusive, simple.getMinInclusive() )) {
+			minInclusive = simple.getMinInclusive();
+		}
+		if (notInitialized( maxInclusive, simple.getMaxInclusive() )) {
+			maxInclusive = simple.getMaxInclusive();
+		}
+		if (notInitialized( minExclusive, simple.getMinExclusive() )) {
+			minExclusive = simple.getMinExclusive();
+		}
+		if (notInitialized( maxExclusive, simple.getMaxExclusive() )) {
+			maxExclusive = simple.getMaxExclusive();
+		}
+		listTypeInd |= simple.isListTypeInd();
+		
+		findConstraints( simple.getParentType(),  visitedEntities );
+		
+		// Work-around for OTM-DE since it represents XSDSimple types as TLSimples (reason unknown)
+		if (simple.getParentType() == null) {
+			baseSimpleType = simple;
+		}
+	}
+	
+	/**
+	 * Returns true if the given current value has not yet been initialized.
+	 * 
+	 * @param currentValue  the current simple-type-info value
+	 * @param entityValue  the value provided by the entity being inspected
+	 * @return
+	 */
+	private boolean notInitialized(String currentValue, String entityValue) {
+		return (currentValue == null) && (entityValue != null);
+	}
+
+	/**
+	 * Returns true if the given current value has not yet been initialized.
+	 * 
+	 * @param currentValue  the current simple-type-info value
+	 * @param entityValue  the value provided by the entity being inspected
+	 * @return
+	 */
+	private boolean notInitialized(int currentValue, int entityValue) {
+		return (currentValue < 0) && (entityValue >= 0);
+	}
+
+	/**
+	 * Initializes constraints from the given XSD simple type.
+	 * 
+	 * @param xsdSimpleType  the XSD simple type for which to find constraints
+	 */
+	private void findXsdSimpleConstraints(XSDSimpleType xsdSimpleType) {
+		JsonSchema simpleSchema = xsdSimplePrimitives.get( xsdSimpleType.getLocalName() );
+		
+		if (simpleSchema != null) {
+			AbstractLibrary xsdLibrary = xsdSimpleType.getOwningModel().getLibrariesForNamespace(
+					XMLConstants.W3C_XML_SCHEMA_NS_URI ).get( 0 );
+			
+			switch (simpleSchema.getType()) {
+				case JSON_DATETIME:
+					baseSimpleType = xsdLibrary.getNamedMember( "dateTime" );
+					break;
+				case JSON_DATE:
+					baseSimpleType = xsdLibrary.getNamedMember( "date" );
+					break;
+				case JSON_STRING:
+					baseSimpleType = xsdLibrary.getNamedMember( "string" );
+					break;
+				default:
+					baseSimpleType = xsdSimpleType;
+					break;
+			}
+			
+			if (pattern == null) {
+				pattern = simpleSchema.getPattern();
+			}
+			if ((minLength < 0) && (simpleSchema.getMinLength() != null)) {
+				minLength = simpleSchema.getMinLength();
+			}
+			if ((maxLength < 0) && (simpleSchema.getMaxLength() != null)) {
+				maxLength = simpleSchema.getMaxLength();
+			}
+			
+		} else {
+			baseSimpleType = xsdSimpleType;
 		}
 	}
 	

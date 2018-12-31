@@ -23,6 +23,7 @@ import java.util.Set;
 import javax.xml.XMLConstants;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
+import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
 import org.opentravel.schemacompiler.codegen.CodeGenerator;
@@ -45,6 +46,7 @@ import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.XSDLibrary;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
+import org.opentravel.schemacompiler.validate.ValidationException;
 import org.springframework.context.ApplicationContext;
 
 /**
@@ -95,53 +97,22 @@ public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask im
      *            required
      * @throws SchemaCompilerException
      */
-    @SuppressWarnings("unchecked")
     protected void compileXmlSchemas(Collection<TLLibrary> userDefinedLibraries,
             Collection<XSDLibrary> legacySchemas, CodeGenerationContext context,
             CodeGenerationFilenameBuilder<?> filenameBuilder, CodeGenerationFilter filter)
             throws SchemaCompilerException {
 
-        // Generate output for all user-defined libraries
         TLModel model = getModel(userDefinedLibraries, legacySchemas);
 
         if (model == null) {
             throw new SchemaCompilerException(
                     "No libraries or legacy schemas found for code generation task.");
         }
-        ImportSchemaLocations importLocations = analyzeImportDependencies(model, context,
-                filenameBuilder, filter);
+        ImportSchemaLocations importLocations = analyzeImportDependencies(model, context, filenameBuilder, filter);
 
-        for (TLLibrary library : userDefinedLibraries) {
-            CodeGenerator<TLLibrary> xsdGenerator = newCodeGenerator(
-                    CodeGeneratorFactory.XSD_TARGET_FORMAT, TLLibrary.class,
-                    (CodeGenerationFilenameBuilder<TLLibrary>) filenameBuilder, filter);
-
-            if (xsdGenerator instanceof AbstractXsdCodeGenerator) {
-                ((AbstractXsdCodeGenerator<?>) xsdGenerator)
-                        .setImportSchemaLocations(importLocations);
-            }
-            addGeneratedFiles(xsdGenerator.generateOutput(library, context));
-
-            // If any non-xsd built-in dependencies were identified, add them to the current filter
-            if ((filter != null) && (xsdGenerator instanceof AbstractJaxbCodeGenerator)) {
-                AbstractJaxbCodeGenerator<?> generator = (AbstractJaxbCodeGenerator<?>) xsdGenerator;
-
-                for (SchemaDeclaration schemaDeclaration : generator.getCompileTimeDependencies()) {
-                    if (schemaDeclaration.getFilename(CodeGeneratorFactory.XSD_TARGET_FORMAT)
-                    		.endsWith(".xsd")) {
-                        continue;
-                    }
-                    AbstractLibrary dependentLib = model.getLibrary(
-                            schemaDeclaration.getNamespace(), schemaDeclaration.getName());
-
-                    if (dependentLib instanceof BuiltInLibrary) {
-                        filter.addBuiltInLibrary((BuiltInLibrary) dependentLib);
-                    }
-                }
-            }
+		for (TLLibrary library : userDefinedLibraries) {
+	        generateXsdForLibrary( library, model, context, filter, filenameBuilder, importLocations );
         }
-
-        // Generate output for all legacy XML schema libraries
 
         // If a filter was not passed to this method create one that will identify the legacy
         // schemas (and schema extensions) are really needed in the output folder.
@@ -159,9 +130,76 @@ public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask im
             }
             legacySchemaFilter = filterBuilder.buildFilter();
         }
+        generateLegacySchemas( legacySchemas, legacySchemaFilter, context, filenameBuilder );
+        
+        generateBuiltIns( model, context, CodeGeneratorFactory.XSD_TARGET_FORMAT,
+        		filter, filenameBuilder, importLocations );
 
-        // Copy the required legacy schemas to the output folder
-        CodeGenerator<XSDLibrary> legacyGenerator = newCodeGenerator(
+        // Generate any consolidated import files (if needed)
+        addGeneratedFiles(importLocations.generateConsolidatedImportFiles());
+    }
+
+	/**
+	 * Generate XML schema output for the given user-defined library.
+	 * 
+	 * @param userDefinedLibraries  the libraries for which to generate output
+	 * @param model  the model that contains all of the libraries and legacy schemas
+	 * @param context  the code generation context
+	 * @param filter  the code generation filter (may be null)
+	 * @param filenameBuilder  the filename builder to use when creating new output files
+	 * @param importLocations  specifies the import locations for other libraries and schemas
+	 * @throws CodeGenerationException  thrown if an error occurs during code generation
+	 * @throws ValidationException  thrown if any validation errors are detected in the model
+	 */
+	@SuppressWarnings("unchecked")
+	private void generateXsdForLibrary(TLLibrary library, TLModel model,
+			CodeGenerationContext context, CodeGenerationFilter filter,
+			CodeGenerationFilenameBuilder<?> filenameBuilder, ImportSchemaLocations importLocations)
+			throws CodeGenerationException, ValidationException {
+        CodeGenerator<TLLibrary> xsdGenerator = newCodeGenerator(
+                CodeGeneratorFactory.XSD_TARGET_FORMAT, TLLibrary.class,
+                (CodeGenerationFilenameBuilder<TLLibrary>) filenameBuilder, filter);
+
+        if (xsdGenerator instanceof AbstractXsdCodeGenerator) {
+            ((AbstractXsdCodeGenerator<?>) xsdGenerator)
+                    .setImportSchemaLocations(importLocations);
+        }
+        addGeneratedFiles(xsdGenerator.generateOutput(library, context));
+
+        // If any non-xsd built-in dependencies were identified, add them to the current filter
+        if ((filter != null) && (xsdGenerator instanceof AbstractJaxbCodeGenerator)) {
+            AbstractJaxbCodeGenerator<?> generator = (AbstractJaxbCodeGenerator<?>) xsdGenerator;
+
+            for (SchemaDeclaration schemaDeclaration : generator.getCompileTimeDependencies()) {
+                if (schemaDeclaration.getFilename(CodeGeneratorFactory.XSD_TARGET_FORMAT)
+                		.endsWith(".xsd")) {
+                    continue;
+                }
+                AbstractLibrary dependentLib = model.getLibrary(
+                        schemaDeclaration.getNamespace(), schemaDeclaration.getName());
+
+                if (dependentLib instanceof BuiltInLibrary) {
+                    filter.addBuiltInLibrary((BuiltInLibrary) dependentLib);
+                }
+            }
+        }
+	}
+
+	/**
+	 * Copies the required legacy schemas to the output folder.
+	 * 
+	 * @param legacySchemas  the legacy schemas to be copied to the output location
+	 * @param legacySchemaFilter  the code generation filter
+	 * @param context  the code generation context
+	 * @param filenameBuilder  the filename builder to use when creating new output files
+	 * @throws CodeGenerationException  thrown if an error occurs during code generation
+	 * @throws ValidationException  thrown if any validation errors are detected in the model
+	 */
+	@SuppressWarnings("unchecked")
+	private void generateLegacySchemas(Collection<XSDLibrary> legacySchemas, CodeGenerationFilter legacySchemaFilter,
+			CodeGenerationContext context, CodeGenerationFilenameBuilder<?> filenameBuilder)
+			throws CodeGenerationException, ValidationException {
+		CodeGenerator<XSDLibrary> legacyGenerator = newCodeGenerator(
                 CodeGeneratorFactory.XSD_TARGET_FORMAT, XSDLibrary.class,
                 (CodeGenerationFilenameBuilder<XSDLibrary>) filenameBuilder, legacySchemaFilter);
         CodeGenerator<XSDLibrary> legacyExtensionGenerator = newCodeGenerator(
@@ -172,11 +210,27 @@ public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask im
             addGeneratedFiles(legacyGenerator.generateOutput(library, context));
             addGeneratedFiles(legacyExtensionGenerator.generateOutput(library, context));
         }
+	}
 
-        // Generate output for all built-in libraries
-        if (model != null) {
+	/**
+	 * Generate output for all built-in libraries.
+	 * 
+	 * @param model  the model from which to generate output
+	 * @param context  the code generation context
+	 * @param targetFormat  indicates the format of the built-in libraries to generate
+	 * @param filter  the code generation filter (may be null)
+	 * @param filenameBuilder  the filename builder to use when creating new output files
+	 * @param importLocations  specifies the import locations for other libraries and schemas
+	 * @throws CodeGenerationException  thrown if an error occurs during code generation
+	 * @throws ValidationException  thrown if any validation errors are detected in the model
+	 */
+	@SuppressWarnings("unchecked")
+	private void generateBuiltIns(TLModel model, CodeGenerationContext context, String targetFormat,
+			CodeGenerationFilter filter, CodeGenerationFilenameBuilder<?> filenameBuilder,
+			ImportSchemaLocations importLocations) throws CodeGenerationException, ValidationException {
+		if (model != null) {
             CodeGenerator<BuiltInLibrary> xsdGenerator = newCodeGenerator(
-                    CodeGeneratorFactory.XSD_TARGET_FORMAT, BuiltInLibrary.class,
+                    targetFormat, BuiltInLibrary.class,
                     (CodeGenerationFilenameBuilder<BuiltInLibrary>) filenameBuilder, filter);
             CodeGenerationContext builtInContext = context.getCopy();
 
@@ -188,10 +242,7 @@ public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask im
                 addGeneratedFiles(xsdGenerator.generateOutput(library, builtInContext));
             }
         }
-
-        // Generate any consolidated import files (if needed)
-        addGeneratedFiles(importLocations.generateConsolidatedImportFiles());
-    }
+	}
 
     /**
      * Performs a dependency analysis of all the libraries that are to be included in the generated
@@ -253,9 +304,24 @@ public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask im
             }
         }
 
-        // For built-ins, we have to dig into the schema declaration dependencies that are defined
-        // in
-        // the Spring application context
+        analyzeBuiltInDependencies( model, builtInOutputFolder, filter, builtInFilenameBuilder, importLocations );
+        
+        return importLocations;
+    }
+
+	/**
+	 * Adds dependencies that exist within the built-in libraries of the model.
+	 * 
+	 * @param model  the model for which to analyze built-in dependencies
+	 * @param builtInOutputFolder  the output folder where built-in libraries will be generated
+	 * @param filter  the code generation filter (may be null)
+	 * @param filenameBuilder  the filename builder to use when creating new output files
+	 * @param importLocations  specifies the import locations for other libraries and schemas
+	 */
+	private void analyzeBuiltInDependencies(TLModel model, File builtInOutputFolder, CodeGenerationFilter filter,
+			CodeGenerationFilenameBuilder<BuiltInLibrary> filenameBuilder, ImportSchemaLocations importLocations) {
+		// For built-ins, we have to dig into the schema declaration dependencies that are defined
+        // in the Spring application context
         Set<SchemaDeclaration> builtInDependencies = new HashSet<>();
 
         for (BuiltInLibrary library : model.getBuiltInLibraries()) {
@@ -273,14 +339,13 @@ public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask im
                 BuiltInLibrary builtInLib = getBuiltInLibrary(builtIn, model);
 
                 if (builtInLib != null) {
-                    filename = builtInFilenameBuilder.buildFilename(builtInLib, "xsd");
+                    filename = filenameBuilder.buildFilename(builtInLib, "xsd");
                 }
             }
             importLocations.setSchemaLocation(builtIn.getNamespace(), builtIn.getDefaultPrefix(),
                     new File(builtInOutputFolder, filename));
         }
-        return importLocations;
-    }
+	}
 
     /**
      * Searches the implied schema dependencies of the given built-in and adds any required
@@ -335,7 +400,6 @@ public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask im
      * @param filter  the filter used to identify specific artifacts for which schema generation is required
      * @throws SchemaCompilerException
      */
-    @SuppressWarnings("unchecked")
     protected void compileJsonSchemas(Collection<TLLibrary> userDefinedLibraries,
             Collection<XSDLibrary> legacySchemas, CodeGenerationContext context,
             CodeGenerationFilenameBuilder<?> filenameBuilder, CodeGenerationFilter filter)
@@ -349,44 +413,53 @@ public abstract class AbstractSchemaCompilerTask extends AbstractCompilerTask im
                     "No libraries or legacy schemas found for code generation task.");
         }
 
-        for (TLLibrary library : userDefinedLibraries) {
-            CodeGenerator<TLLibrary> jsonSchemaGenerator = newCodeGenerator(
-                    CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT, TLLibrary.class,
-                    (CodeGenerationFilenameBuilder<TLLibrary>) filenameBuilder, filter);
+		for (TLLibrary library : userDefinedLibraries) {
+	        generateJsonForLibrary( library, model, context, filter, filenameBuilder );
+        }
 
-            addGeneratedFiles(jsonSchemaGenerator.generateOutput(library, context));
+        // Generate output for all built-in libraries
+        generateBuiltIns( model, context, CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT, filter, filenameBuilder, null );
+    }
 
-            // If any OTM built-in dependencies were identified, add them to the current filter
-            if ((filter != null) && (jsonSchemaGenerator instanceof AbstractJsonSchemaCodeGenerator)) {
-            	AbstractJsonSchemaCodeGenerator<?> generator = (AbstractJsonSchemaCodeGenerator<?>) jsonSchemaGenerator;
+	/**
+	 * Generate JSON schema output for the given user-defined library.
+	 * 
+	 * @param userDefinedLibraries  the libraries for which to generate output
+	 * @param model  the model that contains all of the libraries and legacy schemas
+	 * @param context  the code generation context
+	 * @param filter  the code generation filter (may be null)
+	 * @param filenameBuilder  the filename builder to use when creating new output files
+	 * @throws CodeGenerationException  thrown if an error occurs during code generation
+	 * @throws ValidationException  thrown if any validation errors are detected in the model
+	 */
+    @SuppressWarnings("unchecked")
+	private void generateJsonForLibrary(TLLibrary library, TLModel model, CodeGenerationContext context,
+			CodeGenerationFilter filter, CodeGenerationFilenameBuilder<?> filenameBuilder)
+					throws CodeGenerationException, ValidationException {
+        CodeGenerator<TLLibrary> jsonSchemaGenerator = newCodeGenerator(
+                CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT, TLLibrary.class,
+                (CodeGenerationFilenameBuilder<TLLibrary>) filenameBuilder, filter);
 
-                for (SchemaDeclaration schemaDeclaration : generator.getCompileTimeDependencies()) {
-                	String schemaFilename = schemaDeclaration.getFilename(CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT);
-                	
-                    if ((schemaFilename != null) && schemaFilename.endsWith(".json")) {
-                        AbstractLibrary dependentLib = model.getLibrary(
-                                schemaDeclaration.getNamespace(), schemaDeclaration.getName());
+        addGeneratedFiles(jsonSchemaGenerator.generateOutput(library, context));
 
-                        if (dependentLib instanceof BuiltInLibrary) {
-                            filter.addBuiltInLibrary((BuiltInLibrary) dependentLib);
-                        }
+        // If any OTM built-in dependencies were identified, add them to the current filter
+        if ((filter != null) && (jsonSchemaGenerator instanceof AbstractJsonSchemaCodeGenerator)) {
+        	AbstractJsonSchemaCodeGenerator<?> generator = (AbstractJsonSchemaCodeGenerator<?>) jsonSchemaGenerator;
+
+            for (SchemaDeclaration schemaDeclaration : generator.getCompileTimeDependencies()) {
+            	String schemaFilename = schemaDeclaration.getFilename(CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT);
+            	
+                if ((schemaFilename != null) && schemaFilename.endsWith(".json")) {
+                    AbstractLibrary dependentLib = model.getLibrary(
+                            schemaDeclaration.getNamespace(), schemaDeclaration.getName());
+
+                    if (dependentLib instanceof BuiltInLibrary) {
+                        filter.addBuiltInLibrary((BuiltInLibrary) dependentLib);
                     }
                 }
             }
         }
-
-        // Generate output for all built-in libraries
-        if (model != null) {
-            CodeGenerator<BuiltInLibrary> xsdGenerator = newCodeGenerator(
-                    CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT, BuiltInLibrary.class,
-                    (CodeGenerationFilenameBuilder<BuiltInLibrary>) filenameBuilder, filter);
-            CodeGenerationContext builtInContext = context.getCopy();
-
-            for (BuiltInLibrary library : model.getBuiltInLibraries()) {
-                addGeneratedFiles(xsdGenerator.generateOutput(library, builtInContext));
-            }
-        }
-    }
+	}
 
     /**
      * @see org.opentravel.schemacompiler.task.AbstractCompilerTask#createContext()

@@ -75,53 +75,68 @@ public class DefaultAuthorizationProvider implements AuthorizationProvider {
         // Traverse up the namespace hierarchy gathering all of the granted and denied permissions
         // for this user
         for (String ns : getNamespaceHierarchy(namespace)) {
-            AuthorizationResource authResource = getAuthorizationResource(ns);
-            Set<RepositoryPermission> nsGrants = authResource.getGrantedPermissions(user);
-            Set<RepositoryPermission> nsDenies = authResource.getDeniedPermissions(user);
-            RepositoryPermission deniedPermission = null;
-            int grantRank = getRank(grantedPermission);
-            int denyRank = 99;
-
-            // Find the least-restrictive GRANT permission that we have seen so far (at any level)
-            for (RepositoryPermission pGrant : nsGrants) {
-                int pGrantRank = getRank(pGrant);
-
-                if (pGrantRank > grantRank) {
-                    grantedPermission = pGrant;
-                    grantRank = pGrantRank;
-                }
-            }
-
-            // Find the most-restrictive DENY permission declared at this level
-            for (RepositoryPermission pDeny : nsDenies) {
-                int pDenyRank = getRank(pDeny);
-
-                if (pDenyRank < denyRank) {
-                    deniedPermission = pDeny;
-                    denyRank = pDenyRank;
-                }
-            }
-
-            // Determine if the DENY permission at this level should downgrade our current GRANT
-            if (deniedPermission == RepositoryPermission.READ_FINAL) {
-                // Denying Read-Final means no granted access at all
-                grantedPermission = null;
-
-            } else if (deniedPermission == RepositoryPermission.READ_DRAFT) {
-                // Denying Read-Draft means the maximum granted permission is Read-Final
-                if (grantedPermission != null) {
-                    grantedPermission = RepositoryPermission.READ_FINAL;
-                }
-
-            } else if ((deniedPermission == RepositoryPermission.WRITE)
-            		&& (grantedPermission == RepositoryPermission.WRITE)) {
-                // Denying Write means the maximum granted permission is Read-Draft
-                grantedPermission = RepositoryPermission.READ_DRAFT;
-            }
+            grantedPermission = assessGrantedPermission( ns, grantedPermission, user );
         }
 
         return grantedPermission;
     }
+
+	/**
+	 * Assesses the user's permissions for the specified namespace and adjusts the granted
+	 * permission as required.  The updated permission grant is returned by this method.
+	 * 
+	 * @param ns  the namespace for which to assess the user's permissions
+	 * @param currentGrantedPermission  the permission that has been assessed for the user prior to this call
+	 * @param user  the user for which the access check is being made
+	 * @return RepositoryPermission
+	 */
+	private RepositoryPermission assessGrantedPermission(String ns, RepositoryPermission currentGrantedPermission,
+			UserPrincipal user) {
+		AuthorizationResource authResource = getAuthorizationResource(ns);
+		Set<RepositoryPermission> nsGrants = authResource.getGrantedPermissions(user);
+		Set<RepositoryPermission> nsDenies = authResource.getDeniedPermissions(user);
+		RepositoryPermission deniedPermission = null;
+		int grantRank = getRank(currentGrantedPermission);
+		int denyRank = 99;
+
+		// Find the least-restrictive GRANT permission that we have seen so far (at any level)
+		for (RepositoryPermission pGrant : nsGrants) {
+		    int pGrantRank = getRank(pGrant);
+
+		    if (pGrantRank > grantRank) {
+		        currentGrantedPermission = pGrant;
+		        grantRank = pGrantRank;
+		    }
+		}
+
+		// Find the most-restrictive DENY permission declared at this level
+		for (RepositoryPermission pDeny : nsDenies) {
+		    int pDenyRank = getRank(pDeny);
+
+		    if (pDenyRank < denyRank) {
+		        deniedPermission = pDeny;
+		        denyRank = pDenyRank;
+		    }
+		}
+
+		// Determine if the DENY permission at this level should downgrade our current GRANT
+		if (deniedPermission == RepositoryPermission.READ_FINAL) {
+		    // Denying Read-Final means no granted access at all
+		    currentGrantedPermission = null;
+
+		} else if (deniedPermission == RepositoryPermission.READ_DRAFT) {
+		    // Denying Read-Draft means the maximum granted permission is Read-Final
+		    if (currentGrantedPermission != null) {
+		        currentGrantedPermission = RepositoryPermission.READ_FINAL;
+		    }
+
+		} else if ((deniedPermission == RepositoryPermission.WRITE)
+				&& (currentGrantedPermission == RepositoryPermission.WRITE)) {
+		    // Denying Write means the maximum granted permission is Read-Draft
+		    currentGrantedPermission = RepositoryPermission.READ_DRAFT;
+		}
+		return currentGrantedPermission;
+	}
 
     /**
      * Searches the repository folder structure, looking for at least one authorization file. If

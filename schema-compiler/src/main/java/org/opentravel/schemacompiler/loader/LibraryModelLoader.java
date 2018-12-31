@@ -15,7 +15,6 @@
  */
 package org.opentravel.schemacompiler.loader;
 
-import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -1258,7 +1257,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
      *            the optional message parameters for the finding
      */
     private void addLoaderFinding(FindingType type, Validatable source, String messageKey,
-            Serializable... messageParams) {
+            Object... messageParams) {
         if (isImportValidationMessageKey(messageKey)) {
             importLoaderFindings.put(source.getValidationIdentity(), new ValidationFinding(source,
                     type, messageKey, messageParams));

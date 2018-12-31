@@ -189,85 +189,18 @@ public class StringCache {
                 synchronized (bcStats) {
                     // If the cache has been generated on a previous invocation
                     // while waiting fot the lock, just return the toString
-                    // value
-                    // we just calculated
+                    // value we just calculated
                     if (bcCache != null) {
                         return value;
                     }
-                    // Two cases: either we just exceeded the train count, in
-                    // which
-                    // case the cache must be created, or we just update the
-                    // count for
+                    // Two cases: either we just exceeded the train count, in which
+                    // case the cache must be created, or we just update the count for
                     // the string
                     if (bcCount > trainThreshold) {
-                        // Sort the entries according to occurrence
-                        TreeMap<Integer,ArrayList<ByteEntry>> tempMap = new TreeMap<>();
-                        Iterator<ByteEntry> entries = bcStats.keySet().iterator();
-                        while (entries.hasNext()) {
-                            ByteEntry entry = entries.next();
-                            int[] countA = bcStats.get(entry);
-                            Integer count = Integer.valueOf(countA[0]);
-                            // Add to the list for that count
-                            ArrayList<ByteEntry> list = tempMap.get(count);
-                            if (list == null) {
-                                // Create list
-                                list = new ArrayList<>();
-                                tempMap.put(count, list);
-                            }
-                            list.add(entry);
-                        }
-                        // Allocate array of the right size
-                        int size = bcStats.size();
-                        if (size > cacheSize) {
-                            size = cacheSize;
-                        }
-                        ByteEntry[] tempbcCache = new ByteEntry[size];
-                        // Fill it up using an alphabetical order
-                        // and a dumb insert sort
-                        ByteChunk tempChunk = new ByteChunk();
-                        int n = 0;
-                        while (n < size) {
-                            Object key = tempMap.lastKey();
-                            ArrayList<ByteEntry> list = tempMap.get(key);
-                            for (int i = 0; i < list.size() && n < size; i++, n++) {
-                                ByteEntry entry = list.get(i);
-                                tempChunk.setBytes(entry.getName(), 0, entry.getName().length);
-                                int insertPos = findClosest(tempChunk, tempbcCache, n);
-                                if (insertPos == n) {
-                                    tempbcCache[n + 1] = entry;
-                                } else {
-                                    System.arraycopy(tempbcCache, insertPos + 1, tempbcCache,
-                                            insertPos + 2, n - insertPos - 1);
-                                    tempbcCache[insertPos + 1] = entry;
-                                }
-                            }
-                            tempMap.remove(key);
-                        }
-                        bcCount = 0;
-                        bcStats.clear();
-                        bcCache = tempbcCache;
+                        createCache();
+                        
                     } else {
-                        bcCount++;
-                        // Allocate new ByteEntry for the lookup
-                        ByteEntry entry = new ByteEntry();
-                        entry.setValue(value);
-                        int[] count = bcStats.get(entry);
-                        if (count == null) {
-                            int end = bc.getEnd();
-                            int start = bc.getStart();
-                            // Create byte array and copy bytes
-                            entry.setName(new byte[bc.getLength()]);
-                            System.arraycopy(bc.getBuffer(), start, entry.getName(), 0, end - start);
-                            // Set encoding
-                            entry.setEnc(bc.getEncoding());
-                            // Initialize occurrence count to one
-                            count = new int[1];
-                            count[0] = 1;
-                            // Set in the stats hash map
-                            bcStats.put(entry, count);
-                        } else {
-                            count[0] = count[0] + 1;
-                        }
+                        updateCount( value, bc );
                     }
                 }
             }
@@ -286,6 +219,88 @@ public class StringCache {
 
     }
 
+	/**
+	 * Called to create a cache when the train count has been exceeded.
+	 */
+	private static void createCache() {
+		// Sort the entries according to occurrence
+		TreeMap<Integer,ArrayList<ByteEntry>> tempMap = new TreeMap<>();
+		Iterator<ByteEntry> entries = bcStats.keySet().iterator();
+		while (entries.hasNext()) {
+		    ByteEntry entry = entries.next();
+		    int[] countA = bcStats.get(entry);
+		    Integer count = Integer.valueOf(countA[0]);
+		    // Add to the list for that count
+		    ArrayList<ByteEntry> list = tempMap.get(count);
+		    if (list == null) {
+		        // Create list
+		        list = new ArrayList<>();
+		        tempMap.put(count, list);
+		    }
+		    list.add(entry);
+		}
+		// Allocate array of the right size
+		int size = bcStats.size();
+		if (size > cacheSize) {
+		    size = cacheSize;
+		}
+		ByteEntry[] tempbcCache = new ByteEntry[size];
+		// Fill it up using an alphabetical order
+		// and a dumb insert sort
+		ByteChunk tempChunk = new ByteChunk();
+		int n = 0;
+		while (n < size) {
+		    Object key = tempMap.lastKey();
+		    ArrayList<ByteEntry> list = tempMap.get(key);
+		    for (int i = 0; i < list.size() && n < size; i++, n++) {
+		        ByteEntry entry = list.get(i);
+		        tempChunk.setBytes(entry.getName(), 0, entry.getName().length);
+		        int insertPos = findClosest(tempChunk, tempbcCache, n);
+		        if (insertPos == n) {
+		            tempbcCache[n + 1] = entry;
+		        } else {
+		            System.arraycopy(tempbcCache, insertPos + 1, tempbcCache,
+		                    insertPos + 2, n - insertPos - 1);
+		            tempbcCache[insertPos + 1] = entry;
+		        }
+		    }
+		    tempMap.remove(key);
+		}
+		bcCount = 0;
+		bcStats.clear();
+		bcCache = tempbcCache;
+	}
+
+	/**
+	 * Updates the cache count for the given string value.
+	 * 
+	 * @param value  the string value for which to update the count
+	 * @param bc  the byte chunk
+	 */
+	private static void updateCount(String value, ByteChunk bc) {
+		bcCount++;
+		// Allocate new ByteEntry for the lookup
+		ByteEntry entry = new ByteEntry();
+		entry.setValue(value);
+		int[] count = bcStats.get(entry);
+		if (count == null) {
+		    int end = bc.getEnd();
+		    int start = bc.getStart();
+		    // Create byte array and copy bytes
+		    entry.setName(new byte[bc.getLength()]);
+		    System.arraycopy(bc.getBuffer(), start, entry.getName(), 0, end - start);
+		    // Set encoding
+		    entry.setEnc(bc.getEncoding());
+		    // Initialize occurrence count to one
+		    count = new int[1];
+		    count[0] = 1;
+		    // Set in the stats hash map
+		    bcStats.put(entry, count);
+		} else {
+		    count[0] = count[0] + 1;
+		}
+	}
+
     public static String toString(CharChunk cc) {
 
         // If the cache is null, then either caching is disabled, or we're
@@ -297,83 +312,18 @@ public class StringCache {
                 synchronized (ccStats) {
                     // If the cache has been generated on a previous invocation
                     // while waiting fot the lock, just return the toString
-                    // value
-                    // we just calculated
+                    // value we just calculated
                     if (ccCache != null) {
                         return value;
                     }
-                    // Two cases: either we just exceeded the train count, in
-                    // which
-                    // case the cache must be created, or we just update the
-                    // count for
+                    // Two cases: either we just exceeded the train count, in which
+                    // case the cache must be created, or we just update the count for
                     // the string
                     if (ccCount > trainThreshold) {
-                        // Sort the entries according to occurrence
-                        TreeMap<Integer,ArrayList<CharEntry>> tempMap = new TreeMap<>();
-                        Iterator<CharEntry> entries = ccStats.keySet().iterator();
-                        while (entries.hasNext()) {
-                            CharEntry entry = entries.next();
-                            int[] countA = ccStats.get(entry);
-                            Integer count = Integer.valueOf(countA[0]);
-                            // Add to the list for that count
-                            ArrayList<CharEntry> list = tempMap.get(count);
-                            if (list == null) {
-                                // Create list
-                                list = new ArrayList<>();
-                                tempMap.put(count, list);
-                            }
-                            list.add(entry);
-                        }
-                        // Allocate array of the right size
-                        int size = ccStats.size();
-                        if (size > cacheSize) {
-                            size = cacheSize;
-                        }
-                        CharEntry[] tempccCache = new CharEntry[size];
-                        // Fill it up using an alphabetical order
-                        // and a dumb insert sort
-                        CharChunk tempChunk = new CharChunk();
-                        int n = 0;
-                        while (n < size) {
-                            Object key = tempMap.lastKey();
-                            ArrayList<CharEntry> list = tempMap.get(key);
-                            for (int i = 0; i < list.size() && n < size; i++, n++) {
-                                CharEntry entry = list.get(i);
-                                tempChunk.setChars(entry.getName(), 0, entry.getName().length);
-                                int insertPos = findClosest(tempChunk, tempccCache, n);
-                                if (insertPos == n) {
-                                    tempccCache[n + 1] = entry;
-                                } else {
-                                    System.arraycopy(tempccCache, insertPos + 1, tempccCache,
-                                            insertPos + 2, n - insertPos - 1);
-                                    tempccCache[insertPos + 1] = entry;
-                                }
-                            }
-                            tempMap.remove(key);
-                        }
-                        ccCount = 0;
-                        ccStats.clear();
-                        ccCache = tempccCache;
+                        createCache2();
+                        
                     } else {
-                        ccCount++;
-                        // Allocate new CharEntry for the lookup
-                        CharEntry entry = new CharEntry();
-                        entry.setValue(value);
-                        int[] count = ccStats.get(entry);
-                        if (count == null) {
-                            int end = cc.getEnd();
-                            int start = cc.getStart();
-                            // Create char array and copy chars
-                            entry.setName(new char[cc.getLength()]);
-                            System.arraycopy(cc.getBuffer(), start, entry.getName(), 0, end - start);
-                            // Initialize occurrence count to one
-                            count = new int[1];
-                            count[0] = 1;
-                            // Set in the stats hash map
-                            ccStats.put(entry, count);
-                        } else {
-                            count[0] = count[0] + 1;
-                        }
+                        updateCount2( value, cc );
                     }
                 }
             }
@@ -391,6 +341,85 @@ public class StringCache {
         }
 
     }
+
+	/**
+	 * Updates the cache count for the given string value.
+	 * 
+	 * @param value  the string value for which to update the count
+	 * @param cc  the char chunk
+	 */
+	private static void updateCount2(String value, CharChunk cc) {
+		ccCount++;
+		// Allocate new CharEntry for the lookup
+		CharEntry entry = new CharEntry();
+		entry.setValue(value);
+		int[] count = ccStats.get(entry);
+		if (count == null) {
+		    int end = cc.getEnd();
+		    int start = cc.getStart();
+		    // Create char array and copy chars
+		    entry.setName(new char[cc.getLength()]);
+		    System.arraycopy(cc.getBuffer(), start, entry.getName(), 0, end - start);
+		    // Initialize occurrence count to one
+		    count = new int[1];
+		    count[0] = 1;
+		    // Set in the stats hash map
+		    ccStats.put(entry, count);
+		} else {
+		    count[0] = count[0] + 1;
+		}
+	}
+
+	/**
+	 * Called to create a cache when the train count has been exceeded.
+	 */
+	private static void createCache2() {
+		TreeMap<Integer,ArrayList<CharEntry>> tempMap = new TreeMap<>();
+		Iterator<CharEntry> entries = ccStats.keySet().iterator();
+		while (entries.hasNext()) {
+		    CharEntry entry = entries.next();
+		    int[] countA = ccStats.get(entry);
+		    Integer count = Integer.valueOf(countA[0]);
+		    // Add to the list for that count
+		    ArrayList<CharEntry> list = tempMap.get(count);
+		    if (list == null) {
+		        // Create list
+		        list = new ArrayList<>();
+		        tempMap.put(count, list);
+		    }
+		    list.add(entry);
+		}
+		// Allocate array of the right size
+		int size = ccStats.size();
+		if (size > cacheSize) {
+		    size = cacheSize;
+		}
+		CharEntry[] tempccCache = new CharEntry[size];
+		// Fill it up using an alphabetical order
+		// and a dumb insert sort
+		CharChunk tempChunk = new CharChunk();
+		int n = 0;
+		while (n < size) {
+		    Object key = tempMap.lastKey();
+		    ArrayList<CharEntry> list = tempMap.get(key);
+		    for (int i = 0; i < list.size() && n < size; i++, n++) {
+		        CharEntry entry = list.get(i);
+		        tempChunk.setChars(entry.getName(), 0, entry.getName().length);
+		        int insertPos = findClosest(tempChunk, tempccCache, n);
+		        if (insertPos == n) {
+		            tempccCache[n + 1] = entry;
+		        } else {
+		            System.arraycopy(tempccCache, insertPos + 1, tempccCache,
+		                    insertPos + 2, n - insertPos - 1);
+		            tempccCache[insertPos + 1] = entry;
+		        }
+		    }
+		    tempMap.remove(key);
+		}
+		ccCount = 0;
+		ccStats.clear();
+		ccCache = tempccCache;
+	}
 
     // ----------------------------------------------------- Protected Methods
 

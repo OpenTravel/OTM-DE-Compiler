@@ -211,35 +211,7 @@ public class URLUtils {
                         sourceUrl.lastIndexOf(urlPath)));
                 List<String> pathList = new ArrayList<>();
 
-                // Use the stack to resolve relative path references
-                boolean pathStarted = false;
-                Matcher m;
-
-                while ((m = pathPartPattern.matcher(urlPath)).find()) {
-                    String pathPart = m.group(1);
-
-                    if (pathPart.equals("/") && !pathStarted) {
-                        pathList.add(pathPart);
-
-                    } else if (pathPart.equals("/.") || pathPart.equals("/")) {
-                        // no action - discard
-                        pathStarted = true;
-
-                    } else if (pathPart.equals("/..")) {
-                        if (!pathList.isEmpty()) {
-                            pathList.remove(pathList.size() - 1);
-                        }
-                        pathStarted = true;
-
-                    } else {
-                        pathList.add(pathPart);
-                        pathStarted = true;
-                    }
-                    urlPath = urlPath.substring(m.end(1));
-                }
-                if (urlPath.length() > 0) {
-                    pathList.add(urlPath);
-                }
+                resolveRelativePathReferences( urlPath, pathList );
 
                 // Append the remaining path parts to the target URL
                 for (String pathPart : pathList) {
@@ -256,6 +228,43 @@ public class URLUtils {
         }
         return result;
     }
+
+	/**
+	 * Resolves relative path references (e.g. /. and /..) in the given path.
+	 * 
+	 * @param urlPath  the URL path for which relative references will be resolved
+	 * @param pathList  the list of URL path components
+	 */
+	private static void resolveRelativePathReferences(String urlPath, List<String> pathList) {
+		boolean pathStarted = false;
+		Matcher m;
+
+		while ((m = pathPartPattern.matcher(urlPath)).find()) {
+		    String pathPart = m.group(1);
+
+		    if (pathPart.equals("/") && !pathStarted) {
+		        pathList.add(pathPart);
+
+		    } else if (pathPart.equals("/.") || pathPart.equals("/")) {
+		        // no action - discard
+		        pathStarted = true;
+
+		    } else if (pathPart.equals("/..")) {
+		        if (!pathList.isEmpty()) {
+		            pathList.remove(pathList.size() - 1);
+		        }
+		        pathStarted = true;
+
+		    } else {
+		        pathList.add(pathPart);
+		        pathStarted = true;
+		    }
+		    urlPath = urlPath.substring(m.end(1));
+		}
+		if (urlPath.length() > 0) {
+		    pathList.add(urlPath);
+		}
+	}
 
     /**
      * Returns the relative URL string that represents the path from the specified originating

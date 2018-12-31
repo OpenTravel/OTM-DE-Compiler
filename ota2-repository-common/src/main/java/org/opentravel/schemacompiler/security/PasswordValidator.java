@@ -99,13 +99,7 @@ public class PasswordValidator {
 
                     // Decode stored password.
                     ByteChunk pwbc = new ByteChunk(userPassword.length());
-                    try {
-                        pwbc.append(userPassword.getBytes(), 0, userPassword.length());
-
-                    } catch (IOException e) {
-                        // Should never happen, but just in case...
-                        log.error("Could not append password bytes to chunk: ", e);
-                    }
+                    appendPassword( userPassword, pwbc );
 
                     CharChunk decoded = new CharChunk();
                     Base64.decode(pwbc, decoded);
@@ -136,6 +130,22 @@ public class PasswordValidator {
         return isValid;
     }
 
+	/**
+	 * Appends the given password string to the password byte chunk provided.
+	 * 
+	 * @param userPassword  the user password to append
+	 * @param pwbc  the password byte chunk
+	 */
+	private void appendPassword(String userPassword, ByteChunk pwbc) {
+		try {
+		    pwbc.append(userPassword.getBytes(), 0, userPassword.length());
+
+		} catch (IOException e) {
+		    // Should never happen, but just in case...
+		    log.error("Could not append password bytes to chunk: ", e);
+		}
+	}
+
     /**
      * Digest the password using the specified algorithm and convert the result to a corresponding
      * hexadecimal string. If exception, the plain credentials string is returned.
@@ -160,13 +170,7 @@ public class PasswordValidator {
                     bytes = credentials.getBytes();
 
                 } else {
-                    try {
-                        bytes = credentials.getBytes(digestEncoding);
-
-                    } catch (UnsupportedEncodingException uee) {
-                        log.error("Illegal digestEncoding: " + digestEncoding, uee);
-                        throw new IllegalArgumentException(uee.getMessage());
-                    }
+                    bytes = getCredentialsBytes( credentials );
                 }
                 messageDigest.update(bytes);
 
@@ -179,6 +183,25 @@ public class PasswordValidator {
         }
 
     }
+
+	/**
+	 * Returns the raw byte array for the given credentials string.
+	 * 
+	 * @param credentials  the string for which to return the raw byte array  
+	 * @return byte[]
+	 */
+	private byte[] getCredentialsBytes(String credentials) {
+		byte[] bytes = null;
+		
+		try {
+		    bytes = credentials.getBytes(digestEncoding);
+
+		} catch (UnsupportedEncodingException uee) {
+		    log.error("Illegal digestEncoding: " + digestEncoding, uee);
+		    throw new IllegalArgumentException(uee.getMessage());
+		}
+		return bytes;
+	}
 
     /**
      * Returns the message digest algorithm to employ when encrypting passwords.

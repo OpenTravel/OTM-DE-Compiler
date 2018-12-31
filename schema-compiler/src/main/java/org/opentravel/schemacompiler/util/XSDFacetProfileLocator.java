@@ -55,50 +55,50 @@ public class XSDFacetProfileLocator {
 	 */
 	private static XSDFacetProfile getXSDFacetProfile(TLAttributeType entity, HashSet<String> visitedEntities) {
 		XSDFacetProfile facetProfile;
+		String entityKey;
 		
-		if (entity != null) {
-			String entityKey = entity.getNamespace() + ":" + entity.getLocalName();
+		if (entity == null) {
+			return XSDFacetProfile.FP_UNKNOWN;
+		}
+		entityKey = entity.getNamespace() + ":" + entity.getLocalName();
+		
+		if (visitedEntities.contains( entityKey )) {
+			facetProfile = XSDFacetProfile.FP_UNKNOWN;
 			
-			if (visitedEntities.contains( entityKey )) {
-				facetProfile = XSDFacetProfile.FP_UNKNOWN;
-				
-			} else if (entity instanceof TLSimple) {
-				TLAttributeType parentType = ((TLSimple) entity).getParentType();
-				
-				if (parentType != null) {
-					visitedEntities.add( entityKey );
-					facetProfile = getXSDFacetProfile( parentType, visitedEntities );
-					
-				} else {
-					facetProfile = XSDFacetProfile.FP_UNKNOWN;
-				}
-			} else if (entity instanceof TLSimpleFacet) {
-				NamedEntity simpleType = ((TLSimpleFacet) entity).getSimpleType();
-				
-				if (simpleType instanceof TLAttributeType) {
-					visitedEntities.add( entityKey );
-					facetProfile = getXSDFacetProfile( (TLAttributeType) simpleType, visitedEntities );
-					
-				} else {
-					facetProfile = XSDFacetProfile.FP_UNKNOWN;
-				}
-				
-			} else if (entity instanceof TLListFacet) {
-				NamedEntity itemFacet = ((TLListFacet) entity).getItemFacet();
-				
-				if (itemFacet instanceof TLAttributeType) {
-					visitedEntities.add( entityKey );
-					facetProfile = getXSDFacetProfile( (TLAttributeType) itemFacet, visitedEntities );
-					
-				} else {
-					facetProfile = XSDFacetProfile.FP_UNKNOWN;
-				}
+		} else if (entity instanceof TLSimple) {
+			TLAttributeType parentType = ((TLSimple) entity).getParentType();
+			
+			if (parentType != null) {
+				visitedEntities.add( entityKey );
+				facetProfile = getXSDFacetProfile( parentType, visitedEntities );
 				
 			} else {
-				facetProfile = entity.getXSDFacetProfile();
+				facetProfile = XSDFacetProfile.FP_UNKNOWN;
 			}
+		} else if (entity instanceof TLSimpleFacet) {
+			NamedEntity simpleType = ((TLSimpleFacet) entity).getSimpleType();
+			
+			if (simpleType instanceof TLAttributeType) {
+				visitedEntities.add( entityKey );
+				facetProfile = getXSDFacetProfile( (TLAttributeType) simpleType, visitedEntities );
+				
+			} else {
+				facetProfile = XSDFacetProfile.FP_UNKNOWN;
+			}
+			
+		} else if (entity instanceof TLListFacet) {
+			NamedEntity itemFacet = ((TLListFacet) entity).getItemFacet();
+			
+			if (itemFacet instanceof TLAttributeType) {
+				visitedEntities.add( entityKey );
+				facetProfile = getXSDFacetProfile( (TLAttributeType) itemFacet, visitedEntities );
+				
+			} else {
+				facetProfile = XSDFacetProfile.FP_UNKNOWN;
+			}
+			
 		} else {
-			facetProfile = XSDFacetProfile.FP_UNKNOWN;
+			facetProfile = entity.getXSDFacetProfile();
 		}
 		return facetProfile;
 	}

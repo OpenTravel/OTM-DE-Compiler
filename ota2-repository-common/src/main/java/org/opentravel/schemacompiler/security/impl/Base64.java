@@ -115,7 +115,28 @@ public class Base64 {
             encodedData = new byte[numberTriplets * 4];
         }
 
-        byte k = 0;
+        encodeData( binaryData, encodedData, numberTriplets, fewerThan24bits );
+
+        String result;
+        try {
+            result = new String(encodedData, "ISO-8859-1");
+        } catch (UnsupportedEncodingException e) {
+            // Should never happen but in case it does...
+            result = new String(encodedData);
+        }
+        return result;
+    }
+
+	/**
+	 * Performs the encoding of the binary data provided.
+	 * 
+	 * @param binaryData  the binary data to be encoded
+	 * @param encodedData  the array that will receive the encoded data
+	 * @param numberTriplets  the number of triplets in the encoded data
+	 * @param fewerThan24bits  number of bits away from an even 24-bit boundary in the binary data
+	 */
+	private static void encodeData(byte[] binaryData, byte[] encodedData, int numberTriplets, int fewerThan24bits) {
+		byte k = 0;
         byte l = 0;
         byte b1 = 0;
         byte b2 = 0;
@@ -171,16 +192,7 @@ public class Base64 {
             encodedData[encodedIndex + 2] = lookUpBase64Alphabet[l << 2];
             encodedData[encodedIndex + 3] = PAD;
         }
-
-        String result;
-        try {
-            result = new String(encodedData, "ISO-8859-1");
-        } catch (UnsupportedEncodingException e) {
-            // Should never happen but in case it does...
-            result = new String(encodedData);
-        }
-        return result;
-    }
+	}
 
     /**
      * Decodes Base64 data into octets

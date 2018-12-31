@@ -592,40 +592,20 @@ public class SubscriptionManager {
 	 */
 	private void processNotificationJob(NotificationJob job) {
 		try {
-			List<InternetAddress> recipients;
-			List<String> userList;
+			List<String> userList = getUserList( job );
+			List<InternetAddress> recipients = getEmailAddresses( userList );
 			
-			switch (job.getAction()) {
-				case NS_CREATED:
-				case NS_DELETED:
-					userList = getNotificationList( job.getAffectedNamespace(), job.getAction() );
-					break;
-				default:
-					userList = getNotificationList( job.getItem(), job.getAction() );
-					break;
-			}
-			recipients = getEmailAddresses( userList );
 			log.info("Processing notification job: " + job.getAction() +
 					" (" + recipients.size() + " recipients)");
 			
 			if (!recipients.isEmpty()) {
 				final String smtpUser = smtpConfig.getSmtpUser();
 				final String smtpPassword = smtpConfig.getSmtpPassword();
-				Session mailSession = smtpConfig.isAuthEnable() ?
-						Session.getInstance( smtpConfig.getSmtpProps(),
-								 new javax.mail.Authenticator() {
-									@Override protected PasswordAuthentication getPasswordAuthentication() {
-										return new PasswordAuthentication( smtpUser, smtpPassword );
-									}
-								 }) :
-						Session.getInstance( smtpConfig.getSmtpProps() );
+				Session mailSession = getMailSession( smtpUser, smtpPassword );
 									 
 				InternetAddress fromAddress = new InternetAddress(
 						smtpConfig.getSenderAddress(), smtpConfig.getSenderName() );
 				Message message = new MimeMessage( mailSession );
-				boolean successInd = false;
-				boolean abortInd = false;
-				int retryCount = 1;
 				
 				for (InternetAddress recipient : recipients) {
 					message.addRecipient( RecipientType.TO, recipient );
@@ -641,34 +621,102 @@ public class SubscriptionManager {
 				message.setSubject( buildMessageSubject( job ) );
 				message.setContent( buildMessageBody( job ), "text/html" );
 				
-				while (!successInd && !abortInd && (retryCount <= MAX_RETRIES)) {
-					try {
-						if (!smtpConfig.isAuthEnable() && (smtpUser != null) && (smtpPassword != null)) {
-							Transport.send( message, smtpUser, smtpPassword );
-							
-						} else {
-							Transport.send( message );
-						}
-						successInd = true;
-						
-					} catch (SendFailedException | AuthenticationFailedException e) {
-						String errorMessage = e.getMessage();
-						if (errorMessage == null) errorMessage = e.getClass().getSimpleName();
-						log.error( "Fatal error sending email notification - " + errorMessage );
-						abortInd = true;
-						
-					} catch (Exception e) {
-						String errorMessage = e.getMessage();
-						if (errorMessage == null) errorMessage = e.getClass().getSimpleName();
-						log.error( "Error sending email notification (attempt " + retryCount + ") - " + errorMessage );
-						retryCount++;
-					}
-				}
+				sendEmailNotification( message, smtpUser, smtpPassword );
 			}
 			
 		} catch (Exception e) {
 			log.error("Error processing notification job.", e);
 		}
+	}
+
+	/**
+	 * Returns the SMTP mail session to use for email notifications.
+	 * 
+	 * @param smtpUser  the user who is sending the messages
+	 * @param smtpPassword  the password of the user sending the messages
+	 * @return Session
+	 */
+	private Session getMailSession(final String smtpUser, final String smtpPassword) {
+		return smtpConfig.isAuthEnable() ?
+				Session.getInstance( smtpConfig.getSmtpProps(),
+						 new javax.mail.Authenticator() {
+							@Override protected PasswordAuthentication getPasswordAuthentication() {
+								return new PasswordAuthentication( smtpUser, smtpPassword );
+							}
+						 }) :
+				Session.getInstance( smtpConfig.getSmtpProps() );
+	}
+
+	/**
+	 * Returns the list of repository users to which the given notification should be sent.
+	 * 
+	 * @param job  the notification job for which to return the list of applicable users
+	 * @return List<String>
+	 * @throws RepositoryException  thrown if an error occurs while accessing the repository search index
+	 */
+	private List<String> getUserList(NotificationJob job) throws RepositoryException {
+		List<String> userList;
+		switch (job.getAction()) {
+			case NS_CREATED:
+			case NS_DELETED:
+				userList = getNotificationList( job.getAffectedNamespace(), job.getAction() );
+				break;
+			default:
+				userList = getNotificationList( job.getItem(), job.getAction() );
+				break;
+		}
+		return userList;
+	}
+
+	/**
+	 * Sends the given email message notification.
+	 * 
+	 * @param message  the email message to be sent
+	 * @param smtpUser  the user who is sending the message
+	 * @param smtpPassword  the password of the user sending the message
+	 */
+	private void sendEmailNotification(Message message, final String smtpUser, final String smtpPassword) {
+		boolean successInd = false;
+		boolean abortInd = false;
+		int retryCount = 1;
+		
+		while (!successInd && !abortInd && (retryCount <= MAX_RETRIES)) {
+			try {
+				if (!smtpConfig.isAuthEnable() && (smtpUser != null) && (smtpPassword != null)) {
+					Transport.send( message, smtpUser, smtpPassword );
+					
+				} else {
+					Transport.send( message );
+				}
+				successInd = true;
+				
+			} catch (SendFailedException | AuthenticationFailedException e) {
+				String errorMessage = getErrorMessage( e );
+				log.error( "Fatal error sending email notification - " + errorMessage );
+				abortInd = true;
+				
+			} catch (Exception e) {
+				String errorMessage = e.getMessage();
+				if (errorMessage == null) errorMessage = e.getClass().getSimpleName();
+				log.error( "Error sending email notification (attempt " + retryCount + ") - " + errorMessage );
+				retryCount++;
+			}
+		}
+	}
+
+	/**
+	 * Returns the error message for the given exception.
+	 * 
+	 * @param e  the exception for which to return a message
+	 * @return String
+	 */
+	private String getErrorMessage(Exception e) {
+		String errorMessage = e.getMessage();
+		
+		if (errorMessage == null) {
+			errorMessage = e.getClass().getSimpleName();
+		}
+		return errorMessage;
 	}
 	
 	/**
