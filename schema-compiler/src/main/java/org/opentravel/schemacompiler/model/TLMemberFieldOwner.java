@@ -22,7 +22,7 @@ import java.util.List;
  *
  * @author S. Livezey
  */
-public interface TLMemberFieldOwner {
+public interface TLMemberFieldOwner extends ModelElement {
 	
 	/**
 	 * Returns the list of all member fields for the entity.

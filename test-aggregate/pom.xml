@@ -78,13 +78,6 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<configuration>
-					<excludes>
-						<exclude>org/opentravel/ns/ota2/**</exclude>
-						<exclude>org/w3/_2001/xmlschema/**</exclude>
-						<exclude>org/xmlsoap/schemas/wsdl/**</exclude>
-					</excludes>
-				</configuration>
 				<executions>
 					<execution>
 						<id>report-merge</id>
