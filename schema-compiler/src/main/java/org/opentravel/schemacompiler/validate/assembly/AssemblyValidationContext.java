@@ -35,12 +35,16 @@ import org.opentravel.schemacompiler.repository.ServiceAssemblyItem;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationContext;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Validation context to be used during the validation of
  * <code>ServiceAssembly</code> elements.
  */
 public class AssemblyValidationContext implements ValidationContext {
+	
+	private static final Logger log = LoggerFactory.getLogger(ValidationContext.class);
 	
 	private RepositoryManager repositoryManager;
 	private Map<String,List<Integer>> libraryCommitNumbers = new HashMap<>();
@@ -144,13 +148,9 @@ public class AssemblyValidationContext implements ValidationContext {
 						int commitNumber = getCommitNumber( member );
 						
 						if (commitNumber >= 0) {
-							List<Integer> commitList = libraryCommitNumbers.get( libraryId );
-							
-							if (commitList == null) {
-								commitList = new ArrayList<>();
-								libraryCommitNumbers.put( libraryId, commitList );
-							}
-							commitList.add( commitNumber );
+							libraryCommitNumbers.computeIfAbsent( libraryId,
+									id -> libraryCommitNumbers.put( id, new ArrayList<>() ) );
+							libraryCommitNumbers.get( libraryId ).add( commitNumber );
 						}
 						libraryItems.add( member.getRepositoryItem() );
 					}
@@ -158,7 +158,7 @@ public class AssemblyValidationContext implements ValidationContext {
 				}
 				
 			} catch (RepositoryException e) {
-				// TODO: Log warning - Unable to load release from remote repository.
+				log.warn( "Unable to load release from remote repository", e );
 			}
 		}
 	}
@@ -193,7 +193,7 @@ public class AssemblyValidationContext implements ValidationContext {
 			}
 			
 		} catch (RepositoryException e) {
-			// TODO: Log warning - Unable to load library history from remote repository.
+			log.warn( "Unable to load library history from remote repository.", e );
 		}
 		return commitNumber;
 	}

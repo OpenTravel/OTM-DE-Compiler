@@ -257,6 +257,7 @@ public class CircularReferenceChecker {
      * @param visitedEntities  the set of extension owners that have already been checked
      * @return boolean
      */
+	@SuppressWarnings("unlikely-arg-type")
 	private static boolean checkCircularReference(TLPropertyType elementType, TLPropertyOwner originalElementOwner,
 			Set<TLPropertyType> visitedEntities) {
 		boolean result = false;

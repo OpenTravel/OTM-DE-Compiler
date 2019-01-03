@@ -104,7 +104,25 @@ public class DuplicateFieldChecker {
 			memberFields = ValidatorUtils.getMembers( (TLExtensionPointFacet) fieldOwner );
 		}
 		
-		// Collect the number of occurrances of each field name
+		countFieldNameOccurrances( memberFields, fieldCounts );
+		
+		// Populate the list of duplicate names based on the occurrance count of each field name
+		for (Entry<String,Integer> entry : fieldCounts.entrySet()) {
+			String fieldName = entry.getKey();
+			
+			if (entry.getValue() > 1) {
+				duplicateFieldNames.add( fieldName );
+			}
+		}
+	}
+
+	/**
+	 * Collect the number of occurrances of each field name.
+	 * 
+	 * @param memberFields  the list of member fields to analyze
+	 * @param fieldCounts  the map associating each field name with the total number of occurrances
+	 */
+	private void countFieldNameOccurrances(List<TLModelElement> memberFields, Map<String,Integer> fieldCounts) {
 		for (TLModelElement field : memberFields) {
 			String fieldName;
 			
@@ -128,15 +146,6 @@ public class DuplicateFieldChecker {
 				} else {
 					fieldCounts.put( fieldName, 1 );
 				}
-			}
-		}
-		
-		// Populate the list of duplicate names based on the occurrance count of each field name
-		for (Entry<String,Integer> entry : fieldCounts.entrySet()) {
-			String fieldName = entry.getKey();
-			
-			if (entry.getValue() > 1) {
-				duplicateFieldNames.add( fieldName );
 			}
 		}
 	}

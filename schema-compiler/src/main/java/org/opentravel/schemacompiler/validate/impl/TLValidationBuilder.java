@@ -227,35 +227,44 @@ public final class TLValidationBuilder extends ValidationBuilder<TLValidationBui
         if (isNamedEntityProperty) {
             NamedEntity value = propertyValueAsNamedEntity();
 
-            if (value != null) {
-                boolean isDeprecated = false;
-
-                if (ValidatorUtils.isEmptyValueType(value)) {
-                	// Special case - do not warn deprecations on ota2:Empty
-                	
-                } else if (value instanceof TLDocumentationOwner) {
-                    isDeprecated = DocumentationFinder.isDeprecated( (TLDocumentationOwner) value );
-                    
-                } else {
-                    AbstractLibrary valueLibrary = value.getOwningLibrary();
-
-                    // Entities defined in built-in libraries that contain the keyword "Deprecated" will
-                    // always be considered to be deprecated. YES - this is a kludge, but we have no other
-                    // (easy) way to deprecate legacy (XSD) built-in schema entities. :)
-                    if (valueLibrary instanceof BuiltInLibrary) {
-                        isDeprecated = (valueLibrary.getName() != null)
-                                && (valueLibrary.getName().indexOf("Deprecated") >= 0);
-                    }
-                }
-                if (isDeprecated) {
-                    addFinding(DEPRECATED_TYPE_REFERENCE, value.getLocalName());
-                }
+            if ((value != null) && isDeprecated( value )) {
+                addFinding(DEPRECATED_TYPE_REFERENCE, value.getLocalName());
             }
+            
         } else {
             return super.assertNotNull();
         }
         return getThis();
     }
+
+	/**
+	 * Returns true if the given entity has been deprecated.
+	 * 
+	 * @param entity  the named entity to check for deprecation
+	 * @return boolean
+	 */
+	private boolean isDeprecated(NamedEntity entity) {
+		boolean isDeprecated = false;
+
+		if (ValidatorUtils.isEmptyValueType(entity)) {
+			// Special case - do not warn deprecations on ota2:Empty
+			
+		} else if (entity instanceof TLDocumentationOwner) {
+		    isDeprecated = DocumentationFinder.isDeprecated( (TLDocumentationOwner) entity );
+		    
+		} else {
+		    AbstractLibrary valueLibrary = entity.getOwningLibrary();
+
+		    // Entities defined in built-in libraries that contain the keyword "Deprecated" will
+		    // always be considered to be deprecated. YES - this is a kludge, but we have no other
+		    // (easy) way to deprecate legacy (XSD) built-in schema entities. :)
+		    if (valueLibrary instanceof BuiltInLibrary) {
+		        isDeprecated = (valueLibrary.getName() != null)
+		                && (valueLibrary.getName().indexOf("Deprecated") >= 0);
+		    }
+		}
+		return isDeprecated;
+	}
     
     /**
      * Adds a validation finding if the <code>NamedEntity</code> value is obsolete. Entities are
@@ -356,29 +365,39 @@ public final class TLValidationBuilder extends ValidationBuilder<TLValidationBui
             }
             
         } else {
-            StringBuilder dnBuilder = new StringBuilder("[");
-            boolean firstType = true;
-
-            for (Class<?> elementType : modelElementTypes) {
-                if (!firstType) {
-                    dnBuilder.append(", ");
-                }
-                try {
-                    String elementName = SchemaCompilerApplicationContext.getContext()
-                            .getMessage(elementType.getSimpleName() + ".displayName", null,
-                                    Locale.getDefault());
-
-                    dnBuilder.append(elementName);
-
-                } catch (Exception e) {
-                    dnBuilder.append((elementType == null) ? "[UNKNOWN TYPE]" : elementType
-                            .getSimpleName());
-                }
-                firstType = false;
-            }
-            displayName = dnBuilder.append(']').toString();
+            displayName = buildDisplayNames( modelElementTypes );
         }
         return displayName;
     }
+
+	/**
+	 * Builds a comma-separated list of display names for the given model types.
+	 * 
+	 * @param modelElementTypes  the list of model element types
+	 * @return String
+	 */
+	private String buildDisplayNames(Class<?>... modelElementTypes) {
+		StringBuilder dnBuilder = new StringBuilder("[");
+		boolean firstType = true;
+
+		for (Class<?> elementType : modelElementTypes) {
+		    if (!firstType) {
+		        dnBuilder.append(", ");
+		    }
+		    try {
+		        String elementName = SchemaCompilerApplicationContext.getContext()
+		                .getMessage(elementType.getSimpleName() + ".displayName", null,
+		                        Locale.getDefault());
+
+		        dnBuilder.append(elementName);
+
+		    } catch (Exception e) {
+		        dnBuilder.append((elementType == null) ? "[UNKNOWN TYPE]" : elementType
+		                .getSimpleName());
+		    }
+		    firstType = false;
+		}
+		return dnBuilder.append(']').toString();
+	}
 
 }

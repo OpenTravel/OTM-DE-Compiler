@@ -56,7 +56,6 @@ public class TLContextualFacetCompileValidator extends TLContextualFacetBaseVali
 		boolean specialCaseQueryFacet = (target.getFacetType() == TLFacetType.QUERY)
 				&& !(target.getOwningEntity() instanceof TLContextualFacet);
 		TLValidationBuilder builder = newValidationBuilder(target);
-		TLFacetType impliedType = getImpliedFacetType(target);
 		TLFacetOwner owningEntity = target.getOwningEntity();
 		
 		builder.setEntityReferenceProperty(OWNING_ENTITY, target.getOwningEntity(), target.getOwningEntityName())
@@ -73,28 +72,7 @@ public class TLContextualFacetCompileValidator extends TLContextualFacetBaseVali
 				.assertPatternMatch(NAME_XML_PATTERN);
 		}
 		
-		builder.setProperty("facetType", target.getFacetType()).setFindingType(FindingType.ERROR).assertNotNull();
-		
-		if ((impliedType != null) && (impliedType != target.getFacetType())) {
-			if (owningEntity instanceof TLBusinessObject) {
-				builder.addFinding(FindingType.ERROR, "businessObject.findingType", ERROR_INVALID_FACET_TYPE,
-						target.getFacetType().getIdentityName(), impliedType.getIdentityName());
-				
-			} else if (owningEntity instanceof TLChoiceObject) {
-				builder.addFinding(FindingType.ERROR, "choiceObject.findingType", ERROR_INVALID_FACET_TYPE,
-						target.getFacetType().getIdentityName());
-				
-			} else if (owningEntity instanceof TLContextualFacet) {
-				builder.addFinding(FindingType.ERROR, "contextualFacet.findingType", ERROR_INVALID_FACET_TYPE,
-						target.getFacetType().getIdentityName(), impliedType.getIdentityName());
-			}
-		}
-		
-		if (impliedType != null) {
-			builder.setProperty("identity", getSiblingFacets(target, impliedType))
-				.setFindingType(FindingType.ERROR)
-				.assertNoDuplicates( e -> ((TLContextualFacet) e).getFacetType().getIdentityName(((TLContextualFacet) e).getName() ) );
-		}
+		validateFacetType( target, owningEntity, builder );
 		
 		builder.setProperty("aliases", target.getAliases()).setFindingType(FindingType.ERROR).assertNotNull()
 			.assertContainsNoNullElements();
@@ -128,6 +106,41 @@ public class TLContextualFacetCompileValidator extends TLContextualFacetBaseVali
 			}
 		}
 		return builder.getFindings();
+	}
+
+	/**
+	 * Validates the type of the contextual facet.
+	 * 
+	 * @param target  the target contextual facet being validated
+	 * @param owningEntity  the entity that owns the contextual facet
+	 * @param builder  the validation builder where errors and warnings will be reported
+	 */
+	private void validateFacetType(TLContextualFacet target, TLFacetOwner owningEntity,
+			TLValidationBuilder builder) {
+		TLFacetType impliedType = getImpliedFacetType(target);
+		
+		builder.setProperty("facetType", target.getFacetType()).setFindingType(FindingType.ERROR).assertNotNull();
+		
+		if ((impliedType != null) && (impliedType != target.getFacetType())) {
+			if (owningEntity instanceof TLBusinessObject) {
+				builder.addFinding(FindingType.ERROR, "businessObject.findingType", ERROR_INVALID_FACET_TYPE,
+						target.getFacetType().getIdentityName(), impliedType.getIdentityName());
+				
+			} else if (owningEntity instanceof TLChoiceObject) {
+				builder.addFinding(FindingType.ERROR, "choiceObject.findingType", ERROR_INVALID_FACET_TYPE,
+						target.getFacetType().getIdentityName());
+				
+			} else if (owningEntity instanceof TLContextualFacet) {
+				builder.addFinding(FindingType.ERROR, "contextualFacet.findingType", ERROR_INVALID_FACET_TYPE,
+						target.getFacetType().getIdentityName(), impliedType.getIdentityName());
+			}
+		}
+		
+		if (impliedType != null) {
+			builder.setProperty("identity", getSiblingFacets(target, impliedType))
+				.setFindingType(FindingType.ERROR)
+				.assertNoDuplicates( e -> ((TLContextualFacet) e).getFacetType().getIdentityName(((TLContextualFacet) e).getName() ) );
+		}
 	}
 	
 	/**

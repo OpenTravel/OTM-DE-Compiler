@@ -87,9 +87,9 @@ import org.w3._2001.xmlschema.TopLevelElement;
 public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys {
 
 	private static final String INVALID_NAMESPACE_URI = "Invalid namespace URI on import: ";
+	private static final boolean ENFORCE_CRC_VALIDATION = false;
 	
 	private static final Logger log = LoggerFactory.getLogger(LibraryModelLoader.class);
-	private static final boolean ENFORCE_CRC_VALIDATION = false;
 
     /** Internal indicator used to define the possible types of loader operations. */
     private enum OperationType { CLIENT_REQUESTED, INCLUDE, IMPORT }

@@ -166,27 +166,51 @@ public class ChameleonTypeChecker {
      */
     private void navigateXSDLibraryDependencies(XSDLibrary legacySchema, String referringNamespace,
             Collection<XSDLibrary> visitedLibraries) {
-        String schemaNamespace = legacySchema.getNamespace();
+        String schemaNamespace = addChameleonSchema( legacySchema, referringNamespace, visitedLibraries );
 
-        // If the schema is a previously-undiscovered chameleon that will be assigned to the source
-        // namespace, add it to the list of libraries to be checked for duplicate symbols
-        if (((schemaNamespace == null) || schemaNamespace
+        // Recursively analyze the imported/included schemas
+        navigateXsdIncludes( legacySchema, schemaNamespace, visitedLibraries );
+        navigateXsdImports( legacySchema, schemaNamespace, visitedLibraries );
+    }
+
+	/**
+	 * If the schema is a previously-undiscovered chameleon that will be assigned to the source
+	 * namespace, add it to the list of libraries to be checked for duplicate symbols
+	 * 
+	 * @param legacySchema  the legacy schema to process
+	 * @param referringNamespace  the namespace of the schema that is referencing the given one
+	 * @param visitedLibraries  the list of libraries visited so far (prevents infinite loops)
+	 * @return String
+	 */
+	private String addChameleonSchema(XSDLibrary legacySchema, String referringNamespace,
+			Collection<XSDLibrary> visitedLibraries) {
+		String schemaNamespace = legacySchema.getNamespace();
+		
+		if (((schemaNamespace == null) || schemaNamespace
                 .equals(AnonymousEntityFilter.ANONYMOUS_PSEUDO_NAMESPACE))) {
+			chameleonSchemaMappings.computeIfAbsent( referringNamespace,
+					ns -> chameleonSchemaMappings.put( ns, new ArrayList<>() ) );
             List<XSDLibrary> chameleonSchemas = chameleonSchemaMappings.get(referringNamespace);
 
-            if (chameleonSchemas == null) {
-                chameleonSchemas = new ArrayList<>();
-                chameleonSchemaMappings.put(referringNamespace, chameleonSchemas);
-            }
             if (!chameleonSchemas.contains(legacySchema)) {
                 chameleonSchemas.add(legacySchema);
             }
             schemaNamespace = referringNamespace;
         }
         visitedLibraries.add(legacySchema);
+		return schemaNamespace;
+	}
 
-        // Recursively analyze the imported/included schemas
-        for (TLInclude include : legacySchema.getIncludes()) {
+	/**
+	 * Navigates the includes of the given legacy schema.
+	 * 
+	 * @param legacySchema  the legacy schema whose includes are to be navigated
+	 * @param schemaNamespace  the resolved namespace of the legacy schema
+	 * @param visitedLibraries  the list of libraries visited so far (prevents infinite loops)
+	 */
+	private void navigateXsdIncludes(XSDLibrary legacySchema, String schemaNamespace,
+			Collection<XSDLibrary> visitedLibraries) {
+		for (TLInclude include : legacySchema.getIncludes()) {
             if (include.getPath() != null) {
                 URL includedUrl = getReferencedLibraryURL(include.getPath(), legacySchema);
                 AbstractLibrary includedLibrary = legacySchema.getOwningModel().getLibrary(
@@ -199,8 +223,18 @@ public class ChameleonTypeChecker {
                 }
             }
         }
+	}
 
-        for (TLNamespaceImport nsImport : legacySchema.getNamespaceImports()) {
+	/**
+	 * Navigates the imports of the given legacy schema.
+	 * 
+	 * @param legacySchema  the legacy schema whose imports are to be navigated
+	 * @param schemaNamespace  the resolved namespace of the legacy schema
+	 * @param visitedLibraries  the list of libraries visited so far (prevents infinite loops)
+	 */
+	private void navigateXsdImports(XSDLibrary legacySchema, String schemaNamespace,
+			Collection<XSDLibrary> visitedLibraries) {
+		for (TLNamespaceImport nsImport : legacySchema.getNamespaceImports()) {
             if (nsImport.getFileHints() != null) {
                 for (String fileHint : nsImport.getFileHints()) {
                     URL importedUrl = getReferencedLibraryURL(fileHint, legacySchema);
@@ -215,7 +249,7 @@ public class ChameleonTypeChecker {
                 }
             }
         }
-    }
+	}
 
     /**
      * Returns the full URL that is referenced by the specified relative URL path.

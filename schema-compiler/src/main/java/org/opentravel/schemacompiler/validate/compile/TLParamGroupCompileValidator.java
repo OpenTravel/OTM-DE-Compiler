@@ -101,17 +101,30 @@ public class TLParamGroupCompileValidator extends TLParamGroupBaseValidator{
 				}
 				if (isValid) break;
 			}
+			
 			if (!isValid) {
-				TLFacetOwner ownerExtension = FacetCodegenUtils.getFacetOwnerExtension( facetOwner );
-				
-				if (ownerExtension instanceof TLBusinessObject) {
-					facetOwner = ownerExtension;
-				} else {
-					facetOwner = null;
-				}
+				facetOwner = nextFacetOwner( facetOwner );
 			}
 		}
 		return isValid;
+	}
+
+	/**
+	 * Returns the next-higher facet owner extension from the one provided.  If the
+	 * given owner does not have an extension, this method will return null.
+	 * 
+	 * @param facetOwner  the facet owner for which to return the extension
+	 * @return TLFacetOwner
+	 */
+	private TLFacetOwner nextFacetOwner(TLFacetOwner facetOwner) {
+		TLFacetOwner ownerExtension = FacetCodegenUtils.getFacetOwnerExtension( facetOwner );
+		
+		if (ownerExtension instanceof TLBusinessObject) {
+			facetOwner = ownerExtension;
+		} else {
+			facetOwner = null;
+		}
+		return facetOwner;
 	}
 	
 }

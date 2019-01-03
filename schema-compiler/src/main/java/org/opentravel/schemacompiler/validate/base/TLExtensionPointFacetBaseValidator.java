@@ -53,23 +53,17 @@ public class TLExtensionPointFacetBaseValidator extends TLValidatorBase<TLExtens
         }
         if (target.getAttributes() != null) {
             for (TLAttribute attribute : target.getAttributes()) {
-                if (attribute != null) {
-                    findings.addAll(attributeValidator.validate(attribute));
-                }
+                findings.addAll(attributeValidator.validate(attribute));
             }
         }
         if (target.getElements() != null) {
             for (TLProperty element : target.getElements()) {
-                if (element != null) {
-                    findings.addAll(elementValidator.validate(element));
-                }
+                findings.addAll(elementValidator.validate(element));
             }
         }
         if (target.getIndicators() != null) {
             for (TLIndicator indicator : target.getIndicators()) {
-                if (indicator != null) {
-                    findings.addAll(indicatorValidator.validate(indicator));
-                }
+                findings.addAll(indicatorValidator.validate(indicator));
             }
         }
         if (target.getDocumentation() != null) {

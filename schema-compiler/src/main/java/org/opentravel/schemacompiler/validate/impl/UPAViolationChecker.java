@@ -91,8 +91,56 @@ public class UPAViolationChecker {
 	 * @param fieldOwner  the owner of the field names to be analyzed
 	 */
 	private UPAViolationChecker(TLModelElement fieldOwner) {
-		List<TLModelElement> elementSequence;
+		List<TLModelElement> elementSequence = getElementSequence( fieldOwner );
 		
+		if (elementSequence.size() <= 1) {
+			return;
+		}
+		
+		for (int checkIdx = 1; checkIdx < elementSequence.size(); checkIdx++) {
+			TLModelElement checkElement = elementSequence.get( checkIdx );
+			boolean hasSubstitutionGroup = (checkElement instanceof TLProperty)
+					&& isSubstitutionGroupElement( (TLProperty) checkElement );
+			Set<QName> checkElementNames = new HashSet<>();
+			Set<QName> precedingNames = new HashSet<>();
+			
+			// Identify the possible names for the check element
+			if (checkElement instanceof TLIndicator) {
+				checkElementNames.addAll( getPossibleElementNames( (TLIndicator) checkElement ) );
+				
+			} else if (checkElement instanceof TLProperty) {
+				checkElementNames.addAll( getPossibleElementNames( (TLProperty) checkElement ) );
+			}
+			
+			// Collect a list of possible preceding names by starting with the previous
+			// element and working our way back towards the beginning of the list.
+			hasSubstitutionGroup = hasPrecedingElementConflict( elementSequence, precedingNames, checkIdx,
+					hasSubstitutionGroup );
+			
+			// Only report errors if we have encountered at least one substitution group
+			// element during this check; non-substition errors will be reported as duplicate
+			// names rather than UPA violations.
+			if (hasSubstitutionGroup) {
+				// If there is any overlap between the check element name(s) and the possible
+				// preceding names, then we have a UPA violation to report.
+				for (QName checkName : checkElementNames) {
+					if (precedingNames.contains( checkName )) {
+						upaViolationItems.add( checkElement );
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Returns the element sequence to be checked for UPA violations for the given field owner.
+	 * 
+	 * @param fieldOwner  the field owner for which to return the element sequence
+	 * @return List<TLModelElement>
+	 */
+	private List<TLModelElement> getElementSequence(TLModelElement fieldOwner) {
+		List<TLModelElement> elementSequence;
 		if (fieldOwner == null) {
 			throw new IllegalArgumentException("The field owner entity cannot be null.");
 		}
@@ -106,64 +154,43 @@ public class UPAViolationChecker {
 		} else { // instanceof TLValueWithAttributes
 			elementSequence = new ArrayList<>(); // no elements, so no possible UPA violations
 		}
-		
-		if (elementSequence.size() > 1) {
-			for (int checkIdx = 1; checkIdx < elementSequence.size(); checkIdx++) {
-				TLModelElement checkElement = elementSequence.get( checkIdx );
-				boolean hasSubstitutionGroup = (checkElement instanceof TLProperty)
-						&& isSubstitutionGroupElement( (TLProperty) checkElement );
-				Set<QName> checkElementNames = new HashSet<>();
-				Set<QName> precedingNames = new HashSet<>();
+		return elementSequence;
+	}
+
+	/**
+	 * Returns true if the current element under inspection has a conflict with the preceding one.
+	 * 
+	 * @param elementSequence  the overall sequence of elements being checked
+	 * @param precedingNames  the list of preceding names of the current element
+	 * @param checkIdx  the current index in the overall element sequence that is being checked for UPA errors
+	 * @param hasSubstitutionGroup  indicates if the current element defines a substitution group
+	 * @return boolean
+	 */
+	private boolean hasPrecedingElementConflict(List<TLModelElement> elementSequence, Set<QName> precedingNames,
+			int checkIdx, boolean hasSubstitutionGroup) {
+		for (int i = checkIdx - 1; i >= 0; i--) {
+			TLModelElement precedingElement = elementSequence.get( i );
+			
+			if (precedingElement instanceof TLIndicator) {
+				precedingNames.addAll( getPossibleElementNames( (TLIndicator) precedingElement ) );
 				
-				// Identify the possible names for the check element
-				if (checkElement instanceof TLIndicator) {
-					checkElementNames.addAll( getPossibleElementNames( (TLIndicator) checkElement ) );
-					
-				} else if (checkElement instanceof TLProperty) {
-					checkElementNames.addAll( getPossibleElementNames( (TLProperty) checkElement ) );
-				}
+			} else if (precedingElement instanceof TLProperty) {
+				TLProperty element = (TLProperty) precedingElement;
 				
-				// Collect a list of possible preceding names by starting with the previous
-				// element and working our way back towards the beginning of the list.
-				for (int i = checkIdx - 1; i >= 0; i--) {
-					TLModelElement precedingElement = elementSequence.get( i );
-					
-					if (precedingElement instanceof TLIndicator) {
-						precedingNames.addAll( getPossibleElementNames( (TLIndicator) precedingElement ) );
-						
-					} else if (precedingElement instanceof TLProperty) {
-						TLProperty element = (TLProperty) precedingElement;
-						
-						precedingNames.addAll( getPossibleElementNames( element ) );
-						hasSubstitutionGroup = isSubstitutionGroupElement( element );
-						
-						// If this element is mandatory, we can stop searching since prededing
-						// elements cannot create a UPA violation
-						//
-						// NOTE: Indicators are always optional, so we will never break out of the
-						//       loop unless we encounter a required TLProperty
-						if (element.isMandatory()) {
-							break;
-						}
-					}
-				}
+				precedingNames.addAll( getPossibleElementNames( element ) );
+				hasSubstitutionGroup = isSubstitutionGroupElement( element );
 				
-				// Only report errors if we have encountered at least one substitution group
-				// element during this check; non-substition errors will be reported as duplicate
-				// names rather than UPA violations.
-				if (hasSubstitutionGroup) {
-					
-					// If there is any overlap between the check element name(s) and the possible
-					// preceding names, then we have a UPA violation to report.
-					for (QName checkName : checkElementNames) {
-						if (precedingNames.contains( checkName )) {
-							upaViolationItems.add( checkElement );
-							break;
-						}
-					}
+				// If this element is mandatory, we can stop searching since prededing
+				// elements cannot create a UPA violation
+				//
+				// NOTE: Indicators are always optional, so we will never break out of the
+				//       loop unless we encounter a required TLProperty
+				if (element.isMandatory()) {
+					break;
 				}
 			}
 		}
+		return hasSubstitutionGroup;
 	}
 	
 	/**
@@ -232,31 +259,7 @@ public class UPAViolationChecker {
 		
 		if ((element != null) && (element.getOwningLibrary() != null)) {
 			if (isSubstitutionGroupElement( element )) {
-				TLPropertyType elementType = element.getType();
-				TLAlias ownerAlias = null;
-				
-				if (elementType instanceof TLAlias) {
-					ownerAlias = (TLAlias) elementType;
-					elementType = (TLPropertyType) ownerAlias.getOwningEntity();
-				}
-				
-				if (elementType instanceof TLCoreObject) {
-					TLCoreObject core = (TLCoreObject) elementType;
-					
-					addElementName( core.getSummaryFacet(), ownerAlias, elementNames );
-					addElementName( core.getDetailFacet(), ownerAlias, elementNames );
-					
-				} else { // instanceof TLBusinessObject
-					TLBusinessObject bo = (TLBusinessObject) elementType;
-					
-					addElementName( bo.getIdFacet(), ownerAlias, elementNames );
-					addElementName( bo.getSummaryFacet(), ownerAlias, elementNames );
-					addElementName( bo.getDetailFacet(), ownerAlias, elementNames );
-					
-					for (TLFacet customFacet : bo.getCustomFacets()) {
-						addElementName( customFacet, ownerAlias, elementNames );
-					}
-				}
+				addSubstitutionGroupNames( element, elementNames );
 				
 			} else {
 				String fieldName = fieldNameResolver.getIdentity( element );
@@ -268,6 +271,40 @@ public class UPAViolationChecker {
 			}
 		}
 		return elementNames;
+	}
+
+	/**
+	 * Adds element names for the given element's substitution group.
+	 * 
+	 * @param element  the element for which to return substitution group names
+	 * @param elementNames  the set of element names being populated
+	 */
+	private void addSubstitutionGroupNames(TLProperty element, Set<QName> elementNames) {
+		TLPropertyType elementType = element.getType();
+		TLAlias ownerAlias = null;
+		
+		if (elementType instanceof TLAlias) {
+			ownerAlias = (TLAlias) elementType;
+			elementType = (TLPropertyType) ownerAlias.getOwningEntity();
+		}
+		
+		if (elementType instanceof TLCoreObject) {
+			TLCoreObject core = (TLCoreObject) elementType;
+			
+			addElementName( core.getSummaryFacet(), ownerAlias, elementNames );
+			addElementName( core.getDetailFacet(), ownerAlias, elementNames );
+			
+		} else { // instanceof TLBusinessObject
+			TLBusinessObject bo = (TLBusinessObject) elementType;
+			
+			addElementName( bo.getIdFacet(), ownerAlias, elementNames );
+			addElementName( bo.getSummaryFacet(), ownerAlias, elementNames );
+			addElementName( bo.getDetailFacet(), ownerAlias, elementNames );
+			
+			for (TLFacet customFacet : bo.getCustomFacets()) {
+				addElementName( customFacet, ownerAlias, elementNames );
+			}
+		}
 	}
 	
 	/**

@@ -37,37 +37,33 @@ public abstract class TLContextualFacetBaseValidator extends TLValidatorBase<TLC
 	 */
 	@Override
 	protected ValidationFindings validateChildren(TLContextualFacet target) {
-        Validator<TLDocumentation> docValidator = getValidatorFactory().getValidatorForClass(TLDocumentation.class);
-        Validator<TLAttribute> attributeValidator = getValidatorFactory().getValidatorForClass(TLAttribute.class);
+		Validator<TLAttribute> attributeValidator = getValidatorFactory().getValidatorForClass(TLAttribute.class);
         Validator<TLProperty> elementValidator = getValidatorFactory().getValidatorForClass(TLProperty.class);
         Validator<TLIndicator> indicatorValidator = getValidatorFactory().getValidatorForClass(TLIndicator.class);
+        Validator<TLDocumentation> docValidator = getValidatorFactory().getValidatorForClass(TLDocumentation.class);
         ValidationFindings findings = new ValidationFindings();
         
         if (target.getDocumentation() != null) {
             findings.addAll(docValidator.validate(target.getDocumentation()));
         }
+        
         if (target.getAttributes() != null) {
             for (TLAttribute attribute : target.getAttributes()) {
-                if (attribute != null) {
-                    findings.addAll(attributeValidator.validate(attribute));
-                }
+                findings.addAll(attributeValidator.validate(attribute));
             }
         }
         if (target.getElements() != null) {
             for (TLProperty element : target.getElements()) {
-                if (element != null) {
-                    findings.addAll(elementValidator.validate(element));
-                }
+                findings.addAll(elementValidator.validate(element));
             }
         }
         if (target.getIndicators() != null) {
             for (TLIndicator indicator : target.getIndicators()) {
-                if (indicator != null) {
-                    findings.addAll(indicatorValidator.validate(indicator));
-                }
+                findings.addAll(indicatorValidator.validate(indicator));
             }
         }
+        
         return findings;
 	}
-	
+
 }
