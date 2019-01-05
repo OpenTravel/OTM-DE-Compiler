@@ -28,6 +28,7 @@ import org.opentravel.schemacompiler.diff.LibraryChangeSet;
 import org.opentravel.schemacompiler.diff.LibraryChangeType;
 import org.opentravel.schemacompiler.diff.ModelCompareOptions;
 import org.opentravel.schemacompiler.diff.ResourceChangeSet;
+import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
@@ -205,7 +206,7 @@ public class LibraryComparator extends BaseComparator {
 	private Map<String,NamedEntity> buildEntityMap(TLLibrary library) {
 		Map<String,NamedEntity> entityMap = new HashMap<>();
 		
-		for (NamedEntity entity : library.getNamedMembers()) {
+		for (LibraryMember entity : library.getNamedMembers()) {
 			if (((entity instanceof TLContextualFacet)
 					&& ((TLContextualFacet) entity).isLocalFacet())
 					|| (entity instanceof TLService)) {

@@ -227,7 +227,7 @@ public class TestRepositoryConcurrency {
                 item.getBaseNamespace(), item.getFilename());
 		
 		repositoryManager.get().lock( item );
-        ProjectFileUtils.copyFile( repositoryFile, wipFile );
+        new ProjectFileUtils().copyFile( repositoryFile, wipFile );
 		
 		for (int i = 1; i <= 5; i++) {
 			repositoryManager.get().commit( item, "Commit #" + i );

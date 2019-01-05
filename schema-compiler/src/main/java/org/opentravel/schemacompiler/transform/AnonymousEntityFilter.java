@@ -22,7 +22,7 @@ package org.opentravel.schemacompiler.transform;
  * 
  * @author S. Livezey
  */
-public interface AnonymousEntityFilter {
+public abstract class AnonymousEntityFilter {
 
     public static final String ANONYMOUS_PSEUDO_NAMESPACE = "http://chameleon.anonymous/ns";
 
@@ -35,6 +35,6 @@ public interface AnonymousEntityFilter {
      *            the symbol table from which the resulting entity should be resolved
      * @return Object
      */
-    public Object getAnonymousEntity(String localName, SymbolTable symbols);
+    public abstract Object getAnonymousEntity(String localName, SymbolTable symbols);
 
 }

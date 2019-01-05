@@ -27,7 +27,7 @@ import org.w3c.dom.Node;
  * 
  * @author S. Livezey
  */
-public class LibraryLineBreakProcessor implements PrettyPrintLineBreakProcessor {
+public class LibraryLineBreakProcessor extends PrettyPrintLineBreakProcessor {
 
     private static final String[] LINE_BREAK_ELEMENTS = { "Simple", "ValueWithAttrs",
             "Enumeration_Closed", "Enumeration_Open", "CoreObject", "BusinessObject",

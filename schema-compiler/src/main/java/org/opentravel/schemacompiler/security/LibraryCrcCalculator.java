@@ -19,8 +19,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.zip.CRC32;
 
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
@@ -223,14 +223,7 @@ public class LibraryCrcCalculator {
          * @return byte[]
          */
         public byte[] getCrcData() {
-            byte[] crcBytes = null;
-            try {
-                crcBytes = crcData.toString().getBytes("UTF-8");
-
-            } catch (UnsupportedEncodingException e) {
-                // No error - UTF-8 encoding is supported by all platforms
-            }
-            return crcBytes;
+            return crcData.toString().getBytes(StandardCharsets.UTF_8);
         }
 
         /**

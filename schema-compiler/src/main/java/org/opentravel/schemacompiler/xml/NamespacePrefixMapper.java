@@ -13,20 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.opentravel.schemacompiler.index;
+package org.opentravel.schemacompiler.xml;
 
 /**
- * MBean interface for the <code>IndexProcessManager</code>.
- * 
- * @author S. Livezey
+ * Empty extension of the <code>com.sun.xml.bind.marshaller.NamespacePrefixMapper</code>
+ * class.  Sonar scans recommend not using the internal <code>com.sun</code> classes, but
+ * it seems to be impossible with the current implementation of JAXB.  This class isolates
+ * the use into a single location in the schema compiler code allowing the scans for all
+ * extending classes to be clean.
  */
-public interface IndexProcessManagerMBean {
-	
-	/**
-	 * JMX hook to shutdown the <code>IndexProcessManager</code> and any
-	 * associated indexing agent child processes.
-	 */
-	public void shutdown();
+@SuppressWarnings( { "squid:S1191", "squid:S2176" } )
+public abstract class NamespacePrefixMapper extends com.sun.xml.bind.marshaller.NamespacePrefixMapper {
 	
 }

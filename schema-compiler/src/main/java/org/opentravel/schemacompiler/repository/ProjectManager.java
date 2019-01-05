@@ -101,6 +101,7 @@ public final class ProjectManager {
     private static Map<TLModel,ProjectManager> instanceMap = new HashMap<>();
 
     private RepositoryManager repositoryManager;
+    private ProjectFileUtils fileUtils = new ProjectFileUtils();
     private List<Project> projects = new ArrayList<>();
     private List<ProjectItem> projectItems = new ArrayList<>();
     private boolean autoSaveProjects;
@@ -262,7 +263,7 @@ public final class ProjectManager {
         validateProjectID(projectId, null);
         validateProjectFile(projectFile, null);
 
-        ProjectFileUtils.saveProjectFile(project);
+        fileUtils.saveProjectFile(project);
         projects.add(project);
 
         return project;
@@ -326,7 +327,7 @@ public final class ProjectManager {
      */
     public Project loadProject(File projectFile, ValidationFindings findings, LoaderProgressMonitor monitor)
             throws LibraryLoaderException, RepositoryException {
-        ProjectType jaxbProject = ProjectFileUtils.loadJaxbProjectFile(projectFile, findings);
+        ProjectType jaxbProject = fileUtils.loadJaxbProjectFile(projectFile, findings);
         ValidationFindings loaderFindings = new ValidationFindings();
         Project project = null;
 
@@ -698,7 +699,7 @@ public final class ProjectManager {
             }
             findings.addAll(new LibraryModelSaver().saveLibraries(libraryList));
         }
-        ProjectFileUtils.saveProjectFile(project);
+        fileUtils.saveProjectFile(project);
     }
 
     /**
@@ -1973,8 +1974,8 @@ public final class ProjectManager {
 
             wipFile = repositoryManager.getFileManager().getLibraryWIPContentLocation(
                     item.getBaseNamespace(), item.getFilename());
-            backupFile = ProjectFileUtils.createBackupFile(wipFile);
-            ProjectFileUtils.copyFile(repositoryFile, wipFile);
+            backupFile = fileUtils.createBackupFile(wipFile);
+            fileUtils.copyFile(repositoryFile, wipFile);
 
             // Call the remote web service to obtain the lock
             ProjectItemImpl managedItem = (ProjectItemImpl) item;
@@ -2008,14 +2009,14 @@ public final class ProjectManager {
 						FileUtils.delete( wipFile );
 						
 						if (backupFile != null) {
-							ProjectFileUtils.restoreBackupFile(backupFile, wipFile.getName());
+							fileUtils.restoreBackupFile(backupFile, wipFile.getName());
 						}
 					}
 					
 				} else {
 					// Purge the backup file if the operation was successful
 					if (backupFile != null)
-						ProjectFileUtils.removeBackupFile(backupFile);
+						fileUtils.removeBackupFile(backupFile);
 				}
 			} catch (Exception e) {
 				// Ignore error and continue

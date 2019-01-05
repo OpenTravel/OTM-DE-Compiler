@@ -27,10 +27,9 @@ import org.w3c.dom.Node;
  * 
  * @author S. Livezey
  */
-public class WSDLLineBreakProcessor implements PrettyPrintLineBreakProcessor {
+public class WSDLLineBreakProcessor extends PrettyPrintLineBreakProcessor {
 
-    private static final String[] LINE_BREAK_ELEMENTS = { "types", "message", "portType",
-            "binding", "service" };
+    private static final String[] LINE_BREAK_ELEMENTS = { "types", "message", "portType", "binding", "service" };
 
     private static final List<String> lineBreakElements = Arrays.asList(LINE_BREAK_ELEMENTS);
 

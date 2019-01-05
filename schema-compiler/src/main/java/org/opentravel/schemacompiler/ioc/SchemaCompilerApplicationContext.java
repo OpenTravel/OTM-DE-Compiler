@@ -15,7 +15,7 @@
  */
 package org.opentravel.schemacompiler.ioc;
 
-import org.opentravel.schemacompiler.ota2.OTA2CompilerConstants;
+import org.opentravel.schemacompiler.ota2.OTA2CompilerExtensionProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
@@ -51,7 +51,7 @@ public final class SchemaCompilerApplicationContext implements ApplicationContex
     public static ApplicationContext getContext() {
         if (context == null) {
             CompilerExtensionRegistry
-                    .setActiveExtension(OTA2CompilerConstants.OTA2_COMPILER_EXTENSION_ID);
+                    .setActiveExtension(OTA2CompilerExtensionProvider.OTA2_COMPILER_EXTENSION_ID);
         }
         return context;
     }

@@ -38,7 +38,7 @@ public class ShutdownIndexingService {
 	 */
 	public static void main(String[] args) {
 		try {
-	        ObjectName name = new ObjectName( IndexProcessManagerMBean.MBEAN_NAME );
+	        ObjectName name = new ObjectName( IndexProcessManager.MBEAN_NAME );
 			JMXServiceURL jmxUrl = new JMXServiceURL( IndexProcessManager.getJmxServerUrl() );
 			JMXConnector jmxc;
 			

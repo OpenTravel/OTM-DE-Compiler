@@ -37,10 +37,9 @@ import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
 import org.opentravel.schemacompiler.util.ClasspathResourceResolver;
 import org.opentravel.schemacompiler.util.URLUtils;
+import org.opentravel.schemacompiler.xml.NamespacePrefixMapper;
 import org.w3._2001.xmlschema.FormChoice;
 import org.w3._2001.xmlschema.Include;
-
-import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
 
 /**
  * Optional component that allows the code generation orchestrator to pre-specify the names and

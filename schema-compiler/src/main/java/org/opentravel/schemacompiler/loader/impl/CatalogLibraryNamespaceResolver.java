@@ -72,10 +72,9 @@ public class CatalogLibraryNamespaceResolver extends MapLibraryNamespaceResolver
      *             thrown if the catalog file cannot be loaded
      */
     public CatalogLibraryNamespaceResolver(URL catalogUrl) throws LibraryLoaderException {
-        try {
+        try (InputStream is = getInputStream( catalogUrl )) {
             String folderUrl = catalogUrl.toExternalForm();
             int folderIdx = folderUrl.lastIndexOf('/');
-            InputStream is = null;
 
             if (folderIdx >= 0) {
                 folderUrl = folderUrl.substring(0, folderIdx);
@@ -84,24 +83,36 @@ public class CatalogLibraryNamespaceResolver extends MapLibraryNamespaceResolver
                         - catalogUrl.getFile().length());
             }
             catalogFolder = new URL(folderUrl);
-
-            if (URLUtils.isFileURL(catalogUrl)) {
-                try {
-                    is = new FileInputStream(URLUtils.toFile(catalogUrl));
-
-                } catch (IllegalArgumentException e) {
-                    // No error - use the openStream() method to establish a connection
-                }
-            }
-            if (is == null) {
-                is = catalogUrl.openStream();
-            }
             initCatalog(is);
 
         } catch (IOException e) {
             throw new LibraryLoaderException("Error loading catalog file.", e);
         }
     }
+
+	/**
+	 * Returns an input stream for the given catalog URL.
+	 * 
+	 * @param catalogUrl  the URL for which to return an input stream
+	 * @return InputStream
+	 * @throws IOException  thrown if the input stream cannot be opened
+	 */
+	private InputStream getInputStream(URL catalogUrl) throws IOException {
+		InputStream is = null;
+		
+		if (URLUtils.isFileURL(catalogUrl)) {
+		    try {
+		        is = new FileInputStream(URLUtils.toFile(catalogUrl));
+
+		    } catch (IllegalArgumentException e) {
+		        // No error - use the openStream() method to establish a connection
+		    }
+		}
+		if (is == null) {
+		    is = catalogUrl.openStream();
+		}
+		return is;
+	}
 
     /**
      * Constructor that obtains catalog mappings from the specified file.

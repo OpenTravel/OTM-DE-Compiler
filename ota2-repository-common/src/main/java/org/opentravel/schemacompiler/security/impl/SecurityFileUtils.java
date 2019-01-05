@@ -35,8 +35,7 @@ import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.repository.RepositorySecurityException;
 import org.opentravel.schemacompiler.util.ClasspathResourceResolver;
-
-import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
+import org.opentravel.schemacompiler.xml.NamespacePrefixMapper;
 
 /**
  * Utility methods used for loading and saving the contents of security-related files in the OTA2.0

@@ -1556,7 +1556,7 @@ public class RepositoryManager implements Repository {
 
         // Rename WIP file to ".bak" since the 'real' content is now managed by the repository.
         File backupFile = new File(wipFile.getParentFile(),
-                ProjectFileUtils.getBackupFilename(wipFile));
+                new ProjectFileUtils().getBackupFilename(wipFile));
 
         FileUtils.delete( backupFile );
         FileUtils.renameTo( wipFile, backupFile );

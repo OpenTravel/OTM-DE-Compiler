@@ -15,7 +15,7 @@
  */
 package org.opentravel.schemacompiler.security.impl;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * This class provides encode/decode for RFC 2045 Base64 as defined by RFC 2045, N. Freed and N.
@@ -114,17 +114,8 @@ public class Base64 {
             // 16 or 8 bit
             encodedData = new byte[numberTriplets * 4];
         }
-
         encodeData( binaryData, encodedData, numberTriplets, fewerThan24bits );
-
-        String result;
-        try {
-            result = new String(encodedData, "ISO-8859-1");
-        } catch (UnsupportedEncodingException e) {
-            // Should never happen but in case it does...
-            result = new String(encodedData);
-        }
-        return result;
+        return new String(encodedData, StandardCharsets.ISO_8859_1);
     }
 
 	/**

@@ -28,7 +28,7 @@ import org.opentravel.schemacompiler.util.FileUtils;
  * Base class for utility file managers that provide methods for creating,
  * restoring, and deleting backup files during save operations.
  */
-public abstract class AbstractFileUtils {
+public interface AbstractFileUtils {
 	
     /**
      * Creates a backup of the specified original file on the local file system. The location of the
@@ -40,7 +40,7 @@ public abstract class AbstractFileUtils {
      * @throws IOException
      *             thrown if the backup file cannot be created
      */
-    public static File createBackupFile(File originalFile) throws IOException {
+    public default File createBackupFile(File originalFile) throws IOException {
         File backupFile;
 
         if (!originalFile.exists()) {
@@ -72,7 +72,7 @@ public abstract class AbstractFileUtils {
      * @throws IOException
      *             thrown if the backup file cannot be restored
      */
-    public static void restoreBackupFile(File backupFile, String originalFilename)
+    public default void restoreBackupFile(File backupFile, String originalFilename)
             throws IOException {
         if ((backupFile != null) && backupFile.exists()) {
             String filename = backupFile.getName();
@@ -101,7 +101,7 @@ public abstract class AbstractFileUtils {
      * @param backupFile
      *            the backup file to remove
      */
-    public static void removeBackupFile(File backupFile) {
+    public default void removeBackupFile(File backupFile) {
     		FileUtils.delete( backupFile );
     }
 
@@ -112,7 +112,7 @@ public abstract class AbstractFileUtils {
      *            the original file for which a backup is being created
      * @return String
      */
-    public static String getBackupFilename(File originalFile) {
+    public default String getBackupFilename(File originalFile) {
         String filename = null;
 
         if (originalFile != null) {
@@ -136,7 +136,7 @@ public abstract class AbstractFileUtils {
      * @throws IOException
      *             thrown if the file cannot be copied
      */
-    public static void copyFile(File sourceFile, File destinationFile) throws IOException {
+    public default void copyFile(File sourceFile, File destinationFile) throws IOException {
         if (!destinationFile.getParentFile().exists()) {
             destinationFile.getParentFile().mkdirs();
         }

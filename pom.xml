@@ -30,10 +30,10 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		
 		<!-- Dependency Versions -->
-		<jaxb.version>2.2.11</jaxb.version>
+		<jaxb.version>2.3.0.1</jaxb.version>
 		<gson.version>2.5</gson.version>
 		<jackson.version>2.4.5</jackson.version>
-		<spring.version>4.1.5.RELEASE</spring.version>
+		<spring.version>4.3.21.RELEASE</spring.version>
 		<httpcomponents.version>4.4</httpcomponents.version>
 		<maven.plugin.api.version>3.2.5</maven.plugin.api.version>
 		<maven.annotations.version>3.4</maven.annotations.version>
@@ -59,7 +59,7 @@
 		<velocity.version>1.7</velocity.version>
 		
 		<!-- Plugin Versions -->
-		<jaxb2.plugin.version>0.12.1</jaxb2.plugin.version>
+		<jaxb2.plugin.version>2.4</jaxb2.plugin.version>
 		<license.plugin.version>2.10</license.plugin.version>
 		<felix.bundle.plugin.version>4.1.0</felix.bundle.plugin.version>
 		
@@ -152,13 +152,13 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>com.sun.xml.bind</groupId>
+				<groupId>org.glassfish.jaxb</groupId>
 				<artifactId>jaxb-core</artifactId>
 				<version>${jaxb.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.sun.xml.bind</groupId>
-				<artifactId>jaxb-impl</artifactId>
+				<groupId>org.glassfish.jaxb</groupId>
+				<artifactId>jaxb-runtime</artifactId>
 				<version>${jaxb.version}</version>
 			</dependency>
 			<dependency>

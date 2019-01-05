@@ -28,6 +28,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -112,7 +113,6 @@ public class RemoteRepositoryClient implements RemoteRepository {
 	private static final String VERSION = "version";
 	private static final String STATUS = "status";
 	private static final String FILE_CONTENT = "fileContent";
-	private static final String UTF_8 = "UTF-8";
 	private static final String REPOSITORY_UNAVAILABLE = "The remote repository is unavailable.";
 	private static final String SERVICE_RESPONSE_UNREADABLE = "The format of the service response is unreadable.";
 	private static final String METADATA_UNREADABLE = "The format of the library meta-data is unreadable.";
@@ -1739,10 +1739,11 @@ public class RemoteRepositoryClient implements RemoteRepository {
 			StringBuilder contentUrl = new StringBuilder( endpointUrl ).append( HISTORICAL_CONTENT_ENDPOINT );
 			RepositoryItemHistory history = getHistory( item );
 			LibraryStreamInputSource contentSource;
+			String charSet = StandardCharsets.UTF_8.name();
 			
-			contentUrl.append( "?basens=" ).append( URLEncoder.encode( item.getBaseNamespace(), UTF_8 ) );
-			contentUrl.append( "&version=" ).append( URLEncoder.encode( item.getVersion(), UTF_8 ) );
-			contentUrl.append( "&filename=" ).append( URLEncoder.encode( item.getFilename(), UTF_8 ) );
+			contentUrl.append( "?basens=" ).append( URLEncoder.encode( item.getBaseNamespace(), charSet ) );
+			contentUrl.append( "&version=" ).append( URLEncoder.encode( item.getVersion(), charSet ) );
+			contentUrl.append( "&filename=" ).append( URLEncoder.encode( item.getFilename(), charSet ) );
 			
 			effectiveDate = DateUtils.truncate( effectiveDate, Calendar.SECOND );
 			
@@ -1893,7 +1894,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
 
             if (urlParam.getParamValue() != null) {
                 try {
-                    requestUrl.append(URLEncoder.encode(urlParam.getParamValue(), UTF_8));
+                    requestUrl.append(URLEncoder.encode(urlParam.getParamValue(), StandardCharsets.UTF_8.name()));
 
                 } catch (UnsupportedEncodingException e) {
                     // No error - UTF-8 is always supported
@@ -1957,7 +1958,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
                     byteStream.write(buffer, 0, bytesRead);
                 }
                 responseStream.close();
-                errorMessage = new String(byteStream.toByteArray(), UTF_8);
+                errorMessage = new String(byteStream.toByteArray(), StandardCharsets.UTF_8);
 
             } catch (IOException e) {
                 errorMessage = "Unknown repository error on the remote host.";

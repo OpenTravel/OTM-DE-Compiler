@@ -43,11 +43,10 @@ import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.xml.LibraryLineBreakProcessor;
+import org.opentravel.schemacompiler.xml.NamespacePrefixMapper;
 import org.opentravel.schemacompiler.xml.XMLPrettyPrinter;
 import org.w3c.dom.Document;
 import org.xml.sax.helpers.DefaultHandler;
-
-import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
 
 /**
  * Default implementation that saves JAXB library content as a file on the local file system.

@@ -50,6 +50,7 @@ import org.apache.lucene.util.BytesRef;
 import org.opentravel.ns.ota2.librarymodel_v01_06.Library;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoType;
 import org.opentravel.schemacompiler.index.IndexingUtils;
+import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLInclude;
@@ -196,7 +197,7 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
 		List<NamedEntity> entityList = new ArrayList<>();
 		
 		// Assemble a list of all entities in the library
-		for (NamedEntity entity : library.getNamedMembers()) {
+		for (LibraryMember entity : library.getNamedMembers()) {
 			if ((entity instanceof TLContextualFacet) && ((TLContextualFacet) entity).isLocalFacet()) {
 				continue; // skip local contextual facets since they will be indexed under their owner
 			}

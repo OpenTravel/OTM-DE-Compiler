@@ -19,13 +19,12 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.opentravel.schemacompiler.util.SchemaCompilerRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -125,13 +124,7 @@ public class XMLPrettyPrinter {
          *            the underlying output stream
          */
         public LineBreakTokenWriter(OutputStream outputStream) {
-            try {
-                this.outputWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF8"));
-
-            } catch (UnsupportedEncodingException e) {
-                // Should never happen, but just in case...
-                throw new SchemaCompilerRuntimeException(e);
-            }
+            this.outputWriter = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
         }
 
         /**

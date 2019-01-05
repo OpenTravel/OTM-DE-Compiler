@@ -33,12 +33,11 @@ import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.TLNamespaceImport;
 import org.opentravel.schemacompiler.model.XSDLibrary;
 import org.opentravel.schemacompiler.transform.AnonymousEntityFilter;
+import org.opentravel.schemacompiler.xml.NamespacePrefixMapper;
 import org.springframework.context.ApplicationContext;
 import org.w3._2001.xmlschema.Import;
 import org.w3._2001.xmlschema.OpenAttrs;
 import org.w3._2001.xmlschema.Schema;
-
-import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
 
 /**
  * JAXB namespace prefix mapper that obtains its mappings from the namespace import declarations of

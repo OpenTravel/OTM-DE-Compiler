@@ -54,20 +54,23 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.jvnet.jaxb2.maven2</groupId>
-				<artifactId>maven-jaxb2-plugin</artifactId>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>jaxb2-maven-plugin</artifactId>
 				<version>${jaxb2.plugin.version}</version>
 				<executions>
 					<execution>
-						<id>jaxb-generate</id>
+						<id>xjc</id>
 						<phase>generate-sources</phase>
 						<goals>
-							<goal>generate</goal>
+							<goal>xjc</goal>
 						</goals>
 					</execution>
 				</executions>
 				<configuration>
-					<schemaDirectory>${basedir}/src/main/resources/schemas</schemaDirectory>
+					<outputDirectory>${project.build.directory}/generated-sources/xjc</outputDirectory>
+					<sources>
+						<source>${basedir}/src/main/resources/schemas</source>
+					</sources>
 					<strict>true</strict>
 					<verbose>false</verbose>
 				</configuration>

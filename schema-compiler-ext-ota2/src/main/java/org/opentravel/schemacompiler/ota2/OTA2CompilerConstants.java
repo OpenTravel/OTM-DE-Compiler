@@ -22,7 +22,4 @@ package org.opentravel.schemacompiler.ota2;
  */
 public interface OTA2CompilerConstants {
 
-    /** The unique ID of the OTA2 compiler extension. */
-    public static final String OTA2_COMPILER_EXTENSION_ID = "OTA2";
-
 }

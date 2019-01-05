@@ -30,7 +30,7 @@ import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
 import org.opentravel.schemacompiler.codegen.impl.LegacySchemaExtensionFilenameBuilder;
 import org.opentravel.schemacompiler.codegen.impl.LibraryFilenameBuilder;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
-import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.XSDComplexType;
 import org.opentravel.schemacompiler.model.XSDLibrary;
 import org.opentravel.schemacompiler.transform.AnonymousEntityFilter;
@@ -146,7 +146,7 @@ public class XsdExtensionSchemaCodeGenerator extends AbstractXsdCodeGenerator<XS
 
         // For each complex type that does not declare an identity element, create it for this
         // schema
-        for (NamedEntity member : source.getNamedMembers()) {
+        for (LibraryMember member : source.getNamedMembers()) {
             if ((member instanceof XSDComplexType)
                     && ((filter == null) || filter.processEntity(member))) {
                 XSDComplexType complexType = (XSDComplexType) member;

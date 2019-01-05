@@ -37,7 +37,7 @@ import org.opentravel.schemacompiler.util.URLUtils;
  * 
  * @author S. Livezey
  */
-public class ChameleonFilter implements AnonymousEntityFilter {
+public class ChameleonFilter extends AnonymousEntityFilter {
 
     private Collection<String> anonymousLibraryUrls = new ArrayList<>();
 

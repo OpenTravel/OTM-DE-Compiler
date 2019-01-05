@@ -38,6 +38,9 @@ import org.springframework.core.io.InputStreamResource;
  */
 public class OTA2CompilerExtensionProvider implements CompilerExtensionProvider {
 
+    /** The unique ID of the OTA2 compiler extension. */
+    public static final String OTA2_COMPILER_EXTENSION_ID = "OTA2";
+
     private static final Collection<CompilerExtension> compilerExtensions;
     private static final Map<String, List<String>> extensionUrls;
 
@@ -134,7 +137,7 @@ public class OTA2CompilerExtensionProvider implements CompilerExtensionProvider 
             Map<String,List<String>> urlMap = new HashMap<>();
 
             registerBindingStyle(extensions, urlMap,
-                    OTA2CompilerConstants.OTA2_COMPILER_EXTENSION_ID, 50,
+                    OTA2_COMPILER_EXTENSION_ID, 50,
                     "/ota2-context/defaultBaseCompilerExtensions.xml",
                     "/ota2-context/defaultCompilerExtensions.xml");
             compilerExtensions = Collections.unmodifiableCollection(extensions);

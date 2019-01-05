@@ -67,416 +67,390 @@ import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.version.VersionScheme;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 import org.opentravel.schemacompiler.version.VersionSchemeFactory;
-
-import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
+import org.opentravel.schemacompiler.xml.NamespacePrefixMapper;
 
 /**
- * Static helper methods that handle the loading and saving of projects to and from the local file
- * system using JAXB.
+ * Static helper methods that handle the loading and saving of projects to and from the local file system using JAXB.
  * 
  * @author S. Livezey
  */
-public class ProjectFileUtils extends AbstractFileUtils {
-
-    private static final String SCHEMA_CONTEXT = ":org.w3._2001.xmlschema:org.opentravel.ns.ota2.project_v01_00";
-    private static final String PROJECT_FILE_NAMESPACE = "http://www.OpenTravel.org/ns/OTA2/Project_v01_00";
-
-    private static Log log = LogFactory.getLog(ProjectFileUtils.class);
-    
-    private static javax.xml.validation.Schema projectValidationSchema;
-    private static ObjectFactory objectFactory = new ObjectFactory();
-    private static JAXBContext jaxbContext;
-
-    /**
-     * Loads the JAXB representation of the project from the specified file location.
-     * 
-     * @param projectFile
-     *            the project file to load
-     * @param findings
-     *            the validation findings encountered during the load process
-     * @return ProjectType
-     * @throws LibraryLoaderException
-     *             thrown if the project file cannot be loaded
-     */
-    @SuppressWarnings("unchecked")
-    public static ProjectType loadJaxbProjectFile(File projectFile, ValidationFindings findings)
-            throws LibraryLoaderException {
-        ProjectType jaxbProject = null;
-        
-        try (InputStream is = new FileInputStream(projectFile)){
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            unmarshaller.setSchema(projectValidationSchema);
-
-            JAXBElement<ProjectType> documentElement = (JAXBElement<ProjectType>) unmarshaller
-                    .unmarshal(is);
-            jaxbProject = documentElement.getValue();
-
-        } catch (JAXBException e) {
-            if (findings != null) {
-                String filename = (projectFile == null) ? "[UNKNOWN FILE]" : projectFile.getName();
-
-                findings.addFinding(FindingType.ERROR, new FileValidationSource(projectFile),
-                        LoaderValidationMessageKeys.ERROR_UNREADABLE_PROJECT_CONTENT, filename,
-                        ExceptionUtils.getExceptionClass(e).getSimpleName(),
-                        ExceptionUtils.getExceptionMessage(e));
-            } else {
-                throw new LibraryLoaderException(e.getMessage(), e);
-            }
-
-        } catch (IOException e) {
-            if (findings != null) {
-                findings.addFinding(FindingType.WARNING, new FileValidationSource(projectFile),
-                        LoaderValidationMessageKeys.WARNING_PROJECT_NOT_FOUND,
-                        (projectFile == null) ? "[UNKNOWN FILE]" : projectFile.getName());
-            } else {
-                throw new LibraryLoaderException(e.getMessage(), e);
-            }
-
-        } catch (Exception e) {
-            throw new LibraryLoaderException("Unknown error while loading project.", e);
-        }
-        return jaxbProject;
-    }
-
-    /**
-     * Saves the JAXB representation of the project to the specified file location.
-     * 
-     * @param project
-     *            the OTM project to be saved
-     * @throws LibrarySaveException
-     *             thrown if the project file cannot be saved
-     */
-    public static void saveProjectFile(Project project) throws LibrarySaveException {
-    	saveProjectFile( convertToJaxbProject(project), project.getProjectFile() );
-    }
-    
-    /**
-     * Saves the JAXB representation of the project to the specified file location.
-     * 
-     * @param jaxbProject
-     *            the JAXB representation of the project's contents
-     * @param projectFile
-     *            the file to which the project contents should be saved
-     * @throws LibrarySaveException
-     *             thrown if the project file cannot be saved
-     */
-    public static void saveProjectFile(ProjectType jaxbProject, File projectFile) throws LibrarySaveException {
-        boolean success = false;
-        File backupFile = null;
-        try {
-            backupFile = createBackupFile(projectFile);
-        } catch (IOException e) {
-            // If we could not create the backup file, proceed without one
-        }
-
-        try {
-            Marshaller marshaller = jaxbContext.createMarshaller();
-
-            if (!projectFile.exists()) {
-            	projectFile.getParentFile().mkdirs();
-            }
-            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper",
-                    new NamespacePrefixMapper() {
-
-                        @Override
-                        public String getPreferredPrefix(String namespaceUri, String suggestion,
-                                boolean requirePrefix) {
-                            return PROJECT_FILE_NAMESPACE.equals(namespaceUri) ? SchemaDeclarations.OTA2_PROJECT_SCHEMA
-                                    .getDefaultPrefix() : suggestion;
-                        }
-
-                        @Override
-                        public String[] getPreDeclaredNamespaceUris() {
-                            return new String[] { PROJECT_FILE_NAMESPACE };
-                        }
-
-                    });
-            marshaller.setSchema(projectValidationSchema);
-            marshaller.marshal(objectFactory.createProject(jaxbProject), projectFile);
-            success = true;
-
-        } catch (JAXBException e) {
-            throw new LibrarySaveException("Unknown error while saving project.", e);
-
-        } finally {
-            if (!success && (backupFile != null)) {
-                try {
-                    restoreBackupFile(backupFile, projectFile.getName());
-                    
-                } catch (Exception e) {
-                	log.warn("Error restoring backup file from failed operation.");
-                }
-            }
-        }
-    }
-
-    /**
-     * Transforms the given model project into its JAXB equivalent.
-     * 
-     * @param project
-     *            the model project to transform
-     * @return ProjectType
-     */
-    private static ProjectType convertToJaxbProject(Project project) {
-        URL projectFileUrl = URLUtils.toURL(project.getProjectFile());
-        ProjectItem defaultItem = project.getDefaultItem();
-        Set<String> repositoryIds = new HashSet<>();
-        ProjectType jaxbProject = new ProjectType();
-
-        jaxbProject.setProjectId(project.getProjectId());
-        jaxbProject.setName(project.getName());
-        jaxbProject.setDescription(project.getDescription());
-        jaxbProject.setDefaultContextId(project.getDefaultContextId());
-
-        for (ProjectItem item : purgeImpliedManagedVersions(project.getProjectItems())) {
-            convertToJaxbProjectItem(item, jaxbProject, defaultItem, projectFileUrl, repositoryIds);
-        }
-        assignFailedProjectItems(jaxbProject, project);
-        assignRepositoryReferences(jaxbProject, project, repositoryIds);
-        
-        return jaxbProject;
-    }
-
+public class ProjectFileUtils implements AbstractFileUtils {
+	
+	private static final String SCHEMA_CONTEXT = ":org.w3._2001.xmlschema:org.opentravel.ns.ota2.project_v01_00";
+	private static final String PROJECT_FILE_NAMESPACE = "http://www.OpenTravel.org/ns/OTA2/Project_v01_00";
+	
+	private static Log log = LogFactory.getLog( ProjectFileUtils.class );
+	
+	private static javax.xml.validation.Schema projectValidationSchema;
+	private static ObjectFactory objectFactory = new ObjectFactory();
+	private static JAXBContext jaxbContext;
+	
+	/**
+	 * Loads the JAXB representation of the project from the specified file location.
+	 * 
+	 * @param projectFile the project file to load
+	 * @param findings the validation findings encountered during the load process
+	 * @return ProjectType
+	 * @throws LibraryLoaderException thrown if the project file cannot be loaded
+	 */
+	@SuppressWarnings("unchecked")
+	public ProjectType loadJaxbProjectFile(File projectFile, ValidationFindings findings)
+			throws LibraryLoaderException {
+		ProjectType jaxbProject = null;
+		
+		try (InputStream is = new FileInputStream( projectFile )) {
+			Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+			unmarshaller.setSchema( projectValidationSchema );
+			
+			JAXBElement<ProjectType> documentElement = (JAXBElement<ProjectType>) unmarshaller.unmarshal( is );
+			jaxbProject = documentElement.getValue();
+			
+		} catch (JAXBException e) {
+			if (findings != null) {
+				String filename = (projectFile == null) ? "[UNKNOWN FILE]" : projectFile.getName();
+				
+				findings.addFinding( FindingType.ERROR, new FileValidationSource( projectFile ),
+						LoaderValidationMessageKeys.ERROR_UNREADABLE_PROJECT_CONTENT, filename,
+						ExceptionUtils.getExceptionClass( e ).getSimpleName(),
+						ExceptionUtils.getExceptionMessage( e ) );
+			} else {
+				throw new LibraryLoaderException( e.getMessage(), e );
+			}
+			
+		} catch (IOException e) {
+			if (findings != null) {
+				findings.addFinding( FindingType.WARNING, new FileValidationSource( projectFile ),
+						LoaderValidationMessageKeys.WARNING_PROJECT_NOT_FOUND,
+						(projectFile == null) ? "[UNKNOWN FILE]" : projectFile.getName() );
+			} else {
+				throw new LibraryLoaderException( e.getMessage(), e );
+			}
+			
+		} catch (Exception e) {
+			throw new LibraryLoaderException( "Unknown error while loading project.", e );
+		}
+		return jaxbProject;
+	}
+	
+	/**
+	 * Saves the JAXB representation of the project to the specified file location.
+	 * 
+	 * @param project the OTM project to be saved
+	 * @throws LibrarySaveException thrown if the project file cannot be saved
+	 */
+	public void saveProjectFile(Project project) throws LibrarySaveException {
+		saveProjectFile( convertToJaxbProject( project ), project.getProjectFile() );
+	}
+	
+	/**
+	 * Saves the JAXB representation of the project to the specified file location.
+	 * 
+	 * @param jaxbProject the JAXB representation of the project's contents
+	 * @param projectFile the file to which the project contents should be saved
+	 * @throws LibrarySaveException thrown if the project file cannot be saved
+	 */
+	public void saveProjectFile(ProjectType jaxbProject, File projectFile) throws LibrarySaveException {
+		boolean success = false;
+		File backupFile = null;
+		try {
+			backupFile = createBackupFile( projectFile );
+		} catch (IOException e) {
+			// If we could not create the backup file, proceed without one
+		}
+		
+		try {
+			Marshaller marshaller = jaxbContext.createMarshaller();
+			
+			if (!projectFile.exists()) {
+				projectFile.getParentFile().mkdirs();
+			}
+			marshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE );
+			marshaller.setProperty( "com.sun.xml.bind.namespacePrefixMapper", new NamespacePrefixMapper() {
+				
+				@Override
+				public String getPreferredPrefix(String namespaceUri, String suggestion, boolean requirePrefix) {
+					return PROJECT_FILE_NAMESPACE.equals( namespaceUri )
+							? SchemaDeclarations.OTA2_PROJECT_SCHEMA.getDefaultPrefix()
+							: suggestion;
+				}
+				
+				@Override
+				public String[] getPreDeclaredNamespaceUris() {
+					return new String[] { PROJECT_FILE_NAMESPACE };
+				}
+				
+			} );
+			marshaller.setSchema( projectValidationSchema );
+			marshaller.marshal( objectFactory.createProject( jaxbProject ), projectFile );
+			success = true;
+			
+		} catch (JAXBException e) {
+			throw new LibrarySaveException( "Unknown error while saving project.", e );
+			
+		} finally {
+			if (!success && (backupFile != null)) {
+				try {
+					restoreBackupFile( backupFile, projectFile.getName() );
+					
+				} catch (Exception e) {
+					log.warn( "Error restoring backup file from failed operation." );
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Transforms the given model project into its JAXB equivalent.
+	 * 
+	 * @param project the model project to transform
+	 * @return ProjectType
+	 */
+	private ProjectType convertToJaxbProject(Project project) {
+		URL projectFileUrl = URLUtils.toURL( project.getProjectFile() );
+		ProjectItem defaultItem = project.getDefaultItem();
+		Set<String> repositoryIds = new HashSet<>();
+		ProjectType jaxbProject = new ProjectType();
+		
+		jaxbProject.setProjectId( project.getProjectId() );
+		jaxbProject.setName( project.getName() );
+		jaxbProject.setDescription( project.getDescription() );
+		jaxbProject.setDefaultContextId( project.getDefaultContextId() );
+		
+		for (ProjectItem item : purgeImpliedManagedVersions( project.getProjectItems() )) {
+			convertToJaxbProjectItem( item, jaxbProject, defaultItem, projectFileUrl, repositoryIds );
+		}
+		assignFailedProjectItems( jaxbProject, project );
+		assignRepositoryReferences( jaxbProject, project, repositoryIds );
+		
+		return jaxbProject;
+	}
+	
 	/**
 	 * Converts the given project item and adds it to the JAXB project.
 	 * 
-	 * @param item  the project item to convert
-	 * @param jaxbProject  the JAXB project to which the converted item will be added
-	 * @param defaultItem  the default item of the owning project
-	 * @param projectFileUrl  the URL where the project file will be saved
-	 * @param repositoryIds  the collection of all known repository IDs from the project
+	 * @param item the project item to convert
+	 * @param jaxbProject the JAXB project to which the converted item will be added
+	 * @param defaultItem the default item of the owning project
+	 * @param projectFileUrl the URL where the project file will be saved
+	 * @param repositoryIds the collection of all known repository IDs from the project
 	 */
-	private static void convertToJaxbProjectItem(ProjectItem item, ProjectType jaxbProject, ProjectItem defaultItem,
+	private void convertToJaxbProjectItem(ProjectItem item, ProjectType jaxbProject, ProjectItem defaultItem,
 			URL projectFileUrl, Set<String> repositoryIds) {
 		if (item.getState() == RepositoryItemState.UNMANAGED) {
-		    UnmanagedProjectItemType jaxbItem = new UnmanagedProjectItemType();
-
-		    jaxbItem.setDefaultItem((defaultItem == item) ? Boolean.TRUE : null);
-		    jaxbItem.setFileLocation(URLUtils.getRelativeURL(projectFileUrl, item.getContent()
-		            .getLibraryUrl(), true));
-		    jaxbProject.getProjectItemBase().add(
-		            objectFactory.createUnmanagedProjectItem(jaxbItem));
-
+			UnmanagedProjectItemType jaxbItem = new UnmanagedProjectItemType();
+			
+			jaxbItem.setDefaultItem( (defaultItem == item) ? Boolean.TRUE : null );
+			jaxbItem
+				.setFileLocation( URLUtils.getRelativeURL( projectFileUrl, item.getContent().getLibraryUrl(), true ) );
+			jaxbProject.getProjectItemBase().add( objectFactory.createUnmanagedProjectItem( jaxbItem ) );
+			
 		} else {
-		    String repositoryId = (item.getRepository() == null) ? null : item.getRepository().getId();
-		    ManagedProjectItemType jaxbItem = new ManagedProjectItemType();
-
-		    if (repositoryId != null) {
-		        repositoryIds.add(repositoryId);
-		    }
-		    jaxbItem.setDefaultItem((defaultItem == item) ? Boolean.TRUE : null);
-		    jaxbItem.setRepository(repositoryId);
-		    jaxbItem.setBaseNamespace(item.getBaseNamespace());
-		    jaxbItem.setFilename(item.getFilename());
-		    jaxbItem.setVersion(item.getVersion());
-		    jaxbProject.getProjectItemBase().add(
-		            objectFactory.createManagedProjectItem(jaxbItem));
+			String repositoryId = (item.getRepository() == null) ? null : item.getRepository().getId();
+			ManagedProjectItemType jaxbItem = new ManagedProjectItemType();
+			
+			if (repositoryId != null) {
+				repositoryIds.add( repositoryId );
+			}
+			jaxbItem.setDefaultItem( (defaultItem == item) ? Boolean.TRUE : null );
+			jaxbItem.setRepository( repositoryId );
+			jaxbItem.setBaseNamespace( item.getBaseNamespace() );
+			jaxbItem.setFilename( item.getFilename() );
+			jaxbItem.setVersion( item.getVersion() );
+			jaxbProject.getProjectItemBase().add( objectFactory.createManagedProjectItem( jaxbItem ) );
 		}
 	}
-
+	
 	/**
-	 * Add any failed project items to the JAXB project so they will not be lost
-	 * when the file is re-opened.
+	 * Add any failed project items to the JAXB project so they will not be lost when the file is re-opened.
 	 * 
-	 * @param jaxbProject  the JAXB project being constructed
-	 * @param project  the project from which the JAXB instance is being created
+	 * @param jaxbProject the JAXB project being constructed
+	 * @param project the project from which the JAXB instance is being created
 	 */
-	private static void assignFailedProjectItems(ProjectType jaxbProject, Project project) {
+	private void assignFailedProjectItems(ProjectType jaxbProject, Project project) {
 		for (ProjectItemType failedItem : project.getFailedProjectItems()) {
-        	if (failedItem instanceof UnmanagedProjectItemType) {
-                jaxbProject.getProjectItemBase().add( objectFactory.createUnmanagedProjectItem(
-                		(UnmanagedProjectItemType) failedItem ) );
-        		
-        	} else { // Must be a ManagedProjectItemType
-                jaxbProject.getProjectItemBase().add( objectFactory.createManagedProjectItem(
-                		(ManagedProjectItemType) failedItem ) );
-        	}
-        	failedItem.setDefaultItem( null );
-        }
-	}
-
-	/**
-	 * Assign the repositories that are referenced and their endpoint URL's to the given
-	 * JAXB project.
-	 * 
-	 * @param jaxbProject  the JAXB project being constructed
-	 * @param project  the project from which the JAXB instance is being created
-	 * @param repositoryIds  the collection of all known repository IDs from the project
-	 */
-	private static void assignRepositoryReferences(ProjectType jaxbProject, Project project,
-			Set<String> repositoryIds) {
-		ProjectManager projectManager = project.getProjectManager();
-        RepositoryManager repositoryManager = (projectManager == null) ? null : projectManager
-                .getRepositoryManager();
-
-        if ((repositoryManager != null) && !repositoryIds.isEmpty()) {
-            RepositoryReferencesType repositoryRefs = new RepositoryReferencesType();
-
-            for (String repositoryId : repositoryIds) {
-                Repository repository = repositoryManager.getRepository(repositoryId);
-
-                if (repository instanceof RemoteRepository) {
-                    RepositoryRefType repositoryRef = new RepositoryRefType();
-
-                    repositoryRef.setRepositoryId(repositoryId);
-                    repositoryRef.setValue(((RemoteRepository) repository).getEndpointUrl());
-                    repositoryRefs.getRepositoryRef().add(repositoryRef);
-                }
-            }
-            jaxbProject.setRepositoryReferences(repositoryRefs);
-        }
-	}
-
-    /**
-     * Purges any project items from the given list that are implied by the existence of later
-     * versions. Only managed project items are processed by this method.
-     * 
-     * @param projectItems
-     *            the list of project items to process
-     * @return List<ProjectItem>
-     */
-    private static List<ProjectItem> purgeImpliedManagedVersions(List<ProjectItem> projectItems) {
-        Map<ProjectItem,List<String>> itemVersionChains = new HashMap<>();
-        List<ProjectItem> keepItems = new ArrayList<>();
-
-        for (ProjectItem item : projectItems) {
-            if (item.getState() == RepositoryItemState.UNMANAGED) {
-                continue; // only purge managed versions
-            }
-            addKeepItemIfNotEclipsed(item, keepItems, itemVersionChains);
-        }
-
-        // Scan the original list, and assemble the final list of items that should be included in
-        // project's save file
-        List<ProjectItem> result = new ArrayList<>();
-
-        for (ProjectItem item : projectItems) {
-            if ((item.getState() == RepositoryItemState.UNMANAGED) || keepItems.contains(item)) {
-                result.add(item);
-            }
-        }
-        return result;
-    }
-
-	/**
-	 * If the given project item is not eclisped by a later minor version, it
-	 * will be added to the given list of keep items.
-	 * 
-	 * @param item  the item to be kept if not eclipsed
-	 * @param keepItems  the list of keep items that have been discovered so far
-	 * @param itemVersionChains  the version identifier chain for each project item
-	 */
-	private static void addKeepItemIfNotEclipsed(ProjectItem item, List<ProjectItem> keepItems,
-			Map<ProjectItem, List<String>> itemVersionChains) {
-		try {
-		    VersionScheme vScheme = VersionSchemeFactory.getInstance().getVersionScheme(
-		            item.getVersionScheme());
-		    List<String> itemVersionChain = vScheme.getMajorVersionChain(item.getNamespace());
-		    boolean purgeCurrentItem = false;
-
-		    // Determine if the current item is eclipsed by one of the existing keep item
-		    for (ProjectItem keepItem : keepItems) {
-		        if (item.getLibraryName().equals(keepItem.getLibraryName())
-		                && item.getBaseNamespace().equals(keepItem.getBaseNamespace())) {
-		            List<String> keepItemChain = itemVersionChains.get(keepItem);
-
-		            if (isInVersionChain(item.getNamespace(), keepItemChain, vScheme)) {
-		                purgeCurrentItem = true;
-		                break;
-		            }
-		        }
-		    }
-
-		    if (!purgeCurrentItem) {
-		        keepProjectItem(item, keepItems, vScheme, itemVersionChain);
-		    }
-		    itemVersionChains.put(item, itemVersionChain);
-
-		} catch (VersionSchemeException e) {
-		    // On error, we DO NOT want to purge the item from the list
-		    keepItems.add(item);
+			if (failedItem instanceof UnmanagedProjectItemType) {
+				jaxbProject.getProjectItemBase()
+					.add( objectFactory.createUnmanagedProjectItem( (UnmanagedProjectItemType) failedItem ) );
+				
+			} else { // Must be a ManagedProjectItemType
+				jaxbProject.getProjectItemBase()
+					.add( objectFactory.createManagedProjectItem( (ManagedProjectItemType) failedItem ) );
+			}
+			failedItem.setDefaultItem( null );
 		}
 	}
-
+	
 	/**
-	 * Adds the given project item to the given keep list and purges any existing
-	 * keep items that are eclipsed by the new one.
+	 * Assign the repositories that are referenced and their endpoint URL's to the given JAXB project.
 	 * 
-	 * @param item  the project item to keep
-	 * @param keepItems  the list of keep items that have been discovered so far
-	 * @param vScheme  the version scheme of the project item
-	 * @param itemVersionChains  the version identifier chain for each project item
+	 * @param jaxbProject the JAXB project being constructed
+	 * @param project the project from which the JAXB instance is being created
+	 * @param repositoryIds the collection of all known repository IDs from the project
 	 */
-	private static void keepProjectItem(ProjectItem item, List<ProjectItem> keepItems, VersionScheme vScheme,
+	private void assignRepositoryReferences(ProjectType jaxbProject, Project project, Set<String> repositoryIds) {
+		ProjectManager projectManager = project.getProjectManager();
+		RepositoryManager repositoryManager = (projectManager == null) ? null : projectManager.getRepositoryManager();
+		
+		if ((repositoryManager != null) && !repositoryIds.isEmpty()) {
+			RepositoryReferencesType repositoryRefs = new RepositoryReferencesType();
+			
+			for (String repositoryId : repositoryIds) {
+				Repository repository = repositoryManager.getRepository( repositoryId );
+				
+				if (repository instanceof RemoteRepository) {
+					RepositoryRefType repositoryRef = new RepositoryRefType();
+					
+					repositoryRef.setRepositoryId( repositoryId );
+					repositoryRef.setValue( ((RemoteRepository) repository).getEndpointUrl() );
+					repositoryRefs.getRepositoryRef().add( repositoryRef );
+				}
+			}
+			jaxbProject.setRepositoryReferences( repositoryRefs );
+		}
+	}
+	
+	/**
+	 * Purges any project items from the given list that are implied by the existence of later versions. Only managed
+	 * project items are processed by this method.
+	 * 
+	 * @param projectItems the list of project items to process
+	 * @return List<ProjectItem>
+	 */
+	private List<ProjectItem> purgeImpliedManagedVersions(List<ProjectItem> projectItems) {
+		Map<ProjectItem,List<String>> itemVersionChains = new HashMap<>();
+		List<ProjectItem> keepItems = new ArrayList<>();
+		
+		for (ProjectItem item : projectItems) {
+			if (item.getState() == RepositoryItemState.UNMANAGED) {
+				continue; // only purge managed versions
+			}
+			addKeepItemIfNotEclipsed( item, keepItems, itemVersionChains );
+		}
+		
+		// Scan the original list, and assemble the final list of items that should be included in
+		// project's save file
+		List<ProjectItem> result = new ArrayList<>();
+		
+		for (ProjectItem item : projectItems) {
+			if ((item.getState() == RepositoryItemState.UNMANAGED) || keepItems.contains( item )) {
+				result.add( item );
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * If the given project item is not eclisped by a later minor version, it will be added to the given list of keep
+	 * items.
+	 * 
+	 * @param item the item to be kept if not eclipsed
+	 * @param keepItems the list of keep items that have been discovered so far
+	 * @param itemVersionChains the version identifier chain for each project item
+	 */
+	private void addKeepItemIfNotEclipsed(ProjectItem item, List<ProjectItem> keepItems,
+			Map<ProjectItem,List<String>> itemVersionChains) {
+		try {
+			VersionScheme vScheme = VersionSchemeFactory.getInstance().getVersionScheme( item.getVersionScheme() );
+			List<String> itemVersionChain = vScheme.getMajorVersionChain( item.getNamespace() );
+			boolean purgeCurrentItem = false;
+			
+			// Determine if the current item is eclipsed by one of the existing keep item
+			for (ProjectItem keepItem : keepItems) {
+				if (item.getLibraryName().equals( keepItem.getLibraryName() )
+						&& item.getBaseNamespace().equals( keepItem.getBaseNamespace() )) {
+					List<String> keepItemChain = itemVersionChains.get( keepItem );
+					
+					if (isInVersionChain( item.getNamespace(), keepItemChain, vScheme )) {
+						purgeCurrentItem = true;
+						break;
+					}
+				}
+			}
+			
+			if (!purgeCurrentItem) {
+				keepProjectItem( item, keepItems, vScheme, itemVersionChain );
+			}
+			itemVersionChains.put( item, itemVersionChain );
+			
+		} catch (VersionSchemeException e) {
+			// On error, we DO NOT want to purge the item from the list
+			keepItems.add( item );
+		}
+	}
+	
+	/**
+	 * Adds the given project item to the given keep list and purges any existing keep items that are eclipsed by the
+	 * new one.
+	 * 
+	 * @param item the project item to keep
+	 * @param keepItems the list of keep items that have been discovered so far
+	 * @param vScheme the version scheme of the project item
+	 * @param itemVersionChains the version identifier chain for each project item
+	 */
+	private void keepProjectItem(ProjectItem item, List<ProjectItem> keepItems, VersionScheme vScheme,
 			List<String> itemVersionChain) {
 		Iterator<ProjectItem> keepIterator = keepItems.iterator();
-
+		
 		// Discard any existing keep items that are eclipsed by the current item
 		while (keepIterator.hasNext()) {
-		    ProjectItem keepItem = keepIterator.next();
-
-		    if (!item.getLibraryName().equals(keepItem.getLibraryName())
-		            || !item.getBaseNamespace().equals(keepItem.getBaseNamespace())) {
-		        continue; // purge candidates must have the same library name and base
-		                  // namespace
-		    }
-
-		    if (isInVersionChain(keepItem.getNamespace(), itemVersionChain, vScheme)) {
-		        keepIterator.remove();
-		    }
+			ProjectItem keepItem = keepIterator.next();
+			
+			if (!item.getLibraryName().equals( keepItem.getLibraryName() )
+					|| !item.getBaseNamespace().equals( keepItem.getBaseNamespace() )) {
+				continue; // purge candidates must have the same library name and base
+							// namespace
+			}
+			
+			if (isInVersionChain( keepItem.getNamespace(), itemVersionChain, vScheme )) {
+				keepIterator.remove();
+			}
 		}
-		keepItems.add(item);
+		keepItems.add( item );
 	}
-
-    /**
-     * Returns true if the specified namespace is a member of the version chain provided.
-     * 
-     * <p>
-     * NOTE: This method assumed that the base namespaces of the given namespace and the chain have
-     * already been matched.
-     * 
-     * @param namespace
-     *            the namespace to analyze
-     * @param versionChain
-     *            the version chain to check for membership
-     * @param scheme
-     *            the version scheme for the namespace and version chain
-     * @return boolean
-     */
-    private static boolean isInVersionChain(String namespace, List<String> versionChain,
-            VersionScheme scheme) {
-        String nsVersion = scheme.getVersionIdentifier(namespace);
-        boolean result = false;
-
-        if (nsVersion != null) {
-            for (String chainNS : versionChain) {
-                if (nsVersion.equals(scheme.getVersionIdentifier(chainNS))) {
-                    result = true;
-                    break;
-                }
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Initializes the validation schema and shared JAXB context.
-     */
-    static {
-        try {
-            SchemaFactory schemaFactory = SchemaFactory
-                    .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            InputStream schemaStream = SchemaDeclarations.OTA2_PROJECT_SCHEMA.getContent(
-            		CodeGeneratorFactory.XSD_TARGET_FORMAT);
-
-            schemaFactory.setResourceResolver(new ClasspathResourceResolver());
-            projectValidationSchema = schemaFactory.newSchema(new StreamSource(schemaStream));
-            jaxbContext = JAXBContext.newInstance(SCHEMA_CONTEXT);
-
-        } catch (Exception e) {
-            throw new ExceptionInInitializerError(e);
-        }
-    }
-
+	
+	/**
+	 * Returns true if the specified namespace is a member of the version chain provided.
+	 * 
+	 * <p>
+	 * NOTE: This method assumed that the base namespaces of the given namespace and the chain have already been
+	 * matched.
+	 * 
+	 * @param namespace the namespace to analyze
+	 * @param versionChain the version chain to check for membership
+	 * @param scheme the version scheme for the namespace and version chain
+	 * @return boolean
+	 */
+	private boolean isInVersionChain(String namespace, List<String> versionChain, VersionScheme scheme) {
+		String nsVersion = scheme.getVersionIdentifier( namespace );
+		boolean result = false;
+		
+		if (nsVersion != null) {
+			for (String chainNS : versionChain) {
+				if (nsVersion.equals( scheme.getVersionIdentifier( chainNS ) )) {
+					result = true;
+					break;
+				}
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * Initializes the validation schema and shared JAXB context.
+	 */
+	static {
+		try {
+			SchemaFactory schemaFactory = SchemaFactory.newInstance( XMLConstants.W3C_XML_SCHEMA_NS_URI );
+			InputStream schemaStream = SchemaDeclarations.OTA2_PROJECT_SCHEMA
+				.getContent( CodeGeneratorFactory.XSD_TARGET_FORMAT );
+			
+			schemaFactory.setResourceResolver( new ClasspathResourceResolver() );
+			projectValidationSchema = schemaFactory.newSchema( new StreamSource( schemaStream ) );
+			jaxbContext = JAXBContext.newInstance( SCHEMA_CONTEXT );
+			
+		} catch (Exception e) {
+			throw new ExceptionInInitializerError( e );
+		}
+	}
+	
 }

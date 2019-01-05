@@ -19,11 +19,9 @@ package org.opentravel.schemacompiler.index;
  * Interface that defines constants for all indexing fields and terms used by the
  * free-text search service.
  */
-@SuppressWarnings("squid:S1214")
 public interface IndexingTerms {
 	
 	// Common fields used for all indexed entities
-	
 	public static final String IDENTITY_FIELD           = "identity";
 	public static final String ENTITY_TYPE_FIELD        = "entityType";
 	public static final String ENTITY_NAME_FIELD        = "entityName";

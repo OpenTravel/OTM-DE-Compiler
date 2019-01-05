@@ -23,7 +23,7 @@ import org.w3c.dom.Document;
  * 
  * @author S. Livezey
  */
-public interface PrettyPrintLineBreakProcessor {
+public abstract class PrettyPrintLineBreakProcessor {
 
     public static final String LINE_BREAK_TOKEN = "__LINE_BREAK__";
     public static final String LINE_BREAK_COMMENT = "<!--" + LINE_BREAK_TOKEN + "-->";
@@ -35,6 +35,6 @@ public interface PrettyPrintLineBreakProcessor {
      * @param document
      *            the DOM document to process
      */
-    public void insertLineBreakTokens(Document document);
+    public abstract void insertLineBreakTokens(Document document);
 
 }

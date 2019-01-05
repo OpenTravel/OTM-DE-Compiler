@@ -54,9 +54,8 @@ import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
 import org.opentravel.schemacompiler.util.ClasspathResourceResolver;
 import org.opentravel.schemacompiler.util.FileUtils;
+import org.opentravel.schemacompiler.xml.NamespacePrefixMapper;
 import org.opentravel.schemacompiler.xml.XMLGregorianCalendarConverter;
-
-import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
 
 /**
  * Base class that handles all low-level file I/O for an OTA2.0 repository. Each time a file is

@@ -26,8 +26,9 @@ import org.opentravel.schemacompiler.security.RepositorySecurityManager;
 import org.opentravel.schemacompiler.security.UserPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -58,7 +59,7 @@ public class LoginController extends BaseController {
 	 * @param redirectAttrs request attributes for the redirect in the case of a successful operation
 	 * @return String
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = { "/", "/login.html", "/login.htm" })
+	@PostMapping( { "/", "/login.html", "/login.htm" } )
 	public String login(@RequestParam("userid") String userId, @RequestParam("password") String password,
 			HttpSession session, Model model, RedirectAttributes redirectAttrs) {
 		RepositorySecurityManager securityManager = RepositoryComponentFactory.getDefault().getSecurityManager();
@@ -94,7 +95,7 @@ public class LoginController extends BaseController {
 	 * @param redirectAttrs request attributes for the redirect in the case of a successful operation
 	 * @return String
 	 */
-	@RequestMapping(method = RequestMethod.GET, value = { "/", "/logout.html", "/logout.htm" })
+	@GetMapping( { "/", "/logout.html", "/logout.htm" } )
 	public String logout(HttpSession session, Model model) {
 		session.removeAttribute( USER );
 		session.removeAttribute( ADMIN_AUTHORIZED );

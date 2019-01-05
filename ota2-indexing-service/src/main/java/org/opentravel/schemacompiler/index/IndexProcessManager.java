@@ -57,6 +57,8 @@ public class IndexProcessManager {
 	
 	public static final int FATAL_EXIT_CODE = 69; // service unavailable exit code
 	
+	public static final String MBEAN_NAME = "org.opentravel.mbeans:type=IndexProcessManagerMBean";
+	
 	public static final String MANAGER_CONFIG_SYSPROP = "ota2.index.manager.config";
 	public static final String MANAGER_JMXPORT_BEANID = "jmxPort";
 	public static final String AGENT_CONFIG_SYSPROP   = "ota2.index.agent.config";
@@ -72,7 +74,7 @@ public class IndexProcessManager {
     private static JMXConnectorServer jmxServer;
 	private static boolean shutdownRequested = false;
 	private static Thread launcherThread;
-	private static Process agentProcess;
+	private static AgentLauncher launcher;
 	private static String agentJvmOpts;
 	
 	/**
@@ -87,7 +89,8 @@ public class IndexProcessManager {
 			startJMXServer();
 			log.info("Indexing process manager started.");
 			
-			launcherThread = new Thread( new AgentLauncher() );
+			launcher = new AgentLauncher();
+			launcherThread = new Thread( launcher );
 			shutdownRequested = false;
 			launcherThread.start();
 			
@@ -147,8 +150,8 @@ public class IndexProcessManager {
 			try {
 				shutdownRequested = true;
 				
-				if (agentProcess != null) {
-					agentProcess.destroy();
+				if (launcher.getAgentProcess() != null) {
+					launcher.getAgentProcess().destroy();
 				}
 				launcherThread.interrupt();
 				jmxServer.stop();
@@ -213,7 +216,7 @@ public class IndexProcessManager {
 		try {
 			JMXServiceURL jmxUrl = new JMXServiceURL( getJmxServerUrl() );
 			MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-			ObjectName name = new ObjectName( IndexProcessManagerMBean.MBEAN_NAME );
+			ObjectName name = new ObjectName( MBEAN_NAME );
 	        
 	        mbs.registerMBean( new ShutdownHook(), name );
 	        LocateRegistry.createRegistry( getJmxPort() );
@@ -232,6 +235,8 @@ public class IndexProcessManager {
 	 * Runner that handles the launching of agent processes.
 	 */
 	private static class AgentLauncher implements Runnable {
+		
+		private Process agentProcess;
 		
 		/**
 		 * @see java.lang.Runnable#run()
@@ -377,6 +382,15 @@ public class IndexProcessManager {
 				jvmOption = "-XX:+ExitOnOutOfMemoryError";
 			}
 			return jvmOption;
+		}
+
+		/**
+		 * Returns the handle to the indexing agent process.
+		 *
+		 * @return Process
+		 */
+		public Process getAgentProcess() {
+			return agentProcess;
 		}
 		
 	}

@@ -19,12 +19,12 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.sun.xml.bind</groupId>
+			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-core</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.sun.xml.bind</groupId>
-			<artifactId>jaxb-impl</artifactId>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -111,20 +111,23 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.jvnet.jaxb2.maven2</groupId>
-				<artifactId>maven-jaxb2-plugin</artifactId>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>jaxb2-maven-plugin</artifactId>
 				<version>${jaxb2.plugin.version}</version>
 				<executions>
 					<execution>
-						<id>jaxb-generate</id>
+						<id>xjc</id>
 						<phase>generate-sources</phase>
 						<goals>
-							<goal>generate</goal>
+							<goal>xjc</goal>
 						</goals>
 					</execution>
 				</executions>
 				<configuration>
-					<schemaDirectory>${basedir}/src/main/resources/ota2-context/schemas</schemaDirectory>
+					<outputDirectory>${project.build.directory}/generated-sources/xjc</outputDirectory>
+					<sources>
+						<source>src/main/resources/ota2-context/schemas</source>
+					</sources>
 					<strict>true</strict>
 					<verbose>false</verbose>
 				</configuration>

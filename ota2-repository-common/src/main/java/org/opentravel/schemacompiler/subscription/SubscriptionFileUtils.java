@@ -38,8 +38,7 @@ import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.util.ClasspathResourceResolver;
 import org.opentravel.schemacompiler.util.RepositoryJaxbContext;
-
-import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
+import org.opentravel.schemacompiler.xml.NamespacePrefixMapper;
 
 /**
  * Utility methods used for loading and saving the contents of subscription-related files

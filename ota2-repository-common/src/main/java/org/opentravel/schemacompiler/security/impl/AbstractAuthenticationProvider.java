@@ -44,8 +44,7 @@ import org.opentravel.schemacompiler.repository.RepositoryFileManager;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.security.AuthenticationProvider;
 import org.opentravel.schemacompiler.util.ClasspathResourceResolver;
-
-import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
+import org.opentravel.schemacompiler.xml.NamespacePrefixMapper;
 
 /**
  * Base class that provides common methods for all <code>AuthenticationProvider</code>

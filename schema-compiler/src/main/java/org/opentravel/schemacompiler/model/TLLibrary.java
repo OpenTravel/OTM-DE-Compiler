@@ -820,7 +820,7 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
 	private <T extends NamedEntity> List<T> buildMemberList(Class<T> memberType) {
 		List<T> memberList = new ArrayList<>();
 		
-		for (NamedEntity member : getNamedMembers()) {
+		for (LibraryMember member : getNamedMembers()) {
 			if (memberType.equals( member.getClass() )) {
 				memberList.add( (T) member );
 			}
