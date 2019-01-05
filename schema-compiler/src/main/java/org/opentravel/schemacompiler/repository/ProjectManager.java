@@ -56,7 +56,7 @@ import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.loader.LibraryModelLoader;
 import org.opentravel.schemacompiler.loader.LibraryNamespaceResolver;
 import org.opentravel.schemacompiler.loader.LoaderProgressMonitor;
-import org.opentravel.schemacompiler.loader.LoaderValidationMessageKeys;
+import org.opentravel.schemacompiler.loader.LoaderConstants;
 import org.opentravel.schemacompiler.loader.impl.DefaultLibraryNamespaceResolver;
 import org.opentravel.schemacompiler.loader.impl.FileValidationSource;
 import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
@@ -439,7 +439,7 @@ public final class ProjectManager {
 		} catch (MalformedURLException e) {
 		    findings.addFinding(FindingType.ERROR, new FileValidationSource(
 		            projectFile),
-		            LoaderValidationMessageKeys.ERROR_INVALID_PROJECT_ITEM_LOCATION,
+		            LoaderConstants.ERROR_INVALID_PROJECT_ITEM_LOCATION,
 		            jaxbProjectItem.getFileLocation());
 		}
 		return defaultItemUrl;
@@ -483,7 +483,7 @@ public final class ProjectManager {
 		    if (repositoryItem.getRepository() == null) {
 		        findings.addFinding(FindingType.ERROR, new FileValidationSource(
 		                projectFile),
-		                LoaderValidationMessageKeys.ERROR_MISSING_REPOSITORY,
+		                LoaderConstants.ERROR_MISSING_REPOSITORY,
 		                jaxbProjectItem.getFilename());
 		    }
 		    if ((jaxbProjectItem.isDefaultItem() != null) && jaxbProjectItem.isDefaultItem()) {
@@ -494,13 +494,13 @@ public final class ProjectManager {
 		} catch (RepositoryUnavailableException e) {
 		    findings.addFinding(FindingType.ERROR, new FileValidationSource(
 		            projectFile),
-		            LoaderValidationMessageKeys.ERROR_REPOSITORY_UNAVAILABLE,
+		            LoaderConstants.ERROR_REPOSITORY_UNAVAILABLE,
 		            jaxbProjectItem.getFilename(), jaxbProjectItem.getRepository());
 
 		} catch (RepositoryException e) {
 		    findings.addFinding(FindingType.ERROR, new FileValidationSource(
 		            projectFile),
-		            LoaderValidationMessageKeys.ERROR_LOADING_FROM_REPOSITORY,
+		            LoaderConstants.ERROR_LOADING_FROM_REPOSITORY,
 		            jaxbProjectItem.getFilename(), e.getClass().getSimpleName(), e
 		                    .getMessage());
 		}
@@ -621,7 +621,7 @@ public final class ProjectManager {
 		        if (!success) {
 		            findings.addFinding(FindingType.WARNING, new FileValidationSource(
 		                    projectFile),
-		                    LoaderValidationMessageKeys.WARNING_INVALID_REPOSITORY_URL,
+		                    LoaderConstants.WARNING_INVALID_REPOSITORY_URL,
 		                    repositoryUrl);
 		        }
 		    }
@@ -794,7 +794,7 @@ public final class ProjectManager {
 				
 			} catch (Exception e) {
 				loaderFindings.addFinding(FindingType.ERROR, new LibraryValidationSource(item.getContent()),
-						LoaderValidationMessageKeys.ERROR_UNKNOWN_EXCEPTION_DURING_MODULE_LOAD,
+						LoaderConstants.ERROR_UNKNOWN_EXCEPTION_DURING_MODULE_LOAD,
 						URLUtils.getShortRepresentation(item.getContent().getLibraryUrl()),
 						ExceptionUtils.getExceptionClass(e).getSimpleName(), ExceptionUtils.getExceptionMessage(e));
 			}
@@ -870,7 +870,7 @@ public final class ProjectManager {
 			
 		} catch (Exception e) {
 			findings.addFinding(FindingType.ERROR, new LibraryValidationSource(refreshedItem.getContent()),
-					LoaderValidationMessageKeys.ERROR_UNKNOWN_EXCEPTION_DURING_MODULE_LOAD,
+					LoaderConstants.ERROR_UNKNOWN_EXCEPTION_DURING_MODULE_LOAD,
 					URLUtils.getShortRepresentation(libraryUrl),
 					ExceptionUtils.getExceptionClass(e).getSimpleName(), ExceptionUtils.getExceptionMessage(e));
 		}
@@ -1361,7 +1361,7 @@ public final class ProjectManager {
             if (!libraryFile.exists()) {
             	if (findings != null) {
                     findings.addFinding(FindingType.ERROR, new FileValidationSource(libraryFile),
-                            LoaderValidationMessageKeys.ERROR_INVALID_PROJECT_ITEM_LOCATION,
+                            LoaderConstants.ERROR_INVALID_PROJECT_ITEM_LOCATION,
                             libraryFile.getAbsolutePath());
             	}
                 continue;
@@ -1436,7 +1436,7 @@ public final class ProjectManager {
 		                .addFinding(
 		                        FindingType.ERROR,
 		                        new FileValidationSource(project.getProjectFile()),
-		                        LoaderValidationMessageKeys.ERROR_UNKNOWN_EXCEPTION_DURING_PROJECT_LOAD,
+		                        LoaderConstants.ERROR_UNKNOWN_EXCEPTION_DURING_PROJECT_LOAD,
 		                        URLUtils.getShortRepresentation(libraryUrl), ExceptionUtils
 		                                .getExceptionClass(e).getSimpleName(),
 		                        ExceptionUtils.getExceptionMessage(e));
@@ -1459,14 +1459,14 @@ public final class ProjectManager {
 			try {
 				managedLibrary.setNamespace(managedItem.getNamespace());
 				findings.addFinding(FindingType.WARNING, new LibraryValidationSource(managedLibrary),
-						LoaderValidationMessageKeys.WARNING_MANAGED_LIBRARY_NAMESPACE_MISMATCH,
+						LoaderConstants.WARNING_MANAGED_LIBRARY_NAMESPACE_MISMATCH,
 						managedItem.getFilename());
 				
 			} catch (IllegalArgumentException e) {
 				// If we cannot reassign the namespace because a duplicate exists,
 				// remove the library and issue a loader error.
 				findings.addFinding(FindingType.ERROR, new LibraryValidationSource(managedLibrary),
-						LoaderValidationMessageKeys.ERROR_MANAGED_LIBRARY_NAMESPACE_ERROR, managedItem.getFilename());
+						LoaderConstants.ERROR_MANAGED_LIBRARY_NAMESPACE_ERROR, managedItem.getFilename());
 			}
 		}
 	}
@@ -1500,7 +1500,7 @@ public final class ProjectManager {
 		                .addFinding(
 		                        FindingType.ERROR,
 		                        new FileValidationSource(project.getProjectFile()),
-		                        LoaderValidationMessageKeys.ERROR_UNKNOWN_EXCEPTION_DURING_PROJECT_LOAD,
+		                        LoaderConstants.ERROR_UNKNOWN_EXCEPTION_DURING_PROJECT_LOAD,
 		                        URLUtils.getShortRepresentation(libraryUrl), ExceptionUtils
 		                                .getExceptionClass(e).getSimpleName(),
 		                        ExceptionUtils.getExceptionMessage(e));

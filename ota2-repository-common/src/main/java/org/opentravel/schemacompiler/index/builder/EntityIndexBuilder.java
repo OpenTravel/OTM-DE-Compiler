@@ -79,7 +79,7 @@ import org.opentravel.schemacompiler.visitor.ModelNavigator;
  *
  * @param <T>  the type of the OTM named entity for which to construct a search index document
  */
-public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> implements IndexingTerms {
+public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> {
 	
     private static Log log = LogFactory.getLog( EntityIndexBuilder.class );
     
@@ -117,44 +117,44 @@ public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> i
 			Field.Store nonStoreField = searchIndexInd ? Field.Store.NO : Field.Store.YES;
 			Document indexDoc = new Document();
 			
-			indexDoc.add( new StringField( IDENTITY_FIELD, identityKey, Field.Store.YES ) );
-			indexDoc.add( new StringField( SEARCH_INDEX_FIELD, searchIndexInd + "", Field.Store.NO ) );
-			indexDoc.add( new StringField( OWNING_LIBRARY_FIELD, owningLibraryIdentity, Field.Store.YES ) );
-			indexDoc.add( new StringField( ENTITY_TYPE_FIELD, sourceObject.getClass().getName(), Field.Store.YES ) );
-			indexDoc.add( new StringField( ENTITY_NAME_FIELD, getEntityName( sourceObject ), Field.Store.YES ) );
-			indexDoc.add( new StringField( ENTITY_NAMESPACE_FIELD, sourceObject.getNamespace(), Field.Store.YES ) );
-			indexDoc.add( new StringField( VERSION_FIELD, owningLibrary.getVersion(), Field.Store.YES ) );
-			indexDoc.add( new StringField( LATEST_VERSION_FIELD, latestVersion + "", nonStoreField ) );
-			indexDoc.add( new StringField( LATEST_VERSION_AT_UNDER_REVIEW_FIELD, latestVersionAtUnderReview + "", nonStoreField ) );
-			indexDoc.add( new StringField( LATEST_VERSION_AT_FINAL_FIELD, latestVersionAtFinal + "", nonStoreField ) );
-			indexDoc.add( new StringField( LATEST_VERSION_AT_OBSOLETE_FIELD, latestVersionAtObsolete + "", nonStoreField ) );
-			indexDoc.add( new TextField( KEYWORDS_FIELD, getFreeTextSearchContent(), nonStoreField ) );
+			indexDoc.add( new StringField( IndexingTerms.IDENTITY_FIELD, identityKey, Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.SEARCH_INDEX_FIELD, searchIndexInd + "", Field.Store.NO ) );
+			indexDoc.add( new StringField( IndexingTerms.OWNING_LIBRARY_FIELD, owningLibraryIdentity, Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.ENTITY_TYPE_FIELD, sourceObject.getClass().getName(), Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.ENTITY_NAME_FIELD, getEntityName( sourceObject ), Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.ENTITY_NAMESPACE_FIELD, sourceObject.getNamespace(), Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.VERSION_FIELD, owningLibrary.getVersion(), Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.LATEST_VERSION_FIELD, latestVersion + "", nonStoreField ) );
+			indexDoc.add( new StringField( IndexingTerms.LATEST_VERSION_AT_UNDER_REVIEW_FIELD, latestVersionAtUnderReview + "", nonStoreField ) );
+			indexDoc.add( new StringField( IndexingTerms.LATEST_VERSION_AT_FINAL_FIELD, latestVersionAtFinal + "", nonStoreField ) );
+			indexDoc.add( new StringField( IndexingTerms.LATEST_VERSION_AT_OBSOLETE_FIELD, latestVersionAtObsolete + "", nonStoreField ) );
+			indexDoc.add( new TextField( IndexingTerms.KEYWORDS_FIELD, getFreeTextSearchContent(), nonStoreField ) );
 			
 			if (entityDescription != null) {
-				indexDoc.add( new StringField( ENTITY_DESCRIPTION_FIELD, entityDescription, Field.Store.YES ) );
+				indexDoc.add( new StringField( IndexingTerms.ENTITY_DESCRIPTION_FIELD, entityDescription, Field.Store.YES ) );
 			}
 			if (owningLibrary.getStatus() != null) {
-				indexDoc.add( new StringField( STATUS_FIELD, owningLibrary.getStatus().toString(), Field.Store.YES ) );
+				indexDoc.add( new StringField( IndexingTerms.STATUS_FIELD, owningLibrary.getStatus().toString(), Field.Store.YES ) );
 			}
 			if (lockedByUser != null) {
-				indexDoc.add( new StringField( LOCKED_BY_USER_FIELD, lockedByUser, Field.Store.YES ) );
+				indexDoc.add( new StringField( IndexingTerms.LOCKED_BY_USER_FIELD, lockedByUser, Field.Store.YES ) );
 			}
 			if (extendsEntityKey != null) {
-				indexDoc.add( new StringField( EXTENDS_ENTITY_FIELD, extendsEntityKey, Field.Store.YES ) );
+				indexDoc.add( new StringField( IndexingTerms.EXTENDS_ENTITY_FIELD, extendsEntityKey, Field.Store.YES ) );
 			}
 			if (facetOwnerKey != null) {
-				indexDoc.add( new StringField( FACET_OWNER_FIELD, facetOwnerKey, Field.Store.YES ) );
+				indexDoc.add( new StringField( IndexingTerms.FACET_OWNER_FIELD, facetOwnerKey, Field.Store.YES ) );
 			}
 			if (entityContent != null) {
-				indexDoc.add( new StoredField( CONTENT_DATA_FIELD, new BytesRef( entityContent ) ) );
+				indexDoc.add( new StoredField( IndexingTerms.CONTENT_DATA_FIELD, new BytesRef( entityContent ) ) );
 			}
 			for (String key : referenceIdentityKeys) {
-				indexDoc.add( new StringField( REFERENCE_IDENTITY_FIELD, key, Field.Store.YES ) );
+				indexDoc.add( new StringField( IndexingTerms.REFERENCE_IDENTITY_FIELD, key, Field.Store.YES ) );
 			}
 			for (String key : referencedEntityKeys) {
-				indexDoc.add( new StringField( REFERENCED_ENTITY_FIELD, key, nonStoreField ) );
+				indexDoc.add( new StringField( IndexingTerms.REFERENCED_ENTITY_FIELD, key, nonStoreField ) );
 			}
-			getIndexWriter().updateDocument( new Term( IDENTITY_FIELD, identityKey ), indexDoc );
+			getIndexWriter().updateDocument( new Term( IndexingTerms.IDENTITY_FIELD, identityKey ), indexDoc );
 			
 			// If the entity is a Choice or Business Object, add it to the list of facet
 			// owners to be post-processed for their contextual facet content
@@ -174,11 +174,11 @@ public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> i
 			IndexWriter indexWriter = getIndexWriter();
 			
 			indexWriter.deleteDocuments(
-					new Term( IDENTITY_FIELD, IndexingUtils.getIdentityKey( sourceObject ) ) );
+					new Term( IndexingTerms.IDENTITY_FIELD, IndexingUtils.getIdentityKey( sourceObject ) ) );
 			
 			if (!isSearchIndexEntity( sourceObject )) {
 				indexWriter.deleteDocuments(
-						new Term( IDENTITY_FIELD, IndexingUtils.getIdentityKey( sourceObject, false ) ) );
+						new Term( IndexingTerms.IDENTITY_FIELD, IndexingUtils.getIdentityKey( sourceObject, false ) ) );
 			}
 			
 		} catch (IOException e) {

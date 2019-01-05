@@ -49,7 +49,7 @@ import org.opentravel.ns.ota2.project_v01_00.UnmanagedProjectItemType;
 import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
-import org.opentravel.schemacompiler.loader.LoaderValidationMessageKeys;
+import org.opentravel.schemacompiler.loader.LoaderConstants;
 import org.opentravel.schemacompiler.loader.impl.FileValidationSource;
 import org.opentravel.schemacompiler.repository.Project;
 import org.opentravel.schemacompiler.repository.ProjectItem;
@@ -110,7 +110,7 @@ public class ProjectFileUtils implements AbstractFileUtils {
 				String filename = (projectFile == null) ? "[UNKNOWN FILE]" : projectFile.getName();
 				
 				findings.addFinding( FindingType.ERROR, new FileValidationSource( projectFile ),
-						LoaderValidationMessageKeys.ERROR_UNREADABLE_PROJECT_CONTENT, filename,
+						LoaderConstants.ERROR_UNREADABLE_PROJECT_CONTENT, filename,
 						ExceptionUtils.getExceptionClass( e ).getSimpleName(),
 						ExceptionUtils.getExceptionMessage( e ) );
 			} else {
@@ -120,7 +120,7 @@ public class ProjectFileUtils implements AbstractFileUtils {
 		} catch (IOException e) {
 			if (findings != null) {
 				findings.addFinding( FindingType.WARNING, new FileValidationSource( projectFile ),
-						LoaderValidationMessageKeys.WARNING_PROJECT_NOT_FOUND,
+						LoaderConstants.WARNING_PROJECT_NOT_FOUND,
 						(projectFile == null) ? "[UNKNOWN FILE]" : projectFile.getName() );
 			} else {
 				throw new LibraryLoaderException( e.getMessage(), e );

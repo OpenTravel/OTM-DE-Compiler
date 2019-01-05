@@ -23,7 +23,7 @@ import org.opentravel.schemacompiler.repository.RepositoryException;
 /**
  * Abstract base class for all search results returned by the <code>FreeTextSearchService</code>.
  */
-public abstract class SearchResult<T> implements IndexingTerms {
+public abstract class SearchResult<T> {
 	
     private static Log log = LogFactory.getLog( SearchResult.class );
 
@@ -44,12 +44,12 @@ public abstract class SearchResult<T> implements IndexingTerms {
 	 * @param searchService  the indexing search service that created this search result
 	 */
 	public SearchResult(Document doc, FreeTextSearchService searchService) {
-		String entityTypeStr = doc.get( ENTITY_TYPE_FIELD );
+		String entityTypeStr = doc.get( IndexingTerms.ENTITY_TYPE_FIELD );
 		
-		this.searchIndexId = doc.get( IDENTITY_FIELD );
-		this.itemNamespace = doc.get( ENTITY_NAMESPACE_FIELD );
-		this.itemName = doc.get( ENTITY_NAME_FIELD );
-		this.itemDescription = doc.get( ENTITY_DESCRIPTION_FIELD );
+		this.searchIndexId = doc.get( IndexingTerms.IDENTITY_FIELD );
+		this.itemNamespace = doc.get( IndexingTerms.ENTITY_NAMESPACE_FIELD );
+		this.itemName = doc.get( IndexingTerms.ENTITY_NAME_FIELD );
+		this.itemDescription = doc.get( IndexingTerms.ENTITY_DESCRIPTION_FIELD );
 		this.searchService = searchService;
 		
 		try {

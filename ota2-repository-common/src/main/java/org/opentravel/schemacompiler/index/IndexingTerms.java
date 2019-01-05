@@ -16,10 +16,10 @@
 package org.opentravel.schemacompiler.index;
 
 /**
- * Interface that defines constants for all indexing fields and terms used by the
- * free-text search service.
+ * Constants for all indexing fields and terms used by the free-text search
+ * service.
  */
-public interface IndexingTerms {
+public class IndexingTerms {
 	
 	// Common fields used for all indexed entities
 	public static final String IDENTITY_FIELD           = "identity";
@@ -33,7 +33,7 @@ public interface IndexingTerms {
 	public static final String KEYWORDS_FIELD           = "keywords";
 	public static final String CONTENT_DATA_FIELD       = "contentData";
 	public static final String SEARCH_INDEX_FIELD       = "searchIndexInd";
-    
+	
 	// Common fields used to exclude library/entity versions from search results
 	public static final String LATEST_VERSION_FIELD                 = "latestVersion";
 	public static final String LATEST_VERSION_AT_UNDER_REVIEW_FIELD = "latestVersionAtUnderReview";
@@ -71,5 +71,10 @@ public interface IndexingTerms {
 	public static final String FINDING_SOURCE_FIELD  = "findingSource";
 	public static final String FINDING_TYPE_FIELD    = "findingType";
 	public static final String FINDING_MESSAGE_FIELD = "findingMessage";
+	
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private IndexingTerms() {}
 	
 }

@@ -43,7 +43,7 @@ import org.springframework.jms.core.MessageCreator;
 /**
  * Notification service that broadcasts repository events to a JMS topic.
  */
-public class JMSNotificationService implements NotificationService, NotificationConstants {
+public class JMSNotificationService implements NotificationService {
 	
     private static Log log = LogFactory.getLog(JMSNotificationService.class);
     private static ObjectFactory objectFactory = new ObjectFactory();
@@ -130,7 +130,7 @@ public class JMSNotificationService implements NotificationService, Notification
 	 */
 	@Override
 	public void itemPublished(RepositoryItem item) {
-		queueNotification( PUBLISH_ACTION_ID, item );
+		queueNotification( NotificationConstants.PUBLISH_ACTION_ID, item );
 	}
 
 	/**
@@ -138,7 +138,7 @@ public class JMSNotificationService implements NotificationService, Notification
 	 */
 	@Override
 	public void itemModified(RepositoryItem item) {
-		queueNotification( MODIFIED_ACTION_ID, item );
+		queueNotification( NotificationConstants.MODIFIED_ACTION_ID, item );
 	}
 
 	/**
@@ -146,7 +146,7 @@ public class JMSNotificationService implements NotificationService, Notification
 	 */
 	@Override
 	public void itemLocked(RepositoryItem item) {
-		queueNotification( LOCKED_ACTION_ID, item );
+		queueNotification( NotificationConstants.LOCKED_ACTION_ID, item );
 	}
 
 	/**
@@ -154,7 +154,7 @@ public class JMSNotificationService implements NotificationService, Notification
 	 */
 	@Override
 	public void itemUnlocked(RepositoryItem item) {
-		queueNotification( UNLOCKED_ACTION_ID, item );
+		queueNotification( NotificationConstants.UNLOCKED_ACTION_ID, item );
 	}
 
 	/**
@@ -162,7 +162,7 @@ public class JMSNotificationService implements NotificationService, Notification
 	 */
 	@Override
 	public void itemStatusChanged(RepositoryItem item) {
-		queueNotification( STATUS_CHANGED_ACTION_ID, item );
+		queueNotification( NotificationConstants.STATUS_CHANGED_ACTION_ID, item );
 	}
 
 	/**
@@ -170,7 +170,7 @@ public class JMSNotificationService implements NotificationService, Notification
 	 */
 	@Override
 	public void itemDeleted(RepositoryItem item) {
-		queueNotification( DELETED_ACTION_ID, item );
+		queueNotification( NotificationConstants.DELETED_ACTION_ID, item );
 	}
 	
 	/**
@@ -210,7 +210,7 @@ public class JMSNotificationService implements NotificationService, Notification
 				public Message createMessage(Session session) throws JMSException {
 					TextMessage msg = session.createTextMessage();
 					
-					msg.setStringProperty( MSGPROP_ACTION, job.getActionId() );
+					msg.setStringProperty( NotificationConstants.MSGPROP_ACTION, job.getActionId() );
 					msg.setText( writer.toString() );
 					return msg;
 				}

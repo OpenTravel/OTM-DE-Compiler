@@ -46,12 +46,12 @@ public class ValidationResult extends SearchResult<ValidationFinding> {
 	 */
 	public ValidationResult(Document doc, FreeTextSearchService searchService) {
 		super( doc, searchService );
-		String findingTypeStr = doc.get( FINDING_TYPE_FIELD );
+		String findingTypeStr = doc.get( IndexingTerms.FINDING_TYPE_FIELD );
 		
-		this.libraryIndexId = doc.get( TARGET_LIBRARY_FIELD );
-		this.entityIndexId = doc.get( TARGET_ENTITY_FIELD );
-		this.findingSource = doc.get( FINDING_SOURCE_FIELD );
-		this.findingMessage = doc.get( FINDING_MESSAGE_FIELD );
+		this.libraryIndexId = doc.get( IndexingTerms.TARGET_LIBRARY_FIELD );
+		this.entityIndexId = doc.get( IndexingTerms.TARGET_ENTITY_FIELD );
+		this.findingSource = doc.get( IndexingTerms.FINDING_SOURCE_FIELD );
+		this.findingMessage = doc.get( IndexingTerms.FINDING_MESSAGE_FIELD );
 		
 		try {
 			this.findingType = FindingType.valueOf( findingTypeStr );

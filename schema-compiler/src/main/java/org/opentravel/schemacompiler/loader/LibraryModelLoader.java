@@ -84,7 +84,7 @@ import org.w3._2001.xmlschema.TopLevelElement;
  *            the content type must be returned by the input source used by the module loader
  * @author S. Livezey
  */
-public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys {
+public final class LibraryModelLoader<C> {
 
 	private static final String INVALID_NAMESPACE_URI = "Invalid namespace URI on import: ";
 	private static final boolean ENFORCE_CRC_VALIDATION = false;
@@ -152,7 +152,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
             for (ValidationFinding finding : findings.getAllFindingsAsList()) {
                 String messageKey = finding.getMessageKey();
 
-                if ((messageKey != null) && messageKey.startsWith(LOADER_VALIDATION_PREFIX)) {
+                if ((messageKey != null) && messageKey.startsWith(LoaderConstants.LOADER_VALIDATION_PREFIX)) {
                     loaderFindings.addFinding(finding.getType(), finding.getSource(), messageKey,
                             finding.getMessageParams());
                 }
@@ -332,7 +332,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
                 } catch (URISyntaxException e) {
                     addLoaderFinding(FindingType.ERROR,
                             new URLValidationSource(inputSource.getLibraryURL()),
-                            ERROR_INVALID_NAMESPACE_URI_ON_IMPORT, namespace);
+                            LoaderConstants.ERROR_INVALID_NAMESPACE_URI_ON_IMPORT, namespace);
                     log.debug(INVALID_NAMESPACE_URI + namespace, e);
                 }
             }
@@ -457,8 +457,8 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
 					&& (operationType != OperationType.CLIENT_REQUESTED)
 					&& !isAllowedNamespaceVariation(expectedNamespace, libraryInfo.getNamespace(),
 							libraryInfo.getVersionScheme())) {
-				String errorKey = (operationType == OperationType.INCLUDE) ? ERROR_NAMESPACE_MISMATCH_ON_INCLUDE
-						: ERROR_NAMESPACE_MISMATCH_ON_IMPORT;
+				String errorKey = (operationType == OperationType.INCLUDE) ? LoaderConstants.ERROR_NAMESPACE_MISMATCH_ON_INCLUDE
+						: LoaderConstants.ERROR_NAMESPACE_MISMATCH_ON_IMPORT;
 				
 				addLoaderFinding(FindingType.ERROR, new LibraryValidationSource(library), errorKey, expectedNamespace,
 						libraryInfo.getNamespace());
@@ -516,7 +516,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
 			
 		} catch (URISyntaxException e) {
 			addLoaderFinding(FindingType.ERROR, new LibraryValidationSource(library),
-					ERROR_INVALID_URL_ON_INCLUDE, include);
+					LoaderConstants.ERROR_INVALID_URL_ON_INCLUDE, include);
 		}
 	}
 
@@ -549,20 +549,20 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
 						}
 					} else {
 						addLoaderFinding(FindingType.WARNING, new LibraryValidationSource(library),
-								WARNING_UNRESOLVED_LIBRARY_NAMESPACE, nsImport.getNamespace());
+								LoaderConstants.WARNING_UNRESOLVED_LIBRARY_NAMESPACE, nsImport.getNamespace());
 					}
 				}
 			} else {
 				addLoaderFinding(FindingType.ERROR, new LibraryValidationSource(library),
-						ERROR_MISSING_NAMESPACE_URI_ON_IMPORT, libraryInfo.getLibraryName());
+						LoaderConstants.ERROR_MISSING_NAMESPACE_URI_ON_IMPORT, libraryInfo.getLibraryName());
 			}
 		} catch (URISyntaxException e) {
 			addLoaderFinding(FindingType.ERROR, new LibraryValidationSource(library),
-					ERROR_INVALID_NAMESPACE_URI_ON_IMPORT, nsImport.getNamespace());
+					LoaderConstants.ERROR_INVALID_NAMESPACE_URI_ON_IMPORT, nsImport.getNamespace());
 			log.debug(INVALID_NAMESPACE_URI + libraryInfo.getNamespace(), e);
 		} catch (Exception e) {
 			addLoaderFinding(FindingType.ERROR, new LibraryValidationSource(library),
-					ERROR_UNKNOWN_EXCEPTION_DURING_MODULE_LOAD, libraryInfo.getLibraryName(),
+					LoaderConstants.ERROR_UNKNOWN_EXCEPTION_DURING_MODULE_LOAD, libraryInfo.getLibraryName(),
 					ExceptionUtils.getExceptionClass(e).getSimpleName(), ExceptionUtils.getExceptionMessage(e));
 			log.debug("Unexpected exception loading liberary module: " + libraryInfo.getLibraryName(), e);
 		}
@@ -669,11 +669,11 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
 			
 		} catch (URISyntaxException e) {
 			addLoaderFinding(FindingType.ERROR, new LibraryValidationSource(library),
-					ERROR_INVALID_NAMESPACE_URI_ON_IMPORT, versionNS);
+					LoaderConstants.ERROR_INVALID_NAMESPACE_URI_ON_IMPORT, versionNS);
 			log.debug(INVALID_NAMESPACE_URI + libraryInfo.getNamespace(), e);
 		} catch (Exception e) {
 			addLoaderFinding(FindingType.ERROR, new LibraryValidationSource(library),
-					ERROR_UNKNOWN_EXCEPTION_DURING_MODULE_LOAD, libraryInfo.getLibraryName(),
+					LoaderConstants.ERROR_UNKNOWN_EXCEPTION_DURING_MODULE_LOAD, libraryInfo.getLibraryName(),
 					ExceptionUtils.getExceptionClass(e).getSimpleName(),
 					ExceptionUtils.getExceptionMessage(e));
 			log.debug("Unexpected exception loading liberary module: " + libraryInfo.getLibraryName(), e);
@@ -760,12 +760,12 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
 		
 		if (chameleonImport) {
 		    addLoaderFinding(FindingType.ERROR, new URLValidationSource(schemaUrl),
-		            ERROR_ILLEGAL_CHAMELEON_IMPORT, expectedNamespace);
+		            LoaderConstants.ERROR_ILLEGAL_CHAMELEON_IMPORT, expectedNamespace);
 
 		} else if ((operationType != OperationType.CLIENT_REQUESTED) && !namespaceMatches
 		        && !chameleonInclude) {
-		    String errorKey = (operationType == OperationType.INCLUDE) ? ERROR_NAMESPACE_MISMATCH_ON_INCLUDE
-		            : ERROR_NAMESPACE_MISMATCH_ON_IMPORT;
+		    String errorKey = (operationType == OperationType.INCLUDE) ? LoaderConstants.ERROR_NAMESPACE_MISMATCH_ON_INCLUDE
+		            : LoaderConstants.ERROR_NAMESPACE_MISMATCH_ON_IMPORT;
 
 		    addLoaderFinding(FindingType.ERROR, new URLValidationSource(schemaUrl),
 		            errorKey, expectedNamespace, schema.getTargetNamespace());
@@ -800,7 +800,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
 
 		} catch (MalformedURLException e) {
 		    addLoaderFinding(FindingType.ERROR, new URLValidationSource(schemaUrl),
-		            ERROR_INVALID_URL_ON_INCLUDE, include);
+		            LoaderConstants.ERROR_INVALID_URL_ON_INCLUDE, include);
 		}
 	}
 
@@ -834,24 +834,24 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
 		                
 		            } else {
 		                addLoaderFinding(FindingType.WARNING, new URLValidationSource(
-		                        schemaUrl), WARNING_UNRESOLVED_LIBRARY_NAMESPACE,
+		                        schemaUrl), LoaderConstants.WARNING_UNRESOLVED_LIBRARY_NAMESPACE,
 		                        nsImport.getNamespace());
 		            }
 		        }
 		        
 		    } else {
 		        addLoaderFinding(FindingType.ERROR, new URLValidationSource(schemaUrl),
-		                ERROR_MISSING_NAMESPACE_URI_ON_IMPORT,
+		                LoaderConstants.ERROR_MISSING_NAMESPACE_URI_ON_IMPORT,
 		                URLUtils.getShortRepresentation(schemaUrl));
 		    }
 		    
 		} catch (URISyntaxException e) {
 		    addLoaderFinding(FindingType.ERROR, new URLValidationSource(schemaUrl),
-		            ERROR_INVALID_NAMESPACE_URI_ON_IMPORT, nsImport.getNamespace());
+		            LoaderConstants.ERROR_INVALID_NAMESPACE_URI_ON_IMPORT, nsImport.getNamespace());
 		    log.debug(INVALID_NAMESPACE_URI + schema.getTargetNamespace(), e);
 		} catch (Exception e) {
 		    addLoaderFinding(FindingType.ERROR, new URLValidationSource(schemaUrl),
-		            ERROR_UNKNOWN_EXCEPTION_DURING_MODULE_LOAD,
+		            LoaderConstants.ERROR_UNKNOWN_EXCEPTION_DURING_MODULE_LOAD,
 		            URLUtils.getShortRepresentation(schemaUrl), ExceptionUtils
 		                    .getExceptionClass(e).getSimpleName(),
 		            ExceptionUtils.getExceptionMessage(e));
@@ -892,12 +892,12 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
 
                 } else {
                     addLoaderFinding(FindingType.WARNING, new URLValidationSource(sUrl),
-                            WARNING_DUPLICATE_SCHEMA, URLUtils.getShortRepresentation(sUrl));
+                            LoaderConstants.WARNING_DUPLICATE_SCHEMA, URLUtils.getShortRepresentation(sUrl));
                 }
 
             } catch (Exception e) {
                 addLoaderFinding(FindingType.ERROR, new URLValidationSource(sUrl),
-                        ERROR_UNKNOWN_EXCEPTION_DURING_TRANSFORMATION,
+                        LoaderConstants.ERROR_UNKNOWN_EXCEPTION_DURING_TRANSFORMATION,
                         URLUtils.getShortRepresentation(sUrl), ExceptionUtils
                                 .getExceptionClass(e).getSimpleName(),
                         ExceptionUtils.getExceptionMessage(e));
@@ -948,7 +948,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
 
                     } else {
                         addLoaderFinding(FindingType.WARNING, new URLValidationSource(lUrl),
-                                WARNING_DUPLICATE_LIBRARY,
+                                LoaderConstants.WARNING_DUPLICATE_LIBRARY,
                                 URLUtils.getShortRepresentation(lUrl));
                     }
                 }
@@ -956,7 +956,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
             } catch (Exception e) {
                 addLoaderFinding(FindingType.ERROR,
                         new LibraryValidationSource(libraryInfo.getJaxbArtifact()),
-                        ERROR_UNKNOWN_EXCEPTION_DURING_TRANSFORMATION,
+                        LoaderConstants.ERROR_UNKNOWN_EXCEPTION_DURING_TRANSFORMATION,
                         libraryInfo.getLibraryName(), ExceptionUtils.getExceptionClass(e)
                                 .getSimpleName(), ExceptionUtils.getExceptionMessage(e));
                 log.debug(
@@ -985,7 +985,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
 			if ((libraryCrcValue != null) || LibraryCrcCalculator.isCrcRequired(library)) {
 			    if (libraryCrcValue == null) {
 			        addLoaderFinding(FindingType.ERROR, new URLValidationSource(libraryUrl),
-			                ERROR_MISSING_CRC);
+			                LoaderConstants.ERROR_MISSING_CRC);
 			        isValidCrc = false; // CRC is required, but not provided by the library
 
 			    } else {
@@ -993,7 +993,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
 
 			        if (libraryCrcValue.longValue() != calculatedCrc) {
 			            addLoaderFinding(FindingType.ERROR,
-			                    new URLValidationSource(libraryUrl), ERROR_INVALID_CRC);
+			                    new URLValidationSource(libraryUrl), LoaderConstants.ERROR_INVALID_CRC);
 			            isValidCrc = false; // CRC is present, but does not match the calculated value
 			        }
 			    }
@@ -1018,7 +1018,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
 
             } catch (Exception e) {
                 addLoaderFinding(FindingType.ERROR, library,
-                        ERROR_UNKNOWN_EXCEPTION_DURING_VALIDATION, library.getName(),
+                        LoaderConstants.ERROR_UNKNOWN_EXCEPTION_DURING_VALIDATION, library.getName(),
                         ExceptionUtils.getExceptionClass(e).getSimpleName(),
                         ExceptionUtils.getExceptionMessage(e));
                 log.debug("Unexpected exception validating liberary module: " + library.getName(), e);
@@ -1275,7 +1275,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
      * @return boolean
      */
     private boolean isImportValidationMessageKey(String messageKey) {
-        return (messageKey != null) && messageKey.equals(WARNING_LIBRARY_NOT_FOUND);
+        return (messageKey != null) && messageKey.equals(LoaderConstants.WARNING_LIBRARY_NOT_FOUND);
     }
     
     /**
@@ -1338,7 +1338,7 @@ public final class LibraryModelLoader<C> implements LoaderValidationMessageKeys 
 
                 } else {
                     getValidationFindings().addFinding(FindingType.ERROR, new LibraryValidationSource(
-                            libraryModule), ERROR_MISSING_NAMESPACE_URI, URLUtils
+                            libraryModule), LoaderConstants.ERROR_MISSING_NAMESPACE_URI, URLUtils
                             .getShortRepresentation(libraryUrl));
                 }
             }

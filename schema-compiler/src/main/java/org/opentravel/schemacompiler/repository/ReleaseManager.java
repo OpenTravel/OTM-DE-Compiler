@@ -35,7 +35,7 @@ import org.opentravel.ns.ota2.release_v01_00.ReleaseStatus;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.loader.LibraryModelLoader;
-import org.opentravel.schemacompiler.loader.LoaderValidationMessageKeys;
+import org.opentravel.schemacompiler.loader.LoaderConstants;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Handles the loading and saving of OTM releases on the local file system and the OTM repository.
  */
-public class ReleaseManager implements LoaderValidationMessageKeys {
+public class ReleaseManager {
 	
 	private static final String INITIAL_VERSION = "1.0.0";
 	
@@ -855,7 +855,7 @@ public class ReleaseManager implements LoaderValidationMessageKeys {
 				findings.addAll( TLModelCompileValidator.validateModelElement( library, false ) );
 				
 			} catch (Exception e) {
-				findings.addFinding( FindingType.ERROR, library, ERROR_UNKNOWN_EXCEPTION_DURING_VALIDATION,
+				findings.addFinding( FindingType.ERROR, library, LoaderConstants.ERROR_UNKNOWN_EXCEPTION_DURING_VALIDATION,
 						library.getName(), ExceptionUtils.getExceptionClass( e ).getSimpleName(),
 						ExceptionUtils.getExceptionMessage( e ) );
 				log.debug( "Unexpected exception validating liberary module: " + library.getName(), e );

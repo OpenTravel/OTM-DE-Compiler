@@ -27,7 +27,7 @@ import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionTarget;
  * Search result object that encapsulates all relevant information about a user's
  * subscription in an OTM repository.
  */
-public class SubscriptionSearchResult implements IndexingTerms, Comparable<SubscriptionSearchResult> {
+public class SubscriptionSearchResult implements Comparable<SubscriptionSearchResult> {
 	
 	private SubscriptionTarget subscriptionTarget;
 	private List<SubscriptionEventType> eventTypes = new ArrayList<>();

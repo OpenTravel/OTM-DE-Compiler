@@ -27,6 +27,7 @@ import org.apache.lucene.index.Term;
 import org.opentravel.ns.ota2.repositoryinfoext_v01_00.Subscription;
 import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionList;
 import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionTarget;
+import org.opentravel.schemacompiler.index.IndexingTerms;
 import org.opentravel.schemacompiler.index.IndexingUtils;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.subscription.SubscriptionManager;
@@ -55,21 +56,21 @@ public class SubscriptionIndexBuilder extends IndexBuilder<SubscriptionTarget> {
 				String identityKey = IndexingUtils.getIdentityKey( sourceObject, subscription.getEventType() );
 				Document indexDoc = new Document();
 				
-				indexDoc.add( new StringField( IDENTITY_FIELD, identityKey, Field.Store.YES ) );
-				indexDoc.add( new StringField( ENTITY_TYPE_FIELD, Subscription.class.getName(), Field.Store.YES ) );
-				indexDoc.add( new StringField( BASE_NAMESPACE_FIELD, sourceObject.getBaseNamespace(), Field.Store.YES ) );
-				indexDoc.add( new StringField( EVENT_TYPE_FIELD, subscription.getEventType().toString(), Field.Store.YES ) );
+				indexDoc.add( new StringField( IndexingTerms.IDENTITY_FIELD, identityKey, Field.Store.YES ) );
+				indexDoc.add( new StringField( IndexingTerms.ENTITY_TYPE_FIELD, Subscription.class.getName(), Field.Store.YES ) );
+				indexDoc.add( new StringField( IndexingTerms.BASE_NAMESPACE_FIELD, sourceObject.getBaseNamespace(), Field.Store.YES ) );
+				indexDoc.add( new StringField( IndexingTerms.EVENT_TYPE_FIELD, subscription.getEventType().toString(), Field.Store.YES ) );
 				
 				if (libraryName != null) {
-					indexDoc.add( new StringField( LIBRARY_NAME_FIELD, libraryName, Field.Store.YES ) );
+					indexDoc.add( new StringField( IndexingTerms.LIBRARY_NAME_FIELD, libraryName, Field.Store.YES ) );
 				}
 				if (version != null) {
-					indexDoc.add( new StringField( VERSION_FIELD, version, Field.Store.YES ) );
+					indexDoc.add( new StringField( IndexingTerms.VERSION_FIELD, version, Field.Store.YES ) );
 				}
 				for (String userId : subscription.getUser()) {
-					indexDoc.add( new StringField( USERID_FIELD, userId, Field.Store.YES ) );
+					indexDoc.add( new StringField( IndexingTerms.USERID_FIELD, userId, Field.Store.YES ) );
 				}
-				getIndexWriter().updateDocument( new Term( IDENTITY_FIELD, identityKey ), indexDoc );
+				getIndexWriter().updateDocument( new Term( IndexingTerms.IDENTITY_FIELD, identityKey ), indexDoc );
 			}
 			
 			if (libraryName != null) logIdentity += " : " + libraryName;

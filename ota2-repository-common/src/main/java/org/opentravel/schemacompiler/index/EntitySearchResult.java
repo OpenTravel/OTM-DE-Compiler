@@ -63,12 +63,12 @@ public class EntitySearchResult extends SearchResult<NamedEntity> {
 	 */
 	public EntitySearchResult(Document doc, FreeTextSearchService searchService) {
 		super( doc, searchService );
-		String statusStr = doc.get( STATUS_FIELD );
+		String statusStr = doc.get( IndexingTerms.STATUS_FIELD );
 		
-		this.lockedByUser = doc.get( LOCKED_BY_USER_FIELD );
-		this.owningLibraryId = doc.get( OWNING_LIBRARY_FIELD );
-		this.extendsEntityId = doc.get( EXTENDS_ENTITY_FIELD );
-		this.referenceIdentityIds.addAll( Arrays.asList( doc.getValues( REFERENCE_IDENTITY_FIELD ) ) );
+		this.lockedByUser = doc.get( IndexingTerms.LOCKED_BY_USER_FIELD );
+		this.owningLibraryId = doc.get( IndexingTerms.OWNING_LIBRARY_FIELD );
+		this.extendsEntityId = doc.get( IndexingTerms.EXTENDS_ENTITY_FIELD );
+		this.referenceIdentityIds.addAll( Arrays.asList( doc.getValues( IndexingTerms.REFERENCE_IDENTITY_FIELD ) ) );
 		
 		if (statusStr != null) {
 			try {
@@ -79,7 +79,7 @@ public class EntitySearchResult extends SearchResult<NamedEntity> {
 			}
 		}
 		
-		if (doc.getBinaryValue( CONTENT_DATA_FIELD ) != null) {
+		if (doc.getBinaryValue( IndexingTerms.CONTENT_DATA_FIELD ) != null) {
 			initializeItemContent( doc );
 		}
 	}
@@ -90,7 +90,7 @@ public class EntitySearchResult extends SearchResult<NamedEntity> {
 	@Override
 	protected void initializeItemContent(Document itemDoc) {
 		try {
-			BytesRef binaryContent = (itemDoc == null) ? null : itemDoc.getBinaryValue( CONTENT_DATA_FIELD );
+			BytesRef binaryContent = (itemDoc == null) ? null : itemDoc.getBinaryValue( IndexingTerms.CONTENT_DATA_FIELD );
 			String content = (binaryContent == null) ? null : binaryContent.utf8ToString();
 			
 			if (content != null) {
@@ -115,7 +115,7 @@ public class EntitySearchResult extends SearchResult<NamedEntity> {
 	 * @param itemDoc  the search index document of the facet owner
 	 */
 	private void initializeContextualFacets(TLFacetOwner facetOwner, Document itemDoc) {
-		BytesRef[] facetContents = itemDoc.getBinaryValues( FACET_CONTENT_FIELD );
+		BytesRef[] facetContents = itemDoc.getBinaryValues( IndexingTerms.FACET_CONTENT_FIELD );
 		Map<QName,TLFacetOwner> facetOwnerMap = new HashMap<>();
 		List<TLContextualFacet> facetList = new ArrayList<>();
 		
@@ -132,7 +132,7 @@ public class EntitySearchResult extends SearchResult<NamedEntity> {
 		
 		// The initial facet owner is the original one passed to this method
 		facetOwnerMap.put( new QName(
-				itemDoc.get( ENTITY_NAMESPACE_FIELD ), facetOwner.getLocalName() ), facetOwner );
+				itemDoc.get( IndexingTerms.ENTITY_NAMESPACE_FIELD ), facetOwner.getLocalName() ), facetOwner );
 		
 		// Continue making passes through the facet list until we cannot resolve anything else
 		int originalSize = -1;

@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.opentravel.schemacompiler.notification;
 
 /**
  * Constant definitions used by the notification service.
  */
-public interface NotificationConstants {
+public class NotificationConstants {
 	
 	public static final String MSGPROP_ACTION           = "action";
 	public static final String PUBLISH_ACTION_ID        = "publish";
@@ -28,5 +27,10 @@ public interface NotificationConstants {
 	public static final String UNLOCKED_ACTION_ID       = "unlocked";
 	public static final String STATUS_CHANGED_ACTION_ID = "status-changed";
 	public static final String DELETED_ACTION_ID        = "deleted";
+
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private NotificationConstants() {}
 	
 }

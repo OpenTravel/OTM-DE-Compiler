@@ -49,7 +49,7 @@ import org.opentravel.ns.ota2.release_v01_00.ReleaseType;
 import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
-import org.opentravel.schemacompiler.loader.LoaderValidationMessageKeys;
+import org.opentravel.schemacompiler.loader.LoaderConstants;
 import org.opentravel.schemacompiler.loader.impl.FileValidationSource;
 import org.opentravel.schemacompiler.repository.Release;
 import org.opentravel.schemacompiler.repository.ReleaseCompileOptions;
@@ -109,13 +109,13 @@ public class ReleaseFileUtils implements AbstractFileUtils {
 			String filename = (releaseFile == null) ? "[UNKNOWN FILE]" : releaseFile.getName();
 			
 			findings.addFinding( FindingType.ERROR, new FileValidationSource( releaseFile ),
-					LoaderValidationMessageKeys.ERROR_UNREADABLE_RELEASE_CONTENT, filename,
+					LoaderConstants.ERROR_UNREADABLE_RELEASE_CONTENT, filename,
 					ExceptionUtils.getExceptionClass( e ).getSimpleName(), ExceptionUtils.getExceptionMessage( e ) );
 			
 		} catch (IOException e) {
 			if (findings != null) {
 				findings.addFinding( FindingType.ERROR, new FileValidationSource( releaseFile ),
-						LoaderValidationMessageKeys.ERROR_RELEASE_NOT_FOUND,
+						LoaderConstants.ERROR_RELEASE_NOT_FOUND,
 						(releaseFile == null) ? "[UNKNOWN FILE]" : releaseFile.getName() );
 			} else {
 				throw new LibraryLoaderException( e.getMessage(), e );

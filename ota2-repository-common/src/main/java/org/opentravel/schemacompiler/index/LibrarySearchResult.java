@@ -59,10 +59,10 @@ public class LibrarySearchResult extends SearchResult<TLLibrary> {
 	public LibrarySearchResult(Document doc, Repository owningRepository, FreeTextSearchService searchService) {
 		super( doc, searchService );
 		RepositoryItemImpl item = new RepositoryItemImpl();
-		String statusStr = doc.get( STATUS_FIELD );
+		String statusStr = doc.get( IndexingTerms.STATUS_FIELD );
 		
-		this.lockedByUser = doc.get( LOCKED_BY_USER_FIELD );
-		this.referencedLibraryIds.addAll( Arrays.asList( doc.getValues( REFERENCED_LIBRARY_FIELD ) ) );
+		this.lockedByUser = doc.get( IndexingTerms.LOCKED_BY_USER_FIELD );
+		this.referencedLibraryIds.addAll( Arrays.asList( doc.getValues( IndexingTerms.REFERENCED_LIBRARY_FIELD ) ) );
 		
 		if (statusStr != null) {
 			try {
@@ -74,19 +74,19 @@ public class LibrarySearchResult extends SearchResult<TLLibrary> {
 		}
 		
 		item.setRepository( owningRepository );
-		item.setBaseNamespace( doc.get( BASE_NAMESPACE_FIELD ) );
-		item.setNamespace( doc.get( ENTITY_NAMESPACE_FIELD ) );
-		item.setLibraryName( doc.get( ENTITY_NAME_FIELD ) );
-		item.setFilename( doc.get( FILENAME_FIELD ) );
-		item.setVersion( doc.get( VERSION_FIELD ) );
-		item.setVersionScheme( doc.get( VERSION_SCHEME_FIELD ) );
-		item.setLockedByUser( doc.get( LOCKED_BY_USER_FIELD ) );
+		item.setBaseNamespace( doc.get( IndexingTerms.BASE_NAMESPACE_FIELD ) );
+		item.setNamespace( doc.get( IndexingTerms.ENTITY_NAMESPACE_FIELD ) );
+		item.setLibraryName( doc.get( IndexingTerms.ENTITY_NAME_FIELD ) );
+		item.setFilename( doc.get( IndexingTerms.FILENAME_FIELD ) );
+		item.setVersion( doc.get( IndexingTerms.VERSION_FIELD ) );
+		item.setVersionScheme( doc.get( IndexingTerms.VERSION_SCHEME_FIELD ) );
+		item.setLockedByUser( doc.get( IndexingTerms.LOCKED_BY_USER_FIELD ) );
 		item.setStatus( this.status );
 		item.setState( (this.lockedByUser == null) ?
 				RepositoryItemState.MANAGED_UNLOCKED : RepositoryItemState.MANAGED_LOCKED );
 		this.repositoryItem = item;
 		
-		for (String prefixMapping : doc.getValues( PREFIX_MAPPING_FIELD )) {
+		for (String prefixMapping : doc.getValues( IndexingTerms.PREFIX_MAPPING_FIELD )) {
 			String[] mappingParts = prefixMapping.split( "\\~" );
 			
 			if (mappingParts.length == 2) {
@@ -94,7 +94,7 @@ public class LibrarySearchResult extends SearchResult<TLLibrary> {
 			}
 		}
 		
-		if (doc.getBinaryValue( CONTENT_DATA_FIELD ) != null) {
+		if (doc.getBinaryValue( IndexingTerms.CONTENT_DATA_FIELD ) != null) {
 			initializeItemContent( doc );
 		}
 	}
@@ -105,7 +105,7 @@ public class LibrarySearchResult extends SearchResult<TLLibrary> {
 	@Override
 	protected void initializeItemContent(Document itemDoc) {
 		try {
-			BytesRef binaryContent = (itemDoc == null) ? null : itemDoc.getBinaryValue( CONTENT_DATA_FIELD );
+			BytesRef binaryContent = (itemDoc == null) ? null : itemDoc.getBinaryValue( IndexingTerms.CONTENT_DATA_FIELD );
 			String content = (binaryContent == null) ? null : binaryContent.utf8ToString();
 			
 			if (content != null) {

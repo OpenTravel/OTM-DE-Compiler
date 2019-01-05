@@ -58,7 +58,7 @@ public class ReleaseSearchResult extends SearchResult<Release> {
 	public ReleaseSearchResult(Document doc, FreeTextSearchService searchService) {
 		super( doc, searchService );
 		ReleaseFileUtils fileUtils = new ReleaseFileUtils( null );
-		String statusStr = doc.get( STATUS_FIELD );
+		String statusStr = doc.get( IndexingTerms.STATUS_FIELD );
 		
 		if (statusStr != null) {
 			try {
@@ -69,21 +69,21 @@ public class ReleaseSearchResult extends SearchResult<Release> {
 			}
 		}
 		
-		this.releaseName = doc.get( ENTITY_NAME_FIELD );
-		this.namespace = doc.get( ENTITY_NAMESPACE_FIELD );
-		this.baseNamespace = doc.get( BASE_NAMESPACE_FIELD );
-		this.filename = doc.get( FILENAME_FIELD );
-		this.version = doc.get( VERSION_FIELD );
-		this.referencedLibraryIds.addAll( Arrays.asList( doc.getValues( REFERENCED_LIBRARY_FIELD ) ) );
+		this.releaseName = doc.get( IndexingTerms.ENTITY_NAME_FIELD );
+		this.namespace = doc.get( IndexingTerms.ENTITY_NAMESPACE_FIELD );
+		this.baseNamespace = doc.get( IndexingTerms.BASE_NAMESPACE_FIELD );
+		this.filename = doc.get( IndexingTerms.FILENAME_FIELD );
+		this.version = doc.get( IndexingTerms.VERSION_FIELD );
+		this.referencedLibraryIds.addAll( Arrays.asList( doc.getValues( IndexingTerms.REFERENCED_LIBRARY_FIELD ) ) );
 		
-		for (String memberContent : doc.getValues( EXTERNAL_PRINCIPAL_FIELD )) {
+		for (String memberContent : doc.getValues( IndexingTerms.EXTERNAL_PRINCIPAL_FIELD )) {
 			addReleaseMember(memberContent, externalPrincipals, fileUtils);
 		}
-		for (String memberContent : doc.getValues( EXTERNAL_REFERENCE_FIELD )) {
+		for (String memberContent : doc.getValues( IndexingTerms.EXTERNAL_REFERENCE_FIELD )) {
 			addReleaseMember(memberContent, externalReferences, fileUtils);
 		}
 		
-		if (doc.getBinaryValue( CONTENT_DATA_FIELD ) != null) {
+		if (doc.getBinaryValue( IndexingTerms.CONTENT_DATA_FIELD ) != null) {
 			initializeItemContent( doc );
 		}
 	}
@@ -112,7 +112,7 @@ public class ReleaseSearchResult extends SearchResult<Release> {
 	@Override
 	protected void initializeItemContent(Document itemDoc) {
 		try {
-			BytesRef binaryContent = (itemDoc == null) ? null : itemDoc.getBinaryValue( CONTENT_DATA_FIELD );
+			BytesRef binaryContent = (itemDoc == null) ? null : itemDoc.getBinaryValue( IndexingTerms.CONTENT_DATA_FIELD );
 			String content = (binaryContent == null) ? null : binaryContent.utf8ToString();
 			
 			if (content != null) {

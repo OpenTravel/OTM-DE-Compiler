@@ -43,7 +43,7 @@ import org.opentravel.ns.ota2.assembly_v01_00.QualifiedNameType;
 import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
-import org.opentravel.schemacompiler.loader.LoaderValidationMessageKeys;
+import org.opentravel.schemacompiler.loader.LoaderConstants;
 import org.opentravel.schemacompiler.loader.impl.FileValidationSource;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
@@ -103,13 +103,13 @@ public class ServiceAssemblyFileUtils implements AbstractFileUtils {
 			String filename = (assemblyFile == null) ? "[UNKNOWN FILE]" : assemblyFile.getName();
 			
 			findings.addFinding( FindingType.ERROR, new FileValidationSource( assemblyFile ),
-					LoaderValidationMessageKeys.ERROR_UNREADABLE_RELEASE_CONTENT, filename,
+					LoaderConstants.ERROR_UNREADABLE_RELEASE_CONTENT, filename,
 					ExceptionUtils.getExceptionClass( e ).getSimpleName(), ExceptionUtils.getExceptionMessage( e ) );
 			
 		} catch (IOException e) {
 			if (findings != null) {
 				findings.addFinding( FindingType.ERROR, new FileValidationSource( assemblyFile ),
-						LoaderValidationMessageKeys.ERROR_RELEASE_NOT_FOUND,
+						LoaderConstants.ERROR_RELEASE_NOT_FOUND,
 						(assemblyFile == null) ? "[UNKNOWN FILE]" : assemblyFile.getName() );
 			} else {
 				throw new LibraryLoaderException( e.getMessage(), e );

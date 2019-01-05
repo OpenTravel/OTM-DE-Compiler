@@ -41,7 +41,7 @@ import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.loader.LibraryModuleImport;
 import org.opentravel.schemacompiler.loader.LibraryModuleInfo;
 import org.opentravel.schemacompiler.loader.LibraryModuleLoader;
-import org.opentravel.schemacompiler.loader.LoaderValidationMessageKeys;
+import org.opentravel.schemacompiler.loader.LoaderConstants;
 import org.opentravel.schemacompiler.transform.util.SchemaUtils;
 import org.opentravel.schemacompiler.util.ClasspathResourceResolver;
 import org.opentravel.schemacompiler.util.ExceptionUtils;
@@ -58,8 +58,7 @@ import org.w3._2001.xmlschema.Schema;
  * 
  * @author S. Livezey
  */
-public abstract class AbstractLibraryModuleLoader implements LibraryModuleLoader<InputStream>,
-        LoaderValidationMessageKeys {
+public abstract class AbstractLibraryModuleLoader implements LibraryModuleLoader<InputStream> {
 
 	protected static final Logger log = LoggerFactory.getLogger(AbstractLibraryModuleLoader.class);
 
@@ -125,7 +124,7 @@ public abstract class AbstractLibraryModuleLoader implements LibraryModuleLoader
                 validationFindings.addFinding(
                         FindingType.WARNING,
                         new URLValidationSource(libraryUrl),
-                        WARNING_LIBRARY_NOT_FOUND,
+                        LoaderConstants.WARNING_LIBRARY_NOT_FOUND,
                         (libraryUrl == null) ? MISSING_URL : URLUtils
                                 .getShortRepresentation(libraryUrl));
             }
@@ -167,7 +166,7 @@ public abstract class AbstractLibraryModuleLoader implements LibraryModuleLoader
                 validationFindings.addFinding(
                         FindingType.WARNING,
                         new URLValidationSource(schemaUrl),
-                        WARNING_SCHEMA_NOT_FOUND,
+                        LoaderConstants.WARNING_SCHEMA_NOT_FOUND,
                         (schemaUrl == null) ? MISSING_URL : URLUtils
                                 .getShortRepresentation(schemaUrl));
             }
@@ -183,7 +182,7 @@ public abstract class AbstractLibraryModuleLoader implements LibraryModuleLoader
                     .getShortRepresentation(schemaUrl);
 
             validationFindings.addFinding(FindingType.ERROR, new URLValidationSource(schemaUrl),
-                    ERROR_UNREADABLE_SCHEMA_CONTENT, urlString, ExceptionUtils.getExceptionClass(e)
+                    LoaderConstants.ERROR_UNREADABLE_SCHEMA_CONTENT, urlString, ExceptionUtils.getExceptionClass(e)
                             .getSimpleName(), ExceptionUtils.getExceptionMessage(e));
             log.debug("Error during JAXB parsing of content from URL: " + urlString, e);
             

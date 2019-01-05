@@ -49,6 +49,7 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.util.BytesRef;
 import org.opentravel.ns.ota2.librarymodel_v01_06.Library;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoType;
+import org.opentravel.schemacompiler.index.IndexingTerms;
 import org.opentravel.schemacompiler.index.IndexingUtils;
 import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.NamedEntity;
@@ -97,39 +98,39 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
 			String identityKey = IndexingUtils.getIdentityKey( sourceObject );
 			Document indexDoc = new Document();
 			
-			indexDoc.add( new StringField( IDENTITY_FIELD, identityKey, Field.Store.YES ) );
-			indexDoc.add( new StringField( SEARCH_INDEX_FIELD, Boolean.TRUE + "", Field.Store.NO ) );
-			indexDoc.add( new StringField( ENTITY_TYPE_FIELD, TLLibrary.class.getName(), Field.Store.YES ) );
-			indexDoc.add( new StringField( ENTITY_NAME_FIELD, library.getName(), Field.Store.YES ) );
-			indexDoc.add( new StringField( ENTITY_NAMESPACE_FIELD, library.getNamespace(), Field.Store.YES ) );
-			indexDoc.add( new StringField( BASE_NAMESPACE_FIELD, sourceObject.getBaseNamespace(), Field.Store.YES ) );
-			indexDoc.add( new StringField( FILENAME_FIELD, sourceObject.getFilename(), Field.Store.YES ) );
-			indexDoc.add( new StringField( VERSION_FIELD, sourceObject.getVersion(), Field.Store.YES ) );
-			indexDoc.add( new StringField( VERSION_SCHEME_FIELD, sourceObject.getVersionScheme(), Field.Store.YES ) );
-			indexDoc.add( new StringField( LATEST_VERSION_FIELD, latestVersionsByStatus.get( TLLibraryStatus.DRAFT ) + "", Field.Store.NO ) );
-			indexDoc.add( new StringField( LATEST_VERSION_AT_UNDER_REVIEW_FIELD, latestVersionsByStatus.get( TLLibraryStatus.UNDER_REVIEW ) + "", Field.Store.NO ) );
-			indexDoc.add( new StringField( LATEST_VERSION_AT_FINAL_FIELD, latestVersionsByStatus.get( TLLibraryStatus.FINAL ) + "", Field.Store.NO ) );
-			indexDoc.add( new StringField( LATEST_VERSION_AT_OBSOLETE_FIELD, latestVersionsByStatus.get( TLLibraryStatus.OBSOLETE ) + "", Field.Store.NO ) );
-			indexDoc.add( new TextField( KEYWORDS_FIELD, getFreeTextSearchContent(), Field.Store.NO ) );
+			indexDoc.add( new StringField( IndexingTerms.IDENTITY_FIELD, identityKey, Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.SEARCH_INDEX_FIELD, Boolean.TRUE + "", Field.Store.NO ) );
+			indexDoc.add( new StringField( IndexingTerms.ENTITY_TYPE_FIELD, TLLibrary.class.getName(), Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.ENTITY_NAME_FIELD, library.getName(), Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.ENTITY_NAMESPACE_FIELD, library.getNamespace(), Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.BASE_NAMESPACE_FIELD, sourceObject.getBaseNamespace(), Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.FILENAME_FIELD, sourceObject.getFilename(), Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.VERSION_FIELD, sourceObject.getVersion(), Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.VERSION_SCHEME_FIELD, sourceObject.getVersionScheme(), Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.LATEST_VERSION_FIELD, latestVersionsByStatus.get( TLLibraryStatus.DRAFT ) + "", Field.Store.NO ) );
+			indexDoc.add( new StringField( IndexingTerms.LATEST_VERSION_AT_UNDER_REVIEW_FIELD, latestVersionsByStatus.get( TLLibraryStatus.UNDER_REVIEW ) + "", Field.Store.NO ) );
+			indexDoc.add( new StringField( IndexingTerms.LATEST_VERSION_AT_FINAL_FIELD, latestVersionsByStatus.get( TLLibraryStatus.FINAL ) + "", Field.Store.NO ) );
+			indexDoc.add( new StringField( IndexingTerms.LATEST_VERSION_AT_OBSOLETE_FIELD, latestVersionsByStatus.get( TLLibraryStatus.OBSOLETE ) + "", Field.Store.NO ) );
+			indexDoc.add( new TextField( IndexingTerms.KEYWORDS_FIELD, getFreeTextSearchContent(), Field.Store.NO ) );
 			
 			if (library.getComments() != null) {
-				indexDoc.add( new StringField( ENTITY_DESCRIPTION_FIELD, library.getComments(), Field.Store.YES ) );
+				indexDoc.add( new StringField( IndexingTerms.ENTITY_DESCRIPTION_FIELD, library.getComments(), Field.Store.YES ) );
 			}
 			if (library.getStatus() != null) {
-				indexDoc.add( new StringField( STATUS_FIELD, library.getStatus().toString(), Field.Store.YES ) );
+				indexDoc.add( new StringField( IndexingTerms.STATUS_FIELD, library.getStatus().toString(), Field.Store.YES ) );
 			}
 			if (libraryMetadata.getLockedBy() != null) {
-				indexDoc.add( new StringField( LOCKED_BY_USER_FIELD, libraryMetadata.getLockedBy(), Field.Store.YES ) );
+				indexDoc.add( new StringField( IndexingTerms.LOCKED_BY_USER_FIELD, libraryMetadata.getLockedBy(), Field.Store.YES ) );
 			}
 			if (libraryContent != null) {
-				indexDoc.add( new StoredField( CONTENT_DATA_FIELD, new BytesRef( libraryContent ) ) );
+				indexDoc.add( new StoredField( IndexingTerms.CONTENT_DATA_FIELD, new BytesRef( libraryContent ) ) );
 			}
 			
 			for (TLInclude nsInclude : library.getIncludes()) {
 				String includeKey = getIdentityKey( nsInclude, library.getNamespace() );
 				
 				if (includeKey != null) {
-					indexDoc.add( new StringField( REFERENCED_LIBRARY_FIELD, includeKey, Field.Store.YES ) );
+					indexDoc.add( new StringField( IndexingTerms.REFERENCED_LIBRARY_FIELD, includeKey, Field.Store.YES ) );
 				}
 			}
 			for (TLNamespaceImport nsImport : library.getNamespaceImports()) {
@@ -138,13 +139,13 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
 				String ns = nsImport.getNamespace();
 				
 				for (String importKey : importKeys) {
-					indexDoc.add( new StringField( REFERENCED_LIBRARY_FIELD, importKey, Field.Store.YES ) );
+					indexDoc.add( new StringField( IndexingTerms.REFERENCED_LIBRARY_FIELD, importKey, Field.Store.YES ) );
 				}
 				if ((prefix != null) && (ns != null)) {
-					indexDoc.add( new StringField( PREFIX_MAPPING_FIELD, prefix + "~" + ns, Field.Store.YES ) );
+					indexDoc.add( new StringField( IndexingTerms.PREFIX_MAPPING_FIELD, prefix + "~" + ns, Field.Store.YES ) );
 				}
 			}
-			getIndexWriter().updateDocument( new Term( IDENTITY_FIELD, identityKey ), indexDoc );
+			getIndexWriter().updateDocument( new Term( IndexingTerms.IDENTITY_FIELD, identityKey ), indexDoc );
 			getFactory().getValidationService().validateLibrary( sourceObject );
 			
 		} catch (RepositoryException | IOException e) {
@@ -260,7 +261,7 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
         
 		try (SearcherManager searchManager =
 				new SearcherManager( getIndexWriter(), true, new SearcherFactory() )) {
-			QueryParser parser = new QueryParser( OWNING_LIBRARY_FIELD, new StandardAnalyzer() );
+			QueryParser parser = new QueryParser( IndexingTerms.OWNING_LIBRARY_FIELD, new StandardAnalyzer() );
 			Query entityQuery = parser.parse( "\"" + IndexingUtils.getIdentityKey( sourceObject ) + "\"" );
 			IndexSearcher searcher = searchManager.acquire();
 			IndexWriter indexWriter = getIndexWriter();
@@ -271,7 +272,7 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
             
             for (ScoreDoc scoreDoc : searchResults.scoreDocs) {
             	Document entityDoc = searcher.doc( scoreDoc.doc );
-            	IndexableField entityId = entityDoc.getField( IDENTITY_FIELD );
+            	IndexableField entityId = entityDoc.getField( IndexingTerms.IDENTITY_FIELD );
             	
             	if (entityId != null) {
                 	documentKeys.add( entityId.stringValue() );
@@ -283,7 +284,7 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
             // Delete all of the documents from the search index
             for (String documentId : documentKeys) {
         		log.info("Deleting index: " + documentId);
-    			indexWriter.deleteDocuments( new Term( IDENTITY_FIELD, documentId ) );
+    			indexWriter.deleteDocuments( new Term( IndexingTerms.IDENTITY_FIELD, documentId ) );
             }
             
             // Delete any associated validation findings from the search index

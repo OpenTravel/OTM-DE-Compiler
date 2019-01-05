@@ -22,7 +22,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.index.IndexWriter;
-import org.opentravel.schemacompiler.index.IndexingTerms;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 
 /**
@@ -31,7 +30,7 @@ import org.opentravel.schemacompiler.repository.RepositoryManager;
  *
  * @param <T>  the type of the repository artifact to be indexed
  */
-public abstract class IndexBuilder<T> implements IndexingTerms {
+public abstract class IndexBuilder<T> {
 	
     private static Log log = LogFactory.getLog( IndexBuilder.class );
 

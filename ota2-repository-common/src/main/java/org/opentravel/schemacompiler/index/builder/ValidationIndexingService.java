@@ -70,7 +70,7 @@ import org.opentravel.schemacompiler.validate.ValidationFindings;
  * service is optimized such that libraries can be skipped if their validations have already
  * been performed during previous validation passes (e.g. for common libraries).
  */
-public class ValidationIndexingService implements IndexingTerms {
+public class ValidationIndexingService {
 	
 	private static Pattern findingSourcePattern = Pattern.compile( "[A-Za-z0-9_]*?\\.otm\\s+\\:\\s+(.*)" );
     private static Log log = LogFactory.getLog( ValidationIndexingService.class );
@@ -262,20 +262,20 @@ public class ValidationIndexingService implements IndexingTerms {
 				findingSource = m.group( 1 );
 			}
 			
-			indexDoc.add( new StringField( IDENTITY_FIELD, identityKey, Field.Store.YES ) );
-			indexDoc.add( new StringField( ENTITY_TYPE_FIELD, ValidationFinding.class.getName(), Field.Store.YES ) );
-			indexDoc.add( new StringField( ENTITY_NAMESPACE_FIELD, sourceObjectName.getNamespaceURI(), Field.Store.YES ) );
-			indexDoc.add( new StringField( ENTITY_NAME_FIELD, sourceObjectName.getLocalPart(), Field.Store.YES ) );
-			indexDoc.add( new StringField( TARGET_LIBRARY_FIELD, libraryIndexId, Field.Store.YES ) );
-			indexDoc.add( new StringField( FINDING_SOURCE_FIELD, findingSource, Field.Store.YES ) );
-			indexDoc.add( new StringField( FINDING_TYPE_FIELD, finding.getType().toString(), Field.Store.YES ) );
-			indexDoc.add( new StringField( FINDING_MESSAGE_FIELD, finding.getFormattedMessage(
+			indexDoc.add( new StringField( IndexingTerms.IDENTITY_FIELD, identityKey, Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.ENTITY_TYPE_FIELD, ValidationFinding.class.getName(), Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.ENTITY_NAMESPACE_FIELD, sourceObjectName.getNamespaceURI(), Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.ENTITY_NAME_FIELD, sourceObjectName.getLocalPart(), Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.TARGET_LIBRARY_FIELD, libraryIndexId, Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.FINDING_SOURCE_FIELD, findingSource, Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.FINDING_TYPE_FIELD, finding.getType().toString(), Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.FINDING_MESSAGE_FIELD, finding.getFormattedMessage(
 					FindingMessageFormat.MESSAGE_ONLY_FORMAT ), Field.Store.YES ) );
 			
 			if (entityIndexId != null) {
-				indexDoc.add( new StringField( TARGET_ENTITY_FIELD, entityIndexId, Field.Store.YES ) );
+				indexDoc.add( new StringField( IndexingTerms.TARGET_ENTITY_FIELD, entityIndexId, Field.Store.YES ) );
 			}
-			indexWriter.updateDocument( new Term( IDENTITY_FIELD, identityKey ), indexDoc );
+			indexWriter.updateDocument( new Term( IndexingTerms.IDENTITY_FIELD, identityKey ), indexDoc );
 			
 		} catch (IOException e) {
             log.warn("Error indexing validation result for library: " + libraryIndexId, e);
@@ -291,14 +291,14 @@ public class ValidationIndexingService implements IndexingTerms {
 	public void deleteValidationResults(String libraryIndexId) {
 		try (SearcherManager searchManager =
 				new SearcherManager( indexWriter, true, new SearcherFactory() )) {
-			Query query = new TermQuery(new Term(TARGET_LIBRARY_FIELD, libraryIndexId));
+			Query query = new TermQuery(new Term(IndexingTerms.TARGET_LIBRARY_FIELD, libraryIndexId));
 			IndexSearcher searcher = searchManager.acquire();
 			TopDocs searchResults = searcher.search(query, Integer.MAX_VALUE);
 			List<String> documentKeys = new ArrayList<>();
 			
 			for (ScoreDoc scoreDoc : searchResults.scoreDocs) {
 				Document entityDoc = searcher.doc(scoreDoc.doc);
-				IndexableField entityId = entityDoc.getField(IDENTITY_FIELD);
+				IndexableField entityId = entityDoc.getField(IndexingTerms.IDENTITY_FIELD);
 				
 				if (entityId != null) {
 					documentKeys.add(entityId.stringValue());
@@ -308,7 +308,7 @@ public class ValidationIndexingService implements IndexingTerms {
 			// Delete all of the documents from the search index
 			for (String documentId : documentKeys) {
 				log.info("Deleting index: " + documentId);
-				indexWriter.deleteDocuments(new Term(IDENTITY_FIELD, documentId));
+				indexWriter.deleteDocuments(new Term(IndexingTerms.IDENTITY_FIELD, documentId));
 			}
 			
 		} catch (IOException e) {

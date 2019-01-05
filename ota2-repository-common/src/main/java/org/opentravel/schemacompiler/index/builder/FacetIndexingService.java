@@ -50,7 +50,7 @@ import org.opentravel.schemacompiler.validate.ValidationFinding;
  * Indexing service that handles post-processing of contextual-facet meta-data records
  * that were created during the initial indexing pass.
  */
-public class FacetIndexingService implements IndexingTerms {
+public class FacetIndexingService {
 	
     private static Log log = LogFactory.getLog( FacetIndexingService.class );
 
@@ -122,7 +122,7 @@ public class FacetIndexingService implements IndexingTerms {
 				findContextualFacets( facetOwnerId, contextualFacets, new HashSet<String>(), searcher);
 				searchableDoc = createSearchableDocument( facetOwner, contextualFacets );
 				
-				indexWriter.updateDocument( new Term( IDENTITY_FIELD,
+				indexWriter.updateDocument( new Term( IndexingTerms.IDENTITY_FIELD,
 						IndexingUtils.getSearchableIdentityKey( facetOwnerId ) ), searchableDoc );
 				
 			} else {
@@ -144,7 +144,7 @@ public class FacetIndexingService implements IndexingTerms {
 	 */
 	private Document getFacetOwnerSearchMetaData(String facetOwnerId, IndexSearcher searcher)
 			throws IOException {
-    	Query query = new TermQuery( new Term( IDENTITY_FIELD, IndexingUtils.getNonSearchableIdentityKey( facetOwnerId ) ) );
+    	Query query = new TermQuery( new Term( IndexingTerms.IDENTITY_FIELD, IndexingUtils.getNonSearchableIdentityKey( facetOwnerId ) ) );
     	TopDocs queryResults = searcher.search( query, Integer.MAX_VALUE );
     	Document searchResult = null;
 		
@@ -173,7 +173,7 @@ public class FacetIndexingService implements IndexingTerms {
 			
 			for (Document facet : childFacets) {
 				contextualFacets.add( facet );
-				findContextualFacets( facet.get( IDENTITY_FIELD ), contextualFacets, facetOwnerKeys, searcher );
+				findContextualFacets( facet.get( IndexingTerms.IDENTITY_FIELD ), contextualFacets, facetOwnerKeys, searcher );
 			}
 		}
 	}
@@ -193,11 +193,11 @@ public class FacetIndexingService implements IndexingTerms {
     	TopDocs queryResults;
     	
     	query.add( new BooleanClause( new TermQuery(
-				new Term( FACET_OWNER_FIELD, facetOwnerId ) ), Occur.MUST ));
+				new Term( IndexingTerms.FACET_OWNER_FIELD, facetOwnerId ) ), Occur.MUST ));
     	query.add( new BooleanClause( new TermQuery(
-				new Term( ENTITY_TYPE_FIELD, TLContextualFacet.class.getName() ) ), Occur.MUST ));
+				new Term( IndexingTerms.ENTITY_TYPE_FIELD, TLContextualFacet.class.getName() ) ), Occur.MUST ));
 		query.add( new BooleanClause( new TermQuery(
-				new Term( SEARCH_INDEX_FIELD, Boolean.FALSE.toString() ) ), Occur.MUST ));
+				new Term( IndexingTerms.SEARCH_INDEX_FIELD, Boolean.FALSE.toString() ) ), Occur.MUST ));
 		
         queryResults = searcher.search( query, Integer.MAX_VALUE );
     	
@@ -216,48 +216,48 @@ public class FacetIndexingService implements IndexingTerms {
 	 * @return Document
 	 */
 	private Document createSearchableDocument(Document facetOwner, List<Document> contextualFacets) {
-		String identityKey = IndexingUtils.getSearchableIdentityKey( facetOwner.get( IDENTITY_FIELD ) );
-		String libraryStatus = facetOwner.get( STATUS_FIELD );
-		String lockedByUser = facetOwner.get( LOCKED_BY_USER_FIELD );
-		String extendsEntityKey = facetOwner.get( EXTENDS_ENTITY_FIELD );
-		String entityDescription = facetOwner.get( ENTITY_DESCRIPTION_FIELD );
-		BytesRef facetOwnerContent = facetOwner.getBinaryValue( CONTENT_DATA_FIELD );
-		String[] referenceIdentityKeys = facetOwner.getValues( REFERENCE_IDENTITY_FIELD );
-		String[] referencedEntityKeys = facetOwner.getValues( REFERENCED_ENTITY_FIELD );
+		String identityKey = IndexingUtils.getSearchableIdentityKey( facetOwner.get( IndexingTerms.IDENTITY_FIELD ) );
+		String libraryStatus = facetOwner.get( IndexingTerms.STATUS_FIELD );
+		String lockedByUser = facetOwner.get( IndexingTerms.LOCKED_BY_USER_FIELD );
+		String extendsEntityKey = facetOwner.get( IndexingTerms.EXTENDS_ENTITY_FIELD );
+		String entityDescription = facetOwner.get( IndexingTerms.ENTITY_DESCRIPTION_FIELD );
+		BytesRef facetOwnerContent = facetOwner.getBinaryValue( IndexingTerms.CONTENT_DATA_FIELD );
+		String[] referenceIdentityKeys = facetOwner.getValues( IndexingTerms.REFERENCE_IDENTITY_FIELD );
+		String[] referencedEntityKeys = facetOwner.getValues( IndexingTerms.REFERENCED_ENTITY_FIELD );
 		Document indexDoc = new Document();
 		
-		indexDoc.add( new StringField( IDENTITY_FIELD, identityKey, Field.Store.YES ) );
-		indexDoc.add( new StringField( SEARCH_INDEX_FIELD, Boolean.TRUE.toString(), Field.Store.NO ) );
-		indexDoc.add( new StringField( OWNING_LIBRARY_FIELD, facetOwner.get( OWNING_LIBRARY_FIELD ), Field.Store.YES ) );
-		indexDoc.add( new StringField( ENTITY_TYPE_FIELD, facetOwner.get( ENTITY_TYPE_FIELD ), Field.Store.YES ) );
-		indexDoc.add( new StringField( ENTITY_NAME_FIELD, facetOwner.get( ENTITY_NAME_FIELD ), Field.Store.YES ) );
-		indexDoc.add( new StringField( ENTITY_NAMESPACE_FIELD, facetOwner.get( ENTITY_NAMESPACE_FIELD ), Field.Store.YES ) );
-		indexDoc.add( new StringField( VERSION_FIELD, facetOwner.get( VERSION_FIELD ), Field.Store.YES ) );
-		indexDoc.add( new StringField( LATEST_VERSION_FIELD, facetOwner.get( LATEST_VERSION_FIELD ), Field.Store.NO ) );
-		indexDoc.add( new StringField( LATEST_VERSION_AT_UNDER_REVIEW_FIELD, facetOwner.get( LATEST_VERSION_AT_UNDER_REVIEW_FIELD ), Field.Store.NO ) );
-		indexDoc.add( new StringField( LATEST_VERSION_AT_FINAL_FIELD, facetOwner.get( LATEST_VERSION_AT_FINAL_FIELD ), Field.Store.NO ) );
-		indexDoc.add( new StringField( LATEST_VERSION_AT_OBSOLETE_FIELD, facetOwner.get( LATEST_VERSION_AT_OBSOLETE_FIELD ), Field.Store.NO ) );
+		indexDoc.add( new StringField( IndexingTerms.IDENTITY_FIELD, identityKey, Field.Store.YES ) );
+		indexDoc.add( new StringField( IndexingTerms.SEARCH_INDEX_FIELD, Boolean.TRUE.toString(), Field.Store.NO ) );
+		indexDoc.add( new StringField( IndexingTerms.OWNING_LIBRARY_FIELD, facetOwner.get( IndexingTerms.OWNING_LIBRARY_FIELD ), Field.Store.YES ) );
+		indexDoc.add( new StringField( IndexingTerms.ENTITY_TYPE_FIELD, facetOwner.get( IndexingTerms.ENTITY_TYPE_FIELD ), Field.Store.YES ) );
+		indexDoc.add( new StringField( IndexingTerms.ENTITY_NAME_FIELD, facetOwner.get( IndexingTerms.ENTITY_NAME_FIELD ), Field.Store.YES ) );
+		indexDoc.add( new StringField( IndexingTerms.ENTITY_NAMESPACE_FIELD, facetOwner.get( IndexingTerms.ENTITY_NAMESPACE_FIELD ), Field.Store.YES ) );
+		indexDoc.add( new StringField( IndexingTerms.VERSION_FIELD, facetOwner.get( IndexingTerms.VERSION_FIELD ), Field.Store.YES ) );
+		indexDoc.add( new StringField( IndexingTerms.LATEST_VERSION_FIELD, facetOwner.get( IndexingTerms.LATEST_VERSION_FIELD ), Field.Store.NO ) );
+		indexDoc.add( new StringField( IndexingTerms.LATEST_VERSION_AT_UNDER_REVIEW_FIELD, facetOwner.get( IndexingTerms.LATEST_VERSION_AT_UNDER_REVIEW_FIELD ), Field.Store.NO ) );
+		indexDoc.add( new StringField( IndexingTerms.LATEST_VERSION_AT_FINAL_FIELD, facetOwner.get( IndexingTerms.LATEST_VERSION_AT_FINAL_FIELD ), Field.Store.NO ) );
+		indexDoc.add( new StringField( IndexingTerms.LATEST_VERSION_AT_OBSOLETE_FIELD, facetOwner.get( IndexingTerms.LATEST_VERSION_AT_OBSOLETE_FIELD ), Field.Store.NO ) );
 		
 		if (entityDescription != null) {
-			indexDoc.add( new StringField( ENTITY_DESCRIPTION_FIELD, entityDescription, Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.ENTITY_DESCRIPTION_FIELD, entityDescription, Field.Store.YES ) );
 		}
 		if (libraryStatus != null) {
-			indexDoc.add( new StringField( STATUS_FIELD, libraryStatus, Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.STATUS_FIELD, libraryStatus, Field.Store.YES ) );
 		}
 		if (lockedByUser != null) {
-			indexDoc.add( new StringField( LOCKED_BY_USER_FIELD, lockedByUser, Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.LOCKED_BY_USER_FIELD, lockedByUser, Field.Store.YES ) );
 		}
 		if (extendsEntityKey != null) {
-			indexDoc.add( new StringField( EXTENDS_ENTITY_FIELD, extendsEntityKey, Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.EXTENDS_ENTITY_FIELD, extendsEntityKey, Field.Store.YES ) );
 		}
 		if (facetOwnerContent != null) {
-			indexDoc.add( new StoredField( CONTENT_DATA_FIELD, facetOwnerContent ) );
+			indexDoc.add( new StoredField( IndexingTerms.CONTENT_DATA_FIELD, facetOwnerContent ) );
 		}
 		for (String key : referenceIdentityKeys) {
-			indexDoc.add( new StringField( REFERENCE_IDENTITY_FIELD, key, Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.REFERENCE_IDENTITY_FIELD, key, Field.Store.YES ) );
 		}
 		for (String key : referencedEntityKeys) {
-			indexDoc.add( new StringField( REFERENCED_ENTITY_FIELD, key, Field.Store.NO ) );
+			indexDoc.add( new StringField( IndexingTerms.REFERENCED_ENTITY_FIELD, key, Field.Store.NO ) );
 		}
 		
 		// Combine the keywords from the facet owner and all of the contextual facets
@@ -272,14 +272,14 @@ public class FacetIndexingService implements IndexingTerms {
 		for (String keyword : freeTextKeywords) {
 			keywordsContent.append( keyword ).append(" ");
 		}
-		indexDoc.add( new TextField( KEYWORDS_FIELD, keywordsContent.toString(), Field.Store.NO ) );
+		indexDoc.add( new TextField( IndexingTerms.KEYWORDS_FIELD, keywordsContent.toString(), Field.Store.NO ) );
 		
 		// Add contextual facet binary content to the search index document
 		for (Document facetDoc : contextualFacets) {
-			BytesRef facetContent = facetDoc.getBinaryValue( CONTENT_DATA_FIELD );
+			BytesRef facetContent = facetDoc.getBinaryValue( IndexingTerms.CONTENT_DATA_FIELD );
 			
 			if (facetContent != null) {
-				indexDoc.add( new StoredField( FACET_CONTENT_FIELD, new BytesRef( facetContent.utf8ToString() ) ) );
+				indexDoc.add( new StoredField( IndexingTerms.FACET_CONTENT_FIELD, new BytesRef( facetContent.utf8ToString() ) ) );
 			}
 		}
 		
@@ -293,7 +293,7 @@ public class FacetIndexingService implements IndexingTerms {
 	 * @param keywords  the collection of keywords being constructed
 	 */
 	private void addKeywords(Document doc, Set<String> keywords) {
-		String keywordsStr = doc.get( KEYWORDS_FIELD );
+		String keywordsStr = doc.get( IndexingTerms.KEYWORDS_FIELD );
 		
 		if (keywordsStr != null) {
 			for (String keyword : keywordsStr.split("\\s+")) {

@@ -37,6 +37,7 @@ import org.apache.lucene.util.BytesRef;
 import org.opentravel.ns.ota2.release_v01_00.ReleaseIdentityType;
 import org.opentravel.ns.ota2.release_v01_00.ReleaseMemberType;
 import org.opentravel.ns.ota2.release_v01_00.ReleaseType;
+import org.opentravel.schemacompiler.index.IndexingTerms;
 import org.opentravel.schemacompiler.index.IndexingUtils;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.Release;
@@ -91,43 +92,43 @@ public class ReleaseIndexBuilder extends IndexBuilder<RepositoryItem> {
 			String identityKey = IndexingUtils.getIdentityKey( sourceObject );
 			Document indexDoc = new Document();
 			
-			indexDoc.add( new StringField( IDENTITY_FIELD, identityKey, Field.Store.YES ) );
-			indexDoc.add( new StringField( SEARCH_INDEX_FIELD, Boolean.TRUE + "", Field.Store.NO ) );
-			indexDoc.add( new StringField( ENTITY_TYPE_FIELD, Release.class.getName(), Field.Store.YES ) );
-			indexDoc.add( new StringField( ENTITY_NAME_FIELD, releaseId.getName(), Field.Store.YES ) );
-			indexDoc.add( new StringField( ENTITY_NAMESPACE_FIELD, sourceObject.getNamespace(), Field.Store.YES ) );
-			indexDoc.add( new StringField( BASE_NAMESPACE_FIELD, releaseId.getBaseNamespace(), Field.Store.YES ) );
-			indexDoc.add( new StringField( FILENAME_FIELD, sourceObject.getFilename(), Field.Store.YES ) );
-			indexDoc.add( new StringField( VERSION_FIELD, releaseId.getVersion(), Field.Store.YES ) );
-			indexDoc.add( new StringField( VERSION_SCHEME_FIELD, sourceObject.getVersionScheme(), Field.Store.YES ) );
-			indexDoc.add( new StringField( LATEST_VERSION_FIELD, latestVersion + "", Field.Store.NO ) );
-			indexDoc.add( new StringField( LATEST_VERSION_AT_UNDER_REVIEW_FIELD, latestVersion + "", Field.Store.NO ) );
-			indexDoc.add( new StringField( LATEST_VERSION_AT_FINAL_FIELD, latestVersion + "", Field.Store.NO ) );
-			indexDoc.add( new StringField( LATEST_VERSION_AT_OBSOLETE_FIELD, Boolean.FALSE + "", Field.Store.NO ) );
-			indexDoc.add( new TextField( KEYWORDS_FIELD, getFreeTextSearchContent(), Field.Store.NO ) );
+			indexDoc.add( new StringField( IndexingTerms.IDENTITY_FIELD, identityKey, Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.SEARCH_INDEX_FIELD, Boolean.TRUE + "", Field.Store.NO ) );
+			indexDoc.add( new StringField( IndexingTerms.ENTITY_TYPE_FIELD, Release.class.getName(), Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.ENTITY_NAME_FIELD, releaseId.getName(), Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.ENTITY_NAMESPACE_FIELD, sourceObject.getNamespace(), Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.BASE_NAMESPACE_FIELD, releaseId.getBaseNamespace(), Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.FILENAME_FIELD, sourceObject.getFilename(), Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.VERSION_FIELD, releaseId.getVersion(), Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.VERSION_SCHEME_FIELD, sourceObject.getVersionScheme(), Field.Store.YES ) );
+			indexDoc.add( new StringField( IndexingTerms.LATEST_VERSION_FIELD, latestVersion + "", Field.Store.NO ) );
+			indexDoc.add( new StringField( IndexingTerms.LATEST_VERSION_AT_UNDER_REVIEW_FIELD, latestVersion + "", Field.Store.NO ) );
+			indexDoc.add( new StringField( IndexingTerms.LATEST_VERSION_AT_FINAL_FIELD, latestVersion + "", Field.Store.NO ) );
+			indexDoc.add( new StringField( IndexingTerms.LATEST_VERSION_AT_OBSOLETE_FIELD, Boolean.FALSE + "", Field.Store.NO ) );
+			indexDoc.add( new TextField( IndexingTerms.KEYWORDS_FIELD, getFreeTextSearchContent(), Field.Store.NO ) );
 			
 			if (release.getDescription() != null) {
-				indexDoc.add( new StringField( ENTITY_DESCRIPTION_FIELD, release.getDescription(), Field.Store.YES ) );
+				indexDoc.add( new StringField( IndexingTerms.ENTITY_DESCRIPTION_FIELD, release.getDescription(), Field.Store.YES ) );
 			}
 			if (sourceObject.getStatus() != null) {
-				indexDoc.add( new StringField( STATUS_FIELD, sourceObject.getStatus().toString(), Field.Store.YES ) );
+				indexDoc.add( new StringField( IndexingTerms.STATUS_FIELD, sourceObject.getStatus().toString(), Field.Store.YES ) );
 			}
 			if (release.getStatus() != null) {
-				indexDoc.add( new StringField( RELEASE_STATUS_FIELD, release.getStatus().toString(), Field.Store.YES ) );
+				indexDoc.add( new StringField( IndexingTerms.RELEASE_STATUS_FIELD, release.getStatus().toString(), Field.Store.YES ) );
 			}
 			if (releaseContent != null) {
-				indexDoc.add( new StoredField( CONTENT_DATA_FIELD, new BytesRef( releaseContent ) ) );
+				indexDoc.add( new StoredField( IndexingTerms.CONTENT_DATA_FIELD, new BytesRef( releaseContent ) ) );
 			}
 			for (String libraryId : referencedLibraryIds) {
-				indexDoc.add( new StringField( REFERENCED_LIBRARY_FIELD, libraryId, Field.Store.YES ) );
+				indexDoc.add( new StringField( IndexingTerms.REFERENCED_LIBRARY_FIELD, libraryId, Field.Store.YES ) );
 			}
 			for (String externalRef : externalPrincipals) {
-				indexDoc.add( new StringField( EXTERNAL_PRINCIPAL_FIELD, externalRef, Field.Store.YES ) );
+				indexDoc.add( new StringField( IndexingTerms.EXTERNAL_PRINCIPAL_FIELD, externalRef, Field.Store.YES ) );
 			}
 			for (String externalRef : externalReferences) {
-				indexDoc.add( new StringField( EXTERNAL_REFERENCE_FIELD, externalRef, Field.Store.YES ) );
+				indexDoc.add( new StringField( IndexingTerms.EXTERNAL_REFERENCE_FIELD, externalRef, Field.Store.YES ) );
 			}
-			getIndexWriter().updateDocument( new Term( IDENTITY_FIELD, identityKey ), indexDoc );
+			getIndexWriter().updateDocument( new Term( IndexingTerms.IDENTITY_FIELD, identityKey ), indexDoc );
 			
 		} catch (RepositoryException | IOException e) {
 			log.error("Error creating index for OTM release: " + sourceObject.getFilename(), e);
@@ -184,7 +185,7 @@ public class ReleaseIndexBuilder extends IndexBuilder<RepositoryItem> {
 			RepositoryItem sourceObject = getSourceObject();
 			String sourceObjectIdentity = IndexingUtils.getIdentityKey( sourceObject );
 			
-			getIndexWriter().deleteDocuments( new Term( IDENTITY_FIELD, sourceObjectIdentity ) );
+			getIndexWriter().deleteDocuments( new Term( IndexingTerms.IDENTITY_FIELD, sourceObjectIdentity ) );
 			
 		} catch (IOException e) {
 			log.error("Error deleting search index for OTM release.", e);

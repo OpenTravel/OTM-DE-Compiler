@@ -34,6 +34,7 @@ import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.loader.LibraryModuleImport;
 import org.opentravel.schemacompiler.loader.LibraryModuleInfo;
+import org.opentravel.schemacompiler.loader.LoaderConstants;
 import org.opentravel.schemacompiler.util.ClasspathResourceResolver;
 import org.opentravel.schemacompiler.util.ExceptionUtils;
 import org.opentravel.schemacompiler.util.FileHintUtils;
@@ -81,7 +82,7 @@ public class LibrarySchema14ModuleLoader extends AbstractLibraryModuleLoader {
                     .getShortRepresentation(libraryUrl);
 
             validationFindings.addFinding(FindingType.ERROR, new URLValidationSource(libraryUrl),
-                    ERROR_UNREADABLE_LIBRARY_CONTENT, urlString, ExceptionUtils
+                    LoaderConstants.ERROR_UNREADABLE_LIBRARY_CONTENT, urlString, ExceptionUtils
                             .getExceptionClass(e).getSimpleName(), ExceptionUtils
                             .getExceptionMessage(e));
         }
@@ -138,7 +139,7 @@ public class LibrarySchema14ModuleLoader extends AbstractLibraryModuleLoader {
 
 		    if (jaxbLibrary != null) {
 		        validationFindings.addFinding(FindingType.WARNING, new URLValidationSource(
-		                libraryUrl), WARNING_CORRUPT_LIBRARY_CONTENT, urlString,
+		                libraryUrl), LoaderConstants.WARNING_CORRUPT_LIBRARY_CONTENT, urlString,
 		                ExceptionUtils.getExceptionClass(originalException).getSimpleName(), ExceptionUtils
 		                        .getExceptionMessage(originalException));
 		    }
