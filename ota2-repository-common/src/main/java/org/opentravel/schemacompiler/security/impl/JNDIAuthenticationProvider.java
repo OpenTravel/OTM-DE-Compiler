@@ -440,8 +440,7 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
 			
 			if (!isAuthenticationCached) {
 				// The cached authentication was expired or unavailable, so we
-				// need to perform
-				// a live authentication against the JNDI server.
+				// need to perform a live authentication against the JNDI server.
 				context = openConnection(connectionPrincipal, connectionPassword);
 				String userPassword;
 				

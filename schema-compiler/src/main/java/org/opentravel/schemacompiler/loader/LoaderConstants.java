@@ -64,6 +64,6 @@ public class LoaderConstants {
 	/**
 	 * Private constructor to prevent instantiation.
 	 */
-	public LoaderConstants() {}
+	private LoaderConstants() {}
 	
 }

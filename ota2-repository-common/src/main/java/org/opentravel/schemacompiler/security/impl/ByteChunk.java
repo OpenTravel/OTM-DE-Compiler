@@ -616,7 +616,10 @@ public class ByteChunk {
         if (b1 == null || b2 == null || b2.length > len) {
             return false;
         }
-        for (int i = start, j = 0; i < end && j < b2.length;) {
+        int i = start;
+        int j = 0;
+        
+        while (i < end && j < b2.length) {
             if (b1[i++] != b2[j++])
                 return false;
         }
@@ -652,14 +655,16 @@ public class ByteChunk {
         // Look for first char
         int srcEnd = srcOff + srcLen;
 
-        mainLoop: for (int i = myOff + start; i <= (end - srcLen); i++) {
+        for (int i = myOff + start; i <= (end - srcLen); i++) {
             if (buff[i] != first)
                 continue;
             // found first char, now look for a match
             int myPos = i + 1;
-            for (int srcPos = srcOff + 1; srcPos < srcEnd;) {
+            int srcPos = srcOff + 1;
+            
+            while (srcPos < srcEnd) {
                 if (buff[myPos++] != src.charAt(srcPos++))
-                    continue mainLoop;
+                    break;
             }
             return i - start; // found it
         }

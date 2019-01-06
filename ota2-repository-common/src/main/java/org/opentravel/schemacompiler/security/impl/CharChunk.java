@@ -661,7 +661,9 @@ public class CharChunk implements CharSequence {
                 continue;
             // found first char, now look for a match
             int myPos = i + 1;
-            for (int srcPos = srcOff + 1; srcPos < srcEnd;) {
+            int srcPos = srcOff + 1;
+            
+            while (srcPos < srcEnd) {
                 if (buff[myPos++] != src.charAt(srcPos++))
                     break;
                 if (srcPos == srcEnd)
