@@ -44,6 +44,15 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
 	private TLFacet detailFacet;
 	
 	/**
+	 * Default constructor.
+	 */
+	public TLBusinessObject() {
+		setIdFacet( new TLFacet() );
+		setSummaryFacet( new TLFacet() );
+		setDetailFacet( new TLFacet() );
+	}
+	
+	/**
 	 * @see org.opentravel.schemacompiler.validate.Validatable#getValidationIdentity()
 	 */
 	@Override
@@ -253,11 +262,6 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
 	 * @return TLFacet
 	 */
 	public TLFacet getIdFacet() {
-		if (idFacet == null) {
-			idFacet = new TLFacet();
-			idFacet.setFacetType( TLFacetType.ID );
-			idFacet.setOwningEntity( this );
-		}
 		return idFacet;
 	}
 	
@@ -289,11 +293,6 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
 	 * @return TLFacet
 	 */
 	public TLFacet getSummaryFacet() {
-		if (summaryFacet == null) {
-			summaryFacet = new TLFacet();
-			summaryFacet.setFacetType( TLFacetType.SUMMARY );
-			summaryFacet.setOwningEntity( this );
-		}
 		return summaryFacet;
 	}
 	
@@ -326,11 +325,6 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
 	 * @return TLFacet
 	 */
 	public TLFacet getDetailFacet() {
-		if (detailFacet == null) {
-			detailFacet = new TLFacet();
-			detailFacet.setFacetType( TLFacetType.DETAIL );
-			detailFacet.setOwningEntity( this );
-		}
 		return detailFacet;
 	}
 	
@@ -503,14 +497,7 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
 	 */
 	@Deprecated
 	public TLContextualFacet getQueryFacet(String context, String label) {
-		StringBuilder contextualName = new StringBuilder();
-		
-		contextualName.append( (context == null) ? "Unknown" : context );
-		
-		if ((label != null) && (label.length() > 0)) {
-			contextualName.append( ':' ).append( label );
-		}
-		return queryFacetManager.getChild( contextualName.toString() );
+		return getQueryFacet( label );
 	}
 	
 	/**
@@ -627,14 +614,7 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
 	 */
 	@Deprecated
 	public TLFacet getUpdateFacet(String context, String label) {
-		StringBuilder contextualName = new StringBuilder();
-		
-		contextualName.append( (context == null) ? "Unknown" : context );
-		
-		if ((label != null) && (label.length() > 0)) {
-			contextualName.append( ':' ).append( label );
-		}
-		return updateFacetManager.getChild( contextualName.toString() );
+		return getUpdateFacet( label );
 	}
 	
 	/**

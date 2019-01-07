@@ -37,6 +37,13 @@ public class TLChoiceObject extends TLComplexTypeBase implements TLFacetOwner, T
             ModelEventType.CHOICE_FACET_ADDED, ModelEventType.CHOICE_FACET_REMOVED);
     private TLFacet sharedFacet;
     
+	/**
+	 * Default constructor.
+	 */
+	public TLChoiceObject() {
+		setSharedFacet( new TLFacet() );
+	}
+	
     /**
      * @see org.opentravel.schemacompiler.validate.Validatable#getValidationIdentity()
      */
@@ -224,11 +231,6 @@ public class TLChoiceObject extends TLComplexTypeBase implements TLFacetOwner, T
      * @return TLFacet
      */
     public TLFacet getSharedFacet() {
-        if (sharedFacet == null) {
-        	sharedFacet = new TLFacet();
-            sharedFacet.setFacetType(TLFacetType.SHARED);
-            sharedFacet.setOwningEntity(this);
-        }
         return sharedFacet;
     }
 
@@ -284,14 +286,7 @@ public class TLChoiceObject extends TLComplexTypeBase implements TLFacetOwner, T
      */
     @Deprecated
     public TLContextualFacet getChoiceFacet(String context, String label) {
-        StringBuilder contextualName = new StringBuilder();
-
-        contextualName.append((context == null) ? "Unknown" : context);
-
-        if ((label != null) && (label.length() > 0)) {
-            contextualName.append(':').append(label);
-        }
-        return choiceFacetManager.getChild(contextualName.toString());
+		return getChoiceFacet( label );
     }
 
     /**

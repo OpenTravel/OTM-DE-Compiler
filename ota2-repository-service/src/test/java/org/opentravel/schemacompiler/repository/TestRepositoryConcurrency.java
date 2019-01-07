@@ -90,7 +90,7 @@ public class TestRepositoryConcurrency {
     
 	@BeforeClass
 	public static void checkSvnInstalled() throws Exception {
-		assumeTrue( Boolean.parseBoolean( System.getProperty("svnInstalled", "false") ) );
+		assumeTrue( SvnserveProcess.isSupported() );
 	}
 	
 	@Before

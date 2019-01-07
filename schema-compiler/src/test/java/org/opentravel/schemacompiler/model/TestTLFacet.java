@@ -13,22 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.util;
+package org.opentravel.schemacompiler.model;
+
+import org.junit.Test;
 
 /**
- * Temporary class used to indicate whether the OTM1.6 file format is enabled for the compiler.
+ * Verifies the functions of the <code>TLFacet</code> class.
  */
-public class OTM16Upgrade {
+public class TestTLFacet extends AbstractModelTest {
 	
-	/**
-	 * Private constructor to prevent instantiation.
-	 */
-	private OTM16Upgrade() {}
-	
-	/**
-	 * @deprecated  Deprecated and scheduled for removal.  Once removed, OTM 1.6 functions will be enabled permanently.
-	 */
-	@Deprecated
-	public static boolean otm16Enabled = true;
+	@Test
+	public void testMemberFieldFunctions() throws Exception {
+		TLCoreObject core = addCore( "TestObject", library1 );
+		
+		testAttributeOwnerFunctions( core.getDetailFacet() );
+		testPropertyOwnerFunctions( core.getDetailFacet() );
+		testIndicatorOwnerFunctions( core.getDetailFacet() );
+	}
 	
 }

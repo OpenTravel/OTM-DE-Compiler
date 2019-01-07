@@ -41,8 +41,13 @@ public class TestLibraryComparator extends AbstractVersionHelperTests {
         
         nsMappings.put(  NS_VERSION_1, NS_VERSION_1_2 );
         LibraryComparator comparator = new LibraryComparator( ModelCompareOptions.getDefaultOptions(), nsMappings );
-        LibraryChangeSet changeSet = comparator.compareLibraries( oldLibrary, newLibrary );
+        LibraryChangeSet changeSet;
         
+        changeSet = comparator.compareLibraries( oldLibrary, newLibrary );
+        assertNotNull( changeSet );
+        assertTrue( changeSet.getChangeItems().size() > 0 );
+        
+        changeSet = comparator.compareLibraries( newLibrary, oldLibrary );
         assertNotNull( changeSet );
         assertTrue( changeSet.getChangeItems().size() > 0 );
 	}

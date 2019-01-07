@@ -38,6 +38,15 @@ public class TLCoreObject extends TLComplexTypeBase implements TLFacetOwner, TLA
     private TLListFacet summaryListFacet;
     private TLListFacet detailListFacet;
 
+	/**
+	 * Default constructor.
+	 */
+	public TLCoreObject() {
+		setSimpleFacet( new TLSimpleFacet() );
+		setSummaryFacet( new TLFacet() );
+		setDetailFacet( new TLFacet() );
+	}
+	
     /**
      * @see org.opentravel.schemacompiler.validate.Validatable#getValidationIdentity()
      */
@@ -210,12 +219,6 @@ public class TLCoreObject extends TLComplexTypeBase implements TLFacetOwner, TLA
      * @return TLSimpleFacet
      */
     public TLSimpleFacet getSimpleFacet() {
-        if (simpleFacet == null) {
-            simpleFacet = new TLSimpleFacet();
-            simpleFacet.setFacetType(TLFacetType.SIMPLE);
-            simpleFacet.setOwningEntity(this);
-            simpleListFacet = new TLListFacet(simpleFacet);
-        }
         return simpleFacet;
     }
 
@@ -262,12 +265,6 @@ public class TLCoreObject extends TLComplexTypeBase implements TLFacetOwner, TLA
      * @return TLFacet
      */
     public TLFacet getSummaryFacet() {
-        if (summaryFacet == null) {
-            summaryFacet = new TLFacet();
-            summaryFacet.setFacetType(TLFacetType.SUMMARY);
-            summaryFacet.setOwningEntity(this);
-            summaryListFacet = new TLListFacet(summaryFacet);
-        }
         return summaryFacet;
     }
 
@@ -303,12 +300,6 @@ public class TLCoreObject extends TLComplexTypeBase implements TLFacetOwner, TLA
      * @return TLFacet
      */
     public TLFacet getDetailFacet() {
-        if (detailFacet == null) {
-            detailFacet = new TLFacet();
-            detailFacet.setFacetType(TLFacetType.DETAIL);
-            detailFacet.setOwningEntity(this);
-            detailListFacet = new TLListFacet(detailFacet);
-        }
         return detailFacet;
     }
 

@@ -554,6 +554,8 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
         TLClosedEnumeration newMinorVersionClosedEnum = helper.createNewMinorVersion(existingMinorVersionClosedEnum, minorVersionLibrary12);
         TLSimple newMinorVersionSimple = helper.createNewMinorVersion(existingMinorVersionSimple, minorVersionLibrary12);
         TLResource newMinorVersionResource = helper.createNewMinorVersion(existingMinorVersionResource, minorVersionLibrary12);
+        
+        assertTrue( minorVersionLibrary12.isLaterVersion( minorVersionLibrary11 ) );
 
         assertNotNull(newMinorVersionBO);
         assertTrue(newMinorVersionBO.getOwningLibrary() == minorVersionLibrary12);
@@ -561,6 +563,7 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
         assertEquals(0, newMinorVersionBO.getSummaryFacet().getAttributes().size());
         assertEquals(0, newMinorVersionBO.getSummaryFacet().getElements().size());
         assertEquals(0, newMinorVersionBO.getSummaryFacet().getIndicators().size());
+        assertTrue( newMinorVersionBO.isLaterVersion( existingMinorVersionBO ) );
 
         assertNotNull(newMinorVersionCore);
         assertTrue(newMinorVersionCore.getOwningLibrary() == minorVersionLibrary12);
@@ -568,6 +571,7 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
         assertEquals(0, newMinorVersionCore.getSummaryFacet().getAttributes().size());
         assertEquals(0, newMinorVersionCore.getSummaryFacet().getElements().size());
         assertEquals(0, newMinorVersionCore.getSummaryFacet().getIndicators().size());
+        assertTrue( newMinorVersionCore.isLaterVersion( existingMinorVersionCore ) );
 
         assertNotNull(newMinorVersionChoice);
         assertTrue(newMinorVersionChoice.getOwningLibrary() == minorVersionLibrary12);
@@ -575,12 +579,14 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
         assertEquals(0, newMinorVersionChoice.getSharedFacet().getAttributes().size());
         assertEquals(0, newMinorVersionChoice.getSharedFacet().getElements().size());
         assertEquals(0, newMinorVersionChoice.getSharedFacet().getIndicators().size());
+        assertTrue( newMinorVersionChoice.isLaterVersion( existingMinorVersionChoice ) );
 
         assertNotNull(newMinorVersionVWA);
         assertTrue(newMinorVersionVWA.getOwningLibrary() == minorVersionLibrary12);
         assertTrue(newMinorVersionVWA.getParentType() == existingMinorVersionVWA);
         assertEquals(0, newMinorVersionVWA.getAttributes().size());
         assertEquals(0, newMinorVersionVWA.getIndicators().size());
+        assertTrue( newMinorVersionVWA.isLaterVersion( existingMinorVersionVWA ) );
         
         assertNotNull(newMinorVersionOp);
         assertTrue(newMinorVersionOp.getOwningLibrary() == minorVersionLibrary12);
@@ -588,16 +594,19 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
         assertEquals(0, newMinorVersionOp.getRequest().getAttributes().size());
         assertEquals(0, newMinorVersionOp.getRequest().getElements().size());
         assertEquals(0, newMinorVersionOp.getRequest().getIndicators().size());
+        assertTrue( newMinorVersionOp.isLaterVersion( existingMinorVersionOp ) );
 
         assertNotNull(newMinorVersionOpenEnum);
         assertTrue(newMinorVersionOpenEnum.getOwningLibrary() == minorVersionLibrary12);
         assertTrue(newMinorVersionOpenEnum.getExtension().getExtendsEntity() == existingMinorVersionOpenEnum);
         assertEquals(0, newMinorVersionOpenEnum.getValues().size());
+        assertTrue( newMinorVersionOpenEnum.isLaterVersion( existingMinorVersionOpenEnum ) );
 
         assertNotNull(newMinorVersionClosedEnum);
         assertTrue(newMinorVersionClosedEnum.getOwningLibrary() == minorVersionLibrary12);
         assertTrue(newMinorVersionClosedEnum.getExtension().getExtendsEntity() == existingMinorVersionClosedEnum);
         assertEquals(0, newMinorVersionClosedEnum.getValues().size());
+        assertTrue( newMinorVersionClosedEnum.isLaterVersion( existingMinorVersionClosedEnum ) );
 
         assertNotNull(newMinorVersionSimple);
         assertTrue(newMinorVersionSimple.getOwningLibrary() == minorVersionLibrary12);
@@ -611,6 +620,7 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
         assertNull(newMinorVersionSimple.getMaxInclusive());
         assertNull(newMinorVersionSimple.getMinExclusive());
         assertNull(newMinorVersionSimple.getMaxExclusive());
+        assertTrue( newMinorVersionSimple.isLaterVersion( existingMinorVersionSimple ) );
 
         assertNotNull(newMinorVersionResource);
         assertTrue(newMinorVersionResource.getOwningLibrary() == minorVersionLibrary12);
@@ -619,6 +629,7 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
         assertEquals(0, newMinorVersionResource.getParamGroups().size());
         assertEquals(0, newMinorVersionResource.getActionFacets().size());
         assertEquals(0, newMinorVersionResource.getActions().size());
+        assertTrue( newMinorVersionResource.isLaterVersion( existingMinorVersionResource ) );
     }
 
     @Test
@@ -649,6 +660,7 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
         TLSimple laterMinorVersionSimple = minorVersionLibrary12.getSimpleType("LaterMinorVersionSimple");
         TLResource laterMinorVersionResource = minorVersionLibrary12.getResourceType("LaterMinorVersionResource");
 
+        assertTrue( minorVersionLibrary12.isLaterVersion( minorVersionLibrary11 ) );
         assertTrue(laterMinorVersionBO.getExtension().getExtendsEntity() == firstMinorVersionBO);
         assertTrue(laterMinorVersionCore.getExtension().getExtendsEntity() == firstMinorVersionCore);
         assertTrue(laterMinorVersionChoice.getExtension().getExtendsEntity() == firstMinorVersionChoice);
@@ -675,6 +687,7 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
         assertEquals(1, newMinorVersionBO.getSummaryFacet().getAttributes().size());
         assertEquals(0, newMinorVersionBO.getSummaryFacet().getElements().size());
         assertEquals(0, newMinorVersionBO.getSummaryFacet().getIndicators().size());
+        assertTrue( newMinorVersionBO.isLaterVersion( firstMinorVersionBO ) );
         assertContainsAttributes(newMinorVersionBO.getSummaryFacet(), "extBOAttribute101");
 
         assertNotNull(newMinorVersionCore);
@@ -683,6 +696,7 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
         assertEquals(1, newMinorVersionCore.getSummaryFacet().getAttributes().size());
         assertEquals(0, newMinorVersionCore.getSummaryFacet().getElements().size());
         assertEquals(0, newMinorVersionCore.getSummaryFacet().getIndicators().size());
+        assertTrue( newMinorVersionCore.isLaterVersion( firstMinorVersionCore ) );
         assertContainsAttributes(newMinorVersionCore.getSummaryFacet(), "extCoreAttribute101");
 
         assertNotNull(newMinorVersionChoice);
@@ -691,6 +705,7 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
         assertEquals(1, newMinorVersionChoice.getSharedFacet().getAttributes().size());
         assertEquals(0, newMinorVersionChoice.getSharedFacet().getElements().size());
         assertEquals(0, newMinorVersionChoice.getSharedFacet().getIndicators().size());
+        assertTrue( newMinorVersionChoice.isLaterVersion( firstMinorVersionChoice ) );
         assertContainsAttributes(newMinorVersionChoice.getSharedFacet(), "extChoiceAttribute101");
 
         assertNotNull(newMinorVersionVWA);
@@ -698,6 +713,7 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
         assertTrue(newMinorVersionVWA.getParentType() == firstMinorVersionVWA);
         assertEquals(0, newMinorVersionVWA.getAttributes().size());
         assertEquals(0, newMinorVersionVWA.getIndicators().size());
+        assertTrue( newMinorVersionVWA.isLaterVersion( firstMinorVersionVWA ) );
 
         assertNotNull(newMinorVersionOp);
         assertTrue(newMinorVersionOp.getOwningLibrary() == minorVersionLibrary11);
@@ -706,22 +722,27 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
         assertEquals(0, newMinorVersionOp.getRequest().getElements().size());
         assertEquals(0, newMinorVersionOp.getRequest().getIndicators().size());
         assertContainsAttributes(newMinorVersionOp.getRequest(), "extOperationAttribute101");
+        assertTrue( newMinorVersionOp.isLaterVersion( firstMinorVersionOp ) );
 
         assertNotNull(newMinorVersionOpenEnum);
         assertTrue(newMinorVersionOpenEnum.getOwningLibrary() == minorVersionLibrary11);
         assertTrue(newMinorVersionOpenEnum.getExtension().getExtendsEntity() == firstMinorVersionOpenEnum);
+        assertTrue( newMinorVersionOpenEnum.isLaterVersion( firstMinorVersionOpenEnum ) );
         
         assertNotNull(newMinorVersionClosedEnum);
         assertTrue(newMinorVersionClosedEnum.getOwningLibrary() == minorVersionLibrary11);
         assertTrue(newMinorVersionClosedEnum.getExtension().getExtendsEntity() == firstMinorVersionClosedEnum);
+        assertTrue( newMinorVersionClosedEnum.isLaterVersion( firstMinorVersionClosedEnum ) );
         
         assertNotNull(newMinorVersionSimple);
         assertTrue(newMinorVersionSimple.getOwningLibrary() == minorVersionLibrary11);
         assertTrue(newMinorVersionSimple.getParentType() == firstMinorVersionSimple);
+        assertTrue( newMinorVersionSimple.isLaterVersion( firstMinorVersionSimple ) );
         
         assertNotNull(newMinorVersionResource);
         assertTrue(newMinorVersionResource.getOwningLibrary() == minorVersionLibrary11);
         assertTrue(newMinorVersionResource.getExtension().getExtendsEntity() == firstMinorVersionResource);
+        assertTrue( newMinorVersionResource.isLaterVersion( firstMinorVersionResource ) );
         
         // Make sure the later minor version was adjusted to extend the new minor version we just
         // created

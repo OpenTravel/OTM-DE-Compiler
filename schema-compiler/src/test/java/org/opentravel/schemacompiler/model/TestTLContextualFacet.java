@@ -13,22 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.util;
+package org.opentravel.schemacompiler.model;
 
 /**
- * Temporary class used to indicate whether the OTM1.6 file format is enabled for the compiler.
+ *
  */
-public class OTM16Upgrade {
+public class TestTLContextualFacet {
 	
 	/**
-	 * Private constructor to prevent instantiation.
+	 * 
 	 */
-	private OTM16Upgrade() {}
-	
-	/**
-	 * @deprecated  Deprecated and scheduled for removal.  Once removed, OTM 1.6 functions will be enabled permanently.
-	 */
-	@Deprecated
-	public static boolean otm16Enabled = true;
+	public TestTLContextualFacet() {
+		// TODO Auto-generated constructor stub
+	}
 	
 }
