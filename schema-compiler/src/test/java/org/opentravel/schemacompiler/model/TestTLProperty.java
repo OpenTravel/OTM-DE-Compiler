@@ -20,41 +20,40 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 /**
- * Verifies the functions of the <code>TLFacet</code> class.
+ * Verifies the functions of the <code>TLProperty</code> class.
  */
-public class TestTLFacet extends AbstractModelTest {
+public class TestTLProperty extends AbstractModelTest {
 	
 	@Test
 	public void testIdentityFunctions() throws Exception {
 		TLCoreObject core = addCore( "TestObject", library1 );
-		TLFacet facet = core.getSummaryFacet();
+		TLProperty element = addElement( "TestElement", core.getSummaryFacet() );
 		
-		assertEquals( library1.getNamespace(), core.getSimpleFacet().getNamespace() );
-		assertEquals( library1.getNamespace(), facet.getNamespace() );
-		assertEquals( core.getName() + "_Summary", facet.getLocalName() );
-		assertEquals( "TestLibrary1.otm : TestObject/Summary", facet.getValidationIdentity() );
+		assertEquals( "TestLibrary1.otm : TestObject/Summary/TestElement", element.getValidationIdentity() );
 	}
 	
 	@Test
 	public void testDocumentationFunctions() throws Exception {
 		TLCoreObject core = addCore( "TestObject", library1 );
+		TLProperty element = addElement( "TestElement", core.getSummaryFacet() );
 		
-		testDocumentationFunctions( core.getSimpleFacet() );
-		testDocumentationFunctions( core.getSummaryFacet() );
+		testDocumentationFunctions( element );
 	}
 	
 	@Test
 	public void testEquivalentFunctions() throws Exception {
-		testEquivalentFunctions( addCore( "TestObject", library1 ).getSimpleFacet() );
+		TLCoreObject core = addCore( "TestObject", library1 );
+		TLProperty element = addElement( "TestElement", core.getSummaryFacet() );
+		
+		testEquivalentFunctions( element );
 	}
 	
 	@Test
-	public void testMemberFieldFunctions() throws Exception {
+	public void testExampleFunctions() throws Exception {
 		TLCoreObject core = addCore( "TestObject", library1 );
+		TLProperty element = addElement( "TestElement", core.getSummaryFacet() );
 		
-		testAttributeFunctions( core.getDetailFacet() );
-		testPropertyFunctions( core.getDetailFacet() );
-		testIndicatorFunctions( core.getDetailFacet() );
+		testExampleFunctions( element );
 	}
 	
 }

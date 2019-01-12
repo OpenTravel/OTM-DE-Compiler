@@ -45,7 +45,7 @@ public class TLIndicator extends TLModelElement implements TLMemberField<TLIndic
         StringBuilder identity = new StringBuilder();
 
         if (owner != null) {
-            identity.append(owner.getValidationIdentity()).append(".");
+            identity.append(owner.getValidationIdentity()).append("/");
         }
         if (name == null) {
             identity.append("[Unnamed Indicator]");

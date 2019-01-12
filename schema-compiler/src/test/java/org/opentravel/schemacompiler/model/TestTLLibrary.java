@@ -18,6 +18,7 @@ package org.opentravel.schemacompiler.model;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
@@ -27,13 +28,39 @@ import org.junit.Test;
 public class TestTLLibrary extends AbstractModelTest {
 	
 	@Test
-	public void testSetNamespaceAndVersion() throws Exception {
+	public void testNamespaceAndVersionFunctions() throws Exception {
+		TLLibrary errorLibrary = new TLLibrary();
 		String baseNS = library1.getBaseNamespace();
 		String version = library1.getVersion();
 		
 		library1.setNamespaceAndVersion( baseNS, version );
 		assertEquals( baseNS, library1.getBaseNamespace() );
 		assertEquals( version, library1.getVersion() );
+		
+		library1.setVersion( "2.0.0" );
+		assertEquals( baseNS + "/v2", library1.getNamespace() );
+		testNegativeCase( library1, l -> library1.setVersion( "a.b.c" ), IllegalArgumentException.class );
+		
+		library1.setVersionScheme( null );
+		assertNull( library1.getVersion() );
+		testNegativeCase( library1, l -> library1.setVersion( "1.0.0" ), IllegalStateException.class );
+		testNegativeCase( library1, l -> library1.setVersion( null ), IllegalStateException.class );
+		
+		// Not an error to assign an invalid version scheme - should behave as if one
+		// is not assigned
+		errorLibrary.setVersionScheme( "INVALID" );
+		assertEquals( "INVALID", errorLibrary.getVersionScheme() );
+		testNegativeCase( errorLibrary, l -> errorLibrary.setVersion( "1.0.0" ), IllegalStateException.class );
+		testNegativeCase( errorLibrary, l -> errorLibrary.setVersion( null ), IllegalStateException.class );
+		
+		errorLibrary.setVersionScheme( null );
+		testNegativeCase( errorLibrary, l -> errorLibrary.setVersion( "1.0.0" ), IllegalStateException.class );
+		testNegativeCase( errorLibrary, l -> errorLibrary.setVersion( null ), IllegalStateException.class );
+	}
+	
+	@Test( expected = IllegalArgumentException.class )
+	public void testNegativeAddMember() throws Exception {
+		library1.addNamedMember( new XSDSimpleType( "error", null ) );
 	}
 	
 	@Test
@@ -101,6 +128,28 @@ public class TestTLLibrary extends AbstractModelTest {
 	}
 	
 	@Test
+	public void testLibraryStatus() throws Exception {
+		org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryStatus[] rStatuses =
+				org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryStatus.values();
+		TLLibraryStatus[] lStatuses = TLLibraryStatus.values();
+		
+		for (int i = 0; i < rStatuses.length; i++) {
+			assertEquals( lStatuses[i], TLLibraryStatus.fromRepositoryStatus( rStatuses[i] ) );
+			assertEquals( rStatuses[i], lStatuses[i].toRepositoryStatus() );
+		}
+		
+		assertEquals( null, TLLibraryStatus.DRAFT.previousStatus() );
+		assertEquals( TLLibraryStatus.DRAFT, TLLibraryStatus.UNDER_REVIEW.previousStatus() );
+		assertEquals( TLLibraryStatus.UNDER_REVIEW, TLLibraryStatus.FINAL.previousStatus() );
+		assertEquals( TLLibraryStatus.FINAL, TLLibraryStatus.OBSOLETE.previousStatus() );
+		
+		assertEquals( TLLibraryStatus.UNDER_REVIEW, TLLibraryStatus.DRAFT.nextStatus() );
+		assertEquals( TLLibraryStatus.FINAL, TLLibraryStatus.UNDER_REVIEW.nextStatus() );
+		assertEquals( TLLibraryStatus.OBSOLETE, TLLibraryStatus.FINAL.nextStatus() );
+		assertEquals( null, TLLibraryStatus.OBSOLETE.nextStatus() );
+	}
+	
+	@Test
 	public void testContextFunctions() throws Exception {
 		TLContext context1 = addContext( "context1", "http://www.opentravel.org/context1", library1 );
 		TLContext context2 = addContext( "context2", "http://www.opentravel.org/context2", library1 );
@@ -109,6 +158,15 @@ public class TestTLLibrary extends AbstractModelTest {
 		assertEquals( context2, library1.getContext( "context2" ) );
 		assertEquals( context1, library1.getContextByApplicationContext( context1.getApplicationContext() ) );
 		assertArrayEquals( new String[] { "context1", "context2" }, getNames( library1.getContexts(), c -> c.getContextId() ) );
+		
+		context1.moveDown();
+		assertArrayEquals( new String[] { "context2", "context1" }, getNames( library1.getContexts(), c -> c.getContextId() ) );
+		
+		library1.sortContexts( (c1, c2) -> c1.getContextId().compareTo( c2.getContextId() ) );
+		assertArrayEquals( new String[] { "context1", "context2" }, getNames( library1.getContexts(), c -> c.getContextId() ) );
+		
+		context2.moveUp();
+		assertArrayEquals( new String[] { "context2", "context1" }, getNames( library1.getContexts(), c -> c.getContextId() ) );
 		
 		library1.removeContext( context1 );
 		assertArrayEquals( new String[] { "context2" }, getNames( library1.getContexts(), c -> c.getContextId() ) );

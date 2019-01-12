@@ -49,7 +49,7 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
 	private TLLibraryStatus status = TLLibraryStatus.DRAFT;
 	private String comments;
 	private TLService service;
-	private TLFolder rootFolder = new TLFolder( this );
+	private List<TLFolder> folderList = new ArrayList<>();
 	
 	/**
 	 * Default constructor.
@@ -737,7 +737,7 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
 	 */
 	@Override
 	public List<TLFolder> getFolders() {
-		return rootFolder.getFolders();
+		return Collections.unmodifiableList( folderList );
 	}
 	
 	/**
@@ -748,7 +748,7 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
 		TLFolder folder = null;
 		
 		if (folderName != null) {
-			for (TLFolder f : rootFolder.getFolders()) {
+			for (TLFolder f : folderList) {
 				if (folderName.equals( f.getName() )) {
 					folder = f;
 					break;
@@ -763,7 +763,18 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
 	 */
 	@Override
 	public void addFolder(TLFolder folder) {
-		rootFolder.addFolder( folder );
+		if (folder == null) {
+			throw new IllegalArgumentException("The sub-folder cannot be null.");
+		}
+		if (folder.getOwningLibrary() != this) {
+			throw new IllegalArgumentException(
+					"A top-level folder must be owned by the library to which it is assigned.");
+		}
+		if (TLFolder.isDuplicateName(folder.getName(), folderList)) {
+			throw new IllegalArgumentException("A folder with the name '" + folder.getName() + "' already exists.");
+		}
+		folderList.add( folder );
+		folder.setOwner( this );
 	}
 	
 	/**
@@ -771,9 +782,19 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
 	 */
 	@Override
 	public void removeFolder(TLFolder folder) {
-		rootFolder.removeFolder( folder );
+		if (folderList.remove( folder )) {
+			folder.setOwner( null );
+		}
 	}
 	
+	/**
+	 * @see org.opentravel.schemacompiler.model.TLFolderOwner#sortFolders()
+	 */
+	@Override
+	public void sortFolders() {
+		Collections.sort( folderList, TLFolder.folderComparator );
+	}
+
 	/**
 	 * Returns the list of member entities that are not currently assigned to a folder.
 	 * 
@@ -792,21 +813,24 @@ public class TLLibrary extends AbstractLibrary implements TLFolderOwner {
 				unfolderedMembers.remove( facet );
 			}
 		}
-		purgeFolderedMembers( rootFolder, unfolderedMembers );
+		purgeFolderedMembers( this, unfolderedMembers );
 		return unfolderedMembers;
 	}
 	
 	/**
 	 * Removes all entities that are assigned to the given folder or its sub-folders from the list of members provided.
 	 * 
-	 * @param folder the folder whose member entities are to be removed from the list
+	 * @param owner the folder whose member entities are to be removed from the list
 	 * @param memberList the list of members to be purged
 	 */
-	private void purgeFolderedMembers(TLFolder folder, List<LibraryMember> memberList) {
-		for (TLFolder subFolder : folder.getFolders()) {
+	private void purgeFolderedMembers(TLFolderOwner owner, List<LibraryMember> memberList) {
+		for (TLFolder subFolder : owner.getFolders()) {
 			purgeFolderedMembers( subFolder, memberList );
 		}
-		memberList.removeAll( folder.getEntities() );
+		
+		if (owner instanceof TLFolder) {
+			memberList.removeAll( ((TLFolder) owner).getEntities() );
+		}
 	}
 	
 	/**

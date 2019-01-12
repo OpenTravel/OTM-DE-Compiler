@@ -31,11 +31,11 @@ import org.opentravel.schemacompiler.event.ModelEventType;
  */
 public class TLFolder extends TLModelElement implements TLFolderOwner {
 	
-	private static final Comparator<TLFolder> folderComparator = new FolderComparator();
+	protected static final Comparator<TLFolder> folderComparator = new FolderComparator();
 	private static final Comparator<LibraryMember> itemComparator = new FolderItemComparator();
 	
 	private String name;
-	private TLFolder parentFolder;
+	private TLFolderOwner owner;
 	private TLLibrary owningLibrary;
 	private List<TLFolder> subFolders = new ArrayList<>();
 	private List<LibraryMember> entities = new ArrayList<>();
@@ -74,9 +74,11 @@ public class TLFolder extends TLModelElement implements TLFolderOwner {
 		TLFolder f = this;
 		
 		while (f != null) {
-			String fName = "/" + ((f.name == null) ? "???" : f.name);
+			String fName = ((identity.length() == 0) ? "" : "/") + ((f.name == null) ? "???" : f.name);
+			TLFolderOwner owner = f.getOwner();
+			
 			identity.insert( 0, fName );
-			f = f.getParentFolder();
+			f = (owner instanceof TLFolder) ? (TLFolder) owner : null;
 		}
         if (owningLibrary != null) {
             identity.insert( 0, owningLibrary.getValidationIdentity() + " : " );
@@ -107,11 +109,11 @@ public class TLFolder extends TLModelElement implements TLFolderOwner {
 	 * @param name  the field value to assign
 	 */
 	public void setName(String name) {
-		if ((parentFolder != null) && isDuplicateName(name, parentFolder.subFolders)) {
-			throw new IllegalArgumentException("A folder with the name '" + name + "' already exists.");
-		}
 		if ((name == null) || (name.length() == 0)) {
 			throw new IllegalArgumentException("The folder name is a required value");
+		}
+		if ((owner != null) && isDuplicateName(name, owner.getFolders())) {
+			throw new IllegalArgumentException("A folder with the name '" + name + "' already exists.");
 		}
         ModelEvent<?> event = new ModelEventBuilder( ModelEventType.NAME_MODIFIED, this )
                 .setOldValue( this.name ).setNewValue( name ).buildEvent();
@@ -119,8 +121,8 @@ public class TLFolder extends TLModelElement implements TLFolderOwner {
 		this.name = name;
         publishEvent( event );
 		
-		if (parentFolder != null) {
-			Collections.sort( parentFolder.subFolders, folderComparator );
+		if (owner != null) {
+			owner.sortFolders();
 		}
 	}
 	
@@ -128,10 +130,20 @@ public class TLFolder extends TLModelElement implements TLFolderOwner {
 	 * Returns the parent folder to which this folder belongs (null for root
 	 * library folders).
 	 *
-	 * @return TLFolder
+	 * @return TLFolderOwner
 	 */
-	public TLFolder getParentFolder() {
-		return parentFolder;
+	public TLFolderOwner getOwner() {
+		return owner;
+	}
+
+	/**
+	 * Assigns the parent folder to which this folder belongs (null for root
+	 * library folders).
+	 *
+	 * @param owner  the folder owner to assign
+	 */
+	public void setOwner(TLFolderOwner owner) {
+		this.owner = owner;
 	}
 
 	/**
@@ -174,11 +186,11 @@ public class TLFolder extends TLModelElement implements TLFolderOwner {
 	 */
 	@Override
 	public void addFolder(TLFolder folder) {
-		if ((parentFolder != null) && isDuplicateName(folder.name, subFolders)) {
-			throw new IllegalArgumentException("A sub-folder with the name '" + folder.name + "' already exists.");
-		}
 		if (folder == null) {
 			throw new IllegalArgumentException("The sub-folder cannot be null.");
+		}
+		if ((owner != null) && isDuplicateName(folder.name, subFolders)) {
+			throw new IllegalArgumentException("A sub-folder with the name '" + folder.name + "' already exists.");
 		}
 		if (folder.owningLibrary != this.owningLibrary) {
 			throw new IllegalArgumentException(
@@ -189,7 +201,7 @@ public class TLFolder extends TLModelElement implements TLFolderOwner {
         ModelEvent<?> event = new ModelEventBuilder( ModelEventType.FOLDER_ADDED, this )
                 .setAffectedItem( folder ).buildEvent();
         
-		folder.parentFolder = this;
+		folder.owner = this;
 		subFolders.add( folder );
 		Collections.sort( subFolders, folderComparator );
 		publishEvent( event );
@@ -205,11 +217,19 @@ public class TLFolder extends TLModelElement implements TLFolderOwner {
 	                .setAffectedItem( folder ).buildEvent();
 	        
 			subFolders.remove( folder );
-			folder.parentFolder = null;
+			folder.owner = null;
 			publishEvent( event );
 		}
 	}
 	
+	/**
+	 * @see org.opentravel.schemacompiler.model.TLFolderOwner#sortFolders()
+	 */
+	@Override
+	public void sortFolders() {
+		Collections.sort( subFolders, folderComparator );
+	}
+
 	/**
 	 * Returns the list of library entities for this folder.  The list of entities
 	 * that is returned is unmodifiable and sorted in alphabetical order by entity
@@ -264,7 +284,7 @@ public class TLFolder extends TLModelElement implements TLFolderOwner {
 			throw new IllegalArgumentException(
 					"Entities must belong to the same library as their parent folder.");
 		}
-		if (isExistingFolderedEntity( subFolders, entity )) {
+		if (isExistingFolderedEntity( owningLibrary.getFolders(), entity )) {
 			throw new IllegalArgumentException(
 					"The entity is already assigned to the folder structure for its owning library.");
 		}
@@ -301,14 +321,14 @@ public class TLFolder extends TLModelElement implements TLFolderOwner {
 	 *									 a circular reference
 	 */
 	private void checkCircularFolders(TLFolder checkFolder) {
-		TLFolder parent = this.parentFolder;
+		TLFolderOwner parent = this.owner;
 		
 		while (parent != null) {
 			if (parent == checkFolder) {
 				throw new IllegalArgumentException(
 						"The given sub-folder is already a parent in the existing folder structure.");
 			}
-			parent = parent.parentFolder;
+			parent = (parent instanceof TLFolder) ? ((TLFolder) parent).owner : null;
 		}
 		
 		for (TLFolder sf : subFolders) {
@@ -349,7 +369,7 @@ public class TLFolder extends TLModelElement implements TLFolderOwner {
 	 * @param folders  the list of folders to be checked for the existing name
 	 * @return boolean
 	 */
-	private boolean isDuplicateName(String folderName, List<TLFolder> folders) {
+	protected static boolean isDuplicateName(String folderName, List<TLFolder> folders) {
 		boolean result = false;
 		
 		if (folderName != null) {

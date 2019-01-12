@@ -58,4 +58,9 @@ public interface TLFolderOwner {
 	 */
 	public void removeFolder(TLFolder folder);
 	
+	/**
+	 * Sorts the existing list of sub-folders in ascending order by name.
+	 */
+	public void sortFolders();
+	
 }

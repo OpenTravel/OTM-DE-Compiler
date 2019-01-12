@@ -227,7 +227,7 @@ public class Base64 {
                 return;
             }
         }
-        decodedDataCC.allocate(lastData - numberQuadruple, -1);
+        decodedDataCC.allocate(lastData - numberQuadruple);
         decodedDataCC.setEnd(lastData - numberQuadruple);
         decodedData = decodedDataCC.getBuffer();
 

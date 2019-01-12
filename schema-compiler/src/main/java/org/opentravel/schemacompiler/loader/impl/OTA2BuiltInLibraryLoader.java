@@ -71,8 +71,7 @@ public class OTA2BuiltInLibraryLoader extends AbstractBuiltInLibraryLoader {
                         ota2Library.getPrefix() );
                 library = new BuiltInLibrary(qualifiedName, inputSource.getLibraryURL(),
                         ota2Library.getNamedMembers(), ota2Library.getNamespaceImports(),
-                        ota2Library.getIncludes(), getLibraryDeclaration(),
-                        ota2Library.getVersionScheme());
+                        getLibraryDeclaration(), ota2Library.getVersionScheme());
             }
         } catch (Exception e) {
             throw new LibraryLoaderException("Error constructing built-in library instance ("

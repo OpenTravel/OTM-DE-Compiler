@@ -27,20 +27,6 @@ public class HexUtils {
 
 	private static final String INVALID_HEXADECIMAL_STRING = "Invalid hexadecimal string - bad digit(s).";
 	
-	// Table for HEX to DEC byte translation
-    private static final int[] DEC = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 00, 01, 02, 03, 04, 05, 06, 07, 8, 9, -1,
-            -1, -1, -1, -1, -1, -1, 10, 11, 12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 10, 11, 12, 13, 14, 15,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, };
-    
     /**
      * Private constructor to prevent instantiation.
      */
@@ -124,49 +110,6 @@ public class HexUtils {
         }
         return sb.toString();
 
-    }
-
-    /**
-     * Convert 4 hex digits to an int, and return the number of converted bytes.
-     * 
-     * @param hex
-     *            byte array containing exactly four hexadecimal digits
-     * @return int
-     * @exception IllegalArgumentException
-     *                thrown if an invalid hexadecimal digit is included
-     */
-    public static int convert2Int(byte[] hex) {
-        int len;
-
-        if (hex.length < 4) {
-            return 0;
-        }
-        if (DEC[hex[0]] < 0) {
-            throw new IllegalArgumentException(INVALID_HEXADECIMAL_STRING);
-        }
-
-        len = DEC[hex[0]];
-        len = len << 4;
-
-        if (DEC[hex[1]] < 0) {
-            throw new IllegalArgumentException(INVALID_HEXADECIMAL_STRING);
-        }
-
-        len += DEC[hex[1]];
-        len = len << 4;
-
-        if (DEC[hex[2]] < 0) {
-            throw new IllegalArgumentException(INVALID_HEXADECIMAL_STRING);
-        }
-        len += DEC[hex[2]];
-        len = len << 4;
-
-        if (DEC[hex[3]] < 0) {
-            throw new IllegalArgumentException(INVALID_HEXADECIMAL_STRING);
-        }
-        len += DEC[hex[3]];
-
-        return len;
     }
 
     /**

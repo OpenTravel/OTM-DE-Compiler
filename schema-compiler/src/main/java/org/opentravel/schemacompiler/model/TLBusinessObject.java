@@ -699,7 +699,7 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
 	 * @param comparator the comparator to use when sorting the list
 	 */
 	public void sortUpdateFacets(Comparator<TLContextualFacet> comparator) {
-		queryFacetManager.sortChildren( comparator );
+		updateFacetManager.sortChildren( comparator );
 	}
 	
 }

@@ -45,6 +45,15 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
     private boolean notExtendable;
     private TLExtension extension;
 
+	/**
+	 * Default constructor.
+	 */
+	public TLOperation() {
+		setRequest( new TLFacet() );
+		setResponse( new TLFacet() );
+		setNotification( new TLFacet() );
+	}
+	
     /**
      * @see org.opentravel.schemacompiler.model.ModelElement#getOwningModel()
      */
@@ -331,11 +340,6 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
      * @return TLFacet
      */
     public TLFacet getRequest() {
-        if (request == null) {
-            request = new TLFacet();
-            request.setFacetType(TLFacetType.REQUEST);
-            request.setOwningEntity(this);
-        }
         return request;
     }
 
@@ -368,11 +372,6 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
      * @return TLFacet
      */
     public TLFacet getResponse() {
-        if (response == null) {
-            response = new TLFacet();
-            response.setFacetType(TLFacetType.RESPONSE);
-            response.setOwningEntity(this);
-        }
         return response;
     }
 
@@ -406,11 +405,6 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
      * @return TLFacet
      */
     public TLFacet getNotification() {
-        if (notification == null) {
-            notification = new TLFacet();
-            notification.setFacetType(TLFacetType.NOTIFICATION);
-            notification.setOwningEntity(this);
-        }
         return notification;
     }
 

@@ -58,9 +58,8 @@ public class BuiltInLibrary extends AbstractLibrary {
 	 * @param members the member types of the library
 	 */
 	public BuiltInLibrary(QName qualifiedName, URL libraryUrl, List<LibraryMember> members) {
-		
-		this( qualifiedName, libraryUrl, members, null, null,
-				createDefaultSchemaDeclaration( qualifiedName, libraryUrl.toString() ), XSDVersionScheme.ID );
+		this( qualifiedName, libraryUrl, members, null, createDefaultSchemaDeclaration(
+				qualifiedName, libraryUrl.toString() ), XSDVersionScheme.ID );
 	}
 	
 	/**
@@ -90,8 +89,7 @@ public class BuiltInLibrary extends AbstractLibrary {
 	 * @param members the member types of the library
 	 */
 	public BuiltInLibrary(QName qualifiedName, URL libraryUrl, List<LibraryMember> members,
-			List<TLNamespaceImport> importList, List<TLInclude> includeList, SchemaDeclaration schemaDeclaration,
-			String versionScheme) {
+			List<TLNamespaceImport> importList, SchemaDeclaration schemaDeclaration, String versionScheme) {
 		super.setNamespace( qualifiedName.getNamespaceURI() );
 		super.setName( qualifiedName.getLocalPart() );
 		super.setLibraryUrl( libraryUrl );
@@ -101,15 +99,9 @@ public class BuiltInLibrary extends AbstractLibrary {
 		if (members != null) {
 			setBuiltInType( qualifiedName.getNamespaceURI(), members );
 		}
-		
 		if (importList != null) {
 			for (TLNamespaceImport nsImport : importList) {
 				super.addNamespaceImport( nsImport );
-			}
-		}
-		if (includeList != null) {
-			for (TLInclude include : includeList) {
-				super.addInclude( include );
 			}
 		}
 		this.schemaDeclaration = schemaDeclaration;
@@ -135,7 +127,7 @@ public class BuiltInLibrary extends AbstractLibrary {
 			builtInType = BuiltInType.SCHEMA_FOR_SCHEMAS_BUILTIN; // special case:
 																	// schema-for-schemas
 			
-		} else if (hasTLLibraryMembers && hasXsdMembers) {
+		} else if (!members.isEmpty() && hasTLLibraryMembers && hasXsdMembers) {
 			throw new IllegalArgumentException(
 					"Error: Built-in libraries cannot be a mix of XSD and OTA2 member types." );
 			

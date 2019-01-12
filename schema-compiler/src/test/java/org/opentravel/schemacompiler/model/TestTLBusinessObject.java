@@ -34,13 +34,33 @@ public class TestTLBusinessObject extends AbstractModelTest {
 		assertEquals( library1.getNamespace(), bo.getNamespace() );
 		assertEquals( library1.getBaseNamespace(), bo.getBaseNamespace() );
 		assertEquals( bo.getName(), bo.getLocalName() );
+		assertEquals( library1.getVersion(), bo.getVersion() );
 		assertEquals( "TestLibrary1.otm : TestObject", bo.getValidationIdentity() );
 		assertEquals( VersionSchemeFactory.getInstance().getDefaultVersionScheme(), bo.getVersionScheme() );
 	}
 	
 	@Test
+	public void testExtensionFunctions() throws Exception {
+		TLBusinessObject bo1 = addBusinessObject( "TestObject1", library1 );
+		TLBusinessObject bo2 = addBusinessObject( "TestObject2", library1 );
+		
+		addExtension( bo2, bo1 );
+		testExtensionFunctions( bo2 );
+	}
+	
+	@Test
 	public void testAliasFunctions() throws Exception {
-		testAliasOwnerFunctions( addBusinessObject( "TestObject", library1 ) );
+		testAliasFunctions( addBusinessObject( "TestObject", library1 ) );
+	}
+	
+	@Test
+	public void testDocumentationFunctions() throws Exception {
+		testDocumentationFunctions( addBusinessObject( "TestObject", library1 ) );
+	}
+	
+	@Test
+	public void testEquivalentFunctions() throws Exception {
+		testEquivalentFunctions( addBusinessObject( "TestObject", library1 ) );
 	}
 	
 	@Test
@@ -87,7 +107,7 @@ public class TestTLBusinessObject extends AbstractModelTest {
 		TLContextualFacet facet2 = newContextualFacet( "Test2", TLFacetType.CUSTOM, library1 );
 		
 		bo.addCustomFacet( facet1 );
-		bo.addCustomFacet( facet2 );
+		bo.addCustomFacet( 1, facet2 );
 		assertEquals( 5, bo.getAllFacets().size() );
 		assertEquals( facet1, bo.getCustomFacet( "Test1" ) );
 		assertEquals( facet2, bo.getCustomFacet( "Test2" ) );
@@ -98,8 +118,11 @@ public class TestTLBusinessObject extends AbstractModelTest {
 		bo.moveCustomFacetDown( facet1 );
 		assertArrayEquals( new String[] { "Test2", "Test1" }, getNames( bo.getCustomFacets(), f -> f.getName() ) );
 		
-		bo.moveCustomFacetUp( facet1 );
+		bo.sortCustomFacets( (f1, f2) -> f1.getName().compareTo( f2.getName() ) );
 		assertArrayEquals( new String[] { "Test1", "Test2" }, getNames( bo.getCustomFacets(), f -> f.getName() ) );
+		
+		bo.moveCustomFacetUp( facet2 );
+		assertArrayEquals( new String[] { "Test2", "Test1" }, getNames( bo.getCustomFacets(), f -> f.getName() ) );
 		
 		bo.removeCustomFacet( facet1 );
 		assertArrayEquals( new String[] { "Test2" }, getNames( bo.getCustomFacets(), f -> f.getName() ) );
@@ -113,7 +136,7 @@ public class TestTLBusinessObject extends AbstractModelTest {
 		TLContextualFacet facet2 = newContextualFacet( "Test2", TLFacetType.QUERY, library1 );
 		
 		bo.addQueryFacet( facet1 );
-		bo.addQueryFacet( facet2 );
+		bo.addQueryFacet( 1, facet2 );
 		assertEquals( 5, bo.getAllFacets().size() );
 		assertEquals( facet1, bo.getQueryFacet( "Test1" ) );
 		assertEquals( facet2, bo.getQueryFacet( "Test2" ) );
@@ -124,8 +147,11 @@ public class TestTLBusinessObject extends AbstractModelTest {
 		bo.moveQueryFacetDown( facet1 );
 		assertArrayEquals( new String[] { "Test2", "Test1" }, getNames( bo.getQueryFacets(), f -> f.getName() ) );
 		
-		bo.moveQueryFacetUp( facet1 );
+		bo.sortQueryFacets( (f1, f2) -> f1.getName().compareTo( f2.getName() ) );
 		assertArrayEquals( new String[] { "Test1", "Test2" }, getNames( bo.getQueryFacets(), f -> f.getName() ) );
+		
+		bo.moveQueryFacetUp( facet2 );
+		assertArrayEquals( new String[] { "Test2", "Test1" }, getNames( bo.getQueryFacets(), f -> f.getName() ) );
 		
 		bo.removeQueryFacet( facet1 );
 		assertArrayEquals( new String[] { "Test2" }, getNames( bo.getQueryFacets(), f -> f.getName() ) );
@@ -139,7 +165,7 @@ public class TestTLBusinessObject extends AbstractModelTest {
 		TLContextualFacet facet2 = newContextualFacet( "Test2", TLFacetType.UPDATE, library1 );
 		
 		bo.addUpdateFacet( facet1 );
-		bo.addUpdateFacet( facet2 );
+		bo.addUpdateFacet( 1, facet2 );
 		assertEquals( 5, bo.getAllFacets().size() );
 		assertEquals( facet1, bo.getUpdateFacet( "Test1" ) );
 		assertEquals( facet2, bo.getUpdateFacet( "Test2" ) );
@@ -150,8 +176,11 @@ public class TestTLBusinessObject extends AbstractModelTest {
 		bo.moveUpdateFacetDown( facet1 );
 		assertArrayEquals( new String[] { "Test2", "Test1" }, getNames( bo.getUpdateFacets(), f -> f.getName() ) );
 		
-		bo.moveUpdateFacetUp( facet1 );
+		bo.sortUpdateFacets( (f1, f2) -> f1.getName().compareTo( f2.getName() ) );
 		assertArrayEquals( new String[] { "Test1", "Test2" }, getNames( bo.getUpdateFacets(), f -> f.getName() ) );
+		
+		bo.moveUpdateFacetUp( facet2 );
+		assertArrayEquals( new String[] { "Test2", "Test1" }, getNames( bo.getUpdateFacets(), f -> f.getName() ) );
 		
 		bo.removeUpdateFacet( facet1 );
 		assertArrayEquals( new String[] { "Test2" }, getNames( bo.getUpdateFacets(), f -> f.getName() ) );

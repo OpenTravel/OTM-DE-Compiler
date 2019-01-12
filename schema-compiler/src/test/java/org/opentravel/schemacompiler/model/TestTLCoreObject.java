@@ -29,12 +29,42 @@ public class TestTLCoreObject extends AbstractModelTest {
 	@Test
 	public void testIdentityFunctions() throws Exception {
 		TLCoreObject core = addCore( "TestObject", library1 );
+		TLAlias alias = addAlias( "TestAlias", core );
 		
 		assertEquals( library1.getNamespace(), core.getNamespace() );
 		assertEquals( library1.getBaseNamespace(), core.getBaseNamespace() );
 		assertEquals( core.getName(), core.getLocalName() );
+		assertEquals( library1.getVersion(), core.getVersion() );
 		assertEquals( "TestLibrary1.otm : TestObject", core.getValidationIdentity() );
 		assertEquals( VersionSchemeFactory.getInstance().getDefaultVersionScheme(), core.getVersionScheme() );
+		
+		assertEquals( library1.getNamespace(), alias.getNamespace() );
+		assertEquals( alias.getName(), alias.getLocalName() );
+		assertEquals( "TestLibrary1.otm : TestObject : TestAlias", alias.getValidationIdentity() );
+	}
+	
+	@Test
+	public void testExtensionFunctions() throws Exception {
+		TLCoreObject core1 = addCore( "TestObject1", library1 );
+		TLCoreObject core2 = addCore( "TestObject2", library1 );
+		
+		addExtension( core2, core1 );
+		testExtensionFunctions( core2 );
+	}
+	
+	@Test
+	public void testAliasFunctions() throws Exception {
+		testAliasFunctions( addCore( "TestObject", library1 ) );
+	}
+	
+	@Test
+	public void testDocumentationFunctions() throws Exception {
+		testDocumentationFunctions( addCore( "TestObject1", library1 ) );
+	}
+	
+	@Test
+	public void testEquivalentFunctions() throws Exception {
+		testEquivalentFunctions( addCore( "TestObject1", library1 ) );
 	}
 	
 	@Test
@@ -73,11 +103,6 @@ public class TestTLCoreObject extends AbstractModelTest {
 		assertNull( orphanCore.getDetailFacet() );
 		assertNull( orphanDetail.getFacetType() );
 		assertNull( orphanDetail.getOwningEntity() );
-	}
-	
-	@Test
-	public void testAliasFunctions() throws Exception {
-		testAliasOwnerFunctions( addCore( "TestObject", library1 ) );
 	}
 	
 }

@@ -110,7 +110,7 @@ public class XSDLibrary extends AbstractLibrary {
      */
     @Override
     protected boolean isValidMember(LibraryMember namedMember) {
-        return (namedMember != null) && validMemberTypes.contains(namedMember.getClass());
+        return isValidLibraryMember( namedMember );
     }
 
     /**

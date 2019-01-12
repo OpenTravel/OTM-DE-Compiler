@@ -18,13 +18,11 @@ package org.opentravel.schemacompiler.diff;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
-import org.opentravel.schemacompiler.diff.impl.LibraryComparator;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
+import org.opentravel.schemacompiler.util.ModelComparator;
 import org.opentravel.schemacompiler.version.AbstractVersionHelperTests;
 
 /**
@@ -33,23 +31,54 @@ import org.opentravel.schemacompiler.version.AbstractVersionHelperTests;
 public class TestLibraryComparator extends AbstractVersionHelperTests {
 	
 	@Test
-	public void testLibraryComparator() throws Exception {
+	public void testLibraryComparison() throws Exception {
         TLModel model = loadTestModel(FILE_VERSION_1_2_2);
         TLLibrary oldLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1, TEST_LIBRARY_NAME);
         TLLibrary newLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_2, TEST_LIBRARY_NAME);
-        Map<String,String> nsMappings = new HashMap<>();
         
-        nsMappings.put(  NS_VERSION_1, NS_VERSION_1_2 );
-        LibraryComparator comparator = new LibraryComparator( ModelCompareOptions.getDefaultOptions(), nsMappings );
+        ModelComparator comparator = new ModelComparator( ModelCompareOptions.getDefaultOptions() );
         LibraryChangeSet changeSet;
         
         changeSet = comparator.compareLibraries( oldLibrary, newLibrary );
+        comparator.compareLibraries( oldLibrary, newLibrary, new ByteArrayOutputStream() );
         assertNotNull( changeSet );
         assertTrue( changeSet.getChangeItems().size() > 0 );
         
         changeSet = comparator.compareLibraries( newLibrary, oldLibrary );
+        comparator.compareLibraries( newLibrary, oldLibrary, new ByteArrayOutputStream() );
         assertNotNull( changeSet );
         assertTrue( changeSet.getChangeItems().size() > 0 );
+	}
+	
+	@Test
+	public void testLibraryMinorVersionComparison() throws Exception {
+        TLModel model = loadTestModel(FILE_VERSION_1_2_2);
+        TLLibrary oldLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1, TEST_LIBRARY_NAME);
+        TLLibrary newLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_2, TEST_LIBRARY_NAME);
+        ModelCompareOptions options = ModelCompareOptions.getDefaultOptions();
+        
+        options.setSuppressFieldVersionChanges( true );
+        ModelComparator comparator = new ModelComparator( options );
+        LibraryChangeSet changeSet;
+        
+        changeSet = comparator.compareLibraries( oldLibrary, newLibrary );
+        comparator.compareLibraries( newLibrary, oldLibrary, new ByteArrayOutputStream() );
+        assertNotNull( changeSet );
+        assertTrue( changeSet.getChangeItems().size() > 0 );
+	}
+	
+	@Test
+	public void testLibraryNoChangeComparison() throws Exception {
+        TLModel model = loadTestModel(FILE_VERSION_1_2_2);
+        TLLibrary library = (TLLibrary) model.getLibrary(NS_VERSION_1_2, TEST_LIBRARY_NAME);
+        
+        ModelComparator comparator = new ModelComparator( ModelCompareOptions.getDefaultOptions() );
+        LibraryChangeSet changeSet;
+        
+        changeSet = comparator.compareLibraries( library, library );
+        comparator.compareLibraries( library, library, new ByteArrayOutputStream() );
+        assertNotNull( changeSet );
+        assertTrue( changeSet.getChangeItems().size() == 0 );
 	}
 	
 }

@@ -15,7 +15,6 @@
  */
 package org.opentravel.schemacompiler.security;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -126,13 +125,7 @@ public class PasswordValidator {
 	 * @param pwbc the password byte chunk
 	 */
 	private void appendPassword(String userPassword, ByteChunk pwbc) {
-		try {
-			pwbc.append( userPassword.getBytes(), 0, userPassword.length() );
-			
-		} catch (IOException e) {
-			// Should never happen, but just in case...
-			log.error( "Could not append password bytes to chunk: ", e );
-		}
+		pwbc.append( userPassword.getBytes(), 0, userPassword.length() );
 	}
 	
 	/**

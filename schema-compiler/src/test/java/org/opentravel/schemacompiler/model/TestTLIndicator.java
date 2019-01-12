@@ -20,41 +20,32 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 /**
- * Verifies the functions of the <code>TLFacet</code> class.
+ * Verifies the functions of the <code>TLIndicator</code> class.
  */
-public class TestTLFacet extends AbstractModelTest {
+public class TestTLIndicator extends AbstractModelTest {
 	
 	@Test
 	public void testIdentityFunctions() throws Exception {
 		TLCoreObject core = addCore( "TestObject", library1 );
-		TLFacet facet = core.getSummaryFacet();
+		TLIndicator indicator = addIndicator( "TestIndicator", core.getSummaryFacet() );
 		
-		assertEquals( library1.getNamespace(), core.getSimpleFacet().getNamespace() );
-		assertEquals( library1.getNamespace(), facet.getNamespace() );
-		assertEquals( core.getName() + "_Summary", facet.getLocalName() );
-		assertEquals( "TestLibrary1.otm : TestObject/Summary", facet.getValidationIdentity() );
+		assertEquals( "TestLibrary1.otm : TestObject/Summary/TestIndicator", indicator.getValidationIdentity() );
 	}
 	
 	@Test
 	public void testDocumentationFunctions() throws Exception {
 		TLCoreObject core = addCore( "TestObject", library1 );
+		TLIndicator indicator = addIndicator( "TestIndicator", core.getSummaryFacet() );
 		
-		testDocumentationFunctions( core.getSimpleFacet() );
-		testDocumentationFunctions( core.getSummaryFacet() );
+		testDocumentationFunctions( indicator );
 	}
 	
 	@Test
 	public void testEquivalentFunctions() throws Exception {
-		testEquivalentFunctions( addCore( "TestObject", library1 ).getSimpleFacet() );
-	}
-	
-	@Test
-	public void testMemberFieldFunctions() throws Exception {
 		TLCoreObject core = addCore( "TestObject", library1 );
+		TLIndicator indicator = addIndicator( "TestIndicator", core.getSummaryFacet() );
 		
-		testAttributeFunctions( core.getDetailFacet() );
-		testPropertyFunctions( core.getDetailFacet() );
-		testIndicatorFunctions( core.getDetailFacet() );
+		testEquivalentFunctions( indicator );
 	}
 	
 }

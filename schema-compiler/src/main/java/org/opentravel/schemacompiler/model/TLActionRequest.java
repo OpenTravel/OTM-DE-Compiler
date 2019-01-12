@@ -234,7 +234,7 @@ public class TLActionRequest extends TLModelElement implements TLDocumentationOw
         ModelEvent<?> event = new ModelEventBuilder(ModelEventType.MIME_TYPES_MODIFIED, this)
         		.setOldValue(this.mimeTypes).setNewValue(mimeTypes).buildEvent();
 
-		this.mimeTypes = (mimeTypes == null) ? new ArrayList<>() : mimeTypes;
+		this.mimeTypes = (mimeTypes == null) ? new ArrayList<>() : new ArrayList<>( mimeTypes );
         publishEvent(event);
 	}
 	

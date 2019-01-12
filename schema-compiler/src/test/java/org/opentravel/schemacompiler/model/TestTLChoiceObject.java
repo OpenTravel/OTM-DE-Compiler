@@ -34,13 +34,33 @@ public class TestTLChoiceObject extends AbstractModelTest {
 		assertEquals( library1.getNamespace(), choice.getNamespace() );
 		assertEquals( library1.getBaseNamespace(), choice.getBaseNamespace() );
 		assertEquals( choice.getName(), choice.getLocalName() );
+		assertEquals( library1.getVersion(), choice.getVersion() );
 		assertEquals( "TestLibrary1.otm : TestObject", choice.getValidationIdentity() );
 		assertEquals( VersionSchemeFactory.getInstance().getDefaultVersionScheme(), choice.getVersionScheme() );
 	}
 	
 	@Test
+	public void testExtensionFunctions() throws Exception {
+		TLChoiceObject choice1 = addChoice( "TestObject1", library1 );
+		TLChoiceObject choice2 = addChoice( "TestObject2", library1 );
+		
+		addExtension( choice2, choice1 );
+		testExtensionFunctions( choice2 );
+	}
+	
+	@Test
 	public void testAliasFunctions() throws Exception {
-		testAliasOwnerFunctions( addChoice( "TestObject", library1 ) );
+		testAliasFunctions( addChoice( "TestObject", library1 ) );
+	}
+	
+	@Test
+	public void testDocumentationFunctions() throws Exception {
+		testDocumentationFunctions( addChoice( "TestObject", library1 ) );
+	}
+	
+	@Test
+	public void testEquivalentFunctions() throws Exception {
+		testEquivalentFunctions( addChoice( "TestObject", library1 ) );
 	}
 	
 	@Test
@@ -67,7 +87,7 @@ public class TestTLChoiceObject extends AbstractModelTest {
 		TLContextualFacet facet2 = newContextualFacet( "Test2", TLFacetType.CHOICE, library1 );
 		
 		choice.addChoiceFacet( facet1 );
-		choice.addChoiceFacet( facet2 );
+		choice.addChoiceFacet( 1, facet2 );
 		assertEquals( 3, choice.getAllFacets().size() );
 		assertEquals( facet1, choice.getChoiceFacet( "Test1" ) );
 		assertEquals( facet2, choice.getChoiceFacet( "Test2" ) );
@@ -78,8 +98,11 @@ public class TestTLChoiceObject extends AbstractModelTest {
 		choice.moveChoiceFacetDown( facet1 );
 		assertArrayEquals( new String[] { "Test2", "Test1" }, getNames( choice.getChoiceFacets(), f -> f.getName() ) );
 		
-		choice.moveChoiceFacetUp( facet1 );
+		choice.sortChoiceFacets( (f1, f2) -> f1.getName().compareTo( f2.getName() ) );
 		assertArrayEquals( new String[] { "Test1", "Test2" }, getNames( choice.getChoiceFacets(), f -> f.getName() ) );
+		
+		choice.moveChoiceFacetUp( facet2 );
+		assertArrayEquals( new String[] { "Test2", "Test1" }, getNames( choice.getChoiceFacets(), f -> f.getName() ) );
 		
 		choice.removeChoiceFacet( facet1 );
 		assertArrayEquals( new String[] { "Test2" }, getNames( choice.getChoiceFacets(), f -> f.getName() ) );

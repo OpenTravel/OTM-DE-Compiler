@@ -17,6 +17,7 @@ package org.opentravel.schemacompiler.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.opentravel.schemacompiler.event.ModelEvent;
@@ -106,7 +107,7 @@ public class TLActionResponse extends TLModelElement implements TLDocumentationO
 		ModelEvent<?> event = new ModelEventBuilder(ModelEventType.STATUS_CODES_MODIFIED, this)
 				.setOldValue(this.statusCodes).setNewValue(statusCodes).buildEvent();
 
-		this.statusCodes = (statusCodes == null) ? new ArrayList<>() : statusCodes;
+		this.statusCodes = (statusCodes == null) ? new ArrayList<>() : new ArrayList<>( statusCodes );
         publishEvent(event);
 	}
 
@@ -135,13 +136,21 @@ public class TLActionResponse extends TLModelElement implements TLDocumentationO
 	 * @param statusCode  the status code to remove
 	 */
 	public void removeStatusCode(int statusCode) {
+		Iterator<Integer> iterator = statusCodes.iterator();
 		ModelEventBuilder eventBuilder = null;
 		
 		if (this.statusCodes.contains(statusCode)) {
 			eventBuilder = new ModelEventBuilder(ModelEventType.STATUS_CODES_MODIFIED, this)
     				.setOldValue( new ArrayList<>( this.statusCodes ) );
 		}
-		this.statusCodes.remove( statusCode );
+		
+		while (iterator.hasNext()) {
+			Integer sCode = iterator.next();
+			
+			if ((sCode != null) && (sCode == statusCode)) {
+				iterator.remove();
+			}
+		}
 		
 		if (eventBuilder != null) {
 			publishEvent( eventBuilder.setNewValue( new ArrayList<>( this.statusCodes ) ).buildEvent() );
@@ -206,7 +215,7 @@ public class TLActionResponse extends TLModelElement implements TLDocumentationO
         ModelEvent<?> event = new ModelEventBuilder(ModelEventType.MIME_TYPES_MODIFIED, this)
         		.setOldValue(this.mimeTypes).setNewValue(mimeTypes).buildEvent();
 
-		this.mimeTypes = (mimeTypes == null) ? new ArrayList<>() : mimeTypes;
+		this.mimeTypes = (mimeTypes == null) ? new ArrayList<>() : new ArrayList<>( mimeTypes );
         publishEvent(event);
 	}
 

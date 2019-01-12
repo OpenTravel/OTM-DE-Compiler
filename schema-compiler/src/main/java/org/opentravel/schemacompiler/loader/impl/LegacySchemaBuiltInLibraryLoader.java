@@ -74,8 +74,8 @@ public class LegacySchemaBuiltInLibraryLoader extends AbstractBuiltInLibraryLoad
 
                 library = new BuiltInLibrary(qualifiedName,
                         inputSource.getLibraryURL(), xsdLibrary.getNamedMembers(),
-                        xsdLibrary.getNamespaceImports(), xsdLibrary.getIncludes(),
-                        getLibraryDeclaration(), xsdLibrary.getVersionScheme());
+                        xsdLibrary.getNamespaceImports(), getLibraryDeclaration(),
+                        xsdLibrary.getVersionScheme());
             }
             
 		} catch (Exception e) {
