@@ -17,6 +17,7 @@
 package org.opentravel.schemacompiler.security.impl;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,6 +45,7 @@ import org.opentravel.schemacompiler.repository.RepositoryFileManager;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.security.AuthenticationProvider;
 import org.opentravel.schemacompiler.util.ClasspathResourceResolver;
+import org.opentravel.schemacompiler.util.FileUtils;
 import org.opentravel.schemacompiler.xml.NamespacePrefixMapper;
 
 /**
@@ -269,8 +271,8 @@ public abstract class AbstractAuthenticationProvider implements AuthenticationPr
 		            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 		            unmarshaller.setSchema(validationSchema);
 
-		            JAXBElement<RepositoryUsers> documentElement =
-		            		(JAXBElement<RepositoryUsers>) unmarshaller.unmarshal( registryFile );
+		            JAXBElement<RepositoryUsers> documentElement = (JAXBElement<RepositoryUsers>)
+		            		FileUtils.unmarshalFileContent( registryFile, unmarshaller );
 		            RepositoryUsers repoUsers = documentElement.getValue();
 		            
 		            userRegistry.clear();
@@ -281,7 +283,7 @@ public abstract class AbstractAuthenticationProvider implements AuthenticationPr
 					userFileLastModified = lastModified;
 					refreshPerformed = true;
 					
-		        } catch (JAXBException e) {
+		        } catch (JAXBException | IOException e) {
 		            log.error( "Repository user file is unreadable.", e );
 				}
 			}

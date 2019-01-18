@@ -37,6 +37,7 @@ import org.opentravel.schemacompiler.repository.RepositoryFileManager;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.util.ClasspathResourceResolver;
+import org.opentravel.schemacompiler.util.FileUtils;
 import org.opentravel.schemacompiler.util.RepositoryJaxbContext;
 import org.opentravel.schemacompiler.xml.NamespacePrefixMapper;
 
@@ -190,8 +191,8 @@ public class SubscriptionFileUtils {
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
             unmarshaller.setSchema( validationSchema );
 
-            JAXBElement<SubscriptionList> documentElement =
-            		(JAXBElement<SubscriptionList>) unmarshaller.unmarshal( file );
+            JAXBElement<SubscriptionList> documentElement = (JAXBElement<SubscriptionList>)
+            		FileUtils.unmarshalFileContent( file, unmarshaller );
             return documentElement.getValue();
 
         } catch (JAXBException e) {

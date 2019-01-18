@@ -16,10 +16,8 @@
 package org.opentravel.schemacompiler.codegen;
 
 import static org.junit.Assert.fail;
-import io.swagger.parser.SwaggerParser;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -45,13 +43,12 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
-import junit.framework.AssertionFailedError;
-
 import org.junit.Assert;
 import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
 import org.opentravel.schemacompiler.util.ClasspathResourceResolver;
 import org.opentravel.schemacompiler.util.FileSystemResourceResolver;
+import org.opentravel.schemacompiler.util.FileUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.ErrorHandler;
@@ -73,6 +70,9 @@ import com.github.fge.jsonschema.core.report.ProcessingMessage;
 import com.github.fge.jsonschema.core.report.ProcessingReport;
 import com.github.fge.jsonschema.main.JsonSchema;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
+
+import io.swagger.parser.SwaggerParser;
+import junit.framework.AssertionFailedError;
 
 /**
  * Static assertion methods used to validate generated XML schema and WSDL documents.
@@ -281,9 +281,9 @@ public class CodeGeneratorTestAssertions {
                         + wsdlFile.getAbsolutePath());
             }
             Unmarshaller unmarshaller = jaxbWsdlContext.createUnmarshaller();
+            
             unmarshaller.setSchema(wsdlValidationSchema);
-
-            unmarshaller.unmarshal(new FileInputStream(wsdlFile));
+            FileUtils.unmarshalFileContent( wsdlFile, unmarshaller );
 
         } catch (IOException e) {
             throw new AssertionFailedError("IOException encountered during WSDL validation: " + e.getMessage());

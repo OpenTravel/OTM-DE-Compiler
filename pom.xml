@@ -31,7 +31,7 @@
 		<!-- Dependency Versions -->
 		<jaxb.version>2.3.0.1</jaxb.version>
 		<gson.version>2.5</gson.version>
-		<jackson.version>2.4.5</jackson.version>
+		<jackson.version>2.9.8</jackson.version>
 		<spring.version>4.3.21.RELEASE</spring.version>
 		<httpcomponents.version>4.4</httpcomponents.version>
 		<maven.plugin.api.version>3.2.5</maven.plugin.api.version>
@@ -169,6 +169,11 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-databind</artifactId>
+				<version>${jackson.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-core</artifactId>
 				<version>${jackson.version}</version>
 			</dependency>
 			<dependency>

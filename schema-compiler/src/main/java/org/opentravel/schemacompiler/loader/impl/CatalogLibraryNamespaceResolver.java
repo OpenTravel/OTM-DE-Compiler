@@ -35,6 +35,7 @@ import org.opentravel.ns.ota2.librarycatalog_v01_00.CatalogEntry;
 import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
+import org.opentravel.schemacompiler.util.FileUtils;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.xml.sax.SAXException;
 
@@ -149,10 +150,9 @@ public class CatalogLibraryNamespaceResolver extends MapLibraryNamespaceResolver
             SchemaFactory schemaFactory = SchemaFactory
                     .newInstance(javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI);
             Schema validationSchema = schemaFactory.newSchema(new StreamSource(schemaStream));
-            Unmarshaller unmarshaller = JAXBContext.newInstance(SCHEMA_CONTEXT)
-                    .createUnmarshaller();
+            Unmarshaller unmarshaller = JAXBContext.newInstance(SCHEMA_CONTEXT).createUnmarshaller();
             unmarshaller.setSchema(validationSchema);
-            JAXBElement<?> documentElement = (JAXBElement<?>) unmarshaller.unmarshal(is);
+            JAXBElement<?> documentElement = (JAXBElement<?>) FileUtils.unmarshalStreamContent( is, unmarshaller );
 
             // Populate the namespace mappings with elements from the catalog
             Catalog catalog = (Catalog) documentElement.getValue();

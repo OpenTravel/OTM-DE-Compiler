@@ -17,8 +17,15 @@
 package org.opentravel.schemacompiler.util;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.nio.file.Files;
+
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,6 +104,38 @@ public class FileUtils {
 			successful = origFile.renameTo( renamedFile );
 		}
 		return successful;
+	}
+	
+	/**
+	 * Parses content from the given file using the JAXB unmarshaller provided.
+	 * 
+	 * @param file  the file from which to unmarshal content
+	 * @param unmarshaller  the unmarshaller to use for parsing and building the corresponding object structure
+	 * @return Object
+	 * @throws JAXBException  thrown if the file content cannot be parsed by the unmarshaller
+	 * @throws IOException  thrown if the file cannot be opened or read from
+	 */
+	public static Object unmarshalFileContent(File file, Unmarshaller unmarshaller)
+			throws JAXBException, IOException {
+		try (Reader reader = new FileReader( file )) {
+			return unmarshaller.unmarshal( reader );
+		}
+	}
+	
+	/**
+	 * Parses content from the given input stream using the JAXB unmarshaller provided.
+	 * 
+	 * @param in  the input stream from which to unmarshal content
+	 * @param unmarshaller  the unmarshaller to use for parsing and building the corresponding object structure
+	 * @return Object
+	 * @throws JAXBException  thrown if the stream content cannot be parsed by the unmarshaller
+	 * @throws IOException  thrown if the stream cannot be opened or read from
+	 */
+	public static Object unmarshalStreamContent(InputStream in, Unmarshaller unmarshaller)
+			throws JAXBException, IOException {
+		try (Reader reader = new InputStreamReader( in )) {
+			return unmarshaller.unmarshal( reader );
+		}
 	}
 	
 }

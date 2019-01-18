@@ -48,6 +48,7 @@ import org.opentravel.schemacompiler.transform.TransformerFactory;
 import org.opentravel.schemacompiler.transform.symbols.DefaultTransformerContext;
 import org.opentravel.schemacompiler.transform.symbols.SymbolResolverTransformerContext;
 import org.opentravel.schemacompiler.util.ClasspathResourceResolver;
+import org.opentravel.schemacompiler.util.FileUtils;
 import org.opentravel.schemacompiler.util.SchemaCompilerRuntimeException;
 import org.opentravel.schemacompiler.validate.impl.TLModelSymbolResolver;
 
@@ -84,7 +85,8 @@ public class IndexContentHelper {
 	public static Library unmarshallLibrary(File contentFile) throws RepositoryException {
 		try {
 			Unmarshaller u = jaxbContext.createUnmarshaller();
-			JAXBElement<?> libraryElement = (JAXBElement<?>) u.unmarshal( contentFile );
+			JAXBElement<?> libraryElement = (JAXBElement<?>)
+					FileUtils.unmarshalFileContent( contentFile, u );
 			JaxbLibraryVersionConverter<?> versionConverter;
 			Object jaxbLibrary = libraryElement.getValue();
 			Library library;
@@ -99,7 +101,7 @@ public class IndexContentHelper {
 			}
 			return library;
 			
-		} catch (JAXBException e) {
+		} catch (JAXBException | IOException e) {
 			throw new RepositoryException("Error unmarshalling library content: " + contentFile.getName(), e);
 		}
 	}

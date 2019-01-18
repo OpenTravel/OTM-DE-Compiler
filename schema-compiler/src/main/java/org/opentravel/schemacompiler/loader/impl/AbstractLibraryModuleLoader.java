@@ -17,6 +17,8 @@ package org.opentravel.schemacompiler.loader.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
@@ -106,18 +108,24 @@ public abstract class AbstractLibraryModuleLoader implements LibraryModuleLoader
             ValidationFindings validationFindings, JAXBContext jaxbContext,
             javax.xml.validation.Schema validationSchema) throws LibraryLoaderException,
             JAXBException {
-        URL libraryUrl = (inputSource == null) ? null : inputSource.getLibraryURL();
+    	InputStream inputStream = null;
+    	URL libraryUrl = null;
         Object jaxbLibrary = null;
+    	
+    	if (inputSource != null) {
+            libraryUrl = inputSource.getLibraryURL();
+            inputStream = inputSource.getLibraryContent();
+    	}
 
-        try (InputStream is = (inputSource == null) ? null : inputSource.getLibraryContent()) {
-            if (is != null) {
+        try (Reader reader = (inputStream == null) ? null : new InputStreamReader( inputStream )) {
+            if (reader != null) {
                 Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 
                 if (validationSchema != null) {
                     unmarshaller.setSchema(validationSchema);
                 }
 
-                JAXBElement<?> documentElement = (JAXBElement<?>) unmarshaller.unmarshal( is );
+                JAXBElement<?> documentElement = (JAXBElement<?>) unmarshaller.unmarshal( reader );
                 jaxbLibrary = documentElement.getValue();
 
             } else {
@@ -125,8 +133,7 @@ public abstract class AbstractLibraryModuleLoader implements LibraryModuleLoader
                         FindingType.WARNING,
                         new URLValidationSource(libraryUrl),
                         LoaderConstants.WARNING_LIBRARY_NOT_FOUND,
-                        (libraryUrl == null) ? MISSING_URL : URLUtils
-                                .getShortRepresentation(libraryUrl));
+                        URLUtils.getShortRepresentation(libraryUrl));
             }
         } catch (IOException e) {
         	throw new LibraryLoaderException("Error reading from library input source", e);

@@ -1126,7 +1126,8 @@ public abstract class RepositoryFileManager {
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
             unmarshaller.setSchema(repositoryValidationSchema);
 
-            JAXBElement<?> documentElement = (JAXBElement<?>) unmarshaller.unmarshal(file);
+            JAXBElement<?> documentElement = (JAXBElement<?>)
+            		FileUtils.unmarshalFileContent( file, unmarshaller );
             return documentElement.getValue();
 
         } catch (JAXBException e) {

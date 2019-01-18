@@ -61,6 +61,7 @@ import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.saver.LibrarySaveException;
 import org.opentravel.schemacompiler.util.ClasspathResourceResolver;
 import org.opentravel.schemacompiler.util.ExceptionUtils;
+import org.opentravel.schemacompiler.util.FileUtils;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
@@ -102,7 +103,8 @@ public class ProjectFileUtils implements AbstractFileUtils {
 			Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 			unmarshaller.setSchema( projectValidationSchema );
 			
-			JAXBElement<ProjectType> documentElement = (JAXBElement<ProjectType>) unmarshaller.unmarshal( is );
+			JAXBElement<ProjectType> documentElement = (JAXBElement<ProjectType>)
+					FileUtils.unmarshalStreamContent( is, unmarshaller );
 			jaxbProject = documentElement.getValue();
 			
 		} catch (JAXBException e) {

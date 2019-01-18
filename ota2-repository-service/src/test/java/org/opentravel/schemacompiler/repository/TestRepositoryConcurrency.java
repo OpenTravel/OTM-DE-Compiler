@@ -43,6 +43,7 @@ import org.opentravel.ns.ota2.repositoryinfoext_v01_00.UserInfo;
 import org.opentravel.schemacompiler.repository.impl.ProjectFileUtils;
 import org.opentravel.schemacompiler.svn.SvnserveProcess;
 import org.opentravel.schemacompiler.svn.TestOptions;
+import org.opentravel.schemacompiler.util.FileUtils;
 import org.opentravel.schemacompiler.util.RepositoryTestUtils;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.tmatesoft.svn.core.SVNDepth;
@@ -241,7 +242,7 @@ public class TestRepositoryConcurrency {
 		File userFile = new File( repositorySnapshotFolder, "repository-users.xml" );
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         JAXBElement<RepositoryUsers> documentElement =
-        		(JAXBElement<RepositoryUsers>) unmarshaller.unmarshal( userFile );
+        		(JAXBElement<RepositoryUsers>) FileUtils.unmarshalFileContent(userFile, unmarshaller );
         RepositoryUsers repoUsers = documentElement.getValue();
 		List<String> useridList = new ArrayList<>();
 		

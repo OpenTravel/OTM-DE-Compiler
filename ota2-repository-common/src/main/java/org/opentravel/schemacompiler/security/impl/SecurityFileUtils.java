@@ -35,6 +35,7 @@ import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.repository.RepositorySecurityException;
 import org.opentravel.schemacompiler.util.ClasspathResourceResolver;
+import org.opentravel.schemacompiler.util.FileUtils;
 import org.opentravel.schemacompiler.xml.NamespacePrefixMapper;
 
 /**
@@ -182,7 +183,8 @@ public class SecurityFileUtils {
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
             unmarshaller.setSchema(validationSchema);
 
-            JAXBElement<?> documentElement = (JAXBElement<?>) unmarshaller.unmarshal(file);
+            JAXBElement<?> documentElement = (JAXBElement<?>)
+            		FileUtils.unmarshalFileContent( file, unmarshaller );
             return documentElement.getValue();
 
         } catch (JAXBException e) {
