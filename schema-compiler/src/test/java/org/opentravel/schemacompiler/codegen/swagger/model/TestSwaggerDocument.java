@@ -13,25 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.security;
-
-import org.opentravel.schemacompiler.model.TLLibrary;
+package org.opentravel.schemacompiler.codegen.swagger.model;
 
 /**
- * Interface to be implemented by components that can determine whether a user should be allowed
- * access to edit a user-defined library instance.
- * 
- * @author S. Livezey
+ * Verifies the functions of the <code>SwaggerDocument</code> class.
  */
-public interface LibraryAccessController {
-
-    /**
-     * Returns true if the current user is allowed to modify the given library.
-     * 
-     * @param library
-     *            the user-defined library
-     * @return boolean
-     */
-    public boolean hasModifyPermission(TLLibrary library);
-
+public class TestSwaggerDocument {
+	
+//	@Test
+	public void testSecurityScheme() throws Exception {
+		
+	}
+	
 }

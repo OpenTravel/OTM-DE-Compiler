@@ -677,7 +677,7 @@ public class RepositoryContentResource {
 					
 					RepositoryUtils.populateMetadata( srLibrary.getRepositoryItem(), srEntity );
 					srEntity.setEntityName( searchResult.getItemName() );
-					srEntity.setEntityName( searchResult.getEntityType().getName() );
+					srEntity.setEntityType( searchResult.getEntityType().getName() );
 					metadataList.getEntityInfo().add( srEntity );
 				}
 			}

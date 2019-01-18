@@ -12,7 +12,6 @@
 
 	<modules>
 		<module>schema-compiler</module>
-		<module>schema-compiler-admin</module>
 		<module>schema-compiler-ext-ota2</module>
 		<module>schema-compiler-cli</module>
 		<module>ota2-schema-compiler</module>
@@ -65,6 +64,7 @@
 		
 	    <!-- Sonar -->
 	    <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+	    <sonar.exclusions>${project.build.directory}/generated-sources/**</sonar.exclusions>
 	    <sonar.jacoco.reportPaths>${project.basedir}/../test-aggregate/target/jacoco.exec</sonar.jacoco.reportPaths>
 	</properties>
 

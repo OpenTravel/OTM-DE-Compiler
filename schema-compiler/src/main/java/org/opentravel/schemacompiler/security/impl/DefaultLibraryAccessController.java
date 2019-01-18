@@ -21,12 +21,7 @@ import java.net.URL;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.security.LibraryAccessController;
-import org.opentravel.schemacompiler.security.ProtectedNamespaceCredentials;
-import org.opentravel.schemacompiler.security.ProtectedNamespaceRegistry;
-import org.opentravel.schemacompiler.security.SchemaCompilerSecurityException;
 import org.opentravel.schemacompiler.util.URLUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Library access controller component that utilizes the <code>ProtectedNamespaceRegistry</code> to
@@ -34,49 +29,15 @@ import org.slf4j.LoggerFactory;
  * 
  * @author S. Livezey
  */
-public class ProtectedNamespaceLibraryAccessController implements LibraryAccessController {
-
-    private static Logger log = LoggerFactory
-            .getLogger(ProtectedNamespaceLibraryAccessController.class);
-
-    private ProtectedNamespaceCredentials userCredentials;
+public class DefaultLibraryAccessController implements LibraryAccessController {
 
     /**
      * @see org.opentravel.schemacompiler.security.LibraryAccessController#hasModifyPermission(org.opentravel.schemacompiler.model.TLLibrary)
      */
     @Override
     public boolean hasModifyPermission(TLLibrary library) {
-        ProtectedNamespaceRegistry nsRegistry = ProtectedNamespaceRegistry.getInstance();
-        boolean grantPermission = false;
-
         // Only check protected namespace credentials if the file is not read-only
-        if (isWritableLibraryFile(library)) {
-            if (nsRegistry.isProtectedNamespace(library.getNamespace())) {
-                if (userCredentials != null) {
-                    try {
-                        grantPermission = nsRegistry.hasWriteAccess(library.getNamespace(),
-                                userCredentials);
-
-                    } catch (SchemaCompilerSecurityException e) {
-                        // Log exception and return false to deny write access
-                        log.error(
-                                "Error determining write access to library: " + library.getName(),
-                                e);
-                    }
-                }
-            } else {
-                grantPermission = true; // allow write access for all non-protected namespaces
-            }
-        }
-        return grantPermission;
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.security.LibraryAccessController#setUserCredentials(org.opentravel.schemacompiler.security.ProtectedNamespaceCredentials)
-     */
-    @Override
-    public void setUserCredentials(ProtectedNamespaceCredentials userCredentials) {
-        this.userCredentials = userCredentials;
+        return isWritableLibraryFile(library);
     }
 
     /**

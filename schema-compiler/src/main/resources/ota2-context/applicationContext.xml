@@ -6,36 +6,6 @@
 	<bean id="contextApplicationContextProvider" class="org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext" />
 
 	<!--
-	 Library Access Controller
-	 
-	 Optional bean definitions that assigns the component that will handle access control permissions
-	 for user-defined libraries.  Classes that are assigned to this bean ID must implement the
-	 'org.opentravel.schemacompiler.security.LibraryAccessController' interface.
-	 -->
-	<bean id="libraryAccessController" class="org.opentravel.schemacompiler.security.impl.ProtectedNamespaceLibraryAccessController" />
-	
-	<!--
-	  OTA Protected Namespace Group
-	  
-	  Defines the protected namespaces that are managed by the OTA staff, and the location of the
-	  credentials used to verify the people who have write access to the libraries assigned to those
-	  namespaces.
-	  -->
-	  
-	<!-- Example definition  
-	<bean id="otaProtectedNamespaceGroup" class="org.opentravel.schemacompiler.security.impl.DefaultProtectedNamespaceGroup">
-		<property name="groupId" value="OTA" />
-		<property name="groupTitle" value="OTA Namespaces" />
-		<property name="credentialUrl" value="http://localhost/~user/otm-credentials.otc"/>
-		<property name="protectedNamespaceUris">
-			<list>
-				<value>http://opentravel.org</value>
-			</list>
-		</property>
-	</bean>
-	 -->
-	
-	<!--
 	  Schema Declarations
 	  
 	  The following schema declarations define the name, namespace, location, etc. of various XML schema
@@ -1497,23 +1467,6 @@
 		</property>
 		<property name="defaultVersionScheme" value="OTA2" />
 	</bean>
-	
-	<!--
-	  Protected Namespace Registry
-	  
-	  Defines the list of protected namespace groupings that will be write-protected by the schema compiler's
-	  security functions.
-	  -->
-	<bean id="protectedNamespaceRegistry" class="org.opentravel.schemacompiler.security.impl.DefaultProtectedNamespaceRegistry" scope="singleton">
-		<property name="protectedNamespaces">
-			<list>
-				<!--
-				<ref bean="otaProtectedNamespaceGroup" />
-				-->
-			</list>
-		</property>
-	</bean>
-	
 	
 	<!--
 	  Code Generation Tasks

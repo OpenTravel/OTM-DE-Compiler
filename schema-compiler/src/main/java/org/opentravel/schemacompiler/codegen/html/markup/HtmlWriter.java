@@ -36,7 +36,6 @@ import org.opentravel.schemacompiler.codegen.html.LinkOutputImpl;
 import org.opentravel.schemacompiler.codegen.html.Util;
 import org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
-import org.opentravel.schemacompiler.codegen.html.builders.FacetDocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.builders.FieldDocumentationBuilder;
 import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.TLDocumentation;
@@ -54,15 +53,10 @@ import org.opentravel.schemacompiler.model.TLLibrary;
  */
 public class HtmlWriter extends PrintWriter {
 	
-	private static final String PRE = "<PRE>";
 	private static final String WIDTH = "\" WIDTH=\"";
-	private static final String VALIGN2 = "\" VALIGN=\"";
 	private static final String SUMMARY = "\" SUMMARY=\"\">";
 	private static final String CLASS = "\" CLASS=\"";
-	private static final String CELLSPACING2 = "\" CELLSPACING=\"";
-	private static final String CELLPADDING2 = "\" CELLPADDING=\"";
 	private static final String TH_ALIGN = "<TH ALIGN=\"";
-	private static final String TD_ALIGN = "<TD ALIGN=\"";
 	private static final String TABLE_BORDER = "<TABLE BORDER=\"";
 	private static final String INDENT_CLOSE_BRACE = "    }";
 	private static final String TEXT_JAVASCRIPT = "text/javascript";
@@ -336,47 +330,10 @@ public class HtmlWriter extends PrintWriter {
     }
 
     /**
-     * Get the configuration string as a content.
-     *
-     * @param key the key to look for in the configuration file
-     * @param a1 string argument added to configuration text
-     * @param a2 string argument added to configuration text
-     * @return a content tree for the text
-     */
-    public Content getResource(String key, String a1, String a2) {
-        return new RawHtml(configuration.getText(key, a1, a2));
-    }
-
-    /**
-     * Print &lt;HTML&gt; tag. Add a newline character at the end.
-     */
-    public void html() {
-        println("<HTML lang=\"" + configuration.getLocale().getLanguage() + "\">");
-    }
-
-    /**
      * Print &lt;/HTML&gt; tag. Add a newline character at the end.
      */
     public void htmlEnd() {
         println("</HTML>");
-    }
-
-    /**
-     * Print the script code to be embeded before the  &lt;/HEAD&gt; tag.
-     */
-    protected void printWinTitleScript(String winTitle){
-        if(winTitle != null && winTitle.length() > 0) {
-            script();
-            println("function windowTitle()");
-            println("{");
-            println("    if (location.href.indexOf('is-external=true') == -1) {");
-            println("        parent.document.title=\"" + winTitle + "\";");
-            println(INDENT_CLOSE_BRACE);
-            println("}");
-            scriptEnd();
-            noScript();
-            noScriptEnd();
-        }
     }
 
     /**
@@ -498,22 +455,6 @@ public class HtmlWriter extends PrintWriter {
     }
 
     /**
-     * Print &lt;BODY BGCOLOR="bgcolor"&gt;, including JavaScript
-     * "onload" call to load windowtitle script.  This script shows the name
-     * of the document in the window title bar when frames are on.
-     *
-     * @param bgcolor Background color.
-     * @param includeScript  boolean set true if printing windowtitle script
-     */
-    public void body(String bgcolor, boolean includeScript) {
-        print("<BODY BGCOLOR=\"" + bgcolor + "\"");
-        if (includeScript) {
-            print(getWindowTitleOnload());
-        }
-        println(">");
-    }
-
-    /**
      * Returns an HtmlTree for the BODY tag.
      *
      * @param includeScript  set true if printing windowtitle script
@@ -570,43 +511,6 @@ public class HtmlWriter extends PrintWriter {
     }
 
     /**
-     * Print &lt;/TITLE&gt; tag. Add a newline character at the end.
-     */
-    public void titleEnd() {
-        println("</TITLE>");
-    }
-
-    /**
-     * Print &lt;UL&gt; tag. Add a newline character at the end.
-     */
-    public void ul() {
-        println("<UL>");
-    }
-
-    /**
-     * Print &lt;/UL&gt; tag. Add a newline character at the end.
-     */
-    public void ulEnd() {
-        println("</UL>");
-    }
-
-    /**
-     * Print &lt;LI&gt; tag.
-     */
-    public void li() {
-        print("<LI>");
-    }
-
-    /**
-     * Print &lt;LI TYPE="type"&gt; tag.
-     *
-     * @param type Type string.
-     */
-    public void li(String type) {
-        print("<LI TYPE=\"" + type + "\">");
-    }
-
-    /**
      * Print &lt;H1&gt; tag. Add a newline character at the end.
      */
     public void h1() {
@@ -621,34 +525,10 @@ public class HtmlWriter extends PrintWriter {
     }
 
     /**
-     * Print text with &lt;H1&gt; tag. Also adds &lt;/H1&gt; tag. Add a newline character
-     * at the end of the text.
-     *
-     * @param text Text to be printed with &lt;H1&gt; format.
-     */
-    public void h1(String text) {
-        h1();
-        println(text);
-        h1End();
-    }
-
-    /**
      * Print &lt;H2&gt; tag. Add a newline character at the end.
      */
     public void h2() {
         println("<H2>");
-    }
-
-    /**
-     * Print text with &lt;H2&gt; tag. Also adds &lt;/H2&gt; tag. Add a newline character
-     *  at the end of the text.
-     *
-     * @param text Text to be printed with &lt;H2&gt; format.
-     */
-    public void h2(String text) {
-        h2();
-        println(text);
-        h2End();
     }
 
     /**
@@ -666,25 +546,6 @@ public class HtmlWriter extends PrintWriter {
     }
 
     /**
-     * Print text with &lt;H3&gt; tag. Also adds &lt;/H3&gt; tag. Add a newline character
-     *  at the end of the text.
-     *
-     * @param text Text to be printed with &lt;H3&gt; format.
-     */
-    public void h3(String text) {
-        h3();
-        println(text);
-        h3End();
-    }
-
-    /**
-     * Print &lt;/H3&gt; tag. Add a newline character at the end.
-     */
-    public void h3End() {
-        println("</H3>");
-    }
-
-    /**
      * Print &lt;H4&gt; tag. Add a newline character at the end.
      */
     public void h4() {
@@ -696,112 +557,6 @@ public class HtmlWriter extends PrintWriter {
      */
     public void h4End() {
         println("</H4>");
-    }
-
-    /**
-     * Print text with &lt;H4&gt; tag. Also adds &lt;/H4&gt; tag. Add a newline character
-     * at the end of the text.
-     *
-     * @param text Text to be printed with &lt;H4&gt; format.
-     */
-    public void h4(String text) {
-        h4();
-        println(text);
-        h4End();
-    }
-
-    /**
-     * Print &lt;H5&gt; tag. Add a newline character at the end.
-     */
-    public void h5() {
-        println("<H5>");
-    }
-
-    /**
-     * Print &lt;/H5&gt; tag. Add a newline character at the end.
-     */
-    public void h5End() {
-        println("</H5>");
-    }
-
-    /**
-     * Print HTML &lt;IMG SRC="imggif" WIDTH="width" HEIGHT="height" ALT="imgname&gt;
-     * tag. It prepends the "images" directory name to the "imggif". This
-     * method is used for oneone format generation. Add a newline character
-     * at the end.
-     *
-     * @param imggif   Image GIF file.
-     * @param imgname  Image name.
-     * @param width    Width of the image.
-     * @param height   Height of the image.
-     */
-    public void img(String imggif, String imgname, int width, int height) {
-        println("<IMG SRC=\"images/" + imggif + ".gif\""
-              + " WIDTH=\"" + width + "\" HEIGHT=\"" + height
-              + "\" ALT=\"" + imgname + "\">");
-    }
-
-    /**
-     * Print &lt;MENU&gt; tag. Add a newline character at the end.
-     */
-    public void menu() {
-        println("<MENU>");
-    }
-
-    /**
-     * Print &lt;/MENU&gt; tag. Add a newline character at the end.
-     */
-    public void menuEnd() {
-        println("</MENU>");
-    }
-
-    /**
-     * Print &lt;PRE&gt; tag. Add a newline character at the end.
-     */
-    public void pre() {
-        println(PRE);
-    }
-
-    /**
-     * Print &lt;PRE&gt; tag without adding new line character at th eend.
-     */
-    public void preNoNewLine() {
-        print(PRE);
-    }
-
-    /**
-     * Print &lt;/PRE&gt; tag. Add a newline character at the end.
-     */
-    public void preEnd() {
-        println("</PRE>");
-    }
-
-    /**
-     * Print &lt;HR&gt; tag. Add a newline character at the end.
-     */
-    public void hr() {
-        println("<HR>");
-    }
-
-    /**
-     * Print &lt;HR SIZE="size" WIDTH="widthpercent%"&gt; tag. Add a newline
-     * character at the end.
-     *
-     * @param size           Size of the ruler.
-     * @param widthPercent   Percentage Width of the ruler
-     */
-    public void hr(int size, int widthPercent) {
-        println("<HR SIZE=\"" + size + WIDTH + widthPercent + "%\">");
-    }
-
-    /**
-     * Print &lt;HR SIZE="size" NOSHADE&gt; tag. Add a newline character at the end.
-     *
-     * @param size           Size of the ruler.
-     * @param noshade        noshade string.
-     */
-    public void hr(int size, String noshade) {
-        println("<HR SIZE=\"" + size + "\" NOSHADE>");
     }
 
     /**
@@ -828,39 +583,7 @@ public class HtmlWriter extends PrintWriter {
         print(text);
         strongEnd();
     }
-
-    /**
-     * Print text passed, in Italics using &lt;I&gt; and &lt;/I&gt; tags.
-     *
-     * @param text String to be printed in between &lt;I&gt; and &lt;/I&gt; tags.
-     */
-    public void italics(String text) {
-        print("<I>");
-        print(text);
-        println("</I>");
-    }
-
-    /**
-     * Return, text passed, with Italics &lt;i&gt; and &lt;/i&gt; tags, surrounding it.
-     * So if the text passed is "Hi", then string returned will be "&lt;i&gt;Hi&lt;/i&gt;".
-     *
-     * @param text String to be printed in between &lt;I&gt; and &lt;/I&gt; tags.
-     */
-    public String italicsText(String text) {
-        return "<i>" + text + "</i>";
-    }
-
-    public String codeText(String text) {
-        return "<code>" + text + "</code>";
-    }
-
-    /**
-     * Print "&#38;nbsp;", non-breaking space.
-     */
-    public void space() {
-        print("&nbsp;");
-    }
-
+    
     /**
      * Return "&#38;nbsp;", non-breaking space.
      */
@@ -883,48 +606,6 @@ public class HtmlWriter extends PrintWriter {
     }
 
     /**
-     * Print &lt;DT&gt; tag.
-     */
-    public void dt() {
-        print("<DT>");
-    }
-
-    /**
-     * Print &lt;/DT&gt; tag.
-     */
-    public void dtEnd() {
-        print("</DT>");
-    }
-
-    /**
-     * Print &lt;DD&gt; tag.
-     */
-    public void dd() {
-        print("<DD>");
-    }
-
-    /**
-     * Print &lt;/DD&gt; tag. Add a newline character at the end.
-     */
-    public void ddEnd() {
-        println("</DD>");
-    }
-
-    /**
-     * Print &lt;SUP&gt; tag. Add a newline character at the end.
-     */
-    public void sup() {
-        println("<SUP>");
-    }
-
-    /**
-     * Print &lt;/SUP&gt; tag. Add a newline character at the end.
-     */
-    public void supEnd() {
-        println("</SUP>");
-    }
-
-    /**
      * Print &lt;FONT SIZE="size"&gt; tag. Add a newline character at the end.
      *
      * @param size String size.
@@ -934,65 +615,12 @@ public class HtmlWriter extends PrintWriter {
     }
 
     /**
-     * Print &lt;FONT SIZE="size"&gt; tag.
-     *
-     * @param size String size.
-     */
-    public void fontNoNewLine(String size) {
-        print("<FONT SIZE=\"" + size + "\">");
-    }
-
-    /**
-     * Print &lt;FONT CLASS="stylename"&gt; tag. Add a newline character at the end.
-     *
-     * @param stylename String stylename.
-     */
-    public void fontStyle(String stylename) {
-        print("<FONT CLASS=\"" + stylename + "\">");
-    }
-
-    /**
-     * Print &lt;FONT SIZE="size" CLASS="stylename"&gt; tag. Add a newline character
-     * at the end.
-     *
-     * @param size String size.
-     * @param stylename String stylename.
-     */
-    public void fontSizeStyle(String size, String stylename) {
-        println("<FONT size=\"" + size + CLASS + stylename + "\">");
-    }
-
-    /**
      * Print &lt;/FONT&gt; tag.
      */
     public void fontEnd() {
         print("</FONT>");
     }
-
-    /**
-     * Get the "&lt;FONT COLOR="color"&gt;" string.
-     *
-     * @param color String color.
-     * @return String Return String "&lt;FONT COLOR="color"&gt;".
-     */
-    public String getFontColor(String color) {
-        return "<FONT COLOR=\"" + color + "\">";
-    }
-
-    /**
-     * Print &lt;CENTER&gt; tag. Add a newline character at the end.
-     */
-    public void center() {
-        println("<CENTER>");
-    }
-
-    /**
-     * Print &lt;/CENTER&gt; tag. Add a newline character at the end.
-     */
-    public void centerEnd() {
-        println("</CENTER>");
-    }
-
+    
     /**
      * Print anchor &lt;A NAME="name"&gt; tag.
      *
@@ -1007,20 +635,6 @@ public class HtmlWriter extends PrintWriter {
      */
     public void aEnd() {
         print("</A>");
-    }
-
-    /**
-     * Print &lt;I&gt; tag.
-     */
-    public void italic() {
-        print("<I>");
-    }
-
-    /**
-     * Print &lt;/I&gt; tag.
-     */
-    public void italicEnd() {
-        print("</I>");
     }
 
     /**
@@ -1044,162 +658,7 @@ public class HtmlWriter extends PrintWriter {
     public void anchor(String name) {
         anchor(name, "<!-- -->");
     }
-
-    /**
-     * Print newline and then print &lt;P&gt; tag. Add a newline character at the
-     * end.
-     */
-    public void p() {
-        println();
-        println("<P>");
-    }
-
-    /**
-     * Print newline and then print &lt;/P&gt; tag. Add a newline character at the
-     * end.
-     */
-    public void pEnd() {
-        println();
-        println("</P>");
-    }
-
-    /**
-     * Print newline and then print &lt;BR&gt; tag. Add a newline character at the
-     * end.
-     */
-    public void br() {
-        println();
-        println("<BR>");
-    }
-
-    /**
-     * Print &lt;ADDRESS&gt; tag. Add a newline character at the end.
-     */
-    public void address() {
-        println("<ADDRESS>");
-    }
-
-    /**
-     * Print &lt;/ADDRESS&gt; tag. Add a newline character at the end.
-     */
-    public void addressEnd() {
-        println("</ADDRESS>");
-    }
-
-    /**
-     * Print &lt;HEAD&gt; tag. Add a newline character at the end.
-     */
-    public void head() {
-        println("<HEAD>");
-    }
-
-    /**
-     * Print &lt;/HEAD&gt; tag. Add a newline character at the end.
-     */
-    public void headEnd() {
-        println("</HEAD>");
-    }
-
-    /**
-     * Print &lt;CODE&gt; tag.
-     */
-    public void code() {
-        print("<CODE>");
-    }
-
-    /**
-     * Print &lt;/CODE&gt; tag.
-     */
-    public void codeEnd() {
-        print("</CODE>");
-    }
-
-    /**
-     * Print &lt;EM&gt; tag. Add a newline character at the end.
-     */
-    public void em() {
-        println("<EM>");
-    }
-
-    /**
-     * Print &lt;/EM&gt; tag. Add a newline character at the end.
-     */
-    public void emEnd() {
-        println("</EM>");
-    }
-
-    /**
-     * Print HTML &lt;TABLE BORDER="border" WIDTH="width"
-     * CELLPADDING="cellpadding" CELLSPACING="cellspacing"&gt; tag.
-     *
-     * @param border       Border size.
-     * @param width        Width of the table.
-     * @param cellpadding  Cellpadding for the table cells.
-     * @param cellspacing  Cellspacing for the table cells.
-     */
-    public void table(int border, String width, int cellpadding,
-                      int cellspacing) {
-        println(DocletConstants.NL +
-                TABLE_BORDER + border +
-                WIDTH + width +
-                CELLPADDING2 + cellpadding +
-                CELLSPACING2 + cellspacing +
-                SUMMARY);
-    }
-
-    /**
-     * Print HTML &lt;TABLE BORDER="border" WIDTH="width"
-     * CELLPADDING="cellpadding" CELLSPACING="cellspacing" SUMMARY="SUMMARY"&gt; tag.
-     *
-     * @param border       Border size.
-     * @param width        Width of the table.
-     * @param cellpadding  Cellpadding for the table cells.
-     * @param cellspacing  Cellspacing for the table cells.
-     * @param SUMMARY      Table SUMMARY.
-     */
-    public void table(int border, String width, int cellpadding,
-                      int cellspacing, String summary) {
-        println(DocletConstants.NL +
-                TABLE_BORDER + border +
-                WIDTH + width +
-                CELLPADDING2 + cellpadding +
-                CELLSPACING2 + cellspacing +
-                "\" SUMMARY=\"" + summary + "\">");
-    }
-
-    /**
-     * Print HTML &lt;TABLE BORDER="border" CELLPADDING="cellpadding"
-     * CELLSPACING="cellspacing"&gt; tag.
-     *
-     * @param border       Border size.
-     * @param cellpadding  Cellpadding for the table cells.
-     * @param cellspacing  Cellspacing for the table cells.
-     */
-    public void table(int border, int cellpadding, int cellspacing) {
-        println(DocletConstants.NL +
-                TABLE_BORDER + border +
-                CELLPADDING2 + cellpadding +
-                CELLSPACING2 + cellspacing +
-                SUMMARY);
-    }
-
-    /**
-     * Print HTML &lt;TABLE BORDER="border" CELLPADDING="cellpadding"
-     * CELLSPACING="cellspacing" SUMMARY="SUMMARY"&gt; tag.
-     *
-     * @param border       Border size.
-     * @param cellpadding  Cellpadding for the table cells.
-     * @param cellspacing  Cellspacing for the table cells.
-     * @param SUMMARY      Table SUMMARY.
-     */
-    public void table(int border, int cellpadding, int cellspacing, String summary) {
-        println(DocletConstants.NL +
-                TABLE_BORDER + border +
-                CELLPADDING2 + cellpadding +
-                CELLSPACING2 + cellspacing +
-                "\" SUMMARY=\"" + summary + "\">");
-    }
-
+    
     /**
      * Print HTML &lt;TABLE BORDER="border" WIDTH="width"&gt;
      *
@@ -1249,13 +708,6 @@ public class HtmlWriter extends PrintWriter {
     }
 
     /**
-     * Print &lt;TD NOWRAP&gt; tag.
-     */
-    public void tdNowrap() {
-        print("<TD NOWRAP>");
-    }
-
-    /**
      * Print &lt;TD WIDTH="width"&gt; tag.
      *
      * @param width String width.
@@ -1281,37 +733,6 @@ public class HtmlWriter extends PrintWriter {
     }
 
     /**
-     * Print "&lt;!-- " comment start string.
-     */
-    public void commentStart() {
-         print("<!-- ");
-    }
-
-    /**
-     * Print "--&gt;" comment end string. Add a newline character at the end.
-     */
-    public void commentEnd() {
-         println("-->");
-    }
-
-    /**
-     * Print &lt;CAPTION CLASS="stylename"&gt; tag. Adds a newline character
-     * at the end.
-     *
-     * @param stylename style to be applied.
-     */
-    public void captionStyle(String stylename) {
-        println("<CAPTION CLASS=\"" + stylename + "\">");
-    }
-
-    /**
-     * Print &lt;/CAPTION&gt; tag. Add a newline character at the end.
-     */
-    public void captionEnd() {
-        println("</CAPTION>");
-    }
-
-    /**
      * Print &lt;TR BGCOLOR="color" CLASS="stylename"&gt; tag. Adds a newline character
      * at the end.
      *
@@ -1323,49 +744,12 @@ public class HtmlWriter extends PrintWriter {
     }
 
     /**
-     * Print &lt;TR BGCOLOR="color"&gt; tag. Adds a newline character at the end.
-     *
-     * @param color String color.
-     */
-    public void trBgcolor(String color) {
-        println("<TR BGCOLOR=\"" + color + "\">");
-    }
-
-    /**
-     * Print &lt;TR ALIGN="align" VALIGN="valign"&gt; tag. Adds a newline character
-     * at the end.
-     *
-     * @param align String align.
-     * @param valign String valign.
-     */
-    public void trAlignVAlign(String align, String valign) {
-        println("<TR ALIGN=\"" + align + VALIGN2 + valign + "\">");
-    }
-
-    /**
      * Print &lt;TH ALIGN="align"&gt; tag.
      *
      * @param align the align attribute.
      */
     public void thAlign(String align) {
         print(TH_ALIGN + align + "\">");
-    }
-
-    /**
-     * Print &lt;TH CLASS="stylename" SCOPE="scope" NOWRAP&gt; tag.
-     *
-     * @param stylename style to be applied.
-     * @param scope the scope attribute.
-     */
-    public void thScopeNoWrap(String stylename, String scope) {
-        print("<TH CLASS=\"" + stylename + "\" SCOPE=\"" + scope + "\" NOWRAP>");
-    }
-
-    /*
-     * Returns a header for Modifier and Type column of a table.
-     */
-    public String getTypeHeader(String key) {
-        return configuration.getText(key);
     }
 
     /**
@@ -1379,142 +763,12 @@ public class HtmlWriter extends PrintWriter {
     }
 
     /**
-     * Print &lt;TH align="align" NOWRAP&gt; tag.
-     *
-     * @param align the align attribute.
-     */
-    public void thAlignNowrap(String align) {
-        print(TH_ALIGN + align + "\" NOWRAP>");
-    }
-
-    /**
      * Print &lt;/TH&gt; tag. Add a newline character at the end.
      */
     public void thEnd() {
         println("</TH>");
     }
 
-    /**
-     * Print &lt;TD COLSPAN=i&gt; tag.
-     *
-     * @param i integer.
-     */
-    public void tdColspan(int i) {
-        print("<TD COLSPAN=" + i + ">");
-    }
-
-    /**
-     * Print &lt;TD BGCOLOR="color" CLASS="stylename"&gt; tag.
-     *
-     * @param color String color.
-     * @param stylename String stylename.
-     */
-    public void tdBgcolorStyle(String color, String stylename) {
-        print("<TD BGCOLOR=\"" + color + CLASS + stylename + "\">");
-    }
-
-    /**
-     * Print &lt;TD COLSPAN=i BGCOLOR="color" CLASS="stylename"&gt; tag.
-     *
-     * @param i integer.
-     * @param color String color.
-     * @param stylename String stylename.
-     */
-    public void tdColspanBgcolorStyle(int i, String color, String stylename) {
-        print("<TD COLSPAN=" + i + " BGCOLOR=\"" + color + CLASS +
-              stylename + "\">");
-    }
-
-    /**
-     * Print &lt;TD ALIGN="align"&gt; tag. Adds a newline character
-     * at the end.
-     *
-     * @param align String align.
-     */
-    public void tdAlign(String align) {
-        print(TD_ALIGN + align + "\">");
-    }
-
-    /**
-     * Print &lt;TD ALIGN="align" CLASS="stylename"&gt; tag.
-     *
-     * @param align        String align.
-     * @param stylename    String stylename.
-     */
-    public void tdVAlignClass(String align, String stylename) {
-        print("<TD VALIGN=\"" + align + CLASS + stylename + "\">");
-    }
-
-    /**
-     * Print &lt;TD VALIGN="valign"&gt; tag.
-     *
-     * @param valign String valign.
-     */
-    public void tdVAlign(String valign) {
-        print("<TD VALIGN=\"" + valign + "\">");
-    }
-
-    /**
-     * Print &lt;TD ALIGN="align" VALIGN="valign"&gt; tag.
-     *
-     * @param align   String align.
-     * @param valign  String valign.
-     */
-    public void tdAlignVAlign(String align, String valign) {
-        print(TD_ALIGN + align + VALIGN2 + valign + "\">");
-    }
-
-    /**
-     * Print &lt;TD ALIGN="align" ROWSPAN=rowspan&gt; tag.
-     *
-     * @param align    String align.
-     * @param rowspan  integer rowspan.
-     */
-    public void tdAlignRowspan(String align, int rowspan) {
-        print(TD_ALIGN + align + "\" ROWSPAN=" + rowspan + ">");
-    }
-
-    /**
-     * Print &lt;TD ALIGN="align" VALIGN="valign" ROWSPAN=rowspan&gt; tag.
-     *
-     * @param align    String align.
-     * @param valign  String valign.
-     * @param rowspan  integer rowspan.
-     */
-    public void tdAlignVAlignRowspan(String align, String valign,
-                                     int rowspan) {
-        print(TD_ALIGN + align + VALIGN2 + valign
-                + "\" ROWSPAN=" + rowspan + ">");
-    }
-
-    /**
-     * Print &lt;BLOCKQUOTE&gt; tag. Add a newline character at the end.
-     */
-    public void blockquote() {
-        println("<BLOCKQUOTE>");
-    }
-
-    /**
-     * Print &lt;/BLOCKQUOTE&gt; tag. Add a newline character at the end.
-     */
-    public void blockquoteEnd() {
-        println("</BLOCKQUOTE>");
-    }
-
-    /**
-     * Print &lt;NOFRAMES&gt; tag. Add a newline character at the end.
-     */
-    public void noFrames() {
-        println("<NOFRAMES>");
-    }
-
-    /**
-     * Print &lt;/NOFRAMES&gt; tag. Add a newline character at the end.
-     */
-    public void noFramesEnd() {
-        println("</NOFRAMES>");
-    }
-    
     /**
      * Print Html Hyper Link.
      *
@@ -1530,34 +784,6 @@ public class HtmlWriter extends PrintWriter {
     }
 
     /**
-     * Print Html Hyper Link.
-     *
-     * @param link String name of the file.
-     * @param where Position of the link in the file. Character '#' is not
-     * needed.
-     * @param label Tag for the link.
-     */
-    public void printHyperLink(String link, String where, String label) {
-        printHyperLink(link, where, label, false);
-    }
-
-    /**
-     * Print Html Hyper Link.
-     *
-     * @param link       String name of the file.
-     * @param where      Position of the link in the file. Character '#' is not
-     * needed.
-     * @param label      Tag for the link.
-     * @param STRONG       Boolean that sets label to STRONG.
-     * @param stylename  String style of text defined in style sheet.
-     */
-    public void printHyperLink(String link, String where,
-                               String label, boolean strong,
-                               String stylename) {
-        print(getHyperLinkString(link, where, label, strong, stylename, "", ""));
-    }
-
-    /**
      * Return Html Hyper Link string.
      *
      * @param link       String name of the file.
@@ -1570,23 +796,6 @@ public class HtmlWriter extends PrintWriter {
     public String getHyperLinkString(String link, String where,
                                String label, boolean strong) {
         return getHyperLinkString(link, where, label, strong, "", "", "");
-    }
-
-    /**
-     * Get Html Hyper Link string.
-     *
-     * @param link       String name of the file.
-     * @param where      Position of the link in the file. Character '#' is not
-     *                   needed.
-     * @param label      Tag for the link.
-     * @param STRONG       Boolean that sets label to STRONG.
-     * @param stylename  String style of text defined in style sheet.
-     * @return String    Hyper Link.
-     */
-    public String getHyperLinkString(String link, String where,
-                               String label, boolean strong,
-                               String stylename) {
-        return getHyperLinkString(link, where, label, strong, stylename, "", "");
     }
 
     /**
@@ -1702,15 +911,6 @@ public class HtmlWriter extends PrintWriter {
     }
 
     /**
-     * Print the name of the package, this class is in.
-     *
-     * @param cd    ClassDoc.
-     */
-    public void printNamespaceName(LibraryMember cd) {
-        print(getNamespace(cd));
-    }
-
-    /**
      * Get the name of the package, this class is in.
      *
      * @param cd    ClassDoc.
@@ -1722,15 +922,6 @@ public class HtmlWriter extends PrintWriter {
             return namespace;
         }
         return "";
-    }
-
-    /**
-     * Print the name of the package, this class is in.
-     *
-     * @param cd    ClassDoc.
-     */
-    public void printNamespaceName(DocumentationBuilder cd) {
-        print(getNamespace(cd));
     }
 
     /**
@@ -1746,27 +937,6 @@ public class HtmlWriter extends PrintWriter {
         }
         return "";
     }
-    /**
-     * Keep track of member details list. Print the definition list start tag
-     * if it is not printed yet.
-     */
-    public void printMemberDetailsListStartTag () {
-        if (!getMemberDetailsListPrinted()) {
-            dl();
-            memberDetailsListPrinted = true;
-        }
-    }
-
-    /**
-     * Print the definition list end tag if the list start tag was printed.
-     */
-    public void printMemberDetailsListEndTag () {
-        if (getMemberDetailsListPrinted()) {
-            dlEnd();
-            memberDetailsListPrinted = false;
-        }
-    }
-
     public boolean getMemberDetailsListPrinted() {
         return memberDetailsListPrinted;
     }
@@ -1797,20 +967,6 @@ public class HtmlWriter extends PrintWriter {
     }
 
     /**
-     * Print the appropriate spaces to format the class tree in the class page.
-     *
-     * @param len   Number of spaces.
-     */
-    public String spaces(int len) {
-        StringBuilder space = new StringBuilder();
-
-        for (int i = 0; i < len; i++) {
-            space.append(" ");
-        }
-        return space.toString();
-    }
-
-    /**
      * Print the closing &lt;/body&gt; and &lt;/html&gt; tags.
      */
     public void printBodyHtmlEnd() {
@@ -1827,20 +983,6 @@ public class HtmlWriter extends PrintWriter {
     }
 
     /**
-     * Print closing &lt;/html&gt; tag.
-     */
-    public void printFrameFooter() {
-        htmlEnd();
-    }
-
-    /**
-     * Print ten non-breaking spaces("&#38;nbsp;").
-     */
-    public void printNbsps() {
-        print("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
-    }
-
-    /**
      * Get the day and date information for today, depending upon user option.
      *
      * @return String Today.
@@ -1853,39 +995,6 @@ public class HtmlWriter extends PrintWriter {
         return calendar.getTime().toString();
     }
     
-	/**
-	 * Print Html Hyper Link, with target frame. This link will only appear if
-	 * page is not in a frame.
-	 *
-	 * @param link
-	 *            String name of the file.
-	 * @param where
-	 *            Position in the file
-	 * @param target
-	 *            Name of the target frame.
-	 * @param label
-	 *            Tag for the link.
-	 * @param STRONG
-	 *            Whether the label should be STRONG or not?
-	 */
-	public void printNoFramesTargetHyperLink(String link, String where,
-			String target, String label, boolean strong) {
-		script();
-		println("  <!--");
-		println("  if(window==top) {");
-		println("    document.writeln('"
-				+ getHyperLinkString(link, where, label, strong, "", "", target)
-				+ "');");
-		println("  }");
-		println("  //-->");
-		scriptEnd();
-		noScript();
-		println("  "
-				+ getHyperLinkString(link, where, label, strong, "", "", target));
-		noScriptEnd();
-		println(DocletConstants.NL);
-	}
-
 	/**
 	 * Get the script to show or hide the All classes link.
 	 *
@@ -1951,14 +1060,6 @@ public class HtmlWriter extends PrintWriter {
 		return script;
 	}
 	
-	protected void printTagsInfoHeader() {
-		dl();
-	}
-
-	protected void printTagsInfoFooter() {
-		dlEnd();
-	}
-
 	/**
 	 * Get Package link, with target frame.
 	 *
@@ -2447,140 +1548,6 @@ public class HtmlWriter extends PrintWriter {
 	}
 
 	/**
-	 * Print table header for the inherited members summary tables. Print the
-	 * background color information.
-	 *
-	 * @param color
-	 *            Background color.
-	 */
-	public void tableInheritedHeaderStart(String color) {
-		trBgcolorStyle(color, "TableSubHeadingColor");
-		thAlign("left");
-	}
-
-	/**
-	 * Print "Use" table header. Print the background color and the column span.
-	 *
-	 * @param color
-	 *            Background color.
-	 */
-	public void tableUseInfoHeaderStart(String color) {
-		trBgcolorStyle(color, "TableSubHeadingColor");
-		thAlignColspan("left", 2);
-	}
-
-	/**
-	 * Print table header with the background color with default column span 2.
-	 *
-	 * @param color
-	 *            Background color.
-	 */
-	public void tableHeaderStart(String color) {
-		tableHeaderStart(color, 2);
-	}
-
-	/**
-	 * Print table header with the column span, with the default color #CCCCFF.
-	 *
-	 * @param span
-	 *            Column span.
-	 */
-	public void tableHeaderStart(int span) {
-		tableHeaderStart("#CCCCFF", span);
-	}
-
-	/**
-	 * Print table header with default column span 2 and default color #CCCCFF.
-	 */
-	public void tableHeaderStart() {
-		tableHeaderStart(2);
-	}
-
-	/**
-	 * Print table header end tags for font, column and row.
-	 */
-	public void tableHeaderEnd() {
-		fontEnd();
-		thEnd();
-		trEnd();
-	}
-
-	/**
-	 * Print table header end tags in inherited tables for column and row.
-	 */
-	public void tableInheritedHeaderEnd() {
-		thEnd();
-		trEnd();
-	}
-
-	/**
-	 * Print the summary table row cell attribute width.
-	 *
-	 * @param width
-	 *            Width of the table cell.
-	 */
-	public void summaryRow(int width) {
-		if (width != 0) {
-			tdWidth(width + "%");
-		} else {
-			td();
-		}
-	}
-
-	/**
-	 * Print the summary table row cell end tag.
-	 */
-	public void summaryRowEnd() {
-		tdEnd();
-	}
-
-	/**
-	 * Print the heading in Html &lt;H2> format.
-	 *
-	 * @param str
-	 *            The Header string.
-	 */
-	public void printIndexHeading(String str) {
-		h2();
-		print(str);
-		h2End();
-	}
-
-	/**
-	 * Print Html tag &lt;FRAMESET=arg&gt;.
-	 *
-	 * @param arg
-	 *            Argument for the tag.
-	 */
-	public void frameSet(String arg) {
-		println("<FRAMESET " + arg + ">");
-	}
-
-	/**
-	 * Print Html closing tag &lt;/FRAMESET&gt;.
-	 */
-	public void frameSetEnd() {
-		println("</FRAMESET>");
-	}
-
-	/**
-	 * Print Html tag &lt;FRAME=arg&gt;.
-	 *
-	 * @param arg
-	 *            Argument for the tag.
-	 */
-	public void frame(String arg) {
-		println("<FRAME " + arg + ">");
-	}
-
-	/**
-	 * Print Html closing tag &lt;/FRAME&gt;.
-	 */
-	public void frameEnd() {
-		println("</FRAME>");
-	}
-
-	/**
 	 * Return path to the class page for a classdoc. For EXAMPLE, the class name
 	 * is "java.lang.Object" and if the current file getting generated is
 	 * "java/io/File.html", then the path string to the class, returned is
@@ -2591,19 +1558,6 @@ public class HtmlWriter extends PrintWriter {
 	 */
 	protected String pathToObject(DocumentationBuilder cd) {
 		return pathString(cd.getOwningLibrary(), cd.getName() + ".html");
-	}
-
-	/**
-	 * Return the path to the class page for a classdoc. Works same as
-	 * {@link #pathToObject(ClassDoc)}.
-	 *
-	 * @param cd
-	 *            Class to which the path is requested.
-	 * @param name
-	 *            Name of the file(doesn't include path).
-	 */
-	protected String pathString(DocumentationBuilder cd, String name) {
-		return pathString(cd.getOwningLibrary(), name);
 	}
 
 	/**
@@ -2636,23 +1590,6 @@ public class HtmlWriter extends PrintWriter {
 	 */
 	public void printNamespaceLink(String pkg, String label, boolean isStrong) {
 		print(getNamespaceLinkString(pkg, label, isStrong));
-	}
-
-	/**
-	 * Print the link to the given package.
-	 *
-	 * @param pkg
-	 *            the package to link to.
-	 * @param label
-	 *            the label for the link.
-	 * @param isStrong
-	 *            true if the label should be STRONG.
-	 * @param style
-	 *            the font of the package link label.
-	 */
-	public void printNamespaceLink(String pkg, String label, boolean isStrong,
-			String style) {
-		print(getNamespaceLinkString(pkg, label, isStrong, style));
 	}
 
 	/**
@@ -2734,82 +1671,6 @@ public class HtmlWriter extends PrintWriter {
 	}
 
 	/**
-	 * Print the link to the given class.
-	 */
-	public void printLink(LinkInfoImpl linkInfo) {
-		print(getLink(linkInfo));
-	}
-
-	/*************************************************************
-	 * Return a class cross link to external class documentation. The name must
-	 * be fully qualified to determine which package the class is in. The -link
-	 * option does not allow users to link to external classes in the "default"
-	 * package.
-	 *
-	 * @param qualifiedClassName
-	 *            the qualified name of the external class.
-	 * @param refMemName
-	 *            the name of the member being referenced. This should be null
-	 *            or empty string if no member is being referenced.
-	 * @param label
-	 *            the label for the external link.
-	 * @param STRONG
-	 *            true if the link should be STRONG.
-	 * @param style
-	 *            the style of the link.
-	 * @param code
-	 *            true if the label should be code font.
-	 */
-	public String getCrossClassLink(String qualifiedClassName,
-			String refMemName, String label, String style, boolean code) {
-		String packageName = qualifiedClassName == null ? "" : qualifiedClassName;
-		String className = "";
-		int periodIndex;
-		
-		while ((periodIndex = packageName.lastIndexOf('.')) != -1) {
-			className = packageName.substring(periodIndex + 1,
-					packageName.length())
-					+ (className.length() > 0 ? "." + className : "");
-			packageName = packageName.substring(0, periodIndex);
-		}
-		return null;
-	}
-
-	public boolean isObjectLinkable(DocumentationBuilder builder) {
-		return (builder != null);
-	}
-
-	/**
-	 * Get the class link.
-	 *
-	 * @param context
-	 *            the id of the context where the link will be added
-	 * @param cd
-	 *            the class doc to link to
-	 * @return a content tree for the link
-	 */
-	public Content getQualifiedClassLink(int context,
-			AbstractDocumentationBuilder<?> cd) {
-		return new RawHtml(getLink(new LinkInfoImpl(context, cd,
-				configuration.getQualifiedName(cd), "")));
-	}
-
-	/**
-	 * Add the class link.
-	 *
-	 * @param context
-	 *            the id of the context where the link will be added
-	 * @param cd
-	 *            the class doc to link to
-	 * @param contentTree
-	 *            the content tree to which the link will be added
-	 */
-	public void addPreQualifiedClassLink(int context,
-			AbstractDocumentationBuilder<?> cd, Content contentTree) {
-		addPreQualifiedClassLink(context, cd, false, contentTree);
-	}
-
-	/**
 	 * Retrieve the class link with the package portion of the label in plain
 	 * text. If the qualifier is excluded, it willnot be included in the link
 	 * label.
@@ -2830,93 +1691,6 @@ public class HtmlWriter extends PrintWriter {
 		classlink += getLink(new LinkInfoImpl(context, cd, cd.getName(),
 				isStrong));
 		return classlink;
-	}
-
-	/**
-	 * Add the class link with the package portion of the label in plain text.
-	 * If the qualifier is excluded, it will not be included in the link label.
-	 *
-	 * @param context
-	 *            the id of the context where the link will be added
-	 * @param cd
-	 *            the class to link to
-	 * @param isStrong
-	 *            true if the link should be STRONG
-	 * @param contentTree
-	 *            the content tree to which the link with be added
-	 */
-	public void addPreQualifiedClassLink(int context,
-			AbstractDocumentationBuilder<?> cd, boolean isStrong,
-			Content contentTree) {
-		String pd = cd.getNamespace();
-		if (pd != null) {
-			contentTree.addContent(getNamespace(cd));
-		}
-		contentTree.addContent(new RawHtml(getLink(new LinkInfoImpl(context,
-				cd, cd.getName(), isStrong))));
-	}
-
-	/**
-	 * Add the class link with the package portion of the label in plain text.
-	 * If the qualifier is excluded, it will not be included in the link label.
-	 *
-	 * @param context
-	 *            the id of the context where the link will be added
-	 * @param cd
-	 *            the class to link to
-	 * @param isStrong
-	 *            true if the link should be STRONG
-	 * @param contentTree
-	 *            the content tree to which the link with be added
-	 */
-	public void addPreQualifiedClassLink(int context, LibraryMember cd,
-			boolean isStrong, Content contentTree) {
-		String pd = cd.getNamespace();
-		if (pd != null) {
-			contentTree.addContent(getNamespace(cd));
-		}
-		contentTree.addContent(new RawHtml(getLink(new LinkInfoImpl(context,
-				cd, cd.getLocalName(), isStrong))));
-	}
-
-	/**
-	 * Add the class link, with only class name as the STRONG link and prefixing
-	 * plain package name.
-	 *
-	 * @param context
-	 *            the id of the context where the link will be added
-	 * @param cd
-	 *            the class to link to
-	 * @param contentTree
-	 *            the content tree to which the link with be added
-	 */
-	public void addPreQualifiedStrongClassLink(int context,
-			AbstractDocumentationBuilder<?> cd, Content contentTree) {
-		addPreQualifiedClassLink(context, cd, true, contentTree);
-	}
-
-	public void printText(String key) {
-		print(configuration.getText(key));
-	}
-
-	public void printText(String key, String a1) {
-		print(configuration.getText(key, a1));
-	}
-
-	public void printText(String key, String a1, String a2) {
-		print(configuration.getText(key, a1, a2));
-	}
-
-	public void strongText(String key) {
-		strong(configuration.getText(key));
-	}
-
-	public void strongText(String key, String a1) {
-		strong(configuration.getText(key, a1));
-	}
-
-	public void strongText(String key, String a1, String a2) {
-		strong(configuration.getText(key, a1, a2));
 	}
 
 	/**
@@ -2954,42 +1728,6 @@ public class HtmlWriter extends PrintWriter {
 			AbstractDocumentationBuilder<?> classDoc,
 			FieldDocumentationBuilder<?> doc, String label, boolean strong) {
 		print(getDocLink(context, classDoc, doc, label, strong));
-	}
-
-	/**
-	 * Return the link for the given member.
-	 *
-	 * @param context
-	 *            the id of the context where the link will be printed.
-	 * @param doc
-	 *            the member being linked to.
-	 * @param label
-	 *            the label for the link.
-	 * @param STRONG
-	 *            true if the link should be STRONG.
-	 * @return the link for the given member.
-	 */
-	public String getDocLink(int context, FieldDocumentationBuilder<?> doc,
-			String label, boolean strong) {
-		return getDocLink(context, doc.getOwner(), doc, label, strong);
-	}
-
-	/**
-	 * Return the link for the given member.
-	 *
-	 * @param context
-	 *            the id of the context where the link will be printed.
-	 * @param doc
-	 *            the member being linked to.
-	 * @param label
-	 *            the label for the link.
-	 * @param STRONG
-	 *            true if the link should be STRONG.
-	 * @return the link for the given member.
-	 */
-	public String getDocLink(int context, FacetDocumentationBuilder doc,
-			String label, boolean strong) {
-		return getDocLink(context, doc.getOwner(), doc, label, strong);
 	}
 
 	/**
@@ -3044,10 +1782,6 @@ public class HtmlWriter extends PrintWriter {
 		} else {
 			return new StringContent(label);
 		}
-	}
-
-	public void anchor(AbstractDocumentationBuilder<?> emd) {
-		anchor(getAnchor(emd));
 	}
 
 	public String getAnchor(AbstractDocumentationBuilder<?> emd) {
@@ -3150,67 +1884,6 @@ public class HtmlWriter extends PrintWriter {
 		}
 	}
 
-	
-
-	public String removeNonInlineHtmlTags(String text) {
-		if (text.indexOf('<') < 0) {
-			return text;
-		}
-		String[] noninlinetags = { "<ul>", "</ul>", "<ol>", "</ol>", "<dl>",
-				"</dl>", "<table>", "</table>", "<tr>", "</tr>", "<td>",
-				"</td>", "<th>", "</th>", "<p>", "</p>", "<li>", "</li>",
-				"<dd>", "</dd>", "<dir>", "</dir>", "<dt>", "</dt>", "<h1>",
-				"</h1>", "<h2>", "</h2>", "<h3>", "</h3>", "<h4>", "</h4>",
-				"<h5>", "</h5>", "<h6>", "</h6>", "<pre>", "</pre>", "<menu>",
-				"</menu>", "<listing>", "</listing>", "<hr>", "<blockquote>",
-				"</blockquote>", "<center>", "</center>", "<UL>", "</UL>",
-				"<OL>", "</OL>", "<DL>", "</DL>", "<TABLE>", "</TABLE>",
-				"<TR>", "</TR>", "<TD>", "</TD>", "<TH>", "</TH>", "<P>",
-				"</P>", "<LI>", "</LI>", "<DD>", "</DD>", "<DIR>", "</DIR>",
-				"<DT>", "</DT>", "<H1>", "</H1>", "<H2>", "</H2>", "<H3>",
-				"</H3>", "<H4>", "</H4>", "<H5>", "</H5>", "<H6>", "</H6>",
-				PRE, "</PRE>", "<MENU>", "</MENU>", "<LISTING>",
-				"</LISTING>", "<HR>", "<BLOCKQUOTE>", "</BLOCKQUOTE>",
-				"<CENTER>", "</CENTER>" };
-		for (int i = 0; i < noninlinetags.length; i++) {
-			text = replace(text, noninlinetags[i], "");
-		}
-		return text;
-	}
-
-	public String replace(String text, String tobe, String by) {
-		while (true) {
-			int startindex = text.indexOf(tobe);
-			if (startindex < 0) {
-				return text;
-			}
-			int endindex = startindex + tobe.length();
-			StringBuilder replaced = new StringBuilder();
-			if (startindex > 0) {
-				replaced.append(text.substring(0, startindex));
-			}
-			replaced.append(by);
-			if (text.length() > endindex) {
-				replaced.append(text.substring(endindex));
-			}
-			text = replaced.toString();
-		}
-	}
-
-	public void printStyleSheetProperties() {
-		String fName = configuration.getStylesheetfile();
-		
-		if (fName.length() > 0) {
-			File stylefile = new File(fName);
-			String parent = stylefile.getParent();
-			fName = (parent == null) ? fName : fName.substring(parent.length() + 1);
-		} else {
-			fName = "stylesheet.css";
-		}
-		fName = getRelativePath() + fName;
-		link("REL =\"stylesheet\" TYPE=\"text/css\" HREF=\"" + fName + "\" " + "TITLE=\"Style\"");
-	}
-
 	/**
 	 * Returns a link to the stylesheet file.
 	 *
@@ -3230,14 +1903,6 @@ public class HtmlWriter extends PrintWriter {
 		}
 		fName = getRelativePath() + fName;
 		return HtmlTree.link("stylesheet", "text/css", fName, "Style");
-	}
-
-	/**
-	 * According to <cite>The Java&trade; Language Specification</cite>, all the
-	 * outer classes and static nested classes are core classes.
-	 */
-	public boolean isCoreClass(AbstractDocumentationBuilder<?> cd) {
-		return !(cd instanceof FacetDocumentationBuilder || cd instanceof FieldDocumentationBuilder<?>);
 	}
 
 	/**

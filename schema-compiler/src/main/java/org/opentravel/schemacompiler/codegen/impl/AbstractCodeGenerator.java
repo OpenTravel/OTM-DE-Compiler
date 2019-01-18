@@ -108,17 +108,6 @@ public abstract class AbstractCodeGenerator<S extends ModelElement> implements C
     protected abstract CodeGenerationFilenameBuilder<S> getDefaultFilenameBuilder();
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.CodeGenerator#setLogger(org.slf4j.Logger)
-     */
-    @Override
-    public void setLogger(Logger log) {
-        if (log == null) {
-            throw new NullPointerException("Logger cannot be null.");
-        }
-        this.log = log;
-    }
-
-    /**
      * @see org.opentravel.schemacompiler.codegen.CodeGenerator#generateOutput(java.lang.Object,
      *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
      */

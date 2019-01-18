@@ -15,9 +15,8 @@
  */
 package org.opentravel.schemacompiler.security;
 
-import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.model.TLLibrary;
-import org.springframework.context.ApplicationContext;
+import org.opentravel.schemacompiler.security.impl.DefaultLibraryAccessController;
 
 /**
  * Handler that determines whether a library can be modified by the user of an editor application.
@@ -30,7 +29,7 @@ import org.springframework.context.ApplicationContext;
  */
 public final class LibrarySecurityHandler {
 
-    private static final LibraryAccessController accessController;
+    private static final LibraryAccessController accessController = new DefaultLibraryAccessController();
 
     /**
      * Private contstructor to prevent instantiation of this class.
@@ -47,38 +46,6 @@ public final class LibrarySecurityHandler {
      */
     public static boolean hasModifyPermission(TLLibrary library) {
         return (accessController == null) || accessController.hasModifyPermission(library);
-    }
-
-    /**
-     * Assigns the set of security credentials that determine which (if any) protected namespaces
-     * the user has the authority to modify.
-     * 
-     * @param userCredentials
-     *            the user credentials that provide access to update protected namespaces
-     */
-    public static void setUserCredentials(ProtectedNamespaceCredentials userCredentials) {
-        if (accessController != null) {
-            accessController.setUserCredentials(userCredentials);
-        }
-    }
-
-    /**
-     * Initializes the <code>LibraryAccessController</code> from the Spring application context.
-     */
-    static {
-        try {
-            ApplicationContext appContext = SchemaCompilerApplicationContext.getContext();
-
-            if (appContext.containsBean(SchemaCompilerApplicationContext.LIBRARY_ACCESS_CONTROLLER)) {
-                accessController = (LibraryAccessController) appContext
-                        .getBean(SchemaCompilerApplicationContext.LIBRARY_ACCESS_CONTROLLER);
-
-            } else {
-                accessController = null;
-            }
-        } catch (Exception e) {
-            throw new ExceptionInInitializerError(e);
-        }
     }
 
 }

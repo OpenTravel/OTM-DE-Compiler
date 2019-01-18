@@ -28,7 +28,6 @@ import org.opentravel.schemacompiler.codegen.example.ExampleGeneratorOptions;
 import org.opentravel.schemacompiler.codegen.example.XMLExampleCodeGenerator;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.validate.ValidationException;
-import org.slf4j.Logger;
 
 /**
  * @author Eric.Bronson
@@ -40,8 +39,6 @@ public class DocumentationGenerator implements CodeGenerator<TLModel> {
 
 	private CodeGenerationFilenameBuilder<TLModel> filenameBuilder;
 
-	protected Logger log;
-	
 	@Override
 	public Collection<File> generateOutput(TLModel model,
 			CodeGenerationContext context) throws ValidationException,
@@ -85,11 +82,6 @@ public class DocumentationGenerator implements CodeGenerator<TLModel> {
 	public void setFilenameBuilder(
 			CodeGenerationFilenameBuilder<TLModel> filenameBuilder) {
 		this.filenameBuilder = filenameBuilder;
-	}
-
-	@Override
-	public void setLogger(Logger log) {
-		this.log = log;
 	}
 
 }

@@ -230,52 +230,6 @@ public class LinkInfoImpl extends LinkInfo {
 	 *
 	 * @param context
 	 *            the context of the link.
-	 * @param classDoc
-	 *            the class to link to.
-	 * @param label
-	 *            the label for the link.
-	 * @param target
-	 *            the value of the target attribute.
-	 */
-	public LinkInfoImpl(int context, DocumentationBuilder builder,
-			String label, String target) {
-		this.setBuilder(builder);
-		this.setLabel(label);
-		this.setTarget(target);
-		setContext(context);
-	}
-
-	/**
-	 * Construct a LinkInfo object.
-	 *
-	 * @param context
-	 *            the context of the link.
-	 * @param classDoc
-	 *            the class to link to.
-	 * @param where
-	 *            the value of the marker #.
-	 * @param label
-	 *            the label for the link.
-	 * @param isStrong
-	 *            true if the link should be STRONG.
-	 * @param styleName
-	 *            String style of text defined in style sheet.
-	 */
-	public LinkInfoImpl(int context, DocumentationBuilder builder,
-			String where, String label, boolean isStrong, String styleName) {
-		this.setBuilder(builder);
-		this.setWhere(where);
-		this.setLabel(label);
-		this.setStrong(isStrong);
-		this.setStyleName(styleName);
-		setContext(context);
-	}
-
-	/**
-	 * Construct a LinkInfo object.
-	 *
-	 * @param context
-	 *            the context of the link.
 	 * @param builder
 	 *            the class to link to.
 	 * @param where
@@ -292,20 +246,6 @@ public class LinkInfoImpl extends LinkInfo {
 		this.setLabel(label);
 		this.setStrong(isStrong);
 		setContext(context);
-	}
-
-	/**
-	 * Construct a LinkInfo object.
-	 *
-	 * @param builder
-	 *            the class to link to.
-	 * @param label
-	 *            the label for the link.
-	 */
-	public LinkInfoImpl(DocumentationBuilder builder, String label) {
-		this.setBuilder(builder);
-		this.setLabel(label);
-		setContext(getContext());
 	}
 
 	/**
@@ -366,15 +306,6 @@ public class LinkInfoImpl extends LinkInfo {
 	}
 
 	public LinkInfoImpl(int context, LibraryMember member, String label,
-			boolean isStrong) {
-		this.setBuilder(DocumentationBuilderFactory.getInstance()
-				.getDocumentationBuilder(member));
-		this.setLabel(label);
-		this.setStrong(isStrong);
-		setContext(context);
-	}
-
-	public LinkInfoImpl(int context, LibraryMember member, String label,
 			String target) {
 		this.setBuilder(DocumentationBuilderFactory.getInstance()
 				.getDocumentationBuilder(member));
@@ -382,13 +313,6 @@ public class LinkInfoImpl extends LinkInfo {
 		this.setTarget(target);
 		setContext(context);
 	}
-
-	public LinkInfoImpl(int contextPackage, LibraryMember member, boolean isStrong) {
-		this.setBuilder(DocumentationBuilderFactory.getInstance()
-				.getDocumentationBuilder(member));
-		this.setStrong(isStrong);
-		setContext(contextPackage);	
-		}
 
 	/**
 	 * {@inheritDoc}

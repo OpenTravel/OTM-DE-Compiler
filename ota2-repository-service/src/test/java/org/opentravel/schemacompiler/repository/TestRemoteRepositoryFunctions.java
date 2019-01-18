@@ -18,6 +18,7 @@ package org.opentravel.schemacompiler.repository;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.ws.rs.core.Response;
 
@@ -29,7 +30,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryPermission;
-import org.opentravel.schemacompiler.repository.RemoteRepository;
+import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLLibrary;
 
 /**
  * Verifies the operation of items published to a remote repository.
@@ -49,7 +51,37 @@ public class TestRemoteRepositoryFunctions extends TestRepositoryFunctions {
         shutdownTestServer();
     }
 
-    @Test
+	@Override
+	public void test_02_LockLibrary() throws Exception {
+		RemoteRepository repository = (RemoteRepository) testRepository.get();
+		List<EntitySearchResult> searchResult;
+		List<RepositoryItem> lockedItems;
+		List<RepositoryItem> whereUsedItems;
+		TLLibrary library;
+		NamedEntity entity;
+		
+		super.test_02_LockLibrary();
+		repositoryManager.get().refreshRemoteRepositories();
+		
+		lockedItems = repository.getLockedItems();
+		assertEquals( 1, lockedItems.size() );
+		assertEquals( "library_1_p2_2_0_0.otm", lockedItems.get( 0 ).getFilename() );
+		
+		whereUsedItems = repository.getItemWhereUsed( lockedItems.get( 0 ), true );
+		assertEquals( 0, whereUsedItems.size() );
+		
+		library = (TLLibrary) model.get().getLibrary(
+				"http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package_v2", "library_1_p2" );
+		entity = library.getBusinessObjectType( "SampleBusinessObject" );
+		searchResult = repository.getEntityWhereUsed( entity, true );
+		assertEquals( 3, searchResult.size() );
+		
+		entity = library.getBusinessObjectType( "EmptyBusinessObject" );
+		searchResult = repository.getEntityWhereExtended( entity );
+		assertEquals( 2, searchResult.size() );
+	}
+	
+	@Test
     public void testUserAuthorizations() throws Exception {
         String readNS = "http://www.OpenTravel.org";
         String writeNS = "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler";

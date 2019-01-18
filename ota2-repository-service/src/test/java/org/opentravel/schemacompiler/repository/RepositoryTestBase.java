@@ -18,11 +18,7 @@ package org.opentravel.schemacompiler.repository;
 import java.io.File;
 import java.util.List;
 
-import org.opentravel.schemacompiler.repository.Project;
-import org.opentravel.schemacompiler.repository.ProjectItem;
-import org.opentravel.schemacompiler.repository.Repository;
-import org.opentravel.schemacompiler.repository.RepositoryItem;
-import org.opentravel.schemacompiler.repository.RepositoryManager;
+import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.util.RepositoryTestUtils;
 
 /**
@@ -34,10 +30,11 @@ public abstract class RepositoryTestBase {
 
     protected static final boolean DEBUG = true;
 
-    protected static ThreadLocal<RepositoryManager> repositoryManager = new ThreadLocal<RepositoryManager>();
-    protected static ThreadLocal<Repository> testRepository = new ThreadLocal<Repository>();
-    protected static ThreadLocal<JettyTestServer> jettyServer = new ThreadLocal<JettyTestServer>();
-    protected static ThreadLocal<File> wipFolder = new ThreadLocal<File>();
+    protected static ThreadLocal<RepositoryManager> repositoryManager = new ThreadLocal<>();
+    protected static ThreadLocal<Repository> testRepository = new ThreadLocal<>();
+    protected static ThreadLocal<JettyTestServer> jettyServer = new ThreadLocal<>();
+    protected static ThreadLocal<File> wipFolder = new ThreadLocal<>();
+    protected static ThreadLocal<TLModel> model = new ThreadLocal<>();
     
     protected static File defaultRepositoryConfig = new File(System.getProperty("user.dir"),
     		"/target/test-classes/ota2-repository-config.xml");

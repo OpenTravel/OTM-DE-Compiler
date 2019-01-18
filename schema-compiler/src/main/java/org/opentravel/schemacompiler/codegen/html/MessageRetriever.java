@@ -77,17 +77,6 @@ public class MessageRetriever {
     /**
      * Initilize the ResourceBundle with the given resource.
      *
-     * @param rb the esource bundle to read.
-     */
-    public MessageRetriever(ResourceBundle rb) {
-        this.configuration = null;
-        this.messageRB = rb;
-        this.resourcelocation = null;
-    }
-
-    /**
-     * Initilize the ResourceBundle with the given resource.
-     *
      * @param configuration the configuration
      * @param resourcelocation Resource.
      */

@@ -19,7 +19,6 @@ import java.io.File;
 import java.util.Collection;
 
 import org.opentravel.schemacompiler.validate.ValidationException;
-import org.slf4j.Logger;
 
 /**
  * Orchestrates the code generation process by transforming the compiler's meta-model objects into
@@ -89,15 +88,5 @@ public interface CodeGenerator<S> {
      *            the filename builder to assign
      */
     public void setFilenameBuilder(CodeGenerationFilenameBuilder<S> filenameBuilder);
-
-    /**
-     * Assigns the logger to use for all user feedback and message displays. If no logger is
-     * assigned prior to output generation, a no-op logger will be used that will suppress all
-     * feedback.
-     * 
-     * @param log
-     *            the logger instance to assign
-     */
-    public void setLogger(Logger log);
 
 }

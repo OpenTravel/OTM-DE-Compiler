@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegate;
@@ -844,91 +843,6 @@ public class PropertyCodegenUtils {
 	}
 	
 	/**
-	 * Analyzes the given property instance to determine the root of its substitution group hierarchy. This is typically
-	 * the core or business object that is the owner of the facet or alias that is given the property type. If the given
-	 * property type is not capable of being a member of a substitution group hierarchy (e.g. a simple type or VWA),
-	 * this method will return null.
-	 * 
-	 * @param propertyType the property type to analyze
-	 * @return NamedEntity
-	 */
-	public static NamedEntity getSubstitutionRoot(TLPropertyType propertyType) {
-		NamedEntity sgRoot = null;
-		
-		if (propertyType instanceof TLFacetOwner) {
-			sgRoot = propertyType;
-			
-		} else if (propertyType instanceof TLFacet) {
-			TLFacet facet = (TLFacet) propertyType;
-			
-			if (isSubstitutableFacet( facet )) {
-				sgRoot = facet.getOwningEntity();
-			}
-			
-		} else if (propertyType instanceof TLAlias) {
-			TLAlias alias = (TLAlias) propertyType;
-			
-			if (alias.getOwningEntity() instanceof TLFacetOwner) {
-				sgRoot = alias;
-				
-			} else if (alias.getOwningEntity() instanceof TLFacet) {
-				TLFacet facet = (TLFacet) alias.getOwningEntity();
-				
-				if (isSubstitutableFacet( facet )) {
-					sgRoot = AliasCodegenUtils.getOwnerAlias( alias );
-				}
-			}
-		}
-		return sgRoot;
-	}
-	
-	/**
-	 * Returns true if the given facet is a member of a substitution group, based on its type.
-	 * 
-	 * @param facet the facet to analyze
-	 * @return boolean
-	 */
-	private static boolean isSubstitutableFacet(TLFacet facet) {
-		boolean result;
-		
-		switch (facet.getFacetType()) {
-			case ID:
-			case SUMMARY:
-			case DETAIL:
-			case CUSTOM:
-				result = true;
-				break;
-			default:
-				result = false;
-		}
-		return result;
-	}
-	
-	/**
-	 * Returns true if the given property is a reference to a complex type, or is assigned as a simple type of "IDREF"
-	 * or "IDREFS".
-	 * 
-	 * @param property the model property to analyze
-	 * @return boolean
-	 */
-	public static boolean isReferenceProperty(TLProperty property) {
-		boolean result = false;
-		
-		if (property.isReference()) {
-			result = true;
-			
-		} else {
-			TLPropertyType propertyType = property.getType();
-			
-			if ((propertyType != null) && XMLConstants.W3C_XML_SCHEMA_NS_URI.equals( propertyType.getNamespace() )) {
-				result = propertyType.getLocalName().equals( "IDREF" )
-						|| propertyType.getLocalName().equals( "IDREFS" );
-			}
-		}
-		return result;
-	}
-	
-	/**
 	 * Returns true if the property type passed into this method is either a facet or an alias for a facet.
 	 * 
 	 * @param propertyType the property type to analyze
@@ -1021,7 +935,7 @@ public class PropertyCodegenUtils {
 	 * @param referencedFacet the facet being referenced (also the source facet used to lookup this delegate instance)
 	 * @return TLAbstractFacet[]
 	 */
-	private static TLAbstractFacet[] getAlternateFacets(TLAbstractFacet referencedFacet) {
+	protected static TLAbstractFacet[] getAlternateFacets(TLAbstractFacet referencedFacet) {
 		TLAbstractFacet[] results = new TLAbstractFacet[0];
 		
 		if (referencedFacet instanceof TLListFacet) {
@@ -1041,7 +955,7 @@ public class PropertyCodegenUtils {
 	 * @param referencedFacet  the referenced facet from the original call
 	 * @return TLAbstractFacet[]
 	 */
-	private static TLAbstractFacet[] getAlternateFacets(TLFacet facet, TLAbstractFacet referencedFacet) {
+	protected static TLAbstractFacet[] getAlternateFacets(TLFacet facet, TLAbstractFacet referencedFacet) {
 		TLAbstractFacet[] results = new TLAbstractFacet[0];
 		
 		if (facet.getOwningEntity() instanceof TLBusinessObject) {
@@ -1077,7 +991,7 @@ public class PropertyCodegenUtils {
 	/**
 	 * Simple dispatch method used to decompose the problem from the primary 'getAlternateFacets()' method.
 	 */
-	private static TLAbstractFacet[] getAlternateFacets(TLCoreObject referencedOwner, TLListFacet referencedFacet) {
+	protected static TLAbstractFacet[] getAlternateFacets(TLCoreObject referencedOwner, TLListFacet referencedFacet) {
 		TLAbstractFacet[] results;
 		
 		// The summary-list facet is the alternate for the info-list, and vice-versa
@@ -1092,7 +1006,7 @@ public class PropertyCodegenUtils {
 	/**
 	 * Simple dispatch method used to decompose the problem from the primary 'getAlternateFacets()' method.
 	 */
-	private static TLAbstractFacet[] getAlternateFacets(TLFacet originatingFacet, TLBusinessObject referencedOwner,
+	protected static TLAbstractFacet[] getAlternateFacets(TLFacet originatingFacet, TLBusinessObject referencedOwner,
 			TLAbstractFacet referencedFacet) {
 		TLAbstractFacet[] results = new TLAbstractFacet[0];
 		
@@ -1171,7 +1085,7 @@ public class PropertyCodegenUtils {
 	/**
 	 * Simple dispatch method used to decompose the problem from the primary 'getAlternateFacets()' method.
 	 */
-	private static TLAbstractFacet[] getAlternateFacets(TLFacet originatingFacet, TLCoreObject referencedOwner,
+	protected static TLAbstractFacet[] getAlternateFacets(TLFacet originatingFacet, TLCoreObject referencedOwner,
 			TLAbstractFacet referencedFacet) {
 		TLAbstractFacet[] results = new TLAbstractFacet[0];
 		
@@ -1241,7 +1155,7 @@ public class PropertyCodegenUtils {
 	/**
 	 * Simple dispatch method used to decompose the problem from the primary 'getAlternateFacets()' method.
 	 */
-	private static TLAbstractFacet[] getAlternateFacets(TLCoreObject referencedOwner, TLAbstractFacet referencedFacet) {
+	protected static TLAbstractFacet[] getAlternateFacets(TLCoreObject referencedOwner, TLAbstractFacet referencedFacet) {
 		TLAbstractFacet[] results = new TLAbstractFacet[0];
 		
 		switch (referencedFacet.getFacetType()) {
@@ -1263,7 +1177,7 @@ public class PropertyCodegenUtils {
 	/**
 	 * Simple dispatch method used to decompose the problem from the primary 'getAlternateFacets()' method.
 	 */
-	private static TLAbstractFacet[] getAlternateFacets(TLBusinessObject referencedOwner,
+	protected static TLAbstractFacet[] getAlternateFacets(TLBusinessObject referencedOwner,
 			TLAbstractFacet referencedFacet) {
 		TLAbstractFacet[] results = new TLAbstractFacet[0];
 		
