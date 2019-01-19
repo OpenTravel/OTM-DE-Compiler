@@ -477,7 +477,7 @@ public abstract class TLFacetCodegenDelegate extends FacetCodegenDelegate<TLFace
 		type.setAnnotation( createJaxbDocumentation( sourceFacet ) );
 		
 		// Add any required application info
-		XsdCodegenUtils.addAppInfo( sourceFacet.getOwningEntity(), type );
+		XsdCodegenUtils.addAppInfo( FacetCodegenUtils.getTopLevelOwner( sourceFacet ), type );
 		
 		return type;
 	}

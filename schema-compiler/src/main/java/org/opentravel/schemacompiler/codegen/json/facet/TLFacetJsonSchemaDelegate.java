@@ -33,6 +33,7 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonType;
 import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
+import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
@@ -144,7 +145,7 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
 		}
 		
         facetSchema.setDocumentation( createJsonDocumentation( sourceFacet ) );
-		facetSchema.setEntityInfo( jsonUtils.getEntityInfo( sourceFacet.getOwningEntity() ) );
+		facetSchema.setEntityInfo( jsonUtils.getEntityInfo( FacetCodegenUtils.getTopLevelOwner( sourceFacet ) ) );
         definition.setSchema( new JsonSchemaReference( facetSchema ) );
         
 		localFacetSchema.getProperties().addAll( createDefinitions() );
