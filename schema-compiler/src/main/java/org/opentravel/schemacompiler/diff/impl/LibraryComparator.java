@@ -73,23 +73,26 @@ public class LibraryComparator extends BaseComparator {
 			changeItems.add( new LibraryChangeItem( changeSet, LibraryChangeType.NAME_CHANGED,
 					oldLibrary.getName(), newLibrary.getName() ) );
 		}
-		if (valueChanged( oldLibrary.getNamespace(), newLibrary.getNamespace() )) {
-			changeItems.add( new LibraryChangeItem( changeSet, LibraryChangeType.NAMESPACE_CHANGED,
-					oldLibrary.getNamespace(), newLibrary.getNamespace() ) );
+		if (!getCompareOptions().isSuppressLibraryPropertyChanges()) {
+			if (valueChanged( oldLibrary.getNamespace(), newLibrary.getNamespace() )) {
+				changeItems.add( new LibraryChangeItem( changeSet, LibraryChangeType.NAMESPACE_CHANGED,
+						oldLibrary.getNamespace(), newLibrary.getNamespace() ) );
+			}
+			if (valueChanged( oldLibrary.getPrefix(), newLibrary.getPrefix() )) {
+				changeItems.add( new LibraryChangeItem( changeSet, LibraryChangeType.PREFIX_CHANGED,
+						oldLibrary.getPrefix(), newLibrary.getPrefix() ) );
+			}
+			if (valueChanged( oldLibrary.getVersionScheme(), newLibrary.getVersionScheme() )) {
+				changeItems.add( new LibraryChangeItem( changeSet, LibraryChangeType.VERSION_SCHEME_CHANGED,
+						oldLibrary.getVersionScheme(), newLibrary.getVersionScheme() ) );
+			}
+			if (valueChanged( oldStatus, newStatus )) {
+				changeItems.add( new LibraryChangeItem( changeSet, LibraryChangeType.STATUS_CHANGED,
+						oldStatus, newStatus ) );
+			}
 		}
-		if (valueChanged( oldLibrary.getPrefix(), newLibrary.getPrefix() )) {
-			changeItems.add( new LibraryChangeItem( changeSet, LibraryChangeType.PREFIX_CHANGED,
-					oldLibrary.getPrefix(), newLibrary.getPrefix() ) );
-		}
-		if (valueChanged( oldLibrary.getVersionScheme(), newLibrary.getVersionScheme() )) {
-			changeItems.add( new LibraryChangeItem( changeSet, LibraryChangeType.VERSION_SCHEME_CHANGED,
-					oldLibrary.getVersionScheme(), newLibrary.getVersionScheme() ) );
-		}
-		if (valueChanged( oldStatus, newStatus )) {
-			changeItems.add( new LibraryChangeItem( changeSet, LibraryChangeType.STATUS_CHANGED,
-					oldStatus, newStatus ) );
-		}
-		if (valueChanged( oldLibrary.getComments(), newLibrary.getComments() )) {
+		if (!getCompareOptions().isSuppressDocumentationChanges() &&
+				valueChanged( oldLibrary.getComments(), newLibrary.getComments() )) {
 			changeItems.add( new LibraryChangeItem( changeSet, LibraryChangeType.COMMENTS_CHANGED,
 					oldLibrary.getComments(), newLibrary.getComments() ) );
 		}

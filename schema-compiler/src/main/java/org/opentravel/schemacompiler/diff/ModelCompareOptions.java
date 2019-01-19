@@ -25,6 +25,8 @@ public class ModelCompareOptions {
 	private static ModelCompareOptions defaultOptions;
 	
 	private boolean suppressFieldVersionChanges;
+	private boolean suppressLibraryPropertyChanges;
+	private boolean suppressDocumentationChanges;
 	
 	/**
 	 * Default constructor.
@@ -65,6 +67,53 @@ public class ModelCompareOptions {
 	}
 	
 	/**
+	 * Returns the flag indicating whether library-level NS/Prefix/Version/Status changes will be supressed from
+	 * the generation diff reports.  During major version upgrades, this can have a large effect
+	 * on reducing the "noise" due to nothing but version updates at the field level.
+	 *
+	 * @return boolean
+	 */
+	public boolean isSuppressLibraryPropertyChanges() {
+		return suppressLibraryPropertyChanges;
+	}
+	
+	/**
+	 * Assigns the flag indicating whether library-level NS/Prefix/Version/Status changes will be supressed from
+	 * the generation diff reports.  During major version upgrades, this can have a large effect
+	 * on reducing the "noise" due to nothing but version updates at the field level.
+	 *
+	 * @param suppressLibraryPropertyChanges  the flag value to assign
+	 */
+
+	public void setSuppressLibraryPropertyChanges(boolean suppressLibPropertyChanges) {
+		this.suppressLibraryPropertyChanges = suppressLibPropertyChanges;
+	}
+
+	/**
+	 * Returns the flag indicating whether library/Entity/Field-level documentation changes will be supressed from
+	 * the generation diff reports.  During major version upgrades, this can have a large effect
+	 * on reducing the "noise" due to nothing but version updates at the field level.
+	 *
+	 * @return boolean
+	 */
+	
+	public boolean isSuppressDocumentationChanges() {
+		return suppressDocumentationChanges;
+	}
+	
+	/**
+	 * Assigns the flag indicating whether library/Entity/Field-level documentation changes will be supressed from
+	 * the generation diff reports.  During major version upgrades, this can have a large effect
+	 * on reducing the "noise" due to nothing but version updates at the field level.
+	 *
+	 * @param suppressDocumentationChanges  the flag value to assign
+	 */
+
+	public void setSuppressDocumentationChanges(boolean suppressDocumentChanges) {
+		this.suppressDocumentationChanges = suppressDocumentChanges;
+	}
+	
+	/**
 	 * Loads the settings for this options instance from the given properties.
 	 * 
 	 * @param props  the properties from which to load the comparison options
@@ -72,8 +121,14 @@ public class ModelCompareOptions {
 	public void loadOptions(Properties props) {
 		String suppressFieldVersionChangesStr = props.getProperty(
 				"suppressFieldVersionChanges", defaultOptions.isSuppressFieldVersionChanges() + "" );
+		String suppressLibraryPropertyChangesStr = props.getProperty(
+				"suppressLibraryPropertyChanges", defaultOptions.isSuppressLibraryPropertyChanges() + "" );
+		String suppressDocumentationChangesStr = props.getProperty(
+				"suppressDocumentationChanges", defaultOptions.isSuppressDocumentationChanges() + "" );
 		
 		this.suppressFieldVersionChanges = Boolean.parseBoolean( suppressFieldVersionChangesStr );
+		this.suppressLibraryPropertyChanges = Boolean.parseBoolean( suppressLibraryPropertyChangesStr );
+		this.suppressDocumentationChanges = Boolean.parseBoolean( suppressDocumentationChangesStr );
 	}
 	
 	/**
@@ -83,6 +138,8 @@ public class ModelCompareOptions {
 	 */
 	public void saveOptions(Properties props) {
 		props.put( "suppressFieldVersionChanges", suppressFieldVersionChanges + "" );
+		props.put( "suppressLibraryPropertyChanges", suppressLibraryPropertyChanges + "" );
+		props.put( "suppressDocumentationChanges", suppressDocumentationChanges + "" );
 	}
 	
 	/**
@@ -92,6 +149,8 @@ public class ModelCompareOptions {
 	 */
 	private static void configureDefaultOptions(ModelCompareOptions options) {
 		options.setSuppressFieldVersionChanges( false );
+		options.setSuppressLibraryPropertyChanges( false );
+		options.setSuppressDocumentationChanges( false );
 	}
 	
 	/**

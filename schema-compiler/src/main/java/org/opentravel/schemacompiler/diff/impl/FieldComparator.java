@@ -84,7 +84,8 @@ public class FieldComparator extends BaseComparator {
 					FieldChangeType.CHANGED_TO_REFERENCE : FieldChangeType.CHANGED_TO_NON_REFERENCE;
 			changeItems.add( new FieldChangeItem( changeSet, changeType, "" + oldField.isReference(), "" + newField.isReference() ) );
 		}
-		if (valueChanged( oldField.getDocumentation(), newField.getDocumentation() )) {
+		if (!getCompareOptions().isSuppressDocumentationChanges() &&
+				valueChanged( oldField.getDocumentation(), newField.getDocumentation() )) {
 			changeItems.add( new FieldChangeItem( changeSet, FieldChangeType.DOCUMENTATION_CHANGED, null, null ) );
 		}
 		

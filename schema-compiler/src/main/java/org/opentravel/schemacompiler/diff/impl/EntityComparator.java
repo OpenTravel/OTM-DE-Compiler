@@ -88,7 +88,8 @@ public class EntityComparator extends BaseComparator {
 			changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.NAME_CHANGED,
 					oldEntity.getName(), newEntity.getName() ) );
 		}
-		if (valueChanged( oldEntity.getDocumentation(), newEntity.getDocumentation() )) {
+		if (!getCompareOptions().isSuppressDocumentationChanges() &&
+				valueChanged( oldEntity.getDocumentation(), newEntity.getDocumentation() )) {
 			changeItems.add( new EntityChangeItem( changeSet, EntityChangeType.DOCUMENTATION_CHANGED, null, null ) );
 		}
 		
