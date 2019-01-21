@@ -1548,6 +1548,9 @@ public class RepositoryManager implements Repository {
                     throw new RepositoryException("The work-in-process file cannot be accessed: "
                             + item.getFilename());
                 }
+                
+            } else {
+            	unlock(item, null, remarks);
             }
 
         } else {

@@ -1141,6 +1141,7 @@ public class AdminController extends BaseController {
 					RepositoryManager repositoryManager = getRepositoryManager();
 					RepositoryItem item = repositoryManager.getRepositoryItem( baseNamespace, filename, version );
 					
+					repositoryManager.getFileManager().setCurrentUserId( user.getUserId() );
 					repositoryManager.promote( item );
 					searchService.indexRepositoryItem( item );
 					
@@ -1215,6 +1216,7 @@ public class AdminController extends BaseController {
 					RepositoryManager repositoryManager = getRepositoryManager();
 					RepositoryItem item = repositoryManager.getRepositoryItem( baseNamespace, filename, version );
 					
+					repositoryManager.getFileManager().setCurrentUserId( user.getUserId() );
 					repositoryManager.demote( item );
 					searchService.indexRepositoryItem( item );
 					
@@ -1367,6 +1369,7 @@ public class AdminController extends BaseController {
 								redirectAttrs );
 						
 					} else {
+						repositoryManager.getFileManager().setCurrentUserId( user.getUserId() );
 						repositoryManager.recalculateCrc( item );
 						searchService.indexRepositoryItem( item );
 						
