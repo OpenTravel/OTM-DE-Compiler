@@ -1,21 +1,15 @@
-#Overview
+# Overview
 
 OTA2 Type Library Compiler
 
-##Dependencies
-* [Java >= 1.6](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
-* [Maven](http://maven.apache.org/)
+[![Travis CI](https://travis-ci.com/OpenTravel/OTM-DE-Compiler.svg?branch=master)](https://travis-ci.com/OpenTravel/OTM-DE-Compiler)
+
+## Dependencies
+* Java >= 1.8
+* Maven 3.x
 
 
-##Build
-Clone repository:
-
-```
-$ git clone git@git.assembla.com:OpenTravel-2-0-tooling-project.Compiler.git
-```
-
-Run the following command from root folder (by default: OpenTravel-2-0-tooling-project.Compiler): 
-
+## Build
 ```
 $ mvn clean install
 ```
