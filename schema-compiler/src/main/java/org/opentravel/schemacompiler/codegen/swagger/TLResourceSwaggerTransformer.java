@@ -69,6 +69,8 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
 		} else {
 			basePath += source.getBasePath();
 		}
+		basePath += getVersionPathSuffix( source );
+		
 		swaggerDoc.setHost( urlComponents.getAuthority() );
 		swaggerDoc.getSchemes().add( urlComponents.getScheme() );
 		swaggerDoc.setBasePath( basePath );
@@ -151,6 +153,27 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
 		applyBindingStyle(swaggerDoc);
 		
 		return swaggerDoc;
+	}
+	
+	/**
+	 * Returns the version suffix that will be appended to the base path of the Swagger
+	 * document.
+	 * 
+	 * @param source  the resource being transformed
+	 * @return String
+	 */
+	private String getVersionPathSuffix(TLResource source) {
+	    String[] versionParts = source.getVersion().split( "\\." );
+	    StringBuilder suffix = new StringBuilder();
+	    
+	    if (versionParts.length >= 1) {
+	        suffix.append( "/v" ).append( versionParts[0] );
+	    }
+        if (versionParts.length >= 2) {
+            suffix.append( "_" ).append( versionParts[1] );
+        }
+	    
+	    return suffix.toString();
 	}
 
 	/**
