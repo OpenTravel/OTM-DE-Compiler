@@ -198,7 +198,7 @@ public class ResourceComparator extends BaseComparator {
 			for (TLResourceParentRef oldParentRef : oldResource.getParentRefs()) {
 				String oldParentRefName = oldParentRef.getParentResource().getName() +
 						"/" + oldParentRef.getParentParamGroup().getName();
-				TLResourceParentRef newParentRef = oldResource.getParentRef( oldParentRefName );
+				TLResourceParentRef newParentRef = newResource.getParentRef( oldParentRefName );
 				
 				if (newParentRef == null) {
 					changeItems.add( new ResourceChangeItem( changeSet,
@@ -239,7 +239,7 @@ public class ResourceComparator extends BaseComparator {
 		if (!isMinorVersionCompare) {
 			for (TLParamGroup oldParamGroup : oldResource.getParamGroups()) {
 				String oldParamGroupName = oldParamGroup.getName();
-				TLParamGroup newParamGroup = oldResource.getParamGroup( oldParamGroupName );
+				TLParamGroup newParamGroup = newResource.getParamGroup( oldParamGroupName );
 				
 				if (newParamGroup == null) {
 					changeItems.add( new ResourceChangeItem( changeSet,
@@ -281,7 +281,7 @@ public class ResourceComparator extends BaseComparator {
 		if (!isMinorVersionCompare) {
 			for (TLActionFacet oldActionFacet : oldResource.getActionFacets()) {
 				String oldActionFacetName = oldActionFacet.getName();
-				TLActionFacet newActionFacet = oldResource.getActionFacet( oldActionFacetName );
+				TLActionFacet newActionFacet = newResource.getActionFacet( oldActionFacetName );
 				
 				if (newActionFacet == null) {
 					changeItems.add( new ResourceChangeItem( changeSet,
@@ -322,7 +322,7 @@ public class ResourceComparator extends BaseComparator {
 		if (!isMinorVersionCompare) {
 			for (TLAction oldAction : oldResource.getActions()) {
 				String oldActionName = oldAction.getActionId();
-				TLAction newAction = oldResource.getAction( oldActionName );
+				TLAction newAction = newResource.getAction( oldActionName );
 				
 				if (newAction == null) {
 					changeItems.add( new ResourceChangeItem( changeSet,

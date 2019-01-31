@@ -17,7 +17,6 @@ package org.opentravel.schemacompiler.validate.compile;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -140,8 +139,9 @@ public class TLExampleCompileValidator extends TLValidatorBase<TLExample> {
 			}
 		}
 		
-		if ((simpleType.getFractionDigits() == 0) && (simpleType.getTotalDigits() == 0)) {
-			return;
+		if ((simpleType.getFractionDigits() <= 0) && (simpleType.getTotalDigits() <= 0)) {
+			// No action required of fraction/total digits not specified
+		    return;
 		}
 		if (!isNumericValue( exampleValue )) {
 			builder.addFinding( FindingType.WARNING, VALUE, ERROR_NON_NUMERIC_EXAMPLE, exampleValue );
@@ -242,7 +242,6 @@ public class TLExampleCompileValidator extends TLValidatorBase<TLExample> {
 	 * @return String[]
 	 */
 	private String[] getExampleValues(TLExample target, NamedEntity simpleType) {
-		String pattern = (simpleType instanceof TLSimple) ? getPattern( (TLSimple) simpleType ) : null;
 		boolean isListType = (simpleType instanceof TLSimple) && ((TLSimple) simpleType).isListTypeInd();
 		String[] values = null;
 		
@@ -250,70 +249,14 @@ public class TLExampleCompileValidator extends TLValidatorBase<TLExample> {
 			values = new String[0];
 			
 		} else if ((simpleType != null) && isListType) {
-			if (pattern != null) {
-				values = getMatchingValues( target, pattern );
-				
-			} else {
-				values = target.getValue().split( "\\s+" );
-			}
+            values = target.getValue().split( "\\s+" );
+            
 		} else {
 			values = new String[] { target.getValue() };
 		}
 		return values;
 	}
 
-	/**
-	 * Returns the list of values that match the regular expression pattern provided.
-	 * 
-	 * @param target the example instance being validated
-	 * @param pattern  the pattern to be matched
-	 * @return String[]
-	 */
-	private String[] getMatchingValues(TLExample target, String pattern) {
-		String[] values;
-		Pattern splitPattern = Pattern.compile( "(" + pattern + ")\\s*" );
-		Matcher m = splitPattern.matcher( target.getValue() );
-		
-		if (m.matches()) {
-			List<String> valueList = new ArrayList<>();
-			valueList.add( m.group( 1 ) );
-			
-			while (m.find()) {
-				valueList.add( m.group( 1 ) );
-			}
-			values = valueList.toArray( new String[valueList.size()] );
-			
-		} else {
-			// If the pattern isn't recognized, we probably have an invalid EXAMPLE.
-			// The fallback is to split the EXAMPLE values using standard white space
-			// separators.
-			values = target.getValue().split( "\\s+" );
-		}
-		return values;
-	}
-	
-	/**
-	 * Returns the required regular expression pattern for the simple type, or null if the type does not specify a
-	 * pattern.
-	 * 
-	 * @param simpleType the simple type for which to return a pattern
-	 * @return String
-	 */
-	private String getPattern(TLSimple simpleType) {
-		TLAttributeType type = simpleType;
-		String pattern = null;
-		
-		if (simpleType.isListTypeInd()) {
-			type = simpleType.getParentType();
-		}
-		
-		while ((type instanceof TLSimple) && (pattern == null)) {
-			pattern = ((TLSimple) type).getPattern();
-			type = ((TLSimple) type).getParentType();
-		}
-		return pattern;
-	}
-	
 	/**
 	 * Returns true if the given EXAMPLE value is a numeric representation.
 	 * 

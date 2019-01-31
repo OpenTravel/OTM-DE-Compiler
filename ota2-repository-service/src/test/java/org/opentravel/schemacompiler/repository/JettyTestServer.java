@@ -29,7 +29,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
 import org.opentravel.schemacompiler.index.FreeTextSearchService;
 import org.opentravel.schemacompiler.index.FreeTextSearchServiceFactory;
-import org.opentravel.schemacompiler.repository.impl.RemoteRepositoryClient;
+import org.opentravel.schemacompiler.repository.impl.RemoteRepositoryUtils;
 import org.opentravel.schemacompiler.util.RepositoryTestUtils;
 
 /**
@@ -154,8 +154,8 @@ public class JettyTestServer {
      * repository web service.
      */
     private void initializeRepositoryServices() throws Exception {
-        RemoteRepositoryClient.getRepositoryMetadata("http://localhost:" + port
-                + "/ota2-repository-service");
+        new RemoteRepositoryUtils().getRepositoryMetadata(
+                "http://localhost:" + port + "/ota2-repository-service");
     }
 
     /**

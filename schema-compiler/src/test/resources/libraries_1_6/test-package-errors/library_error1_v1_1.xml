@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_06"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_06 ../../../../main/resources/ota2-context/schemas/OTA2_LibraryModel_v1.6.0.xsd">
+    
+    <VersionScheme>OTA2</VersionScheme>
+    <Status>Draft</Status>
+    <Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-error1/v1_1</Namespace>
+    <Prefix>e1v11</Prefix>
+    <Name>library_error1</Name>
+    <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
+    <Import namespace="http://www.opentravel.org/OTM/Common/v0" prefix="ota"/>
+    <Import fileHints="library_error1_v1.xml"
+        namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-error1/v1" prefix="e1v1"/>
+    <Context applicationContext="default-applicationContext" context="default"/>
+    <Comments>Test Error Library 1</Comments>
+    
+    <Simple name="TestInteger" type="e1v1:TestInteger"/>
+    
+    <CoreObject name="TestCore" notExtendable="true">
+    		<Extension extends="e1v1:TestCore"/>
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Attribute name="testEclipseAttr1" type="xsd:string" mandatory="true"/>
+            <Element name="TestEclipse1" type="TestInteger" mandatory="true"/>
+            <Element name="TestEclipse2" type="xsd:string" mandatory="true"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+</Library>

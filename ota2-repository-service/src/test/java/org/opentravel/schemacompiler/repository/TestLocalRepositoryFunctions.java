@@ -15,18 +15,17 @@
  */
 package org.opentravel.schemacompiler.repository;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.List;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opentravel.schemacompiler.model.TLModel;
-import org.opentravel.schemacompiler.repository.Project;
-import org.opentravel.schemacompiler.repository.ProjectManager;
-import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.util.RepositoryTestUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
@@ -59,6 +58,24 @@ public class TestLocalRepositoryFunctions extends TestRepositoryFunctions {
         setupWorkInProcessArea(TestLocalRepositoryFunctions.class);
     }
 
+    @Override
+    public void test_02_LockLibrary() throws Exception {
+        Repository repository = testRepository.get();
+        List<RepositoryItem> lockedItems;
+        
+        super.test_02_LockLibrary();
+        
+        lockedItems = repository.getLockedItems();
+        assertEquals( 1, lockedItems.size() );
+        assertEquals( "library_1_p2_2_0_0.otm", lockedItems.get( 0 ).getFilename() );
+    }
+    
+    @Override
+    public void test_19_ListNamespaceChildren() throws Exception {
+        super.test_19_ListNamespaceChildren();
+        assertEquals( 14, testRepository.get().listAllNamespaces().size() );
+    }
+    
     @Test
     public void testAutoLoadPriorVersions() throws Exception {
         ProjectManager projectManager = new ProjectManager(new TLModel(), false,

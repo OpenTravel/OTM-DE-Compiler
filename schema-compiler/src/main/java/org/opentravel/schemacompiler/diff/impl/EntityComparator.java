@@ -336,8 +336,10 @@ public class EntityComparator extends BaseComparator {
 			QName oldFieldName = iterator.next();
 			List<TLMemberField<?>> oldVersionFields = oldFieldMap.get( oldFieldName );
 			String vScheme = getVersionScheme( oldVersionFields );
-			List<QName> matchingNewFieldNames = ModelCompareUtils.findMatchingVersions( oldFieldName, newFieldNames,  vScheme );
-			QName newFieldName = ModelCompareUtils.findClosestVersion( oldFieldName, matchingNewFieldNames, vScheme );
+			List<QName> matchingNewFieldNames = ModelCompareUtils.findMatchingVersions(
+			        oldFieldName, newFieldNames, vScheme );
+			QName newFieldName = ModelCompareUtils.findClosestVersion(
+			        oldFieldName, matchingNewFieldNames, vScheme );
 			
 			if (newFieldName != null) {
 				List<TLMemberField<?>> newVersionFields = newFieldMap.get( newFieldName );

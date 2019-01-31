@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_06"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_06 ../../../../main/resources/ota2-context/schemas/OTA2_LibraryModel_v1.6.0.xsd">
+
+	<VersionScheme>OTA2</VersionScheme>
+	<Status>Draft</Status>
+	<Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-error1/v1</Namespace>
+	<Prefix>e1v1</Prefix>
+	<Name>library_error1</Name>
+	<Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd" />
+	<Import namespace="http://www.opentravel.org/OTM/Common/v0" prefix="ota" />
+	<Context applicationContext="default-applicationContext" context="default" />
+	<Comments>Test Error Library 1</Comments>
+
+	<Simple name="TestInteger" type="xsd:int" />
+
+	<Simple name="TestInvalidDigits" type="xsd:decimal" fractionDigits="2" totalDigits="3">
+		<Example context="default">123.456</Example>
+	</Simple>
+	
+	<Simple name="TestIntegerList" type="TestInteger" listTypeInd="true">
+		<Example context="default">123 456 789</Example>
+	</Simple>
+
+	<Simple name="TestString" type="xsd:string" pattern="[A-Z]+">
+		<Example context="default">12345</Example>
+	</Simple>
+
+	<Simple name="TestStringList" type="TestString" listTypeInd="true">
+		<Example context="default">ABC DEF XYZ</Example>
+	</Simple>
+
+	<Simple name="TestConstraintError" type="xsd:string"
+		minInclusive="1" minExclusive="1" maxExclusive="1" maxInclusive="1" />
+	
+	<Simple name="TestPatternError" type="xsd:string" pattern="([A-]" />
+	
+	<Enumeration_Open name="TestOpenEnum">
+		<Value literal="one" label="oneLabel" />
+		<Value literal="two" label="twoLabel" />
+		<Value literal="three" label="threeLabel" />
+	</Enumeration_Open>
+
+	<ValueWithAttrs name="TestVWA" type="ota:Empty">
+		<Attribute name="vwaAttr" type="xsd:string" />
+	</ValueWithAttrs>
+
+	<CoreObject name="TestCore" notExtendable="true">
+		<Aliases />
+		<Simple type="ota:Empty" />
+		<Summary>
+			<Attribute name="vwaAttr" type="TestVWA" />
+			<Attribute name="openEnumAttr" type="TestOpenEnum" />
+			<Attribute name="booleanAttr" type="xsd:boolean" />
+			<Attribute name="testEclipseAttr1" type="xsd:string" />
+			<Attribute name="tcDetail" type="TargetCore_Detail_List" reference="true" />
+			<Attribute name="cwrRepeatRef" type="CoreWithRoles_Summary_List" reference="true" referenceRepeat="4" />
+			<Element name="TargetCoreDetail" type="TargetCore_Detail_List" repeat="0" />
+			<Element name="CoreWithRoles" type="CoreWithRoles_Summary_List" repeat="4" />
+			<Element name="TestBusinessObject" type="TestBusinessObject" repeat="5" reference="true" />
+			<Element name="TestEclipse1" type="TestInteger" mandatory="true" />
+			<Element name="TestEclipse2" type="xsd:string" />
+		</Summary>
+		<Detail />
+		<Roles />
+	</CoreObject>
+
+	<CoreObject name="TargetCore" notExtendable="true">
+		<Aliases />
+		<Simple type="xsd:string" />
+		<Summary>
+			<Attribute name="id" type="xsd:ID" />
+		</Summary>
+		<Detail>
+			<Attribute name="nonSimpleCoreAttr" type="TestCore" />
+			<Element name="detailId" repeat="0" type="xsd:ID" />
+			<Element name="DetailMessage" repeat="0" type="xsd:string" />
+			<Element name="TestBusinessObjectDetail" repeat="0" type="TestBusinessObject_Detail" />
+		</Detail>
+		<Roles />
+	</CoreObject>
+
+	<CoreObject name="CoreWithRoles" notExtendable="true">
+		<Aliases />
+		<Simple type="xsd:string" />
+		<Summary>
+			<Attribute name="id" type="xsd:ID" />
+		</Summary>
+		<Detail />
+		<Roles>
+			<Role value="Role1" />
+			<Role value="Role2" />
+			<Role value="Role3" />
+		</Roles>
+	</CoreObject>
+
+	<CoreObject name="ExampleCore" notExtendable="true">
+		<Aliases />
+		<Simple type="xsd:string" />
+		<Summary>
+			<Attribute name="attrInvalidContext" type="xsd:string">
+				<Example context="invalid">ABC</Example>
+			</Attribute>
+			<Attribute name="attrInvalidDate" type="xsd:date">
+				<Example context="default">INVALID</Example>
+			</Attribute>
+			<Attribute name="attrInvalidTime" type="xsd:time">
+				<Example context="default">INVALID</Example>
+			</Attribute>
+			<Attribute name="attrInvalidDateTime" type="xsd:dateTime">
+				<Example context="default">INVALID</Example>
+			</Attribute>
+		</Summary>
+		<Detail />
+		<Roles />
+	</CoreObject>
+
+	<ChoiceObject name="TestChoice" notExtendable="false">
+		<Shared />
+	</ChoiceObject>
+
+	<ContextualFacet name="ChoiceA" type="Choice" facetOwner="TestChoice">
+		<Element name="choiceAId" repeat="0" type="xsd:ID" />
+	</ContextualFacet>
+
+	<ContextualFacet name="Child" type="Choice" facetOwner="TestChoice_ChoiceA">
+		<Element name="ChildElement" repeat="0" type="xsd:string" />
+	</ContextualFacet>
+
+	<ContextualFacet name="ChoiceB" type="Choice" facetOwner="TestChoice">
+		<Element name="choiceBId" repeat="0" type="xsd:ID" />
+		<Element name="choiceBId2" repeat="0" type="xsd:ID" />
+	</ContextualFacet>
+
+	<BusinessObject name="TestBusinessObject" notExtendable="false">
+		<Aliases />
+		<ID>
+			<Element name="empty_oid" repeat="0" type="xsd:int" />
+		</ID>
+		<Summary />
+		<Detail>
+			<Attribute name="testCoreSimple" type="TestCore_Simple" />
+			<Element name="testCoreSimple" repeat="0" type="TestCore_Simple" />
+			<Element name="detailId" repeat="0" type="xsd:ID" />
+		</Detail>
+	</BusinessObject>
+
+	<ContextualFacet name="TestQuery" type="Query" facetOwner="TestBusinessObject">
+		<Element name="QueryElement" repeat="0" type="xsd:string" />
+	</ContextualFacet>
+
+</Library>

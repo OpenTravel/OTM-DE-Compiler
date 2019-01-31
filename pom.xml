@@ -19,7 +19,7 @@
 		<module>ota2-repository-service</module>
 		<module>ota2-repository-plugin</module>
 		<module>ota2-indexing-service</module>
-		<!--module>ota2-repository-reporting</module-->
+		<!--module>ota2-repository-reporting</module -->
 		<module>test-aggregate</module>
 	</modules>
 
@@ -27,7 +27,7 @@
 		<!-- General Build Properties -->
 		<java.version>1.8</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		
+
 		<!-- Dependency Versions -->
 		<jaxb.version>2.3.0.1</jaxb.version>
 		<gson.version>2.5</gson.version>
@@ -53,19 +53,20 @@
 		<jsp.api.version>2.1</jsp.api.version>
 		<slf4j.version>1.7.10</slf4j.version>
 		<junit.version>4.12</junit.version>
+		<mockito.version>2.23.4</mockito.version>
 		<fge.version>2.2.6</fge.version>
 		<swagger.parser.version>1.0.17</swagger.parser.version>
 		<velocity.version>1.7</velocity.version>
-		
+
 		<!-- Plugin Versions -->
 		<jaxb2.plugin.version>2.4</jaxb2.plugin.version>
 		<license.plugin.version>2.10</license.plugin.version>
 		<felix.bundle.plugin.version>4.1.0</felix.bundle.plugin.version>
-		
-	    <!-- Sonar -->
-	    <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
-	    <sonar.exclusions>${project.build.directory}/generated-sources/**</sonar.exclusions>
-	    <sonar.jacoco.reportPaths>${project.basedir}/../test-aggregate/target/jacoco.exec</sonar.jacoco.reportPaths>
+
+		<!-- Sonar -->
+		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+		<sonar.exclusions>${project.build.directory}/generated-sources/**</sonar.exclusions>
+		<sonar.jacoco.reportPaths>${project.basedir}/../test-aggregate/target/jacoco.exec</sonar.jacoco.reportPaths>
 	</properties>
 
 	<build>
@@ -212,7 +213,7 @@
 				<version>${maven.annotations.version}</version>
 			</dependency>
 			<dependency>
-			    <groupId>org.apache.commons</groupId>
+				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-text</artifactId>
 				<version>${commons.text.version}</version>
 			</dependency>
@@ -342,6 +343,11 @@
 				<version>${junit.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-core</artifactId>
+				<version>${mockito.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>com.github.fge</groupId>
 				<artifactId>json-schema-validator</artifactId>
 				<version>${fge.version}</version>
@@ -373,5 +379,5 @@
 			<layout>default</layout>
 		</repository>
 	</repositories>
-	
+
 </project>

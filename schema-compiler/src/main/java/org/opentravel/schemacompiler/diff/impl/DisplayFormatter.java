@@ -76,6 +76,16 @@ public class DisplayFormatter {
 		}
 	}
 	
+    /**
+     * Constructor that supplies the repository manager instance to use for
+     * remote library lookups.
+     * 
+     * @param repositoryManager  the repository manager instance to use
+     */
+    public DisplayFormatter(RepositoryManager repositoryManager) {
+        this.repositoryManager = repositoryManager;
+    }
+    
 	/**
 	 * Returns a user-displayable string with the current date and time.
 	 * 
@@ -102,9 +112,9 @@ public class DisplayFormatter {
 	 * @param status  the library status for which to return a display name
 	 * @return String
 	 */
-	public String getLibraryStatusDisplayName(TLLibraryStatus status) {
+    public String getLibraryStatusDisplayName(TLLibraryStatus status) {
 		return (status == null) ? null : SchemaCompilerApplicationContext.getContext().getMessage(
-				status.toString() + ".displayName", null, Locale.getDefault() );
+				status.toString(), null, Locale.getDefault() );
 	}
 	
 	/**

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<otp:Project xmlns="http://www.w3.org/2001/XMLSchema" xmlns:otp="http://www.OpenTravel.org/ns/OTA2/Project_v01_00"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/Project_v01_00 ../../../main/resources/ota2-context/schemas/OTA2_Project_v1.0.0.xsd">
+    <otp:projectId>http://www.OpenTravel.org/projects/diff2</otp:projectId>
+    <otp:name>Diff Project #1</otp:name>
+    <otp:description>Test project for model-diff testing</otp:description>
+    <otp:UnmanagedProjectItem>
+        <otp:FileLocation>library_diff1_v1.xml</otp:FileLocation>
+    </otp:UnmanagedProjectItem>
+    <otp:UnmanagedProjectItem>
+        <otp:FileLocation>library_diff1_v1_1.xml</otp:FileLocation>
+    </otp:UnmanagedProjectItem>
+    <otp:UnmanagedProjectItem>
+        <otp:FileLocation>library_diff2_v2.xml</otp:FileLocation>
+    </otp:UnmanagedProjectItem>
+</otp:Project>

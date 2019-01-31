@@ -434,6 +434,7 @@ public class EntityComparisonFacade {
 		
 		this.entityType = entity.getClass();
 		this.owningLibrary = (TLLibrary) entity.getOwningLibrary();
+		this.basePayloadType = basePayload;
 		this.referenceType = entity.getReferenceType();
 		this.referenceRepeat = entity.getReferenceRepeat();
 		this.referenceFacetName = entity.getReferenceFacetName();

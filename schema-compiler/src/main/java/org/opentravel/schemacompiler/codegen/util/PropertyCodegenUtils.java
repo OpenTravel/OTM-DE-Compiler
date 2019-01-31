@@ -561,6 +561,8 @@ public class PropertyCodegenUtils {
 	 * @return List<TLProperty>
 	 */
 	public static List<TLProperty> getInheritedFacetProperties(TLFacet facet) {
+        Set<NamedEntity> complexInheritanceRoots = new HashSet<>();
+        Map<String,Set<NamedEntity>> simpleInheritanceRoots = new HashMap<>();
 		Collection<TLFacetOwner> visitedOwners = new HashSet<>();
 		List<TLProperty> propertyList = new ArrayList<>();
 		TLFacetOwner facetOwner = facet.getOwningEntity();
@@ -573,7 +575,7 @@ public class PropertyCodegenUtils {
 			String facetName = FacetCodegenUtils.getFacetName( facet );
 			
 			if (aFacet != null) {
-				addLocalProperties( aFacet, propertyList );
+				addLocalProperties( aFacet, propertyList, complexInheritanceRoots, simpleInheritanceRoots );
 			}
 			visitedOwners.add( facetOwner );
 			facetOwner = FacetCodegenUtils.getFacetOwnerExtension( facetOwner );
@@ -589,10 +591,11 @@ public class PropertyCodegenUtils {
 	 * 
 	 * @param facet  the facet from which to collect local properties
 	 * @param propertyList  the list of inherited properties being constructed
+     * @param complexInheritanceRoots  collection of complex substitution group properties discovered so far
+     * @param simpleInheritanceRoots  map of simple inheritance root properties discovered so far
 	 */
-	private static void addLocalProperties(TLFacet facet, List<TLProperty> propertyList) {
-		Set<NamedEntity> complexInheritanceRoots = new HashSet<>();
-		Map<String,Set<NamedEntity>> simpleInheritanceRoots = new HashMap<>();
+	private static void addLocalProperties(TLFacet facet, List<TLProperty> propertyList,
+            Set<NamedEntity> complexInheritanceRoots, Map<String,Set<NamedEntity>> simpleInheritanceRoots) {
 		List<TLProperty> localProperties = new ArrayList<>( facet.getElements() );
 		
 		// We are traversing upward in the inheritance hierarchy, so we must pre-pend

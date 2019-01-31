@@ -23,10 +23,13 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.net.URL;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import javax.xml.namespace.QName;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -34,7 +37,9 @@ import org.opentravel.ns.ota2.release_v01_00.ReleaseStatus;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.model.TLModel;
+import org.opentravel.schemacompiler.task.CommonCompilerTaskOptions;
 import org.opentravel.schemacompiler.task.CompileAllCompilerTask;
+import org.opentravel.schemacompiler.task.CompileAllTaskOptions;
 import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.util.RepositoryTestUtils;
 import org.opentravel.schemacompiler.util.URLUtils;
@@ -68,21 +73,20 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
 		test_11_CreateRelease();
 		test_12_PublishRelease();
 		test_13_CompileRelease();
-		test_14_NewReleaseVersion();
-		test_15_UnpublishRelease();
-		test_16_DeleteLibrary();
-		test_17_CreateNamespace();
-		test_17a_CreateNamespaceError();
-		test_18_ListNamespaceChildren();
-		test_19_DeleteNamespace();
-		test_20_CreateRootNamespace();
-		test_21_DeleteRootNamespace();
+		test_14_CreateServiceAssembly();
+		test_15_NewReleaseVersion();
+		test_16_UnpublishRelease();
+		test_17_DeleteLibrary();
+		test_18_CreateNamespace();
+		test_18a_CreateNamespaceError();
+		test_19_ListNamespaceChildren();
+		test_20_DeleteNamespace();
+		test_21_CreateRootNamespace();
+		test_22_DeleteRootNamespace();
 	}
 	
 	public void test_01_PublishLibrary() throws Exception {
-		if (DEBUG)
-			System.out.println(
-					"PUBLISH - Publishing new content to the remote repository. [" + getClass().getSimpleName() + "]" );
+	    logDebug( "PUBLISH - Publishing new content to the remote repository. [%s]" );
 		ProjectManager projectManager = new ProjectManager( new TLModel(), true, repositoryManager.get() );
 		File projectFile = new File( wipFolder.get(), "/projects/project_1.xml" );
 		
@@ -120,14 +124,11 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
 		assertEquals( RepositoryItemState.MANAGED_UNLOCKED, projectItem.getState() );
 		model.set( projectManager.getModel() );
 		
-		if (DEBUG)
-			System.out.println( "DONE - Success." );
+		logDebug( "DONE - Success." );
 	}
 	
 	public void test_02_LockLibrary() throws Exception {
-		if (DEBUG)
-			System.out
-				.println( "LOCK - Obtaining a lock for a managed project item. [" + getClass().getSimpleName() + "]" );
+	    logDebug( "LOCK - Obtaining a lock for a managed project item. [%s]" );
 		ProjectManager projectManager = new ProjectManager( new TLModel(), true, repositoryManager.get() );
 		File projectFile = new File( wipFolder.get(), "/projects/project_1.xml" );
 		
@@ -167,14 +168,11 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
 		}
 		model.set( projectManager.getModel() );
 		
-		if (DEBUG)
-			System.out.println( "DONE - Success." );
+		logDebug( "DONE - Success." );
 	}
 	
 	public void test_03_CommitLibrary() throws Exception {
-		if (DEBUG)
-			System.out.println(
-					"COMMIT - Committing changes to the remote repository. [" + getClass().getSimpleName() + "]" );
+	    logDebug( "COMMIT - Committing changes to the remote repository. [%s]" );
 		ProjectManager projectManager = new ProjectManager( new TLModel(), true, repositoryManager.get() );
 		File projectFile = new File( wipFolder.get(), "/projects/project_1.xml" );
 		
@@ -202,8 +200,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
 		projectManager.commit( projectItem, "Updated library comments." );
 		model.set( projectManager.getModel() );
 		
-		if (DEBUG)
-			System.out.println( "DONE - Success." );
+		logDebug( "DONE - Success." );
 	}
 	
 	public void test_04_RevertLibrary() throws Exception {
@@ -237,14 +234,11 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
 		projectManager.revert( projectItem );
 		model.set( projectManager.getModel() );
 		
-		if (DEBUG)
-			System.out.println( "DONE - Success." );
+		logDebug( "DONE - Success." );
 	}
 	
 	public void test_05_UnlockLibrary() throws Exception {
-		if (DEBUG)
-			System.out
-				.println( "UNLOCK - Releasing lock for a managed project item. [" + getClass().getSimpleName() + "]" );
+	    logDebug( "UNLOCK - Releasing lock for a managed project item. [%s]" );
 		ProjectManager projectManager = new ProjectManager( new TLModel(), true, repositoryManager.get() );
 		File projectFile = new File( wipFolder.get(), "/projects/project_1.xml" );
 		
@@ -272,13 +266,11 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
 		projectManager.unlock( projectItem, true, "Unlocking with commit." );
 		model.set( projectManager.getModel() );
 		
-		if (DEBUG)
-			System.out.println( "DONE - Success." );
+		logDebug( "DONE - Success." );
 	}
 	
 	public void test_06_PromoteLibrary() throws Exception {
-		if (DEBUG)
-			System.out.println( "PROMOTE - Promoting a managed project item. [" + getClass().getSimpleName() + "]" );
+	    logDebug( "PROMOTE - Promoting a managed project item. [%s]" );
 		ProjectManager projectManager = new ProjectManager( new TLModel(), true, repositoryManager.get() );
 		File projectFile = new File( wipFolder.get(), "/projects/project_1.xml" );
 		
@@ -307,14 +299,11 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
 		assertEquals( TLLibraryStatus.FINAL, projectItem.getStatus() );
 		model.set( projectManager.getModel() );
 		
-		if (DEBUG)
-			System.out.println( "DONE - Success." );
+		logDebug( "DONE - Success." );
 	}
 	
 	public void test_07_RecalculateLibraryCrc() throws Exception {
-		if (DEBUG)
-			System.out.println( "RECALCULATE-CRC - Recalculating CRC for a managed project item. ["
-					+ getClass().getSimpleName() + "]" );
+	    logDebug( "RECALCULATE-CRC - Recalculating CRC for a managed project item. [%s]" );
 		ProjectManager projectManager = new ProjectManager( new TLModel(), true, repositoryManager.get() );
 		File projectFile = new File( wipFolder.get(), "/projects/project_1.xml" );
 		
@@ -341,8 +330,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
 	}
 	
 	public void test_08_DemoteLibrary() throws Exception {
-		if (DEBUG)
-			System.out.println( "DEMOTE - Demoting a managed project item. [" + getClass().getSimpleName() + "]" );
+	    logDebug( "DEMOTE - Demoting a managed project item. [%s]" );
 		ProjectManager projectManager = new ProjectManager( new TLModel(), true, repositoryManager.get() );
 		File projectFile = new File( wipFolder.get(), "/projects/project_1.xml" );
 		
@@ -371,14 +359,11 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
 		assertEquals( TLLibraryStatus.DRAFT, projectItem.getStatus() );
 		model.set( projectManager.getModel() );
 		
-		if (DEBUG)
-			System.out.println( "DONE - Success." );
+		logDebug( "DONE - Success." );
 	}
 	
 	public void test_09_UpdateLibraryStatus() throws Exception {
-		if (DEBUG)
-			System.out.println(
-					"UPDATE-STATUS - Updating status of a managed project item. [" + getClass().getSimpleName() + "]" );
+	    logDebug( "UPDATE-STATUS - Updating status of a managed project item. [%s]" );
 		ProjectManager projectManager = new ProjectManager( new TLModel(), true, repositoryManager.get() );
 		File projectFile = new File( wipFolder.get(), "/projects/project_1.xml" );
 		
@@ -403,13 +388,11 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
 		assertEquals( TLLibraryStatus.DRAFT, projectItem.getStatus() );
 		model.set( projectManager.getModel() );
 		
-		if (DEBUG)
-			System.out.println( "DONE - Success." );
+		logDebug( "DONE - Success." );
 	}
 	
 	public void test_10_GetLibraryHistory() throws Exception {
-		System.out.println( "GET-HISTORY - Retrieving commit history of a managed project item. ["
-				+ getClass().getSimpleName() + "]" );
+	    logDebug( "GET-HISTORY - Retrieving commit history of a managed project item. [%s]" );
 		ProjectManager projectManager = new ProjectManager( new TLModel(), true, repositoryManager.get() );
 		File projectFile = new File( wipFolder.get(), "/projects/project_1.xml" );
 		
@@ -443,13 +426,11 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
 		}
 		model.set( projectManager.getModel() );
 		
-		if (DEBUG)
-			System.out.println( "DONE - Success." );
+		logDebug( "DONE - Success." );
 	}
 	
 	public void test_11_CreateRelease() throws Exception {
-		if (DEBUG)
-			System.out.println( "CREATE RELEASE - Creating beta release. [" + getClass().getSimpleName() + "]" );
+	    logDebug( "CREATE RELEASE - Creating beta release. [%s]" );
 		
 		// Load the project that contains the library we have been making updates to
 		ProjectManager projectManager = new ProjectManager( new TLModel(), true, repositoryManager.get() );
@@ -462,6 +443,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
 		ValidationFindings findings = new ValidationFindings();
 		Project project = projectManager.loadProject( projectFile, findings );
 		ProjectItem projectItem = findProjectItem( project, "library_1_p2_2_0_0.otm" );
+		ReleaseCompileOptions compileOptions = new ReleaseCompileOptions();
 		
 		// Verify that the release loaded correctly
 		if (findings.hasFinding( FindingType.ERROR )) {
@@ -476,11 +458,13 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
 		ValidationFindings releaseFindings = new ValidationFindings();
 		RepositoryItemCommit commit = history.getCommitHistory().get( 1 );
 		
-		releaseManager.createNewRelease( "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package", "TestRelease",
-				wipFolder.get() );
+		releaseManager.createNewRelease( "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package",
+		        "TestRelease", wipFolder.get() );
 		releaseManager.getRelease().setDefaultEffectiveDate( commit.getEffectiveOn() );
 		releaseManager.addPrincipalMember( projectItem );
 		releaseManager.loadReleaseModel( releaseFindings );
+		compileOptions.applyTaskOptions( getReleaseCompileOptions() );
+		releaseManager.getRelease().setCompileOptions( compileOptions );
 		releaseManager.saveRelease();
 		
 		// Verify that the release loaded correctly
@@ -503,14 +487,11 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
 		assertTrue( referencedFilenames.contains( "library_1_p1_1_0_0.otm" ) );
 		model.set( projectManager.getModel() );
 		
-		if (DEBUG)
-			System.out.println( "DONE - Success." );
+		logDebug( "DONE - Success." );
 	}
 	
 	public void test_12_PublishRelease() throws Exception {
-		if (DEBUG)
-			System.out
-				.println( "PUBLISH RELEASE - Publishing release to repository. [" + getClass().getSimpleName() + "]" );
+	    logDebug( "PUBLISH RELEASE - Publishing release to repository. [%s]" );
 		ReleaseManager releaseManager = new ReleaseManager( repositoryManager.get() );
 		File releaseFile = new File( wipFolder.get(), "/TestRelease_1_0_0.otr" );
 		ValidationFindings findings = new ValidationFindings();
@@ -547,14 +528,11 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
 		}
 		model.set( releaseManager.getModel() );
 		
-		if (DEBUG)
-			System.out.println( "DONE - Success." );
+		logDebug( "DONE - Success." );
 	}
 	
 	public void test_13_CompileRelease() throws Exception {
-		if (DEBUG)
-			System.out.println( "COMPILE RELEASE - Compiling the repository-managed release. ["
-					+ getClass().getSimpleName() + "]" );
+	    logDebug( "COMPILE RELEASE - Compiling the repository-managed release. [%s]" );
 		List<RepositoryItem> releaseItems = testRepository.get().listItems(
 				"http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package", TLLibraryStatus.DRAFT, false,
 				RepositoryItemType.RELEASE );
@@ -580,14 +558,49 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
 		assertFalse( findings.hasFinding( FindingType.ERROR ) );
 		model.set( null );
 		
-		if (DEBUG)
-			System.out.println( "DONE - Success." );
+		logDebug( "DONE - Success." );
 	}
 	
-	public void test_14_NewReleaseVersion() throws Exception {
-		if (DEBUG)
-			System.out.println(
-					"NEW RELEASE VERSION - Creating new version of a release. [" + getClass().getSimpleName() + "]" );
+    public void test_14_CreateServiceAssembly() throws Exception {
+        logDebug( "CREATE SERVICE ASSEMBLY - Compiling a service assembly. [%s]" );
+        File assemblyFile = new File( wipFolder.get(), "/TestAssembly.osm" );
+        ServiceAssemblyManager assemblyManager = new ServiceAssemblyManager( repositoryManager.get() );
+        ReleaseManager releaseManager = new ReleaseManager( repositoryManager.get() );
+        ServiceAssembly assembly = assemblyManager.newAssembly(
+                "http://www.opentravel.org/assemblies", "TestAssembly", "1.0.0", assemblyFile );
+        ServiceAssemblyItem providerItem = new ServiceAssemblyItem();
+        ServiceAssemblyItem consumerItem = new ServiceAssemblyItem();
+        RepositoryItem releaseItem = loadManagedRelease( "TestRelease_1_0_0.otr", releaseManager );
+        TLModel consumerModel, providerModel, implementationModel;
+        ValidationFindings findings = new ValidationFindings();
+        
+        providerItem.setReleaseItem( releaseItem );
+        providerItem.setResourceName( new QName( "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package_v2", "SampleResource" ) );
+        consumerItem.setReleaseItem( releaseItem );
+        assembly.addProviderApi( providerItem );
+        assembly.addConsumerApi( providerItem );
+        assemblyManager.saveAssembly( assembly );
+        
+        assembly = assemblyManager.loadAssembly( assemblyFile, findings );
+        assertFalse( findings.hasFinding( FindingType.ERROR ) );
+        
+        consumerModel = assemblyManager.loadConsumerModel( assembly, findings = new ValidationFindings() );
+        assertFalse( findings.hasFinding( FindingType.ERROR ) );
+        assertEquals( 4, consumerModel.getUserDefinedLibraries().size() );
+        
+        providerModel = assemblyManager.loadProviderModel( assembly, findings = new ValidationFindings() );
+        assertFalse( findings.hasFinding( FindingType.ERROR ) );
+        assertEquals( 4, providerModel.getUserDefinedLibraries().size() );
+        
+        implementationModel = assemblyManager.loadImplementationModel( assembly, findings = new ValidationFindings() );
+        assertFalse( findings.hasFinding( FindingType.ERROR ) );
+        assertEquals( 4, implementationModel.getUserDefinedLibraries().size() );
+        
+        logDebug( "DONE - Success." );
+    }
+                    
+	public void test_15_NewReleaseVersion() throws Exception {
+	    logDebug( "NEW RELEASE VERSION - Creating new version of a release. [%s]" );
 		ValidationFindings findings = new ValidationFindings();
 		ReleaseManager releaseManager = new ReleaseManager( repositoryManager.get() );
 		ReleaseManager newVersionReleaseManager;
@@ -623,14 +636,11 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
 		assertTrue( referencedFilenames.contains( "library_1_p1_1_0_0.otm" ) );
 		model.set( releaseManager.getModel() );
 		
-		if (DEBUG)
-			System.out.println( "DONE - Success." );
+		logDebug( "DONE - Success." );
 	}
 	
-	public void test_15_UnpublishRelease() throws Exception {
-		if (DEBUG)
-			System.out.println( "UNPUBLISH RELEASE - Unpublishing a release from the repository. ["
-					+ getClass().getSimpleName() + "]" );
+	public void test_16_UnpublishRelease() throws Exception {
+	    logDebug( "UNPUBLISH RELEASE - Unpublishing a release from the repository. [%s]" );
 		ReleaseManager releaseManager = new ReleaseManager( repositoryManager.get() );
 		ReleaseManager localReleaseManager;
 		
@@ -657,8 +667,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
 		assertEquals( 0, searchResults.size() );
 		model.set( releaseManager.getModel() );
 		
-		if (DEBUG)
-			System.out.println( "DONE - Success." );
+		logDebug( "DONE - Success." );
 	}
 	
 	private Set<String> getReleaseItemFilenames(List<ReleaseMember> memberList) {
@@ -699,9 +708,8 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
 		return releaseItem;
 	}
 	
-	public void test_16_DeleteLibrary() throws Exception {
-		if (DEBUG)
-			System.out.println( "DELETE - Delete a managed project item. [" + getClass().getSimpleName() + "]" );
+	public void test_17_DeleteLibrary() throws Exception {
+	    logDebug( "DELETE - Delete a managed project item. [%s]" );
 		ProjectManager projectManager = new ProjectManager( new TLModel(), true, repositoryManager.get() );
 		File projectFile = new File( wipFolder.get(), "/projects/project_1.xml" );
 		
@@ -732,14 +740,11 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
 		}
 		model.set( projectManager.getModel() );
 		
-		if (DEBUG)
-			System.out.println( "DONE - Success." );
+		logDebug( "DONE - Success." );
 	}
 	
-	public void test_17_CreateNamespace() throws Exception {
-		if (DEBUG)
-			System.out
-				.println( "CREATE NAMESPACE - Create a managed namespace item. [" + getClass().getSimpleName() + "]" );
+	public void test_18_CreateNamespace() throws Exception {
+	    logDebug( "CREATE NAMESPACE - Create a managed namespace item. [%s]" );
 		String managedNS = "http://www.OpenTravel.org/ns/Test-NS";
 		List<String> repositoryNamespaces = testRepository.get().listBaseNamespaces();
 		
@@ -752,14 +757,11 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
 		assertTrue( repositoryNamespaces.contains( managedNS ) );
 		model.set( null );
 		
-		if (DEBUG)
-			System.out.println( "DONE - Success." );
+		logDebug( "DONE - Success." );
 	}
 	
-	public void test_17a_CreateNamespaceError() throws Exception {
-		if (DEBUG)
-			System.out.println( "CREATE NAMESPACE (Error Test) - Attempt to create conflicting namespace. ["
-					+ getClass().getSimpleName() + "]" );
+	public void test_18a_CreateNamespaceError() throws Exception {
+	    logDebug( "CREATE NAMESPACE (Error Test) - Attempt to create conflicting namespace. [%s]" );
 		String managedNS = "http://www.OpenTravel.org/NS/Test-NS/ns2"; // case-sensitive conflict with test_10
 		List<String> repositoryNamespaces = testRepository.get().listBaseNamespaces();
 		
@@ -778,28 +780,22 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
 		assertFalse( repositoryNamespaces.contains( managedNS ) );
 		model.set( null );
 		
-		if (DEBUG)
-			System.out.println( "DONE - Success." );
+		logDebug( "DONE - Success." );
 	}
 	
-	public void test_18_ListNamespaceChildren() throws Exception {
-		if (DEBUG)
-			System.out.println( "LIST NAMESPACE CHILDREN - Find the children of a managed namespace. ["
-					+ getClass().getSimpleName() + "]" );
+	public void test_19_ListNamespaceChildren() throws Exception {
+	    logDebug( "LIST NAMESPACE CHILDREN - Find the children of a managed namespace. [%s]" );
 		List<String> nsChildren = testRepository.get().listNamespaceChildren( "http://www.OpenTravel.org/ns" );
 		
 		assertEquals( 2, nsChildren.size() );
 		assertTrue( nsChildren.contains( "OTA2" ) );
 		assertTrue( nsChildren.contains( "Test-NS" ) );
 		
-		if (DEBUG)
-			System.out.println( "DONE - Success." );
+		logDebug( "DONE - Success." );
 	}
 	
-	public void test_19_DeleteNamespace() throws Exception {
-		if (DEBUG)
-			System.out
-				.println( "DELETE NAMESPACE - Delete a managed namespace item. [" + getClass().getSimpleName() + "]" );
+	public void test_20_DeleteNamespace() throws Exception {
+	    logDebug( "DELETE NAMESPACE - Delete a managed namespace item. [%s]" );
 		String managedNS = "http://www.OpenTravel.org/ns/Test-NS";
 		List<String> repositoryNamespaces = testRepository.get().listBaseNamespaces();
 		
@@ -812,14 +808,11 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
 		assertFalse( repositoryNamespaces.contains( managedNS ) );
 		model.set( null );
 		
-		if (DEBUG)
-			System.out.println( "DONE - Success." );
+		logDebug( "DONE - Success." );
 	}
 	
-	public void test_20_CreateRootNamespace() throws Exception {
-		if (DEBUG)
-			System.out.println(
-					"CREATE ROOT NAMESPACE - Create a managed namespace item. [" + getClass().getSimpleName() + "]" );
+	public void test_21_CreateRootNamespace() throws Exception {
+	    logDebug( "CREATE ROOT NAMESPACE - Create a managed namespace item. [%s]" );
 		String rootNS = "http://www.testnamespace.com";
 		List<String> rootNamespaces = testRepository.get().listRootNamespaces();
 		
@@ -852,14 +845,11 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
 		testRepository.get().deleteNamespace( childNS );
 		model.set( null );
 		
-		if (DEBUG)
-			System.out.println( "DONE - Success." );
+		logDebug( "DONE - Success." );
 	}
 	
-	public void test_21_DeleteRootNamespace() throws Exception {
-		if (DEBUG)
-			System.out.println(
-					"DELETE ROOT NAMESPACE - Delete a managed namespace item. [" + getClass().getSimpleName() + "]" );
+	public void test_22_DeleteRootNamespace() throws Exception {
+	    logDebug( "DELETE ROOT NAMESPACE - Delete a managed namespace item. [%s]" );
 		String rootNS = "http://www.testnamespace.com";
 		List<String> rootNamespaces = testRepository.get().listRootNamespaces();
 		
@@ -872,8 +862,70 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
 		assertFalse( rootNamespaces.contains( rootNS ) );
 		model.set( null );
 		
-		if (DEBUG)
-			System.out.println( "DONE - Success." );
+		logDebug( "DONE - Success." );
 	}
 	
+    protected void logDebug(String message) {
+        if (DEBUG) {
+            System.out.println( String.format( message, getClass().getSimpleName() ) );
+        }
+    }
+    
+    protected CompileAllTaskOptions getReleaseCompileOptions() {
+        return new CompileAllTaskOptions() {
+            public String getResourceBaseUrl() {
+                return "http://www.opentravel.org/resources";
+            }
+            public URL getServiceLibraryUrl() {
+                return null;
+            }
+            public String getServiceEndpointUrl() {
+                return "http://www.opentravel.org/services";
+            }
+            public boolean isSuppressOptionalFields() {
+                return false;
+            }
+            public boolean isGenerateMaxDetailsForExamples() {
+                return true;
+            }
+            public boolean isGenerateExamples() {
+                return true;
+            }
+            public Integer getExampleMaxRepeat() {
+                return 2;
+            }
+            public Integer getExampleMaxDepth() {
+                return 2;
+            }
+            public String getExampleContext() {
+                return null;
+            }
+            public String getOutputFolder() {
+                return null;
+            }
+            public String getCatalogLocation() {
+                return null;
+            }
+            public boolean isSuppressOtmExtensions() {
+                return false;
+            }
+            public boolean isCompileSwagger() {
+                return true;
+            }
+            public boolean isCompileServices() {
+                return true;
+            }
+            public boolean isCompileSchemas() {
+                return true;
+            }
+            public boolean isCompileJsonSchemas() {
+                return true;
+            }
+            public boolean isCompileHtml() {
+                return true;
+            }
+            public void applyTaskOptions(CommonCompilerTaskOptions taskOptions) {}
+        };
+    }
+    
 }

@@ -74,13 +74,19 @@ public class TestRemoteRepositoryFunctions extends TestRepositoryFunctions {
 				"http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package_v2", "library_1_p2" );
 		entity = library.getBusinessObjectType( "SampleBusinessObject" );
 		searchResult = repository.getEntityWhereUsed( entity, true );
-		assertEquals( 3, searchResult.size() );
+		assertEquals( 4, searchResult.size() );
 		
 		entity = library.getBusinessObjectType( "EmptyBusinessObject" );
 		searchResult = repository.getEntityWhereExtended( entity );
 		assertEquals( 2, searchResult.size() );
 	}
 	
+    @Override
+    public void test_19_ListNamespaceChildren() throws Exception {
+        super.test_19_ListNamespaceChildren();
+        assertEquals( 8, testRepository.get().listAllNamespaces().size() );
+    }
+    
 	@Test
     public void testUserAuthorizations() throws Exception {
         String readNS = "http://www.OpenTravel.org";

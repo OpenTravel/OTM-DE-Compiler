@@ -26,7 +26,8 @@ import org.opentravel.schemacompiler.util.ModelComparator;
 import org.opentravel.schemacompiler.version.AbstractVersionHelperTests;
 
 /**
- * Verifies the operation of the library comparator utility.
+ * Verifies the operation of the <code>LibraryComparator</code> and its
+ * associated utility classes.
  */
 public class TestLibraryComparator extends AbstractVersionHelperTests {
 	

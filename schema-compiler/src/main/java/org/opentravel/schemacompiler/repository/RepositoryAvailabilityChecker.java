@@ -32,7 +32,6 @@ import java.util.concurrent.Future;
 
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
-import org.opentravel.schemacompiler.repository.impl.RemoteRepositoryClient;
 import org.opentravel.schemacompiler.util.URLUtils;
 
 /**
@@ -242,7 +241,7 @@ public class RepositoryAvailabilityChecker {
 					try {
 						String endpointUrl = ((RemoteRepository) repository).getEndpointUrl();
 						
-						RemoteRepositoryClient.getRepositoryMetadata( endpointUrl );
+						repositoryManager.getRemoteUtils().getRepositoryMetadata( endpointUrl );
 						successfulPingCache.put( repositoryId, System.currentTimeMillis() );
 						isAvailable = true;
 						

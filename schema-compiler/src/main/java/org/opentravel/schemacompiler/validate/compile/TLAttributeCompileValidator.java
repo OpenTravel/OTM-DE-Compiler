@@ -55,6 +55,7 @@ public class TLAttributeCompileValidator extends TLAttributeBaseValidator {
 	
 	public static final String ERROR_NON_SIMPLE_CORE_AS_ATTRIBUTE = "NON_SIMPLE_CORE_AS_ATTRIBUTE";
 	public static final String ERROR_ILLEGAL_LIST_FACET_REFERENCE = "ILLEGAL_LIST_FACET_REFERENCE";
+    public static final String WARNING_LIST_FACET_REPEAT_IGNORED = "LIST_FACET_REPEAT_IGNORED";
 	public static final String ERROR_EMPTY_FACET_REFERENCED = "EMPTY_FACET_REFERENCED";
 	public static final String ERROR_ILLEGAL_VWA_ATTRIBUTE = "ILLEGAL_VWA_ATTRIBUTE";
 	public static final String ERROR_ILLEGAL_OPEN_ENUM_ATTRIBUTE = "ILLEGAL_OPEN_ENUM_ATTRIBUTE";
@@ -145,6 +146,10 @@ public class TLAttributeCompileValidator extends TLAttributeBaseValidator {
 				builder.addFinding( FindingType.ERROR, "type", ERROR_ILLEGAL_LIST_FACET_REFERENCE,
 						referencedCore.getName() );
 			}
+            if ((target.getReferenceRepeat() != 0) && (target.getReferenceRepeat() != roleCount)) {
+                String repeatValue = (target.getReferenceRepeat() < 0) ? "*" : (target.getReferenceRepeat() + "");
+                builder.addFinding( FindingType.WARNING, "repeat", WARNING_LIST_FACET_REPEAT_IGNORED, repeatValue );
+            }
 		}
 	}
 	

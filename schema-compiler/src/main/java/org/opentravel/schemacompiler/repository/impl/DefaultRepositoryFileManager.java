@@ -41,7 +41,14 @@ import org.opentravel.schemacompiler.util.FileUtils;
 public class DefaultRepositoryFileManager extends RepositoryFileManager {
 
     private static Log log = LogFactory.getLog(DefaultRepositoryFileManager.class);
-
+    
+    /**
+     * Default constructor.
+     */
+    protected DefaultRepositoryFileManager() {
+        super( RepositoryFileManager.getDefaultRepositoryLocation() );
+    }
+    
     /**
      * Constructor that initializes a new instance used for managing and retrieving files in an
      * OTA2.0 repository at the specified file location.

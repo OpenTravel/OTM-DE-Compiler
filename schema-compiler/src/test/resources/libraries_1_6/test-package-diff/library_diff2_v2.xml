@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_06"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_06 ../../../../main/resources/ota2-context/schemas/OTA2_LibraryModel_v1.6.0.xsd">
+    
+    <VersionScheme>OTA2</VersionScheme>
+    <Status>Draft</Status>
+    <Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-diff2/v2</Namespace>
+    <Prefix>d2v2</Prefix>
+    <Name>library_diff2</Name>
+    <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
+    <Import namespace="http://www.opentravel.org/OTM/Common/v0" prefix="ota"/>
+    <Import fileHints="library_diff1_v1.xml"
+        namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-diff1/v1" prefix="d1v1"/>
+    <Import fileHints="library_diff1_v1_1.xml"
+        namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-diff1/v1_1" prefix="d1v11"/>
+    <Comments>Test Diff Library 2</Comments>
+    
+    <Simple name="TestSimple" type="xsd:decimal" pattern="[0-9]+" fractionDigits="3" totalDigits="5"
+    		minLength="0" maxLength="9" minInclusive="0" maxInclusive="9" minExclusive="0" maxExclusive="9" />
+    
+    <Simple name="TestSimpleList" type="TestSimple" listTypeInd="true">
+    		<Documentation>
+    			<Description>New Version Description</Description>
+    		</Documentation>
+    </Simple>
+    
+    <CoreObject name="TestTypeChange" notExtendable="true">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Attribute name="id" type="xsd:ID"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <CoreObject name="ExtendedCore" notExtendable="true">
+   		<Extension extends="d1v11:BaseCore"/>
+        <Aliases/>
+        <Simple type="xsd:string"/>
+        <Summary>
+            <Attribute name="extendedAttrV2" type="xsd:string"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <BusinessObject name="TestBusinessObject" notExtendable="false">
+        <Aliases/>
+        <ID>
+            <Attribute name="messageId" type="xsd:ID"/>
+            <Element name="sample_oid" repeat="0" type="xsd:int"/>
+        </ID>
+        <Summary>
+            <Attribute name="addedAttr" type="xsd:string"/>
+            <Attribute name="modifiedAttr" type="xsd:int"/>
+            <Element name="fieldTypeChange" type="xsd:string"/>
+            <Element name="BaseCore" type="d1v1:BaseCore" />
+            <Element name="CardinalityChange" type="xsd:string" repeat="4"/>
+            <Element name="OptionalityChange" type="xsd:string" mandatory="true"/>
+            <Element name="ReferenceChange" type="xsd:string" reference="true"/>
+            <Element name="ExampleAndEquivalentChange" type="xsd:string">
+            		<Example context="default">XYZ</Example>
+            		<Equivalent context="default">987</Equivalent>
+            </Element>
+            <Element name="DocumentationChange" type="xsd:string">
+				<Documentation>
+					<Description>New Documentation</Description>
+				</Documentation>
+            </Element>
+        </Summary>
+        <Detail>
+            <Attribute name="facetChange" type="xsd:string"/>
+        </Detail>
+    </BusinessObject>
+
+	<ContextualFacet name="FindByName" type="Query" facetOwner="TestBusinessObject">
+		<Element name="name" repeat="0" type="xsd:string" />
+	</ContextualFacet>
+
+    <BusinessObject name="NewBusinessObject" notExtendable="false">
+        <Aliases/>
+        <ID>
+            <Attribute name="messageId" type="xsd:ID"/>
+            <Element name="sample_oid" repeat="0" type="xsd:int"/>
+        </ID>
+        <Summary>
+            <Attribute name="addedAttr" type="xsd:string"/>
+            <Attribute name="modifiedAttr" type="xsd:int"/>
+        </Summary>
+        <Detail/>
+    </BusinessObject>
+
+	<ContextualFacet name="FindByName" type="Query" facetOwner="NewBusinessObject">
+		<Element name="name" repeat="0" type="xsd:string" />
+	</ContextualFacet>
+
+    <Resource name="ParentResource" businessObjectRef="TestBusinessObject" basePath="/services/ParentResource"
+    			abstract="false" firstClass="true">
+        <ParamGroup name="IDParameters" idGroup="true" facetName="TestBusinessObject_ID">
+    		    	<Parameter fieldName="sample_oid" location="Path"/>
+        </ParamGroup>
+   	</Resource>
+   	
+    <Resource name="AddedParentResource" businessObjectRef="TestBusinessObject" basePath="/services/ParentResource"
+    			abstract="false" firstClass="true">
+        <ParamGroup name="IDParameters" idGroup="true" facetName="TestBusinessObject_ID">
+	        	<Parameter fieldName="sample_oid" location="Path"/>
+        </ParamGroup>
+   	</Resource>
+   	
+	<Resource name="TestResource2" businessObjectRef="NewBusinessObject" basePath="/services/TestResource/changed" abstract="true" firstClass="false">
+		<Documentation>
+			<Description>New Documentation</Description>
+		</Documentation>
+		<ResourceParentRef parent="ParentResource" parentParamGroup="IDParameters" pathTemplate="/changedParent/{sample_oid}">
+			<Documentation>
+				<Description>New Documentation</Description>
+			</Documentation>
+		</ResourceParentRef>
+		<ResourceParentRef parent="AddedParentResource" parentParamGroup="IDParameters" pathTemplate="/addedParent/{sample_oid}" />
+		<ParamGroup name="IDParameters" idGroup="true" facetName="NewBusinessObject_ID">
+			<Documentation>
+				<Description>New Documentation</Description>
+			</Documentation>
+			<Parameter fieldName="sample_oid" location="Path">
+				<Documentation>
+					<Description>New Documentation</Description>
+				</Documentation>
+			</Parameter>
+		</ParamGroup>
+		<ParamGroup name="OtherIDParameters" idGroup="true" facetName="NewBusinessObject_ID">
+			<Parameter fieldName="sample_oid" location="Path" />
+		</ParamGroup>
+		<ParamGroup name="QueryParameters" idGroup="false" facetName="NewBusinessObject_Query_FindByName">
+			<Parameter fieldName="name" location="Query" />
+		</ParamGroup>
+		<ParamGroup name="AddedParamGroup" idGroup="false" facetName="TestBusinessObject_Query_FindByName">
+			<Parameter fieldName="name" location="Query" />
+		</ParamGroup>
+		<ParamGroup name="ChangedParamGroup" idGroup="true" facetName="TestBusinessObject_ID">
+			<Parameter fieldName="sample_oid" location="Query" />
+		</ParamGroup>
+		<ActionFacet label="ObjectOnly" referenceType="Required">
+			<Documentation>
+				<Description>New Documentation</Description>
+			</Documentation>
+		</ActionFacet>
+		<ActionFacet label="AddedAF" referenceType="Required" referenceFacet="Detail" />
+		<ActionFacet label="ObjectList" referenceType="Required" referenceFacet="Summary" referenceRepeat="1000" />
+		<ActionFacet label="ObjectWrapper" referenceType="Required" referenceFacet="Detail" basePayload="ExtendedCore" referenceRepeat="99" />
+		<Action actionId="Create" common="false">
+			<Documentation>
+				<Description>New Documentation</Description>
+			</Documentation>
+			<ActionRequest httpMethod="PUT" pathTemplate="/changedSamples" payloadType="TestResource2_AddedAF" mimeTypes="TEXT_XML TEXT_JSON">
+				<Documentation>
+					<Description>New Documentation</Description>
+				</Documentation>
+			</ActionRequest>
+			<ActionResponse statusCodes="200 204" payloadType="TestResource2_ObjectOnly" mimeTypes="APPLICATION_XML APPLICATION_JSON">
+				<Documentation>
+					<Description>New Documentation</Description>
+				</Documentation>
+			</ActionResponse>
+		</Action>
+		<Action actionId="Update" common="false">
+			<ActionRequest httpMethod="PUT" pathTemplate="/sample/{sample_oid}" paramGroup="OtherIDParameters"
+				payloadType="TestResource2_ObjectWrapper" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+			<ActionResponse statusCodes="200" payloadType="TestResource2_ObjectList" mimeTypes="TEXT_XML TEXT_JSON" />
+			<ActionResponse statusCodes="403" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+		</Action>
+		<Action actionId="Search" common="true">
+			<ActionRequest httpMethod="GET" pathTemplate="/changedSamples" paramGroup="QueryParameters" />
+			<ActionResponse statusCodes="200" payloadType="TestResource2_ObjectList" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+		</Action>
+		<Action actionId="AddedAction" common="false">
+			<ActionRequest httpMethod="POST" pathTemplate="/samples" payloadType="TestResource2_ObjectOnly" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+			<ActionResponse statusCodes="200 204" payloadType="TestResource2_ObjectOnly" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+		</Action>
+	</Resource>
+    
+</Library>
