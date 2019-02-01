@@ -93,6 +93,11 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>com.sun.mail</groupId>
 			<artifactId>javax.mail</artifactId>
 			<scope>test</scope>
