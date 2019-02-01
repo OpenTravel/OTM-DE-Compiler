@@ -383,7 +383,7 @@ public class CodeGeneratorTestAssertions {
     		
     		// Run Swagger parser to ensure semantic correctness
     		if (errors.size() == 0) {
-        		new SwaggerParser().read( swaggerNode, true );
+        		new SwaggerParser().read( swaggerFile.getCanonicalPath() );
     		}
     		
     		// If we are working on the file that includes the JSON schema definitions, we need to
