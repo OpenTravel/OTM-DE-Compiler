@@ -19,8 +19,10 @@ package org.opentravel.schemacompiler.validate.assembly;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.opentravel.schemacompiler.repository.ReleaseItem;
 import org.opentravel.schemacompiler.repository.ReleaseManager;
@@ -47,7 +49,7 @@ public class AssemblyValidationContext implements ValidationContext {
 	private static final Logger log = LoggerFactory.getLogger(ValidationContext.class);
 	
 	private RepositoryManager repositoryManager;
-	private Map<String,List<Integer>> libraryCommitNumbers = new HashMap<>();
+	private Map<String,Set<Integer>> libraryCommitNumbers = new HashMap<>();
 	private Map<String,List<RepositoryItem>> releaseLibraries = new HashMap<>();
 	private ServiceAssembly assembly;
 	
@@ -115,9 +117,9 @@ public class AssemblyValidationContext implements ValidationContext {
 		
 		if (libraryItem != null) {
 			String libraryId = getUniqueId( libraryItem );
-			List<Integer> commitList = libraryCommitNumbers.get( libraryId );
+			Set<Integer> commitSet = libraryCommitNumbers.get( libraryId );
 			
-			multipleCommits = (commitList != null) && (commitList.size() > 1);
+			multipleCommits = (commitSet != null) && (commitSet.size() > 1);
 		}
 		return multipleCommits;
 	}
@@ -149,7 +151,7 @@ public class AssemblyValidationContext implements ValidationContext {
 						
 						if (commitNumber >= 0) {
 							libraryCommitNumbers.computeIfAbsent( libraryId,
-									id -> libraryCommitNumbers.put( id, new ArrayList<>() ) );
+									id -> libraryCommitNumbers.put( id, new HashSet<>() ) );
 							libraryCommitNumbers.get( libraryId ).add( commitNumber );
 						}
 						libraryItems.add( member.getRepositoryItem() );
