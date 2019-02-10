@@ -51,9 +51,25 @@ import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.ObjectFactory;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryInfoType;
 import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
+import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
+import org.opentravel.schemacompiler.loader.LibraryModuleInfo;
+import org.opentravel.schemacompiler.loader.LibraryModuleLoader;
+import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
+import org.opentravel.schemacompiler.loader.impl.MultiVersionLibraryModuleLoader;
+import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.repository.impl.LibraryContentWrapper;
+import org.opentravel.schemacompiler.saver.LibraryModelSaver;
+import org.opentravel.schemacompiler.saver.LibrarySaveException;
+import org.opentravel.schemacompiler.saver.impl.Library15FileSaveHandler;
+import org.opentravel.schemacompiler.saver.impl.Library16FileSaveHandler;
+import org.opentravel.schemacompiler.transform.ObjectTransformer;
+import org.opentravel.schemacompiler.transform.TransformerFactory;
+import org.opentravel.schemacompiler.transform.symbols.DefaultTransformerContext;
 import org.opentravel.schemacompiler.util.ClasspathResourceResolver;
 import org.opentravel.schemacompiler.util.FileUtils;
+import org.opentravel.schemacompiler.util.URLUtils;
+import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.xml.NamespacePrefixMapper;
 import org.opentravel.schemacompiler.xml.XMLGregorianCalendarConverter;
 
@@ -867,6 +883,65 @@ public abstract class RepositoryFileManager {
                 }
             }
         }
+    }
+    
+    /**
+     * Attempts to load the content of the specified file as an OTM library. If any non-validation exceptions occur
+     * during the load, the file will be assumed to be a non-OTM file. In such, cases this method will return null
+     * instead of throwing an exception.
+     * 
+     * @param libraryFile the library file load
+     * @return LibraryContentWrapper
+     */
+    public LibraryContentWrapper loadLibraryContent(File libraryFile) {
+        boolean is16Library = false;
+        TLLibrary library = null;
+        
+        try {
+            if ((libraryFile != null) && libraryFile.exists()
+                    && !libraryFile.getName().toLowerCase().endsWith( ".xsd" )) {
+                LibraryModuleLoader<InputStream> loader = new MultiVersionLibraryModuleLoader();
+                LibraryModuleInfo<Object> moduleInfo = loader.loadLibrary( new LibraryStreamInputSource( libraryFile ),
+                        new ValidationFindings() );
+                Object jaxbLibrary = moduleInfo.getJaxbArtifact();
+                
+                if (jaxbLibrary != null) {
+                    TransformerFactory<DefaultTransformerContext> transformerFactory = TransformerFactory.getInstance(
+                            SchemaCompilerApplicationContext.LOADER_TRANSFORMER_FACTORY,
+                            new DefaultTransformerContext() );
+                    ObjectTransformer<Object,TLLibrary,DefaultTransformerContext> transformer = transformerFactory
+                        .getTransformer( jaxbLibrary, TLLibrary.class );
+                    
+                    library = transformer.transform( jaxbLibrary );
+                    library.setLibraryUrl( URLUtils.toURL( libraryFile ) );
+                    is16Library = (jaxbLibrary instanceof org.opentravel.ns.ota2.librarymodel_v01_06.Library);
+                }
+            }
+        } catch (Exception e) {
+            // No action - method will return a null library
+        }
+        return new LibraryContentWrapper( library, libraryFile, is16Library );
+    }
+    
+    /**
+     * Saves the OTM library content using the original file format from which it was loaded.
+     * 
+     * @param libraryContent the library content to be saved
+     * @throws RepositoryException thrown if the library file cannot be added to the current change set
+     * @throws LibrarySaveException thrown if an error occurs during the save operation
+     */
+    public void saveLibraryContent(LibraryContentWrapper libraryContent)
+            throws RepositoryException, LibrarySaveException {
+        LibraryModelSaver modelSaver = new LibraryModelSaver();
+        
+        if (libraryContent.isIs16Library()) {
+            modelSaver.setSaveHandler( new Library16FileSaveHandler() );
+        } else {
+            modelSaver.setSaveHandler( new Library15FileSaveHandler() );
+        }
+        addToChangeSet( libraryContent.getContentFile() );
+        modelSaver.getSaveHandler().setCreateBackupFile( false );
+        modelSaver.saveLibrary( libraryContent.getContent() );
     }
     
     /**

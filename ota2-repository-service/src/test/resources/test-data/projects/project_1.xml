@@ -3,7 +3,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/Project_v01_00 ../../../../../../schema-compiler/src/main/resources/ota2-context/schemas/OTA2_Project_v1.0.0.xsd">
     <otp:projectId>http://www.OpenTravel.org/projects/test/p1</otp:projectId>
-    <otp:name>Test Project #1</otp:name>
+    <otp:name>Test_Project</otp:name>
     <otp:description>Test description for the project.</otp:description>
     <otp:UnmanagedProjectItem defaultItem="true">
         <otp:FileLocation>../test-package_v2/library_1_p2.xml</otp:FileLocation>

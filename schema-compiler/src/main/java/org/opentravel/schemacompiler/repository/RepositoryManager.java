@@ -20,7 +20,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -49,31 +48,20 @@ import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryPermission;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryState;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
-import org.opentravel.schemacompiler.loader.LibraryModuleInfo;
-import org.opentravel.schemacompiler.loader.LibraryModuleLoader;
 import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
-import org.opentravel.schemacompiler.loader.impl.MultiVersionLibraryModuleLoader;
-import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.impl.DefaultRepositoryFileManager;
+import org.opentravel.schemacompiler.repository.impl.LibraryContentWrapper;
 import org.opentravel.schemacompiler.repository.impl.ProjectFileUtils;
 import org.opentravel.schemacompiler.repository.impl.RemoteRepositoryClient;
 import org.opentravel.schemacompiler.repository.impl.RemoteRepositoryUtils;
 import org.opentravel.schemacompiler.repository.impl.RepositoryItemImpl;
 import org.opentravel.schemacompiler.repository.impl.RepositoryItemVersionedWrapper;
 import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
-import org.opentravel.schemacompiler.saver.LibraryModelSaver;
-import org.opentravel.schemacompiler.saver.LibrarySaveException;
-import org.opentravel.schemacompiler.saver.impl.Library15FileSaveHandler;
-import org.opentravel.schemacompiler.saver.impl.Library16FileSaveHandler;
 import org.opentravel.schemacompiler.security.PasswordHelper;
-import org.opentravel.schemacompiler.transform.ObjectTransformer;
-import org.opentravel.schemacompiler.transform.TransformerFactory;
-import org.opentravel.schemacompiler.transform.symbols.DefaultTransformerContext;
 import org.opentravel.schemacompiler.util.ExceptionUtils;
 import org.opentravel.schemacompiler.util.FileUtils;
 import org.opentravel.schemacompiler.util.URLUtils;
-import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.version.VersionScheme;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 import org.opentravel.schemacompiler.version.VersionSchemeFactory;
@@ -1031,16 +1019,13 @@ public class RepositoryManager implements Repository {
             
             // Validation Check - Make sure the namespace follows a proper URL format
             try {
-                URL nsUrl = new URL( rootNamespace );
+                new URI( rootNamespace ).parseServerAuthority();
                 
-                if ((nsUrl.getProtocol() == null) || (nsUrl.getAuthority() == null)) {
-                    throw new MalformedURLException(); // URLs without protocols or authorities are
-                                                       // not valid for the repository
-                }
                 if (rootNamespace.indexOf( '?' ) >= 0) {
                     throw new RepositoryException( "Query strings are not allowed on root namespace URIs." );
                 }
-            } catch (MalformedURLException e) {
+                
+            } catch (URISyntaxException e) {
                 throw new RepositoryException( "The root namespace does not conform to the required URI format." );
             }
             
@@ -1580,7 +1565,7 @@ public class RepositoryManager implements Repository {
         LibraryInfoType libraryMetadata = fileManager.loadLibraryMetadata( baseNS, item.getFilename(),
                 item.getVersion() );
         File contentFile = fileManager.getLibraryContentLocation( baseNS, item.getFilename(), item.getVersion() );
-        LibraryContentWrapper libraryContent = loadOtmLibraryContent( contentFile );
+        LibraryContentWrapper libraryContent = fileManager.loadLibraryContent( contentFile );
         TLLibraryStatus originalStatus = item.getStatus();
         TLLibraryStatus targetStatus = null;
         
@@ -1601,7 +1586,7 @@ public class RepositoryManager implements Repository {
                 libraryMetadata.setLastUpdated( XMLGregorianCalendarConverter.toXMLGregorianCalendar( new Date() ) );
                 
                 // Save the changes and update the repository item sent for this method call
-                saveOtmLibraryContent( libraryContent );
+                fileManager.saveLibraryContent( libraryContent );
                 fileManager.saveLibraryMetadata( libraryMetadata );
                 
                 // Create the history entry for this update
@@ -1670,7 +1655,7 @@ public class RepositoryManager implements Repository {
         LibraryInfoType libraryMetadata = fileManager.loadLibraryMetadata( baseNS, item.getFilename(),
                 item.getVersion() );
         File contentFile = fileManager.getLibraryContentLocation( baseNS, item.getFilename(), item.getVersion() );
-        LibraryContentWrapper libraryContent = loadOtmLibraryContent( contentFile );
+        LibraryContentWrapper libraryContent = fileManager.loadLibraryContent( contentFile );
         TLLibraryStatus originalStatus = item.getStatus();
         TLLibraryStatus targetStatus = null;
         
@@ -1690,7 +1675,7 @@ public class RepositoryManager implements Repository {
                 libraryMetadata.setStatus( targetStatus.toRepositoryStatus() );
                 libraryMetadata.setLastUpdated( XMLGregorianCalendarConverter.toXMLGregorianCalendar( new Date() ) );
                 
-                saveOtmLibraryContent( libraryContent );
+                fileManager.saveLibraryContent( libraryContent );
                 fileManager.saveLibraryMetadata( libraryMetadata );
                 
                 // Create the history entry for this update
@@ -1775,13 +1760,13 @@ public class RepositoryManager implements Repository {
                 fileManager.startChangeSet();
                 
                 // Change the status of the library metadata and content
-                LibraryContentWrapper libraryContent = loadOtmLibraryContent( contentFile );
+                LibraryContentWrapper libraryContent = fileManager.loadLibraryContent( contentFile );
                 
                 libraryContent.getContent().setStatus( newStatus );
                 libraryMetadata.setStatus( newStatus.toRepositoryStatus() );
                 libraryMetadata.setLastUpdated( XMLGregorianCalendarConverter.toXMLGregorianCalendar( new Date() ) );
                 
-                saveOtmLibraryContent( libraryContent );
+                fileManager.saveLibraryContent( libraryContent );
                 fileManager.saveLibraryMetadata( libraryMetadata );
                 
                 if (!(item instanceof ProjectItem)) {
@@ -1826,12 +1811,12 @@ public class RepositoryManager implements Repository {
                 fileManager.startChangeSet();
                 
                 // Re-save the library content; this will force a recalculation of the CRC value
-                LibraryContentWrapper libraryContent = loadOtmLibraryContent( contentFile );
+                LibraryContentWrapper libraryContent = fileManager.loadLibraryContent( contentFile );
                 
                 // Set the library's status - just in case it is out of sync with the meta-data record
                 libraryContent.getContent()
                     .setStatus( TLLibraryStatus.fromRepositoryStatus( libraryMetadata.getStatus() ) );
-                saveOtmLibraryContent( libraryContent );
+                fileManager.saveLibraryContent( libraryContent );
                 
                 libraryMetadata.setLastUpdated( XMLGregorianCalendarConverter.toXMLGregorianCalendar( new Date() ) );
                 fileManager.saveLibraryMetadata( libraryMetadata );
@@ -2095,7 +2080,7 @@ public class RepositoryManager implements Repository {
      * @param forceRefresh indicates whether the metadata should be refreshed regardless of the file's last-upated
      *            timestamp
      */
-    private void refreshLocalRepositoryInfo(boolean forceRefresh) {
+    public void refreshLocalRepositoryInfo(boolean forceRefresh) {
         try {
             Date actualLastUpdated = fileManager.getRepositoryMetadataLastUpdated();
             
@@ -2202,65 +2187,6 @@ public class RepositoryManager implements Repository {
     }
     
     /**
-     * Attempts to load the content of the specified file as an OTM library. If any non-validation exceptions occur
-     * during the load, the file will be assumed to be a non-OTM file. In such, cases this method will return null
-     * instead of throwing an exception.
-     * 
-     * @param libraryFile the library file load
-     * @return LibraryContentWrapper
-     */
-    private LibraryContentWrapper loadOtmLibraryContent(File libraryFile) {
-        boolean is16Library = false;
-        TLLibrary library = null;
-        
-        try {
-            if ((libraryFile != null) && libraryFile.exists()
-                    && !libraryFile.getName().toLowerCase().endsWith( ".xsd" )) {
-                LibraryModuleLoader<InputStream> loader = new MultiVersionLibraryModuleLoader();
-                LibraryModuleInfo<Object> moduleInfo = loader.loadLibrary( new LibraryStreamInputSource( libraryFile ),
-                        new ValidationFindings() );
-                Object jaxbLibrary = moduleInfo.getJaxbArtifact();
-                
-                if (jaxbLibrary != null) {
-                    TransformerFactory<DefaultTransformerContext> transformerFactory = TransformerFactory.getInstance(
-                            SchemaCompilerApplicationContext.LOADER_TRANSFORMER_FACTORY,
-                            new DefaultTransformerContext() );
-                    ObjectTransformer<Object,TLLibrary,DefaultTransformerContext> transformer = transformerFactory
-                        .getTransformer( jaxbLibrary, TLLibrary.class );
-                    
-                    library = transformer.transform( jaxbLibrary );
-                    library.setLibraryUrl( URLUtils.toURL( libraryFile ) );
-                    is16Library = (jaxbLibrary instanceof org.opentravel.ns.ota2.librarymodel_v01_06.Library);
-                }
-            }
-        } catch (Exception e) {
-            // No action - method will return a null library
-        }
-        return new LibraryContentWrapper( library, libraryFile, is16Library );
-    }
-    
-    /**
-     * Saves the OTM library content using the original file format from which it was loaded.
-     * 
-     * @param libraryContent the library content to be saved
-     * @throws RepositoryException thrown if the library file cannot be added to the current change set
-     * @throws LibrarySaveException thrown if an error occurs during the save operation
-     */
-    private void saveOtmLibraryContent(LibraryContentWrapper libraryContent)
-            throws RepositoryException, LibrarySaveException {
-        LibraryModelSaver modelSaver = new LibraryModelSaver();
-        
-        if (libraryContent.isIs16Library()) {
-            modelSaver.setSaveHandler( new Library16FileSaveHandler() );
-        } else {
-            modelSaver.setSaveHandler( new Library15FileSaveHandler() );
-        }
-        fileManager.addToChangeSet( libraryContent.getContentFile() );
-        modelSaver.getSaveHandler().setCreateBackupFile( false );
-        modelSaver.saveLibrary( libraryContent.getContent() );
-    }
-    
-    /**
      * Rolls back the current change set if the success flag provided is set to false.
      * 
      * @param success flag indicating if the change set operation was successful
@@ -2327,85 +2253,6 @@ public class RepositoryManager implements Repository {
          * @param listener the listener to be notified
          */
         public void notifyListener(RepositoryListener listener);
-        
-    }
-    
-    /**
-     * Wrapper class that contains the <code>TLLibrary</code> content as well as an indicator of whether the library was
-     * originally saved in the 1.6 format.
-     */
-    private class LibraryContentWrapper {
-        
-        private TLLibrary content;
-        private File contentFile;
-        private boolean is16Library;
-        
-        /**
-         * Full constructor.
-         * 
-         * @param content the OTM library content
-         * @param contentFile the original file from which the library content was loaded
-         * @param is16Library flag indicating whether the library was originally saved in the 1.6 format
-         */
-        public LibraryContentWrapper(TLLibrary content, File contentFile, boolean is16Library) {
-            this.setContent( content );
-            this.setContentFile( contentFile );
-            this.setIs16Library( is16Library );
-        }
-        
-        /**
-         * Returns the value of the 'content' field.
-         *
-         * @return TLLibrary
-         */
-        public TLLibrary getContent() {
-            return content;
-        }
-        
-        /**
-         * Assigns the value of the 'content' field.
-         *
-         * @param content the field value to assign
-         */
-        public void setContent(TLLibrary content) {
-            this.content = content;
-        }
-        
-        /**
-         * Returns the value of the 'contentFile' field.
-         *
-         * @return File
-         */
-        public File getContentFile() {
-            return contentFile;
-        }
-        
-        /**
-         * Assigns the value of the 'contentFile' field.
-         *
-         * @param contentFile the field value to assign
-         */
-        public void setContentFile(File contentFile) {
-            this.contentFile = contentFile;
-        }
-        
-        /**
-         * Returns the value of the 'is16Library' field.
-         *
-         * @return boolean
-         */
-        public boolean isIs16Library() {
-            return is16Library;
-        }
-        
-        /**
-         * Assigns the value of the 'is16Library' field.
-         *
-         * @param is16Library the field value to assign
-         */
-        public void setIs16Library(boolean is16Library) {
-            this.is16Library = is16Library;
-        }
         
     }
     

@@ -738,11 +738,11 @@ public abstract class AbstractVersionHelper {
 		}
 		
 		// Verify that the patch is, in fact, a patch of one of its prior minor versions
-		VersionHandler<Versioned> handler = getVersionHandler( majorOrMinorVersionTarget );
-		List<Versioned> priorMajorOrMinorVersions = handler.getAllVersionExtensions( majorOrMinorVersionTarget );
+		VersionChainFactory chainFactory = new VersionChainFactory( majorOrMinorVersionTarget.getOwningModel() );
+		VersionChain<Versioned> versionChain = chainFactory.getVersionChain( majorOrMinorVersionTarget );
 		Versioned patchedVersion = getPatchedVersion( patchVersion );
 		
-		if ((patchedVersion == null) || !priorMajorOrMinorVersions.contains( patchedVersion )) {
+		if ((patchedVersion == null) || !versionChain.getVersions().contains( patchedVersion )) {
 			throw new VersionSchemeException(
 					"Unable to roll-up because the patch provided does not apply to a prior version of the given target." );
 		}

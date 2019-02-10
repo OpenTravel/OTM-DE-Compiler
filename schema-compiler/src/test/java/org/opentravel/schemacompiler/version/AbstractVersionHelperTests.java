@@ -56,18 +56,18 @@ import org.opentravel.schemacompiler.validate.ValidationFindings;
  * @author S. Livezey
  */
 public abstract class AbstractVersionHelperTests {
-
+    
     public static final String TEST_LIBRARY_NAME = "test_library";
     public static final String FACET1_LIBRARY_NAME = "cf1_library";
     public static final String FACET2_LIBRARY_NAME = "cf2_library";
-
+    
     public static final String LIBNAME_VERSION_1 = "library_v01_00";
     public static final String LIBNAME_VERSION_1_0_1 = "library_v01_00_01";
     public static final String LIBNAME_VERSION_1_1 = "library_v01_01";
     public static final String LIBNAME_VERSION_1_2 = "library_v01_02";
     public static final String LIBNAME_VERSION_1_2_1 = "library_v01_02_01";
     public static final String LIBNAME_VERSION_1_2_2 = "library_v01_02_02";
-
+    
     public static final String FILE_VERSION_1 = LIBNAME_VERSION_1 + ".xml";
     public static final String FILE_VERSION_1_0_1 = LIBNAME_VERSION_1_0_1 + ".xml";
     public static final String FILE_VERSION_1_1 = LIBNAME_VERSION_1_1 + ".xml";
@@ -78,27 +78,28 @@ public abstract class AbstractVersionHelperTests {
     public static final String FILE_FACET1_2 = "facets1_v02_00.xml";
     public static final String FILE_FACET2_1 = "facets2_v01_00.xml";
     public static final String FILE_FACET2_2 = "facets2_v02_00.xml";
-
-    public static final String NS_VERSION_1 = "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01";
-    public static final String NS_VERSION_1_0_1 = "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01_00_01";
-    public static final String NS_VERSION_1_1 = "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01_01";
-    public static final String NS_VERSION_1_2 = "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01_02";
-    public static final String NS_VERSION_1_2_1 = "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01_02_01";
-    public static final String NS_VERSION_1_2_2 = "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01_02_02";
-
-    public static final String NS_FACET1_VERSION_1 = "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/cf1/v01";
-    public static final String NS_FACET1_VERSION_2 = "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/cf1/v02";
-    public static final String NS_FACET2_VERSION_1 = "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/cf2/v01";
-    public static final String NS_FACET2_VERSION_2 = "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/cf2/v02";
+    
+    public static final String BASE_NS = "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test";
+    public static final String NS_VERSION_1 = BASE_NS + "/v01";
+    public static final String NS_VERSION_1_0_1 = BASE_NS + "/v01_00_01";
+    public static final String NS_VERSION_1_1 = BASE_NS + "/v01_01";
+    public static final String NS_VERSION_1_2 = BASE_NS + "/v01_02";
+    public static final String NS_VERSION_1_2_1 = BASE_NS + "/v01_02_01";
+    public static final String NS_VERSION_1_2_2 = BASE_NS + "/v01_02_02";
+    
+    public static final String NS_FACET1_VERSION_1 = BASE_NS + "/cf1/v01";
+    public static final String NS_FACET1_VERSION_2 = BASE_NS + "/cf1/v02";
+    public static final String NS_FACET2_VERSION_1 = BASE_NS + "/cf2/v01";
+    public static final String NS_FACET2_VERSION_2 = BASE_NS + "/cf2/v02";
     
     /**
      * Returns the folder location of the test library files.
      * 
      * @return File
      */
-    private File getTestFolder() {
-    	return new File(System.getProperty("user.dir"), OTM16Upgrade.otm16Enabled ?
-    			"/src/test/resources/versions_1_6" : "/src/test/resources/versions");
+    private static File getTestFolder() {
+        return new File( System.getProperty( "user.dir" ),
+                OTM16Upgrade.otm16Enabled ? "/src/test/resources/versions_1_6" : "/src/test/resources/versions" );
     }
     
     /**
@@ -106,63 +107,79 @@ public abstract class AbstractVersionHelperTests {
      * 
      * @return File
      */
-    private File getCatalogFile() {
-    	return new File(getTestFolder(), "/version-catalog.xml");
+    private static File getCatalogFile() {
+        return new File( getTestFolder(), "/version-catalog.xml" );
     }
     
     /**
-     * Loads the specified library and all of its dependencies. Prior to returning the model, it
-     * will be checked to ensure that no validation errors exist.
+     * Loads the specified library and all of its dependencies. Prior to returning the model, it will be checked to
+     * ensure that no validation errors exist.
      * 
-     * @param libraryFilenames
-     *            the list of filename for the library version to load
+     * @param libraryFilenames the list of filename for the library version to load
      * @return TLModel
      * @throws Exception
      */
-    protected TLModel loadTestModel(String... libraryFilenames) throws Exception {
-        LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>();
+    protected static TLModel loadTestModel(String... libraryFilenames) throws Exception {
+        return loadTestModel( new TLModel(), false, libraryFilenames );
+    }
+    
+    /**
+     * Loads the specified library and all of its dependencies. Prior to returning the model, it will be checked to
+     * ensure that no validation errors exist.
+     * 
+     * @param existingModel  the model to which the newly loaded libraries will be added
+     * @param ignoreErrrors  flag indicating whether validation errors are to be ignored
+     * @param libraryFilenames the list of filename for the library version to load
+     * @return TLModel
+     * @throws Exception
+     */
+    protected static TLModel loadTestModel(TLModel existingModel, boolean ignoreErrrors, String... libraryFilenames) throws Exception {
+        LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>( existingModel );
         
-        modelLoader.setNamespaceResolver(new CatalogLibraryNamespaceResolver(getCatalogFile()));
-
+        modelLoader.setNamespaceResolver( new CatalogLibraryNamespaceResolver( getCatalogFile() ) );
+        
         for (String libraryFilename : libraryFilenames) {
             LibraryInputSource<InputStream> libraryInput = new LibraryStreamInputSource(
-            		new File(getTestFolder(), "/" + libraryFilename));
-            ValidationFindings findings = modelLoader.loadLibraryModel(libraryInput);
-
-            SchemaCompilerTestUtils.printFindings(findings, null);//FindingType.ERROR);
-            assertFalse(findings.hasFinding(FindingType.ERROR));
+                    new File( getTestFolder(), "/" + libraryFilename ) );
+            ValidationFindings findings = modelLoader.loadLibraryModel( libraryInput );
+            
+            
+            if (!ignoreErrrors) {
+                SchemaCompilerTestUtils.printFindings( findings, null );
+                assertFalse( findings.hasFinding( FindingType.ERROR ) );
+            }
         }
         TLModel model = modelLoader.getLibraryModel();
-        assertNotNull(model);
+        assertNotNull( model );
         return model;
     }
     
     protected List<String> getLibraryNames(List<TLLibrary> libraryList) {
         List<String> libraryNames = new ArrayList<String>();
-
+        
         for (TLLibrary library : libraryList) {
-            libraryNames.add(getLibraryName(library));
+            libraryNames.add( getLibraryName( library ) );
         }
         return libraryNames;
     }
-
+    
     protected String getLibraryName(TLLibrary library) {
         String libraryName = null;
-
+        
         if (library != null) {
-            libraryName = URLUtils.getShortRepresentation(library.getLibraryUrl());
-            int dotIdx = libraryName.indexOf('.');
-
+            libraryName = URLUtils.getShortRepresentation( library.getLibraryUrl() );
+            int dotIdx = libraryName.indexOf( '.' );
+            
             if (dotIdx >= 0) {
-                libraryName = libraryName.substring(0, dotIdx);
+                libraryName = libraryName.substring( 0, dotIdx );
             }
-            if (libraryName.startsWith("/")) {
-                libraryName = libraryName.substring(1);
+            if (libraryName.startsWith( "/" )) {
+                libraryName = libraryName.substring( 1 );
             }
         }
         return libraryName;
     }
-
+    
     protected File purgeExistingFile(File file) {
         if (file.exists()) {
             file.delete();
@@ -172,111 +189,111 @@ public abstract class AbstractVersionHelperTests {
         }
         return file;
     }
-
+    
     protected void assertContainsAttributes(TLAttributeOwner attrOwner, String... attrNames) {
         Set<String> ownerAttrs = new HashSet<String>();
-
+        
         for (TLAttribute attr : attrOwner.getAttributes()) {
-            ownerAttrs.add(attr.getName());
+            ownerAttrs.add( attr.getName() );
         }
         for (String attrName : attrNames) {
-            if (!ownerAttrs.contains(attrName)) {
-                fail("Expected attribute name not found: " + attrName);
+            if (!ownerAttrs.contains( attrName )) {
+                fail( "Expected attribute name not found: " + attrName );
             }
         }
     }
-
+    
     protected void assertContainsElements(TLPropertyOwner elementOwner, String... elementNames) {
         Set<String> ownerElements = new HashSet<String>();
-
+        
         for (TLProperty element : elementOwner.getElements()) {
-            ownerElements.add(element.getName());
+            ownerElements.add( element.getName() );
         }
         for (String elementName : elementNames) {
-            if (!ownerElements.contains(elementName)) {
-            	fail("Expected element name not found: " + elementName);
+            if (!ownerElements.contains( elementName )) {
+                fail( "Expected element name not found: " + elementName );
             }
         }
     }
-
+    
     protected void assertContainsValues(TLAbstractEnumeration valueOwner, String... valueLiterals) {
         Set<String> ownerLiterals = new HashSet<String>();
-
+        
         for (TLEnumValue value : valueOwner.getValues()) {
-        	ownerLiterals.add(value.getLiteral());
+            ownerLiterals.add( value.getLiteral() );
         }
         for (String literal : valueLiterals) {
-            if (!ownerLiterals.contains(literal)) {
-            	fail("Expected enumeration value not found: " + literal);
+            if (!ownerLiterals.contains( literal )) {
+                fail( "Expected enumeration value not found: " + literal );
             }
         }
     }
-
+    
     protected void assertContainsParentRefs(TLResource resource, String... pathTemplates) {
         Set<String> resourceParentPaths = new HashSet<String>();
-
+        
         for (TLResourceParentRef parentRef : resource.getParentRefs()) {
-        	resourceParentPaths.add(parentRef.getPathTemplate());
+            resourceParentPaths.add( parentRef.getPathTemplate() );
         }
         for (String pathTemplate : pathTemplates) {
-            if (!resourceParentPaths.contains(pathTemplate)) {
-            	fail("Expected parent reference not found: " + pathTemplate);
+            if (!resourceParentPaths.contains( pathTemplate )) {
+                fail( "Expected parent reference not found: " + pathTemplate );
             }
         }
     }
-
+    
     protected void assertContainsParamGroups(TLResource resource, String... paramGroupNames) {
         Set<String> resourceParamGroups = new HashSet<String>();
-
+        
         for (TLParamGroup paramGroup : resource.getParamGroups()) {
-        	resourceParamGroups.add(paramGroup.getName());
+            resourceParamGroups.add( paramGroup.getName() );
         }
         for (String groupName : paramGroupNames) {
-            if (!resourceParamGroups.contains(groupName)) {
-            	fail("Expected parameter group not found: " + groupName);
+            if (!resourceParamGroups.contains( groupName )) {
+                fail( "Expected parameter group not found: " + groupName );
             }
         }
     }
-
+    
     protected void assertContainsParameters(TLParamGroup paramGroup, String... paramNames) {
         Set<String> pgParameterNames = new HashSet<String>();
-
+        
         for (TLParameter param : paramGroup.getParameters()) {
-        	if (param.getFieldRef() != null) {
-            	pgParameterNames.add(param.getFieldRef().getName());
-        	}
+            if (param.getFieldRef() != null) {
+                pgParameterNames.add( param.getFieldRef().getName() );
+            }
         }
         for (String paramName : paramNames) {
-            if (!pgParameterNames.contains(paramName)) {
-            	fail("Expected parameter not found: " + paramName);
+            if (!pgParameterNames.contains( paramName )) {
+                fail( "Expected parameter not found: " + paramName );
             }
         }
     }
-
+    
     protected void assertContainsActionFacets(TLResource resource, String... facetNames) {
         Set<String> resourceActionFacets = new HashSet<String>();
-
+        
         for (TLActionFacet facet : resource.getActionFacets()) {
-        	resourceActionFacets.add(facet.getName());
+            resourceActionFacets.add( facet.getName() );
         }
         for (String facetName : facetNames) {
-            if (!resourceActionFacets.contains(facetName)) {
-            	fail("Expected action facet not found: " + facetName);
+            if (!resourceActionFacets.contains( facetName )) {
+                fail( "Expected action facet not found: " + facetName );
             }
         }
     }
-
+    
     protected void assertContainsActions(TLResource resource, String... actionIds) {
         Set<String> resourceActionIds = new HashSet<String>();
-
+        
         for (TLAction action : resource.getActions()) {
-        	resourceActionIds.add(action.getActionId());
+            resourceActionIds.add( action.getActionId() );
         }
         for (String actionId : actionIds) {
-            if (!resourceActionIds.contains(actionId)) {
-            	fail("Expected resource action not found: " + actionId);
+            if (!resourceActionIds.contains( actionId )) {
+                fail( "Expected resource action not found: " + actionId );
             }
         }
     }
-
+    
 }

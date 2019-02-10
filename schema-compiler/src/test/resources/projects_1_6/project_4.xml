@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<otp:Project xmlns="http://www.w3.org/2001/XMLSchema" xmlns:otp="http://www.OpenTravel.org/ns/OTA2/Project_v01_00"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/Project_v01_00 ../../../main/resources/ota2-context/schemas/OTA2_Project_v1.0.0.xsd">
+    <otp:projectId>http://www.OpenTravel.org/projects/test/p4</otp:projectId>
+    <otp:name>Test Project #4</otp:name>
+    <otp:description>Test description for the project.</otp:description>
+    <otp:ManagedProjectItem>
+    		<otp:Repository>mock-repository</otp:Repository>
+    		<otp:BaseNamespace>http://www.mock-repository.org/testns</otp:BaseNamespace>
+    		<otp:Filename>MockLibrary_1_0_0.otm</otp:Filename>
+    		<otp:Version>1.0.0</otp:Version>
+    </otp:ManagedProjectItem>
+</otp:Project>
