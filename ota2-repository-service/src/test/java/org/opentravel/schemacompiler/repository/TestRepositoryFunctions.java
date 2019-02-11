@@ -466,8 +466,22 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
 		compileOptions.applyTaskOptions( getReleaseCompileOptions() );
 		releaseManager.getRelease().setCompileOptions( compileOptions );
 		releaseManager.saveRelease();
+		validateRelease( releaseManager, releaseFindings, 1 );
 		
-		// Verify that the release loaded correctly
+        // Create another release by importing from a project (should be a duplicate of the one we created manually)
+        releaseManager = new ReleaseManager( repositoryManager.get() );
+        releaseFindings = new ValidationFindings();
+        releaseManager.importFromProject( projectFile, releaseFindings );
+        validateRelease( releaseManager, releaseFindings, 4 );
+        
+		model.set( projectManager.getModel() );
+		
+		logDebug( "DONE - Success." );
+	}
+
+    private void validateRelease(ReleaseManager releaseManager, ValidationFindings releaseFindings,
+            int expectedPrincipalMembers) {
+        // Verify that the release loaded correctly
 		if (releaseFindings.hasFinding( FindingType.ERROR )) {
 			RepositoryTestUtils.printFindings( releaseFindings );
 		}
@@ -476,19 +490,15 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
 		
 		// Verify that all principal and referenced libraries were identified
 		Release release = releaseManager.getRelease();
-		Set<String> principalFilenames = getReleaseItemFilenames( release.getPrincipalMembers() );
-		Set<String> referencedFilenames = getReleaseItemFilenames( release.getReferencedMembers() );
+		Set<String> itemFilenames = getReleaseItemFilenames( release.getAllMembers() );
 		
-		assertEquals( 1, principalFilenames.size() );
-		assertEquals( 3, referencedFilenames.size() );
-		assertTrue( principalFilenames.contains( "library_1_p2_2_0_0.otm" ) );
-		assertTrue( referencedFilenames.contains( "library_2_p2_2_0_0.otm" ) );
-		assertTrue( referencedFilenames.contains( "library_2_p1_1_0_0.otm" ) );
-		assertTrue( referencedFilenames.contains( "library_1_p1_1_0_0.otm" ) );
-		model.set( projectManager.getModel() );
-		
-		logDebug( "DONE - Success." );
-	}
+		assertEquals( expectedPrincipalMembers, release.getPrincipalMembers().size() );
+		assertEquals( (4 - expectedPrincipalMembers), release.getReferencedMembers().size() );
+		assertTrue( itemFilenames.contains( "library_1_p2_2_0_0.otm" ) );
+		assertTrue( itemFilenames.contains( "library_2_p2_2_0_0.otm" ) );
+		assertTrue( itemFilenames.contains( "library_2_p1_1_0_0.otm" ) );
+		assertTrue( itemFilenames.contains( "library_1_p1_1_0_0.otm" ) );
+    }
 	
 	public void test_12_PublishRelease() throws Exception {
 	    logDebug( "PUBLISH RELEASE - Publishing release to repository. [%s]" );

@@ -473,7 +473,7 @@ public final class ProjectManager {
 		    } else {
 		        // If the item's repository ID was not explicitly specified, invoking
 		        // the search on the repository manager will call will force a searching
-		    	// all known repositories.
+		        // all known repositories.
 		        repository = repositoryManager;
 		    }
 		    RepositoryItem repositoryItem = repository.getRepositoryItem(
@@ -485,11 +485,13 @@ public final class ProjectManager {
 		                projectFile),
 		                LoaderConstants.ERROR_MISSING_REPOSITORY,
 		                jaxbProjectItem.getFilename());
+		        
+		    } else {
+	            if ((jaxbProjectItem.isDefaultItem() != null) && jaxbProjectItem.isDefaultItem()) {
+	                defaultItem = repositoryItem;
+	            }
+	            managedItems.add(repositoryItem);
 		    }
-		    if ((jaxbProjectItem.isDefaultItem() != null) && jaxbProjectItem.isDefaultItem()) {
-		        defaultItem = repositoryItem;
-		    }
-		    managedItems.add(repositoryItem);
 
 		} catch (RepositoryUnavailableException e) {
 		    findings.addFinding(FindingType.ERROR, new FileValidationSource(
@@ -896,7 +898,16 @@ public final class ProjectManager {
         ProjectItem result = null;
 
         if (library != null) {
-            for (ProjectItem item : projectItems) {
+            List<ProjectItem> itemList;
+            
+            if (library instanceof BuiltInLibrary) {
+                itemList = builtInProject.getProjectItems();
+                
+            } else {
+                itemList = projectItems;
+            }
+            
+            for (ProjectItem item : itemList) {
                 if (item.getContent() == library) {
                     result = item;
                     break;

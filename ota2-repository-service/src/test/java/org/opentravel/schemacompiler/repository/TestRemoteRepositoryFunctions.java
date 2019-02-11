@@ -51,7 +51,16 @@ public class TestRemoteRepositoryFunctions extends TestRepositoryFunctions {
         shutdownTestServer();
     }
 
-	@Override
+	/**
+     * @see org.opentravel.schemacompiler.repository.TestRepositoryFunctions#test_01_PublishLibrary()
+     */
+    @Override
+    public void test_01_PublishLibrary() throws Exception {
+        super.test_01_PublishLibrary();
+        repositoryManager.get().refreshLocalRepositoryInfo( true );
+    }
+
+    @Override
 	public void test_02_LockLibrary() throws Exception {
 		RemoteRepository repository = (RemoteRepository) testRepository.get();
 		List<EntitySearchResult> searchResult;

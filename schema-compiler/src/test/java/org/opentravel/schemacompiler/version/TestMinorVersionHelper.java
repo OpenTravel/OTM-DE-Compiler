@@ -940,6 +940,33 @@ public class TestMinorVersionHelper extends AbstractVersionHelperTests {
         assertFalse(findings.hasFinding());
     }
 
+    @Test
+    public void testRollupPatchVersion() throws Exception {
+        TLModel model = loadTestModel(FILE_VERSION_1_1);
+        TLLibrary minorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_1, TEST_LIBRARY_NAME);
+        File newVersionLibraryFile = purgeExistingFile(new File(System.getProperty("user.dir"),
+                "/target/test-save-location/library_v01_02.otm"));
+        MinorVersionHelper helper = new MinorVersionHelper();
+
+        TLLibrary newMinorVersionLibrary = helper.createNewMinorVersion(minorVersionLibrary, newVersionLibraryFile);
+        TLBusinessObject lookupBOv11 = minorVersionLibrary.getBusinessObjectType( "LookupBO" );
+        TLBusinessObject lookupBOv12 = new TLBusinessObject();
+        TLExtension extension = new TLExtension();
+        
+        extension.setExtendsEntity( lookupBOv11 );
+        lookupBOv12.setExtension( extension );
+        lookupBOv12.setName( "LookupBO" );
+        newMinorVersionLibrary.addNamedMember( lookupBOv12 );
+        
+        loadTestModel( model, true, FILE_VERSION_1_0_1 );
+        TLLibrary patchVersionLibrary101 = (TLLibrary) model.getLibrary(NS_VERSION_1_0_1, TEST_LIBRARY_NAME);
+        TLExtensionPointFacet boPatch = patchVersionLibrary101.getExtensionPointFacetType( "ExtensionPoint_LookupBO_Summary" );
+        
+        helper.rollupPatchVersion( lookupBOv12, boPatch );
+        
+        assertNotNull( lookupBOv12.getSummaryFacet().getAttribute( "extBOAttribute101" ) );
+    }
+
     private Object resolveEntity(TLModel m, String name) {
         SymbolResolver resolver = new TLModelSymbolResolver(m);
         resolver.setPrefixResolver(new LibraryPrefixResolver(m.getBuiltInLibraries().get(0)));

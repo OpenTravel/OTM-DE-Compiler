@@ -27,6 +27,7 @@ import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLCoreObject;
+import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLFolder;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
@@ -148,6 +149,44 @@ public class TestMajorVersionHelper extends AbstractVersionHelperTests {
         assertEquals(patchVersionLibrary.getBaseNamespace(), newMajorVersionLibrary.getBaseNamespace());
         assertEquals(patchVersionLibrary.getComments(), newMajorVersionLibrary.getComments());
         validateLibraryContents(newMajorVersionLibrary);
+    }
+
+    @Test
+    public void testRollupMinorVersion() throws Exception {
+        TLModel model = loadTestModel(FILE_VERSION_1_1);
+        TLLibrary minorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_1, TEST_LIBRARY_NAME);
+        File newVersionLibraryFile = purgeExistingFile(new File(System.getProperty("user.dir"),
+                "/target/test-save-location/library_v02_00.otm"));
+        MajorVersionHelper helper = new MajorVersionHelper();
+
+        TLLibrary newMajorVersionLibrary = helper.createNewMajorVersion(minorVersionLibrary, newVersionLibraryFile);
+        TLBusinessObject lookupBOv2 = newMajorVersionLibrary.getBusinessObjectType( "LookupBO" );
+        
+        loadTestModel( model, true, FILE_VERSION_1_2 );
+        TLLibrary minorVersionLibrary12 = (TLLibrary) model.getLibrary(NS_VERSION_1_2, TEST_LIBRARY_NAME);
+        TLBusinessObject lookupBOv12 = minorVersionLibrary12.getBusinessObjectType( "LookupBO" );
+        
+        helper.rollupMinorVersion( lookupBOv2, lookupBOv12 );
+        assertNotNull( lookupBOv2.getSummaryFacet().getElement( "Element12" ) );
+    }
+
+    @Test
+    public void testRollupPatchVersion() throws Exception {
+        TLModel model = loadTestModel(FILE_VERSION_1_1);
+        TLLibrary minorVersionLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_1, TEST_LIBRARY_NAME);
+        File newVersionLibraryFile = purgeExistingFile(new File(System.getProperty("user.dir"),
+                "/target/test-save-location/library_v02_00.otm"));
+        MajorVersionHelper helper = new MajorVersionHelper();
+
+        TLLibrary newMajorVersionLibrary = helper.createNewMajorVersion(minorVersionLibrary, newVersionLibraryFile);
+        TLBusinessObject lookupBOv2 = newMajorVersionLibrary.getBusinessObjectType( "LookupBO" );
+        
+        loadTestModel( model, true, FILE_VERSION_1_0_1 );
+        TLLibrary patchVersionLibrary101 = (TLLibrary) model.getLibrary(NS_VERSION_1_0_1, TEST_LIBRARY_NAME);
+        TLExtensionPointFacet boPatch = patchVersionLibrary101.getExtensionPointFacetType( "ExtensionPoint_LookupBO_Summary" );
+        
+        helper.rollupPatchVersion( lookupBOv2, boPatch );
+        assertNotNull( lookupBOv2.getSummaryFacet().getAttribute( "extBOAttribute101" ) );
     }
 
     private void validateLibraryContents(TLLibrary newMajorVersionLibrary) throws Exception {

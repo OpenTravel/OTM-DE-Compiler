@@ -17,10 +17,13 @@ package org.opentravel.schemacompiler.repository;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -31,13 +34,17 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryStatus;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RefreshPolicy;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryInfoType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryState;
+import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.repository.impl.DefaultRepositoryFileManager;
+import org.opentravel.schemacompiler.repository.impl.LibraryContentWrapper;
 import org.opentravel.schemacompiler.repository.impl.RemoteRepositoryUtils;
+import org.opentravel.schemacompiler.repository.impl.RepositoryItemImpl;
 import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
 
 /**
@@ -201,6 +208,154 @@ public class TestRepositoryManager {
         repositoryManager.getRepositoryItem( itemUri, mockItem.getNamespace() );
     }
     
+    @Test( expected = RepositoryException.class )
+    public void testPromote_fileUpdateFailure() throws Exception {
+        LibraryInfoType mockMetadata = getMockLibraryMetadata();
+        RepositoryItem mockItem;
+        
+        mockItem = setupStatusChangeMock( mockMetadata );
+        repositoryManager.promote( mockItem );
+    }
+    
+    @Test( expected = RepositoryException.class )
+    public void testPromote_invalidLocked() throws Exception {
+        LibraryInfoType mockMetadata = getMockLibraryMetadata();
+        RepositoryItem mockItem;
+        
+        mockMetadata.setState( RepositoryState.MANAGED_LOCKED );
+        mockItem = setupStatusChangeMock( mockMetadata );
+        repositoryManager.promote( mockItem );
+    }
+    
+    @Test( expected = RepositoryException.class )
+    public void testPromote_obsoleteStatus() throws Exception {
+        LibraryInfoType mockMetadata = getMockLibraryMetadata();
+        RepositoryItem mockItem;
+        
+        mockMetadata.setStatus( LibraryStatus.OBSOLETE );
+        mockItem = setupStatusChangeMock( mockMetadata );
+        repositoryManager.promote( mockItem );
+    }
+    
+    @Test( expected = RepositoryException.class )
+    public void testPromote_unassignedStatus() throws Exception {
+        LibraryInfoType mockMetadata = getMockLibraryMetadata();
+        RepositoryItemImpl mockItem;
+        
+        mockItem = setupStatusChangeMock( mockMetadata );
+        mockItem.setStatus( null );
+        mockMetadata.setStatus( null );
+        repositoryManager.promote( mockItem );
+    }
+    
+    @Test( expected = RepositoryException.class )
+    public void testDemote_fileUpdateFailure() throws Exception {
+        LibraryInfoType mockMetadata = getMockLibraryMetadata();
+        RepositoryItem mockItem;
+        
+        mockMetadata.setStatus( LibraryStatus.UNDER_REVIEW );
+        mockItem = setupStatusChangeMock( mockMetadata );
+        repositoryManager.demote( mockItem );
+    }
+    
+    @Test( expected = RepositoryException.class )
+    public void testDemote_invalidLocked() throws Exception {
+        LibraryInfoType mockMetadata = getMockLibraryMetadata();
+        RepositoryItem mockItem;
+        
+        mockMetadata.setState( RepositoryState.MANAGED_LOCKED );
+        mockItem = setupStatusChangeMock( mockMetadata );
+        repositoryManager.demote( mockItem );
+    }
+    
+    @Test( expected = RepositoryException.class )
+    public void testDemote_obsoleteStatus() throws Exception {
+        LibraryInfoType mockMetadata = getMockLibraryMetadata();
+        RepositoryItem mockItem;
+        
+        mockMetadata.setStatus( LibraryStatus.DRAFT );
+        mockItem = setupStatusChangeMock( mockMetadata );
+        repositoryManager.demote( mockItem );
+    }
+    
+    @Test( expected = RepositoryException.class )
+    public void testDemote_unassignedStatus() throws Exception {
+        LibraryInfoType mockMetadata = getMockLibraryMetadata();
+        RepositoryItemImpl mockItem;
+        
+        mockItem = setupStatusChangeMock( mockMetadata );
+        mockItem.setStatus( null );
+        mockMetadata.setStatus( null );
+        repositoryManager.demote( mockItem );
+    }
+    
+    private RepositoryItemImpl setupStatusChangeMock(LibraryInfoType mockLibraryMetadata) throws Exception {
+        File mockLibraryFile = new File( folder.getRoot(), "/mock-library_0_0_0.otm" );
+        RepositoryItemImpl mockItem = getTestRepositoryItem( mockLibraryMetadata );
+        TLLibrary mockLibrary = new TLLibrary();
+        LibraryContentWrapper mockWrapper = new LibraryContentWrapper( mockLibrary, mockLibraryFile, true );
+        
+        mockFileManager = mock( DefaultRepositoryFileManager.class );
+        mockFileManager.setRepositoryLocation( folder.getRoot() );
+        repositoryManager.setFileManager( mockFileManager );
+        
+        when( mockFileManager.loadLibraryMetadata(
+                mockItem.getBaseNamespace(), mockItem.getFilename(), mockItem.getVersion() ) )
+                    .thenReturn( mockLibraryMetadata );
+        when( mockFileManager.getLibraryContentLocation(
+                mockItem.getBaseNamespace(), mockItem.getFilename(), mockItem.getVersion() ) )
+                    .thenReturn( mockLibraryFile );
+        when( mockFileManager.loadLibraryContent( mockLibraryFile ) ).thenReturn( mockWrapper );
+        doAnswer((Answer<?>) i -> { throw new RepositoryException(); } )
+                .when( mockFileManager ).saveLibraryContent( mockWrapper );
+        return mockItem;
+    }
+    
+    @Test( expected = RepositoryException.class )
+    public void testCreateRootNamespace_invalidURI() throws Exception {
+        repositoryManager.createRootNamespace( "http::::@@@||ABC123" );
+    }
+    
+    @Test( expected = RepositoryException.class )
+    public void testCreateRootNamespace_invalidURI2() throws Exception {
+        repositoryManager.createRootNamespace( "http://www.mock-repository.org/test-root-ns?query=param" );
+    }
+    
+    @Test( expected = RepositoryException.class )
+    public void testCreateRootNamespace_duplicate() throws Exception {
+        String existingRootNS  = repositoryManager.listRootNamespaces().get( 0 );
+        String childNS = existingRootNS + "/childNS";
+        
+        repositoryManager.createNamespace( childNS );
+        repositoryManager.createRootNamespace( childNS );
+    }
+    
+    @Test
+    public void testRefreshLocalRepositoryInfo_noLocalRepo() throws Exception {
+        mockFileManager = mock( DefaultRepositoryFileManager.class );
+        mockFileManager.setRepositoryLocation( folder.getRoot() );
+        repositoryManager.setFileManager( mockFileManager );
+        
+        when( mockFileManager.getRepositoryMetadataLastUpdated() ).thenReturn( null );
+        when( mockFileManager.getRepositoryLocation() ).thenReturn( folder.getRoot() );
+        
+        repositoryManager.refreshLocalRepositoryInfo( true );  // No exception - error logged
+    }
+    
+    @Test
+    public void testRefreshLocalRepositoryInfo_repoError() throws Exception {
+        mockFileManager = mock( DefaultRepositoryFileManager.class );
+        mockFileManager.setRepositoryLocation( folder.getRoot() );
+        repositoryManager.setFileManager( mockFileManager );
+        
+        when( mockFileManager.getRepositoryMetadataLastUpdated() )
+                .thenReturn( new Date() );
+        when( mockFileManager.loadRepositoryMetadata())
+                .thenThrow( RepositoryException.class );
+        
+        repositoryManager.refreshLocalRepositoryInfo( true );  // No exception - warning logged
+    }
+    
     private RepositoryInfoType getRemoteRepositoryInfo() {
         RepositoryInfoType remoteRepoInfo = new RepositoryInfoType();
         
@@ -211,8 +366,12 @@ public class TestRepositoryManager {
         return remoteRepoInfo;
     }
     
-    private RepositoryItem getTestRepositoryItem() {
+    private RepositoryItemImpl getTestRepositoryItem() {
         return RepositoryUtils.createRepositoryItem( repositoryManager, getMockLibraryMetadata() );
+    }
+    
+    private RepositoryItemImpl getTestRepositoryItem(LibraryInfoType libraryMetadata) {
+        return RepositoryUtils.createRepositoryItem( repositoryManager, libraryMetadata );
     }
     
     private LibraryInfoType getMockLibraryMetadata() {
@@ -225,7 +384,7 @@ public class TestRepositoryManager {
         metadata.setLibraryName( "TestLibrary" );
         metadata.setVersion( "1.0.0" );
         metadata.setStatus( LibraryStatus.DRAFT );
-        metadata.setState( RepositoryState.UNMANAGED );
+        metadata.setState( RepositoryState.MANAGED_UNLOCKED );
         return metadata;
     }
     

@@ -19,21 +19,31 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import javax.xml.XMLConstants;
 
 import org.junit.Test;
 import org.opentravel.schemacompiler.ic.ModelIntegrityChecker;
+import org.opentravel.schemacompiler.loader.LoaderConstants;
+import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLSimple;
+import org.opentravel.schemacompiler.repository.impl.RepositoryItemImpl;
 import org.opentravel.schemacompiler.util.SchemaCompilerTestUtils;
 import org.opentravel.schemacompiler.util.URLUtils;
-import org.opentravel.schemacompiler.validate.FindingMessageFormat;
 import org.opentravel.schemacompiler.validate.FindingType;
+import org.opentravel.schemacompiler.validate.ValidationFinding;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 
 /**
@@ -279,38 +289,119 @@ public class TestProjectManager {
         assertTrue(localProjectItems.contains("library_2_p1.xml")); // added because of dependency
                                                                     // on type assignment
     }
-
-    // @Test
-    public void testLoadProject_manualTest() throws Exception {
-        File projectTestFolder = new File(System.getProperty("user.dir"), "../../../temp/models");
-        File projectFile = new File(projectTestFolder, "/MyProject.otp");
-        assertTrue(projectFile.exists());
+    
+    @Test
+    public void testLoadManagedProjectItem_unknownRepository() throws Exception {
+        RepositoryManager mockRepositoryManager = mock( RepositoryManager.class );
+        Set<String> messageKeys;
+        
+        when( mockRepositoryManager.getRepository( "mock-repository" ) ).thenReturn( null );
+        messageKeys = loadManagedProject( mockRepositoryManager );
+        
+        assertEquals( 1, messageKeys.size() );
+        assertTrue( messageKeys.contains( LoaderConstants.ERROR_LOADING_FROM_REPOSITORY ) );
+    }
+    
+    @Test
+    public void testLoadManagedProjectItem_unresolvedRepository() throws Exception {
+        RepositoryManager mockRepositoryManager = mock( RepositoryManager.class );
+        RepositoryItemImpl mockItem = new RepositoryItemImpl();
+        Set<String> messageKeys;
+        
+        mockItem.setRepository( null );
+        when( mockRepositoryManager.getRepository( "mock-repository" ) ).thenReturn( mockRepositoryManager );
+        when( mockRepositoryManager.getRepositoryItem( "http://www.mock-repository.org/testns", "MockLibrary_1_0_0.otm", "1.0.0" ) )
+                .thenReturn( mockItem );
+        
+        messageKeys = loadManagedProject( mockRepositoryManager );
+        
+        assertEquals( 1, messageKeys.size() );
+        assertTrue( messageKeys.contains( LoaderConstants.ERROR_MISSING_REPOSITORY ) );
+    }
+    
+    @Test
+    public void testLoadManagedProjectItem_repositoryUnavailable() throws Exception {
+        RepositoryManager mockRepositoryManager = mock( RepositoryManager.class );
+        RepositoryItemImpl mockItem = new RepositoryItemImpl();
+        Set<String> messageKeys;
+        
+        mockItem.setRepository( null );
+        when( mockRepositoryManager.getRepository( "mock-repository" ) ).thenReturn( mockRepositoryManager );
+        when( mockRepositoryManager.getRepositoryItem( "http://www.mock-repository.org/testns", "MockLibrary_1_0_0.otm", "1.0.0" ) )
+                .thenThrow( RepositoryUnavailableException.class );
+        
+        messageKeys = loadManagedProject( mockRepositoryManager );
+        
+        assertEquals( 1, messageKeys.size() );
+        assertTrue( messageKeys.contains( LoaderConstants.ERROR_REPOSITORY_UNAVAILABLE ) );
+    }
+    
+    private Set<String> loadManagedProject(RepositoryManager mockRepositoryManager) throws Exception {
+        File projectTestFolder = new File(SchemaCompilerTestUtils.getBaseProjectLocation());
+        File projectFile = new File(projectTestFolder, "/project_4.xml");
+        ProjectManager projectManager = new ProjectManager( new TLModel(), false, mockRepositoryManager );
         ValidationFindings findings = new ValidationFindings();
-        ProjectManager projectManager = new ProjectManager(false);
-        Project project = projectManager.loadProject(projectFile, findings);
-        SchemaCompilerTestUtils.printFindings(findings, FindingType.ERROR);
-
-        System.out.println("Project Items:");
-        for (ProjectItem item : project.getProjectItems()) {
-            System.out.println("  " + item.getFilename());
-        }
-
-        System.out.println("\nErrors/Warnings:");
-        for (String message : findings
-                .getAllValidationMessages(FindingMessageFormat.IDENTIFIED_FORMAT)) {
-            System.out.println("  " + message);
-        }
+        
+        projectManager.loadProject( projectFile, findings, null );
+        return getFindingMessageKeys( findings );
     }
 
-    // @Test
-    public void testListNamespaces_manualTest() throws Exception {
-        RepositoryManager rm = RepositoryManager.getDefault();
-        RemoteRepository remoteRepo = rm.listRemoteRepositories().get(0);
-        List<String> nsList = remoteRepo.listBaseNamespaces();
+    @Test
+    public void testGetVersionChain() throws Exception {
+        File projectTestFolder = new File(SchemaCompilerTestUtils.getBaseProjectLocation());
+        File projectFile = new File(projectTestFolder, "/project_1.xml");
+        ProjectManager projectManager = new ProjectManager(false);
+        
+        projectManager.loadProject(projectFile);
+        
+        AbstractLibrary tlLibrary = projectManager.getModel().getLibrary(
+                "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package_v2", "library_1_p2" );
+        AbstractLibrary biLibrary = projectManager.getModel().getLibrary(
+                XMLConstants.W3C_XML_SCHEMA_NS_URI, "XMLSchema" );
+        ProjectItem tlItem = projectManager.getProjectItem( tlLibrary );
+        ProjectItem biItem = projectManager.getProjectItem( biLibrary );
+        
+        assertEquals( 1, projectManager.getVersionChain( tlItem ).size() );
+        assertEquals( 1, projectManager.getVersionChain( biItem ).size() );
+        assertEquals( 0, projectManager.getVersionChain( null ).size() );
+    }
 
-        for (String ns : nsList) {
-            System.out.println(ns);
-        }
+    @Test( expected = RepositoryException.class )
+    public void testAddUnmanagedProjectItem_unsavedLibrary() throws Exception {
+        File projectTestFolder = new File(SchemaCompilerTestUtils.getBaseProjectLocation());
+        File projectFile = new File(projectTestFolder, "/project_1.xml");
+        ProjectManager projectManager = new ProjectManager(false);
+        Project project = projectManager.loadProject(projectFile);
+        TLLibrary unsavedLibrary = new TLLibrary();
+        
+        projectManager.addUnmanagedProjectItem( unsavedLibrary, project );
+    }
+    
+    @Test( expected = RepositoryException.class )
+    public void testAddUnmanagedProjectItem_managedLibrary() throws Exception {
+        File projectTestFolder = new File(SchemaCompilerTestUtils.getBaseProjectLocation());
+        File projectFile = new File(projectTestFolder, "/project_1.xml");
+        ProjectManager projectManager = new ProjectManager(false);
+        Project project = projectManager.loadProject(projectFile);
+        File repositoryLocation = projectManager.getRepositoryManager().getRepositoryLocation();
+        File libraryLocation = new File( repositoryLocation, "/managed-library_1_0_0.otm" );
+        TLLibrary managedLibrary = new TLLibrary();
+        
+        managedLibrary.setLibraryUrl( URLUtils.toURL( libraryLocation ) );
+        projectManager.addUnmanagedProjectItem( managedLibrary, project );
+    }
+
+    @Test
+    public void testAddUnmanagedProjectItem_existingLibrary() throws Exception {
+        File projectTestFolder = new File(SchemaCompilerTestUtils.getBaseProjectLocation());
+        File projectFile = new File(projectTestFolder, "/project_1.xml");
+        ProjectManager projectManager = new ProjectManager(false);
+        Project project = projectManager.loadProject(projectFile);
+        int originalItemCount = projectManager.getAllProjectItems().size();
+        ProjectItem item = project.getProjectItems().get( 0 );
+        
+        projectManager.addUnmanagedProjectItem( item.getContent(), project );
+        assertEquals( originalItemCount, projectManager.getAllProjectItems().size() );
     }
 
     private List<String> getProjectItemNames(ProjectManager projectManager) {
@@ -331,4 +422,13 @@ public class TestProjectManager {
         return projectItemNames;
     }
 
+    protected Set<String> getFindingMessageKeys(ValidationFindings f) {
+        Set<String> messageKeys = new HashSet<>();
+        
+        for (ValidationFinding finding : f.getAllFindingsAsList()) {
+            messageKeys.add( finding.getMessageKey() );
+        }
+        return messageKeys;
+    }
+    
 }
