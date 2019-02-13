@@ -21,6 +21,9 @@ import java.util.List;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.util.RepositoryTestUtils;
 
+import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.WebClient;
+
 /**
  * Abstract base class that defines common methods used during live repository testing.
  * 
@@ -54,6 +57,11 @@ public abstract class RepositoryTestBase {
 
     protected synchronized static void startTestServer(String repositorySnapshotFolder, int port,
             Class<?> testClass) throws Exception {
+    	startTestServer( repositorySnapshotFolder, port, false, testClass );
+    }
+    
+    protected synchronized static void startTestServer(String repositorySnapshotFolder, int port,
+    		boolean enableWebConsole, Class<?> testClass) throws Exception {
         System.setProperty("ota2.repository.realTimeIndexing", "true");
         File localRepository = new File(System.getProperty("user.dir"), "/target/test-workspace/"
                 + testClass.getSimpleName() + "/local-repository");
@@ -68,7 +76,7 @@ public abstract class RepositoryTestBase {
         repositoryManager.set(new RepositoryManager(localRepository));
 
         jettyServer.set(new JettyTestServer(port, repositorySnapshot, testClass, defaultRepositoryConfig));
-        jettyServer.get().start();
+        jettyServer.get().start( enableWebConsole );
 
         testRepository.set(jettyServer.get().configureRepositoryManager(repositoryManager.get()));
         repositoryManager.get().setCredentials(testRepository.get(), "testuser", "password");
@@ -101,5 +109,9 @@ public abstract class RepositoryTestBase {
         }
         return result;
     }
-
+    
+    protected WebClient newWebClient() throws Exception {
+    	return new WebClient( BrowserVersion.CHROME );
+    }
+    
 }

@@ -53,6 +53,7 @@
 		<jsp.api.version>2.1</jsp.api.version>
 		<slf4j.version>1.7.10</slf4j.version>
 		<junit.version>4.12</junit.version>
+		<htmlunit.version>2.17</htmlunit.version>
 		<mockito.version>2.23.4</mockito.version>
 		<fge.version>2.2.6</fge.version>
 		<swagger.parser.version>1.0.41</swagger.parser.version>
@@ -324,6 +325,11 @@
 				<version>${jetty.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-util</artifactId>
+				<version>${jetty.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>javax.servlet</groupId>
 				<artifactId>servlet-api</artifactId>
 				<version>${servlet.api.version}</version>
@@ -342,6 +348,11 @@
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
 				<version>${junit.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.sourceforge.htmlunit</groupId>
+				<artifactId>htmlunit</artifactId>
+				<version>${htmlunit.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.mockito</groupId>
