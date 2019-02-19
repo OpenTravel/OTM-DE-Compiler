@@ -231,6 +231,7 @@ public class FacetIndexingService {
 		indexDoc.add( new StringField( IndexingTerms.OWNING_LIBRARY_FIELD, facetOwner.get( IndexingTerms.OWNING_LIBRARY_FIELD ), Field.Store.YES ) );
 		indexDoc.add( new StringField( IndexingTerms.ENTITY_TYPE_FIELD, facetOwner.get( IndexingTerms.ENTITY_TYPE_FIELD ), Field.Store.YES ) );
 		indexDoc.add( new StringField( IndexingTerms.ENTITY_NAME_FIELD, facetOwner.get( IndexingTerms.ENTITY_NAME_FIELD ), Field.Store.YES ) );
+        indexDoc.add( new StringField( IndexingTerms.ENTITY_LOCAL_NAME_FIELD, facetOwner.get( IndexingTerms.ENTITY_LOCAL_NAME_FIELD ), Field.Store.YES ) );
 		indexDoc.add( new StringField( IndexingTerms.ENTITY_NAMESPACE_FIELD, facetOwner.get( IndexingTerms.ENTITY_NAMESPACE_FIELD ), Field.Store.YES ) );
 		indexDoc.add( new StringField( IndexingTerms.VERSION_FIELD, facetOwner.get( IndexingTerms.VERSION_FIELD ), Field.Store.YES ) );
 		indexDoc.add( new StringField( IndexingTerms.LATEST_VERSION_FIELD, facetOwner.get( IndexingTerms.LATEST_VERSION_FIELD ), Field.Store.NO ) );

@@ -17,7 +17,7 @@
 --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <small>Select a root namespace to delete or use the text field below to create a new one.<br/></small>
-<form  id="rootNamespaceForm" action="${pageContext.request.contextPath}/console/adminManageRootNamespaces.html" method="post" onsubmit="return prepareForm();">
+<form  id="rootNamespaceForm" action="${pageContext.request.contextPath}/console/adminManageRootNamespaces.html" method="post">
 <input name="action" type="hidden" value="" />
 <input name="rootNamespace" type="hidden" value="" />
 <table>

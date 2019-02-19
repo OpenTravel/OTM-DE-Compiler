@@ -48,6 +48,7 @@ public class TestRepositoryVersioning extends RepositoryTestBase {
 
     @BeforeClass
     public static void setupTests() throws Exception {
+        startSmtpTestServer( 1592 );
         setupWorkInProcessArea(TestRepositoryVersioning.class);
         startTestServer("versions-repository", 9293, TestRepositoryVersioning.class);
     }

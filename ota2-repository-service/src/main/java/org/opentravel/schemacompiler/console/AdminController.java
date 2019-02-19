@@ -34,7 +34,6 @@ import org.opentravel.schemacompiler.repository.RepositoryComponentFactory;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
-import org.opentravel.schemacompiler.repository.RepositorySecurityException;
 import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
 import org.opentravel.schemacompiler.security.AuthenticationProvider;
 import org.opentravel.schemacompiler.security.AuthorizationResource;
@@ -83,8 +82,7 @@ public class AdminController extends BaseController {
 	 */
 	public AdminController() {
 		try {
-			FreeTextSearchServiceFactory.initializeSingleton(
-					RepositoryComponentFactory.getDefault().getSearchIndexLocation(), getRepositoryManager() );
+			FreeTextSearchServiceFactory.initializeSingleton( getRepositoryManager() );
 			searchService = FreeTextSearchServiceFactory.getInstance();
 			
 		} catch (Exception e) {
@@ -176,23 +174,15 @@ public class AdminController extends BaseController {
 		}
 		
 		try {
-			UserPrincipal user = getCurrentUser( session );
-			
 			if ((formAction == null) || (formAction.length() == 0)) {
 				// No action required for first-time display of the page
 				
 			} else if (formAction.equals( "create" )) {
-				if (!getSecurityManager().isAdministrator( user )) {
-					throw new RepositorySecurityException( "You are not authorized to create a new root namespace." );
-				}
 				getRepositoryManager().createRootNamespace( rootNamespace );
 				setStatusMessage( "Root namespace created successfully.", redirectAttrs );
 				targetPage = "redirect:/console/adminManageRootNamespaces.html";
 				
 			} else if (formAction.equals( "delete" )) {
-				if (!getSecurityManager().isAdministrator( user )) {
-					throw new RepositorySecurityException( "You are not authorized to delete a root namespace." );
-				}
 				getRepositoryManager().deleteRootNamespace( rootNamespace );
 				setStatusMessage( "Root namespace deleted successfully.", redirectAttrs );
 				targetPage = "redirect:/console/adminManageRootNamespaces.html";
@@ -209,7 +199,6 @@ public class AdminController extends BaseController {
 		
 		if (targetPage == null) {
 			buildRootNamespaceFormData( model );
-			targetPage = applyCommonValues( session, model, "adminManageRootNamespaces" );
 		}
 		return targetPage;
 	}
@@ -347,33 +336,6 @@ public class AdminController extends BaseController {
 			targetPage = applyCommonValues( session, model, "adminPermissionsEdit" );
 		}
 		return targetPage;
-	}
-	
-	/**
-	 * Called by the Spring MVC controller to display the application administration page used to test namespace
-	 * permissions.
-	 * 
-	 * @param baseNamespace the base namespace for which permissions should be tested
-	 * @param session the HTTP session that contains information about an authenticated user
-	 * @param model the model context to be used when rendering the page view
-	 * @param redirectAttrs request attributes for the redirect in the case of success or an unauthorized user
-	 * @return String
-	 */
-	@RequestMapping({ "/adminPermissionsTest.html", "/adminPermissionsTest.htm" })
-	public String adminPermissionsTestPage(@RequestParam(value = "namespace", required = false) String baseNamespace,
-			HttpSession session, Model model, RedirectAttributes redirectAttrs) {
-		String homeRedirect = checkAdminAccess( session, redirectAttrs );
-		
-		if (homeRedirect != null) {
-			return homeRedirect;
-		}
-		
-		if ((baseNamespace != null) && (baseNamespace.length() == 0)) {
-			baseNamespace = null;
-		}
-		
-		model.addAttribute( BASE_NAMESPACE, baseNamespace );
-		return applyCommonValues( session, model, "adminPermissionsTest" );
 	}
 	
 	/**
@@ -809,7 +771,10 @@ public class AdminController extends BaseController {
 				List<UserGroup> groupList = new ArrayList<>();
 				List<String> groupNames = Arrays.asList( groupsResource.getGroupNames() );
 				
-				if (groupName.indexOf( ' ' ) >= 0) {
+				if (groupName.length() == 0) {
+				    setErrorMessage( "Group name is a required value.", model );
+				    
+				} else if (groupName.indexOf( ' ' ) >= 0) {
 					setErrorMessage( "White space characters are not allowed in group names.", model );
 					
 				} else if (groupNames.contains( groupName )) {
@@ -832,9 +797,6 @@ public class AdminController extends BaseController {
 				log.error( "Error creating user group.", e );
 				setErrorMessage( "Error creating user group (see server log for details).", model );
 			}
-		}
-		if (targetPage == null) {
-			targetPage = applyCommonValues( session, model, "adminGroupsAdd" );
 		}
 		return targetPage;
 	}
@@ -1058,26 +1020,15 @@ public class AdminController extends BaseController {
 		
 		if (confirmDeletion) {
 			try {
-				UserPrincipal user = getCurrentUser( session );
-				
-				if (getSecurityManager().isAdministrator( user )) {
-					RepositoryManager repositoryManager = getRepositoryManager();
-					RepositoryItem item = repositoryManager.getRepositoryItem( baseNamespace, filename, version );
-					
-					repositoryManager.delete( item );
-					searchService.deleteRepositoryItemIndex( item );
-					
-					setStatusMessage( "Repository item deleted successfully: " + filename, redirectAttrs );
-					redirectAttrs.addAttribute( BASE_NAMESPACE, baseNamespace );
-					targetPage = "redirect:/console/browse.html";
-					
-				} else {
-					setErrorMessage( "You do not have permission to delete the repository item.", redirectAttrs );
-					redirectAttrs.addAttribute( BASE_NAMESPACE, baseNamespace );
-					redirectAttrs.addAttribute( FILENAME, filename );
-					redirectAttrs.addAttribute( VERSION, version );
-					targetPage = REDIRECT_LIBRARY_INFO;
-				}
+                RepositoryManager repositoryManager = getRepositoryManager();
+                RepositoryItem item = repositoryManager.getRepositoryItem( baseNamespace, filename, version );
+                
+                repositoryManager.delete( item );
+                searchService.deleteRepositoryItemIndex( item );
+                
+                setStatusMessage( "Repository item deleted successfully: " + filename, redirectAttrs );
+                redirectAttrs.addAttribute( BASE_NAMESPACE, baseNamespace );
+                targetPage = "redirect:/console/browse.html";
 				
 			} catch (Exception e) {
 				String message = getErrorMessage( e );
@@ -1136,20 +1087,14 @@ public class AdminController extends BaseController {
 		if (confirmPromote) {
 			try {
 				UserPrincipal user = getCurrentUser( session );
-				
-				if (getSecurityManager().isAdministrator( user )) {
-					RepositoryManager repositoryManager = getRepositoryManager();
-					RepositoryItem item = repositoryManager.getRepositoryItem( baseNamespace, filename, version );
-					
-					repositoryManager.getFileManager().setCurrentUserId( user.getUserId() );
-					repositoryManager.promote( item );
-					searchService.indexRepositoryItem( item );
-					
-					setStatusMessage( "Repository item promoted successfully: " + filename, redirectAttrs );
-					
-				} else {
-					setErrorMessage( "You do not have permission to promote the repository item.", redirectAttrs );
-				}
+                RepositoryManager repositoryManager = getRepositoryManager();
+                RepositoryItem item = repositoryManager.getRepositoryItem( baseNamespace, filename, version );
+                
+                repositoryManager.getFileManager().setCurrentUserId( user.getUserId() );
+                repositoryManager.promote( item );
+                searchService.indexRepositoryItem( item );
+                
+                setStatusMessage( "Repository item promoted successfully: " + filename, redirectAttrs );
 				
 			} catch (Exception e) {
 				String message = getErrorMessage( e );
@@ -1211,20 +1156,13 @@ public class AdminController extends BaseController {
 		if (confirmDemote) {
 			try {
 				UserPrincipal user = getCurrentUser( session );
-				
-				if (getSecurityManager().isAdministrator( user )) {
-					RepositoryManager repositoryManager = getRepositoryManager();
-					RepositoryItem item = repositoryManager.getRepositoryItem( baseNamespace, filename, version );
-					
-					repositoryManager.getFileManager().setCurrentUserId( user.getUserId() );
-					repositoryManager.demote( item );
-					searchService.indexRepositoryItem( item );
-					
-					setStatusMessage( "Repository item demoted successfully: " + filename, redirectAttrs );
-					
-				} else {
-					setErrorMessage( "You do not have permission to demote the repository item.", redirectAttrs );
-				}
+                RepositoryManager repositoryManager = getRepositoryManager();
+                RepositoryItem item = repositoryManager.getRepositoryItem( baseNamespace, filename, version );
+                
+                repositoryManager.getFileManager().setCurrentUserId( user.getUserId() );
+                repositoryManager.demote( item );
+                searchService.indexRepositoryItem( item );
+                setStatusMessage( "Repository item demoted successfully: " + filename, redirectAttrs );
 				
 			} catch (Exception e) {
 				String message = getErrorMessage( e );
@@ -1285,20 +1223,12 @@ public class AdminController extends BaseController {
 		
 		if (confirmUnlock) {
 			try {
-				UserPrincipal user = getCurrentUser( session );
-				
-				if (getSecurityManager().isAdministrator( user )) {
-					RepositoryManager repositoryManager = getRepositoryManager();
-					RepositoryItem item = repositoryManager.getRepositoryItem( baseNamespace, filename, version );
-					
-					repositoryManager.unlock( item, false, null );
-					searchService.indexRepositoryItem( item );
-					
-					setStatusMessage( "Repository item unlocked successfully: " + filename, redirectAttrs );
-					
-				} else {
-					setErrorMessage( "You do not have permission to unlock the repository item.", redirectAttrs );
-				}
+                RepositoryManager repositoryManager = getRepositoryManager();
+                RepositoryItem item = repositoryManager.getRepositoryItem( baseNamespace, filename, version );
+                
+                repositoryManager.unlock( item, false, null );
+                searchService.indexRepositoryItem( item );
+                setStatusMessage( "Repository item unlocked successfully: " + filename, redirectAttrs );
 				
 			} catch (Exception e) {
 				String message = getErrorMessage( e );
@@ -1358,28 +1288,21 @@ public class AdminController extends BaseController {
 		
 		if (confirmRecalculate) {
 			try {
-				UserPrincipal user = getCurrentUser( session );
-				
-				if (getSecurityManager().isAdministrator( user )) {
-					RepositoryManager repositoryManager = getRepositoryManager();
-					RepositoryItem item = repositoryManager.getRepositoryItem( baseNamespace, filename, version );
-					
-					if (item.getStatus() == TLLibraryStatus.DRAFT) {
-						setErrorMessage( "Only repository items in non-Draft status are assigned a CRC value.",
-								redirectAttrs );
-						
-					} else {
-						repositoryManager.getFileManager().setCurrentUserId( user.getUserId() );
-						repositoryManager.recalculateCrc( item );
-						searchService.indexRepositoryItem( item );
-						
-						setStatusMessage( "Repository item CRC recalculated successfully: " + filename, redirectAttrs );
-					}
-					
-				} else {
-					setErrorMessage( "You do not have permission to recalculate the repository item's CRC.",
-							redirectAttrs );
-				}
+                RepositoryManager repositoryManager = getRepositoryManager();
+                RepositoryItem item = repositoryManager.getRepositoryItem( baseNamespace, filename, version );
+                
+                if (item.getStatus() == TLLibraryStatus.DRAFT) {
+                    setErrorMessage( "Only repository items in non-Draft status are assigned a CRC value.", redirectAttrs );
+                    
+                } else {
+                    UserPrincipal user = getCurrentUser( session );
+                    
+                    repositoryManager.getFileManager().setCurrentUserId( user.getUserId() );
+                    repositoryManager.recalculateCrc( item );
+                    searchService.indexRepositoryItem( item );
+                    
+                    setStatusMessage( "Repository item CRC recalculated successfully: " + filename, redirectAttrs );
+                }
 				
 			} catch (Exception e) {
 				String message = getErrorMessage( e );

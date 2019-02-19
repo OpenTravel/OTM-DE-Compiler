@@ -34,14 +34,9 @@ import org.springframework.ui.Model;
  */
 public abstract class BaseController {
 
-    /**
-	 * 
-	 */
 	private static final String STATUS_MESSAGE = "statusMessage";
-	/**
-	 * 
-	 */
 	private static final String ERROR_MESSAGE = "errorMessage";
+	
 	private RepositoryManager repositoryManager;
     private RepositorySecurityManager securityManager;
     @Autowired private HttpServletRequest servletRequest;

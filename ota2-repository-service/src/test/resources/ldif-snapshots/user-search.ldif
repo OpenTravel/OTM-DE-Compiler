@@ -1,0 +1,44 @@
+dn: dc=opentravel,dc=org
+objectClass: domain
+objectClass: top
+dc: opentravel
+
+dn: ou=Users,dc=opentravel,dc=org
+objectClass: organizationalUnit
+objectClass: top
+ou: Users
+
+dn: cn=testuser,ou=Users,dc=opentravel,dc=org
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: Test User
+givenName: Test
+sn: User
+uid: testuser
+userPassword: password
+
+dn: cn=doejohn,ou=Users,dc=opentravel,dc=org
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: John Doe
+givenName: John
+sn: Doe
+mail: doejohn@opentravel.org
+uid: doejohn
+userPassword: AOxvAVbKZKfyEIheEsu2kX3gfJtB89kZnPHC3/muKZ4rZIuRdzy7tQDgg/HV3igEtypORNUJB9YrXlzQm7NLg+yjV4xw6wHWJPDUUfcI+yyEuTRWrfD+lWVNI9CAxIvfVVVXYmsiaIlL8Aa6BQ/qYNJGrlk1wUBcrrmTZxs+i+0=
+
+dn: cn=doejane,ou=Users,dc=opentravel,dc=org
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: Jane Doe
+givenName: Jane
+sn: Doe
+mail: doejane@opentravel.org
+uid: doejane
+userPassword: AOxvAVbKZKfyEIheEsu2kX3gfJtB89kZnPHC3/muKZ4rZIuRdzy7tQDgg/HV3igEtypORNUJB9YrXlzQm7NLg+yjV4xw6wHWJPDUUfcI+yyEuTRWrfD+lWVNI9CAxIvfVVVXYmsiaIlL8Aa6BQ/qYNJGrlk1wUBcrrmTZxs+i+0=

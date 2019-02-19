@@ -65,7 +65,7 @@ public class IndexProcessManager {
 	public static final String AGENT_JVMOPTS_BEANID   = "agentJvmOpts";
 	public static final String AMQ_BROKER_BEANID      = "amqBroker";
 	
-    private static final boolean DEBUG = false;
+    protected static boolean debugMode = false;
     
     private static Log log = LogFactory.getLog(IndexProcessManager.class);
     
@@ -76,6 +76,7 @@ public class IndexProcessManager {
 	private static Thread launcherThread;
 	private static AgentLauncher launcher;
 	private static String agentJvmOpts;
+	private static boolean running;
 	
 	/**
 	 * Main method invoked from the command-line.
@@ -84,9 +85,11 @@ public class IndexProcessManager {
 	 */
 	public static void main(String[] args) {
 		try {
+            running = false;
 			initializeContext();
 			startActiveMQBroker();
 			startJMXServer();
+			running = true;
 			log.info("Indexing process manager started.");
 			
 			launcher = new AgentLauncher();
@@ -100,6 +103,9 @@ public class IndexProcessManager {
 			
 		} catch (Exception e) {
 			log.error("Error launching index process manager.", e);
+			
+		} finally {
+            running = false;
 		}
 	}
 
@@ -143,6 +149,32 @@ public class IndexProcessManager {
 	}
 	
 	/**
+	 * Returns true if the process manager is currently running (used for testing purposes).
+	 * 
+	 * @return boolean
+	 */
+	public static boolean isRunning() {
+	    if (!running) {
+	        try {
+	            Thread.sleep( 100 );
+	            
+	        } catch (InterruptedException e) {
+	            Thread.currentThread().interrupt();
+	        }
+	    }
+	    return running;
+	}
+	
+	/**
+	 * Returns a handle to the agent process (used for testing purposes).
+	 * 
+	 * @return Process
+	 */
+	public static Process getAgentProcess() {
+	    return (launcher == null) ? null : launcher.getAgentProcess();
+	}
+	
+	/**
 	 * Shuts down the process manager as well as the indexing agent child process.
 	 */
 	public static void shutdown() {
@@ -154,10 +186,12 @@ public class IndexProcessManager {
 					launcher.getAgentProcess().destroy();
 				}
 				launcherThread.interrupt();
+				amqBroker.stop();
+				amqBroker.waitUntilStopped();
 				jmxServer.stop();
 				log.info("Indexing process manager shut down.");
 				
-			} catch (IOException e) {
+			} catch (Exception e) {
 				log.error("Error shutting down JMX server", e);
 			}
 		}
@@ -249,7 +283,7 @@ public class IndexProcessManager {
 				while (!shutdownRequested) {
 					agentProcess = launchJavaProcess( IndexingAgent.class );
 					
-					if (DEBUG) {
+					if (debugMode) {
 						redirectAgentProcessOutout();
 					}
 					int exitCode = agentProcess.waitFor();

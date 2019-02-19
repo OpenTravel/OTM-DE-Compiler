@@ -625,6 +625,7 @@ public class SubscriptionManager {
 			}
 			
 		} catch (Exception e) {
+		    e.printStackTrace( System.out );
 			log.error("Error processing notification job.", e);
 		}
 	}
@@ -682,7 +683,7 @@ public class SubscriptionManager {
 		
 		while (!successInd && !abortInd && (retryCount <= MAX_RETRIES)) {
 			try {
-				if (!smtpConfig.isAuthEnable() && (smtpUser != null) && (smtpPassword != null)) {
+				if (smtpConfig.isAuthEnable() && (smtpUser != null) && (smtpPassword != null)) {
 					Transport.send( message, smtpUser, smtpPassword );
 					
 				} else {

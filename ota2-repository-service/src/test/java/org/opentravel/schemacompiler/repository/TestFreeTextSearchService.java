@@ -31,6 +31,8 @@ import org.opentravel.schemacompiler.index.LibrarySearchResult;
 import org.opentravel.schemacompiler.index.RealTimeFreeTextSearchService;
 import org.opentravel.schemacompiler.index.ReleaseSearchResult;
 import org.opentravel.schemacompiler.index.SearchResult;
+import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.util.RepositoryTestUtils;
 
 /**
@@ -119,7 +121,7 @@ public class TestFreeTextSearchService {
             assertTrue(filenames.contains("Version_Test_1_1_1.otm"));
 
             // Search for a non-existent keyword
-            searchResults = service.search("blue", null, false, false);
+            searchResults = service.search("nonexistentkeyword", null, false, false);
             filenames = getFilenames(searchResults);
 
             assertEquals(0, filenames.size());
@@ -129,6 +131,75 @@ public class TestFreeTextSearchService {
         }
     }
 
+    @Test
+    public void testSearchQueries() throws Exception {
+        FreeTextSearchService service = initSearchService("testSearchQueries");
+        List<SearchResult<Object>> searchResults;
+        
+        searchResults = service.search( "Version", TLLibraryStatus.DRAFT, false, true );
+        assertEquals( 4, searchResults.size() );
+        
+        // Test resolution of item content and search results based on search index IDs and
+        // repository items
+        for (SearchResult<Object> result : searchResults) {
+            if (result.getEntityType().equals( TLLibrary.class )) {
+                LibrarySearchResult lsr = service.getLibrary( result.getSearchIndexId(), true );
+                TLLibrary library = lsr.getItemContent();
+                RepositoryItem item;
+                
+                assertNotNull( library );
+                assertEquals( result.getSearchIndexId(), lsr.getSearchIndexId() );
+                item = service.getRepositoryManager().getRepositoryItem( library.getBaseNamespace(),
+                        library.getName() + "_" + library.getVersion().replace( '.', '_' ) + ".otm", library.getVersion() );
+                lsr = service.getLibrary( item, true );
+                assertEquals( result.getSearchIndexId(), lsr.getSearchIndexId() );
+                
+            } else if (result.getEntityType().equals( Release.class )) {
+                ReleaseSearchResult rsr = service.getRelease( result.getSearchIndexId(), true );
+                Release release = rsr.getItemContent();
+                RepositoryItem item;
+                
+                assertNotNull( release );
+                assertEquals( result.getSearchIndexId(), rsr.getSearchIndexId() );
+                item = service.getRepositoryManager().getRepositoryItem( release.getBaseNamespace(),
+                        release.getName() + "_" + release.getVersion().replace( '.', '_' ) + ".otr", release.getVersion() );
+                rsr = service.getRelease( item, true );
+                assertEquals( result.getSearchIndexId(), rsr.getSearchIndexId() );
+            }
+        }
+        
+        // Test various other types of search parameters
+        searchResults = service.search( "Version", TLLibraryStatus.UNDER_REVIEW, false, true );
+        assertEquals( 0, searchResults.size() );
+        searchResults = service.search( "Version", TLLibraryStatus.FINAL, false, true );
+        assertEquals( 0, searchResults.size() );
+        searchResults = service.search( "Version", TLLibraryStatus.OBSOLETE, false, true );
+        assertEquals( 0, searchResults.size() );
+        
+        searchResults = service.search( "Version", TLLibraryStatus.DRAFT, true, true );
+        assertEquals( 2, searchResults.size() );
+        searchResults = service.search( "Version", TLLibraryStatus.UNDER_REVIEW, true, true );
+        assertEquals( 1, searchResults.size() );
+        searchResults = service.search( "Version", TLLibraryStatus.FINAL, true, true );
+        assertEquals( 1, searchResults.size() );
+        searchResults = service.search( "Version", TLLibraryStatus.OBSOLETE, true, true );
+        assertEquals( 0, searchResults.size() );
+        
+        // Search for direct and indirect where-used
+        RepositoryItem item = service.getRepositoryManager().getRepositoryItem(
+                "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test", "Version_Test_1_0_0.otm", "1.0.0" );
+        LibrarySearchResult lsr = service.getLibrary( item, true );
+        org.opentravel.schemacompiler.index.EntitySearchResult esr =
+                service.getEntity( lsr.getSearchIndexId(), "SimpleCore", true );
+        
+        assertEquals( 2, service.getLibraryWhereUsed( lsr, true, true ).size() );
+        assertEquals( 1, service.getEntityWhereUsed( esr, true, true ).size() );
+        
+        // Search for validation errors/warnings
+        assertEquals( 1, service.getLibraryFindings( lsr.getSearchIndexId() ).size() );
+        assertEquals( 1, service.getEntityFindings( esr.getSearchIndexId() ).size() );
+    }
+    
     protected FreeTextSearchService initSearchService(String testName) throws Exception {
         File repositorySnapshot = new File(System.getProperty("user.dir"),
                 "/src/test/resources/repo-snapshots/versions-repository");

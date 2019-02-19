@@ -361,6 +361,7 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
 					userFirstNameAttribute, userEmailAttribute });
 			
 			try {
+                initializeConfigurationSettings();
 				context = openConnection(connectionPrincipal, connectionPassword);
 				NamingEnumeration<SearchResult> searchResults = context.search(
 						userSearchBase, searchFilter, constraints);
@@ -400,14 +401,14 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
 	 * @return String
 	 */
 	private String buildSearchFilter(String searchCriteria, List<String> searchAttributes) {
-		StringBuilder searchFilter = new StringBuilder("(&(objectCategory=person)(").append(userIdAttribute).append("=*)(|");
+		StringBuilder searchFilter = new StringBuilder("(|");
 		
 		for (String searchAttr : searchAttributes) {
 			if ((searchAttr != null) && (searchAttr.length() > 0)) {
 				searchFilter.append("(").append(searchAttr).append("=*").append(searchCriteria).append("*)");
 			}
 		}
-		searchFilter.append("))");
+		searchFilter.append(")");
 		
 		return searchFilter.toString();
 	}
@@ -488,10 +489,11 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
 			throws NamingException {
 		String userDn = findUserDn(userId, context);
 		
+        context.close(); // close the generic lookup context
+        context = null;
+        
 		if (userDn != null) {
 			try {
-				context.close(); // close the generic lookup context
-				context = null;
 				context = openConnection(userDn, authCredentials);
 				
 			} catch (NamingException e) {
@@ -873,19 +875,19 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
 	private void validateUserSearch() throws RepositorySecurityException {
 		if ((connectionPrincipal == null) || (connectionPrincipal.length() == 0)) {
 		    throw new RepositorySecurityException(
-		            "The 'authentication.jndi.connectionPrincipal' property is a required value for the JNDI user-lookup mode.");
+		            "The 'authentication.jndi.connectionPrincipal' property is a required value for the JNDI user-search mode.");
 		}
 		if ((connectionPassword == null) || (connectionPassword.length() == 0)) {
 		    throw new RepositorySecurityException(
-		            "The 'authentication.jndi.connectionPassword' property is a required value for the JNDI user-lookup mode.");
+		            "The 'authentication.jndi.connectionPassword' property is a required value for the JNDI user-search mode.");
 		}
 		if (userSearchBase == null) {
 		    throw new RepositorySecurityException(
-		            "The 'authentication.jndi.userSearchBase' property is a required value for the JNDI user-lookup mode.");
+		            "The 'authentication.jndi.userSearchBase' property is a required value for the JNDI user-search mode.");
 		}
 		if ((userSearchPatterns == null) || (userSearchPatterns.length == 0)) {
 		    throw new RepositorySecurityException(
-		            "The 'authentication.jndi.userSearchPatterns' property is a required value for the JNDI user-lookup mode.");
+		            "The 'authentication.jndi.userSearchPatterns' property is a required value for the JNDI user-search mode.");
 		}
 	}
 
@@ -902,10 +904,6 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
 		if ((connectionPassword == null) || (connectionPassword.length() == 0)) {
 		    throw new RepositorySecurityException(
 		            "The 'authentication.jndi.connectionPassword' property is a required value for the JNDI user-lookup mode.");
-		}
-		if (userPattern == null) {
-		    throw new RepositorySecurityException(
-		            "The 'authentication.jndi.userPattern' property is a required value for the JNDI user-lookup mode.");
 		}
 		if (passwordValidator == null) {
 		    throw new RepositorySecurityException(

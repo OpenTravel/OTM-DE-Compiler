@@ -25,6 +25,7 @@ public class IndexingTerms {
 	public static final String IDENTITY_FIELD           = "identity";
 	public static final String ENTITY_TYPE_FIELD        = "entityType";
 	public static final String ENTITY_NAME_FIELD        = "entityName";
+    public static final String ENTITY_LOCAL_NAME_FIELD  = "entityLocalName";
 	public static final String ENTITY_NAMESPACE_FIELD   = "entityNamespace";
 	public static final String ENTITY_DESCRIPTION_FIELD = "entityDescription";
 	public static final String VERSION_FIELD            = "version";

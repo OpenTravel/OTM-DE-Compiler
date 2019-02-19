@@ -36,6 +36,7 @@
 		<httpcomponents.version>4.4</httpcomponents.version>
 		<maven.plugin.api.version>3.2.5</maven.plugin.api.version>
 		<maven.annotations.version>3.4</maven.annotations.version>
+		<maven.testing.harness.version>3.3.0</maven.testing.harness.version>
 		<commons.text.version>1.1</commons.text.version>
 		<commons.cli.version>1.2</commons.cli.version>
 		<commons.codec.version>1.9</commons.codec.version>
@@ -55,6 +56,9 @@
 		<junit.version>4.12</junit.version>
 		<htmlunit.version>2.17</htmlunit.version>
 		<mockito.version>2.23.4</mockito.version>
+		<mockrunner.jms.version>2.0.1</mockrunner.jms.version>
+		<unboundid.ldap.version>4.0.9</unboundid.ldap.version>
+		<greenmail.version>1.5.9</greenmail.version>
 		<fge.version>2.2.6</fge.version>
 		<swagger.parser.version>1.0.41</swagger.parser.version>
 		<guava.version>23.1-jre</guava.version>
@@ -107,6 +111,11 @@
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>0.8.2</version>
+				<configuration>
+					<excludes>
+						<exclude>**com.steadystate*</exclude>
+					</excludes>
+				</configuration>
 				<executions>
 					<execution>
 						<goals>
@@ -210,9 +219,24 @@
 				<version>${maven.plugin.api.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.apache.maven</groupId>
+				<artifactId>maven-aether-provider</artifactId>
+				<version>${maven.plugin.api.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven</groupId>
+				<artifactId>maven-compat</artifactId>
+				<version>${maven.plugin.api.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.apache.maven.plugin-tools</groupId>
 				<artifactId>maven-plugin-annotations</artifactId>
 				<version>${maven.annotations.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven.plugin-testing</groupId>
+				<artifactId>maven-plugin-testing-harness</artifactId>
+				<version>${maven.testing.harness.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -330,6 +354,16 @@
 				<version>${jetty.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>apache-jsp</artifactId>
+				<version>${jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>apache-jstl</artifactId>
+				<version>${jetty.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>javax.servlet</groupId>
 				<artifactId>servlet-api</artifactId>
 				<version>${servlet.api.version}</version>
@@ -358,6 +392,21 @@
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
 				<version>${mockito.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.mockrunner</groupId>
+				<artifactId>mockrunner-jms</artifactId>
+				<version>${mockrunner.jms.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.unboundid</groupId>
+				<artifactId>unboundid-ldapsdk</artifactId>
+				<version>${unboundid.ldap.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.icegreen</groupId>
+				<artifactId>greenmail</artifactId>
+				<version>${greenmail.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.fge</groupId>

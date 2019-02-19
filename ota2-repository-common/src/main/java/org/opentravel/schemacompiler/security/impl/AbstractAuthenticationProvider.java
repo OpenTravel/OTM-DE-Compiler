@@ -63,11 +63,11 @@ public abstract class AbstractAuthenticationProvider implements AuthenticationPr
     private static ObjectFactory objectFactory = new ObjectFactory();
     private static JAXBContext jaxbContext;
     
-	protected static Map<String,UserInfo> userRegistry;
-	private static long userFileLastModified = Integer.MIN_VALUE;
     private static Log log = LogFactory.getLog( AbstractAuthenticationProvider.class );
 	
 	private RepositoryManager repositoryManager;
+    private long userFileLastModified = Integer.MIN_VALUE;
+    protected Map<String,UserInfo> userRegistry;
 	
 	/**
 	 * @see org.opentravel.schemacompiler.security.AuthenticationProvider#getUserInfo(java.lang.String)
@@ -232,6 +232,7 @@ public abstract class AbstractAuthenticationProvider implements AuthenticationPr
             marshaller.marshal( objectFactory.createRepositoryUsers( repoUsers ), usersFile );
 			
             fileManager.commitChangeSet();
+            userFileLastModified = -1;
             success = true;
             
 		} catch (JAXBException e) {

@@ -108,8 +108,7 @@ public class RepositoryContentResource {
 		this.securityManager = componentFactory.getSecurityManager();
 		
 		try {
-			FreeTextSearchServiceFactory.initializeSingleton( componentFactory.getSearchIndexLocation(),
-					repositoryManager );
+			FreeTextSearchServiceFactory.initializeSingleton( repositoryManager );
 			
 		} catch (IOException e) {
 			throw new RepositoryException( "Error initializing the free-text search service.", e );

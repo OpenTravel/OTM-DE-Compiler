@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<r:SubscriptionList xmlns:r="http://www.OpenTravel.org/ns/OTA2/RepositoryInfoExt_v01_00">
+    <r:SubscriptionTarget>
+        <r:BaseNamespace>http://www.OpenTravel.org</r:BaseNamespace>
+    </r:SubscriptionTarget>
+    <r:Subscription eventType="LibraryPublish">
+        <r:User>testuser</r:User>
+    </r:Subscription>
+    <r:Subscription eventType="LibraryNewVersion">
+        <r:User>testuser</r:User>
+    </r:Subscription>
+    <r:Subscription eventType="LibraryStatusChange">
+        <r:User>testuser</r:User>
+    </r:Subscription>
+    <r:Subscription eventType="LibraryStateChange">
+        <r:User>testuser</r:User>
+    </r:Subscription>
+    <r:Subscription eventType="LibraryCommit">
+        <r:User>testuser</r:User>
+    </r:Subscription>
+    <r:Subscription eventType="LibraryMoveOrRename">
+        <r:User>testuser</r:User>
+    </r:Subscription>
+    <r:Subscription eventType="NamespaceAction">
+        <r:User>testuser</r:User>
+    </r:Subscription>
+</r:SubscriptionList>

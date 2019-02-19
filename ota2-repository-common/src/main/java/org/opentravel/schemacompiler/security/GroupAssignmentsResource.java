@@ -173,6 +173,8 @@ public class GroupAssignmentsResource extends FileResource<Map<String, List<Stri
             fileManager.addToChangeSet(dataFile);
             fileUtils.saveGroupAssignments(dataFile, groupAssignments);
             fileManager.commitChangeSet();
+            invalidateResource();
+            refreshResource(dataFile);
             success = true;
 
         } catch (IOException e) {

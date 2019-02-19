@@ -78,8 +78,7 @@ public class SearchController extends BaseController {
      */
     public SearchController() {
         try {
-        	FreeTextSearchServiceFactory.initializeSingleton(RepositoryComponentFactory.getDefault()
-                    .getSearchIndexLocation(), getRepositoryManager());
+        	FreeTextSearchServiceFactory.initializeSingleton(getRepositoryManager());
             searchService = FreeTextSearchServiceFactory.getInstance();
 
         } catch (Exception e) {
@@ -124,6 +123,7 @@ public class SearchController extends BaseController {
 					searchResults = prepareSearchResults( results, nsFilter, entityType, user );
 					
 				} catch (RepositoryException e) {
+				    e.printStackTrace( System.out );
 					log.error("An error occured while performing the requested search.", e);
 					setErrorMessage(
 							"An error occured while performing the requested search (see server log for details).",
@@ -163,7 +163,7 @@ public class SearchController extends BaseController {
 			
 			if (result instanceof ReleaseSearchResult) {
 				ReleaseSearchResult release = (ReleaseSearchResult) result;
-				RepositoryItem releaseItem = RepositoryManager.getDefault().getRepositoryItem(
+				RepositoryItem releaseItem = getRepositoryManager().getRepositoryItem(
 						release.getBaseNamespace(), release.getFilename(), release.getVersion());
 				
 				addIfReadAuthorized( result, releaseItem, searchResults, user );

@@ -55,8 +55,8 @@ public class SubscriptionFileUtils {
     private static final String LIBRARY_SUBSCRIPTION_SUFFIX = "-subscriptions.xml";
 
     private static javax.xml.validation.Schema validationSchema;
-    protected static ObjectFactory objectFactory = new ObjectFactory();
-    protected static JAXBContext jaxbContext = RepositoryJaxbContext.getExtContext();
+    protected static ObjectFactory objectFactory;
+    protected static JAXBContext jaxbContext;
 
     private RepositoryManager manager;
 
@@ -242,7 +242,9 @@ public class SubscriptionFileUtils {
 
             schemaFactory.setResourceResolver( new ClasspathResourceResolver() );
             validationSchema = schemaFactory.newSchema( new StreamSource( schemaStream ) );
-
+            jaxbContext = RepositoryJaxbContext.getExtContext();
+            objectFactory = new ObjectFactory();
+            
         } catch (Exception e) {
             throw new ExceptionInInitializerError(e);
         }

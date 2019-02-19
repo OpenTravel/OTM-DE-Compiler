@@ -42,6 +42,7 @@ public class TestRemoteRepositoryFunctions extends TestRepositoryFunctions {
 
     @BeforeClass
     public static void setupTests() throws Exception {
+        startSmtpTestServer( 1587 );
         setupWorkInProcessArea(TestRemoteRepositoryFunctions.class);
         startTestServer("empty-repository", 9291, TestRemoteRepositoryFunctions.class);
     }

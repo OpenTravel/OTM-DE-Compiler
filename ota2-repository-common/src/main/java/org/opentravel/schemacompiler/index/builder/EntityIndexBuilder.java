@@ -122,6 +122,7 @@ public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> {
 			indexDoc.add( new StringField( IndexingTerms.OWNING_LIBRARY_FIELD, owningLibraryIdentity, Field.Store.YES ) );
 			indexDoc.add( new StringField( IndexingTerms.ENTITY_TYPE_FIELD, sourceObject.getClass().getName(), Field.Store.YES ) );
 			indexDoc.add( new StringField( IndexingTerms.ENTITY_NAME_FIELD, getEntityName( sourceObject ), Field.Store.YES ) );
+            indexDoc.add( new StringField( IndexingTerms.ENTITY_LOCAL_NAME_FIELD, sourceObject.getLocalName(), Field.Store.YES ) );
 			indexDoc.add( new StringField( IndexingTerms.ENTITY_NAMESPACE_FIELD, sourceObject.getNamespace(), Field.Store.YES ) );
 			indexDoc.add( new StringField( IndexingTerms.VERSION_FIELD, owningLibrary.getVersion(), Field.Store.YES ) );
 			indexDoc.add( new StringField( IndexingTerms.LATEST_VERSION_FIELD, latestVersion + "", nonStoreField ) );

@@ -25,7 +25,7 @@
 	</span>
 </h3>
 
-<form action="${pageContext.request.contextPath}/console/adminPermissionsEdit.html" method="post">
+<form id="editForm" action="${pageContext.request.contextPath}/console/adminPermissionsEdit.html" method="post">
 <input name="namespace" type="hidden" value="${baseNamespace}" />
 <input name="processForm" type="hidden" value="true" />
 

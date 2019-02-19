@@ -18,7 +18,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <h3>Group: ${groupName}</h3>
 <small>Use the controls below to add or remove members for this group.<br/></small>
-<form action="${pageContext.request.contextPath}/console/adminGroupsEdit.html" method="POST">
+<form id="editForm" action="${pageContext.request.contextPath}/console/adminGroupsEdit.html" method="POST">
 <table id="groupEditTable">
 	<tr>
 		<td>

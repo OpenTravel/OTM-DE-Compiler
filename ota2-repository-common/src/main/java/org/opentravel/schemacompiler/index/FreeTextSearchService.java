@@ -73,10 +73,10 @@ public abstract class FreeTextSearchService {
 	private static final String WHERE_USED_QUERY_ERROR = "Error executing where-used query for entity: ";
 	
 	private static final Set<String> nonContentAttrs = new HashSet<>( Arrays.asList(
-			IndexingTerms.IDENTITY_FIELD, IndexingTerms.ENTITY_TYPE_FIELD, IndexingTerms.ENTITY_NAME_FIELD, IndexingTerms.ENTITY_NAMESPACE_FIELD,
-			IndexingTerms.BASE_NAMESPACE_FIELD, IndexingTerms.FILENAME_FIELD, IndexingTerms.VERSION_FIELD, IndexingTerms.VERSION_SCHEME_FIELD,
-			IndexingTerms.ENTITY_DESCRIPTION_FIELD, IndexingTerms.STATUS_FIELD, IndexingTerms.RELEASE_STATUS_FIELD, IndexingTerms.LOCKED_BY_USER_FIELD,
-			IndexingTerms.REFERENCED_LIBRARY_FIELD, IndexingTerms.PREFIX_MAPPING_FIELD, IndexingTerms.OWNING_LIBRARY_FIELD,
+			IndexingTerms.IDENTITY_FIELD, IndexingTerms.ENTITY_TYPE_FIELD, IndexingTerms.ENTITY_NAME_FIELD, IndexingTerms.ENTITY_LOCAL_NAME_FIELD,
+			IndexingTerms.ENTITY_NAMESPACE_FIELD, IndexingTerms.BASE_NAMESPACE_FIELD, IndexingTerms.FILENAME_FIELD, IndexingTerms.VERSION_FIELD,
+			IndexingTerms.VERSION_SCHEME_FIELD, IndexingTerms.ENTITY_DESCRIPTION_FIELD, IndexingTerms.STATUS_FIELD, IndexingTerms.RELEASE_STATUS_FIELD,
+			IndexingTerms.LOCKED_BY_USER_FIELD, IndexingTerms.REFERENCED_LIBRARY_FIELD, IndexingTerms.PREFIX_MAPPING_FIELD, IndexingTerms.OWNING_LIBRARY_FIELD,
 			IndexingTerms.EXTENDS_ENTITY_FIELD, IndexingTerms.REFERENCE_IDENTITY_FIELD, IndexingTerms.FACET_OWNER_FIELD
 		) );
 	private static final Set<String> contentAttr = new HashSet<>( Arrays.asList( IndexingTerms.CONTENT_DATA_FIELD ) );

@@ -36,6 +36,7 @@ public class TestRepositorySearch extends RepositoryTestBase {
 
     @BeforeClass
     public static void setupTests() throws Exception {
+        startSmtpTestServer( 1591 );
         setupWorkInProcessArea(TestRepositorySearch.class);
         startTestServer("versions-repository", 9292, TestRepositorySearch.class);
     }
@@ -271,7 +272,7 @@ public class TestRepositorySearch extends RepositoryTestBase {
         assertTrue(itemFilenames.contains("Version_Test_1_1_1.otm"));
 
         // Search for a non-existent keyword
-        itemFilenames = getFilenames(repositoryManager.get().search("blue", false, true));
+        itemFilenames = getFilenames(repositoryManager.get().search("nonexistentkeyword", false, true));
 
         assertEquals(0, itemFilenames.size());
     }
@@ -312,7 +313,7 @@ public class TestRepositorySearch extends RepositoryTestBase {
             assertTrue(itemFilenames.contains("Version_Test_1_1_0.otm"));
 
             // Search for a keyword in only one library
-            itemFilenames = getFilenames(repositoryManager.get().search("blue", false, false));
+            itemFilenames = getFilenames(repositoryManager.get().search("nonexistentkeyword", false, false));
 
             assertEquals(0, itemFilenames.size());
 

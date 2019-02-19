@@ -97,7 +97,7 @@ public final class CompilerExtension implements Comparable<CompilerExtension> {
 	 */
 	@Override
 	public int hashCode() {
-		return (extensionId == null) ? null : extensionId.hashCode();
+		return (extensionId == null) ? 0 : extensionId.hashCode();
 	}
 
 	/**

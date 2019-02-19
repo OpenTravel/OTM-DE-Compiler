@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.AfterClass;
+import org.opentravel.schemacompiler.index.FreeTextSearchServiceFactory;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.util.RepositoryTestUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
@@ -53,11 +54,12 @@ public class RepositoryMultiUserTestBase {
     
     protected static void startTestServer(String repositorySnapshotFolder, int port,
             Class<?> testClass) throws Exception {
-        System.setProperty("ota2.repository.realTimeIndexing", "true");
+        FreeTextSearchServiceFactory.setRealTimeIndexing( true );
         File snapshotBase = new File(System.getProperty("user.dir"),
                 "/src/test/resources/repo-snapshots");
         File repositorySnapshot = new File(snapshotBase, repositorySnapshotFolder);
 
+        System.setProperty( "smtp.port", "1587" );
         jettyServer = new JettyTestServer(port, repositorySnapshot, testClass,
         		RepositoryTestBase.defaultRepositoryConfig);
         jettyServer.start();

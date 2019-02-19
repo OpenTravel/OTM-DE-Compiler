@@ -17,7 +17,7 @@
 --%>
 <%@taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<form action="${pageContext.request.contextPath}/console/adminPermissions.html" method="GET">
+<form id="selectForm" action="${pageContext.request.contextPath}/console/adminPermissions.html" method="GET">
 	Select a namespace from the list below to view the access control settings.<br/>
 	<select name="namespace" size="1">
 		<option value="">Global Permissions</option>
@@ -35,7 +35,7 @@
 </form>
 <div class="divider"></div>
 
-<form>
+<form id="permissionsForm">
 	<h3>
 		Namespace:
 		<span style="text-decoration:underline;">

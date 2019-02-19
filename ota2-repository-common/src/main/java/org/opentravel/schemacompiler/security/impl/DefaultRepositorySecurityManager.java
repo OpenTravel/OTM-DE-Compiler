@@ -332,6 +332,7 @@ public class DefaultRepositorySecurityManager implements RepositorySecurityManag
      */
     @Override
     public List<String> getGroupNames() throws RepositorySecurityException {
+        groupAssignmentsResource.invalidateResource();
         return Arrays.asList(groupAssignmentsResource.getGroupNames());
     }
 

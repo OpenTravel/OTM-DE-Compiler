@@ -131,11 +131,6 @@
 		<put-attribute name="pageTitle" value="Edit Namespace Permissions" />
 		<put-attribute name="body" value="/WEB-INF/console/adminPermissionsEdit.jsp" />
 	</definition>
-	<definition name="adminPermissionsTest" extends="baseLayout">
-		<put-attribute name="title" value="OTA2.0 Repository - Manage Namespace Permissions" />
-		<put-attribute name="pageTitle" value="Test Namespace Permissions" />
-		<put-attribute name="body" value="/WEB-INF/console/adminPermissionsTest.jsp" />
-	</definition>
 	<definition name="adminUsers" extends="baseLayout">
 		<put-attribute name="title" value="OTA2.0 Repository - Manage User Accounts" />
 		<put-attribute name="pageTitle" value="Manage User Accounts" />

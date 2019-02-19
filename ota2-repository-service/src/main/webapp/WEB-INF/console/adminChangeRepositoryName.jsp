@@ -16,7 +16,7 @@
 
 --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<form action="${pageContext.request.contextPath}/console/adminChangeRepositoryName.html" method="post">
+<form id="renameForm" action="${pageContext.request.contextPath}/console/adminChangeRepositoryName.html" method="post">
 <br/>
 <table id="changeNameTable">
 	<tr>

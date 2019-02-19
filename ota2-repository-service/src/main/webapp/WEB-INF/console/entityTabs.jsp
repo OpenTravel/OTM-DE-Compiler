@@ -28,15 +28,15 @@
 </c:url>
 <c:url var="dictionaryUrl" value="/console/entityDictionary.html">
 	<c:param name="namespace" value="${entity.itemNamespace}" />
-	<c:param name="localName" value="${entity.itemName}" />
+	<c:param name="localName" value="${entity.itemLocalName}" />
 </c:url>
 <c:url var="usageUrl" value="/console/entityUsage.html">
 	<c:param name="namespace" value="${entity.itemNamespace}" />
-	<c:param name="localName" value="${entity.itemName}" />
+	<c:param name="localName" value="${entity.itemLocalName}" />
 </c:url>
 <c:url var="validationUrl" value="/console/entityValidation.html">
 	<c:param name="namespace" value="${entity.itemNamespace}" />
-	<c:param name="localName" value="${entity.itemName}" />
+	<c:param name="localName" value="${entity.itemLocalName}" />
 </c:url>
 
 <h2 style="padding-bottom: 0;"><spring:message code="${entity.entityType.simpleName}" />: ${entity.itemName} <small>(${library.repositoryItem.version})</small></h2>

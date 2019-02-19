@@ -152,7 +152,17 @@ public class RealTimeFreeTextSearchService extends FreeTextSearchService {
 	 */
 	@Override
 	protected void submitIndexingJob(SubscriptionTarget subscriptionTarget) {
-		// TODO: Implement the 'submitIndexingJob(SubscriptionTarget)' method
+	    try {
+	        IndexBuilderFactory factory = new IndexBuilderFactory( getRepositoryManager(), indexWriter );
+	        IndexBuilder<SubscriptionTarget> indexBuilder = factory.newSubscriptionIndexBuilder( subscriptionTarget );
+	        
+	        indexBuilder.performIndexingAction();
+	        indexWriter.commit();
+	        refreshIndexReader();
+	        
+        } catch (IOException e) {
+            log.error("Error indexing subscription.", e);
+        }
 	}
 	
 }

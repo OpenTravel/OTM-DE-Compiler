@@ -87,11 +87,11 @@ public class ViewItemController extends BaseController {
 	private static final String PAGE_UTILS = "pageUtils";
 	private static final String LIBRARY = "library";
 	private static final String ENTITY = "entity";
-	private static final String LIBRARY_NOT_AUTHORIZED = "You are not authorized to view the requested library.";
-	private static final String ENTITY_NOT_AUTHORIZED = "You are not authorized to view the requested entity.";
-	private static final String ENTITY_NOT_FOUND = "The requested entity could not be found.";
-	private static final String ERROR_DISPLAYING_LIBRARY = "An error occured while displaying the library.";
-	private static final String ERROR_DISPLAYING_LIBRARY2 = "An error occured while displaying the library (see server log for details).";
+	public static final String LIBRARY_NOT_AUTHORIZED = "You are not authorized to view the requested library.";
+	public static final String ENTITY_NOT_AUTHORIZED = "You are not authorized to view the requested entity.";
+	public static final String ENTITY_NOT_FOUND = "The requested entity could not be found.";
+	public static final String ERROR_DISPLAYING_LIBRARY = "An error occured while displaying the library.";
+	public static final String ERROR_DISPLAYING_LIBRARY2 = "An error occured while displaying the library (see server log for details).";
 	
 	private static Log log = LogFactory.getLog( BrowseController.class );
 	

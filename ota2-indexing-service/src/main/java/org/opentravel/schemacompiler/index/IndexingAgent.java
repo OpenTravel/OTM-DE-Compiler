@@ -83,6 +83,7 @@ public class IndexingAgent {
 	private IndexWriterConfig writerConfig;
 	private IndexWriter indexWriter;
 	private JmsTemplate jmsTemplate;
+    private boolean running;
 	
 	/**
 	 * Default constructor.
@@ -157,6 +158,7 @@ public class IndexingAgent {
 		if (!repositoryLocation.exists() || !repositoryLocation.isDirectory()) {
 			throw new FileNotFoundException( "Invalid OTM repository location specified: " + repositoryLocationPath );
 		}
+        running = false;
 	}
 	
 	/**
@@ -166,6 +168,8 @@ public class IndexingAgent {
 	 */
 	public void startListening() throws JMSException {
 		checkJmsAvailable();
+        running = true;
+        
 		log.info( "Indexing agent started for location: " + searchIndexLocation.getAbsolutePath() );
 		
 		while (!shutdownRequested) {
@@ -218,6 +222,23 @@ public class IndexingAgent {
 		}
 	}
 
+    /**
+     * Returns true if the process manager is currently running (used for testing purposes).
+     * 
+     * @return boolean
+     */
+    public boolean isRunning() {
+        if (!running) {
+            try {
+                Thread.sleep( 100 );
+                
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+        return running;
+    }
+    
 	/**
 	 * Forwards the given indexing message request to the proper method for processing.
 	 * 
@@ -300,7 +321,6 @@ public class IndexingAgent {
 	 * @throws IOException thrown if the search index cannot be deleted
 	 */
 	private void processDeleteAll() throws IOException {
-		log.info( "Deleting search index." );
 		indexWriter.deleteAll();
 		
 		try {

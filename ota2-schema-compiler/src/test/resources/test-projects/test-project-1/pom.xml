@@ -1,0 +1,35 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.opentravel.otm</groupId>
+	<artifactId>test-project-1</artifactId>
+	<packaging>maven-plugin</packaging>
+	<version>1.0-SNAPSHOT</version>
+	<name>OTA2 Compiler Maven Mojo</name>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.opentravel.otm</groupId>
+				<artifactId>ota2-schema-compiler</artifactId>
+				<executions>
+					<execution>
+						<id>ota2-compile</id>
+						<goals>
+							<goal>ota2-compile</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<libraryFile>${basedir}/src/test/resources/test-models/TestLibrary.otm</libraryFile>
+					<outputFolder>${basedir}/target/test-output/test-project-1</outputFolder>
+					<compileSchemas>true</compileSchemas>
+					<compileJson>true</compileJson>
+					<debug>true</debug>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	
+</project>

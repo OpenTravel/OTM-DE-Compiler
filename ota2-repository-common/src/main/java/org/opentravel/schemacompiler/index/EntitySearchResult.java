@@ -48,6 +48,7 @@ public class EntitySearchResult extends SearchResult<NamedEntity> {
 	
     private static Log log = LogFactory.getLog( EntitySearchResult.class );
 
+    private String itemLocalName;
     private TLLibraryStatus status;
 	private String lockedByUser;
 	private String owningLibraryId;
@@ -65,6 +66,7 @@ public class EntitySearchResult extends SearchResult<NamedEntity> {
 		super( doc, searchService );
 		String statusStr = doc.get( IndexingTerms.STATUS_FIELD );
 		
+        this.itemLocalName = doc.get( IndexingTerms.ENTITY_LOCAL_NAME_FIELD );
 		this.lockedByUser = doc.get( IndexingTerms.LOCKED_BY_USER_FIELD );
 		this.owningLibraryId = doc.get( IndexingTerms.OWNING_LIBRARY_FIELD );
 		this.extendsEntityId = doc.get( IndexingTerms.EXTENDS_ENTITY_FIELD );
@@ -187,6 +189,15 @@ public class EntitySearchResult extends SearchResult<NamedEntity> {
 		}
 	}
 	
+    /**
+     * Returns the local name of the OTM item.
+     *
+     * @return String
+     */
+    public String getItemLocalName() {
+        return itemLocalName;
+    }
+
 	/**
 	 * Returns the current status of the entity's owning library.
 	 *

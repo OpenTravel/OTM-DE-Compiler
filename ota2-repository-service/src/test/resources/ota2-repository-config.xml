@@ -70,67 +70,6 @@
 	</bean>
 	
 	<!--
-		Authentication Provider: (JNDI - Authentication Mode)
-		
-		Authentication provider that implements JNDI authentication using direct user authentication.  In this
-		mode, each user's credentials are used to attempt a login to the remote directory server.  This approach
-		is sometimes considered more secure because it does not require an LDAP administrator's password to be
-		stored with the configuration settings of the repository.  In some cases, however, this mode is not
-		possible because user accounts in a corporate directory are not granted permission to login to the LDAP
-		server itself.
-	-->
-	<!--
-	<bean id="authenticationProvider" class="org.opentravel.schemacompiler.security.impl.JNDIAuthenticationProvider">
-		<property name="connectionUrl" value="ldap://localhost:389/dc=opentravel,dc=com" />
-		<property name="securityAuthentication" value="simple" />
-		<property name="connectionPrincipal" value="cn=Manager,dc=opentravel,dc=com" />
-		<property name="connectionPassword" value="password" />
-		<property name="userPattern" value="uid={0},ou=users,dc=opentravel,dc=com" />
-	</bean>
-	-->
-	
-	<!--
-		Authentication Provider: (JNDI - User Lookup Mode)
-		
-		Authentication provider that implements JNDI authentication using user lookups.  In this mode, an
-		authenticated user (typically an LDAP administrator) is used to establish all connections to the remote
-		directory.  User accounts are identified by a distinguished name format that is the same for all users
-		defined in the directory.  Once identified, encrypted password credentials are retrieved from the
-		directory and compared with the credentials provided by the remote user of the repository.
-	-->
-	<!--
-	<bean id="authenticationProvider" class="org.opentravel.schemacompiler.security.impl.JNDIAuthenticationProvider">
-		<property name="connectionUrl" value="ldap://localhost:389/dc=opentravel,dc=com" />
-		<property name="securityAuthentication" value="simple" />
-		<property name="connectionPrincipal" value="cn=Manager,dc=opentravel,dc=com" />
-		<property name="connectionPassword" value="password" />
-		<property name="userPattern" value="uid={0},ou=users" />
-		<property name="digestAlgorithm" value="SHA-1" />
-	</bean>
-	-->
-	
-	<!--
-		Authentication Provider: (JNDI - User Search Mode)
-		
-		Authentication provider that implements JNDI authentication using user searches.  This mode of operation
-		establishes remote connections using a single authenticated user account.  User accounts are located by
-		searches within the directory using one or more configurable query strings.  Once user accounts are
-		located by a search, the user's encrypted password credentials are retrieved from the directory and
-		compared with the credentials provided by the remote user of the repository.
-	-->
-	<!--
-	<bean id="authenticationProvider" class="org.opentravel.schemacompiler.security.impl.JNDIAuthenticationProvider">
-		<property name="connectionUrl" value="ldap://localhost:389/dc=opentravel,dc=com" />
-		<property name="securityAuthentication" value="simple" />
-		<property name="connectionPrincipal" value="cn=Manager,dc=opentravel,dc=com" />
-		<property name="connectionPassword" value="password" />
-		<property name="userSearchBase" value="ou=users" />
-		<property name="userSearchPatterns" value="(uid={0})" />
-		<property name="digestAlgorithm" value="SHA-1" />
-	</bean>
-	-->
-	
-	<!--
 		Authorization Provider:
 		
 		Provides information about which operations a particular user is authorized to perform on a namespace
@@ -182,34 +121,28 @@
 		
 		Optional configuration that defines the implementation class for the notification service and the
 		JMS connection factory and queues used to publish notification events.
-		
-		NOTE: The 'notificationAMQConnectionFactory' bean definition may change based upon the MQ provider to
-		which notifications will be sent.  This example assumes an ActiveMQ provider running on localhost.
 	-->
-	<!--
 	<bean id="notificationService" class="org.opentravel.schemacompiler.notification.JMSNotificationService">
 		<constructor-arg ref="notificationJmsService" />
 	</bean>
 	
-	<bean id="notificationAMQConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
-		<constructor-arg index="0" value="tcp://localhost:61616" />
-	</bean>
-	
-	<bean id="notificationConnectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
-		<property name="targetConnectionFactory" ref="localAMQConnectionFactory" />
-		<property name="sessionCacheSize" value="10" />
-	</bean>
+    <bean id="destinationManager" class="com.mockrunner.jms.DestinationManager"/>
+    <bean id="configurationManager" class="com.mockrunner.jms.ConfigurationManager"/>
 
-	<bean id="notificationTopic" class="org.apache.activemq.command.ActiveMQTopic">
-		<constructor-arg index="0" value="otm.notification.topic" />
-	</bean>
+    <bean id="notificationConnectionFactory" class="com.mockrunner.mock.jms.MockQueueConnectionFactory" >
+        <constructor-arg index="0" ref="destinationManager" />
+        <constructor-arg index="1" ref="configurationManager" />
+    </bean>
+    
+    <bean id="notificationTopic" factory-bean="destinationManager" factory-method="createTopic">
+        <constructor-arg index="0" value="otm.notification.topic" />
+    </bean>
 
 	<bean id="notificationJmsService" class="org.springframework.jms.core.JmsTemplate">
 		<property name="connectionFactory" ref="notificationConnectionFactory" />
 		<property name="defaultDestination" ref="notificationTopic" />
 		<property name="receiveTimeout" value="500" />
 	</bean>
-	-->
 	
 	<!--
 		Subscription Manager Configuration:
@@ -222,27 +155,25 @@
 		<property name="notificationDelay" value="1000" />
 		<property name="smtpConfig">
 			<bean class="org.opentravel.schemacompiler.subscription.SMTPConfig">
-				<property name="smtpHost" value="smtp.example.com" />
-				<property name="smtpPort" value="587" />
-				<property name="smtpUser" value="user1" />
-				<property name="smtpPassword" value="user1passwd" />
+				<property name="smtpHost" value="localhost" />
+				<property name="smtpPort" value="#{systemProperties['smtp.port']}" />
+				<property name="smtpUser" value="testuser" />
+				<property name="smtpPassword" value="password" />
 				<property name="timeout" value="5000" />
 				<property name="sslEnable" value="false" />
-				<property name="authEnable" value="false" />
+				<property name="authEnable" value="true" />
 				<property name="startTlsEnable" value="true" />
-				<property name="senderAddress" value="user1@example.com" />
-				<property name="senderName" value="User Smith" />
-				<!--
-				<property name="replyToAddress" value="replyToUser@example.com" />
+				<property name="senderAddress" value="testuser@opentravel.org" />
+				<property name="senderName" value="Test User" />
+				<property name="replyToAddress" value="replyToUser@opentravel.org" />
 				<property name="replyToName" value="Reply To User" />
 				<property name="ccRecipients">
 					<list>
-						<value>user1@example.com</value>
-						<value>user2@example.com</value>
-						<value>user3@example.com</value>
+						<value>cc1@opentravel.org</value>
+						<value>cc2@opentravel.org</value>
+						<value>cc3@opentravel.org</value>
 					</list>
 				</property>
-				-->
 			</bean>
 		</property>
 	</bean>

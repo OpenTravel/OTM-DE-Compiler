@@ -77,8 +77,8 @@ public class NotificationServiceFactory {
 			RepositoryManager manager = RepositoryComponentFactory.getDefault().getRepositoryManager();
 			
 			instance.getService().shutdown();
-			instance.service = new NoOpNotificationService();
 			manager.removeListener( repoListener );
+            instance = null;
 		}
 	}
 	

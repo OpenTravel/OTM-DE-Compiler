@@ -41,8 +41,8 @@ public class SubscriptionNavigator {
 	 * @param manager  the repository manager instance
 	 */
 	public SubscriptionNavigator(RepositoryManager manager) {
-		this.manager = manager;
-		this.fileUtils = new SubscriptionFileUtils( manager );
+        this.manager = manager;
+        this.fileUtils = new SubscriptionFileUtils( manager );
 	}
 	
 	/**

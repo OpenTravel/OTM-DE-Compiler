@@ -47,154 +47,146 @@ import org.opentravel.schemacompiler.util.RepositoryTestUtils;
 import org.springframework.web.servlet.DispatcherServlet;
 
 /**
- * Encapsulates the configuration and run-time environment of an OTA2.0 repository that is launched
- * as an embedded Jetty application to facilitate testing.
+ * Encapsulates the configuration and run-time environment of an OTA2.0 repository that is launched as an embedded Jetty
+ * application to facilitate testing.
  * 
  * @author S. Livezey
  */
 public class JettyTestServer {
-
+    
     private Server jettyServer;
     private File repositorySnapshotLocation;
     private File repositoryRuntimeLocation;
     private File repositoryIndexLocation;
     private int port;
-
+    
     /**
      * Constructor that specifies the configuration of the Jetty server to be used for testing.
      * 
-     * @param port
-     *            the server port to which HTTP requests will be directed on the local host
-     * @param snapshotLocation
-     *            the folder location that contains an initial snapshot of the OTA2.0 repository
-     * @param testClass
-     *            the test class that is starting the server instance
-     * @param repositoryConfigFile
-     *            location of the main OTA2 repository configuration file
+     * @param port the server port to which HTTP requests will be directed on the local host
+     * @param snapshotLocation the folder location that contains an initial snapshot of the OTA2.0 repository
+     * @param testClass the test class that is starting the server instance
+     * @param repositoryConfigFile location of the main OTA2 repository configuration file
      */
     public JettyTestServer(int port, File snapshotLocation, Class<?> testClass, File repositoryConfigFile) {
         this.repositorySnapshotLocation = snapshotLocation;
-        this.repositoryRuntimeLocation = new File(System.getProperty("user.dir"),
-                "/target/test-workspace/" + testClass.getSimpleName() + "/test-repository");
-        this.repositoryIndexLocation = new File(repositoryRuntimeLocation.getParentFile(),
-                "/search-index");
+        this.repositoryRuntimeLocation = new File( System.getProperty( "user.dir" ),
+                "/target/test-workspace/" + testClass.getSimpleName() + "/test-repository" );
+        this.repositoryIndexLocation = new File( repositoryRuntimeLocation.getParentFile(), "/search-index" );
         this.port = port;
+        
         // disable logging becouse of invalid slf4j version
-        org.eclipse.jetty.util.log.Log.setLog(new NoLogging());
-
+        org.eclipse.jetty.util.log.Log.setLog( new NoLogging() );
+        
         if ((repositorySnapshotLocation != null) && !repositorySnapshotLocation.exists()) {
-            throw new IllegalArgumentException("Repository Snapshot Not Found: "
-                    + repositorySnapshotLocation.getAbsolutePath());
+            throw new IllegalArgumentException(
+                    "Repository Snapshot Not Found: " + repositorySnapshotLocation.getAbsolutePath() );
         }
         if (!repositoryRuntimeLocation.exists() && !repositoryRuntimeLocation.mkdirs()) {
-            throw new IllegalArgumentException("Unable to create run-rime repository folder: "
-                    + repositoryRuntimeLocation.getAbsolutePath());
+            throw new IllegalArgumentException(
+                    "Unable to create run-rime repository folder: " + repositoryRuntimeLocation.getAbsolutePath() );
         }
-        System.setProperty("test.class", testClass.getSimpleName());
-        System.setProperty("ota2.repository.config", repositoryConfigFile.getAbsolutePath());
+        
+        System.setProperty( "test.class", testClass.getSimpleName() );
+        System.setProperty( "ota2.repository.config", repositoryConfigFile.getAbsolutePath() );
         RepositoryComponentFactory.resetDefault();
-    }
-
-    /**
-     * Initializes the run-time repository from the snapshot and launches the Jetty server.
-     * 
-     * @throws Exception  thrown if the server cannot be started
-     */
-    public synchronized void start() throws Exception {
-    	start( false );
     }
     
     /**
      * Initializes the run-time repository from the snapshot and launches the Jetty server.
      * 
-     * @param enableWebConsole  flag indicating whether the repository web console should be enabled
-     * @throws Exception  thrown if the server cannot be started
+     * @throws Exception thrown if the server cannot be started
+     */
+    public synchronized void start() throws Exception {
+        start( false );
+    }
+    
+    /**
+     * Initializes the run-time repository from the snapshot and launches the Jetty server.
+     * 
+     * @param enableWebConsole flag indicating whether the repository web console should be enabled
+     * @throws Exception thrown if the server cannot be started
      */
     public synchronized void start(boolean enableWebConsole) throws Exception {
         if (jettyServer != null) {
-            throw new IllegalStateException("The Jetty server is already running.");
+            throw new IllegalStateException( "The Jetty server is already running." );
         }
-        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
-		ResourceConfig resourceConfig = new ResourceConfig();
-		Map<String,Object> resourceProps = new HashMap<>();
-		
-		resourceProps.put( ServerProperties.PROVIDER_PACKAGES,
-				"org.opentravel.schemacompiler.repository org.opentravel.schemacompiler.providers" );
-		resourceConfig.addProperties( resourceProps );
+        ServletContextHandler context = new ServletContextHandler( ServletContextHandler.SESSIONS );
+        ResourceConfig resourceConfig = new ResourceConfig();
+        Map<String,Object> resourceProps = new HashMap<>();
         
-		context.setContextPath("/ota2-repository-service");
+        resourceProps.put( ServerProperties.PROVIDER_PACKAGES,
+                "org.opentravel.schemacompiler.repository org.opentravel.schemacompiler.providers" );
+        resourceConfig.addProperties( resourceProps );
+        
+        context.setContextPath( "/ota2-repository-service" );
         context.setResourceBase( System.getProperty( "user.dir" ) + "/src/main/webapp" );
-        context.addServlet(new ServletHolder(new RepositoryServlet(resourceConfig)), "/service/*");
+        context.addServlet( new ServletHolder( new RepositoryServlet( resourceConfig ) ), "/service/*" );
         
         if (enableWebConsole) {
             configureConsoleSupport( context );
         }
-        jettyServer = new Server(port);
-
+        
+        jettyServer = new Server( port );
+        
         ErrorHandler errH = new ErrorHandler();
-        errH.setShowStacks(true);
-
-        jettyServer.setHandler(context);
-        context.setErrorHandler(errH);
-
+        errH.setShowStacks( true );
+        
+        jettyServer.setHandler( context );
+        context.setErrorHandler( errH );
+        
         initializeRuntimeRepository();
         jettyServer.start();
-
+        
         initializeRepositoryServices();
         indexTestRepository();
     }
     
     private void configureConsoleSupport(ServletContextHandler context) throws Exception {
-    	File targetTemp = new File( System.getProperty("user.dir"), "target/jsp-temp" );
-    	ServletHolder holderDefault = new ServletHolder( "default", new DefaultServlet() );
-    	ServletHolder holderJsp = new ServletHolder( "jsp", new JspServlet() );
+        File targetTemp = new File( System.getProperty( "user.dir" ), "target/jsp-temp" );
+        ServletHolder holderDefault = new ServletHolder( "default", new DefaultServlet() );
+        ServletHolder holderJsp = new ServletHolder( "jsp", new JspServlet() );
         TldScanner scanner = new TldScanner( context.getServletContext(), true, false, true );
-		DispatcherServlet mvcServlet = new DispatcherServlet();
-    	
-        mvcServlet.setContextConfigLocation( "/WEB-INF/console-servlet.xml" );
-        context.addServlet(new ServletHolder("console", mvcServlet), "/console/*");
+        DispatcherServlet mvcServlet = new DispatcherServlet();
         
-    	targetTemp.mkdirs();
-    	context.setAttribute( "javax.servlet.context.tempdir", targetTemp );
-    	context.setAttribute( JarScanner.class.getName(), new StandardJarScanner() );
-    	context.setAttribute( InstanceManager.class.getName(), new SimpleInstanceManager() );
-    	context.setClassLoader( new URLClassLoader( new URL[0], this.getClass().getClassLoader() ) );
-    	
-    	holderJsp.setInitOrder( 0 );
-    	holderJsp.setInitParameter( "logVerbosityLevel", "DEBUG" );
+        mvcServlet.setContextConfigLocation( "/WEB-INF/console-servlet.xml" );
+        context.addServlet( new ServletHolder( "console", mvcServlet ), "/console/*" );
+        
+        targetTemp.mkdirs();
+        context.setAttribute( "javax.servlet.context.tempdir", targetTemp );
+        context.setAttribute( JarScanner.class.getName(), new StandardJarScanner() );
+        context.setAttribute( InstanceManager.class.getName(), new SimpleInstanceManager() );
+        context.setClassLoader( new URLClassLoader( new URL[0], this.getClass().getClassLoader() ) );
+        
+        holderJsp.setInitOrder( 0 );
+        holderJsp.setInitParameter( "logVerbosityLevel", "DEBUG" );
         holderJsp.setInitParameter( "fork", "false" );
         holderJsp.setInitParameter( "xpoweredBy", "false" );
         holderJsp.setInitParameter( "compilerTargetVM", "1.8" );
         holderJsp.setInitParameter( "compilerSourceVM", "1.8" );
         holderJsp.setInitParameter( "keepgenerated", "true" );
-    	JspFactory.setDefaultFactory( new JspFactoryImpl() );
-    	
+        JspFactory.setDefaultFactory( new JspFactoryImpl() );
+        
         holderDefault.setInitParameter( "resourceBase", context.getResourceBase() );
-    	holderDefault.setInitParameter( "dirAllowed", "true" );
-    	
-    	context.addServlet( holderDefault, "/" );
-    	context.addServlet( holderJsp, "*.jsp" );
-    	
-
+        holderDefault.setInitParameter( "dirAllowed", "true" );
+        
+        context.addServlet( holderDefault, "/" );
+        context.addServlet( holderJsp, "*.jsp" );
+        
         scanner.scan();
-        context.setAttribute( TldCache.SERVLET_CONTEXT_ATTRIBUTE_NAME,
-                new TldCache( context.getServletContext(), scanner.getUriTldResourcePathMap(),
-                        scanner.getTldResourcePathTaglibXmlMap() ) );
+        context.setAttribute( TldCache.SERVLET_CONTEXT_ATTRIBUTE_NAME, new TldCache( context.getServletContext(),
+                scanner.getUriTldResourcePathMap(), scanner.getTldResourcePathTaglibXmlMap() ) );
     }
-
+    
     /**
      * Adds this test server instance to the given repository manager.
      * 
-     * @param manager
-     *            the repository manager instance to configure
-     * @throws RepositoryException
-     *             thrown if the configuration settings cannot be modified
+     * @param manager the repository manager instance to configure
+     * @throws RepositoryException thrown if the configuration settings cannot be modified
      */
-    public RemoteRepository configureRepositoryManager(RepositoryManager manager)
-            throws RepositoryException {
-        RemoteRepository testRepository = (RemoteRepository) manager
-                .getRepository("test-repository");
-
+    public RemoteRepository configureRepositoryManager(RepositoryManager manager) throws RepositoryException {
+        RemoteRepository testRepository = (RemoteRepository) manager.getRepository( "test-repository" );
+        
         if (testRepository == null) {
             testRepository = manager.addRemoteRepository( getBaseRepositoryUrl() );
         }
@@ -207,77 +199,74 @@ public class JettyTestServer {
      * @return String
      */
     public String getBaseRepositoryUrl() {
-    	return "http://localhost:" + port + "/ota2-repository-service";
+        return "http://localhost:" + port + "/ota2-repository-service";
     }
     
     /**
      * Returns a repository URL using the relative path provided.
      * 
-     * @param urlPath  the relative URL path from the base
+     * @param urlPath the relative URL path from the base
      * @return String
      */
     public String getRepositoryUrl(String urlPath) {
-    	if (urlPath == null) {
-    		urlPath = "";
-    	} else if (!urlPath.startsWith( "/" )){
-    		urlPath = "/" + urlPath;
-    	}
-    	return getBaseRepositoryUrl() + urlPath;
+        if (urlPath == null) {
+            urlPath = "";
+        } else if (!urlPath.startsWith( "/" )) {
+            urlPath = "/" + urlPath;
+        }
+        return getBaseRepositoryUrl() + urlPath;
     }
-
+    
     /**
      * Shuts down the Jetty server.
      * 
-     * @throws Exception
-     *             thrown if the server cannot be shut down
+     * @throws Exception thrown if the server cannot be shut down
      */
     public synchronized void stop() throws Exception {
         if (jettyServer == null) {
-            throw new IllegalStateException("The Jetty server is not running.");
+            throw new IllegalStateException( "The Jetty server is not running." );
         }
         jettyServer.stop();
         jettyServer = null;
     }
-
+    
     /**
-     * Pings the Jetty service with a meta-data request that forces the initialization of the
-     * repository web service.
+     * Pings the Jetty service with a meta-data request that forces the initialization of the repository web service.
      */
     private void initializeRepositoryServices() throws Exception {
-        new RemoteRepositoryUtils().getRepositoryMetadata(
-                "http://localhost:" + port + "/ota2-repository-service");
+        new RemoteRepositoryUtils().getRepositoryMetadata( "http://localhost:" + port + "/ota2-repository-service" );
     }
-
+    
     /**
      * Indexes the contents of the server's test repository.
      */
     @SuppressWarnings("squid:S2925") // Ignore Sonar warning
     private void indexTestRepository() throws Exception {
+        FreeTextSearchServiceFactory.initializeSingleton( RepositoryComponentFactory.getDefault().getRepositoryManager() );
         FreeTextSearchService service = FreeTextSearchServiceFactory.getInstance();
-
+        
         while (!service.isRunning()) {
             try {
-                System.out.println("Waiting for Indexing Service startup...");
-                Thread.sleep(100);
+                System.out.println( "Waiting for Indexing Service startup..." );
+                Thread.sleep( 100 );
             } catch (InterruptedException e) {
             }
         }
         service.indexAllRepositoryItems();
     }
-
+    
     /**
-     * Initializes the run-time OTA2.0 repository by deleting any existing files and copying all of
-     * the files in the snapshot folder location.
+     * Initializes the run-time OTA2.0 repository by deleting any existing files and copying all of the files in the
+     * snapshot folder location.
      * 
-     * @throws IOException
-     *             thrown if the contents of the repository cannot be initialized
+     * @throws IOException thrown if the contents of the repository cannot be initialized
      */
     private void initializeRuntimeRepository() throws IOException {
         if (repositorySnapshotLocation != null) {
-            RepositoryTestUtils.deleteContents(repositoryRuntimeLocation);
-            RepositoryTestUtils.copyContents(repositorySnapshotLocation, repositoryRuntimeLocation);
+            RepositoryTestUtils.deleteContents( repositoryRuntimeLocation );
+            RepositoryTestUtils.copyContents( repositorySnapshotLocation, repositoryRuntimeLocation );
         }
-        RepositoryTestUtils.deleteContents(repositoryIndexLocation);
+        RepositoryTestUtils.deleteContents( repositoryIndexLocation );
     }
     
     public class NoLogging implements Logger {
@@ -285,65 +274,65 @@ public class JettyTestServer {
         public String getName() {
             return "no";
         }
-
+        
         @Override
         public void warn(String msg, Object... args) {
         }
-
+        
         @Override
         public void warn(Throwable thrown) {
         }
-
+        
         @Override
         public void warn(String msg, Throwable thrown) {
         }
-
+        
         @Override
         public void info(String msg, Object... args) {
         }
-
+        
         @Override
         public void info(Throwable thrown) {
         }
-
+        
         @Override
         public void info(String msg, Throwable thrown) {
         }
-
+        
         @Override
         public boolean isDebugEnabled() {
             return false;
         }
-
+        
         @Override
         public void setDebugEnabled(boolean enabled) {
         }
-
+        
         @Override
         public void debug(String msg, Object... args) {
         }
-
-		@Override
-		public void debug(String msg, long level) {
-		}
-		
+        
+        @Override
+        public void debug(String msg, long level) {
+        }
+        
         @Override
         public void debug(Throwable thrown) {
         }
-
+        
         @Override
         public void debug(String msg, Throwable thrown) {
         }
-
+        
         @Override
         public Logger getLogger(String name) {
             return this;
         }
-
+        
         @Override
         public void ignore(Throwable ignored) {
         }
-
+        
     }
-
+    
 }

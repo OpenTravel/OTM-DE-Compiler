@@ -181,6 +181,17 @@
 	</bean>
 	
 	<!--
+		Notification Service Configuration:
+		
+		Optional configuration that defines the implementation class for the notification service and the
+		JMS connection factory and queues used to publish notification events.
+		
+		NOTE: The 'notificationAMQConnectionFactory' bean definition may change based upon the MQ provider to
+		which notifications will be sent.  This example assumes an ActiveMQ provider running on localhost.
+	-->
+	<bean id="notificationService" class="org.opentravel.schemacompiler.notification.NoOpNotificationService" />
+	
+	<!--
 		Subscription Manager Configuration:
 		
 		Configuration settings used for subscriptions and email notifications.
