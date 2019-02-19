@@ -53,6 +53,7 @@ import org.opentravel.schemacompiler.repository.RepositoryItemType;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.repository.ServiceAssembly;
 import org.opentravel.schemacompiler.repository.ServiceAssemblyManager;
+import org.opentravel.schemacompiler.repository.impl.BuiltInProject;
 import org.opentravel.schemacompiler.saver.LibraryModelSaver;
 import org.opentravel.schemacompiler.saver.LibrarySaveException;
 import org.opentravel.schemacompiler.saver.impl.Library15FileSaveHandler;
@@ -307,6 +308,13 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 		for (File ssFile : snapshotLibraryFolder.listFiles()) {
 			if (ssFile.getName().endsWith( ".bak" )) {
 				FileUtils.delete( ssFile );
+			}
+		}
+		
+		// Close any projects that are not our snapshot that is being created
+		for (Project project : projectManager.getAllProjects()) {
+			if ((project != snapshotProject) && !(project instanceof BuiltInProject)) {
+				projectManager.closeProject( project );
 			}
 		}
 		
