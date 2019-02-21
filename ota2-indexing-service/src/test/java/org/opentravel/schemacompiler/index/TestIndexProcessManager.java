@@ -21,7 +21,6 @@ import static org.junit.Assert.assertNotNull;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -35,7 +34,6 @@ public class TestIndexProcessManager extends AbstractIndexingServiceTest {
     }
     
     @Test
-    @Ignore
     @SuppressWarnings("squid:S2925")
     public void testStartupAndShutdown() throws Exception {
         ProcessManagerRunner pmRunner = new ProcessManagerRunner();

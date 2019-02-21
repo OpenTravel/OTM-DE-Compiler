@@ -219,7 +219,7 @@ public class CommandLineCompilerTaskOptions implements CompileAllTaskOptions {
 	 */
 	@Override
 	public boolean isSuppressOptionalFields() {
-		return false;
+		return commandLineArgs.hasOption("o");
 	}
 
 	/**

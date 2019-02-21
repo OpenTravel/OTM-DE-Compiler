@@ -29,7 +29,6 @@ import javax.xml.bind.Marshaller;
 import org.apache.activemq.broker.BrokerService;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoListType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.ObjectFactory;
@@ -93,7 +92,6 @@ public class TestIndexingAgent extends AbstractIndexingServiceTest {
     }
     
     @Test
-    @Ignore
     public void testIndexRepositoryItem() throws Exception {
         RepositoryItem item = repositoryManager.getRepositoryItem(
                 "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test",
@@ -110,7 +108,6 @@ public class TestIndexingAgent extends AbstractIndexingServiceTest {
     }
     
     @Test
-    @Ignore
     public void testDeleteRepositoryItemIndex() throws Exception {
         RepositoryItem item = repositoryManager.getRepositoryItem(
                 "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test",
@@ -127,7 +124,6 @@ public class TestIndexingAgent extends AbstractIndexingServiceTest {
     }
     
     @Test
-    @Ignore
     public void testIndexSubscriptionTarget() throws Exception {
         SubscriptionTarget target = new SubscriptionTarget();
         JAXBContext jaxbContext = RepositoryJaxbContext.getExtContext();
@@ -142,7 +138,6 @@ public class TestIndexingAgent extends AbstractIndexingServiceTest {
     }
     
     @Test
-    @Ignore
     public void testDeleteAll() throws Exception {
         sendIndexingJob( IndexingConstants.JOB_TYPE_DELETE_ALL, null );
         waitForCommitMessage();

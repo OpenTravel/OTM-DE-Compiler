@@ -180,6 +180,8 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
      */
 	@Parameter( defaultValue = "false" )
     protected boolean debug;
+	
+	private RepositoryManager repositoryManager;
 
     /**
      * @see org.apache.maven.plugin.Mojo#execute()
@@ -188,6 +190,7 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
 		synchronized (OTA2SchemaCompilerMojo.class) {
 			try {
 				if (debug) displayOptions();
+				initRepositoryManager( null );
 				
 				// Validate the source file or managed release and the output folder
 				RepositoryItem releaseItem = null;
@@ -203,10 +206,7 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
 				} else {
 					throw new MojoFailureException("Either a libraryFile or a release must be specified.");
 				}
-				
-				if (!outputFolder.exists() && !outputFolder.mkdirs()) {
-					throw new IOException("Unable to create ouput folder: " + outputFolder.getAbsolutePath());
-				}
+				createOutputFolder();
 				
 				// Select the user-specified schema compiler extension
 				if (bindingStyle != null) {
@@ -223,9 +223,11 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
 				ValidationFindings findings = null;
 				Log log = getLog();
 				
+                compilerTask.applyTaskOptions( this );
+				compilerTask.setRepositoryManager( repositoryManager );
+				
 				if (libraryFile != null) {
 					log.info("Compiling OTA2 Library: " + libraryFile.getName());
-					compilerTask.applyTaskOptions(this);
 					findings = compilerTask.compileOutput(libraryFile);
 					
 				} else if (releaseItem != null) {
@@ -266,6 +268,23 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
 			}
 		}
 	}
+	
+	/**
+	 * Creates the output folder specified in the plugin configuration.  If the folder does
+	 * not exist and cannot be created (or is a file), an exception will be thrown.
+	 * 
+	 * @throws IOException  thrown if the folder is not valid or cannot be created
+	 */
+	private void createOutputFolder() throws IOException {
+	    if (outputFolder.exists()) {
+	        if (!outputFolder.isDirectory()) {
+	            throw new IOException("The specified output folder is not a directory: " + outputFolder.getAbsolutePath());
+	        }
+	        
+	    } else if (!outputFolder.mkdirs()) {
+            throw new IOException("Unable to create ouput folder: " + outputFolder.getAbsolutePath());
+        }
+	}
 
 	/**
 	 * Returns the repository item for the release to be loaded.
@@ -277,7 +296,7 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
 	private RepositoryItem getReleaseItem() throws MojoFailureException, MojoExecutionException {
 		RepositoryItem releaseItem;
 		try {
-			releaseItem = RepositoryManager.getDefault().getRepositoryItem(release.getBaseNamespace(),
+			releaseItem = repositoryManager.getRepositoryItem(release.getBaseNamespace(),
 					release.getFilename(), release.getVersion());
 			
 			if (!RepositoryItemType.RELEASE.isItemType(releaseItem.getFilename())) {
@@ -317,6 +336,24 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
         log.info("exampleMaxRepeat              = " + exampleMaxRepeat);
         log.info("exampleMaxDepth               = " + exampleMaxDepth);
         log.info("suppressOptionalFields        = " + suppressOptionalFields);
+    }
+    
+    /**
+     * Initializes the repository manager to be used by this mojo.  If null, the default
+     * manager instance will be used.
+     * 
+     * @param repositoryManager  the repository manager instance (null to use default)
+     * @throws RepositoryException  thrown if the default instance cannot be initialized
+     */
+    protected void initRepositoryManager(RepositoryManager repositoryManager) throws RepositoryException {
+        if (this.repositoryManager == null) {
+            if (repositoryManager == null) {
+                this.repositoryManager = RepositoryManager.getDefault();
+                
+            } else {
+                this.repositoryManager = repositoryManager;
+            }
+        }
     }
 
     /**

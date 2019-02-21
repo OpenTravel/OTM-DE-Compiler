@@ -1,0 +1,44 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.opentravel.otm</groupId>
+	<artifactId>test-project-2</artifactId>
+	<packaging>maven-plugin</packaging>
+	<version>1.0-SNAPSHOT</version>
+	<name>OTA2 Compiler Maven Mojo</name>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.opentravel.otm</groupId>
+				<artifactId>ota2-repository-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>initialize-snapshot</id>
+						<goals>
+							<goal>initialize-snapshot</goal>
+						</goals>
+					</execution>
+				</executions>
+				<executions>
+					<execution>
+						<id>update-snapshot</id>
+						<goals>
+							<goal>update-snapshot</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<release>
+						<baseNamespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test</baseNamespace>
+						<filename>Version_Release_1_0_0.otr</filename>
+						<version>1.0.0</version>
+					</release>
+					<snapshotProjectFolder>${basedir}/target/test-output/snapshot-test-6</snapshotProjectFolder>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	
+</project>

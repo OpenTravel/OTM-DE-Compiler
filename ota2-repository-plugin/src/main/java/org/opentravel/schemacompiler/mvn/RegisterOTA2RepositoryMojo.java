@@ -40,7 +40,7 @@ import org.opentravel.schemacompiler.repository.RepositoryManager;
 @Execute( goal="register-repository", phase = LifecyclePhase.VALIDATE )
 public class RegisterOTA2RepositoryMojo extends AbstractMojo {
 	
-	private static final String FORCE_UPDATE_SYSPROP = "otm.repository.forceUpdate";
+	public static final String FORCE_UPDATE_SYSPROP = "otm.repository.forceUpdate";
 	
 	@Parameter( required = true )
 	private String repositoryId;
@@ -54,13 +54,14 @@ public class RegisterOTA2RepositoryMojo extends AbstractMojo {
 	@Parameter
 	private String userPassword;
 
+    private RepositoryManager repositoryManager;
+
 	/**
 	 * @see org.apache.maven.plugin.Mojo#execute()
 	 */
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		try {
-			RepositoryManager repositoryManager = RepositoryManager.getDefault();
 			Repository repository = repositoryManager.getRepository( repositoryId );
 			Log log = getLog();
 			
@@ -110,4 +111,22 @@ public class RegisterOTA2RepositoryMojo extends AbstractMojo {
 		return Boolean.valueOf( syspropValue );
 	}
 	
+    /**
+     * Initializes the repository manager to be used by this mojo.  If null, the default
+     * manager instance will be used.
+     * 
+     * @param repositoryManager  the repository manager instance (null to use default)
+     * @throws RepositoryException  thrown if the default instance cannot be initialized
+     */
+    protected void initRepositoryManager(RepositoryManager repositoryManager) throws RepositoryException {
+        if (this.repositoryManager == null) {
+            if (repositoryManager == null) {
+                this.repositoryManager = RepositoryManager.getDefault();
+                
+            } else {
+                this.repositoryManager = repositoryManager;
+            }
+        }
+    }
+
 }

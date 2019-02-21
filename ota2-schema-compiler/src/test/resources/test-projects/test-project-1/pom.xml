@@ -26,6 +26,7 @@
 					<outputFolder>${basedir}/target/test-output/test-project-1</outputFolder>
 					<compileSchemas>true</compileSchemas>
 					<compileJson>true</compileJson>
+					<bindingStyle>OTA2</bindingStyle>
 					<debug>true</debug>
 				</configuration>
 			</plugin>
