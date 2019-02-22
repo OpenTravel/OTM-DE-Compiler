@@ -40,6 +40,7 @@ import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
 import org.apache.activemq.broker.BrokerService;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
@@ -354,7 +355,7 @@ public class IndexProcessManager {
 			
 			// For windows, we must wrap all of the path arguments in double quotes in case
 			// they contain spaces.
-			if (SystemUtils.isWindows()) {
+			if (SystemUtils.IS_OS_WINDOWS) {
 				javaCmd = "\"" + javaCmd + ".exe\"";
 				oomeOption = "\"" + oomeOption + "\"";
 				agentConfigLocation = "\"" + agentConfigLocation + "\"";
@@ -390,8 +391,8 @@ public class IndexProcessManager {
 		private static String getJvmOptionForOutOfMemoryErrors() {
 			String jvmOption = "";
 			
-			if (SystemUtils.isHotSpotVM()) {
-				if (SystemUtils.isWindows()) {
+			if (isJVM("HotSpot")) {
+				if (SystemUtils.IS_OS_WINDOWS) {
 					// ProcessBuilder "on Windows" needs every word (space separated) to be
 					// a different element in the array/list. See #47312. Need to study why!
 					jvmOption = "-XX:OnOutOfMemoryError=taskkill /F /PID %p";
@@ -400,25 +401,33 @@ public class IndexProcessManager {
 					jvmOption = "-XX:OnOutOfMemoryError=kill -KILL %p";
 				}
 				
-			} else if (SystemUtils.isJ9VM()) {
+			} else if (SystemUtils.IS_JAVA_9) {
 				// NOTE IBM states the following IBM J9 JVM command-line option/switch has
 				// side-effects on "performance", as noted in the reference documentation...
 				// http://publib.boulder.ibm.com/infocenter/javasdk/v6r0/index.jsp?topic=/com.ibm.java.doc.diagnostics.60/diag/appendixes/cmdline/commands_jvm.html
 				jvmOption = "-Xcheck:memory";
 				
-			} else if (SystemUtils.isJRockitVM()) {
+			} else if (isJVM("JRockit")) {
 				// NOTE the following Oracle JRockit JVM documentation was referenced to
 				// identify the appropriate JVM option to set when handling OutOfMemoryErrors.
 				// http://docs.oracle.com/cd/E13150_01/jrockit_jvm/jrockit/jrdocs/refman/optionXX.html
 				jvmOption = "-XXexitOnOutOfMemory";
 				
-			} else if (SystemUtils.isOpenJDKVM()) {
+			} else if (isJVM("OpenJDK")) {
 				// NOTE this option was added in Java™ SE Development Kit 8, Update 92 (JDK 8u92)
 				jvmOption = "-XX:+ExitOnOutOfMemoryError";
 			}
 			return jvmOption;
 		}
 		
+	    /**
+	     * @see java.lang.System#getProperty(String) with "java.vm.name".
+	     */
+	    private static boolean isJVM(final String expectedJvmName) {
+	        String jvmName = System.getProperty("java.vm.name");
+	        return (jvmName != null && jvmName.contains(expectedJvmName));
+	    }
+	    
 		/**
 		 * Returns the location of the log4j configuration file to be used by the indexing
 		 * agent.  If an override has not been provided in the <code>log4j.agent.configuration</code>
@@ -431,7 +440,7 @@ public class IndexProcessManager {
 			String configFileLocation = System.getProperty( "log4j.agent.configuration" );
 			
 			if (configFileLocation == null) {
-				configFileLocation = (SystemUtils.isWindows() ? "file:/" : "file://")
+				configFileLocation = (SystemUtils.IS_OS_WINDOWS ? "file:/" : "file://")
 						+ System.getProperty("user.dir") + "/conf/log4j-agent.properties";
 			}
 			return "-Dlog4j.configuration=" + configFileLocation;

@@ -20,6 +20,7 @@ import java.io.FileWriter;
 import java.io.Writer;
 import java.util.Properties;
 
+import org.apache.commons.lang.SystemUtils;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.util.RepositoryJaxbContext;
 
@@ -31,7 +32,6 @@ public abstract class AbstractIndexingServiceTest {
     protected static RepositoryManager repositoryManager;
     
     public static void setupEnvironment() throws Exception {
-        boolean isWindows = SystemUtils.isWindows();
         File testResourcesFolder = new File( System.getProperty( "user.dir" ), "/src/test/resources" );
         File repositoryFolder = new File( testResourcesFolder, "/repo-snapshots/versions-repository" );
         File searchIndexFolder = new File( System.getProperty( "user.dir" ), "/target/test-output/search-index" );
@@ -60,7 +60,7 @@ public abstract class AbstractIndexingServiceTest {
         
         System.setProperty( "ota2.index.manager.config", "src/test/resources/test-config/indexing-manager.xml" );
         System.setProperty( "ota2.index.agent.config", "src/test/resources/test-config/indexing-agent.xml" );
-        System.setProperty( "log4j.configuration", (isWindows ? "file:/" : "file://") +
+        System.setProperty( "log4j.configuration", (SystemUtils.IS_OS_WINDOWS ? "file:/" : "file://") +
                 System.getProperty( "user.dir" ) + "/src/test/resources/log4j.properties" );
         System.setProperty( "log4j.agent.configuration", System.getProperty( "log4j.configuration" ) );
         
