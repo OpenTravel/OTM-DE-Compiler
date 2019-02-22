@@ -65,7 +65,7 @@ public class IndexProcessManager {
 	public static final String AGENT_JVMOPTS_BEANID   = "agentJvmOpts";
 	public static final String AMQ_BROKER_BEANID      = "amqBroker";
 	
-    protected static boolean debugMode = false;
+    protected static boolean debugMode = true;
     
     private static Log log = LogFactory.getLog(IndexProcessManager.class);
     
@@ -97,7 +97,7 @@ public class IndexProcessManager {
 			shutdownRequested = false;
 			launcherThread.start();
 			
-			while (launcherThread.isAlive()) {
+			while (launcher.getAgentProcess() != null) {
 				sleep1();
 			}
 			
@@ -108,7 +108,7 @@ public class IndexProcessManager {
             running = false;
 		}
 	}
-
+	
 	/**
 	 * Causes the current thread to sleep for one second unless interrupted.
 	 */
@@ -283,6 +283,11 @@ public class IndexProcessManager {
 				while (!shutdownRequested) {
 					agentProcess = launchJavaProcess( IndexingAgent.class );
 					
+					// Notify all waiting threads when startup is complete
+					synchronized (IndexProcessManager.class) {
+						IndexProcessManager.class.notifyAll();
+					}
+					
 					if (debugMode) {
 						redirectAgentProcessOutout();
 					}
@@ -334,12 +339,10 @@ public class IndexProcessManager {
 		 * @throws IOException  thrown if the external process cannot be launched
 		 */
 		private static Process launchJavaProcess(Class<?> mainClass) throws IOException {
-			boolean isWindows = SystemUtils.isWindows();
 			String javaCmd = System.getProperty("java.home") + File.separatorChar +
 					"bin" + File.separatorChar + "java";
 			String agentConfigLocation = System.getProperty( AGENT_CONFIG_SYSPROP );
-			String log4jConfig = "-Dlog4j.configuration=" + (isWindows ? "file:/" : "file://")
-					+ System.getProperty("user.dir") + "/conf/log4j-agent.properties";
+			String log4jConfig = getAgentLog4jConfiguration();
 			String oomeOption = getJvmOptionForOutOfMemoryErrors();
 			String classpath = System.getProperty("java.class.path");
 			
@@ -351,7 +354,7 @@ public class IndexProcessManager {
 			
 			// For windows, we must wrap all of the path arguments in double quotes in case
 			// they contain spaces.
-			if (isWindows) {
+			if (SystemUtils.isWindows()) {
 				javaCmd = "\"" + javaCmd + ".exe\"";
 				oomeOption = "\"" + oomeOption + "\"";
 				agentConfigLocation = "\"" + agentConfigLocation + "\"";
@@ -373,9 +376,7 @@ public class IndexProcessManager {
 			
 			log.info("Starting indexing agent process...");
 			return new ProcessBuilder()
-				.command( command )
-				.redirectOutput( Redirect.PIPE )
-				.start();
+				.command( command ).redirectOutput( Redirect.PIPE ).start();
 		}
 		
 		/**
@@ -416,6 +417,24 @@ public class IndexProcessManager {
 				jvmOption = "-XX:+ExitOnOutOfMemoryError";
 			}
 			return jvmOption;
+		}
+		
+		/**
+		 * Returns the location of the log4j configuration file to be used by the indexing
+		 * agent.  If an override has not been provided in the <code>log4j.agent.configuration</code>
+		 * system property, a default location will be used based on the standard installation
+		 * directory structure of the indexing service.
+		 * 
+		 * @return String
+		 */
+		private static String getAgentLog4jConfiguration() {
+			String configFileLocation = System.getProperty( "log4j.agent.configuration" );
+			
+			if (configFileLocation == null) {
+				configFileLocation = (SystemUtils.isWindows() ? "file:/" : "file://")
+						+ System.getProperty("user.dir") + "/conf/log4j-agent.properties";
+			}
+			return "-Dlog4j.configuration=" + configFileLocation;
 		}
 
 		/**

@@ -96,7 +96,7 @@
 	<bean id="indexingJmsService" class="org.springframework.jms.core.JmsTemplate" lazy-init="true">
 		<property name="connectionFactory" ref="connectionFactory" />
 		<property name="defaultDestination" ref="indexingJobQueue" />
-		<property name="receiveTimeout" value="${org.opentravel.index.jms.receiveTimeout}" />
+		<property name="receiveTimeout" value="5000" />
 	</bean>
 	
 </beans>

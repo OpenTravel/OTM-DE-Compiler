@@ -15,6 +15,7 @@
  */
 package org.opentravel.schemacompiler.index;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.io.StringWriter;
@@ -85,7 +86,8 @@ public class TestIndexingAgent extends AbstractIndexingServiceTest {
     
     @AfterClass
     public static void tearDown() throws Exception {
-        IndexingAgent.shutdown();
+    	indexAgent.shutdown();
+        indexAgent.closeIndexWriter();
         amqBroker.stop();
         amqBroker.waitUntilStopped();
         context.close();
@@ -157,14 +159,8 @@ public class TestIndexingAgent extends AbstractIndexingServiceTest {
     }
     
     @SuppressWarnings("squid:S2925")
-    private void waitForCommitMessage() {
-        try {
-            Thread.sleep( 1000 );
-            
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        jmsService.receiveSelected( IndexingConstants.SELECTOR_COMMITMSG );
+    private static synchronized void waitForCommitMessage() {
+        assertNotNull( jmsService.receiveSelected( IndexingConstants.SELECTOR_COMMITMSG ) );
     }
     
 }

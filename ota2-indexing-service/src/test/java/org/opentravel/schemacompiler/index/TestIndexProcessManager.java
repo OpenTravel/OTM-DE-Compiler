@@ -34,19 +34,17 @@ public class TestIndexProcessManager extends AbstractIndexingServiceTest {
     }
     
     @Test
-    @SuppressWarnings("squid:S2925")
     public void testStartupAndShutdown() throws Exception {
-        ProcessManagerRunner pmRunner = new ProcessManagerRunner();
-        Thread pmThread = new Thread( pmRunner );
+        Thread pmThread = new Thread( () -> {
+        	IndexProcessManager.main( new String[0] );
+        } );
         
         // Start the process manager and wait for everything to be up and running
         IndexProcessManager.debugMode = true;
         pmThread.start();
         
-        for (int i = 0; i < 100; i++) {
-            if (pmRunner.isRunning()) {
-                break;
-            }
+        synchronized (IndexProcessManager.class) {
+        	IndexProcessManager.class.wait( 5000 ); // wait for up to five seconds
         }
         
         // Kill the agent process and verify that a new one is started up to replace it
@@ -54,28 +52,16 @@ public class TestIndexProcessManager extends AbstractIndexingServiceTest {
         
         agentProcess.destroyForcibly();
         agentProcess.waitFor( 5, TimeUnit.SECONDS );
-        Thread.sleep( 500 );
+        
+        synchronized (IndexProcessManager.class) {
+        	IndexProcessManager.class.wait( 5000 ); // wait for up to five seconds
+        }
         assertNotNull( IndexProcessManager.getAgentProcess() );
         assertFalse( agentProcess == IndexProcessManager.getAgentProcess() );
         
         // Gracefully shut down the process manager
         ShutdownIndexingService.main( new String[0] );
         pmThread.join( 5000 );
-    }
-    
-    /**
-     * Used to launch the <code>IndexProcessManager</code> as a background task.
-     */
-    private static class ProcessManagerRunner implements Runnable {
-
-        @Override
-        public void run() {
-            IndexProcessManager.main( new String[0] );
-        }
-        
-        public boolean isRunning() {
-            return IndexProcessManager.isRunning();
-        }
     }
     
 }

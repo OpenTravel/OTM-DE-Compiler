@@ -62,6 +62,8 @@ public abstract class AbstractIndexingServiceTest {
         System.setProperty( "ota2.index.agent.config", "src/test/resources/test-config/indexing-agent.xml" );
         System.setProperty( "log4j.configuration", (isWindows ? "file:/" : "file://") +
                 System.getProperty( "user.dir" ) + "/src/test/resources/log4j.properties" );
+        System.setProperty( "log4j.agent.configuration", System.getProperty( "log4j.configuration" ) );
+        
         repositoryManager = new RepositoryManager( repositoryFolder );
         IndexProcessManager.getJmxPort(); // Forces initialization of the Spring context using the above information
     }

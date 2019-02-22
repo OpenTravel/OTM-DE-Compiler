@@ -21,7 +21,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,7 +55,6 @@ import org.opentravel.schemacompiler.subscription.SubscriptionNavigator;
 import org.opentravel.schemacompiler.util.RepositoryJaxbContext;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
-import org.springframework.jms.JmsException;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 
@@ -74,8 +72,7 @@ public class IndexingAgent {
 	public static final String REPOSITORY_LOCATION_BEANID = "repositoryLocation";
 	public static final String SEARCH_INDEX_LOCATION_BEANID = "searchIndexLocation";
 	
-	private static boolean shutdownRequested = false;
-	
+	private boolean shutdownRequested = false;
 	private File repositoryLocation;
 	private File searchIndexLocation;
 	private RepositoryManager repositoryManager;
@@ -92,7 +89,20 @@ public class IndexingAgent {
 	 * @throws IOException thrown if the search index writer cannot be initialized
 	 */
 	public IndexingAgent() throws RepositoryException, IOException {
-		initializeContext();
+		this( null );
+	}
+	
+	/**
+	 * Constructor that allows the caller to override the value of the system property
+	 * for the config location (used for testing purposes only).  Setting the override
+	 * to a value of <code>NULL</code> will be interpreted as a null override value.
+	 * 
+	 * @param overrideConfigLocation  the override location for the agent's spring configuration file
+	 * @throws RepositoryException thrown if the repository manager cannot be initialized
+	 * @throws IOException thrown if the search index writer cannot be initialized
+	 */
+	public IndexingAgent(String overrideConfigLocation) throws RepositoryException, IOException {
+		initializeContext( overrideConfigLocation );
 		
 		// Check to make sure the index was properly closed, and release any lock that might exist
 		if (!searchIndexLocation.exists())
@@ -114,14 +124,22 @@ public class IndexingAgent {
 	/**
 	 * Initializes the Spring application context and all of the properties that are obtained from it.
 	 * 
+	 * @param overrideConfigLocation  the override location for the agent's spring configuration file
 	 * @throws RepositoryException thrown if errors are detected in the agent configuration settings
 	 * @throws FileNotFoundException thrown if the indexing agent configuration file does not exist in the specified
 	 *             location
 	 */
 	@SuppressWarnings("resource")
-	private void initializeContext() throws RepositoryException, FileNotFoundException {
-		String configFileLocation = System.getProperty( IndexProcessManager.AGENT_CONFIG_SYSPROP );
+	private void initializeContext(String overrideConfigLocation) throws RepositoryException, FileNotFoundException {
+		String configFileLocation = overrideConfigLocation;
 		File configFile;
+		
+		if (configFileLocation == null) {
+			configFileLocation = System.getProperty( IndexProcessManager.AGENT_CONFIG_SYSPROP );
+
+		} else if (configFileLocation.equals( "NULL" )) {
+			configFileLocation = null;
+		}
 		
 		// Verify the existence of the configuration file and initialize the context
 		if (configFileLocation == null) {
@@ -162,11 +180,40 @@ public class IndexingAgent {
 	}
 	
 	/**
+	 * Returns the <code>JmsTemplate</code> being used by this service for messaging
+	 * (intended for testing purposes only).
+	 * 
+	 * @return JmsTemplate
+	 */
+	protected JmsTemplate getJmsService() {
+		return jmsTemplate;
+	}
+	
+	/**
+	 * Permanently closes the index writer for this agent.
+	 */
+	protected void closeIndexWriter() {
+		if (indexWriter != null) {
+			try {
+				indexWriter.close();
+				
+			} catch (IOException e) {
+				// Ignore error and return
+				
+			} finally {
+				indexWriter = null;
+			}
+		}
+	}
+	
+	/**
 	 * Starts listening for JMS messages and performs the appropriate indexing action when one is received.
 	 * 
 	 * @throws JMSException thrown if a fatal error occurs because the JMS connection is not available
 	 */
 	public void startListening() throws JMSException {
+		boolean initialStartup = true;
+		
 		checkJmsAvailable();
         running = true;
         
@@ -175,6 +222,8 @@ public class IndexingAgent {
 		while (!shutdownRequested) {
 			try {
 				Message msg = jmsTemplate.receiveSelected( IndexingConstants.SELECTOR_JOBMSG );
+				
+				initialStartup = false;
 				
 				if (msg instanceof TextMessage) {
 					TextMessage message = (TextMessage) msg;
@@ -189,15 +238,12 @@ public class IndexingAgent {
 					}
 				}
 				
-			} catch (JmsException e) {
-				if (isConnectException( e )) {
-					throw e; // re-throw connection exceptions as a fatal error
-					
-				} else {
-					log.error( "Error receiving indexing job.", e );
-				}
 			} catch (Exception e) {
 				log.error( "Error receiving indexing job.", e );
+				
+				if (initialStartup) {
+					throw new IndexingRuntimeException( "Receive error during indexing agent startup", e );
+				}
 			}
 		}
 	}
@@ -383,24 +429,6 @@ public class IndexingAgent {
 	}
 	
 	/**
-	 * Returns true if the given exception or any of its nested caused-by exceptions is due to a network connection
-	 * exception (typically because the JMS connection is down).
-	 * 
-	 * @param t the throwable to analyze
-	 * @return boolean
-	 */
-	private boolean isConnectException(Throwable t) {
-		boolean isCE = false;
-		
-		while (!isCE && (t != null)) {
-			isCE = t.getClass().equals( ConnectException.class );
-			if (!isCE)
-				t = t.getCause();
-		}
-		return isCE;
-	}
-	
-	/**
 	 * Sends a JMS message to the OTM repository as notification that an indexing job has been committed.
 	 */
 	private void sendCommitNotifiation() {
@@ -417,7 +445,7 @@ public class IndexingAgent {
 	/**
 	 * Requests a shutdown of this indexing agent.
 	 */
-	public static void shutdown() {
+	public void shutdown() {
 		shutdownRequested = true;
 	}
 	
@@ -428,7 +456,14 @@ public class IndexingAgent {
 	 */
 	public static void main(String[] args) {
 		try {
-			new IndexingAgent().startListening();
+			IndexingAgent agent = new IndexingAgent();
+			
+			try {
+				agent.startListening();
+				
+			} finally {
+				agent.closeIndexWriter();
+			}
 			
 		} catch (Exception e) {
 			log.fatal( "Indexing agent encountered a fatal error.", e );
