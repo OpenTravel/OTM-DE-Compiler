@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerHeader;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerParameter;
+import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerResponse;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerScheme;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerSecurityScheme;
 
@@ -53,6 +54,15 @@ public interface CodeGenerationSwaggerBindings {
 	 * @return List<SwaggerHeader>
 	 */
 	public List<SwaggerHeader> getGlobalResponseHeaders();
+	
+	/**
+	 * Returns a list of responses that will be included for every operation declared
+	 * in the generated Swagger document.  If a duplicate response status code is explicitly
+	 * provided in the model, the global response with the same status code will be omitted.
+	 * 
+	 * @return List<SwaggerResponse>
+	 */
+	public List<SwaggerResponse> getGlobalResponses();
 	
 	/**
 	 * Returns the list of supported security schemes that should be included in the

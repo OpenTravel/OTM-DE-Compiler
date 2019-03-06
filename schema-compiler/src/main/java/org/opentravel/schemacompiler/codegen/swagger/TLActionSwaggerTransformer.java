@@ -16,7 +16,9 @@
 package org.opentravel.schemacompiler.codegen.swagger;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
@@ -54,8 +56,6 @@ public class TLActionSwaggerTransformer extends AbstractSwaggerCodegenTransforme
 	public SwaggerOperation transform(QualifiedAction source) {
         ObjectTransformer<QualifiedParameter,SwaggerParameter,CodeGenerationTransformerContext> paramTransformer =
         		getTransformerFactory().getTransformer(QualifiedParameter.class, SwaggerParameter.class);
-        ObjectTransformer<TLActionResponse,CodegenArtifacts,CodeGenerationTransformerContext> responseTransformer =
-        		getTransformerFactory().getTransformer(TLActionResponse.class, CodegenArtifacts.class);
 		TLAction sourceAction = source.getAction();
 		TLActionRequest sourceRequest = ResourceCodegenUtils.getDeclaredOrInheritedRequest( sourceAction );
 		List<TLActionResponse> sourceResponses = ResourceCodegenUtils.getInheritedResponses( sourceAction );
@@ -86,11 +86,49 @@ public class TLActionSwaggerTransformer extends AbstractSwaggerCodegenTransforme
 			swaggerOp.getParameters().add( bodyParam );
 		}
 		
-		for (TLActionResponse response : ResourceCodegenUtils.getInheritedResponses( sourceAction )) {
-			swaggerOp.getResponses().addAll( responseTransformer.transform( response )
+        transformResponses(sourceResponses, swaggerOp);
+        
+		return swaggerOp;
+	}
+
+	/**
+	 * Transforms the given list of model responses and adds them to the swagger
+	 * operation provided.
+	 * 
+	 * @param sourceResponses  the list of action responses to transform
+	 * @param swaggerOp  the swagger operation to which the transformed responses will be added
+	 */
+	private void transformResponses(List<TLActionResponse> sourceResponses, SwaggerOperation swaggerOp) {
+		ObjectTransformer<TLActionResponse,CodegenArtifacts,CodeGenerationTransformerContext> responseTransformer =
+        		getTransformerFactory().getTransformer(TLActionResponse.class, CodegenArtifacts.class);
+		TLActionResponse defaultResponse = null;
+		
+		for (TLActionResponse response : sourceResponses) {
+			if (response.getStatusCodes().isEmpty()) {
+				defaultResponse = response;
+				
+			} else {
+				swaggerOp.getResponses().addAll( responseTransformer.transform( response )
+						.getArtifactsOfType( SwaggerResponse.class ) );
+			}
+		}
+		
+		if ((swaggerBindings != null) && (swaggerBindings.getGlobalResponses() != null)) {
+			Set<Integer> statusCodes = new HashSet<>();
+			
+			sourceResponses.forEach( r -> statusCodes.addAll( r.getStatusCodes() ) );
+			
+			for (SwaggerResponse response : swaggerBindings.getGlobalResponses()) {
+				if (!statusCodes.contains( response.getStatusCode() )) {
+					swaggerOp.getResponses().add( response );
+				}
+			}
+		}
+		
+		if (defaultResponse != null) {
+			swaggerOp.getResponses().addAll( responseTransformer.transform( defaultResponse )
 					.getArtifactsOfType( SwaggerResponse.class ) );
 		}
-		return swaggerOp;
 	}
 	
 	/**

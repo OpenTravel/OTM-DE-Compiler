@@ -25,6 +25,7 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonType;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerHeader;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerParamType;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerParameter;
+import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerResponse;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerScheme;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerSecurityScheme;
 
@@ -36,6 +37,7 @@ public class DefaultSwaggerBindings implements CodeGenerationSwaggerBindings {
 	protected List<SwaggerScheme> supportedSchemes = new ArrayList<>();
 	protected List<SwaggerParameter> globalParameters = new ArrayList<>();
 	protected List<SwaggerHeader> globalResponseHeaders = new ArrayList<>();
+	protected List<SwaggerResponse> globalResponses = new ArrayList<>();
 	protected List<SwaggerSecurityScheme> securitySchemes = new ArrayList<>();
 	
 	/**
@@ -62,6 +64,14 @@ public class DefaultSwaggerBindings implements CodeGenerationSwaggerBindings {
 		return globalResponseHeaders;
 	}
 	
+	/**
+	 * @see org.opentravel.schemacompiler.codegen.swagger.CodeGenerationSwaggerBindings#getGlobalResponses()
+	 */
+	@Override
+	public List<SwaggerResponse> getGlobalResponses() {
+		return globalResponses;
+	}
+
 	/**
 	 * @see org.opentravel.schemacompiler.codegen.swagger.CodeGenerationSwaggerBindings#getSecuritySchemes()
 	 */

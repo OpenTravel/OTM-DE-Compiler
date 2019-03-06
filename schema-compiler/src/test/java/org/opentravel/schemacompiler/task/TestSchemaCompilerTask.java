@@ -21,6 +21,7 @@ import java.io.File;
 
 import org.junit.Test;
 import org.opentravel.schemacompiler.codegen.CodeGeneratorTestAssertions;
+import org.opentravel.schemacompiler.ioc.CompilerExtensionRegistry;
 import org.opentravel.schemacompiler.util.SchemaCompilerTestUtils;
 import org.opentravel.schemacompiler.validate.FindingMessageFormat;
 import org.opentravel.schemacompiler.validate.FindingType;
@@ -35,12 +36,21 @@ public class TestSchemaCompilerTask {
 	
     @Test
     public void testSchemaCompilerTask() throws Exception {
+    	compileTestModel( "testSchemaCompilerTask", "OTA2" );
+    }
+    
+    @Test
+    public void testSchemaCompilerTask_customBinding() throws Exception {
+    	compileTestModel( "testSchemaCompilerTask_customBinding", "XYZ" );
+    }
+    
+    private void compileTestModel(String testOutputFolder, String bindingStyle) throws Exception {
         File catalogFile = new File(SchemaCompilerTestUtils.getBaseLibraryLocation()
                 + "/library-catalog.xml");
         File sourceFile = new File(SchemaCompilerTestUtils.getBaseLibraryLocation()
                 + "/test-package_v2/library_1_p2.xml");
         File targetFolder = new File(System.getProperty("user.dir")
-                + "/target/codegen-output/testSchemaCompilerTask");
+                + "/target/codegen-output/" + testOutputFolder);
         CompileAllCompilerTask compilerTask = TaskFactory.getTask(CompileAllCompilerTask.class);
 
         compilerTask.setCatalogLocation(catalogFile.getAbsolutePath());
@@ -55,6 +65,7 @@ public class TestSchemaCompilerTask {
         compilerTask.setServiceEndpointUrl("http://www.OpenTravel.org/services");
         compilerTask.setResourceBaseUrl("http://www.OpenTravel.org/resources");
         compilerTask.setSuppressOtmExtensions(false);
+        CompilerExtensionRegistry.setActiveExtension( bindingStyle );
 
         ValidationFindings findings = compilerTask.compileOutput(sourceFile);
 
@@ -80,7 +91,8 @@ public class TestSchemaCompilerTask {
         compilerTask.setGenerateExamples(true);
         compilerTask.setServiceEndpointUrl("http://www.OpenTravel.org/services");
         compilerTask.setResourceBaseUrl("http://www.OpenTravel.org/resources");
-
+        CompilerExtensionRegistry.setActiveExtension( "OTA2" );
+        
         ValidationFindings findings = compilerTask.compileOutput(sourceFile);
 
         SchemaCompilerTestUtils.printFindings(findings);
@@ -105,6 +117,7 @@ public class TestSchemaCompilerTask {
         compilerTask.setGenerateExamples(true);
         compilerTask.setServiceEndpointUrl("http://www.OpenTravel.org/services");
         compilerTask.setResourceBaseUrl("http://www.OpenTravel.org/resources");
+        CompilerExtensionRegistry.setActiveExtension( "OTA2" );
 
         ValidationFindings findings = compilerTask.compileOutput(sourceFile);
 
@@ -133,6 +146,7 @@ public class TestSchemaCompilerTask {
         compilerTask.setGenerateExamples(true);
         compilerTask.setServiceEndpointUrl("http://www.OpenTravel.org/services");
         compilerTask.setResourceBaseUrl("http://www.OpenTravel.org/resources");
+        CompilerExtensionRegistry.setActiveExtension( "OTA2" );
 
         ValidationFindings findings = compilerTask.compileOutput(sourceFile);
 
@@ -156,6 +170,7 @@ public class TestSchemaCompilerTask {
         compilerTask.setCompileServices(true);
         compilerTask.setServiceEndpointUrl("http://www.OpenTravel.org/services");
         compilerTask.setResourceBaseUrl("http://www.OpenTravel.org/resources");
+        CompilerExtensionRegistry.setActiveExtension( "OTA2" );
 
         ValidationFindings findings = compilerTask.compileOutput(sourceFile);
 
