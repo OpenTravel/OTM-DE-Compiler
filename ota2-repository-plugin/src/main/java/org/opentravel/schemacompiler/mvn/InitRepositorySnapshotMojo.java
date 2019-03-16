@@ -20,6 +20,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Execute;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.opentravel.schemacompiler.repository.RepositoryManager;
 
 /**
  * OTA2.0 repository plugin that executes during the <code>initialize</code> phase of the build
@@ -30,6 +31,22 @@ import org.apache.maven.plugins.annotations.Mojo;
 @Execute( goal="initialize-snapshot", phase = LifecyclePhase.INITIALIZE )
 public class InitRepositorySnapshotMojo extends AbstractOTA2RepositoryMojo {
 	
+    /**
+     * Default constructor.
+     */
+    public InitRepositorySnapshotMojo() {
+    	super( null );
+    }
+    
+    /**
+     * Constructor that specifies an alternate repository manager from the default.
+     * 
+     * @param rm  the repository manager to use when executing the mojo
+     */
+    public InitRepositorySnapshotMojo(RepositoryManager rm) {
+    	super( rm );
+    }
+    
 	/**
 	 * @see org.apache.maven.plugin.Mojo#execute()
 	 */

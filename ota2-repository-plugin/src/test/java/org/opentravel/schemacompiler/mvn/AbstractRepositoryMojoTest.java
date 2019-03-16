@@ -62,13 +62,12 @@ public abstract class AbstractRepositoryMojoTest {
     protected void executeInitializeMojo(PlexusConfiguration config, boolean purgeOutputFolder) throws Exception {
         String snapshotFolderStr = config.getChild( "snapshotProjectFolder" ).getValue();
         File snapshotFolder = new File( snapshotFolderStr.replace( "${basedir}", System.getProperty( "user.dir" ) ) );
-        InitRepositorySnapshotMojo mojo = new InitRepositorySnapshotMojo();
+        InitRepositorySnapshotMojo mojo = new InitRepositorySnapshotMojo( repositoryManager );
         
         if (purgeOutputFolder) {
             FileUtils.deleteDirectory( snapshotFolder );
         }
         mojo = (InitRepositorySnapshotMojo) rule.configureMojo( mojo, config );
-        mojo.initRepositoryManager( repositoryManager );
         mojo.setLog( new SilentLog() );
         mojo.execute();
         
@@ -78,10 +77,9 @@ public abstract class AbstractRepositoryMojoTest {
     protected void executeUpdateMojo(PlexusConfiguration config) throws Exception {
         String snapshotFolderStr = config.getChild( "snapshotProjectFolder" ).getValue();
         File snapshotFolder = new File( snapshotFolderStr.replace( "${basedir}", System.getProperty( "user.dir" ) ) );
-        UpdateRepositorySnapshotMojo mojo = new UpdateRepositorySnapshotMojo();
+        UpdateRepositorySnapshotMojo mojo = new UpdateRepositorySnapshotMojo( repositoryManager );
         
         mojo = (UpdateRepositorySnapshotMojo) rule.configureMojo( mojo, config );
-        mojo.initRepositoryManager( repositoryManager );
         mojo.setLog( new SilentLog() );
         mojo.execute();
         

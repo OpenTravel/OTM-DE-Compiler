@@ -18,6 +18,7 @@ package org.opentravel.schemacompiler.mvn;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.opentravel.schemacompiler.repository.RepositoryManager;
 
 /**
  * OTA2.0 repository plugin that executes during the <code>initialize</code> phase of the build
@@ -27,6 +28,22 @@ import org.apache.maven.plugins.annotations.Mojo;
 @Mojo( name = "update-snapshot", threadSafe=true  )
 public class UpdateRepositorySnapshotMojo extends AbstractOTA2RepositoryMojo {
 	
+    /**
+     * Default constructor.
+     */
+    public UpdateRepositorySnapshotMojo() {
+    	super( null );
+    }
+    
+    /**
+     * Constructor that specifies an alternate repository manager from the default.
+     * 
+     * @param rm  the repository manager to use when executing the mojo
+     */
+    public UpdateRepositorySnapshotMojo(RepositoryManager rm) {
+    	super( rm );
+    }
+    
 	/**
 	 * @see org.apache.maven.plugin.Mojo#execute()
 	 */

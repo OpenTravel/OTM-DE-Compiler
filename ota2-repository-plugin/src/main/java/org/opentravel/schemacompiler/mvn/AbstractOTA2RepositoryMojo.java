@@ -120,7 +120,24 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 	private File javaProjectFolder;
 	
     private RepositoryManager repositoryManager;
-
+    private RepositoryManager alternateRepositoryManager;
+    
+    /**
+     * Default constructor.
+     */
+    public AbstractOTA2RepositoryMojo() {
+    	this( null );
+    }
+    
+    /**
+     * Constructor that specifies an alternate repository manager from the default.
+     * 
+     * @param rm  the repository manager to use when executing the mojo
+     */
+    public AbstractOTA2RepositoryMojo(RepositoryManager rm) {
+    	this.alternateRepositoryManager = rm;
+    }
+    
 	/**
 	 * Creates or updates the OTA2 repository snapshot.
 	 * 
@@ -138,7 +155,7 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 		try {
 			ValidationFindings findings = new ValidationFindings();
 			
-            initRepositoryManager( null );
+            initRepositoryManager();
             projectManager = new ProjectManager( new TLModel(), false, repositoryManager );
 			releaseManager = new ReleaseManager( repositoryManager );
 			
@@ -469,10 +486,14 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 	 * false or throws a <code>MojoFailureException</code>, depending on the error that was discovered.
 	 * 
 	 * @return boolean
+	 * @throws MojoFailureException  thrown if a validation error in the plugin configuration is detected
+	 * @throws MojoExecutionException  thrown if an error occurs during initialization of the plugin
 	 */
-	protected boolean validate() throws MojoFailureException {
+	protected boolean validate() throws MojoFailureException, MojoExecutionException {
 		boolean isValid = true;
 		Log log = getLog();
+		
+		initRepositoryManager();
 		
 		if (!enabled) {
 			log.info( "OTA2 repository snapshot processing disabled (skipping)." );
@@ -637,19 +658,23 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 	}
 	
     /**
-     * Initializes the repository manager to be used by this mojo.  If null, the default
-     * manager instance will be used.
+     * Initializes the repository manager to be used by this mojo.  If an alternate manager
+     * has not been provided by the constructor, the default instance will be used.
      * 
-     * @param repositoryManager  the repository manager instance (null to use default)
-     * @throws RepositoryException  thrown if the default instance cannot be initialized
+     * @throws MojoExecutionException  thrown if the default instance cannot be initialized
      */
-    protected void initRepositoryManager(RepositoryManager repositoryManager) throws RepositoryException {
+    private void initRepositoryManager() throws MojoExecutionException {
         if (this.repositoryManager == null) {
-            if (repositoryManager == null) {
-                this.repositoryManager = RepositoryManager.getDefault();
+            if (alternateRepositoryManager == null) {
+                try {
+					this.repositoryManager = RepositoryManager.getDefault();
+					
+				} catch (RepositoryException e) {
+					throw new MojoExecutionException( "Error initializing the default repository manager.", e );
+				}
                 
             } else {
-                this.repositoryManager = repositoryManager;
+                this.repositoryManager = alternateRepositoryManager;
             }
         }
     }
