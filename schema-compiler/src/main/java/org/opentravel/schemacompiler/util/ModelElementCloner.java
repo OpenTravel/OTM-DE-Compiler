@@ -79,6 +79,7 @@ import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLMemberField;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLModelElement;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
@@ -196,9 +197,12 @@ public class ModelElementCloner {
 
             // Use the transformer subsystem to create the clone of the object
             Map<Object,NamedEntity> typeAssignments = new HashMap<>();
+            Map<Object,TLMemberField<?>> fieldReferences = new HashMap<>();
 
             sourceTransformerFactory.setTypeAssignments(typeAssignments);
+            sourceTransformerFactory.setFieldReferences(fieldReferences);
             targetTransformerFactory.setTypeAssignments(typeAssignments);
+            targetTransformerFactory.setFieldReferences(fieldReferences);
 
             ObjectTransformer<C, I, SymbolResolverTransformerContext> sourceTransformer = sourceTransformerFactory
                     .getTransformer(source, intermediateType);
@@ -344,6 +348,7 @@ public class ModelElementCloner {
             TransformerFactory<C> {
 
         private Map<Object, NamedEntity> typeAssignments;
+        private Map<Object,TLMemberField<?>> fieldReferences;
         private TransformerFactory<C> delegateFactory;
 
         /**
@@ -368,6 +373,16 @@ public class ModelElementCloner {
         }
 
         /**
+		 * Assigns the map instance to use for field references collected and assigned by the
+         * transformers returned by this factory.
+		 *
+		 * @param fieldReferences  the map instance to use for handling field references
+		 */
+		public void setFieldReferences(Map<Object, TLMemberField<?>> fieldReferences) {
+			this.fieldReferences = fieldReferences;
+		}
+
+		/**
          * @see org.opentravel.schemacompiler.transform.TransformerFactory#getTransformer(java.lang.Class,
          *      java.lang.Class)
          */
@@ -377,10 +392,10 @@ public class ModelElementCloner {
             ObjectTransformer<S,T,C> transformer;
 
             if (TLModelElement.class.isAssignableFrom(sourceType)) {
-                transformer = new TypeMappingTransformer<>(delegateTransformer,
-                        typeAssignments);
+                transformer = new TypeMappingTransformer<>(delegateTransformer, typeAssignments, fieldReferences);
+                
             } else {
-                transformer = new TypeAssignmentTransformer<>(delegateTransformer, typeAssignments);
+                transformer = new TypeAssignmentTransformer<>(delegateTransformer, typeAssignments, fieldReferences);
             }
             transformer.setContext(getContext());
             return transformer;
@@ -396,6 +411,7 @@ public class ModelElementCloner {
             ObjectTransformer<S,T,C> {
 
         private Map<Object,NamedEntity> typeAssignments;
+        private Map<Object,TLMemberField<?>> fieldReferences;
         private ObjectTransformer<S,T,C> delegate;
 
         /**
@@ -407,13 +423,30 @@ public class ModelElementCloner {
          *            the mappings of type assignments for the entities being transformed
          * @param typeNameAssignments
          *            the mappings of type names for the entities being transformed
+         * @param fieldReferences
+         *            the mappings of field references for the entities being transformed
          */
         public TypeMappingTransformer(ObjectTransformer<S,T,C> delegate,
-                Map<Object,NamedEntity> typeAssignments) {
+                Map<Object,NamedEntity> typeAssignments, Map<Object,TLMemberField<?>> fieldReferences) {
             this.typeAssignments = typeAssignments;
+            this.fieldReferences = fieldReferences;
             this.delegate = delegate;
         }
 
+        private ClassSpecificAssignment<Object> getTypeAssignment = new ClassSpecificAssignment<Object>()
+        		.addAssignment( TLSimple.class, (s, v) -> typeAssignments.put(v, s.getParentType()))
+        		.addAssignment( TLSimpleFacet.class, (s, v) -> typeAssignments.put(v, s.getSimpleType()))
+        		.addAssignment( TLValueWithAttributes.class, (s, v) -> typeAssignments.put(v, s.getParentType()))
+        		.addAssignment( TLAttribute.class, (s, v) -> typeAssignments.put(v, s.getType()))
+        		.addAssignment( TLProperty.class, (s, v) -> typeAssignments.put(v, s.getType()))
+        		.addAssignment( TLExtension.class, (s, v) -> typeAssignments.put(v, s.getExtendsEntity()))
+        		.addAssignment( TLResource.class, (s, v) -> typeAssignments.put(v, s.getBusinessObjectRef()))
+        		.addAssignment( TLParamGroup.class, (s, v) -> typeAssignments.put(v, s.getFacetRef()))
+        		.addAssignment( TLParameter.class, (s, v) -> fieldReferences.put(v, s.getFieldRef()))
+        		.addAssignment( TLActionFacet.class, (s, v) -> typeAssignments.put(v, s.getBasePayload()))
+        		.addAssignment( TLActionRequest.class, (s, v) -> typeAssignments.put(v, s.getPayloadType()))
+        		.addAssignment( TLActionResponse.class, (s, v) -> typeAssignments.put(v, s.getPayloadType()));
+        
         /**
          * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
          */
@@ -421,25 +454,9 @@ public class ModelElementCloner {
         public T transform(S source) {
             T intermediateObject = delegate.transform(source);
 
-            if (source instanceof TLSimple) {
-                typeAssignments.put(intermediateObject, ((TLSimple) source).getParentType());
-
-            } else if (source instanceof TLSimpleFacet) {
-                typeAssignments.put(intermediateObject, ((TLSimpleFacet) source).getSimpleType());
-
-            } else if (source instanceof TLValueWithAttributes) {
-                typeAssignments.put(intermediateObject,
-                        ((TLValueWithAttributes) source).getParentType());
-
-            } else if (source instanceof TLAttribute) {
-                typeAssignments.put(intermediateObject, ((TLAttribute) source).getType());
-
-            } else if (source instanceof TLProperty) {
-                typeAssignments.put(intermediateObject, ((TLProperty) source).getType());
-
-            } else if (source instanceof TLExtension) {
-                typeAssignments.put(intermediateObject, ((TLExtension) source).getExtendsEntity());
-            }
+			if (getTypeAssignment.canApply( source )) {
+				getTypeAssignment.apply( source, intermediateObject );
+			}
             return intermediateObject;
         }
 
@@ -461,6 +478,7 @@ public class ModelElementCloner {
             ObjectTransformer<S,T,C> {
 
         private Map<Object,NamedEntity> typeAssignments;
+        private Map<Object,TLMemberField<?>> fieldReferences;
         private ObjectTransformer<S,T,C> delegate;
 
         /**
@@ -470,12 +488,29 @@ public class ModelElementCloner {
          *            the delegate transformer that will perform the actual object transformation
          * @param typeAssignments
          *            the mappings of type assignments for the entities being transformed
+         * @param fieldReferences
+         *            the mappings of field references for the entities being transformed
          */
         public TypeAssignmentTransformer(ObjectTransformer<S, T, C> delegate,
-                Map<Object, NamedEntity> typeAssignments) {
+                Map<Object,NamedEntity> typeAssignments, Map<Object,TLMemberField<?>> fieldReferences) {
             this.typeAssignments = typeAssignments;
+            this.fieldReferences = fieldReferences;
             this.delegate = delegate;
         }
+        
+        private ClassSpecificAssignment<Object> setTypeAssignment = new ClassSpecificAssignment<Object>()
+        		.addAssignment( TLSimple.class, (s, v) -> s.setParentType((TLAttributeType) typeAssignments.get(v)) )
+        		.addAssignment( TLSimpleFacet.class, (s, v) -> s.setSimpleType((TLAttributeType) typeAssignments.get(v)))
+        		.addAssignment( TLValueWithAttributes.class, (s, v) -> s.setParentType((TLAttributeType) typeAssignments.get(v)))
+        		.addAssignment( TLAttribute.class, (s, v) -> s.setType((TLPropertyType) typeAssignments.get(v)))
+        		.addAssignment( TLProperty.class, (s, v) -> s.setType((TLPropertyType) typeAssignments.get(v)))
+        		.addAssignment( TLExtension.class, (s, v) -> s.setExtendsEntity(typeAssignments.get(v)))
+        		.addAssignment( TLResource.class, (s, v) -> s.setBusinessObjectRef((TLBusinessObject) typeAssignments.get(v)))
+        		.addAssignment( TLParamGroup.class, (s, v) -> s.setFacetRef((TLFacet) typeAssignments.get(v)))
+        		.addAssignment( TLParameter.class, (s, v) -> s.setFieldRef(fieldReferences.get(v)))
+        		.addAssignment( TLActionFacet.class, (s, v) -> s.setBasePayload(typeAssignments.get(v)))
+        		.addAssignment( TLActionRequest.class, (s, v) -> s.setPayloadType((TLActionFacet) typeAssignments.get(v)))
+        		.addAssignment( TLActionResponse.class, (s, v) -> s.setPayloadType((TLActionFacet) typeAssignments.get(v)));
 
         /**
          * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
@@ -483,28 +518,10 @@ public class ModelElementCloner {
         @Override
         public T transform(S source) {
             T targetObject = delegate.transform(source);
-
-            if (targetObject instanceof TLSimple) {
-                ((TLSimple) targetObject).setParentType((TLAttributeType) typeAssignments
-                        .get(source));
-
-            } else if (targetObject instanceof TLSimpleFacet) {
-                ((TLSimpleFacet) targetObject).setSimpleType((TLAttributeType) typeAssignments
-                        .get(source));
-
-            } else if (targetObject instanceof TLValueWithAttributes) {
-                ((TLValueWithAttributes) targetObject)
-                        .setParentType((TLAttributeType) typeAssignments.get(source));
-
-            } else if (targetObject instanceof TLAttribute) {
-                ((TLAttribute) targetObject).setType((TLPropertyType) typeAssignments.get(source));
-
-            } else if (targetObject instanceof TLProperty) {
-                ((TLProperty) targetObject).setType((TLPropertyType) typeAssignments.get(source));
-
-            } else if (targetObject instanceof TLExtension) {
-                ((TLExtension) targetObject).setExtendsEntity(typeAssignments.get(source));
-            }
+            
+			if (setTypeAssignment.canApply( targetObject )) {
+				setTypeAssignment.apply( targetObject, source );
+			}
             return targetObject;
         }
 

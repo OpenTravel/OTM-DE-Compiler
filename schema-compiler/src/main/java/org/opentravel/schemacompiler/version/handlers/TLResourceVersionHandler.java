@@ -117,7 +117,7 @@ public class TLResourceVersionHandler extends TLExtensionOwnerVersionHandler<TLR
 			majorVersionTarget.setBusinessObjectRef( minorVersion.getBusinessObjectRef() );
 		}
 		
-		rollupActionFacets( minorVersion, majorVersionTarget, cloner );
+		rollupActionFacets( minorVersion, majorVersionTarget, referenceHandler, cloner );
 		rollupParameterGroups( minorVersion, majorVersionTarget, referenceHandler, cloner );
 		rollupResourceActions( minorVersion, majorVersionTarget, referenceHandler, cloner );
 	}
@@ -127,9 +127,11 @@ public class TLResourceVersionHandler extends TLExtensionOwnerVersionHandler<TLR
 	 * 
 	 * @param minorVersion  the minor version to be rolled up
 	 * @param majorVersionTarget  the target resource version that will receive the rolled up content
+	 * @param referenceHandler  the rollup reference handler instance
 	 * @param cloner  used for cloning model element as required
 	 */
-	private void rollupActionFacets(TLResource minorVersion, TLResource majorVersionTarget, ModelElementCloner cloner) {
+	private void rollupActionFacets(TLResource minorVersion, TLResource majorVersionTarget,
+			RollupReferenceHandler referenceHandler, ModelElementCloner cloner) {
 		for (TLActionFacet sourceFacet : minorVersion.getActionFacets()) {
 			TLActionFacet targetFacet = majorVersionTarget.getActionFacet( sourceFacet.getName() );
 			
@@ -141,6 +143,7 @@ public class TLResourceVersionHandler extends TLExtensionOwnerVersionHandler<TLR
 				targetFacet.setReferenceType( sourceFacet.getReferenceType() );
 				targetFacet.setBasePayload( sourceFacet.getBasePayload() );
 				majorVersionTarget.addActionFacet( targetFacet );
+				referenceHandler.captureRollupReferences( targetFacet );
 			}
 			if (targetFacet.getDocumentation() == null) {
 				targetFacet.setDocumentation( cloner.clone( sourceFacet.getDocumentation() ) );
@@ -196,7 +199,7 @@ public class TLResourceVersionHandler extends TLExtensionOwnerVersionHandler<TLR
 				TLParameter targetParam = targetParamGroup.getParameter( sourceFieldRef.getName() );
 				
 				if (targetParam == null) {
-					targetParam = cloner.clone( sourceParam );
+					targetParam = cloner.clone( sourceParam ); // TODO: After cloning, targetParam.fieldRef is null
 					targetParamGroup.addParameter( targetParam );
 					referenceHandler.captureRollupReferences( targetParam );
 				}

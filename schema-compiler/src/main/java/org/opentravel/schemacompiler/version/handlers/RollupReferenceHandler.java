@@ -173,6 +173,10 @@ public class RollupReferenceHandler {
 				addRollupReference( e, e.getFieldRef() );
 				return null;
 			} )
+			.addFunction( TLActionFacet.class, e -> {
+				captureRollupReferences( e.getBasePayload() );
+				return null;
+			} )
 			.addFunction( TLAction.class, e -> {
 				captureRollupReferences( e.getRequest() );
 				e.getResponses().forEach( this::captureRollupReferences );
@@ -361,14 +365,17 @@ public class RollupReferenceHandler {
 		 */
 		@SuppressWarnings("unchecked")
 		private <T extends NamedEntity> T findSameNameEntity(T originalEntity, TLLibrary library) {
-			Object entity = symbols.getEntity( library.getNamespace(), originalEntity.getLocalName() );
 			T sameNameEntity = null;
 			
-			if (originalEntity.getClass().equals( entity.getClass() )) {
-				T namedEntity = (T) entity;
+			if (originalEntity != null) {
+				Object entity = symbols.getEntity( library.getNamespace(), originalEntity.getLocalName() );
 				
-				if (namedEntity.getOwningLibrary() == library) {
-					sameNameEntity = namedEntity;
+				if (originalEntity.getClass().equals( entity.getClass() )) {
+					T namedEntity = (T) entity;
+					
+					if (namedEntity.getOwningLibrary() == library) {
+						sameNameEntity = namedEntity;
+					}
 				}
 			}
 			return sameNameEntity;
@@ -450,16 +457,19 @@ public class RollupReferenceHandler {
 		 * @return TLParamGroup
 		 */
 		private TLParamGroup findSameNameParamGroup(TLParamGroup originalParamGroup, TLLibrary library) {
-			TLResource originalOwner = originalParamGroup.getOwner();
-			NamedEntity sameNameOwner = findSameNameEntity( originalOwner, library );
-			String groupName = originalParamGroup.getName();
 			TLParamGroup sameNameParamGroup = null;
 			
-			if ((sameNameOwner instanceof TLResource) && (groupName != null)) {
-				for (TLParamGroup paramGroup : ((TLResource) sameNameOwner).getParamGroups()) {
-					if (groupName.equals( paramGroup.getName() )) {
-						sameNameParamGroup = paramGroup;
-						break;
+			if (originalParamGroup != null) {
+				TLResource originalOwner = originalParamGroup.getOwner();
+				NamedEntity sameNameOwner = findSameNameEntity( originalOwner, library );
+				String groupName = originalParamGroup.getName();
+				
+				if ((sameNameOwner instanceof TLResource) && (groupName != null)) {
+					for (TLParamGroup paramGroup : ((TLResource) sameNameOwner).getParamGroups()) {
+						if (groupName.equals( paramGroup.getName() )) {
+							sameNameParamGroup = paramGroup;
+							break;
+						}
 					}
 				}
 			}
