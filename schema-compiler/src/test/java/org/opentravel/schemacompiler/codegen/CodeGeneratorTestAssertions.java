@@ -15,6 +15,9 @@
  */
 package org.opentravel.schemacompiler.codegen;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.io.File;
@@ -43,7 +46,6 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
-import org.junit.Assert;
 import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
 import org.opentravel.schemacompiler.util.ClasspathResourceResolver;
@@ -345,7 +347,7 @@ public class CodeGeneratorTestAssertions {
         				System.out.println("ERROR COUNT: " + errors.size());
         			}
         		}
-        		Assert.assertEquals( 0, errors.size() );
+        		assertEquals( 0, errors.size() );
     		}
     		
     	} catch (ProcessingException | IOException e) {
@@ -379,11 +381,27 @@ public class CodeGeneratorTestAssertions {
     				System.out.println("ERROR COUNT: " + errors.size());
     			}
     		}
-    		Assert.assertEquals( "Validation errors exist in swagger document.", 0, errors.size() );
+    		assertEquals( "Validation errors exist in swagger document.", 0, errors.size() );
     		
     		// Run Swagger parser to ensure semantic correctness
     		if (errors.size() == 0) {
         		new SwaggerParser().read( swaggerFile.getCanonicalPath() );
+    		}
+    		
+    		// Check the base path and all operation paths to make sure we did not end
+    		// up with any double-slashes ("//")
+    		String swaggerBasePath = swaggerNode.get( "basePath" ).asText();
+    		Iterator<String> pathIterator = swaggerNode.get( "paths" ).fieldNames();
+    		
+    		assertNotNull( swaggerBasePath );
+    		assertFalse( "Swagger base path contains a double-slash.", swaggerBasePath.contains( "//" ) );
+    		
+    		while (pathIterator.hasNext()) {
+    			String path = pathIterator.next();
+    			
+        		assertNotNull( path );
+        		assertFalse( "Operation path cannot be zero length.", path.length() == 0 );
+        		assertFalse( "Operation path contains a double-slash.", path.contains( "//" ) );
     		}
     		
     		// If we are working on the file that includes the JSON schema definitions, we need to
@@ -418,7 +436,7 @@ public class CodeGeneratorTestAssertions {
     					isMissingReference = true;
     				}
     			}
-    			Assert.assertFalse( "One or more swagger type definitions are missing.", isMissingReference );
+    			assertFalse( "One or more swagger type definitions are missing.", isMissingReference );
     		}
     		
     	} catch (ProcessingException | IOException e) {

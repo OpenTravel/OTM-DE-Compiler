@@ -69,6 +69,9 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
 		} else {
 			basePath += source.getBasePath();
 		}
+		if (!basePath.endsWith("/")) {
+			basePath += "/";
+		}
 		basePath += getVersionPathSuffix( source );
 		
 		swaggerDoc.setHost( urlComponents.getAuthority() );
@@ -167,12 +170,11 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
 	    StringBuilder suffix = new StringBuilder();
 	    
 	    if (versionParts.length >= 1) {
-	        suffix.append( "/v" ).append( versionParts[0] );
+	        suffix.append( "v" ).append( versionParts[0] );
 	    }
         if (versionParts.length >= 2) {
             suffix.append( "_" ).append( versionParts[1] );
         }
-	    
 	    return suffix.toString();
 	}
 

@@ -63,7 +63,7 @@ public class TestSchemaCompilerTask {
         compilerTask.setGenerateExamples(true);
         compilerTask.setExampleMaxRepeat( 3 );
         compilerTask.setServiceEndpointUrl("http://www.OpenTravel.org/services");
-        compilerTask.setResourceBaseUrl("http://www.OpenTravel.org/resources");
+        compilerTask.setResourceBaseUrl("http://www.OpenTravel.org");
         compilerTask.setSuppressOtmExtensions(false);
         CompilerExtensionRegistry.setActiveExtension( bindingStyle );
 

@@ -368,7 +368,7 @@
         </ParamGroup>
    	</Resource>
    	
-    <Resource name="SampleResource" businessObjectRef="SampleBusinessObject" basePath="/services/SampleResource"
+    <Resource name="SampleResource" businessObjectRef="SampleBusinessObject" basePath="/"
     			abstract="false" firstClass="true">
         <Documentation>
             <Description>SampleResource-documentation-line_1</Description>
