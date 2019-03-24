@@ -29,8 +29,20 @@
 	<includeBaseDirectory>false</includeBaseDirectory>
 	<fileSets>
 		<fileSet>
+			<includes>
+				<include>*.sh</include>
+			</includes>
 			<directory>${project.basedir}/src/main/bin</directory>
 			<outputDirectory>ota2-indexing-service</outputDirectory>
+			<fileMode>755</fileMode>
+		</fileSet>
+		<fileSet>
+			<includes>
+				<include>*.bat</include>
+			</includes>
+			<directory>${project.basedir}/src/main/bin</directory>
+			<outputDirectory>ota2-indexing-service</outputDirectory>
+			<fileMode>644</fileMode>
 		</fileSet>
 		<fileSet>
 			<directory>${project.basedir}/target</directory>

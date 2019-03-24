@@ -4,7 +4,8 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>test-aggregation</artifactId>
 	<name>Test Aggregation for Code Coverage</name>
-
+	<packaging>pom</packaging>
+	
 	<parent>
 		<groupId>org.opentravel.otm</groupId>
 		<artifactId>ota-parent-pom</artifactId>
@@ -83,7 +84,7 @@
 				<executions>
 					<execution>
 						<id>report-merge</id>
-						<phase>verify</phase>
+						<phase>package</phase>
 						<goals>
 							<goal>merge</goal>
 						</goals>
@@ -99,52 +100,20 @@
 					</execution>
 					<execution>
 						<id>report-aggregate</id>
-						<phase>verify</phase>
+						<phase>package</phase>
 						<goals>
 							<goal>report-aggregate</goal>
 						</goals>
 					</execution>
 				</executions>
 			</plugin>
-			<!--
 			<plugin>
-				<artifactId>maven-resources-plugin</artifactId>
-				<version>3.0.2</version>
-				<executions>
-					<execution>
-						<id>copy-resources-1</id>
-						<phase>package</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${basedir}/../schema-compiler/target</outputDirectory>
-							<resources>
-								<resource>
-									<directory>${project.build.directory}/jacoco</directory>
-									<include></include>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
-					<execution>
-						<id>copy-resources-2</id>
-						<phase>package</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${basedir}/../ota2-repository-service/target</outputDirectory>
-							<resources>
-								<resource>
-									<directory>${project.build.directory}/jacoco</directory>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
-				</executions>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
 			</plugin>
-			-->
 		</plugins>
 	</build>
 
