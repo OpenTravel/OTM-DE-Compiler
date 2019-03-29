@@ -125,6 +125,21 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>3.0.0</version>
+				<configuration>
+					<configLocation>${basedir}/../checkstyle.xml</configLocation>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>com.mycila</groupId>
 				<artifactId>license-maven-plugin</artifactId>
 				<version>${license.plugin.version}</version>
