@@ -16,14 +16,14 @@
 
 package org.opentravel.schemacompiler.subscription;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.opentravel.ns.ota2.repositoryinfoext_v01_00.Subscription;
 import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionEventType;
 import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionList;
 import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionTarget;
 import org.opentravel.schemacompiler.config.FileResource;
+
+import java.io.File;
+import java.io.IOException;
 
 
 /**
@@ -32,95 +32,95 @@ import org.opentravel.schemacompiler.config.FileResource;
  * @author S. Livezey
  */
 public class SubscriptionResource extends FileResource<SubscriptionList> {
-	
+
     private SubscriptionFileUtils fileUtils;
     private String baseNS;
     private String libraryName;
     private String version;
-    
-	/**
-	 * Constructor that specifies the characteristics of the subscription target.
-	 * 
-	 * @param fileUtils  the subscription file utilities instance
-     * @param baseNS  the base namespace of the subscription target
-     * @param libraryName  the library name of the subscription target
-     * @param version  the library version of the subscription target
-     * @throws IOException  thrown if the subscription list file cannot be identified
-	 */
-	public SubscriptionResource(SubscriptionFileUtils fileUtils, String baseNS, String libraryName,
-			String version) throws IOException {
-		super( fileUtils.getSubscriptionListFile( baseNS, libraryName, version ) );
-		this.fileUtils = fileUtils;
-		this.baseNS = baseNS;
-		this.libraryName = libraryName;
-		this.version = version;
-		invalidateResource();
-		initResource();
-	}
 
-	/**
-	 * Returns the base namespace of the subscription target.
-	 *
-	 * @return String
-	 */
-	public String getBaseNS() {
-		return baseNS;
-	}
+    /**
+     * Constructor that specifies the characteristics of the subscription target.
+     * 
+     * @param fileUtils the subscription file utilities instance
+     * @param baseNS the base namespace of the subscription target
+     * @param libraryName the library name of the subscription target
+     * @param version the library version of the subscription target
+     * @throws IOException thrown if the subscription list file cannot be identified
+     */
+    public SubscriptionResource(SubscriptionFileUtils fileUtils, String baseNS, String libraryName, String version)
+        throws IOException {
+        super( fileUtils.getSubscriptionListFile( baseNS, libraryName, version ) );
+        this.fileUtils = fileUtils;
+        this.baseNS = baseNS;
+        this.libraryName = libraryName;
+        this.version = version;
+        invalidateResource();
+        initResource();
+    }
 
-	/**
-	 * Returns the library name of the subscription target.
-	 *
-	 * @return String
-	 */
-	public String getLibraryName() {
-		return libraryName;
-	}
+    /**
+     * Returns the base namespace of the subscription target.
+     *
+     * @return String
+     */
+    public String getBaseNS() {
+        return baseNS;
+    }
 
-	/**
-	 * Returns the version of the subscription target.
-	 *
-	 * @return String
-	 */
-	public String getVersion() {
-		return version;
-	}
+    /**
+     * Returns the library name of the subscription target.
+     *
+     * @return String
+     */
+    public String getLibraryName() {
+        return libraryName;
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.config.FileResource#getDefaultResourceValue()
-	 */
-	@Override
-	protected SubscriptionList getDefaultResourceValue() {
-		SubscriptionList subscriptionList = null;
-		
-		if (baseNS != null) {
-	    	SubscriptionTarget subscriptionTarget = new SubscriptionTarget();
-	    	subscriptionList = new SubscriptionList();
-	    	
-	    	for (SubscriptionEventType eventType : SubscriptionEventType.values()) {
-	    		Subscription subscription = new Subscription();
-	    		
-	    		subscription.setEventType( eventType );
-	    		subscriptionList.getSubscription().add( subscription );
-	    	}
-	    	subscriptionTarget.setBaseNamespace( baseNS );
-	    	subscriptionTarget.setLibraryName( libraryName );
-	    	subscriptionTarget.setVersion( version );
-	    	subscriptionList.setSubscriptionTarget( subscriptionTarget );
-		}
-    	return subscriptionList;
-	}
+    /**
+     * Returns the version of the subscription target.
+     *
+     * @return String
+     */
+    public String getVersion() {
+        return version;
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.config.FileResource#loadResource(java.io.File)
-	 */
-	@Override
-	protected SubscriptionList loadResource(File dataFile) throws IOException {
-		SubscriptionList resource = null;
-		
+    /**
+     * @see org.opentravel.schemacompiler.config.FileResource#getDefaultResourceValue()
+     */
+    @Override
+    protected SubscriptionList getDefaultResourceValue() {
+        SubscriptionList subscriptionList = null;
+
+        if (baseNS != null) {
+            SubscriptionTarget subscriptionTarget = new SubscriptionTarget();
+            subscriptionList = new SubscriptionList();
+
+            for (SubscriptionEventType eventType : SubscriptionEventType.values()) {
+                Subscription subscription = new Subscription();
+
+                subscription.setEventType( eventType );
+                subscriptionList.getSubscription().add( subscription );
+            }
+            subscriptionTarget.setBaseNamespace( baseNS );
+            subscriptionTarget.setLibraryName( libraryName );
+            subscriptionTarget.setVersion( version );
+            subscriptionList.setSubscriptionTarget( subscriptionTarget );
+        }
+        return subscriptionList;
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.config.FileResource#loadResource(java.io.File)
+     */
+    @Override
+    protected SubscriptionList loadResource(File dataFile) throws IOException {
+        SubscriptionList resource = null;
+
         if ((fileUtils != null) && dataFile.isFile()) {
             resource = fileUtils.loadFile( dataFile );
         }
         return resource;
-	}
-	
+    }
+
 }

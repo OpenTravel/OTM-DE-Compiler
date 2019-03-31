@@ -16,40 +16,40 @@
 
 package org.opentravel.schemacompiler.index;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
  * Class that initiates the shutdown of the <code>IndexProcessManager</code> service.
  */
 public class ShutdownIndexingService {
-	
+
     private static Log log = LogFactory.getLog( ShutdownIndexingService.class );
-    
-	/**
-	 * Main method invoked from the command-line.
-	 * 
-	 * @param args  the command-line arguments (ignored)
-	 */
-	public static void main(String[] args) {
-		try {
-	        ObjectName name = new ObjectName( IndexProcessManager.MBEAN_NAME );
-			JMXServiceURL jmxUrl = new JMXServiceURL( IndexProcessManager.getJmxServerUrl() );
-			JMXConnector jmxc;
-			
-			log.info("Shutting down index process manager...");
-			jmxc = JMXConnectorFactory.connect( jmxUrl, null );
-			jmxc.connect();
-			jmxc.getMBeanServerConnection().invoke(name, "shutdown", null, null);
-			
-		} catch (Exception e) {
-			log.error("Error attempting to shut down indexing service.", e);
-		}
-	}
-	
+
+    /**
+     * Main method invoked from the command-line.
+     * 
+     * @param args the command-line arguments (ignored)
+     */
+    public static void main(String[] args) {
+        try {
+            ObjectName name = new ObjectName( IndexProcessManager.MBEAN_NAME );
+            JMXServiceURL jmxUrl = new JMXServiceURL( IndexProcessManager.getJmxServerUrl() );
+            JMXConnector jmxc;
+
+            log.info( "Shutting down index process manager..." );
+            jmxc = JMXConnectorFactory.connect( jmxUrl, null );
+            jmxc.connect();
+            jmxc.getMBeanServerConnection().invoke( name, "shutdown", null, null );
+
+        } catch (Exception e) {
+            log.error( "Error attempting to shut down indexing service.", e );
+        }
+    }
+
 }

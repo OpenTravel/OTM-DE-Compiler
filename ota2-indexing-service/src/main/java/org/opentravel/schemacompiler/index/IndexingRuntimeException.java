@@ -21,16 +21,16 @@ package org.opentravel.schemacompiler.index;
  */
 public class IndexingRuntimeException extends RuntimeException {
 
-	private static final long serialVersionUID = 670922777950849075L;
+    private static final long serialVersionUID = 670922777950849075L;
 
-	/**
-	 * Constructor that specifies the root cause and an exception message.
-	 * 
-	 * @param message  the exception message
-	 * @param cause  the root cause of the exception
-	 */
-	public IndexingRuntimeException(String message, Throwable cause) {
-		super( message, cause, false, true );
-	}
-	
+    /**
+     * Constructor that specifies the root cause and an exception message.
+     * 
+     * @param message the exception message
+     * @param cause the root cause of the exception
+     */
+    public IndexingRuntimeException(String message, Throwable cause) {
+        super( message, cause, false, true );
+    }
+
 }

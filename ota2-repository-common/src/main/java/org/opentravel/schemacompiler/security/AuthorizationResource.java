@@ -13,12 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.security;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
+package org.opentravel.schemacompiler.security;
 
 import org.opentravel.ns.ota2.security_v01_00.AuthorizationSpec;
 import org.opentravel.ns.ota2.security_v01_00.NamespaceAuthorizations;
@@ -29,9 +25,13 @@ import org.opentravel.schemacompiler.repository.RepositoryFileManager;
 import org.opentravel.schemacompiler.repository.RepositorySecurityException;
 import org.opentravel.schemacompiler.security.impl.SecurityFileUtils;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
- * File-based resource that provides access to authorization grants (and denies) for a single
- * namespace URI.
+ * File-based resource that provides access to authorization grants (and denies) for a single namespace URI.
  * 
  * @author S. Livezey
  */
@@ -44,16 +44,13 @@ public class AuthorizationResource extends FileResource<NamespaceAuthorizations>
     /**
      * Constructor that specifies the namespace for which authorizations should be retrieved.
      * 
-     * @param repositoryLocation
-     *            the root folder location of the OTA2.0 repository
-     * @param namespace
-     *            the namespace for which authorizations should be retrieved
-     * @throws RepositorySecurityException
-     *             thrown if the location of the authorization file resource cannot be identified
+     * @param fileUtils the file utilities instance used for accessing security settings of the repository
+     * @param namespace the namespace for which authorizations should be retrieved
+     * @throws RepositorySecurityException thrown if the location of the authorization file resource cannot be
+     *         identified
      */
-    public AuthorizationResource(SecurityFileUtils fileUtils, String namespace)
-            throws RepositorySecurityException {
-        super(fileUtils.getAuthorizationFile(namespace));
+    public AuthorizationResource(SecurityFileUtils fileUtils, String namespace) throws RepositorySecurityException {
+        super( fileUtils.getAuthorizationFile( namespace ) );
         this.fileManager = fileUtils.getRepositoryManager().getFileManager();
         this.fileUtils = fileUtils;
         this.namespace = namespace;
@@ -70,12 +67,10 @@ public class AuthorizationResource extends FileResource<NamespaceAuthorizations>
     }
 
     /**
-     * Returns the permissions that have been explicitly granted to the specified user in this
-     * resource's namespace.
+     * Returns the permissions that have been explicitly granted to the specified user in this resource's namespace.
      * 
-     * @param user
-     *            the user for which granted permissions should be returned
-     * @return Set<RepositoryPermission>
+     * @param user the user for which granted permissions should be returned
+     * @return Set&lt;RepositoryPermission&gt;
      */
     public Set<RepositoryPermission> getGrantedPermissions(UserPrincipal user) {
         Set<RepositoryPermission> grantedPermissions = new HashSet<>();
@@ -83,20 +78,18 @@ public class AuthorizationResource extends FileResource<NamespaceAuthorizations>
 
         // Search the grants/denies to determine which permissions apply to this user
         for (AuthorizationSpec grant : authorizations.getGrant()) {
-            if (appliesToUser(grant, user)) {
-                grantedPermissions.add(grant.getPermission());
+            if (appliesToUser( grant, user )) {
+                grantedPermissions.add( grant.getPermission() );
             }
         }
         return grantedPermissions;
     }
 
     /**
-     * Returns the permissions that have been explicitly denied to the specified user in this
-     * resource's namespace.
+     * Returns the permissions that have been explicitly denied to the specified user in this resource's namespace.
      * 
-     * @param user
-     *            the user for which denied permissions should be returned
-     * @return Set<RepositoryPermission>
+     * @param user the user for which denied permissions should be returned
+     * @return Set&lt;RepositoryPermission&gt;
      */
     public Set<RepositoryPermission> getDeniedPermissions(UserPrincipal user) {
         Set<RepositoryPermission> deniedPermissions = new HashSet<>();
@@ -104,8 +97,8 @@ public class AuthorizationResource extends FileResource<NamespaceAuthorizations>
 
         // Search the grants/denies to determine which permissions apply to this user
         for (AuthorizationSpec deny : authorizations.getDeny()) {
-            if (appliesToUser(deny, user)) {
-                deniedPermissions.add(deny.getPermission());
+            if (appliesToUser( deny, user )) {
+                deniedPermissions.add( deny.getPermission() );
             }
         }
         return deniedPermissions;
@@ -114,17 +107,15 @@ public class AuthorizationResource extends FileResource<NamespaceAuthorizations>
     /**
      * Returns true if the given grant/deny specification applies to the indicated user.
      * 
-     * @param spec
-     *            the grant/deny specification to analyze
-     * @param user
-     *            the user whose permissions are to be checked
+     * @param spec the grant/deny specification to analyze
+     * @param user the user whose permissions are to be checked
      * @return boolean
      */
     private boolean appliesToUser(AuthorizationSpec spec, UserPrincipal user) {
         boolean result = false;
 
         for (String authPrincipal : spec.getPrincipal()) {
-            if (user.getAuthorizationIds().contains(authPrincipal)) {
+            if (user.getAuthorizationIds().contains( authPrincipal )) {
                 result = true;
                 break;
             }
@@ -148,36 +139,35 @@ public class AuthorizationResource extends FileResource<NamespaceAuthorizations>
         if (fileUtils == null) {
             return getDefaultResourceValue(); // Special case for constructor initialization
         }
-        return fileUtils.loadNamespaceAuthorizations(dataFile);
+        return fileUtils.loadNamespaceAuthorizations( dataFile );
     }
 
     /**
-     * Saves the collection of namespace authorizations to the locally maintained authorizations
-     * file.
+     * Saves the collection of namespace authorizations to the locally maintained authorizations file.
      * 
-     * @param authorizations
-     *            the authorizations to be saved
-     * @throws RepositoryException
-     *             thrown if the authorizations file cannot be saved
+     * @param authorizations the authorizations to be saved
+     * @throws RepositoryException thrown if the authorizations file cannot be saved
      */
     public synchronized void saveNamespaceAuthorizations(NamespaceAuthorizations authorizations)
-            throws RepositoryException {
+        throws RepositoryException {
         fileManager.startChangeSet();
         boolean success = false;
         try {
             File dataFile = getDataFile();
 
-            fileManager.addToChangeSet(dataFile);
-            fileUtils.saveNamespaceAuthorizations(dataFile, authorizations);
+            fileManager.addToChangeSet( dataFile );
+            fileUtils.saveNamespaceAuthorizations( dataFile, authorizations );
             fileManager.commitChangeSet();
             success = true;
 
         } catch (IOException e) {
-            throw new RepositoryException("Error saving the group assignments file.", e);
+            throw new RepositoryException( "Error saving the group assignments file.", e );
 
         } finally {
             try {
-                if (!success) fileManager.rollbackChangeSet();
+                if (!success) {
+                    fileManager.rollbackChangeSet();
+                }
             } catch (Exception e) {
                 // Ignore possible errors and continue
             }

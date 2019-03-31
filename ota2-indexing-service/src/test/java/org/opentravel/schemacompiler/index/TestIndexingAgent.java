@@ -13,19 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.index;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
-
-import java.io.StringWriter;
-
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
 
 import org.apache.activemq.broker.BrokerService;
 import org.junit.AfterClass;
@@ -41,38 +33,48 @@ import org.springframework.context.support.FileSystemXmlApplicationContext;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 
+import java.io.StringWriter;
+
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.Session;
+import javax.jms.TextMessage;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+
 /**
  * Verifies the functions of the <code>IndexingAgent</code> class.
  */
 public class TestIndexingAgent extends AbstractIndexingServiceTest {
-    
+
     private static FileSystemXmlApplicationContext context;
     private static BrokerService amqBroker;
     private static IndexingAgent indexAgent;
     private static JmsTemplate jmsService;
-    
+
     @BeforeClass
     public static void setup() throws Exception {
         setupEnvironment();
-        
+
         String configFileLocation = System.getProperty( IndexProcessManager.MANAGER_CONFIG_SYSPROP );
-        
+
         context = new FileSystemXmlApplicationContext( configFileLocation );
         amqBroker = (BrokerService) context.getBean( IndexProcessManager.AMQ_BROKER_BEANID );
         amqBroker.start();
         indexAgent = new IndexingAgent();
-        
+
         new Thread( new Runnable() {
-            @Override public void run() {
+            @Override
+            public void run() {
                 try {
                     indexAgent.startListening();
-                    
+
                 } catch (Exception e) {
                     e.printStackTrace( System.out );
                 }
             }
-        }).start();
-        
+        } ).start();
+
         for (int i = 0; i < 20; i++) {
             if (indexAgent.isRunning()) {
                 break;
@@ -83,84 +85,83 @@ public class TestIndexingAgent extends AbstractIndexingServiceTest {
         }
         jmsService = (JmsTemplate) context.getBean( "indexingJmsService" );
     }
-    
+
     @AfterClass
     public static void tearDown() throws Exception {
-    	indexAgent.shutdown();
+        indexAgent.shutdown();
         indexAgent.closeIndexWriter();
         amqBroker.stop();
         amqBroker.waitUntilStopped();
         context.close();
     }
-    
+
     @Test
     public void testIndexRepositoryItem() throws Exception {
         RepositoryItem item = repositoryManager.getRepositoryItem(
-                "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test",
-                "Version_Test_1_0_0.otm", "1.0.0" );
+            "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test", "Version_Test_1_0_0.otm", "1.0.0" );
         JAXBContext jaxbContext = RepositoryJaxbContext.getContext();
         LibraryInfoListType metadataList = new LibraryInfoListType();
         Marshaller m = jaxbContext.createMarshaller();
         StringWriter writer = new StringWriter();
-        
+
         metadataList.getLibraryInfo().add( RepositoryUtils.createItemMetadata( item ) );
         m.marshal( new ObjectFactory().createLibraryInfoList( metadataList ), writer );
         sendIndexingJob( IndexingConstants.JOB_TYPE_CREATE_INDEX, writer.toString() );
         waitForCommitMessage();
     }
-    
+
     @Test
     public void testDeleteRepositoryItemIndex() throws Exception {
         RepositoryItem item = repositoryManager.getRepositoryItem(
-                "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test",
-                "Version_Test_1_0_0.otm", "1.0.0" );
+            "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test", "Version_Test_1_0_0.otm", "1.0.0" );
         JAXBContext jaxbContext = RepositoryJaxbContext.getContext();
         LibraryInfoListType metadataList = new LibraryInfoListType();
         Marshaller m = jaxbContext.createMarshaller();
         StringWriter writer = new StringWriter();
-        
+
         metadataList.getLibraryInfo().add( RepositoryUtils.createItemMetadata( item ) );
         m.marshal( new ObjectFactory().createLibraryInfoList( metadataList ), writer );
         sendIndexingJob( IndexingConstants.JOB_TYPE_DELETE_INDEX, writer.toString() );
         waitForCommitMessage();
     }
-    
+
     @Test
     public void testIndexSubscriptionTarget() throws Exception {
         SubscriptionTarget target = new SubscriptionTarget();
         JAXBContext jaxbContext = RepositoryJaxbContext.getExtContext();
         Marshaller m = jaxbContext.createMarshaller();
         StringWriter writer = new StringWriter();
-        
+
         target.setBaseNamespace( "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test" );
-        m.marshal( new org.opentravel.ns.ota2.repositoryinfoext_v01_00.ObjectFactory()
-                .createSubscriptionTarget( target ), writer );
+        m.marshal(
+            new org.opentravel.ns.ota2.repositoryinfoext_v01_00.ObjectFactory().createSubscriptionTarget( target ),
+            writer );
         sendIndexingJob( IndexingConstants.JOB_TYPE_SUBSCRIPTION, writer.toString() );
         waitForCommitMessage();
     }
-    
+
     @Test
     public void testDeleteAll() throws Exception {
         sendIndexingJob( IndexingConstants.JOB_TYPE_DELETE_ALL, null );
         waitForCommitMessage();
     }
-    
+
     private void sendIndexingJob(final String jobType, final String messageContent) {
-        jmsService.send(new MessageCreator() {
+        jmsService.send( new MessageCreator() {
             public Message createMessage(Session session) throws JMSException {
                 TextMessage msg = session.createTextMessage();
-                
+
                 msg.setStringProperty( IndexingConstants.MSGPROP_JOB_TYPE, jobType );
                 msg.setIntProperty( IndexingConstants.MSGPROP_SELECTOR, IndexingConstants.SELECTOR_VALUE_JOBMSG );
                 msg.setText( messageContent );
                 return msg;
             }
-        });
+        } );
     }
-    
+
     @SuppressWarnings("squid:S2925")
     private static synchronized void waitForCommitMessage() {
         assertNotNull( jmsService.receiveSelected( IndexingConstants.SELECTOR_COMMITMSG ) );
     }
-    
+
 }

@@ -13,55 +13,56 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.index;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
-import java.util.concurrent.TimeUnit;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Verifies the functions of the <code>IndexProcessManager</code> class.
  */
 public class TestIndexProcessManager extends AbstractIndexingServiceTest {
-    
+
     @BeforeClass
     public static void setup() throws Exception {
         setupEnvironment();
     }
-    
+
     @Test
     public void testStartupAndShutdown() throws Exception {
         Thread pmThread = new Thread( () -> {
-        	IndexProcessManager.main( new String[0] );
+            IndexProcessManager.main( new String[0] );
         } );
-        
+
         // Start the process manager and wait for everything to be up and running
         IndexProcessManager.debugMode = true;
         pmThread.start();
-        
+
         synchronized (IndexProcessManager.class) {
-        	IndexProcessManager.class.wait( 5000 ); // wait for up to five seconds
+            IndexProcessManager.class.wait( 5000 ); // wait for up to five seconds
         }
-        
+
         // Kill the agent process and verify that a new one is started up to replace it
         Process agentProcess = IndexProcessManager.getAgentProcess();
-        
+
         agentProcess.destroyForcibly();
         agentProcess.waitFor( 5, TimeUnit.SECONDS );
-        
+
         synchronized (IndexProcessManager.class) {
-        	IndexProcessManager.class.wait( 5000 ); // wait for up to five seconds
+            IndexProcessManager.class.wait( 5000 ); // wait for up to five seconds
         }
         assertNotNull( IndexProcessManager.getAgentProcess() );
         assertFalse( agentProcess == IndexProcessManager.getAgentProcess() );
-        
+
         // Gracefully shut down the process manager
         ShutdownIndexingService.main( new String[0] );
         pmThread.join( 5000 );
     }
-    
+
 }

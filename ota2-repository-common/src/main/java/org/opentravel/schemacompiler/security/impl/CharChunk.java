@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.security.impl;
 
 import java.util.Arrays;
 
 /**
- * Utilities to manipulate char chunks. While String is the easiest way to manipulate chars (
- * search, substrings, etc), it is known to not be the most efficient solution - Strings are
- * designed as immutable and secure objects.
+ * Utilities to manipulate char chunks. While String is the easiest way to manipulate chars ( search, substrings, etc),
+ * it is known to not be the most efficient solution - Strings are designed as immutable and secure objects.
  * 
  * @author dac@sun.com
  * @author James Todd [gonzo@sun.com]
@@ -35,12 +35,12 @@ public class CharChunk implements CharSequence {
 
     private int start;
     private int end;
-    
+
     /**
      * Default constructor.
      */
     public CharChunk() {}
-    
+
     /**
      * Copy constructor.
      * 
@@ -60,6 +60,11 @@ public class CharChunk implements CharSequence {
         end = 0;
     }
 
+    /**
+     * Allocates the specified number of characters for this chunk.
+     * 
+     * @param initial the initial size of the chunk
+     */
     public void allocate(int initial) {
         if (buff == null || buff.length < initial) {
             buff = new char[initial];
@@ -79,6 +84,8 @@ public class CharChunk implements CharSequence {
 
     /**
      * Returns the start offset of the bytes. For output this is the end of the buffer.
+     * 
+     * @return int
      */
     public int getStart() {
         return start;
@@ -86,6 +93,8 @@ public class CharChunk implements CharSequence {
 
     /**
      * Returns the start offset of the bytes.
+     * 
+     * @param off the start offset value to assign
      */
     public void setOffset(int off) {
         start = off;
@@ -93,6 +102,8 @@ public class CharChunk implements CharSequence {
 
     /**
      * Returns the length of the bytes.
+     * 
+     * @return int
      */
     public int getLength() {
         return end - start;
@@ -110,16 +121,20 @@ public class CharChunk implements CharSequence {
         return buff[index + start];
     }
 
+    /**
+     * @see java.lang.CharSequence#subSequence(int, int)
+     */
+    @Override
     public CharSequence subSequence(int start, int end) {
         CharChunk result = new CharChunk( this );
-        
-        result.setOffset(this.start + start);
-        result.setEnd(this.start + end);
+
+        result.setOffset( this.start + start );
+        result.setEnd( this.start + end );
         return result;
     }
 
     public int length() {
         return end - start;
     }
-    
+
 }

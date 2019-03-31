@@ -13,16 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.security.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
-
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -34,31 +32,33 @@ import com.unboundid.ldap.listener.InMemoryDirectoryServerConfig;
 import com.unboundid.ldap.listener.InMemoryListenerConfig;
 import com.unboundid.ldif.LDIFReader;
 
+import java.io.File;
+
 /**
  * Unit test cases for the <code>JNDIAuthenticationProvider</code> class.
  */
 public class TestJNDIAuthenticationProvider {
-    
+
     private static InMemoryDirectoryServer directoryServer;
     private static JNDIAuthenticationProvider authProvider;
     private static TemporaryFolder repositoryFolder = new TemporaryFolder();
-    
+
     @BeforeClass
     public static void setup() throws Exception {
         File testResourcesFolder = new File( System.getProperty( "user.dir" ), "/src/test/resources" );
         File ldifFile = new File( testResourcesFolder, "/ldif-snapshots/user-lookup.ldif" );
-        
+
         try (LDIFReader reader = new LDIFReader( ldifFile )) {
             InMemoryDirectoryServerConfig serverConfig = new InMemoryDirectoryServerConfig( "dc=opentravel,dc=org" );
             InMemoryListenerConfig listenerConfig = InMemoryListenerConfig.createLDAPConfig( "ldapListener", 1390 );
-            
+
             serverConfig.addAdditionalBindCredentials( "cn=Manager,dc=opentravel,dc=org", "password" );
             serverConfig.setListenerConfigs( listenerConfig );
             directoryServer = new InMemoryDirectoryServer( serverConfig );
             directoryServer.importFromLDIF( true, reader );
             directoryServer.startListening();
         }
-        
+
         repositoryFolder.create();
         authProvider = new JNDIAuthenticationProvider();
         authProvider.setContextFactory( "com.sun.jndi.ldap.LdapCtxFactory" );
@@ -85,17 +85,17 @@ public class TestJNDIAuthenticationProvider {
         authProvider.setUserFullNameAttribute( "cn" );
         authProvider.setUserEmailAttribute( "mail" );
     }
-    
+
     @AfterClass
     public static void tearDown() throws Exception {
         directoryServer.shutDown( true );
         repositoryFolder.delete();
     }
-    
+
     @Test
     public void testDefaultConfiguration() throws Exception {
         JNDIAuthenticationProvider ap = new JNDIAuthenticationProvider();
-        
+
         assertNull( ap.getConnectionUrl() );
         assertNull( ap.getAlternateUrl() );
         assertNull( ap.getConnectionProtocol() );
@@ -106,7 +106,7 @@ public class TestJNDIAuthenticationProvider {
         assertNull( ap.getDigestEncoding() );
         assertNull( ap.getUserPattern() );
         assertNull( ap.getUserSearchPatterns() );
-        
+
         assertEquals( "com.sun.jndi.ldap.LdapCtxFactory", ap.getContextFactory() );
         assertEquals( 5000, ap.getConnectionTimeout() );
         assertEquals( "", ap.getUserSearchBase() );
@@ -121,97 +121,97 @@ public class TestJNDIAuthenticationProvider {
         assertEquals( "ignore", ap.getReferralStrategy() );
         assertEquals( 300000, ap.getAuthenticationCacheTimeout() );
     }
-    
+
     @Test
     public void testUserSearchPatterns() throws Exception {
         assertEquals( 2, authProvider.getUserSearchPatterns().split( ":" ).length );
     }
-    
-    @Test( expected = UnsupportedOperationException.class )
+
+    @Test(expected = UnsupportedOperationException.class)
     public void testSetUserPassword() throws Exception {
         authProvider.setUserPassword( "testuser", "password" );
     }
-    
+
     @Test
     public void testAlternateConnection() throws Exception {
         assertTrue( authProvider.isValidUser( "testuser", "password" ) );
         assertTrue( authProvider.isValidUser( "testuser", "password" ) ); // retrieves from cached authentication
     }
-    
-    @Test( expected = RepositorySecurityException.class )
+
+    @Test(expected = RepositorySecurityException.class)
     public void testUserLookupMode_missingConnectionPrincipal() throws Exception {
         JNDIAuthenticationProvider ap = new JNDIAuthenticationProvider();
-        
+
         ap.setConnectionUrl( "ldap://localhost:1390/dc=opentravel,dc=org" );
-        
+
         ap.searchCandidateUsers( "Doe", 10 );
     }
-    
-    @Test( expected = RepositorySecurityException.class )
+
+    @Test(expected = RepositorySecurityException.class)
     public void testUserLookupMode_missingConnectionPassword() throws Exception {
         JNDIAuthenticationProvider ap = new JNDIAuthenticationProvider();
-        
+
         ap.setConnectionUrl( "ldap://localhost:1390/dc=opentravel,dc=org" );
         ap.setConnectionPrincipal( "cn=Manager,dc=opentravel,dc=org" );
-        
+
         ap.searchCandidateUsers( "Doe", 10 );
     }
-    
-    @Test( expected = RepositorySecurityException.class )
+
+    @Test(expected = RepositorySecurityException.class)
     public void testUserLookupMode_missingUserSearchBase() throws Exception {
         JNDIAuthenticationProvider ap = new JNDIAuthenticationProvider();
-        
+
         ap.setConnectionUrl( "ldap://localhost:1390/dc=opentravel,dc=org" );
         ap.setConnectionPrincipal( "cn=Manager,dc=opentravel,dc=org" );
         ap.setConnectionPassword( "password" );
         ap.setUserSearchBase( null );
-        
+
         ap.searchCandidateUsers( "Doe", 10 );
     }
-    
-    @Test( expected = RepositorySecurityException.class )
+
+    @Test(expected = RepositorySecurityException.class)
     public void testUserLookupMode_missingUserSearchPatterns() throws Exception {
         JNDIAuthenticationProvider ap = new JNDIAuthenticationProvider();
-        
+
         ap.setConnectionUrl( "ldap://localhost:1390/dc=opentravel,dc=org" );
         ap.setConnectionPrincipal( "cn=Manager,dc=opentravel,dc=org" );
         ap.setConnectionPassword( "password" );
         authProvider.setUserSearchBase( "ou=Users" );
-        
+
         ap.searchCandidateUsers( "Doe", 10 );
     }
-    
-    @Test( expected = RepositorySecurityException.class )
+
+    @Test(expected = RepositorySecurityException.class)
     public void testUserSearchMode_missingConnectionPrincipal() throws Exception {
         JNDIAuthenticationProvider ap = new JNDIAuthenticationProvider();
-        
+
         ap.setUserPattern( "cn={0},ou=Users" );
         ap.setConnectionUrl( "ldap://localhost:1390/dc=opentravel,dc=org" );
-        
+
         ap.searchCandidateUsers( "Doe", 10 );
     }
-    
-    @Test( expected = RepositorySecurityException.class )
+
+    @Test(expected = RepositorySecurityException.class)
     public void testUserSearchMode_missingConnectionPassword() throws Exception {
         JNDIAuthenticationProvider ap = new JNDIAuthenticationProvider();
-        
+
         ap.setUserPattern( "cn={0},ou=Users" );
         ap.setConnectionUrl( "ldap://localhost:1390/dc=opentravel,dc=org" );
         ap.setConnectionPrincipal( "cn=Manager,dc=opentravel,dc=org" );
-        
+
         ap.searchCandidateUsers( "Doe", 10 );
     }
-    
-    @Test( expected = RepositorySecurityException.class )
+
+    @Test(expected = RepositorySecurityException.class)
     public void testUserSearchMode_missingDigestAlgorithm() throws Exception {
         JNDIAuthenticationProvider ap = new JNDIAuthenticationProvider();
-        
+
         ap.setUserPattern( "cn={0},ou=Users" );
         ap.setConnectionUrl( "ldap://localhost:1390/dc=opentravel,dc=org" );
         ap.setConnectionPrincipal( "cn=Manager,dc=opentravel,dc=org" );
         ap.setDigestAlgorithm( null );
-        
+
         ap.searchCandidateUsers( "Doe", 10 );
     }
-    
+
 }

@@ -13,7 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.providers;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.opentravel.schemacompiler.repository.RepositoryException;
+import org.opentravel.schemacompiler.repository.RepositorySecurityException;
 
 import java.io.IOException;
 
@@ -22,11 +28,6 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 import javax.xml.bind.JAXBException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.opentravel.schemacompiler.repository.RepositoryException;
-import org.opentravel.schemacompiler.repository.RepositorySecurityException;
-
 /**
  * Handles the mapping of common exception to HTTP responses.
  * 
@@ -34,31 +35,29 @@ import org.opentravel.schemacompiler.repository.RepositorySecurityException;
  */
 public abstract class RepositoryServiceExceptionMapper {
 
-    private static Log log = LogFactory.getLog(RepositoryServiceExceptionMapper.class);
-    
+    private static Log log = LogFactory.getLog( RepositoryServiceExceptionMapper.class );
+
     /**
      * Private constructor to prevent instantiation.
      */
     private RepositoryServiceExceptionMapper() {}
-    
+
     /**
-     * Converts the given exception into an HTTP response that can be transmitted back to the web
-     * service client.
+     * Converts the given exception into an HTTP response that can be transmitted back to the web service client.
      * 
-     * @param t
-     *            the exception to convert
+     * @param t the exception to convert
      * @return Response
      */
     private static Response mapException(Throwable t) {
         Response r;
 
         if (t instanceof RepositorySecurityException) {
-            r = Response.status(Response.Status.UNAUTHORIZED).entity(t.getMessage()).build();
+            r = Response.status( Response.Status.UNAUTHORIZED ).entity( t.getMessage() ).build();
 
         } else {
-            r = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(t.getMessage()).build();
+            r = Response.status( Response.Status.INTERNAL_SERVER_ERROR ).entity( t.getMessage() ).build();
         }
-        log.error("Unexpected exception during service request processing.", t);
+        log.error( "Unexpected exception during service request processing.", t );
         return r;
     }
 
@@ -67,14 +66,14 @@ public abstract class RepositoryServiceExceptionMapper {
      */
     @Provider
     public static class RepositoryExceptionMapper extends RepositoryServiceExceptionMapper
-            implements ExceptionMapper<RepositoryException> {
+        implements ExceptionMapper<RepositoryException> {
 
         /**
          * @see javax.ws.rs.ext.ExceptionMapper#toResponse(java.lang.Throwable)
          */
         @Override
         public Response toResponse(RepositoryException exception) {
-            return mapException(exception);
+            return mapException( exception );
         }
 
     }
@@ -84,14 +83,14 @@ public abstract class RepositoryServiceExceptionMapper {
      */
     @Provider
     public static class RepositorySecurityExceptionMapper extends RepositoryServiceExceptionMapper
-            implements ExceptionMapper<RepositorySecurityException> {
+        implements ExceptionMapper<RepositorySecurityException> {
 
         /**
          * @see javax.ws.rs.ext.ExceptionMapper#toResponse(java.lang.Throwable)
          */
         @Override
         public Response toResponse(RepositorySecurityException exception) {
-            return mapException(exception);
+            return mapException( exception );
         }
 
     }
@@ -100,15 +99,15 @@ public abstract class RepositoryServiceExceptionMapper {
      * Handles the JAX-RS mapping of <code>IOException</code> occurrances.
      */
     @Provider
-    public static class IOExceptionMapper extends RepositoryServiceExceptionMapper implements
-            ExceptionMapper<IOException> {
+    public static class IOExceptionMapper extends RepositoryServiceExceptionMapper
+        implements ExceptionMapper<IOException> {
 
         /**
          * @see javax.ws.rs.ext.ExceptionMapper#toResponse(java.lang.Throwable)
          */
         @Override
         public Response toResponse(IOException exception) {
-            return mapException(exception);
+            return mapException( exception );
         }
 
     }
@@ -117,15 +116,15 @@ public abstract class RepositoryServiceExceptionMapper {
      * Handles the JAX-RS mapping of <code>JAXBException</code> occurrances.
      */
     @Provider
-    public static class JAXBExceptionMapper extends RepositoryServiceExceptionMapper implements
-            ExceptionMapper<JAXBException> {
+    public static class JAXBExceptionMapper extends RepositoryServiceExceptionMapper
+        implements ExceptionMapper<JAXBException> {
 
         /**
          * @see javax.ws.rs.ext.ExceptionMapper#toResponse(java.lang.Throwable)
          */
         @Override
         public Response toResponse(JAXBException exception) {
-            return mapException(exception);
+            return mapException( exception );
         }
 
     }

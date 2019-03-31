@@ -19,17 +19,16 @@ package org.opentravel.schemacompiler.subscription;
 import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionList;
 
 /**
- * Specifies a callback for the <code>SubscriptionNavigator</code> to invoke each
- * time a <code>SubscriptionList</code> is discovered.
+ * Specifies a callback for the <code>SubscriptionNavigator</code> to invoke each time a <code>SubscriptionList</code>
+ * is discovered.
  */
 public interface SubscriptionVisitor {
-	
-	/**
-	 * Called by the <code>SubscriptionNavigator</code> each time a new
-	 * <code>SubscriptionList</code> is discovered.
-	 * 
-	 * @param subscriptionList  the subscription list to process
-	 */
-	public void visitSubscriptionList(SubscriptionList subscriptionList);
-	
+
+    /**
+     * Called by the <code>SubscriptionNavigator</code> each time a new <code>SubscriptionList</code> is discovered.
+     * 
+     * @param subscriptionList the subscription list to process
+     */
+    public void visitSubscriptionList(SubscriptionList subscriptionList);
+
 }

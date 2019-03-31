@@ -13,14 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.repository;
 
 import static org.junit.Assert.assertEquals;
-
-import java.io.IOException;
-import java.util.List;
-
-import javax.ws.rs.core.Response;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -33,6 +29,11 @@ import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryPermission;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLLibrary;
 
+import java.io.IOException;
+import java.util.List;
+
+import javax.ws.rs.core.Response;
+
 /**
  * Verifies the operation of items published to a remote repository.
  * 
@@ -43,8 +44,8 @@ public class TestRemoteRepositoryFunctions extends TestRepositoryFunctions {
     @BeforeClass
     public static void setupTests() throws Exception {
         startSmtpTestServer( 1587 );
-        setupWorkInProcessArea(TestRemoteRepositoryFunctions.class);
-        startTestServer("empty-repository", 9291, TestRemoteRepositoryFunctions.class);
+        setupWorkInProcessArea( TestRemoteRepositoryFunctions.class );
+        startTestServer( "empty-repository", 9291, TestRemoteRepositoryFunctions.class );
     }
 
     @AfterClass
@@ -52,7 +53,7 @@ public class TestRemoteRepositoryFunctions extends TestRepositoryFunctions {
         shutdownTestServer();
     }
 
-	/**
+    /**
      * @see org.opentravel.schemacompiler.repository.TestRepositoryFunctions#test_01_PublishLibrary()
      */
     @Override
@@ -62,74 +63,69 @@ public class TestRemoteRepositoryFunctions extends TestRepositoryFunctions {
     }
 
     @Override
-	public void test_02_LockLibrary() throws Exception {
-		RemoteRepository repository = (RemoteRepository) testRepository.get();
-		List<EntitySearchResult> searchResult;
-		List<RepositoryItem> lockedItems;
-		List<RepositoryItem> whereUsedItems;
-		TLLibrary library;
-		NamedEntity entity;
-		
-		super.test_02_LockLibrary();
-		repositoryManager.get().refreshRemoteRepositories();
-		
-		lockedItems = repository.getLockedItems();
-		assertEquals( 1, lockedItems.size() );
-		assertEquals( "library_1_p2_2_0_0.otm", lockedItems.get( 0 ).getFilename() );
-		
-		whereUsedItems = repository.getItemWhereUsed( lockedItems.get( 0 ), true );
-		assertEquals( 0, whereUsedItems.size() );
-		
-		library = (TLLibrary) model.get().getLibrary(
-				"http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package_v2", "library_1_p2" );
-		entity = library.getBusinessObjectType( "SampleBusinessObject" );
-		searchResult = repository.getEntityWhereUsed( entity, true );
-		assertEquals( 4, searchResult.size() );
-		
-		entity = library.getBusinessObjectType( "EmptyBusinessObject" );
-		searchResult = repository.getEntityWhereExtended( entity );
-		assertEquals( 2, searchResult.size() );
-	}
-	
+    public void test_02_LockLibrary() throws Exception {
+        RemoteRepository repository = (RemoteRepository) testRepository.get();
+        List<EntitySearchResult> searchResult;
+        List<RepositoryItem> lockedItems;
+        List<RepositoryItem> whereUsedItems;
+        TLLibrary library;
+        NamedEntity entity;
+
+        super.test_02_LockLibrary();
+        repositoryManager.get().refreshRemoteRepositories();
+
+        lockedItems = repository.getLockedItems();
+        assertEquals( 1, lockedItems.size() );
+        assertEquals( "library_1_p2_2_0_0.otm", lockedItems.get( 0 ).getFilename() );
+
+        whereUsedItems = repository.getItemWhereUsed( lockedItems.get( 0 ), true );
+        assertEquals( 0, whereUsedItems.size() );
+
+        library = (TLLibrary) model.get()
+            .getLibrary( "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package_v2", "library_1_p2" );
+        entity = library.getBusinessObjectType( "SampleBusinessObject" );
+        searchResult = repository.getEntityWhereUsed( entity, true );
+        assertEquals( 4, searchResult.size() );
+
+        entity = library.getBusinessObjectType( "EmptyBusinessObject" );
+        searchResult = repository.getEntityWhereExtended( entity );
+        assertEquals( 2, searchResult.size() );
+    }
+
     @Override
     public void test_19_ListNamespaceChildren() throws Exception {
         super.test_19_ListNamespaceChildren();
         assertEquals( 8, testRepository.get().listAllNamespaces().size() );
     }
-    
-	@Test
+
+    @Test
     public void testUserAuthorizations() throws Exception {
         String readNS = "http://www.OpenTravel.org";
         String writeNS = "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler";
-        RepositoryPermission permission1 = ((RemoteRepository) testRepository.get())
-                .getUserAuthorization(readNS);
-        RepositoryPermission permission2 = ((RemoteRepository) testRepository.get())
-                .getUserAuthorization(writeNS);
+        RepositoryPermission permission1 = ((RemoteRepository) testRepository.get()).getUserAuthorization( readNS );
+        RepositoryPermission permission2 = ((RemoteRepository) testRepository.get()).getUserAuthorization( writeNS );
 
-        assertEquals(RepositoryPermission.READ_FINAL, permission1);
-        assertEquals(RepositoryPermission.WRITE, permission2);
+        assertEquals( RepositoryPermission.READ_FINAL, permission1 );
+        assertEquals( RepositoryPermission.WRITE, permission2 );
     }
 
     @Test
     public void testGetUserAuthorizationWithNamespace() throws ClientProtocolException, IOException {
-        CloseableHttpResponse ret = doGet(((RemoteRepository) testRepository.get())
-                .getEndpointUrl()
-                + "/service/user-authorization?baseNamespace=http://www.OpenTravel.org");
-        assertEquals(Response.Status.OK.getStatusCode(), ret.getStatusLine().getStatusCode());
+        CloseableHttpResponse ret = doGet( ((RemoteRepository) testRepository.get()).getEndpointUrl()
+            + "/service/user-authorization?baseNamespace=http://www.OpenTravel.org" );
+        assertEquals( Response.Status.OK.getStatusCode(), ret.getStatusLine().getStatusCode() );
     }
 
     @Test
-    public void testGetUserAuthorizationForMissingNamespace() throws ClientProtocolException,
-            IOException {
-        CloseableHttpResponse ret = doGet(((RemoteRepository) testRepository.get())
-                .getEndpointUrl() + "/service/user-authorization");
-        assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), ret.getStatusLine()
-                .getStatusCode());
+    public void testGetUserAuthorizationForMissingNamespace() throws ClientProtocolException, IOException {
+        CloseableHttpResponse ret =
+            doGet( ((RemoteRepository) testRepository.get()).getEndpointUrl() + "/service/user-authorization" );
+        assertEquals( Response.Status.UNAUTHORIZED.getStatusCode(), ret.getStatusLine().getStatusCode() );
     }
 
     private CloseableHttpResponse doGet(String url) throws ClientProtocolException, IOException {
-        HttpGet get = new HttpGet(url);
-        return HttpClients.createDefault().execute(get);
+        HttpGet get = new HttpGet( url );
+        return HttpClients.createDefault().execute( get );
     }
 
 }

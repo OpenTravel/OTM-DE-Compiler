@@ -13,29 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.console;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 /**
- * Verifies the ability of the OTA2.0 repository to authenticate against an
- * LDAP directory in USER_LOOKUP mode.
+ * Verifies the ability of the OTA2.0 repository to authenticate against an LDAP directory in USER_LOOKUP mode.
  */
 public class TestLdapLookupAuthentication extends TestLdapAuthentication {
-    
+
     @BeforeClass
     public static void setupTests() throws Exception {
         setupWorkInProcessArea( TestLdapLookupAuthentication.class );
         startLdapTestServer( 1389, "/ldif-snapshots/user-lookup.ldif" );
-        startTestServer( "versions-repository", 9298, ldapLookupRepositoryConfig,
-                true, true, TestLdapLookupAuthentication.class );
+        startTestServer( "versions-repository", 9298, ldapLookupRepositoryConfig, true, true,
+            TestLdapLookupAuthentication.class );
     }
-    
+
     @AfterClass
     public static void tearDownTests() throws Exception {
         shutdownTestServer();
         stopLdapTestServer();
     }
-    
+
 }

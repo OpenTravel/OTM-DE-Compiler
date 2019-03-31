@@ -13,7 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.ota2;
+
+import org.opentravel.schemacompiler.extension.CompilerExtension;
+import org.opentravel.schemacompiler.extension.CompilerExtensionProvider;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.io.InputStreamResource;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -23,16 +31,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.opentravel.schemacompiler.extension.CompilerExtension;
-import org.opentravel.schemacompiler.extension.CompilerExtensionProvider;
-import org.springframework.beans.factory.BeanDefinitionStoreException;
-import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.io.InputStreamResource;
-
 /**
- * Implementation of the <code>CompilerExtensionProvider</code> service that provides the default
- * 'OTA2' compiler extension.
+ * Implementation of the <code>CompilerExtensionProvider</code> service that provides the default 'OTA2' compiler
+ * extension.
  * 
  * @author S. Livezey
  */
@@ -42,7 +43,7 @@ public class OTA2CompilerExtensionProvider implements CompilerExtensionProvider 
     public static final String OTA2_COMPILER_EXTENSION_ID = "OTA2";
 
     private static final Collection<CompilerExtension> compilerExtensions;
-    private static final Map<String, List<String>> extensionUrls;
+    private static final Map<String,List<String>> extensionUrls;
 
     /**
      * @see org.opentravel.schemacompiler.extension.CompilerExtensionProvider#getCompilerExtensions()
@@ -57,7 +58,7 @@ public class OTA2CompilerExtensionProvider implements CompilerExtensionProvider 
      */
     @Override
     public boolean isSupportedExtension(String extensionId) {
-        return extensionUrls.containsKey(extensionId);
+        return extensionUrls.containsKey( extensionId );
     }
 
     /**
@@ -66,22 +67,21 @@ public class OTA2CompilerExtensionProvider implements CompilerExtensionProvider 
      */
     @Override
     public void loadCompilerExtension(GenericApplicationContext context, String extensionId) {
-        if (!isSupportedExtension(extensionId)) {
-            throw new IllegalArgumentException("Unsupported compiler extension: " + extensionId);
+        if (!isSupportedExtension( extensionId )) {
+            throw new IllegalArgumentException( "Unsupported compiler extension: " + extensionId );
         }
-        XmlBeanDefinitionReader beanReader = new XmlBeanDefinitionReader(context);
+        XmlBeanDefinitionReader beanReader = new XmlBeanDefinitionReader( context );
 
-        beanReader.setBeanClassLoader(getClass().getClassLoader());
-        beanReader.setValidating(false);
+        beanReader.setBeanClassLoader( getClass().getClassLoader() );
+        beanReader.setValidating( false );
 
-        for (String configUrl : extensionUrls.get(extensionId)) {
-            InputStream configStream = getClass().getResourceAsStream(configUrl);
+        for (String configUrl : extensionUrls.get( extensionId )) {
+            InputStream configStream = getClass().getResourceAsStream( configUrl );
 
             if (configStream == null) {
-                throw new BeanDefinitionStoreException("Unable to load configuration file: "
-                        + configUrl);
+                throw new BeanDefinitionStoreException( "Unable to load configuration file: " + configUrl );
             }
-            beanReader.loadBeanDefinitions(new InputStreamResource(configStream));
+            beanReader.loadBeanDefinitions( new InputStreamResource( configStream ) );
         }
     }
 
@@ -98,34 +98,28 @@ public class OTA2CompilerExtensionProvider implements CompilerExtensionProvider 
      */
     @Override
     public InputStream getExtensionResource(String resourcePath) {
-        return getClass().getResourceAsStream(resourcePath);
+        return getClass().getResourceAsStream( resourcePath );
     }
 
     /**
      * Registers a single binding style using the information provided.
      * 
-     * @param extensions
-     *            the list that will contain the registered extensions for this provider
-     * @param urlMap
-     *            associates each extension ID with a list of URL locations for the Spring
-     *            configuration files for the binding
-     * @param extensionId
-     *            the unique ID of the extension to register
-     * @param rank
-     *            the ranking of the extension to register
-     * @param configLocations
-     *            the classpath URL for the Spring configuration files that define the binding style
+     * @param extensions the list that will contain the registered extensions for this provider
+     * @param urlMap associates each extension ID with a list of URL locations for the Spring configuration files for
+     *        the binding
+     * @param extensionId the unique ID of the extension to register
+     * @param rank the ranking of the extension to register
+     * @param configLocations the classpath URL for the Spring configuration files that define the binding style
      */
-    private static void registerBindingStyle(Collection<CompilerExtension> extensions,
-            Map<String, List<String>> urlMap, String extensionId, int rank,
-            String... configLocations) {
+    private static void registerBindingStyle(Collection<CompilerExtension> extensions, Map<String,List<String>> urlMap,
+        String extensionId, int rank, String... configLocations) {
         List<String> configUrls = new ArrayList<>();
 
         for (String configLocation : configLocations) {
-            configUrls.add(configLocation);
+            configUrls.add( configLocation );
         }
-        extensions.add(new CompilerExtension(extensionId, rank));
-        urlMap.put(extensionId, configUrls);
+        extensions.add( new CompilerExtension( extensionId, rank ) );
+        urlMap.put( extensionId, configUrls );
     }
 
     /**
@@ -136,15 +130,13 @@ public class OTA2CompilerExtensionProvider implements CompilerExtensionProvider 
             Collection<CompilerExtension> extensions = new ArrayList<>();
             Map<String,List<String>> urlMap = new HashMap<>();
 
-            registerBindingStyle(extensions, urlMap,
-                    OTA2_COMPILER_EXTENSION_ID, 50,
-                    "/ota2-context/defaultBaseCompilerExtensions.xml",
-                    "/ota2-context/defaultCompilerExtensions.xml");
-            compilerExtensions = Collections.unmodifiableCollection(extensions);
-            extensionUrls = Collections.unmodifiableMap(urlMap);
+            registerBindingStyle( extensions, urlMap, OTA2_COMPILER_EXTENSION_ID, 50,
+                "/ota2-context/defaultBaseCompilerExtensions.xml", "/ota2-context/defaultCompilerExtensions.xml" );
+            compilerExtensions = Collections.unmodifiableCollection( extensions );
+            extensionUrls = Collections.unmodifiableMap( urlMap );
 
         } catch (Exception e) {
-            throw new ExceptionInInitializerError(e);
+            throw new ExceptionInInitializerError( e );
         }
     }
 

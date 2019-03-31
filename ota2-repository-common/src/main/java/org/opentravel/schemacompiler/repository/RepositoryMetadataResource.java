@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.repository;
 
-import java.io.File;
-import java.io.IOException;
+package org.opentravel.schemacompiler.repository;
 
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryInfoType;
 import org.opentravel.schemacompiler.config.FileResource;
 import org.opentravel.schemacompiler.repository.impl.DefaultRepositoryFileManager;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * File resource used to access the repository meta-data record.
@@ -31,9 +32,14 @@ public class RepositoryMetadataResource extends FileResource<RepositoryInfoType>
 
     private RepositoryFileManager fileManager;
 
+    /**
+     * Constructor that specifies the root directory location of the repository.
+     * 
+     * @param repositoryLocation the repository's root folder location
+     */
     public RepositoryMetadataResource(File repositoryLocation) {
-        super(repositoryLocation);
-        this.setFileManager(new DefaultRepositoryFileManager(repositoryLocation));
+        super( repositoryLocation );
+        this.setFileManager( new DefaultRepositoryFileManager( repositoryLocation ) );
         invalidateResource();
     }
 
@@ -51,26 +57,26 @@ public class RepositoryMetadataResource extends FileResource<RepositoryInfoType>
             return metadata;
 
         } catch (RepositoryException e) {
-            throw new IOException(e.getMessage());
+            throw new IOException( e.getMessage() );
         }
     }
 
-	/**
-	 * Returns the value of the 'fileManager' field.
-	 *
-	 * @return RepositoryFileManager
-	 */
-	public RepositoryFileManager getFileManager() {
-		return fileManager;
-	}
+    /**
+     * Returns the value of the 'fileManager' field.
+     *
+     * @return RepositoryFileManager
+     */
+    public RepositoryFileManager getFileManager() {
+        return fileManager;
+    }
 
-	/**
-	 * Assigns the value of the 'fileManager' field.
-	 *
-	 * @param fileManager  the field value to assign
-	 */
-	public void setFileManager(RepositoryFileManager fileManager) {
-		this.fileManager = fileManager;
-	}
+    /**
+     * Assigns the value of the 'fileManager' field.
+     *
+     * @param fileManager the field value to assign
+     */
+    public void setFileManager(RepositoryFileManager fileManager) {
+        this.fileManager = fileManager;
+    }
 
 }

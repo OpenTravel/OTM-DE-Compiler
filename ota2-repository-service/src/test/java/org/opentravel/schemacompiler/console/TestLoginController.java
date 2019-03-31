@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.console;
 
 import static org.junit.Assert.assertNull;
@@ -32,55 +33,50 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
  * browser.
  */
 public class TestLoginController extends AbstractConsoleTest {
-    
+
     @BeforeClass
     public static void setupTests() throws Exception {
         startSmtpTestServer( 1588 );
         setupWorkInProcessArea( TestLoginController.class );
-        startTestServer( "versions-repository", 9295, defaultRepositoryConfig,
-                true, true, TestLoginController.class );
+        startTestServer( "versions-repository", 9295, defaultRepositoryConfig, true, true, TestLoginController.class );
     }
-    
+
     @AfterClass
     public static void tearDownTests() throws Exception {
         shutdownTestServer();
     }
-    
+
     @Test
     public void testUserLoginAndLogout() throws Exception {
         try (WebClient client = newWebClient( true )) {
             String pageUrl = jettyServer.get().getRepositoryUrl( "/console/browse.html" );
             HtmlPage page = client.getPage( pageUrl );
             HtmlForm form;
-            
+
             page = page.getAnchorByText( "Logout" ).click();
             form = (HtmlForm) page.getElementById( "headerlogin" );
             form.getInputByValue( "Login" );
         }
     }
-    
+
     @Test
     public void testChangePassword() throws Exception {
-        String[][] passwordAttempts = new String[][] {
-            new String[] { "badPassword", "password", "password" },
-            new String[] { "password", "newpassword1", "newpassword2" },
-            new String[] { "password", "invalid password", "invalid password" },
-            new String[] { "password", "", "" },
-            new String[] { "", "password", "password" },
-            new String[] { "password", "password", "password" }
-        };
-        
+        String[][] passwordAttempts = new String[][] {new String[] {"badPassword", "password", "password"},
+            new String[] {"password", "newpassword1", "newpassword2"},
+            new String[] {"password", "invalid password", "invalid password"}, new String[] {"password", "", ""},
+            new String[] {"", "password", "password"}, new String[] {"password", "password", "password"}};
+
         try (WebClient client = newWebClient( true )) {
             String pageUrl = jettyServer.get().getRepositoryUrl( "/console/changePassword.html" );
             HtmlPage page = client.getPage( pageUrl );
-            
+
             for (String[] attempt : passwordAttempts) {
                 HtmlForm form = (HtmlForm) page.getElementById( "changePasswordForm" );
                 HtmlInput oldPassword = form.getInputByName( "oldPassword" );
                 HtmlInput newPassword = form.getInputByName( "newPassword" );
                 HtmlInput newPasswordConfirm = form.getInputByName( "newPasswordConfirm" );
                 HtmlInput submitButton = form.getInputByValue( "Change Password" );
-                
+
                 oldPassword.setValueAttribute( attempt[0] );
                 newPassword.setValueAttribute( attempt[1] );
                 newPasswordConfirm.setValueAttribute( attempt[2] );
@@ -89,22 +85,22 @@ public class TestLoginController extends AbstractConsoleTest {
             assertNull( page.getElementById( "changePasswordForm" ) );
         }
     }
-    
+
     @Test
     public void testEditUserProfile() throws Exception {
-        String[] emailAttempts = new String[] { "bad#email", "John.Doe@opentravel.org" };
-        
+        String[] emailAttempts = new String[] {"bad#email", "John.Doe@opentravel.org"};
+
         try (WebClient client = newWebClient( true )) {
             String pageUrl = jettyServer.get().getRepositoryUrl( "/console/editUserProfile.html" );
             HtmlPage page = client.getPage( pageUrl );
-            
+
             for (String emailAttempt : emailAttempts) {
                 HtmlForm form = (HtmlForm) page.getElementById( "editUserForm" );
                 HtmlInput lastName = form.getInputByName( "lastName" );
                 HtmlInput firstName = form.getInputByName( "firstName" );
                 HtmlInput emailAddress = form.getInputByName( "emailAddress" );
                 HtmlInput submitButton = form.getInputByValue( "Update Profile" );
-                
+
                 lastName.setValueAttribute( "Doe" );
                 firstName.setValueAttribute( "John" );
                 emailAddress.setValueAttribute( emailAttempt );
@@ -113,5 +109,5 @@ public class TestLoginController extends AbstractConsoleTest {
             assertTrue( page.asText().contains( "John Doe" ) );
         }
     }
-    
+
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.mvn;
 
 import org.apache.maven.plugin.MojoExecutionException;
@@ -23,42 +24,42 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 
 /**
- * OTA2.0 repository plugin that executes during the <code>initialize</code> phase of the build
- * to ensure that a snapshot has been created if one does not already exist.  If a snapshot does
- * exist, this mojo will exit successfully without action.
+ * OTA2.0 repository plugin that executes during the <code>initialize</code> phase of the build to ensure that a
+ * snapshot has been created if one does not already exist. If a snapshot does exist, this mojo will exit successfully
+ * without action.
  */
-@Mojo( name = "initialize-snapshot", defaultPhase = LifecyclePhase.INITIALIZE, threadSafe=true  )
-@Execute( goal="initialize-snapshot", phase = LifecyclePhase.INITIALIZE )
+@Mojo(name = "initialize-snapshot", defaultPhase = LifecyclePhase.INITIALIZE, threadSafe = true)
+@Execute(goal = "initialize-snapshot", phase = LifecyclePhase.INITIALIZE)
 public class InitRepositorySnapshotMojo extends AbstractOTA2RepositoryMojo {
-	
+
     /**
      * Default constructor.
      */
     public InitRepositorySnapshotMojo() {
-    	super( null );
+        super( null );
     }
-    
+
     /**
      * Constructor that specifies an alternate repository manager from the default.
      * 
-     * @param rm  the repository manager to use when executing the mojo
+     * @param rm the repository manager to use when executing the mojo
      */
     public InitRepositorySnapshotMojo(RepositoryManager rm) {
-    	super( rm );
+        super( rm );
     }
-    
-	/**
-	 * @see org.apache.maven.plugin.Mojo#execute()
-	 */
-	@Override
-	public void execute() throws MojoExecutionException, MojoFailureException {
-		validate();
-		
-		if (snapshotInitialized()) {
-			getLog().info("OTA2 repository snapshot already initialized.");
-		} else {
-			createOrUpdateSnapshot();
-		}
-	}
-	
+
+    /**
+     * @see org.apache.maven.plugin.Mojo#execute()
+     */
+    @Override
+    public void execute() throws MojoExecutionException, MojoFailureException {
+        validate();
+
+        if (snapshotInitialized()) {
+            getLog().info( "OTA2 repository snapshot already initialized." );
+        } else {
+            createOrUpdateSnapshot();
+        }
+    }
+
 }

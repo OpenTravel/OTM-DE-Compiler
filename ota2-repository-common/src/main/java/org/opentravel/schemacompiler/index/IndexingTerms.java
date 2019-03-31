@@ -13,69 +13,69 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.index;
 
 /**
- * Constants for all indexing fields and terms used by the free-text search
- * service.
+ * Constants for all indexing fields and terms used by the free-text search service.
  */
 public class IndexingTerms {
-	
-	// Common fields used for all indexed entities
-	public static final String IDENTITY_FIELD           = "identity";
-	public static final String ENTITY_TYPE_FIELD        = "entityType";
-	public static final String ENTITY_NAME_FIELD        = "entityName";
-    public static final String ENTITY_LOCAL_NAME_FIELD  = "entityLocalName";
-	public static final String ENTITY_NAMESPACE_FIELD   = "entityNamespace";
-	public static final String ENTITY_DESCRIPTION_FIELD = "entityDescription";
-	public static final String VERSION_FIELD            = "version";
-	public static final String STATUS_FIELD             = "status";
-	public static final String LOCKED_BY_USER_FIELD     = "lockedBy";
-	public static final String KEYWORDS_FIELD           = "keywords";
-	public static final String CONTENT_DATA_FIELD       = "contentData";
-	public static final String SEARCH_INDEX_FIELD       = "searchIndexInd";
-	
-	// Common fields used to exclude library/entity versions from search results
-	public static final String LATEST_VERSION_FIELD                 = "latestVersion";
-	public static final String LATEST_VERSION_AT_UNDER_REVIEW_FIELD = "latestVersionAtUnderReview";
-	public static final String LATEST_VERSION_AT_FINAL_FIELD        = "latestVersionAtFinal";
-	public static final String LATEST_VERSION_AT_OBSOLETE_FIELD     = "latestVersionAtObsolete";
-	
-	// Fields used exclusively by OTM libraries and/or repository items
-	public static final String BASE_NAMESPACE_FIELD     = "baseNamespace"; // also used by subscriptions
-	public static final String FILENAME_FIELD           = "filename";
-	public static final String VERSION_SCHEME_FIELD     = "versionScheme";
-	public static final String REFERENCED_LIBRARY_FIELD = "referencedLibrary";
-	public static final String EXTERNAL_PRINCIPAL_FIELD = "externalPrincipal";
-	public static final String EXTERNAL_REFERENCE_FIELD = "externalReference";
-	public static final String PREFIX_MAPPING_FIELD     = "prefixMapping";
-	
-	// Fields used exclusively by OTM entities
-	public static final String OWNING_LIBRARY_FIELD     = "owningLibrary";
-	public static final String REFERENCE_IDENTITY_FIELD = "referenceIdentity";
-	public static final String REFERENCED_ENTITY_FIELD  = "referencedEntity";
-	public static final String EXTENDS_ENTITY_FIELD     = "extendsEntity";
-	public static final String FACET_OWNER_FIELD        = "facetOwner";
-	public static final String FACET_CONTENT_FIELD      = "facetContent";
-	
-	// Fields used exclusively by OTM releases
-	public static final String RELEASE_STATUS_FIELD     = "releaseStatus";
-	
-	// Fields used exclusively by subscriptions
-	public static final String EVENT_TYPE_FIELD         = "eventType";
-	public static final String LIBRARY_NAME_FIELD       = "libraryName";
-	public static final String USERID_FIELD             = "userId";
-	
-	// Fields used exclusively by validation findings
-	public static final String TARGET_LIBRARY_FIELD  = "targetLibrary";
-	public static final String TARGET_ENTITY_FIELD   = "targetEntity";
-	public static final String FINDING_SOURCE_FIELD  = "findingSource";
-	public static final String FINDING_TYPE_FIELD    = "findingType";
-	public static final String FINDING_MESSAGE_FIELD = "findingMessage";
-	
-	/**
-	 * Private constructor to prevent instantiation.
-	 */
-	private IndexingTerms() {}
-	
+
+    // Common fields used for all indexed entities
+    public static final String IDENTITY_FIELD = "identity";
+    public static final String ENTITY_TYPE_FIELD = "entityType";
+    public static final String ENTITY_NAME_FIELD = "entityName";
+    public static final String ENTITY_LOCAL_NAME_FIELD = "entityLocalName";
+    public static final String ENTITY_NAMESPACE_FIELD = "entityNamespace";
+    public static final String ENTITY_DESCRIPTION_FIELD = "entityDescription";
+    public static final String VERSION_FIELD = "version";
+    public static final String STATUS_FIELD = "status";
+    public static final String LOCKED_BY_USER_FIELD = "lockedBy";
+    public static final String KEYWORDS_FIELD = "keywords";
+    public static final String CONTENT_DATA_FIELD = "contentData";
+    public static final String SEARCH_INDEX_FIELD = "searchIndexInd";
+
+    // Common fields used to exclude library/entity versions from search results
+    public static final String LATEST_VERSION_FIELD = "latestVersion";
+    public static final String LATEST_VERSION_AT_UNDER_REVIEW_FIELD = "latestVersionAtUnderReview";
+    public static final String LATEST_VERSION_AT_FINAL_FIELD = "latestVersionAtFinal";
+    public static final String LATEST_VERSION_AT_OBSOLETE_FIELD = "latestVersionAtObsolete";
+
+    // Fields used exclusively by OTM libraries and/or repository items
+    public static final String BASE_NAMESPACE_FIELD = "baseNamespace"; // also used by subscriptions
+    public static final String FILENAME_FIELD = "filename";
+    public static final String VERSION_SCHEME_FIELD = "versionScheme";
+    public static final String REFERENCED_LIBRARY_FIELD = "referencedLibrary";
+    public static final String EXTERNAL_PRINCIPAL_FIELD = "externalPrincipal";
+    public static final String EXTERNAL_REFERENCE_FIELD = "externalReference";
+    public static final String PREFIX_MAPPING_FIELD = "prefixMapping";
+
+    // Fields used exclusively by OTM entities
+    public static final String OWNING_LIBRARY_FIELD = "owningLibrary";
+    public static final String REFERENCE_IDENTITY_FIELD = "referenceIdentity";
+    public static final String REFERENCED_ENTITY_FIELD = "referencedEntity";
+    public static final String EXTENDS_ENTITY_FIELD = "extendsEntity";
+    public static final String FACET_OWNER_FIELD = "facetOwner";
+    public static final String FACET_CONTENT_FIELD = "facetContent";
+
+    // Fields used exclusively by OTM releases
+    public static final String RELEASE_STATUS_FIELD = "releaseStatus";
+
+    // Fields used exclusively by subscriptions
+    public static final String EVENT_TYPE_FIELD = "eventType";
+    public static final String LIBRARY_NAME_FIELD = "libraryName";
+    public static final String USERID_FIELD = "userId";
+
+    // Fields used exclusively by validation findings
+    public static final String TARGET_LIBRARY_FIELD = "targetLibrary";
+    public static final String TARGET_ENTITY_FIELD = "targetEntity";
+    public static final String FINDING_SOURCE_FIELD = "findingSource";
+    public static final String FINDING_TYPE_FIELD = "findingType";
+    public static final String FINDING_MESSAGE_FIELD = "findingMessage";
+
+    /**
+     * Private constructor to prevent instantiation.
+     */
+    private IndexingTerms() {}
+
 }

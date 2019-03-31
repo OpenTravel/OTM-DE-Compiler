@@ -22,11 +22,10 @@ package org.opentravel.schemacompiler.index;
  * @author S. Livezey
  */
 public interface IndexProcessManagerMBean {
-	
-	/**
-	 * JMX hook to shutdown the <code>IndexProcessManager</code> and any
-	 * associated indexing agent child processes.
-	 */
-	public void shutdown();
-	
+
+    /**
+     * JMX hook to shutdown the <code>IndexProcessManager</code> and any associated indexing agent child processes.
+     */
+    public void shutdown();
+
 }

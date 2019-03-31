@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.extension;
 
 /**
@@ -28,10 +29,8 @@ public final class CompilerExtension implements Comparable<CompilerExtension> {
     /**
      * Construtor that creates a new compiler extension entry.
      * 
-     * @param extensionId
-     *            the unique ID of the compiler extension
-     * @param rank
-     *            the rank of the extension (used for sorting and prioritization)
+     * @param extensionId the unique ID of the compiler extension
+     * @param rank the rank of the extension (used for sorting and prioritization)
      */
     public CompilerExtension(String extensionId, int rank) {
         this.extensionId = extensionId;
@@ -65,7 +64,7 @@ public final class CompilerExtension implements Comparable<CompilerExtension> {
 
         if (other != null) {
             if (this.rank == other.rank) {
-                result = compareExtensionId(other);
+                result = compareExtensionId( other );
             } else {
                 result = (this.rank < other.rank) ? -1 : 1;
             }
@@ -75,50 +74,49 @@ public final class CompilerExtension implements Comparable<CompilerExtension> {
         return result;
     }
 
-	/**
-	 * Compares the 'extensionId' of the other object with this one.
-	 * 
-	 * @param other  the other object being compared to this one
-	 * @return int
-	 */
-	private int compareExtensionId(CompilerExtension other) {
-		int result;
-		if (this.extensionId == null) {
-		    result = (other.extensionId == null) ? 0 : -1;
+    /**
+     * Compares the 'extensionId' of the other object with this one.
+     * 
+     * @param other the other object being compared to this one
+     * @return int
+     */
+    private int compareExtensionId(CompilerExtension other) {
+        int result;
+        if (this.extensionId == null) {
+            result = (other.extensionId == null) ? 0 : -1;
 
-		} else {
-		    result = this.extensionId.compareTo(other.extensionId);
-		}
-		return result;
-	}
+        } else {
+            result = this.extensionId.compareTo( other.extensionId );
+        }
+        return result;
+    }
 
     /**
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		return (extensionId == null) ? 0 : extensionId.hashCode();
-	}
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return (extensionId == null) ? 0 : extensionId.hashCode();
+    }
 
-	/**
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		return (obj instanceof CompilerExtension) &&
-				(compareTo((CompilerExtension) obj) == 0);
-	}
+    /**
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        return (obj instanceof CompilerExtension) && (compareTo( (CompilerExtension) obj ) == 0);
+    }
 
-	/**
+    /**
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
-        StringBuilder str = new StringBuilder(getClass().getSimpleName()).append('[');
+        StringBuilder str = new StringBuilder( getClass().getSimpleName() ).append( '[' );
 
-        str.append("extensionId=").append(extensionId);
-        str.append(", rank=").append(rank);
-        str.append(']');
+        str.append( "extensionId=" ).append( extensionId );
+        str.append( ", rank=" ).append( rank );
+        str.append( ']' );
         return str.toString();
     }
 

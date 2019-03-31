@@ -13,28 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.console;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 /**
- * Verifies the operation of the <code>BrowseController</code> when the repository is
- * configured with the JMS indexing service.
+ * Verifies the operation of the <code>BrowseController</code> when the repository is configured with the JMS indexing
+ * service.
  */
 public class TestBrowseControllerRealTime extends TestBrowseController {
-    
+
     @BeforeClass
     public static void setupTests() throws Exception {
         startSmtpTestServer( 1595 );
         setupWorkInProcessArea( TestBrowseControllerRealTime.class );
-        startTestServer( "versions-repository", 9294, defaultRepositoryConfig,
-                true, true, TestBrowseControllerRealTime.class );
+        startTestServer( "versions-repository", 9294, defaultRepositoryConfig, true, true,
+            TestBrowseControllerRealTime.class );
     }
-    
+
     @AfterClass
     public static void tearDownTests() throws Exception {
         shutdownTestServer();
     }
-    
+
 }

@@ -24,46 +24,46 @@ import javax.xml.bind.JAXBContext;
  * @author S. Livezey
  */
 public class RepositoryJaxbContext {
-	
+
     private static final String SCHEMA_CONTEXT = ":org.w3._2001.xmlschema:org.opentravel.ns.ota2.repositoryinfo_v01_00";
     private static final String EXT_SCHEMA_CONTEXT = ":org.opentravel.ns.ota2.repositoryinfoext_v01_00";
 
-	private static final JAXBContext jaxbContext;
-	private static final JAXBContext extJaxbContext;
-	
-	/**
-	 * Private constructor to prevent instantiation.
-	 */
-	private RepositoryJaxbContext() {}
-	
-	/**
-	 * Returns the static JAXB context for standard OTM repository messages.
-	 * 
-	 * @return JAXBContext
-	 */
-	public static JAXBContext getContext() {
-		return jaxbContext;
-	}
-	
-	/**
-	 * Returns the static JAXB context for extended OTM repository messages.
-	 * 
-	 * @return JAXBContext
-	 */
-	public static JAXBContext getExtContext() {
-		return extJaxbContext;
-	}
-	
+    private static final JAXBContext jaxbContext;
+    private static final JAXBContext extJaxbContext;
+
+    /**
+     * Private constructor to prevent instantiation.
+     */
+    private RepositoryJaxbContext() {}
+
+    /**
+     * Returns the static JAXB context for standard OTM repository messages.
+     * 
+     * @return JAXBContext
+     */
+    public static JAXBContext getContext() {
+        return jaxbContext;
+    }
+
+    /**
+     * Returns the static JAXB context for extended OTM repository messages.
+     * 
+     * @return JAXBContext
+     */
+    public static JAXBContext getExtContext() {
+        return extJaxbContext;
+    }
+
     /**
      * Initializes the shared JAXB context.
      */
     static {
         try {
-            jaxbContext = JAXBContext.newInstance(SCHEMA_CONTEXT);
-            extJaxbContext = JAXBContext.newInstance(EXT_SCHEMA_CONTEXT);
+            jaxbContext = JAXBContext.newInstance( SCHEMA_CONTEXT );
+            extJaxbContext = JAXBContext.newInstance( EXT_SCHEMA_CONTEXT );
 
         } catch (Exception e) {
-            throw new ExceptionInInitializerError(e);
+            throw new ExceptionInInitializerError( e );
         }
     }
 

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.lock;
 
 /**
@@ -28,12 +29,8 @@ public class LockableResource {
     /**
      * Full constructor that assigns the namespace and local name of the resource.
      * 
-     * @param namespace
-     *            the namespace to which the locked resource is assigned
-     * @param resourceName
-     *            the local name of the locked resource
-     * @param type
-     *            the type of lock acquired for the resource
+     * @param namespace the namespace to which the locked resource is assigned
+     * @param resourceName the local name of the locked resource
      */
     protected LockableResource(String namespace, String resourceName) {
         this.namespace = namespace;
@@ -68,10 +65,10 @@ public class LockableResource {
         if (obj instanceof LockableResource) {
             LockableResource otherLock = (LockableResource) obj;
 
-            result = ((this.namespace == null) ? (otherLock.namespace == null) : this.namespace
-                    .equals(otherLock.namespace))
-                    && ((this.resourceName == null) ? (otherLock.resourceName == null)
-                            : this.resourceName.equals(otherLock.resourceName));
+            result = ((this.namespace == null) ? (otherLock.namespace == null)
+                : this.namespace.equals( otherLock.namespace ))
+                && ((this.resourceName == null) ? (otherLock.resourceName == null)
+                    : this.resourceName.equals( otherLock.resourceName ));
         } else {
             result = false;
         }
@@ -84,7 +81,7 @@ public class LockableResource {
     @Override
     public int hashCode() {
         return ((namespace == null) ? 0 : namespace.hashCode())
-                + ((resourceName == null) ? 0 : resourceName.hashCode());
+            + ((resourceName == null) ? 0 : resourceName.hashCode());
     }
 
 }

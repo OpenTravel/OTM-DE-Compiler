@@ -20,63 +20,63 @@ package org.opentravel.schemacompiler.mvn;
  * Specifies the key identity attributes of a managed OTM release.
  */
 public class Release {
-	
-	private String baseNamespace;
-	private String filename;
-	private String version;
-	
-	/**
-	 * Returns the base namespace of the managed OTM release.
-	 *
-	 * @return String
-	 */
-	public String getBaseNamespace() {
-		return baseNamespace;
-	}
-	
-	/**
-	 * Assigns the base namespace of the managed OTM release.
-	 *
-	 * @param baseNamespace  the field value to assign
-	 */
-	public void setBaseNamespace(String baseNamespace) {
-		this.baseNamespace = baseNamespace;
-	}
-	
-	/**
-	 * Returns the filename of the managed OTM release.
-	 *
-	 * @return String
-	 */
-	public String getFilename() {
-		return filename;
-	}
-	
-	/**
-	 * Assigns the filename of the managed OTM release.
-	 *
-	 * @param filename  the field value to assign
-	 */
-	public void setFilename(String filename) {
-		this.filename = filename;
-	}
-	
-	/**
-	 * Returns the version of the managed OTM release.
-	 *
-	 * @return String
-	 */
-	public String getVersion() {
-		return version;
-	}
-	
-	/**
-	 * Assigns the version of the managed OTM release.
-	 *
-	 * @param version  the field value to assign
-	 */
-	public void setVersion(String version) {
-		this.version = version;
-	}
-	
+
+    private String baseNamespace;
+    private String filename;
+    private String version;
+
+    /**
+     * Returns the base namespace of the managed OTM release.
+     *
+     * @return String
+     */
+    public String getBaseNamespace() {
+        return baseNamespace;
+    }
+
+    /**
+     * Assigns the base namespace of the managed OTM release.
+     *
+     * @param baseNamespace the field value to assign
+     */
+    public void setBaseNamespace(String baseNamespace) {
+        this.baseNamespace = baseNamespace;
+    }
+
+    /**
+     * Returns the filename of the managed OTM release.
+     *
+     * @return String
+     */
+    public String getFilename() {
+        return filename;
+    }
+
+    /**
+     * Assigns the filename of the managed OTM release.
+     *
+     * @param filename the field value to assign
+     */
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
+
+    /**
+     * Returns the version of the managed OTM release.
+     *
+     * @return String
+     */
+    public String getVersion() {
+        return version;
+    }
+
+    /**
+     * Assigns the version of the managed OTM release.
+     *
+     * @param version the field value to assign
+     */
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
 }

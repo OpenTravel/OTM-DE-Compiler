@@ -13,183 +13,182 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.index.builder;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.regex.Pattern;
+package org.opentravel.schemacompiler.index.builder;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.index.IndexWriter;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.regex.Pattern;
+
 /**
- * Base class for all components used to create search index documents for OTM repository
- * artifacts.
+ * Base class for all components used to create search index documents for OTM repository artifacts.
  *
- * @param <T>  the type of the repository artifact to be indexed
+ * @param <T> the type of the repository artifact to be indexed
  */
 public abstract class IndexBuilder<T> {
-	
+
     private static Log log = LogFactory.getLog( IndexBuilder.class );
 
     private static Pattern tokenPattern = Pattern.compile( "[A-Za-z0-9]+" );
 
-	private T sourceObject;
+    private T sourceObject;
     private IndexBuilderFactory factory;
     private RepositoryManager repositoryManager;
     private IndexWriter indexWriter;
     private boolean createIndex = true;
-	private Set<String> freeTextKeywords = new HashSet<>();
-	
-	/**
-	 * Constructs the search index documents using the <code>IndexWriter</code> provided.
-	 */
-	public void performIndexingAction() {
-		try {
-			if (createIndex) {
-				createIndex();
-				
-			} else {
-				deleteIndex();
-			}
-			
-		} catch (Exception e) {
-			log.error("Unknown error encountered during index processing.", e);
-		}
-	}
-	
-	/**
-	 * Constructs the search index documents using the <code>IndexWriter</code> provided.
-	 */
-	protected abstract void createIndex();
-	
-	/**
-	 * Deletes the search index documents using the <code>IndexWriter</code> provided.
-	 */
-	protected abstract void deleteIndex();
-	
-	/**
-	 * Returns the set of free-text keywords that should be included in the search index document
-	 * for the source object.
-	 * 
-	 * @return Set<String>
-	 */
-	protected Set<String> getFreeTextKeywords() {
-		return freeTextKeywords;
-	}
-	
-	/**
-	 * Adds all keywords after tokenizing the given string.
-	 * 
-	 * @param keywordsStr  string containing the keyword tokens to add
-	 */
-	protected void addFreeTextKeywords(String keywordsStr) {
-		if (keywordsStr != null) {
-			String[] keywords = keywordsStr.split( "\\b" );
-			
-			for (String keyword : keywords) {
-				if (tokenPattern.matcher( keyword ).matches()) {
-					freeTextKeywords.add( keyword );
-				}
-			}
-		}
-	}
-	
-	/**
-	 * Returns a string containing the free-text search tokens for the source object being indexed.
-	 * 
-	 * @return String
-	 */
-	protected String getFreeTextSearchContent() {
-		StringBuilder content = new StringBuilder();
-		
-		for (String keyword : freeTextKeywords) {
-			content.append( keyword ).append(" ");
-		}
-		return content.toString();
-	}
-	
-	/**
-	 * Returns source object that will provide all content for the search index(es).
-	 *
-	 * @return T
-	 */
-	public T getSourceObject() {
-		return sourceObject;
-	}
+    private Set<String> freeTextKeywords = new HashSet<>();
 
-	/**
-	 * Assigns the source object that will provide all content for the search index(es).
-	 *
-	 * @param sourceObject  the source object to assign
-	 */
-	public void setSourceObject(T sourceObject) {
-		this.sourceObject = sourceObject;
-	}
+    /**
+     * Constructs the search index documents using the <code>IndexWriter</code> provided.
+     */
+    public void performIndexingAction() {
+        try {
+            if (createIndex) {
+                createIndex();
 
-	/**
-	 * Returns the factory that created this <code>IndexBuilder</code>.
-	 *
-	 * @return IndexBuilderFactory
-	 */
-	public IndexBuilderFactory getFactory() {
-		return factory;
-	}
+            } else {
+                deleteIndex();
+            }
 
-	/**
-	 * Assigns the factory that created this <code>IndexBuilder</code>.
-	 *
-	 * @param factory  the factory instance to assign
-	 */
-	public void setFactory(IndexBuilderFactory factory) {
-		this.factory = factory;
-	}
+        } catch (Exception e) {
+            log.error( "Unknown error encountered during index processing.", e );
+        }
+    }
 
-	/**
-	 * Returns the manager for the repository that owns the item(s) to be indexed.
-	 *
-	 * @return RepositoryManager
-	 */
-	public RepositoryManager getRepositoryManager() {
-		return repositoryManager;
-	}
+    /**
+     * Constructs the search index documents using the <code>IndexWriter</code> provided.
+     */
+    protected abstract void createIndex();
 
-	/**
-	 * Assigns the manager for the repository that owns the item(s) to be indexed.
-	 *
-	 * @param repositoryManager  the repository manager to assign
-	 */
-	public void setRepositoryManager(RepositoryManager repositoryManager) {
-		this.repositoryManager = repositoryManager;
-	}
+    /**
+     * Deletes the search index documents using the <code>IndexWriter</code> provided.
+     */
+    protected abstract void deleteIndex();
 
-	/**
-	 * Returns the index writer to use for creating or deleting the search index document(s).
-	 *
-	 * @return IndexWriter
-	 */
-	public IndexWriter getIndexWriter() {
-		return indexWriter;
-	}
+    /**
+     * Returns the set of free-text keywords that should be included in the search index document for the source object.
+     * 
+     * @return Set&lt;String&gt;
+     */
+    protected Set<String> getFreeTextKeywords() {
+        return freeTextKeywords;
+    }
 
-	/**
-	 * Assigns the index writer to use for creating or deleting the search index document(s).
-	 *
-	 * @param indexWriter  the index writer to assign
-	 */
-	public void setIndexWriter(IndexWriter indexWriter) {
-		this.indexWriter = indexWriter;
-	}
+    /**
+     * Adds all keywords after tokenizing the given string.
+     * 
+     * @param keywordsStr string containing the keyword tokens to add
+     */
+    protected void addFreeTextKeywords(String keywordsStr) {
+        if (keywordsStr != null) {
+            String[] keywords = keywordsStr.split( "\\b" );
 
-	/**
-	 * Assigns the flag value indicating whether to create or delete search index document(s).
-	 *
-	 * @param createIndex  the flag value to assign
-	 */
-	public void setCreateIndex(boolean createIndex) {
-		this.createIndex = createIndex;
-	}
+            for (String keyword : keywords) {
+                if (tokenPattern.matcher( keyword ).matches()) {
+                    freeTextKeywords.add( keyword );
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns a string containing the free-text search tokens for the source object being indexed.
+     * 
+     * @return String
+     */
+    protected String getFreeTextSearchContent() {
+        StringBuilder content = new StringBuilder();
+
+        for (String keyword : freeTextKeywords) {
+            content.append( keyword ).append( " " );
+        }
+        return content.toString();
+    }
+
+    /**
+     * Returns source object that will provide all content for the search index(es).
+     *
+     * @return T
+     */
+    public T getSourceObject() {
+        return sourceObject;
+    }
+
+    /**
+     * Assigns the source object that will provide all content for the search index(es).
+     *
+     * @param sourceObject the source object to assign
+     */
+    public void setSourceObject(T sourceObject) {
+        this.sourceObject = sourceObject;
+    }
+
+    /**
+     * Returns the factory that created this <code>IndexBuilder</code>.
+     *
+     * @return IndexBuilderFactory
+     */
+    public IndexBuilderFactory getFactory() {
+        return factory;
+    }
+
+    /**
+     * Assigns the factory that created this <code>IndexBuilder</code>.
+     *
+     * @param factory the factory instance to assign
+     */
+    public void setFactory(IndexBuilderFactory factory) {
+        this.factory = factory;
+    }
+
+    /**
+     * Returns the manager for the repository that owns the item(s) to be indexed.
+     *
+     * @return RepositoryManager
+     */
+    public RepositoryManager getRepositoryManager() {
+        return repositoryManager;
+    }
+
+    /**
+     * Assigns the manager for the repository that owns the item(s) to be indexed.
+     *
+     * @param repositoryManager the repository manager to assign
+     */
+    public void setRepositoryManager(RepositoryManager repositoryManager) {
+        this.repositoryManager = repositoryManager;
+    }
+
+    /**
+     * Returns the index writer to use for creating or deleting the search index document(s).
+     *
+     * @return IndexWriter
+     */
+    public IndexWriter getIndexWriter() {
+        return indexWriter;
+    }
+
+    /**
+     * Assigns the index writer to use for creating or deleting the search index document(s).
+     *
+     * @param indexWriter the index writer to assign
+     */
+    public void setIndexWriter(IndexWriter indexWriter) {
+        this.indexWriter = indexWriter;
+    }
+
+    /**
+     * Assigns the flag value indicating whether to create or delete search index document(s).
+     *
+     * @param createIndex the flag value to assign
+     */
+    public void setCreateIndex(boolean createIndex) {
+        this.createIndex = createIndex;
+    }
 
 }

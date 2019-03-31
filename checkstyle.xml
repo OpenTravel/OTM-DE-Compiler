@@ -159,7 +159,7 @@
 		<module name="AbbreviationAsWordInName">
 			<property name="ignoreFinal" value="false" />
 			<property name="allowedAbbreviationLength" value="3" />
-			<property name="allowedAbbreviations" value="WSDL,JSON,IDREF,NTLM" />
+			<property name="allowedAbbreviations" value="WSDL,JSON,IDREF,JAXB,JNDI,SMTP,NTLM" />
 		</module>
 		<module name="OverloadMethodsDeclarationOrder" />
 		<!--module name="VariableDeclarationUsageDistance" /-->

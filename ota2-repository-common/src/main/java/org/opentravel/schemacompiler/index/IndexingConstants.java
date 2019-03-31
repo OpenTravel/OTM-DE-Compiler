@@ -20,22 +20,22 @@ package org.opentravel.schemacompiler.index;
  * Constant definitions used for various aspects of the indexing service.
  */
 public class IndexingConstants {
-	
-	public static final String MSGPROP_JOB_TYPE      = "jobType";
-	public static final String JOB_TYPE_CREATE_INDEX = "create-index";
-	public static final String JOB_TYPE_DELETE_INDEX = "delete-index";
-	public static final String JOB_TYPE_SUBSCRIPTION = "subscription-index";
-	public static final String JOB_TYPE_DELETE_ALL   = "delete-all";
-	
-	public static final String MSGPROP_SELECTOR      = "indexSelector";
-	public static final int SELECTOR_VALUE_JOBMSG    = 0;
-	public static final int SELECTOR_VALUE_COMMITMSG = 1;
-	public static final String SELECTOR_JOBMSG       = MSGPROP_SELECTOR + " = " + SELECTOR_VALUE_JOBMSG;
-	public static final String SELECTOR_COMMITMSG    = MSGPROP_SELECTOR + " = " + SELECTOR_VALUE_COMMITMSG;
-	
-	/**
-	 * Private constructor to prevent instantiation.
-	 */
-	private IndexingConstants() {}
-	
+
+    public static final String MSGPROP_JOB_TYPE = "jobType";
+    public static final String JOB_TYPE_CREATE_INDEX = "create-index";
+    public static final String JOB_TYPE_DELETE_INDEX = "delete-index";
+    public static final String JOB_TYPE_SUBSCRIPTION = "subscription-index";
+    public static final String JOB_TYPE_DELETE_ALL = "delete-all";
+
+    public static final String MSGPROP_SELECTOR = "indexSelector";
+    public static final int SELECTOR_VALUE_JOBMSG = 0;
+    public static final int SELECTOR_VALUE_COMMITMSG = 1;
+    public static final String SELECTOR_JOBMSG = MSGPROP_SELECTOR + " = " + SELECTOR_VALUE_JOBMSG;
+    public static final String SELECTOR_COMMITMSG = MSGPROP_SELECTOR + " = " + SELECTOR_VALUE_COMMITMSG;
+
+    /**
+     * Private constructor to prevent instantiation.
+     */
+    private IndexingConstants() {}
+
 }

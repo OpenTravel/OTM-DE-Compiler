@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.cli;
 
-import java.net.URL;
+package org.opentravel.schemacompiler.cli;
 
 import org.apache.commons.cli.CommandLine;
 import org.opentravel.schemacompiler.task.CommonCompilerTaskOptions;
@@ -23,9 +22,11 @@ import org.opentravel.schemacompiler.task.CompileAllTaskOptions;
 import org.opentravel.schemacompiler.task.TaskUtils;
 import org.opentravel.schemacompiler.util.URLUtils;
 
+import java.net.URL;
+
 /**
- * Compile-All task options implementation that obtains its settings from the command-line arguments
- * provided by the user.
+ * Compile-All task options implementation that obtains its settings from the command-line arguments provided by the
+ * user.
  * 
  * @author S. Livezey
  */
@@ -36,8 +37,7 @@ public class CommandLineCompilerTaskOptions implements CompileAllTaskOptions {
     /**
      * Constructor that supplies the command-line arguments provided by the user.
      * 
-     * @param commandLineArgs
-     *            the command-line arguments
+     * @param commandLineArgs the command-line arguments
      */
     public CommandLineCompilerTaskOptions(CommandLine commandLineArgs) {
         this.commandLineArgs = commandLineArgs;
@@ -50,8 +50,8 @@ public class CommandLineCompilerTaskOptions implements CompileAllTaskOptions {
     public String getCatalogLocation() {
         String catalogLocation = null;
 
-        if (commandLineArgs.hasOption("c")) {
-            catalogLocation = commandLineArgs.getOptionValue("c");
+        if (commandLineArgs.hasOption( "c" )) {
+            catalogLocation = commandLineArgs.getOptionValue( "c" );
         }
         return catalogLocation;
     }
@@ -66,7 +66,7 @@ public class CommandLineCompilerTaskOptions implements CompileAllTaskOptions {
         if (isCompileServices() && !isCompileSchemas()) {
             String filename = commandLineArgs.getArgs()[0];
 
-            serviceLibraryUrl = URLUtils.toURL(TaskUtils.getPathFromOptionValue(filename));
+            serviceLibraryUrl = URLUtils.toURL( TaskUtils.getPathFromOptionValue( filename ) );
         }
         return serviceLibraryUrl;
     }
@@ -76,41 +76,41 @@ public class CommandLineCompilerTaskOptions implements CompileAllTaskOptions {
      */
     @Override
     public String getServiceEndpointUrl() {
-        return commandLineArgs.getOptionValue("s");
+        return commandLineArgs.getOptionValue( "s" );
     }
 
     /**
-	 * @see org.opentravel.schemacompiler.task.ResourceCompilerTaskOptions#getResourceBaseUrl()
-	 */
-	@Override
-	public String getResourceBaseUrl() {
-        return commandLineArgs.getOptionValue("p");
-	}
+     * @see org.opentravel.schemacompiler.task.ResourceCompilerTaskOptions#getResourceBaseUrl()
+     */
+    @Override
+    public String getResourceBaseUrl() {
+        return commandLineArgs.getOptionValue( "p" );
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.task.SchemaCompilerTaskOptions#isSuppressOtmExtensions()
-	 */
-	@Override
-	public boolean isSuppressOtmExtensions() {
-        return commandLineArgs.hasOption("e");
-	}
+    /**
+     * @see org.opentravel.schemacompiler.task.SchemaCompilerTaskOptions#isSuppressOtmExtensions()
+     */
+    @Override
+    public boolean isSuppressOtmExtensions() {
+        return commandLineArgs.hasOption( "e" );
+    }
 
-	/**
+    /**
      * @see org.opentravel.schemacompiler.task.CommonCompilerTaskOptions#getOutputFolder()
      */
     @Override
     public String getOutputFolder() {
-        return commandLineArgs.getOptionValue("d");
+        return commandLineArgs.getOptionValue( "d" );
     }
 
     /**
-     * Returns the user-specified binding style for the compiled output, or null if the default
-     * binding style is to be used.
+     * Returns the user-specified binding style for the compiled output, or null if the default binding style is to be
+     * used.
      * 
      * @return String
      */
     public String getBindingStyle() {
-        return commandLineArgs.getOptionValue("b");
+        return commandLineArgs.getOptionValue( "b" );
     }
 
     /**
@@ -118,46 +118,46 @@ public class CommandLineCompilerTaskOptions implements CompileAllTaskOptions {
      */
     @Override
     public boolean isCompileSchemas() {
-        return commandLineArgs.hasOption("X")
-                || (!commandLineArgs.hasOption("X") && !commandLineArgs.hasOption("W"));
+        return commandLineArgs.hasOption( "X" )
+            || (!commandLineArgs.hasOption( "X" ) && !commandLineArgs.hasOption( "W" ));
     }
 
     /**
-	 * @see org.opentravel.schemacompiler.task.CompileAllTaskOptions#isCompileJsonSchemas()
-	 */
-	@Override
-	public boolean isCompileJsonSchemas() {
-        return commandLineArgs.hasOption("J");
-	}
+     * @see org.opentravel.schemacompiler.task.CompileAllTaskOptions#isCompileJsonSchemas()
+     */
+    @Override
+    public boolean isCompileJsonSchemas() {
+        return commandLineArgs.hasOption( "J" );
+    }
 
     /**
      * @see org.opentravel.schemacompiler.task.CompileAllTaskOptions#isCompileServices()
      */
     @Override
     public boolean isCompileServices() {
-        return commandLineArgs.hasOption("W")
-                || (!commandLineArgs.hasOption("X") && !commandLineArgs.hasOption("W"));
+        return commandLineArgs.hasOption( "W" )
+            || (!commandLineArgs.hasOption( "X" ) && !commandLineArgs.hasOption( "W" ));
     }
 
-	/**
-	 * @see org.opentravel.schemacompiler.task.CompileAllTaskOptions#isCompileSwagger()
-	 */
-	@Override
-	public boolean isCompileSwagger() {
-        return commandLineArgs.hasOption("S");
-	}
-	
-	@Override
-	public boolean isCompileHtml() {
-		return commandLineArgs.hasOption("H");
-	}
+    /**
+     * @see org.opentravel.schemacompiler.task.CompileAllTaskOptions#isCompileSwagger()
+     */
+    @Override
+    public boolean isCompileSwagger() {
+        return commandLineArgs.hasOption( "S" );
+    }
+
+    @Override
+    public boolean isCompileHtml() {
+        return commandLineArgs.hasOption( "H" );
+    }
 
     /**
      * @see org.opentravel.schemacompiler.task.ExampleCompilerTaskOptions#isGenerateExamples()
      */
     @Override
     public boolean isGenerateExamples() {
-        return commandLineArgs.hasOption("E");
+        return commandLineArgs.hasOption( "E" );
     }
 
     /**
@@ -165,7 +165,7 @@ public class CommandLineCompilerTaskOptions implements CompileAllTaskOptions {
      */
     @Override
     public boolean isGenerateMaxDetailsForExamples() {
-        return commandLineArgs.hasOption("M");
+        return commandLineArgs.hasOption( "M" );
     }
 
     /**
@@ -173,7 +173,7 @@ public class CommandLineCompilerTaskOptions implements CompileAllTaskOptions {
      */
     @Override
     public String getExampleContext() {
-        return commandLineArgs.getOptionValue("C");
+        return commandLineArgs.getOptionValue( "C" );
     }
 
     /**
@@ -181,12 +181,12 @@ public class CommandLineCompilerTaskOptions implements CompileAllTaskOptions {
      */
     @Override
     public Integer getExampleMaxRepeat() {
-        String optionValue = commandLineArgs.getOptionValue("r");
+        String optionValue = commandLineArgs.getOptionValue( "r" );
         Integer maxRepeat = null;
 
         if (optionValue != null) {
             try {
-                maxRepeat = new Integer(optionValue);
+                maxRepeat = new Integer( optionValue );
 
             } catch (NumberFormatException e) {
                 // No error - ignore and return null
@@ -200,12 +200,12 @@ public class CommandLineCompilerTaskOptions implements CompileAllTaskOptions {
      */
     @Override
     public Integer getExampleMaxDepth() {
-        String optionValue = commandLineArgs.getOptionValue("D");
+        String optionValue = commandLineArgs.getOptionValue( "D" );
         Integer maxDepth = null;
 
         if (optionValue != null) {
             try {
-                maxDepth = new Integer(optionValue);
+                maxDepth = new Integer( optionValue );
 
             } catch (NumberFormatException e) {
                 // No error - ignore and return null
@@ -215,14 +215,14 @@ public class CommandLineCompilerTaskOptions implements CompileAllTaskOptions {
     }
 
     /**
-	 * @see org.opentravel.schemacompiler.task.ExampleCompilerTaskOptions#isSuppressOptionalFields()
-	 */
-	@Override
-	public boolean isSuppressOptionalFields() {
-		return commandLineArgs.hasOption("o");
-	}
+     * @see org.opentravel.schemacompiler.task.ExampleCompilerTaskOptions#isSuppressOptionalFields()
+     */
+    @Override
+    public boolean isSuppressOptionalFields() {
+        return commandLineArgs.hasOption( "o" );
+    }
 
-	/**
+    /**
      * @see org.opentravel.schemacompiler.task.CommonCompilerTaskOptions#applyTaskOptions(org.opentravel.schemacompiler.task.CommonCompilerTaskOptions)
      */
     @Override

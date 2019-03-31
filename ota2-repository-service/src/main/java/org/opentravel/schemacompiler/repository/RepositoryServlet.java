@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.repository;
-
-import java.io.IOException;
-
-import javax.servlet.ServletException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,16 +26,20 @@ import org.opentravel.schemacompiler.notification.NotificationServiceFactory;
 import org.opentravel.schemacompiler.subscription.SubscriptionManager;
 import org.opentravel.schemacompiler.util.OTM16Upgrade;
 
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+
 /**
- * Servlet class that extends the Jersey JAX-RS servlet, adding a function to gracefully release the
- * indexing service resources when the servlet container is shut down.
+ * Servlet class that extends the Jersey JAX-RS servlet, adding a function to gracefully release the indexing service
+ * resources when the servlet container is shut down.
  * 
  * @author S. Livezey
  */
 public class RepositoryServlet extends ServletContainer {
 
-	private static final long serialVersionUID = -5879953110490573634L;
-	private static Log log = LogFactory.getLog(RepositoryServlet.class);
+    private static final long serialVersionUID = -5879953110490573634L;
+    private static Log log = LogFactory.getLog( RepositoryServlet.class );
 
     /**
      * Default constructor.
@@ -47,28 +48,27 @@ public class RepositoryServlet extends ServletContainer {
         super();
     }
 
-	/**
+    /**
      * Constructor that initializes the servlet using the resource configuration provided.
      * 
-     * @param app
-     *            the JAX-RS application instance
+     * @param resourceConfig the JAX-RS resource configuration
      */
     public RepositoryServlet(ResourceConfig resourceConfig) {
-		super(resourceConfig);
-		resourceConfig.register( MultiPartFeature.class );
-	}
+        super( resourceConfig );
+        resourceConfig.register( MultiPartFeature.class );
+    }
 
     /**
-     * @see com.sun.jersey.spi.container.servlet.ServletContainer#init()
+     * @see org.glassfish.jersey.servlet.ServletContainer#init()
      */
     @Override
     @SuppressWarnings("squid:S2696")
     public void init() throws ServletException {
         super.init();
         OTM16Upgrade.otm16Enabled = true;
-        FreeTextSearchServiceFactory.registerServiceOwner(this);
+        FreeTextSearchServiceFactory.registerServiceOwner( this );
         SubscriptionManager sManager = RepositoryComponentFactory.getDefault().getSubscriptionManager();
-        
+
         if (sManager != null) {
             sManager.startNotificationListener();
         }
@@ -76,28 +76,28 @@ public class RepositoryServlet extends ServletContainer {
     }
 
     /**
-     * @see com.sun.jersey.spi.container.servlet.ServletContainer#destroy()
+     * @see org.glassfish.jersey.servlet.ServletContainer#destroy()
      */
     @Override
     public void destroy() {
         super.destroy();
         SubscriptionManager sManager = RepositoryComponentFactory.getDefault().getSubscriptionManager();
-        
+
         if (sManager != null) {
-        	sManager.shutdownNotificationListener();
+            sManager.shutdownNotificationListener();
         }
-        
+
         // Attempt to shut down the singleton instance of the service. If this servlet is not the
         // last remaining instance for the container, this method will have no effect.
-        FreeTextSearchServiceFactory.unregisterServiceOwner(this);
+        FreeTextSearchServiceFactory.unregisterServiceOwner( this );
 
         try {
-        	FreeTextSearchServiceFactory.destroySingleton();
+            FreeTextSearchServiceFactory.destroySingleton();
 
         } catch (IOException e) {
-            log.error("Error shutting down the free-text search service.", e);
+            log.error( "Error shutting down the free-text search service.", e );
         }
-        
+
         // Shut down the notification service
         NotificationServiceFactory.shutdown();
     }

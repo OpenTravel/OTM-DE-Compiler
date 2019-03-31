@@ -19,33 +19,31 @@ package org.opentravel.schemacompiler.index;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.springframework.jms.core.JmsTemplate;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 
-import org.springframework.jms.core.JmsTemplate;
-
 /**
- * Factory class used to inject a mock <code>JmsTemplate</code> into the
- * indexing agent's application context.
+ * Factory class used to inject a mock <code>JmsTemplate</code> into the indexing agent's application context.
  */
 public class MockJmsTemplateFactory {
-	
-	/**
-	 * Returns a mock <code>JmsTemplate</code> that is capable of returning a
-	 * mocked out JMS connection factory and connection in order to simulate the
-	 * verification of a valid JMS configuration.
-	 * 
-	 * @return JmsTemplate
-	 * @throws Exception  thrown if the mock cannot be created
-	 */
-	public JmsTemplate newMockJmsTemplate() throws Exception {
-		JmsTemplate jmsTemplate = mock( JmsTemplate.class );
-		ConnectionFactory cnxFactory = mock( ConnectionFactory.class );
-		Connection cnx = mock( Connection.class );
-		
-		when( cnxFactory.createConnection() ).thenReturn( cnx );
-		when( jmsTemplate.getConnectionFactory() ).thenReturn( cnxFactory );
-		return jmsTemplate;
-	}
-	
+
+    /**
+     * Returns a mock <code>JmsTemplate</code> that is capable of returning a mocked out JMS connection factory and
+     * connection in order to simulate the verification of a valid JMS configuration.
+     * 
+     * @return JmsTemplate
+     * @throws Exception thrown if the mock cannot be created
+     */
+    public JmsTemplate newMockJmsTemplate() throws Exception {
+        JmsTemplate jmsTemplate = mock( JmsTemplate.class );
+        ConnectionFactory cnxFactory = mock( ConnectionFactory.class );
+        Connection cnx = mock( Connection.class );
+
+        when( cnxFactory.createConnection() ).thenReturn( cnx );
+        when( jmsTemplate.getConnectionFactory() ).thenReturn( cnxFactory );
+        return jmsTemplate;
+    }
+
 }

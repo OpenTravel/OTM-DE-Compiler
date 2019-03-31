@@ -13,7 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.security;
+
+import org.opentravel.ns.ota2.security_v01_00.Group;
+import org.opentravel.ns.ota2.security_v01_00.GroupAssignments;
+import org.opentravel.schemacompiler.config.FileResource;
+import org.opentravel.schemacompiler.repository.RepositoryException;
+import org.opentravel.schemacompiler.repository.RepositoryFileManager;
+import org.opentravel.schemacompiler.repository.RepositoryManager;
+import org.opentravel.schemacompiler.security.impl.SecurityFileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,20 +33,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.opentravel.ns.ota2.security_v01_00.Group;
-import org.opentravel.ns.ota2.security_v01_00.GroupAssignments;
-import org.opentravel.schemacompiler.config.FileResource;
-import org.opentravel.schemacompiler.repository.RepositoryException;
-import org.opentravel.schemacompiler.repository.RepositoryFileManager;
-import org.opentravel.schemacompiler.repository.RepositoryManager;
-import org.opentravel.schemacompiler.security.impl.SecurityFileUtils;
-
 /**
  * File resource that returns the mappings of known user ID's to each user's group assignments.
  * 
  * @author S. Livezey
  */
-public class GroupAssignmentsResource extends FileResource<Map<String, List<String>>> {
+public class GroupAssignmentsResource extends FileResource<Map<String,List<String>>> {
 
     public static final String GROUP_ASSIGNMENTS_FILE = "group-assignments.xml";
 
@@ -47,82 +48,79 @@ public class GroupAssignmentsResource extends FileResource<Map<String, List<Stri
     /**
      * Constructor that assigns the web service's repository location.
      * 
-     * @param repositoryManager
-     *            the repository manager for all file-system resources
+     * @param repositoryManager the repository manager for all file-system resources
      */
     public GroupAssignmentsResource(RepositoryManager repositoryManager) {
-        super(new File(repositoryManager.getRepositoryLocation(), GROUP_ASSIGNMENTS_FILE));
+        super( new File( repositoryManager.getRepositoryLocation(), GROUP_ASSIGNMENTS_FILE ) );
         this.fileManager = repositoryManager.getFileManager();
-        this.fileUtils = new SecurityFileUtils(repositoryManager);
+        this.fileUtils = new SecurityFileUtils( repositoryManager );
         invalidateResource();
     }
 
     /**
-     * Returns the list of assigned groups for the specified user. If no groups are assigned, this
-     * method will return an empty array.
+     * Returns the list of assigned groups for the specified user. If no groups are assigned, this method will return an
+     * empty array.
      * 
-     * @param userId
-     *            the ID of the user for which to return group assignments
+     * @param userId the ID of the user for which to return group assignments
      * @return String[]
      */
-	public String[] getAssignedGroups(String userId) {
-		Map<String, List<String>> groupAssignments = getResource();
-		List<String> assignedGroups = new ArrayList<>();
-		
-		for (Entry<String, List<String>> entry : groupAssignments.entrySet()) {
-			List<String> memberIds = new ArrayList<>(entry.getValue());
-			String groupName = entry.getKey();
-			boolean memberOfGroup = false;
-			
-			for (String memberId : memberIds) {
-				if (memberId.equalsIgnoreCase(userId)) {
-					memberOfGroup = true;
-					break;
-				}
-			}
-			if (memberOfGroup) {
-				assignedGroups.add(groupName);
-			}
-		}
-		return assignedGroups.toArray(new String[assignedGroups.size()]);
-	}
-	
+    public String[] getAssignedGroups(String userId) {
+        Map<String,List<String>> groupAssignments = getResource();
+        List<String> assignedGroups = new ArrayList<>();
+
+        for (Entry<String,List<String>> entry : groupAssignments.entrySet()) {
+            List<String> memberIds = new ArrayList<>( entry.getValue() );
+            String groupName = entry.getKey();
+            boolean memberOfGroup = false;
+
+            for (String memberId : memberIds) {
+                if (memberId.equalsIgnoreCase( userId )) {
+                    memberOfGroup = true;
+                    break;
+                }
+            }
+            if (memberOfGroup) {
+                assignedGroups.add( groupName );
+            }
+        }
+        return assignedGroups.toArray( new String[assignedGroups.size()] );
+    }
+
     /**
      * Returns the list of all group names defined in the group assignments file.
      * 
      * @return String[]
      */
     public String[] getGroupNames() {
-        Map<String, List<String>> groupAssignments = getResource();
-        List<String> allGroups = new ArrayList<>(groupAssignments.keySet());
+        Map<String,List<String>> groupAssignments = getResource();
+        List<String> allGroups = new ArrayList<>( groupAssignments.keySet() );
 
-        Collections.sort(allGroups);
-        return allGroups.toArray(new String[allGroups.size()]);
+        Collections.sort( allGroups );
+        return allGroups.toArray( new String[allGroups.size()] );
     }
 
     /**
      * Returns the list of all users assigned to the specified group.
      * 
-     * @param groupName
-     *            the name of the group for which to return a list of members
+     * @param groupName the name of the group for which to return a list of members
      * @return String[]
      */
-	public String[] getAssignedUsers(String groupName) {
-		Map<String, List<String>> groupAssignments = getResource();
-		List<String> groupMembers = new ArrayList<>();
-		
-		for (Entry<String, List<String>> entry : groupAssignments.entrySet()) {
-			String gName = entry.getKey();
-			
-			if (groupName.equals(gName)) {
-				groupMembers = entry.getValue();
-				break;
-			}
-		}
-		Collections.sort(groupMembers);
-		return groupMembers.toArray(new String[groupMembers.size()]);
-	}
-	
+    public String[] getAssignedUsers(String groupName) {
+        Map<String,List<String>> groupAssignments = getResource();
+        List<String> groupMembers = new ArrayList<>();
+
+        for (Entry<String,List<String>> entry : groupAssignments.entrySet()) {
+            String gName = entry.getKey();
+
+            if (groupName.equals( gName )) {
+                groupMembers = entry.getValue();
+                break;
+            }
+        }
+        Collections.sort( groupMembers );
+        return groupMembers.toArray( new String[groupMembers.size()] );
+    }
+
     /**
      * @see org.opentravel.schemacompiler.config.FileResource#getDefaultResourceValue()
      */
@@ -135,14 +133,15 @@ public class GroupAssignmentsResource extends FileResource<Map<String, List<Stri
      * @see org.opentravel.schemacompiler.config.FileResource#loadResource(java.io.File)
      */
     @Override
-    protected Map<String, List<String>> loadResource(File dataFile) throws IOException {
-        if (fileUtils == null)
+    protected Map<String,List<String>> loadResource(File dataFile) throws IOException {
+        if (fileUtils == null) {
             return getDefaultResourceValue(); // Special case for constructor initialization
-        GroupAssignments groupAssignments = fileUtils.loadGroupAssignments(dataFile);
+        }
+        GroupAssignments groupAssignments = fileUtils.loadGroupAssignments( dataFile );
         Map<String,List<String>> assignmentMap = new HashMap<>();
 
         for (Group group : groupAssignments.getGroup()) {
-            assignmentMap.put(group.getName(), new ArrayList<String>(group.getMember()));
+            assignmentMap.put( group.getName(), new ArrayList<String>( group.getMember() ) );
         }
         return assignmentMap;
     }
@@ -150,13 +149,10 @@ public class GroupAssignmentsResource extends FileResource<Map<String, List<Stri
     /**
      * Saves the list of all group assignments to the locally maintained group assignments file.
      * 
-     * @param allGroups
-     *            the list of groups to be saved
-     * @throws RepositoryException
-     *             thrown if the group assignments file cannot be saved
+     * @param allGroups the list of groups to be saved
+     * @throws RepositoryException thrown if the group assignments file cannot be saved
      */
-    public synchronized void saveGroupAssignments(List<UserGroup> allGroups)
-            throws RepositoryException {
+    public synchronized void saveGroupAssignments(List<UserGroup> allGroups) throws RepositoryException {
         fileManager.startChangeSet();
         boolean success = false;
         try {
@@ -166,23 +162,25 @@ public class GroupAssignmentsResource extends FileResource<Map<String, List<Stri
             for (UserGroup group : allGroups) {
                 Group jaxbGroup = new Group();
 
-                jaxbGroup.setName(group.getGroupName());
-                jaxbGroup.getMember().addAll(group.getMemberIds());
-                groupAssignments.getGroup().add(jaxbGroup);
+                jaxbGroup.setName( group.getGroupName() );
+                jaxbGroup.getMember().addAll( group.getMemberIds() );
+                groupAssignments.getGroup().add( jaxbGroup );
             }
-            fileManager.addToChangeSet(dataFile);
-            fileUtils.saveGroupAssignments(dataFile, groupAssignments);
+            fileManager.addToChangeSet( dataFile );
+            fileUtils.saveGroupAssignments( dataFile, groupAssignments );
             fileManager.commitChangeSet();
             invalidateResource();
-            refreshResource(dataFile);
+            refreshResource( dataFile );
             success = true;
 
         } catch (IOException e) {
-            throw new RepositoryException("Error saving the group assignments file.", e);
+            throw new RepositoryException( "Error saving the group assignments file.", e );
 
         } finally {
             try {
-                if (!success) fileManager.rollbackChangeSet();
+                if (!success) {
+                    fileManager.rollbackChangeSet();
+                }
             } catch (Exception e) {
                 // Ignore possible errrors and continue
             }

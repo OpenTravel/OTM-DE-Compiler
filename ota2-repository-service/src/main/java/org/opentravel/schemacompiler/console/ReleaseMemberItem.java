@@ -16,45 +16,45 @@
 
 package org.opentravel.schemacompiler.console;
 
-import java.util.Date;
-
 import org.opentravel.schemacompiler.index.LibrarySearchResult;
+
+import java.util.Date;
 
 /**
  * Encapsulates all relevant information for a release member to be displayed on the UI.
  */
 public class ReleaseMemberItem {
-	
-	private LibrarySearchResult library;
-	private Date effectiveDate;
-	
-	/**
-	 * Constructor that specifies the member library and the effective date.
-	 * 
-	 * @param library  the library member
-	 * @param effectiveDate  the effective date of the member (may be null)
-	 */
-	public ReleaseMemberItem(LibrarySearchResult library, Date effectiveDate) {
-		this.library = library;
-		this.effectiveDate = effectiveDate;
-	}
 
-	/**
-	 * Returns the the library member.
-	 *
-	 * @return LibrarySearchResult
-	 */
-	public LibrarySearchResult getLibrary() {
-		return library;
-	}
+    private LibrarySearchResult library;
+    private Date effectiveDate;
 
-	/**
-	 * Returns the effective date of the member (may be null).
-	 *
-	 * @return Date
-	 */
-	public Date getEffectiveDate() {
-		return effectiveDate;
-	}
-	
+    /**
+     * Constructor that specifies the member library and the effective date.
+     * 
+     * @param library the library member
+     * @param effectiveDate the effective date of the member (may be null)
+     */
+    public ReleaseMemberItem(LibrarySearchResult library, Date effectiveDate) {
+        this.library = library;
+        this.effectiveDate = effectiveDate;
+    }
+
+    /**
+     * Returns the the library member.
+     *
+     * @return LibrarySearchResult
+     */
+    public LibrarySearchResult getLibrary() {
+        return library;
+    }
+
+    /**
+     * Returns the effective date of the member (may be null).
+     *
+     * @return Date
+     */
+    public Date getEffectiveDate() {
+        return effectiveDate;
+    }
+
 }

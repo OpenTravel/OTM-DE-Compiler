@@ -13,7 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.security.impl;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.opentravel.ns.ota2.repositoryinfoext_v01_00.UserInfo;
+import org.opentravel.schemacompiler.repository.RepositoryException;
+import org.opentravel.schemacompiler.repository.RepositorySecurityException;
+import org.opentravel.schemacompiler.security.PasswordHelper;
+import org.opentravel.schemacompiler.security.PasswordValidator;
+import org.opentravel.schemacompiler.security.UserPrincipal;
 
 import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
@@ -40,42 +50,29 @@ import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.opentravel.ns.ota2.repositoryinfoext_v01_00.UserInfo;
-import org.opentravel.schemacompiler.repository.RepositoryException;
-import org.opentravel.schemacompiler.repository.RepositorySecurityException;
-import org.opentravel.schemacompiler.security.PasswordHelper;
-import org.opentravel.schemacompiler.security.PasswordValidator;
-import org.opentravel.schemacompiler.security.UserPrincipal;
-
 /**
- * Authentication provider that performs its checks against an LDAP directory. The configuration
- * settings required for JNDI authentication should be included in the
- * <code>ota2-repository-config.xml</code> configuration file.
+ * Authentication provider that performs its checks against an LDAP directory. The configuration settings required for
+ * JNDI authentication should be included in the <code>ota2-repository-config.xml</code> configuration file.
  * 
  * <p>
- * JNDI authentication for OTA2.0 repositories is very similar to that of standard Tomcat
- * authentication using a JNDI security realm. The configuration options for this provider support
- * two modes of operation:
+ * JNDI authentication for OTA2.0 repositories is very similar to that of standard Tomcat authentication using a JNDI
+ * security realm. The configuration options for this provider support two modes of operation:
  * 
  * <ul>
- * <li><b>User Lookup Mode</b> - In user lookup mode, an authenticated user (typically an LDAP
- * administrator) is used to establish all connections to the remote directory. User accounts are
- * identified by a distinguished name format that is the same for all users defined in the
- * directory. Once identified, encrypted password credentials are retrieved from the directory and
- * compared with the credentials provided by the remote user of the repository.
- * <li><b>User Search Mode</b> - Like user-lookup, this mode of operation establishes remote
- * connections using a single authenticated user account. User accounts are located by searches
- * within the directory using one or more configurable query strings. Once user accounts are located
- * by a search, the user's credentials are verified by attempting a login to the directory.
+ * <li><b>User Lookup Mode</b> - In user lookup mode, an authenticated user (typically an LDAP administrator) is used to
+ * establish all connections to the remote directory. User accounts are identified by a distinguished name format that
+ * is the same for all users defined in the directory. Once identified, encrypted password credentials are retrieved
+ * from the directory and compared with the credentials provided by the remote user of the repository.
+ * <li><b>User Search Mode</b> - Like user-lookup, this mode of operation establishes remote connections using a single
+ * authenticated user account. User accounts are located by searches within the directory using one or more configurable
+ * query strings. Once user accounts are located by a search, the user's credentials are verified by attempting a login
+ * to the directory.
  * </ul>
  * 
  * <p>
- * The table below provides the detail of the various configuration options for each mode of
- * operation:
+ * The table below provides the detail of the various configuration options for each mode of operation:
  * 
- * <table border="1" cellspacing="0" cellpadding="0">
+ * <table border="1" cellspacing="0" cellpadding="0" summary="">
  * <tr>
  * <th rowspan="2">Property Name</th>
  * <th rowspan="2">Description</th>
@@ -87,72 +84,70 @@ import org.opentravel.schemacompiler.security.UserPrincipal;
  * </tr>
  * <tr>
  * <td>contextFactory</td>
- * <td>Fully qualified Java class name of the factory class used to acquire our JNDI InitialContext.
- * By default, assumes that the standard JNDI LDAP provider will be utilized.</td>
+ * <td>Fully qualified Java class name of the factory class used to acquire our JNDI InitialContext. By default, assumes
+ * that the standard JNDI LDAP provider will be utilized.</td>
  * <td>Optional</td>
  * <td>Optional</td>
  * </tr>
  * <tr>
  * <td>connectionUrl</td>
- * <td>The connection URL to be passed to the JNDI driver when establishing a connection to the
- * directory.</td>
+ * <td>The connection URL to be passed to the JNDI driver when establishing a connection to the directory.</td>
  * <td>Required</td>
  * <td>Required</td>
  * </tr>
  * <tr>
  * <td>alternateUrl</td>
- * <td>If a socket connection can not be made to the provider at the <code>connectionURL</code> an
- * attempt will be made to use this address.</td>
+ * <td>If a socket connection can not be made to the provider at the <code>connectionURL</code> an attempt will be made
+ * to use this address.</td>
  * <td>Optional</td>
  * <td>Optional</td>
  * </tr>
  * <tr>
  * <td>connectionProtocol</td>
- * <td>A string specifying the security protocol to use. If not given the providers default is used.
- * </td>
+ * <td>A string specifying the security protocol to use. If not given the providers default is used.</td>
  * <td>Optional</td>
  * <td>Optional</td>
  * </tr>
  * <tr>
  * <td>securityAuthentication</td>
- * <td>A string specifying the type of authentication to use. "none", "simple", "STRONG" or a
- * provider specific definition can be used. If no value is given the providers default is used.</td>
+ * <td>A string specifying the type of authentication to use. "none", "simple", "STRONG" or a provider specific
+ * definition can be used. If no value is given the providers default is used.</td>
  * <td>Optional</td>
  * <td>Optional</td>
  * </tr>
  * <tr>
  * <td>connectionTimeout</td>
- * <td>The timeout in milliseconds to use when establishing the connection to the LDAP directory. If
- * not specified, a value of 5000 (5 seconds) is used.</td>
+ * <td>The timeout in milliseconds to use when establishing the connection to the LDAP directory. If not specified, a
+ * value of 5000 (5 seconds) is used.</td>
  * <td>Optional</td>
  * <td>Optional</td>
  * </tr>
  * <tr>
  * <td>authenticationCacheTimeout</td>
- * <td>The amount of time (in milliseconds) that the results of a user's login attempt should be
- * cached. Default value is 5 minutes.</td>
+ * <td>The amount of time (in milliseconds) that the results of a user's login attempt should be cached. Default value
+ * is 5 minutes.</td>
  * <td>Optional</td>
  * <td>Optional</td>
  * </tr>
  * <tr>
  * <td>connectionPrincipal</td>
- * <td>The directory username to use when establishing a connection to the directory for LDAP search
- * and lookup operations. If not specified an anonymous connection is made, which is often
- * sufficient unless you specify the <code>connectionPassword</code> property.</td>
+ * <td>The directory username to use when establishing a connection to the directory for LDAP search and lookup
+ * operations. If not specified an anonymous connection is made, which is often sufficient unless you specify the
+ * <code>connectionPassword</code> property.</td>
  * <td>Required</td>
  * <td>Required</td>
  * </tr>
  * <tr>
  * <td>connectionPassword</td>
- * <td>The directory password to use when establishing a connection to the directory for LDAP search
- * and lookup operations. If not specified an anonymous connection is made.</td>
+ * <td>The directory password to use when establishing a connection to the directory for LDAP search and lookup
+ * operations. If not specified an anonymous connection is made.</td>
  * <td>Required</td>
  * <td>Required</td>
  * </tr>
  * <tr>
  * <td>userPattern</td>
- * <td>Pattern for the distinguished name (DN) of the user's directory entry, with <code>{0}</code>
- * marking where the actual username should be inserted.</td>
+ * <td>Pattern for the distinguished name (DN) of the user's directory entry, with <code>{0}</code> marking where the
+ * actual username should be inserted.</td>
  * <td>Required</td>
  * <td>N/A</td>
  * </tr>
@@ -164,86 +159,82 @@ import org.opentravel.schemacompiler.security.UserPrincipal;
  * </tr>
  * <tr>
  * <td>searchUserSubtree</td>
- * <td>Set to true if you want to search the entire subtree of the element specified by the
- * 'userSearchBase' property for the user's entry. The default value of false causes only the top
- * level to be searched.</td>
+ * <td>Set to true if you want to search the entire subtree of the element specified by the 'userSearchBase' property
+ * for the user's entry. The default value of false causes only the top level to be searched.</td>
  * <td>N/A</td>
  * <td>Optional</td>
  * </tr>
  * <tr>
  * <td>userSearchPatterns</td>
- * <td>A colon-separated list of LDAP filter expressions to use when searching for a user's
- * directory entry, with <code>{0}</code> marking where the actual username should be inserted.</td>
+ * <td>A colon-separated list of LDAP filter expressions to use when searching for a user's directory entry, with
+ * <code>{0}</code> marking where the actual username should be inserted.</td>
  * <td>N/A</td>
  * <td>Required</td>
  * </tr>
  * <tr>
  * <td>userSearchTimeout</td>
- * <td>Specifies the time (in milliseconds) to wait for records to be returned when employing the
- * user-search mode of operation. If not specified, the default of 0 is used which indicates no
- * limit.</td>
+ * <td>Specifies the time (in milliseconds) to wait for records to be returned when employing the user-search mode of
+ * operation. If not specified, the default of 0 is used which indicates no limit.</td>
  * <td>N/A</td>
  * <td>Optional</td>
  * </tr>
  * <tr>
  * <td>userIdAttribute</td>
- * <td>Specifies the name of the attribute where user ID's are stored on user entries. If not
- * specified, a default value of "uid" is assumed.</td>
+ * <td>Specifies the name of the attribute where user ID's are stored on user entries. If not specified, a default value
+ * of "uid" is assumed.</td>
  * <td>Optional</td>
  * <td>Optional</td>
  * </tr>
  * <tr>
  * <tr>
  * <td>userLastNameAttribute</td>
- * <td>Specifies the name of the attribute where last (family) names are stored on user entries. If not
- * specified, a default value of "sn" is assumed.</td>
+ * <td>Specifies the name of the attribute where last (family) names are stored on user entries. If not specified, a
+ * default value of "sn" is assumed.</td>
  * <td>Optional</td>
  * <td>Optional</td>
  * </tr>
  * <tr>
  * <td>userFirstNameAttribute</td>
- * <td>Specifies the name of the attribute where first (given) names are stored on user entries. If not
- * specified, a default value of "givenName" is assumed.</td>
+ * <td>Specifies the name of the attribute where first (given) names are stored on user entries. If not specified, a
+ * default value of "givenName" is assumed.</td>
  * <td>Optional</td>
  * <td>Optional</td>
  * </tr>
  * <tr>
  * <td>userFullNameAttribute</td>
- * <td>Specifies the name of the attribute where full names (typically "Last, First") are stored on user
- * entries. If not specified, a default value of "cn" is assumed.</td>
+ * <td>Specifies the name of the attribute where full names (typically "Last, First") are stored on user entries. If not
+ * specified, a default value of "cn" is assumed.</td>
  * <td>Optional</td>
  * <td>Optional</td>
  * </tr>
  * <tr>
  * <td>userEmailAttribute</td>
- * <td>Specifies the name of the attribute where email addresses are stored on user entries. If not
- * specified, a default value of "mail" is assumed.</td>
+ * <td>Specifies the name of the attribute where email addresses are stored on user entries. If not specified, a default
+ * value of "mail" is assumed.</td>
  * <td>Optional</td>
  * <td>Optional</td>
  * </tr>
  * <tr>
  * <td>userPasswordAttribute</td>
- * <td>Specifies the name of the attribute where passwords are stored on user entries. If not
- * specified, a default value of "userPassword" is assumed.</td>
+ * <td>Specifies the name of the attribute where passwords are stored on user entries. If not specified, a default value
+ * of "userPassword" is assumed.</td>
  * <td>Optional</td>
  * <td>N/A</td>
  * </tr>
  * <tr>
  * <td>referralStrategy</td>
- * <td>Specifies the strategy for JNDI referrals; allowed values are "ignore", "follow", or "throw"
- * (see javax.naming.Context.REFERRAL for more information). Microsoft Active Directory often
- * returns referrals. If you need to follow them set referrals to "follow". Caution: if your DNS is
- * not part of AD, the LDAP client lib might try to resolve your domain name in DNS to find another
- * LDAP server.</td>
+ * <td>Specifies the strategy for JNDI referrals; allowed values are "ignore", "follow", or "throw" (see
+ * javax.naming.Context.REFERRAL for more information). Microsoft Active Directory often returns referrals. If you need
+ * to follow them set referrals to "follow". Caution: if your DNS is not part of AD, the LDAP client lib might try to
+ * resolve your domain name in DNS to find another LDAP server.</td>
  * <td>Optional</td>
  * <td>Optional</td>
  * </tr>
  * <tr>
  * <td>digestAlgorithm</td>
- * <td>The digest algorithm to apply to the plaintext password offered by the user before comparing
- * it with the value retrieved from the directory. Valid values are those accepted for the algorithm
- * name by the java.security.MessageDigest class. If not specified the plaintext password is assumed
- * to be retrieved.</td>
+ * <td>The digest algorithm to apply to the plaintext password offered by the user before comparing it with the value
+ * retrieved from the directory. Valid values are those accepted for the algorithm name by the
+ * java.security.MessageDigest class. If not specified the plaintext password is assumed to be retrieved.</td>
  * <td>Required</td>
  * <td>N/A</td>
  * </tr>
@@ -259,10 +250,16 @@ import org.opentravel.schemacompiler.security.UserPrincipal;
  */
 public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
 
-	private static final String ERROR_CLOSING_JNDI_CONTEXT = "Error closing JNDI context.";
-	private static Log log = LogFactory.getLog(JNDIAuthenticationProvider.class);
+    private static final String REQUIRED_LOOKUP_PROPERTY =
+        " property is a required value for the JNDI user-lookup mode.";
+    private static final String REQUIRED_SEARCH_PROPERTY =
+        " property is a required value for the JNDI user-search mode.";
+    private static final String ERROR_CLOSING_JNDI_CONTEXT = "Error closing JNDI context.";
+    private static Log log = LogFactory.getLog( JNDIAuthenticationProvider.class );
 
-    private enum AuthenticationMode { USER_LOOKUP, USER_SEARCH }
+    private enum AuthenticationMode {
+        USER_LOOKUP, USER_SEARCH
+    }
 
     private AuthenticationMode mode;
 
@@ -295,7 +292,7 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     private Map<String,Long> profileCacheTimeouts = new HashMap<>();
     private Map<String,AuthenticationCacheEntry> authenticationCache = new HashMap<>();
     private PasswordValidator passwordValidator;
-    
+
     /**
      * @see org.opentravel.schemacompiler.security.AuthenticationProvider#isValidUser(java.lang.String,java.lang.String)
      */
@@ -303,361 +300,359 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     public boolean isValidUser(String userId, String password) throws RepositorySecurityException {
         boolean isValid = false;
         int attemptCount = 0;
-        
+
         while (!isValid && (attemptCount < 2)) {
             try {
                 initializeConfigurationSettings();
-                isValid = checkCredentials(userId, password);
+                isValid = checkCredentials( userId, password );
 
             } catch (CommunicationException | ServiceUnavailableException e) {
-            	// Continue to make another attempt
-            	
+                // Continue to make another attempt
+
             } catch (NamingException e) {
-                log.error("Error from remote directory: " + e.getMessage(), e);
-                
+                log.error( "Error from remote directory: " + e.getMessage(), e );
+
             } finally {
-            	attemptCount++;
+                attemptCount++;
             }
         }
         return isValid;
     }
 
-	/**
-	 * @see org.opentravel.schemacompiler.security.AuthenticationProvider#setUserPassword(java.lang.String, java.lang.String)
-	 */
-	@Override
-	public void setUserPassword(String userId, String password) throws RepositoryException {
-		throw new UnsupportedOperationException("Passwords for directory users cannot be modified from the repository.");
-	}
-
-	/**
-	 * @see org.opentravel.schemacompiler.security.impl.AbstractAuthenticationProvider#deleteUser(java.lang.String)
-	 */
-	@Override
-	public void deleteUser(String userId) throws RepositoryException {
-		super.deleteUser(userId);
-		profileCacheTimeouts.remove( userId );
-		authenticationCache.remove( userId );
-	}
-
-	/**
-	 * @see org.opentravel.schemacompiler.security.AuthenticationProvider#searchCandidateUsers(java.lang.String, int)
-	 */
-	@Override
-	public List<UserPrincipal> searchCandidateUsers(String searchCriteria, int maxResults) throws RepositoryException {
-		List<UserPrincipal> userList = new ArrayList<>();
-		
-		if ((searchCriteria != null) && (searchCriteria.length() > 0)) {
-			List<String> searchAttributes = Arrays.asList(userLastNameAttribute, userFirstNameAttribute,userFullNameAttribute);
-			SearchControls constraints = new SearchControls();
-			String searchFilter = buildSearchFilter(searchCriteria, searchAttributes);
-			DirContext context = null;
-			
-			constraints.setSearchScope(
-					searchUserSubtree ? SearchControls.SUBTREE_SCOPE : SearchControls.ONELEVEL_SCOPE);
-			constraints.setTimeLimit(userSearchTimeout);
-			constraints.setCountLimit(maxResults);
-			constraints.setReturningAttributes(new String[] { userIdAttribute, userLastNameAttribute,
-					userFirstNameAttribute, userEmailAttribute });
-			
-			try {
-                initializeConfigurationSettings();
-				context = openConnection(connectionPrincipal, connectionPassword);
-				NamingEnumeration<SearchResult> searchResults = context.search(
-						userSearchBase, searchFilter, constraints);
-				
-				while (searchResults.hasMore()) {
-					SearchResult resultItem = searchResults.next();
-					Attributes itemAttrs = resultItem.getAttributes();
-					String userId = getAttributeValue(itemAttrs, userIdAttribute);
-					String lastName = getAttributeValue(itemAttrs, userLastNameAttribute);
-					String firstName = getAttributeValue(itemAttrs, userFirstNameAttribute);
-					String email = getAttributeValue(itemAttrs, userEmailAttribute);
-					UserPrincipal user = new UserPrincipal();
-					
-					user.setUserId(userId);
-					user.setLastName(lastName);
-					user.setFirstName(firstName);
-					user.setEmailAddress(email);
-					userList.add(user);
-				}
-				
-			} catch (PartialResultException | SizeLimitExceededException e) {
-				// Ignore - this means we have reached the end of the list and that any remaining
-				// items are aliased referrals which cannot be resolved.
-				
-			} catch (NamingException e) {
-				throw new RepositoryException("Error encountered during directory search.", e);
-			}
-		}
-		return userList;
-	}
-
-	/**
-	 * Constructs a JNDI search filter using the given search criteria and attributes.
-	 * 
-	 * @param searchCriteria  the JNDI search criteria
-	 * @param searchAttributes  the search attributes
-	 * @return String
-	 */
-	private String buildSearchFilter(String searchCriteria, List<String> searchAttributes) {
-		StringBuilder searchFilter = new StringBuilder("(|");
-		
-		for (String searchAttr : searchAttributes) {
-			if ((searchAttr != null) && (searchAttr.length() > 0)) {
-				searchFilter.append("(").append(searchAttr).append("=*").append(searchCriteria).append("*)");
-			}
-		}
-		searchFilter.append(")");
-		
-		return searchFilter.toString();
-	}
-	
-	/**
-     * Contacts the remote directory to determine if the password provided is valid for the
-     * specified userId.
-     * 
-     * @param userId
-     *            the user ID to verify
-     * @param authCredentials
-     *            the user's password to be authenticated
-     * @return boolean
-     * @throws NamingException
-     *             thrown if an error occurs while communicating with the remote directory
+    /**
+     * @see org.opentravel.schemacompiler.security.AuthenticationProvider#setUserPassword(java.lang.String,
+     *      java.lang.String)
      */
-	protected boolean checkCredentials(String userId, String authCredentials) throws NamingException {
-		DirContext context = null;
-		boolean isValid = false;
-		
-		try {
-			AuthenticationCacheEntry cacheEntry = getCachedAuthentication(userId);
-			boolean isAuthenticationCached = false;
-			
-			if ((cacheEntry != null) && (authCredentials != null)
-					&& PasswordHelper.encrypt(authCredentials).equals(cacheEntry.getEncryptedPassword())) {
-				isAuthenticationCached = true;
-				isValid = cacheEntry.isAuthenticationSuccessful();
-			}
-			
-			if (!isAuthenticationCached) {
-				// The cached authentication was expired or unavailable, so we
-				// need to perform a live authentication against the JNDI server.
-				context = openConnection(connectionPrincipal, connectionPassword);
-				String userPassword;
-				
-				if (mode == AuthenticationMode.USER_LOOKUP) {
-					userPassword = lookupUserPassword(userId, context);
-					
-					if (userPassword != null) {
-						isValid = passwordValidator.isValidPassword(authCredentials, userPassword);
-					}
-					
-				} else { // AuthenticationMode.USER_SEARCH
-					context = authenticateUser(userId, authCredentials, context);
-					isValid = (context != null);
-				}
-				
-				// Add these results to the cache so the results will be cached
-				// for the next inquiry
-				setCachedAuthentication(
-						new AuthenticationCacheEntry(userId, PasswordHelper.encrypt(authCredentials), isValid));
-			}
-			return isValid;
-			
-		} finally {
-			try {
-				if (context != null) context.close();
-				
-			} catch (Exception e) {
-				log.warn(ERROR_CLOSING_JNDI_CONTEXT, e);
-			}
-		}
-	}
+    @Override
+    public void setUserPassword(String userId, String password) throws RepositoryException {
+        throw new UnsupportedOperationException(
+            "Passwords for directory users cannot be modified from the repository." );
+    }
 
-	/**
-	 * Authenticates the user by closing the given context and opening a new one, using
-	 * the credentials provided to perform the authentication.  If the operation was successful,
-	 * the new context will be returned.  On failure, this method will return null.
-	 * 
-	 * @param userId  the user ID to authenticate
-	 * @param authCredentials  the user's password to authenticate
-	 * @param context  the directory context to user for the user's DN lookup
-	 * @return DirContext
-	 * @throws NamingException  thrown if an error occurs during the user's DN lookup
-	 */
-	private DirContext authenticateUser(String userId, String authCredentials, DirContext context)
-			throws NamingException {
-		String userDn = findUserDn(userId, context);
-		
+    /**
+     * @see org.opentravel.schemacompiler.security.impl.AbstractAuthenticationProvider#deleteUser(java.lang.String)
+     */
+    @Override
+    public void deleteUser(String userId) throws RepositoryException {
+        super.deleteUser( userId );
+        profileCacheTimeouts.remove( userId );
+        authenticationCache.remove( userId );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.security.AuthenticationProvider#searchCandidateUsers(java.lang.String, int)
+     */
+    @Override
+    public List<UserPrincipal> searchCandidateUsers(String searchCriteria, int maxResults) throws RepositoryException {
+        List<UserPrincipal> userList = new ArrayList<>();
+
+        if ((searchCriteria != null) && (searchCriteria.length() > 0)) {
+            List<String> searchAttributes =
+                Arrays.asList( userLastNameAttribute, userFirstNameAttribute, userFullNameAttribute );
+            SearchControls constraints = new SearchControls();
+            String searchFilter = buildSearchFilter( searchCriteria, searchAttributes );
+            DirContext context = null;
+
+            constraints
+                .setSearchScope( searchUserSubtree ? SearchControls.SUBTREE_SCOPE : SearchControls.ONELEVEL_SCOPE );
+            constraints.setTimeLimit( userSearchTimeout );
+            constraints.setCountLimit( maxResults );
+            constraints.setReturningAttributes(
+                new String[] {userIdAttribute, userLastNameAttribute, userFirstNameAttribute, userEmailAttribute} );
+
+            try {
+                initializeConfigurationSettings();
+                context = openConnection( connectionPrincipal, connectionPassword );
+                NamingEnumeration<SearchResult> searchResults =
+                    context.search( userSearchBase, searchFilter, constraints );
+
+                while (searchResults.hasMore()) {
+                    SearchResult resultItem = searchResults.next();
+                    Attributes itemAttrs = resultItem.getAttributes();
+                    String userId = getAttributeValue( itemAttrs, userIdAttribute );
+                    String lastName = getAttributeValue( itemAttrs, userLastNameAttribute );
+                    String firstName = getAttributeValue( itemAttrs, userFirstNameAttribute );
+                    String email = getAttributeValue( itemAttrs, userEmailAttribute );
+                    UserPrincipal user = new UserPrincipal();
+
+                    user.setUserId( userId );
+                    user.setLastName( lastName );
+                    user.setFirstName( firstName );
+                    user.setEmailAddress( email );
+                    userList.add( user );
+                }
+
+            } catch (PartialResultException | SizeLimitExceededException e) {
+                // Ignore - this means we have reached the end of the list and that any remaining
+                // items are aliased referrals which cannot be resolved.
+
+            } catch (NamingException e) {
+                throw new RepositoryException( "Error encountered during directory search.", e );
+            }
+        }
+        return userList;
+    }
+
+    /**
+     * Constructs a JNDI search filter using the given search criteria and attributes.
+     * 
+     * @param searchCriteria the JNDI search criteria
+     * @param searchAttributes the search attributes
+     * @return String
+     */
+    private String buildSearchFilter(String searchCriteria, List<String> searchAttributes) {
+        StringBuilder searchFilter = new StringBuilder( "(|" );
+
+        for (String searchAttr : searchAttributes) {
+            if ((searchAttr != null) && (searchAttr.length() > 0)) {
+                searchFilter.append( "(" ).append( searchAttr ).append( "=*" ).append( searchCriteria ).append( "*)" );
+            }
+        }
+        searchFilter.append( ")" );
+
+        return searchFilter.toString();
+    }
+
+    /**
+     * Contacts the remote directory to determine if the password provided is valid for the specified userId.
+     * 
+     * @param userId the user ID to verify
+     * @param authCredentials the user's password to be authenticated
+     * @return boolean
+     * @throws NamingException thrown if an error occurs while communicating with the remote directory
+     */
+    protected boolean checkCredentials(String userId, String authCredentials) throws NamingException {
+        DirContext context = null;
+        boolean isValid = false;
+
+        try {
+            AuthenticationCacheEntry cacheEntry = getCachedAuthentication( userId );
+            boolean isAuthenticationCached = false;
+
+            if ((cacheEntry != null) && (authCredentials != null)
+                && PasswordHelper.encrypt( authCredentials ).equals( cacheEntry.getEncryptedPassword() )) {
+                isAuthenticationCached = true;
+                isValid = cacheEntry.isAuthenticationSuccessful();
+            }
+
+            if (!isAuthenticationCached) {
+                // The cached authentication was expired or unavailable, so we
+                // need to perform a live authentication against the JNDI server.
+                context = openConnection( connectionPrincipal, connectionPassword );
+                String userPassword;
+
+                if (mode == AuthenticationMode.USER_LOOKUP) {
+                    userPassword = lookupUserPassword( userId, context );
+
+                    if (userPassword != null) {
+                        isValid = passwordValidator.isValidPassword( authCredentials, userPassword );
+                    }
+
+                } else { // AuthenticationMode.USER_SEARCH
+                    context = authenticateUser( userId, authCredentials, context );
+                    isValid = (context != null);
+                }
+
+                // Add these results to the cache so the results will be cached
+                // for the next inquiry
+                setCachedAuthentication(
+                    new AuthenticationCacheEntry( userId, PasswordHelper.encrypt( authCredentials ), isValid ) );
+            }
+            return isValid;
+
+        } finally {
+            try {
+                if (context != null) {
+                    context.close();
+                }
+            } catch (Exception e) {
+                log.warn( ERROR_CLOSING_JNDI_CONTEXT, e );
+            }
+        }
+    }
+
+    /**
+     * Authenticates the user by closing the given context and opening a new one, using the credentials provided to
+     * perform the authentication. If the operation was successful, the new context will be returned. On failure, this
+     * method will return null.
+     * 
+     * @param userId the user ID to authenticate
+     * @param authCredentials the user's password to authenticate
+     * @param context the directory context to user for the user's DN lookup
+     * @return DirContext
+     * @throws NamingException thrown if an error occurs during the user's DN lookup
+     */
+    private DirContext authenticateUser(String userId, String authCredentials, DirContext context)
+        throws NamingException {
+        String userDn = findUserDn( userId, context );
+
         context.close(); // close the generic lookup context
         context = null;
-        
-		if (userDn != null) {
-			try {
-				context = openConnection(userDn, authCredentials);
-				
-			} catch (NamingException e) {
-				// Ignore and return false
-			}
-		}
-		return context;
-	}
-	
-	/**
+
+        if (userDn != null) {
+            try {
+                context = openConnection( userDn, authCredentials );
+
+            } catch (NamingException e) {
+                // Ignore and return false
+            }
+        }
+        return context;
+    }
+
+    /**
      * Verifies that the user has a valid account in the directory.
      * 
-	 * @see org.opentravel.schemacompiler.security.impl.AbstractAuthenticationProvider#validateUserInfo(org.opentravel.ns.ota2.repositoryinfoext_v01_00.UserInfo)
-	 */
-	@Override
-	protected void validateUserInfo(UserInfo userInfo) throws RepositoryException {
-		super.validateUserInfo( userInfo );
-		refreshUserInfo( userInfo );
-	}
-
-	/**
-	 * @see org.opentravel.schemacompiler.security.impl.AbstractAuthenticationProvider#refreshUserInfo(org.opentravel.ns.ota2.repositoryinfoext_v01_00.UserInfo)
-	 */
-	@Override
-	protected void refreshUserInfo(UserInfo userInfo) {
-		String userId = (userInfo == null) ? null : userInfo.getUserId();
-		DirContext context = null;
-		
-		try {
-			if (userId != null) {
-				Long profileCacheTimeout = profileCacheTimeouts.get( userId );
-				
-				if ((profileCacheTimeout == null) || (System.currentTimeMillis() > profileCacheTimeout)) {
-					context = openConnection( connectionPrincipal, connectionPassword );
-					refreshUserInfo( userInfo, context );
-					profileCacheTimeouts.put( userId, System.currentTimeMillis() + authenticationCacheTimeout );
-				}
-			}
-			
-		} catch (NamingException e) {
-			log.error( "Error refreshing user account: " + userId, e );
-			
-		} finally {
-			try {
-				if (context != null) context.close();
-				
-			} catch (Exception e) {
-				log.warn(ERROR_CLOSING_JNDI_CONTEXT, e);
-			}
-		}
-	}
-
-	/**
-	 * @see org.opentravel.schemacompiler.security.impl.AbstractAuthenticationProvider#refreshAllUsers()
-	 */
-	@Override
-	protected void refreshAllUsers() {
-		DirContext context = null;
-		
-		try {
-			for (Entry<String,UserInfo> entry : userRegistry.entrySet()) {
-				String userId = entry.getKey();
-				Long profileCacheTimeout = profileCacheTimeouts.get( userId );
-				
-				if ((profileCacheTimeout == null) || (System.currentTimeMillis() > profileCacheTimeout)) {
-					UserInfo userInfo = entry.getValue();
-					
-					if (context == null) {
-						context = openConnection( connectionPrincipal, connectionPassword );
-					}
-					refreshUserInfo( userInfo, context );
-				}
-			}
-			
-		} catch (NamingException e) {
-			log.error( "Error refreshing user accounts.", e );
-			
-		} finally {
-			try {
-				if (context != null) context.close();
-				
-			} catch (Exception e) {
-				log.warn(ERROR_CLOSING_JNDI_CONTEXT);
-			}
-		}
-	}
-
-	/**
-	 * Uses the context provided to refresh the user information from the directory.
-	 * 
-	 * @param userInfo  the user information to be refreshed
-	 * @param context  the directory context to use for the refresh
-	 */
-	private void refreshUserInfo(UserInfo userInfo, DirContext context) {
-		try {
-			String userId = (userInfo == null) ? null : userInfo.getUserId();
-			String userDn;
-			
-			if (userId != null) {
-				if (mode == AuthenticationMode.USER_LOOKUP) {
-					userDn = userPattern.format(new String[] { userId });
-					
-				} else {
-					userDn = findUserDn( userId, context );
-				}
-				
-				if (userDn == null) {
-					log.warn( "User account does not exist in the directory: " + userId );
-					
-				} else { // Make sure the account profile fields are populated from the directory
-					String contextDnSuffix = "," + context.getNameInNamespace();
-					if (userDn.endsWith( contextDnSuffix )) {
-						userDn = userDn.replaceAll( contextDnSuffix, "" );
-					}
-					
-					Attributes userAttrs = context.getAttributes( userDn, new String[] {
-							userLastNameAttribute, userFirstNameAttribute, userEmailAttribute } );
-					
-					userInfo.setLastName( getAttributeValue( userAttrs, userLastNameAttribute ) );
-					userInfo.setFirstName( getAttributeValue( userAttrs, userFirstNameAttribute ) );
-					userInfo.setEmailAddress( getAttributeValue( userAttrs, userEmailAttribute ) );
-				}
-			}
-			
-		} catch (NamingException e) {
-			log.warn( "Error refreshing user information from directory.", e );
-			
-		} finally {
-			if (userInfo != null) {
-				profileCacheTimeouts.put( userInfo.getUserId(), System.currentTimeMillis() + authenticationCacheTimeout );
-			}
-		}
-	}
-	
-	/**
-     * Opens a connection to the remote directory. If the first attempt is unsuccessful using the
-     * primary connection URL, a second attempt is made using the alternate URL (if one has been
-     * provided).
-     * 
-     * @param loginId
-     *            the user principal ID to use when establishing the connection
-     * @param loginPassword
-     *            the password credentials to use when establishing the connection
-     * @return DirContext
-     * @throws NamingException
-     *             thrown if a connection to the remote directory cannot be established
+     * @see org.opentravel.schemacompiler.security.impl.AbstractAuthenticationProvider#validateUserInfo(org.opentravel.ns.ota2.repositoryinfoext_v01_00.UserInfo)
      */
-    protected DirContext openConnection(String loginId, String loginPassword)
-            throws NamingException {
+    @Override
+    protected void validateUserInfo(UserInfo userInfo) throws RepositoryException {
+        super.validateUserInfo( userInfo );
+        refreshUserInfo( userInfo );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.security.impl.AbstractAuthenticationProvider#refreshUserInfo(org.opentravel.ns.ota2.repositoryinfoext_v01_00.UserInfo)
+     */
+    @Override
+    protected void refreshUserInfo(UserInfo userInfo) {
+        String userId = (userInfo == null) ? null : userInfo.getUserId();
+        DirContext context = null;
+
+        try {
+            if (userId != null) {
+                Long profileCacheTimeout = profileCacheTimeouts.get( userId );
+
+                if ((profileCacheTimeout == null) || (System.currentTimeMillis() > profileCacheTimeout)) {
+                    context = openConnection( connectionPrincipal, connectionPassword );
+                    refreshUserInfo( userInfo, context );
+                    profileCacheTimeouts.put( userId, System.currentTimeMillis() + authenticationCacheTimeout );
+                }
+            }
+
+        } catch (NamingException e) {
+            log.error( "Error refreshing user account: " + userId, e );
+
+        } finally {
+            try {
+                if (context != null) {
+                    context.close();
+                }
+            } catch (Exception e) {
+                log.warn( ERROR_CLOSING_JNDI_CONTEXT, e );
+            }
+        }
+    }
+
+    /**
+     * Uses the context provided to refresh the user information from the directory.
+     * 
+     * @param userInfo the user information to be refreshed
+     * @param context the directory context to use for the refresh
+     */
+    private void refreshUserInfo(UserInfo userInfo, DirContext context) {
+        try {
+            String userId = (userInfo == null) ? null : userInfo.getUserId();
+            String userDn;
+
+            if (userId != null) {
+                if (mode == AuthenticationMode.USER_LOOKUP) {
+                    userDn = userPattern.format( new String[] {userId} );
+
+                } else {
+                    userDn = findUserDn( userId, context );
+                }
+
+                if (userDn == null) {
+                    log.warn( "User account does not exist in the directory: " + userId );
+
+                } else { // Make sure the account profile fields are populated from the directory
+                    String contextDnSuffix = "," + context.getNameInNamespace();
+                    if (userDn.endsWith( contextDnSuffix )) {
+                        userDn = userDn.replaceAll( contextDnSuffix, "" );
+                    }
+
+                    Attributes userAttrs = context.getAttributes( userDn,
+                        new String[] {userLastNameAttribute, userFirstNameAttribute, userEmailAttribute} );
+
+                    userInfo.setLastName( getAttributeValue( userAttrs, userLastNameAttribute ) );
+                    userInfo.setFirstName( getAttributeValue( userAttrs, userFirstNameAttribute ) );
+                    userInfo.setEmailAddress( getAttributeValue( userAttrs, userEmailAttribute ) );
+                }
+            }
+
+        } catch (NamingException e) {
+            log.warn( "Error refreshing user information from directory.", e );
+
+        } finally {
+            if (userInfo != null) {
+                profileCacheTimeouts.put( userInfo.getUserId(),
+                    System.currentTimeMillis() + authenticationCacheTimeout );
+            }
+        }
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.security.impl.AbstractAuthenticationProvider#refreshAllUsers()
+     */
+    @Override
+    protected void refreshAllUsers() {
+        DirContext context = null;
+
+        try {
+            for (Entry<String,UserInfo> entry : userRegistry.entrySet()) {
+                String userId = entry.getKey();
+                Long profileCacheTimeout = profileCacheTimeouts.get( userId );
+
+                if ((profileCacheTimeout == null) || (System.currentTimeMillis() > profileCacheTimeout)) {
+                    UserInfo userInfo = entry.getValue();
+
+                    if (context == null) {
+                        context = openConnection( connectionPrincipal, connectionPassword );
+                    }
+                    refreshUserInfo( userInfo, context );
+                }
+            }
+
+        } catch (NamingException e) {
+            log.error( "Error refreshing user accounts.", e );
+
+        } finally {
+            try {
+                if (context != null) {
+                    context.close();
+                }
+            } catch (Exception e) {
+                log.warn( ERROR_CLOSING_JNDI_CONTEXT );
+            }
+        }
+    }
+
+    /**
+     * Opens a connection to the remote directory. If the first attempt is unsuccessful using the primary connection
+     * URL, a second attempt is made using the alternate URL (if one has been provided).
+     * 
+     * @param loginId the user principal ID to use when establishing the connection
+     * @param loginPassword the password credentials to use when establishing the connection
+     * @return DirContext
+     * @throws NamingException thrown if a connection to the remote directory cannot be established
+     */
+    protected DirContext openConnection(String loginId, String loginPassword) throws NamingException {
         DirContext context = null;
 
         if (alternateUrl == null) {
-            context = new InitialDirContext( new Hashtable<>(
-            		getDirectoryContextEnvironment(loginId, loginPassword, false) ) );
+            context = new InitialDirContext(
+                new Hashtable<>( getDirectoryContextEnvironment( loginId, loginPassword, false ) ) );
 
         } else {
             try {
-                context = new InitialDirContext(new Hashtable<>(
-                		getDirectoryContextEnvironment(loginId, loginPassword, false) ) );
+                context = new InitialDirContext(
+                    new Hashtable<>( getDirectoryContextEnvironment( loginId, loginPassword, false ) ) );
 
             } catch (NamingException e) {
-                log.warn("Unable to connect using primary directory URL - attempting using alternate address.");
-                context = new InitialDirContext(new Hashtable<>(
-                		getDirectoryContextEnvironment(loginId, loginPassword, true) ) );
+                log.warn( "Unable to connect using primary directory URL - attempting using alternate address." );
+                context = new InitialDirContext(
+                    new Hashtable<>( getDirectoryContextEnvironment( loginId, loginPassword, true ) ) );
             }
         }
         return context;
@@ -666,21 +661,18 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     /**
      * Performs a lookup of the user's password in the remote directory.
      * 
-     * @param userId
-     *            the ID of the user whose password is to be retrieved
-     * @param context
-     *            the directory context from which to retrieve the user's password
+     * @param userId the ID of the user whose password is to be retrieved
+     * @param context the directory context from which to retrieve the user's password
      * @return String
-     * @throws NamingException
+     * @throws NamingException thrown if an error occurs during the naming lookup
      */
     protected String lookupUserPassword(String userId, DirContext context) throws NamingException {
         String userPassword = null;
         try {
-            String userDn = userPattern.format(new String[] { userId });
-            Attributes userAttributes = context.getAttributes(userDn,
-                    new String[] { userCredentialAttribute });
+            String userDn = userPattern.format( new String[] {userId} );
+            Attributes userAttributes = context.getAttributes( userDn, new String[] {userCredentialAttribute} );
 
-            userPassword = getAttributeValue(userAttributes, userCredentialAttribute);
+            userPassword = getAttributeValue( userAttributes, userCredentialAttribute );
 
         } catch (NameNotFoundException e) {
             // Ignore and return null
@@ -689,87 +681,79 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Searches the remote directory for the user's entry and returns its distinguished name
-     * string.
+     * Searches the remote directory for the user's entry and returns its distinguished name string.
      * 
-     * @param userId
-     *            the ID of the user whose DN is to be retrieved
-     * @param context
-     *            the directory context from which to retrieve the user's DN
+     * @param userId the ID of the user whose DN is to be retrieved
+     * @param context the directory context from which to retrieve the user's DN
      * @return String
-     * @throws NamingException
+     * @throws NamingException thrown if an error occurs during the naming lookup
      */
-	protected String findUserDn(String userId, DirContext context) throws NamingException {
-		String userDn = null;
-		
-		for (MessageFormat userSearchPattern : userSearchPatterns) {
-			try {
-				String searchFilter = userSearchPattern.format(new String[] { userId });
-				SearchControls constraints = new SearchControls();
-				
-				constraints
-					.setSearchScope(searchUserSubtree ? SearchControls.SUBTREE_SCOPE : SearchControls.ONELEVEL_SCOPE);
-				constraints.setTimeLimit(userSearchTimeout);
-				
-				NamingEnumeration<SearchResult> results = context.search(userSearchBase, searchFilter, constraints);
-				SearchResult result = getUserSearchResult(userId, results);
-				
-				if (result != null) {
-					userDn = result.getNameInNamespace();
-					break;
-				}
-				
-			} catch (NameNotFoundException e) {
-				// Ignore and keep searching
-			}
-		}
-		return userDn;
-	}
-	
-	/**
-	 * Returns the first search result for the specified user.
-	 * 
-	 * @param userId  the user ID for which the search was conducted
-	 * @param results  the search results from which to return an item
-	 * @return SearchResult
-	 * @throws NamingException  thrown if an error occurs retrieving the result
-	 */
-	private SearchResult getUserSearchResult(String userId, NamingEnumeration<SearchResult> results)
-			throws NamingException {
-        SearchResult result = null;
-        
-		try {
-		    if ((results != null) && results.hasMore()) {
-		        result = results.next();
+    protected String findUserDn(String userId, DirContext context) throws NamingException {
+        String userDn = null;
 
-		        // Make sure only one entry exists for the requested user
-		        if (results.hasMore()) {
-		            log.warn("Multiple entries found for user: " + userId);
-		            result = null;
-		        }
-		    }
-		} catch (PartialResultException e) {
-		    // Ignore partial result errors - most likely due to ActiveDirectory referrals
-		}
-		return result;
-	}
+        for (MessageFormat userSearchPattern : userSearchPatterns) {
+            try {
+                String searchFilter = userSearchPattern.format( new String[] {userId} );
+                SearchControls constraints = new SearchControls();
+
+                constraints
+                    .setSearchScope( searchUserSubtree ? SearchControls.SUBTREE_SCOPE : SearchControls.ONELEVEL_SCOPE );
+                constraints.setTimeLimit( userSearchTimeout );
+
+                NamingEnumeration<SearchResult> results = context.search( userSearchBase, searchFilter, constraints );
+                SearchResult result = getUserSearchResult( userId, results );
+
+                if (result != null) {
+                    userDn = result.getNameInNamespace();
+                    break;
+                }
+
+            } catch (NameNotFoundException e) {
+                // Ignore and keep searching
+            }
+        }
+        return userDn;
+    }
 
     /**
-     * Returns the specified attribute value from the list of attributes provided. If multiple
-     * values are assigned to the requested attribute, only the first available value will be
-     * returned.
+     * Returns the first search result for the specified user.
      * 
-     * @param attributes
-     *            the list of attributes from which to return a value
-     * @param attributeName
-     *            the name of the attribute whose value is to be returned
-     * @return String
-     * @throws NamingException
-     *             thrown if an error occurs while scanning the attributes
+     * @param userId the user ID for which the search was conducted
+     * @param results the search results from which to return an item
+     * @return SearchResult
+     * @throws NamingException thrown if an error occurs retrieving the result
      */
-    private String getAttributeValue(Attributes attributes, String attributeName)
-            throws NamingException {
-        Attribute attribute = (attributes == null) ? null : attributes.get(attributeName);
+    private SearchResult getUserSearchResult(String userId, NamingEnumeration<SearchResult> results)
+        throws NamingException {
+        SearchResult result = null;
+
+        try {
+            if ((results != null) && results.hasMore()) {
+                result = results.next();
+
+                // Make sure only one entry exists for the requested user
+                if (results.hasMore()) {
+                    log.warn( "Multiple entries found for user: " + userId );
+                    result = null;
+                }
+            }
+        } catch (PartialResultException e) {
+            // Ignore partial result errors - most likely due to ActiveDirectory referrals
+        }
+        return result;
+    }
+
+    /**
+     * Returns the specified attribute value from the list of attributes provided. If multiple values are assigned to
+     * the requested attribute, only the first available value will be returned.
+     * 
+     * @param attributes the list of attributes from which to return a value
+     * @param attributeName the name of the attribute whose value is to be returned
+     * @return String
+     * @throws NamingException thrown if an error occurs while scanning the attributes
+     */
+    private String getAttributeValue(Attributes attributes, String attributeName) throws NamingException {
+        Attribute attribute = (attributes == null) ? null : attributes.get( attributeName );
         String attributeValue = null;
 
         if (attribute != null) {
@@ -777,7 +761,7 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
 
             if (attrValue != null) {
                 if (attrValue instanceof byte[]) {
-                    attributeValue = new String((byte[]) attrValue);
+                    attributeValue = new String( (byte[]) attrValue );
 
                 } else {
                     attributeValue = attrValue.toString();
@@ -790,43 +774,40 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     /**
      * Creates the directory context configuration.
      * 
-     * @param loginId
-     *            the user principal ID to use when establishing the connection
-     * @param loginPassword
-     *            the password credentials to use when establishing the connection
-     * @param isConnectionRetry
-     *            if true, the alternate URL will be employed
-     * @return Hashtable<String,String>
+     * @param loginId the user principal ID to use when establishing the connection
+     * @param loginPassword the password credentials to use when establishing the connection
+     * @param isConnectionRetry if true, the alternate URL will be employed
+     * @return Hashtable&lt;String,String&gt;
      */
-    protected Map<String, String> getDirectoryContextEnvironment(String loginId,
-            String loginPassword, boolean isConnectionRetry) {
+    protected Map<String,String> getDirectoryContextEnvironment(String loginId, String loginPassword,
+        boolean isConnectionRetry) {
         Map<String,String> env = new HashMap<>();
 
-        env.put(Context.INITIAL_CONTEXT_FACTORY, contextFactory);
+        env.put( Context.INITIAL_CONTEXT_FACTORY, contextFactory );
 
         if (!isConnectionRetry) {
-            env.put(Context.PROVIDER_URL, connectionUrl);
+            env.put( Context.PROVIDER_URL, connectionUrl );
 
         } else if (alternateUrl != null) {
-            env.put(Context.PROVIDER_URL, alternateUrl);
+            env.put( Context.PROVIDER_URL, alternateUrl );
         }
         if (loginId != null) {
-            env.put(Context.SECURITY_PRINCIPAL, loginId);
+            env.put( Context.SECURITY_PRINCIPAL, loginId );
         }
         if (loginPassword != null) {
-            env.put(Context.SECURITY_CREDENTIALS, loginPassword);
+            env.put( Context.SECURITY_CREDENTIALS, loginPassword );
         }
         if (securityAuthentication != null) {
-            env.put(Context.SECURITY_AUTHENTICATION, securityAuthentication);
+            env.put( Context.SECURITY_AUTHENTICATION, securityAuthentication );
         }
         if (connectionProtocol != null) {
-            env.put(Context.SECURITY_PROTOCOL, connectionProtocol);
+            env.put( Context.SECURITY_PROTOCOL, connectionProtocol );
         }
         if (referralStrategy != null) {
-            env.put(Context.REFERRAL, referralStrategy);
+            env.put( Context.REFERRAL, referralStrategy );
         }
         if (connectionTimeout > 0) {
-            env.put("com.sun.jndi.ldap.connect.timeout", connectionTimeout + "");
+            env.put( "com.sun.jndi.ldap.connect.timeout", connectionTimeout + "" );
         }
         return env;
     }
@@ -834,19 +815,18 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     /**
      * Ensure that the configuration settings are valid for one of the allowed modes of operatoin.
      * 
-     * @throws RepositorySecurityException
-     *             thrown if the JNDI configuration settings are not valid for one of the allowed
-     *             modes of operation
+     * @throws RepositorySecurityException thrown if the JNDI configuration settings are not valid for one of the
+     *         allowed modes of operation
      */
-    protected synchronized void initializeConfigurationSettings()
-            throws RepositorySecurityException {
-        if (isInitialized)
+    protected synchronized void initializeConfigurationSettings() throws RepositorySecurityException {
+        if (isInitialized) {
             return; // Already done - return without action
+        }
 
         // First, verify that all required mode-independent settings are present
         if ((connectionUrl == null) || (connectionUrl.length() == 0)) {
-            throw new RepositorySecurityException(
-                    "The 'authentication.jndi.connectionUrl' property is a required value for all JNDI authentication modes.");
+            throw new RepositorySecurityException( "The 'authentication.jndi.connectionUrl'"
+                + " property is a required value for all JNDI authentication modes." );
         }
 
         // Next, identify the mode of operation based on the configuration settings provided
@@ -860,60 +840,60 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
         // Finally, ensure that all required mode-specific settings have been provided
         if (mode == AuthenticationMode.USER_LOOKUP) {
             validateUserLookup();
-        	
+
         } else if (mode == AuthenticationMode.USER_SEARCH) {
             // userSearchBase, userSearchPatterns
             validateUserSearch();
         }
     }
 
-	/**
-	 * Validates the USER_SEARCH configuration.
-	 * 
-	 * @throws RepositorySecurityException  thrown if a configuration error is detected
-	 */
-	private void validateUserSearch() throws RepositorySecurityException {
-		if ((connectionPrincipal == null) || (connectionPrincipal.length() == 0)) {
-		    throw new RepositorySecurityException(
-		            "The 'authentication.jndi.connectionPrincipal' property is a required value for the JNDI user-search mode.");
-		}
-		if ((connectionPassword == null) || (connectionPassword.length() == 0)) {
-		    throw new RepositorySecurityException(
-		            "The 'authentication.jndi.connectionPassword' property is a required value for the JNDI user-search mode.");
-		}
-		if (userSearchBase == null) {
-		    throw new RepositorySecurityException(
-		            "The 'authentication.jndi.userSearchBase' property is a required value for the JNDI user-search mode.");
-		}
-		if ((userSearchPatterns == null) || (userSearchPatterns.length == 0)) {
-		    throw new RepositorySecurityException(
-		            "The 'authentication.jndi.userSearchPatterns' property is a required value for the JNDI user-search mode.");
-		}
-	}
-
-	/**
-	 * Validates the USER_LOOKUP configuration.
-	 * 
-	 * @throws RepositorySecurityException  thrown if a configuration error is detected
-	 */
-	private void validateUserLookup() throws RepositorySecurityException {
-		if ((connectionPrincipal == null) || (connectionPrincipal.length() == 0)) {
-		    throw new RepositorySecurityException(
-		            "The 'authentication.jndi.connectionPrincipal' property is a required value for the JNDI user-lookup mode.");
-		}
-		if ((connectionPassword == null) || (connectionPassword.length() == 0)) {
-		    throw new RepositorySecurityException(
-		            "The 'authentication.jndi.connectionPassword' property is a required value for the JNDI user-lookup mode.");
-		}
-		if (passwordValidator == null) {
-		    throw new RepositorySecurityException(
-		            "The 'authentication.jndi.digestAlgorithm' property is a required value for the JNDI user-lookup mode.");
-		}
-	}
+    /**
+     * Validates the USER_SEARCH configuration.
+     * 
+     * @throws RepositorySecurityException thrown if a configuration error is detected
+     */
+    private void validateUserSearch() throws RepositorySecurityException {
+        if ((connectionPrincipal == null) || (connectionPrincipal.length() == 0)) {
+            throw new RepositorySecurityException(
+                "The 'authentication.jndi.connectionPrincipal'" + REQUIRED_SEARCH_PROPERTY );
+        }
+        if ((connectionPassword == null) || (connectionPassword.length() == 0)) {
+            throw new RepositorySecurityException(
+                "The 'authentication.jndi.connectionPassword'" + REQUIRED_SEARCH_PROPERTY );
+        }
+        if (userSearchBase == null) {
+            throw new RepositorySecurityException(
+                "The 'authentication.jndi.userSearchBase'" + REQUIRED_SEARCH_PROPERTY );
+        }
+        if ((userSearchPatterns == null) || (userSearchPatterns.length == 0)) {
+            throw new RepositorySecurityException(
+                "The 'authentication.jndi.userSearchPatterns'" + REQUIRED_SEARCH_PROPERTY );
+        }
+    }
 
     /**
-     * Returns the fully qualified Java class name of the factory class used to acquire our JNDI
-     * InitialContext. By default, assumes that the standard JNDI LDAP provider will be utilized.
+     * Validates the USER_LOOKUP configuration.
+     * 
+     * @throws RepositorySecurityException thrown if a configuration error is detected
+     */
+    private void validateUserLookup() throws RepositorySecurityException {
+        if ((connectionPrincipal == null) || (connectionPrincipal.length() == 0)) {
+            throw new RepositorySecurityException(
+                "The 'authentication.jndi.connectionPrincipal'" + REQUIRED_LOOKUP_PROPERTY );
+        }
+        if ((connectionPassword == null) || (connectionPassword.length() == 0)) {
+            throw new RepositorySecurityException(
+                "The 'authentication.jndi.connectionPassword'" + REQUIRED_LOOKUP_PROPERTY );
+        }
+        if (passwordValidator == null) {
+            throw new RepositorySecurityException(
+                "The 'authentication.jndi.digestAlgorithm'" + REQUIRED_LOOKUP_PROPERTY );
+        }
+    }
+
+    /**
+     * Returns the fully qualified Java class name of the factory class used to acquire our JNDI InitialContext. By
+     * default, assumes that the standard JNDI LDAP provider will be utilized.
      * 
      * @return String
      */
@@ -922,11 +902,10 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Assigns the fully qualified Java class name of the factory class used to acquire our JNDI
-     * InitialContext. By default, assumes that the standard JNDI LDAP provider will be utilized.
+     * Assigns the fully qualified Java class name of the factory class used to acquire our JNDI InitialContext. By
+     * default, assumes that the standard JNDI LDAP provider will be utilized.
      * 
-     * @param contextFactory
-     *            the field value to assign
+     * @param contextFactory the field value to assign
      */
     public void setContextFactory(String contextFactory) {
         this.isInitialized = false;
@@ -934,8 +913,7 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Returns the connection URL to be passed to the JNDI driver when establishing a connection to
-     * the directory.
+     * Returns the connection URL to be passed to the JNDI driver when establishing a connection to the directory.
      * 
      * @return String
      */
@@ -944,11 +922,9 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Assigns the connection URL to be passed to the JNDI driver when establishing a connection to
-     * the directory.
+     * Assigns the connection URL to be passed to the JNDI driver when establishing a connection to the directory.
      * 
-     * @param connectionUrl
-     *            the field value to assign
+     * @param connectionUrl the field value to assign
      */
     public void setConnectionUrl(String connectionUrl) {
         this.isInitialized = false;
@@ -956,8 +932,8 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Returns the connection URL to be used if a socket connection can not be made to the provider
-     * at the <code>connectionURL</code> an attempt will be made to use this address.
+     * Returns the connection URL to be used if a socket connection can not be made to the provider at the
+     * <code>connectionURL</code> an attempt will be made to use this address.
      * 
      * @return String
      */
@@ -966,11 +942,10 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Assigns the connection URL to be used if a socket connection can not be made to the provider
-     * at the <code>connectionURL</code> an attempt will be made to use this address.
+     * Assigns the connection URL to be used if a socket connection can not be made to the provider at the
+     * <code>connectionURL</code> an attempt will be made to use this address.
      * 
-     * @param alternateUrl
-     *            the field value to assign
+     * @param alternateUrl the field value to assign
      */
     public void setAlternateUrl(String alternateUrl) {
         this.isInitialized = false;
@@ -978,8 +953,7 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Returns the string specifying the security protocol to use. If not given the providers
-     * default is used.
+     * Returns the string specifying the security protocol to use. If not given the providers default is used.
      * 
      * @return String
      */
@@ -988,11 +962,9 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Assigns the string specifying the security protocol to use. If not given the providers
-     * default is used.
+     * Assigns the string specifying the security protocol to use. If not given the providers default is used.
      * 
-     * @param connectionProtocol
-     *            the field value to assign
+     * @param connectionProtocol the field value to assign
      */
     public void setConnectionProtocol(String connectionProtocol) {
         this.isInitialized = false;
@@ -1000,9 +972,8 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Returns the string specifying the type of authentication to use. "none", "simple", "STRONG"
-     * or a provider specific definition can be used. If no value is given the providers default is
-     * used.
+     * Returns the string specifying the type of authentication to use. "none", "simple", "STRONG" or a provider
+     * specific definition can be used. If no value is given the providers default is used.
      * 
      * @return String
      */
@@ -1011,12 +982,10 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Assigns the string specifying the type of authentication to use. "none", "simple", "STRONG"
-     * or a provider specific definition can be used. If no value is given the providers default is
-     * used.
+     * Assigns the string specifying the type of authentication to use. "none", "simple", "STRONG" or a provider
+     * specific definition can be used. If no value is given the providers default is used.
      * 
-     * @param securityAuthentication
-     *            the field value to assign
+     * @param securityAuthentication the field value to assign
      */
     public void setSecurityAuthentication(String securityAuthentication) {
         this.isInitialized = false;
@@ -1024,8 +993,8 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Returns the timeout in milliseconds to use when establishing the connection to the LDAP
-     * directory. If not specified, a value of 5000 (5 seconds) is used.
+     * Returns the timeout in milliseconds to use when establishing the connection to the LDAP directory. If not
+     * specified, a value of 5000 (5 seconds) is used.
      * 
      * @return int
      */
@@ -1034,11 +1003,10 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Assigns the timeout in milliseconds to use when establishing the connection to the LDAP
-     * directory. If not specified, a value of 5000 (5 seconds) is used.
+     * Assigns the timeout in milliseconds to use when establishing the connection to the LDAP directory. If not
+     * specified, a value of 5000 (5 seconds) is used.
      * 
-     * @param connectionTimeout
-     *            the field value to assign
+     * @param connectionTimeout the field value to assign
      */
     public void setConnectionTimeout(int connectionTimeout) {
         this.isInitialized = false;
@@ -1046,9 +1014,9 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Returns the directory username to use when establishing a connection to the directory for
-     * LDAP search and lookup operations. If not specified an anonymous connection is made, which is
-     * often sufficient unless you specify the <code>connectionPassword</code> property.
+     * Returns the directory username to use when establishing a connection to the directory for LDAP search and lookup
+     * operations. If not specified an anonymous connection is made, which is often sufficient unless you specify the
+     * <code>connectionPassword</code> property.
      * 
      * @return String
      */
@@ -1057,12 +1025,11 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Assigns the directory username to use when establishing a connection to the directory for
-     * LDAP search and lookup operations. If not specified an anonymous connection is made, which is
-     * often sufficient unless you specify the <code>connectionPassword</code> property.
+     * Assigns the directory username to use when establishing a connection to the directory for LDAP search and lookup
+     * operations. If not specified an anonymous connection is made, which is often sufficient unless you specify the
+     * <code>connectionPassword</code> property.
      * 
-     * @param connectionPrincipal
-     *            the field value to assign
+     * @param connectionPrincipal the field value to assign
      */
     public void setConnectionPrincipal(String connectionPrincipal) {
         this.isInitialized = false;
@@ -1070,8 +1037,8 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Returns the directory password to use when establishing a connection to the directory for
-     * LDAP search and lookup operations. If not specified an anonymous connection is made.
+     * Returns the directory password to use when establishing a connection to the directory for LDAP search and lookup
+     * operations. If not specified an anonymous connection is made.
      * 
      * @return String
      */
@@ -1080,11 +1047,10 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Assigns the directory password to use when establishing a connection to the directory for
-     * LDAP search and lookup operations. If not specified an anonymous connection is made.
+     * Assigns the directory password to use when establishing a connection to the directory for LDAP search and lookup
+     * operations. If not specified an anonymous connection is made.
      * 
-     * @param connectionPassword
-     *            the field value to assign
+     * @param connectionPassword the field value to assign
      */
     public void setConnectionPassword(String connectionPassword) {
         this.isInitialized = false;
@@ -1092,8 +1058,8 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Returns the pattern for the distinguished name (DN) of the user's directory entry, with
-     * <code>{0}</code> marking where the actual username should be inserted.
+     * Returns the pattern for the distinguished name (DN) of the user's directory entry, with <code>{0}</code> marking
+     * where the actual username should be inserted.
      * 
      * @return String
      */
@@ -1102,20 +1068,18 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Assigns the pattern for the distinguished name (DN) of the user's directory entry, with
-     * <code>{0}</code> marking where the actual username should be inserted.
+     * Assigns the pattern for the distinguished name (DN) of the user's directory entry, with <code>{0}</code> marking
+     * where the actual username should be inserted.
      * 
-     * @param userPattern
-     *            the field value to assign
+     * @param userPattern the field value to assign
      */
     public void setUserPattern(String userPattern) {
         this.isInitialized = false;
-        this.userPattern = (userPattern == null) ? null : new MessageFormat(userPattern);
+        this.userPattern = (userPattern == null) ? null : new MessageFormat( userPattern );
     }
 
     /**
-     * Returns the base element for user searches performed using the 'userSearchPatterns'
-     * expressions.
+     * Returns the base element for user searches performed using the 'userSearchPatterns' expressions.
      * 
      * @return String
      */
@@ -1124,11 +1088,9 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Assigns the base element for user searches performed using the 'userSearchPatterns'
-     * expressions.
+     * Assigns the base element for user searches performed using the 'userSearchPatterns' expressions.
      * 
-     * @param userSearchBase
-     *            the field value to assign
+     * @param userSearchBase the field value to assign
      */
     public void setUserSearchBase(String userSearchBase) {
         this.isInitialized = false;
@@ -1136,9 +1098,9 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Returns the flag value that determines whether to search the entire subtree of the element
-     * specified by the 'userSearchBase' property for the user's entry. The default value of false
-     * causes only the top level to be searched.
+     * Returns the flag value that determines whether to search the entire subtree of the element specified by the
+     * 'userSearchBase' property for the user's entry. The default value of false causes only the top level to be
+     * searched.
      * 
      * @return boolean
      */
@@ -1147,12 +1109,11 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Assigns the flag value that determines whether to search the entire subtree of the element
-     * specified by the 'userSearchBase' property for the user's entry. The default value of false
-     * causes only the top level to be searched.
+     * Assigns the flag value that determines whether to search the entire subtree of the element specified by the
+     * 'userSearchBase' property for the user's entry. The default value of false causes only the top level to be
+     * searched.
      * 
-     * @param searchUserSubtree
-     *            the field value to assign
+     * @param searchUserSubtree the field value to assign
      */
     public void setSearchUserSubtree(boolean searchUserSubtree) {
         this.isInitialized = false;
@@ -1160,9 +1121,8 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Returns the colon-separated list of LDAP filter expressions to use when searching for a
-     * user's directory entry, with <code>{0}</code> marking where the actual username should be
-     * inserted.
+     * Returns the colon-separated list of LDAP filter expressions to use when searching for a user's directory entry,
+     * with <code>{0}</code> marking where the actual username should be inserted.
      * 
      * @return String
      */
@@ -1173,9 +1133,10 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
             StringBuilder sp = new StringBuilder();
 
             for (MessageFormat pattern : userSearchPatterns) {
-                if (sp.length() > 0)
-                    sp.append(":");
-                sp.append(pattern.toPattern());
+                if (sp.length() > 0) {
+                    sp.append( ":" );
+                }
+                sp.append( pattern.toPattern() );
             }
             searchPatterns = sp.toString();
 
@@ -1186,22 +1147,20 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Assigns the colon-separated list of LDAP filter expressions to use when searching for a
-     * user's directory entry, with <code>{0}</code> marking where the actual username should be
-     * inserted.
+     * Assigns the colon-separated list of LDAP filter expressions to use when searching for a user's directory entry,
+     * with <code>{0}</code> marking where the actual username should be inserted.
      * 
-     * @param userSearchPatterns
-     *            the field value to assign
+     * @param userSearchPatterns the field value to assign
      */
     public void setUserSearchPatterns(String userSearchPatterns) {
         this.isInitialized = false;
 
         if (userSearchPatterns != null) {
-            String[] patternList = userSearchPatterns.split("\\:");
+            String[] patternList = userSearchPatterns.split( "\\:" );
             this.userSearchPatterns = new MessageFormat[patternList.length];
 
             for (int i = 0; i < patternList.length; i++) {
-                this.userSearchPatterns[i] = new MessageFormat(patternList[i]);
+                this.userSearchPatterns[i] = new MessageFormat( patternList[i] );
             }
         } else {
             this.userSearchPatterns = null;
@@ -1209,9 +1168,8 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Returns the time (in milliseconds) to wait for records to be returned when employing the
-     * user-search mode of operation. If not specified, the default of 0 is used which indicates no
-     * limit.
+     * Returns the time (in milliseconds) to wait for records to be returned when employing the user-search mode of
+     * operation. If not specified, the default of 0 is used which indicates no limit.
      * 
      * @return int
      */
@@ -1220,12 +1178,10 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Assignsthe time (in milliseconds) to wait for records to be returned when employing the
-     * user-search mode of operation. If not specified, the default of 0 is used which indicates no
-     * limit.
+     * Assignsthe time (in milliseconds) to wait for records to be returned when employing the user-search mode of
+     * operation. If not specified, the default of 0 is used which indicates no limit.
      * 
-     * @param userSearchTimeout
-     *            the field value to assign
+     * @param userSearchTimeout the field value to assign
      */
     public void setUserSearchTimeout(int userSearchTimeout) {
         this.isInitialized = false;
@@ -1233,108 +1189,108 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-	 * Returns the name of the attribute where user ID's are stored on user entries. If not
-     * specified, a default value of "uid" is assumed.
-	 *
-	 * @return String
-	 */
-	public String getUserIdAttribute() {
-		return userIdAttribute;
-	}
+     * Returns the name of the attribute where user ID's are stored on user entries. If not specified, a default value
+     * of "uid" is assumed.
+     *
+     * @return String
+     */
+    public String getUserIdAttribute() {
+        return userIdAttribute;
+    }
 
-	/**
-	 * Assigns the name of the attribute where user ID's are stored on user entries. If not
-     * specified, a default value of "uid" is assumed.
-	 *
-	 * @param userIdAttribute  the attribute name to assign
-	 */
-	public void setUserIdAttribute(String userIdAttribute) {
-		this.userIdAttribute = userIdAttribute;
-	}
+    /**
+     * Assigns the name of the attribute where user ID's are stored on user entries. If not specified, a default value
+     * of "uid" is assumed.
+     *
+     * @param userIdAttribute the attribute name to assign
+     */
+    public void setUserIdAttribute(String userIdAttribute) {
+        this.userIdAttribute = userIdAttribute;
+    }
 
-	/**
-     * Returns the name of the attribute where last (family) names are stored on user entries. If not
-     * specified, a default value of "sn" is assumed.
-	 *
-	 * @return String
-	 */
-	public String getUserLastNameAttribute() {
-		return userLastNameAttribute;
-	}
+    /**
+     * Returns the name of the attribute where last (family) names are stored on user entries. If not specified, a
+     * default value of "sn" is assumed.
+     *
+     * @return String
+     */
+    public String getUserLastNameAttribute() {
+        return userLastNameAttribute;
+    }
 
-	/**
-	 * Assigns the name of the attribute where last (family) names are stored on user entries. If not
-     * specified, a default value of "sn" is assumed.
-	 *
-	 * @param userLastNameAttribute  the attribute name to assign
-	 */
-	public void setUserLastNameAttribute(String userLastNameAttribute) {
-		this.userLastNameAttribute = userLastNameAttribute;
-	}
+    /**
+     * Assigns the name of the attribute where last (family) names are stored on user entries. If not specified, a
+     * default value of "sn" is assumed.
+     *
+     * @param userLastNameAttribute the attribute name to assign
+     */
+    public void setUserLastNameAttribute(String userLastNameAttribute) {
+        this.userLastNameAttribute = userLastNameAttribute;
+    }
 
-	/**
-     * Returns the name of the attribute where first (given) names are stored on user entries. If not
-     * specified, a default value of "givenName" is assumed.
-	 *
-	 * @return String
-	 */
-	public String getUserFirstNameAttribute() {
-		return userFirstNameAttribute;
-	}
+    /**
+     * Returns the name of the attribute where first (given) names are stored on user entries. If not specified, a
+     * default value of "givenName" is assumed.
+     *
+     * @return String
+     */
+    public String getUserFirstNameAttribute() {
+        return userFirstNameAttribute;
+    }
 
-	/**
-	 * Assigns the name of the attribute where first (given) names are stored on user entries. If not
-     * specified, a default value of "givenName" is assumed.
-	 *
-	 * @param userFirstNameAttribute  the attribute name to assign
-	 */
-	public void setUserFirstNameAttribute(String userFirstNameAttribute) {
-		this.userFirstNameAttribute = userFirstNameAttribute;
-	}
+    /**
+     * Assigns the name of the attribute where first (given) names are stored on user entries. If not specified, a
+     * default value of "givenName" is assumed.
+     *
+     * @param userFirstNameAttribute the attribute name to assign
+     */
+    public void setUserFirstNameAttribute(String userFirstNameAttribute) {
+        this.userFirstNameAttribute = userFirstNameAttribute;
+    }
 
-	/**
-	 * Returns the name of the attribute where full names (typically "Last, First") are stored on user
-	 * entries. If not specified, a default value of "cn" is assumed.
-	 *
-	 * @return String
-	 */
-	public String getUserFullNameAttribute() {
-		return userFullNameAttribute;
-	}
+    /**
+     * Returns the name of the attribute where full names (typically "Last, First") are stored on user entries. If not
+     * specified, a default value of "cn" is assumed.
+     *
+     * @return String
+     */
+    public String getUserFullNameAttribute() {
+        return userFullNameAttribute;
+    }
 
-	/**
-	 * Assigns the name of the attribute where full names (typically "Last, First") are stored on user
-	 * entries. If not specified, a default value of "cn" is assumed.
-	 *
-	 * @param userFullNameAttribute  the attribute name to assign
-	 */
-	public void setUserFullNameAttribute(String userFullNameAttribute) {
-		this.userFullNameAttribute = userFullNameAttribute;
-	}
+    /**
+     * Assigns the name of the attribute where full names (typically "Last, First") are stored on user entries. If not
+     * specified, a default value of "cn" is assumed.
+     *
+     * @param userFullNameAttribute the attribute name to assign
+     */
+    public void setUserFullNameAttribute(String userFullNameAttribute) {
+        this.userFullNameAttribute = userFullNameAttribute;
+    }
 
-	/**
-     * Returns the name of the attribute where email addresses are stored on user entries. If not
-     * specified, a default value of "mail" is assumed.
-	 *
-	 * @return String
-	 */
-	public String getUserEmailAttribute() {
-		return userEmailAttribute;
-	}
+    /**
+     * Returns the name of the attribute where email addresses are stored on user entries. If not specified, a default
+     * value of "mail" is assumed.
+     *
+     * @return String
+     */
+    public String getUserEmailAttribute() {
+        return userEmailAttribute;
+    }
 
-	/**
-	 * Assigns the name of the attribute where email addresses are stored on user entries. If not
-     * specified, a default value of "mail" is assumed.
-	 *
-	 * @param userEmailAttribute  the attribute name to assign
-	 */
-	public void setUserEmailAttribute(String userEmailAttribute) {
-		this.userEmailAttribute = userEmailAttribute;
-	}
+    /**
+     * Assigns the name of the attribute where email addresses are stored on user entries. If not specified, a default
+     * value of "mail" is assumed.
+     *
+     * @param userEmailAttribute the attribute name to assign
+     */
+    public void setUserEmailAttribute(String userEmailAttribute) {
+        this.userEmailAttribute = userEmailAttribute;
+    }
 
-	/**
-     * Returns the name of the attribute where passwords are stored on user entries. If not
-     * specified, a default value of "userPassword" is assumed.
+    /**
+     * Returns the name of the attribute where passwords are stored on user entries. If not specified, a default value
+     * of "userPassword" is assumed.
      * 
      * @return String
      */
@@ -1343,10 +1299,10 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Assigns the name of the attribute where passwords are stored on user entries. If not
-     * specified, a default value of "userPassword" is assumed.
+     * Assigns the name of the attribute where passwords are stored on user entries. If not specified, a default value
+     * of "userPassword" is assumed.
      * 
-     * @param userCredentialAttribute  the attribute name to assign
+     * @param userCredentialAttribute the attribute name to assign
      */
     public void setUserPasswordAttribute(String userCredentialAttribute) {
         this.isInitialized = false;
@@ -1354,11 +1310,10 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Returns the strategy for JNDI referrals; allowed values are "ignore", "follow", or "throw"
-     * (see <code>javax.naming.Context.REFERRAL</code> for more information). Microsoft Active
-     * Directory often returns referrals. If you need to follow them set referrals to "follow".
-     * Caution: if your DNS is not part of AD, the LDAP client lib might try to resolve your domain
-     * name in DNS to find another LDAP server.
+     * Returns the strategy for JNDI referrals; allowed values are "ignore", "follow", or "throw" (see
+     * <code>javax.naming.Context.REFERRAL</code> for more information). Microsoft Active Directory often returns
+     * referrals. If you need to follow them set referrals to "follow". Caution: if your DNS is not part of AD, the LDAP
+     * client lib might try to resolve your domain name in DNS to find another LDAP server.
      * 
      * @return String
      */
@@ -1367,14 +1322,12 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Assigns the strategy for JNDI referrals; allowed values are "ignore", "follow", or "throw"
-     * (see <code>javax.naming.Context.REFERRAL</code> for more information). Microsoft Active
-     * Directory often returns referrals. If you need to follow them set referrals to "follow".
-     * Caution: if your DNS is not part of AD, the LDAP client lib might try to resolve your domain
-     * name in DNS to find another LDAP server.
+     * Assigns the strategy for JNDI referrals; allowed values are "ignore", "follow", or "throw" (see
+     * <code>javax.naming.Context.REFERRAL</code> for more information). Microsoft Active Directory often returns
+     * referrals. If you need to follow them set referrals to "follow". Caution: if your DNS is not part of AD, the LDAP
+     * client lib might try to resolve your domain name in DNS to find another LDAP server.
      * 
-     * @param referralStrategy
-     *            the field value to assign
+     * @param referralStrategy the field value to assign
      */
     public void setReferralStrategy(String referralStrategy) {
         this.isInitialized = false;
@@ -1382,10 +1335,10 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Returns the digest algorithm to apply to the plaintext password offered by the user before
-     * comparing it with the value retrieved from the directory. Valid values are those accepted for
-     * the algorithm name by the <code>java.security.MessageDigest</code> class. If not specified
-     * the plaintext password is assumed to be retrieved.
+     * Returns the digest algorithm to apply to the plaintext password offered by the user before comparing it with the
+     * value retrieved from the directory. Valid values are those accepted for the algorithm name by the
+     * <code>java.security.MessageDigest</code> class. If not specified the plaintext password is assumed to be
+     * retrieved.
      * 
      * @return String
      */
@@ -1394,22 +1347,19 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Assigns the digest algorithm to apply to the plaintext password offered by the user before
-     * comparing it with the value retrieved from the directory. Valid values are those accepted for
-     * the algorithm name by the <code>java.security.MessageDigest</code> class. If not specified
-     * the plaintext password is assumed to be retrieved.
+     * Assigns the digest algorithm to apply to the plaintext password offered by the user before comparing it with the
+     * value retrieved from the directory. Valid values are those accepted for the algorithm name by the
+     * <code>java.security.MessageDigest</code> class. If not specified the plaintext password is assumed to be
+     * retrieved.
      * 
-     * @param digestAlgorithm
-     *            the field value to assign
-     * @throws NoSuchAlgorithmException
-     *             thrown if the specified algorithm is not supported
+     * @param digestAlgorithm the field value to assign
+     * @throws NoSuchAlgorithmException thrown if the specified algorithm is not supported
      */
-    public synchronized void setDigestAlgorithm(String digestAlgorithm)
-            throws NoSuchAlgorithmException {
+    public synchronized void setDigestAlgorithm(String digestAlgorithm) throws NoSuchAlgorithmException {
         this.isInitialized = false;
         this.digestAlgorithm = digestAlgorithm;
-        this.passwordValidator = (digestAlgorithm == null) ? null : new PasswordValidator(
-                digestAlgorithm, digestEncoding);
+        this.passwordValidator =
+            (digestAlgorithm == null) ? null : new PasswordValidator( digestAlgorithm, digestEncoding );
     }
 
     /**
@@ -1424,21 +1374,19 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     /**
      * Assigns the encoding character set to use when applying the digest algorithm.
      * 
-     * @param digestEncoding
-     *            the field value to assign
+     * @param digestEncoding the field value to assign
      */
     public synchronized void setDigestEncoding(String digestEncoding) {
         this.isInitialized = false;
         this.digestEncoding = digestEncoding;
 
         if (passwordValidator != null) {
-            passwordValidator.setDigestEncoding(digestEncoding);
+            passwordValidator.setDigestEncoding( digestEncoding );
         }
     }
 
     /**
-     * Returns the amount of time (in milliseconds) that the results of a user's login attempt
-     * should be cached.
+     * Returns the amount of time (in milliseconds) that the results of a user's login attempt should be cached.
      * 
      * @return long
      */
@@ -1447,31 +1395,28 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Assigns the amount of time (in milliseconds) that the results of a user's login attempt
-     * should be cached.
+     * Assigns the amount of time (in milliseconds) that the results of a user's login attempt should be cached.
      * 
-     * @param connectionCacheTimeout
-     *            the field value to assign
+     * @param connectionCacheTimeout the field value to assign
      */
     public void setAuthenticationCacheTimeout(long connectionCacheTimeout) {
         this.authenticationCacheTimeout = connectionCacheTimeout;
     }
 
     /**
-     * Returns the cached authentication results for the specified user ID. If a cache entry does
-     * not exist for the user, this method will return null. Expired entries will be removed from
-     * the cache and not returned by this method.
+     * Returns the cached authentication results for the specified user ID. If a cache entry does not exist for the
+     * user, this method will return null. Expired entries will be removed from the cache and not returned by this
+     * method.
      * 
-     * @param userId
-     *            the ID of the user for which to retrieve cached authentication results
+     * @param userId the ID of the user for which to retrieve cached authentication results
      * @return AuthenticationCacheEntry
      */
     private AuthenticationCacheEntry getCachedAuthentication(String userId) {
         synchronized (authenticationCache) {
-            AuthenticationCacheEntry cacheEntry = authenticationCache.get(userId);
+            AuthenticationCacheEntry cacheEntry = authenticationCache.get( userId );
 
             if ((cacheEntry != null) && cacheEntry.isExpired()) {
-                authenticationCache.remove(userId);
+                authenticationCache.remove( userId );
                 cacheEntry = null;
             }
             return cacheEntry;
@@ -1479,16 +1424,15 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
     }
 
     /**
-     * Assigns cached authentication results for the specified user ID. If a cache entry does not
-     * exist for the user, this method will return null.
+     * Assigns cached authentication results for the specified user ID. If a cache entry does not exist for the user,
+     * this method will return null.
      * 
-     * @param cacheEntry
-     *            the authentication results to cache
+     * @param cacheEntry the authentication results to cache
      */
     private void setCachedAuthentication(AuthenticationCacheEntry cacheEntry) {
         synchronized (authenticationCache) {
             if ((cacheEntry != null) && !cacheEntry.isExpired()) {
-                authenticationCache.put(cacheEntry.getUserId(), cacheEntry);
+                authenticationCache.put( cacheEntry.getUserId(), cacheEntry );
             }
         }
     }
@@ -1504,18 +1448,14 @@ public class JNDIAuthenticationProvider extends AbstractAuthenticationProvider {
         private long expirationTime;
 
         /**
-         * Constructor that specifies the user ID, encrypted password, and expiration time interval
-         * for the new cache entry.
+         * Constructor that specifies the user ID, encrypted password, and expiration time interval for the new cache
+         * entry.
          * 
-         * @param userId
-         *            the user ID of the account being cached
-         * @param encryptedPassword
-         *            the last-used password (encrypted) for the account being cached
-         * @param authenticationSuccessful
-         *            indicates whether the last live authentication attempt was successful
+         * @param userId the user ID of the account being cached
+         * @param encryptedPassword the last-used password (encrypted) for the account being cached
+         * @param authenticationSuccessful indicates whether the last live authentication attempt was successful
          */
-        public AuthenticationCacheEntry(String userId, String encryptedPassword,
-                boolean authenticationSuccessful) {
+        public AuthenticationCacheEntry(String userId, String encryptedPassword, boolean authenticationSuccessful) {
             this.userId = userId;
             this.encryptedPassword = encryptedPassword;
             this.authenticationSuccessful = authenticationSuccessful;

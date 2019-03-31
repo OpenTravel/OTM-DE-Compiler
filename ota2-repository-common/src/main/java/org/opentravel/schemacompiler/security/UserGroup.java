@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.security;
 
 import java.util.ArrayList;
@@ -31,10 +32,8 @@ public class UserGroup {
     /**
      * Constructor that defines the name of the group and the user ID of each member assigned to it.
      * 
-     * @param groupName
-     *            the name of the group
-     * @param memberIds
-     *            the user ID of each member assigned to the group
+     * @param groupName the name of the group
+     * @param memberIds the user ID of each member assigned to the group
      */
     public UserGroup(String groupName, List<String> memberIds) {
         if (memberIds != null) {
@@ -55,7 +54,7 @@ public class UserGroup {
     /**
      * Returns the value of the 'memberIds' field.
      * 
-     * @return List<String>
+     * @return List&lt;String&gt;
      */
     public List<String> getMemberIds() {
         return memberIds;

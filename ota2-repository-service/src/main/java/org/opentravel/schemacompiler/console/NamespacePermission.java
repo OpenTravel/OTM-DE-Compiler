@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.console;
 
 import org.opentravel.ns.ota2.security_v01_00.RepositoryPermission;
@@ -40,8 +41,7 @@ public class NamespacePermission {
     /**
      * Assigns the value of the 'principal' field.
      * 
-     * @param principal
-     *            the field value to assign
+     * @param principal the field value to assign
      */
     public void setPrincipal(String principal) {
         this.principal = principal;
@@ -59,8 +59,7 @@ public class NamespacePermission {
     /**
      * Assigns the value of the 'grantPermission' field.
      * 
-     * @param grantPermission
-     *            the field value to assign
+     * @param grantPermission the field value to assign
      */
     public void setGrantPermission(RepositoryPermission grantPermission) {
         this.grantPermission = grantPermission;
@@ -78,8 +77,7 @@ public class NamespacePermission {
     /**
      * Assigns the value of the 'denyPermission' field.
      * 
-     * @param denyPermission
-     *            the field value to assign
+     * @param denyPermission the field value to assign
      */
     public void setDenyPermission(RepositoryPermission denyPermission) {
         this.denyPermission = denyPermission;

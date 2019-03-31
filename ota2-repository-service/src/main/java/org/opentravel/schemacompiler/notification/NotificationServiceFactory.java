@@ -20,75 +20,71 @@ import org.opentravel.schemacompiler.repository.RepositoryComponentFactory;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 
 /**
- * Factory used to obtain a working instance of the <code>NotificationService</code>.
- * If no service is configured in the repository's configuration file, the no-op
- * service implementation will be returned.
+ * Factory used to obtain a working instance of the <code>NotificationService</code>. If no service is configured in the
+ * repository's configuration file, the no-op service implementation will be returned.
  */
 public class NotificationServiceFactory {
-	
-	private static final RepositoryNotificationListener repoListener = new RepositoryNotificationListener();
-	
-	private static NotificationServiceFactory instance = null;
-	
-	private NotificationService service;
-	
-	/**
-	 * Private constructor that initializes the <code>NotificationService</code>
-	 * instance.
-	 */
-	private NotificationServiceFactory() {
-		service = RepositoryComponentFactory.getDefault().getNotificationService();
-		
-		if (service == null) {
-			service = new NoOpNotificationService();
-		}
-	}
-	
-	/**
-	 * Initializes the singleton instance of the factory and allocates any system
-	 * resources required by the <code>NotificationService</code>.
-	 * 
-	 * @return NotificationServiceFactory
-	 */
-	public static synchronized NotificationServiceFactory getInstance() {
-		if (instance == null) {
-			instance = new NotificationServiceFactory();
-		}
-		return instance;
-	}
-	
-	/**
-	 * Starts the service and allocates any system resources that are required for
-	 * the implementation.
-	 */
-	public static synchronized void startup() {
-		RepositoryManager manager = RepositoryComponentFactory.getDefault().getRepositoryManager();
-		
-		getInstance().getService().startup();
-		manager.addListener( repoListener );
-	}
-	
-	/**
-	 * Shuts down the factory and releases any system resources that
-	 * are being held.
-	 */
-	public static synchronized void shutdown() {
-		if (instance != null) {
-			RepositoryManager manager = RepositoryComponentFactory.getDefault().getRepositoryManager();
-			
-			instance.getService().shutdown();
-			manager.removeListener( repoListener );
+
+    private static final RepositoryNotificationListener repoListener = new RepositoryNotificationListener();
+
+    private static NotificationServiceFactory instance = null;
+
+    private NotificationService service;
+
+    /**
+     * Private constructor that initializes the <code>NotificationService</code> instance.
+     */
+    private NotificationServiceFactory() {
+        service = RepositoryComponentFactory.getDefault().getNotificationService();
+
+        if (service == null) {
+            service = new NoOpNotificationService();
+        }
+    }
+
+    /**
+     * Initializes the singleton instance of the factory and allocates any system resources required by the
+     * <code>NotificationService</code>.
+     * 
+     * @return NotificationServiceFactory
+     */
+    public static synchronized NotificationServiceFactory getInstance() {
+        if (instance == null) {
+            instance = new NotificationServiceFactory();
+        }
+        return instance;
+    }
+
+    /**
+     * Starts the service and allocates any system resources that are required for the implementation.
+     */
+    public static synchronized void startup() {
+        RepositoryManager manager = RepositoryComponentFactory.getDefault().getRepositoryManager();
+
+        getInstance().getService().startup();
+        manager.addListener( repoListener );
+    }
+
+    /**
+     * Shuts down the factory and releases any system resources that are being held.
+     */
+    public static synchronized void shutdown() {
+        if (instance != null) {
+            RepositoryManager manager = RepositoryComponentFactory.getDefault().getRepositoryManager();
+
+            instance.getService().shutdown();
+            manager.removeListener( repoListener );
             instance = null;
-		}
-	}
-	
-	/**
-	 * Returns the notification service instance.
-	 * 
-	 * @return NotificationService
-	 */
-	public NotificationService getService() {
-		return service;
-	}
-	
+        }
+    }
+
+    /**
+     * Returns the notification service instance.
+     * 
+     * @return NotificationService
+     */
+    public NotificationService getService() {
+        return service;
+    }
+
 }

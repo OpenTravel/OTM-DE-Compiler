@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.console;
 
 import static org.junit.Assert.assertTrue;
@@ -34,20 +35,19 @@ import com.gargoylesoftware.htmlunit.html.HtmlSelect;
  * browser.
  */
 public class TestSearchController extends AbstractConsoleTest {
-    
+
     @BeforeClass
     public static void setupTests() throws Exception {
         startSmtpTestServer( 1589 );
         setupWorkInProcessArea( TestSearchController.class );
-        startTestServer( "versions-repository", 9297, defaultRepositoryConfig,
-                true, true, TestSearchController.class );
+        startTestServer( "versions-repository", 9297, defaultRepositoryConfig, true, true, TestSearchController.class );
     }
-    
+
     @AfterClass
     public static void tearDownTests() throws Exception {
         shutdownTestServer();
     }
-    
+
     @Test
     public void testKeywordLibrarySearch() throws Exception {
         try (WebClient client = newWebClient( true )) {
@@ -55,14 +55,14 @@ public class TestSearchController extends AbstractConsoleTest {
             HtmlPage page = client.getPage( pageUrl );
             HtmlForm form = (HtmlForm) page.getElementById( "searchForm" );
             HtmlInput keywords = form.getInputByName( "keywords" );
-            
+
             keywords.setValueAttribute( "Version" );
             page = form.getInputByValue( "Search" ).click();
             assertTrue( page.asText().contains( "Version_Test" ) );
             assertTrue( page.asText().contains( "Version_Release" ) );
-       }
+        }
     }
-    
+
     @Test
     public void testKeywordEntitySearch() throws Exception {
         try (WebClient client = newWebClient( true )) {
@@ -72,12 +72,12 @@ public class TestSearchController extends AbstractConsoleTest {
             HtmlSelect entityType = (HtmlSelect) form.getSelectByName( "entityType" );
             HtmlOption boOption = entityType.getOptionByValue( TLBusinessObject.class.getSimpleName() );
             HtmlInput keywords = form.getInputByName( "keywords" );
-            
+
             entityType.setSelectedAttribute( boOption, true );
             keywords.setValueAttribute( "SimpleBusinessObject" );
             page = form.getInputByValue( "Search" ).click();
             assertTrue( page.asText().contains( "SimpleBusinessObject" ) );
-       }
+        }
     }
-    
+
 }

@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.mvn;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import java.io.File;
 
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.plexus.configuration.PlexusConfiguration;
@@ -27,61 +26,63 @@ import org.junit.Test;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 
+import java.io.File;
+
 /**
  * Verifies the functions of the <code>UpdateRepositorySnapshotMojo</code> build plugin.
  */
 public class TestUpdateRepositorySnapshotMojo extends AbstractRepositoryMojoTest {
-    
+
     @Test
     public void testUpdateFromProject() throws Exception {
         File pomFile = new File( testProjectsFolder, "/test-project-5/pom.xml" );
         PlexusConfiguration config = rule.extractPluginConfiguration( "ota2-repository-plugin", pomFile );
-        
+
         executeInitializeMojo( config );
         executeUpdateMojo( config );
     }
-    
+
     @Test
     public void testUpdateFromManagedRelease() throws Exception {
         File pomFile = new File( testProjectsFolder, "/test-project-6/pom.xml" );
         PlexusConfiguration config = rule.extractPluginConfiguration( "ota2-repository-plugin", pomFile );
-        
+
         executeInitializeMojo( config );
         executeUpdateMojo( config );
     }
-    
+
     @Test
     public void testUpdateFromUnmanagedRelease() throws Exception {
         File pomFile = new File( testProjectsFolder, "/test-project-7/pom.xml" );
         PlexusConfiguration config = rule.extractPluginConfiguration( "ota2-repository-plugin", pomFile );
-        
+
         executeInitializeMojo( config );
         executeUpdateMojo( config );
     }
-    
+
     @Test
     public void testUpdateFromAssembly() throws Exception {
         File pomFile = new File( testProjectsFolder, "/test-project-8/pom.xml" );
         PlexusConfiguration config = rule.extractPluginConfiguration( "ota2-repository-plugin", pomFile );
-        
+
         executeInitializeMojo( config );
         executeUpdateMojo( config );
     }
-    
-    @Test( expected = MojoFailureException.class )
+
+    @Test(expected = MojoFailureException.class)
     public void testRepositoryError() throws Exception {
         File pomFile = new File( testProjectsFolder, "/test-project-5/pom.xml" );
         PlexusConfiguration config = rule.extractPluginConfiguration( "ota2-repository-plugin", pomFile );
-        
+
         config.getChild( "snapshotProjectFolder" ).setValue( "${basedir}/target/test-output/snapshot-test-99" );
         executeInitializeMojo( config );
-        
+
         repositoryManager = mock( RepositoryManager.class );
         when( repositoryManager.getRepositoryItem( anyString(), anyString(), anyString() ) )
-                .thenThrow( RepositoryException.class );
-        
+            .thenThrow( RepositoryException.class );
+
         config.getChild( "release" ).getChild( "filename" ).setValue( "Version_Test_1_0_0.otm" );
         executeUpdateMojo( config );
     }
-    
+
 }

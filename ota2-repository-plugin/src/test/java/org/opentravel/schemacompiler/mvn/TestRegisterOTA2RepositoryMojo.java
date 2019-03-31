@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.mvn;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import java.io.File;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.testing.SilentLog;
@@ -29,28 +28,31 @@ import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.repository.impl.RemoteRepositoryClient;
 
+import java.io.File;
+
 /**
  * Verifies the functions of the <code>RegisterOTA2RepositoryMojo</code> build plugin.
  */
 public class TestRegisterOTA2RepositoryMojo extends AbstractRepositoryMojoTest {
-    
+
     @Test
     public void testAddRemoteRepository() throws Exception {
         File pomFile = new File( testProjectsFolder, "/test-project-9/pom.xml" );
         PlexusConfiguration config = rule.extractPluginConfiguration( "ota2-repository-plugin", pomFile );
         RemoteRepository mockRepo = getMockRemoteRepository();
-        
+
         // Register a previously-unknown repository
         repositoryManager = mock( RepositoryManager.class );
         when( repositoryManager.addRemoteRepository( mockRepo.getEndpointUrl() ) ).thenReturn( mockRepo );
         System.setProperty( RegisterOTA2RepositoryMojo.FORCE_UPDATE_SYSPROP, "false" );
         executeMojo( config );
-        
-        // Re-register the repository (mock out an error that should  not be thrown)
+
+        // Re-register the repository (mock out an error that should not be thrown)
         when( repositoryManager.getRepository( mockRepo.getId() ) ).thenReturn( mockRepo );
-        when( repositoryManager.addRemoteRepository( mockRepo.getEndpointUrl() ) ).thenThrow( RepositoryException.class );
+        when( repositoryManager.addRemoteRepository( mockRepo.getEndpointUrl() ) )
+            .thenThrow( RepositoryException.class );
         executeMojo( config );
-        
+
         // Execute again and force the update (configure for anonymous access this time)
         repositoryManager = mock( RepositoryManager.class );
         when( repositoryManager.getRepository( mockRepo.getId() ) ).thenReturn( mockRepo );
@@ -60,47 +62,48 @@ public class TestRegisterOTA2RepositoryMojo extends AbstractRepositoryMojoTest {
         config.getChild( "userPassword" ).setValue( null );
         executeMojo( config );
     }
-    
-    @Test( expected = MojoExecutionException.class )
+
+    @Test(expected = MojoExecutionException.class)
     public void testRepositoryIdMismatch() throws Exception {
         File pomFile = new File( testProjectsFolder, "/test-project-9/pom.xml" );
         PlexusConfiguration config = rule.extractPluginConfiguration( "ota2-repository-plugin", pomFile );
         RemoteRepository mockRepo = getMockRemoteRepository();
-        
+
         config.getChild( "repositoryId" ).setValue( "error-repository" );
         repositoryManager = mock( RepositoryManager.class );
         when( repositoryManager.addRemoteRepository( mockRepo.getEndpointUrl() ) ).thenReturn( mockRepo );
         executeMojo( config );
     }
-    
-    @Test( expected = MojoExecutionException.class )
+
+    @Test(expected = MojoExecutionException.class)
     public void testRemoteRepository() throws Exception {
         File pomFile = new File( testProjectsFolder, "/test-project-9/pom.xml" );
         PlexusConfiguration config = rule.extractPluginConfiguration( "ota2-repository-plugin", pomFile );
         RemoteRepository mockRepo = getMockRemoteRepository();
-        
+
         config.getChild( "repositoryId" ).setValue( "error-repository" );
         repositoryManager = mock( RepositoryManager.class );
-        when( repositoryManager.addRemoteRepository( mockRepo.getEndpointUrl() ) ).thenThrow( RepositoryException.class );
+        when( repositoryManager.addRemoteRepository( mockRepo.getEndpointUrl() ) )
+            .thenThrow( RepositoryException.class );
         executeMojo( config );
     }
-    
+
     protected void executeMojo(PlexusConfiguration config) throws Exception {
         RegisterOTA2RepositoryMojo mojo = new RegisterOTA2RepositoryMojo();
-        
+
         mojo = (RegisterOTA2RepositoryMojo) rule.configureMojo( mojo, config );
         mojo.initRepositoryManager( repositoryManager );
         mojo.setLog( new SilentLog() );
         mojo.execute();
     }
-    
+
     private RemoteRepository getMockRemoteRepository() {
         RemoteRepositoryClient repository = new RemoteRepositoryClient( repositoryManager );
-        
+
         repository.setId( "test-remote-repository" );
         repository.setDisplayName( "Test Remote Repository" );
         repository.setEndpointUrl( "http://www.mock-repository.org/ota2-repository-service" );
         return repository;
     }
-    
+
 }

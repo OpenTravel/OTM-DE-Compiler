@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.security.impl;
 
 import java.nio.charset.StandardCharsets;
 
 /**
- * This class provides encode/decode for RFC 2045 Base64 as defined by RFC 2045, N. Freed and N.
- * Borenstein. <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a>: Multipurpose Internet
- * Mail Extensions (MIME) Part One: Format of Internet Message Bodies. Reference 1996
+ * This class provides encode/decode for RFC 2045 Base64 as defined by RFC 2045, N. Freed and N. Borenstein.
+ * <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a>: Multipurpose Internet Mail Extensions (MIME) Part One:
+ * Format of Internet Message Bodies. Reference 1996
  * 
  * @author Jeffrey Rodriguez
  */
@@ -36,12 +37,12 @@ public class Base64 {
     private static final byte PAD = (byte) '=';
     private static byte[] base64Alphabet = new byte[BASELENGTH];
     private static byte[] lookUpBase64Alphabet = new byte[LOOKUPLENGTH];
-    
+
     /**
      * Private constructor to prevent instantiation.
      */
     private Base64() {}
-    
+
     static {
         for (int i = 0; i < BASELENGTH; i++) {
             base64Alphabet[i] = -1;
@@ -59,28 +60,46 @@ public class Base64 {
         base64Alphabet['+'] = 62;
         base64Alphabet['/'] = 63;
 
-        for (int i = 0; i <= 25; i++)
+        for (int i = 0; i <= 25; i++) {
             lookUpBase64Alphabet[i] = (byte) ('A' + i);
-
-        for (int i = 26, j = 0; i <= 51; i++, j++)
+        }
+        for (int i = 26, j = 0; i <= 51; i++, j++) {
             lookUpBase64Alphabet[i] = (byte) ('a' + j);
-
-        for (int i = 52, j = 0; i <= 61; i++, j++)
+        }
+        for (int i = 52, j = 0; i <= 61; i++, j++) {
             lookUpBase64Alphabet[i] = (byte) ('0' + j);
-
+        }
         lookUpBase64Alphabet[62] = (byte) '+';
         lookUpBase64Alphabet[63] = (byte) '/';
     }
 
+    /**
+     * Returns true if the given string is an encoded Base64 string.
+     * 
+     * @param isValidString the string to check
+     * @return boolean
+     */
     public static boolean isBase64(String isValidString) {
-        return isArrayByteBase64(isValidString.getBytes());
+        return isArrayByteBase64( isValidString.getBytes() );
     }
 
+    /**
+     * Returs true if the given byte is an eligible member of a Base64 data block.
+     * 
+     * @param octect the octet value to check
+     * @return boolean
+     */
     public static boolean isBase64(byte octect) {
         // shall we ignore white space? JEFF??
         return (octect == PAD || base64Alphabet[octect] != -1);
     }
 
+    /**
+     * Returns true if the given array is a Base64 byte array.
+     * 
+     * @param arrayOctect the octet array to check
+     * @return boolean
+     */
     public static boolean isArrayByteBase64(byte[] arrayOctect) {
         int length = arrayOctect.length;
         if (length == 0) {
@@ -88,8 +107,9 @@ public class Base64 {
             return true;
         }
         for (int i = 0; i < length; i++) {
-            if (!Base64.isBase64(arrayOctect[i]))
+            if (!Base64.isBase64( arrayOctect[i] )) {
                 return false;
+            }
         }
         return true;
     }
@@ -97,8 +117,7 @@ public class Base64 {
     /**
      * Encodes hex octets into Base64.
      * 
-     * @param binaryData
-     *            Array containing binary data to encode.
+     * @param binaryData Array containing binary data to encode.
      * @return Base64-encoded data.
      */
     public static String encode(byte[] binaryData) {
@@ -115,19 +134,19 @@ public class Base64 {
             encodedData = new byte[numberTriplets * 4];
         }
         encodeData( binaryData, encodedData, numberTriplets, fewerThan24bits );
-        return new String(encodedData, StandardCharsets.ISO_8859_1);
+        return new String( encodedData, StandardCharsets.ISO_8859_1 );
     }
 
-	/**
-	 * Performs the encoding of the binary data provided.
-	 * 
-	 * @param binaryData  the binary data to be encoded
-	 * @param encodedData  the array that will receive the encoded data
-	 * @param numberTriplets  the number of triplets in the encoded data
-	 * @param fewerThan24bits  number of bits away from an even 24-bit boundary in the binary data
-	 */
-	private static void encodeData(byte[] binaryData, byte[] encodedData, int numberTriplets, int fewerThan24bits) {
-		byte k = 0;
+    /**
+     * Performs the encoding of the binary data provided.
+     * 
+     * @param binaryData the binary data to be encoded
+     * @param encodedData the array that will receive the encoded data
+     * @param numberTriplets the number of triplets in the encoded data
+     * @param fewerThan24bits number of bits away from an even 24-bit boundary in the binary data
+     */
+    private static void encodeData(byte[] binaryData, byte[] encodedData, int numberTriplets, int fewerThan24bits) {
+        byte k = 0;
         byte l = 0;
         byte b1 = 0;
         byte b2 = 0;
@@ -136,7 +155,7 @@ public class Base64 {
         int encodedIndex = 0;
         int dataIndex = 0;
         int i = 0;
-        
+
         for (i = 0; i < numberTriplets; i++) {
             dataIndex = i * 3;
             b1 = binaryData[dataIndex];
@@ -183,15 +202,13 @@ public class Base64 {
             encodedData[encodedIndex + 2] = lookUpBase64Alphabet[l << 2];
             encodedData[encodedIndex + 3] = PAD;
         }
-	}
+    }
 
     /**
      * Decodes Base64 data into octets
      * 
-     * @param base64DataBC
-     *            Byte array containing Base64 data
-     * @param decodedDataCC
-     *            The decoded data chars
+     * @param base64DataBC Byte array containing Base64 data
+     * @param decodedDataCC The decoded data chars
      */
     public static void decode(ByteChunk base64DataBC, CharChunk decodedDataCC) {
         int start = base64DataBC.getStart();
@@ -227,8 +244,8 @@ public class Base64 {
                 return;
             }
         }
-        decodedDataCC.allocate(lastData - numberQuadruple);
-        decodedDataCC.setEnd(lastData - numberQuadruple);
+        decodedDataCC.allocate( lastData - numberQuadruple );
+        decodedDataCC.setEnd( lastData - numberQuadruple );
         decodedData = decodedDataCC.getBuffer();
 
         for (int i = 0; i < numberQuadruple; i++) {
@@ -247,11 +264,11 @@ public class Base64 {
                 decodedData[encodedIndex] = (char) ((b1 << 2 | b2 >> 4) & 0xff);
                 decodedData[encodedIndex + 1] = (char) ((((b2 & 0xf) << 4) | ((b3 >> 2) & 0xf)) & 0xff);
                 decodedData[encodedIndex + 2] = (char) ((b3 << 6 | (b4 & 0xff)) & 0xff);
-                
+
             } else if (marker0 == PAD) {
                 // Two PAD e.g. 3c[Pad][Pad]
                 decodedData[encodedIndex] = (char) ((b1 << 2 | b2 >> 4) & 0xff);
-                
+
             } else {
                 // One PAD e.g. 3cQ[Pad]
                 b3 = base64Alphabet[marker0];

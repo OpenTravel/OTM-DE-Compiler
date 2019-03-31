@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.console;
 
-import java.io.File;
-import java.util.Date;
+package org.opentravel.schemacompiler.console;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,16 +24,18 @@ import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryItemState;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 
+import java.io.File;
+import java.util.Date;
+
 /**
- * Encapsulates a single item to display in the repository browser, search results, or item details
- * page.
+ * Encapsulates a single item to display in the repository browser, search results, or item details page.
  * 
  * @author S. Livezey
  */
 public class NamespaceItem {
 
-    private static Log log = LogFactory.getLog(NamespaceItem.class);
-    
+    private static Log log = LogFactory.getLog( NamespaceItem.class );
+
     private String baseNamespace;
     private String filename;
     private String label;
@@ -49,8 +49,7 @@ public class NamespaceItem {
     /**
      * Constructor that represents a root namespace.
      * 
-     * @param rootNamespace
-     *            the root namespace to display
+     * @param rootNamespace the root namespace to display
      */
     public NamespaceItem(String rootNamespace) {
         this.label = this.baseNamespace = rootNamespace;
@@ -59,10 +58,8 @@ public class NamespaceItem {
     /**
      * Constructor that represents a child namespace of the one currently being displayed.
      * 
-     * @param rootNamespace
-     *            the base namespace of the item to display
-     * @param label
-     *            the display label for the item
+     * @param baseNamespace the base namespace of the item to display
+     * @param label the display label for the item
      */
     public NamespaceItem(String baseNamespace, String label) {
         this.baseNamespace = baseNamespace;
@@ -72,7 +69,7 @@ public class NamespaceItem {
     /**
      * Constructor for a namespace item that is a managed repository item.
      * 
-     * @param item  the managed repository item
+     * @param item the managed repository item
      */
     public NamespaceItem(RepositoryItem item) {
         this.baseNamespace = item.getBaseNamespace();
@@ -81,25 +78,24 @@ public class NamespaceItem {
         this.version = item.getVersion();
         this.status = item.getStatus();
         this.state = item.getState();
-        this.lastModified = getLastModified(item);
+        this.lastModified = getLastModified( item );
     }
 
     /**
-     * Constructor for a namespace item that is a managed repository item obtained
-     * from the free-text search index.
+     * Constructor for a namespace item that is a managed repository item obtained from the free-text search index.
      * 
-     * @param searchIndexItem  the repository item record retreived from the search index
+     * @param searchIndexItem the repository item record retreived from the search index
      */
     public NamespaceItem(LibrarySearchResult searchIndexItem) {
-    	RepositoryItem item = searchIndexItem.getRepositoryItem();
-    	
+        RepositoryItem item = searchIndexItem.getRepositoryItem();
+
         this.baseNamespace = item.getBaseNamespace();
         this.filename = item.getFilename();
         this.label = item.getLibraryName();
         this.version = item.getVersion();
         this.status = item.getStatus();
         this.state = item.getState();
-        this.lastModified = getLastModified(item);
+        this.lastModified = getLastModified( item );
         this.description = searchIndexItem.getItemDescription();
     }
 
@@ -140,15 +136,15 @@ public class NamespaceItem {
     }
 
     /**
-	 * Returns the value of the 'DESCRIPTION' field.
-	 *
-	 * @return String
-	 */
-	public String getDescription() {
-		return description;
-	}
+     * Returns the value of the 'DESCRIPTION' field.
+     *
+     * @return String
+     */
+    public String getDescription() {
+        return description;
+    }
 
-	/**
+    /**
      * Returns the value of the 'status' field.
      * 
      * @return TLLibraryStatus
@@ -176,6 +172,31 @@ public class NamespaceItem {
     }
 
     /**
+     * Returns the last modified timestamp of the metadata file for the specified repository item.
+     * 
+     * @param item the repository item for which to return a timestamp
+     * @return Date
+     */
+    public static Date getLastModified(RepositoryItem item) {
+        Date lastModified = null;
+    
+        if (item != null) {
+            try {
+                RepositoryManager repositoryManager = item.getRepository().getManager();
+                File metadataFile = repositoryManager.getFileManager()
+                    .getLibraryMetadataLocation( item.getBaseNamespace(), item.getFilename(), item.getVersion() );
+    
+                if ((metadataFile != null) && metadataFile.exists()) {
+                    lastModified = new Date( metadataFile.lastModified() );
+                }
+            } catch (Exception e) {
+                log.warn( "Error calculating last modified date for item " + item.getFilename(), e );
+            }
+        }
+        return lastModified;
+    }
+
+    /**
      * Returns the value of the 'canDelete' field.
      * 
      * @return boolean
@@ -187,36 +208,10 @@ public class NamespaceItem {
     /**
      * Assigns the value of the 'canDelete' field.
      * 
-     * @param canDelete
-     *            the field value to assign
+     * @param canDelete the field value to assign
      */
     public void setCanDelete(boolean canDelete) {
         this.canDelete = canDelete;
-    }
-
-    /**
-     * Returns the last modified timestamp of the metadata file for the specified repository item.
-     * 
-     * @param item  the repository item for which to return a timestamp
-     * @return Date
-     */
-    public static Date getLastModified(RepositoryItem item) {
-        Date lastModified = null;
-
-        if (item != null) {
-            try {
-                RepositoryManager repositoryManager = item.getRepository().getManager();
-                File metadataFile = repositoryManager.getFileManager().getLibraryMetadataLocation(
-                        item.getBaseNamespace(), item.getFilename(), item.getVersion());
-
-                if ((metadataFile != null) && metadataFile.exists()) {
-                    lastModified = new Date(metadataFile.lastModified());
-                }
-            } catch (Exception e) {
-                log.warn("Error calculating last modified date for item " + item.getFilename(), e);
-            }
-        }
-        return lastModified;
     }
 
 }

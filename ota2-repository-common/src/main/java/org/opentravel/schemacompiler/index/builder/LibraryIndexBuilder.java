@@ -13,19 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.index.builder;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+package org.opentravel.schemacompiler.index.builder;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -63,343 +52,368 @@ import org.opentravel.schemacompiler.model.TLService;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * Index builder used to construct search index documents for managed repository items.
  */
 public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
-	
-	private static Map<TLLibraryStatus,List<TLLibraryStatus>> inclusiveStatuses;
+
+    private static Map<TLLibraryStatus,List<TLLibraryStatus>> inclusiveStatuses;
     private static Log log = LogFactory.getLog( LibraryIndexBuilder.class );
-    
-	/**
-	 * @see org.opentravel.schemacompiler.index.builder.IndexBuilder#createIndex()
-	 */
-	@Override
-	public void createIndex() {
-		RepositoryItem sourceObject = getSourceObject();
-		try {
-			log.info("Indexing Library: " + sourceObject.getFilename());
-			
-			// Now we can begin creating the index...
-			Map<TLLibraryStatus,Boolean> latestVersionsByStatus = getLatestVersionsByStatus( sourceObject );
-			Set<String> keywords = getFreeTextKeywords();
-			LibraryInfoType libraryMetadata = loadLibraryMetadata( sourceObject );
-			Library jaxbLibrary = loadLibrary( sourceObject );
-			TLLibrary library = IndexContentHelper.transformLibrary( jaxbLibrary );
-			addLibraryEntityKeywords( library, keywords, latestVersionsByStatus, libraryMetadata );
-			
-			// Add keywords from this library
-			addFreeTextKeywords( library.getName() );
-			addFreeTextKeywords( library.getPrefix() );
-			addFreeTextKeywords( library.getComments() );
-			
-			// Finish up by creating an index document for the library itself
-			String libraryContent = IndexContentHelper.marshallLibrary( jaxbLibrary );
-			String identityKey = IndexingUtils.getIdentityKey( sourceObject );
-			Document indexDoc = new Document();
-			
-			indexDoc.add( new StringField( IndexingTerms.IDENTITY_FIELD, identityKey, Field.Store.YES ) );
-			indexDoc.add( new StringField( IndexingTerms.SEARCH_INDEX_FIELD, Boolean.TRUE + "", Field.Store.NO ) );
-			indexDoc.add( new StringField( IndexingTerms.ENTITY_TYPE_FIELD, TLLibrary.class.getName(), Field.Store.YES ) );
-			indexDoc.add( new StringField( IndexingTerms.ENTITY_NAME_FIELD, library.getName(), Field.Store.YES ) );
-			indexDoc.add( new StringField( IndexingTerms.ENTITY_NAMESPACE_FIELD, library.getNamespace(), Field.Store.YES ) );
-			indexDoc.add( new StringField( IndexingTerms.BASE_NAMESPACE_FIELD, sourceObject.getBaseNamespace(), Field.Store.YES ) );
-			indexDoc.add( new StringField( IndexingTerms.FILENAME_FIELD, sourceObject.getFilename(), Field.Store.YES ) );
-			indexDoc.add( new StringField( IndexingTerms.VERSION_FIELD, sourceObject.getVersion(), Field.Store.YES ) );
-			indexDoc.add( new StringField( IndexingTerms.VERSION_SCHEME_FIELD, sourceObject.getVersionScheme(), Field.Store.YES ) );
-			indexDoc.add( new StringField( IndexingTerms.LATEST_VERSION_FIELD, latestVersionsByStatus.get( TLLibraryStatus.DRAFT ) + "", Field.Store.NO ) );
-			indexDoc.add( new StringField( IndexingTerms.LATEST_VERSION_AT_UNDER_REVIEW_FIELD, latestVersionsByStatus.get( TLLibraryStatus.UNDER_REVIEW ) + "", Field.Store.NO ) );
-			indexDoc.add( new StringField( IndexingTerms.LATEST_VERSION_AT_FINAL_FIELD, latestVersionsByStatus.get( TLLibraryStatus.FINAL ) + "", Field.Store.NO ) );
-			indexDoc.add( new StringField( IndexingTerms.LATEST_VERSION_AT_OBSOLETE_FIELD, latestVersionsByStatus.get( TLLibraryStatus.OBSOLETE ) + "", Field.Store.NO ) );
-			indexDoc.add( new TextField( IndexingTerms.KEYWORDS_FIELD, getFreeTextSearchContent(), Field.Store.NO ) );
-			
-			if (library.getComments() != null) {
-				indexDoc.add( new StringField( IndexingTerms.ENTITY_DESCRIPTION_FIELD, library.getComments(), Field.Store.YES ) );
-			}
-			if (library.getStatus() != null) {
-				indexDoc.add( new StringField( IndexingTerms.STATUS_FIELD, library.getStatus().toString(), Field.Store.YES ) );
-			}
-			if (libraryMetadata.getLockedBy() != null) {
-				indexDoc.add( new StringField( IndexingTerms.LOCKED_BY_USER_FIELD, libraryMetadata.getLockedBy(), Field.Store.YES ) );
-			}
-			if (libraryContent != null) {
-				indexDoc.add( new StoredField( IndexingTerms.CONTENT_DATA_FIELD, new BytesRef( libraryContent ) ) );
-			}
-			
-			for (TLInclude nsInclude : library.getIncludes()) {
-				String includeKey = getIdentityKey( nsInclude, library.getNamespace() );
-				
-				if (includeKey != null) {
-					indexDoc.add( new StringField( IndexingTerms.REFERENCED_LIBRARY_FIELD, includeKey, Field.Store.YES ) );
-				}
-			}
-			for (TLNamespaceImport nsImport : library.getNamespaceImports()) {
-				List<String> importKeys = getIdentityKeys( nsImport );
-				String prefix = nsImport.getPrefix();
-				String ns = nsImport.getNamespace();
-				
-				for (String importKey : importKeys) {
-					indexDoc.add( new StringField( IndexingTerms.REFERENCED_LIBRARY_FIELD, importKey, Field.Store.YES ) );
-				}
-				if ((prefix != null) && (ns != null)) {
-					indexDoc.add( new StringField( IndexingTerms.PREFIX_MAPPING_FIELD, prefix + "~" + ns, Field.Store.YES ) );
-				}
-			}
-			getIndexWriter().updateDocument( new Term( IndexingTerms.IDENTITY_FIELD, identityKey ), indexDoc );
-			getFactory().getValidationService().validateLibrary( sourceObject );
-			
-		} catch (RepositoryException | IOException e) {
-			log.error("Error creating index for repository item: " + sourceObject.getFilename(), e);
-		}
-	}
 
-	/**
-	 * Search the other sibling versions of this repository item to calculate the 'latestVersion' values
-	 * for the index.
-	 * 
-	 * @param sourceObject  the repository item for which to determine the latest version indicators by status
-	 * @return Map<TLLibraryStatus,Boolean>
-	 * @throws RepositoryException  thrown if the OTM repository cannot be accessed
-	 */
-	private Map<TLLibraryStatus,Boolean> getLatestVersionsByStatus(RepositoryItem sourceObject)
-			throws RepositoryException {
-		String libraryName = sourceObject.getLibraryName();
-		String baseNS = sourceObject.getBaseNamespace();
-		Set<TLLibraryStatus> laterVersionStatuses = new HashSet<>();
-		Map<TLLibraryStatus,Boolean> latestVersionsByStatus = new EnumMap<>( TLLibraryStatus.class );
-		
-		// Start by 
-		for (RepositoryItem itemVersion : getRepositoryManager().listItems( baseNS, false, true )) {
-			if (libraryName.equals( itemVersion.getLibraryName() )) {
-				if (sourceObject.getVersion().equals( itemVersion.getVersion() )) {
-					Arrays.asList( TLLibraryStatus.values() ).forEach( s ->
-						latestVersionsByStatus.put( s,
-								isLatestVersionAtStatus( sourceObject.getStatus(), s, laterVersionStatuses ) ) );
-					break;
-					
-				} else {
-					laterVersionStatuses.add( itemVersion.getStatus() );
-				}
-			}
-		}
-		return latestVersionsByStatus;
-	}
-	
-	/**
-	 * Adds keywords from the library's entity to the set provided.
-	 * 
-	 * @param library  the library from which to obtain the entity keywords
-	 * @param keywords  the set of keywords being constructed
-	 * @param latestVersionsByStatus  map that indicates the latest-version indicators by status
-	 * @param libraryMetadata  meta-data from the library that identifies the locked-by user
-	 */
-	private void addLibraryEntityKeywords(TLLibrary library, Set<String> keywords,
-			Map<TLLibraryStatus,Boolean> latestVersionsByStatus, LibraryInfoType libraryMetadata) {
-		List<NamedEntity> entityList = new ArrayList<>();
-		
-		// Assemble a list of all entities in the library
-		for (LibraryMember entity : library.getNamedMembers()) {
-			if ((entity instanceof TLContextualFacet) && ((TLContextualFacet) entity).isLocalFacet()) {
-				continue; // skip local contextual facets since they will be indexed under their owner
-			}
-			if (entity instanceof TLService) {
-				for (TLOperation op : ((TLService) entity).getOperations()) {
-					entityList.add( op );
-				}
-			} else {
-				entityList.add( entity );
-			}
-		}
-		
-		// Create an index for each entity; keywords for this library include the keywords
-		// for each child entity.
-		for (NamedEntity entity : entityList) {
-			EntityIndexBuilder<NamedEntity> builder = (EntityIndexBuilder<NamedEntity>)
-					getFactory().newCreateIndexBuilder( entity );
-			
-			if (builder != null) {
-				builder.setLatestVersion( latestVersionsByStatus.get( TLLibraryStatus.DRAFT ) );
-				builder.setLatestVersionAtUnderReview( latestVersionsByStatus.get( TLLibraryStatus.UNDER_REVIEW ) );
-				builder.setLatestVersionAtFinal( latestVersionsByStatus.get( TLLibraryStatus.FINAL ) );
-				builder.setLatestVersionAtObsolete( latestVersionsByStatus.get( TLLibraryStatus.OBSOLETE ) );
-				builder.setLockedByUser( libraryMetadata.getLockedBy() );
-				builder.performIndexingAction();
-				keywords.addAll( builder.getFreeTextKeywords() );
-			}
-		}
-	}
+    /**
+     * @see org.opentravel.schemacompiler.index.builder.IndexBuilder#createIndex()
+     */
+    @Override
+    public void createIndex() {
+        RepositoryItem sourceObject = getSourceObject();
+        try {
+            log.info( "Indexing Library: " + sourceObject.getFilename() );
 
-	/**
-	 * Based on the statuses of later library versions, determines whether the given item's status is the
-	 * latest at its version level relative to the check version.
-	 * 
-	 * @param itemStatus  the status of the library item to be analyzed
-	 * @param checkStatus  the status level against which the item status is being checked
-	 * @param laterVerionStatuses  the set of statuses identified for later versions of the library
-	 * @return boolean
-	 */
-	private boolean isLatestVersionAtStatus(TLLibraryStatus itemStatus, TLLibraryStatus checkStatus, Set<TLLibraryStatus> laterVersionStatuses) {
-		Set<TLLibraryStatus> statusesToConsider = new HashSet<>( inclusiveStatuses.get( checkStatus ) );
-		boolean result = false;
-		
-		for (TLLibraryStatus status : laterVersionStatuses) {
-			if (statusesToConsider.contains( status )) {
-				statusesToConsider.removeAll( inclusiveStatuses.get( status ) );
-			}
-		}
-		result = statusesToConsider.contains( itemStatus );
-		return result;
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.index.builder.IndexBuilder#deleteIndex()
-	 */
-	@Override
-	public void deleteIndex() {
-		RepositoryItem sourceObject = getSourceObject();
-		String sourceObjectIdentity = IndexingUtils.getIdentityKey( sourceObject );
-        
-		try (SearcherManager searchManager =
-				new SearcherManager( getIndexWriter(), true, new SearcherFactory() )) {
-			QueryParser parser = new QueryParser( IndexingTerms.OWNING_LIBRARY_FIELD, new StandardAnalyzer() );
-			Query entityQuery = parser.parse( "\"" + IndexingUtils.getIdentityKey( sourceObject ) + "\"" );
-			IndexSearcher searcher = searchManager.acquire();
-			IndexWriter indexWriter = getIndexWriter();
-			
-			// Search for the entity documents that are owned by the library whose index is being deleted
+            // Now we can begin creating the index...
+            Map<TLLibraryStatus,Boolean> latestVersionsByStatus = getLatestVersionsByStatus( sourceObject );
+            Set<String> keywords = getFreeTextKeywords();
+            LibraryInfoType libraryMetadata = loadLibraryMetadata( sourceObject );
+            Library jaxbLibrary = loadLibrary( sourceObject );
+            TLLibrary library = IndexContentHelper.transformLibrary( jaxbLibrary );
+            addLibraryEntityKeywords( library, keywords, latestVersionsByStatus, libraryMetadata );
+
+            // Add keywords from this library
+            addFreeTextKeywords( library.getName() );
+            addFreeTextKeywords( library.getPrefix() );
+            addFreeTextKeywords( library.getComments() );
+
+            // Finish up by creating an index document for the library itself
+            String libraryContent = IndexContentHelper.marshallLibrary( jaxbLibrary );
+            String identityKey = IndexingUtils.getIdentityKey( sourceObject );
+            Document indexDoc = new Document();
+
+            indexDoc.add( new StringField( IndexingTerms.IDENTITY_FIELD, identityKey, Field.Store.YES ) );
+            indexDoc.add( new StringField( IndexingTerms.SEARCH_INDEX_FIELD, Boolean.TRUE + "", Field.Store.NO ) );
+            indexDoc
+                .add( new StringField( IndexingTerms.ENTITY_TYPE_FIELD, TLLibrary.class.getName(), Field.Store.YES ) );
+            indexDoc.add( new StringField( IndexingTerms.ENTITY_NAME_FIELD, library.getName(), Field.Store.YES ) );
+            indexDoc.add(
+                new StringField( IndexingTerms.ENTITY_NAMESPACE_FIELD, library.getNamespace(), Field.Store.YES ) );
+            indexDoc.add( new StringField( IndexingTerms.BASE_NAMESPACE_FIELD, sourceObject.getBaseNamespace(),
+                Field.Store.YES ) );
+            indexDoc
+                .add( new StringField( IndexingTerms.FILENAME_FIELD, sourceObject.getFilename(), Field.Store.YES ) );
+            indexDoc.add( new StringField( IndexingTerms.VERSION_FIELD, sourceObject.getVersion(), Field.Store.YES ) );
+            indexDoc.add( new StringField( IndexingTerms.VERSION_SCHEME_FIELD, sourceObject.getVersionScheme(),
+                Field.Store.YES ) );
+            indexDoc.add( new StringField( IndexingTerms.LATEST_VERSION_FIELD,
+                latestVersionsByStatus.get( TLLibraryStatus.DRAFT ) + "", Field.Store.NO ) );
+            indexDoc.add( new StringField( IndexingTerms.LATEST_VERSION_AT_UNDER_REVIEW_FIELD,
+                latestVersionsByStatus.get( TLLibraryStatus.UNDER_REVIEW ) + "", Field.Store.NO ) );
+            indexDoc.add( new StringField( IndexingTerms.LATEST_VERSION_AT_FINAL_FIELD,
+                latestVersionsByStatus.get( TLLibraryStatus.FINAL ) + "", Field.Store.NO ) );
+            indexDoc.add( new StringField( IndexingTerms.LATEST_VERSION_AT_OBSOLETE_FIELD,
+                latestVersionsByStatus.get( TLLibraryStatus.OBSOLETE ) + "", Field.Store.NO ) );
+            indexDoc.add( new TextField( IndexingTerms.KEYWORDS_FIELD, getFreeTextSearchContent(), Field.Store.NO ) );
+
+            if (library.getComments() != null) {
+                indexDoc.add(
+                    new StringField( IndexingTerms.ENTITY_DESCRIPTION_FIELD, library.getComments(), Field.Store.YES ) );
+            }
+            if (library.getStatus() != null) {
+                indexDoc.add(
+                    new StringField( IndexingTerms.STATUS_FIELD, library.getStatus().toString(), Field.Store.YES ) );
+            }
+            if (libraryMetadata.getLockedBy() != null) {
+                indexDoc.add( new StringField( IndexingTerms.LOCKED_BY_USER_FIELD, libraryMetadata.getLockedBy(),
+                    Field.Store.YES ) );
+            }
+            if (libraryContent != null) {
+                indexDoc.add( new StoredField( IndexingTerms.CONTENT_DATA_FIELD, new BytesRef( libraryContent ) ) );
+            }
+
+            for (TLInclude nsInclude : library.getIncludes()) {
+                String includeKey = getIdentityKey( nsInclude, library.getNamespace() );
+
+                if (includeKey != null) {
+                    indexDoc
+                        .add( new StringField( IndexingTerms.REFERENCED_LIBRARY_FIELD, includeKey, Field.Store.YES ) );
+                }
+            }
+            for (TLNamespaceImport nsImport : library.getNamespaceImports()) {
+                List<String> importKeys = getIdentityKeys( nsImport );
+                String prefix = nsImport.getPrefix();
+                String ns = nsImport.getNamespace();
+
+                for (String importKey : importKeys) {
+                    indexDoc
+                        .add( new StringField( IndexingTerms.REFERENCED_LIBRARY_FIELD, importKey, Field.Store.YES ) );
+                }
+                if ((prefix != null) && (ns != null)) {
+                    indexDoc.add(
+                        new StringField( IndexingTerms.PREFIX_MAPPING_FIELD, prefix + "~" + ns, Field.Store.YES ) );
+                }
+            }
+            getIndexWriter().updateDocument( new Term( IndexingTerms.IDENTITY_FIELD, identityKey ), indexDoc );
+            getFactory().getValidationService().validateLibrary( sourceObject );
+
+        } catch (RepositoryException | IOException e) {
+            log.error( "Error creating index for repository item: " + sourceObject.getFilename(), e );
+        }
+    }
+
+    /**
+     * Search the other sibling versions of this repository item to calculate the 'latestVersion' values for the index.
+     * 
+     * @param sourceObject the repository item for which to determine the latest version indicators by status
+     * @return Map&lt;TLLibraryStatus,Boolean&gt;
+     * @throws RepositoryException thrown if the OTM repository cannot be accessed
+     */
+    private Map<TLLibraryStatus,Boolean> getLatestVersionsByStatus(RepositoryItem sourceObject)
+        throws RepositoryException {
+        String libraryName = sourceObject.getLibraryName();
+        String baseNS = sourceObject.getBaseNamespace();
+        Set<TLLibraryStatus> laterVersionStatuses = new HashSet<>();
+        Map<TLLibraryStatus,Boolean> latestVersionsByStatus = new EnumMap<>( TLLibraryStatus.class );
+
+        // Start by
+        for (RepositoryItem itemVersion : getRepositoryManager().listItems( baseNS, false, true )) {
+            if (libraryName.equals( itemVersion.getLibraryName() )) {
+                if (sourceObject.getVersion().equals( itemVersion.getVersion() )) {
+                    Arrays.asList( TLLibraryStatus.values() ).forEach( s -> latestVersionsByStatus.put( s,
+                        isLatestVersionAtStatus( sourceObject.getStatus(), s, laterVersionStatuses ) ) );
+                    break;
+
+                } else {
+                    laterVersionStatuses.add( itemVersion.getStatus() );
+                }
+            }
+        }
+        return latestVersionsByStatus;
+    }
+
+    /**
+     * Adds keywords from the library's entity to the set provided.
+     * 
+     * @param library the library from which to obtain the entity keywords
+     * @param keywords the set of keywords being constructed
+     * @param latestVersionsByStatus map that indicates the latest-version indicators by status
+     * @param libraryMetadata meta-data from the library that identifies the locked-by user
+     */
+    private void addLibraryEntityKeywords(TLLibrary library, Set<String> keywords,
+        Map<TLLibraryStatus,Boolean> latestVersionsByStatus, LibraryInfoType libraryMetadata) {
+        List<NamedEntity> entityList = new ArrayList<>();
+
+        // Assemble a list of all entities in the library
+        for (LibraryMember entity : library.getNamedMembers()) {
+            if ((entity instanceof TLContextualFacet) && ((TLContextualFacet) entity).isLocalFacet()) {
+                continue; // skip local contextual facets since they will be indexed under their owner
+            }
+            if (entity instanceof TLService) {
+                for (TLOperation op : ((TLService) entity).getOperations()) {
+                    entityList.add( op );
+                }
+            } else {
+                entityList.add( entity );
+            }
+        }
+
+        // Create an index for each entity; keywords for this library include the keywords
+        // for each child entity.
+        for (NamedEntity entity : entityList) {
+            EntityIndexBuilder<NamedEntity> builder =
+                (EntityIndexBuilder<NamedEntity>) getFactory().newCreateIndexBuilder( entity );
+
+            if (builder != null) {
+                builder.setLatestVersion( latestVersionsByStatus.get( TLLibraryStatus.DRAFT ) );
+                builder.setLatestVersionAtUnderReview( latestVersionsByStatus.get( TLLibraryStatus.UNDER_REVIEW ) );
+                builder.setLatestVersionAtFinal( latestVersionsByStatus.get( TLLibraryStatus.FINAL ) );
+                builder.setLatestVersionAtObsolete( latestVersionsByStatus.get( TLLibraryStatus.OBSOLETE ) );
+                builder.setLockedByUser( libraryMetadata.getLockedBy() );
+                builder.performIndexingAction();
+                keywords.addAll( builder.getFreeTextKeywords() );
+            }
+        }
+    }
+
+    /**
+     * Based on the statuses of later library versions, determines whether the given item's status is the latest at its
+     * version level relative to the check version.
+     * 
+     * @param itemStatus the status of the library item to be analyzed
+     * @param checkStatus the status level against which the item status is being checked
+     * @param laterVerionStatuses the set of statuses identified for later versions of the library
+     * @return boolean
+     */
+    private boolean isLatestVersionAtStatus(TLLibraryStatus itemStatus, TLLibraryStatus checkStatus,
+        Set<TLLibraryStatus> laterVersionStatuses) {
+        Set<TLLibraryStatus> statusesToConsider = new HashSet<>( inclusiveStatuses.get( checkStatus ) );
+        boolean result = false;
+
+        for (TLLibraryStatus status : laterVersionStatuses) {
+            if (statusesToConsider.contains( status )) {
+                statusesToConsider.removeAll( inclusiveStatuses.get( status ) );
+            }
+        }
+        result = statusesToConsider.contains( itemStatus );
+        return result;
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.index.builder.IndexBuilder#deleteIndex()
+     */
+    @Override
+    public void deleteIndex() {
+        RepositoryItem sourceObject = getSourceObject();
+        String sourceObjectIdentity = IndexingUtils.getIdentityKey( sourceObject );
+
+        try (SearcherManager searchManager = new SearcherManager( getIndexWriter(), true, new SearcherFactory() )) {
+            QueryParser parser = new QueryParser( IndexingTerms.OWNING_LIBRARY_FIELD, new StandardAnalyzer() );
+            Query entityQuery = parser.parse( "\"" + IndexingUtils.getIdentityKey( sourceObject ) + "\"" );
+            IndexSearcher searcher = searchManager.acquire();
+            IndexWriter indexWriter = getIndexWriter();
+
+            // Search for the entity documents that are owned by the library whose index is being deleted
             TopDocs searchResults = searcher.search( entityQuery, Integer.MAX_VALUE );
             List<String> documentKeys = new ArrayList<>();
-            
+
             for (ScoreDoc scoreDoc : searchResults.scoreDocs) {
-            	Document entityDoc = searcher.doc( scoreDoc.doc );
-            	IndexableField entityId = entityDoc.getField( IndexingTerms.IDENTITY_FIELD );
-            	
-            	if (entityId != null) {
-                	documentKeys.add( entityId.stringValue() );
-            	}
+                Document entityDoc = searcher.doc( scoreDoc.doc );
+                IndexableField entityId = entityDoc.getField( IndexingTerms.IDENTITY_FIELD );
+
+                if (entityId != null) {
+                    documentKeys.add( entityId.stringValue() );
+                }
             }
             documentKeys.add( sourceObjectIdentity );
             searchManager.release( searcher );
-            
+
             // Delete all of the documents from the search index
             for (String documentId : documentKeys) {
-        		log.info("Deleting index: " + documentId);
-    			indexWriter.deleteDocuments( new Term( IndexingTerms.IDENTITY_FIELD, documentId ) );
+                log.info( "Deleting index: " + documentId );
+                indexWriter.deleteDocuments( new Term( IndexingTerms.IDENTITY_FIELD, documentId ) );
             }
-            
+
             // Delete any associated validation findings from the search index
             getFactory().getValidationService().deleteValidationResults( sourceObjectIdentity );
-            
-		} catch (IOException | ParseException e) {
-			log.error("Error deleting search index for repository item.", e);
-		}
-	}
-	
-	/**
-	 * Returns a qualified identity key for the given library include, or null if the
-	 * include does not resolve to a library within the local repository.
-	 * 
-	 * @param nsInclude  the library include for which to return an identity key
-	 * @param libraryNamespace  the namespace of the library that declared the include
-	 * @return String
-	 */
-	protected String getIdentityKey(TLInclude nsInclude, String libraryNamespace) {
-		String fileHint = nsInclude.getPath();
-		String identityKey = null;
-		
-		if ((libraryNamespace != null) && (fileHint != null) && fileHint.startsWith("otm://")) {
-			try {
-				RepositoryItem importItem =
-						getRepositoryManager().getRepositoryItem( fileHint, libraryNamespace );
-				
-				if (importItem != null) {
-					identityKey = IndexingUtils.getIdentityKey( importItem );
-				}
-				
-			} catch (RepositoryException | URISyntaxException e) {
-				// No error - return a null identity key value
-			}
-		}
-		return identityKey;
-	}
-	
-	/**
-	 * Returns the qualified identity keys for the given library import.
-	 * 
-	 * @param nsImport  the library import for which to return identity keys
-	 * @return List<String>
-	 */
-	protected List<String> getIdentityKeys(TLNamespaceImport nsImport) {
-		List<String> fileHints = nsImport.getFileHints();
-		String namespace = nsImport.getNamespace();
-		List<String> identityKeys = new ArrayList<>();
-		
-		if ((namespace != null) && (fileHints != null)) {
-			for (String fileHint : fileHints) {
-				if (fileHint.startsWith("otm://")) {
-					try {
-						RepositoryItem importItem =
-								getRepositoryManager().getRepositoryItem( fileHint, namespace );
-						
-						if (importItem != null) {
-							identityKeys.add( IndexingUtils.getIdentityKey( importItem ) );
-						}
-						
-					} catch (RepositoryException | URISyntaxException e) {
-						// No error - skip this file hint
-					}
-				}
-			}
-		}
-		return identityKeys;
-	}
-	
-	/**
-	 * Loads the contents of the given repository item as a JAXB object.
-	 * 
-	 * @param item  the repository item to load
-	 * @return Library
-	 * @throws RepositoryException
-	 */
-	protected Library loadLibrary(RepositoryItem item) throws RepositoryException {
-		File contentFile = getRepositoryManager().getFileManager().getLibraryContentLocation(
-				item.getBaseNamespace(), item.getFilename(), item.getVersion() );
-		Library library = null;
-		
-		if ((contentFile != null) && contentFile.exists()) {
-			library = IndexContentHelper.unmarshallLibrary( contentFile );
-		}
-		return library;
-	}
-	
-	/**
-	 * Returns the meta-data record for the given repository item.
-	 * 
-	 * @param item  the repository item for which to load meta-data
-	 * @return LibraryInfoType
-	 * @throws RepositoryException  thrown if the meta-data cannot be retrieved for any reason
-	 */
-	protected LibraryInfoType loadLibraryMetadata(RepositoryItem item) throws RepositoryException {
-		return getRepositoryManager().getFileManager().loadLibraryMetadata(
-				item.getBaseNamespace(), item.getFilename(), item.getVersion() );
-	}
-	
-	/**
-	 * Initializes the map of inclusive statuses used to calculate the 'lastVersionAt...' values.
-	 */
-	static {
-		try {
-			Map<TLLibraryStatus,List<TLLibraryStatus>> statusMap = new EnumMap<>(TLLibraryStatus.class);
-			
-			statusMap.put( TLLibraryStatus.DRAFT,        Arrays.asList( TLLibraryStatus.DRAFT, TLLibraryStatus.UNDER_REVIEW, TLLibraryStatus.FINAL, TLLibraryStatus.OBSOLETE ) );
-			statusMap.put( TLLibraryStatus.UNDER_REVIEW, Arrays.asList( TLLibraryStatus.UNDER_REVIEW, TLLibraryStatus.FINAL, TLLibraryStatus.OBSOLETE ) );
-			statusMap.put( TLLibraryStatus.FINAL,        Arrays.asList( TLLibraryStatus.FINAL, TLLibraryStatus.OBSOLETE ) );
-			statusMap.put( TLLibraryStatus.OBSOLETE,     Arrays.asList( TLLibraryStatus.OBSOLETE ) );
-			inclusiveStatuses = Collections.unmodifiableMap( statusMap );
-			
-		} catch (Exception e) {
-			throw new ExceptionInInitializerError(e);
-		}
-	}
-	
+
+        } catch (IOException | ParseException e) {
+            log.error( "Error deleting search index for repository item.", e );
+        }
+    }
+
+    /**
+     * Returns a qualified identity key for the given library include, or null if the include does not resolve to a
+     * library within the local repository.
+     * 
+     * @param nsInclude the library include for which to return an identity key
+     * @param libraryNamespace the namespace of the library that declared the include
+     * @return String
+     */
+    protected String getIdentityKey(TLInclude nsInclude, String libraryNamespace) {
+        String fileHint = nsInclude.getPath();
+        String identityKey = null;
+
+        if ((libraryNamespace != null) && (fileHint != null) && fileHint.startsWith( "otm://" )) {
+            try {
+                RepositoryItem importItem = getRepositoryManager().getRepositoryItem( fileHint, libraryNamespace );
+
+                if (importItem != null) {
+                    identityKey = IndexingUtils.getIdentityKey( importItem );
+                }
+
+            } catch (RepositoryException | URISyntaxException e) {
+                // No error - return a null identity key value
+            }
+        }
+        return identityKey;
+    }
+
+    /**
+     * Returns the qualified identity keys for the given library import.
+     * 
+     * @param nsImport the library import for which to return identity keys
+     * @return List&lt;String&gt;
+     */
+    protected List<String> getIdentityKeys(TLNamespaceImport nsImport) {
+        List<String> fileHints = nsImport.getFileHints();
+        String namespace = nsImport.getNamespace();
+        List<String> identityKeys = new ArrayList<>();
+
+        if ((namespace != null) && (fileHints != null)) {
+            for (String fileHint : fileHints) {
+                if (fileHint.startsWith( "otm://" )) {
+                    try {
+                        RepositoryItem importItem = getRepositoryManager().getRepositoryItem( fileHint, namespace );
+
+                        if (importItem != null) {
+                            identityKeys.add( IndexingUtils.getIdentityKey( importItem ) );
+                        }
+
+                    } catch (RepositoryException | URISyntaxException e) {
+                        // No error - skip this file hint
+                    }
+                }
+            }
+        }
+        return identityKeys;
+    }
+
+    /**
+     * Loads the contents of the given repository item as a JAXB object.
+     * 
+     * @param item the repository item to load
+     * @return Library
+     * @throws RepositoryException thrown if an error occurs while accessing the repository content
+     */
+    protected Library loadLibrary(RepositoryItem item) throws RepositoryException {
+        File contentFile = getRepositoryManager().getFileManager().getLibraryContentLocation( item.getBaseNamespace(),
+            item.getFilename(), item.getVersion() );
+        Library library = null;
+
+        if ((contentFile != null) && contentFile.exists()) {
+            library = IndexContentHelper.unmarshallLibrary( contentFile );
+        }
+        return library;
+    }
+
+    /**
+     * Returns the meta-data record for the given repository item.
+     * 
+     * @param item the repository item for which to load meta-data
+     * @return LibraryInfoType
+     * @throws RepositoryException thrown if the meta-data cannot be retrieved for any reason
+     */
+    protected LibraryInfoType loadLibraryMetadata(RepositoryItem item) throws RepositoryException {
+        return getRepositoryManager().getFileManager().loadLibraryMetadata( item.getBaseNamespace(), item.getFilename(),
+            item.getVersion() );
+    }
+
+    /**
+     * Initializes the map of inclusive statuses used to calculate the 'lastVersionAt...' values.
+     */
+    static {
+        try {
+            Map<TLLibraryStatus,List<TLLibraryStatus>> statusMap = new EnumMap<>( TLLibraryStatus.class );
+
+            statusMap.put( TLLibraryStatus.DRAFT, Arrays.asList( TLLibraryStatus.DRAFT, TLLibraryStatus.UNDER_REVIEW,
+                TLLibraryStatus.FINAL, TLLibraryStatus.OBSOLETE ) );
+            statusMap.put( TLLibraryStatus.UNDER_REVIEW,
+                Arrays.asList( TLLibraryStatus.UNDER_REVIEW, TLLibraryStatus.FINAL, TLLibraryStatus.OBSOLETE ) );
+            statusMap.put( TLLibraryStatus.FINAL, Arrays.asList( TLLibraryStatus.FINAL, TLLibraryStatus.OBSOLETE ) );
+            statusMap.put( TLLibraryStatus.OBSOLETE, Arrays.asList( TLLibraryStatus.OBSOLETE ) );
+            inclusiveStatuses = Collections.unmodifiableMap( statusMap );
+
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError( e );
+        }
+    }
+
 }

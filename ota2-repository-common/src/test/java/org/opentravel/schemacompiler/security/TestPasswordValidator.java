@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.security;
 
 import static org.junit.Assert.assertTrue;
@@ -23,39 +24,39 @@ import org.junit.Test;
  * Verifies the function of the <code>PasswordValidator</code> class.
  */
 public class TestPasswordValidator {
-	
-	private static final String TEST_PASSWORD = "MyPassword@Opentravel";
-	
-	@Test
-	public void testPasswordValidator_clear() throws Exception {
-		String encryptedPassword = PasswordHelper.encrypt( TEST_PASSWORD );
-		PasswordValidator validator = new PasswordValidator( "MD5" );
-		
-		assertTrue(  validator.isValidPassword( TEST_PASSWORD, encryptedPassword ) );
-	}
-	
-	@Test
-	public void testPasswordValidator_MD5() throws Exception {
-		PasswordValidator validator = new PasswordValidator( "MD5" );
-		String encryptedPassword = "{MD5}" + validator.digestBase64( TEST_PASSWORD );
-		
-		assertTrue(  validator.isValidPassword( TEST_PASSWORD, encryptedPassword ) );
-	}
-	
-	@Test
-	public void testPasswordValidator_SHA() throws Exception {
-		PasswordValidator validator = new PasswordValidator( "SHA" );
-		String encryptedPassword = "{SHA}" + validator.digestBase64( TEST_PASSWORD );
-		
-		assertTrue(  validator.isValidPassword( TEST_PASSWORD, encryptedPassword ) );
-	}
-	
-	@Test
-	public void testPasswordValidator_SSHA() throws Exception {
-		PasswordValidator validator = new PasswordValidator( "SHA" );
-		String encryptedPassword = "{SSHA}" + validator.digestBase64( TEST_PASSWORD );
-		
-		assertTrue(  validator.isValidPassword( TEST_PASSWORD, encryptedPassword ) );
-	}
-	
+
+    private static final String TEST_PASSWORD = "MyPassword@Opentravel";
+
+    @Test
+    public void testPasswordValidator_clear() throws Exception {
+        String encryptedPassword = PasswordHelper.encrypt( TEST_PASSWORD );
+        PasswordValidator validator = new PasswordValidator( "MD5" );
+
+        assertTrue( validator.isValidPassword( TEST_PASSWORD, encryptedPassword ) );
+    }
+
+    @Test
+    public void testPasswordValidator_MD5() throws Exception {
+        PasswordValidator validator = new PasswordValidator( "MD5" );
+        String encryptedPassword = "{MD5}" + validator.digestBase64( TEST_PASSWORD );
+
+        assertTrue( validator.isValidPassword( TEST_PASSWORD, encryptedPassword ) );
+    }
+
+    @Test
+    public void testPasswordValidator_SHA() throws Exception {
+        PasswordValidator validator = new PasswordValidator( "SHA" );
+        String encryptedPassword = "{SHA}" + validator.digestBase64( TEST_PASSWORD );
+
+        assertTrue( validator.isValidPassword( TEST_PASSWORD, encryptedPassword ) );
+    }
+
+    @Test
+    public void testPasswordValidator_SSHA() throws Exception {
+        PasswordValidator validator = new PasswordValidator( "SHA" );
+        String encryptedPassword = "{SSHA}" + validator.digestBase64( TEST_PASSWORD );
+
+        assertTrue( validator.isValidPassword( TEST_PASSWORD, encryptedPassword ) );
+    }
+
 }

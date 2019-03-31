@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.providers;
+
+import org.opentravel.schemacompiler.util.RepositoryJaxbContext;
 
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 import javax.xml.bind.JAXBContext;
-
-import org.opentravel.schemacompiler.util.RepositoryJaxbContext;
 
 /**
  * Resolves the JAXB context to the one that includes the required packages for all JAXB classes.

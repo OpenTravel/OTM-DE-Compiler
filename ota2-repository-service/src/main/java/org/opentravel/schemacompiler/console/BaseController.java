@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.console;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+package org.opentravel.schemacompiler.console;
 
 import org.opentravel.schemacompiler.repository.RepositoryComponentFactory;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
@@ -26,21 +24,24 @@ import org.opentravel.schemacompiler.security.impl.FileAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 /**
- * Abstract base class of all Spring Web MVC controllers for the OTA2.0 repository console
- * application.
+ * Abstract base class of all Spring Web MVC controllers for the OTA2.0 repository console application.
  * 
  * @author S. Livezey
  */
 public abstract class BaseController {
 
-	private static final String STATUS_MESSAGE = "statusMessage";
-	private static final String ERROR_MESSAGE = "errorMessage";
-	
-	private RepositoryManager repositoryManager;
+    private static final String STATUS_MESSAGE = "statusMessage";
+    private static final String ERROR_MESSAGE = "errorMessage";
+
+    private RepositoryManager repositoryManager;
     private RepositorySecurityManager securityManager;
-    @Autowired private HttpServletRequest servletRequest;
-    
+    @Autowired
+    private HttpServletRequest servletRequest;
+
     /**
      * Default constructor.
      */
@@ -70,20 +71,20 @@ public abstract class BaseController {
     }
 
     /**
-     * Applies all values to the given model that are common to the entire repository console
-     * application. If 'targetPage' value will always be returned by this method if a non-null value
-     * is provided. If null, a default value of "homePage" will be returned.
+     * Applies all values to the given model that are common to the entire repository console application. If
+     * 'targetPage' value will always be returned by this method if a non-null value is provided. If null, a default
+     * value of "homePage" will be returned.
      * 
-     * @param model  the model to which the common values should be applied
-     * @param targetPage  the target navigation page for the controller
+     * @param model the model to which the common values should be applied
+     * @param targetPage the target navigation page for the controller
      * @return String
      */
     protected String applyCommonValues(Model model, String targetPage) {
         if (servletRequest != null) {
-        	model.addAttribute( ERROR_MESSAGE, servletRequest.getParameter( ERROR_MESSAGE ) );
-        	model.addAttribute( STATUS_MESSAGE, servletRequest.getParameter( STATUS_MESSAGE ) );
+            model.addAttribute( ERROR_MESSAGE, servletRequest.getParameter( ERROR_MESSAGE ) );
+            model.addAttribute( STATUS_MESSAGE, servletRequest.getParameter( STATUS_MESSAGE ) );
         }
-        model.addAttribute("isLocalUserManagement", isLocalUserManagement());
+        model.addAttribute( "isLocalUserManagement", isLocalUserManagement() );
         return (targetPage == null) ? "homePage" : targetPage;
     }
 
@@ -93,56 +94,60 @@ public abstract class BaseController {
      * @return boolean
      */
     protected boolean isLocalUserManagement() {
-        return (RepositoryComponentFactory.getDefault().getAuthenticationProvider() instanceof FileAuthenticationProvider);
+        return (RepositoryComponentFactory.getDefault()
+            .getAuthenticationProvider() instanceof FileAuthenticationProvider);
     }
 
     /**
-     * Returns the current user associated with the given HTTP session. If an authenticated user is
-     * not associated with the session, the anonymous user instance will be returned.
+     * Returns the current user associated with the given HTTP session. If an authenticated user is not associated with
+     * the session, the anonymous user instance will be returned.
      * 
-     * @param session  the HTTP session that contains information about an authenticated user
+     * @param session the HTTP session that contains information about an authenticated user
      * @return UserPrincipal
      */
     protected UserPrincipal getCurrentUser(HttpSession session) {
-        UserPrincipal user = (UserPrincipal) session.getAttribute("user");
+        UserPrincipal user = (UserPrincipal) session.getAttribute( "user" );
         return (user == null) ? UserPrincipal.ANONYMOUS_USER : user;
     }
 
     /**
      * Assigns the status message for the console page that will be displayed.
      * 
-     * @param statusMessage  the status message text
-     * @param model  the model to which the status message should be applied
+     * @param statusMessage the status message text
+     * @param model the model to which the status message should be applied
      */
     protected void setStatusMessage(String statusMessage, Model model) {
-        model.addAttribute(STATUS_MESSAGE, statusMessage);
+        model.addAttribute( STATUS_MESSAGE, statusMessage );
     }
 
     /**
      * Assigns the error message for the console page that will be displayed.
      * 
-     * @param errorMessage  the error message text
-     * @param model  the model to which the error message should be applied
+     * @param errorMessage the error message text
+     * @param model the model to which the error message should be applied
      */
     protected void setErrorMessage(String errorMessage, Model model) {
-        model.addAttribute(ERROR_MESSAGE, errorMessage);
+        model.addAttribute( ERROR_MESSAGE, errorMessage );
     }
-    
+
     /**
-     * Trims the given string.  If the resulting string length is zero, null will be returned.
+     * Trims the given string. If the resulting string length is zero, null will be returned.
      * 
-     * @param str  the string value to be trimmed
+     * @param str the string value to be trimmed
      * @return String
      */
     protected String trimString(String str) {
-    	String result = null;
-    	
-    	if (str != null) {
-    		result = str.trim();
-    		if (result.length() == 0) result = null;
-    	}
-    	return result;
+        String result = null;
+
+        if (str != null) {
+            result = str.trim();
+
+            if (result.length() == 0) {
+                result = null;
+            }
+        }
+        return result;
     }
-    
+
 
 }

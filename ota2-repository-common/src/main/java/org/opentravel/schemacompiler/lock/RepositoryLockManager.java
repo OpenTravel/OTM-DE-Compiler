@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.lock;
+
+import org.opentravel.schemacompiler.repository.RepositoryException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,11 +24,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.opentravel.schemacompiler.repository.RepositoryException;
-
 /**
- * Maintains a central registry of read and write locks for named resources in a multi-threaded
- * environment.
+ * Maintains a central registry of read and write locks for named resources in a multi-threaded environment.
  * 
  * @author S. Livezey
  */
@@ -44,8 +44,7 @@ public class RepositoryLockManager {
     /**
      * Default constructor (private - use singleton instance instead).
      */
-    private RepositoryLockManager() {
-    }
+    private RepositoryLockManager() {}
 
     /**
      * Returns the singleton instance of this class.
@@ -68,114 +67,97 @@ public class RepositoryLockManager {
     /**
      * Assigns the timeout value (in milliseconds) for lock acquisition.
      * 
-     * @param timeout
-     *            the timeout value to assign
+     * @param timeout the timeout value to assign
      */
     public static void setTimeout(long timeout) {
         RepositoryLockManager.timeout = timeout;
     }
 
     /**
-     * Acquires a read lock on the requested resource. If another thread owns (or has requested) a
-     * write lock on the same resource, this method will BLOCK until the write lock has been
-     * released.
+     * Acquires a read lock on the requested resource. If another thread owns (or has requested) a write lock on the
+     * same resource, this method will BLOCK until the write lock has been released.
      * 
-     * @param namespace
-     *            the namespace to which the resource is assigned
-     * @param resourceName
-     *            the local name of the resource
+     * @param namespace the namespace to which the resource is assigned
+     * @param resourceName the local name of the resource
      * @return LockableResource
-     * @throws RepositoryException
-     *             thrown if the timeout expires before the lock can be established
+     * @throws RepositoryException thrown if the timeout expires before the lock can be established
      */
-    public LockableResource acquireReadLock(String namespace, String resourceName)
-            throws RepositoryException {
-        LockableResource resource = new LockableResource(namespace, resourceName);
+    public LockableResource acquireReadLock(String namespace, String resourceName) throws RepositoryException {
+        LockableResource resource = new LockableResource( namespace, resourceName );
         try {
-            ReadWriteLock lock = getReadWriteLock(resource);
+            ReadWriteLock lock = getReadWriteLock( resource );
 
-            lock.readLock().tryLock(timeout, TimeUnit.MILLISECONDS);
+            lock.readLock().tryLock( timeout, TimeUnit.MILLISECONDS );
             return resource;
 
         } catch (InterruptedException e) {
-        	Thread.currentThread().interrupt();
-            throw new RepositoryException("Timed out waiting for read lock for resource: "
-                    + resourceName, e);
+            Thread.currentThread().interrupt();
+            throw new RepositoryException( "Timed out waiting for read lock for resource: " + resourceName, e );
         }
     }
 
     /**
      * Releases the lock previously obtained by a call to 'acquireReadLock()'.
      * 
-     * @param resource
-     *            the resource for which to release the read lock
-     * @throws RepositoryException
-     *             thrown if the current thread does not own a read lock on the resource
+     * @param resource the resource for which to release the read lock
+     * @throws RepositoryException thrown if the current thread does not own a read lock on the resource
      */
     public void releaseReadLock(LockableResource resource) throws RepositoryException {
-		ReadWriteLock lock = getReadWriteLock( resource );
-		
-		synchronized (lock) {
-			lock.readLock().unlock();
-		}
+        ReadWriteLock lock = getReadWriteLock( resource );
+
+        synchronized (lock) {
+            lock.readLock().unlock();
+        }
     }
 
     /**
-     * Acquires a write lock on the requested resource. If one or more threads own a read or write
-     * lock on the same resource, this method will BLOCK until the lock(s) have been released.
+     * Acquires a write lock on the requested resource. If one or more threads own a read or write lock on the same
+     * resource, this method will BLOCK until the lock(s) have been released.
      * 
-     * @param namespace
-     *            the namespace to which the resource is assigned
-     * @param resourceName
-     *            the local name of the resource
+     * @param namespace the namespace to which the resource is assigned
+     * @param resourceName the local name of the resource
      * @return LockableResource
-     * @throws RepositoryException
-     *             thrown if the timeout expires before the lock can be established
+     * @throws RepositoryException thrown if the timeout expires before the lock can be established
      */
-    public LockableResource acquireWriteLock(String namespace, String resourceName)
-            throws RepositoryException {
-        LockableResource resource = new LockableResource(namespace, resourceName);
+    public LockableResource acquireWriteLock(String namespace, String resourceName) throws RepositoryException {
+        LockableResource resource = new LockableResource( namespace, resourceName );
         try {
-            ReadWriteLock lock = getReadWriteLock(resource);
+            ReadWriteLock lock = getReadWriteLock( resource );
 
-            lock.writeLock().tryLock(timeout, TimeUnit.MILLISECONDS);
+            lock.writeLock().tryLock( timeout, TimeUnit.MILLISECONDS );
             return resource;
 
         } catch (InterruptedException e) {
-        	Thread.currentThread().interrupt();
-            throw new RepositoryException("Timed out waiting for write lock for resource: "
-                    + resourceName, e);
+            Thread.currentThread().interrupt();
+            throw new RepositoryException( "Timed out waiting for write lock for resource: " + resourceName, e );
         }
     }
 
     /**
      * Releases the lock previously obtained by a call to 'acquireWriteLock()'.
      * 
-     * @param resource
-     *            the resource for which to release the write lock
-     * @throws RepositoryException
-     *             thrown if the current thread does not own a read lock on the resource
+     * @param resource the resource for which to release the write lock
+     * @throws RepositoryException thrown if the current thread does not own a read lock on the resource
      */
     public void releaseWriteLock(LockableResource resource) throws RepositoryException {
-    		ReadWriteLock lock = getReadWriteLock( resource );
-    		
-    		synchronized (lock) {
-    			lock.writeLock().unlock();
-    		}
+        ReadWriteLock lock = getReadWriteLock( resource );
+
+        synchronized (lock) {
+            lock.writeLock().unlock();
+        }
     }
 
     /**
-     * Obtains a read/write lock from the registry. If a lock instance for the resource does not
-     * already exist, it is created automatically.
+     * Obtains a read/write lock from the registry. If a lock instance for the resource does not already exist, it is
+     * created automatically.
      * 
-     * @param resource
-     *            the resource for which the lock should be retrieved
+     * @param resource the resource for which the lock should be retrieved
      * @return ReadWriteLock
      */
     private ReadWriteLock getReadWriteLock(LockableResource resource) {
         synchronized (lockRegistry) {
             lockRegistry.computeIfAbsent( resource, r -> lockRegistry.put( r, new ReentrantReadWriteLock( true ) ) );
-            return lockRegistry.get(resource);
+            return lockRegistry.get( resource );
         }
     }
 
